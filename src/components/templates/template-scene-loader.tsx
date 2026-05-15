@@ -29,6 +29,26 @@ const SceneSimplisticSaaSLazy = React.lazy(() =>
     default: m.SceneSimplisticSaaS,
   })),
 );
+const SceneOrbitAIPageLazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/orbit-ai-page").then((m) => ({
+    default: m.SceneOrbitAIPage,
+  })),
+);
+const SceneNovaLandingPageLazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/nova-landing-page").then((m) => ({
+    default: m.SceneNovaLandingPage,
+  })),
+);
+const SceneTalentHubLazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/talent-hub-scene").then((m) => ({
+    default: m.SceneTalentHub,
+  })),
+);
+const SceneSynapseAILazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/synapse-ai-scene").then((m) => ({
+    default: m.SceneSynapseAI,
+  })),
+);
 
 const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   "saas-launch-aurora": SceneSaaSLaunchLazy,
@@ -38,6 +58,10 @@ const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType
   "dashboard-aurora-analytics": SceneDashboardAnalyticsLazy,
   "productivity-orbit-suite": SceneProductivitySuiteLazy,
   "simplistic-saas-template": SceneSimplisticSaaSLazy,
+  "orbit-ai-page": SceneOrbitAIPageLazy,
+  "nova-landing-page": SceneNovaLandingPageLazy,
+  "talent-hub-landing": SceneTalentHubLazy,
+  "synapse-ai-platform": SceneSynapseAILazy,
 };
 
 export function TemplateSceneLoader({ slug }: { slug: string }) {
@@ -49,7 +73,7 @@ export function TemplateSceneLoader({ slug }: { slug: string }) {
     <React.Suspense
       fallback={
         <div
-          className="h-full min-h-[200px] animate-pulse rounded-2xl bg-muted dark:bg-white/5"
+          className="h-full min-h-50 animate-pulse rounded-2xl bg-muted dark:bg-white/5"
           aria-hidden
         />
       }

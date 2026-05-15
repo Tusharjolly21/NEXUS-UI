@@ -23,6 +23,56 @@ import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 import { cn } from "@/lib/utils";
 
 function getTemplateCode(tmpl: MarketplaceTemplate): string {
+  if (tmpl.slug === "talent-hub-landing") {
+    return `// ${tmpl.title} — Production Template
+// Stack: ${tmpl.techStack.join(", ")}
+// Pages: ${tmpl.pages.join(", ")}
+
+import type { Metadata } from "next";
+import { TalentHubPage } from "@/components/templates/talent-hub-page";
+
+export const metadata: Metadata = {
+  title: "TalentHub — Scale Faster with Unicorn Talent",
+  description:
+    "World-class Admin, Ops, Marketing, Support & Finance talent " +
+    "from the Philippines and LATAM at 60–70% less.",
+  openGraph: {
+    title: "TalentHub",
+    description: "Unicorn talent at 70% less.",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+};
+
+export default function HomePage() {
+  return <TalentHubPage />;
+}`;
+  }
+
+  if (tmpl.slug === "nova-landing-page") {
+    return `// ${tmpl.title} — Production Template
+// Stack: ${tmpl.techStack.join(", ")}
+// Pages: ${tmpl.pages.join(", ")}
+
+import type { Metadata } from "next";
+import { NovaLandingPage } from "@/components/templates/nova-landing-page";
+
+export const metadata: Metadata = {
+  title: "Nova — The AI that thinks with you",
+  description:
+    "Next-generation AI model built for the way you actually work. " +
+    "Reasoning, creating, coding, and deciding alongside you in real time.",
+  openGraph: {
+    title: "Nova AI",
+    description: "Intelligence, reimagined.",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+};
+
+export default function HomePage() {
+  return <NovaLandingPage />;
+}`;
+  }
+
   if (tmpl.slug === "simplistic-saas-template") {
     return `// ${tmpl.title} — Production Template
 // Stack: ${tmpl.techStack.join(", ")}
@@ -219,7 +269,7 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
                   </pre>
 
                   {tmpl.premium && (
-                    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-8 pt-32 bg-gradient-to-t from-zinc-950 via-zinc-950/90 to-transparent">
+                    <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-8 pt-32 bg-linear-to-t from-zinc-950 via-zinc-950/90 to-transparent">
                       <div className="rounded-2xl border border-zinc-700/60 bg-zinc-900 px-6 py-5 text-center shadow-2xl max-w-xs">
                         <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/30">
                           <Lock className="size-5 text-amber-400" />
@@ -270,14 +320,14 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
             className="inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted/60 hover:text-foreground dark:hover:bg-white/5 sm:gap-1.5 sm:px-3"
           >
             <ArrowLeft className="size-3.5" />
-            <span className="hidden sm:inline max-w-[100px] truncate">{tmpl.title}</span>
+            <span className="hidden sm:inline max-w-25 truncate">{tmpl.title}</span>
             <span className="sm:hidden text-[11px]">Back</span>
           </Link>
 
           <div className="h-4 w-px bg-border/60" />
 
           {/* Preview / Code toggle */}
-          <div className="flex items-center gap-0.5 rounded-full bg-muted/40 p-0.5 dark:bg-white/[0.03]">
+          <div className="flex items-center gap-0.5 rounded-full bg-muted/40 p-0.5 dark:bg-white/3">
             <button
               onClick={() => setMode("preview")}
               className={cn(

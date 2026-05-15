@@ -4,8 +4,11 @@ import { getTemplate, templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { SimplisticSaaSPage } from "@/components/templates/simplistic-saas-page";
 import { LandingPage } from "@/components/marketing/landing-page";
+import { NovaLandingPage } from "@/components/templates/nova-landing-page";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 import { ThemeReceiver } from "@/components/templates/theme-receiver";
+import { TalentHubPage } from "@/components/templates/talent-hub-page";
+import { SynapseAIPage } from "@/components/templates/synapse-ai-page";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -33,6 +36,12 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><SimplisticSaaSPage /></ThemeReceiver>;
   } else if (tmpl.slug === "saas-launch-aurora") {
     return <ThemeReceiver><LandingPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "nova-landing-page") {
+    return <ThemeReceiver><NovaLandingPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "talent-hub-landing") {
+    return <ThemeReceiver><TalentHubPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "synapse-ai-platform") {
+    return <ThemeReceiver><SynapseAIPage /></ThemeReceiver>;
   }
 
   return (
