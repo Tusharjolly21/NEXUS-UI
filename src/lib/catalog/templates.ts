@@ -25,6 +25,8 @@ export type MarketplaceTemplate = {
   techStack: string[];
   pages: string[];
   sections: string[];
+  features: string[];
+  pageLabels: string[];
 };
 
 export const templates: MarketplaceTemplate[] = [
@@ -41,6 +43,17 @@ export const templates: MarketplaceTemplate[] = [
     techStack: ["Next.js", "Tailwind", "Framer Motion", "Supabase"],
     pages: ["/", "/pricing", "/changelog", "/login"],
     sections: ["Hero", "Logo cloud", "Bento", "Testimonials", "Pricing", "FAQ", "CTA"],
+    pageLabels: ["Landing", "Pricing", "Changelog", "Login"],
+    features: [
+      "Animated hero with particle physics",
+      "Social proof logo carousel",
+      "Bento metrics grid with motion",
+      "Pricing toggle (monthly / annual)",
+      "Testimonial scroll rail",
+      "SEO-optimised metadata",
+      "Dark mode + light mode",
+      "Fully responsive layout",
+    ],
   },
   {
     slug: "ai-startup-forge",
@@ -55,6 +68,17 @@ export const templates: MarketplaceTemplate[] = [
     techStack: ["Next.js", "MDX", "Motion", "Stripe"],
     pages: ["/", "/product", "/security", "/signup"],
     sections: ["Hero", "AI demo", "Integrations", "Security", "Pricing", "FAQ"],
+    pageLabels: ["Home", "Product", "Security", "Sign Up"],
+    features: [
+      "Prompt rail interactive demo",
+      "Model trust + security section",
+      "Stripe payment integration",
+      "MDX-powered docs pages",
+      "Motion FAQ accordion",
+      "Integrations grid",
+      "Type-safe with TypeScript",
+      "Edge-ready deployment",
+    ],
   },
   {
     slug: "dev-portfolio-vector",
@@ -69,6 +93,17 @@ export const templates: MarketplaceTemplate[] = [
     techStack: ["Next.js", "Tailwind", "MDX"],
     pages: ["/", "/work", "/writing", "/contact"],
     sections: ["Hero", "Selected work", "Stack", "Writing", "Contact"],
+    pageLabels: ["Home", "Work", "Writing", "Contact"],
+    features: [
+      "Case-study project grid",
+      "MDX-powered blog with syntax highlighting",
+      "Tech stack showcase",
+      "Contact form with validation",
+      "Clean typographic hierarchy",
+      "Smooth page transitions",
+      "Accessible by default",
+      "Zero external UI library dependencies",
+    ],
   },
   {
     slug: "agency-studio-deck",
@@ -83,6 +118,17 @@ export const templates: MarketplaceTemplate[] = [
     techStack: ["Next.js", "Motion", "Sanity-ready"],
     pages: ["/", "/work", "/services", "/contact"],
     sections: ["Hero", "Services", "Case studies", "Process", "CTA"],
+    pageLabels: ["Home", "Work", "Services", "Contact"],
+    features: [
+      "Layered glassmorphism hero",
+      "Services bento grid",
+      "Magnetic CTA hover effects",
+      "Case studies with hover reveal",
+      "Sanity CMS-ready schema",
+      "Process step timeline",
+      "Fluid scroll choreography",
+      "Custom cursor effects",
+    ],
   },
   {
     slug: "dashboard-aurora-analytics",
@@ -97,6 +143,17 @@ export const templates: MarketplaceTemplate[] = [
     techStack: ["Next.js", "Supabase", "Tailwind"],
     pages: ["/app", "/app/reports", "/app/settings"],
     sections: ["Sidebar", "KPIs", "Charts", "Table", "Filters"],
+    pageLabels: ["Dashboard", "Reports", "Settings"],
+    features: [
+      "Responsive collapsible sidebar",
+      "KPI strip with delta indicators",
+      "Chart placeholder slots",
+      "Filterable data table",
+      "Supabase auth integration",
+      "Role-based access patterns",
+      "Real-time update hooks",
+      "Mobile-responsive app shell",
+    ],
   },
   {
     slug: "productivity-orbit-suite",
@@ -111,6 +168,17 @@ export const templates: MarketplaceTemplate[] = [
     techStack: ["Next.js", "Tailwind"],
     pages: ["/", "/product", "/pricing"],
     sections: ["Hero", "Feature columns", "Integrations", "Pricing"],
+    pageLabels: ["Home", "Product", "Pricing"],
+    features: [
+      "Feature triage column layout",
+      "Integrations grid",
+      "Clean pricing section",
+      "Calm, high-density typography",
+      "Mobile-first responsive",
+      "Zero motion-sickness design",
+      "Accessible colour contrast",
+      "Fast initial load",
+    ],
   },
   {
     slug: "simplistic-saas-template",
@@ -122,7 +190,7 @@ export const templates: MarketplaceTemplate[] = [
     premium: true,
     trendingScore: 150,
     createdAt: "2026-05-15",
-    techStack: ["Next.js", "Tailwind CSS v4", "Framer Motion", "Lucide Icons"],
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS v4", "Framer Motion", "Lucide Icons"],
     pages: ["/", "/pricing", "/resources", "/login"],
     sections: [
       "Navigation Bar",
@@ -135,6 +203,51 @@ export const templates: MarketplaceTemplate[] = [
       "Tiered Pricing",
       "FAQ Accordion",
       "CTA Pre-Footer",
+    ],
+    pageLabels: ["Hero", "Pricing", "Resources", "Login"],
+    features: [
+      "AI agent hero with live motion effects",
+      "Asymmetrical bento feature grid",
+      "Multi-device capability matrix",
+      "Logo marquee trust strip",
+      "Tiered pricing with toggle",
+      "FAQ accordion with spring physics",
+      "Tailwind CSS v4 design tokens",
+      "Framer Motion microinteractions",
+      "TypeScript strict mode",
+      "Fully responsive on all viewports",
+    ],
+  },
+  {
+    slug: "orbit-ai-page",
+    title: "Orbit AI Developer Tool",
+    description: "A futuristic, minimal, dark-mode-first landing page tailored for AI coding agents and advanced developer platforms.",
+    category: "AI Tools",
+    tags: ["ai", "agents", "developer", "futuristic", "dark-mode", "terminal"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 185,
+    createdAt: "2026-05-15",
+    techStack: ["Next.js", "Tailwind CSS", "Framer Motion", "Lucide Icons"],
+    pages: ["/", "/docs", "/pricing", "/features"],
+    sections: [
+      "Transparent Navbar",
+      "Typewriter Hero",
+      "Workspace Mockup",
+      "Agent Workflow Steps",
+      "Feature Grid",
+      "Split Showcase",
+      "CTA Gradient Section",
+      "Minimal Footer",
+    ],
+    pageLabels: ["Hero", "Features", "Showcase", "CTA"],
+    features: [
+      "Dark-mode-first futuristic aesthetic",
+      "Framer motion workspace 3D mockup",
+      "Typewriter headline effects",
+      "Agent workflow indicator animations",
+      "Bento feature grid",
+      "Responsive container queries",
     ],
   },
 ];

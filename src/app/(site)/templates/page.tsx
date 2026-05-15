@@ -5,21 +5,18 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
+  ArrowUpRight,
+  Check,
   Crown,
-  LayoutTemplate,
+  Eye,
   Search,
   Sparkles,
   X,
-  Layers,
-  Cpu,
-  ArrowUpRight,
-  Check,
 } from "lucide-react";
 import { templates, type TemplateCategory } from "@/lib/catalog/templates";
 import { GooeyInput } from "@/components/gooey-input";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 
@@ -296,15 +293,19 @@ export default function TemplatesPage() {
                       >
                         Inspect Template
                       </Link>
-                      <Link
-                        href={`/templates/${featuredTemplate.slug}#preview`}
+                      <a
+                        href={`/template-preview/${featuredTemplate.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className={cn(
                           buttonVariants({ variant: "outline" }),
-                          "rounded-full border-border/80 bg-background/50 hover:bg-muted",
+                          "inline-flex items-center gap-1.5 rounded-full border-border/80 bg-background/50 hover:bg-muted",
                         )}
                       >
-                        Live Preview Window
-                      </Link>
+                        <Eye className="size-3.5" />
+                        Live Preview
+                        <ArrowUpRight className="size-3" />
+                      </a>
                     </div>
                   </div>
 
@@ -337,89 +338,109 @@ export default function TemplatesPage() {
             </motion.div>
           )}
 
-          {/* ── Secondary Templates Staggered Grid ── */}
+          {/* ── Secondary Templates Grid ── */}
           {secondaryTemplates.length > 0 && (
-            <div className="grid gap-6 md:grid-cols-2">
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {secondaryTemplates.map((tmpl, i) => (
                 <motion.div
                   key={tmpl.slug}
                   initial={reduce ? false : { opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                  whileHover={reduce ? undefined : { y: -5 }}
-                  className="h-full"
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/60 bg-background shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 dark:bg-white/[0.025] dark:hover:border-primary/20"
                 >
-                  <Card className="group h-full flex flex-col justify-between overflow-hidden border-border/70 bg-background/80 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 dark:bg-white/[0.025] dark:hover:border-primary/20">
-                    <div>
-                      <CardHeader className="space-y-3 pb-3">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <Badge variant="outline" className="border-border/70 text-[10px] text-muted-foreground">
-                              {tmpl.category}
-                            </Badge>
-                            <Badge variant="outline" className="border-border/70 text-[10px] text-muted-foreground">
-                              {tmpl.difficulty}
-                            </Badge>
-                          </div>
-                          {tmpl.premium ? (
-                            <Badge className="border border-border/60 bg-muted/40 text-[10px] font-semibold text-foreground">
-                              Premium
-                            </Badge>
-                          ) : (
-                            <Badge variant="outline" className="border-border/50 text-[10px] text-muted-foreground">
-                              Free
-                            </Badge>
-                          )}
-                        </div>
+                  {/* ── Preview thumbnail ── */}
+                  <div className="relative overflow-hidden border-b border-border/40 bg-muted/40 dark:bg-zinc-950">
+                    {/* Hover reveal overlay */}
+                    <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-background/80 via-background/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                        <CardTitle className="text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                          {tmpl.title}
-                        </CardTitle>
-
-                        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-                          {tmpl.description}
-                        </p>
-                      </CardHeader>
-
-                      <CardContent className="space-y-4 pt-0">
-                        {/* Scene embedded frame */}
-                        <div className="relative overflow-hidden rounded-xl border border-border/60 bg-muted/50 dark:bg-zinc-950">
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-background/20 to-transparent opacity-0 transition duration-300 group-hover:opacity-100" />
-                          <div className="relative h-48 overflow-hidden">
-                            <div className="origin-top-left scale-[0.46] w-[217%] will-change-transform">
-                              <TemplateSceneLoader slug={tmpl.slug} />
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Tech tags list */}
-                        <div className="flex flex-wrap gap-1">
-                          {tmpl.techStack.map((tech) => (
-                            <span
-                              key={tech}
-                              className="rounded-full border border-border/40 bg-muted/40 px-2 py-0.5 text-[10px] text-muted-foreground dark:bg-white/[0.02]"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      </CardContent>
+                    {/* Live Preview button on hover */}
+                    <div className="absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+                      <a
+                        href={`/template-preview/${tmpl.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white shadow-lg backdrop-blur-sm transition hover:bg-white/20"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Eye className="size-3.5" />
+                        Live Preview
+                        <ArrowUpRight className="size-3" />
+                      </a>
                     </div>
 
-                    <div className="border-t border-border/40 bg-muted/10 px-6 py-3 dark:bg-white/[0.01]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {tmpl.pages.length} pages included
-                        </span>
-                        <Link
-                          href={`/templates/${tmpl.slug}`}
-                          className="inline-flex items-center gap-1 text-xs font-semibold text-foreground transition-colors group-hover:text-primary"
-                        >
-                          Details & Preview <ArrowRight className="size-3" />
-                        </Link>
+                    <div className="h-44 overflow-hidden">
+                      <div className="origin-top-left scale-[0.46] w-[217%] will-change-transform pointer-events-none">
+                        <TemplateSceneLoader slug={tmpl.slug} />
                       </div>
                     </div>
-                  </Card>
+                  </div>
+
+                  {/* ── Card info ── */}
+                  <div className="flex flex-1 flex-col p-4">
+                    {/* Badges row */}
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
+                      <div className="flex flex-wrap gap-1">
+                        <span className="rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 text-[10px] text-muted-foreground">
+                          {tmpl.category}
+                        </span>
+                        <span className="rounded-full border border-border/60 bg-muted/30 px-2 py-0.5 text-[10px] text-muted-foreground">
+                          {tmpl.difficulty}
+                        </span>
+                      </div>
+                      {tmpl.premium ? (
+                        <span className="inline-flex items-center gap-0.5 rounded-full border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+                          <Sparkles className="size-2.5" />
+                          Premium
+                        </span>
+                      ) : (
+                        <span className="rounded-full border border-border/50 bg-muted/20 px-2 py-0.5 text-[10px] text-muted-foreground">
+                          Free
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="text-sm font-bold tracking-tight text-foreground transition-colors group-hover:text-primary line-clamp-1">
+                      {tmpl.title}
+                    </h3>
+
+                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+                      {tmpl.description}
+                    </p>
+
+                    {/* Tech stack */}
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {tmpl.techStack.slice(0, 4).map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded-md border border-border/40 bg-muted/30 px-1.5 py-0.5 text-[10px] text-muted-foreground dark:bg-white/[0.02]"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Features preview */}
+                    {tmpl.features?.slice(0, 2).map((f) => (
+                      <div key={f} className="mt-1.5 flex items-center gap-1.5">
+                        <Check className="size-3 shrink-0 text-primary" />
+                        <span className="text-[11px] text-muted-foreground line-clamp-1">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* ── Footer ── */}
+                  <div className="flex items-center justify-between border-t border-border/40 bg-muted/10 px-4 py-2.5 dark:bg-white/[0.01]">
+                    <span className="text-[11px] text-muted-foreground">
+                      {tmpl.pages.length} pages
+                    </span>
+                    <Link
+                      href={`/templates/${tmpl.slug}`}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-foreground transition-colors group-hover:text-primary"
+                    >
+                      View details <ArrowRight className="size-3" />
+                    </Link>
+                  </div>
                 </motion.div>
               ))}
             </div>
