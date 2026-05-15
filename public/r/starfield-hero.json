@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "starfield-hero",
+  "type": "registry:component",
+  "title": "Interactive Starfield Hero",
+  "description": "Dark hero section with a cursor-reactive starfield. Hundreds of glowing particles stretch, brighten, and rotate toward the cursor — built on Canvas + requestAnimationFrame at 60 fps.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/starfield-hero.tsx",
+      "type": "registry:component",
+      "target": "components/starfield-hero.tsx",
+      "content": "\"use client\";\nimport { InteractiveStarfieldHero } from \"@/components/starfield-hero\";\n\nexport function DefaultHero() {\n  return (\n    <InteractiveStarfieldHero\n      title={\"Ship faster.\\\\nBuild better.\"}\n      subtitle=\"A motion-native component library for React — animated, accessible, and production-ready.\"\n      primaryCTA={{ label: \"Get started\",      href: \"/components\" }}\n      secondaryCTA={{ label: \"View components\", href: \"/components\" }}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewStarfieldHeroDeepSpace,\n        reactSource: `\"use client\";\nimport { InteractiveStarfieldHero } from \"@/components/starfield-hero\";\n\nexport function DeepSpaceHero() {\n  return (\n    <InteractiveStarfieldHero\n      title={\"Design systems\\\\nmade simple.\"}\n      subtitle=\"Everything you need to build beautiful products at scale.\"\n      primaryCTA={{ label: \"Start for free\", href: \"#\" }}\n      secondaryCTA={{ label: \"View docs\",    href: \"#\" }}\n      particleCount={400}\n      particleColor=\"#a78bfa\"\n      activeColor=\"#f0abfc\"\n      interactionRadius={180}\n      speed={0.4}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewStarfieldHeroOcean,\n        reactSource: `\"use client\";\nimport { InteractiveStarfieldHero } from \"@/components/starfield-hero\";\n\nexport function OceanNightHero() {\n  return (\n    <InteractiveStarfieldHero\n      title={\"Ship 10× faster\\\\nwith AI.\"}\n      subtitle=\"AI-powered tooling that writes, tests, and deploys your code automatically.\"\n      primaryCTA={{ label: \"Try it free\",  href: \"#\" }}\n      secondaryCTA={{ label: \"Watch demo\", href: \"#\" }}\n      particleColor=\"#22d3ee\"\n      activeColor=\"#ecfeff\"\n      interactionRadius={120}\n      speed={0.8}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewStarfieldHeroEmber,\n        reactSource: `\"use client\";\nimport { InteractiveStarfieldHero } from \"@/components/starfield-hero\";\n\nexport function EmberStormHero() {\n  return (\n    <InteractiveStarfieldHero\n      title={\"Beautiful UX\\\\nstarts here.\"}\n      subtitle=\"Craft interfaces your users will love. Premium components, zero compromise.\"\n      primaryCTA={{ label: \"Explore now\",  href: \"#\" }}\n      secondaryCTA={{ label: \"See pricing\", href: \"#\" }}\n      particleCount={180}\n      particleColor=\"#f59e0b\"\n      activeColor=\"#fef9c3\"\n      interactionRadius={160}\n      speed={0.15}\n    />\n  );\n}\n"
+    }
+  ]
+}

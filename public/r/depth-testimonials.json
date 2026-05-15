@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "depth-testimonials",
+  "type": "registry:component",
+  "title": "Depth Testimonials",
+  "description": "Stacked testimonial planes with staggered motion reveals.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/depth-testimonials.tsx",
+      "type": "registry:component",
+      "target": "components/depth-testimonials.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function DepthTestimonials({ quotes }: { quotes: string[] }) {\n  return (\n    <div className=\"relative h-64\">\n      {quotes.map((q, i) => (\n        <motion.figure key={q} className=\"absolute left-0 right-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl\" style={{ top: 16 + i * 18 }} initial={{ y: 16, opacity: 0 }} whileInView={{ y: 0, opacity: 1 - i * 0.15 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>\n          <blockquote className=\"text-sm text-white\">“{q}”</blockquote>\n        </motion.figure>\n      ))}\n    </div>\n  );\n}\n"
+    }
+  ]
+}

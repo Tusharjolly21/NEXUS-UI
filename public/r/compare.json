@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "compare",
+  "type": "registry:component",
+  "title": "Before / After Compare",
+  "description": "Drag a vertical handle to compare two images side-by-side. Supports mouse and touch, optional labels, custom start position, and any aspect ratio.",
+  "dependencies": [
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/compare.tsx",
+      "type": "registry:component",
+      "target": "components/compare.tsx",
+      "content": "\"use client\";\nimport { Compare } from \"@/components/compare\";\n\nexport function CompareDemo() {\n  return (\n    <Compare\n      beforeImage=\"/images/before.jpg\"\n      afterImage=\"/images/after.jpg\"\n      beforeLabel=\"Before\"\n      afterLabel=\"After\"\n      className=\"aspect-video w-full\"\n    />\n  );\n}\n"
+    }
+  ]
+}

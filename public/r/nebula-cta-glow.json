@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "nebula-cta-glow",
+  "type": "registry:component",
+  "title": "Nebula CTA Glow",
+  "description": "Pulsing dual nebula glow behind a high-contrast CTA.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/nebula-cta-glow.tsx",
+      "type": "registry:component",
+      "target": "components/nebula-cta-glow.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function NebulaCta() {\n  return (\n    <div className=\"relative flex items-center justify-center overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950 px-10 py-16\">\n      <motion.div className=\"absolute size-40 rounded-full bg-cyan-400/25 blur-3xl\" animate={{ scale: [1, 1.2, 1], opacity: [0.35, 0.65, 0.35] }} transition={{ duration: 4, repeat: Infinity }} />\n      <motion.button whileHover={{ scale: 1.03 }} className=\"relative rounded-full bg-white px-6 py-2 text-sm font-semibold text-zinc-950\">Start building</motion.button>\n    </div>\n  );\n}\n"
+    }
+  ]
+}

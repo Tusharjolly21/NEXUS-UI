@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "motion-faq-disclosure",
+  "type": "registry:component",
+  "title": "Motion FAQ Disclosure",
+  "description": "Lightweight FAQ with directional affordance and animated answers.",
+  "dependencies": [
+    "framer-motion",
+    "react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/motion-faq-disclosure.tsx",
+      "type": "registry:component",
+      "target": "components/motion-faq-disclosure.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\nimport { useState } from \"react\";\n\nexport function MotionFaq({ items }: { items: { q: string; a: string }[] }) {\n  const [open, setOpen] = useState(0);\n  return (\n    <div className=\"space-y-2\">\n      {items.map((it, i) => (\n        <button key={it.q} type=\"button\" onClick={() => setOpen(i)} className=\"w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left\">\n          <div className=\"flex items-center justify-between gap-3\">\n            <p className=\"text-sm font-medium text-white\">{it.q}</p>\n            <motion.span animate={{ rotate: open === i ? 90 : 0 }} className=\"text-xs text-zinc-400\">▸</motion.span>\n          </div>\n          {open === i ? <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: \"auto\" }} className=\"mt-2 text-xs text-zinc-400\">{it.a}</motion.p> : null}\n        </button>\n      ))}\n    </div>\n  );\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "orbit-footer",
+  "type": "registry:component",
+  "title": "Orbit Footer",
+  "description": "Compact footer with balanced columns and developer-first links.",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/orbit-footer.tsx",
+      "type": "registry:component",
+      "target": "components/orbit-footer.tsx",
+      "content": "export function OrbitFooter() {\n  return (\n    <footer className=\"rounded-3xl border border-white/10 bg-zinc-950 p-6 text-sm text-zinc-400\">\n      <div className=\"flex flex-wrap items-center justify-between gap-4\">\n        <p className=\"text-white\">Nexus-UI</p>\n        <div className=\"flex gap-4\"><a href=\"#\">Docs</a><a href=\"#\">Status</a></div>\n      </div>\n    </footer>\n  );\n}\n"
+    }
+  ]
+}

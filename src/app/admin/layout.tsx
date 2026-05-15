@@ -1,0 +1,22 @@
+import Link from "next/link";
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-dvh bg-background">
+      <header className="border-b border-border bg-muted/40 backdrop-blur-xl dark:bg-black/50">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+          <div>
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">Admin</p>
+            <Link href="/admin" className="text-sm font-semibold text-foreground">
+              Nexus-UI control
+            </Link>
+          </div>
+          <Link href="/" className="text-xs text-primary transition-colors hover:text-foreground">
+            Exit
+          </Link>
+        </div>
+      </header>
+      {children}
+    </div>
+  );
+}

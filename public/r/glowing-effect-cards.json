@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glowing-effect-cards",
+  "type": "registry:component",
+  "title": "Glowing Effect Cards",
+  "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for premium SaaS sections and dashboards.",
+  "dependencies": [
+    "framer-motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/glowing-effect-cards.tsx",
+      "type": "registry:component",
+      "target": "components/glowing-effect-cards.tsx",
+      "content": "\"use client\";\n\nimport { GlowingCardsLayout } from \"@/components/glowing-effect-cards\";\n\nexport function CursorGlowCardsSection() {\n  return <GlowingCardsLayout className=\"max-w-6xl\" />;\n}`,\n    reactExamples: [\n      {\n        title: \"2-1-2 layout example\",\n        code: `\"use client\";\n\nimport { GlowingCardsLayout } from \"@/components/glowing-effect-cards\";\n\nexport function CursorGlowCardsSection() {\n  return <GlowingCardsLayout className=\"max-w-6xl\" />;\n}`,\n      },\n      {\n        title: \"Single glowing card example\",\n        code: `\"use client\";\n\nimport { Sparkles } from \"lucide-react\";\nimport { GlowingCard } from \"@/components/glowing-effect-cards\";\n\nexport function FeatureGlowCard() {\n  return (\n    <GlowingCard\n      title=\"Cursor-reactive border\"\n      description=\"Glow follows mouse movement and fades smoothly on leave.\"\n      icon={<Sparkles className=\"size-4\" />}\n      cta=\"Open details\"\n      className=\"max-w-md\"\n    />\n  );\n}`,\n      },\n      {\n        title: \"Custom effect wrapper\",\n        code: `\"use client\";\n\nimport { GlowingEffect } from \"@/components/glowing-effect-cards\";\n\nexport function CustomGlowContainer() {\n  return (\n    <GlowingEffect glowColor=\"#7dd3fc\" intensity={1.2} blur={22} className=\"rounded-2xl\">\n      <div className=\"p-6\">\n        <h3 className=\"text-lg font-semibold\">Custom glow theme</h3>\n        <p className=\"mt-2 text-sm text-muted-foreground\">Use on any container, not just cards.</p>\n      </div>\n    </GlowingEffect>\n  );\n}\n"
+    }
+  ]
+}

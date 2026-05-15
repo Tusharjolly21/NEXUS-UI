@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "editorial-blog-rail",
+  "type": "registry:component",
+  "title": "Editorial Blog Rail",
+  "description": "Featured article plus compact secondary headlines for content hubs.",
+  "dependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/editorial-blog-rail.tsx",
+      "type": "registry:component",
+      "target": "components/editorial-blog-rail.tsx",
+      "content": "export function EditorialRail() {\n  return (\n    <div className=\"grid gap-4 md:grid-cols-2\">\n      <article className=\"rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl\">\n        <p className=\"text-xs text-cyan-200/80\">Featured</p>\n        <h2 className=\"mt-2 text-lg font-semibold text-white\">Designing scroll choreography</h2>\n      </article>\n      <div className=\"space-y-3\">{Array.from({ length: 3 }).map((_, i) => (\n        <div key={i} className=\"rounded-2xl border border-white/10 bg-black/30 p-4\" />\n      ))}</div>\n    </div>\n  );\n}\n"
+    }
+  ]
+}

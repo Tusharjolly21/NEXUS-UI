@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "background-boxes",
+  "type": "registry:component",
+  "title": "Background Boxes",
+  "description": "Interactive full-width box grid background with cursor-follow highlight, optional glow, and smooth ripple transitions.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/background-boxes.tsx",
+      "type": "registry:component",
+      "target": "components/background-boxes.tsx",
+      "content": "\"use client\";\n\nimport { BackgroundBoxes } from \"@/components/background-boxes\";\n\nexport function HeroBackgroundBoxes() {\n  return (\n    <BackgroundBoxes\n      rows={11}\n      boxSize={42}\n      highlightColor=\"hsl(var(--primary) / 0.85)\"\n      className=\"rounded-3xl border border-border/60 bg-gradient-to-b from-background to-muted/30\"\n    >\n      <div className=\"mx-auto flex min-h-[340px] max-w-3xl flex-col items-center justify-center px-6 py-10 text-center\">\n        <h2 className=\"text-4xl font-semibold tracking-tight sm:text-5xl\">\n          Premium interactive grid background\n        </h2>\n        <p className=\"mt-3 text-sm text-muted-foreground\">\n          Use as hero, section, or card background with subtle cursor-follow highlights.\n        </p>\n      </div>\n    </BackgroundBoxes>\n  );\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "bento-signal-grid",
+  "type": "registry:component",
+  "title": "Signal Bento Grid",
+  "description": "Animated bento tiles with breathing gradients for product metrics.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/bento-signal-grid.tsx",
+      "type": "registry:component",
+      "target": "components/bento-signal-grid.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function BentoSignals() {\n  return (\n    <div className=\"grid grid-cols-2 gap-3\">\n      {[\"Latency\", \"Uptime\"].map((label, i) => (\n        <motion.div key={label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className=\"rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl\">\n          <p className=\"text-xs text-zinc-400\">{label}</p>\n          <p className=\"mt-2 text-2xl font-semibold text-white\">{i === 0 ? \"42ms\" : \"99.99%\"}</p>\n        </motion.div>\n      ))}\n    </div>\n  );\n}\n"
+    }
+  ]
+}

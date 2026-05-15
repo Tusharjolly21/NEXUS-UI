@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "forge-ai-command-bar",
+  "type": "registry:component",
+  "title": "Forge AI Command Bar",
+  "description": "Command surface for AI copilots with motion layout container.",
+  "dependencies": [
+    "framer-motion",
+    "react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/forge-ai-command-bar.tsx",
+      "type": "registry:component",
+      "target": "components/forge-ai-command-bar.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\nimport { useState } from \"react\";\n\nexport function AiCommandBar() {\n  const [value, setValue] = useState(\"\");\n  return (\n    <motion.div layout className=\"rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl\">\n      <input value={value} onChange={(e) => setValue(e.target.value)} className=\"w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white\" placeholder=\"Describe the UI you need…\" />\n    </motion.div>\n  );\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "vector-tilt-scene",
+  "type": "registry:component",
+  "title": "Vector Tilt Scene",
+  "description": "High depth glass panel for hero cards and feature highlights.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/vector-tilt-scene.tsx",
+      "type": "registry:component",
+      "target": "components/vector-tilt-scene.tsx",
+      "content": "// Same implementation as Nebula Glass Card — tune perspective and lighting for scene-scale layouts.\n"
+    }
+  ]
+}

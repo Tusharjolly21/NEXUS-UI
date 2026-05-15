@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "signup-form",
+  "type": "registry:component",
+  "title": "Signup Form",
+  "description": "Customizable signup form built on shadcn input + label with subtle framer-motion transitions and async submit states.",
+  "dependencies": [
+    "framer-motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/signup-form.tsx",
+      "type": "registry:component",
+      "target": "components/signup-form.tsx",
+      "content": "\"use client\";\n\nimport { SignupForm, type SignupFormValues } from \"@/components/signup-form\";\n\nexport function AuthSignupCard() {\n  async function createAccount(values: SignupFormValues) {\n    await new Promise<void>((resolve) => setTimeout(resolve, 1200));\n  }\n\n  return <SignupForm onSubmit={createAccount} />;\n}\n"
+    }
+  ]
+}

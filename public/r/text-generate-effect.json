@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "text-generate-effect",
+  "type": "registry:component",
+  "title": "Text Generate Effect",
+  "description": "Animated text reveal that fades words, characters, or lines into view with optional blur and upward motion.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/text-generate-effect.tsx",
+      "type": "registry:component",
+      "target": "components/text-generate-effect.tsx",
+      "content": "\"use client\";\n\nimport { TextGenerateEffect } from \"@/components/text-generate-effect\";\n\nexport function HeroTextReveal() {\n  return (\n    <TextGenerateEffect\n      as=\"h2\"\n      text=\"Ship product stories with motion-first typography that reveals ideas with clarity, rhythm, and cinematic polish.\"\n      mode=\"word\"\n      className=\"text-4xl font-semibold tracking-tight sm:text-5xl\"\n      duration={0.4}\n      stagger={0.07}\n      blur\n    />\n  );\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "svg-noise-shader",
+  "type": "registry:component",
+  "title": "SVG Noise Shader",
+  "description": "FeTurbulence-driven noise field for textured sci-fi surfaces.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/svg-noise-shader.tsx",
+      "type": "registry:component",
+      "target": "components/svg-noise-shader.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function SvgNoise() {\n  return (\n    <div className=\"relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950\">\n      <motion.div aria-hidden className=\"absolute inset-0 opacity-40 mix-blend-screen\" style={{ backgroundImage: \"url(\\\\\\\"data:image/svg+xml,...feTurbulence...\\\\\\\")\" }} animate={{ x: [0, -20, 0], y: [0, 10, 0] }} transition={{ duration: 10, repeat: Infinity, ease: \"linear\" }} />\n    </div>\n  );\n}\n"
+    }
+  ]
+}

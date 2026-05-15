@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "beam-sweep-field",
+  "type": "registry:component",
+  "title": "Beam Sweep Field",
+  "description": "Slow sweeping light column for cinematic section backgrounds.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/beam-sweep-field.tsx",
+      "type": "registry:component",
+      "target": "components/beam-sweep-field.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function BeamField() {\n  return (\n    <div className=\"relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950\">\n      <div className=\"lf-grid absolute inset-0 opacity-30\" />\n      <motion.div className=\"absolute inset-y-10 w-[2px] bg-gradient-to-b from-transparent via-cyan-300 to-transparent\" animate={{ left: [\"8%\", \"86%\", \"30%\", \"8%\"] }} transition={{ duration: 9, repeat: Infinity, ease: \"easeInOut\" }} />\n    </div>\n  );\n}\n"
+    }
+  ]
+}

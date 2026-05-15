@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "typewriter-effect",
+  "type": "registry:component",
+  "title": "Typewriter Effect",
+  "description": "Character-by-character typewriter text animation with blinking cursor, optional deleting, looping, and semantic heading support.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/typewriter-effect.tsx",
+      "type": "registry:component",
+      "target": "components/typewriter-effect.tsx",
+      "content": "\"use client\";\n\nimport { TypewriterEffect } from \"@/components/typewriter-effect\";\n\nexport function HeroTypewriterHeading() {\n  return (\n    <TypewriterEffect\n      as=\"h1\"\n      text=\"Build premium SaaS surfaces with cinematic motion.\"\n      typingSpeed={45}\n      pauseDuration={1500}\n      className=\"text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl\"\n    />\n  );\n}`,\n    reactExamples: [\n      {\n        title: \"Hero heading example\",\n        code: `\"use client\";\n\nimport { TypewriterEffect } from \"@/components/typewriter-effect\";\n\nexport function HeroTypewriterHeading() {\n  return (\n    <TypewriterEffect\n      as=\"h1\"\n      text=\"Build premium SaaS surfaces with cinematic motion.\"\n      typingSpeed={45}\n      pauseDuration={1500}\n      className=\"text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl\"\n    />\n  );\n}`,\n      },\n      {\n        title: \"Multiple rotating words example\",\n        code: `\"use client\";\n\nimport { TypewriterEffect } from \"@/components/typewriter-effect\";\n\nexport function RotatingTypewriterWords() {\n  return (\n    <TypewriterEffect\n      as=\"h2\"\n      text={[\"Ship faster.\", \"Polish every interaction.\", \"Convert visitors into customers.\"]}\n      typingSpeed={52}\n      deletingSpeed={36}\n      pauseDuration={1200}\n      loop\n      className=\"text-2xl font-medium tracking-tight text-muted-foreground sm:text-3xl\"\n      cursorClassName=\"bg-primary\"\n    />\n  );\n}\n"
+    }
+  ]
+}

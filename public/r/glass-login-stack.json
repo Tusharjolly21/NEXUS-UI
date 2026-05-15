@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glass-login-stack",
+  "type": "registry:component",
+  "title": "Glass Login Stack",
+  "description": "Minimal glass authentication panel with crisp focus states.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/glass-login-stack.tsx",
+      "type": "registry:component",
+      "target": "components/glass-login-stack.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function GlassLogin() {\n  return (\n    <motion.form initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className=\"w-full max-w-sm space-y-3 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl\">\n      <input className=\"w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white\" placeholder=\"Email\" />\n      <input className=\"w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white\" type=\"password\" placeholder=\"Password\" />\n      <button className=\"w-full rounded-xl bg-cyan-300 py-2 text-sm font-semibold text-zinc-950\">Continue</button>\n    </motion.form>\n  );\n}\n"
+    }
+  ]
+}

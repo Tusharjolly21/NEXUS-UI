@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "encrypted-text",
+  "type": "registry:component",
+  "title": "Encrypted Text",
+  "description": "Characters shuffle through gibberish before locking into the final string — a futuristic cyber decoding reveal for hero headings, buttons, badges, and nav links.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/encrypted-text.tsx",
+      "type": "registry:component",
+      "target": "components/encrypted-text.tsx",
+      "content": "\"use client\";\n\nimport { EncryptedText } from \"@/components/encrypted-text\";\n\n/* Load trigger — plays once on mount */\nexport function HeroHeading() {\n  return (\n    <EncryptedText\n      text=\"INITIALIZING SYSTEM\"\n      trigger=\"load\"\n      speed={55}\n      shuffleSpeed={30}\n      iterations={10}\n      className=\"text-5xl font-bold tracking-[0.12em] text-foreground\"\n    />\n  );\n}\n\n/* Hover trigger — replays on each mouse-enter */\nexport function HoverButton() {\n  return (\n    <button className=\"rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary\">\n      <EncryptedText text=\"Get started\" trigger=\"hover\" speed={35} shuffleSpeed={20} iterations={4} />\n    </button>\n  );\n}\n\n/* Looping badge */\nexport function LiveBadge() {\n  return (\n    <span className=\"inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-300\">\n      <span className=\"size-1.5 rounded-full bg-emerald-500\" />\n      <EncryptedText text=\"ONLINE\" trigger=\"load\" loop loopDelay={3000} speed={80} iterations={3} />\n    </span>\n  );\n}\n"
+    }
+  ]
+}

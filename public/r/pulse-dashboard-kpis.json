@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pulse-dashboard-kpis",
+  "type": "registry:component",
+  "title": "Pulse Dashboard KPIs",
+  "description": "KPI strip with micro-hover lifts and soft chart placeholders.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/pulse-dashboard-kpis.tsx",
+      "type": "registry:component",
+      "target": "components/pulse-dashboard-kpis.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function KpiStrip({ kpis }: { kpis: { label: string; value: string }[] }) {\n  return (\n    <div className=\"grid gap-3 md:grid-cols-3\">\n      {kpis.map((k) => (\n        <motion.div key={k.label} whileHover={{ y: -2 }} className=\"rounded-3xl border border-white/10 bg-white/5 p-4\">\n          <p className=\"text-xs text-zinc-400\">{k.label}</p>\n          <p className=\"mt-2 text-3xl font-semibold text-white\">{k.value}</p>\n        </motion.div>\n      ))}\n    </div>\n  );\n}\n"
+    }
+  ]
+}

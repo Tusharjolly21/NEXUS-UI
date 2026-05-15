@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "meteors",
+  "type": "registry:component",
+  "title": "Meteor Effect",
+  "description": "Animated diagonal meteor beams with glow heads and trailing streaks, designed as a reusable background layer for cards and hero sections.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/meteors.tsx",
+      "type": "registry:component",
+      "target": "components/meteors.tsx",
+      "content": "\"use client\";\n\nimport { Meteors } from \"@/components/meteors\";\n\nexport function HeroMeteors() {\n  return (\n    <Meteors\n      number={26}\n      minDuration={2.8}\n      maxDuration={5.8}\n      minDelay={0.06}\n      maxDelay={1.8}\n      angle={212}\n      className=\"relative overflow-hidden rounded-3xl border border-white/10 bg-[#050911] px-8 py-16 text-white\"\n      intensity=\"high\"\n      glow\n    >\n      <div className=\"relative z-10 mx-auto max-w-2xl text-center\">\n        <h2 className=\"text-4xl font-semibold tracking-tight sm:text-5xl\">Launch cinematic product surfaces</h2>\n      </div>\n    </Meteors>\n  );\n}`,\n    reactExamples: [\n      {\n        title: \"Card background example\",\n        code: `\"use client\";\n\nimport { Meteors } from \"@/components/meteors\";\n\nexport function PricingMeteorCard() {\n  return (\n    <div className=\"relative overflow-hidden rounded-2xl border border-white/10 bg-[#050911] p-6 text-white\">\n      <Meteors number={18} minDuration={3} maxDuration={6} angle={218} className=\"absolute inset-0\" />\n      <div className=\"relative z-10\">\n        <p className=\"text-xs uppercase tracking-[0.2em] text-sky-200/80\">Pro plan</p>\n        <h3 className=\"mt-2 text-2xl font-semibold\">$49/mo</h3>\n      </div>\n    </div>\n  );\n}`,\n      },\n      {\n        title: \"Hero background example\",\n        code: `\"use client\";\n\nimport { Meteors } from \"@/components/meteors\";\n\nexport function HeroMeteors() {\n  return (\n    <Meteors\n      number={30}\n      minDelay={0.05}\n      maxDelay={1.8}\n      minDuration={2.8}\n      maxDuration={5.8}\n      angle={212}\n      intensity=\"high\"\n      glow\n      className=\"relative overflow-hidden rounded-3xl border border-white/10 bg-[#030712] px-8 py-16 text-white\"\n    >\n      <div className=\"relative z-10 mx-auto max-w-2xl text-center\">\n        <h2 className=\"text-balance text-4xl font-semibold tracking-tight sm:text-5xl\">\n          Build launch pages with subtle motion depth\n        </h2>\n      </div>\n    </Meteors>\n  );\n}\n"
+    }
+  ]
+}

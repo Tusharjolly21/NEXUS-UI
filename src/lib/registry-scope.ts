@@ -1,0 +1,7 @@
+/** Scope key for `components.json` registries and `npx shadcn@latest add` commands. */
+export const SHADCN_REGISTRY_SCOPE = "@next-ui";
+
+export function shadcnRegistryUrl(origin: string) {
+  const base = origin.replace(/\/$/, "");
+  return `${base}/r/{name}.json`;
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "images-badge",
+  "type": "registry:component",
+  "title": "Images Badge",
+  "description": "Stacked avatar/image pill that fans open on hover — ideal for team badges, social proof, avatar groups, and template galleries.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/images-badge.tsx",
+      "type": "registry:component",
+      "target": "components/images-badge.tsx",
+      "content": "\"use client\";\nimport { ImagesBadge } from \"@/components/images-badge\";\n\nconst TEAM = [\n  { src: \"https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4\", alt: \"Felix\" },\n  { src: \"https://api.dicebear.com/9.x/avataaars/svg?seed=Aneka&backgroundColor=c0aede\", alt: \"Aneka\" },\n  { src: \"https://api.dicebear.com/9.x/avataaars/svg?seed=Milo&backgroundColor=d1d4f9\",  alt: \"Milo\"  },\n  { src: \"https://api.dicebear.com/9.x/avataaars/svg?seed=Zoe&backgroundColor=ffd5dc\",   alt: \"Zoe\"   },\n  { src: \"https://api.dicebear.com/9.x/avataaars/svg?seed=Kai&backgroundColor=ffdfbf\",   alt: \"Kai\"   },\n];\n\nexport function DefaultBadge() {\n  return (\n    <ImagesBadge\n      images={TEAM}\n      maxVisible={3}\n      revealCount={2}\n      label=\"Trusted by our team\"\n      size=\"md\"\n      direction=\"right\"\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewImagesBadgeLarge,\n        reactSource: `\"use client\";\nimport { ImagesBadge } from \"@/components/images-badge\";\n\nexport function LargeBadge() {\n  return (\n    <ImagesBadge\n      images={TEAM}           // 7 images\n      maxVisible={4}\n      revealCount={3}\n      label=\"12,000+ developers\"\n      size=\"lg\"\n      direction=\"right\"\n      onClick={() => window.location.href = \"/community\"}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewImagesBadgeCompact,\n        reactSource: `\"use client\";\nimport { ImagesBadge } from \"@/components/images-badge\";\n\nexport function CompactBadge() {\n  return (\n    <div className=\"flex items-center gap-3\">\n      <ImagesBadge\n        images={TEAM}\n        maxVisible={2}\n        revealCount={2}\n        size=\"sm\"\n      />\n      <span className=\"text-sm text-muted-foreground\">\n        Felix, Aneka + 3 others liked this\n      </span>\n    </div>\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewImagesBadgeWide,\n        reactSource: `\"use client\";\nimport { ImagesBadge } from \"@/components/images-badge\";\n\nconst TEMPLATES = [\n  { src: \"https://api.dicebear.com/9.x/shapes/svg?seed=alpha&backgroundColor=1e293b\",   alt: \"Dashboard\"  },\n  { src: \"https://api.dicebear.com/9.x/shapes/svg?seed=beta&backgroundColor=0f172a\",    alt: \"Landing\"    },\n  { src: \"https://api.dicebear.com/9.x/shapes/svg?seed=gamma&backgroundColor=172554\",   alt: \"Portfolio\"  },\n  { src: \"https://api.dicebear.com/9.x/shapes/svg?seed=delta&backgroundColor=1c1917\",   alt: \"SaaS\"       },\n  { src: \"https://api.dicebear.com/9.x/shapes/svg?seed=epsilon&backgroundColor=14532d\", alt: \"Store\"      },\n  { src: \"https://api.dicebear.com/9.x/shapes/svg?seed=zeta&backgroundColor=450a0a\",    alt: \"Blog\"       },\n];\n\nexport function WideSpreadBadge() {\n  return (\n    <ImagesBadge\n      images={TEMPLATES}\n      maxVisible={2}\n      revealCount={4}\n      label=\"6 templates included\"\n      size=\"md\"\n      direction=\"left\"\n    />\n  );\n}\n"
+    }
+  ]
+}

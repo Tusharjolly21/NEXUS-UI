@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "lattice-feature-grid",
+  "type": "registry:component",
+  "title": "Lattice Feature Grid",
+  "description": "Four-up feature grid with scroll reveals and glass tiles.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/lattice-feature-grid.tsx",
+      "type": "registry:component",
+      "target": "components/lattice-feature-grid.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function LatticeFeatures({ items }: { items: { title: string; body: string }[] }) {\n  return (\n    <div className=\"grid gap-3 md:grid-cols-2\">\n      {items.map((it, i) => (\n        <motion.div key={it.title} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className=\"rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-5\">\n          <p className=\"text-sm font-semibold text-white\">{it.title}</p>\n          <p className=\"mt-2 text-xs text-zinc-400\">{it.body}</p>\n        </motion.div>\n      ))}\n    </div>\n  );\n}\n"
+    }
+  ]
+}

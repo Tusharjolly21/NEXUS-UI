@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "nebula-glass-card",
+  "type": "registry:component",
+  "title": "Nebula Glass Card",
+  "description": "3D tilt card with spring physics and luminous edge lighting.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/nebula-glass-card.tsx",
+      "type": "registry:component",
+      "target": "components/nebula-glass-card.tsx",
+      "content": "\"use client\";\n\nimport { motion, useMotionValue, useSpring, useTransform } from \"framer-motion\";\n\nexport function NebulaCard() {\n  const x = useMotionValue(0);\n  const y = useMotionValue(0);\n  const rx = useSpring(useTransform(y, [-40, 40], [8, -8]), { stiffness: 260, damping: 20 });\n  const ry = useSpring(useTransform(x, [-40, 40], [-8, 8]), { stiffness: 260, damping: 20 });\n\n  return (\n    <motion.div style={{ rotateX: rx, rotateY: ry, transformPerspective: 900 }} onMouseMove={(e) => {\n      const r = e.currentTarget.getBoundingClientRect();\n      x.set(e.clientX - r.left - r.width / 2);\n      y.set(e.clientY - r.top - r.height / 2);\n    }} onMouseLeave={() => { x.set(0); y.set(0); }} className=\"rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6\">\n      <p className=\"text-white\">Tilt depth</p>\n    </motion.div>\n  );\n}\n"
+    }
+  ]
+}

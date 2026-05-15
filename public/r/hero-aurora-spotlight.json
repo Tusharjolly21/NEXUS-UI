@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "hero-aurora-spotlight",
+  "type": "registry:component",
+  "title": "Aurora Hero Spotlight",
+  "description": "Cursor-reactive spotlight layered over an aurora field for launch heroes.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/hero-aurora-spotlight.tsx",
+      "type": "registry:component",
+      "target": "components/hero-aurora-spotlight.tsx",
+      "content": "\"use client\";\n\nimport { motion, useMotionTemplate, useMotionValue } from \"framer-motion\";\n\nexport function HeroAurora() {\n  const x = useMotionValue(0);\n  const y = useMotionValue(0);\n  const spotlight = useMotionTemplate\\`radial-gradient(420px at \\${x}px \\${y}px, rgba(56,189,248,.35), transparent 60%)\\`;\n\n  return (\n    <section onMouseMove={(e) => {\n      const r = e.currentTarget.getBoundingClientRect();\n      x.set(e.clientX - r.left); y.set(e.clientY - r.top);\n    }} className=\"relative isolate overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950 p-10\">\n      <div className=\"lf-aurora absolute inset-0 opacity-80\" />\n      <motion.div className=\"absolute inset-0\" style={{ backgroundImage: spotlight }} />\n      <div className=\"relative\">\n        <p className=\"text-xs uppercase tracking-[0.2em] text-cyan-200/80\">Ship faster</p>\n        <h1 className=\"mt-3 text-4xl font-semibold text-white\">Motion-native interfaces</h1>\n      </div>\n    </section>\n  );\n}\n"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "text-reveal-card",
+  "type": "registry:component",
+  "title": "Text Reveal Card",
+  "description": "Interactive premium card with mouse-follow spotlight and bottom reveal content for features, case studies, and portfolio sections.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/text-reveal-card.tsx",
+      "type": "registry:component",
+      "target": "components/text-reveal-card.tsx",
+      "content": "\"use client\";\n\nimport { Sparkles } from \"lucide-react\";\nimport { TextRevealCard } from \"@/components/text-reveal-card\";\n\nexport function FeatureRevealCard() {\n  return (\n    <TextRevealCard\n      title=\"Feature Signal Card\"\n      description=\"Reveal launch-ready messaging as users scrub across the card.\"\n      icon={<Sparkles className=\"size-4 text-primary\" />}\n      image=\"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80\"\n      intensity={1.1}\n      className=\"max-w-md\"\n    />\n  );\n}`,\n    reactExamples: [\n      {\n        title: \"Feature card example\",\n        code: `\"use client\";\n\nimport { Rocket } from \"lucide-react\";\nimport { TextRevealCard } from \"@/components/text-reveal-card\";\n\nexport function FeatureRevealCard() {\n  return (\n    <TextRevealCard\n      title=\"Feature Signal Card\"\n      description=\"Progressively reveal polished copy while preserving baseline readability.\"\n      icon={<Rocket className=\"size-4 text-primary\" />}\n      image=\"https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80\"\n      intensity={1.05}\n      className=\"max-w-md\"\n    />\n  );\n}`,\n      },\n      {\n        title: \"Portfolio card example\",\n        code: `\"use client\";\n\nimport { BriefcaseBusiness } from \"lucide-react\";\nimport { TextRevealCard } from \"@/components/text-reveal-card\";\n\nexport function PortfolioRevealCard() {\n  return (\n    <TextRevealCard\n      title=\"Portfolio Proof Card\"\n      description=\"Show outcomes progressively without overloading the initial view.\"\n      icon={<BriefcaseBusiness className=\"size-4 text-primary\" />}\n      image=\"https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80\"\n      revealContent={\n        <div className=\"space-y-1\">\n          <p className=\"text-sm font-medium text-foreground\">Workspace analytics relaunch</p>\n          <p className=\"text-sm text-muted-foreground\">+31% activation after simplifying onboarding copy and interaction cues.</p>\n        </div>\n      }\n      className=\"max-w-md\"\n    />\n  );\n}\n"
+    }
+  ]
+}

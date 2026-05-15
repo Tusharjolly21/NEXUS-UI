@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "split-contact-glass",
+  "type": "registry:component",
+  "title": "Split Contact Glass",
+  "description": "Marketing narrative paired with a compact contact capture form.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/split-contact-glass.tsx",
+      "type": "registry:component",
+      "target": "components/split-contact-glass.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function SplitContact() {\n  return (\n    <div className=\"grid gap-4 md:grid-cols-2\">\n      <div className=\"rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-500/15 to-fuchsia-500/10 p-6\">\n        <p className=\"text-sm font-semibold text-white\">Talk with us</p>\n      </div>\n      <motion.form whileTap={{ scale: 0.995 }} className=\"rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl\">\n        {/* fields */}\n      </motion.form>\n    </div>\n  );\n}\n"
+    }
+  ]
+}

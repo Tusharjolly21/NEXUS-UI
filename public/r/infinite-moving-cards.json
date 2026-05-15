@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "infinite-moving-cards",
+  "type": "registry:component",
+  "title": "Infinite Moving Cards",
+  "description": "Customizable infinite marquee of cards with seamless looping, direction controls, hover pause, and optional custom rendering.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/infinite-moving-cards.tsx",
+      "type": "registry:component",
+      "target": "components/infinite-moving-cards.tsx",
+      "content": "\"use client\";\n\nimport { InfiniteMovingCards } from \"@/components/infinite-moving-cards\";\n\nconst testimonials = [\n  {\n    title: \"Launch velocity increased\",\n    description: \"We shipped our redesign in half the usual time.\",\n    name: \"Ariana Shaw\",\n    role: \"Product Lead\",\n    rating: 5,\n    tags: [\"SaaS\"],\n  },\n  {\n    title: \"No visual jump\",\n    description: \"The loop feels smooth and polished on every screen size.\",\n    name: \"Marcus Lee\",\n    role: \"Frontend Engineer\",\n    rating: 5,\n    tags: [\"Motion\"],\n  },\n];\n\nexport function TestimonialsRail() {\n  return <InfiniteMovingCards items={testimonials} direction=\"left\" speed=\"normal\" pauseOnHover />;\n}`,\n    reactExamples: [\n      {\n        title: \"Testimonials example\",\n        code: `\"use client\";\n\nimport { InfiniteMovingCards } from \"@/components/infinite-moving-cards\";\n\nconst testimonials = [\n  { title: \"Launch velocity increased\", description: \"Shipped in half the time.\", name: \"Ariana\", role: \"Product Lead\", rating: 5, tags: [\"SaaS\"] },\n  { title: \"Production-ready defaults\", description: \"Smooth, readable, responsive.\", name: \"Marcus\", role: \"Frontend Engineer\", rating: 5, tags: [\"React\"] },\n  { title: \"No visual jump\", description: \"Seamless loop even on large screens.\", name: \"Lena\", role: \"Design Manager\", rating: 4, tags: [\"UX\"] },\n];\n\nexport function TestimonialsRail() {\n  return <InfiniteMovingCards items={testimonials} direction=\"left\" speed=\"normal\" pauseOnHover />;\n}`,\n      },\n      {\n        title: \"Logo/cards example\",\n        code: `\"use client\";\n\nimport { InfiniteMovingCards } from \"@/components/infinite-moving-cards\";\n\nconst tools = [\n  { id: \"1\", title: \"Nexus\", tags: [\"UI\"] },\n  { id: \"2\", title: \"Orbit\", tags: [\"Analytics\"] },\n  { id: \"3\", title: \"Flux\", tags: [\"Ops\"] },\n  { id: \"4\", title: \"Pulse\", tags: [\"Growth\"] },\n];\n\nexport function ToolsRail() {\n  return (\n    <InfiniteMovingCards\n      items={tools}\n      direction=\"right\"\n      speed=\"fast\"\n      cardClassName=\"min-w-[180px] max-w-[180px]\"\n      renderItem={(item) => (\n        <div className=\"flex h-[110px] w-[180px] flex-col items-center justify-center rounded-2xl border border-border/70 bg-card\">\n          <p className=\"text-sm font-medium\">{item.title}</p>\n          <p className=\"text-[11px] text-muted-foreground\">{item.tags?.[0]}</p>\n        </div>\n      )}\n    />\n  );\n}\n"
+    }
+  ]
+}

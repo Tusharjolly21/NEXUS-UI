@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "dot-grid-hero",
+  "type": "registry:component",
+  "title": "Interactive Dot Grid Hero",
+  "description": "Cinematic hero section with a Canvas-rendered dot grid that reacts to cursor proximity — dots scale, brighten, and return to rest with a smooth radial glow spotlight.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/dot-grid-hero.tsx",
+      "type": "registry:component",
+      "target": "components/dot-grid-hero.tsx",
+      "content": "\"use client\";\nimport { DotGridHero } from \"@/components/dot-grid-hero\";\n\nexport function DefaultHero() {\n  return (\n    <DotGridHero\n      title={\"Build interfaces\\\\nthat ship.\"}\n      subtitle=\"A motion-native component library for React.\nAnimated, accessible, and production-ready.\"\n      primaryCTA={{ label: \"Get started\",         href: \"/components\" }}\n      secondaryCTA={{ label: \"Browse components\", href: \"/components\" }}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewDotGridHeroDense,\n        reactSource: `\"use client\";\nimport { DotGridHero } from \"@/components/dot-grid-hero\";\n\nexport function DenseHero() {\n  return (\n    <DotGridHero\n      title={\"Design systems\\\\nmade simple.\"}\n      subtitle=\"Everything you need to build fast,\nbeautiful products at scale.\"\n      primaryCTA={{ label: \"Start for free\", href: \"#\" }}\n      secondaryCTA={{ label: \"View docs\",    href: \"#\" }}\n      dotGap={14}\n      dotSize={1.0}\n      glowColor=\"#06b6d4\"\n      activeDotColor=\"#cffafe\"\n      interactionRadius={150}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewDotGridHeroAmber,\n        reactSource: `\"use client\";\nimport { DotGridHero } from \"@/components/dot-grid-hero\";\n\nexport function AmberHero() {\n  return (\n    <DotGridHero\n      title={\"Ship 10× faster\\\\nwith AI.\"}\n      subtitle=\"AI-powered tooling that writes, tests,\nand deploys your code automatically.\"\n      primaryCTA={{ label: \"Try it free\",  href: \"#\" }}\n      secondaryCTA={{ label: \"Watch demo\", href: \"#\" }}\n      dotGap={26}\n      dotSize={1.4}\n      glowColor=\"#f59e0b\"\n      activeDotColor=\"#fef3c7\"\n      dotColor=\"#292524\"\n      interactionRadius={200}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewDotGridHeroRose,\n        reactSource: `\"use client\";\nimport { DotGridHero } from \"@/components/dot-grid-hero\";\n\nexport function RoseHero() {\n  return (\n    <DotGridHero\n      title={\"Beautiful UX\\\\nstarts here.\"}\n      subtitle=\"Craft interfaces your users will love.\nPremium components, zero compromise.\"\n      primaryCTA={{ label: \"Explore now\",  href: \"#\" }}\n      secondaryCTA={{ label: \"See pricing\", href: \"#\" }}\n      dotGap={30}\n      dotSize={2.0}\n      glowColor=\"#f43f5e\"\n      activeDotColor=\"#ffe4e6\"\n      dotColor=\"#3f1f27\"\n      interactionRadius={160}\n    />\n  );\n}\n"
+    }
+  ]
+}

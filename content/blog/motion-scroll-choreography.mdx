@@ -1,0 +1,25 @@
+---
+title: "Designing scroll choreography in React"
+description: "Practical patterns for scroll-linked motion that stays smooth and accessible."
+date: "2026-05-01"
+---
+
+## Why scroll choreography matters
+
+Scroll-linked animations help users understand hierarchy and pacing. The trick is to keep work off the main thread where possible and respect reduced motion.
+
+### Start with primitives
+
+Use `whileInView` for enter animations and `useScroll` + `useTransform` for parallax accents. Avoid animating expensive properties like `box-shadow` at large radii.
+
+### Accessibility
+
+Pair motion with opacity or translate — not color contrast alone. Gate intense effects behind `prefers-reduced-motion`.
+
+```tsx
+const shouldReduce =
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+```
+
+Ship fewer, higher-quality interactions instead of animating everything.

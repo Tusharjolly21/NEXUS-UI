@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "mac-keyboard",
+  "type": "registry:component",
+  "title": "Mac Keyboard",
+  "description": "Fully interactive Mac-style keyboard with Web Audio synthesised click sounds, Framer Motion keycap animations, and real-time physical keyboard highlighting.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/mac-keyboard.tsx",
+      "type": "registry:component",
+      "target": "components/mac-keyboard.tsx",
+      "content": "\"use client\";\nimport { MacKeyboard, usePhysicalKeyboard } from \"@/components/keyboard\";\n\nexport function KeyboardWithSound() {\n  const active = usePhysicalKeyboard();\n\n  return (\n    <MacKeyboard\n      layout=\"mac\"\n      theme=\"auto\"\n      enableSound={true}\n      soundType=\"mechanical\"\n      volume={0.65}\n      activeKeys={active}\n      showFunctionRow={true}\n    />\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewKeyboardSilentDetail,\n        reactSource: `\"use client\";\nimport { MacKeyboard, usePhysicalKeyboard } from \"@/components/keyboard\";\n\nexport function KeyboardSilent() {\n  const active = usePhysicalKeyboard();\n\n  return (\n    <MacKeyboard\n      layout=\"mac\"\n      theme=\"auto\"\n      enableSound={false}\n      activeKeys={active}\n      showFunctionRow={true}\n    />\n  );\n}\n"
+    }
+  ]
+}

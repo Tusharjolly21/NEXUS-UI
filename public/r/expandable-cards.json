@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "expandable-cards",
+  "type": "registry:component",
+  "title": "Expandable Cards",
+  "description": "Responsive card grid where clicking a card smoothly expands it into a full-detail overlay with image, description, and a CTA button.",
+  "dependencies": [
+    "framer-motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/expandable-cards.tsx",
+      "type": "registry:component",
+      "target": "components/expandable-cards.tsx",
+      "content": "\"use client\";\nimport { ExpandableCards } from \"@/components/expandable-cards\";\nimport type { CardItem } from \"@/components/expandable-cards\";\n\nconst cards: CardItem[] = [\n  {\n    id: \"1\",\n    title: \"Motion Design System\",\n    description: \"Animation primitives built for React and Tailwind CSS.\",\n    fullDescription: \"Full description shown when expanded...\",\n    image: \"/images/card-1.jpg\",\n    category: \"Design\",\n    ctaText: \"Explore\",\n    ctaLink: \"/components\",\n  },\n];\n\nexport default function Page() {\n  return <ExpandableCards cards={cards} />;\n}\n"
+    }
+  ]
+}

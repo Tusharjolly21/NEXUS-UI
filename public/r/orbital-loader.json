@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "orbital-loader",
+  "type": "registry:component",
+  "title": "Orbital Loader",
+  "description": "Dual counter-rotating rings with breathing inner glow.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/orbital-loader.tsx",
+      "type": "registry:component",
+      "target": "components/orbital-loader.tsx",
+      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function OrbitalLoader() {\n  return (\n    <div className=\"relative size-28\">\n      <motion.span className=\"absolute inset-0 rounded-full border border-white/10\" animate={{ rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: \"linear\" }} />\n      <motion.span className=\"absolute inset-2 rounded-full border border-cyan-400/40\" animate={{ rotate: -360 }} transition={{ duration: 4.5, repeat: Infinity, ease: \"linear\" }} />\n    </div>\n  );\n}\n"
+    }
+  ]
+}
