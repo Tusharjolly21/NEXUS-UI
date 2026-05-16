@@ -17,7 +17,6 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-  DropdownMenuLabel,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -147,9 +146,9 @@ export function SiteHeader() {
                       <span className="max-w-28 truncate">{displayName}</span>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" sideOffset={8} className="w-52">
-                      <DropdownMenuLabel className="px-2.5 py-2 text-xs text-muted-foreground">
+                      <div className="px-2.5 py-2 text-xs text-muted-foreground truncate">
                         {user.email}
-                      </DropdownMenuLabel>
+                      </div>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
