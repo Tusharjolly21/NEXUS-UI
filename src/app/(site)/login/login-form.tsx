@@ -1,18 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { Github, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
+import { NexusMark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 
 export function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/dashboard";
   const [email, setEmail] = React.useState("");
@@ -55,87 +57,88 @@ export function LoginForm() {
     else toast.success("Check your inbox for the magic link.");
   }
 
-  if (!isSupabaseConfigured()) {
-    return (
-      <div className="mx-auto max-w-lg px-4 py-20">
-        <Card className="border-border bg-card">
-          <CardHeader>
-            <CardTitle className="text-card-foreground">Configure Supabase</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
-            <p>
-              Set <code className="text-primary">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
-              <code className="text-primary">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> in{" "}
-              <code className="text-primary">.env.local</code>, then restart the dev server.
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              className="border-border text-foreground"
-              onClick={() => router.push("/")}
-            >
-              Back home
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <div className="mx-auto max-w-lg px-4 py-20">
-      <Card className="border-border bg-card">
-        <CardHeader>
-          <CardTitle className="text-card-foreground">Sign in</CardTitle>
-          <p className="text-sm text-muted-foreground">Continue with OAuth or email magic link.</p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2 sm:grid-cols-2">
-            <Button
-              type="button"
-              disabled={pending}
-              className="rounded-full bg-foreground text-background hover:bg-foreground/90"
-              onClick={() => oauth("google")}
-            >
-              Google
-            </Button>
-            <Button
-              type="button"
-              disabled={pending}
-              variant="outline"
-              className="rounded-full border-border text-foreground"
-              onClick={() => oauth("github")}
-            >
-              GitHub
-            </Button>
-          </div>
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <Separator className="flex-1 bg-border" />
-            or email
-            <Separator className="flex-1 bg-border" />
-          </div>
+    <div className="relative isolate flex min-h-[calc(100dvh-4rem)] items-center justify-center overflow-hidden bg-background px-4 py-16">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(14,165,233,0.10),transparent_34%),radial-gradient(circle_at_85%_78%,rgba(139,92,246,0.10),transparent_30%)]" />
+      <div className="lf-grid pointer-events-none absolute inset-0 opacity-[0.10] dark:opacity-[0.16]" />
+
+      <motion.div
+        initial={{ opacity: 0, y: 18, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="relative w-full max-w-[420px]"
+      >
+        <div className="mx-auto flex flex-col items-center text-center">
+          <Link
+            href="/"
+            aria-label="Go to Nexus UI home"
+            className="grid size-12 place-items-center rounded-2xl bg-foreground text-background shadow-xl shadow-foreground/10 ring-1 ring-border/60 transition hover:scale-105"
+          >
+            <NexusMark size={28} />
+          </Link>
+          <h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground">Login</h1>
+          <p className="mt-3 text-base text-muted-foreground">
+            Login to your Nexus UI Pro account
+          </p>
+        </div>
+
+        <form
+          className="mt-10 space-y-6"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void magicLink();
+          }}
+        >
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-xs text-muted-foreground">
-              Work email
+            <Label htmlFor="email" className="text-base font-medium text-foreground">
+              Email
             </Label>
             <Input
               id="email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-background"
-              placeholder="you@company.com"
+              className="h-14 rounded-xl border-border bg-background/90 px-4 text-lg shadow-sm transition focus-visible:ring-2 focus-visible:ring-primary/30 dark:bg-white/[0.03]"
+              placeholder="name@example.com"
             />
           </div>
+
+          {!isSupabaseConfigured() && (
+            <p className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-left text-xs leading-relaxed text-muted-foreground">
+              Supabase keys are not configured yet. The buttons are ready, but auth will activate
+              after adding your environment keys.
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            disabled={pending}
+            className="h-14 w-full rounded-xl bg-foreground text-base font-semibold text-background shadow-lg shadow-foreground/10 hover:bg-foreground/90"
+          >
+            {pending ? <Loader2 className="size-5 animate-spin" /> : "Sign In with Email"}
+          </Button>
+
+          <div className="relative flex items-center">
+            <Separator className="bg-border" />
+            <span className="absolute left-1/2 -translate-x-1/2 rounded-full border border-border bg-background px-2 py-1 text-xs text-muted-foreground shadow-sm">
+              or
+            </span>
+          </div>
+
           <Button
             type="button"
             disabled={pending}
-            className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-            onClick={magicLink}
+            variant="outline"
+            className="h-14 w-full rounded-xl border-border bg-background/80 text-base font-semibold text-foreground shadow-sm hover:bg-muted/70 dark:bg-white/[0.02]"
+            onClick={() => oauth("github")}
           >
-            Email magic link
+            <Github className="size-5" />
+            Login with GitHub
           </Button>
-        </CardContent>
-      </Card>
+        </form>
+      </motion.div>
     </div>
   );
 }
