@@ -4,6 +4,61 @@
   "homepage": "http://127.0.0.1:3000",
   "items": [
     {
+      "name": "hover-highlight-text",
+      "type": "registry:component",
+      "title": "Hover Highlight Text",
+      "description": "A cursor-following spotlight text effect that reveals highlighted stroked text on hover.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/hover-highlight-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "shooting-stars-grid",
+      "type": "registry:component",
+      "title": "Shooting Stars Grid",
+      "description": "A subtle grid background with animated shooting star trails for modern hero sections.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/shooting-stars-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-countdown",
+      "type": "registry:component",
+      "title": "Animated Countdown",
+      "description": "A responsive countdown timer with animated number transitions and multiple styles.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/animated-countdown.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",

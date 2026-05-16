@@ -4351,6 +4351,398 @@ export default function Demo() {
       { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper" },
     ],
   },
+  {
+    slug: "interactive-dot-grid",
+    name: "Interactive Dot Grid",
+    registryCliName: "interactive-dot-grid",
+    description:
+      "A cursor-reactive dot grid background with smooth spotlight and magnetic motion effects.",
+    categorySlug: "background-effects",
+    tags: ["background", "dots", "grid", "cursor", "interactive", "hero", "canvas", "motion"],
+    premium: false,
+    trendingScore: 120,
+    createdAt: "2026-05-17",
+    animationKinds: ["magnetic", "hover", "spring"] as AnimationKind[],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "children", type: "React.ReactNode", description: "Foreground content rendered above the dot grid." },
+      { name: "dotSpacing", type: "number", defaultValue: "40", description: "Space between dot centres in pixels." },
+      { name: "dotSize", type: "number", defaultValue: "1.5", description: "Base dot radius in pixels." },
+      { name: "dotColor", type: "string", defaultValue: "\"#6b7280\"", description: "Base colour of all dots." },
+      { name: "activeDotColor", type: "string", defaultValue: "\"#818cf8\"", description: "Colour of dots near the cursor." },
+      { name: "background", type: "string", defaultValue: "\"transparent\"", description: "Container background colour." },
+      { name: "interactionRadius", type: "number", defaultValue: "160", description: "Radius around cursor that influences dots (px)." },
+      { name: "interactionStrength", type: "number", defaultValue: "0.5", description: "How strongly dots react to cursor (0–1)." },
+      { name: "mode", type: "\"spotlight\" | \"repel\" | \"attract\" | \"wave\" | \"static\"", defaultValue: "\"spotlight\"", description: "Interaction mode." },
+      { name: "fadeEdges", type: "boolean", defaultValue: "true", description: "Apply radial fade mask at container edges." },
+      { name: "showGradientOverlay", type: "boolean", defaultValue: "true", description: "Show subtle radial gradient behind content." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disable all cursor interactions." },
+      { name: "className", type: "string", description: "Additional CSS classes for the root container." },
+      { name: "title", type: "string", description: "Hero heading text (used when children is absent)." },
+      { name: "subtitle", type: "string", description: "Hero subtitle text (used when children is absent)." },
+      { name: "primaryCTALabel", type: "string", description: "Primary button label." },
+      { name: "primaryCTAHref", type: "string", defaultValue: "\"#\"", description: "Primary button link href." },
+      { name: "secondaryCTALabel", type: "string", description: "Secondary button label." },
+      { name: "secondaryCTAHref", type: "string", defaultValue: "\"#\"", description: "Secondary button link href." },
+    ],
+    Preview: Previews.PreviewInteractiveDotGrid,
+    previewSections: [
+      {
+        Preview: Previews.PreviewInteractiveDotGrid,
+        reactSource: `"use client";
+
+import { InteractiveDotGrid } from "@/components/interactive-dot-grid";
+
+export function InteractiveDotGridHero() {
+  return (
+    <InteractiveDotGrid
+      className="min-h-[580px]"
+      dotSpacing={40}
+      dotSize={1.5}
+      dotColor="#4b5563"
+      activeDotColor="#818cf8"
+      interactionRadius={170}
+      interactionStrength={0.55}
+      mode="spotlight"
+      fadeEdges
+      showGradientOverlay
+      title="Build interfaces that respond"
+      subtitle="Interactive motion backgrounds for modern React apps."
+      primaryCTALabel="Browse Components"
+      primaryCTAHref="/components"
+      secondaryCTALabel="View Templates"
+      secondaryCTAHref="/templates"
+    />
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "globe-pins",
+    name: "Globe Pins",
+    description: "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
+    categorySlug: "three-d-components",
+    tags: ["globe", "map", "3d", "canvas", "pins", "connections", "arcs", "location", "network", "orthographic", "geo", "bloom"],
+    premium: false,
+    trendingScore: 210,
+    createdAt: "2026-05-17T00:00:00.000Z",
+    animationKinds: ["3d"],
+    dependencies: [],
+    Preview: Previews.PreviewGlobePins,
+    previewSections: [
+      {
+        Preview: Previews.PreviewGlobePinsDefault,
+        reactSource: `"use client";
+
+import { GlobePins } from "@/components/globe-pins/globe-pins";
+
+export function GlobePinsDefault() {
+  return (
+    <div className="relative w-full h-full bg-[#111] overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins showLabels rotationSpeed={60} className="w-[640px] h-[480px]" />
+      </div>
+    </div>
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewGlobePinsBloom,
+        reactSource: `"use client";
+
+import { GlobePins } from "@/components/globe-pins/globe-pins";
+
+export function GlobePinsNeon() {
+  return (
+    <div className="relative w-full h-full bg-black overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins bloom showLabels={false} rotationSpeed={60} className="w-[640px] h-[480px]" />
+      </div>
+    </div>
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewGlobePins,
+        reactSource: `"use client";
+
+import { GlobePins } from "@/components/globe-pins/globe-pins";
+
+export function GlobePinsCompact() {
+  return (
+    <div className="relative w-full h-full bg-[#111] overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins showLabels={false} rotationSpeed={60} className="w-[640px] h-[480px]" />
+      </div>
+    </div>
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
+
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export type GlobePin = {
+  id: string;
+  country: string;
+  city?: string;
+  address?: string;
+  phone?: string;
+  lat: number;
+  lon: number;
+};
+
+export type GlobeConnection = {
+  from: string;
+  to: string;
+};
+
+export type GlobePinsProps = {
+  pins?: GlobePin[];
+  connections?: GlobeConnection[];
+  autoRotate?: boolean;
+  rotationSpeed?: number;
+  initialRotation?: number;
+  dotColor?: string;
+  dotSize?: number;
+  dotOpacity?: number;
+  dotDensity?: number;
+  bloom?: boolean;
+  pinColor?: string;
+  pinSize?: number;
+  showLabels?: boolean;
+  labelBackground?: string;
+  labelColor?: string;
+  labelBorderColor?: string;
+  fontFamily?: string;
+  fontSize?: number;
+  className?: string;
+};
+
+export const DEFAULT_PINS: GlobePin[] = [
+  { id: "uk", country: "United Kingdom", city: "London", address: "Borton str. 88", phone: "+44 20 7946 0958", lat: 51.5, lon: -0.1 },
+  { id: "us", country: "USA", city: "Los Angeles", address: "Beverly Hills 55a", phone: "+1 213-555-0173", lat: 34.05, lon: -118.25 },
+];
+
+export const DEFAULT_CONNECTIONS: GlobeConnection[] = [{ from: "uk", to: "us" }];
+
+type LonLat = readonly [number, number];
+
+let _geoCache: LonLat[] | null = null;
+let _geoLoading = false;
+const _geoCbs: Array<(pts: LonLat[]) => void> = [];
+
+function loadGeoData(cb: (pts: LonLat[]) => void) {
+  if (_geoCache) { cb(_geoCache); return; }
+  _geoCbs.push(cb);
+  if (_geoLoading) return;
+  _geoLoading = true;
+  fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json")
+    .then((r) => r.json())
+    .then((topo: Record<string, unknown>) => {
+      const transform = topo.transform as { scale: number[]; translate: number[] } | undefined;
+      const scale = transform?.scale ?? [1, 1];
+      const translate = transform?.translate ?? [0, 0];
+      const pts: LonLat[] = [];
+      for (const arc of topo.arcs as number[][][]) {
+        let x = 0, y = 0;
+        for (const delta of arc) {
+          x += delta[0]; y += delta[1];
+          pts.push([x * scale[0] + translate[0], y * scale[1] + translate[1]]);
+        }
+      }
+      _geoCache = pts;
+      _geoCbs.forEach((fn) => fn(pts));
+      _geoCbs.length = 0;
+    })
+    .catch(() => { _geoLoading = false; _geoCbs.length = 0; });
+}
+
+type ScreenPt = { x: number; y: number; depth: number };
+
+function project(lat: number, lon: number, rotDeg: number, cx: number, cy: number, r: number): ScreenPt | null {
+  const φ = (lat * Math.PI) / 180;
+  const λ = ((((lon - rotDeg) % 360) + 540) % 360 - 180) * (Math.PI / 180);
+  const depth = Math.cos(φ) * Math.cos(λ);
+  if (depth <= 0.012) return null;
+  return { x: cx + r * Math.cos(φ) * Math.sin(λ), y: cy - r * Math.sin(φ), depth };
+}
+
+interface DrawOpts {
+  geo: LonLat[]; pins: GlobePin[]; connections: GlobeConnection[];
+  pinMap: Record<string, GlobePin>; rot: number;
+  cx: number; cy: number; r: number;
+  dotColor: string; dotSize: number; dotOpacity: number; dotDensity: number;
+  bloom: boolean; pinColor: string; pinSize: number;
+}
+
+function draw(ctx: CanvasRenderingContext2D, size: number, o: DrawOpts) {
+  const { geo, pins, connections, pinMap, rot, cx, cy, r } = o;
+  const bloom = o.bloom;
+  const dc = bloom ? "#22d3ee" : o.dotColor;
+  const pc = o.pinColor;
+  ctx.clearRect(0, 0, size, size);
+  const step = Math.max(1, Math.round(1 / Math.max(0.02, o.dotDensity)));
+  if (bloom) { ctx.shadowBlur = 5; ctx.shadowColor = "#22d3ee"; }
+  ctx.fillStyle = dc;
+  for (let i = 0; i < geo.length; i += step) {
+    const pt = project(geo[i][1], geo[i][0], rot, cx, cy, r);
+    if (!pt) continue;
+    ctx.globalAlpha = Math.min(o.dotOpacity, o.dotOpacity * (pt.depth * 1.3 + 0.08));
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, o.dotSize, 0, Math.PI * 2); ctx.fill();
+  }
+  if (bloom) {
+    ctx.shadowBlur = 3; ctx.shadowColor = "#22d3ee"; ctx.fillStyle = "#22d3ee";
+    for (let lat = -80; lat <= 80; lat += 5) {
+      for (let lon = -180; lon < 180; lon += 4) {
+        const pt = project(lat, lon, rot, cx, cy, r);
+        if (!pt) continue;
+        ctx.globalAlpha = 0.07 * pt.depth;
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 0.65, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  for (const conn of connections) {
+    const a = pinMap[conn.from], b = pinMap[conn.to];
+    if (!a || !b) continue;
+    const pa = project(a.lat, a.lon, rot, cx, cy, r);
+    const pb = project(b.lat, b.lon, rot, cx, cy, r);
+    if (!pa || !pb) continue;
+    const mx = (pa.x + pb.x) / 2, my = (pa.y + pb.y) / 2;
+    const lift = Math.hypot(pb.x - pa.x, pb.y - pa.y) * 0.38;
+    if (bloom) { ctx.shadowBlur = 16; ctx.shadowColor = pc; }
+    ctx.strokeStyle = bloom ? pc : "rgba(255,255,255,0.72)";
+    ctx.lineWidth = bloom ? 1.5 : 1;
+    ctx.beginPath(); ctx.moveTo(pa.x, pa.y);
+    ctx.quadraticCurveTo(mx, my - lift, pb.x, pb.y); ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+  for (const pin of pins) {
+    const pt = project(pin.lat, pin.lon, rot, cx, cy, r);
+    if (!pt) continue;
+    if (bloom) { ctx.shadowBlur = 30; ctx.shadowColor = pc; }
+    ctx.globalAlpha = 1; ctx.fillStyle = pc;
+    ctx.beginPath(); ctx.arc(pt.x, pt.y, o.pinSize, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+}
+
+export function GlobePins({
+  pins = DEFAULT_PINS,
+  connections = DEFAULT_CONNECTIONS,
+  autoRotate = true,
+  rotationSpeed = 60,
+  initialRotation = 300,
+  dotColor = "rgba(255,255,255,0.88)",
+  dotSize = 0.85,
+  dotOpacity = 0.72,
+  dotDensity = 1,
+  bloom = false,
+  pinColor = "#38BDF8",
+  pinSize = 11,
+  showLabels = true,
+  labelBackground = "rgba(16,16,20,0.88)",
+  labelColor = "#ffffff",
+  labelBorderColor = "rgba(255,255,255,0.1)",
+  fontFamily = "\\'Courier New\\', Courier, monospace",
+  fontSize = 13,
+  className,
+}: GlobePinsProps) {
+  const wrapRef  = React.useRef<HTMLDivElement>(null);
+  const canvRef  = React.useRef<HTMLCanvasElement>(null);
+  const lblRefs  = React.useRef<Record<string, HTMLDivElement | null>>({});
+  const rotRef   = React.useRef(initialRotation);
+  const geoRef   = React.useRef<LonLat[]>([]);
+  const [size, setSize] = React.useState(0);
+  const [labelsReady, setLabelsReady] = React.useState(false);
+  const pinMap = React.useMemo(() => Object.fromEntries(pins.map((p) => [p.id, p])), [pins]);
+
+  React.useEffect(() => {
+    const el = wrapRef.current; if (!el) return;
+    const ro = new ResizeObserver(([e]) => setSize(e.contentRect.width));
+    ro.observe(el); setSize(el.offsetWidth);
+    return () => ro.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    loadGeoData((pts) => { geoRef.current = pts; });
+  }, []);
+
+  React.useEffect(() => { setLabelsReady(true); }, []);
+
+  React.useEffect(() => {
+    const canvas = canvRef.current;
+    if (!canvas || size === 0) return;
+    const dpr = Math.min(window.devicePixelRatio ?? 1, 2);
+    canvas.width = size * dpr; canvas.height = size * dpr;
+    const ctx = canvas.getContext("2d")!;
+    ctx.scale(dpr, dpr);
+    const dps = 360 / rotationSpeed;
+    let last = 0, raf = 0, cancelled = false;
+    const cx = size / 2, cy = size / 2, r = size * 0.44;
+    function frame(now: number) {
+      if (cancelled) return;
+      const dt = last ? (now - last) / 1000 : 0; last = now;
+      if (autoRotate) rotRef.current = (rotRef.current + dps * dt) % 360;
+      const rot = rotRef.current;
+      draw(ctx, size, { geo: geoRef.current, pins, connections, pinMap, rot, cx, cy, r, dotColor, dotSize, dotOpacity, dotDensity, bloom, pinColor, pinSize });
+      for (const pin of pins) {
+        const el = lblRefs.current[pin.id]; if (!el) continue;
+        const pt = project(pin.lat, pin.lon, rot, cx, cy, r);
+        if (pt) { el.style.display = "block"; el.style.left = pt.x + "px"; el.style.top = (pt.y - pinSize - 10) + "px"; }
+        else { el.style.display = "none"; }
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    return () => { cancelled = true; cancelAnimationFrame(raf); };
+  }, [size, labelsReady, autoRotate, rotationSpeed, dotColor, dotSize, dotOpacity, dotDensity, bloom, pinColor, pinSize, pins, connections, pinMap]);
+
+  return (
+    <div ref={wrapRef} className={cn("relative w-full aspect-square", className)} aria-label="Animated globe with location pins">
+      <canvas ref={canvRef} aria-hidden style={{ position: "absolute", inset: 0, width: size, height: size }} />
+      {showLabels && pins.map((pin) => (
+        <div key={pin.id} ref={(el) => { lblRefs.current[pin.id] = el; }}
+          style={{ position: "absolute", display: "none", transform: "translate(-50%, -100%)", pointerEvents: "none", zIndex: 10 }}>
+          <div style={{ background: labelBackground, border: \`1px solid \${labelBorderColor}\`, borderRadius: 8, padding: "10px 14px", color: labelColor, fontFamily, fontSize, lineHeight: 1.65, whiteSpace: "nowrap" }}>
+            <div style={{ fontWeight: 700, marginBottom: 1 }}>{pin.country}</div>
+            {pin.city && <div>{pin.city}</div>}
+            {pin.address && <div>{pin.address}</div>}
+            {pin.phone && <div>{pin.phone}</div>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "pins", type: "GlobePin[]", description: "Location pins with country, city, address, phone and lat/lon.", defaultValue: "DEFAULT_PINS (UK + USA)" },
+      { name: "connections", type: "GlobeConnection[]", description: "Pairs of pin IDs to connect with a curved arc.", defaultValue: "DEFAULT_CONNECTIONS" },
+      { name: "autoRotate", type: "boolean", description: "Auto-rotate the globe continuously.", defaultValue: "true" },
+      { name: "rotationSpeed", type: "number", description: "Seconds for one full 360° rotation.", defaultValue: "60" },
+      { name: "initialRotation", type: "number", description: "Starting longitude (degrees) at center of the globe.", defaultValue: "300" },
+      { name: "dotColor", type: "string", description: "Country outline dot color (any CSS color).", defaultValue: "\"rgba(255,255,255,0.88)\"" },
+      { name: "dotSize", type: "number", description: "Country dot radius in px.", defaultValue: "0.85" },
+      { name: "dotOpacity", type: "number", description: "Max opacity of country dots (0–1).", defaultValue: "0.72" },
+      { name: "dotDensity", type: "number", description: "Fraction of geo points rendered — 1 = full, 0.5 = half.", defaultValue: "1" },
+      { name: "bloom", type: "boolean", description: "Enable cyan glow / bloom mode with lat-lon grid overlay.", defaultValue: "false" },
+      { name: "pinColor", type: "string", description: "Hex or CSS color for all pins and arcs.", defaultValue: "\"#38BDF8\"" },
+      { name: "pinSize", type: "number", description: "Pin circle radius in px.", defaultValue: "11" },
+      { name: "showLabels", type: "boolean", description: "Show floating label cards beside each pin.", defaultValue: "true" },
+      { name: "labelBackground", type: "string", description: "CSS background for label cards.", defaultValue: "\"rgba(16,16,20,0.88)\"" },
+      { name: "labelColor", type: "string", description: "Text color inside label cards.", defaultValue: "\"#ffffff\"" },
+      { name: "labelBorderColor", type: "string", description: "Border color of label cards.", defaultValue: "\"rgba(255,255,255,0.1)\"" },
+      { name: "fontFamily", type: "string", description: "Font family used in label cards.", defaultValue: "\"'Courier New', Courier, monospace\"" },
+      { name: "fontSize", type: "number", description: "Base font size in px for label cards.", defaultValue: "13" },
+      { name: "className", type: "string | undefined", description: "Classes on the outermost square container." },
+    ],
+  },
 ];
 
 export function getLibraryComponent(slug: string) {

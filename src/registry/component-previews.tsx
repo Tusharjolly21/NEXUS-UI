@@ -41,6 +41,11 @@ import { PhoneInput } from "@/components/phone-input";
 import { CircularCarousel } from "@/components/circular-carousel";
 import { ChatMessages } from "@/components/chat-messages";
 import { ShaderFlow } from "@/components/shader-flow";
+import { AnimatedCountdown } from "@/components/animated-countdown";
+import { ShootingStarsGrid } from "@/components/shooting-stars-grid";
+import { HoverHighlightText } from "@/components/hover-highlight-text";
+import { GlobePins } from "@/components/globe-pins/globe-pins";
+import { InteractiveDotGrid } from "@/components/interactive-dot-grid";
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
@@ -74,6 +79,191 @@ export function PreviewCinematicLogoCloud() {
       <div className="w-full scale-75 sm:scale-100">
         <CinematicLogoCloud clients={clients} className="bg-transparent dark:bg-transparent py-8" />
       </div>
+    </div>
+  );
+}
+
+function countdownTarget(days: number, hours = 0, minutes = 0) {
+  return new Date(Date.now() + (((days * 24 + hours) * 60 + minutes) * 60 * 1000));
+}
+
+export function PreviewAnimatedCountdownModern() {
+  return (
+    <div className="flex min-h-[260px] flex-col items-center justify-center gap-4 rounded-3xl border border-border bg-[radial-gradient(circle_at_50%_0%,rgba(14,165,233,0.15),transparent_35%),linear-gradient(180deg,var(--background),var(--muted))] p-4 text-center dark:bg-zinc-950">
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Launching in
+      </p>
+      <AnimatedCountdown
+        targetDate={countdownTarget(7, 12, 45)}
+        variant="modern"
+        size="md"
+      />
+    </div>
+  );
+}
+
+export function PreviewAnimatedCountdownDigital() {
+  return (
+    <div className="flex min-h-[260px] items-center justify-center rounded-3xl border border-cyan-400/10 bg-zinc-950 p-4">
+      <AnimatedCountdown
+        targetDate={countdownTarget(2, 8, 20)}
+        variant="digital"
+        size="md"
+        showSeparators
+      />
+    </div>
+  );
+}
+
+export function PreviewAnimatedCountdownMinimal() {
+  return (
+    <div className="flex min-h-[240px] flex-col items-center justify-center gap-4 rounded-3xl border border-border bg-background p-4 text-center">
+      <p className="text-sm font-medium text-muted-foreground">Sale ends in</p>
+      <AnimatedCountdown
+        targetDate={countdownTarget(0, 11, 42)}
+        variant="minimal"
+        showDays={false}
+        size="md"
+      />
+    </div>
+  );
+}
+
+export function PreviewAnimatedCountdown({ compact = true }: { compact?: boolean } = {}) {
+  return compact ? (
+    <PreviewAnimatedCountdownMinimal />
+  ) : (
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-5 p-4">
+      <PreviewAnimatedCountdownModern />
+      <PreviewAnimatedCountdownDigital />
+      <PreviewAnimatedCountdownMinimal />
+    </div>
+  );
+}
+
+export function PreviewShootingStarsGridHero() {
+  return (
+    <ShootingStarsGrid className="min-h-[560px] rounded-3xl" starCount={54} shootingStarCount={7}>
+      <div className="mx-auto max-w-2xl text-center">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-200">
+          Motion background
+        </p>
+        <h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
+          Build interfaces that feel alive
+        </h2>
+        <p className="mx-auto mt-4 max-w-xl text-balance text-sm leading-6 text-zinc-600 dark:text-zinc-300">
+          A subtle grid with ambient stars and straight light runners attached to the grid.
+        </p>
+      </div>
+    </ShootingStarsGrid>
+  );
+}
+
+export function PreviewShootingStarsGrid({ compact = true }: { compact?: boolean } = {}) {
+  return compact ? (
+    <ShootingStarsGrid
+      className="min-h-[380px] rounded-2xl"
+      contentClassName="px-5 py-5"
+      starCount={12}
+      shootingStarCount={7}
+      gridSize={34}
+    >
+      <div className="relative h-[260px] w-full max-w-[420px] overflow-hidden rounded-3xl border border-cyan-400/15 bg-white/35 shadow-2xl shadow-cyan-950/10 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/35">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(6,182,212,0.16)_1px,transparent_1px),linear-gradient(to_bottom,rgba(6,182,212,0.16)_1px,transparent_1px)] bg-[size:34px_34px] opacity-70 dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)]" />
+        <motion.div
+          className="absolute left-[34px] top-[68px] h-px w-[280px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_18px_rgba(6,182,212,0.65)]"
+          animate={{ x: [-70, 62, -70], opacity: [0.25, 1, 0.25] }}
+          transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute left-[204px] top-[34px] h-[204px] w-px bg-gradient-to-b from-transparent via-cyan-300 to-transparent shadow-[0_0_18px_rgba(103,232,249,0.65)]"
+          animate={{ y: [54, -30, 54], opacity: [0.2, 0.9, 0.2] }}
+          transition={{ duration: 5.4, repeat: Infinity, ease: "easeInOut", delay: 0.35 }}
+        />
+        {[0, 1, 2, 3].map((index) => (
+          <motion.span
+            key={index}
+            className="absolute size-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]"
+            style={{
+              left: `${68 + index * 68}px`,
+              top: `${68 + (index % 2) * 102}px`,
+            }}
+            animate={{ scale: [0.8, 1.45, 0.8], opacity: [0.45, 1, 0.45] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut", delay: index * 0.35 }}
+          />
+        ))}
+        <motion.div
+          className="absolute bottom-[34px] left-[68px] grid grid-cols-4 gap-[17px]"
+          animate={{ opacity: [0.35, 0.9, 0.35] }}
+          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {Array.from({ length: 8 }).map((_, index) => (
+            <span
+              key={index}
+              className="size-[17px] rounded-md border border-cyan-400/25 bg-cyan-400/10 shadow-[0_0_16px_rgba(6,182,212,0.18)]"
+            />
+          ))}
+        </motion.div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_46%,transparent_0%,transparent_32%,rgba(255,255,255,0.55)_78%)] dark:bg-[radial-gradient(circle_at_50%_46%,transparent_0%,transparent_34%,rgba(7,9,15,0.75)_78%)]" />
+      </div>
+    </ShootingStarsGrid>
+  ) : (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 p-4">
+      <PreviewShootingStarsGridHero />
+    </div>
+  );
+}
+
+export function PreviewHoverHighlightTextHero() {
+  return (
+    <div className="flex min-h-[620px] items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-black px-5 py-14 text-center shadow-2xl shadow-black/40">
+      <HoverHighlightText
+        text="Build beautiful interfaces that users remember."
+        as="h1"
+        spotlightRadius={130}
+        spotlightSoftness={0.82}
+        baseClassName="max-w-5xl text-5xl font-semibold leading-[1.04] text-white/15 sm:text-6xl md:text-7xl"
+        highlightClassName="max-w-5xl text-5xl font-semibold leading-[1.04] text-transparent sm:text-6xl md:text-7xl"
+        strokeColor="rgba(255,255,255,0.72)"
+        strokeWidth={0.9}
+      />
+    </div>
+  );
+}
+
+export function PreviewHoverHighlightTextBanner() {
+  return (
+    <div className="flex min-h-[420px] items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-black px-5 py-12 text-center">
+      <HoverHighlightText
+        text="Polished motion without the noise."
+        as="h2"
+        spotlightRadius={112}
+        spotlightSoftness={0.82}
+        baseClassName="max-w-4xl text-4xl font-semibold leading-tight text-white/15 sm:text-5xl md:text-6xl"
+        highlightClassName="max-w-4xl text-4xl font-semibold leading-tight text-transparent sm:text-5xl md:text-6xl"
+        strokeColor="rgba(255,255,255,0.72)"
+      />
+    </div>
+  );
+}
+
+export function PreviewHoverHighlightText({ compact = true }: { compact?: boolean } = {}) {
+  return compact ? (
+    <div className="flex min-h-[280px] items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black px-5 text-center">
+      <HoverHighlightText
+        text="Hover highlight reveal"
+        as="h2"
+        spotlightRadius={88}
+        spotlightSoftness={0.82}
+        baseClassName="text-4xl font-semibold leading-tight text-white/15 sm:text-5xl"
+        highlightClassName="text-4xl font-semibold leading-tight text-transparent sm:text-5xl"
+        strokeColor="rgba(255,255,255,0.72)"
+      />
+    </div>
+  ) : (
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-5 p-4">
+      <PreviewHoverHighlightTextHero />
+      <PreviewHoverHighlightTextBanner />
     </div>
   );
 }
@@ -632,18 +822,17 @@ export function PreviewSignupSplit() {
 export function PreviewSignupForm({ compact = true }: { compact?: boolean } = {}) {
   if (compact) {
     return (
-      <div className="flex h-[220px] items-center justify-center rounded-3xl border border-border bg-background p-3">
-        <div className="w-full max-w-xs rounded-xl border border-border bg-card p-3 shadow-sm">
-          <p className="text-sm font-semibold text-foreground">Signup Form</p>
-          <p className="mt-1 text-[11px] text-muted-foreground">Create your account</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <div className="h-8 rounded-md border border-border bg-muted/30" />
-            <div className="h-8 rounded-md border border-border bg-muted/30" />
+      <div className="flex h-[440px] items-center justify-center rounded-3xl border border-border bg-background p-6">
+        <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <p className="text-base font-semibold text-foreground">Create your account</p>
+          <p className="mt-1 text-sm text-muted-foreground">Start building for free</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="h-10 rounded-xl border border-border bg-muted/30" />
+            <div className="h-10 rounded-xl border border-border bg-muted/30" />
           </div>
-          <div className="mt-2 h-8 rounded-md border border-border bg-muted/30" />
-          <div className="mt-2 h-8 rounded-md border border-border bg-muted/30" />
-          <div className="mt-2 h-8 rounded-md border border-border bg-muted/30" />
-          <div className="mt-3 h-8 rounded-md bg-primary/90" />
+          <div className="mt-3 h-10 rounded-xl border border-border bg-muted/30" />
+          <div className="mt-3 h-10 rounded-xl border border-border bg-muted/30" />
+          <div className="mt-3 h-10 rounded-xl bg-primary/90" />
         </div>
       </div>
     );
@@ -767,15 +956,17 @@ export function PreviewFloatingDock({ compact = true }: { compact?: boolean } = 
   return (
     <div
       className={cn(
-        "flex w-full items-end justify-center overflow-visible rounded-xl border border-border bg-gradient-to-b from-muted/45 to-background/60 dark:from-zinc-950/85 dark:to-zinc-950/40",
-        compact ? "min-h-[176px] px-4 py-6" : "min-h-[240px] px-6 py-10",
+        "relative flex w-full items-end justify-center overflow-visible rounded-xl bg-gradient-to-b from-muted/45 to-zinc-950/80 dark:from-zinc-950/85 dark:to-zinc-950/40",
+        compact ? "min-h-[440px]" : "min-h-[240px]",
       )}
     >
-      <FloatingDockDesktop
-        className="relative inset-x-auto bottom-auto z-0 flex w-full max-w-2xl justify-center p-0"
-        items={items}
-        disableLinks
-      />
+      <div className="absolute inset-x-0 bottom-0 flex justify-center pb-4">
+        <FloatingDockDesktop
+          className="relative bottom-auto left-auto flex items-end justify-center rounded-full border border-border/60 bg-background/80 px-4 py-1 shadow-[0_16px_48px_-16px_rgba(0,0,0,0.3)] backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/85"
+          items={items}
+          disableLinks
+        />
+      </div>
     </div>
   );
 }
@@ -787,12 +978,12 @@ export function PreviewStatefulButton() {
     });
   }
   return (
-    <div className="flex min-h-[220px] items-center justify-center rounded-xl border border-border bg-muted/35 px-4 py-8 dark:bg-zinc-950/70">
+    <div className="flex min-h-[440px] items-center justify-center rounded-xl border border-border bg-muted/35 dark:bg-zinc-950/70">
       <StatefulButton
         onClick={fakeAction}
         loadingText="Send message"
         successText="Send message"
-        className="flex min-w-[120px] cursor-pointer items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-2 font-medium text-white ring-offset-2 transition duration-200 hover:ring-2 hover:ring-green-500 dark:ring-offset-black"
+        className="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 rounded-full bg-green-500 px-5 py-2.5 font-medium text-white ring-offset-2 transition duration-200 hover:ring-2 hover:ring-green-500 dark:ring-offset-black"
         successIcon={<CheckCircle2 className="size-4" />}
         resetDelay={1600}
       >
@@ -869,12 +1060,12 @@ export function PreviewSparkles({ compact = true }: { compact?: boolean } = {}) 
 
 export function PreviewGooeySearch() {
   return (
-    <div className="flex min-h-[220px] items-center justify-center px-4 py-6">
+    <div className="flex min-h-[380px] items-center justify-center">
       <GooeyInput
         placeholder="Search catalog…"
-        collapsedWidth={112}
-        expandedWidth={196}
-        expandedOffset={56}
+        collapsedWidth={160}
+        expandedWidth={260}
+        expandedOffset={80}
       />
     </div>
   );
@@ -987,7 +1178,7 @@ export function PreviewTextRevealCard({ compact = true }: { compact?: boolean } 
     <div
       className={cn(
         "flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 p-4",
-        compact ? "min-h-[250px]" : "min-h-[420px] py-10",
+        compact ? "min-h-[280px]" : "min-h-[420px] py-10",
       )}
     >
       <TextRevealCard
@@ -1013,11 +1204,11 @@ export function PreviewMeteors({ compact = true }: { compact?: boolean } = {}) {
     <div
       className={cn(
         "flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 p-4",
-        compact ? "min-h-[340px]" : "min-h-[500px] py-14",
+        compact ? "min-h-[420px] max-h-[420px]" : "min-h-[500px] py-14",
       )}
     >
       <Meteors
-        number={compact ? 18 : 28}
+        number={compact ? 32 : 28}
         minDelay={0.06}
         maxDelay={1.9}
         minDuration={2.8}
@@ -1099,7 +1290,7 @@ export function PreviewGlowingEffectCards({ compact = true }: { compact?: boolea
     <div
       className={cn(
         "flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 p-4",
-        compact ? "min-h-[340px]" : "min-h-[520px] py-12",
+        compact ? "min-h-[280px] max-h-[280px]" : "min-h-[520px] py-12",
       )}
     >
       <div className={cn("w-full", compact ? "max-w-5xl scale-[0.78] origin-center" : "max-w-6xl")}>
@@ -1111,7 +1302,7 @@ export function PreviewGlowingEffectCards({ compact = true }: { compact?: boolea
 
 export function PreviewBackgroundGradient({ compact = true }: { compact?: boolean } = {}) {
   return (
-    <div className={cn("flex items-center justify-center", compact ? "min-h-[190px]" : "min-h-[260px] py-8")}>
+    <div className={cn("flex items-center justify-center overflow-hidden rounded-xl", compact ? "min-h-[280px] max-h-[280px]" : "min-h-[260px] py-8")}>
       <BackgroundGradient
         as="section"
         className={cn("w-full rounded-2xl border-2", compact ? "max-w-md" : "max-w-sm aspect-[4/5]")}
@@ -1377,7 +1568,7 @@ export function PreviewEncryptedText({ compact = true }: { compact?: boolean } =
     <div
       className={cn(
         "flex flex-col items-center justify-center gap-6 rounded-xl bg-zinc-950 px-6",
-        compact ? "min-h-[300px] py-8" : "min-h-[420px] py-14",
+        compact ? "min-h-[280px] py-6" : "min-h-[420px] py-14",
       )}
     >
       <EncryptedText
@@ -1413,11 +1604,11 @@ export function PreviewEncryptedText({ compact = true }: { compact?: boolean } =
 
 export function PreviewBackgroundBoxes({ compact = true }: { compact?: boolean } = {}) {
   return (
-    <div className={cn("flex items-center justify-center", compact ? "min-h-[430px]" : "min-h-[600px] py-12")}>
+    <div className={cn("flex items-center justify-center overflow-hidden rounded-xl", compact ? "min-h-[380px] max-h-[380px]" : "min-h-[600px] py-12")}>
       <BackgroundBoxes
-        rows={compact ? 12 : 14}
-        columns={compact ? 20 : 24}
-        boxSize={compact ? 20 : 24}
+        rows={compact ? 16 : 14}
+        columns={compact ? 28 : 24}
+        boxSize={compact ? 22 : 24}
         highlightColor="hsl(210 100% 90% / 1)"
         defaultColor="hsl(222 55% 18% / 0.35)"
         borderColor="hsl(217 44% 29% / 0.62)"
@@ -1572,7 +1763,7 @@ export function PreviewImagesBadgeWide({ compact = true }: { compact?: boolean }
 // Grid card — compact preview (white bg matching reference)
 export function PreviewDotGridHero({ compact = true }: { compact?: boolean } = {}) {
   return (
-    <div className={cn(compact ? "h-[240px]" : "h-[420px]", "w-full overflow-hidden rounded-xl")}>
+    <div className={cn(compact ? "h-[280px]" : "h-[420px]", "w-full overflow-hidden rounded-xl")}>
       <DotGridHero
         title={"Build interfaces\nthat ship."}
         primaryCTA={{ label: "Get started", href: "#" }}
@@ -1671,7 +1862,7 @@ export function PreviewDotGridHeroRose({ compact = true }: { compact?: boolean }
 // Grid card preview
 export function PreviewStarfieldHero({ compact = true }: { compact?: boolean } = {}) {
   return (
-    <div className={cn(compact ? "h-[420px]" : "h-[560px]", "w-full overflow-hidden rounded-xl")}>
+    <div className={cn(compact ? "h-[280px]" : "h-[560px]", "w-full overflow-hidden rounded-xl")}>
       <InteractiveStarfieldHero
         title={"Ship faster.\nBuild better."}
         subtitle="A motion-native component library for React — animated, accessible, and production-ready."
@@ -1899,8 +2090,8 @@ export function PreviewCircularCarousel({ compact = true }: { compact?: boolean 
   return (
     <div
       className={cn(
-        "flex items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6",
-        compact ? "min-h-[420px]" : "min-h-[520px] py-10",
+        "flex items-center justify-center overflow-hidden rounded-xl",
+        compact ? "min-h-[280px] max-h-[280px]" : "min-h-[480px]",
       )}
     >
       <CircularCarousel items={CAROUSEL_ITEMS} autoPlay={false} />
@@ -1912,8 +2103,8 @@ export function PreviewChatMessages({ compact = true }: { compact?: boolean } = 
   return (
     <div
       className={cn(
-        "flex items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-4",
-        compact ? "min-h-[480px]" : "min-h-[600px] py-8",
+        "flex items-center justify-center overflow-hidden rounded-xl",
+        compact ? "min-h-[280px] max-h-[280px]" : "min-h-[480px]",
       )}
     >
       <div className="h-full w-full max-w-md">
@@ -1927,13 +2118,65 @@ export function PreviewShaderFlow({ compact = true }: { compact?: boolean } = {}
   return (
     <div
       className={cn(
-        "flex items-center justify-center rounded-xl border border-white/10 p-4",
-        compact ? "min-h-[400px]" : "min-h-[550px] py-8",
+        "flex items-center justify-center overflow-hidden rounded-xl",
+        compact ? "min-h-[280px] max-h-[280px]" : "min-h-[480px]",
       )}
     >
       <div className="h-full w-full max-w-4xl">
         <ShaderFlow showContent />
       </div>
+    </div>
+  );
+}
+
+export function PreviewGlobePinsDefault() {
+  return (
+    <div className="relative w-full h-full bg-[#111] overflow-hidden" style={{ minHeight: 280 }}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins showLabels rotationSpeed={60} className="w-[280px] h-[280px]" />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewGlobePinsBloom() {
+  return (
+    <div className="relative w-full h-full bg-black overflow-hidden" style={{ minHeight: 280 }}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins bloom showLabels={false} rotationSpeed={60} className="w-[280px] h-[280px]" />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewGlobePins({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div className="relative w-full h-full bg-[#111] overflow-hidden" style={{ minHeight: 280 }}>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins showLabels={false} rotationSpeed={60} className="w-[280px] h-[280px]" />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewInteractiveDotGrid({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div className={cn("flex items-center justify-center overflow-hidden rounded-xl bg-[#09090b]", compact ? "min-h-[280px]" : "min-h-[520px]")}>
+      <InteractiveDotGrid
+        className={cn("w-full", compact ? "min-h-[280px]" : "min-h-[520px]")}
+        dotSpacing={40}
+        dotSize={1.5}
+        dotColor="#4b5563"
+        activeDotColor="#818cf8"
+        interactionRadius={150}
+        interactionStrength={0.55}
+        mode={compact ? "static" : "spotlight"}
+        fadeEdges
+        showGradientOverlay={!compact}
+        background="transparent"
+        title={compact ? undefined : "Build interfaces that respond"}
+        subtitle={compact ? undefined : "Interactive motion backgrounds for modern React apps."}
+      />
     </div>
   );
 }

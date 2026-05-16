@@ -19,6 +19,15 @@ export function LoginForm() {
   const next = searchParams.get("next") || "/dashboard/orders";
   const [email, setEmail] = React.useState("");
   const [pending, setPending] = React.useState(false);
+  const [cooldown, setCooldown] = React.useState(0);
+
+  React.useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = window.setTimeout(() => {
+      setCooldown((value) => Math.max(0, value - 1));
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [cooldown]);
 
   async function oauth(provider: "google" | "github") {
     if (!isSupabaseConfigured()) {
@@ -37,6 +46,7 @@ export function LoginForm() {
   }
 
   async function magicLink() {
+    if (cooldown > 0) return;
     if (!isSupabaseConfigured()) {
       toast.error("Add Supabase keys to enable email login.");
       return;
@@ -54,8 +64,13 @@ export function LoginForm() {
     });
     setPending(false);
     if (error) toast.error(error.message);
-    else toast.success("Check your inbox for the magic link.");
+    else {
+      setCooldown(60);
+      toast.success("Check your inbox for the magic link.");
+    }
   }
+
+  const canSendEmail = !pending && cooldown === 0;
 
   return (
     <div className="relative isolate flex min-h-[calc(100dvh-4rem)] items-center justify-center overflow-hidden bg-background px-4 py-16">
@@ -114,11 +129,39 @@ export function LoginForm() {
 
           <Button
             type="submit"
-            disabled={pending}
-            className="h-14 w-full rounded-xl bg-foreground text-base font-semibold text-background shadow-lg shadow-foreground/10 hover:bg-foreground/90"
+            disabled={!canSendEmail}
+            className="relative h-14 w-full overflow-hidden rounded-xl bg-foreground text-base font-semibold text-background shadow-lg shadow-foreground/10 hover:bg-foreground/90"
           >
-            {pending ? <Loader2 className="size-5 animate-spin" /> : "Sign In with Email"}
+            {cooldown > 0 && (
+              <motion.span
+                aria-hidden
+                className="absolute inset-y-0 left-0 bg-primary/25"
+                initial={{ width: "100%" }}
+                animate={{ width: "0%" }}
+                transition={{ duration: cooldown, ease: "linear" }}
+                key={cooldown === 60 ? "cooldown-start" : "cooldown-running"}
+              />
+            )}
+            <span className="relative z-10 inline-flex items-center gap-2">
+              {pending ? (
+                <Loader2 className="size-5 animate-spin" />
+              ) : cooldown > 0 ? (
+                `Send another email in ${cooldown}s`
+              ) : (
+                "Sign In with Email"
+              )}
+            </span>
           </Button>
+
+          {cooldown > 0 && (
+            <motion.p
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center text-xs text-muted-foreground"
+            >
+              You can send another magic link after the timer ends.
+            </motion.p>
+          )}
 
           <div className="relative flex items-center">
             <Separator className="bg-border" />

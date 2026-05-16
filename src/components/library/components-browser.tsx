@@ -55,6 +55,8 @@ type FeedItem = {
   componentCategory?: ComponentCategorySlug;
   blockCategory?: BlockCategory;
   tags?: string[];
+  previewSections?: Array<{ Preview: ComponentType; reactSource: string }>;
+  previewLabels?: string[];
 };
 
 function useCategoryCounts() {
@@ -81,6 +83,7 @@ function buildBaseFeed(view: ExplorerView): FeedItem[] {
     searchBlob: `${c.name} ${c.description} ${c.tags.join(" ")}`,
     componentCategory: c.categorySlug,
     tags: c.tags,
+    previewSections: c.previewSections,
   }));
   const blk: FeedItem[] = blocks.map((b, i) => ({
     kind: "block",
@@ -147,6 +150,14 @@ function ComponentCard({
   const kindLabel =
     item.kind === "component" ? "Component" : item.kind === "block" ? "Block" : "Template";
 
+  const sections = item.previewSections;
+  const [activeIdx, setActiveIdx] = React.useState(0);
+  const activeSection = sections?.[activeIdx];
+  const activePreview = activeSection?.Preview ?? Preview;
+  const ActivePreview = activePreview!;
+
+  const hasVariants = !!sections && sections.length > 1;
+
   return (
     <div className="group relative">
       <div
@@ -167,20 +178,50 @@ function ComponentCard({
           }}
           className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hover:shadow-foreground/5 dark:bg-zinc-900/60 dark:hover:border-white/12"
         >
-          {/* Preview area */}
-          <div className="relative aspect-[4/3] overflow-hidden border-b border-border/50 bg-zinc-950">
+          {/* Preview area — fixed 280px everywhere, uniform across all cards */}
+          <div className="relative h-70 shrink-0 overflow-hidden border-b border-border/50 bg-zinc-950">
             <div className="lf-grid absolute inset-0 opacity-25" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            {Preview ? (
-              <div className="relative flex h-full items-center justify-center p-3">
-                <div className="w-full origin-center scale-[0.78] transition-transform duration-300 group-hover:scale-[0.84]">
-                  <Preview />
-                </div>
+            {activePreview ? (
+              <div
+                className="absolute flex items-center justify-center overflow-hidden"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  width: 640,
+                  height: 480,
+                  transform: "translate(-50%, -50%) scale(0.50)",
+                  transformOrigin: "center center",
+                }}
+                onClick={(e) => {
+                  if (!hasVariants) { e.stopPropagation(); return; }
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setActiveIdx((i) => (i + 1) % sections!.length);
+                }}
+              >
+                <ActivePreview />
               </div>
             ) : (
               <div className="relative flex h-full flex-col items-center justify-center gap-2 text-zinc-600">
                 <Layers className="size-8 opacity-40" />
                 <span className="text-[10px] uppercase tracking-[0.2em] opacity-50">Template</span>
+              </div>
+            )}
+            {hasVariants && (
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
+                {sections!.map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(i); }}
+                    className={cn(
+                      "h-1.5 rounded-full transition-all duration-200",
+                      i === activeIdx ? "w-4 bg-white/80" : "w-1.5 bg-white/30 hover:bg-white/50",
+                    )}
+                    aria-label={`Variant ${i + 1}`}
+                  />
+                ))}
               </div>
             )}
             {/* Top-left badge */}
@@ -198,20 +239,20 @@ function ComponentCard({
           </div>
 
           {/* Card body */}
-          <div className="flex flex-1 flex-col gap-1.5 p-4">
+          <div className="flex flex-1 flex-col gap-1.5 p-3.5 sm:p-4">
             <div className="flex items-start justify-between gap-2">
-              <h2 className="text-[14px] font-semibold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary">
+              <h2 className="text-[13.5px] font-semibold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-[14px]">
                 {item.title}
               </h2>
               <span className="mt-0.5 shrink-0 rounded border border-border/60 bg-muted/50 px-1.5 py-0.5 text-[10px] text-muted-foreground">
                 {kindLabel}
               </span>
             </div>
-            <p className="line-clamp-2 text-[12.5px] leading-relaxed text-muted-foreground">
+            <p className="line-clamp-2 text-[12px] leading-relaxed text-muted-foreground sm:text-[12.5px]">
               {item.description}
             </p>
             <div className="mt-auto flex items-center justify-end pt-3">
-              <span className="inline-flex items-center gap-1 text-[12px] font-medium text-primary opacity-70 transition-all duration-200 group-hover:gap-1.5 group-hover:opacity-100">
+              <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-primary opacity-70 transition-all duration-200 group-hover:gap-1.5 group-hover:opacity-100 sm:text-[12px]">
                 View Component <ArrowRight className="size-3" />
               </span>
             </div>
@@ -393,7 +434,7 @@ function ComponentsBrowserInner() {
 
         {/* Main content */}
         <main className="min-w-0 flex-1">
-          <section className="relative overflow-hidden border-b border-border/40 px-4 py-10 sm:px-6 lg:py-12">
+          <section className="relative overflow-hidden border-b border-border/40 px-4 py-8 sm:px-6 lg:py-12">
             <div className="pointer-events-none absolute inset-0 lf-grid opacity-[0.12]" />
             {!reduceMotion && (
               <>
@@ -425,7 +466,7 @@ function ComponentsBrowserInner() {
                   initial={reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                  className="mt-3 text-balance text-5xl font-black tracking-tight text-foreground sm:text-7xl lg:text-8xl"
+                  className="mt-3 text-balance text-4xl font-black tracking-tight text-foreground sm:text-6xl lg:text-7xl 2xl:text-8xl"
                 >
                   Components
                 </motion.h1>
@@ -433,7 +474,7 @@ function ComponentsBrowserInner() {
                   initial={reduceMotion ? false : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.45, delay: 0.08 }}
-                  className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
+                  className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:mt-4 sm:text-base"
                 >
                   Explore motion-ready components, shadcn-compatible blocks, and production templates with live previews.
                 </motion.p>
@@ -457,7 +498,7 @@ function ComponentsBrowserInner() {
                         commitParams({ q: query.trim() || null }, true);
                     }}
                     placeholder="Search components, blocks, tags..."
-                    className="lf-library-search-input h-12 w-full rounded-xl border border-border/70 bg-background/80 pl-11 pr-16 text-sm text-foreground shadow-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10 dark:bg-white/[0.04]"
+                    className="lf-library-search-input h-11 w-full rounded-xl border border-border/70 bg-background/80 pl-10 pr-11 text-sm text-foreground shadow-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10 sm:h-12 sm:pl-11 sm:pr-16 dark:bg-white/[0.04]"
                   />
                   {query ? (
                     <button
@@ -503,9 +544,9 @@ function ComponentsBrowserInner() {
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.15 }}
-            className="flex items-center justify-between gap-3 border-b border-border/40 bg-background/50 px-4 py-3 sm:px-6 backdrop-blur-sm"
+            className="flex flex-wrap items-center justify-between gap-3 border-b border-border/40 bg-background/50 px-4 py-3 backdrop-blur-sm sm:px-6"
           >
-            <p className="text-[12px] text-muted-foreground">
+            <p className="min-w-0 text-[12px] text-muted-foreground">
               <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
               {filtered.length === 1 ? "result" : "results"}
               {view === "components" && category !== "all" && (
@@ -515,7 +556,7 @@ function ComponentsBrowserInner() {
               )}
             </p>
 
-            <div className="flex items-center gap-2">
+            <div className="ml-auto flex shrink-0 items-center gap-2">
               <div className="hidden lg:block">{scopeTabs}</div>
 
               {/* Reset */}
@@ -594,7 +635,7 @@ function ComponentsBrowserInner() {
           )}
 
           {/* Grid */}
-          <div className="px-4 pb-20 pt-6 sm:px-6">
+          <div className="overflow-hidden px-3 pb-20 pt-5 sm:px-6 sm:pt-6">
             <AnimatePresence mode="wait">
               {filtered.length === 0 ? (
                 <motion.div
@@ -621,7 +662,7 @@ function ComponentsBrowserInner() {
                 <motion.div
                   key="grid"
                   initial={false}
-                  className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+                  className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
                 >
                   {filtered.map((item, index) => (
                     <ComponentCard
