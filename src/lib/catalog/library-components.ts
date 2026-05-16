@@ -4352,74 +4352,6 @@ export default function Demo() {
     ],
   },
   {
-    slug: "interactive-dot-grid",
-    name: "Interactive Dot Grid",
-    registryCliName: "interactive-dot-grid",
-    description:
-      "A cursor-reactive dot grid background with smooth spotlight and magnetic motion effects.",
-    categorySlug: "background-effects",
-    tags: ["background", "dots", "grid", "cursor", "interactive", "hero", "canvas", "motion"],
-    premium: false,
-    trendingScore: 120,
-    createdAt: "2026-05-17",
-    animationKinds: ["magnetic", "hover", "spring"] as AnimationKind[],
-    dependencies: ["framer-motion"],
-    props: [
-      { name: "children", type: "React.ReactNode", description: "Foreground content rendered above the dot grid." },
-      { name: "dotSpacing", type: "number", defaultValue: "40", description: "Space between dot centres in pixels." },
-      { name: "dotSize", type: "number", defaultValue: "1.5", description: "Base dot radius in pixels." },
-      { name: "dotColor", type: "string", defaultValue: "\"#6b7280\"", description: "Base colour of all dots." },
-      { name: "activeDotColor", type: "string", defaultValue: "\"#818cf8\"", description: "Colour of dots near the cursor." },
-      { name: "background", type: "string", defaultValue: "\"transparent\"", description: "Container background colour." },
-      { name: "interactionRadius", type: "number", defaultValue: "160", description: "Radius around cursor that influences dots (px)." },
-      { name: "interactionStrength", type: "number", defaultValue: "0.5", description: "How strongly dots react to cursor (0–1)." },
-      { name: "mode", type: "\"spotlight\" | \"repel\" | \"attract\" | \"wave\" | \"static\"", defaultValue: "\"spotlight\"", description: "Interaction mode." },
-      { name: "fadeEdges", type: "boolean", defaultValue: "true", description: "Apply radial fade mask at container edges." },
-      { name: "showGradientOverlay", type: "boolean", defaultValue: "true", description: "Show subtle radial gradient behind content." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disable all cursor interactions." },
-      { name: "className", type: "string", description: "Additional CSS classes for the root container." },
-      { name: "title", type: "string", description: "Hero heading text (used when children is absent)." },
-      { name: "subtitle", type: "string", description: "Hero subtitle text (used when children is absent)." },
-      { name: "primaryCTALabel", type: "string", description: "Primary button label." },
-      { name: "primaryCTAHref", type: "string", defaultValue: "\"#\"", description: "Primary button link href." },
-      { name: "secondaryCTALabel", type: "string", description: "Secondary button label." },
-      { name: "secondaryCTAHref", type: "string", defaultValue: "\"#\"", description: "Secondary button link href." },
-    ],
-    Preview: Previews.PreviewInteractiveDotGrid,
-    previewSections: [
-      {
-        Preview: Previews.PreviewInteractiveDotGrid,
-        reactSource: `"use client";
-
-import { InteractiveDotGrid } from "@/components/interactive-dot-grid";
-
-export function InteractiveDotGridHero() {
-  return (
-    <InteractiveDotGrid
-      className="min-h-[580px]"
-      dotSpacing={40}
-      dotSize={1.5}
-      dotColor="#4b5563"
-      activeDotColor="#818cf8"
-      interactionRadius={170}
-      interactionStrength={0.55}
-      mode="spotlight"
-      fadeEdges
-      showGradientOverlay
-      title="Build interfaces that respond"
-      subtitle="Interactive motion backgrounds for modern React apps."
-      primaryCTALabel="Browse Components"
-      primaryCTAHref="/components"
-      secondaryCTALabel="View Templates"
-      secondaryCTAHref="/templates"
-    />
-  );
-}`,
-      },
-    ],
-    tailwindSource: tw,
-  },
-  {
     slug: "globe-pins",
     name: "Globe Pins",
     description: "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
@@ -4741,6 +4673,58 @@ export function GlobePins({
       { name: "fontFamily", type: "string", description: "Font family used in label cards.", defaultValue: "\"'Courier New', Courier, monospace\"" },
       { name: "fontSize", type: "number", description: "Base font size in px for label cards.", defaultValue: "13" },
       { name: "className", type: "string | undefined", description: "Classes on the outermost square container." },
+    ],
+  },
+  {
+    name: "Card Stack Rotator",
+    slug: "card-stack-rotator",
+    description: "A premium stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
+    categorySlug: "testimonials",
+    tags: ["testimonials", "carousel", "cards", "motion", "stack"],
+    premium: false,
+    trendingScore: 0,
+    createdAt: "2026-05-17",
+    animationKinds: ["spring", "layout"] as const,
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewCardStackRotator,
+    tailwindSource: `"use client";
+
+import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rotator";
+
+export function CardStackRotatorDemo() {
+  const cards = [
+    { id: "1", content: "This product is **absolutely incredible** for our team.", name: "Sarah Chen", designation: "Head of Design", company: "Vercel", initials: "SC" },
+    { id: "2", content: "The **developer experience** is unmatched.", name: "Marcus Rodriguez", designation: "Senior Engineer", company: "Linear", initials: "MR" },
+    { id: "3", content: "Component quality is **genuinely impressive**.", name: "Aisha Patel", designation: "Design Systems Lead", company: "Stripe", initials: "AP" },
+  ];
+  return (
+    <div className="flex items-center justify-center p-8">
+      <CardStackRotator cards={cards} rotationInterval={3000} maxVisible={3} stackOffset={14} scaleStep={0.04} cardWidth="420px" cardHeight="260px" cardBackground="#111113" cardBorderColor="rgba(255,255,255,0.07)" textColor="#fafafa" mutedColor="rgba(250,250,250,0.45)" highlightBackground="rgba(129,140,248,0.15)" highlightTextColor="#a5b4fc" borderRadius="16px" shadowIntensity={0.55} pauseOnHover />
+    </div>
+  );
+}`
+    ,
+    props: [
+      { name: "cards", type: "CardData[]", description: "Array of card objects to display." },
+      { name: "rotationInterval", type: "number", description: "Time between rotations in ms.", defaultValue: "3000" },
+      { name: "maxVisible", type: "number", description: "Maximum number of visible cards in the stack.", defaultValue: "4" },
+      { name: "stackOffset", type: "number", description: "Vertical offset per card in px.", defaultValue: "16" },
+      { name: "scaleStep", type: "number", description: "Scale reduction per card.", defaultValue: "0.04" },
+      { name: "cardWidth", type: "string", description: "CSS width of each card.", defaultValue: "\"420px\"" },
+      { name: "cardHeight", type: "string", description: "CSS height of each card.", defaultValue: "\"auto\"" },
+      { name: "cardBackground", type: "string", description: "Card background color.", defaultValue: "\"#0f0f0f\"" },
+      { name: "cardBorderColor", type: "string", description: "Card border color.", defaultValue: "\"rgba(255,255,255,0.08)\"" },
+      { name: "textColor", type: "string", description: "Primary text color.", defaultValue: "\"#fafafa\"" },
+      { name: "mutedColor", type: "string", description: "Muted/secondary text color.", defaultValue: "\"rgba(250,250,250,0.5)\"" },
+      { name: "highlightBackground", type: "string", description: "Background color for **bold** text highlights.", defaultValue: "\"rgba(129,140,248,0.18)\"" },
+      { name: "highlightTextColor", type: "string", description: "Text color for **bold** highlights.", defaultValue: "\"#a5b4fc\"" },
+      { name: "contentFontSize", type: "string", description: "Font size of card content.", defaultValue: "\"15px\"" },
+      { name: "nameFontSize", type: "string", description: "Font size of card author name.", defaultValue: "\"15px\"" },
+      { name: "designationFontSize", type: "string", description: "Font size of author role.", defaultValue: "\"12px\"" },
+      { name: "borderRadius", type: "string", description: "Card border radius.", defaultValue: "\"16px\"" },
+      { name: "shadowIntensity", type: "number", description: "Shadow intensity 0–1.", defaultValue: "0.5" },
+      { name: "pauseOnHover", type: "boolean", description: "Pause rotation on mouse hover.", defaultValue: "true" },
+      { name: "direction", type: "\"forward\" | \"backward\"", description: "Rotation direction.", defaultValue: "\"forward\"" },
     ],
   },
 ];
