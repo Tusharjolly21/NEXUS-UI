@@ -39,11 +39,12 @@ const fadeUp = {
   }),
 };
 
-const fadeIn = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: 0.25 } },
-  exit: { opacity: 0, transition: { duration: 0.15 } },
-};
+const FADE_IN_PROPS = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.2 },
+} as const;
 
 // ── Copy button with check state ────────────────────────────────────
 function CopyButton({
@@ -82,11 +83,11 @@ function CopyButton({
     >
       <AnimatePresence mode="wait" initial={false}>
         {copied ? (
-          <motion.span key="check" {...fadeIn} className="flex items-center gap-1.5 text-emerald-500">
+          <motion.span key="check" {...FADE_IN_PROPS} className="flex items-center gap-1.5 text-emerald-500">
             <Check className="size-3.5" /> Copied
           </motion.span>
         ) : (
-          <motion.span key="copy" {...fadeIn} className="flex items-center gap-1.5">
+          <motion.span key="copy" {...FADE_IN_PROPS} className="flex items-center gap-1.5">
             <Copy className="size-3.5" /> Copy
           </motion.span>
         )}
@@ -187,7 +188,7 @@ function PreviewFrame({
           backgroundSize: "32px 32px",
         }}
       />
-      <div className="relative flex min-h-[380px] w-full items-center justify-center p-4 sm:p-10">
+      <div className="relative flex min-h-[640px] w-full items-center justify-center p-4 sm:p-10">
         {children}
       </div>
     </motion.div>
@@ -371,7 +372,7 @@ function PreviewSection({
 
       <AnimatePresence mode="wait">
         {tab === "preview" ? (
-          <motion.div key="preview" {...fadeIn}>
+          <motion.div key="preview" {...FADE_IN_PROPS}>
             <PreviewFrame>
               <div className={cn("w-full", previewFrameMaxWidth)}>
                 <section.Preview compact={false} />
@@ -379,7 +380,7 @@ function PreviewSection({
             </PreviewFrame>
           </motion.div>
         ) : (
-          <motion.div key="code" {...fadeIn}>
+          <motion.div key="code" {...FADE_IN_PROPS}>
             <CodeBlock code={section.reactSource} label="React" />
           </motion.div>
         )}
@@ -660,7 +661,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
               {/* Tab content */}
               <AnimatePresence mode="wait">
                 {rootTab === "preview" ? (
-                  <motion.div key="preview" {...fadeIn}>
+                  <motion.div key="preview" {...FADE_IN_PROPS}>
                     <div className="space-y-4">
                       {previewVariants.map((PreviewVariant, idx) => (
                         <PreviewFrame key={`${item.slug}-preview-${idx}`}>
@@ -679,7 +680,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
                     </div>
                   </motion.div>
                 ) : (
-                  <motion.div key="source" {...fadeIn}>
+                  <motion.div key="source" {...FADE_IN_PROPS}>
                     <div className="grid gap-6 lg:grid-cols-[1fr_268px] xl:grid-cols-[1fr_288px]">
                       {/* Code panel */}
                       <div className="min-w-0 space-y-4">
@@ -704,7 +705,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
                         </div>
                         <AnimatePresence mode="wait">
                           {codeTab === "react" ? (
-                            <motion.div key="react" {...fadeIn}>
+                            <motion.div key="react" {...FADE_IN_PROPS}>
                               {reactExamples.length === 1 ? (
                                 <CodeBlock code={reactExamples[0]?.code ?? ""} />
                               ) : (
@@ -720,7 +721,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
                               )}
                             </motion.div>
                           ) : (
-                            <motion.div key="tailwind" {...fadeIn}>
+                            <motion.div key="tailwind" {...FADE_IN_PROPS}>
                               <CodeBlock code={item.tailwindSource ?? ""} />
                             </motion.div>
                           )}
