@@ -2,14 +2,25 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, LayoutDashboard, ShoppingBag, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { SearchCommand } from "@/components/search/search-command";
 import { NexusMark } from "@/components/brand";
+import { isSupabaseConfigured } from "@/lib/env";
+import { createClient } from "@/lib/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 const NAV_LINKS = [
   { href: "/components", label: "Components" },
@@ -21,19 +32,40 @@ const NAV_LINKS = [
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [user, setUser] = React.useState<SupabaseUser | null>(null);
 
   React.useEffect(() => {
     setMounted(true);
+    if (!isSupabaseConfigured()) return;
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Close mobile menu on route change
+  async function signOut() {
+    if (!isSupabaseConfigured()) return;
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push("/");
+  }
+
+  const displayName =
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.name ??
+    user?.email?.split("@")[0] ??
+    "Account";
+
   React.useEffect(() => {
     setMobileOpen(false);
   }, [pathname]);
 
-  // Hide header on template preview pages
   if (pathname?.startsWith("/templates/")) {
     return null;
   }
@@ -88,25 +120,70 @@ export function SiteHeader() {
               <SearchCommand />
             </div>
             <ThemeToggle />
+
             <div className="hidden items-center gap-1.5 md:flex">
-              <Link
-                href="/login"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "sm" }),
-                  "rounded-lg text-[13px] text-muted-foreground hover:text-foreground",
-                )}
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/pricing"
-                className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "rounded-full border-transparent bg-foreground px-4 text-[13px] font-semibold text-background hover:bg-foreground/90",
-                )}
-              >
-                Get premium
-              </Link>
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "gap-2 rounded-lg border-border/60 text-[13px] font-medium text-foreground",
+                    )}
+                  >
+                    <User className="size-3.5 text-muted-foreground" />
+                    <span className="max-w-28 truncate">{displayName}</span>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" sideOffset={8} className="w-48">
+                    <DropdownMenuLabel className="px-2 py-1.5 text-xs text-muted-foreground">
+                      {user.email}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-2.5 px-2 py-2 text-[13px]"
+                      onClick={() => router.push("/dashboard")}
+                    >
+                      <LayoutDashboard className="size-3.5 text-muted-foreground" />
+                      Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-2.5 px-2 py-2 text-[13px]"
+                      onClick={() => router.push("/orders")}
+                    >
+                      <ShoppingBag className="size-3.5 text-muted-foreground" />
+                      Orders
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="cursor-pointer gap-2.5 px-2 py-2 text-[13px] text-destructive focus:text-destructive"
+                      onClick={() => void signOut()}
+                    >
+                      <LogOut className="size-3.5" />
+                      Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={cn(
+                      buttonVariants({ variant: "ghost", size: "sm" }),
+                      "rounded-lg text-[13px] text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className={cn(
+                      buttonVariants({ size: "sm" }),
+                      "rounded-full border-transparent bg-foreground px-4 text-[13px] font-semibold text-background hover:bg-foreground/90",
+                    )}
+                  >
+                    Get premium
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Mobile hamburger */}
@@ -161,7 +238,7 @@ export function SiteHeader() {
         </div>
       </header>
 
-      {/* Mobile menu — full-screen overlay */}
+      {/* Mobile menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -195,26 +272,70 @@ export function SiteHeader() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <Link
-                href="/login"
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "w-full rounded-xl text-sm font-medium",
-                )}
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/pricing"
-                onClick={() => setMobileOpen(false)}
-                className={cn(
-                  buttonVariants(),
-                  "w-full rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90",
-                )}
-              >
-                Get premium
-              </Link>
+              {user ? (
+                <>
+                  <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/40 px-4 py-2.5">
+                    <User className="size-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                      <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-start gap-2 rounded-xl text-sm font-medium",
+                    )}
+                  >
+                    <LayoutDashboard className="size-4" /> Dashboard
+                  </Link>
+                  <Link
+                    href="/orders"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-start gap-2 rounded-xl text-sm font-medium",
+                    )}
+                  >
+                    <ShoppingBag className="size-4" /> Orders
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { setMobileOpen(false); void signOut(); }}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-start gap-2 rounded-xl text-sm font-medium text-destructive hover:text-destructive",
+                    )}
+                  >
+                    <LogOut className="size-4" /> Sign out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full rounded-xl text-sm font-medium",
+                    )}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants(),
+                      "w-full rounded-xl bg-foreground text-sm font-semibold text-background hover:bg-foreground/90",
+                    )}
+                  >
+                    Get premium
+                  </Link>
+                </>
+              )}
             </div>
           </motion.div>
         )}
