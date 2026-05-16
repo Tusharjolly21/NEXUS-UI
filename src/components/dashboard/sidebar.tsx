@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,6 +11,8 @@ import {
   Key,
   Home,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -35,6 +38,12 @@ const NAV_ITEMS = [
 
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  // Close sidebar on route change
+  React.useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
 
   async function signOut() {
     const supabase = createClient();
@@ -42,8 +51,8 @@ export function Sidebar({ user }: SidebarProps) {
     window.location.href = "/";
   }
 
-  return (
-    <aside className="fixed left-0 top-0 z-30 flex h-full w-60 flex-col border-r border-border bg-background px-4 py-5">
+  const navContent = (
+    <>
       {/* Top: Logo + ThemeToggle */}
       <div className="flex items-center justify-between">
         <span className="font-semibold text-foreground">Nexus-UI</span>
@@ -114,6 +123,45 @@ export function Sidebar({ user }: SidebarProps) {
           Sign out
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 lg:hidden">
+        <span className="font-semibold text-foreground">Nexus-UI</span>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            type="button"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMobileOpen((v) => !v)}
+            className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          >
+            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile overlay backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Desktop sidebar (always visible) + Mobile slide-in */}
+      <aside
+        className={cn(
+          "fixed left-0 top-0 z-40 flex h-full w-60 flex-col border-r border-border bg-background px-4 pt-18 pb-5 transition-transform duration-300 lg:pt-5",
+          mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        )}
+      >
+        {navContent}
+      </aside>
+
+    </>
   );
 }

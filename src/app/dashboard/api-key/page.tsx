@@ -19,7 +19,7 @@ export default async function DashboardApiKeyPage() {
   const apiKey = `nxs_${user.id.replace(/-/g, "").slice(0, 32)}`;
 
   return (
-    <div className="px-8 py-10">
+    <div className="px-4 py-6 sm:px-8 sm:py-10">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">API Token</h1>
         <p className="mt-1 text-muted-foreground">

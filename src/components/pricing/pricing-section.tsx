@@ -361,7 +361,7 @@ export function PricingSection() {
           <h2 className="mb-8 text-center text-xl font-bold tracking-tight text-foreground sm:text-2xl">
             Everything compared
           </h2>
-          <div className="overflow-hidden rounded-2xl border border-border/50">
+          <div className="overflow-x-auto rounded-2xl border border-border/50">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border/50 bg-muted/30">

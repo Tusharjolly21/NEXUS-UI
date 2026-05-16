@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { highlight } from "sugar-high";
 import {
   ArrowLeft,
   Bookmark,
@@ -96,29 +97,65 @@ function CopyButton({
   );
 }
 
+// VS Code Dark+ colours via sugar-high v1.1 CSS variables
+const SH_VARS = {
+  "--sh-keyword":     "#569CD6",
+  "--sh-string":      "#CE9178",
+  "--sh-comment":     "#6A9955",
+  "--sh-identifier":  "#9CDCFE",
+  "--sh-sign":        "#D4D4D4",
+  "--sh-class":       "#4EC9B0",
+  "--sh-property":    "#DCDCAA",
+  "--sh-entity":      "#CE9178",
+  "--sh-space":       "#D4D4D4",
+  "--sh-jsxliterals": "#9CDCFE",
+} as React.CSSProperties;
+
 // ── Code block ──────────────────────────────────────────────────────
 function CodeBlock({ code, label, maxH = "520px" }: { code: string; label?: string; maxH?: string }) {
+  const lines = React.useMemo(() => highlight(code).split("\n"), [code]);
+
   return (
-    <div className="overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-xl">
-      {label && (
-        <div className="flex items-center justify-between border-b border-zinc-800/80 px-4 py-2.5">
-          <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
-            {label}
-          </span>
-          <CopyButton text={code} label={label} />
-        </div>
-      )}
-      {!label && (
-        <div className="flex justify-end border-b border-zinc-800/80 px-4 py-2.5">
-          <CopyButton text={code} label="code" />
-        </div>
-      )}
-      <pre
-        className="overflow-auto p-5 font-mono text-xs leading-relaxed text-zinc-200"
-        style={{ maxHeight: maxH }}
+    <div
+      className="overflow-hidden rounded-2xl border border-zinc-800 shadow-xl"
+      style={{ backgroundColor: "#1e1e1e", ...SH_VARS }}
+    >
+
+      {/* Title bar */}
+      <div
+        className="flex items-center justify-between border-b border-zinc-800/60 px-4 py-2.5"
+        style={{ backgroundColor: "#252526" }}
       >
-        <code>{code}</code>
-      </pre>
+        <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+          {label ?? "tsx"}
+        </span>
+        <CopyButton text={code} label={label ?? "code"} />
+      </div>
+
+      {/* Line-numbered editor area */}
+      <div className="overflow-auto" style={{ maxHeight: maxH }}>
+        <table className="w-full border-collapse font-mono text-xs leading-6">
+          <tbody>
+            {lines.map((line, i) => (
+              <tr key={i} className="hover:bg-white/[0.04]">
+                {/* Line number gutter */}
+                <td
+                  className="select-none pl-5 pr-4 text-right align-top"
+                  style={{ color: "#858585", minWidth: "3.25rem", width: "3.25rem" }}
+                >
+                  {i + 1}
+                </td>
+                {/* Code line */}
+                <td
+                  className="pl-2 pr-6 align-top whitespace-pre"
+                  style={{ color: "#D4D4D4" }}
+                  dangerouslySetInnerHTML={{ __html: line || " " }}
+                />
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -394,7 +431,6 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
   const Preview = item.Preview;
   const previewVariants = item.detailPreviews?.length ? item.detailPreviews : [Preview];
   const [rootTab, setRootTab] = React.useState<"preview" | "source">("preview");
-  const [codeTab, setCodeTab] = React.useState<"react" | "tailwind">("react");
   const { toggleFavorite, toggleBookmark, isFavorite, isBookmarked, pushRecent } = useDiscovery();
 
   const related = React.useMemo(
@@ -684,48 +720,19 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
                     <div className="grid gap-6 lg:grid-cols-[1fr_268px] xl:grid-cols-[1fr_288px]">
                       {/* Code panel */}
                       <div className="min-w-0 space-y-4">
-                        {/* React / Tailwind tabs */}
-                        <div className="flex items-center justify-between gap-3">
-                          <TabBar
-                            tabs={[
-                              { value: "react", label: "React" },
-                              { value: "tailwind", label: "Tailwind" },
-                            ]}
-                            active={codeTab}
-                            onChange={setCodeTab}
-                          />
-                          <CopyButton
-                            text={
-                              codeTab === "react"
-                                ? reactExamples.map((ex) => ex.code).join("\n\n")
-                                : item.tailwindSource ?? ""
-                            }
-                            label={codeTab}
-                          />
-                        </div>
-                        <AnimatePresence mode="wait">
-                          {codeTab === "react" ? (
-                            <motion.div key="react" {...FADE_IN_PROPS}>
-                              {reactExamples.length === 1 ? (
-                                <CodeBlock code={reactExamples[0]?.code ?? ""} />
-                              ) : (
-                                <div className="space-y-4">
-                                  {reactExamples.map((example, idx) => (
-                                    <CodeBlock
-                                      key={`${example.title}-${idx}`}
-                                      code={example.code}
-                                      label={example.title}
-                                    />
-                                  ))}
-                                </div>
-                              )}
-                            </motion.div>
-                          ) : (
-                            <motion.div key="tailwind" {...FADE_IN_PROPS}>
-                              <CodeBlock code={item.tailwindSource ?? ""} />
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
+                        {reactExamples.length === 1 ? (
+                          <CodeBlock code={reactExamples[0]?.code ?? ""} />
+                        ) : (
+                          <div className="space-y-4">
+                            {reactExamples.map((example, idx) => (
+                              <CodeBlock
+                                key={`${example.title}-${idx}`}
+                                code={example.code}
+                                label={example.title}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {/* Sidebar */}

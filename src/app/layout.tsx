@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AppProviders } from "@/components/providers/app-providers";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { createMetadata } from "@/lib/seo";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { Analytics } from "@vercel/analytics/next";

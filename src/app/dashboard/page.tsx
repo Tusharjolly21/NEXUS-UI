@@ -41,7 +41,7 @@ export default async function DashboardPage() {
   const firstName = displayName.split(" ")[0];
 
   return (
-    <div className="px-8 py-10">
+    <div className="px-4 py-6 sm:px-8 sm:py-10">
       {/* Heading */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Link cards */}
-      <div className="mt-6 grid grid-cols-2 gap-4">
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Link
           href="/components"
           className={cn(

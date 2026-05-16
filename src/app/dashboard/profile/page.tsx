@@ -36,7 +36,7 @@ export default async function DashboardProfilePage() {
   const avatarLetter = displayName.charAt(0).toUpperCase();
 
   return (
-    <div className="px-8 py-10">
+    <div className="px-4 py-6 sm:px-8 sm:py-10">
       {/* Heading */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">

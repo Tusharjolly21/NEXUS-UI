@@ -33,7 +33,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex h-dvh overflow-hidden">
       <Sidebar user={{ email, name: displayName, avatarLetter }} />
-      <main className="flex-1 overflow-y-auto pl-60">{children}</main>
+      <main className="flex-1 overflow-y-auto pt-14 lg:pl-60 lg:pt-0">{children}</main>
     </div>
   );
 }
