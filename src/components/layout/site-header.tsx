@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, LayoutDashboard, ShoppingBag, LogOut, User } from "lucide-react";
+import { Menu, X, LayoutDashboard, ShoppingBag, LogOut, User, Key, CreditCard } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
@@ -153,10 +153,17 @@ export function SiteHeader() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
-                        onClick={() => router.push("/dashboard")}
+                        onClick={() => router.push("/orders")}
                       >
                         <LayoutDashboard className="size-4 text-muted-foreground" />
                         Dashboard
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
+                        onClick={() => router.push("/api-key")}
+                      >
+                        <Key className="size-4 text-muted-foreground" />
+                        API Key
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
@@ -164,6 +171,13 @@ export function SiteHeader() {
                       >
                         <ShoppingBag className="size-4 text-muted-foreground" />
                         Orders
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
+                        onClick={() => router.push("/billing")}
+                      >
+                        <CreditCard className="size-4 text-muted-foreground" />
+                        Billing
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -307,7 +321,7 @@ export function SiteHeader() {
                     </div>
                   </div>
                   <Link
-                    href="/dashboard"
+                    href="/orders"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
@@ -315,6 +329,16 @@ export function SiteHeader() {
                     )}
                   >
                     <LayoutDashboard className="size-4" /> Dashboard
+                  </Link>
+                  <Link
+                    href="/api-key"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-start gap-2 rounded-xl text-sm font-medium",
+                    )}
+                  >
+                    <Key className="size-4" /> API Key
                   </Link>
                   <Link
                     href="/orders"
@@ -325,6 +349,16 @@ export function SiteHeader() {
                     )}
                   >
                     <ShoppingBag className="size-4" /> Orders
+                  </Link>
+                  <Link
+                    href="/billing"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-start gap-2 rounded-xl text-sm font-medium",
+                    )}
+                  >
+                    <CreditCard className="size-4" /> Billing
                   </Link>
                   <button
                     type="button"
