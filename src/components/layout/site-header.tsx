@@ -72,22 +72,23 @@ export function SiteHeader() {
   return (
     <>
       <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70 dark:border-white/[0.07] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.04)]">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
+        <div className="flex h-16 w-full items-center justify-between gap-4 px-6">
 
-          {/* Logo */}
-          <Link href="/" aria-label="Nexus-UI home" className="group flex shrink-0 items-center gap-2.5">
-            <span className="grid size-8 place-items-center rounded-xl border border-border/60 bg-card/80 text-foreground shadow-sm transition-all group-hover:border-border group-hover:shadow-md dark:bg-white/[0.06] dark:group-hover:bg-white/[0.09]">
-              <NexusMark size={20} />
-            </span>
-            <div className="hidden leading-tight sm:block">
-              <p className="text-[13px] font-semibold tracking-tight text-foreground">Nexus-UI</p>
-              <p className="text-[11px] leading-tight text-muted-foreground">UI systems lab</p>
-            </div>
-          </Link>
+          {/* Left: Logo + Desktop nav */}
+          <div className="flex items-center gap-1">
+            <Link href="/" aria-label="Nexus-UI home" className="group flex shrink-0 items-center gap-2.5 mr-2">
+              <span className="grid size-8 place-items-center rounded-xl border border-border/60 bg-card/80 text-foreground shadow-sm transition-all group-hover:border-border group-hover:shadow-md dark:bg-white/[0.06] dark:group-hover:bg-white/[0.09]">
+                <NexusMark size={20} />
+              </span>
+              <div className="hidden leading-tight sm:block">
+                <p className="text-[13px] font-semibold tracking-tight text-foreground">Nexus-UI</p>
+                <p className="text-[11px] leading-tight text-muted-foreground">UI systems lab</p>
+              </div>
+            </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden flex-1 justify-center gap-0.5 lg:flex">
-            {NAV_LINKS.map((l) => {
+            {/* Desktop nav */}
+            <nav className="hidden items-center gap-0.5 lg:flex">
+              {NAV_LINKS.map((l) => {
               const active = pathname === l.href;
               return (
                 <Link
@@ -112,6 +113,7 @@ export function SiteHeader() {
               );
             })}
           </nav>
+          </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-1.5">

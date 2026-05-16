@@ -1,0 +1,102 @@
+/**
+ * GET /api/registry/[name]
+ *
+ * The endpoint the shadcn CLI hits when a user runs:
+ *   npx shadcn@latest add @next-ui/component-name
+ *
+ * Flow:
+ *  1. Look up the component in the catalog
+ *  2. If free → serve the registry JSON immediately (no auth)
+ *  3. If premium → verify the Authorization: Bearer nxs_xxx token
+ *     → check entitlements in the DB
+ *     → 200 with JSON  or  401/403
+ *
+ * Security properties:
+ *  - Token is never logged
+ *  - No user data is returned in error responses
+ *  - Free components bypass auth entirely (no unnecessary latency)
+ */
+
+import { NextResponse } from "next/server";
+import { readFile } from "fs/promises";
+import path from "path";
+import { getLibraryComponent } from "@/lib/catalog/library-components";
+import { parseApiToken, canAccessComponent } from "@/lib/entitlements";
+
+type Params = { params: Promise<{ name: string }> };
+
+export async function GET(_req: Request, { params }: Params) {
+  const { name } = await params;
+
+  // ── 1. Resolve component metadata ───────────────────────────────
+  const component = getLibraryComponent(name);
+
+  // Unknown component → 404
+  if (!component) {
+    return new NextResponse("Component not found", { status: 404 });
+  }
+
+  // ── 2. Free components — no auth required ────────────────────────
+  if (!component.premium) {
+    return serveRegistryFile(name);
+  }
+
+  // ── 3. Premium — require and validate token ──────────────────────
+  const authHeader = _req.headers.get("authorization") ?? "";
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7).trim()
+    : null;
+
+  if (!token) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Unauthorized",
+        message: "Add your API token to components.json. Get it at nexus-ui.com/dashboard/api-key",
+      }),
+      { status: 401, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  const userId = parseApiToken(token);
+
+  if (!userId) {
+    return new NextResponse(
+      JSON.stringify({ error: "Invalid token format" }),
+      { status: 401, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // ── 4. Entitlement check ─────────────────────────────────────────
+  const allowed = await canAccessComponent(userId, name);
+
+  if (!allowed) {
+    return new NextResponse(
+      JSON.stringify({
+        error: "Forbidden",
+        message: `'${name}' is a premium component. Upgrade at nexus-ui.com/pricing`,
+      }),
+      { status: 403, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // ── 5. Serve ─────────────────────────────────────────────────────
+  return serveRegistryFile(name);
+}
+
+async function serveRegistryFile(name: string): Promise<NextResponse> {
+  try {
+    const filePath = path.join(process.cwd(), "public", "r", `${name}.json`);
+    const contents = await readFile(filePath, "utf-8");
+
+    return new NextResponse(contents, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        // Allow shadcn CLI (and browsers) to cache for 60 s
+        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+      },
+    });
+  } catch {
+    return new NextResponse("Registry file not found", { status: 404 });
+  }
+}

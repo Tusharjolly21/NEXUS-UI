@@ -61,6 +61,102 @@ export interface Database {
           created_at?: string;
         };
       };
+      orders: {
+        Row: {
+          id: string;
+          user_id: string;
+          ls_order_id: string;
+          ls_product_id: string;
+          ls_variant_id: string;
+          product_type: "component" | "template" | "lifetime";
+          product_slug: string | null;
+          status: "paid" | "refunded";
+          amount_cents: number;
+          currency: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          ls_order_id: string;
+          ls_product_id: string;
+          ls_variant_id: string;
+          product_type: "component" | "template" | "lifetime";
+          product_slug?: string | null;
+          status?: "paid" | "refunded";
+          amount_cents: number;
+          currency?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          ls_order_id?: string;
+          ls_product_id?: string;
+          ls_variant_id?: string;
+          product_type?: "component" | "template" | "lifetime";
+          product_slug?: string | null;
+          status?: "paid" | "refunded";
+          amount_cents?: number;
+          currency?: string;
+          created_at?: string;
+        };
+      };
+      subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          ls_subscription_id: string;
+          ls_product_id: string;
+          ls_variant_id: string;
+          status: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid";
+          renews_at: string | null;
+          ends_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          ls_subscription_id: string;
+          ls_product_id: string;
+          ls_variant_id: string;
+          status: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid";
+          renews_at?: string | null;
+          ends_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          ls_subscription_id?: string;
+          ls_product_id?: string;
+          ls_variant_id?: string;
+          status?: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid";
+          renews_at?: string | null;
+          ends_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      webhook_events: {
+        Row: {
+          id: string;
+          event_name: string;
+          processed_at: string;
+        };
+        Insert: {
+          id: string;
+          event_name: string;
+          processed_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_name?: string;
+          processed_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
