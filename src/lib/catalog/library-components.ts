@@ -141,6 +141,392 @@ export function CinematicLogoCloud({ clients, className }: CinematicLogoCloudPro
     ]
   },
   {
+    slug: "phone-input",
+    name: "Phone Input",
+    description: "A modern animated phone number input with country selector and validation.",
+    categorySlug: "cards",
+    tags: ["form", "phone", "country", "input", "validation", "framer-motion"],
+    premium: false,
+    trendingScore: 88,
+    createdAt: "2026-05-16",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewPhoneInput,
+    reactSource: `"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type KeyboardEvent,
+} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Check, ChevronDown, Search, AlertCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export interface Country {
+  iso: string;
+  name: string;
+  code: string;
+  max: number;
+}
+
+export const COUNTRIES: Country[] = [
+  { iso: "US", name: "United States", code: "+1", max: 10 },
+  { iso: "CA", name: "Canada", code: "+1", max: 10 },
+  { iso: "MX", name: "Mexico", code: "+52", max: 10 },
+  { iso: "GB", name: "United Kingdom", code: "+44", max: 10 },
+  { iso: "FR", name: "France", code: "+33", max: 9 },
+  { iso: "DE", name: "Germany", code: "+49", max: 11 },
+  { iso: "IT", name: "Italy", code: "+39", max: 10 },
+  { iso: "ES", name: "Spain", code: "+34", max: 9 },
+  { iso: "NL", name: "Netherlands", code: "+31", max: 9 },
+  { iso: "SE", name: "Sweden", code: "+46", max: 9 },
+  { iso: "IE", name: "Ireland", code: "+353", max: 9 },
+  { iso: "PT", name: "Portugal", code: "+351", max: 9 },
+  { iso: "IN", name: "India", code: "+91", max: 10 },
+  { iso: "CN", name: "China", code: "+86", max: 11 },
+  { iso: "JP", name: "Japan", code: "+81", max: 10 },
+  { iso: "KR", name: "South Korea", code: "+82", max: 10 },
+  { iso: "SG", name: "Singapore", code: "+65", max: 8 },
+  { iso: "HK", name: "Hong Kong", code: "+852", max: 8 },
+  { iso: "AU", name: "Australia", code: "+61", max: 9 },
+  { iso: "NZ", name: "New Zealand", code: "+64", max: 9 },
+  { iso: "BR", name: "Brazil", code: "+55", max: 11 },
+  { iso: "AR", name: "Argentina", code: "+54", max: 10 },
+  { iso: "AE", name: "United Arab Emirates", code: "+971", max: 9 },
+  { iso: "SA", name: "Saudi Arabia", code: "+966", max: 9 },
+  { iso: "IL", name: "Israel", code: "+972", max: 9 },
+  { iso: "EG", name: "Egypt", code: "+20", max: 10 },
+  { iso: "ZA", name: "South Africa", code: "+27", max: 9 },
+  { iso: "TR", name: "Turkey", code: "+90", max: 10 },
+  { iso: "RU", name: "Russia", code: "+7", max: 10 },
+];
+
+function flagFromIso(iso: string): string {
+  return iso
+    .toUpperCase()
+    .split("")
+    .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
+    .join("");
+}
+
+function formatDigits(digits: string): string {
+  if (!digits) return "";
+  const groups: string[] = [];
+  for (let i = 0; i < digits.length; i += 3) {
+    groups.push(digits.slice(i, i + 3));
+  }
+  return groups.join(" ");
+}
+
+export interface PhoneInputValue {
+  iso: string;
+  code: string;
+  number: string;
+  isValid: boolean;
+}
+
+export interface PhoneInputProps {
+  defaultCountry?: string;
+  placeholder?: string;
+  label?: string;
+  minDigits?: number;
+  onChange?: (value: PhoneInputValue) => void;
+  className?: string;
+}
+
+export function PhoneInput({
+  defaultCountry = "US",
+  placeholder = "Phone number",
+  label,
+  minDigits = 7,
+  onChange,
+  className,
+}: PhoneInputProps) {
+  const [selectedIso, setSelectedIso] = useState(defaultCountry);
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [digits, setDigits] = useState("");
+  const [touched, setTouched] = useState(false);
+  const [focused, setFocused] = useState(false);
+
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const phoneInputRef = useRef<HTMLInputElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  const selected = useMemo(
+    () => COUNTRIES.find((c) => c.iso === selectedIso) ?? COUNTRIES[0],
+    [selectedIso],
+  );
+
+  const isValid = digits.length >= minDigits;
+  const hasError = touched && !focused && digits.length > 0 && !isValid;
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return COUNTRIES;
+    return COUNTRIES.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        c.code.includes(q) ||
+        c.iso.toLowerCase().includes(q),
+    );
+  }, [search]);
+
+  useEffect(() => {
+    onChange?.({
+      iso: selected.iso,
+      code: selected.code,
+      number: digits,
+      isValid,
+    });
+  }, [selected.iso, selected.code, digits, isValid, onChange]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (!containerRef.current?.contains(e.target as Node)) {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        setSearch("");
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
+      return () => cancelAnimationFrame(id);
+    }
+  }, [open]);
+
+  const handleDigitsChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value.replace(/\\D/g, "");
+      setDigits(raw.slice(0, selected.max));
+    },
+    [selected.max],
+  );
+
+  const handleSelect = useCallback((iso: string) => {
+    setSelectedIso(iso);
+    setOpen(false);
+    setSearch("");
+    requestAnimationFrame(() => phoneInputRef.current?.focus());
+  }, []);
+
+  const handleTriggerKey = (e: KeyboardEvent<HTMLButtonElement>) => {
+    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setOpen(true);
+    }
+  };
+
+  const ringColor = focused
+    ? "rgb(99,102,241)"
+    : hasError
+      ? "rgb(239,68,68)"
+      : "rgb(229,231,235)";
+  const ringShadow = focused
+    ? "0 0 0 4px rgba(99,102,241,0.14), 0 1px 2px rgba(0,0,0,0.03)"
+    : hasError
+      ? "0 0 0 4px rgba(239,68,68,0.10)"
+      : "0 1px 2px rgba(0,0,0,0.03)";
+  const surfaceBg = focused ? "rgb(255,255,255)" : "rgb(250,250,250)";
+
+  return (
+    <div ref={containerRef} className={cn("relative w-full max-w-md", className)}>
+      {label && (
+        <label className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>
+      )}
+
+      <motion.div
+        animate={{
+          borderColor: ringColor,
+          boxShadow: ringShadow,
+          backgroundColor: surfaceBg,
+        }}
+        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        className="flex items-stretch overflow-hidden rounded-xl border"
+      >
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          onKeyDown={handleTriggerKey}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-label={\`Country: \${selected.name}\`}
+          className="flex shrink-0 items-center gap-2 border-r border-gray-200 px-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none"
+        >
+          <span className="text-lg leading-none" aria-hidden>
+            {flagFromIso(selected.iso)}
+          </span>
+          <span className="text-sm font-medium text-gray-900">{selected.code}</span>
+          <motion.span
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="text-gray-400"
+          >
+            <ChevronDown className="size-4" />
+          </motion.span>
+        </button>
+
+        <div className="relative flex-1">
+          <input
+            ref={phoneInputRef}
+            type="tel"
+            inputMode="numeric"
+            autoComplete="tel-national"
+            value={formatDigits(digits)}
+            onChange={handleDigitsChange}
+            onFocus={() => setFocused(true)}
+            onBlur={() => {
+              setFocused(false);
+              setTouched(true);
+            }}
+            placeholder={placeholder}
+            aria-label={label ?? "Phone number"}
+            aria-invalid={hasError || undefined}
+            aria-describedby={hasError ? "phone-input-error" : undefined}
+            className="h-12 w-full bg-transparent px-3 pr-10 text-sm text-gray-900 outline-none placeholder:text-gray-400"
+          />
+
+          <AnimatePresence>
+            {isValid && !focused && (
+              <motion.span
+                initial={{ opacity: 0, scale: 0.6 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.6 }}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500"
+                aria-hidden
+              >
+                <Check className="size-4" strokeWidth={2.5} />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+
+      <AnimatePresence>
+        {hasError && (
+          <motion.p
+            id="phone-input-error"
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="mt-1.5 flex items-center gap-1.5 text-xs text-red-500"
+          >
+            <AlertCircle className="size-3.5" />
+            That number looks too short — please add the remaining digits.
+          </motion.p>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.96 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            style={{ transformOrigin: "top center" }}
+            className="absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_12px_32px_-12px_rgba(15,23,42,0.18),0_4px_8px_-2px_rgba(15,23,42,0.06)]"
+            role="listbox"
+            aria-label="Country list"
+          >
+            <div className="border-b border-gray-100 p-2">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
+                <input
+                  ref={searchInputRef}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search country or code"
+                  aria-label="Search countries"
+                  className="h-9 w-full rounded-md bg-gray-50 pl-8 pr-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:bg-gray-100"
+                />
+              </div>
+            </div>
+
+            <div className="max-h-56 overflow-y-auto py-1">
+              {filtered.length === 0 ? (
+                <div className="px-3 py-6 text-center text-xs text-gray-400">
+                  No countries match &ldquo;{search}&rdquo;
+                </div>
+              ) : (
+                filtered.map((c) => {
+                  const isSelected = c.iso === selected.iso;
+                  return (
+                    <button
+                      key={c.iso}
+                      type="button"
+                      role="option"
+                      aria-selected={isSelected}
+                      onClick={() => handleSelect(c.iso)}
+                      className={cn(
+                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors",
+                        isSelected
+                          ? "bg-indigo-50 text-indigo-900"
+                          : "text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none",
+                      )}
+                    >
+                      <span className="text-base leading-none" aria-hidden>
+                        {flagFromIso(c.iso)}
+                      </span>
+                      <span className="flex-1 truncate">{c.name}</span>
+                      <span
+                        className={cn(
+                          "text-xs tabular-nums",
+                          isSelected ? "text-indigo-500" : "text-gray-400",
+                        )}
+                      >
+                        {c.code}
+                      </span>
+                      {isSelected && (
+                        <Check className="size-4 text-indigo-500" strokeWidth={2.5} />
+                      )}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    registryCliName: "phone-input",
+    props: [
+      { name: "defaultCountry", type: "string", description: "ISO 3166-1 alpha-2 code for the initially selected country.", defaultValue: "US" },
+      { name: "placeholder", type: "string", description: "Placeholder text shown in the phone number input.", defaultValue: "Phone number" },
+      { name: "label", type: "string", description: "Optional label text displayed above the input." },
+      { name: "minDigits", type: "number", description: "Minimum digits required for validation.", defaultValue: "7" },
+      { name: "onChange", type: "(value: PhoneInputValue) => void", description: "Callback fired when the phone number or country changes." },
+      { name: "className", type: "string", description: "Optional CSS classes to override wrapper styling." }
+    ]
+  },
+  {
     slug: "hero-aurora-spotlight",
     name: "Aurora Hero Spotlight",
     description: "Cursor-reactive spotlight layered over an aurora field for launch heroes.",
@@ -2452,6 +2838,1518 @@ export default function Page() {
       },
     ],
     tailwindSource: tw,
+  },
+  {
+    slug: "animated-select-headline",
+    name: "Animated Select Headline",
+    description: "A cycling word headline where each active word is highlighted with a Figma-style selection rectangle — thin border with corner handles — using blur-fade transitions.",
+    categorySlug: "motion-effects",
+    tags: ["headline", "text", "animation", "cycling", "selection", "framer-motion", "hero", "blur"],
+    premium: false,
+    trendingScore: 188,
+    createdAt: "2026-05-16T00:00:00.000Z",
+    animationKinds: ["spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewAnimatedSelectHeadline,
+    reactSource: `"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export interface AnimatedSelectHeadlineProps {
+  words?: string[];
+  prefix?: string;
+  suffix?: string;
+  interval?: number;
+  className?: string;
+  headingClassName?: string;
+}
+
+const ACCENT_GRADIENTS = [
+  "bg-gradient-to-r from-cyan-400 to-emerald-500 bg-clip-text text-transparent",
+  "bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent",
+];
+
+export function AnimatedSelectHeadline({
+  words = ["warp speed", "record time", "pure flow", "light speed"],
+  prefix = "Build amazing websites at",
+  suffix,
+  interval = 2500,
+  className,
+  headingClassName,
+}: AnimatedSelectHeadlineProps) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setIndex((i) => (i + 1) % words.length), interval);
+    return () => clearInterval(id);
+  }, [words.length, interval]);
+
+  const accentStart = Math.max(words.length - 2, 0);
+  const isAccent = index >= accentStart;
+  const accentClass = isAccent ? ACCENT_GRADIENTS[index - accentStart] : undefined;
+
+  return (
+    <div className={cn("text-center", className)}>
+      <h2
+        className={cn(
+          "text-4xl font-bold leading-tight tracking-tight text-gray-950 sm:text-5xl",
+          headingClassName,
+        )}
+      >
+        {prefix && <>{prefix} </>}
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={index}
+            initial={{ opacity: 0, filter: "blur(8px)", y: 8 }}
+            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            exit={{ opacity: 0, filter: "blur(8px)", y: -8 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={cn("relative inline-block font-bold", accentClass)}
+          >
+            {words[index]}
+          </motion.span>
+        </AnimatePresence>
+        {suffix && <> {suffix}</>}
+      </h2>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "words", type: "string[]", description: "Array of words or phrases to cycle through", defaultValue: '["warp speed", "record time", "pure flow", "light speed"]' },
+      { name: "prefix", type: "string", description: "Static text displayed before the animated word", defaultValue: '"Build amazing websites at"' },
+      { name: "suffix", type: "string | undefined", description: "Optional static text displayed after the animated word" },
+      { name: "interval", type: "number", description: "Milliseconds between each word transition", defaultValue: "2500" },
+      { name: "className", type: "string | undefined", description: "Additional classes applied to the wrapper div" },
+      { name: "headingClassName", type: "string | undefined", description: "Additional classes applied to the h2 heading element" },
+    ],
+  },
+  {
+    slug: "warp-speed-card",
+    name: "Warp Speed Card",
+    description: "A focused warp-speed effect — hover a single phrase to reveal a dark space scene with streaking beams confined to the text's bounding box. The text itself stays static; the effect lives entirely behind it.",
+    categorySlug: "motion-effects",
+    tags: ["hover", "reveal", "beams", "space", "warp", "framer-motion", "card", "background", "text"],
+    premium: false,
+    trendingScore: 210,
+    createdAt: "2026-05-16T00:00:00.000Z",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewWarpSpeedCard,
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+const BEAMS = [
+  { y: "8%",  length: 60,  thickness: 1, opacity: 0.9,  delay: 0,    duration: 0.46 },
+  { y: "20%", length: 95,  thickness: 1, opacity: 0.55, delay: 0.1,  duration: 0.7  },
+  { y: "30%", length: 45,  thickness: 1, opacity: 1.0,  delay: 0.04, duration: 0.4  },
+  { y: "42%", length: 115, thickness: 2, opacity: 0.42, delay: 0.18, duration: 0.86 },
+  { y: "55%", length: 65,  thickness: 1, opacity: 0.85, delay: 0.08, duration: 0.48 },
+  { y: "66%", length: 100, thickness: 1, opacity: 0.5,  delay: 0.22, duration: 0.78 },
+  { y: "78%", length: 50,  thickness: 1, opacity: 0.92, delay: 0.12, duration: 0.44 },
+  { y: "90%", length: 85,  thickness: 2, opacity: 0.6,  delay: 0.06, duration: 0.66 },
+] as const;
+
+const STARS = [
+  { x: 14, y: 22, r: 1,   delay: 0.1 },
+  { x: 36, y: 62, r: 1,   delay: 0.4 },
+  { x: 58, y: 16, r: 1.5, delay: 0.7 },
+  { x: 76, y: 76, r: 1,   delay: 0.2 },
+  { x: 50, y: 45, r: 1,   delay: 0.55 },
+  { x: 88, y: 38, r: 1,   delay: 0.35 },
+] as const;
+
+export interface WarpSpeedCardProps {
+  children: React.ReactNode;
+  className?: string;
+  contentClassName?: string;
+}
+
+export function WarpSpeedCard({ children, className, contentClassName }: WarpSpeedCardProps) {
+  return (
+    <div className={cn("relative overflow-hidden rounded-2xl bg-white", className)}>
+      <div className={cn("relative", contentClassName)}>{children}</div>
+    </div>
+  );
+}
+
+export interface WarpTextTriggerProps {
+  children: React.ReactNode;
+  className?: string;
+  beamColor?: string;
+}
+
+export function WarpTextTrigger({
+  children,
+  className,
+  beamColor = "255,255,255",
+}: WarpTextTriggerProps) {
+  const [hovered, setHovered] = useState(false);
+  const handleBorder = hovered ? "rgba(148,163,184,0.8)" : "rgb(59,130,246)";
+  const handleFill = hovered ? "rgb(24,24,27)" : "white";
+  const boxBorder = hovered ? "rgba(148,163,184,0.5)" : "rgba(59,130,246,0.5)";
+
+  return (
+    <span
+      className={cn("relative inline-block cursor-default select-none align-baseline", className)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Confined warp scene — clipped to the text box */}
+      <span className="pointer-events-none absolute -inset-1 overflow-hidden" aria-hidden>
+        <motion.span
+          className="absolute inset-0 block bg-zinc-950"
+          animate={{ opacity: hovered ? 1 : 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        />
+        {STARS.map((s, i) => (
+          <motion.span
+            key={\`s-\${i}\`}
+            className="absolute block rounded-full bg-white"
+            style={{ left: \`\${s.x}%\`, top: \`\${s.y}%\`, width: s.r, height: s.r }}
+            animate={hovered ? { opacity: [0, 1, 0.3, 1, 0] } : { opacity: 0 }}
+            transition={hovered ? { duration: 2.6, delay: s.delay, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
+          />
+        ))}
+        {BEAMS.map((beam, i) => (
+          <motion.span
+            key={\`b-\${i}\`}
+            className="absolute block"
+            style={{
+              left: 0,
+              top: beam.y,
+              height: beam.thickness,
+              width: beam.length,
+              background: \`linear-gradient(90deg, transparent 0%, rgba(\${beamColor},0.75) 38%, rgba(\${beamColor},1) 50%, rgba(\${beamColor},0.75) 62%, transparent 100%)\`,
+            }}
+            initial={{ x: -160, opacity: 0 }}
+            animate={hovered ? { x: [-160, 700], opacity: [0, beam.opacity, beam.opacity, 0] } : { x: -160, opacity: 0 }}
+            transition={hovered ? {
+              duration: beam.duration, delay: beam.delay, repeat: Infinity,
+              ease: [0.18, 0.52, 0.82, 1], times: [0, 0.08, 0.92, 1],
+            } : { duration: 0.2 }}
+          />
+        ))}
+      </span>
+
+      {/* Static text — color flips on hover so it stays legible on dark bg */}
+      <motion.span
+        className="relative inline-block px-0.5"
+        animate={{ color: hovered ? "rgb(255,255,255)" : "rgb(17,24,39)" }}
+        transition={{ duration: 0.3 }}
+      >
+        {children}
+      </motion.span>
+
+      {/* Figma-style selection handles */}
+      <span className="pointer-events-none absolute -inset-1" aria-hidden>
+        <span className="absolute inset-0 border" style={{ borderColor: boxBorder }} />
+        <span className="absolute -top-0.75 -left-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
+        <span className="absolute -top-0.75 -right-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
+        <span className="absolute -bottom-0.75 -left-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
+        <span className="absolute -bottom-0.75 -right-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
+      </span>
+    </span>
+  );
+}
+
+// Usage example
+export default function Demo() {
+  return (
+    <WarpSpeedCard className="border border-gray-200 shadow-sm">
+      <div className="px-10 py-14 text-center">
+        <h2 className="text-5xl font-bold leading-tight tracking-tight text-gray-950">
+          Build amazing websites
+          <br />
+          at <WarpTextTrigger>warp speed</WarpTextTrigger>
+        </h2>
+      </div>
+    </WarpSpeedCard>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "children", type: "ReactNode", description: "Card content. Place a <WarpTextTrigger>phrase</WarpTextTrigger> inside to enable the inline warp effect on hover." },
+      { name: "className", type: "string | undefined", description: "Additional classes applied to the card root element" },
+      { name: "contentClassName", type: "string | undefined", description: "Additional classes applied to the inner content wrapper" },
+    ],
+  },
+  {
+    slug: "circular-carousel",
+    name: "Circular Carousel",
+    description: "An animated orbital carousel with smooth active-card transitions.",
+    categorySlug: "cards",
+    tags: ["carousel", "circular", "orbital", "cards", "framer-motion", "animation"],
+    premium: false,
+    trendingScore: 85,
+    createdAt: "2026-05-16T00:00:00.000Z",
+    animationKinds: ["spring", "hover"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewCircularCarousel,
+    reactSource: `"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export interface CarouselItem {
+  id: string;
+  title: string;
+  description: string;
+  tag?: string;
+}
+
+export interface CircularCarouselProps {
+  items: CarouselItem[];
+  activeIndex?: number;
+  onActiveChange?: (index: number) => void;
+  autoPlay?: boolean;
+  autoPlayInterval?: number;
+  className?: string;
+}
+
+const VISIBLE_COUNT = 5;
+const RADIUS_X = 220;
+const RADIUS_Y = 100;
+
+function getItemPosition(index: number, activeIndex: number, total: number) {
+  const offset = index - activeIndex;
+  const half = Math.floor(VISIBLE_COUNT / 2);
+  let adjustedOffset = offset;
+
+  if (offset > half) adjustedOffset = offset - total;
+  if (offset < -half) adjustedOffset = offset + total;
+
+  if (Math.abs(adjustedOffset) > half * 2) return null;
+
+  const angle = (adjustedOffset / VISIBLE_COUNT) * Math.PI;
+  const x = Math.sin(angle) * RADIUS_X;
+  const y = -Math.cos(angle) * RADIUS_Y;
+
+  const distance = Math.abs(adjustedOffset);
+  const maxDistance = half + 1;
+  const scale = Math.max(0, 1 - (distance / maxDistance) * 0.3);
+  const opacity = Math.max(0.3, 1 - (distance / maxDistance) * 0.7);
+  const zIndex = VISIBLE_COUNT - distance;
+
+  return { x, y, scale, opacity, zIndex, adjustedOffset };
+}
+
+export function CircularCarousel({
+  items,
+  activeIndex: controlledIndex,
+  onActiveChange,
+  autoPlay = true,
+  autoPlayInterval = 4000,
+  className,
+}: CircularCarouselProps) {
+  const [internalIndex, setInternalIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const activeIndex = controlledIndex ?? internalIndex;
+  const total = items.length;
+
+  const goTo = useCallback(
+    (index: number) => {
+      const newIndex = ((index % total) + total) % total;
+      if (controlledIndex === undefined) {
+        setInternalIndex(newIndex);
+      }
+      onActiveChange?.(newIndex);
+    },
+    [total, controlledIndex, onActiveChange],
+  );
+
+  const next = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
+  const prev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+
+  useEffect(() => {
+    if (!autoPlay || isHovered || isFocused) return;
+    intervalRef.current = setInterval(next, autoPlayInterval);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [autoPlay, autoPlayInterval, isHovered, isFocused, next]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+    };
+    const el = containerRef.current;
+    el?.addEventListener("keydown", handler);
+    return () => el?.removeEventListener("keydown", handler);
+  }, [next, prev]);
+
+  const activeItem = items[activeIndex];
+
+  return (
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      role="region"
+      aria-label="Circular carousel"
+      aria-roledescription="carousel"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      className={cn(
+        "relative flex flex-col items-center justify-center gap-8 outline-none",
+        className,
+      )}
+    >
+      {/* Circular track */}
+      <div className="relative h-[280px] w-full max-w-lg">
+        <AnimatePresence mode="popLayout">
+          {items.map((item, i) => {
+            const pos = getItemPosition(i, activeIndex, total);
+            if (!pos) return null;
+
+            const isActive = i === activeIndex;
+
+            return (
+              <motion.button
+                key={item.id}
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{
+                  x: pos.x,
+                  y: pos.y,
+                  scale: pos.scale,
+                  opacity: pos.opacity,
+                  zIndex: pos.zIndex,
+                }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{
+                  duration: 0.65,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                onClick={() => goTo(i)}
+                aria-label={item.title}
+                aria-selected={isActive}
+                role="option"
+                className={cn(
+                  "absolute left-1/2 top-1/2 flex h-32 w-48 -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col items-start justify-between rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-800/90 to-zinc-900/90 p-4 backdrop-blur-sm transition-shadow duration-300",
+                  isActive
+                    ? "shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]"
+                    : "shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.4)]",
+                )}
+                style={{ transformOrigin: "center center" }}
+              >
+                {item.tag && (
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/70">
+                    {item.tag}
+                  </span>
+                )}
+                <div className="w-full">
+                  <h3 className={cn(
+                    "font-semibold leading-tight transition-colors duration-300",
+                    isActive ? "text-white text-base" : "text-white/80 text-sm"
+                  )}>
+                    {item.title}
+                  </h3>
+                  <p className={cn(
+                    "mt-1 line-clamp-2 text-xs leading-relaxed transition-colors duration-300",
+                    isActive ? "text-white/60" : "text-white/40"
+                  )}>
+                    {item.description}
+                  </p>
+                </div>
+              </motion.button>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Center content */}
+      <motion.div
+        key={activeItem.id}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
+      >
+        <span className="text-5xl font-bold tracking-tight text-white/90">
+          {String(activeIndex + 1).padStart(2, "0")}
+        </span>
+        <span className="mt-1 text-xs text-white/40">
+          of {String(total).padStart(2, "0")}
+        </span>
+      </motion.div>
+
+      {/* Controls */}
+      <div className="flex items-center gap-4">
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={prev}
+          aria-label="Previous item"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/30"
+        >
+          <ChevronLeft className="size-5" />
+        </motion.button>
+
+        {/* Dot indicators */}
+        <div className="flex items-center gap-1.5" role="tablist">
+          {items.map((_, i) => (
+            <button
+              key={i}
+              role="tab"
+              aria-selected={i === activeIndex}
+              onClick={() => goTo(i)}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                i === activeIndex
+                  ? "w-6 bg-white/80"
+                  : "w-1.5 bg-white/20 hover:bg-white/40",
+              )}
+              aria-label={\`Go to item \${i + 1}\`}
+            />
+          ))}
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={next}
+          aria-label="Next item"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/30"
+        >
+          <ChevronRight className="size-5" />
+        </motion.button>
+      </div>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "items", type: "CarouselItem[]", description: "Array of carousel items with id, title, description, and optional tag." },
+      { name: "activeIndex", type: "number | undefined", description: "Controlled active item index." },
+      { name: "onActiveChange", type: "(index: number) => void", description: "Callback fired when the active item changes." },
+      { name: "autoPlay", type: "boolean", description: "Enable automatic rotation.", defaultValue: "true" },
+      { name: "autoPlayInterval", type: "number", description: "Milliseconds between auto-rotation.", defaultValue: "4000" },
+      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper." },
+    ],
+  },
+  {
+    slug: "chat-messages",
+    name: "Chat Messages",
+    description: "Animated chat message bubbles with typing indicators and sequential reveal.",
+    categorySlug: "ai-components",
+    tags: ["chat", "messages", "ai", "conversation", "typing", "animation", "framer-motion"],
+    premium: false,
+    trendingScore: 92,
+    createdAt: "2026-05-16T00:00:00.000Z",
+    animationKinds: ["spring", "hover"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewChatMessages,
+    reactSource: `"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { Send, RotateCcw, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export interface ChatMessage {
+  id: string;
+  sender: "user" | "assistant";
+  content: string;
+  timestamp?: string;
+}
+
+export interface ChatMessagesProps {
+  messages?: ChatMessage[];
+  autoPlay?: boolean;
+  autoPlayDelay?: number;
+  typingDuration?: number;
+  showReplay?: boolean;
+  interactive?: boolean;
+  className?: string;
+}
+
+const DEFAULT_MESSAGES: ChatMessage[] = [
+  { id: "1", sender: "assistant", content: "Hello! I'm your Nexus AI assistant. How can I help you build something amazing today?" },
+  { id: "2", sender: "user", content: "I want to create a beautiful landing page for my SaaS product." },
+  { id: "3", sender: "assistant", content: "Great choice! Nexus UI has everything you need — animated components, premium styling, and easy integration. What feature would you like to showcase first?" },
+  { id: "4", sender: "user", content: "I need something that will impress investors during pitch meetings." },
+  { id: "5", sender: "assistant", content: "Perfect. I'd recommend our Hero Aurora Spotlight combined with the Cinematic Logo Cloud. They create a stunning first impression that showcases both innovation and credibility." },
+  { id: "6", sender: "user", content: "Can I see how they look together?" },
+  { id: "7", sender: "assistant", content: "Absolutely. Click any component in the sidebar to preview it live, then copy the code directly into your project. No complex setup required." },
+];
+
+function TypingIndicator({ className }: { className?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-2xl rounded-tl-md border border-white/10 bg-zinc-800/90 px-4 py-3 backdrop-blur-sm",
+        className,
+      )}
+    >
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="h-2 w-2 rounded-full bg-white/60"
+          animate={{ opacity: [0.4, 1, 0.4], y: [0, -4, 0] }}
+          transition={{
+            duration: 0.8,
+            repeat: Infinity,
+            delay: i * 0.15,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </motion.div>
+  );
+}
+
+function MessageBubble({
+  message,
+  isLast,
+}: {
+  message: ChatMessage;
+  isLast?: boolean;
+}) {
+  const isUser = message.sender === "user";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.96, x: isUser ? 20 : -20 }}
+      animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
+      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "flex w-full",
+        isUser ? "justify-end" : "justify-start",
+      )}
+    >
+      <div className={cn("flex items-end gap-2", isUser && "flex-row-reverse")}>
+        {!isUser && (
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600">
+            <Sparkles className="size-4 text-white" />
+          </div>
+        )}
+        <motion.div
+          layout
+          className={cn(
+            "max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+            isUser
+              ? "rounded-tr-md bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_8px_24px_-4px_rgba(99,102,241,0.4)]"
+              : "rounded-tl-md border border-white/10 bg-zinc-800/90 text-zinc-100 backdrop-blur-sm shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)]",
+          )}
+          whileHover={{ scale: 1.01, y: -1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+        >
+          {message.content}
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+export function ChatMessages({
+  messages = DEFAULT_MESSAGES,
+  autoPlay = true,
+  autoPlayDelay = 1800,
+  typingDuration = 1400,
+  showReplay = true,
+  interactive = false,
+  className,
+}: ChatMessagesProps) {
+  const [visibleCount, setVisibleCount] = useState(autoPlay ? 0 : messages.length);
+  const [isTyping, setIsTyping] = useState(false);
+  const [inputValue, setInputValue] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(messages);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isAutoPlaying = useRef(false);
+
+  const scrollToBottom = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, []);
+
+  const revealNext = useCallback(
+    async (index: number) => {
+      if (index >= chatMessages.length) {
+        isAutoPlaying.current = false;
+        return;
+      }
+
+      const message = chatMessages[index];
+
+      if (message.sender === "assistant") {
+        setIsTyping(true);
+        await new Promise((r) => setTimeout(r, typingDuration));
+        setIsTyping(false);
+      }
+
+      setVisibleCount(index + 1);
+      await new Promise((r) => setTimeout(r, 100));
+      scrollToBottom();
+
+      await new Promise((r) => setTimeout(r, autoPlayDelay - (message.sender === "assistant" ? typingDuration : 0) - 100));
+
+      if (isAutoPlaying.current) {
+        revealNext(index + 1);
+      }
+    },
+    [chatMessages, autoPlayDelay, typingDuration, scrollToBottom],
+  );
+
+  const replay = useCallback(() => {
+    setVisibleCount(0);
+    setChatMessages(messages);
+    isAutoPlaying.current = true;
+    setTimeout(() => revealNext(0), 100);
+  }, [messages, revealNext]);
+
+  useEffect(() => {
+    setChatMessages(messages);
+    if (autoPlay) {
+      setVisibleCount(0);
+      isAutoPlaying.current = true;
+      const timer = setTimeout(() => revealNext(0), 500);
+      return () => {
+        clearTimeout(timer);
+        isAutoPlaying.current = false;
+      };
+    } else {
+      setVisibleCount(messages.length);
+    }
+  }, [messages, autoPlay, revealNext]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [visibleCount, isTyping, scrollToBottom]);
+
+  const handleSend = useCallback(() => {
+    if (!inputValue.trim() || !interactive) return;
+
+    const newMessage: ChatMessage = {
+      id: \`user-\${Date.now()}\`,
+      sender: "user",
+      content: inputValue.trim(),
+    };
+
+    setChatMessages((prev) => [...prev, newMessage]);
+    setInputValue("");
+    setVisibleCount((prev) => prev + 1);
+
+    setTimeout(() => {
+      const assistantReply: ChatMessage = {
+        id: \`assistant-\${Date.now()}\`,
+        sender: "assistant",
+        content: "That's a great question! Let me help you explore the best options for your use case.",
+      };
+      setChatMessages((prev) => [...prev, assistantReply]);
+      setVisibleCount((prev) => prev + 1);
+    }, typingDuration + 500);
+  }, [inputValue, interactive, typingDuration]);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  return (
+    <div
+      className={cn(
+        "relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)]",
+        className,
+      )}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600">
+            <Sparkles className="size-4 text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-medium text-white">Nexus AI</h3>
+            <p className="text-xs text-white/40">Always here to help</p>
+          </div>
+        </div>
+        {showReplay && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={replay}
+            aria-label="Replay conversation"
+            className="flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-white/60 transition-colors hover:bg-white/10 hover:text-white"
+          >
+            <RotateCcw className="size-3.5" />
+            Replay
+          </motion.button>
+        )}
+      </div>
+
+      {/* Messages */}
+      <div
+        ref={scrollRef}
+        role="log"
+        aria-label="Chat messages"
+        aria-live="polite"
+        className="flex-1 space-y-3 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+      >
+        {chatMessages.slice(0, visibleCount).map((message, i) => (
+          <MessageBubble
+            key={message.id}
+            message={message}
+            isLast={i === visibleCount - 1}
+          />
+        ))}
+
+        <AnimatePresence>
+          {isTyping && <TypingIndicator />}
+        </AnimatePresence>
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-white/5 p-3">
+        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2 backdrop-blur-sm focus-within:border-white/20 focus-within:bg-zinc-800/70">
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={!interactive}
+            placeholder={interactive ? "Ask Nexus AI..." : "Demo mode - replay to watch again"}
+            aria-label={interactive ? "Type your message" : "Chat input (demo mode)"}
+            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed"
+          />
+          <motion.button
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleSend}
+            disabled={!interactive || !inputValue.trim()}
+            aria-label="Send message"
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
+              interactive && inputValue.trim()
+                ? "bg-indigo-600 text-white hover:bg-indigo-500"
+                : "bg-white/5 text-white/30",
+            )}
+          >
+            <Send className="size-4" />
+          </motion.button>
+        </div>
+      </div>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "messages", type: "ChatMessage[]", description: "Array of chat messages with id, sender, content, and optional timestamp.", defaultValue: "7 built-in messages" },
+      { name: "autoPlay", type: "boolean", description: "Automatically play the conversation on mount.", defaultValue: "true" },
+      { name: "autoPlayDelay", type: "number", description: "Delay between messages in milliseconds.", defaultValue: "1800" },
+      { name: "typingDuration", type: "number", description: "How long the typing indicator shows before assistant replies.", defaultValue: "1400" },
+      { name: "showReplay", type: "boolean", description: "Show the replay button to restart the animation.", defaultValue: "true" },
+      { name: "interactive", type: "boolean", description: "Allow user to type and send messages.", defaultValue: "false" },
+      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper." },
+    ],
+  },
+  {
+    slug: "shader-flow",
+    name: "Shader Flow",
+    description: "A soft animated shader-style background with flowing gradient motion.",
+    categorySlug: "background-effects",
+    tags: ["background", "shader", "gradient", "animation", "flowing", "blobs", "framer-motion"],
+    premium: false,
+    trendingScore: 88,
+    createdAt: "2026-05-16T00:00:00.000Z",
+    animationKinds: ["gradient", "hover"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewShaderFlow,
+    reactSource: `"use client";
+
+import { useRef, useState, type ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export interface ShaderFlowProps {
+  children?: ReactNode;
+  className?: string;
+  showContent?: boolean;
+  cursorReactive?: boolean;
+  intensity?: "low" | "medium" | "high";
+}
+
+const blobVariants = {
+  animate: {
+    x: ["-10%", "10%", "-10%"],
+    y: ["0%", "8%", "0%"],
+    scale: [1, 1.15, 1],
+    opacity: [0.45, 0.7, 0.45],
+    transition: {
+      duration: 14,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+const blob2Variants = {
+  animate: {
+    x: ["12%", "-8%", "12%"],
+    y: ["10%", "-6%", "10%"],
+    scale: [1.1, 0.95, 1.1],
+    opacity: [0.35, 0.6, 0.35],
+    transition: {
+      duration: 16,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+const blob3Variants = {
+  animate: {
+    rotate: [0, 8, 0],
+    scale: [1, 1.08, 1],
+    opacity: [0.3, 0.5, 0.3],
+    transition: {
+      duration: 20,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+const waveVariants = {
+  animate: {
+    x: ["-5%", "5%", "-5%"],
+    y: ["-3%", "3%", "-3%"],
+    scale: [1, 1.05, 1],
+    opacity: [0.25, 0.4, 0.25],
+    transition: {
+      duration: 22,
+      repeat: Infinity,
+      ease: "easeInOut",
+    },
+  },
+};
+
+function NoiseOverlay({ className }: { className?: string }) {
+  return (
+    <div
+      className={cn(
+        "absolute inset-0 opacity-[0.015] pointer-events-none",
+        "bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=')]",
+        className,
+      )}
+      aria-hidden
+    />
+  );
+}
+
+function BlobLayer({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <motion.div
+      variants={blobVariants}
+      animate="animate"
+      className={cn(
+        "absolute rounded-full bg-gradient-to-br from-indigo-500/30 via-violet-500/20 to-fuchsia-500/30 blur-[100px]",
+        className,
+      )}
+      style={style}
+      aria-hidden
+    />
+  );
+}
+
+function Blob2Layer({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <motion.div
+      variants={blob2Variants}
+      animate="animate"
+      className={cn(
+        "absolute rounded-full bg-gradient-to-tr from-cyan-500/25 via-blue-500/20 to-indigo-500/25 blur-[80px]",
+        className,
+      )}
+      style={style}
+      aria-hidden
+    />
+  );
+}
+
+function Blob3Layer({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <motion.div
+      variants={blob3Variants}
+      animate="animate"
+      className={cn(
+        "absolute rounded-full bg-gradient-to-bl from-amber-500/20 via-orange-500/15 to-pink-500/20 blur-[90px]",
+        className,
+      )}
+      style={style}
+      aria-hidden
+    />
+  );
+}
+
+function WaveLayer({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <motion.div
+      variants={waveVariants}
+      animate="animate"
+      className={cn(
+        "absolute rounded-full bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-cyan-500/10 blur-[120px]",
+        className,
+      )}
+      style={style}
+      aria-hidden
+    />
+  );
+}
+
+function ShaderBackground({
+  cursorReactive,
+  intensity = "medium",
+}: {
+  cursorReactive?: boolean;
+  intensity?: "low" | "medium" | "high";
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const reduceMotion = useReducedMotion();
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cursorReactive || !containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    setMousePosition({ x, y });
+  };
+
+  const intensityScale = intensity === "low" ? 0.6 : intensity === "high" ? 1.2 : 1;
+
+  return (
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      className="absolute inset-0 overflow-hidden"
+      aria-hidden
+    >
+      <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950" />
+
+      {!reduceMotion && (
+        <>
+          <BlobLayer
+            className="h-[600px] w-[600px] -top-48 -left-48"
+            style={{
+              transform: cursorReactive
+                ? \`translate(\${mousePosition.x * 30 * intensityScale}px, \${mousePosition.y * 20 * intensityScale}px)\`
+                : undefined,
+            }}
+          />
+          <Blob2Layer
+            className="h-[500px] w-[500px] -top-24 -right-24"
+            style={{
+              transform: cursorReactive
+                ? \`translate(\${mousePosition.x * -25 * intensityScale}px, \${mousePosition.y * 15 * intensityScale}px)\`
+                : undefined,
+            }}
+          />
+          <Blob3Layer
+            className="h-[450px] w-[450px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+            style={{
+              transform: cursorReactive
+                ? \`translate(\${mousePosition.x * 20 * intensityScale}px, \${mousePosition.y * -20 * intensityScale}px)\`
+                : undefined,
+            }}
+          />
+          <WaveLayer
+            className="h-[700px] w-[700px] -bottom-64 -left-32"
+            style={{
+              transform: cursorReactive
+                ? \`translate(\${mousePosition.x * -15 * intensityScale}px, \${mousePosition.y * 25 * intensityScale}px)\`
+                : undefined,
+            }}
+          />
+          <WaveLayer
+            className="h-[550px] w-[550px] top-0 right-0"
+            style={{
+              transform: cursorReactive
+                ? \`translate(\${mousePosition.x * 20 * intensityScale}px, \${mousePosition.y * -15 * intensityScale}px)\`
+                : undefined,
+            }}
+          />
+        </>
+      )}
+
+      {reduceMotion && (
+        <>
+          <div className="absolute h-[600px] w-[600px] -top-48 -left-48 rounded-full bg-gradient-to-br from-indigo-500/20 via-violet-500/15 to-fuchsia-500/20 blur-[100px]" />
+          <div className="absolute h-[500px] w-[500px] -top-24 -right-24 rounded-full bg-gradient-to-tr from-cyan-500/15 via-blue-500/15 to-indigo-500/15 blur-[80px]" />
+          <div className="absolute h-[450px] w-[450px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-bl from-amber-500/15 via-orange-500/10 to-pink-500/15 blur-[90px]" />
+        </>
+      )}
+
+      <NoiseOverlay />
+    </div>
+  );
+}
+
+function ForegroundContent() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="relative z-10 flex flex-col items-center justify-center text-center"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
+          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          New component available
+        </span>
+      </motion.div>
+
+      <motion.h2
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-6 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl"
+      >
+        Build stunning interfaces with{" "}
+        <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+          Nexus UI
+        </span>
+      </motion.h2>
+
+      <motion.p
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-6 max-w-lg text-base text-white/60 sm:text-lg"
+      >
+        Premium animated components built with Framer Motion and Tailwind CSS.
+        Copy, paste, and ship beautiful interfaces in minutes.
+      </motion.p>
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.6, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-10 flex flex-wrap items-center justify-center gap-4"
+      >
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-3 text-sm font-medium text-white shadow-[0_8px_32px_-8px_rgba(99,102,241,0.5)] transition-shadow hover:shadow-[0_12px_40px_-8px_rgba(99,102,241,0.6)]"
+        >
+          Browse components
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.03, y: -1 }}
+          whileTap={{ scale: 0.97 }}
+          className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/10"
+        >
+          View documentation
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export function ShaderFlow({
+  children,
+  className,
+  showContent = true,
+  cursorReactive = true,
+  intensity = "medium",
+}: ShaderFlowProps) {
+  return (
+    <div
+      className={cn(
+        "relative flex min-h-[500px] items-center justify-center overflow-hidden rounded-2xl border border-white/10",
+        className,
+      )}
+    >
+      <ShaderBackground cursorReactive={cursorReactive} intensity={intensity} />
+
+      {showContent ? (
+        children ?? <ForegroundContent />
+      ) : (
+        children
+      )}
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "children", type: "ReactNode", description: "Custom foreground content to display over the shader background.", defaultValue: "Built-in demo content" },
+      { name: "showContent", type: "boolean", description: "Show the default built-in foreground content.", defaultValue: "true" },
+      { name: "cursorReactive", type: "boolean", description: "Enable subtle cursor-reactive movement of background blobs.", defaultValue: "true" },
+      { name: "intensity", type: "\"low\" | \"medium\" | \"high\"", description: "Control the intensity of cursor-reactive movement.", defaultValue: "\"medium\"" },
+      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper." },
+    ],
+  },
+  {
+    slug: "ask-nexus-input",
+    name: "Ask Nexus Input",
+    description: "A bold \"Ask anything\" headline paired with a pill-shaped search input. Placeholders rotate while idle, and on submit the text disintegrates right-to-left into drifting particles — a Thanos-snap dust effect rendered on canvas, finished off with framer-motion polish.",
+    categorySlug: "ai-components",
+    tags: ["ai", "input", "search", "disintegrate", "particles", "thanos", "snap", "canvas", "framer-motion", "placeholder"],
+    premium: true,
+    trendingScore: 260,
+    createdAt: "2026-05-16T00:00:00.000Z",
+    animationKinds: ["spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewAskNexusInput,
+    reactSource: `"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+export interface AskNexusInputProps {
+  title?: string;
+  placeholders?: string[];
+  placeholderInterval?: number;
+  defaultValue?: string;
+  onSubmit?: (value: string) => void;
+  className?: string;
+}
+
+type Phase = "idle" | "disintegrating";
+
+const INPUT_FONT_PX = 14;
+const PARTICLE_RGB = "17,24,39";
+
+const DEFAULT_PLACEHOLDERS = [
+  "Who is Tyler Durden?",
+  "Explain quantum entanglement like I'm five",
+  "Write a haiku about the ocean at midnight",
+  "What's the best stack for a 2026 startup?",
+  "How do I become a 10x designer?",
+];
+
+export function AskNexusInput({
+  title = "Ask Nexus UI Anything",
+  placeholders = DEFAULT_PLACEHOLDERS,
+  placeholderInterval = 2800,
+  defaultValue = "",
+  onSubmit,
+  className,
+}: AskNexusInputProps) {
+  const [value, setValue] = useState(defaultValue);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [snapshot, setSnapshot] = useState("");
+  const [phIndex, setPhIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const activePlaceholder = placeholders[phIndex] ?? "";
+
+  useEffect(() => {
+    if (phase !== "idle" || value || placeholders.length <= 1) return;
+    const id = setInterval(
+      () => setPhIndex((i) => (i + 1) % placeholders.length),
+      placeholderInterval,
+    );
+    return () => clearInterval(id);
+  }, [phase, value, placeholders.length, placeholderInterval]);
+
+  const handleSubmit = (e?: FormEvent) => {
+    e?.preventDefault();
+    if (phase !== "idle") return;
+    const submitted = value.trim() || activePlaceholder.trim();
+    if (!submitted) return;
+    onSubmit?.(submitted);
+    setSnapshot(submitted);
+    setPhase("disintegrating");
+  };
+
+  const handleComplete = useCallback(() => {
+    setSnapshot("");
+    setValue("");
+    setPhase("idle");
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }, []);
+
+  const showPlaceholder = phase === "idle" && !value;
+
+  return (
+    <div className={cn("flex w-full flex-col items-center gap-10 py-12", className)}>
+      <motion.h1
+        initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl md:text-5xl"
+      >
+        {title}
+      </motion.h1>
+
+      <motion.form
+        onSubmit={handleSubmit}
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+        className="w-full max-w-xl"
+      >
+        <motion.div
+          animate={phase === "disintegrating" ? { scale: [1, 0.985, 1] } : { scale: 1 }}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] focus-within:border-gray-300"
+        >
+          <div className="relative h-6 flex-1">
+            <div className="absolute inset-0 overflow-hidden">
+              <input
+                ref={inputRef}
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                disabled={phase !== "idle"}
+                spellCheck={false}
+                className={cn(
+                  "absolute inset-0 w-full bg-transparent text-sm text-gray-900 outline-none transition-opacity duration-300",
+                  phase === "disintegrating" && "opacity-0",
+                )}
+              />
+              <AnimatePresence mode="wait">
+                {showPlaceholder && (
+                  <motion.span
+                    key={phIndex}
+                    initial={{ y: 10, opacity: 0, filter: "blur(4px)" }}
+                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                    exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 truncate text-sm text-gray-400"
+                  >
+                    {activePlaceholder}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+            {phase === "disintegrating" && (
+              <DisintegratingText text={snapshot} onComplete={handleComplete} />
+            )}
+          </div>
+
+          <motion.button
+            type="submit"
+            aria-label="Ask"
+            disabled={phase !== "idle"}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 420, damping: 18 }}
+            className="grid size-8 shrink-0 place-items-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 disabled:opacity-60"
+          >
+            <ArrowRight className="size-4" strokeWidth={2.25} />
+          </motion.button>
+        </motion.div>
+      </motion.form>
+    </div>
+  );
+}
+
+type Particle = {
+  ox: number; oy: number;
+  vx: number; vy: number;
+  delay: number; life: number; size: number;
+};
+
+const RIGHT_OVERHANG_PX = 90;
+const CHAR_STEP_MS = 50;
+const CHAR_JITTER_MS = 22;
+
+function DisintegratingText({ text, onComplete }: { text: string; onComplete: () => void }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const parent = canvas?.parentElement;
+    if (!canvas || !parent) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const baseW = Math.max(parent.clientWidth, 1);
+    const H = Math.max(parent.clientHeight, 1);
+    const W = baseW + RIGHT_OVERHANG_PX;
+
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = \`\${W}px\`;
+    canvas.style.height = \`\${H}px\`;
+    ctx.scale(dpr, dpr);
+
+    ctx.font = \`\${INPUT_FONT_PX}px ui-sans-serif, system-ui, -apple-system, sans-serif\`;
+    ctx.fillStyle = \`rgb(\${PARTICLE_RGB})\`;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "left";
+    ctx.fillText(text, 0, H / 2);
+
+    // Map x-ranges to character indexes so the wave can snap one character at a time.
+    const chars = Array.from(text);
+    const charBounds: { start: number; end: number }[] = [];
+    let cursor = 0;
+    for (const ch of chars) {
+      const w = ctx.measureText(ch).width;
+      charBounds.push({ start: cursor, end: cursor + w });
+      cursor += w;
+    }
+    const totalChars = chars.length;
+    const charDelay = (charIdx: number) => {
+      const fromRight = totalChars - 1 - charIdx;
+      return fromRight * CHAR_STEP_MS + Math.random() * CHAR_JITTER_MS;
+    };
+    const findCharIdx = (lx: number) => {
+      let lo = 0, hi = charBounds.length - 1;
+      while (lo <= hi) {
+        const mid = (lo + hi) >> 1;
+        const b = charBounds[mid];
+        if (lx < b.start) hi = mid - 1;
+        else if (lx >= b.end) lo = mid + 1;
+        else return mid;
+      }
+      return Math.min(Math.max(lo, 0), charBounds.length - 1);
+    };
+
+    const sampleW = baseW * dpr;
+    const img = ctx.getImageData(0, 0, sampleW, H * dpr);
+    const particles: Particle[] = [];
+    const stride = dpr;
+
+    for (let y = 0; y < H * dpr; y += stride) {
+      for (let x = 0; x < sampleW; x += stride) {
+        const i = (y * sampleW + x) * 4;
+        if (img.data[i + 3] > 110) {
+          const lx = x / dpr;
+          const ly = y / dpr;
+          const charIdx = findCharIdx(lx);
+
+          const angle = (Math.random() - 0.5) * Math.PI * 0.6;
+          const speed = 0.18 + Math.random() * 0.55;
+          const vx = Math.cos(angle) * speed + 0.12;
+          const vy = Math.sin(angle) * speed * 0.55;
+
+          const sizeRoll = Math.random();
+          const size = sizeRoll < 0.65 ? 1 : sizeRoll < 0.92 ? 1.4 : 1.8;
+
+          particles.push({
+            ox: lx, oy: ly,
+            vx, vy,
+            delay: charDelay(charIdx),
+            life: 480 + Math.random() * 320,
+            size,
+          });
+        }
+      }
+    }
+    ctx.clearRect(0, 0, W, H);
+
+    let rafId = 0;
+    let start = 0;
+    let cancelled = false;
+
+    const frame = (now: number) => {
+      if (cancelled) return;
+      if (!start) start = now;
+      const elapsed = now - start;
+      ctx.clearRect(0, 0, W, H);
+      let aliveCount = 0;
+
+      for (const p of particles) {
+        if (elapsed < p.delay) {
+          const ttd = p.delay - elapsed;
+          if (ttd < 80) {
+            const tension = 1 - ttd / 80;
+            const jx = (Math.random() - 0.5) * 0.5 * tension;
+            const jy = (Math.random() - 0.5) * 0.5 * tension;
+            ctx.fillStyle = \`rgb(\${PARTICLE_RGB})\`;
+            ctx.fillRect(p.ox + jx, p.oy + jy, p.size, p.size);
+          } else {
+            ctx.fillStyle = \`rgb(\${PARTICLE_RGB})\`;
+            ctx.fillRect(p.ox, p.oy, p.size, p.size);
+          }
+          aliveCount++;
+          continue;
+        }
+        const t = elapsed - p.delay;
+        if (t > p.life) continue;
+        aliveCount++;
+
+        const norm = t / p.life;
+        const motionT = t / 16;
+        const wobble = Math.sin((p.ox + motionT) * 0.22) * 0.4;
+        const x = p.ox + p.vx * motionT + wobble * norm;
+        const y = p.oy + p.vy * motionT;
+        const opacity = Math.cos((norm * Math.PI) / 2);
+        ctx.fillStyle = \`rgba(\${PARTICLE_RGB},\${opacity.toFixed(3)})\`;
+        ctx.fillRect(x, y, p.size, p.size);
+      }
+
+      if (aliveCount === 0) {
+        onCompleteRef.current();
+        return;
+      }
+      rafId = requestAnimationFrame(frame);
+    };
+
+    rafId = requestAnimationFrame(frame);
+    return () => { cancelled = true; cancelAnimationFrame(rafId); };
+  }, [text]);
+
+  return <canvas ref={canvasRef} className="pointer-events-none absolute left-0 top-0" aria-hidden />;
+}
+
+// Usage
+export default function Demo() {
+  return (
+    <div className="flex min-h-[480px] w-full items-center justify-center bg-white px-8">
+      <AskNexusInput />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "title", type: "string", description: "Main headline shown above the input", defaultValue: '"Ask Nexus UI Anything"' },
+      { name: "placeholders", type: "string[]", description: "Rotating placeholder suggestions shown while the input is empty and idle", defaultValue: "5 built-in prompts" },
+      { name: "placeholderInterval", type: "number", description: "Milliseconds between placeholder rotations", defaultValue: "2800" },
+      { name: "defaultValue", type: "string", description: "Initial value of the input", defaultValue: '""' },
+      { name: "onSubmit", type: "(value: string) => void", description: "Fired with the trimmed query (or the current placeholder if the input is empty) the instant the user submits — runs before the disintegration animation starts" },
+      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper" },
+    ],
   },
 ];
 

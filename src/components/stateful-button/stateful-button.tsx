@@ -25,7 +25,7 @@ const sizeClasses: Record<NonNullable<StatefulButtonProps["size"]>, string> = {
 
 export type StatefulButtonProps = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
-  "children" | "onClick"
+  "children" | "onClick" | "onAnimationStart" | "onAnimationEnd" | "onAnimationIteration" | "onDrag" | "onDragEnd" | "onDragStart"
 > & {
   children: React.ReactNode;
   loadingText?: string;
@@ -65,7 +65,7 @@ export function StatefulButton({
   const resetRef = React.useRef<number | null>(null);
 
   const isLoading = phase === "loading";
-  const isDisabled = disabled || isLoading || buttonProps.disabled;
+  const isDisabled = disabled || isLoading;
 
   const clearResetTimer = React.useCallback(() => {
     if (resetRef.current !== null) {

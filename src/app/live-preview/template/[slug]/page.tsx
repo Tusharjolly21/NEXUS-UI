@@ -9,6 +9,8 @@ import { TemplateSceneLoader } from "@/components/templates/template-scene-loade
 import { ThemeReceiver } from "@/components/templates/theme-receiver";
 import { TalentHubPage } from "@/components/templates/talent-hub-page";
 import { SynapseAIPage } from "@/components/templates/synapse-ai-page";
+import { OrionAIPage } from "@/components/templates/orion-ai-ops";
+import { HelixAIPlatformPage } from "@/components/templates/helix-ai-platform";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -42,6 +44,10 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><TalentHubPage /></ThemeReceiver>;
   } else if (tmpl.slug === "synapse-ai-platform") {
     return <ThemeReceiver><SynapseAIPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "orion-ai-ops") {
+    return <ThemeReceiver><OrionAIPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "helix-ai-platform") {
+    return <ThemeReceiver><HelixAIPlatformPage /></ThemeReceiver>;
   }
 
   return (

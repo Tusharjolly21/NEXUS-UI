@@ -4,6 +4,43 @@
   "homepage": "http://127.0.0.1:3000",
   "items": [
     {
+      "name": "cinematic-logo-cloud",
+      "type": "registry:component",
+      "title": "Cinematic Logo Cloud",
+      "description": "A staggered blur-fade entrance animation for brand logos. Uses framer-motion and fully semantic responsive layouts.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cinematic-logo-cloud.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "phone-input",
+      "type": "registry:component",
+      "title": "Phone Input",
+      "description": "A modern animated phone number input with country selector and validation.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/phone-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "hero-aurora-spotlight",
       "type": "registry:component",
       "title": "Aurora Hero Spotlight",
@@ -764,6 +801,117 @@
       "files": [
         {
           "path": "next-ui/expandable-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-select-headline",
+      "type": "registry:component",
+      "title": "Animated Select Headline",
+      "description": "A cycling word headline where each active word is highlighted with a Figma-style selection rectangle — thin border with corner handles — using blur-fade transitions.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/animated-select-headline.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "warp-speed-card",
+      "type": "registry:component",
+      "title": "Warp Speed Card",
+      "description": "A focused warp-speed effect — hover a single phrase to reveal a dark space scene with streaking beams confined to the text's bounding box. The text itself stays static; the effect lives entirely behind it.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/warp-speed-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "circular-carousel",
+      "type": "registry:component",
+      "title": "Circular Carousel",
+      "description": "An animated orbital carousel with smooth active-card transitions.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/circular-carousel.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "chat-messages",
+      "type": "registry:component",
+      "title": "Chat Messages",
+      "description": "Animated chat message bubbles with typing indicators and sequential reveal.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/chat-messages.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "shader-flow",
+      "type": "registry:component",
+      "title": "Shader Flow",
+      "description": "A soft animated shader-style background with flowing gradient motion.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/shader-flow.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "ask-nexus-input",
+      "type": "registry:component",
+      "title": "Ask Nexus Input",
+      "description": "A bold \\",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/ask-nexus-input.tsx",
           "type": "registry:component"
         }
       ]

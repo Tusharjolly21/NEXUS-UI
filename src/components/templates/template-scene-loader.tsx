@@ -49,6 +49,16 @@ const SceneSynapseAILazy = React.lazy(() =>
     default: m.SceneSynapseAI,
   })),
 );
+const SceneOrionAILazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/orion-ai-scene").then((m) => ({
+    default: m.SceneOrionAI,
+  })),
+);
+const SceneHelixAILazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/helix-ai-scene").then((m) => ({
+    default: m.SceneHelixAI,
+  })),
+);
 
 const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   "saas-launch-aurora": SceneSaaSLaunchLazy,
@@ -62,6 +72,8 @@ const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType
   "nova-landing-page": SceneNovaLandingPageLazy,
   "talent-hub-landing": SceneTalentHubLazy,
   "synapse-ai-platform": SceneSynapseAILazy,
+  "orion-ai-ops": SceneOrionAILazy,
+  "helix-ai-platform": SceneHelixAILazy,
 };
 
 export function TemplateSceneLoader({ slug }: { slug: string }) {

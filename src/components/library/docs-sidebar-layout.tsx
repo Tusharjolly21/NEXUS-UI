@@ -26,7 +26,7 @@ export function DocsSidebarLayout({ children }: { children: React.ReactNode }) {
       <div className="flex min-h-[calc(100dvh-4rem)] w-full flex-col bg-background dark:bg-zinc-950 lg:flex-row">
         <aside className="relative z-10 hidden w-[min(100%,260px)] shrink-0 flex-col border-border bg-background dark:bg-zinc-950 lg:flex lg:border-r">
           <div className="sticky top-16 flex max-h-[calc(100dvh-4rem)] flex-col">
-            <LibraryExplorerSidebarDesktopChrome subtitle="Docs & setup" />
+            <LibraryExplorerSidebarDesktopChrome />
           </div>
         </aside>
 

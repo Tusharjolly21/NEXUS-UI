@@ -34,6 +34,13 @@ import { Compare } from "@/components/compare";
 import { ExpandableCards } from "@/components/expandable-cards";
 import type { CardItem } from "@/components/expandable-cards";
 import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
+import { AnimatedSelectHeadline } from "@/components/animated-select-headline";
+import { WarpSpeedCard, WarpTextTrigger } from "@/components/warp-speed-card";
+import { AskNexusInput } from "@/components/ask-nexus-input";
+import { PhoneInput } from "@/components/phone-input";
+import { CircularCarousel } from "@/components/circular-carousel";
+import { ChatMessages } from "@/components/chat-messages";
+import { ShaderFlow } from "@/components/shader-flow";
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
@@ -1828,6 +1835,105 @@ export function PreviewExpandableCards() {
   return (
     <div className="p-4">
       <ExpandableCards cards={EC_CARDS} />
+    </div>
+  );
+}
+
+export function PreviewAnimatedSelectHeadline() {
+  return (
+    <div className="flex min-h-[220px] w-full items-center justify-center overflow-hidden rounded-3xl border border-zinc-200 bg-white px-8 py-12 dark:border-white/10 dark:bg-zinc-950">
+      <AnimatedSelectHeadline
+        words={["warp speed", "record time", "pure flow", "light speed"]}
+        prefix="Build amazing websites at"
+        headingClassName="dark:text-white"
+      />
+    </div>
+  );
+}
+
+export function PreviewWarpSpeedCard() {
+  return (
+    <WarpSpeedCard className="w-full overflow-hidden rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm">
+      <div className="px-8 py-12 text-center">
+        <h2 className="text-3xl font-bold leading-tight tracking-tight text-gray-950 sm:text-4xl">
+          Build amazing websites
+          <br />
+          at <WarpTextTrigger>warp speed</WarpTextTrigger>
+        </h2>
+      </div>
+    </WarpSpeedCard>
+  );
+}
+
+export function PreviewAskNexusInput() {
+  return (
+    <div className="flex min-h-[440px] w-full items-center justify-center overflow-hidden rounded-3xl border border-gray-200 bg-white px-8 dark:border-white/10">
+      <AskNexusInput />
+    </div>
+  );
+}
+
+export function PreviewPhoneInput({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 p-4",
+        compact ? "min-h-[200px]" : "min-h-[280px] py-8",
+      )}
+    >
+      <PhoneInput placeholder="Phone number" label="Phone number" />
+    </div>
+  );
+}
+
+const CAROUSEL_ITEMS = [
+  { id: "1", title: "Neural Networks", description: "Deep learning architectures for complex pattern recognition.", tag: "AI" },
+  { id: "2", title: "Quantum Computing", description: "Harness quantum mechanics for unprecedented processing power.", tag: "Quantum" },
+  { id: "3", title: "Edge Computing", description: "Process data closer to the source for real-time insights.", tag: "Infrastructure" },
+  { id: "4", title: "Blockchains", description: "Decentralized trust protocols for transparent transactions.", tag: "Web3" },
+  { id: "5", title: "Generative AI", description: "Create content and solutions with intelligent synthesis.", tag: "AI" },
+  { id: "6", title: "Autonomous Systems", description: "Self-governing machines that adapt and learn continuously.", tag: "Robotics" },
+];
+
+export function PreviewCircularCarousel({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-6",
+        compact ? "min-h-[420px]" : "min-h-[520px] py-10",
+      )}
+    >
+      <CircularCarousel items={CAROUSEL_ITEMS} autoPlay={false} />
+    </div>
+  );
+}
+
+export function PreviewChatMessages({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center rounded-xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 p-4",
+        compact ? "min-h-[480px]" : "min-h-[600px] py-8",
+      )}
+    >
+      <div className="h-full w-full max-w-md">
+        <ChatMessages autoPlay showReplay />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewShaderFlow({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-center rounded-xl border border-white/10 p-4",
+        compact ? "min-h-[400px]" : "min-h-[550px] py-8",
+      )}
+    >
+      <div className="h-full w-full max-w-4xl">
+        <ShaderFlow showContent />
+      </div>
     </div>
   );
 }

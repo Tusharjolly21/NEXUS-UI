@@ -15,9 +15,16 @@ export type LogoCloudClient = {
 export interface CinematicLogoCloudProps {
   clients: LogoCloudClient[];
   className?: string;
+  eyebrow?: string;
+  description?: string;
 }
 
-export function CinematicLogoCloud({ clients, className }: CinematicLogoCloudProps) {
+export function CinematicLogoCloud({
+  clients,
+  className,
+  eyebrow = "Trusted by teams building the future of AI.",
+  description = "From prototype to production, autonomously.",
+}: CinematicLogoCloudProps) {
   const renderClient = (client: LogoCloudClient) => {
     if (client.text) {
       return (
@@ -40,9 +47,9 @@ export function CinematicLogoCloud({ clients, className }: CinematicLogoCloudPro
     <div className={cn("w-full bg-zinc-50/50 py-12 md:py-16 dark:bg-zinc-950", className)}>
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
         <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          Trusted by teams building the future of AI.
+          {eyebrow}
         </p>
-        <p className="mt-1 text-xs text-zinc-500">From prototype to production, autonomously.</p>
+        {description && <p className="mt-1 text-xs text-zinc-500">{description}</p>}
 
         <motion.div
           initial="hidden"

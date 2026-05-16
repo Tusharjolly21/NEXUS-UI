@@ -10,9 +10,7 @@ import {
   Crown,
   Heart,
   Layers,
-  PanelLeft,
   Search,
-  Sparkles,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -28,13 +26,11 @@ import {
   LibraryExplorerSidebarProvider,
   LibraryExplorerSidebarDesktopChrome,
   LibraryExplorerSidebarMobileSheetBody,
-  LibraryExplorerFilterFields,
   useLibraryExplorerSidebar,
   type ExplorerView,
 } from "@/components/library/library-explorer-sidebar";
 import { cn } from "@/lib/utils";
 import { useDiscovery } from "@/hooks/use-discovery";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -136,8 +132,6 @@ function ComponentCard({
   index: number;
   reduceMotion: boolean;
 }) {
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => { setMounted(true); }, []);
   const router = useRouter();
 
   const { isFavorite, toggleFavorite } = useDiscovery();
@@ -167,25 +161,26 @@ function ComponentCard({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-32px" }}
           transition={{ delay: reduceMotion ? 0 : Math.min(index * 0.025, 0.2), duration: 0.38 }}
-          whileHover={reduceMotion ? undefined : { y: -4 }}
+          whileHover={reduceMotion ? undefined : {
+            y: -4,
+            boxShadow: "0 20px 60px -20px rgba(99, 102, 241, 0.25)",
+          }}
           className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hover:shadow-foreground/5 dark:bg-zinc-900/60 dark:hover:border-white/12"
         >
           {/* Preview area */}
           <div className="relative aspect-[4/3] overflow-hidden border-b border-border/50 bg-zinc-950">
             <div className="lf-grid absolute inset-0 opacity-25" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            {mounted && Preview ? (
+            {Preview ? (
               <div className="relative flex h-full items-center justify-center p-3">
-                <div className="w-full origin-center scale-[0.80] transition-transform duration-300 group-hover:scale-[0.86]">
+                <div className="w-full origin-center scale-[0.78] transition-transform duration-300 group-hover:scale-[0.84]">
                   <Preview />
                 </div>
               </div>
             ) : (
               <div className="relative flex h-full flex-col items-center justify-center gap-2 text-zinc-600">
-                {!mounted && Preview
-                  ? <div className="h-16 w-16 animate-pulse rounded-xl bg-white/[0.06]" />
-                  : <><Layers className="size-8 opacity-40" /><span className="text-[10px] uppercase tracking-[0.2em] opacity-50">Template</span></>
-                }
+                <Layers className="size-8 opacity-40" />
+                <span className="text-[10px] uppercase tracking-[0.2em] opacity-50">Template</span>
               </div>
             )}
             {/* Top-left badge */}
@@ -260,18 +255,14 @@ function ComponentsBrowserInner() {
   } = useLibraryExplorerSidebar();
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
   const searchRef = React.useRef<HTMLInputElement>(null);
 
   const categoryCounts = useCategoryCounts();
   const totalComponents = libraryComponents.length;
   const totalBlocks = blocks.length;
-  const totalTemplates = templates.length;
   const reduceMotion = useReducedMotion() === true;
   const premiumCount = React.useMemo(() => libraryComponents.filter((c) => c.premium).length, []);
   const freeCount = libraryComponents.length - premiumCount;
-
-  React.useEffect(() => { setMounted(true); }, []);
 
   // ⌘K shortcut
   React.useEffect(() => {
@@ -330,7 +321,7 @@ function ComponentsBrowserInner() {
   const scopeTabs = (
     <div
       role="tablist"
-      className="inline-flex gap-0.5 rounded-xl border border-border/50 bg-muted/30 p-0.5 dark:bg-white/[0.04]"
+      className="inline-flex gap-0.5 rounded-xl border border-border/50 bg-muted/30 p-0.5 dark:bg-white/4"
     >
       {(["all", "components", "blocks"] as const).map((id) => (
         <button
@@ -354,119 +345,6 @@ function ComponentsBrowserInner() {
 
   return (
     <div className="flex min-h-[calc(100dvh-4rem)] flex-col">
-
-      {/* ── HERO ────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-b border-border/40 px-4 py-16 sm:px-8 sm:py-20 lg:py-24">
-        {/* Background elements */}
-        <div className="pointer-events-none absolute inset-0 lf-grid opacity-[0.18]" />
-        <div className="pointer-events-none absolute left-1/2 top-0 h-px w-3/4 -translate-x-1/2 bg-gradient-to-r from-transparent via-foreground/15 to-transparent" />
-        <div className="pointer-events-none absolute -right-40 top-0 size-[36rem] rounded-full bg-primary/5 blur-[130px]" />
-        <div className="pointer-events-none absolute -left-40 bottom-0 size-80 rounded-full bg-foreground/[0.03] blur-[100px]" />
-
-        <div className="relative mx-auto max-w-3xl text-center">
-          {/* Eyebrow */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/8 px-3.5 py-1.5 text-[11px] font-semibold text-primary"
-          >
-            <Sparkles className="size-3.5" />
-            Motion-ready component library
-          </motion.div>
-
-          {/* Title */}
-          <motion.h1
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.05 }}
-            className="text-balance text-4xl font-bold tracking-[-0.02em] text-foreground sm:text-5xl lg:text-6xl"
-          >
-            Build interfaces
-            <br />
-            <span className="text-foreground/60">that ship.</span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mx-auto mt-5 max-w-xl text-[15px] leading-relaxed text-muted-foreground"
-          >
-            Animated React + Tailwind components with live previews.
-            Copy, customise, and ship — powered by Framer Motion.
-          </motion.p>
-
-          {/* Search */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="relative mx-auto mt-8 max-w-lg"
-          >
-            <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              ref={searchRef}
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") commitParams({}); }}
-              placeholder="Search components, blocks, tags…"
-              className="lf-library-search-input w-full rounded-2xl border border-border/60 bg-background/80 py-3.5 pl-11 pr-16 text-sm text-foreground placeholder:text-muted-foreground/50 outline-none ring-0 transition focus:border-primary/40 focus:bg-background focus:ring-2 focus:ring-primary/10 dark:bg-white/[0.04]"
-            />
-            {query ? (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <X className="size-3.5" />
-              </button>
-            ) : (
-              <kbd className="absolute right-3.5 top-1/2 hidden -translate-y-1/2 items-center gap-0.5 rounded border border-border/60 bg-muted/50 px-1.5 py-0.5 text-[10px] text-muted-foreground sm:flex">
-                ⌘K
-              </kbd>
-            )}
-          </motion.div>
-
-          {/* Stats + scope */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.22 }}
-            className="mt-7 flex flex-wrap items-center justify-center gap-2"
-          >
-            <span className="rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] text-muted-foreground dark:bg-white/[0.04]">
-              {totalComponents} components
-            </span>
-            <span className="rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] text-muted-foreground dark:bg-white/[0.04]">
-              {totalBlocks} blocks
-            </span>
-            <span className="rounded-full border border-border/60 bg-background/70 px-3 py-1 text-[11px] text-muted-foreground dark:bg-white/[0.04]">
-              {freeCount} free · {premiumCount} pro
-            </span>
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/8 px-3 py-1 text-[11px] font-semibold text-primary transition hover:bg-primary/14"
-            >
-              <Crown className="size-3" /> Upgrade
-            </Link>
-          </motion.div>
-
-          {/* Scope tabs */}
-          <motion.div
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.4, delay: 0.28 }}
-            className="mt-5 flex justify-center"
-          >
-            {scopeTabs}
-          </motion.div>
-        </div>
-      </section>
-
       {/* ── CATEGORY PILL STRIP (mobile only) ───────────────────── */}
       {(view === "components" || view === "all") && (
         <div className="sticky top-16 z-20 border-b border-border/40 bg-background/90 backdrop-blur-md lg:hidden">
@@ -507,29 +385,126 @@ function ComponentsBrowserInner() {
       <div className="flex flex-1 lg:flex-row">
 
         {/* Desktop sidebar */}
-        <aside className="relative hidden w-[240px] shrink-0 border-r border-border/40 lg:block">
-          <div className="sticky top-16 flex max-h-[calc(100dvh-4rem)] flex-col overflow-hidden">
-            {/* Sidebar header */}
-            <div className="border-b border-border/40 px-4 py-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                Browse
-              </p>
-              <div className="mt-3">{scopeTabs}</div>
-            </div>
-            {/* Filter content */}
-            <ScrollArea className="flex-1">
-              <div className="px-3 py-4">
-                <LibraryExplorerSidebarDesktopChrome />
-              </div>
-            </ScrollArea>
+        <aside className="relative hidden w-[272px] shrink-0 border-r border-border/40 lg:block">
+          <div className="sticky top-16 flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden">
+            <LibraryExplorerSidebarDesktopChrome />
           </div>
         </aside>
 
         {/* Main content */}
         <main className="min-w-0 flex-1">
+          <section className="relative overflow-hidden border-b border-border/40 px-4 py-10 sm:px-6 lg:py-12">
+            <div className="pointer-events-none absolute inset-0 lf-grid opacity-[0.12]" />
+            {!reduceMotion && (
+              <>
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute left-10 top-6 h-px w-48 bg-gradient-to-r from-transparent via-foreground/35 to-transparent"
+                  animate={{ x: [-80, 360], opacity: [0, 1, 0] }}
+                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute bottom-8 right-12 h-28 w-28 rounded-full border border-foreground/10"
+                  animate={{ scale: [0.75, 1.2, 0.75], opacity: [0.14, 0.36, 0.14] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </>
+            )}
+            <div className="relative flex flex-col gap-7 xl:flex-row xl:items-end xl:justify-between">
+              <div className="max-w-3xl">
+                <motion.p
+                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35 }}
+                  className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground"
+                >
+                  Nexus library
+                </motion.p>
+                <motion.h1
+                  initial={reduceMotion ? false : { opacity: 0, y: 18, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                  className="mt-3 text-balance text-5xl font-black tracking-tight text-foreground sm:text-7xl lg:text-8xl"
+                >
+                  Components
+                </motion.h1>
+                <motion.p
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.45, delay: 0.08 }}
+                  className="mt-4 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base"
+                >
+                  Explore motion-ready components, shadcn-compatible blocks, and production templates with live previews.
+                </motion.p>
+              </div>
+
+              <motion.div
+                initial={reduceMotion ? false : { opacity: 0, x: 16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.45, delay: 0.1 }}
+                className="w-full max-w-xl xl:max-w-md"
+              >
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    ref={searchRef}
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter")
+                        commitParams({ q: query.trim() || null }, true);
+                    }}
+                    placeholder="Search components, blocks, tags..."
+                    className="lf-library-search-input h-12 w-full rounded-xl border border-border/70 bg-background/80 pl-11 pr-16 text-sm text-foreground shadow-sm outline-none transition focus:border-primary/40 focus:ring-2 focus:ring-primary/10 dark:bg-white/[0.04]"
+                  />
+                  {query ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setQuery("");
+                        commitParams({ q: null }, true);
+                      }}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                      aria-label="Clear search"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  ) : (
+                    <kbd className="absolute right-3.5 top-1/2 hidden -translate-y-1/2 rounded border border-border/60 bg-muted/50 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:block">
+                      ⌘K
+                    </kbd>
+                  )}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="rounded-md border border-border/60 bg-background/70 px-2.5 py-1 text-[11px] text-muted-foreground dark:bg-white/[0.04]">
+                    {totalComponents} components
+                  </span>
+                  <span className="rounded-md border border-border/60 bg-background/70 px-2.5 py-1 text-[11px] text-muted-foreground dark:bg-white/[0.04]">
+                    {totalBlocks} blocks
+                  </span>
+                  <span className="rounded-md border border-border/60 bg-background/70 px-2.5 py-1 text-[11px] text-muted-foreground dark:bg-white/[0.04]">
+                    {freeCount} free · {premiumCount} pro
+                  </span>
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/8 px-2.5 py-1 text-[11px] font-semibold text-primary transition hover:bg-primary/14"
+                  >
+                    <Crown className="size-3" /> Upgrade
+                  </Link>
+                </div>
+              </motion.div>
+            </div>
+          </section>
 
           {/* Controls bar */}
-          <div className="flex items-center justify-between gap-3 border-b border-border/40 bg-background/50 px-4 py-3 sm:px-6 backdrop-blur-sm">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+            className="flex items-center justify-between gap-3 border-b border-border/40 bg-background/50 px-4 py-3 sm:px-6 backdrop-blur-sm"
+          >
             <p className="text-[12px] text-muted-foreground">
               <span className="font-semibold text-foreground">{filtered.length}</span>{" "}
               {filtered.length === 1 ? "result" : "results"}
@@ -541,6 +516,8 @@ function ComponentsBrowserInner() {
             </p>
 
             <div className="flex items-center gap-2">
+              <div className="hidden lg:block">{scopeTabs}</div>
+
               {/* Reset */}
               {hasActiveFilters && (
                 <button
@@ -553,37 +530,35 @@ function ComponentsBrowserInner() {
               )}
 
               {/* Mobile filter sheet */}
-              {mounted && (
-                <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-                  <SheetTrigger
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      "h-8 gap-1.5 border-border/60 bg-muted/40 text-[12px] text-foreground backdrop-blur-sm lg:hidden",
-                    )}
-                  >
-                    <SlidersHorizontal className="size-3.5" />
-                    Filters
-                    {(premiumOnly || animFilter.length > 0) && (
-                      <span className="ml-0.5 size-1.5 rounded-full bg-primary" />
-                    )}
-                  </SheetTrigger>
-                  <SheetContent
-                    side="right"
-                    className="w-[min(100%,300px)] border-border/60 bg-background/95 p-0 backdrop-blur-xl"
-                  >
-                    <SheetHeader className="border-b border-border px-4 py-4 text-left">
-                      <SheetTitle className="text-sm text-foreground">Filters</SheetTitle>
-                    </SheetHeader>
-                    <ScrollArea className="h-[calc(100dvh-7rem)]">
-                      <div className="px-4 py-4">
-                        <LibraryExplorerSidebarMobileSheetBody onPick={() => setMobileFiltersOpen(false)} />
-                      </div>
-                    </ScrollArea>
-                  </SheetContent>
-                </Sheet>
-              )}
+              <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                <SheetTrigger
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "h-8 gap-1.5 border-border/60 bg-muted/40 text-[12px] text-foreground backdrop-blur-sm lg:hidden",
+                  )}
+                >
+                  <SlidersHorizontal className="size-3.5" />
+                  Filters
+                  {(premiumOnly || animFilter.length > 0) && (
+                    <span className="ml-0.5 size-1.5 rounded-full bg-primary" />
+                  )}
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  className="w-[min(100%,300px)] border-border/60 bg-background/95 p-0 backdrop-blur-xl"
+                >
+                  <SheetHeader className="border-b border-border px-4 py-4 text-left">
+                    <SheetTitle className="text-sm text-foreground">Filters</SheetTitle>
+                  </SheetHeader>
+                  <ScrollArea className="h-[calc(100dvh-7rem)]">
+                    <div className="px-4 py-4">
+                      <LibraryExplorerSidebarMobileSheetBody onPick={() => setMobileFiltersOpen(false)} />
+                    </div>
+                  </ScrollArea>
+                </SheetContent>
+              </Sheet>
             </div>
-          </div>
+          </motion.div>
 
           {/* Desktop category pills */}
           {(view === "components" || view === "all") && (

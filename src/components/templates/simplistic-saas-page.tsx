@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { motion, useReducedMotion, useScroll, useTransform, type Variants } from "framer-motion";
 import { MacKeyboard } from "@/components/keyboard";
 import { InfiniteMovingCards } from "@/components/infinite-moving-cards/InfiniteMovingCards";
 import {
@@ -133,18 +133,20 @@ export function SimplisticSaaSPage() {
     },
   ];
 
-  const staggerVariants = {
+  const easeOutExpo = [0.16, 1, 0.3, 1] as const;
+
+  const staggerVariants: Variants = {
     hidden: {},
     visible: { transition: { staggerChildren: 0.1 } }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
     visible: { 
       opacity: 1, 
       y: 0, 
       filter: "blur(0px)", 
-      transition: { duration: 1.0, ease: [0.16, 1, 0.3, 1] } 
+      transition: { duration: 1.0, ease: easeOutExpo } 
     }
   };
 
@@ -553,7 +555,7 @@ export function SimplisticSaaSPage() {
                     opacity: 1, 
                     y: 0, 
                     filter: "blur(0px)", 
-                    transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } 
+                    transition: { duration: 1.2, ease: easeOutExpo } 
                   }
                 }}
                 className="flex min-w-[100px] sm:min-w-[120px] items-center justify-center px-2"

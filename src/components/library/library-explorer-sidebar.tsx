@@ -3,9 +3,10 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Search } from "lucide-react";
+import { ArrowUpRight, Crown, Search } from "lucide-react";
 import { blocks, type BlockCategory } from "@/lib/catalog/blocks";
 import { libraryComponents } from "@/lib/catalog/library-components";
+import { templates } from "@/lib/catalog/templates";
 import {
   COMPONENT_SIDEBAR_SECTIONS,
   getComponentCategoryLabel,
@@ -14,7 +15,6 @@ import {
   type ComponentCategorySlug,
 } from "@/lib/catalog/taxonomy";
 import { InstallationSidebarLinks } from "@/components/library/installation-sidebar-links";
-import { NexusMark } from "@/components/brand";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -143,8 +143,11 @@ export function LibraryExplorerSidebarProvider({
   const totalBlocks = blocks.length;
 
   React.useEffect(() => {
-    setQuery(searchParams.get("q") ?? "");
-    setPremiumOnly(searchParams.get("premium") === "1");
+    const id = window.setTimeout(() => {
+      setQuery(searchParams.get("q") ?? "");
+      setPremiumOnly(searchParams.get("premium") === "1");
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [searchParams]);
 
   const commitParams = React.useCallback(
@@ -332,137 +335,199 @@ function SidebarNav({ onPick }: { onPick?: () => void }) {
   } = useLibraryExplorerSidebar();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
-        <p className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="mb-2 px-1 text-[11px] font-semibold text-muted-foreground">
           Installation
         </p>
         <InstallationSidebarLinks pathname={pathname} onPick={onPick} />
       </div>
 
-      {(view === "components" || view === "all") && (
-        <div className="border-t border-border pt-4">
-          <p className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Component categories
-          </p>
-          <div className="space-y-3">
+      <div>
+        <p className="mb-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          Templates
+        </p>
+        <div className="space-y-0.5">
+          {templates.slice(0, 8).map((tmpl, index) => (
             <Link
-              href={buildHref({ view: "components", cat: null, bcat: null })}
+              key={tmpl.slug}
+              href={`/templates/${tmpl.slug}`}
               onClick={onPick}
-              className={cn(
-                "flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] transition",
-                view === "components" && category === "all"
-                  ? "bg-foreground/5 text-foreground dark:bg-white/10"
-                  : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
-              )}
+              className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] leading-snug text-muted-foreground transition hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5"
             >
-              <span>All components</span>
-              <span className="text-[11px] text-muted-foreground">
-                {totalComponents}
-              </span>
+              <span className="min-w-0 flex-1 truncate">{tmpl.title}</span>
+              {index < 2 && (
+                <span className="rounded-sm border border-primary/20 bg-primary/8 px-1.5 py-0.5 text-[9px] font-medium text-primary">
+                  New
+                </span>
+              )}
             </Link>
-            {COMPONENT_SIDEBAR_SECTIONS.map((section) => (
-              <details key={section.id} className="group" open>
-                <summary className="cursor-pointer list-none px-1 py-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground marker:hidden [&::-webkit-details-marker]:hidden">
-                  <span className="flex items-center justify-between">
-                    {section.label}
-                    <span className="text-muted-foreground transition group-open:rotate-180">
-                      ⌄
-                    </span>
-                  </span>
-                </summary>
-                <div className="mt-1 space-y-0.5 border-l border-border pl-2">
-                  {section.slugs.map((slug) => {
-                    const count = categoryCounts.get(slug) ?? 0;
-                    const active = view === "components" && category === slug;
-                    return (
-                      <Link
-                        key={slug}
-                        href={buildHref({
-                          view: "components",
-                          cat: slug,
-                          bcat: null,
-                        })}
-                        onClick={onPick}
-                        className={cn(
-                          "flex items-center justify-between gap-2 rounded-md py-1 pr-1 pl-2 text-[13px] leading-snug transition",
-                          active
-                            ? "border-l-2 border-primary bg-primary/10 text-foreground dark:border-primary dark:bg-primary/10"
-                            : "border-l-2 border-transparent text-muted-foreground hover:text-muted-foreground",
-                        )}
-                      >
-                        <span className="min-w-0 flex-1">
-                          {getComponentCategoryLabel(slug)}
-                        </span>
-                        <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
-                          {count}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-              </details>
-            ))}
-          </div>
+          ))}
         </div>
-      )}
+      </div>
 
-      {view === "blocks" && (
-        <div className="border-t border-border pt-4">
-          <p className="mb-2 px-1 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
-            Block categories
-          </p>
-          <div className="space-y-0.5">
-            <Link
-              href={buildHref({ view: "blocks", bcat: null, cat: null })}
-              onClick={onPick}
-              className={cn(
-                "flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] transition",
-                !bcat
-                  ? "bg-foreground/5 text-foreground dark:bg-white/10"
-                  : "text-muted-foreground hover:bg-foreground/5 dark:hover:bg-white/5",
-              )}
-            >
-              <span>All blocks</span>
-              <span className="text-[11px] text-muted-foreground">
-                {totalBlocks}
-              </span>
-            </Link>
-            {BLOCK_CATEGORIES.map((cat) => {
-              const count = blockCategoryCounts.get(cat) ?? 0;
-              if (count === 0) return null;
-              const active = bcat === cat;
-              return (
-                <Link
-                  key={cat}
-                  href={buildHref({
-                    view: "blocks",
-                    bcat: cat,
-                    cat: null,
-                  })}
-                  onClick={onPick}
-                  className={cn(
-                    "flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] transition",
-                    active
-                      ? "bg-foreground/5 text-foreground dark:bg-white/10"
-                      : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
-                  )}
-                >
-                  <span className="leading-snug">{cat}</span>
-                  <span className="shrink-0 text-[11px] text-muted-foreground">
-                    {count}
+      <div>
+        <p className="mb-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          Sections and Blocks
+        </p>
+        <div className="space-y-0.5">
+          <Link
+            href={buildHref({ view: "blocks", bcat: null, cat: null })}
+            onClick={onPick}
+            className={cn(
+              "flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] transition",
+              view === "blocks" && !bcat
+                ? "bg-foreground/5 text-foreground dark:bg-white/10"
+                : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
+            )}
+          >
+            <span>All blocks</span>
+            <span className="text-[11px] text-muted-foreground">{totalBlocks}</span>
+          </Link>
+          {BLOCK_CATEGORIES.map((cat, index) => {
+            const count = blockCategoryCounts.get(cat) ?? 0;
+            if (count === 0) return null;
+            const active = view === "blocks" && bcat === cat;
+            return (
+              <Link
+                key={cat}
+                href={buildHref({ view: "blocks", bcat: cat, cat: null })}
+                onClick={onPick}
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] leading-snug transition",
+                  active
+                    ? "bg-foreground/5 text-foreground dark:bg-white/10"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
+                )}
+              >
+                <span className="min-w-0 flex-1">{cat}</span>
+                {index < 2 && (
+                  <span className="rounded-sm border border-primary/20 bg-primary/8 px-1.5 py-0.5 text-[9px] font-medium text-primary">
+                    New
                   </span>
-                </Link>
-              );
-            })}
-          </div>
+                )}
+                <span className="shrink-0 text-[11px] text-muted-foreground">{count}</span>
+              </Link>
+            );
+          })}
         </div>
-      )}
+      </div>
+
+      <div>
+        <p className="mb-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          Backgrounds & Effects
+        </p>
+        <div className="space-y-0.5">
+          {COMPONENT_SIDEBAR_SECTIONS.find((s) => s.id === "effects")?.slugs.map((slug, index) => {
+            const count = categoryCounts.get(slug) ?? 0;
+            const active = view === "components" && category === slug;
+            return (
+              <Link
+                key={slug}
+                href={buildHref({ view: "components", cat: slug, bcat: null })}
+                onClick={onPick}
+                className={cn(
+                  "flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] leading-snug transition",
+                  active
+                    ? "bg-foreground/5 text-foreground dark:bg-white/10"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
+                )}
+              >
+                <span className="min-w-0 flex-1">{getComponentCategoryLabel(slug)}</span>
+                {index < 2 && (
+                  <span className="rounded-sm border border-primary/20 bg-primary/8 px-1.5 py-0.5 text-[9px] font-medium text-primary">
+                    New
+                  </span>
+                )}
+                <span className="shrink-0 text-[11px] text-muted-foreground">{count}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          Card Components
+        </p>
+        <div className="space-y-0.5">
+          {["cards", "bento-grids", "dashboards", "loaders"].map((slug) => {
+            const typedSlug = slug as ComponentCategorySlug;
+            const count = categoryCounts.get(typedSlug) ?? 0;
+            const active = view === "components" && category === typedSlug;
+            return (
+              <Link
+                key={typedSlug}
+                href={buildHref({ view: "components", cat: typedSlug, bcat: null })}
+                onClick={onPick}
+                className={cn(
+                  "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] leading-snug transition",
+                  active
+                    ? "bg-foreground/5 text-foreground dark:bg-white/10"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
+                )}
+              >
+                <span>{getComponentCategoryLabel(typedSlug)}</span>
+                <span className="text-[11px] text-muted-foreground">{count}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          Text, Forms & Navigation
+        </p>
+        <div className="space-y-0.5">
+          {[
+            "motion-effects",
+            "login-forms",
+            "signup-forms",
+            "contact-sections",
+            "navbars",
+            "footers",
+          ].map((slug) => {
+            const typedSlug = slug as ComponentCategorySlug;
+            const count = categoryCounts.get(typedSlug) ?? 0;
+            const active = view === "components" && category === typedSlug;
+            return (
+              <Link
+                key={typedSlug}
+                href={buildHref({ view: "components", cat: typedSlug, bcat: null })}
+                onClick={onPick}
+                className={cn(
+                  "flex items-center justify-between gap-2 rounded-md px-2 py-1.5 text-[13px] leading-snug transition",
+                  active
+                    ? "bg-foreground/5 text-foreground dark:bg-white/10"
+                    : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
+                )}
+              >
+                <span>{getComponentCategoryLabel(typedSlug)}</span>
+                <span className="text-[11px] text-muted-foreground">{count}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
 
       <div className="border-t border-border pt-4">
+        <Link
+          href={buildHref({ view: "components", cat: null, bcat: null })}
+          onClick={onPick}
+          className={cn(
+            "mb-3 flex items-center justify-between rounded-md px-2 py-1.5 text-[13px] transition",
+            view === "components" && category === "all"
+              ? "bg-foreground/5 text-foreground dark:bg-white/10"
+              : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground dark:hover:bg-white/5",
+          )}
+        >
+          <span>All components</span>
+          <span className="text-[11px] text-muted-foreground">{totalComponents}</span>
+        </Link>
         <Accordion defaultValue={["filters"]}>
           <AccordionItem value="filters" className="border-0">
-            <AccordionTrigger className="px-1 py-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground hover:bg-transparent hover:no-underline">
+            <AccordionTrigger className="px-1 py-1 text-[11px] font-semibold text-muted-foreground hover:bg-transparent hover:no-underline">
               Filters
             </AccordionTrigger>
             <AccordionContent className="px-1 pb-2">
@@ -497,32 +562,24 @@ export function LibraryExplorerFilterFields({
   return <FilterFields compact={compact} />;
 }
 
-// type LibraryExplorerSidebarChromeProps = {
-//   /** e.g. "Components & blocks" vs "Docs & setup" */
-//   subtitle?: string;
-// };
-
-export function LibraryExplorerSidebarDesktopChrome({
-  subtitle = "Components & blocks",
-}: LibraryExplorerSidebarChromeProps) {
+export function LibraryExplorerSidebarDesktopChrome() {
   return (
     <>
-      {/* <div className="border-b border-border px-4 py-4">
+      <div className="border-b border-border px-4 py-4">
         <Link
-          href="/"
-          aria-label="Nexus-UI home"
-          className="inline-flex items-center gap-2 text-[13px] font-semibold text-foreground"
+          href="/pricing"
+          className="flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/8 px-3 py-2.5 text-xs font-semibold text-primary transition hover:bg-primary/14"
         >
-          <NexusMark size={18} />
-          <span>Nexus-UI</span>
+          <Crown className="size-3.5 shrink-0" />
+          Get All-Access
+          <ArrowUpRight className="ml-auto size-3 shrink-0" />
         </Link>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">{subtitle}</p>
         <div className="mt-4">
           <SidebarSearch />
         </div>
-      </div> */}
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="px-3 py-4">
+      </div>
+      <ScrollArea className="h-full min-h-0 flex-1 overflow-hidden">
+        <div className="px-3 py-5">
           <SidebarNav />
         </div>
       </ScrollArea>
