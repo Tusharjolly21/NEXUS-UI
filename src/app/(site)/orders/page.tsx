@@ -24,10 +24,18 @@ export default async function OrdersPage() {
     redirect("/login?next=/orders");
   }
 
+  const displayName =
+    user.user_metadata?.full_name ??
+    user.user_metadata?.name ??
+    user.email?.split("@")[0] ??
+    "there";
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-16">
       <div className="mb-10">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">Your Orders</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">
+          {displayName}&apos;s Orders
+        </h1>
         <p className="mt-1.5 text-sm text-muted-foreground">
           All purchases tied to <span className="text-foreground">{user.email}</span>
         </p>
