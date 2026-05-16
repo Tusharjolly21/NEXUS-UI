@@ -123,17 +123,6 @@ export function SiteHeader() {
             <div className="hidden items-center gap-2 md:flex">
               {user ? (
                 <>
-                  {/* Standalone Orders link */}
-                  <Link
-                    href="/orders"
-                    className={cn(
-                      buttonVariants({ variant: "ghost", size: "sm" }),
-                      "rounded-lg text-[13px] text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    Orders
-                  </Link>
-
                   {/* User dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger
@@ -152,31 +141,38 @@ export function SiteHeader() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
-                        onClick={() => router.push("/orders")}
+                        onClick={() => router.push("/dashboard")}
                       >
                         <LayoutDashboard className="size-4 text-muted-foreground" />
                         Dashboard
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
-                        onClick={() => router.push("/api-key")}
+                        onClick={() => router.push("/dashboard/api-key")}
                       >
                         <Key className="size-4 text-muted-foreground" />
                         API Key
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
-                        onClick={() => router.push("/orders")}
+                        onClick={() => router.push("/dashboard/orders")}
                       >
                         <ShoppingBag className="size-4 text-muted-foreground" />
                         Orders
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
-                        onClick={() => router.push("/billing")}
+                        onClick={() => router.push("/dashboard/billing")}
                       >
                         <CreditCard className="size-4 text-muted-foreground" />
                         Billing
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer gap-2.5 rounded-md px-2.5 py-2 text-[13px]"
+                        onClick={() => router.push("/dashboard/profile")}
+                      >
+                        <User className="size-4 text-muted-foreground" />
+                        Profile
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -320,7 +316,7 @@ export function SiteHeader() {
                     </div>
                   </div>
                   <Link
-                    href="/orders"
+                    href="/dashboard"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
@@ -330,7 +326,7 @@ export function SiteHeader() {
                     <LayoutDashboard className="size-4" /> Dashboard
                   </Link>
                   <Link
-                    href="/api-key"
+                    href="/dashboard/api-key"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
@@ -340,7 +336,7 @@ export function SiteHeader() {
                     <Key className="size-4" /> API Key
                   </Link>
                   <Link
-                    href="/orders"
+                    href="/dashboard/orders"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
@@ -350,7 +346,7 @@ export function SiteHeader() {
                     <ShoppingBag className="size-4" /> Orders
                   </Link>
                   <Link
-                    href="/billing"
+                    href="/dashboard/billing"
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       buttonVariants({ variant: "outline" }),
@@ -358,6 +354,16 @@ export function SiteHeader() {
                     )}
                   >
                     <CreditCard className="size-4" /> Billing
+                  </Link>
+                  <Link
+                    href="/dashboard/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "w-full justify-start gap-2 rounded-xl text-sm font-medium",
+                    )}
+                  >
+                    <User className="size-4" /> Profile
                   </Link>
                   <button
                     type="button"

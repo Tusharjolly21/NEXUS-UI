@@ -16,7 +16,7 @@ import { Separator } from "@/components/ui/separator";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/orders";
+  const next = searchParams.get("next") || "/dashboard";
   const [email, setEmail] = React.useState("");
   const [pending, setPending] = React.useState(false);
 

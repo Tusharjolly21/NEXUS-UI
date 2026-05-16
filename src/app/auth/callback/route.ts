@@ -6,7 +6,7 @@ import type { Database } from "@/lib/supabase/database.types";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/orders";
+  const next = searchParams.get("next") ?? "/dashboard";
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
