@@ -44,6 +44,7 @@ const BLOCK_CATEGORIES: BlockCategory[] = [
   "Logo clouds",
   "Stats sections",
   "CTA sections",
+  "Interactive backgrounds",
   "FAQ sections",
   "Blog sections",
 ];
@@ -126,7 +127,11 @@ export function LibraryExplorerSidebarProvider({
 
   const viewParam = searchParams.get("view") as ExplorerView | null;
   const view: ExplorerView =
-    viewParam === "components" || viewParam === "blocks" ? viewParam : "all";
+    viewParam === "components" || viewParam === "blocks"
+      ? viewParam
+      : pathname === "/blocks"
+        ? "blocks"
+        : "all";
 
   const [query, setQuery] = React.useState(searchParams.get("q") ?? "");
   const category = searchParams.get("cat") ?? "all";
@@ -159,11 +164,12 @@ export function LibraryExplorerSidebarProvider({
         else params.set(k, v);
       });
       const qs = params.toString();
-      const url = qs ? `/components?${qs}` : "/components";
+      const basePath = pathname === "/blocks" ? "/blocks" : "/components";
+      const url = qs ? `${basePath}?${qs}` : basePath;
       if (replace) router.replace(url);
       else router.push(url);
     },
-    [router, searchParams],
+    [pathname, router, searchParams],
   );
 
   const buildHref = React.useCallback(
@@ -175,9 +181,10 @@ export function LibraryExplorerSidebarProvider({
         else params.set(k, v);
       }
       const qs = params.toString();
-      return qs ? `/components?${qs}` : "/components";
+      const basePath = pathname === "/blocks" ? "/blocks" : "/components";
+      return qs ? `${basePath}?${qs}` : basePath;
     },
-    [searchParams],
+    [pathname, searchParams],
   );
 
   const setExplorerView = React.useCallback(

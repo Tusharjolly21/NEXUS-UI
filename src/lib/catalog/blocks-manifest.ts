@@ -11,6 +11,7 @@ export type BlockCategory =
   | "Logo clouds"
   | "Stats sections"
   | "CTA sections"
+  | "Interactive backgrounds"
   | "FAQ sections"
   | "Blog sections";
 
@@ -95,6 +96,26 @@ export const blocksManifest: BlockManifestEntry[] = [
     premium: false,
     variants: ["Primary", "Ghost secondary"],
     reactSource: `export { PreviewCtaGlow as NebulaCta } from "@/registry/component-previews";`,
+  },
+  {
+    slug: "block-interactive-dots",
+    name: "Interactive Background Card",
+    description: "Interactive hero backgrounds with cursor fields, layered waves, particle noise, and premium motion depth.",
+    category: "Interactive backgrounds",
+    tags: ["background", "cursor", "canvas", "waves", "particles"],
+    premium: false,
+    variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise"],
+    reactSource: `export { InteractiveDots } from "@/components/interactive-dots";`,
+  },
+  {
+    slug: "block-animated-bento",
+    name: "Animated Bento Grid",
+    description: "Staggered entrance bento tiles with 4 variants, trend badges, and span support for KPI storytelling.",
+    category: "Feature grids",
+    tags: ["bento", "metrics", "animation", "grid"],
+    premium: false,
+    variants: ["Default", "Glass", "Gradient Border", "Spotlight"],
+    reactSource: `export { AnimatedBentoGrid } from "@/components/animated-bento-grid";`,
   },
   {
     slug: "block-faq-motion",

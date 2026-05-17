@@ -1,148 +1,249 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Blocks, Crown } from "lucide-react";
-import { blocks } from "@/lib/catalog/blocks";
+import {
+  ArrowRight,
+  PanelLeft,
+  Search,
+  Sparkles,
+  X,
+} from "lucide-react";
+import { blocks, type BlockCategory } from "@/lib/catalog/blocks";
+import {
+  LibraryExplorerSidebarProvider,
+  LibraryExplorerSidebarDesktopChrome,
+  LibraryExplorerSidebarMobileSheetBody,
+  useLibraryExplorerSidebar,
+} from "@/components/library/library-explorer-sidebar";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 
-const premiumCount = blocks.filter((b) => b.premium).length;
-const freeCount = blocks.length - premiumCount;
+const CATEGORY_NOTES: Record<BlockCategory, string> = {
+  "Hero blocks": "Opening sections with motion, atmosphere, and sharp conversion hierarchy.",
+  "Pricing blocks": "Billing sections with clear plan comparison and upgrade affordances.",
+  Testimonials: "Social proof patterns for trust, launches, and product validation.",
+  "Feature grids": "Dense product storytelling for capabilities, metrics, and workflows.",
+  "Logo clouds": "Trust bands for partners, users, and ecosystem proof.",
+  "Stats sections": "Numerical proof points with restrained, dashboard-like polish.",
+  "CTA sections": "Closing sections for trials, demos, waitlists, and upgrades.",
+  "Interactive backgrounds": "Responsive motion fields for hero backdrops, feature cards, and product storytelling.",
+  "FAQ sections": "Supportive answer layouts tuned for scannability.",
+  "Blog sections": "Editorial rails for content hubs and announcement pages.",
+};
+
+const CATEGORY_ORDER = Object.keys(CATEGORY_NOTES) as BlockCategory[];
 
 export default function BlocksPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <LibraryExplorerSidebarProvider>
+        <BlocksPageInner />
+      </LibraryExplorerSidebarProvider>
+    </React.Suspense>
+  );
+}
+
+function BlocksPageInner() {
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const reduce = useReducedMotion() === true;
+  const { bcat, query, premiumOnly, commitParams } = useLibraryExplorerSidebar();
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const filteredBlocks = React.useMemo(() => {
+    return blocks.filter((block) => {
+      const categoryMatch = !bcat || block.category === bcat;
+      const premiumMatch = !premiumOnly || block.premium;
+      const searchMatch =
+        !normalizedQuery ||
+        `${block.name} ${block.description} ${block.category} ${block.tags.join(" ")}`
+          .toLowerCase()
+          .includes(normalizedQuery);
+
+      return categoryMatch && premiumMatch && searchMatch;
+    });
+  }, [bcat, normalizedQuery, premiumOnly]);
+
+  const visibleBlocks = React.useMemo(() => {
+    return CATEGORY_ORDER.flatMap((category) =>
+      filteredBlocks.filter((block) => block.category === category),
+    );
+  }, [filteredBlocks]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-4 py-10 md:py-14">
+    <div className="flex flex-1 lg:flex-row">
+      <aside className="relative hidden w-[272px] shrink-0 border-r border-border/40 lg:block">
+        <div className="sticky top-16 flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden">
+          <LibraryExplorerSidebarDesktopChrome />
+        </div>
+      </aside>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-muted/25 px-6 py-10 dark:bg-white/[0.025] sm:px-10 sm:py-12">
-        <div className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-foreground/[0.03] blur-[80px]" />
-        <div className="pointer-events-none absolute -bottom-16 -right-16 size-56 rounded-full bg-primary/6 blur-[64px]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="sticky top-16 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md lg:hidden">
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <SheetTrigger
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "gap-2 border-border bg-muted dark:bg-zinc-900/80",
+              )}
+            >
+              <PanelLeft className="size-4" />
+              Menu
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="w-[min(100%,300px)] border-border bg-background p-0 dark:bg-zinc-950"
+            >
+              <SheetHeader className="border-b border-border px-4 py-4 text-left">
+                <SheetTitle className="text-base text-foreground">Library</SheetTitle>
+              </SheetHeader>
+              <ScrollArea className="h-[calc(100dvh-7rem)]">
+                <div className="px-3 py-4">
+                  <LibraryExplorerSidebarMobileSheetBody onPick={() => setMobileNavOpen(false)} />
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+          <span className="text-xs font-medium text-muted-foreground">Blocks catalog</span>
+        </div>
 
-        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-[11px] font-semibold text-primary ">
-              <Blocks className="size-3.5" />
-              Full-section building blocks
-            </div>
-
-            <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-              Paste and{" "}
-              <span className="text-foreground">
-                choreograph.
-              </span>
+        <main className="mx-auto w-full max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10 lg:py-16 xl:px-14">
+          <section className="pb-16 lg:pb-24">
+            <h1 className="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
+              Blocks
             </h1>
-
-            <p className="max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-              Marketing-grade blocks with motion variants — tuned for accessibility,
-              responsive density, and App Router projects.
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
+              Clean, minimal shadcn compatible blocks for polished product pages.
+              Built for developers who care about design.
             </p>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-foreground shadow-sm dark:bg-white/[0.04]">
-                {blocks.length} blocks
-              </span>
-              <span className="rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs text-muted-foreground shadow-sm dark:bg-white/[0.04]">
-                {freeCount} free · {premiumCount} premium
-              </span>
-              <Link
-                href="/pricing"
-                className="inline-flex items-center gap-1.5 rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary transition hover:bg-primary/15"
-              >
-                <Crown className="size-3.5" />
-                Upgrade
-                <ArrowRight className="size-3" />
-              </Link>
+            {(bcat || premiumOnly || normalizedQuery) && (
+              <div className="mt-7 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                Showing <span className="font-medium text-foreground">{filteredBlocks.length}</span> block
+                {filteredBlocks.length !== 1 && "s"}
+                {bcat && (
+                  <Badge variant="outline" className="border-border/70 text-muted-foreground">
+                    {bcat}
+                  </Badge>
+                )}
+                {premiumOnly && (
+                  <Badge className="bg-foreground text-background">Premium only</Badge>
+                )}
+                <button
+                  type="button"
+                  onClick={() => commitParams({ bcat: null, premium: null, q: null })}
+                  className="inline-flex items-center gap-1 rounded-full border border-border/60 px-2.5 py-1 text-xs font-medium text-foreground transition hover:bg-muted"
+                >
+                  Clear filters
+                  <X className="size-3" />
+                </button>
+              </div>
+            )}
+          </section>
+
+          {visibleBlocks.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border/70 bg-muted/15 px-6 py-16 text-center">
+              <Search className="mx-auto size-10 text-muted-foreground/30" />
+              <p className="mt-4 text-base font-semibold text-foreground">No blocks found</p>
+              <p className="mt-1 text-sm text-muted-foreground">Try another category, search, or access filter.</p>
+            </div>
+          ) : (
+            <section className="grid gap-10 lg:grid-cols-2 xl:gap-x-12 xl:gap-y-14">
+              {visibleBlocks.map((block, index) => (
+                <BlockCard
+                  key={block.slug}
+                  block={block}
+                  index={index}
+                  reduceMotion={reduce}
+                />
+              ))}
+            </section>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function BlockCard({
+  block,
+  index,
+  reduceMotion,
+}: {
+  block: (typeof blocks)[number];
+  index: number;
+  reduceMotion: boolean;
+}) {
+  const Preview = block.Preview;
+
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: Math.min(index * 0.035, 0.28), duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+      className="h-full"
+    >
+      <Link
+        id={block.slug}
+        href={`/blocks/${block.slug}`}
+        className="group block h-full overflow-hidden rounded-[28px] bg-muted/55 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:bg-muted/70 hover:shadow-2xl hover:shadow-foreground/10 dark:bg-white/[0.055] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] dark:hover:bg-white/[0.075]"
+      >
+        <div className="relative p-2.5">
+          <div className="relative h-[260px] overflow-hidden rounded-[22px] border border-border/70 bg-zinc-950 shadow-inner sm:h-[300px] xl:h-[320px] dark:border-white/10">
+            <div className="pointer-events-none absolute inset-0 grid place-items-center">
+              <div className="w-full origin-center scale-[1.18]">
+                <Preview />
+              </div>
+            </div>
+            <div className="absolute right-4 top-4 grid size-10 place-items-center rounded-full border border-border/60 bg-background/95 text-amber-500 shadow-lg shadow-black/10 dark:border-white/10 dark:bg-zinc-950/90">
+              <Sparkles className="size-5 fill-current" />
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ── Grid ── */}
-      <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        {blocks.map((block, i) => {
-          const Preview = block.Preview;
-          return (
-            <motion.div
-              key={block.slug}
-              initial={reduce ? false : { opacity: 0, y: 14 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-32px" }}
-              transition={{ delay: i * 0.04, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={reduce ? undefined : { y: -5 }}
-              className="h-full"
+        <div className="px-8 pb-8 pt-5">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+              {block.name}
+            </h2>
+            <span className="rounded-lg border border-border/70 bg-background px-2.5 py-1 text-sm font-medium text-foreground shadow-sm dark:bg-white/[0.04]">
+              {block.variants.length}+ blocks
+            </span>
+          </div>
+          <p className="mt-4 max-w-xl text-lg leading-8 text-muted-foreground">
+            {block.description}
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <Badge variant="outline" className="border-border/70 bg-background/70 text-muted-foreground dark:bg-white/[0.04]">
+              {block.category}
+            </Badge>
+            <Badge
+              variant={block.premium ? "default" : "outline"}
+              className={cn(
+                block.premium
+                  ? "bg-foreground text-background"
+                  : "border-border/70 bg-background/70 text-muted-foreground dark:bg-white/[0.04]",
+              )}
             >
-              <Card className="group h-full overflow-hidden border-border/70 bg-background/80 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 dark:bg-white/[0.03] dark:hover:border-primary/20">
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-1">
-                      <CardTitle className="text-base font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                        {block.name}
-                      </CardTitle>
-                      <p className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-                        {block.category}
-                      </p>
-                    </div>
-                    {block.premium ? (
-                      <Badge className="shrink-0 border border-border/60 bg-muted/30 text-[10px] text-foreground">
-                        Premium
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="shrink-0 border-border/70 text-[10px] text-muted-foreground">
-                        Free
-                      </Badge>
-                    )}
-                  </div>
-                </CardHeader>
-
-                <CardContent className="space-y-4">
-                  {/* Preview */}
-                  <div className="relative overflow-hidden rounded-xl border border-border/60 bg-muted/60 ring-0 transition duration-300 group-hover:ring-2 group-hover:ring-primary/15 dark:bg-zinc-950">
-                    <div className="origin-top scale-[0.9]">
-                      <Preview />
-                    </div>
-                  </div>
-
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {block.description}
-                  </p>
-
-                  {/* Variants */}
-                  {block.variants.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {block.variants.map((v) => (
-                        <span
-                          key={v}
-                          className="rounded-full border border-border/50 bg-muted/50 px-2.5 py-0.5 text-[11px] text-muted-foreground dark:bg-white/[0.03]"
-                        >
-                          {v}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <Link
-                    href={`/blocks/${block.slug}`}
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      "w-full rounded-full border-border/70 text-foreground hover:border-primary/30 hover:bg-accent",
-                    )}
-                  >
-                    Open block
-                    <ArrowRight className="ml-1.5 size-3.5" />
-                  </Link>
-                </CardContent>
-              </Card>
-            </motion.div>
-          );
-        })}
-      </div>
-
-    </div>
+              {block.premium ? "Included with premium" : "Free"}
+            </Badge>
+            <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-foreground opacity-0 transition group-hover:opacity-100">
+              Open
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
   );
 }

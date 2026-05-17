@@ -122,7 +122,7 @@ export function CardStackRotator({
   stackOffset = 16,
   scaleStep = 0.04,
   cardWidth = "100%",
-  cardHeight = "260px",
+  cardHeight = "380px",
   cardBackground = "#111113",
   cardBorderColor = "rgba(255,255,255,0.07)",
   textColor = "#fafafa",

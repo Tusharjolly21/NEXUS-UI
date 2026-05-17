@@ -14,6 +14,8 @@ const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
   "block-logo-orbit": Previews.PreviewNavbarFloating,
   "block-stats-kpi": Previews.PreviewDashboardKpi,
   "block-cta-nebula": Previews.PreviewCtaGlow,
+  "block-interactive-dots": Previews.PreviewInteractiveDots,
+  "block-animated-bento": Previews.PreviewAnimatedBentoGrid,
   "block-faq-motion": Previews.PreviewFaq,
   "block-blog-editorial": Previews.PreviewBlogRail,
 };

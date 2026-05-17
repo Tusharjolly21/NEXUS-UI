@@ -52,6 +52,7 @@ import {
 } from "@/components/keyboard";
 import { ImagesBadge } from "@/components/images-badge";
 import { DotGridHero } from "@/components/dot-grid-hero";
+import { AnimatedBentoGrid } from "@/components/animated-bento-grid";
 import { InteractiveStarfieldHero } from "@/components/starfield-hero";
 import { Compare } from "@/components/compare";
 import { ExpandableCards } from "@/components/expandable-cards";
@@ -71,6 +72,8 @@ import { GlobePins } from "@/components/globe-pins/globe-pins";
 import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
 import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rotator";
 import { CodeBlock } from "@/components/code-block/code-block";
+import { InteractiveDots } from "@/components/interactive-dots";
+import { LayeredWaveBackground } from "@/components/layered-wave-background";
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
@@ -1091,6 +1094,61 @@ export function PreviewBeamSweep() {
           </p>
         </div>
       </div>
+    </div>
+  );
+}
+
+export function PreviewInteractiveDots() {
+  return (
+    <div className="relative h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950">
+      <InteractiveDots
+        mode="lines"
+        dotSpacing={28}
+        dotSize={2}
+        interactionRadius={105}
+        repulsionStrength={34}
+        lineDistance={58}
+        lineOpacity={0.28}
+        showToggle
+        className="h-full min-h-0 rounded-3xl border-0"
+      />
+      <div className="pointer-events-none absolute bottom-4 left-4">
+        <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+          Interactive
+        </p>
+        <p className="mt-1 text-sm font-semibold text-white">
+          Cursor dot field
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function PreviewLayeredWaveBackground() {
+  return (
+    <div className="relative h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950">
+      <LayeredWaveBackground
+        gradientColors={["#7c3aed", "#06b6d4", "#ec4899"]}
+        backgroundColor="#020617"
+        waveLayers={5}
+        waveWidth={1.2}
+        waveHeight={1.06}
+        blurIntensity={20}
+        opacity={0.72}
+        speed="medium"
+        className="h-full min-h-0 rounded-3xl"
+      >
+        <div className="flex h-full items-center px-6">
+          <div>
+            <p className="text-xs uppercase tracking-[0.22em] text-white/45">
+              Animated
+            </p>
+            <p className="mt-2 max-w-56 text-xl font-semibold leading-tight text-white">
+              Layered gradient waves
+            </p>
+          </div>
+        </div>
+      </LayeredWaveBackground>
     </div>
   );
 }
@@ -2891,25 +2949,25 @@ export function PreviewCardStackRotator({
     },
   ];
   return (
-    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-4 sm:p-8 lg:p-12">
+    <div className="flex items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-[#09090b] p-6 sm:p-10 lg:p-16">
       <CardStackRotator
         cards={cards}
         rotationInterval={compact ? 3500 : 3000}
         maxVisible={compact ? 3 : 4}
         stackOffset={14}
         scaleStep={0.04}
-        cardWidth={compact ? "100%" : "100%"}
-        cardHeight={compact ? "280px" : "260px"}
+        cardWidth="100%"
+        cardHeight={compact ? "360px" : "380px"}
         cardBackground="#111113"
         cardBorderColor="rgba(255,255,255,0.07)"
         textColor="#fafafa"
         mutedColor="rgba(250,250,250,0.45)"
         highlightBackground="rgba(129,140,248,0.15)"
         highlightTextColor="#a5b4fc"
-        contentFontSize="14px"
-        nameFontSize="14px"
-        designationFontSize="11px"
-        borderRadius="16px"
+        contentFontSize="16px"
+        nameFontSize="16px"
+        designationFontSize="13px"
+        borderRadius="20px"
         shadowIntensity={0.55}
         pauseOnHover
         direction="forward"
@@ -3069,6 +3127,28 @@ export function PreviewCodeBlock({
           className="w-full h-full min-h-[320px]"
         />
       </div>
+    </div>
+  );
+}
+
+const BENTO_PREVIEW_ITEMS = [
+  { id: "1", label: "Latency", value: "42ms", span: "1x1" as const },
+  { id: "2", label: "Uptime", value: "99.99%", span: "2x1" as const, trend: { value: 0.1, label: "vs last month" } },
+  { id: "3", label: "Signals", value: "1.2M", span: "1x1" as const },
+  { id: "4", label: "Edge", value: "12 regions", span: "1x1" as const, trend: { value: 20, label: "new this quarter" } },
+];
+
+export function PreviewAnimatedBentoGrid() {
+  return (
+    <div className="relative h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-3">
+      <div className="lf-grid absolute inset-0 opacity-30" />
+      <AnimatedBentoGrid
+        items={BENTO_PREVIEW_ITEMS}
+        variant="default"
+        columns={3}
+        className="relative h-full"
+        itemClassName="h-full"
+      />
     </div>
   );
 }

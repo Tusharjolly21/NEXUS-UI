@@ -1,13 +1,30 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { ChevronRight, Expand, Lock, Monitor } from "lucide-react";
 import { getBlock, blocks } from "@/lib/catalog/blocks";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { CodeBlock } from "@/components/code-block/code-block";
+import { InteractiveDotsHeroCustomizer } from "@/components/library/interactive-dots-hero-customizer";
+import { LayeredWaveHeroCustomizer } from "@/components/library/layered-wave-hero-customizer";
+import { ParticleNoiseHeroCustomizer } from "@/components/library/particle-noise-hero-customizer";
+import { BentoHeroCustomizer } from "@/components/library/bento-hero-customizer";
+import { UsageSnippet } from "@/components/library/usage-snippet";
 import { createMetadata, siteConfig } from "@/lib/seo";
-import { BlockDetailActions } from "@/components/library/block-detail-actions";
-import { cn } from "@/lib/utils";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -17,12 +34,12 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const b = getBlock(slug);
-  if (!b) return {};
+  const block = getBlock(slug);
+  if (!block) return {};
   return createMetadata({
-    title: b.name,
-    description: b.description,
-    openGraph: { title: `${b.name} · ${siteConfig.name}` },
+    title: block.name,
+    description: block.description,
+    openGraph: { title: `${block.name} · ${siteConfig.name}` },
   });
 }
 
@@ -31,63 +48,300 @@ export default async function BlockDetailPage({ params }: Props) {
   const block = getBlock(slug);
   if (!block) notFound();
   const Preview = block.Preview;
+  const code = await getBlockCode(block.slug, block.reactSource);
+  const isInteractiveBackgroundCard = block.slug === "block-interactive-dots";
+  const isAnimatedBentoCard = block.slug === "block-animated-bento";
+  const layeredWaveCode = isInteractiveBackgroundCard
+    ? await readSourceFile("src/components/layered-wave-background/layered-wave-background.tsx", "")
+    : "";
+  const particleNoiseCode = isInteractiveBackgroundCard
+    ? await readSourceFile("src/components/particle-noise/particle-noise.tsx", "")
+    : "";
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div className="space-y-2">
-          <Badge variant="outline" className="border-border text-muted-foreground">
+    <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
+      <nav className="mb-7 flex items-center gap-1 text-sm text-muted-foreground">
+        <Link href="/blocks" className="transition hover:text-foreground">
+          Blocks
+        </Link>
+        <ChevronRight className="size-3.5" />
+        <span className="font-medium text-foreground">{block.name}</span>
+      </nav>
+
+      <header>
+        <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          {block.name}
+        </h1>
+        <p className="mt-4 max-w-3xl text-xl leading-8 text-muted-foreground">
+          {block.description}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Badge variant="outline" className="border-border/70 bg-muted/50 text-muted-foreground">
             {block.category}
           </Badge>
-          <h1 className="text-3xl font-semibold text-foreground md:text-4xl">{block.name}</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">{block.description}</p>
-          <div className="flex flex-wrap gap-2">
-            {block.tags.map((t) => (
-              <span key={t} className="rounded-full border border-border bg-muted/50 dark:bg-white/5 px-3 py-1 text-xs text-muted-foreground">
-                {t}
-              </span>
+          {block.tags.map((tag) => (
+            <Badge
+              key={tag}
+              variant="outline"
+              className="border-border/70 bg-muted/50 text-muted-foreground"
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      </header>
+
+      <Accordion defaultValue={[]} className="mt-10">
+        <AccordionItem value="installation" className="border-0">
+          <AccordionTrigger className="rounded-xl bg-muted/70 px-5 py-4 text-2xl font-semibold text-foreground no-underline hover:bg-muted hover:no-underline dark:bg-white/[0.06] dark:hover:bg-white/[0.08]">
+            Installation
+          </AccordionTrigger>
+          <AccordionContent className="rounded-b-xl border border-t-0 border-border/50 bg-muted/25 px-5 py-4 text-sm text-muted-foreground dark:bg-white/[0.03]">
+            <p>
+              Copy the component code from the Code tab and place it in your
+              components directory. The preview below shows the block in a realistic
+              hero section container.
+            </p>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      {isInteractiveBackgroundCard ? (
+        <>
+          <PreviewCodeSection title="Interactive Dots" code={code}>
+            <InteractiveDotsHeroCustomizer />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Layered Wave Background"
+            code={layeredWaveCode}
+            usageCode={LAYERED_WAVE_USAGE}
+            className="mt-16"
+          >
+            <LayeredWaveHeroCustomizer />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Particle Noise"
+            code={particleNoiseCode}
+            usageCode={PARTICLE_NOISE_USAGE}
+            className="mt-16"
+          >
+            <ParticleNoiseHeroCustomizer />
+          </PreviewCodeSection>
+        </>
+      ) : isAnimatedBentoCard ? (
+        <PreviewCodeSection title={block.name} code={code}>
+          <BentoHeroCustomizer />
+        </PreviewCodeSection>
+      ) : (
+        <PreviewCodeSection title={block.name} code={code}>
+          <Preview />
+        </PreviewCodeSection>
+      )}
+
+      <section className="mt-10 grid gap-4 border-t border-border/50 pt-8 md:grid-cols-2">
+        <div>
+          <h2 className="text-lg font-semibold text-foreground">Variants</h2>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {block.variants.map((variant) => (
+              <Badge key={variant} variant="outline" className="border-border/70 text-muted-foreground">
+                {variant}
+              </Badge>
             ))}
           </div>
         </div>
-        <Link
-          href="/blocks"
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "rounded-full border-border text-foreground",
-          )}
-        >
-          All blocks
-        </Link>
-      </div>
-
-      <Card className="border-border bg-muted/50 dark:bg-white/5 p-4">
-        <div className="overflow-hidden rounded-2xl border border-border bg-muted dark:bg-zinc-950 p-4">
-          <Preview />
+        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 dark:bg-white/[0.04]">
+          <p className="text-sm font-semibold text-foreground">Code access enabled</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Use the Code tab above to inspect and copy this block while you test the flow.
+          </p>
         </div>
-      </Card>
-
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card className="border-border bg-muted/50 dark:bg-white/5">
-          <CardHeader>
-            <CardTitle className="text-foreground">Variants</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {block.variants.map((v) => (
-              <Badge key={v} variant="outline" className="border-border text-muted-foreground">
-                {v}
-              </Badge>
-            ))}
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-muted/50 dark:bg-white/5">
-          <CardHeader>
-            <CardTitle className="text-foreground">Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <BlockDetailActions slug={block.slug} source={block.reactSource} />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
+
+async function getBlockCode(slug: string, fallback: string) {
+  const sourceBySlug: Record<string, string> = {
+    "block-interactive-dots": "src/components/interactive-dots/interactive-dots.tsx",
+  };
+
+  const sourcePath = sourceBySlug[slug];
+  if (!sourcePath) return fallback;
+
+  return readSourceFile(sourcePath, fallback);
+}
+
+async function readSourceFile(sourcePath: string, fallback: string) {
+  try {
+    const filePath = path.join(process.cwd(), sourcePath);
+    return await readFile(filePath, "utf8");
+  } catch {
+    return fallback;
+  }
+}
+
+function PreviewCodeSection({
+  title,
+  code,
+  usageCode,
+  className,
+  children,
+}: {
+  title: string;
+  code: string;
+  usageCode?: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className={className ?? "mt-14"}>
+      <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+        {title}
+      </h2>
+
+      <Tabs defaultValue="preview" className="mt-7 gap-0">
+        <div className="flex items-end justify-between gap-3">
+          <TabsList className="h-11 rounded-xl bg-muted p-1">
+            <TabsTrigger value="preview" className="h-9 gap-2 rounded-lg px-4 text-base">
+              <Monitor className="size-4" />
+              Preview
+            </TabsTrigger>
+            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled>
+              <Lock className="size-4" />
+              Code
+            </TabsTrigger>
+          </TabsList>
+
+          <button
+            type="button"
+            aria-label="Full screen preview"
+            className="grid size-10 place-items-center rounded-xl border border-border/70 bg-background text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-white/[0.04]"
+          >
+            <Expand className="size-4" />
+          </button>
+        </div>
+
+        <TabsContent value="preview" className="mt-4">
+          <div className="rounded-2xl bg-muted/80 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-white/[0.06] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+            <div className="relative h-[620px] overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950 md:h-[720px] xl:h-[860px]">
+              <div className="absolute inset-4 overflow-hidden rounded-lg bg-background dark:bg-zinc-950 sm:inset-6">
+                <div className="h-full w-full [&>*]:!h-full [&>*]:!min-h-full [&>*]:!w-full [&>*]:!max-w-none [&>*]:!rounded-lg">
+                  {children}
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="code" className="mt-4">
+          <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+            <UsageSnippet code={usageCode ?? defaultUsageForTitle(title)} />
+            <CodeBlock
+              code={code}
+              language="tsx"
+              theme="dark"
+              header={{
+                enabled: true,
+                showDots: true,
+                title: `${title}.tsx`,
+                copy: {
+                  enabled: true,
+                  label: "Copy code",
+                  copiedLabel: "Copied",
+                  copiedDurationMs: 1400,
+                },
+              }}
+              codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+              border={{ radius: "16px" }}
+            />
+          </div>
+        </TabsContent>
+      </Tabs>
+    </section>
+  );
+}
+
+function defaultUsageForTitle(title: string) {
+  if (title === "Interactive Dots") return INTERACTIVE_DOTS_USAGE;
+  if (title === "Animated Bento Grid") return BENTO_USAGE;
+  return `<${title.replaceAll(" ", "")} />`;
+}
+
+const INTERACTIVE_DOTS_USAGE = `<section className="relative min-h-[640px] overflow-hidden">
+  <InteractiveDots
+    mode="lines"
+    dotSize={2.4}
+    dotSpacing={30}
+    dotColor="rgba(148, 163, 184, 0.58)"
+    activeDotColor="rgba(125, 211, 252, 0.95)"
+    lineColor="rgba(125, 211, 252, 0.72)"
+    backgroundColor="#05070d"
+    interactionRadius={130}
+    repulsionStrength={48}
+    lineDistance={72}
+    lineOpacity={0.34}
+    className="absolute inset-0 h-full"
+  />
+
+  <div className="relative z-10 mx-auto flex min-h-[640px] max-w-5xl flex-col justify-center px-6">
+    <h1 className="text-5xl font-semibold text-white">Your hero headline</h1>
+    <p className="mt-4 max-w-xl text-white/70">Your supporting copy goes here.</p>
+  </div>
+</section>`;
+
+const BENTO_USAGE = `<AnimatedBentoGrid
+  items={[
+    { id: "1", label: "Latency", value: "42ms", span: "1x1" },
+    { id: "2", label: "Uptime", value: "99.99%", span: "2x1", trend: { value: 0.1, label: "vs last month" } },
+    { id: "3", label: "Signals", value: "1.2M", span: "1x1" },
+    { id: "4", label: "Edge", value: "12 regions", span: "1x1", trend: { value: 20, label: "new" } },
+  ]}
+  variant="default"
+  columns={3}
+/>`;
+
+const LAYERED_WAVE_USAGE = `<section className="relative min-h-[640px] overflow-hidden">
+  <LayeredWaveBackground
+    gradientColors={["#7c3aed", "#06b6d4", "#ec4899"]}
+    backgroundColor="#020617"
+    waveLayers={5}
+    waveWidth={1.25}
+    waveHeight={1.08}
+    blurIntensity={24}
+    opacity={0.72}
+    speed="medium"
+    direction="left"
+    className="absolute inset-0 h-full"
+  />
+
+  <div className="relative z-10 mx-auto flex min-h-[640px] max-w-5xl flex-col justify-center px-6">
+    <h1 className="text-5xl font-semibold text-white">Launch with motion</h1>
+    <p className="mt-4 max-w-xl text-white/70">Use the waves behind your own hero content.</p>
+  </div>
+</section>`;
+
+const PARTICLE_NOISE_USAGE = `<section className="relative min-h-[640px] overflow-hidden bg-black">
+  <ParticleNoise
+    positionX={0}
+    positionY={0.45}
+    zoom={0.9}
+    spacing={18}
+    inflation={58}
+    particleSize={1.1}
+    density={0.95}
+    animationEnabled={true}
+    speed="slow"
+    backgroundColor="#000000"
+    dotColor="#f8fafc"
+    secondaryDotColor="#94a3b8"
+    opacity={0.86}
+    surfaceBias={0.82}
+    gridJitter={0}
+    className="absolute inset-0 h-full"
+  />
+
+  <div className="relative z-10 mx-auto flex min-h-[640px] max-w-5xl flex-col justify-center px-6">
+    <h1 className="text-5xl font-semibold text-white">Generative hero section</h1>
+    <p className="mt-4 max-w-xl text-white/70">Place your page content above the particle field.</p>
+  </div>
+</section>`;
