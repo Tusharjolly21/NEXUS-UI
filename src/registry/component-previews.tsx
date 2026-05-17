@@ -990,8 +990,8 @@ export function PreviewSignupForm({
 }: { compact?: boolean } = {}) {
   if (compact) {
     return (
-      <div className="flex h-[440px] items-center justify-center rounded-3xl border border-border bg-background p-6">
-        <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-sm">
+      <div className="flex h-auto min-h-[440px] w-full items-center justify-center overflow-hidden rounded-3xl border border-border bg-background p-4 sm:p-6">
+        <div className="w-full rounded-2xl border border-border bg-card p-5 shadow-sm">
           <p className="text-base font-semibold text-foreground">
             Create your account
           </p>
@@ -1654,7 +1654,7 @@ export function PreviewKeyboard({
     <div
       className={cn(
         "flex items-center justify-center overflow-hidden rounded-xl",
-        compact ? "p-4 scale-[0.72] origin-top" : "p-6",
+        compact ? "p-2 sm:p-4" : "p-6",
       )}
     >
       <MacKeyboard
@@ -2891,15 +2891,15 @@ export function PreviewCardStackRotator({
     },
   ];
   return (
-    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-28">
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-4 sm:p-8 lg:p-12">
       <CardStackRotator
         cards={cards}
         rotationInterval={compact ? 3500 : 3000}
         maxVisible={compact ? 3 : 4}
         stackOffset={14}
         scaleStep={0.04}
-        cardWidth={compact ? "340px" : "100%"}
-        cardHeight={compact ? "360px" : "320px"}
+        cardWidth={compact ? "100%" : "100%"}
+        cardHeight={compact ? "280px" : "260px"}
         cardBackground="#111113"
         cardBorderColor="rgba(255,255,255,0.07)"
         textColor="#fafafa"

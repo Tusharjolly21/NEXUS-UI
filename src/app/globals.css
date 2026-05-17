@@ -129,9 +129,18 @@ html.dark {
   html.dark {
     color-scheme: dark;
   }
+  html {
+    @apply overflow-x-hidden;
+    scrollbar-gutter: stable;
+  }
   body {
-    @apply bg-background font-sans text-foreground antialiased;
+    @apply overflow-x-hidden bg-background font-sans text-foreground antialiased;
     background-attachment: fixed;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
   }
   html.dark body {
     background-image:
