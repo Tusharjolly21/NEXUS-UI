@@ -4676,6 +4676,211 @@ export function GlobePins({
     ],
   },
   {
+    name: "Globe Pins 3D",
+    slug: "globe-pins-3d",
+    description: "An interactive 3-D globe built with Three.js featuring auto-rotation, location pins with labels, animated arc trails, optional bloom post-processing, and OrbitControls for manual exploration.",
+    categorySlug: "three-d-components",
+    tags: ["globe", "map", "3d", "threejs", "pins", "connections", "arcs", "location", "webgl", "bloom", "trails"],
+    premium: false,
+    trendingScore: 220,
+    createdAt: "2026-05-17T00:00:00.000Z",
+    animationKinds: ["3d"],
+    dependencies: ["three"],
+    Preview: Previews.PreviewGlobePins3D,
+    tailwindSource: tw,
+    previewSections: [
+      {
+        Preview: Previews.PreviewGlobePins3DDefault,
+        reactSource: `"use client";
+
+import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
+
+export function GlobePins3DDefault() {
+  return (
+    <div className="relative w-full h-full bg-[#0a1a20] overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins3D showLabels rotationSpeed={0.03} className="w-[640px] h-[480px]" />
+      </div>
+    </div>
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewGlobePins3DBloom,
+        reactSource: `"use client";
+
+import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
+
+export function GlobePins3DNeon() {
+  return (
+    <div className="relative w-full h-full bg-black overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins3D bloom enablePostFX fxIntensity={0.6} showLabels={false} rotationSpeed={0.03} className="w-[640px] h-[480px]" />
+      </div>
+    </div>
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewGlobePins3D,
+        reactSource: `"use client";
+
+import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
+
+export function GlobePins3DCompact() {
+  return (
+    <div className="relative w-full h-full bg-[#0a1a20] overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins3D showLabels={false} rotationSpeed={0.03} className="w-[640px] h-[480px]" />
+      </div>
+    </div>
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
+
+import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
+
+export function GlobePins3DExample() {
+  return (
+    <GlobePins3D
+      showLabels
+      rotationSpeed={0.03}
+      className="w-[640px] h-[480px]"
+    />
+  );
+}`,
+    props: [
+      { name: "pins", type: "GlobePin3D[]", description: "Location pins with id, name, city, address, phone and lat/lon coordinates.", defaultValue: "DEFAULT_PINS_3D (UK + USA + Japan)" },
+      { name: "connections", type: "GlobeConnection3D[]", description: "Pairs of pin IDs connected by curved arc trails.", defaultValue: "DEFAULT_CONNECTIONS_3D" },
+      { name: "autoRotate", type: "boolean", description: "Enable continuous globe rotation.", defaultValue: "true" },
+      { name: "rotationSpeed", type: "number", description: "Radians per second of rotation.", defaultValue: "0.03" },
+      { name: "initialRotation", type: "number", description: "Starting Y-axis rotation in degrees.", defaultValue: "0" },
+      { name: "dotColor", type: "string", description: "Color of country outline and fill dots.", defaultValue: "\"#7AE1FF\"" },
+      { name: "dotSize", type: "number", description: "Size of country dots.", defaultValue: "0.006" },
+      { name: "dotOpacity", type: "number", description: "Opacity of country dots (0–1).", defaultValue: "0.72" },
+      { name: "bloom", type: "boolean", description: "Enable bloom glow on dots.", defaultValue: "false" },
+      { name: "pinColor", type: "string", description: "Color of pin spheres and halos.", defaultValue: "\"#7AE1FF\"" },
+      { name: "pinSize", type: "number", description: "Radius of pin spheres.", defaultValue: "0.012" },
+      { name: "showLabels", type: "boolean", description: "Show CSS2D floating labels on pins.", defaultValue: "true" },
+      { name: "labelBackground", type: "string", description: "Background color for pin labels.", defaultValue: "\"rgba(12,42,51,0.88)\"" },
+      { name: "labelColor", type: "string", description: "Text color for pin labels.", defaultValue: "\"#E7F8FF\"" },
+      { name: "labelBorderColor", type: "string", description: "Border color for pin labels.", defaultValue: "\"#7AE1FF\"" },
+      { name: "fontFamily", type: "string", description: "Font family for pin labels.", defaultValue: "\"Inter, system-ui, sans-serif\"" },
+      { name: "fontSize", type: "number", description: "Font size for pin labels in px.", defaultValue: "12" },
+      { name: "className", type: "string | undefined", description: "CSS classes on the container." },
+      { name: "dpr", type: "number", description: "Target device pixel ratio cap.", defaultValue: "1.5" },
+      { name: "fpsCap", type: "number", description: "Maximum frames per second.", defaultValue: "30" },
+      { name: "maxCanvasSize", type: "number", description: "Maximum canvas width/height in px.", defaultValue: "600" },
+      { name: "enableTrails", type: "boolean", description: "Enable animated arc trails between pins.", defaultValue: "true" },
+      { name: "trailColor", type: "string", description: "Color of arc trails.", defaultValue: "\"#40C5E3\"" },
+      { name: "enablePostFX", type: "boolean", description: "Enable Three.js post-processing (UnrealBloomPass).", defaultValue: "false" },
+      { name: "fxIntensity", type: "number", description: "Post-FX intensity 0–1.", defaultValue: "0.6" },
+    ],
+  },
+  {
+    name: "Code Block",
+    slug: "code-block",
+    description: "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",
+    categorySlug: "feature-sections",
+    tags: ["code", "syntax", "highlight", "copy", "snippet", "dark", "light"],
+    premium: false,
+    trendingScore: 0,
+    createdAt: "2026-05-17T00:00:00.000Z",
+    animationKinds: ["hover"] as const,
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewCodeBlock,
+    tailwindSource: tw,
+    previewSections: [
+      {
+        Preview: Previews.PreviewCodeBlockDefault,
+        reactSource: `"use client";
+
+import { CodeBlock } from "@/components/code-block/code-block";
+
+const code = \`import React, { useState } from 'react';
+
+export default function PricingCard() {
+  const [isYearly, setIsYearly] = useState(false);
+  return <div>...</div>;
+}\`;
+
+export function CodeBlockDefault() {
+  return (
+    <div style={{ height: 420 }}>
+      <CodeBlock code={code} language="jsx" theme="dark" className="w-full h-full" />
+    </div>
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewCodeBlockLight,
+        reactSource: `"use client";
+
+import { CodeBlock } from "@/components/code-block/code-block";
+
+const code = \`const x = 42;\`;
+
+export function CodeBlockLight() {
+  return (
+    <div style={{ height: 420 }}>
+      <CodeBlock code={code} language="ts" theme="light" className="w-full h-full" />
+    </div>
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewCodeBlockJson,
+        reactSource: `"use client";
+
+import { CodeBlock } from "@/components/code-block/code-block";
+
+const json = \`{ "name": "nexus-ui", "version": "1.0.0" }\`;
+
+export function CodeBlockJson() {
+  return (
+    <div style={{ height: 420 }}>
+      <CodeBlock code={json} language="json" theme="dark" className="w-full h-full" />
+    </div>
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
+
+import { CodeBlock } from "@/components/code-block/code-block";
+
+const code = \`import React from 'react';
+
+export default function App() {
+  return <h1>Hello, world!</h1>;
+}\`;
+
+export function CodeBlockExample() {
+  return (
+    <div style={{ height: 420 }}>
+      <CodeBlock
+        code={code}
+        language="jsx"
+        theme="dark"
+        className="w-full h-full"
+      />
+    </div>
+  );
+}`,
+    props: [
+      { name: "code", type: "string", description: "The code string to display.", defaultValue: "DEFAULT_CODE (PricingCard example)" },
+      { name: "language", type: "CodeLanguage", description: "Syntax language for tokenization.", defaultValue: "\"jsx\"" },
+      { name: "theme", type: "\"dark\" | \"light\" | \"custom\"", description: "Color theme preset.", defaultValue: "\"dark\"" },
+      { name: "header", type: "HeaderProps", description: "Header bar configuration: show/hide, window dots, title, copy button.", defaultValue: "{ enabled: true, showDots: true, title: \"Example\", ... }" },
+      { name: "codeArea", type: "CodeAreaProps", description: "Code area: line numbers, wrap, padding, background, text color.", defaultValue: "{ showLineNumbers: true, wrap: true, padding: 16, ... }" },
+      { name: "border", type: "BorderProps", description: "Border: color, width, border-radius.", defaultValue: "{ color: \"#1A1A1A\", width: 1, radius: \"12px\" }" },
+      { name: "className", type: "string | undefined", description: "CSS classes on the container." },
+      { name: "style", type: "React.CSSProperties | undefined", description: "Inline styles on the container." },
+    ],
+  },
+  {
     name: "Card Stack Rotator",
     slug: "card-stack-rotator",
     description: "A premium stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",

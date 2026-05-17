@@ -68,7 +68,9 @@ import { AnimatedCountdown } from "@/components/animated-countdown";
 import { ShootingStarsGrid } from "@/components/shooting-stars-grid";
 import { HoverHighlightText } from "@/components/hover-highlight-text";
 import { GlobePins } from "@/components/globe-pins/globe-pins";
+import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
 import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rotator";
+import { CodeBlock } from "@/components/code-block/code-block";
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
@@ -2732,13 +2734,13 @@ export function PreviewGlobePinsDefault() {
   return (
     <div
       className="relative w-full h-full bg-[#111] overflow-hidden"
-      style={{ minHeight: 280 }}
+      style={{ minHeight: 360 }}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <GlobePins
           showLabels
           rotationSpeed={60}
-          className="w-[280px] h-[280px]"
+          className="preview-force-active w-[320px] h-[320px]"
         />
       </div>
     </div>
@@ -2749,14 +2751,14 @@ export function PreviewGlobePinsBloom() {
   return (
     <div
       className="relative w-full h-full bg-black overflow-hidden"
-      style={{ minHeight: 280 }}
+      style={{ minHeight: 360 }}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <GlobePins
           bloom
           showLabels={false}
           rotationSpeed={60}
-          className="w-[280px] h-[280px]"
+          className="preview-force-active w-[320px] h-[320px]"
         />
       </div>
     </div>
@@ -2769,13 +2771,69 @@ export function PreviewGlobePins({
   return (
     <div
       className="relative w-full h-full bg-[#111] overflow-hidden"
-      style={{ minHeight: 280 }}
+      style={{ minHeight: 360 }}
     >
       <div className="absolute inset-0 flex items-center justify-center">
         <GlobePins
           showLabels={false}
           rotationSpeed={60}
-          className="w-[280px] h-[280px]"
+          className="preview-force-active w-[320px] h-[320px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewGlobePins3DDefault() {
+  return (
+    <div
+      className="relative w-full h-full bg-[#0a1a20] overflow-hidden"
+      style={{ minHeight: 400 }}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins3D
+          showLabels
+          rotationSpeed={0.03}
+          className="preview-force-active w-full h-full"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewGlobePins3DBloom() {
+  return (
+    <div
+      className="relative w-full h-full bg-black overflow-hidden"
+      style={{ minHeight: 400 }}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins3D
+          bloom
+          enablePostFX
+          fxIntensity={0.6}
+          showLabels={false}
+          rotationSpeed={0.03}
+          className="preview-force-active w-full h-full"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewGlobePins3D({
+  compact = true,
+}: { compact?: boolean } = {}) {
+  return (
+    <div
+      className="relative w-full h-full bg-[#0a1a20] overflow-hidden"
+      style={{ minHeight: 400 }}
+    >
+      <div className="absolute inset-0 flex items-center justify-center">
+        <GlobePins3D
+          showLabels={false}
+          rotationSpeed={0.03}
+          className="preview-force-active w-full h-full"
         />
       </div>
     </div>
@@ -2840,7 +2898,7 @@ export function PreviewCardStackRotator({
         maxVisible={compact ? 3 : 4}
         stackOffset={14}
         scaleStep={0.04}
-        cardWidth={compact ? "340px" : "420px"}
+        cardWidth={compact ? "340px" : "100%"}
         cardHeight={compact ? "360px" : "320px"}
         cardBackground="#111113"
         cardBorderColor="rgba(255,255,255,0.07)"
@@ -2856,6 +2914,161 @@ export function PreviewCardStackRotator({
         pauseOnHover
         direction="forward"
       />
+    </div>
+  );
+}
+
+const SAMPLE_CODE_JS = `import React, { useState } from 'react';
+
+export default function PricingCard() {
+  const [isYearly, setIsYearly] = useState(false);
+
+  return (
+    <div className="pricing-card">
+      <h3>Pro Plan</h3>
+      <p className="price">
+        \${isYearly ? '99' : '12'}
+        <span className="duration">
+          /{isYearly ? 'year' : 'month'}
+        </span>
+      </p>
+
+      <button onClick={() => setIsYearly(!isYearly)}>
+        Toggle Billing
+      </button>
+
+      <ul className="features">
+        <li>Unlimited Projects</li>
+        <li>Priority Support</li>
+      </ul>
+    </div>
+  );
+}`;
+
+const SAMPLE_CODE_HTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My App</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="root"></div>
+  <script src="index.js"></script>
+</body>
+</html>`;
+
+const SAMPLE_CODE_JSON = `{
+  "name": "nexus-ui",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^18.0.0",
+    "framer-motion": "^11.0.0"
+  }
+}`;
+
+const SAMPLE_CODE_CSS = `.button {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}`;
+
+export function PreviewCodeBlockDefault() {
+  return (
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-6">
+      <div className="w-full h-full min-h-[320px]">
+        <CodeBlock
+          code={SAMPLE_CODE_JS}
+          language="jsx"
+          theme="dark"
+          className="w-full h-full min-h-[320px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewCodeBlockLight() {
+  return (
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-white p-6">
+      <div className="w-full h-full min-h-[320px]">
+        <CodeBlock
+          code={SAMPLE_CODE_JS}
+          language="jsx"
+          theme="light"
+          className="w-full h-full min-h-[320px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewCodeBlockHtml() {
+  return (
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-6">
+      <div className="w-full h-full min-h-[320px]">
+        <CodeBlock
+          code={SAMPLE_CODE_HTML}
+          language="html"
+          theme="dark"
+          className="w-full h-full min-h-[320px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewCodeBlockJson() {
+  return (
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-6">
+      <div className="w-full h-full min-h-[320px]">
+        <CodeBlock
+          code={SAMPLE_CODE_JSON}
+          language="json"
+          theme="dark"
+          className="w-full h-full min-h-[320px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewCodeBlockCss() {
+  return (
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-6">
+      <div className="w-full h-full min-h-[320px]">
+        <CodeBlock
+          code={SAMPLE_CODE_CSS}
+          language="css"
+          theme="dark"
+          className="w-full h-full min-h-[320px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function PreviewCodeBlock({
+  compact = false,
+}: { compact?: boolean } = {}) {
+  return (
+    <div className="flex items-center justify-center rounded-xl border border-border/60 bg-[#09090b] p-6">
+      <div className="w-full max-w-xl" style={{ height: compact ? 320 : 420 }}>
+        <CodeBlock
+          code={SAMPLE_CODE_JS}
+          language="jsx"
+          theme="dark"
+          className="w-full h-full min-h-[320px]"
+        />
+      </div>
     </div>
   );
 }
