@@ -81,15 +81,13 @@ function BlocksPageInner() {
   }, [filteredBlocks]);
 
   return (
-    <div className="flex flex-1 lg:flex-row">
-      <aside className="relative hidden w-[272px] shrink-0 border-r border-border/40 lg:block">
-        <div className="sticky top-16 flex h-[calc(100dvh-4rem)] min-h-0 flex-col overflow-hidden">
-          <LibraryExplorerSidebarDesktopChrome />
-        </div>
+    <div className="flex h-[calc(100dvh-4rem)] overflow-hidden lg:flex-row">
+      <aside className="relative hidden w-[272px] shrink-0 border-r border-border/40 lg:flex lg:flex-col">
+        <LibraryExplorerSidebarDesktopChrome />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="sticky top-16 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md lg:hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md lg:hidden">
           <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
             <SheetTrigger
               className={cn(
@@ -193,10 +191,9 @@ function BlockCard({
       transition={{ delay: Math.min(index * 0.035, 0.28), duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
       className="h-full"
     >
-      <Link
+      <div
         id={block.slug}
-        href={`/blocks/${block.slug}`}
-        className="group block h-full overflow-hidden rounded-[28px] bg-muted/55 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:bg-muted/70 hover:shadow-2xl hover:shadow-foreground/10 dark:bg-white/[0.055] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] dark:hover:bg-white/[0.075]"
+        className="group relative flex h-full flex-col overflow-hidden rounded-[28px] bg-muted/55 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:bg-muted/70 hover:shadow-2xl hover:shadow-foreground/10 dark:bg-white/5.5 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] dark:hover:bg-white/7.5"
       >
         <div className="relative p-2.5">
           <div className="relative h-[260px] overflow-hidden rounded-[22px] border border-border/70 bg-zinc-950 shadow-inner sm:h-[300px] xl:h-[320px] dark:border-white/10">
@@ -237,13 +234,19 @@ function BlockCard({
             >
               {block.premium ? "Included with premium" : "Free"}
             </Badge>
-            <span className="ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-foreground opacity-0 transition group-hover:opacity-100">
+            <span className="relative z-10 ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-foreground opacity-0 transition group-hover:opacity-100">
               Open
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
         </div>
-      </Link>
+
+        <Link
+          href={`/blocks/${block.slug}`}
+          className="absolute inset-0 rounded-[28px]"
+          aria-label={`Open ${block.name}`}
+        />
+      </div>
     </motion.div>
   );
 }

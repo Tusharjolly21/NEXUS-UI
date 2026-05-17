@@ -134,11 +134,11 @@ export function SearchCommand() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[10vh]"
-            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[6vh]"
+            onMouseDown={() => setOpen(false)}
           >
             {/* Overlay */}
-            <div className="absolute inset-0 bg-black/55 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
 
             {/* Palette */}
             <motion.div
@@ -147,8 +147,8 @@ export function SearchCommand() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -16 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="relative z-10 flex w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_32px_80px_-8px_rgba(0,0,0,0.85)]"
-              onClick={(e) => e.stopPropagation()}
+              className="relative z-10 flex w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_32px_80px_-8px_rgba(0,0,0,0.85)]"
+              onMouseDown={(e) => e.stopPropagation()}
             >
               {/* Top accent line */}
               <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/80 to-transparent" />
@@ -194,7 +194,7 @@ export function SearchCommand() {
                 </p>
 
                 {/* Results */}
-                <div className="max-h-72 overflow-y-auto pb-3">
+                <div className="max-h-105 overflow-y-auto pb-3">
                   {results.length === 0 ? (
                     <div className="flex flex-col items-center gap-3 py-12">
                       <Search className="size-9 text-zinc-700" />
@@ -276,7 +276,7 @@ export function SearchCommand() {
               </div>
 
               {/* ── RIGHT: component detail panel ── */}
-              <div className="hidden w-72 shrink-0 flex-col sm:flex">
+              <div className="hidden w-96 shrink-0 flex-col sm:flex">
                 <AnimatePresence mode="wait">
                   {activeItem && (
                     <motion.div
@@ -295,14 +295,17 @@ export function SearchCommand() {
                           <span className="size-2 rounded-full bg-green-500/60" />
                           <span className="ml-auto font-mono text-[9px] text-zinc-600">preview</span>
                         </div>
-                        <div className="flex h-40 items-center justify-center p-4">
-                          <React.Suspense
-                            fallback={
-                              <div className="h-16 w-32 animate-pulse rounded-lg bg-white/5" />
-                            }
-                          >
-                            <activeItem.Preview compact />
-                          </React.Suspense>
+                        <div className="relative h-64 overflow-hidden">
+                          <div className="pointer-events-none absolute inset-x-0 top-0 w-full">
+                            <React.Suspense
+                              fallback={
+                                <div className="h-16 w-32 animate-pulse rounded-lg bg-white/5" />
+                              }
+                            >
+                              <activeItem.Preview compact />
+                            </React.Suspense>
+                          </div>
+                          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-zinc-900 to-transparent" />
                         </div>
                       </div>
 

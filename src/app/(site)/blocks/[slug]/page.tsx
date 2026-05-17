@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { ChevronRight, Expand, Lock, Monitor } from "lucide-react";
+import { ChevronRight, Code2, Expand, Monitor } from "lucide-react";
 import { getBlock, blocks } from "@/lib/catalog/blocks";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,6 +23,12 @@ import { InteractiveDotsHeroCustomizer } from "@/components/library/interactive-
 import { LayeredWaveHeroCustomizer } from "@/components/library/layered-wave-hero-customizer";
 import { ParticleNoiseHeroCustomizer } from "@/components/library/particle-noise-hero-customizer";
 import { BentoHeroCustomizer } from "@/components/library/bento-hero-customizer";
+import { BentoGridSkeletonHeroCustomizer } from "@/components/library/bento-grid-skeleton-hero-customizer";
+import { MotionLayerScrollerHeroCustomizer } from "@/components/library/motion-layer-scroller-hero-customizer";
+import { BentoShowcaseHeroCustomizer } from "@/components/library/bento-showcase-hero-customizer";
+import { WhyChooseUsBentoHeroCustomizer } from "@/components/library/why-choose-us-bento-hero-customizer";
+import { AtsBentoGridHeroCustomizer } from "@/components/library/ats-bento-grid-hero-customizer";
+import { SpotlightBentoGridCustomizer } from "@/components/library/spotlight-bento-grid-customizer";
 import { UsageSnippet } from "@/components/library/usage-snippet";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
@@ -51,11 +57,21 @@ export default async function BlockDetailPage({ params }: Props) {
   const code = await getBlockCode(block.slug, block.reactSource);
   const isInteractiveBackgroundCard = block.slug === "block-interactive-dots";
   const isAnimatedBentoCard = block.slug === "block-animated-bento";
+  const isBentoSkeletonCard = block.slug === "block-bento-skeleton";
+  const isMotionLayerScrollerCard = block.slug === "block-motion-layer-scroller";
+  const isBentoShowcaseCard = block.slug === "block-bento-showcase";
+  const isWhyChooseUsCard = block.slug === "block-why-choose-us";
   const layeredWaveCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/layered-wave-background/layered-wave-background.tsx", "")
     : "";
   const particleNoiseCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/particle-noise/particle-noise.tsx", "")
+    : "";
+  const atsBentoCode = isWhyChooseUsCard
+    ? await readSourceFile("src/components/blocks/ats-bento-grid.tsx", "")
+    : "";
+  const spotlightCode = isWhyChooseUsCard
+    ? await readSourceFile("src/components/blocks/spotlight-bento-grid.tsx", "")
     : "";
 
   return (
@@ -132,6 +148,40 @@ export default async function BlockDetailPage({ params }: Props) {
         <PreviewCodeSection title={block.name} code={code}>
           <BentoHeroCustomizer />
         </PreviewCodeSection>
+      ) : isBentoSkeletonCard ? (
+        <PreviewCodeSection title={block.name} code={code}>
+          <BentoGridSkeletonHeroCustomizer />
+        </PreviewCodeSection>
+      ) : isMotionLayerScrollerCard ? (
+        <PreviewCodeSection title={block.name} code={code}>
+          <MotionLayerScrollerHeroCustomizer />
+        </PreviewCodeSection>
+      ) : isBentoShowcaseCard ? (
+        <PreviewCodeSection title={block.name} code={code}>
+          <BentoShowcaseHeroCustomizer />
+        </PreviewCodeSection>
+      ) : isWhyChooseUsCard ? (
+        <>
+          <PreviewCodeSection title={block.name} code={code}>
+            <WhyChooseUsBentoHeroCustomizer />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="ATS Bento Grid"
+            code={atsBentoCode}
+            usageCode={ATS_BENTO_USAGE}
+            className="mt-16"
+          >
+            <AtsBentoGridHeroCustomizer />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Spotlight Bento Grid"
+            code={spotlightCode}
+            usageCode={SPOTLIGHT_BENTO_USAGE}
+            className="mt-16"
+          >
+            <SpotlightBentoGridCustomizer />
+          </PreviewCodeSection>
+        </>
       ) : (
         <PreviewCodeSection title={block.name} code={code}>
           <Preview />
@@ -163,6 +213,7 @@ export default async function BlockDetailPage({ params }: Props) {
 async function getBlockCode(slug: string, fallback: string) {
   const sourceBySlug: Record<string, string> = {
     "block-interactive-dots": "src/components/interactive-dots/interactive-dots.tsx",
+    "block-why-choose-us": "src/components/blocks/animated-bento-grid.tsx",
   };
 
   const sourcePath = sourceBySlug[slug];
@@ -206,8 +257,8 @@ function PreviewCodeSection({
               <Monitor className="size-4" />
               Preview
             </TabsTrigger>
-            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled>
-              <Lock className="size-4" />
+            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base">
+              <Code2 className="size-4" />
               Code
             </TabsTrigger>
           </TabsList>
@@ -264,6 +315,12 @@ function PreviewCodeSection({
 function defaultUsageForTitle(title: string) {
   if (title === "Interactive Dots") return INTERACTIVE_DOTS_USAGE;
   if (title === "Animated Bento Grid") return BENTO_USAGE;
+  if (title === "Bento Grid With Skeleton Previews") return BENTO_SKELETON_USAGE;
+  if (title === "Motion Layer Scroller") return MOTION_LAYER_SCROLLER_USAGE;
+  if (title === "Bento Showcase Grid") return BENTO_SHOWCASE_USAGE;
+  if (title === "Why Choose Us Bento Grid") return WHY_CHOOSE_US_USAGE;
+  if (title === "ATS Bento Grid") return ATS_BENTO_USAGE;
+  if (title === "Spotlight Bento Grid") return SPOTLIGHT_BENTO_USAGE;
   return `<${title.replaceAll(" ", "")} />`;
 }
 
@@ -299,6 +356,56 @@ const BENTO_USAGE = `<AnimatedBentoGrid
   variant="default"
   columns={3}
 />`;
+
+const BENTO_SKELETON_USAGE = `<BentoGridSkeleton
+  cards={[
+    { id: "1", title: "Ready-made sections", description: "Production-ready blocks.", tag: "Pages", span: "2x1", skeletonType: "chat" },
+    { id: "2", title: "Interactive components", description: "Hooks and controls.", tag: "UI", span: "1x1", skeletonType: "dashboard" },
+    { id: "3", title: "Copy-paste blocks", description: "Drop-in snippets.", tag: "DX", span: "1x1", skeletonType: "avatar" },
+    { id: "4", title: "Premium animations", description: "Framer Motion layouts.", tag: "Motion", span: "1x1", skeletonType: "workflow" },
+    { id: "5", title: "Responsive design", description: "Adapts to every viewport.", tag: "Mobile", span: "1x1", skeletonType: "calendar" },
+    { id: "6", title: "Clean structure", description: "Typed and tree-shakeable.", tag: "Dev", span: "1x1", skeletonType: "code" },
+  ]}
+/>`;
+
+const MOTION_LAYER_SCROLLER_USAGE = `<MotionLayerScroller
+  heading="Motion that moves people"
+  description="A scroll-driven 3D layered hero section with parallax depth."
+  scrollHeight={600}
+  perspective={1200}
+  direction="vertical"
+  showGrid={true}
+  showGlow={true}
+  layers={[
+    { id: "bg", xRange: [-30, 30], yRange: [-20, 20], scaleRange: [0.92, 1.04], zIndex: 0 },
+    { id: "main", xRange: [-50, 50], yRange: [-40, 40], scaleRange: [0.95, 1.08], zIndex: 1 },
+  ]}
+/>`;
+
+const BENTO_SHOWCASE_USAGE = `<BentoShowcase />`;
+
+const WHY_CHOOSE_US_USAGE = `import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";
+
+export default function Page() {
+  return <WhyChooseUsBento />;
+}`;
+
+const ATS_BENTO_USAGE = `import { AtsBentoGrid } from "@/components/blocks/ats-bento-grid";
+
+export default function Page() {
+  return (
+    <AtsBentoGrid
+      title="The perfect ATS score platform"
+      description="Upload resumes, track candidates, and schedule interviews from one clean bento dashboard."
+    />
+  );
+}`;
+
+const SPOTLIGHT_BENTO_USAGE = `import SpotlightBentoGrid from "@/components/blocks/spotlight-bento-grid";
+
+export default function Page() {
+  return <SpotlightBentoGrid />;
+}`;
 
 const LAYERED_WAVE_USAGE = `<section className="relative min-h-[640px] overflow-hidden">
   <LayeredWaveBackground

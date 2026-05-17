@@ -5,13 +5,28 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUpRight,
-  Crown,
   Eye,
+  PanelLeft,
   Search,
   Sparkles,
   X,
 } from "lucide-react";
 import { templates, type TemplateCategory } from "@/lib/catalog/templates";
+import {
+  LibraryExplorerSidebarProvider,
+  LibraryExplorerSidebarDesktopChrome,
+  LibraryExplorerSidebarMobileSheetBody,
+  useLibraryExplorerSidebar,
+} from "@/components/library/library-explorer-sidebar";
+import { buttonVariants } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 
@@ -19,145 +34,139 @@ type FilterCat = "all" | TemplateCategory;
 const ALL_CATS = ["all", ...Array.from(new Set(templates.map((t) => t.category)))] as FilterCat[];
 
 export default function TemplatesPage() {
+  return (
+    <React.Suspense fallback={null}>
+      <LibraryExplorerSidebarProvider>
+        <TemplatesPageInner />
+      </LibraryExplorerSidebarProvider>
+    </React.Suspense>
+  );
+}
+
+function TemplatesPageInner() {
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [cat, setCat] = React.useState<FilterCat>("all");
   const reduce = useReducedMotion() === true;
+  const { query, premiumOnly, commitParams } = useLibraryExplorerSidebar();
+
+  const normalizedQuery = query.trim().toLowerCase();
 
   const sorted = React.useMemo(
     () => [...templates].sort((a, b) => b.trendingScore - a.trendingScore),
     [],
   );
 
-  const filtered = React.useMemo(
-    () => (cat === "all" ? sorted : sorted.filter((t) => t.category === cat)),
-    [sorted, cat],
-  );
+  const filtered = React.useMemo(() => {
+    return sorted.filter((t) => {
+      const catMatch = cat === "all" || t.category === cat;
+      const premiumMatch = !premiumOnly || t.premium;
+      const searchMatch =
+        !normalizedQuery ||
+        `${t.title} ${t.description} ${t.category} ${t.techStack.join(" ")}`
+          .toLowerCase()
+          .includes(normalizedQuery);
+      return catMatch && premiumMatch && searchMatch;
+    });
+  }, [sorted, cat, premiumOnly, normalizedQuery]);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div className="flex gap-0 lg:gap-14">
+    <div className="flex h-[calc(100dvh-4rem)] overflow-hidden lg:flex-row">
+      <aside className="relative hidden w-[272px] shrink-0 border-r border-border/40 lg:flex lg:flex-col">
+        <LibraryExplorerSidebarDesktopChrome />
+      </aside>
 
-        {/* ────────────── Sticky Sidebar ────────────── */}
-        <aside className="hidden w-52 shrink-0 lg:block">
-          <div className="sticky top-20 space-y-7 pb-16 pt-10">
-
-            {/* All-Access CTA */}
-            <Link
-              href="/pricing"
-              className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/8 px-3 py-2.5 text-xs font-semibold text-primary transition hover:bg-primary/15 dark:border-primary/20 dark:bg-primary/10"
-            >
-              <Crown className="size-3.5 shrink-0" />
-              Get All-Access
-              <ArrowUpRight className="ml-auto size-3 shrink-0" />
-            </Link>
-
-            {/* Category filter */}
-            <div>
-              <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Categories
-              </p>
-              <div className="space-y-0.5">
-                {ALL_CATS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setCat(c)}
-                    className={cn(
-                      "flex w-full items-center rounded-lg px-3 py-1.5 text-sm transition-colors text-left",
-                      cat === c
-                        ? "bg-muted font-medium text-foreground"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
-                    )}
-                  >
-                    <span className="flex-1">{c === "all" ? "All Templates" : c}</span>
-                    {c === "all" && (
-                      <span className="text-[11px] text-muted-foreground">{templates.length}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Template quick-nav */}
-            <div>
-              <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                Templates
-              </p>
-              <div className="space-y-0.5">
-                {filtered.map((t) => (
-                  <a
-                    key={t.slug}
-                    href={`#tmpl-${t.slug}`}
-                    className="flex items-center rounded-lg px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
-                  >
-                    <span className="line-clamp-1 flex-1">{t.title}</span>
-                    {t.premium && <Sparkles className="ml-1 size-3 shrink-0 text-amber-400" />}
-                  </a>
-                ))}
-              </div>
-            </div>
-
-          </div>
-        </aside>
-
-        {/* ────────────── Main Content ────────────── */}
-        <main className="min-w-0 flex-1 py-10">
-
-          {/* Page heading */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">Templates</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Showing{" "}
-              <span className="font-medium text-foreground">{filtered.length}</span>{" "}
-              template{filtered.length !== 1 && "s"}
-              {cat !== "all" && (
-                <>
-                  {" "}in{" "}
-                  <span className="font-medium text-foreground">{cat}</span>
-                  <button
-                    type="button"
-                    onClick={() => setCat("all")}
-                    aria-label="Clear filter"
-                    className="ml-1.5 text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="inline size-3" />
-                  </button>
-                </>
+      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+        {/* Mobile nav bar */}
+        <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md lg:hidden">
+          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+            <SheetTrigger
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "gap-2 border-border bg-muted dark:bg-zinc-900/80",
               )}
+            >
+              <PanelLeft className="size-4" />
+              Menu
+            </SheetTrigger>
+            <SheetContent
+              side="left"
+              className="w-[min(100%,300px)] border-border bg-background p-0 dark:bg-zinc-950"
+            >
+              <SheetHeader className="border-b border-border px-4 py-4 text-left">
+                <SheetTitle className="text-base text-foreground">Library</SheetTitle>
+              </SheetHeader>
+              <ScrollArea className="h-[calc(100dvh-7rem)]">
+                <div className="px-3 py-4">
+                  <LibraryExplorerSidebarMobileSheetBody onPick={() => setMobileNavOpen(false)} />
+                </div>
+              </ScrollArea>
+            </SheetContent>
+          </Sheet>
+          <span className="text-xs font-medium text-muted-foreground">Templates catalog</span>
+        </div>
+
+        <main className="mx-auto w-full max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10 lg:py-16 xl:px-14">
+          {/* Page heading */}
+          <section className="pb-16 lg:pb-24">
+            <h1 className="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
+              Templates
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
+              Full-page Next.js templates built for production. Copy, customize, ship.
             </p>
 
-            {/* Mobile category pills */}
-            <div className="mt-4 flex flex-wrap gap-2 lg:hidden">
+            {(cat !== "all" || premiumOnly || normalizedQuery) && (
+              <div className="mt-7 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                Showing{" "}
+                <span className="font-medium text-foreground">{filtered.length}</span>{" "}
+                template{filtered.length !== 1 && "s"}
+                {premiumOnly && (
+                  <span className="rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground">
+                    Premium only
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCat("all");
+                    commitParams({ premium: null, q: null });
+                  }}
+                  className="inline-flex items-center gap-1 rounded-full border border-border/60 px-2.5 py-1 text-xs font-medium text-foreground transition hover:bg-muted"
+                >
+                  Clear filters <X className="size-3" />
+                </button>
+              </div>
+            )}
+
+            {/* Category pills */}
+            <div className="mt-6 flex flex-wrap gap-2">
               {ALL_CATS.map((c) => (
                 <button
                   key={c}
                   type="button"
                   onClick={() => setCat(c)}
                   className={cn(
-                    "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                    "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
                     cat === c
-                      ? "border-primary/40 bg-primary/10 text-foreground"
-                      : "border-border/60 bg-muted/30 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                      ? "border-foreground/20 bg-foreground text-background"
+                      : "border-border/60 bg-muted/30 text-muted-foreground hover:bg-muted hover:text-foreground",
                   )}
                 >
-                  {c === "all" ? "All" : c}
+                  {c === "all" ? "All Templates" : c}
+                  {c === "all" && (
+                    <span className="ml-1.5 text-[11px] opacity-60">{templates.length}</span>
+                  )}
                 </button>
               ))}
             </div>
-          </div>
+          </section>
 
           {/* Template rows */}
           {filtered.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-border/70 bg-muted/15 px-6 py-16 text-center">
               <Search className="mx-auto size-10 text-muted-foreground/30" />
               <p className="mt-4 text-base font-semibold text-foreground">No templates found</p>
-              <p className="mt-1 text-sm text-muted-foreground">Try selecting a different category.</p>
-              <button
-                type="button"
-                onClick={() => setCat("all")}
-                className="mt-5 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
-              >
-                Show all
-              </button>
+              <p className="mt-1 text-sm text-muted-foreground">Try a different category or search term.</p>
             </div>
           ) : (
             <div className="divide-y divide-border/50">
@@ -196,7 +205,7 @@ export default function TemplatesPage() {
                         {tmpl.techStack.slice(0, 4).map((tech) => (
                           <span
                             key={tech}
-                            className="rounded-md border border-border/50 bg-muted/30 px-2 py-0.5 text-[10px] text-muted-foreground dark:bg-white/3"
+                            className="rounded-md border border-border/50 bg-muted/30 px-2 py-0.5 text-[10px] text-muted-foreground dark:bg-white/[0.03]"
                           >
                             {tech}
                           </span>
@@ -210,7 +219,7 @@ export default function TemplatesPage() {
                         href={`/live-preview/template/${tmpl.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-background px-3.5 py-2 text-xs font-medium text-foreground transition hover:border-border hover:bg-muted dark:bg-white/3"
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border/70 bg-background px-3.5 py-2 text-xs font-medium text-foreground transition hover:border-border hover:bg-muted dark:bg-white/[0.03]"
                       >
                         <Eye className="size-3.5" />
                         Live Preview
@@ -222,7 +231,7 @@ export default function TemplatesPage() {
                           "inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold transition",
                           tmpl.premium
                             ? "bg-foreground text-background hover:bg-foreground/90"
-                            : "border border-border/70 bg-background hover:bg-muted dark:bg-white/3",
+                            : "border border-border/70 bg-background hover:bg-muted dark:bg-white/[0.03]",
                         )}
                       >
                         {tmpl.premium ? "Buy now →" : "Get free →"}
@@ -242,14 +251,14 @@ export default function TemplatesPage() {
                         </span>
                       </div>
                       <div className="relative h-44 overflow-hidden">
-                        <div className="pointer-events-none origin-top-left scale-[0.46] w-[217%] will-change-transform">
+                        <div className="pointer-events-none w-[217%] origin-top-left scale-[0.46] will-change-transform">
                           <TemplateSceneLoader slug={tmpl.slug} />
                         </div>
                       </div>
                     </div>
 
                     <div className="flex flex-col gap-3">
-                      <div className="flex-1 rounded-xl border border-border/60 bg-muted/20 p-3 dark:bg-white/2">
+                      <div className="flex-1 rounded-xl border border-border/60 bg-muted/20 p-3 dark:bg-white/[0.02]">
                         <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                           Pages
                         </p>
@@ -267,7 +276,7 @@ export default function TemplatesPage() {
                           )}
                         </div>
                       </div>
-                      <div className="rounded-xl border border-border/60 bg-muted/20 p-3 dark:bg-white/2">
+                      <div className="rounded-xl border border-border/60 bg-muted/20 p-3 dark:bg-white/[0.02]">
                         <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
                           Difficulty
                         </p>
@@ -278,7 +287,6 @@ export default function TemplatesPage() {
                       </div>
                     </div>
                   </div>
-
                 </motion.div>
               ))}
             </div>
@@ -299,7 +307,6 @@ export default function TemplatesPage() {
               </Link>
             </div>
           )}
-
         </main>
       </div>
     </div>

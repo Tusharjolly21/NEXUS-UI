@@ -7,17 +7,8 @@ export type { BlockCategory, BlockManifestEntry };
 export type MarketplaceBlock = BlockManifestEntry & { Preview: ComponentType };
 
 const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
-  "block-hero-beam": Previews.PreviewBeamSweep,
-  "block-bento-signals": Previews.PreviewBentoMetrics,
-  "block-pricing-toggle": Previews.PreviewPricingToggle,
-  "block-testimonial-depth": Previews.PreviewTestimonialStack,
-  "block-logo-orbit": Previews.PreviewNavbarFloating,
-  "block-stats-kpi": Previews.PreviewDashboardKpi,
-  "block-cta-nebula": Previews.PreviewCtaGlow,
   "block-interactive-dots": Previews.PreviewInteractiveDots,
-  "block-animated-bento": Previews.PreviewAnimatedBentoGrid,
-  "block-faq-motion": Previews.PreviewFaq,
-  "block-blog-editorial": Previews.PreviewBlogRail,
+  "block-why-choose-us": Previews.PreviewWhyChooseUs,
 };
 
 export const blocks: MarketplaceBlock[] = blocksManifest.map((b) => {
