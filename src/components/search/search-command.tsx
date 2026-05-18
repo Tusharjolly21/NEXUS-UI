@@ -55,6 +55,19 @@ export function SearchCommand() {
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const modalRef = React.useRef<HTMLDivElement>(null);
+
+  /* Close on click outside */
+  React.useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   /* Keyboard shortcut: ⌘K / Ctrl+K / / */
   React.useEffect(() => {
@@ -135,7 +148,6 @@ export function SearchCommand() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[6vh]"
-            onMouseDown={() => setOpen(false)}
           >
             {/* Overlay */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
@@ -147,8 +159,8 @@ export function SearchCommand() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -16 }}
               transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              ref={modalRef}
               className="relative z-10 flex w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_32px_80px_-8px_rgba(0,0,0,0.85)]"
-              onMouseDown={(e) => e.stopPropagation()}
             >
               {/* Top accent line */}
               <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/80 to-transparent" />

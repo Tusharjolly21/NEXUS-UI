@@ -2,14 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import {
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-} from "framer-motion";
+import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import {
   ArrowRight,
   Cpu,
@@ -23,7 +16,7 @@ import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ParticleNoise } from "@/components/ui/particle-noise";
+import { ParticleNoise } from "@/components/particle-noise";
 import {
   Accordion,
   AccordionContent,
@@ -266,59 +259,49 @@ function SectionHeader({
 
 function Hero() {
   const reduce = useReducedMotion() === true;
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const spotlight = useMotionTemplate`radial-gradient(900px circle at ${mouseX}px ${mouseY}px, oklch(0.72 0.18 195 / 0.10), transparent 52%)`;
 
   return (
-    <section
-      onMouseMove={(e) => {
-        if (reduce) return;
-        const r = e.currentTarget.getBoundingClientRect();
-        mouseX.set(e.clientX - r.left);
-        mouseY.set(e.clientY - r.top);
-      }}
-      className="relative isolate flex min-h-[90dvh] flex-col items-center justify-center overflow-hidden border-b border-border bg-[#f7fbff] px-4 py-24 text-center md:py-32 dark:bg-[#050711]"
-    >
-      {/* Layered backgrounds */}
+    <section className="relative isolate flex min-h-[90dvh] flex-col items-center justify-center overflow-hidden border-b border-border bg-[#f7fbff] px-4 py-24 text-center dark:bg-black md:py-32">
+      {/* Particle Noise — light mode (dark dots, transparent bg so source-over composite renders them correctly) */}
       <ParticleNoise
-        dotColor="37, 99, 235"
-        dotSize={1.45}
-        dotOpacity={0.36}
-        particleSpacing={25}
-        noiseZoom={720}
-        inflation={22}
-        speed={0.00012}
-        className="opacity-65 mix-blend-multiply dark:hidden"
+        positionX={0}
+        positionY={0.45}
+        zoom={0.9}
+        spacing={18}
+        inflation={58}
+        particleSize={1.5}
+        density={0.95}
+        animationEnabled={true}
+        speed="medium"
+        backgroundColor="transparent"
+        dotColor="#1e293b"
+        secondaryDotColor="#475569"
+        opacity={0.72}
+        blur={0}
+        surfaceBias={0.82}
+        gridJitter={0}
+        className="absolute inset-0 h-full min-h-full dark:hidden"
       />
+      {/* Particle Noise — dark mode (light dots on black bg) */}
       <ParticleNoise
-        dotColor="125, 249, 255"
-        dotSize={1.6}
-        dotOpacity={0.5}
-        particleSpacing={25}
-        noiseZoom={700}
-        inflation={24}
-        speed={0.00012}
-        className="hidden opacity-90 mix-blend-screen dark:block"
+        positionX={0}
+        positionY={0.45}
+        zoom={0.9}
+        spacing={18}
+        inflation={58}
+        particleSize={1.5}
+        density={0.95}
+        animationEnabled={true}
+        speed="medium"
+        backgroundColor="#000000"
+        dotColor="#f8fafc"
+        secondaryDotColor="#94a3b8"
+        opacity={0.86}
+        blur={0}
+        surfaceBias={0.82}
+        gridJitter={0}
+        className="absolute inset-0 hidden h-full min-h-full dark:block"
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(14,165,233,0.20),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(124,58,237,0.15),transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.62),rgba(255,255,255,0.88)_58%,var(--background))] dark:bg-[radial-gradient(circle_at_18%_12%,rgba(34,211,238,0.16),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(139,92,246,0.18),transparent_34%),linear-gradient(180deg,rgba(5,7,17,0.44),rgba(5,7,17,0.80)_58%,var(--background))]" />
-      <div className="lf-grid absolute inset-0 opacity-[0.10] dark:opacity-[0.18]" />
-      {!reduce && (
-        <motion.div
-          className="pointer-events-none absolute inset-0"
-          style={{ backgroundImage: spotlight }}
-        />
-      )}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(255,255,255,0.10)_0%,rgba(255,255,255,0.56)_54%,rgba(247,251,255,0.94)_100%)] dark:bg-[radial-gradient(circle_at_50%_42%,transparent_0%,rgba(5,7,17,0.42)_54%,rgba(5,7,17,0.96)_100%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
-
-      {/* Accent lines */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
-      {/* Decorative orbs */}
-      <div className="pointer-events-none absolute -left-40 top-1/4 size-96 rounded-full bg-foreground/[0.04] blur-[96px]" />
-      <div className="pointer-events-none absolute -right-40 bottom-1/4 size-96 rounded-full bg-foreground/[0.04] blur-[96px]" />
 
       {/* Content */}
       <div className="relative z-10 mx-auto w-full max-w-4xl space-y-8">
@@ -394,7 +377,7 @@ function Hero() {
             whileTap={reduce ? undefined : { scale: 0.97 }}
             className={cn(
               buttonVariants({ variant: "outline" }),
-              "rounded-full border-border/70 bg-background/60 px-8 py-3.5 text-foreground backdrop-blur-xl hover:bg-accent dark:bg-white/[0.04] dark:hover:bg-white/[0.08]",
+              "rounded-full border-border/70 bg-background/60 px-8 py-3.5 text-foreground backdrop-blur-xl hover:bg-accent",
             )}
           >
             Explore templates
@@ -989,7 +972,13 @@ function FeaturedComponents() {
                             y: -10,
                             rotateX: 1.5,
                             rotateY:
-                              cardsPerView === 1 ? 0 : i === 1 ? 0 : i === 0 ? -1.4 : 1.4,
+                              cardsPerView === 1
+                                ? 0
+                                : i === 1
+                                  ? 0
+                                  : i === 0
+                                    ? -1.4
+                                    : 1.4,
                           }
                     }
                     className="h-full"

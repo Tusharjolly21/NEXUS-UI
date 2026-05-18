@@ -3,10 +3,12 @@
 import * as React from "react";
 import {
   motion,
+  animate,
   useMotionTemplate,
   useMotionValue,
   useSpring,
   useTransform,
+  type MotionValue,
 } from "framer-motion";
 import {
   BookOpen,
@@ -77,6 +79,7 @@ import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rot
 import { CodeBlock } from "@/components/code-block/code-block";
 import { InteractiveDots } from "@/components/interactive-dots";
 import { LayeredWaveBackground } from "@/components/layered-wave-background";
+import Cinematic3DLetterScatter from "@/components/blocks/cinematic-3d-letter-scatter";
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
@@ -3217,6 +3220,460 @@ export function PreviewWhyChooseUs() {
       <div className="pointer-events-none absolute bottom-3 left-3">
         <p className="text-[10px] font-semibold text-zinc-500">6 animated cards</p>
       </div>
+    </div>
+  );
+}
+
+// ── ScrollRevealText preview ────────────────────────────────────────────────
+
+type SRTEffect = "blur" | "scale" | "slideX" | "slideY" | "rotate" | "skew";
+
+interface SRTSection {
+  label: string;
+  lines: string[]; // each string = one line
+  effect: SRTEffect;
+  font: string;
+  size: string;
+  weight: number;
+  italic?: boolean;
+  tracking?: string;
+  lineHeight?: number;
+}
+
+const SRT_SECTIONS: SRTSection[] = [
+  {
+    label: "WORD · BLUR",
+    lines: [
+      "Crafted for the",
+      "next generation",
+      "of ambitious",
+      "builders.",
+    ],
+    effect: "blur",
+    font: '"Helvetica Neue","Arial",system-ui,sans-serif',
+    size: "3.2rem",
+    weight: 200,
+    tracking: "0em",
+    lineHeight: 1.18,
+  },
+  {
+    label: "CHAR · SCALE",
+    lines: [
+      "MAKE IT",
+      "BIG, BOLD",
+      "AND LOUD.",
+    ],
+    effect: "scale",
+    font: 'system-ui,-apple-system,sans-serif',
+    size: "3.8rem",
+    weight: 900,
+    tracking: "-0.04em",
+    lineHeight: 1.05,
+  },
+  {
+    label: "WORD · SLIDE X",
+    lines: [
+      "Every great product",
+      "starts with a single",
+      "thoughtful decision",
+      "made boldly.",
+    ],
+    effect: "slideX",
+    font: '"Segoe UI","Helvetica Neue",system-ui,sans-serif',
+    size: "2.4rem",
+    weight: 400,
+    tracking: "0.01em",
+    lineHeight: 1.3,
+  },
+  {
+    label: "WORD · SLIDE Y",
+    lines: [
+      "Move faster",
+      "than anyone",
+      "thought was",
+      "possible.",
+    ],
+    effect: "slideY",
+    font: 'system-ui,sans-serif',
+    size: "3.4rem",
+    weight: 700,
+    italic: true,
+    tracking: "-0.03em",
+    lineHeight: 1.1,
+  },
+  {
+    label: "WORD · ROTATE",
+    lines: [
+      "The future of",
+      "interfaces starts",
+      "with words that",
+      "come alive.",
+    ],
+    effect: "rotate",
+    font: '"Trebuchet MS","Gill Sans",system-ui,sans-serif',
+    size: "2.8rem",
+    weight: 600,
+    tracking: "-0.02em",
+    lineHeight: 1.15,
+  },
+  {
+    label: "WORD · SKEW",
+    lines: [
+      "Ship products",
+      "your users will",
+      "genuinely love",
+      "forever.",
+    ],
+    effect: "skew",
+    font: 'system-ui,"Helvetica Neue",sans-serif',
+    size: "3.2rem",
+    weight: 800,
+    tracking: "-0.035em",
+    lineHeight: 1.08,
+  },
+];
+
+const SRT_INIT: Record<SRTEffect, Record<string, unknown>> = {
+  blur:   { opacity: 0.08, filter: "blur(12px)", y: 10 },
+  scale:  { opacity: 0.08, scale: 0.5 },
+  slideX: { opacity: 0,    x: -32 },
+  slideY: { opacity: 0,    y: 28 },
+  rotate: { opacity: 0.08, rotate: -10 },
+  skew:   { opacity: 0.08, skewX: 14, x: -8 },
+};
+
+const SRT_END: Record<SRTEffect, Record<string, unknown>> = {
+  blur:   { opacity: 1, filter: "blur(0px)", y: 0 },
+  scale:  { opacity: 1, scale: 1 },
+  slideX: { opacity: 1, x: 0 },
+  slideY: { opacity: 1, y: 0 },
+  rotate: { opacity: 1, rotate: 0 },
+  skew:   { opacity: 1, skewX: 0, x: 0 },
+};
+
+function SRTSection({
+  section,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  root,
+}: {
+  section: SRTSection;
+  root: React.RefObject<any>;
+}) {
+  let wi = 0;
+
+  return (
+    <div
+      style={{
+        padding: "36px 28px 44px",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        fontFamily: section.font,
+        fontSize: section.size,
+        fontWeight: section.weight,
+        fontStyle: section.italic ? "italic" : "normal",
+        letterSpacing: section.tracking ?? "-0.02em",
+        lineHeight: section.lineHeight ?? 1.15,
+        color: "#ffffff",
+      }}
+    >
+      <p
+        style={{
+          fontFamily: "system-ui, sans-serif",
+          fontSize: "8px",
+          fontWeight: 600,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.3)",
+          marginBottom: "14px",
+          fontStyle: "normal",
+        }}
+      >
+        {section.label}
+      </p>
+      {section.lines.map((line, li) => {
+        const words = line.split(" ").filter(Boolean);
+        return (
+          <div key={li} style={{ display: "block", overflow: "visible" }}>
+            {words.map((word) => {
+              const idx = wi++;
+              return (
+                <React.Fragment key={idx}>
+                  <motion.span
+                    initial={{ ...SRT_INIT[section.effect], color: "rgba(255,255,255,0.08)" }}
+                    whileInView={{ ...SRT_END[section.effect], color: "#ffffff" }}
+                    viewport={{ once: false, root, amount: 0.1 }}
+                    transition={{
+                      delay: idx * 0.07,
+                      duration: 0.5,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    style={{ display: "inline-block", willChange: "opacity, transform, filter" }}
+                  >
+                    {word}
+                  </motion.span>
+                  {" "}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function PreviewScrollRevealText() {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let raf: number;
+    let paused = false;
+
+    const tick = () => {
+      if (!paused && el) {
+        el.scrollTop += 1.2;
+        const maxScroll = el.scrollHeight - el.clientHeight;
+        if (el.scrollTop >= maxScroll - 4) {
+          paused = true;
+          setTimeout(() => {
+            el.scrollTop = 0;
+            setTimeout(() => { paused = false; }, 500);
+          }, 1400);
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  return (
+    // height: 640px — matches detail page's min-h-[640px] so preview fills it fully.
+    // On the /components listing card (max 320px overflow:hidden), it gets clipped to fill that too.
+    <div
+      ref={scrollRef}
+      style={{
+        width: "100%",
+        height: "640px",
+        overflowY: "scroll",
+        scrollbarWidth: "none",
+        background: "#09090b",
+      } as React.CSSProperties}
+    >
+      {SRT_SECTIONS.map((section, i) => (
+        <SRTSection key={i} section={section} root={scrollRef} />
+      ))}
+    </div>
+  );
+}
+
+// ── Cinematic3DLetterScatter preview ──────────────────────────────────────────
+
+// Seeded random helpers (same logic as the component, scaled down for preview)
+function c3dRand(seed: number) {
+  const x = Math.sin(seed + 1.6180339) * 43758.5453123;
+  return x - Math.floor(x);
+}
+function c3dSr(seed: number) { return c3dRand(seed) * 2 - 1; }
+
+interface C3DSection {
+  label: string;
+  lines: string[];
+  font: string;
+  size: string;
+  weight: number;
+  italic?: boolean;
+  tracking?: string;
+}
+
+const C3D_SECTIONS: C3DSection[] = [
+  {
+    label: "SCATTER · ASSEMBLE",
+    lines: [
+      "Beyond the limits of",
+      "what you thought was",
+      "possible lies a new era.",
+    ],
+    font: '"Helvetica Neue","Arial",system-ui,sans-serif',
+    size: "2.6rem",
+    weight: 200,
+    tracking: "-0.01em",
+  },
+  {
+    label: "3D · DEPTH",
+    lines: ["Ship Faster.", "Build Bolder."],
+    font: "system-ui,-apple-system,sans-serif",
+    size: "3.8rem",
+    weight: 900,
+  },
+  {
+    label: "CINEMATIC · REVEAL",
+    lines: [
+      "Every word a particle,",
+      "every sentence a universe",
+      "collapsing into clarity.",
+    ],
+    font: '"Segoe UI","Helvetica Neue",system-ui,sans-serif',
+    size: "2.4rem",
+    weight: 400,
+    tracking: "-0.015em",
+  },
+  {
+    label: "MOTION · NATIVE",
+    lines: [
+      "Interfaces that move",
+      "the way ideas do —",
+      "freely, then precisely.",
+    ],
+    font: "system-ui,sans-serif",
+    size: "3rem",
+    weight: 700,
+    italic: true,
+  },
+  {
+    label: "PERSPECTIVE · CHAOS",
+    lines: ["Design with intention.", "Animate with purpose."],
+    font: '"Trebuchet MS","Gill Sans",system-ui,sans-serif',
+    size: "2.8rem",
+    weight: 600,
+  },
+];
+
+function C3DSectionBlock({
+  section,
+  sectionIdx,
+  root,
+}: {
+  section: C3DSection;
+  sectionIdx: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  root: React.RefObject<any>;
+}) {
+  let wi = 0;
+  return (
+    <div
+      style={{
+        padding: "36px 28px 44px",
+        borderBottom: "1px solid rgba(255,255,255,0.07)",
+        fontFamily: section.font,
+        fontSize: section.size,
+        fontWeight: section.weight,
+        fontStyle: section.italic ? "italic" : "normal",
+        letterSpacing: section.tracking ?? "-0.02em",
+        lineHeight: 1.15,
+        color: "#ffffff",
+      }}
+    >
+      <p
+        style={{
+          fontFamily: "system-ui,sans-serif",
+          fontSize: "8px",
+          fontWeight: 600,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.3)",
+          marginBottom: "14px",
+          fontStyle: "normal",
+        }}
+      >
+        {section.label}
+      </p>
+      {section.lines.map((line, li) => {
+        const words = line.split(" ").filter(Boolean);
+        return (
+          <div key={li} style={{ display: "block", overflow: "visible" }}>
+            {words.map((word) => {
+              const idx = wi++;
+              // Deterministic scatter offsets per word
+              const b = (sectionIdx * 200 + idx) * 19 + 5;
+              const ix  = c3dSr(b + 1) * 70;
+              const iy  = c3dSr(b + 2) * 40;
+              const irz = c3dSr(b + 6) * 20;
+              return (
+                <React.Fragment key={idx}>
+                  <motion.span
+                    initial={{ opacity: 0, x: ix, y: iy, rotateZ: irz, scale: 0.55, filter: "blur(7px)" }}
+                    whileInView={{ opacity: 1, x: 0, y: 0, rotateZ: 0, scale: 1, filter: "blur(0px)" }}
+                    viewport={{ once: false, root, amount: 0.1 }}
+                    transition={{ delay: idx * 0.07, duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+                    style={{ display: "inline-block", willChange: "opacity, transform, filter" }}
+                  >
+                    {word}
+                  </motion.span>
+                  {" "}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export function PreviewCinematic3DLetterScatter({ compact = true }: { compact?: boolean } = {}) {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let raf: number;
+    let paused = false;
+
+    const tick = () => {
+      if (!paused && el) {
+        el.scrollTop += 1.2;
+        const maxScroll = el.scrollHeight - el.clientHeight;
+        if (el.scrollTop >= maxScroll - 4) {
+          paused = true;
+          setTimeout(() => {
+            el.scrollTop = 0;
+            setTimeout(() => { paused = false; }, 500);
+          }, 1400);
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
+  if (!compact) {
+    return (
+      <Cinematic3DLetterScatter
+        text="Beyond Limits"
+        scrollDepth={3}
+        scatterIntensity={1}
+        depthIntensity={1}
+        blurIntensity={16}
+        backgroundColor="#030303"
+        textColor="#ffffff"
+        perspective={1000}
+        align="center"
+        characterStagger={0.3}
+        finalScale={1}
+        initialOpacity={0}
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={scrollRef}
+      style={{
+        width: "100%",
+        height: "640px",
+        overflowY: "scroll",
+        scrollbarWidth: "none",
+        background: "#030303",
+      } as React.CSSProperties}
+    >
+      {C3D_SECTIONS.map((section, i) => (
+        <C3DSectionBlock key={i} section={section} sectionIdx={i} root={scrollRef} />
+      ))}
     </div>
   );
 }

@@ -599,7 +599,7 @@ export function BentoSignals() {
     description: "3D tilt card with spring physics and luminous edge lighting.",
     categorySlug: "cards",
     tags: ["product", "depth"],
-    premium: true,
+    premium: false,
     trendingScore: 104,
     createdAt: "2026-04-28",
     animationKinds: ["3d", "spring", "hover"],
@@ -683,7 +683,7 @@ export function FloatingNav() {
     description: "Stacked testimonial planes with staggered motion reveals.",
     categorySlug: "testimonials",
     tags: ["social-proof"],
-    premium: true,
+    premium: false,
     trendingScore: 76,
     createdAt: "2026-04-12",
     animationKinds: ["scroll", "layout"],
@@ -712,7 +712,7 @@ export function DepthTestimonials({ quotes }: { quotes: string[] }) {
     description: "Annual/monthly toggle with spring knob and contextual savings callout.",
     categorySlug: "pricing-sections",
     tags: ["billing", "motion"],
-    premium: true,
+    premium: false,
     trendingScore: 112,
     createdAt: "2026-05-01",
     animationKinds: ["spring", "layout"],
@@ -768,7 +768,7 @@ export function BeamField() {
     description: "High depth glass panel for hero cards and feature highlights.",
     categorySlug: "three-d-components",
     tags: ["depth", "product"],
-    premium: true,
+    premium: false,
     trendingScore: 96,
     createdAt: "2026-04-20",
     animationKinds: ["3d", "spring"],
@@ -884,7 +884,7 @@ export function AuthSignupCard() {
     description: "Dense sidebar navigation tuned for dashboards and tools.",
     categorySlug: "sidebars",
     tags: ["app-shell"],
-    premium: true,
+    premium: false,
     trendingScore: 88,
     createdAt: "2026-04-05",
     animationKinds: ["hover", "layout"],
@@ -913,7 +913,7 @@ export function WorkbenchSidebar() {
     description: "KPI strip with micro-hover lifts and soft chart placeholders.",
     categorySlug: "dashboards",
     tags: ["analytics"],
-    premium: true,
+    premium: false,
     trendingScore: 101,
     createdAt: "2026-04-16",
     animationKinds: ["hover", "scroll"],
@@ -1148,7 +1148,7 @@ export function SplitContact() {
     description: "FeTurbulence-driven noise field for textured sci-fi surfaces.",
     categorySlug: "shaders",
     tags: ["texture"],
-    premium: true,
+    premium: false,
     trendingScore: 77,
     createdAt: "2026-04-22",
     animationKinds: ["gradient", "layout"],
@@ -1173,7 +1173,7 @@ export function SvgNoise() {
     description: "Cursor-traced highlight for feature callouts and pricing tiers.",
     categorySlug: "motion-effects",
     tags: ["pointer"],
-    premium: true,
+    premium: false,
     trendingScore: 107,
     createdAt: "2026-05-06",
     animationKinds: ["hover", "gradient"],
@@ -1202,7 +1202,7 @@ export function TracingSpotlight() {
     description: "Command surface for AI copilots with motion layout container.",
     categorySlug: "ai-components",
     tags: ["copilot"],
-    premium: true,
+    premium: false,
     trendingScore: 118,
     createdAt: "2026-05-09",
     animationKinds: ["layout", "spring"],
@@ -4023,7 +4023,7 @@ export function ShaderFlow({
     description: "A bold \"Ask anything\" headline paired with a pill-shaped search input. Placeholders rotate while idle, and on submit the text disintegrates right-to-left into drifting particles — a Thanos-snap dust effect rendered on canvas, finished off with framer-motion polish.",
     categorySlug: "ai-components",
     tags: ["ai", "input", "search", "disintegrate", "particles", "thanos", "snap", "canvas", "framer-motion", "placeholder"],
-    premium: true,
+    premium: false,
     trendingScore: 260,
     createdAt: "2026-05-16T00:00:00.000Z",
     animationKinds: ["spring"],
@@ -4931,6 +4931,432 @@ export function CardStackRotatorDemo() {
       { name: "pauseOnHover", type: "boolean", description: "Pause rotation on mouse hover.", defaultValue: "true" },
       { name: "direction", type: "\"forward\" | \"backward\"", description: "Rotation direction.", defaultValue: "\"forward\"" },
     ],
+  },
+  {
+    slug: "scroll-reveal-text",
+    name: "Scroll Reveal Text",
+    description:
+      "Premium scroll-linked text reveal — words, characters, or lines emerge from muted gray to bright white as the user scrolls, with optional blur dissolve and staggered cascade.",
+    categorySlug: "motion-effects",
+    tags: ["scroll", "text", "reveal", "animation", "typography", "blur", "framer-motion", "storytelling"],
+    premium: false,
+    trendingScore: 88,
+    createdAt: "2026-05-18",
+    animationKinds: ["scroll"],
+    dependencies: ["framer-motion"],
+    previewShell: "plain",
+    Preview: Previews.PreviewScrollRevealText,
+    reactSource: `"use client";
+
+import ScrollRevealText from "@/components/blocks/scroll-reveal-text";
+
+/* Word reveal — hero heading */
+export function WordRevealDemo() {
+  return (
+    <section className="min-h-[60vh] flex items-center px-8 py-24 bg-zinc-950">
+      <ScrollRevealText
+        text="We design tools that engineers actually want to use every single day."
+        mode="word"
+        stagger={0.7}
+        blurAmount={8}
+        fontSize="clamp(2rem, 5vw, 4.5rem)"
+        align="left"
+      />
+    </section>
+  );
+}
+
+/* Character reveal — punchy short line */
+export function CharRevealDemo() {
+  return (
+    <section className="min-h-[60vh] flex items-center justify-center px-8 py-24 bg-zinc-950">
+      <ScrollRevealText
+        text="Ship faster."
+        mode="character"
+        stagger={0.85}
+        blurAmount={10}
+        mutedColor="#27272a"
+        activeColor="#ffffff"
+        fontSize="clamp(3.5rem, 9vw, 8rem)"
+        align="center"
+      />
+    </section>
+  );
+}
+
+/* Line reveal — multi-line manifesto */
+export function LineRevealDemo() {
+  return (
+    <section className="min-h-[80vh] flex items-center px-8 py-24 bg-zinc-950">
+      <ScrollRevealText
+        text={"Built for speed.\\nDesigned to last.\\nShips on Friday."}
+        mode="line"
+        stagger={1}
+        blurAmount={4}
+        startOffset={0.1}
+        endOffset={0.8}
+        fontSize="clamp(2.5rem, 6vw, 5.5rem)"
+        align="left"
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "text", type: "string", description: "The text to reveal. Use \\n as line separators in line mode." },
+      { name: "mode", type: '"word" | "character" | "line"', defaultValue: '"word"', description: "Granularity of the reveal unit." },
+      { name: "mutedColor", type: "string", defaultValue: '"#52525b"', description: "Color of unrevealed units (start state)." },
+      { name: "activeColor", type: "string", defaultValue: '"#fafafa"', description: "Color of fully revealed units (end state)." },
+      { name: "startOffset", type: "number", defaultValue: "0.05", description: "Scroll progress (0–1) when the reveal begins." },
+      { name: "endOffset", type: "number", defaultValue: "0.75", description: "Scroll progress (0–1) when the reveal finishes." },
+      { name: "blurAmount", type: "number", defaultValue: "6", description: "Starting blur in px. Set 0 to disable blur dissolve." },
+      { name: "stagger", type: "number", defaultValue: "0.65", description: "0 = all units reveal simultaneously · 1 = fully sequential cascade." },
+      { name: "fontSize", type: "string", defaultValue: '"clamp(1.75rem, 4.5vw, 3.75rem)"', description: "CSS font-size (supports clamp)." },
+      { name: "align", type: '"left" | "center" | "right"', defaultValue: '"left"', description: "Text alignment." },
+      { name: "className", type: "string", description: "Additional classes merged onto the root element." },
+    ],
+  },
+  {
+    slug: "cinematic-3d-letter-scatter",
+    name: "Cinematic 3D Letter Scatter",
+    description: "Scroll-driven sticky animation that scatters individual characters in full 3D chaos and assembles them into a readable headline as the user scrolls.",
+    categorySlug: "motion-effects",
+    tags: ["scroll", "3d", "text", "perspective", "typography", "cinematic", "framer-motion", "sticky"],
+    premium: false,
+    trendingScore: 95,
+    createdAt: "2026-05-18",
+    animationKinds: ["scroll", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    previewShell: "plain",
+    Preview: Previews.PreviewCinematic3DLetterScatter,
+    reactSource: `"use client";
+
+import Cinematic3DLetterScatter from "@/components/blocks/cinematic-3d-letter-scatter";
+
+/* Basic usage — scroll through the section to watch letters assemble */
+export function Demo() {
+  return (
+    <Cinematic3DLetterScatter
+      text="Beyond Limits"
+      scrollDepth={3}
+      scatterIntensity={1}
+      depthIntensity={1}
+      blurIntensity={16}
+      backgroundColor="#030303"
+      textColor="#ffffff"
+      perspective={1000}
+      align="center"
+      characterStagger={0.3}
+    />
+  );
+}
+
+/* With background image */
+export function DemoWithImage() {
+  return (
+    <Cinematic3DLetterScatter
+      text="Ship Faster"
+      scrollDepth={4}
+      scatterIntensity={0.8}
+      depthIntensity={0.9}
+      blurIntensity={20}
+      backgroundColor="#000000"
+      textColor="#ffffff"
+      imageSrc="/hero.jpg"
+      showImage
+      imagePosition="behind"
+      overlayOpacity={0.35}
+      align="center"
+      characterStagger={0.25}
+    />
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "text", type: "string", defaultValue: '"Cinematic"', description: "The headline text. Each non-space character is individually animated." },
+      { name: "scrollDepth", type: "number", defaultValue: "3", description: "Multiplied by 100vh to set the sticky section height (scroll budget)." },
+      { name: "scatterIntensity", type: "number", defaultValue: "1", description: "Multiplier for XY scatter distance. Lower values keep letters closer to final position." },
+      { name: "depthIntensity", type: "number", defaultValue: "1", description: "Multiplier for Z-axis depth. Higher = letters start deeper behind the viewer." },
+      { name: "blurIntensity", type: "number", defaultValue: "16", description: "Starting blur in px (depth-of-field effect). 0 disables blur." },
+      { name: "perspective", type: "number", defaultValue: "1000", description: "CSS perspective distance in px for the 3D projection." },
+      { name: "characterStagger", type: "number", defaultValue: "0.3", description: "Fraction of scroll range used to stagger character reveal (0 = simultaneous)." },
+      { name: "finalScale", type: "number", defaultValue: "1", description: "Scale of each character at the assembled (end) state." },
+      { name: "initialOpacity", type: "number", defaultValue: "0", description: "Opacity of each character at the scattered (start) state." },
+      { name: "backgroundColor", type: "string", defaultValue: '"#050505"', description: "Background color of the sticky viewport." },
+      { name: "textColor", type: "string", defaultValue: '"#ffffff"', description: "Color of the headline text." },
+      { name: "align", type: '"left" | "center" | "right"', defaultValue: '"center"', description: "Text alignment." },
+      { name: "fontClassName", type: "string", description: "Tailwind class(es) applied to the text container for font customisation." },
+      { name: "imageSrc", type: "string", description: "Optional image URL to layer with the text." },
+      { name: "showImage", type: "boolean", defaultValue: "false", description: "Toggle the optional image layer." },
+      { name: "imagePosition", type: '"left" | "right" | "behind"', defaultValue: '"behind"', description: "Where to render the image relative to the text." },
+      { name: "imageScale", type: "number", defaultValue: "1.06", description: "CSS scale applied to the image (slight zoom prevents edge gaps)." },
+      { name: "overlayOpacity", type: "number", defaultValue: "0.45", description: "Opacity of the image when imagePosition is 'behind'." },
+      { name: "className", type: "string", description: "Additional classes merged onto the root element." },
+    ],
+  },
+  {
+    slug: "animated-countdown",
+    name: "Animated Countdown",
+    description: "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion.",
+    categorySlug: "motion-effects",
+    tags: ["countdown", "timer", "flip", "launch", "framer-motion"],
+    premium: false,
+    trendingScore: 88,
+    createdAt: "2026-04-10",
+    animationKinds: ["spring", "layout"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewAnimatedCountdown,
+    detailPreviews: [
+      Previews.PreviewAnimatedCountdownModern,
+      Previews.PreviewAnimatedCountdownDigital,
+      Previews.PreviewAnimatedCountdownMinimal,
+    ],
+    reactSource: `"use client";
+
+import { AnimatedCountdown } from "@/components/animated-countdown";
+
+export function LaunchCountdown() {
+  return (
+    <AnimatedCountdown
+      targetDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
+      variant="modern"
+      size="md"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "shooting-stars-grid",
+    name: "Shooting Stars Grid",
+    description: "Animated dot grid with diagonal shooting star streaks and glowing nodes. A dramatic yet subtle background for hero sections and feature blocks.",
+    categorySlug: "background-effects",
+    tags: ["grid", "stars", "background", "hero", "ambient", "framer-motion"],
+    premium: false,
+    trendingScore: 85,
+    createdAt: "2026-04-05",
+    animationKinds: ["gradient", "scroll"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewShootingStarsGrid,
+    detailPreviews: [Previews.PreviewShootingStarsGridHero],
+    reactSource: `"use client";
+
+import { ShootingStarsGrid } from "@/components/shooting-stars-grid";
+
+export function HeroSection() {
+  return (
+    <ShootingStarsGrid
+      starCount={54}
+      shootingStarCount={7}
+      className="min-h-[560px] rounded-3xl"
+    >
+      <h1 className="text-4xl font-semibold tracking-tight">
+        Build interfaces that feel alive
+      </h1>
+    </ShootingStarsGrid>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "hover-highlight-text",
+    name: "Hover Highlight Text",
+    description: "Cursor-tracked SVG spotlight that reveals outlined text beneath a base layer. Smooth spring physics follow the mouse for a cinematic hover effect.",
+    categorySlug: "motion-effects",
+    tags: ["hover", "text", "spotlight", "cursor", "svg", "spring", "framer-motion"],
+    premium: false,
+    trendingScore: 90,
+    createdAt: "2026-04-18",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewHoverHighlightText,
+    detailPreviews: [Previews.PreviewHoverHighlightTextHero, Previews.PreviewHoverHighlightTextBanner],
+    reactSource: `"use client";
+
+import { HoverHighlightText } from "@/components/hover-highlight-text";
+
+export function Hero() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-black px-6">
+      <HoverHighlightText
+        text="Build beautiful interfaces that users remember."
+        as="h1"
+        spotlightRadius={130}
+        baseClassName="max-w-5xl text-6xl font-semibold leading-tight text-white/15"
+        highlightClassName="max-w-5xl text-6xl font-semibold leading-tight text-transparent"
+        strokeColor="rgba(255,255,255,0.72)"
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "interactive-dots",
+    name: "Interactive Dots",
+    description: "Mouse-reactive canvas field of dots and connecting lines. Dots repel from the cursor with configurable physics — great for immersive hero backgrounds.",
+    categorySlug: "background-effects",
+    tags: ["canvas", "cursor", "dots", "background", "interactive", "hero"],
+    premium: false,
+    trendingScore: 82,
+    createdAt: "2026-03-22",
+    animationKinds: ["hover"],
+    dependencies: [],
+    Preview: Previews.PreviewInteractiveDots,
+    reactSource: `"use client";
+
+import { InteractiveDots } from "@/components/interactive-dots";
+
+export function DotsBackground() {
+  return (
+    <InteractiveDots
+      mode="lines"
+      dotSpacing={28}
+      dotSize={2}
+      interactionRadius={105}
+      repulsionStrength={34}
+      lineDistance={58}
+      className="h-screen w-full"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "layered-wave-background",
+    name: "Layered Wave Background",
+    description: "Multiple sine-wave layers with configurable gradient colors, speed, and blur. Produces a flowing, liquid ambient backdrop for any section.",
+    categorySlug: "background-effects",
+    tags: ["wave", "gradient", "background", "ambient", "animated", "hero"],
+    premium: false,
+    trendingScore: 86,
+    createdAt: "2026-04-02",
+    animationKinds: ["gradient"],
+    dependencies: [],
+    Preview: Previews.PreviewLayeredWaveBackground,
+    reactSource: `"use client";
+
+import { LayeredWaveBackground } from "@/components/layered-wave-background";
+
+export function WaveHero() {
+  return (
+    <LayeredWaveBackground
+      gradientColors={["#7c3aed", "#06b6d4", "#ec4899"]}
+      backgroundColor="#020617"
+      waveLayers={5}
+      speed="medium"
+      className="min-h-screen"
+    >
+      <div className="flex min-h-screen items-center justify-center">
+        <h1 className="text-5xl font-semibold text-white">Your hero content</h1>
+      </div>
+    </LayeredWaveBackground>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "motion-layer-scroller",
+    name: "Motion Layer Scroller",
+    description: "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
+    categorySlug: "motion-effects",
+    tags: ["parallax", "scroll", "depth", "layers", "framer-motion"],
+    premium: false,
+    trendingScore: 83,
+    createdAt: "2026-03-28",
+    animationKinds: ["scroll", "parallax"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewMotionLayerScroller,
+    reactSource: `"use client";
+
+import { MotionLayerScroller } from "@/components/motion-layer-scroller";
+
+export function ParallaxScene() {
+  return (
+    <MotionLayerScroller
+      scrollHeight={600}
+      layers={[
+        { id: "bg", yRange: [0, -60], content: <BackgroundLayer /> },
+        { id: "mid", yRange: [0, -30], content: <MidLayer /> },
+        { id: "fg", yRange: [0, 20], content: <ForegroundLayer /> },
+      ]}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "animated-bento-grid",
+    name: "Animated Bento Grid",
+    description: "Feature showcase bento grid with entrance animations and configurable column spans. Each tile supports custom content, tags, and motion entrance delays.",
+    categorySlug: "bento-grids",
+    tags: ["bento", "grid", "features", "showcase", "framer-motion", "layout"],
+    premium: false,
+    trendingScore: 94,
+    createdAt: "2026-04-20",
+    animationKinds: ["scroll", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewAnimatedBentoGrid,
+    reactSource: `"use client";
+
+import { AnimatedBentoGrid } from "@/components/animated-bento-grid";
+
+const items = [
+  { id: "1", title: "Ship faster", description: "Production components, zero setup.", tag: "DX", span: "2x1" },
+  { id: "2", title: "Motion-native", description: "Framer Motion built in.", tag: "Anim", span: "1x1" },
+];
+
+export function FeatureGrid() {
+  return <AnimatedBentoGrid items={items} columns={3} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bento-grid-skeleton",
+    name: "Bento Grid Skeleton",
+    description: "Bento grid with animated skeleton placeholder tiles — chat, dashboard, avatar, workflow, calendar, and code variants. Perfect for loading states.",
+    categorySlug: "bento-grids",
+    tags: ["bento", "skeleton", "loading", "placeholder", "framer-motion"],
+    premium: false,
+    trendingScore: 80,
+    createdAt: "2026-03-15",
+    animationKinds: ["layout"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewBentoGridSkeleton,
+    reactSource: `"use client";
+
+import { BentoGridSkeleton } from "@/components/bento-grid-skeleton";
+
+const cards = [
+  { id: "1", title: "Chat activity", tag: "Live", span: "2x1", skeletonType: "chat" },
+  { id: "2", title: "Dashboard", tag: "Stats", span: "1x1", skeletonType: "dashboard" },
+];
+
+export function SkeletonGrid() {
+  return <BentoGridSkeleton cards={cards} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "why-choose-us-bento",
+    name: "Why Choose Us Bento",
+    description: "Full-page feature bento with animated tiles showcasing product advantages. Rich motion entrance effects and a polished dark aesthetic out of the box.",
+    categorySlug: "feature-sections",
+    tags: ["bento", "features", "marketing", "section", "framer-motion", "dark"],
+    premium: false,
+    trendingScore: 87,
+    createdAt: "2026-04-25",
+    animationKinds: ["scroll", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewWhyChooseUs,
+    reactSource: `"use client";
+
+import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";
+
+export function WhyChooseUsSection() {
+  return <WhyChooseUsBento />;
+}`,
+    tailwindSource: tw,
   },
 ];
 

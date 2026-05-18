@@ -2,12 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import {
-  CheckCircle2,
-  Sparkles,
-  Upload,
-  Video,
-} from "lucide-react";
+import { CheckCircle2, Sparkles, Upload, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type UploadState = {
@@ -34,12 +29,12 @@ const candidateCards = [
   },
   {
     name: "Julian",
-    score: 92,
+    score: 70,
     src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=520&q=80",
   },
   {
     name: "Sofia",
-    score: 91,
+    score: 98,
     src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=520&q=80",
   },
 ];
@@ -84,7 +79,11 @@ function CandidateTile({
       )}
       initial={reduce ? false : { opacity: 0, y: 12, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ delay: 0.12 + index * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+      transition={{
+        delay: 0.12 + index * 0.08,
+        duration: 0.45,
+        ease: [0.22, 1, 0.36, 1],
+      }}
       whileHover={reduce ? undefined : { y: -3 }}
     >
       <img
@@ -123,7 +122,11 @@ function ScorePicturesCard() {
   }, [reduce]);
 
   return (
-    <BentoCard className="md:col-span-4" title="Generate scores based on pictures" description="Rate your candidate's looks. As real as ATS scores.">
+    <BentoCard
+      className="md:col-span-4"
+      title="Generate scores based on pictures"
+      description="Rate your candidate's looks. As real as ATS scores."
+    >
       <div className="grid grid-cols-2 gap-4">
         {candidateCards.map((candidate, index) => (
           <CandidateTile
@@ -157,10 +160,18 @@ function ProgressCard() {
                 "grid size-4 place-items-center rounded-full border bg-white",
                 index <= 2 ? "border-zinc-900" : "border-zinc-200",
               )}
-              animate={reduce || index !== 2 ? undefined : { scale: [1, 1.28, 1] }}
-              transition={{ duration: 1.7, repeat: Infinity, ease: "easeInOut" }}
+              animate={
+                reduce || index !== 2 ? undefined : { scale: [1, 1.28, 1] }
+              }
+              transition={{
+                duration: 1.7,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
-              {index <= 2 ? <span className="size-1.5 rounded-full bg-zinc-900" /> : null}
+              {index <= 2 ? (
+                <span className="size-1.5 rounded-full bg-zinc-900" />
+              ) : null}
             </motion.div>
           ))}
         </div>
@@ -172,7 +183,7 @@ function ProgressCard() {
           Application Submitted
         </motion.div>
         <span className="absolute left-[20%] top-[7.7rem] text-xs text-zinc-400">
-          Manu
+          Nexus
         </span>
         <motion.div
           className="absolute right-[25%] top-32 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 shadow-[0_16px_40px_rgba(15,23,42,0.1)]"
@@ -190,7 +201,11 @@ function InterviewCard() {
   const reduce = useReducedMotion() === true;
 
   return (
-    <BentoCard className="md:col-span-4" title="Schedule interviews seamlessly" description="Ask about DSA or roles, we don't care.">
+    <BentoCard
+      className="md:col-span-4"
+      title="Schedule interviews seamlessly"
+      description="Ask about DSA or roles, we don't care."
+    >
       <div className="relative mt-8 grid grid-cols-2 gap-4">
         <div className="absolute -left-8 top-4 h-px w-10 bg-blue-500/40" />
         <div className="absolute -left-12 top-10 h-px w-8 bg-blue-400/35" />
@@ -198,8 +213,14 @@ function InterviewCard() {
           <motion.div
             key={person.name}
             className="group relative aspect-[1.08] overflow-hidden rounded-xl border border-zinc-200 bg-zinc-950 shadow-sm"
-            animate={reduce ? undefined : { y: item === 0 ? [0, -3, 0] : [0, 4, 0] }}
-            transition={{ duration: item === 0 ? 3.4 : 3.9, repeat: Infinity, ease: "easeInOut" }}
+            animate={
+              reduce ? undefined : { y: item === 0 ? [0, -3, 0] : [0, 4, 0] }
+            }
+            transition={{
+              duration: item === 0 ? 3.4 : 3.9,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           >
             <img
               src={person.src}
@@ -212,7 +233,9 @@ function InterviewCard() {
             </div>
             <div className="absolute inset-x-2 bottom-2 translate-y-[115%] rounded-xl border border-white/15 bg-black/70 p-3 text-left text-white shadow-2xl backdrop-blur-md transition duration-300 group-hover:translate-y-0">
               <p className="text-xs font-semibold">{person.name}</p>
-              <p className="mt-1 text-[11px] leading-4 text-white/72">{person.note}</p>
+              <p className="mt-1 text-[11px] leading-4 text-white/72">
+                {person.note}
+              </p>
             </div>
           </motion.div>
         ))}
@@ -235,7 +258,11 @@ function ResumeUploadCard() {
   }, []);
 
   return (
-    <BentoCard className="md:col-span-4 md:row-span-2" title="Easy upload resumes manually" description="One-click drag and drop candidates' resumes.">
+    <BentoCard
+      className="md:col-span-4 md:row-span-2"
+      title="Easy upload resumes manually"
+      description="One-click drag and drop candidates' resumes."
+    >
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -295,7 +322,11 @@ function ResumeUploadCard() {
               : { duration: 3, repeat: Infinity, ease: "easeInOut" }
           }
         >
-          {file ? <CheckCircle2 className="size-5 text-emerald-500" /> : <Upload className="size-5" />}
+          {file ? (
+            <CheckCircle2 className="size-5 text-emerald-500" />
+          ) : (
+            <Upload className="size-5" />
+          )}
         </motion.div>
 
         <div className="relative z-10 mt-4 max-w-[260px]">
@@ -303,7 +334,9 @@ function ResumeUploadCard() {
             {file ? file.name : dragging ? "Drop resume here" : "Upload resume"}
           </p>
           <p className="mt-1 text-xs leading-5 text-zinc-500">
-            {file ? `${formatSize(file.size)} ready for scoring` : "PDF, DOCX, or TXT files are supported."}
+            {file
+              ? `${formatSize(file.size)} ready for scoring`
+              : "PDF, DOCX, or TXT files are supported."}
           </p>
         </div>
       </button>
@@ -326,7 +359,10 @@ function BentoCard({
 
   return (
     <motion.article
-      className={cn("rounded-2xl border border-zinc-200/80 bg-white p-7 shadow-[0_24px_80px_rgba(15,23,42,0.08)]", className)}
+      className={cn(
+        "rounded-2xl border border-zinc-200/80 bg-white p-7 shadow-[0_24px_80px_rgba(15,23,42,0.08)]",
+        className,
+      )}
       initial={reduce ? false : { opacity: 0, y: 18, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-80px" }}
@@ -334,7 +370,9 @@ function BentoCard({
     >
       <div className="mb-4">
         <h3 className="text-base font-medium text-zinc-950">{title}</h3>
-        <p className="mt-4 max-w-[330px] text-base leading-6 text-zinc-500">{description}</p>
+        <p className="mt-4 max-w-[330px] text-base leading-6 text-zinc-500">
+          {description}
+        </p>
       </div>
       {children}
     </motion.article>
@@ -347,7 +385,12 @@ export function AtsBentoGrid({
   className,
 }: AtsBentoGridProps) {
   return (
-    <section className={cn("relative flex min-h-[960px] w-full items-center justify-center overflow-hidden bg-[#f4f4f3] px-5 py-16 text-zinc-950", className)}>
+    <section
+      className={cn(
+        "relative flex min-h-[960px] w-full items-center justify-center overflow-hidden bg-[#f4f4f3] px-5 py-16 text-zinc-950",
+        className,
+      )}
+    >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.95),rgba(244,244,245,0.35)_45%,rgba(250,250,250,0.9)_100%)]" />
 
       <div className="relative w-full max-w-7xl">
@@ -355,7 +398,9 @@ export function AtsBentoGrid({
           <h2 className="text-4xl font-semibold tracking-[-0.03em] text-zinc-950 sm:text-5xl">
             {title}
           </h2>
-          <p className="mt-6 max-w-xl text-lg leading-7 text-zinc-600">{description}</p>
+          <p className="mt-6 max-w-xl text-lg leading-7 text-zinc-600">
+            {description}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
@@ -370,11 +415,17 @@ export function AtsBentoGrid({
         <div className="mx-auto mt-36 flex w-fit items-center gap-4 rounded-full border border-zinc-200 bg-white/90 p-2 text-base text-zinc-500 shadow-[0_16px_60px_rgba(15,23,42,0.08)] backdrop-blur">
           <span className="px-4">← Blocks</span>
           <span className="h-7 w-px bg-zinc-200" />
-          <span className="font-semibold text-zinc-950">three-column-bento-grid</span>
-          <span className="rounded-full border border-zinc-200 px-2 py-0.5 text-sm font-medium text-zinc-950">Pro</span>
+          <span className="font-semibold text-zinc-950">
+            three-column-bento-grid
+          </span>
+          <span className="rounded-full border border-zinc-200 px-2 py-0.5 text-sm font-medium text-zinc-950">
+            Pro
+          </span>
           <span className="h-7 w-px bg-zinc-200" />
           <Sparkles className="size-5 text-zinc-500" />
-          <span className="rounded-full bg-zinc-950 px-5 py-2 text-white shadow-inner">All Access</span>
+          <span className="rounded-full bg-zinc-950 px-5 py-2 text-white shadow-inner">
+            All Access
+          </span>
         </div>
       </div>
     </section>

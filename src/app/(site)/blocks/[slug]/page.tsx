@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { ChevronRight, Code2, Expand, Monitor } from "lucide-react";
+import { ChevronRight, Code2, Expand, Lock, Monitor } from "lucide-react";
 import { getBlock, blocks } from "@/lib/catalog/blocks";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -162,13 +162,14 @@ export default async function BlockDetailPage({ params }: Props) {
         </PreviewCodeSection>
       ) : isWhyChooseUsCard ? (
         <>
-          <PreviewCodeSection title={block.name} code={code}>
+          <PreviewCodeSection title={block.name} code={code} locked>
             <WhyChooseUsBentoHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
             title="ATS Bento Grid"
             code={atsBentoCode}
             usageCode={ATS_BENTO_USAGE}
+            locked
             className="mt-16"
           >
             <AtsBentoGridHeroCustomizer />
@@ -177,6 +178,7 @@ export default async function BlockDetailPage({ params }: Props) {
             title="Spotlight Bento Grid"
             code={spotlightCode}
             usageCode={SPOTLIGHT_BENTO_USAGE}
+            locked
             className="mt-16"
           >
             <SpotlightBentoGridCustomizer />
@@ -237,12 +239,14 @@ function PreviewCodeSection({
   usageCode,
   className,
   children,
+  locked = false,
 }: {
   title: string;
   code: string;
   usageCode?: string;
   className?: string;
   children: React.ReactNode;
+  locked?: boolean;
 }) {
   return (
     <section className={className ?? "mt-14"}>
@@ -257,8 +261,8 @@ function PreviewCodeSection({
               <Monitor className="size-4" />
               Preview
             </TabsTrigger>
-            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base">
-              <Code2 className="size-4" />
+            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled={locked}>
+              <Lock className="size-4" />
               Code
             </TabsTrigger>
           </TabsList>
@@ -285,27 +289,58 @@ function PreviewCodeSection({
         </TabsContent>
 
         <TabsContent value="code" className="mt-4">
-          <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-            <UsageSnippet code={usageCode ?? defaultUsageForTitle(title)} />
-            <CodeBlock
-              code={code}
-              language="tsx"
-              theme="dark"
-              header={{
-                enabled: true,
-                showDots: true,
-                title: `${title}.tsx`,
-                copy: {
+          {locked ? (
+            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-muted/30 p-8">
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <div className="flex size-12 items-center justify-center rounded-2xl border border-border/50 bg-muted/50 shadow-inner">
+                  <Lock className="size-5 text-muted-foreground" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-semibold text-muted-foreground">Code access locked</p>
+                  <p className="mt-1 text-xs text-muted-foreground/60">
+                    Code will be available soon. Stay tuned for updates.
+                  </p>
+                </div>
+              </div>
+              <div
+                className="h-48 w-full blur-xl filter"
+                aria-hidden
+                contentEditable={false}
+                suppressContentEditableWarning
+              >
+                <CodeBlock
+                  code={code}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: false }}
+                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+                  border={{ radius: "16px" }}
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+              <UsageSnippet code={usageCode ?? defaultUsageForTitle(title)} />
+              <CodeBlock
+                code={code}
+                language="tsx"
+                theme="dark"
+                header={{
                   enabled: true,
-                  label: "Copy code",
-                  copiedLabel: "Copied",
-                  copiedDurationMs: 1400,
-                },
-              }}
-              codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-              border={{ radius: "16px" }}
-            />
-          </div>
+                  showDots: true,
+                  title: `${title}.tsx`,
+                  copy: {
+                    enabled: true,
+                    label: "Copy code",
+                    copiedLabel: "Copied",
+                    copiedDurationMs: 1400,
+                  },
+                }}
+                codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+                border={{ radius: "16px" }}
+              />
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </section>

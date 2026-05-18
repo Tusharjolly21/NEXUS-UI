@@ -7,120 +7,64 @@ import {
   AnimatePresence,
   useReducedMotion,
 } from "framer-motion";
+import Image from "next/image";
 
 const SPRING = { type: "spring" as const, bounce: 0.12, duration: 0.45 };
 
-// ── abstract animated visuals ─────────────────────────────────────────────────
+// ── Apple product images ────────────────────────────────────────────────────────
 
-function PulseRings({ color }: { color: string }) {
+const MACBOOK_IMG =
+  // "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?fm=jpg&q=85&w=900&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1540726811314-7648cc1b4426?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
+const IPHONE_IMG =
+  // "https://images.unsplash.com/photo-1576103200868-2dd3eec3f333?fm=jpg&q=85&w=900&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1604671368394-2240d0b1bb6c?q=80&w=2831&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+const MACBOOK_PRO_IMG =
+  "https://images.unsplash.com/photo-1605784401368-5af1d9d6c4dc?fm=jpg&q=85&w=900&auto=format&fit=crop";
+
+const IPAD_IMG =
+  // "https://images.unsplash.com/photo-1651747137395-065bd3af97bb?fm=jpg&q=85&w=900&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1587033411391-5d9e51cce126?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
+// ── image visual ──────────────────────────────────────────────────────────────
+
+function ProductImage({
+  src,
+  alt,
+  objectFit = "contain",
+  className,
+}: {
+  src: string;
+  alt: string;
+  objectFit?: "contain" | "cover";
+  className?: string;
+}) {
   const reduced = useReducedMotion();
+  const [loaded, setLoaded] = React.useState(false);
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      {[72, 120, 168].map((size, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full border"
-          style={{ width: size, height: size, borderColor: color }}
-          animate={reduced ? {} : { scale: [1, 1.07, 1], opacity: [0.55, 0.18, 0.55] }}
-          transition={{ duration: 2.6, delay: i * 0.72, repeat: Infinity, ease: "easeInOut" }}
-        />
-      ))}
+    <div
+      className={`relative h-full w-full overflow-hidden ${className ?? ""}`}
+    >
       <motion.div
-        className="size-9 rounded-full"
-        style={{ background: color, filter: "blur(6px)", opacity: 0.55 }}
-        animate={reduced ? {} : { scale: [1, 1.18, 1] }}
-        transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}
-      />
-    </div>
-  );
-}
-
-function ChartBars({ color }: { color: string }) {
-  const reduced = useReducedMotion();
-  const heights = [34, 58, 42, 74, 50, 66, 38];
-  return (
-    <div className="absolute inset-x-0 bottom-0 flex items-end justify-center gap-2 px-10 pb-14">
-      {heights.map((h, i) => (
-        <motion.div
-          key={i}
-          className="flex-1 rounded-t-sm"
-          style={{ height: `${h}%`, background: color, opacity: 0.65 }}
-          animate={reduced ? {} : { scaleY: [1, 1.16, 0.91, 1] }}
-          transition={{ duration: 2.1, delay: i * 0.13, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute inset-0"
+        animate={reduced ? {} : { scale: [1, 1.06, 1] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover transition-opacity duration-700"
+          style={{ objectFit }}
+          onLoad={() => setLoaded(true)}
+          priority={false}
         />
-      ))}
-    </div>
-  );
-}
-
-function OrbitRings({ color }: { color: string }) {
-  const reduced = useReducedMotion();
-  return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      {[
-        { size: 100, dur: 8, dir: 1, opacity: 0.35 },
-        { size: 62, dur: 5, dir: -1, opacity: 0.25 },
-      ].map(({ size, dur, dir, opacity }, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full border"
-          style={{ width: size, height: size, borderColor: color, opacity }}
-          animate={reduced ? {} : { rotate: dir * 360 }}
-          transition={{ duration: dur, repeat: Infinity, ease: "linear" }}
-        >
-          <div
-            className="absolute left-1/2 -top-1.5 size-3 -translate-x-1/2 rounded-full"
-            style={{ background: color }}
-          />
-        </motion.div>
-      ))}
-      <div
-        className="size-8 rounded-full"
-        style={{ background: color, opacity: 0.5, filter: "blur(5px)" }}
-      />
-    </div>
-  );
-}
-
-function NodeGraph({ color }: { color: string }) {
-  const reduced = useReducedMotion();
-  const lines = [
-    { x1: 80, y1: 55, x2: 28, y2: 18 },
-    { x1: 80, y1: 55, x2: 132, y2: 18 },
-    { x1: 80, y1: 55, x2: 80, y2: 94 },
-  ];
-  const nodes = [
-    { cx: 80, cy: 55, r: 10 },
-    { cx: 28, cy: 18, r: 6 },
-    { cx: 132, cy: 18, r: 6 },
-    { cx: 80, cy: 94, r: 6 },
-  ];
-  return (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <svg viewBox="0 0 160 112" width="160" height="112">
-        {lines.map((l, i) => (
-          <motion.line
-            key={i}
-            {...l}
-            stroke={color}
-            strokeWidth="1.5"
-            animate={reduced ? {} : { strokeOpacity: [0.3, 0.75, 0.3] }}
-            transition={{ duration: 2.1, delay: i * 0.42, repeat: Infinity }}
-          />
-        ))}
-        {nodes.map(({ cx, cy, r }, i) => (
-          <motion.circle
-            key={i}
-            cx={cx}
-            cy={cy}
-            r={r}
-            fill={color}
-            fillOpacity={i === 0 ? 0.6 : 0.4}
-            animate={reduced ? {} : { r: [r, r * 1.22, r] }}
-            transition={{ duration: 2.1, delay: i * 0.32, repeat: Infinity }}
-          />
-        ))}
-      </svg>
+      </motion.div>
+      {!loaded && (
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 to-white/10" />
+      )}
     </div>
   );
 }
@@ -135,48 +79,70 @@ interface CardDef {
   bg: string;
   glow: string;
   visual: React.ReactElement;
+  imgSrc?: string;
+  imgAlt?: string;
 }
 
 const CARDS: CardDef[] = [
   {
     id: "smart-interface",
-    tag: "Interface",
-    title: "Smart Interface",
+    tag: "MacBook Pro",
+    title: "MacBook Pro",
     description:
-      "Adaptive UI that learns your workflow and surfaces the right tools at exactly the right moment.",
-    bg: "linear-gradient(135deg,#0f172a 0%,#1e1b4b 60%,#0f0f23 100%)",
+      "The most powerful MacBook Pro ever. M3 Pro and M3 Max deliver exceptional performance for demanding workflows.",
     glow: "#6366f1",
-    visual: <PulseRings color="#6366f1" />,
+    imgSrc: MACBOOK_PRO_IMG,
+    imgAlt: "MacBook Pro",
+    visual: (
+      <ProductImage
+        src={MACBOOK_PRO_IMG}
+        alt="MacBook Pro"
+        className="h-full w-full"
+      />
+    ),
   },
   {
     id: "realtime-insights",
-    tag: "Analytics",
-    title: "Real-time Insights",
+    tag: "iPhone",
+    title: "iPhone Pro",
     description:
-      "Live dashboards with zero-latency data streams so every decision is backed by now.",
-    bg: "linear-gradient(135deg,#022c22 0%,#064e3b 50%,#0c4a6e 100%)",
+      "Titanium design. A17 Pro chip. Camera system that captures your most epic shots in any light.",
     glow: "#10b981",
-    visual: <ChartBars color="#10b981" />,
+    imgSrc: IPHONE_IMG,
+    imgAlt: "iPhone",
+    visual: (
+      <ProductImage src={IPHONE_IMG} alt="iPhone" className="h-full w-full" />
+    ),
   },
   {
     id: "seamless-sync",
-    tag: "Sync",
-    title: "Seamless Sync",
+    tag: "MacBook Air",
+    title: "MacBook Air",
     description:
-      "One source of truth across every device, teammate, and integration you connect.",
-    bg: "linear-gradient(135deg,#2e1065 0%,#4c1d95 50%,#1a1040 100%)",
+      "Supercharged by M3. Impossibly thin. Remarkably fast. Built for Apple Intelligence and all-day battery.",
     glow: "#8b5cf6",
-    visual: <OrbitRings color="#8b5cf6" />,
+    imgSrc: MACBOOK_IMG,
+    imgAlt: "MacBook Air",
+    visual: (
+      <ProductImage
+        src={MACBOOK_IMG}
+        alt="MacBook Air"
+        className="h-full w-full"
+      />
+    ),
   },
   {
     id: "personalized-workflow",
-    tag: "Workflow",
-    title: "Personalized Workflow",
+    tag: "iPad Pro",
+    title: "iPad Pro",
     description:
-      "AI-tuned pipelines that adapt to how your team actually works, not a template.",
-    bg: "linear-gradient(135deg,#431407 0%,#7c2d12 50%,#451a03 100%)",
+      "The ultimate iPad experience. M4 chip, nano-texture display option, and Apple Pencil Pro support.",
     glow: "#f97316",
-    visual: <NodeGraph color="#f97316" />,
+    imgSrc: IPAD_IMG,
+    imgAlt: "iPad Pro",
+    visual: (
+      <ProductImage src={IPAD_IMG} alt="iPad Pro" className="h-full w-full" />
+    ),
   },
 ];
 
@@ -243,7 +209,8 @@ function SpotlightCardItem({
           ? `0 0 0 1px ${card.glow}28, 0 8px 64px 0 ${card.glow}22`
           : "none",
         filter: dimmed ? "saturate(0.15) brightness(0.42)" : "none",
-        transition: "filter 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease",
+        transition:
+          "filter 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease",
       }}
     >
       {/* Ambient glow blob */}
@@ -275,7 +242,8 @@ function SpotlightCardItem({
       <div
         className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5"
         style={{
-          background: "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)",
+          background:
+            "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)",
           opacity: isActive || mobile ? 1 : 0,
           transition: "opacity 0.3s ease",
         }}
@@ -338,7 +306,10 @@ export default function SpotlightBentoGrid() {
               key={card.id}
               layout
               transition={SPRING}
-              style={{ gridColumn: `span ${layouts[i].span}`, order: layouts[i].order }}
+              style={{
+                gridColumn: `span ${layouts[i].span}`,
+                order: layouts[i].order,
+              }}
               onHoverStart={() => setActiveIdx(i)}
               onHoverEnd={() => setActiveIdx(null)}
               className="min-w-0"
