@@ -15,8 +15,6 @@ import {
 } from "lucide-react";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { getComponentCategoryLabel, type ComponentCategorySlug } from "@/lib/catalog/taxonomy";
-import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { siteConfig } from "@/lib/seo";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -63,45 +61,47 @@ function InstallSidebar({
   animationKinds: string[];
 }) {
   const name = registryCliName ?? slug;
-  const shadcnAddCmd = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${name}`;
-  const registryJson = `"registries": {\n  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl(siteConfig.url)}"\n}`;
+  const shadcnAddCmd = `npx shadcn@latest add @next-ui/${name}`;
+  const registryConfig = `"registries": {\n  "@next-ui": "https://nexus-ui.com/r/{name}.json"\n}`;
   const installCmd = `npm install ${dependencies.join(" ")}`;
 
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card/80 p-5 shadow-sm dark:bg-white/[0.03]">
       {/* shadcn CLI */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Zap className="size-3.5 text-muted-foreground" />
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Shadcn CLI
           </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Add{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px] text-foreground">
-            {SHADCN_REGISTRY_SCOPE}
-          </code>{" "}
-          to{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px] text-foreground">
-            components.json
-          </code>
-          , then run:
-        </p>
-        <div className="relative overflow-hidden rounded-xl border border-border bg-muted/30 dark:bg-white/[0.04]">
-          <pre className="overflow-x-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
-            {shadcnAddCmd}
-          </pre>
-          <div className="absolute right-2 top-2">
-            <CopyBtn text={shadcnAddCmd} />
+
+        {/* Step 1 */}
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold text-foreground">Step 1 — One-time setup</p>
+          <p className="text-[11px] text-muted-foreground">
+            Create or open <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px] text-foreground">components.json</code> in your project root and add:
+          </p>
+          <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
+            <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[10px] leading-relaxed text-foreground">
+              {registryConfig}
+            </pre>
+            <div className="absolute right-2 top-2">
+              <CopyBtn text={registryConfig} />
+            </div>
           </div>
         </div>
-        <div className="relative overflow-hidden rounded-xl border border-border bg-muted/30 dark:bg-white/[0.04]">
-          <pre className="overflow-x-auto p-3 pr-16 font-mono text-[10px] leading-relaxed text-foreground">
-            {registryJson}
-          </pre>
-          <div className="absolute right-2 top-2">
-            <CopyBtn text={registryJson} />
+
+        {/* Step 2 */}
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold text-foreground">Step 2 — Install component</p>
+          <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
+            <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
+              {shadcnAddCmd}
+            </pre>
+            <div className="absolute right-2 top-2">
+              <CopyBtn text={shadcnAddCmd} />
+            </div>
           </div>
         </div>
       </div>
@@ -118,8 +118,8 @@ function InstallSidebar({
                 npm packages
               </p>
             </div>
-            <div className="relative overflow-hidden rounded-xl border border-border bg-muted/30 dark:bg-white/[0.04]">
-              <pre className="overflow-x-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
+            <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
+              <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
                 {installCmd}
               </pre>
               <div className="absolute right-2 top-2">
@@ -258,7 +258,7 @@ export function ComponentDetailPageClient({ slug }: { slug: string }) {
               registryCliName={comp.registryCliName}
               className={i > 0 ? "mt-16" : undefined}
             >
-              <SectionPreview />
+              <SectionPreview compact={false} />
             </PreviewCodeSection>
           );
         })
@@ -271,7 +271,7 @@ export function ComponentDetailPageClient({ slug }: { slug: string }) {
           animationKinds={comp.animationKinds}
           registryCliName={comp.registryCliName}
         >
-          <comp.Preview />
+          <comp.Preview compact={false} />
         </PreviewCodeSection>
       )}
 
@@ -292,7 +292,7 @@ export function ComponentDetailPageClient({ slug }: { slug: string }) {
             )}
           </div>
         </div>
-        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 dark:bg-white/[0.04]">
+        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 dark:bg-white/4">
           <p className="text-sm font-semibold text-foreground">Copy-paste ready</p>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             Use the Code tab above to inspect and copy this component into your project.
@@ -346,21 +346,15 @@ function PreviewCodeSection({
             type="button"
             aria-label="Full screen preview"
             onClick={() => setExpanded(true)}
-            className="grid size-10 place-items-center rounded-xl border border-border/70 bg-background text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-white/[0.04]"
+            className="grid size-10 place-items-center rounded-xl border border-border/70 bg-background text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-white/4"
           >
             <Expand className="size-4" />
           </button>
         </div>
 
         <TabsContent value="preview" className="mt-4">
-          <div className="rounded-2xl bg-muted/80 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-white/[0.06] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-            <div className="relative h-[620px] overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950 md:h-[720px] xl:h-[860px]">
-              <div className="absolute inset-4 overflow-auto rounded-lg sm:inset-6">
-                <div className="flex min-h-full w-full items-start justify-center">
-                  {children}
-                </div>
-              </div>
-            </div>
+          <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950">
+            {children}
           </div>
         </TabsContent>
 
@@ -372,24 +366,26 @@ function PreviewCodeSection({
               dependencies={dependencies}
               animationKinds={animationKinds}
             />
-            <CodeBlock
-              code={code}
-              language="tsx"
-              theme="dark"
-              header={{
-                enabled: true,
-                showDots: true,
-                title: `${title}.tsx`,
-                copy: {
+            <div className="h-[600px] xl:h-[700px]">
+              <CodeBlock
+                code={code}
+                language="tsx"
+                theme="dark"
+                header={{
                   enabled: true,
-                  label: "Copy code",
-                  copiedLabel: "Copied",
-                  copiedDurationMs: 1400,
-                },
-              }}
-              codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-              border={{ radius: "16px" }}
-            />
+                  showDots: true,
+                  title: `${title}.tsx`,
+                  copy: {
+                    enabled: true,
+                    label: "Copy code",
+                    copiedLabel: "Copied",
+                    copiedDurationMs: 1400,
+                  },
+                }}
+                codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+                border={{ radius: "16px" }}
+              />
+            </div>
           </div>
         </TabsContent>
       </Tabs>
