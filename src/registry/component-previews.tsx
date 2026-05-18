@@ -86,6 +86,7 @@ import { GlowButton } from "@/components/glow-button";
 import { FaqFolderCard } from "@/components/blocks/faq-folder-card";
 import { WordMagnet } from "@/components/word-magnet";
 import { ThreeDFolder } from "@/components/three-d-folder";
+import { RealTimeCursors } from "@/components/real-time-cursors";
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
@@ -1020,6 +1021,14 @@ export function PreviewThreeDFolder() {
           product shots, or any visual collection that deserves a little depth.
         </p>
       </div>
+    </div>
+  );
+}
+
+export function PreviewRealTimeCursors() {
+  return (
+    <div className="w-full rounded-3xl">
+      <RealTimeCursors className="w-full rounded-3xl" />
     </div>
   );
 }

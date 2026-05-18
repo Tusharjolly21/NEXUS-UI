@@ -1304,6 +1304,62 @@ export function FolderShowcase() {
     ],
   },
   {
+    slug: "real-time-cursors",
+    name: "Real-Time Cursors",
+    description:
+      "Collaborative workspace preview with animated teammate cursors, code review cards, and simulated live presence trails.",
+    categorySlug: "motion-effects",
+    tags: ["cursor", "collaboration", "code", "presence", "framer-motion", "workspace"],
+    premium: false,
+    trendingScore: 92,
+    createdAt: "2026-05-18",
+    animationKinds: ["spring", "hover"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewRealTimeCursors,
+    reactSource: `"use client";
+
+import { RealTimeCursors } from "@/components/real-time-cursors";
+
+export function CollaborativeReview() {
+  return (
+    <RealTimeCursors
+      cursors={[
+        {
+          name: "Ava",
+          color: "#2563eb",
+          note: "checking props",
+          path: [
+            { x: 16, y: 26 },
+            { x: 72, y: 21 },
+            { x: 64, y: 58 },
+            { x: 20, y: 68 },
+          ],
+        },
+        {
+          name: "Noah",
+          color: "#7c3aed",
+          note: "left a comment",
+          path: [
+            { x: 78, y: 74 },
+            { x: 36, y: 54 },
+            { x: 52, y: 30 },
+            { x: 84, y: 42 },
+          ],
+        },
+      ]}
+      className="min-h-[520px]"
+    />
+  );
+}`,
+    tailwindSource: tw,
+    registryCliName: "real-time-cursors",
+    props: [
+      { name: "cursors", type: "LiveCursor[]", description: "Presence cursor definitions with name, color, note, and percentage-based path points." },
+      { name: "showCodePanel", type: "boolean", defaultValue: "true", description: "Shows or hides the built-in code review surface behind the cursors." },
+      { name: "className", type: "string", description: "Optional classes for the outer workspace container." },
+    ],
+  },
+  {
     slug: "editorial-blog-rail",
     name: "Editorial Blog Rail",
     description: "Featured article plus compact secondary headlines for content hubs.",

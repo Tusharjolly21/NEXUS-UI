@@ -115,7 +115,7 @@ const appearUp = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.44, 0, 0.56, 1] },
+    transition: { duration: 0.4, ease: [0.44, 0, 0.56, 1] as [number, number, number, number] },
   },
 };
 
@@ -124,7 +124,7 @@ const appearSide = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { delay: 0.4, duration: 1, ease: [0.12, 0.23, 0, 1] },
+    transition: { delay: 0.4, duration: 1, ease: [0.12, 0.23, 0, 1] as [number, number, number, number] },
   },
 };
 
@@ -300,7 +300,7 @@ export function SearchableFaqSection({
   const [search, setSearch] = React.useState("");
   const [activeTab, setActiveTab] = React.useState("All");
   const categories = React.useMemo(
-    () => ["All", ...Array.from(new Set(items.map((item) => item.tag).filter(Boolean)))],
+    () => ["All", ...Array.from(new Set(items.map((item) => item.tag).filter((t): t is string => Boolean(t))))],
     [items],
   );
 
