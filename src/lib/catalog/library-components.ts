@@ -1086,6 +1086,224 @@ export function NebulaCta() {
     tailwindSource: tw,
   },
   {
+    slug: "glow-button",
+    name: "Glow Button",
+    description:
+      "Framer-style glowing CTA button with expanding shadow, radial border sweep, glass edge, and animated arrow.",
+    categorySlug: "cta-sections",
+    tags: ["button", "cta", "glow", "framer-motion", "hover"],
+    premium: false,
+    trendingScore: 96,
+    createdAt: "2026-05-18",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewGlowButton,
+    reactSource: `"use client";
+
+import * as React from "react";
+import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+type GlowButtonProps = {
+  children?: React.ReactNode;
+  href?: string;
+  className?: string;
+  innerClassName?: string;
+  background?: string;
+  textColor?: string;
+  arrowColor?: string;
+  radius?: number;
+  glow?: string;
+  borderColor?: string;
+  openInNewTab?: boolean;
+} & Omit<React.ComponentPropsWithoutRef<typeof motion.a>, "children" | "href" | "color">;
+
+export function GlowButton({
+  children = "Get Started Now",
+  href = "#",
+  className,
+  innerClassName,
+  background = "rgb(0, 0, 0)",
+  textColor = "rgb(255, 255, 255)",
+  arrowColor = "rgb(255, 255, 255)",
+  radius = 8,
+  glow = "0px 20px 50px 4px rgba(255, 255, 255, 0.25)",
+  borderColor = "rgba(255, 255, 255, 0.25)",
+  openInNewTab = false,
+  ...props
+}: GlowButtonProps) {
+  const rounded = \`\${radius}px\`;
+  const target = openInNewTab ? "_blank" : undefined;
+  const rel = openInNewTab ? "noreferrer noopener" : undefined;
+
+  return (
+    <motion.a
+      href={href}
+      target={target}
+      rel={rel}
+      initial="rest"
+      animate="rest"
+      whileHover="hover"
+      className={cn("relative inline-flex cursor-pointer items-center justify-center overflow-visible no-underline", className)}
+      {...props}
+    >
+      <motion.span
+        aria-hidden
+        variants={{
+          rest: { scale: 0.4, boxShadow: glow },
+          hover: { scale: 1, boxShadow: "0px 7px 20px 0px rgba(255, 255, 255, 0.25)" },
+        }}
+        transition={{ type: "spring", duration: 1, bounce: 0 }}
+        className="absolute inset-0 z-0 origin-bottom"
+        style={{ borderRadius: rounded, backgroundColor: "transparent" }}
+      />
+
+      <span className="relative z-10 inline-flex items-center justify-center overflow-hidden p-px" style={{ borderRadius: rounded, backgroundColor: "rgba(255, 255, 255, 0.05)" }}>
+        <motion.span
+          aria-hidden
+          variants={{
+            rest: { left: "30%", width: "40%" },
+            hover: { left: "0%", width: "100%" },
+          }}
+          transition={{ type: "spring", duration: 1, bounce: 0 }}
+          className="absolute bottom-0 z-10 h-1/2"
+          style={{
+            borderRadius: rounded,
+            background: "radial-gradient(50% 200% at 50% 50%, rgba(255,255,255,0.1) 0%, rgb(255,255,255) 52%, rgba(255,255,255,0.1) 100%)",
+          }}
+        />
+        <span
+          aria-hidden
+          className="absolute inset-0 z-0 backdrop-blur-[10px]"
+          style={{
+            borderRadius: rounded,
+            background: "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.47) 0%, rgba(171,171,171,0.4) 100%)",
+          }}
+        />
+        <span aria-hidden className="pointer-events-none absolute inset-0 z-10" style={{ borderRadius: rounded, border: \`1px solid \${borderColor}\` }} />
+        <span className={cn("relative z-20 inline-flex items-center justify-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm leading-none", innerClassName)} style={{ borderRadius: rounded, background, color: textColor }}>
+          <span>{children}</span>
+          <span className="grid size-5 place-items-center overflow-hidden">
+            <motion.span variants={{ rest: { x: 0 }, hover: { x: [0, 4, 0] } }} transition={{ duration: 0.8, ease: "easeInOut" }}>
+              <ArrowRight className="size-5" style={{ color: arrowColor, strokeWidth: 1.5 }} />
+            </motion.span>
+          </span>
+        </span>
+      </span>
+    </motion.a>
+  );
+}`,
+    tailwindSource: tw,
+    registryCliName: "glow-button",
+    props: [
+      { name: "children", type: "React.ReactNode", defaultValue: "\"Get Started Now\"", description: "Button label or inline content." },
+      { name: "href", type: "string", defaultValue: "\"#\"", description: "Destination link for the CTA." },
+      { name: "background", type: "string", defaultValue: "\"rgb(0, 0, 0)\"", description: "Inner button background color." },
+      { name: "textColor", type: "string", defaultValue: "\"rgb(255, 255, 255)\"", description: "Button text color." },
+      { name: "arrowColor", type: "string", defaultValue: "\"rgb(255, 255, 255)\"", description: "Arrow icon color." },
+      { name: "radius", type: "number", defaultValue: "8", description: "Corner radius in pixels." },
+      { name: "glow", type: "string", description: "CSS box-shadow used for the resting outer glow." },
+      { name: "borderColor", type: "string", description: "Subtle glass border color." },
+      { name: "openInNewTab", type: "boolean", defaultValue: "false", description: "Opens the link in a new browser tab." },
+    ],
+  },
+  {
+    slug: "word-magnet",
+    name: "Word Magnet",
+    description:
+      "Cursor-reactive text where whole words gently repel from the pointer and spring back without splitting letters.",
+    categorySlug: "motion-effects",
+    tags: ["text", "cursor", "magnetic", "hover", "spring", "framer-motion"],
+    premium: false,
+    trendingScore: 91,
+    createdAt: "2026-05-18",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewWordMagnet,
+    reactSource: `"use client";
+
+import { WordMagnet } from "@/components/word-magnet";
+
+export function MagneticHeadline() {
+  return (
+    <div className="flex min-h-[420px] items-center justify-center rounded-3xl bg-zinc-50 px-6 dark:bg-zinc-950">
+      <WordMagnet
+        text="Move your cursor through this magnetic headline and watch every word gently drift aside before snapping back into a clean readable rhythm"
+        radius={130}
+        force={0.45}
+        damping={28}
+        returnDelay={360}
+        className="max-w-5xl text-5xl font-semibold tracking-[-0.03em] text-zinc-950 dark:text-white"
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    registryCliName: "word-magnet",
+    props: [
+      { name: "text", type: "string", defaultValue: "\"Magnetic words react to your cursor and snap back into place\"", description: "Text split into magnetic word tokens." },
+      { name: "radius", type: "number", defaultValue: "130", description: "Pointer influence radius in pixels." },
+      { name: "force", type: "number", defaultValue: "0.45", description: "Repulsion strength applied to nearby words." },
+      { name: "damping", type: "number", defaultValue: "28", description: "Spring damping for the return motion." },
+      { name: "returnDelay", type: "number", defaultValue: "360", description: "Delay before a word springs back after being pushed." },
+      { name: "disableOnMobile", type: "boolean", defaultValue: "true", description: "Disables pointer motion on touch and small screens." },
+      { name: "overflow", type: "CSSProperties['overflow']", defaultValue: "\"visible\"", description: "Controls whether moving words can leave the text box." },
+      { name: "className", type: "string", description: "Classes for the wrapping text container." },
+      { name: "wordClassName", type: "string", description: "Classes applied to each individual word." },
+    ],
+  },
+  {
+    slug: "three-d-folder",
+    name: "3D Folder",
+    description:
+      "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
+    categorySlug: "cards",
+    tags: ["folder", "portfolio", "gallery", "hover", "3d", "framer-motion"],
+    premium: false,
+    trendingScore: 90,
+    createdAt: "2026-05-18",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewThreeDFolder,
+    reactSource: `"use client";
+
+import { ThreeDFolder } from "@/components/three-d-folder";
+
+export function FolderShowcase() {
+  return (
+    <div className="grid min-h-[520px] items-center gap-8 rounded-3xl bg-zinc-50 p-8 md:grid-cols-2 dark:bg-zinc-950">
+      <ThreeDFolder
+        title="Launch Assets"
+        folderBackColor="#fb7185"
+        folderFrontColor="#facc15"
+        folderTabColor="#f97316"
+      />
+
+      <div>
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-rose-500">Portfolio folder</p>
+        <h2 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+          Hover the folder to reveal stacked project previews.
+        </h2>
+        <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+          Use it for case studies, campaign assets, product shots, or any compact visual archive.
+        </p>
+      </div>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+    registryCliName: "three-d-folder",
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Design Archive\"", description: "Folder label displayed below the 3D folder." },
+      { name: "projects", type: "FolderProject[]", description: "Gallery items with id, title, image URL, and optional href." },
+      { name: "folderBackColor", type: "string", defaultValue: "\"#fb7185\"", description: "Back panel color." },
+      { name: "folderFrontColor", type: "string", defaultValue: "\"#fbbf24\"", description: "Front panel color." },
+      { name: "folderTabColor", type: "string", defaultValue: "\"#f97316\"", description: "Folder tab color." },
+      { name: "className", type: "string", description: "Optional classes for the card wrapper." },
+    ],
+  },
+  {
     slug: "editorial-blog-rail",
     name: "Editorial Blog Rail",
     description: "Featured article plus compact secondary headlines for content hubs.",

@@ -34,8 +34,9 @@ export const blocksManifest: BlockManifestEntry[] = [
     category: "Interactive backgrounds",
     tags: ["background", "cursor", "canvas", "waves", "particles"],
     premium: false,
-    variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise"],
-    reactSource: `export { InteractiveDots } from "@/components/interactive-dots";`,
+    variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise", "Aurora Wavy Lines"],
+    reactSource: `export { InteractiveDots } from "@/components/interactive-dots";
+export { WavyLines } from "@/components/wavy-lines";`,
   },
   {
     slug: "block-why-choose-us",
@@ -46,5 +47,43 @@ export const blocksManifest: BlockManifestEntry[] = [
     premium: false,
     variants: ["Mentorship Bento", "ATS Bento Grid", "Upload Flow", "Progress Tracker", "Interview Cards"],
     reactSource: `import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";\n\nexport default function Page() {\n  return <WhyChooseUsBento />;\n}`,
+  },
+  {
+    slug: "block-faq-folder-card",
+    name: "FAQ Folder Card",
+    description:
+      "A collection of FAQ sections with editable data, searchable categories, and chat-style animated answers.",
+    category: "FAQ sections",
+    tags: ["faq", "accordion", "chat", "support", "framer-motion"],
+    premium: false,
+    variants: ["Questions & Answers FAQ", "Searchable FAQ", "Chat FAQ"],
+    reactSource: `import {
+  ChatFaqSection,
+  FaqFolderCard,
+  SearchableFaqSection,
+} from "@/components/blocks/faq-folder-card";
+
+const faqs = [
+  {
+    question: "Can I add more FAQs?",
+    answer: "Yes. Add as many objects as you need to the items array.",
+    tag: "Content",
+  },
+  {
+    question: "Can I use this with CMS data?",
+    answer: "Yes. Pass your CMS questions into the items prop.",
+    tag: "CMS",
+  },
+];
+
+export default function Page() {
+  return (
+    <>
+      <FaqFolderCard items={faqs} />
+      <SearchableFaqSection items={faqs} />
+      <ChatFaqSection items={faqs} />
+    </>
+  );
+}`,
   },
 ];

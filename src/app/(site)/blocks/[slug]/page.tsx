@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { ChevronRight, Code2, Expand, Lock, Monitor } from "lucide-react";
+import { ChevronRight, Expand, Lock, Monitor } from "lucide-react";
 import { getBlock, blocks } from "@/lib/catalog/blocks";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -22,6 +22,7 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { InteractiveDotsHeroCustomizer } from "@/components/library/interactive-dots-hero-customizer";
 import { LayeredWaveHeroCustomizer } from "@/components/library/layered-wave-hero-customizer";
 import { ParticleNoiseHeroCustomizer } from "@/components/library/particle-noise-hero-customizer";
+import { WavyLines } from "@/components/wavy-lines";
 import { BentoHeroCustomizer } from "@/components/library/bento-hero-customizer";
 import { BentoGridSkeletonHeroCustomizer } from "@/components/library/bento-grid-skeleton-hero-customizer";
 import { MotionLayerScrollerHeroCustomizer } from "@/components/library/motion-layer-scroller-hero-customizer";
@@ -30,6 +31,11 @@ import { WhyChooseUsBentoHeroCustomizer } from "@/components/library/why-choose-
 import { AtsBentoGridHeroCustomizer } from "@/components/library/ats-bento-grid-hero-customizer";
 import { SpotlightBentoGridCustomizer } from "@/components/library/spotlight-bento-grid-customizer";
 import { UsageSnippet } from "@/components/library/usage-snippet";
+import {
+  ChatFaqSection,
+  FaqFolderCard,
+  SearchableFaqSection,
+} from "@/components/blocks/faq-folder-card";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -72,11 +78,15 @@ export default async function BlockDetailPage({ params }: Props) {
   const isMotionLayerScrollerCard = block.slug === "block-motion-layer-scroller";
   const isBentoShowcaseCard = block.slug === "block-bento-showcase";
   const isWhyChooseUsCard = block.slug === "block-why-choose-us";
+  const isFaqFolderCard = block.slug === "block-faq-folder-card";
   const layeredWaveCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/layered-wave-background/layered-wave-background.tsx", "")
     : "";
   const particleNoiseCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/particle-noise/particle-noise.tsx", "")
+    : "";
+  const wavyLinesCode = isInteractiveBackgroundCard
+    ? await readSourceFile("src/components/wavy-lines/wavy-lines.tsx", "")
     : "";
   const atsBentoCode = isWhyChooseUsCard
     ? await readSourceFile("src/components/blocks/ats-bento-grid.tsx", "")
@@ -156,6 +166,36 @@ export default async function BlockDetailPage({ params }: Props) {
           >
             <ParticleNoiseHeroCustomizer />
           </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Aurora Wavy Lines"
+            code={wavyLinesCode}
+            usageCode={WAVY_LINES_USAGE}
+            className="mt-16"
+          >
+            <div className="relative h-full min-h-full overflow-hidden rounded-lg bg-[#031412]">
+              <WavyLines
+                lineColor="#5eead4"
+                backgroundColorStart="#031413"
+                backgroundColorEnd="#123c2d"
+                speed={1.35}
+                radius={12}
+                className="h-full min-h-full w-full"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_42%,transparent_0%,rgba(0,0,0,.18)_46%,rgba(0,0,0,.72)_100%)]" />
+              <div className="pointer-events-none absolute bottom-8 left-8 max-w-sm">
+                <p className="text-xs uppercase tracking-[0.24em] text-teal-100/55">
+                  WebGL motion
+                </p>
+                <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
+                  Aurora lines for immersive sections
+                </p>
+                <p className="mt-3 text-sm leading-6 text-teal-50/60">
+                  Animated shader waves with a cooler emerald palette and smooth
+                  flowing depth.
+                </p>
+              </div>
+            </div>
+          </PreviewCodeSection>
         </>
       ) : isAnimatedBentoCard ? (
         <PreviewCodeSection title={block.name} code={code}>
@@ -197,6 +237,26 @@ export default async function BlockDetailPage({ params }: Props) {
             <SpotlightBentoGridCustomizer />
           </PreviewCodeSection>
         </>
+      ) : isFaqFolderCard ? (
+        <>
+          <PreviewCodeSection title="Questions & Answers FAQ" code={code}>
+            <FaqFolderCard />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Searchable FAQ"
+            code={code}
+            className="mt-16"
+          >
+            <SearchableFaqSection />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Chat FAQ"
+            code={code}
+            className="mt-16"
+          >
+            <ChatFaqSection />
+          </PreviewCodeSection>
+        </>
       ) : (
         <PreviewCodeSection title={block.name} code={code}>
           <Preview />
@@ -230,6 +290,7 @@ async function getBlockCode(slug: string, fallback: string) {
   const sourceBySlug: Record<string, string> = {
     "block-interactive-dots": "src/components/interactive-dots/interactive-dots.tsx",
     "block-why-choose-us": "src/components/blocks/animated-bento-grid.tsx",
+    "block-faq-folder-card": "src/components/blocks/faq-folder-card.tsx",
   };
 
   const sourcePath = sourceBySlug[slug];
@@ -370,6 +431,7 @@ function defaultUsageForTitle(title: string) {
   if (title === "Why Choose Us Bento Grid") return WHY_CHOOSE_US_USAGE;
   if (title === "ATS Bento Grid") return ATS_BENTO_USAGE;
   if (title === "Spotlight Bento Grid") return SPOTLIGHT_BENTO_USAGE;
+  if (title === "Aurora Wavy Lines") return WAVY_LINES_USAGE;
   return `<${title.replaceAll(" ", "")} />`;
 }
 
@@ -392,6 +454,23 @@ const INTERACTIVE_DOTS_USAGE = `<section className="relative min-h-[640px] overf
   <div className="relative z-10 mx-auto flex min-h-[640px] max-w-5xl flex-col justify-center px-6">
     <h1 className="text-5xl font-semibold text-white">Your hero headline</h1>
     <p className="mt-4 max-w-xl text-white/70">Your supporting copy goes here.</p>
+  </div>
+</section>`;
+
+const WAVY_LINES_USAGE = `<section className="relative min-h-[640px] overflow-hidden rounded-3xl bg-[#031412]">
+  <WavyLines
+    lineColor="#5eead4"
+    backgroundColorStart="#031413"
+    backgroundColorEnd="#123c2d"
+    speed={1.35}
+    radius={24}
+    className="absolute inset-0 h-full w-full"
+  />
+
+  <div className="relative z-10 mx-auto flex min-h-[640px] max-w-5xl flex-col justify-center px-6">
+    <p className="text-sm uppercase tracking-[0.24em] text-teal-100/55">WebGL motion</p>
+    <h1 className="mt-4 max-w-2xl text-5xl font-semibold text-white">Aurora lines for immersive sections</h1>
+    <p className="mt-4 max-w-xl text-teal-50/65">Animated shader waves with a cooler emerald palette and smooth flowing depth.</p>
   </div>
 </section>`;
 

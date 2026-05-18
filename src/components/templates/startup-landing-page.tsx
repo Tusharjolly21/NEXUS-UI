@@ -1618,8 +1618,6 @@ export function InvestorArc() {
   // Bigger than visible arc so images can enter/exit smoothly.
   const startAngle = 190;
   const endAngle = 350;
-  const visibleStart = 205;
-  const visibleEnd = 335;
 
   const slotCount = INVESTOR_AVATARS.length;
   const angleGap = (endAngle - startAngle) / (slotCount - 1);
@@ -1648,11 +1646,11 @@ export function InvestorArc() {
 
       const rotation = angle - 270;
 
-      const edgeDistance = Math.min(
-        Math.abs(angle - visibleStart),
-        Math.abs(angle - visibleEnd),
-      );
-      const opacity = Math.max(0.72, Math.min(1, edgeDistance / 18));
+      const leftFade = Math.min(Math.max((angle - startAngle) / 18, 0), 1);
+      const rightFade = Math.min(Math.max((endAngle - angle) / 18, 0), 1);
+      const exitFade = Math.min(leftFade, rightFade);
+      const opacity = 0.18 + exitFade * 0.82;
+      const blur = (1 - exitFade) * 5;
 
       return {
         id,
@@ -1660,6 +1658,7 @@ export function InvestorArc() {
         y,
         rotation,
         opacity,
+        blur,
       };
     });
   }, [phase, slotCount, angleGap]);
@@ -1696,6 +1695,7 @@ export function InvestorArc() {
                     marginTop: -72,
                     rotate: avatar.rotation,
                     opacity: avatar.opacity,
+                    filter: `blur(${avatar.blur}px)`,
                   }}
                   whileHover={{
                     y: -18,
@@ -1741,7 +1741,7 @@ export function InvestorArc() {
         </div>
       </div>
 
-      <div className="border-t border-white/10 bg-[#141414] py-12">
+      <div className="relative z-20 border-t border-white/10 bg-[#141414] py-12">
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-5 sm:px-8 md:flex-row md:items-start md:justify-between">
           <div>
             <AureonMark small />
