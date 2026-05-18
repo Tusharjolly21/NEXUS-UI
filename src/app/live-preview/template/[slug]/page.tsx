@@ -11,6 +11,7 @@ import { TalentHubPage } from "@/components/templates/talent-hub-page";
 import { SynapseAIPage } from "@/components/templates/synapse-ai-page";
 import { OrionAIPage } from "@/components/templates/orion-ai-ops";
 import { HelixAIPlatformPage } from "@/components/templates/helix-ai-platform";
+import { StartupLandingPage } from "@/components/templates/startup-landing-page";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -48,6 +49,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><OrionAIPage /></ThemeReceiver>;
   } else if (tmpl.slug === "helix-ai-platform") {
     return <ThemeReceiver><HelixAIPlatformPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "startup-landing-page") {
+    return <ThemeReceiver><StartupLandingPage /></ThemeReceiver>;
   }
 
   return (

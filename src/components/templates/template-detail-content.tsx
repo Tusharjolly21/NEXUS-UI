@@ -125,6 +125,20 @@ const FEATURE_COPY: Record<string, string> = {
   "SEO-optimised metadata": "Next.js Metadata API configured with OpenGraph, Twitter card, and canonical tags.",
   "Dark mode + light mode": "System-preference detection with manual override persisted to localStorage.",
   "Fully responsive layout": "Mobile-first grid using Tailwind's responsive prefix system, tested from 375 px to 4 K.",
+  "3D Transforms": "CSS perspective and rotateX/Y/Z transforms power card flips, tilt effects, and depth-layered hero compositions.",
+  "A11y Optimized": "WCAG 2.1 AA compliant — proper ARIA roles, keyboard navigation, focus rings, reduced-motion support, and colour contrast.",
+  "Animations & Effects": "Scroll-triggered reveals, staggered entrances, blur-to-clear transitions, and hover microinteractions via Framer Motion v12.",
+  "Automated SEO": "Next.js Metadata API pre-configured with titles, descriptions, OpenGraph, Twitter cards, and canonical URLs per page.",
+  "Built-in Analytics": "Analytics event hooks wired to page views and CTA clicks — drop in your Plausible, Posthog, or GA4 token and go.",
+  "CMS": "Content structured as typed TypeScript config objects for easy copy updates without touching layout or component code.",
+  "Components": "40+ pre-built UI primitives — buttons, cards, badges, inputs, modals, tabs, and more — all dark-mode ready.",
+  "Forms": "Contact and waitlist forms with client-side validation, accessible error states, and a submit handler ready to wire to any API.",
+  "Layout Templates": "Named layout presets (hero, features, pricing, FAQ, CTA) that can be mixed and reordered with minimal prop changes.",
+  "Overlays & Modals": "AnimatePresence-powered dialogs, drawers, and full-screen overlays with keyboard-dismissal and scroll-lock built in.",
+  "Project Styles": "Global design tokens (colours, spacing, radii, shadows) defined as CSS custom properties for one-file brand theming.",
+  "Slideshows/Tickers": "Auto-scrolling logo marquees and testimonial rails with configurable speed, gap, and pause-on-hover behaviour.",
+  "Sticky Scrolling": "Sticky-left process section where the heading pins while step cards scroll past — built with CSS position:sticky.",
+  "Visual Breakpoints": "Tailwind responsive prefixes cover sm/md/lg/xl/2xl with tested layouts from 375 px iPhone SE to 4 K desktop.",
 };
 function featureDesc(f: string) {
   return FEATURE_COPY[f] ?? "Production-ready and fully customisable out of the box.";
