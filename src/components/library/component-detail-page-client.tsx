@@ -11,7 +11,6 @@ import {
   Expand,
   Monitor,
   Package,
-  X,
   Zap,
 } from "lucide-react";
 
@@ -45,7 +44,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogClose, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import { CodeBlock } from "@/components/code-block/code-block";
 
 // ── tiny copy button ────────────────────────────────────────────────
@@ -333,8 +331,6 @@ function PreviewCodeSection({
   className?: string;
   children: React.ReactNode;
 }) {
-  const [expanded, setExpanded] = React.useState(false);
-
   return (
     <section className={className ?? "mt-14"}>
       <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
@@ -352,14 +348,15 @@ function PreviewCodeSection({
             </TabsTrigger>
           </TabsList>
 
-          <button
-            type="button"
-            aria-label="Full screen preview"
-            onClick={() => setExpanded(true)}
+          <Link
+            href={`/live-preview/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open full-screen preview in new tab"
             className="grid size-10 place-items-center rounded-xl border border-border/70 bg-background text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-white/4"
           >
             <Expand className="size-4" />
-          </button>
+          </Link>
         </div>
 
         <TabsContent value="preview" className="mt-4">
@@ -400,25 +397,6 @@ function PreviewCodeSection({
         </TabsContent>
       </Tabs>
 
-      {/* fullscreen expand dialog */}
-      <Dialog open={expanded} onOpenChange={setExpanded}>
-        <DialogPortal>
-          <DialogOverlay />
-          <div className="fixed inset-4 z-50 flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-background shadow-2xl dark:bg-zinc-950 sm:inset-6 lg:inset-10">
-            <div className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-5">
-              <span className="text-sm font-semibold text-foreground">{title}</span>
-              <DialogClose className="grid size-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground">
-                <X className="size-4" />
-              </DialogClose>
-            </div>
-            <div className="min-h-0 flex-1 overflow-auto">
-              <div className="flex min-h-full w-full items-start justify-center p-6">
-                {children}
-              </div>
-            </div>
-          </div>
-        </DialogPortal>
-      </Dialog>
     </section>
   );
 }

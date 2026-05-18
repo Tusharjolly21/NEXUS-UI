@@ -6068,6 +6068,36 @@ export function ProfileOrbitDemo() {
       { name: "className", type: "string", description: "Extra className on the root element." },
     ],
   },
+  {
+    slug: "command-palette",
+    name: "Command Palette",
+    description: "Animated command palette with ⌘K shortcut, grouped navigation/actions/theme commands, backdrop blur overlay, and Framer Motion enter/exit transitions.",
+    categorySlug: "motion-effects",
+    tags: ["command", "search", "keyboard", "modal", "framer-motion", "shadcn"],
+    premium: false,
+    trendingScore: 88,
+    createdAt: "2026-05-18",
+    animationKinds: ["spring", "hover"],
+    dependencies: ["framer-motion", "lucide-react", "cmdk"],
+    Preview: Previews.PreviewCommandPalette,
+    tailwindSource: `"use client";
+
+import { CommandPalette } from "@/components/command-palette";
+
+export function CommandPaletteDemo() {
+  return <CommandPalette />;
+}`,
+    reactSource: `"use client";
+
+import { CommandPalette } from "@/components/command-palette";
+
+export function CommandPaletteDemo() {
+  return <CommandPalette />;
+}`,
+    props: [
+      { name: "className", type: "string", description: "Optional className for the root wrapper." },
+    ],
+  },
 ];
 
 export function getLibraryComponent(slug: string) {

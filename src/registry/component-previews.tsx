@@ -87,6 +87,15 @@ import { FaqFolderCard } from "@/components/blocks/faq-folder-card";
 import { WordMagnet } from "@/components/word-magnet";
 import { ThreeDFolder } from "@/components/three-d-folder";
 import { RealTimeCursors } from "@/components/real-time-cursors";
+import { CommandPalette } from "@/components/command-palette";
+
+export function PreviewCommandPalette() {
+  return (
+    <div className="h-[500px] w-full overflow-hidden rounded-3xl bg-[#111111]">
+      <CommandPalette className="h-full" />
+    </div>
+  );
+}
 
 export function PreviewCinematicLogoCloud() {
   const clients = [
