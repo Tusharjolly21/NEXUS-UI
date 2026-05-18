@@ -10,13 +10,11 @@ import {
   useTransform,
   useAnimationFrame,
 } from "framer-motion";
-import type { MotionValue } from "framer-motion";
 import {
   BarChart3,
   Check,
   ChevronDown,
   CircleDollarSign,
-  Gauge,
   Globe2,
   LineChart,
   Menu,
@@ -28,9 +26,9 @@ import {
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1509927083803-4bd519298ac4?auto=format&fit=crop&w=1800&q=85";
+  "https://images.unsplash.com/photo-1642790106117-e829e14a795f?auto=format&fit=crop&w=1800&q=85";
 const ADVISOR_IMAGE =
-  "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=1200&q=85";
+  "https://images.unsplash.com/photo-1723990720522-e8e0d5f8c052?q=80&w=1440&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 function useLenis() {
   React.useEffect(() => {
@@ -274,10 +272,10 @@ function Hero() {
 
 function Stats() {
   const stats = [
-    ["$998+", "Portfolio value analyzed"],
-    ["150K+", "Active investors"],
-    ["12K+", "Daily recommendations"],
-    ["94%", "Decision confidence"],
+    { prefix: "$", value: 998, suffix: "+", label: "Portfolio value analyzed" },
+    { value: 150, suffix: "K+", label: "Active investors" },
+    { value: 12, suffix: "K+", label: "Daily recommendations" },
+    { value: 94, suffix: "%", label: "Decision confidence" },
   ];
   return (
     <section id="about" className="bg-black py-24 text-white lg:py-32">
@@ -301,16 +299,20 @@ function Stats() {
           </div>
         </Reveal>
         <div className="grid grid-cols-2 border border-white/10">
-          {stats.map(([value, label], i) => (
+          {stats.map((stat, i) => (
             <Reveal
-              key={label}
+              key={stat.label}
               delay={i * 0.08}
               className="border-b border-r border-white/10 p-8 last:border-r-0 even:border-r-0 [&:nth-last-child(-n+2)]:border-b-0"
             >
               <p className="text-4xl font-normal tracking-[-0.04em] sm:text-5xl">
-                {value}
+                <CountUpStat
+                  value={stat.value}
+                  prefix={stat.prefix}
+                  suffix={stat.suffix}
+                />
               </p>
-              <p className="mt-3 text-xs text-white/40">{label}</p>
+              <p className="mt-3 text-xs text-white/40">{stat.label}</p>
             </Reveal>
           ))}
         </div>
@@ -319,7 +321,50 @@ function Stats() {
   );
 }
 
-function FeatureVisual({ type }: { type: "dial" | "orb" | "gauge" }) {
+function CountUpStat({
+  value,
+  prefix = "",
+  suffix = "",
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+}) {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-40px" });
+  const [display, setDisplay] = React.useState(0);
+
+  React.useEffect(() => {
+    if (!inView) return;
+
+    let frame = 0;
+    const duration = 850;
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      setDisplay(Math.round(value * eased));
+
+      if (progress < 1) {
+        frame = requestAnimationFrame(tick);
+      }
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [inView, value]);
+
+  return (
+    <span ref={ref}>
+      {prefix}
+      {display.toLocaleString()}
+      {suffix}
+    </span>
+  );
+}
+
+function FeatureVisual({ type }: { type: "dial" | "orb" | "exposure" }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
 
@@ -355,60 +400,149 @@ function FeatureVisual({ type }: { type: "dial" | "orb" | "gauge" }) {
     );
   }
 
-  if (type === "gauge") {
+  if (type === "exposure") {
+    const holdings = [
+      { label: "Tech", impact: "+18%", x: "18%", y: "62%", delay: 0 },
+      { label: "Energy", impact: "-7%", x: "55%", y: "42%", delay: 0.18 },
+      { label: "Bonds", impact: "+4%", x: "72%", y: "70%", delay: 0.34 },
+    ];
+
     return (
       <div
         ref={ref}
-        className="relative flex h-[260px] items-center justify-center"
+        className="relative flex h-[260px] items-center justify-center overflow-hidden"
       >
-        <svg
-          viewBox="0 0 300 170"
-          className="h-48 w-full max-w-[310px] overflow-visible"
+        <motion.div
+          initial={{ opacity: 0, y: 18, scale: 0.96 }}
+          animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+          transition={{ duration: 0.75, ease: EASE }}
+          className="relative h-[220px] w-full max-w-[310px] overflow-hidden rounded-2xl border border-white/10 bg-black/35 p-5 shadow-[0_0_70px_rgba(255,255,255,.035)]"
         >
-          <path
-            d="M42 138 A108 108 0 0 1 258 138"
-            fill="none"
-            stroke="rgba(255,255,255,.07)"
-            strokeWidth="17"
-            strokeLinecap="butt"
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,.045)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,.035)_1px,transparent_1px)] bg-[size:52px_42px]" />
+          <motion.div
+            aria-hidden
+            className="absolute inset-y-4 w-14 rounded-full bg-white/12 blur-xl"
+            initial={{ left: "-20%" }}
+            animate={inView ? { left: ["-20%", "82%", "-20%"] } : {}}
+            transition={{ duration: 5.4, repeat: Infinity, ease: "easeInOut" }}
           />
-          <motion.path
-            d="M42 138 A108 108 0 0 1 258 138"
-            fill="none"
-            stroke="rgba(255,255,255,.8)"
-            strokeWidth="17"
-            strokeLinecap="butt"
-            initial={{ pathLength: 0 }}
-            animate={
-              inView ? { pathLength: [0.12, 0.46, 0.22, 0.62, 0.18] } : {}
-            }
-            transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.g
-            animate={
-              inView ? { rotate: [-58, 34, -18, 52, -58] } : { rotate: -58 }
-            }
-            transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
-            style={{ transformOrigin: "150px 138px" }}
-          >
-            <path
-              d="M144 138 L156 138 L153 64 L150 50 L147 64 Z"
-              fill="white"
-            />
-            <path
-              d="M148 138 L152 138 L151 62 L150 55 L149 62 Z"
-              fill="rgba(255,255,255,.9)"
-            />
-          </motion.g>
-          <circle
-            cx="150"
-            cy="138"
-            r="12"
-            fill="#141414"
-            stroke="white"
-            strokeWidth="5"
-          />
-        </svg>
+
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-xs text-white/35">Portfolio exposure</p>
+              <p className="mt-1 max-w-[170px] text-[22px] leading-none tracking-[-0.05em]">
+                Volatility impact
+              </p>
+            </div>
+            <motion.div
+              animate={{ scale: [1, 1.08, 1], opacity: [0.72, 1, 0.72] }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="grid size-12 place-items-center rounded-full border border-white/10 bg-white/[0.04]"
+            >
+              <ShieldCheck className="size-5 text-white/85" />
+            </motion.div>
+          </div>
+
+          <div className="relative mt-3 h-[118px]">
+            <motion.svg
+              viewBox="0 0 260 112"
+              className="absolute inset-0 h-full w-full overflow-visible"
+            >
+              <path
+                d="M4 78 C35 60 50 96 82 70 C111 46 124 52 146 35 C178 9 194 55 220 37 C238 26 249 24 256 22"
+                fill="none"
+                stroke="rgba(255,255,255,.08)"
+                strokeWidth="20"
+                strokeLinecap="round"
+              />
+              <motion.path
+                d="M4 78 C35 60 50 96 82 70 C111 46 124 52 146 35 C178 9 194 55 220 37 C238 26 249 24 256 22"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0 }}
+                animate={
+                  inView
+                    ? {
+                        pathLength: [0, 1, 1],
+                        opacity: [0, 1, 0.72],
+                      }
+                    : {}
+                }
+                transition={{ duration: 2.1, ease: EASE }}
+              />
+              <motion.path
+                d="M4 78 C35 60 50 96 82 70 C111 46 124 52 146 35 C178 9 194 55 220 37 C238 26 249 24 256 22"
+                fill="none"
+                stroke="rgba(255,255,255,.55)"
+                strokeWidth="7"
+                strokeLinecap="round"
+                strokeDasharray="18 240"
+                animate={inView ? { strokeDashoffset: [0, -260] } : {}}
+                transition={{
+                  duration: 3.4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </motion.svg>
+
+            {holdings.map((holding) => (
+              <motion.div
+                key={holding.label}
+                className="absolute rounded-full border border-white/10 bg-[#141414]/95 px-3 py-1.5 shadow-[0_10px_30px_rgba(0,0,0,.28)]"
+                style={{ left: holding.x, top: holding.y }}
+                initial={{ opacity: 0, y: 12, scale: 0.88 }}
+                animate={
+                  inView
+                    ? {
+                        opacity: 1,
+                        y: [0, -5, 0],
+                        scale: 1,
+                      }
+                    : {}
+                }
+                transition={{
+                  opacity: { duration: 0.55, delay: 0.45 + holding.delay },
+                  scale: {
+                    duration: 0.55,
+                    delay: 0.45 + holding.delay,
+                    ease: EASE,
+                  },
+                  y: {
+                    duration: 2.7,
+                    repeat: Infinity,
+                    delay: holding.delay,
+                    ease: "easeInOut",
+                  },
+                }}
+              >
+                <span className="mr-2 text-[10px] text-white/38">
+                  {holding.label}
+                </span>
+                <span className="font-mono text-[11px] text-white/82">
+                  {holding.impact}
+                </span>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="relative flex items-center justify-between border-t border-white/10 pt-3">
+            <span className="text-[10px] text-white/35">Market volatility</span>
+            <motion.span
+              className="font-mono text-lg leading-none tracking-[-0.05em] text-white"
+              animate={{ opacity: [0.62, 1, 0.62] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              -12.4%
+            </motion.span>
+          </div>
+        </motion.div>
       </div>
     );
   }
@@ -478,10 +612,10 @@ function Features() {
       type: "orb" as const,
     },
     {
-      icon: Gauge,
+      icon: ShieldCheck,
       title: "Understand your exposure",
       body: "Quantify portfolio risk and see how market volatility could impact your holdings.",
-      type: "gauge" as const,
+      type: "exposure" as const,
     },
   ];
 
@@ -551,15 +685,14 @@ function Process() {
     offset: ["start start", "end end"],
   });
 
-  // This moves the whole card list upward.
-  // Increase -360 to -420 if you want cards 3/4 to come higher.
-  const cardsY = useTransform(scrollYProgress, [0, 1], [0, -360]);
+  // This moves the whole card list upward through the visible mask.
+  const cardsY = useTransform(scrollYProgress, [0, 1], [0, -300]);
 
   return (
     <section
       ref={ref}
       id="product"
-      className="relative z-10 -mt-20 h-[150vh] bg-black text-white"
+      className="relative z-10 -mt-20 h-[170vh] bg-black text-white"
     >
       <div className="sticky top-0 mx-auto grid h-screen max-w-7xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[0.55fr_1.45fr] lg:px-10">
         {/* Left side */}
@@ -578,10 +711,16 @@ function Process() {
         </div>
 
         {/* Right side mask */}
-        <div className="relative h-[420px] overflow-hidden">
-          <motion.div style={{ y: cardsY }} className="space-y-7">
-            {process.map(([num, title, body]) => (
-              <ProcessCard key={num} num={num} title={title} body={body} />
+        <div className="relative h-[520px] overflow-hidden">
+          <motion.div style={{ y: cardsY }} className="space-y-5">
+            {process.map(([num, title, body], index) => (
+              <ProcessCard
+                key={num}
+                num={num}
+                title={title}
+                body={body}
+                index={index}
+              />
             ))}
           </motion.div>
         </div>
@@ -594,27 +733,116 @@ function ProcessCard({
   num,
   title,
   body,
+  index,
 }: {
   num: string;
   title: string;
   body: string;
+  index: number;
 }) {
+  const progress = ["24%", "52%", "76%", "100%"][index] ?? "50%";
+  const labels = ["Secure sync", "Portfolio scan", "AI brief", "Ready to act"];
+
   return (
-    <div className="relative h-[132px] overflow-hidden rounded-md border border-white/[0.04] bg-[#141414] px-8 py-6 shadow-2xl shadow-black/60">
-      <span className="pointer-events-none absolute -left-4 top-1/2 -translate-y-1/2 select-none text-[120px] font-semibold leading-none tracking-[-0.08em] text-white/[0.035]">
+    <motion.article
+      initial={{ opacity: 0, x: 28, scale: 0.97 }}
+      whileInView={{ opacity: 1, x: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-80px" }}
+      whileHover={{ y: -4, scale: 1.012 }}
+      transition={{
+        duration: 0.65,
+        delay: index * 0.06,
+        ease: EASE,
+      }}
+      className="group relative h-[146px] overflow-hidden rounded-2xl border border-white/[0.07] bg-[#121212] px-7 py-6 shadow-2xl shadow-black/55"
+    >
+      <motion.div
+        aria-hidden
+        className="absolute -right-20 -top-24 size-48 rounded-full bg-white/[0.055] blur-3xl"
+        animate={{
+          opacity: [0.25, 0.7, 0.25],
+          scale: [0.86, 1.08, 0.86],
+        }}
+        transition={{
+          duration: 4 + index * 0.3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        aria-hidden
+        className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent)]"
+        initial={{ x: "-100%" }}
+        whileInView={{ x: "100%" }}
+        viewport={{ once: true }}
+        transition={{
+          duration: 1.8,
+          delay: 0.25 + index * 0.1,
+          ease: "easeInOut",
+        }}
+      />
+
+      <span className="pointer-events-none absolute -left-5 top-1/2 -translate-y-1/2 select-none text-[128px] font-semibold leading-none tracking-[-0.08em] text-white/[0.035]">
         {num}
       </span>
 
-      <div className="relative ml-24 max-w-[580px]">
-        <h3 className="text-sm font-medium tracking-[-0.02em] text-white">
-          {title}
-        </h3>
+      <div className="relative grid h-full gap-5 sm:grid-cols-[108px_1fr] sm:items-center">
+        <div className="hidden sm:block">
+          <motion.div
+            className="relative size-16 rounded-full border border-white/10 bg-black/40"
+            animate={{ rotate: [0, 8, 0] }}
+            transition={{
+              duration: 3.8,
+              repeat: Infinity,
+              delay: index * 0.18,
+              ease: "easeInOut",
+            }}
+          >
+            <div className="absolute inset-2 rounded-full border border-white/[0.06]" />
+            <div className="absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white" />
+            <motion.span
+              className="absolute left-1/2 top-1/2 h-px w-6 origin-left bg-white/70"
+              animate={{ rotate: [-24, 22, -12] }}
+              transition={{
+                duration: 2.8,
+                repeat: Infinity,
+                delay: index * 0.2,
+                ease: "easeInOut",
+              }}
+            />
+          </motion.div>
+        </div>
 
-        <p className="mt-3 max-w-[520px] text-xs leading-relaxed text-white/45">
-          {body}
-        </p>
+        <div className="min-w-0">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="text-base font-normal tracking-[-0.035em] text-white">
+              {title}
+            </h3>
+            <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 font-mono text-[10px] text-white/48">
+              {labels[index]}
+            </span>
+          </div>
+
+          <p className="max-w-[560px] text-xs leading-relaxed text-white/45">
+            {body}
+          </p>
+
+          <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+            <motion.div
+              className="h-full rounded-full bg-white"
+              initial={{ width: 0 }}
+              whileInView={{ width: progress }}
+              viewport={{ once: true }}
+              transition={{
+                duration: 1,
+                delay: 0.2 + index * 0.08,
+                ease: EASE,
+              }}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </motion.article>
   );
 }
 
@@ -1144,29 +1372,36 @@ function Benefits() {
 function Advisor() {
   return (
     <section id="blog" className="bg-black py-24 text-white lg:py-32">
-      <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
-        <Reveal>
-          <h2 className="mb-8 text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <Reveal className="mb-8">
+          <h2 className="max-w-3xl text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
             See how investors use Aureon daily
           </h2>
-          <div className="relative h-[520px] overflow-hidden bg-white/[0.03]">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${ADVISOR_IMAGE})` }}
-            />
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.2),rgba(0,0,0,.78))]" />
-          </div>
         </Reveal>
-        <Reveal delay={0.12}>
-          <blockquote className="border border-white/10 bg-white/[0.035] p-8 text-xl leading-relaxed tracking-[-0.03em] text-white/72">
-            Aureon helped me rebalance my portfolio in a week instead of a
-            month. The AI explains the rationale, the risk, and the exact
-            trade-offs before I act.
-            <footer className="mt-8 text-sm text-white/38">
-              Maya Rodriguez, private investor
-            </footer>
-          </blockquote>
-        </Reveal>
+
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-stretch">
+          <Reveal className="h-full">
+            <div className="relative h-[420px] overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] lg:h-full lg:min-h-[520px]">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${ADVISOR_IMAGE})` }}
+              />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,.2),rgba(0,0,0,.78))]" />
+            </div>
+          </Reveal>
+          <Reveal delay={0.12} className="h-full">
+            <blockquote className="flex h-full min-h-[420px] flex-col justify-between rounded-2xl border border-white/10 bg-white/[0.035] p-8 text-xl leading-relaxed tracking-[-0.03em] text-white/72 lg:min-h-[520px] lg:p-10">
+              <span>
+                Aureon helped me rebalance my portfolio in a week instead of a
+                month. The AI explains the rationale, the risk, and the exact
+                trade-offs before I act.
+              </span>
+              <footer className="mt-8 text-sm text-white/38">
+                Maya Rodriguez, private investor
+              </footer>
+            </blockquote>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
@@ -1363,20 +1598,20 @@ function FAQ() {
   );
 }
 
-export function InvestorArc() {
-  const avatars = [
-    "photo-1494790108377-be9c29b29330",
-    "photo-1507003211169-0a1dd7228f2d",
-    "photo-1560250097-0b93528c311a",
-    "photo-1438761681033-6461ffad8d80",
-    "photo-1500648767791-00dcc994a43e",
-    "photo-1544005313-94ddf0286df2",
-    "photo-1519345182560-3f2917c472ef",
-    "photo-1508214751196-bcfd4ca60f91",
-    "photo-1527980965255-d3b416303d12",
-    "photo-1487412720507-e7ab37603c6f",
-  ];
+const INVESTOR_AVATARS = [
+  "photo-1494790108377-be9c29b29330",
+  "photo-1507003211169-0a1dd7228f2d",
+  "photo-1560250097-0b93528c311a",
+  "photo-1438761681033-6461ffad8d80",
+  "photo-1500648767791-00dcc994a43e",
+  "photo-1544005313-94ddf0286df2",
+  "photo-1519345182560-3f2917c472ef",
+  "photo-1508214751196-bcfd4ca60f91",
+  "photo-1527980965255-d3b416303d12",
+  "photo-1487412720507-e7ab37603c6f",
+];
 
+export function InvestorArc() {
   const radius = 520;
   const center = 590;
 
@@ -1386,7 +1621,7 @@ export function InvestorArc() {
   const visibleStart = 205;
   const visibleEnd = 335;
 
-  const slotCount = avatars.length;
+  const slotCount = INVESTOR_AVATARS.length;
   const angleGap = (endAngle - startAngle) / (slotCount - 1);
 
   // 20 = speed of the avatar movement.
@@ -1402,7 +1637,7 @@ export function InvestorArc() {
   });
 
   const avatarPositions = useMemo(() => {
-    return avatars.map((id, index) => {
+    return INVESTOR_AVATARS.map((id, index) => {
       // This creates continuous slot movement.
       // When one image exits from one side, it wraps back from the other side.
       const slot = (index + phase) % slotCount;
@@ -1413,9 +1648,11 @@ export function InvestorArc() {
 
       const rotation = angle - 270;
 
-      // Fade images slightly when they are entering/exiting the arc.
-      const isFullyVisible = angle >= visibleStart && angle <= visibleEnd;
-      const opacity = isFullyVisible ? 1 : 0;
+      const edgeDistance = Math.min(
+        Math.abs(angle - visibleStart),
+        Math.abs(angle - visibleEnd),
+      );
+      const opacity = Math.max(0.72, Math.min(1, edgeDistance / 18));
 
       return {
         id,
@@ -1425,15 +1662,15 @@ export function InvestorArc() {
         opacity,
       };
     });
-  }, [avatars, phase, slotCount, angleGap]);
+  }, [phase, slotCount, angleGap]);
 
   return (
     <footer
       id="contact"
-      className="relative overflow-hidden bg-black pt-24 text-white"
+      className="relative overflow-visible bg-black pt-24 text-white"
     >
       <div className="mx-auto max-w-7xl px-5 text-center sm:px-8">
-        <div className="relative mx-auto h-[560px] max-w-7xl overflow-hidden">
+        <div className="relative mx-auto h-[650px] max-w-7xl overflow-visible">
           {/* Outer rotating circle only */}
           <motion.div
             className="absolute left-1/2 top-[680px] h-295 w-295 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.025]"
@@ -1451,12 +1688,12 @@ export function InvestorArc() {
               return (
                 <motion.div
                   key={avatar.id}
-                  className="absolute h-33 w-29 overflow-hidden rounded-[18px] border border-white/10 bg-black shadow-2xl shadow-black/70"
+                  className="absolute h-36 w-31 overflow-hidden rounded-[18px] border border-white/10 bg-black shadow-2xl shadow-black/70"
                   style={{
                     left: avatar.x,
                     top: avatar.y,
-                    marginLeft: -58,
-                    marginTop: -66,
+                    marginLeft: -62,
+                    marginTop: -72,
                     rotate: avatar.rotation,
                     opacity: avatar.opacity,
                   }}
@@ -1471,7 +1708,7 @@ export function InvestorArc() {
                   }}
                 >
                   <div
-                    className="absolute inset-[-18%] bg-cover bg-center"
+                    className="absolute inset-[-8%] bg-cover bg-top"
                     style={{
                       backgroundImage: `url(https://images.unsplash.com/${avatar.id}?auto=format&fit=crop&w=360&q=85)`,
                     }}
@@ -1484,19 +1721,19 @@ export function InvestorArc() {
           </div>
 
           {/* Center CTA content */}
-          <div className="absolute inset-x-0 top-[240px] z-10 mx-auto max-w-md">
-            <h2 className="text-4xl font-normal tracking-[-0.05em]">
+          <div className="absolute left-1/2 top-[245px] z-10 w-full max-w-2xl -translate-x-1/2 px-4 text-center">
+            <h2 className="text-6xl font-normal leading-none tracking-[-0.065em] sm:text-7xl">
               Join 100,000+ investors
             </h2>
 
-            <p className="mt-5 text-xl leading-snug text-white/42">
+            <p className="mx-auto mt-7 max-w-xl text-3xl leading-tight tracking-[-0.04em] text-white/45">
               Connect your portfolio and unlock AI-powered insights in minutes.
               No credit card required.
             </p>
 
             <a
               href="#pricing"
-              className="mt-10 inline-flex rounded-full border border-white/15 bg-white/[0.06] px-6 py-3 text-lg font-semibold text-white transition hover:bg-white hover:text-black"
+              className="mt-11 inline-flex rounded-full border border-white/15 bg-white/[0.06] px-8 py-4 text-2xl font-semibold text-white transition hover:bg-white hover:text-black"
             >
               Start free trial
             </a>

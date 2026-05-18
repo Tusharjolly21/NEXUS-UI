@@ -4,7 +4,7 @@ const siteConfig = {
   tagline: "Motion-native UI components for Next.js",
 };
 
-export const runtime = "nodejs";
+export const runtime = "nodejs"; //changed edge to nodejs for better image rendering performance
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
