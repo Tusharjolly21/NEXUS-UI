@@ -62,46 +62,24 @@ function InstallSidebar({
 }) {
   const name = registryCliName ?? slug;
   const shadcnAddCmd = `npx shadcn@latest add @next-ui/${name}`;
-  const registryConfig = `"registries": {\n  "@next-ui": "https://nexus-ui.com/r/{name}.json"\n}`;
   const installCmd = `npm install ${dependencies.join(" ")}`;
 
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card/80 p-5 shadow-sm dark:bg-white/[0.03]">
       {/* shadcn CLI */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Zap className="size-3.5 text-muted-foreground" />
           <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
             Shadcn CLI
           </p>
         </div>
-
-        {/* Step 1 */}
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold text-foreground">Step 1 — One-time setup</p>
-          <p className="text-[11px] text-muted-foreground">
-            Create or open <code className="rounded bg-muted px-1 py-0.5 font-mono text-[10px] text-foreground">components.json</code> in your project root and add:
-          </p>
-          <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
-            <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[10px] leading-relaxed text-foreground">
-              {registryConfig}
-            </pre>
-            <div className="absolute right-2 top-2">
-              <CopyBtn text={registryConfig} />
-            </div>
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div className="space-y-1.5">
-          <p className="text-[11px] font-semibold text-foreground">Step 2 — Install component</p>
-          <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
-            <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
-              {shadcnAddCmd}
-            </pre>
-            <div className="absolute right-2 top-2">
-              <CopyBtn text={shadcnAddCmd} />
-            </div>
+        <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
+          <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
+            {shadcnAddCmd}
+          </pre>
+          <div className="absolute right-2 top-2">
+            <CopyBtn text={shadcnAddCmd} />
           </div>
         </div>
       </div>

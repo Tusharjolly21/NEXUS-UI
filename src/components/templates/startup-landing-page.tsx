@@ -10,15 +10,16 @@ import {
   useTransform,
   useAnimationFrame,
 } from "framer-motion";
+import type { MotionValue } from "framer-motion";
 import {
   BarChart3,
   Check,
   ChevronDown,
   CircleDollarSign,
+  Gauge,
   Globe2,
   LineChart,
   Menu,
-  Radar,
   ShieldCheck,
   Sparkles,
   X,
@@ -279,7 +280,7 @@ function Stats() {
     ["94%", "Decision confidence"],
   ];
   return (
-    <section id="about" className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section id="about" className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto grid max-w-7xl gap-10 px-5 sm:px-8 lg:grid-cols-[1fr_1.2fr] lg:items-start">
         <Reveal>
           <h2 className="max-w-sm text-3xl font-normal leading-tight tracking-[-0.04em] sm:text-5xl">
@@ -318,7 +319,7 @@ function Stats() {
   );
 }
 
-function FeatureVisual({ type }: { type: "dial" | "orb" | "risk" }) {
+function FeatureVisual({ type }: { type: "dial" | "orb" | "gauge" }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
 
@@ -354,49 +355,60 @@ function FeatureVisual({ type }: { type: "dial" | "orb" | "risk" }) {
     );
   }
 
-  if (type === "risk") {
+  if (type === "gauge") {
     return (
       <div
         ref={ref}
-        className="relative flex h-[260px] items-center justify-center overflow-hidden"
+        className="relative flex h-[260px] items-center justify-center"
       >
-        <div className="absolute inset-x-10 top-12 h-px bg-white/[0.08]" />
-        <div className="absolute inset-x-10 top-28 h-px bg-white/[0.08]" />
-        <div className="absolute inset-x-10 top-44 h-px bg-white/[0.08]" />
-        <div className="relative grid w-[78%] grid-cols-5 items-end gap-2">
-          {[34, 62, 46, 88, 58].map((height, i) => (
-            <motion.div
-              key={i}
-              className="rounded-t-sm border border-white/10 bg-white/[0.055]"
-              initial={{ height: 18 }}
-              animate={{ height: [height, height + 22, height - 10, height] }}
-              transition={{
-                duration: 3.8,
-                delay: i * 0.18,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              <motion.div
-                className="h-full rounded-t-sm bg-[linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,.08))]"
-                animate={{ opacity: [0.35, 0.8, 0.45] }}
-                transition={{
-                  duration: 2.6,
-                  delay: i * 0.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-            </motion.div>
-          ))}
-        </div>
-        <motion.div
-          className="absolute left-[28%] top-[34%] rounded-lg border border-white/10 bg-black/70 px-3 py-2 text-xs text-white/65"
-          animate={{ y: [0, -10, 0], opacity: [0.55, 1, 0.55] }}
-          transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+        <svg
+          viewBox="0 0 300 170"
+          className="h-48 w-full max-w-[310px] overflow-visible"
         >
-          Risk exposure mapped
-        </motion.div>
+          <path
+            d="M42 138 A108 108 0 0 1 258 138"
+            fill="none"
+            stroke="rgba(255,255,255,.07)"
+            strokeWidth="17"
+            strokeLinecap="butt"
+          />
+          <motion.path
+            d="M42 138 A108 108 0 0 1 258 138"
+            fill="none"
+            stroke="rgba(255,255,255,.8)"
+            strokeWidth="17"
+            strokeLinecap="butt"
+            initial={{ pathLength: 0 }}
+            animate={
+              inView ? { pathLength: [0.12, 0.46, 0.22, 0.62, 0.18] } : {}
+            }
+            transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.g
+            animate={
+              inView ? { rotate: [-58, 34, -18, 52, -58] } : { rotate: -58 }
+            }
+            transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut" }}
+            style={{ transformOrigin: "150px 138px" }}
+          >
+            <path
+              d="M144 138 L156 138 L153 64 L150 50 L147 64 Z"
+              fill="white"
+            />
+            <path
+              d="M148 138 L152 138 L151 62 L150 55 L149 62 Z"
+              fill="rgba(255,255,255,.9)"
+            />
+          </motion.g>
+          <circle
+            cx="150"
+            cy="138"
+            r="12"
+            fill="#141414"
+            stroke="white"
+            strokeWidth="5"
+          />
+        </svg>
       </div>
     );
   }
@@ -466,15 +478,15 @@ function Features() {
       type: "orb" as const,
     },
     {
-      icon: Radar,
+      icon: Gauge,
       title: "Understand your exposure",
       body: "Quantify portfolio risk and see how market volatility could impact your holdings.",
-      type: "risk" as const,
+      type: "gauge" as const,
     },
   ];
 
   return (
-    <section id="features" className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section id="features" className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mb-12">
           <h2 className="max-w-2xl text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
@@ -487,7 +499,7 @@ function Features() {
             <Reveal key={card.title} delay={i * 0.08}>
               <motion.article
                 whileHover={{ y: -6 }}
-                className="flex min-h-[420px] flex-col justify-between rounded-lg border border-white/5 bg-[#141414] p-5 transition-colors hover:bg-[#181818] sm:min-h-[520px] sm:p-7"
+                className="flex min-h-[520px] flex-col justify-between rounded-lg border border-white/5 bg-[#141414] p-7 transition-colors hover:bg-[#181818]"
               >
                 <FeatureVisual type={card.type} />
                 <div>
@@ -495,7 +507,7 @@ function Features() {
                   <h3 className="text-xl font-normal tracking-[-0.03em]">
                     {card.title}
                   </h3>
-                  <p className="mt-3 text-base leading-snug text-white/42 sm:text-lg">
+                  <p className="mt-3 text-lg leading-snug text-white/42">
                     {card.body}
                   </p>
                 </div>
@@ -508,71 +520,6 @@ function Features() {
   );
 }
 
-// const process = [
-//   [
-//     "01",
-//     "Connect your accounts",
-//     "Link brokerage, bank, and crypto accounts through secure read-only connections.",
-//   ],
-//   [
-//     "02",
-//     "AI analyzes instantly",
-//     "Your holdings are evaluated against goals, risk tolerance, and live market context.",
-//   ],
-//   [
-//     "03",
-//     "Receive personalized insights",
-//     "Get clear, actionable recommendations tailored to your goals. Ask Nova questions anytime and receive answers in plain language.",
-//   ],
-//   [
-//     "04",
-//     "Make informed decisions",
-//     "Execute through your broker when you're ready. Track progress and refine your strategy over time while staying in control.",
-//   ],
-// ];
-
-// function Process() {
-//   const ref = React.useRef<HTMLElement>(null);
-//   const { scrollYProgress } = useScroll({
-//     target: ref,
-//     offset: ["start start", "end end"],
-//   });
-
-//   return (
-//     <section
-//       ref={ref}
-//       id="product"
-//       className="relative min-h-[260vh] bg-black py-24 text-white lg:py-32"
-//     >
-//       <div className="sticky top-24 mx-auto grid max-w-7xl gap-14 px-5 sm:px-8 lg:grid-cols-[0.72fr_1.28fr]">
-//         <Reveal className="lg:sticky lg:top-36 lg:h-fit">
-//           <h2 className="text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
-//             Simple process,{" "}
-//             <span className="block text-white/45">powerful results</span>
-//           </h2>
-//           <a
-//             href="#pricing"
-//             className="mt-7 inline-flex rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white hover:text-black"
-//           >
-//             Get Started
-//           </a>
-//         </Reveal>
-//         <div className="relative h-[620px]">
-//           {process.map(([num, title, body], i) => (
-//             <ProcessStackCard
-//               key={title}
-//               index={i}
-//               num={num}
-//               title={title}
-//               body={body}
-//               progress={scrollYProgress}
-//             />
-//           ))}
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
 const process = [
   [
     "01",
@@ -606,18 +553,18 @@ function Process() {
 
   // This moves the whole card list upward.
   // Increase -360 to -420 if you want cards 3/4 to come higher.
-  const cardsY = useTransform(scrollYProgress, [0, 1], [0, -320]);
+  const cardsY = useTransform(scrollYProgress, [0, 1], [0, -360]);
 
   return (
     <section
       ref={ref}
       id="product"
-      className="relative z-10 -mt-8 bg-black py-16 text-white sm:py-20 lg:-mt-20 lg:h-[125vh] lg:py-0"
+      className="relative z-10 -mt-20 h-[150vh] bg-black text-white"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-5 sm:px-8 lg:sticky lg:top-0 lg:h-screen lg:grid-cols-[0.55fr_1.45fr] lg:items-center lg:px-10">
+      <div className="sticky top-0 mx-auto grid h-screen max-w-7xl grid-cols-1 items-center gap-10 px-6 lg:grid-cols-[0.55fr_1.45fr] lg:px-10">
         {/* Left side */}
         <div className="self-center">
-          <h2 className="max-w-[320px] text-4xl font-normal leading-[0.95] tracking-[-0.06em] sm:text-5xl lg:max-w-[260px] lg:text-4xl">
+          <h2 className="max-w-[260px] text-3xl font-normal leading-[0.95] tracking-[-0.06em] sm:text-4xl">
             Simple process,
             <span className="block text-white/50">powerful results</span>
           </h2>
@@ -631,8 +578,8 @@ function Process() {
         </div>
 
         {/* Right side mask */}
-        <div className="relative overflow-hidden lg:h-[420px]">
-          <motion.div style={{ y: cardsY }} className="space-y-4 lg:space-y-7">
+        <div className="relative h-[420px] overflow-hidden">
+          <motion.div style={{ y: cardsY }} className="space-y-7">
             {process.map(([num, title, body]) => (
               <ProcessCard key={num} num={num} title={title} body={body} />
             ))}
@@ -653,12 +600,12 @@ function ProcessCard({
   body: string;
 }) {
   return (
-    <div className="relative min-h-[132px] overflow-hidden rounded-md border border-white/[0.04] bg-[#141414] px-5 py-5 shadow-2xl shadow-black/60 sm:px-8 sm:py-6">
-      <span className="pointer-events-none absolute -left-4 top-1/2 -translate-y-1/2 select-none text-[96px] font-semibold leading-none tracking-[-0.08em] text-white/[0.035] sm:text-[120px]">
+    <div className="relative h-[132px] overflow-hidden rounded-md border border-white/[0.04] bg-[#141414] px-8 py-6 shadow-2xl shadow-black/60">
+      <span className="pointer-events-none absolute -left-4 top-1/2 -translate-y-1/2 select-none text-[120px] font-semibold leading-none tracking-[-0.08em] text-white/[0.035]">
         {num}
       </span>
 
-      <div className="relative ml-14 max-w-[580px] sm:ml-24">
+      <div className="relative ml-24 max-w-[580px]">
         <h3 className="text-sm font-medium tracking-[-0.02em] text-white">
           {title}
         </h3>
@@ -670,88 +617,6 @@ function ProcessCard({
     </div>
   );
 }
-
-// function ProcessStackCard({
-//   index,
-//   num,
-//   title,
-//   body,
-//   progress,
-// }: {
-//   index: number;
-//   num: string;
-//   title: string;
-//   body: string;
-//   progress: MotionValue<number>;
-// }) {
-//   const start = Math.max(0, index * 0.17 - 0.02);
-//   const end = start + 0.2;
-//   const y = useTransform(
-//     progress,
-//     [0, start, end, 1],
-//     [index === 0 ? 0 : 520, index === 0 ? 0 : 520, index * 24, index * 24],
-//   );
-//   const scale = useTransform(
-//     progress,
-//     [start, end, 1],
-//     [1, 1 - index * 0.022, 1 - index * 0.022],
-//   );
-//   const opacity = useTransform(
-//     progress,
-//     [0, start, end],
-//     [index === 0 ? 1 : 0, index === 0 ? 1 : 0, 1],
-//   );
-
-//   return (
-//     <motion.div
-//       className="absolute inset-x-0 top-0 min-h-[280px] overflow-hidden rounded-lg border border-white/[0.04] bg-[#141414] p-8 shadow-2xl shadow-black/70"
-//       style={{ y, scale, opacity, zIndex: index + 1 }}
-//       whileHover={{ y: -4 }}
-//     >
-//       <span className="pointer-events-none absolute -left-5 top-1/2 -translate-y-1/2 select-none text-[180px] font-semibold leading-none tracking-[-0.08em] text-white/[0.035]">
-//         {num}
-//       </span>
-//       <div className="relative ml-12 max-w-[620px] sm:ml-36">
-//         <p className="mb-5 font-mono text-xs text-white/22">{num}</p>
-//         <h3 className="text-3xl font-normal tracking-[-0.04em]">{title}</h3>
-//         <p className="mt-5 text-xl leading-snug text-white/45">{body}</p>
-//         <div className="mt-8 h-px w-full bg-white/[0.06]" />
-//         <div className="mt-5 flex gap-3 text-xs text-white/32">
-//           <span>Portfolio-aware</span>
-//           <span>Read-only</span>
-//           <span>Human controlled</span>
-//         </div>
-//       </div>
-//     </motion.div>
-//   );
-// }
-// function ProcessCard({
-//   num,
-//   title,
-//   body,
-// }: {
-//   num: string;
-//   title: string;
-//   body: string;
-// }) {
-//   return (
-//     <div className="relative min-h-[138px] overflow-hidden rounded-lg border border-white/[0.04] bg-[#141414] px-8 py-6 shadow-2xl shadow-black/70">
-//       <span className="pointer-events-none absolute -left-4 top-1/2 -translate-y-1/2 select-none text-[120px] font-semibold leading-none tracking-[-0.08em] text-white/[0.035]">
-//         {num}
-//       </span>
-
-//       <div className="relative ml-16 max-w-[620px] sm:ml-28">
-//         <h3 className="text-base font-normal tracking-[-0.03em] text-white">
-//           {title}
-//         </h3>
-
-//         <p className="mt-3 max-w-[520px] text-sm leading-snug text-white/45">
-//           {body}
-//         </p>
-//       </div>
-//     </div>
-//   );
-// }
 
 type InvestorTab = {
   key: "retirement" | "rebalance" | "tax" | "risk";
@@ -1145,7 +1010,7 @@ function InvestorChart() {
   }, []);
 
   return (
-    <section className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mb-8">
           <h2 className="text-4xl font-normal tracking-[-0.05em] sm:text-6xl">
@@ -1154,12 +1019,12 @@ function InvestorChart() {
           </h2>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="flex flex-wrap gap-2 sm:gap-6">
+          <div className="flex flex-wrap gap-6">
             {investorTabs.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setActive(tab.key)}
-                className={`rounded-lg px-3 py-2 text-sm transition sm:px-5 sm:py-3 sm:text-lg ${
+                className={`rounded-lg px-5 py-3 text-lg transition ${
                   active === tab.key
                     ? "bg-[#151515] text-white shadow-[0_0_0_1px_rgba(255,255,255,.1),0_0_0_2px_rgba(59,130,246,.7)]"
                     : "text-white/45 hover:text-white"
@@ -1187,13 +1052,13 @@ function InvestorChart() {
             </div>
           </Reveal>
           <Reveal delay={0.12}>
-            <p className="text-base text-white/42 sm:text-xl">{current.eyebrow}</p>
-            <p className="mt-5 text-2xl leading-tight tracking-[-0.04em] text-white sm:mt-7 sm:text-3xl">
+            <p className="text-xl text-white/42">{current.eyebrow}</p>
+            <p className="mt-7 text-3xl leading-tight tracking-[-0.04em] text-white">
               {current.copy}
             </p>
             <a
               href="#pricing"
-              className="mt-7 inline-flex rounded-full border border-white/15 px-5 py-3 text-sm font-semibold text-white/80 transition hover:bg-white hover:text-black sm:text-lg"
+              className="mt-7 inline-flex rounded-full border border-white/15 px-5 py-3 text-lg font-semibold text-white/80 transition hover:bg-white hover:text-black"
             >
               Get Started
             </a>
@@ -1238,7 +1103,7 @@ function Benefits() {
     ],
   ];
   return (
-    <section className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mb-10 flex items-end justify-between gap-6">
           <h2 className="text-4xl font-normal tracking-[-0.05em] sm:text-6xl">
@@ -1278,7 +1143,7 @@ function Benefits() {
 
 function Advisor() {
   return (
-    <section id="blog" className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section id="blog" className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-8 lg:grid-cols-[1fr_0.75fr] lg:items-center">
         <Reveal>
           <h2 className="mb-8 text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
@@ -1350,7 +1215,7 @@ const plans = [
 function Pricing() {
   const [billing, setBilling] = React.useState<BillingCycle>("Monthly");
   return (
-    <section id="pricing" className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section id="pricing" className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
         <Reveal className="mb-8">
           <h2 className="text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
@@ -1453,7 +1318,7 @@ function FAQ() {
     ],
   ];
   return (
-    <section className="bg-black py-16 text-white sm:py-24 lg:py-32">
+    <section className="bg-black py-24 text-white lg:py-32">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal>
           <h2 className="text-4xl font-normal leading-[1.02] tracking-[-0.05em] sm:text-6xl">
@@ -1498,20 +1363,20 @@ function FAQ() {
   );
 }
 
-const INVESTOR_AVATARS = [
-  "photo-1494790108377-be9c29b29330",
-  "photo-1507003211169-0a1dd7228f2d",
-  "photo-1560250097-0b93528c311a",
-  "photo-1438761681033-6461ffad8d80",
-  "photo-1500648767791-00dcc994a43e",
-  "photo-1544005313-94ddf0286df2",
-  "photo-1519345182560-3f2917c472ef",
-  "photo-1508214751196-bcfd4ca60f91",
-  "photo-1527980965255-d3b416303d12",
-  "photo-1487412720507-e7ab37603c6f",
-];
-
 export function InvestorArc() {
+  const avatars = [
+    "photo-1494790108377-be9c29b29330",
+    "photo-1507003211169-0a1dd7228f2d",
+    "photo-1560250097-0b93528c311a",
+    "photo-1438761681033-6461ffad8d80",
+    "photo-1500648767791-00dcc994a43e",
+    "photo-1544005313-94ddf0286df2",
+    "photo-1519345182560-3f2917c472ef",
+    "photo-1508214751196-bcfd4ca60f91",
+    "photo-1527980965255-d3b416303d12",
+    "photo-1487412720507-e7ab37603c6f",
+  ];
+
   const radius = 520;
   const center = 590;
 
@@ -1521,7 +1386,7 @@ export function InvestorArc() {
   const visibleStart = 205;
   const visibleEnd = 335;
 
-  const slotCount = INVESTOR_AVATARS.length;
+  const slotCount = avatars.length;
   const angleGap = (endAngle - startAngle) / (slotCount - 1);
 
   // 20 = speed of the avatar movement.
@@ -1537,7 +1402,7 @@ export function InvestorArc() {
   });
 
   const avatarPositions = useMemo(() => {
-    return INVESTOR_AVATARS.map((id, index) => {
+    return avatars.map((id, index) => {
       // This creates continuous slot movement.
       // When one image exits from one side, it wraps back from the other side.
       const slot = (index + phase) % slotCount;
@@ -1560,7 +1425,7 @@ export function InvestorArc() {
         opacity,
       };
     });
-  }, [phase, slotCount, angleGap]);
+  }, [avatars, phase, slotCount, angleGap]);
 
   return (
     <footer

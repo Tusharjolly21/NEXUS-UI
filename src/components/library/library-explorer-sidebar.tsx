@@ -106,6 +106,12 @@ export type LibraryExplorerSidebarContextValue = {
 const LibraryExplorerSidebarContext =
   React.createContext<LibraryExplorerSidebarContextValue | null>(null);
 
+function getCatalogBasePath(pathname: string) {
+  if (pathname === "/blocks") return "/blocks";
+  if (pathname === "/templates") return "/templates";
+  return "/components";
+}
+
 export function useLibraryExplorerSidebar() {
   const ctx = React.useContext(LibraryExplorerSidebarContext);
   if (!ctx) {
@@ -164,7 +170,7 @@ export function LibraryExplorerSidebarProvider({
         else params.set(k, v);
       });
       const qs = params.toString();
-      const basePath = pathname === "/blocks" ? "/blocks" : "/components";
+      const basePath = getCatalogBasePath(pathname);
       const url = qs ? `${basePath}?${qs}` : basePath;
       if (replace) router.replace(url);
       else router.push(url);
@@ -181,7 +187,7 @@ export function LibraryExplorerSidebarProvider({
         else params.set(k, v);
       }
       const qs = params.toString();
-      const basePath = pathname === "/blocks" ? "/blocks" : "/components";
+      const basePath = getCatalogBasePath(pathname);
       return qs ? `${basePath}?${qs}` : basePath;
     },
     [pathname, searchParams],

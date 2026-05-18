@@ -54,15 +54,20 @@ export function NexusProgressBar() {
   const [visible, setVisible] = useState(false);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const showTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const maxTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const start = useCallback(() => {
     clearTimeout(hideTimerRef.current);
+    clearTimeout(showTimerRef.current);
+    clearTimeout(maxTimerRef.current);
     // 120ms delay — instant navigations never flash the loader
     showTimerRef.current = setTimeout(() => setVisible(true), 120);
+    maxTimerRef.current = setTimeout(() => setVisible(false), 6000);
   }, []);
 
   const stop = useCallback(() => {
     clearTimeout(showTimerRef.current);
+    clearTimeout(maxTimerRef.current);
     hideTimerRef.current = setTimeout(() => setVisible(false), 200);
   }, []);
 
@@ -74,8 +79,23 @@ export function NexusProgressBar() {
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
+      if (
+        e.defaultPrevented ||
+        e.button !== 0 ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return;
+      }
+
       const anchor = (e.target as Element).closest("a");
       if (!anchor) return;
+      if (anchor.hasAttribute("download")) return;
+      const target = anchor.getAttribute("target");
+      if (target && target !== "_self") return;
+
       const href = anchor.getAttribute("href");
       if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
       try {
@@ -90,6 +110,11 @@ export function NexusProgressBar() {
     document.addEventListener("click", handleClick, { capture: true });
     return () => document.removeEventListener("click", handleClick, { capture: true });
   }, [start, pathname]);
+
+  useEffect(() => {
+    window.addEventListener("pageshow", stop);
+    return () => window.removeEventListener("pageshow", stop);
+  }, [stop]);
 
   if (!visible) return null;
 
