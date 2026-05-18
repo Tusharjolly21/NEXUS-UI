@@ -1,0 +1,719 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "next-ui",
+  "homepage": "https://nexus-ui.com",
+  "items": [
+    {
+      "name": "animated-countdown",
+      "type": "registry:component",
+      "title": "Animated Countdown",
+      "description": "A responsive countdown timer with animated number transitions and multiple styles.",
+      "files": [
+        {
+          "path": "next-ui/animated-countdown.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-select-headline",
+      "type": "registry:component",
+      "title": "Animated Select Headline",
+      "description": "A cycling word headline where each active word is highlighted with a Figma-style selection rectangle \u2014 thin border with corner handles \u2014 using blur-fade transitions.",
+      "files": [
+        {
+          "path": "next-ui/animated-select-headline.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "ask-nexus-input",
+      "type": "registry:component",
+      "title": "Ask Nexus Input",
+      "description": "A bold \\",
+      "files": [
+        {
+          "path": "next-ui/ask-nexus-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "background-boxes",
+      "type": "registry:component",
+      "title": "Background Boxes",
+      "description": "Interactive full-width box grid background with cursor-follow highlight, optional glow, and smooth ripple transitions.",
+      "files": [
+        {
+          "path": "next-ui/background-boxes.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "background-gradient",
+      "type": "registry:component",
+      "title": "Background Gradient",
+      "description": "Animated gradient wrapper with soft glow and blur for cards, buttons, and hero sections.",
+      "files": [
+        {
+          "path": "next-ui/background-gradient.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "beam-sweep-field",
+      "type": "registry:component",
+      "title": "Beam Sweep Field",
+      "description": "Slow sweeping light column for cinematic section backgrounds.",
+      "files": [
+        {
+          "path": "next-ui/beam-sweep-field.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "bento-signal-grid",
+      "type": "registry:component",
+      "title": "Signal Bento Grid",
+      "description": "Animated bento tiles with breathing gradients for product metrics.",
+      "files": [
+        {
+          "path": "next-ui/bento-signal-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "chat-messages",
+      "type": "registry:component",
+      "title": "Chat Messages",
+      "description": "Animated chat message bubbles with typing indicators and sequential reveal.",
+      "files": [
+        {
+          "path": "next-ui/chat-messages.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "cinematic-logo-cloud",
+      "type": "registry:component",
+      "title": "Cinematic Logo Cloud",
+      "description": "A staggered blur-fade entrance animation for brand logos. Uses framer-motion and fully semantic responsive layouts.",
+      "files": [
+        {
+          "path": "next-ui/cinematic-logo-cloud.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "circular-carousel",
+      "type": "registry:component",
+      "title": "Circular Carousel",
+      "description": "An animated orbital carousel with smooth active-card transitions.",
+      "files": [
+        {
+          "path": "next-ui/circular-carousel.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "compare",
+      "type": "registry:component",
+      "title": "Before / After Compare",
+      "description": "Drag a vertical handle to compare two images side-by-side. Supports mouse and touch, optional labels, custom start position, and any aspect ratio.",
+      "files": [
+        {
+          "path": "next-ui/compare.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "depth-testimonials",
+      "type": "registry:component",
+      "title": "Depth Testimonials",
+      "description": "Stacked testimonial planes with staggered motion reveals.",
+      "files": [
+        {
+          "path": "next-ui/depth-testimonials.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "dot-grid-hero",
+      "type": "registry:component",
+      "title": "Interactive Dot Grid Hero",
+      "description": "Cinematic hero section with a Canvas-rendered dot grid that reacts to cursor proximity \u2014 dots scale, brighten, and return to rest with a smooth radial glow spotlight.",
+      "files": [
+        {
+          "path": "next-ui/dot-grid-hero.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "editorial-blog-rail",
+      "type": "registry:component",
+      "title": "Editorial Blog Rail",
+      "description": "Featured article plus compact secondary headlines for content hubs.",
+      "files": [
+        {
+          "path": "next-ui/editorial-blog-rail.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "encrypted-text",
+      "type": "registry:component",
+      "title": "Encrypted Text",
+      "description": "Characters shuffle through gibberish before locking into the final string \u2014 a futuristic cyber decoding reveal for hero headings, buttons, badges, and nav links.",
+      "files": [
+        {
+          "path": "next-ui/encrypted-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "expandable-cards",
+      "type": "registry:component",
+      "title": "Expandable Cards",
+      "description": "Responsive card grid where clicking a card smoothly expands it into a full-detail overlay with image, description, and a CTA button.",
+      "files": [
+        {
+          "path": "next-ui/expandable-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "float-glass-navbar",
+      "type": "registry:component",
+      "title": "Float Glass Navbar",
+      "description": "Glass navigation rail with spring entrance and CTA emphasis.",
+      "files": [
+        {
+          "path": "next-ui/float-glass-navbar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "floating-dock",
+      "type": "registry:component",
+      "title": "Nexus floating dock",
+      "description": "Bottom-centered macOS-style dock with pointer-driven magnification, glass pill, tooltips, and mobile sheet menu.",
+      "files": [
+        {
+          "path": "next-ui/floating-dock/types.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/floating-dock/icon-container.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/floating-dock-desktop.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/floating-dock-mobile.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/floating-dock.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/floating-dock-import.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "forge-ai-command-bar",
+      "type": "registry:component",
+      "title": "Forge AI Command Bar",
+      "description": "Command surface for AI copilots with motion layout container.",
+      "files": [
+        {
+          "path": "next-ui/forge-ai-command-bar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "glass-login-stack",
+      "type": "registry:component",
+      "title": "Glass Login Stack",
+      "description": "Minimal glass authentication panel with crisp focus states.",
+      "files": [
+        {
+          "path": "next-ui/glass-login-stack.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "globe-pins",
+      "type": "registry:component",
+      "title": "Globe Pins",
+      "description": "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
+      "files": [
+        {
+          "path": "next-ui/globe-pins.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "glowing-effect-cards",
+      "type": "registry:component",
+      "title": "Glowing Effect Cards",
+      "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for premium SaaS sections and dashboards.",
+      "files": [
+        {
+          "path": "next-ui/glowing-effect-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "gooey-input",
+      "type": "registry:component",
+      "title": "Gooey Search Input",
+      "description": "Expandable search pill with SVG gooey filter and Framer Motion layout transitions.",
+      "files": [
+        {
+          "path": "next-ui/gooey-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "hero-aurora-spotlight",
+      "type": "registry:component",
+      "title": "Aurora Hero Spotlight",
+      "description": "Cursor-reactive spotlight layered over an aurora field for launch heroes.",
+      "files": [
+        {
+          "path": "next-ui/hero-aurora-spotlight.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "hover-highlight-text",
+      "type": "registry:component",
+      "title": "Hover Highlight Text",
+      "description": "A cursor-following spotlight text effect that reveals highlighted stroked text on hover.",
+      "files": [
+        {
+          "path": "next-ui/hover-highlight-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "images-badge",
+      "type": "registry:component",
+      "title": "Images Badge",
+      "description": "Stacked avatar/image pill that fans open on hover \u2014 ideal for team badges, social proof, avatar groups, and template galleries.",
+      "files": [
+        {
+          "path": "next-ui/images-badge.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "infinite-moving-cards",
+      "type": "registry:component",
+      "title": "Infinite Moving Cards",
+      "description": "Customizable infinite marquee of cards with seamless looping, direction controls, hover pause, and optional custom rendering.",
+      "files": [
+        {
+          "path": "next-ui/infinite-moving-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "lattice-feature-grid",
+      "type": "registry:component",
+      "title": "Lattice Feature Grid",
+      "description": "Four-up feature grid with scroll reveals and glass tiles.",
+      "files": [
+        {
+          "path": "next-ui/lattice-feature-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "mac-keyboard",
+      "type": "registry:component",
+      "title": "Mac Keyboard",
+      "description": "Fully interactive Mac-style keyboard with Web Audio synthesised click sounds, Framer Motion keycap animations, and real-time physical keyboard highlighting.",
+      "files": [
+        {
+          "path": "next-ui/mac-keyboard.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "meteors",
+      "type": "registry:component",
+      "title": "Meteor Effect",
+      "description": "Animated diagonal meteor beams with glow heads and trailing streaks, designed as a reusable background layer for cards and hero sections.",
+      "files": [
+        {
+          "path": "next-ui/meteors.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "milestone-timeline",
+      "type": "registry:component",
+      "title": "Milestone Timeline",
+      "description": "Vertical roadmap timeline with glowing nodes.",
+      "files": [
+        {
+          "path": "next-ui/milestone-timeline.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "motion-faq-disclosure",
+      "type": "registry:component",
+      "title": "Motion FAQ Disclosure",
+      "description": "Lightweight FAQ with directional affordance and animated answers.",
+      "files": [
+        {
+          "path": "next-ui/motion-faq-disclosure.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "nebula-cta-glow",
+      "type": "registry:component",
+      "title": "Nebula CTA Glow",
+      "description": "Pulsing dual nebula glow behind a high-contrast CTA.",
+      "files": [
+        {
+          "path": "next-ui/nebula-cta-glow.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "nebula-glass-card",
+      "type": "registry:component",
+      "title": "Nebula Glass Card",
+      "description": "3D tilt card with spring physics and luminous edge lighting.",
+      "files": [
+        {
+          "path": "next-ui/nebula-glass-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "orbit-footer",
+      "type": "registry:component",
+      "title": "Orbit Footer",
+      "description": "Compact footer with balanced columns and developer-first links.",
+      "files": [
+        {
+          "path": "next-ui/orbit-footer.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "orbital-loader",
+      "type": "registry:component",
+      "title": "Orbital Loader",
+      "description": "Dual counter-rotating rings with breathing inner glow.",
+      "files": [
+        {
+          "path": "next-ui/orbital-loader.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "phone-input",
+      "type": "registry:component",
+      "title": "Phone Input",
+      "description": "A modern animated phone number input with country selector and validation.",
+      "files": [
+        {
+          "path": "next-ui/phone-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "pulse-dashboard-kpis",
+      "type": "registry:component",
+      "title": "Pulse Dashboard KPIs",
+      "description": "KPI strip with micro-hover lifts and soft chart placeholders.",
+      "files": [
+        {
+          "path": "next-ui/pulse-dashboard-kpis.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "shader-flow",
+      "type": "registry:component",
+      "title": "Shader Flow",
+      "description": "A soft animated shader-style background with flowing gradient motion.",
+      "files": [
+        {
+          "path": "next-ui/shader-flow.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "shooting-stars-grid",
+      "type": "registry:component",
+      "title": "Shooting Stars Grid",
+      "description": "A subtle grid background with animated shooting star trails for modern hero sections.",
+      "files": [
+        {
+          "path": "next-ui/shooting-stars-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "signup-form",
+      "type": "registry:component",
+      "title": "Signup Form",
+      "description": "Customizable signup form built on shadcn input + label with subtle framer-motion transitions and async submit states.",
+      "files": [
+        {
+          "path": "next-ui/signup-form.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "sparkles",
+      "type": "registry:component",
+      "title": "Sparkles field",
+      "description": "Configurable animated particle field for hero highlights, card backgrounds, and decorative UI layers.",
+      "files": [
+        {
+          "path": "next-ui/sparkles.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "split-contact-glass",
+      "type": "registry:component",
+      "title": "Split Contact Glass",
+      "description": "Marketing narrative paired with a compact contact capture form.",
+      "files": [
+        {
+          "path": "next-ui/split-contact-glass.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "split-signup-convert",
+      "type": "registry:component",
+      "title": "Split Signup Convert",
+      "description": "Two-column signup with narrative panel and compact fields.",
+      "files": [
+        {
+          "path": "next-ui/split-signup-convert.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "squiggly-text",
+      "type": "registry:component",
+      "title": "RippleLine squiggly text",
+      "description": "Hero-grade headline with an animated wave underline, turbulence + Gaussian blur + displacement, optional glyph micro-warp, and reduced-motion fallbacks.",
+      "files": [
+        {
+          "path": "next-ui/squiggly-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "starfield-hero",
+      "type": "registry:component",
+      "title": "Interactive Starfield Hero",
+      "description": "Dark hero section with a cursor-reactive starfield. Hundreds of glowing particles stretch, brighten, and rotate toward the cursor \u2014 built on Canvas + requestAnimationFrame at 60 fps.",
+      "files": [
+        {
+          "path": "next-ui/starfield-hero.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "stateful-button",
+      "type": "registry:component",
+      "title": "Stateful message button",
+      "description": "Animated async button with idle \u2192 loading \u2192 success transitions, click guarding, and smooth icon/text motion.",
+      "files": [
+        {
+          "path": "next-ui/stateful-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "svg-noise-shader",
+      "type": "registry:component",
+      "title": "SVG Noise Shader",
+      "description": "FeTurbulence-driven noise field for textured sci-fi surfaces.",
+      "files": [
+        {
+          "path": "next-ui/svg-noise-shader.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "terminal",
+      "type": "registry:component",
+      "title": "Interactive Terminal",
+      "description": "macOS-style terminal with typewriter commands, output sequencing, optional Aceternity sprite audio.",
+      "files": [
+        {
+          "path": "next-ui/terminal.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/terminal-sprite-audio.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "text-generate-effect",
+      "type": "registry:component",
+      "title": "Text Generate Effect",
+      "description": "Animated text reveal that fades words, characters, or lines into view with optional blur and upward motion.",
+      "files": [
+        {
+          "path": "next-ui/text-generate-effect.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "text-reveal-card",
+      "type": "registry:component",
+      "title": "Text Reveal Card",
+      "description": "Interactive premium card with mouse-follow spotlight and bottom reveal content for features, case studies, and portfolio sections.",
+      "files": [
+        {
+          "path": "next-ui/text-reveal-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "toggle-pricing-pro",
+      "type": "registry:component",
+      "title": "Toggle Pricing Pro",
+      "description": "Annual/monthly toggle with spring knob and contextual savings callout.",
+      "files": [
+        {
+          "path": "next-ui/toggle-pricing-pro.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tracing-spotlight-panel",
+      "type": "registry:component",
+      "title": "Tracing Spotlight Panel",
+      "description": "Cursor-traced highlight for feature callouts and pricing tiers.",
+      "files": [
+        {
+          "path": "next-ui/tracing-spotlight-panel.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "typewriter-effect",
+      "type": "registry:component",
+      "title": "Typewriter Effect",
+      "description": "Character-by-character typewriter text animation with blinking cursor, optional deleting, looping, and semantic heading support.",
+      "files": [
+        {
+          "path": "next-ui/typewriter-effect.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "vector-tilt-scene",
+      "type": "registry:component",
+      "title": "Vector Tilt Scene",
+      "description": "High depth glass panel for hero cards and feature highlights.",
+      "files": [
+        {
+          "path": "next-ui/vector-tilt-scene.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "warp-speed-card",
+      "type": "registry:component",
+      "title": "Warp Speed Card",
+      "description": "A focused warp-speed effect \u2014 hover a single phrase to reveal a dark space scene with streaking beams confined to the text's bounding box. The text itself stays static; the effect lives entirely behind it.",
+      "files": [
+        {
+          "path": "next-ui/warp-speed-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "workbench-sidebar",
+      "type": "registry:component",
+      "title": "Workbench Sidebar",
+      "description": "Dense sidebar navigation tuned for dashboards and tools.",
+      "files": [
+        {
+          "path": "next-ui/workbench-sidebar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}
