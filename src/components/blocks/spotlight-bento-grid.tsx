@@ -76,7 +76,7 @@ interface CardDef {
   tag: string;
   title: string;
   description: string;
-  bg: string;
+  bg?: string;
   glow: string;
   visual: React.ReactElement;
   imgSrc?: string;
@@ -203,7 +203,7 @@ function SpotlightCardItem({
     <div
       className="relative h-[280px] w-full overflow-hidden rounded-[20px]"
       style={{
-        background: card.bg,
+        background: card.bg ?? "rgba(255,255,255,0.04)",
         border: `1px solid ${isActive ? `${card.glow}55` : "rgba(255,255,255,0.07)"}`,
         boxShadow: isActive
           ? `0 0 0 1px ${card.glow}28, 0 8px 64px 0 ${card.glow}22`
