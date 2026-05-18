@@ -9,6 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 export const metadata: Metadata = createMetadata({
   title: "Blog",
   description: "Guides on motion design, Tailwind, and shipping SaaS landing pages.",
+  alternates: { canonical: "/blog" },
 });
 
 export default async function BlogIndexPage() {

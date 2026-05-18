@@ -2,9 +2,12 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { track } from "@vercel/analytics";
 import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import { useTheme } from "@/components/providers/theme-provider";
 import {
   ArrowRight,
+  ChevronDown,
   Cpu,
   Layers,
   MousePointer2,
@@ -259,10 +262,14 @@ function SectionHeader({
 
 function Hero() {
   const reduce = useReducedMotion() === true;
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
+  const isDark = !mounted || resolvedTheme !== "light";
 
   return (
-    <section className="relative isolate flex min-h-[90dvh] flex-col items-center justify-center overflow-hidden border-b border-border bg-[#f7fbff] px-4 py-24 text-center dark:bg-black md:py-32">
-      {/* Particle Noise — light mode (dark dots, transparent bg so source-over composite renders them correctly) */}
+    <section className="relative isolate flex min-h-[78dvh] flex-col items-center justify-center overflow-hidden border-b border-border bg-[#f7fbff] px-4 py-20 text-center dark:bg-black md:py-28">
+      {/* Particle Noise — light mode: animate only when theme is light */}
       <ParticleNoise
         positionX={0}
         positionY={0.45}
@@ -271,7 +278,7 @@ function Hero() {
         inflation={58}
         particleSize={1.5}
         density={0.95}
-        animationEnabled={true}
+        animationEnabled={!isDark}
         speed="medium"
         backgroundColor="transparent"
         dotColor="#1e293b"
@@ -282,7 +289,7 @@ function Hero() {
         gridJitter={0}
         className="absolute inset-0 h-full min-h-full dark:hidden"
       />
-      {/* Particle Noise — dark mode (light dots on black bg) */}
+      {/* Particle Noise — dark mode: animate only when theme is dark */}
       <ParticleNoise
         positionX={0}
         positionY={0.45}
@@ -291,7 +298,7 @@ function Hero() {
         inflation={58}
         particleSize={1.5}
         density={0.95}
-        animationEnabled={true}
+        animationEnabled={isDark}
         speed="medium"
         backgroundColor="#000000"
         dotColor="#f8fafc"
@@ -403,6 +410,30 @@ function Hero() {
           ))}
         </motion.div>
       </div>
+
+      {/* Scroll indicator */}
+      {!reduce && (
+        <motion.button
+          type="button"
+          aria-label="Scroll to explore"
+          onClick={() => {
+            document
+              .getElementById("nexus-below-fold")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="absolute bottom-7 left-1/2 z-10 -translate-x-1/2 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+        >
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChevronDown className="size-6" />
+          </motion.div>
+        </motion.button>
+      )}
     </section>
   );
 }
@@ -1217,19 +1248,44 @@ function CtaFooter() {
 
 // ── Export ─────────────────────────────────────────────────────────────────────
 
+function useScrollDepthTracking() {
+  React.useEffect(() => {
+    const milestones = [25, 50, 75, 90];
+    const fired = new Set<number>();
+
+    const onScroll = () => {
+      const scrolled =
+        (window.scrollY / (document.body.scrollHeight - window.innerHeight)) *
+        100;
+      for (const milestone of milestones) {
+        if (scrolled >= milestone && !fired.has(milestone)) {
+          fired.add(milestone);
+          track("scroll_depth", { percent: milestone });
+        }
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+}
+
 export function LandingPage() {
   useLandingLenis();
+  useScrollDepthTracking();
 
   return (
     <div>
       <ScrollProgress />
       <Hero />
-      <NexusMosaicSection />
-      <TrustedBy />
-      <FeaturedComponents />
-      <TestimonialWallSection />
-      <Faq />
-      <CtaFooter />
+      <div id="nexus-below-fold">
+        <NexusMosaicSection />
+        <TrustedBy />
+        <FeaturedComponents />
+        <TestimonialWallSection />
+        <Faq />
+        <CtaFooter />
+      </div>
     </div>
   );
 }

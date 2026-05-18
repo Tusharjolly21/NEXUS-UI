@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: t.title,
     description: t.description,
     openGraph: { title: `${t.title} · ${siteConfig.name}` },
+    alternates: { canonical: `/templates/${slug}` },
   });
 }
 
@@ -26,5 +27,20 @@ export default async function TemplateDetailPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  return <TemplateDetailContent tmpl={tmpl} />;
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+      { "@type": "ListItem", position: 2, name: "Templates", item: `${siteConfig.url}/templates` },
+      { "@type": "ListItem", position: 3, name: tmpl.title, item: `${siteConfig.url}/templates/${slug}` },
+    ],
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <TemplateDetailContent tmpl={tmpl} />
+    </>
+  );
 }

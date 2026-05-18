@@ -13,6 +13,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Install Tailwind CSS",
   description: "Add Tailwind CSS v4 with PostCSS to a Next.js app — aligned with Nexus-UI globals and shadcn-style tokens.",
+  alternates: { canonical: "/docs/install-tailwindcss" },
 });
 
 export default function InstallTailwindPage() {

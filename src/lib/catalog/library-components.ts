@@ -5280,6 +5280,520 @@ export function WhyChooseUsSection() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "scrolling-testimonials",
+    name: "Scrolling Testimonials",
+    description: "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
+    categorySlug: "testimonials",
+    tags: ["testimonials", "social proof", "marquee", "infinite scroll", "vertical", "cards", "reviews"],
+    premium: false,
+    trendingScore: 96,
+    createdAt: "2026-05-18",
+    animationKinds: ["scroll"],
+    dependencies: [],
+    Preview: Previews.PreviewScrollingTestimonials,
+    reactSource: `"use client";
+
+import * as React from "react";
+import { cn } from "@/lib/utils";
+
+export type Testimonial = {
+  id: string;
+  quote: string;
+  name: string;
+  role: string;
+  company?: string;
+  avatar?: string;
+  rating?: number;
+};
+
+export interface ScrollingTestimonialsProps {
+  testimonials: Testimonial[];
+  columns?: 1 | 2 | 3;
+  speed?: number;
+  columnSpeeds?: number[];
+  reverseColumns?: boolean[];
+  pauseOnHover?: boolean;
+  showHeader?: boolean;
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  backgroundColor?: string;
+  cardBackground?: string;
+  borderColor?: string;
+  textColor?: string;
+  mutedTextColor?: string;
+  avatarSize?: number;
+  showStars?: boolean;
+  fadeMask?: boolean;
+  className?: string;
+}
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = React.useState(false);
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReduced(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
+
+function nameInitials(name: string): string {
+  return name.split(" ").slice(0, 2).map((n) => n[0] ?? "").join("").toUpperCase();
+}
+
+function nameHue(name: string): number {
+  return name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+}
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <svg key={i} className="size-3.5" viewBox="0 0 16 16" aria-hidden>
+          <path
+            d="M8 1.5 9.8 5.2l4.1.6-2.96 2.88.7 4.07L8 10.68l-3.64 1.07.7-4.07L2.1 5.8l4.1-.6z"
+            fill={i < rating ? "#f59e0b" : "none"}
+            stroke={i < rating ? "#f59e0b" : "rgba(148,163,184,0.35)"}
+            strokeWidth="1.25"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+function AvatarEl({ src, name, size }: { src?: string; name: string; size: number }) {
+  if (src) {
+    return <img src={src} alt={name} style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />;
+  }
+  const hue = nameHue(name);
+  return (
+    <div aria-hidden style={{ width: size, height: size, borderRadius: "50%", background: \`oklch(0.46 0.13 \${hue})\`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: Math.round(size * 0.36), fontWeight: 600, color: "#fff", flexShrink: 0, letterSpacing: "-0.02em", userSelect: "none" }}>
+      {nameInitials(name)}
+    </div>
+  );
+}
+
+function TestimonialCard({ item, cardBackground, borderColor, textColor, mutedTextColor, avatarSize, showStars }: { item: Testimonial; cardBackground?: string; borderColor?: string; textColor?: string; mutedTextColor?: string; avatarSize: number; showStars: boolean }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-2xl p-4 sm:p-5" style={{ background: cardBackground ?? "var(--card, rgba(255,255,255,0.04))", border: \`1px solid \${borderColor ?? "rgba(255,255,255,0.08)"}\`, boxShadow: "0 1px 10px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.03) inset" }}>
+      {showStars && typeof item.rating === "number" && <StarRating rating={item.rating} />}
+      <p className="text-sm leading-relaxed sm:text-[15px]" style={{ color: textColor ?? "var(--foreground)" }}>
+        &ldquo;{item.quote}&rdquo;
+      </p>
+      <div className="flex items-center gap-3 pt-0.5">
+        <AvatarEl src={item.avatar} name={item.name} size={avatarSize} />
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold leading-snug" style={{ color: textColor ?? "var(--foreground)" }}>{item.name}</p>
+          <p className="truncate text-xs leading-snug" style={{ color: mutedTextColor ?? "var(--muted-foreground, rgba(255,255,255,0.45))" }}>{item.role}{item.company ? \` · \${item.company}\` : ""}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScrollColumn({ items, duration, reverse, pauseOnHover, cardBackground, borderColor, textColor, mutedTextColor, avatarSize, showStars }: { items: Testimonial[]; duration: number; reverse: boolean; pauseOnHover: boolean; cardBackground?: string; borderColor?: string; textColor?: string; mutedTextColor?: string; avatarSize: number; showStars: boolean }) {
+  const [hovered, setHovered] = React.useState(false);
+  const reduced = usePrefersReducedMotion();
+  const doubled = React.useMemo(() => [...items, ...items], [items]);
+  return (
+    <div className="h-full overflow-hidden" onMouseEnter={() => pauseOnHover && setHovered(true)} onMouseLeave={() => pauseOnHover && setHovered(false)}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14, animation: reduced ? "none" : \`\${reverse ? "nexus-st-rev" : "nexus-st-fwd"} \${duration}ms linear infinite\`, animationPlayState: hovered ? "paused" : "running", willChange: "transform" }}>
+        {doubled.map((item, i) => (
+          <TestimonialCard key={\`\${item.id}-\${i}\`} item={item} cardBackground={cardBackground} borderColor={borderColor} textColor={textColor} mutedTextColor={mutedTextColor} avatarSize={avatarSize} showStars={showStars} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function ScrollingTestimonials({ testimonials, columns = 3, speed = 35000, columnSpeeds, reverseColumns = [], pauseOnHover = true, showHeader = true, badge = "Testimonials", title = "Loved by teams worldwide", subtitle = "Join thousands of teams shipping beautiful products faster.", backgroundColor, cardBackground, borderColor, textColor, mutedTextColor, avatarSize = 40, showStars = true, fadeMask = true, className }: ScrollingTestimonialsProps) {
+  const cols = React.useMemo<Testimonial[][]>(() => {
+    const buckets: Testimonial[][] = Array.from({ length: columns }, () => []);
+    testimonials.forEach((t, i) => buckets[i % columns].push(t));
+    return buckets;
+  }, [testimonials, columns]);
+  const bg = backgroundColor ?? "var(--background)";
+  return (
+    <>
+      <style>{\`@keyframes nexus-st-fwd { from { transform: translateY(0); } to { transform: translateY(-50%); } } @keyframes nexus-st-rev { from { transform: translateY(-50%); } to { transform: translateY(0); } }\`}</style>
+      <section className={cn("relative w-full overflow-hidden py-20", className)} style={{ background: bg }}>
+        {showHeader && (
+          <div className="relative z-10 mx-auto mb-14 max-w-2xl px-4 text-center">
+            {badge && <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-primary">{badge}</span>}
+            {title && <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{title}</h2>}
+            {subtitle && <p className="mt-4 text-balance text-base leading-relaxed" style={{ color: mutedTextColor ?? "var(--muted-foreground)" }}>{subtitle}</p>}
+          </div>
+        )}
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {fadeMask && (
+            <>
+              <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28" style={{ background: \`linear-gradient(to bottom, \${bg} 0%, transparent 100%)\` }} />
+              <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28" style={{ background: \`linear-gradient(to top, \${bg} 0%, transparent 100%)\` }} />
+            </>
+          )}
+          <div className={cn("grid gap-4 overflow-hidden", columns === 1 && "grid-cols-1", columns === 2 && "grid-cols-1 md:grid-cols-2", columns === 3 && "grid-cols-1 md:grid-cols-2 lg:grid-cols-3")} style={{ height: 680 }}>
+            {cols.map((items, i) => (
+              <div key={i} className={cn("h-full", i === 1 && "hidden md:block", i === 2 && "hidden lg:block")}>
+                <ScrollColumn items={items} duration={columnSpeeds?.[i] ?? speed * (1 + i * 0.22)} reverse={reverseColumns[i] ?? false} pauseOnHover={pauseOnHover} cardBackground={cardBackground} borderColor={borderColor} textColor={textColor} mutedTextColor={mutedTextColor} avatarSize={avatarSize} showStars={showStars} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}`,
+    tailwindSource: `"use client";
+
+import { ScrollingTestimonials } from "@/components/scrolling-testimonials/scrolling-testimonials";
+
+const TESTIMONIALS = [
+  { id: "1", quote: "Shipped our entire landing page in a weekend. The animation quality is genuinely best-in-class.", name: "Sarah Chen", role: "Head of Design", company: "Vercel", rating: 5 },
+  { id: "2", quote: "Finally a component library that respects the craft. Motion feels intentional, never gimmicky.", name: "Marcus Rodriguez", role: "Senior Engineer", company: "Linear", rating: 5 },
+  { id: "3", quote: "Copy-paste components that actually look premium out of the box. Our conversion rate went up 18%.", name: "Aisha Patel", role: "Design Systems Lead", company: "Stripe", rating: 5 },
+  { id: "4", quote: "The attention to detail in every component is remarkable. Accessibility is built in from the start.", name: "James Kim", role: "Engineering Manager", company: "Notion", rating: 5 },
+  { id: "5", quote: "We replaced three different component libraries with Nexus UI. Cleaner code, better performance.", name: "Elena Vasquez", role: "CTO", company: "Raycast", rating: 5 },
+  { id: "6", quote: "Dark mode, responsive, and animated right out of the box. This saved our team two weeks.", name: "David Park", role: "Founder", company: "Resend", rating: 5 },
+  { id: "7", quote: "Our design-to-code handoff is basically gone now. Devs just grab components and ship.", name: "Priya Nair", role: "Product Designer", company: "Planetscale", rating: 5 },
+  { id: "8", quote: "I've evaluated 12 UI libraries this year. This is the first one I actually wanted to use.", name: "Tom Hanley", role: "Frontend Lead", company: "Loom", rating: 5 },
+  { id: "9", quote: "The Framer Motion integration is handled perfectly. No more wrestling with animation configs.", name: "Yuki Tanaka", role: "UI Engineer", company: "Figma", rating: 5 },
+];
+
+export function ScrollingTestimonialsDemo() {
+  return (
+    <ScrollingTestimonials
+      testimonials={TESTIMONIALS}
+      columns={3}
+      speed={35000}
+      reverseColumns={[false, true, false]}
+      pauseOnHover
+      badge="Social proof"
+      title="Loved by teams worldwide"
+      subtitle="Join thousands of teams shipping beautiful products faster."
+      showStars
+      fadeMask
+    />
+  );
+}`,
+    props: [
+      { name: "testimonials", type: "Testimonial[]", description: "Array of testimonial objects to display." },
+      { name: "columns", type: "1 | 2 | 3", description: "Number of columns (responsive — clamped by breakpoint).", defaultValue: "3" },
+      { name: "speed", type: "number", description: "Base animation duration in ms for column 0.", defaultValue: "35000" },
+      { name: "columnSpeeds", type: "number[]", description: "Per-column override durations. Overrides `speed` when provided." },
+      { name: "reverseColumns", type: "boolean[]", description: "Per-column reverse direction flags.", defaultValue: "[]" },
+      { name: "pauseOnHover", type: "boolean", description: "Pause a column's animation on hover.", defaultValue: "true" },
+      { name: "showHeader", type: "boolean", description: "Render the badge / title / subtitle header.", defaultValue: "true" },
+      { name: "badge", type: "string", description: "Small pill badge text above the heading.", defaultValue: "\"Testimonials\"" },
+      { name: "title", type: "string", description: "Section heading.", defaultValue: "\"Loved by teams worldwide\"" },
+      { name: "subtitle", type: "string", description: "Section subheading.", defaultValue: "\"Join thousands of teams...\"" },
+      { name: "backgroundColor", type: "string", description: "Section background. Defaults to `var(--background)`." },
+      { name: "cardBackground", type: "string", description: "Card background color." },
+      { name: "borderColor", type: "string", description: "Card border color." },
+      { name: "textColor", type: "string", description: "Primary text color." },
+      { name: "mutedTextColor", type: "string", description: "Muted / secondary text color." },
+      { name: "avatarSize", type: "number", description: "Avatar diameter in px.", defaultValue: "40" },
+      { name: "showStars", type: "boolean", description: "Render star ratings when `rating` is set.", defaultValue: "true" },
+      { name: "fadeMask", type: "boolean", description: "Show gradient top/bottom fade masks.", defaultValue: "true" },
+      { name: "className", type: "string", description: "Extra className on the section wrapper." },
+    ],
+  },
+  {
+    slug: "spectra-frame",
+    name: "Spectra Frame",
+    description: "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
+    categorySlug: "cards",
+    tags: ["gallery", "grid", "images", "grayscale", "hover", "color", "photo", "portfolio", "css-animation", "responsive"],
+    premium: false,
+    trendingScore: 102,
+    createdAt: "2026-05-18",
+    animationKinds: ["hover"],
+    dependencies: [],
+    Preview: Previews.PreviewSpectraFrame,
+    reactSource: `"use client";
+
+import * as React from "react";
+
+export interface SpectraImage {
+  src: string;
+  alt: string;
+}
+
+export interface SpectraFrameProps {
+  images?: SpectraImage[];
+  imageCount?: number;
+  gap?: number;
+  columns?: number;
+  aspectRatio?: string;
+  transitionSpeed?: number;
+  scaleAmount?: number;
+  colorRevealTiming?: string;
+  backgroundColor?: string;
+  grayscaleIntensity?: number;
+  borderRadius?: number;
+  className?: string;
+}
+
+const PLACEHOLDERS: SpectraImage[] = Array.from({ length: 12 }, (_, i) => ({
+  src: \`https://picsum.photos/seed/sf\${i + 1}/800/600\`,
+  alt: \`Photo \${i + 1}\`,
+}));
+
+export function SpectraFrame({
+  images             = PLACEHOLDERS,
+  imageCount         = 12,
+  gap                = 10,
+  columns            = 4,
+  aspectRatio        = "4/3",
+  transitionSpeed    = 480,
+  scaleAmount        = 1.08,
+  colorRevealTiming  = "cubic-bezier(0.4, 0, 0.2, 1)",
+  backgroundColor    = "#09090b",
+  grayscaleIntensity = 100,
+  borderRadius       = 14,
+  className,
+}: SpectraFrameProps) {
+  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+  const rawId = React.useId();
+  const uid   = "sf" + rawId.replace(/[^a-zA-Z0-9]/g, "");
+
+  const items        = images.slice(0, imageCount);
+  const isAnyHovered = hoveredIndex !== null;
+  const imgTransition = [
+    \`filter    \${transitionSpeed}ms \${colorRevealTiming}\`,
+    \`transform \${transitionSpeed}ms \${colorRevealTiming}\`,
+    \`opacity   \${Math.round(transitionSpeed * 0.7)}ms \${colorRevealTiming}\`,
+  ].join(", ");
+
+  return (
+    <>
+      <style>{\`
+        #\${uid} { --sf-cols: \${columns}; box-sizing: border-box; width: 100%; background: \${backgroundColor}; padding: \${gap}px; }
+        @media (max-width: 900px) { #\${uid} { --sf-cols: 3; } }
+        @media (max-width: 600px) { #\${uid} { --sf-cols: 2; } }
+        #\${uid} .sf-grid { display: grid; grid-template-columns: repeat(var(--sf-cols), 1fr); gap: \${gap}px; }
+        #\${uid} .sf-cell { border-radius: \${borderRadius}px; overflow: hidden; aspect-ratio: \${aspectRatio}; cursor: pointer; position: relative; transform: translateZ(0); isolation: isolate; }
+        #\${uid} .sf-cell img { width: 100%; height: 100%; display: block; object-fit: cover; transform-origin: center center; will-change: filter, transform, opacity; backface-visibility: hidden; }
+      \`}</style>
+      <div id={uid} className={className}>
+        <div className="sf-grid">
+          {items.map((img, index) => {
+            const isActive = hoveredIndex === index;
+            const isDimmed = isAnyHovered && !isActive;
+            const grayPct    = isActive ? 0              : grayscaleIntensity;
+            const brightness = isActive ? 1.06            : isDimmed ? 0.62 : 1;
+            const scale      = isActive ? scaleAmount      : isDimmed ? 0.96 : 1;
+            const opacity    = isActive ? 1                : isDimmed ? 0.72 : 1;
+            return (
+              <div key={index} className="sf-cell" onMouseEnter={() => setHoveredIndex(index)} onMouseLeave={() => setHoveredIndex(null)}>
+                <img src={img.src} alt={img.alt} style={{ filter: \`grayscale(\${grayPct}%) brightness(\${brightness})\`, transform: \`scale(\${scale}) translateZ(0)\`, opacity, transition: imgTransition }} />
+                <div aria-hidden style={{ position: "absolute", inset: 0, borderRadius, boxShadow: "0 0 0 2px rgba(255,255,255,0.20) inset", opacity: isActive ? 1 : 0, transition: \`opacity \${Math.round(transitionSpeed * 0.5)}ms \${colorRevealTiming}\`, pointerEvents: "none" }} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default SpectraFrame;`,
+    tailwindSource: `import { SpectraFrame } from "@/components/spectra-frame/spectra-frame";
+
+export function SpectraFrameDemo() {
+  return (
+    <SpectraFrame
+      imageCount={12}
+      columns={4}
+      gap={10}
+      aspectRatio="4/3"
+      transitionSpeed={480}
+      scaleAmount={1.08}
+      backgroundColor="#09090b"
+      grayscaleIntensity={100}
+      borderRadius={14}
+    />
+  );
+}`,
+    props: [
+      { name: "images", type: "SpectraImage[]", description: "Array of { src, alt } objects. Defaults to 12 picsum placeholders." },
+      { name: "imageCount", type: "number", description: "Number of images to render (slices the array).", defaultValue: "12" },
+      { name: "gap", type: "number", description: "Grid gap in px.", defaultValue: "10" },
+      { name: "columns", type: "number", description: "Column count on desktop (≥901px). Auto-reduces to 3 on tablet, 2 on mobile.", defaultValue: "4" },
+      { name: "aspectRatio", type: "string", description: "CSS aspect-ratio per cell.", defaultValue: "\"4/3\"" },
+      { name: "transitionSpeed", type: "number", description: "Transition duration in ms.", defaultValue: "480" },
+      { name: "scaleAmount", type: "number", description: "Scale multiplier on the hovered image.", defaultValue: "1.08" },
+      { name: "colorRevealTiming", type: "string", description: "CSS easing for all transitions.", defaultValue: "\"cubic-bezier(0.4,0,0.2,1)\"" },
+      { name: "backgroundColor", type: "string", description: "Grid background color.", defaultValue: "\"#09090b\"" },
+      { name: "grayscaleIntensity", type: "number", description: "Grayscale % on idle images (0–100).", defaultValue: "100" },
+      { name: "borderRadius", type: "number", description: "Cell corner radius in px.", defaultValue: "14" },
+      { name: "className", type: "string", description: "Extra className on the root element." },
+    ],
+  },
+  {
+    slug: "profile-orbit",
+    name: "Profile Orbit",
+    description: "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
+    categorySlug: "cards",
+    tags: ["profile", "carousel", "avatar", "orbit", "social", "team", "hover", "animation", "navigation"],
+    premium: false,
+    trendingScore: 108,
+    createdAt: "2026-05-18",
+    animationKinds: ["hover", "spring"],
+    dependencies: [],
+    Preview: Previews.PreviewProfileOrbit,
+    reactSource: `"use client";
+
+import * as React from "react";
+
+export type ProfilePerson = { seed: number; name: string; role: string; email: string; };
+
+export interface ProfileOrbitProps {
+  people?: ProfilePerson[];
+  autoRotateInterval?: number;
+  className?: string;
+}
+
+const DEFAULT_PEOPLE: ProfilePerson[] = [
+  { seed: 10, name: "Jordan Lee",   role: "Head of Product",  email: "jordan@example.com"  },
+  { seed: 20, name: "Alex Chen",    role: "Lead Designer",    email: "alex@example.com"    },
+  { seed: 30, name: "Maya Patel",   role: "Engineering Lead", email: "maya@example.com"    },
+  { seed: 40, name: "Sam Rivera",   role: "Marketing Dir.",   email: "sam@example.com"     },
+  { seed: 50, name: "Chris Morgan", role: "Head of Sales",    email: "chris@example.com"   },
+];
+
+const ORBIT: { top: string; left: string }[] = [
+  { top: "17%", left: "50%" },
+  { top: "40%", left: "71%" },
+  { top: "77%", left: "68%" },
+  { top: "77%", left: "32%" },
+  { top: "40%", left: "29%" },
+];
+
+const SPRING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
+
+function ArrowButton({ onClick, direction, ariaLabel }: { onClick: () => void; direction: "left" | "right"; ariaLabel: string }) {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <button aria-label={ariaLabel} onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      style={{ width: 36, height: 36, borderRadius: "50%", background: hovered ? "#e0e0e0" : "#f0f0f0", border: "none", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#111", transition: "background 0.2s ease", userSelect: "none" }}>
+      {direction === "left" ? "←" : "→"}
+    </button>
+  );
+}
+
+function ConnectButton() {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <button onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+      style={{ flex: 1, margin: "0 10px", background: hovered ? "#333" : "#111", color: "white", borderRadius: 100, padding: "10px 0", fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", transition: "background 0.2s ease" }}>
+      Connect
+    </button>
+  );
+}
+
+export function ProfileOrbit({ people = DEFAULT_PEOPLE, autoRotateInterval = 3000, className }: ProfileOrbitProps) {
+  const [activeIndex, setActiveIndex]   = React.useState(0);
+  const [displayIndex, setDisplayIndex] = React.useState(0);
+  const cardInnerRef = React.useRef<HTMLDivElement>(null);
+  const timerRef     = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const pausedRef    = React.useRef(false);
+  const count = people.length;
+
+  React.useEffect(() => {
+    const el = cardInnerRef.current;
+    if (!el) return;
+    el.style.opacity = "0"; el.style.transform = "translateY(6px)";
+    const t = setTimeout(() => { setDisplayIndex(activeIndex); el.style.opacity = "1"; el.style.transform = "translateY(0)"; }, 200);
+    return () => clearTimeout(t);
+  }, [activeIndex]);
+
+  React.useEffect(() => {
+    timerRef.current = setInterval(() => { if (!pausedRef.current) setActiveIndex((i) => (i + 1) % count); }, autoRotateInterval);
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [autoRotateInterval, count]);
+
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft")  setActiveIndex((i) => (i - 1 + count) % count);
+      if (e.key === "ArrowRight") setActiveIndex((i) => (i + 1) % count);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [count]);
+
+  const pause  = () => { pausedRef.current = true;  };
+  const resume = () => { pausedRef.current = false; };
+  const prev   = () => setActiveIndex((i) => (i - 1 + count) % count);
+  const next   = () => setActiveIndex((i) => (i + 1) % count);
+  const person = people[displayIndex];
+
+  return (
+    <div className={className} style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden", background: "#0a0e1a", backgroundImage: ["radial-gradient(ellipse 60% 50% at 70% 40%, rgba(100,40,180,0.5) 0%, transparent 70%)", "radial-gradient(ellipse 50% 60% at 20% 60%, rgba(20,80,160,0.4) 0%, transparent 70%)"].join(", ") }}>
+      <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
+
+      {people.map((p, i) => {
+        const isActive  = i === activeIndex;
+        const slotIndex = (i - activeIndex + count) % count;
+        const slot      = ORBIT[slotIndex];
+        return (
+          <button key={p.seed} aria-label={\`View \${p.name}\`} onClick={() => setActiveIndex(i)} onMouseEnter={pause} onMouseLeave={resume}
+            style={{ position: "absolute", top: slot.top, left: slot.left, transform: "translate(-50%, -50%)", width: isActive ? 72 : 64, height: isActive ? 72 : 64, borderRadius: "50%", border: \`3px solid \${isActive ? "white" : "rgba(255,255,255,0.3)"}\`, boxShadow: isActive ? "0 0 0 4px rgba(255,255,255,0.15)" : "none", padding: 0, background: "none", cursor: "pointer", overflow: "hidden", zIndex: isActive ? 3 : 2, transition: \`top 0.55s \${SPRING}, left 0.55s \${SPRING}, width 0.4s ease, height 0.4s ease, box-shadow 0.4s ease, border 0.4s ease\` }}>
+            <img src={\`https://picsum.photos/seed/\${p.seed}/300/300\`} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", pointerEvents: "none" }} />
+          </button>
+        );
+      })}
+
+      <div onMouseEnter={pause} onMouseLeave={resume} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 48, zIndex: 4 }}>
+        <div style={{ width: 280, background: "white", borderRadius: 20, padding: "0 24px 24px", boxShadow: "0 20px 60px rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <div ref={cardInnerRef} style={{ transition: "opacity 0.25s ease, transform 0.25s ease" }}>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <img src={\`https://picsum.photos/seed/\${person.seed}/300/300\`} alt={person.name} style={{ width: 96, height: 96, borderRadius: "50%", objectFit: "cover", border: "3px solid white", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", marginTop: -48, display: "block" }} />
+            </div>
+            <p style={{ fontSize: 20, fontWeight: 700, color: "#111", marginTop: 12, textAlign: "center", lineHeight: 1.3, margin: "12px 0 0" }}>{person.name}</p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 6, fontSize: 13, color: "#666" }}><span aria-hidden>💼</span><span>{person.role}</span></div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 4, fontSize: 13, color: "#666" }}><span aria-hidden>✉️</span><span>{person.email}</span></div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
+              <ArrowButton onClick={prev} direction="left"  ariaLabel="Previous profile" />
+              <ConnectButton />
+              <ArrowButton onClick={next} direction="right" ariaLabel="Next profile" />
+            </div>
+          </div>
+        </div>
+        <div style={{ marginTop: 24, display: "flex", gap: 8, alignItems: "center" }}>
+          {people.map((_, i) => {
+            const isActive = i === activeIndex;
+            return <button key={i} aria-label={\`Go to profile \${i + 1}\`} onClick={() => setActiveIndex(i)} style={{ width: isActive ? 24 : 8, height: 8, borderRadius: isActive ? 4 : "50%", background: isActive ? "white" : "rgba(255,255,255,0.3)", border: "none", cursor: "pointer", padding: 0, transition: "all 0.3s ease" }} />;
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ProfileOrbit;`,
+    tailwindSource: `"use client";
+
+import { ProfileOrbit } from "@/components/profile-orbit/profile-orbit";
+
+export function ProfileOrbitDemo() {
+  return (
+    <div className="w-full h-screen">
+      <ProfileOrbit />
+    </div>
+  );
+}`,
+    props: [
+      { name: "people", type: "ProfilePerson[]", description: "Array of 5 people. Each needs: seed (picsum image seed), name, role, email." },
+      { name: "autoRotateInterval", type: "number", description: "Auto-rotation interval in ms.", defaultValue: "3000" },
+      { name: "className", type: "string", description: "Extra className on the root element." },
+    ],
+  },
 ];
 
 export function getLibraryComponent(slug: string) {

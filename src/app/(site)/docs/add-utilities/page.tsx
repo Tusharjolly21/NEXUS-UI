@@ -13,6 +13,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Add utilities",
   description: "Install clsx, tailwind-merge, and a cn() helper — the same composition pattern Nexus-UI uses across components.",
+  alternates: { canonical: "/docs/add-utilities" },
 });
 
 export default function AddUtilitiesPage() {

@@ -5,6 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Pricing",
   description: "Compare Nexus-UI plans and unlock premium templates, blocks, and components.",
+  alternates: { canonical: "/pricing" },
 });
 
 export default function PricingPage() {

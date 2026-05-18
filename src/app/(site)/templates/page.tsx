@@ -29,13 +29,14 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
+import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 
 type FilterCat = "all" | TemplateCategory;
 const ALL_CATS = ["all", ...Array.from(new Set(templates.map((t) => t.category)))] as FilterCat[];
 
 export default function TemplatesPage() {
   return (
-    <React.Suspense fallback={null}>
+    <React.Suspense fallback={<CatalogSkeleton />}>
       <LibraryExplorerSidebarProvider>
         <TemplatesPageInner />
       </LibraryExplorerSidebarProvider>

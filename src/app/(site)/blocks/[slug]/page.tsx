@@ -46,6 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: block.name,
     description: block.description,
     openGraph: { title: `${block.name} · ${siteConfig.name}` },
+    alternates: { canonical: `/blocks/${slug}` },
   });
 }
 
@@ -53,6 +54,16 @@ export default async function BlockDetailPage({ params }: Props) {
   const { slug } = await params;
   const block = getBlock(slug);
   if (!block) notFound();
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+      { "@type": "ListItem", position: 2, name: "Blocks", item: `${siteConfig.url}/blocks` },
+      { "@type": "ListItem", position: 3, name: block.name, item: `${siteConfig.url}/blocks/${slug}` },
+    ],
+  };
   const Preview = block.Preview;
   const code = await getBlockCode(block.slug, block.reactSource);
   const isInteractiveBackgroundCard = block.slug === "block-interactive-dots";
@@ -75,7 +86,9 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
 
   return (
-    <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
       <nav className="mb-7 flex items-center gap-1 text-sm text-muted-foreground">
         <Link href="/blocks" className="transition hover:text-foreground">
           Blocks
@@ -208,7 +221,8 @@ export default async function BlockDetailPage({ params }: Props) {
           </p>
         </div>
       </section>
-    </main>
+      </main>
+    </>
   );
 }
 

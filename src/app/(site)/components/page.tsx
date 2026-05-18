@@ -36,6 +36,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 
 type SortMode = "all" | "trending" | "newest";
 type AccessMode = "all" | "free" | "pro";
@@ -56,7 +57,7 @@ const ACCESS_OPTIONS: { value: AccessMode; label: string; icon?: React.ReactNode
 
 export default function ComponentsPage() {
   return (
-    <React.Suspense fallback={null}>
+    <React.Suspense fallback={<CatalogSkeleton />}>
       <LibraryExplorerSidebarProvider>
         <ComponentsPageInner />
       </LibraryExplorerSidebarProvider>

@@ -28,6 +28,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 
 const CATEGORY_NOTES: Record<BlockCategory, string> = {
   "Hero blocks": "Opening sections with motion, atmosphere, and sharp conversion hierarchy.",
@@ -46,7 +47,7 @@ const CATEGORY_ORDER = Object.keys(CATEGORY_NOTES) as BlockCategory[];
 
 export default function BlocksPage() {
   return (
-    <React.Suspense fallback={null}>
+    <React.Suspense fallback={<CatalogSkeleton />}>
       <LibraryExplorerSidebarProvider>
         <BlocksPageInner />
       </LibraryExplorerSidebarProvider>

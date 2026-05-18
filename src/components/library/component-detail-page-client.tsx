@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import {
+  ArrowUpRight,
   Check,
   ChevronRight,
   Code2,
@@ -13,6 +14,26 @@ import {
   X,
   Zap,
 } from "lucide-react";
+
+const DEMO_SLUGS = new Set([
+  "background-boxes",
+  "background-gradient",
+  "encrypted-text",
+  "floating-dock",
+  "glowing-effect-cards",
+  "gooey-input",
+  "infinite-moving-cards",
+  "keyboard",
+  "meteors",
+  "signup-form",
+  "sparkles",
+  "squiggly-text",
+  "stateful-button",
+  "terminal",
+  "text-generate-effect",
+  "text-reveal-card",
+  "typewriter-effect",
+]);
 import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { getComponentCategoryLabel, type ComponentCategorySlug } from "@/lib/catalog/taxonomy";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +45,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
+import { Dialog, DialogClose, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import { CodeBlock } from "@/components/code-block/code-block";
 
 // ── tiny copy button ────────────────────────────────────────────────
@@ -275,6 +296,17 @@ export function ComponentDetailPageClient({ slug }: { slug: string }) {
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             Use the Code tab above to inspect and copy this component into your project.
           </p>
+          {DEMO_SLUGS.has(comp.slug) && (
+            <Link
+              href={`/demos/${comp.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-foreground"
+            >
+              Full-page demo
+              <ArrowUpRight className="size-3.5" />
+            </Link>
+          )}
         </div>
       </section>
     </main>
@@ -375,13 +407,9 @@ function PreviewCodeSection({
           <div className="fixed inset-4 z-50 flex flex-col overflow-hidden rounded-2xl border border-border/70 bg-background shadow-2xl dark:bg-zinc-950 sm:inset-6 lg:inset-10">
             <div className="flex h-12 shrink-0 items-center justify-between border-b border-border/60 px-5">
               <span className="text-sm font-semibold text-foreground">{title}</span>
-              <button
-                type="button"
-                onClick={() => setExpanded(false)}
-                className="grid size-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground"
-              >
+              <DialogClose className="grid size-8 place-items-center rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground">
                 <X className="size-4" />
-              </button>
+              </DialogClose>
             </div>
             <div className="min-h-0 flex-1 overflow-auto">
               <div className="flex min-h-full w-full items-start justify-center p-6">

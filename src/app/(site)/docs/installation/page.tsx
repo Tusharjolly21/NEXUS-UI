@@ -7,6 +7,7 @@ export const metadata: Metadata = createMetadata({
   title: "Installation",
   description:
     "Run Nexus-UI locally: Node, dependencies, environment variables, and optional Supabase plus Stripe.",
+  alternates: { canonical: "/docs/installation" },
 });
 
 export default function InstallationPage() {

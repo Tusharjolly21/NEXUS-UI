@@ -14,6 +14,7 @@ export const metadata: Metadata = createMetadata({
   title: "CLI",
   description:
     "Use the shadcn/ui CLI for primitives, install catalog pieces via the @next-ui registry, or paste snippets from component pages.",
+  alternates: { canonical: "/docs/cli" },
 });
 
 export default function CliDocsPage() {

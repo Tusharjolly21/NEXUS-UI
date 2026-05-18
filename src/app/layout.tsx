@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { AppProviders } from "@/components/providers/app-providers";
 import { createMetadata } from "@/lib/seo";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -11,6 +11,13 @@ import "./globals.css";
  * fetches stall (offline VPN, IPv6, corporate proxy). Fonts come from `globals.css` stacks.
  */
 export const metadata: Metadata = createMetadata();
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: light)", color: "#f7fbff" },
+  ],
+};
 
 export default function RootLayout({
   children,

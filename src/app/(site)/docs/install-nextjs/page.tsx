@@ -13,6 +13,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Install Next.js",
   description: "Create a new Next.js App Router project with TypeScript — the baseline Nexus-UI expects.",
+  alternates: { canonical: "/docs/install-nextjs" },
 });
 
 export default function InstallNextjsPage() {
