@@ -23,7 +23,6 @@ import type { LibraryComponent } from "@/lib/catalog/library-components";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { COMPONENT_CATEGORIES } from "@/lib/catalog/taxonomy";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { siteConfig } from "@/lib/seo";
 import { useDiscovery } from "@/hooks/use-discovery";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -463,7 +462,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
 
   const registryBaseName = item.registryCliName ?? item.slug;
   const shadcnAddCmd = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryBaseName}`;
-  const registryJsonSnippet = `"registries": {\n  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl(siteConfig.url)}"\n}`;
+  const registryJsonSnippet = `"registries": {\n  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"\n}`;
 
   const favorited = isFavorite("component", item.slug);
   const bookmarked = isBookmarked("component", item.slug);

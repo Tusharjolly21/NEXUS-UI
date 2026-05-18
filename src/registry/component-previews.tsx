@@ -216,7 +216,6 @@ export function PreviewAnimatedCountdownMinimal() {
       />
     </div>
   );
-  x;
 }
 
 export function PreviewAnimatedCountdown({
