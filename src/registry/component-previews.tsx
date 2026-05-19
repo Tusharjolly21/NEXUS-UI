@@ -101,92 +101,111 @@ export function PreviewCommandPalette() {
   );
 }
 
-export function PreviewCinematicLogoCloud() {
-  const clients = [
-    {
-      name: "OpenAI",
-      text: true,
-      className:
-        "font-sans font-semibold tracking-tight text-zinc-900 dark:text-white",
-    },
-    {
-      name: "hello patient",
-      text: true,
-      className: "font-serif lowercase tracking-tight",
-    },
-    {
-      name: "granola",
-      text: true,
-      className: "font-sans font-bold tracking-tighter",
-    },
-    {
-      name: "character.ai",
-      text: true,
-      className: "font-bold tracking-tighter lowercase",
-    },
-    {
-      name: "ORACLE",
-      text: true,
-      className:
-        "font-sans font-black tracking-widest text-red-600 dark:text-red-500",
-    },
-    {
-      name: "Portola",
-      text: true,
-      className: "font-serif tracking-widest uppercase",
-    },
-    { name: "Accel", text: true, className: "font-black tracking-tight" },
-    {
-      name: "Bloomberg",
-      text: true,
-      className:
-        "font-sans font-black tracking-tighter text-zinc-900 dark:text-white",
-    },
-    {
-      name: "Forbes",
-      text: true,
-      className:
-        "font-serif font-bold tracking-tighter uppercase text-zinc-900 dark:text-white",
-    },
-    {
-      name: "SoftBank",
-      text: true,
-      className:
-        "font-sans font-bold tracking-tight text-zinc-900 dark:text-white",
-    },
-    { name: "The Guardian", slug: "theguardian", invertDark: true },
-    {
-      name: "WIRED",
-      text: true,
-      className:
-        "font-sans font-black tracking-tighter text-zinc-900 dark:text-white",
-    },
-    {
-      name: "hulu",
-      text: true,
-      className:
-        "font-sans font-bold tracking-tighter text-[#1ce783] lowercase",
-    },
-    { name: "YouTube", slug: "youtube" },
-    { name: "NETFLIX", slug: "netflix" },
-    { name: "Spotify", slug: "spotify" },
-    { name: "twitch", slug: "twitch" },
-    { name: "Raycast", slug: "raycast" },
-    { name: "Vercel", slug: "vercel", invertDark: true },
-    { name: "Stripe", slug: "stripe" },
-    { name: "Linear", slug: "linear", invertDark: true },
-    { name: "GitHub", slug: "github", invertDark: true },
-    { name: "Notion", slug: "notion", invertDark: true },
-  ];
+const LOGO_CLOUD_GRID_CLIENTS = [
+  { name: "OpenAI", text: true, className: "font-sans font-semibold tracking-tight text-zinc-900 dark:text-white" },
+  { name: "hello patient", text: true, className: "font-serif lowercase tracking-tight" },
+  { name: "granola", text: true, className: "font-sans font-bold tracking-tighter" },
+  { name: "character.ai", text: true, className: "font-bold tracking-tighter lowercase" },
+  { name: "ORACLE", text: true, className: "font-sans font-black tracking-widest text-red-600 dark:text-red-500" },
+  { name: "Portola", text: true, className: "font-serif tracking-widest uppercase" },
+  { name: "Accel", text: true, className: "font-black tracking-tight" },
+  { name: "Bloomberg", text: true, className: "font-sans font-black tracking-tighter text-zinc-900 dark:text-white" },
+  { name: "Forbes", text: true, className: "font-serif font-bold tracking-tighter uppercase text-zinc-900 dark:text-white" },
+  { name: "SoftBank", text: true, className: "font-sans font-bold tracking-tight text-zinc-900 dark:text-white" },
+  { name: "The Guardian", slug: "theguardian", invertDark: true },
+  { name: "WIRED", text: true, className: "font-sans font-black tracking-tighter text-zinc-900 dark:text-white" },
+  { name: "hulu", text: true, className: "font-sans font-bold tracking-tighter text-[#1ce783] lowercase" },
+  { name: "YouTube", slug: "youtube" },
+  { name: "NETFLIX", slug: "netflix" },
+  { name: "Spotify", slug: "spotify" },
+  { name: "twitch", slug: "twitch" },
+  { name: "Raycast", slug: "raycast" },
+  { name: "Vercel", slug: "vercel", invertDark: true },
+  { name: "Stripe", slug: "stripe" },
+  { name: "Linear", slug: "linear", invertDark: true },
+  { name: "GitHub", slug: "github", invertDark: true },
+  { name: "Notion", slug: "notion", invertDark: true },
+];
 
+const LOGO_CLOUD_MARQUEE_CLIENTS = [
+  { name: "Stripe", slug: "stripe" },
+  { name: "Figma", slug: "figma", invertDark: true },
+  { name: "Framer", slug: "framer" },
+  { name: "Linear", slug: "linear", invertDark: true },
+  { name: "Vercel", slug: "vercel", invertDark: true },
+  { name: "GitHub", slug: "github", invertDark: true },
+  { name: "Notion", slug: "notion", invertDark: true },
+  { name: "Raycast", slug: "raycast" },
+  { name: "Loom", slug: "loom" },
+  { name: "Intercom", slug: "intercom" },
+  { name: "Twitch", slug: "twitch" },
+];
+
+const LOGO_CLOUD_NAMED_CLIENTS = [
+  { name: "Stripe",    slug: "stripe",    nameClassName: "font-sans font-semibold tracking-tight" },
+  { name: "Figma",     slug: "figma",     invertDark: true, nameClassName: "font-sans font-semibold tracking-tight" },
+  { name: "Framer",    slug: "framer",    nameClassName: "font-sans font-medium" },
+  { name: "Linear",    slug: "linear",    invertDark: true, nameClassName: "font-sans font-medium tracking-tight" },
+  { name: "Vercel",    slug: "vercel",    invertDark: true, nameClassName: "font-sans font-bold tracking-tight" },
+  { name: "GitHub",    slug: "github",    invertDark: true, nameClassName: "font-sans font-semibold" },
+  { name: "Notion",    slug: "notion",    invertDark: true, nameClassName: "font-sans font-medium" },
+  { name: "Raycast",   slug: "raycast",   nameClassName: "font-sans font-semibold tracking-tight" },
+  { name: "Loom",      slug: "loom",      nameClassName: "font-sans font-bold tracking-tight" },
+  { name: "Intercom",  slug: "intercom",  nameClassName: "font-sans font-bold" },
+  { name: "Twitch",    slug: "twitch",    nameClassName: "font-sans font-black tracking-tight" },
+  { name: "Spotify",   slug: "spotify",   nameClassName: "font-sans font-black tracking-tight" },
+];
+
+// Card thumbnail — default grid variant
+export function PreviewCinematicLogoCloud() {
   return (
     <div className="flex w-full items-center justify-center overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-zinc-950">
       <div className="w-full scale-75 sm:scale-100">
         <CinematicLogoCloud
-          clients={clients}
+          clients={LOGO_CLOUD_GRID_CLIENTS}
           className="bg-transparent dark:bg-transparent py-8"
         />
       </div>
+    </div>
+  );
+}
+
+// Section 1 — Cinematic stagger-in grid
+export function PreviewCinematicLogoCloudGrid() {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-zinc-950">
+      <CinematicLogoCloud
+        clients={LOGO_CLOUD_GRID_CLIENTS}
+        className="bg-transparent dark:bg-transparent py-10"
+      />
+    </div>
+  );
+}
+
+// Section 2 — Scrolling marquee row
+export function PreviewCinematicLogoCloudMarquee() {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-zinc-950">
+      <CinematicLogoCloud
+        clients={LOGO_CLOUD_MARQUEE_CLIENTS}
+        variant="marquee"
+        eyebrow="Integrates with your entire stack."
+        className="bg-transparent dark:bg-transparent py-10"
+      />
+    </div>
+  );
+}
+
+// Section 3 — Scrolling marquee with logo + name
+export function PreviewCinematicLogoCloudNamed() {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-zinc-50 dark:border-white/10 dark:bg-zinc-950">
+      <CinematicLogoCloud
+        clients={LOGO_CLOUD_NAMED_CLIENTS}
+        variant="marquee-named"
+        eyebrow="Used by teams at the world's best companies."
+        className="bg-transparent dark:bg-transparent py-10"
+      />
     </div>
   );
 }

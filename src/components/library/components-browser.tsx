@@ -6,10 +6,8 @@ import { useRouter } from "next/navigation";
 import type { ComponentType } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
-  ArrowRight,
   Crown,
   Heart,
-  Layers,
   Search,
   SlidersHorizontal,
   X,
@@ -32,6 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useDiscovery } from "@/hooks/use-discovery";
 import { buttonVariants } from "@/components/ui/button";
+import { ComponentCardPreview } from "@/components/library/component-card-preview";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -48,14 +47,14 @@ type FeedItem = {
   description: string;
   premium: boolean;
   href: string;
-  Preview: ComponentType | null;
+  Preview: ComponentType<{ compact?: boolean }> | null;
   trendingScore: number;
   createdAt: string;
   searchBlob: string;
   componentCategory?: ComponentCategorySlug;
   blockCategory?: BlockCategory;
   tags?: string[];
-  previewSections?: Array<{ Preview: ComponentType; reactSource: string }>;
+  previewSections?: Array<{ Preview: ComponentType<{ compact?: boolean }>; reactSource: string }>;
   previewLabels?: string[];
 };
 
@@ -154,7 +153,6 @@ function ComponentCard({
   const [activeIdx, setActiveIdx] = React.useState(0);
   const activeSection = sections?.[activeIdx];
   const activePreview = activeSection?.Preview ?? Preview;
-  const ActivePreview = activePreview!;
 
   const hasVariants = !!sections && sections.length > 1;
 
@@ -163,7 +161,7 @@ function ComponentCard({
       <div
         role="link"
         tabIndex={0}
-        className="block h-full cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        className="block h-full cursor-pointer rounded-[24px] outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
         onClick={() => router.push(item.href)}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(item.href); }}
       >
@@ -172,89 +170,52 @@ function ComponentCard({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-32px" }}
           transition={{ delay: reduceMotion ? 0 : Math.min(index * 0.025, 0.2), duration: 0.38 }}
-          whileHover={reduceMotion ? undefined : {
-            y: -4,
-            boxShadow: "0 20px 60px -20px rgba(99, 102, 241, 0.25)",
-          }}
-          className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm transition-all duration-300 hover:border-foreground/15 hover:shadow-xl hover:shadow-foreground/5 dark:bg-zinc-900/60 dark:hover:border-white/12"
+          whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
+          className="flex h-full flex-col overflow-hidden rounded-[24px] border border-black/[0.07] bg-white shadow-[0_2px_16px_-4px_rgba(15,23,42,0.10)] transition-all duration-300 hover:border-black/[0.12] hover:shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:border-white/[0.08] dark:bg-[#151517] dark:shadow-none dark:hover:border-white/[0.14]"
         >
-          {/* Preview area — fixed 280px everywhere, uniform across all cards */}
-          <div className="relative h-70 shrink-0 overflow-hidden border-b border-border/50 bg-zinc-950">
-            <div className="lf-grid absolute inset-0 opacity-25" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-            {activePreview ? (
-              <div
-                className="absolute flex items-center justify-center overflow-hidden"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  width: 640,
-                  height: 480,
-                  transform: "translate(-50%, -50%) scale(0.50)",
-                  transformOrigin: "center center",
-                }}
-                onClick={(e) => {
-                  if (!hasVariants) { e.stopPropagation(); return; }
-                  e.preventDefault();
-                  e.stopPropagation();
+          {/* Preview image area */}
+          <div className="relative p-3 pb-0">
+            <ComponentCardPreview
+              Preview={activePreview}
+              hasVariants={hasVariants}
+              activeIndex={activeIdx}
+              variantCount={sections?.length ?? 0}
+              onCycleVariant={() => {
+                if (hasVariants) {
                   setActiveIdx((i) => (i + 1) % sections!.length);
-                }}
-              >
-                <ActivePreview />
-              </div>
-            ) : (
-              <div className="relative flex h-full flex-col items-center justify-center gap-2 text-zinc-600">
-                <Layers className="size-8 opacity-40" />
-                <span className="text-[10px] uppercase tracking-[0.2em] opacity-50">Template</span>
-              </div>
-            )}
-            {hasVariants && (
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-20">
-                {sections!.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(i); }}
-                    className={cn(
-                      "h-1.5 rounded-full transition-all duration-200",
-                      i === activeIdx ? "w-4 bg-white/80" : "w-1.5 bg-white/30 hover:bg-white/50",
-                    )}
-                    aria-label={`Variant ${i + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-            {/* Top-left badge */}
-            <div className="absolute left-3 top-3">
-              {item.premium ? (
+                }
+              }}
+              onSelectVariant={setActiveIdx}
+            />
+            {/* Premium badge */}
+            {item.premium && (
+              <div className="absolute left-5 top-5">
                 <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
                   <Crown className="size-2.5" /> Pro
                 </span>
-              ) : (
-                <span className="rounded-md border border-white/8 bg-black/60 px-2 py-0.5 text-[10px] text-zinc-400 backdrop-blur-sm">
-                  Free
-                </span>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Card body */}
-          <div className="flex flex-1 flex-col gap-1.5 p-3.5 sm:p-4">
-            <div className="flex items-start justify-between gap-2">
-              <h2 className="text-[13.5px] font-semibold leading-snug tracking-tight text-foreground transition-colors duration-200 group-hover:text-primary sm:text-[14px]">
+          <div className="flex flex-1 flex-col px-5 pb-4 pt-5">
+            <div className="mb-2 flex items-start justify-between gap-2">
+              <h2 className="line-clamp-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-slate-800 dark:text-white">
                 {item.title}
               </h2>
-              <span className="mt-0.5 shrink-0 rounded border border-border/60 bg-muted/50 px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              <span className="mt-0.5 shrink-0 text-[15px] font-semibold text-slate-500 dark:text-white/50">
                 {kindLabel}
               </span>
             </div>
-            <p className="line-clamp-2 text-[12px] leading-relaxed text-muted-foreground sm:text-[12.5px]">
+            <p className="line-clamp-2 text-[13px] leading-[1.6] text-slate-400 dark:text-white/40">
               {item.description}
             </p>
-            <div className="mt-auto flex items-center justify-end pt-3">
-              <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-primary opacity-70 transition-all duration-200 group-hover:gap-1.5 group-hover:opacity-100 sm:text-[12px]">
-                View Component <ArrowRight className="size-3" />
-              </span>
+          </div>
+
+          {/* CTA */}
+          <div className="border-t border-black/[0.05] px-5 py-4 dark:border-white/[0.06]">
+            <div className="w-full text-center text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 transition-colors duration-200 group-hover:text-slate-900 dark:text-white/60 dark:group-hover:text-white">
+              View {kindLabel}
             </div>
           </div>
         </motion.article>
@@ -264,7 +225,7 @@ function ComponentCard({
       <button
         type="button"
         aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
-        className="absolute right-3 top-3 z-20 grid size-8 place-items-center rounded-full border border-white/10 bg-black/70 text-zinc-400 backdrop-blur-sm transition hover:text-white"
+        className="absolute right-5 top-5 z-20 grid size-8 place-items-center rounded-full border border-white/10 bg-black/70 text-zinc-400 backdrop-blur-sm transition hover:text-white"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -662,7 +623,7 @@ function ComponentsBrowserInner() {
                 <motion.div
                   key="grid"
                   initial={false}
-                  className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4"
+                  className="grid min-w-0 grid-cols-1 items-stretch gap-4 sm:grid-cols-2 md:grid-cols-3 sm:gap-5 2xl:gap-6"
                 >
                   {filtered.map((item, index) => (
                     <ComponentCard

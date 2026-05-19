@@ -55,11 +55,100 @@ export const libraryComponents: LibraryComponent[] = [
     animationKinds: ["spring"],
     dependencies: ["framer-motion"],
     Preview: Previews.PreviewCinematicLogoCloud,
-    reactSource: `"use client";
+    previewSections: [
+      {
+        Preview: Previews.PreviewCinematicLogoCloudGrid,
+        reactSource: `"use client";
+import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
 
+const clients = [
+  { name: "OpenAI",       text: true, className: "font-sans font-semibold tracking-tight" },
+  { name: "Bloomberg",    text: true, className: "font-sans font-black tracking-tighter" },
+  { name: "NETFLIX",      slug: "netflix" },
+  { name: "Spotify",      slug: "spotify" },
+  { name: "Raycast",      slug: "raycast" },
+  { name: "Vercel",       slug: "vercel",  invertDark: true },
+  { name: "Stripe",       slug: "stripe" },
+  { name: "Linear",       slug: "linear",  invertDark: true },
+  { name: "GitHub",       slug: "github",  invertDark: true },
+  { name: "Notion",       slug: "notion",  invertDark: true },
+];
+
+export function GridLogoCloud() {
+  return (
+    <CinematicLogoCloud
+      clients={clients}
+      eyebrow="Trusted by teams building the future of AI."
+      description="From prototype to production, autonomously."
+    />
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewCinematicLogoCloudMarquee,
+        reactSource: `"use client";
+import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
+
+const clients = [
+  { name: "Stripe",    slug: "stripe" },
+  { name: "Figma",     slug: "figma",     invertDark: true },
+  { name: "Framer",    slug: "framer" },
+  { name: "Linear",    slug: "linear",    invertDark: true },
+  { name: "Vercel",    slug: "vercel",    invertDark: true },
+  { name: "GitHub",    slug: "github",    invertDark: true },
+  { name: "Notion",    slug: "notion",    invertDark: true },
+  { name: "Raycast",   slug: "raycast" },
+  { name: "Loom",      slug: "loom" },
+  { name: "Intercom",  slug: "intercom" },
+  { name: "Twitch",    slug: "twitch" },
+];
+
+export function MarqueeLogoCloud() {
+  return (
+    <CinematicLogoCloud
+      clients={clients}
+      variant="marquee"
+      eyebrow="Integrates with your entire stack."
+    />
+  );
+}`,
+      },
+      {
+        Preview: Previews.PreviewCinematicLogoCloudNamed,
+        reactSource: `"use client";
+import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
+
+const clients = [
+  { name: "Stripe",   slug: "stripe",   nameClassName: "font-sans font-semibold tracking-tight" },
+  { name: "Figma",    slug: "figma",    invertDark: true, nameClassName: "font-sans font-semibold tracking-tight" },
+  { name: "Framer",   slug: "framer",   nameClassName: "font-sans font-medium" },
+  { name: "Linear",   slug: "linear",   invertDark: true, nameClassName: "font-sans font-medium tracking-tight" },
+  { name: "Vercel",   slug: "vercel",   invertDark: true, nameClassName: "font-sans font-bold tracking-tight" },
+  { name: "GitHub",   slug: "github",   invertDark: true, nameClassName: "font-sans font-semibold" },
+  { name: "Notion",   slug: "notion",   invertDark: true, nameClassName: "font-sans font-medium" },
+  { name: "Raycast",  slug: "raycast",  nameClassName: "font-sans font-semibold tracking-tight" },
+  { name: "Loom",     slug: "loom",     nameClassName: "font-sans font-bold tracking-tight" },
+  { name: "Intercom", slug: "intercom", nameClassName: "font-sans font-bold" },
+  { name: "Twitch",   slug: "twitch",   nameClassName: "font-sans font-black tracking-tight" },
+  { name: "Spotify",  slug: "spotify",  nameClassName: "font-sans font-black tracking-tight" },
+];
+
+export function NamedMarqueeLogoCloud() {
+  return (
+    <CinematicLogoCloud
+      clients={clients}
+      variant="marquee-named"
+      eyebrow="Used by teams at the world's best companies."
+    />
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
 import * as React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Marquee } from "@/components/ui/marquee";
 
 export type LogoCloudClient = {
   name: string;
@@ -71,14 +160,23 @@ export type LogoCloudClient = {
 
 export interface CinematicLogoCloudProps {
   clients: LogoCloudClient[];
+  variant?: "grid" | "marquee";
   className?: string;
+  eyebrow?: string;
+  description?: string;
 }
 
-export function CinematicLogoCloud({ clients, className }: CinematicLogoCloudProps) {
-  const renderClient = (client: LogoCloudClient) => {
+export function CinematicLogoCloud({
+  clients,
+  variant = "grid",
+  className,
+  eyebrow = "Trusted by teams building the future of AI.",
+  description,
+}: CinematicLogoCloudProps) {
+  const renderClient = (client: LogoCloudClient, size: "lg" | "sm" = "lg") => {
     if (client.text) {
       return (
-        <span className={cn("text-xl font-bold text-zinc-900 dark:text-white", client.className)}>
+        <span className={cn(size === "lg" ? "text-xl font-bold text-zinc-900 dark:text-white" : "text-sm font-semibold text-zinc-700 dark:text-zinc-300", client.className)}>
           {client.name}
         </span>
       );
@@ -87,43 +185,47 @@ export function CinematicLogoCloud({ clients, className }: CinematicLogoCloudPro
       <img
         src={\`https://cdn.simpleicons.org/\${client.slug}\`}
         alt={client.name}
-        className={cn("h-6 w-auto", client.invertDark && "dark:invert")}
+        className={cn(size === "lg" ? "h-6 w-auto" : "h-5 w-auto", client.invertDark && "dark:invert")}
         loading="lazy"
       />
     );
   };
 
+  if (variant === "marquee") {
+    return (
+      <div className={cn("w-full bg-zinc-50/50 py-12 md:py-16 dark:bg-zinc-950", className)}>
+        <p className="mb-8 text-center text-xs font-semibold uppercase tracking-widest text-zinc-400">{eyebrow}</p>
+        <Marquee speed={35}>
+          {clients.map((brand) => (
+            <div key={brand.name} className="flex shrink-0 items-center justify-center rounded-xl border border-zinc-200/80 bg-white px-5 py-3 shadow-sm dark:border-white/8 dark:bg-zinc-900">
+              {renderClient(brand, "sm")}
+            </div>
+          ))}
+        </Marquee>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("w-full bg-zinc-50/50 py-12 md:py-16 dark:bg-zinc-950", className)}>
       <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-          Trusted by teams building the future of AI.
-        </p>
-        <p className="mt-1 text-xs text-zinc-500">From prototype to production, autonomously.</p>
-
+        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">{eyebrow}</p>
+        {description && <p className="mt-1 text-xs text-zinc-500">{description}</p>}
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-50px" }}
-          variants={{
-            visible: { transition: { staggerChildren: 0.1 } },
-            hidden: {},
-          }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 transition-all"
+          variants={{ visible: { transition: { staggerChildren: 0.1 } }, hidden: {} }}
+          className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6"
         >
           {clients.map((brand) => (
             <motion.div
               key={brand.name}
               variants={{
                 hidden: { opacity: 0, y: 20, filter: "blur(12px)" },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  filter: "blur(0px)",
-                  transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] },
-                },
+                visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } },
               }}
-              className="flex min-w-[100px] items-center justify-center px-2 sm:min-w-[120px]"
+              className="flex min-w-25 items-center justify-center px-2 sm:min-w-30"
             >
               {renderClient(brand)}
             </motion.div>
@@ -136,8 +238,11 @@ export function CinematicLogoCloud({ clients, className }: CinematicLogoCloudPro
     tailwindSource: "",
     registryCliName: "cinematic-logo-cloud",
     props: [
-      { name: "clients", type: "LogoCloudClient[]", description: "Array of brand objects containing name, optional slug, or text overrides." },
-      { name: "className", type: "string", description: "Optional CSS classes to override wrapper styling." }
+      { name: "clients",     type: "LogoCloudClient[]",       description: "Array of brand objects — each needs name plus either slug (simpleicons) or text: true with optional className." },
+      { name: "variant",     type: '"grid" | "marquee"',       description: "grid renders a staggered blur-fade entrance; marquee renders a continuously scrolling pill row.", defaultValue: '"grid"' },
+      { name: "eyebrow",     type: "string",                   description: "Small uppercase label above the logos.", defaultValue: '"Trusted by teams building the future of AI."' },
+      { name: "description", type: "string",                   description: "Optional supporting line shown below the eyebrow in grid variant." },
+      { name: "className",   type: "string",                   description: "Extra classes on the section wrapper." },
     ]
   },
   {

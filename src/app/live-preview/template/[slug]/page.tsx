@@ -13,6 +13,8 @@ import { OrionAIPage } from "@/components/templates/orion-ai-ops";
 import { HelixAIPlatformPage } from "@/components/templates/helix-ai-platform";
 import { StartupLandingPage } from "@/components/templates/startup-landing-page";
 import { ClauraAgencyPage } from "@/components/templates/claura-agency-page";
+import { OceanFlowPage } from "@/components/templates/ocean-flow-page";
+import { PulseLandingPage } from "@/components/templates/pulse-landing-page";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -54,6 +56,10 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><StartupLandingPage /></ThemeReceiver>;
   } else if (tmpl.slug === "claura-agency") {
     return <ThemeReceiver><ClauraAgencyPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "ocean-flow") {
+    return <ThemeReceiver><OceanFlowPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "pulse-landing") {
+    return <ThemeReceiver><PulseLandingPage /></ThemeReceiver>;
   }
 
   return (

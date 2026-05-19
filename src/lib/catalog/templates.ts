@@ -10,7 +10,8 @@ export type TemplateCategory =
   | "Developer Portfolio"
   | "Startup Landing Pages"
   | "AI Tools"
-  | "Creator Websites";
+  | "Creator Websites"
+  | "E-Commerce";
 
 export type MarketplaceTemplate = {
   slug: string;
@@ -548,6 +549,90 @@ export const templates: MarketplaceTemplate[] = [
       "AnimatePresence FAQ accordion (+ rotates to ×)",
       "Lenis smooth scroll integration",
       "Fully responsive layout",
+    ],
+  },
+  {
+    slug: "pulse-landing",
+    title: "Pulse — Engineering Operations Platform",
+    description:
+      "A dark, Linear-inspired SaaS landing page for an engineering operations platform. 3D perspective-transformed dashboard hero, AI agent dropdown mockup, 3D timeline visualization, integration carousel, and minimal CTA.",
+    category: "SaaS",
+    tags: ["saas", "dark", "engineering", "dashboard", "3d", "linear", "project-management", "ops"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 232,
+    createdAt: "2026-05-19",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion", "Lucide Icons"],
+    pages: ["/", "/platform", "/pricing", "/docs"],
+    sections: [
+      "Sticky Navbar (scroll-aware)",
+      "3D Perspective Dashboard Hero",
+      "Logo Cloud with Hover Reveal",
+      "Feature Cards (3-column)",
+      "AI Agent Dropdown Mockup",
+      "Autonomous Triage + MCP Section",
+      "3D Timeline Visualization",
+      "End-to-End Initiative Tracker",
+      "Deployment Health Cards",
+      "Integration Carousel (7 cards)",
+      "CTA Banner",
+      "Multi-Column Footer",
+    ],
+    pageLabels: ["Hero", "AI Section", "Roadmap", "Integrations"],
+    features: [
+      "3D perspective-transformed dashboard mockup in hero",
+      "Scroll-driven parallax on hero stage",
+      "AI agent assignment dropdown with glass overlay",
+      "Perspective-tilted 3D timeline visualization",
+      "Interactive integration carousel with prev/next",
+      "Staggered panel entrance animations",
+      "Scroll-aware transparent-to-frosted navbar",
+      "Framer Motion whileInView scroll-reveals",
+      "Full dashboard sidebar + inbox + detail panel",
+      "Fully responsive across all viewports",
+    ],
+  },
+  {
+    slug: "ocean-flow",
+    title: "Ocean Flow — Diving Equipment Store",
+    description:
+      "A cinematic deep-ocean product landing page for a premium diving gear brand. Dark navy aesthetic with parallax hero, horizontal scroll gallery, sticky technology section, and Lenis smooth scroll throughout.",
+    category: "E-Commerce",
+    tags: ["ocean", "product", "dark", "e-commerce", "lenis", "parallax", "diving"],
+    difficulty: "Intermediate",
+    premium: false,
+    trendingScore: 118,
+    createdAt: "2026-05-19",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion", "Lenis"],
+    pages: ["/", "/gear", "/technology", "/journal"],
+    sections: [
+      "Translucent Navbar (scroll-aware)",
+      "Full-Screen Parallax Hero",
+      "Animated Water Ripples",
+      "Stats Counter Band",
+      "Philosophy (two-column split)",
+      "Horizontal Scroll Gallery",
+      "Products Grid (4 cards)",
+      "Sticky Technology Section",
+      "Full-Bleed Editorial Banner",
+      "Testimonials (3-column)",
+      "FAQ Accordion",
+      "Footer with Link Grid",
+    ],
+    pageLabels: ["Landing", "Gear", "Technology", "Journal"],
+    features: [
+      "Dark navy deep-ocean colour palette",
+      "Parallax scroll hero with animated ripple rings",
+      "Lenis smooth scroll integration",
+      "Framer Motion scroll-reveal on every section",
+      "Horizontal parallax gallery strip",
+      "Sticky left-column technology feature list",
+      "Scale-on-scroll full-bleed editorial image",
+      "Count-up animated stat numbers",
+      "AnimatePresence FAQ accordion",
+      "Responsive across all viewports",
+      "Mobile hamburger menu with AnimatePresence",
+      "Scroll-aware transparent-to-frosted navbar",
     ],
   },
 ];

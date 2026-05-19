@@ -33,6 +33,7 @@ import {
   LibraryExplorerSidebarMobileSheetBody,
   useLibraryExplorerSidebar,
 } from "@/components/library/library-explorer-sidebar";
+import { ComponentCardPreview } from "@/components/library/component-card-preview";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -308,7 +309,7 @@ function ComponentsPageInner() {
               </p>
             </div>
           ) : (
-            <section className="grid gap-10 lg:grid-cols-2 xl:gap-x-12 xl:gap-y-14">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
               {visibleComponents.map((comp, index) => (
                 <ComponentCard
                   key={comp.slug}
@@ -337,100 +338,62 @@ function ComponentCard({
   reduceMotion: boolean;
   isTrending?: boolean;
 }) {
-  const Preview = comp.Preview;
-
   return (
     <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        delay: Math.min(index * 0.035, 0.28),
-        duration: 0.42,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      className="h-full"
+      transition={{ delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
+      className="group relative h-full"
     >
       <div
         id={comp.slug}
-        className="group relative flex h-full flex-col overflow-hidden rounded-[28px] bg-muted/55 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:bg-muted/70 hover:shadow-2xl hover:shadow-foreground/10 dark:bg-white/[0.055] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] dark:hover:bg-white/[0.075]"
+        className="flex h-full flex-col overflow-hidden rounded-[24px] border border-black/7 bg-white shadow-[0_2px_16px_-4px_rgba(15,23,42,0.10)] transition-all duration-300 hover:border-black/12 hover:shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-[#151517] dark:shadow-none dark:hover:border-white/14"
       >
-        <div className="relative p-2.5">
-          <div className="relative h-[260px] overflow-hidden rounded-[22px] border border-border/70 bg-zinc-950 shadow-inner sm:h-[300px] xl:h-[320px] dark:border-white/10">
-            <div className="pointer-events-none absolute inset-x-0 top-0 w-full">
-              <Preview compact />
+        {/* Preview */}
+        <div className="relative p-3 pb-0">
+          <ComponentCardPreview Preview={comp.Preview} />
+          {isTrending && (
+            <div className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold text-orange-400 backdrop-blur-sm">
+              <Flame className="size-3 fill-current" />
+              {index === 0 ? "Hot" : "Trending"}
             </div>
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-zinc-950 to-transparent" />
-
-            {/* Trending flame badge — top-right, animates in */}
-            {isTrending && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.6, y: -4 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: index * 0.04, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                className={cn(
-                  "absolute top-3.5 right-3.5 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold shadow-lg backdrop-blur-sm",
-                  "border border-orange-500/30 bg-orange-500/15 text-orange-400",
-                  comp.premium && "right-16", // shift left if premium badge also present
-                )}
-              >
-                <Flame className="size-3 fill-current" />
-                {index === 0 ? "Hot" : "Trending"}
-              </motion.div>
-            )}
-
-            {/* Premium badge */}
-            {comp.premium && (
-              <div className="absolute right-4 top-4 grid size-10 place-items-center rounded-full border border-border/60 bg-background/95 text-amber-500 shadow-lg shadow-black/10 dark:border-white/10 dark:bg-zinc-950/90">
-                <Sparkles className="size-5 fill-current" />
-              </div>
-            )}
-          </div>
+          )}
+          {comp.premium && (
+            <div className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-amber-400 backdrop-blur-sm">
+              <Sparkles className="size-2.5 fill-current" /> Pro
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-1 flex-col px-8 pb-8 pt-5">
-          <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+        {/* Body */}
+        <div className="flex flex-1 flex-col px-5 pb-4 pt-5">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <h2 className="line-clamp-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-slate-800 dark:text-white">
               {comp.name}
             </h2>
-            {comp.animationKinds.length > 0 && (
-              <span className="rounded-lg border border-border/70 bg-background px-2.5 py-1 text-sm font-medium text-foreground shadow-sm dark:bg-white/[0.04]">
-                {comp.animationKinds.length} effects
-              </span>
-            )}
-          </div>
-          <p className="mt-4 max-w-xl text-lg leading-8 text-muted-foreground">
-            {comp.description}
-          </p>
-          <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
-            <Badge
-              variant="outline"
-              className="border-border/70 bg-background/70 text-muted-foreground dark:bg-white/[0.04]"
-            >
+            <span className="mt-0.5 shrink-0 text-[13px] font-medium text-slate-400 dark:text-white/40">
               {getComponentCategoryLabel(comp.categorySlug)}
-            </Badge>
-            <Badge
-              variant={comp.premium ? "default" : "outline"}
-              className={cn(
-                comp.premium
-                  ? "bg-foreground text-background"
-                  : "border-border/70 bg-background/70 text-muted-foreground dark:bg-white/[0.04]",
-              )}
-            >
-              {comp.premium ? "Included with premium" : "Free"}
-            </Badge>
-            <span className="relative z-10 ml-auto inline-flex items-center gap-1.5 text-sm font-semibold text-foreground opacity-0 transition group-hover:opacity-100">
-              Open
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
+          <p className="line-clamp-2 text-[13px] leading-[1.6] text-slate-400 dark:text-white/40">
+            {comp.description}
+          </p>
         </div>
 
-        <Link
-          href={`/components/${comp.slug}`}
-          className="absolute inset-0 rounded-[28px]"
-          aria-label={`Open ${comp.name}`}
-        />
+        {/* CTA */}
+        <div className="border-t border-black/5 px-5 py-4 dark:border-white/6">
+          <p className="w-full text-center text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 transition-colors duration-200 group-hover:text-slate-900 dark:text-white/60 dark:group-hover:text-white">
+            View Component
+          </p>
+        </div>
       </div>
+
+      <Link
+        href={`/components/${comp.slug}`}
+        className="absolute inset-0 rounded-[24px]"
+        aria-label={`Open ${comp.name}`}
+      />
     </motion.div>
   );
 }
