@@ -49,7 +49,13 @@ function playSynthFallback(ac: AudioContext, sink: AudioNode, opts: TerminalSpri
   o.stop(t0 + (isEnter ? 0.08 : 0.04));
 }
 
-export function createTerminalSpriteSfx(options?: { soundUrl?: string; configUrl?: string }) {
+export function createTerminalSpriteSfx(options?: {
+  soundUrl?: string;
+  configUrl?: string;
+  /** When true, plays the entire soundUrl file on each keypress (no sprite config needed). */
+  simpleMode?: boolean;
+}) {
+  const simpleMode = options?.simpleMode ?? false;
   const soundUrl = options?.soundUrl ?? "/sounds/sound.ogg";
   const configUrl = options?.configUrl ?? "/sounds/sprite-config.json";
 
@@ -88,6 +94,14 @@ export function createTerminalSpriteSfx(options?: { soundUrl?: string; configUrl
   const loadOnce = async () => {
     const ac = getCtx();
     getSink(ac);
+    if (simpleMode) {
+      const bRes = await fetch(soundUrl);
+      if (!bRes.ok) throw new Error(`Could not load ${soundUrl} (${bRes.status}).`);
+      const arr = await bRes.arrayBuffer();
+      decoded = await ac.decodeAudioData(arr.slice(0));
+      defines = {};
+      return;
+    }
     const [bRes, cRes] = await Promise.all([fetch(soundUrl), fetch(configUrl)]);
     if (!bRes.ok) {
       throw new Error(
@@ -146,6 +160,16 @@ export function createTerminalSpriteSfx(options?: { soundUrl?: string; configUrl
         const def = defines;
 
         if (loadState === "ready" && buf && def) {
+          if (simpleMode) {
+            const src = ac.createBufferSource();
+            src.buffer = buf;
+            const g = ac.createGain();
+            g.gain.setValueAtTime(vol, ac.currentTime);
+            g.connect(sink);
+            src.connect(g);
+            src.start(ac.currentTime);
+            return;
+          }
           const slice = pickSpriteSlice(def, opts.kind, ch);
           if (slice) {
             const [offMs, durMs] = slice;

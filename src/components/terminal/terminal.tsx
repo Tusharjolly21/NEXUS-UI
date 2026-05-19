@@ -56,6 +56,12 @@ export type TerminalProps = {
   soundSpriteUrl?: string;
   /** JSON timing map for the sprite (default matches the `config.json` shape). */
   soundSpriteConfigUrl?: string;
+  /**
+   * URL of a single audio file to play on every keypress (no sprite config needed).
+   * Takes precedence over soundSpriteUrl when set.
+   * Example: `/sounds/keypress.mp3` — place the file in `public/sounds/`.
+   */
+  simpleSoundUrl?: string;
   /** Show sound toggle button in the header. */
   showSoundToggle?: boolean;
   /** Show pause/resume controls. */
@@ -251,6 +257,7 @@ export function Terminal({
   enableSound = true,
   soundSpriteUrl,
   soundSpriteConfigUrl,
+  simpleSoundUrl,
   showSoundToggle = true,
   showControls = true,
   theme = "carbon",
@@ -265,11 +272,12 @@ export function Terminal({
 
   const spriteSfx = React.useMemo(
     () =>
-      createTerminalSpriteSfx({
-        soundUrl: soundSpriteUrl,
-        configUrl: soundSpriteConfigUrl,
-      }),
-    [soundSpriteUrl, soundSpriteConfigUrl],
+      createTerminalSpriteSfx(
+        simpleSoundUrl
+          ? { soundUrl: simpleSoundUrl, simpleMode: true }
+          : { soundUrl: soundSpriteUrl, configUrl: soundSpriteConfigUrl },
+      ),
+    [simpleSoundUrl, soundSpriteUrl, soundSpriteConfigUrl],
   );
 
   React.useEffect(() => {

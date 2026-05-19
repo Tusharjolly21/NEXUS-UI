@@ -5,13 +5,21 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
+  Box,
+  Brain,
+  Clock,
+  Compass,
+  CreditCard,
+  FileText,
   Flame,
+  Layers,
+  LayoutGrid,
   PanelLeft,
   Search,
   Sparkles,
-  Clock,
-  LayoutGrid,
+  Type,
   X,
+  Zap,
 } from "lucide-react";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import {
@@ -40,8 +48,22 @@ import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 
 type SortMode = "all" | "trending" | "newest";
 type AccessMode = "all" | "free" | "pro";
+type TypeFilter = "all" | "text" | "background" | "3d" | "motion" | "cards" | "forms" | "navigation" | "ai";
 
 const CATEGORY_ORDER = COMPONENT_CATEGORIES.map((c) => c.slug) as ComponentCategorySlug[];
+
+type TypeFilterDef = { value: TypeFilter; label: string; icon: React.ReactNode; match: (comp: (typeof libraryComponents)[number]) => boolean };
+const TYPE_FILTERS: TypeFilterDef[] = [
+  { value: "all",        label: "All",        icon: <LayoutGrid className="size-3.5" />, match: () => true },
+  { value: "text",       label: "Text",       icon: <Type className="size-3.5" />,       match: (c) => c.tags.some((t) => ["text","typography","typewriter","headline","decode","reveal","typing","warp","underline","highlight","squiggly"].includes(t)) },
+  { value: "background", label: "Background", icon: <Layers className="size-3.5" />,     match: (c) => ["background-effects","shaders"].includes(c.categorySlug) || c.tags.some((t) => ["background","particles","beams","stars","starfield","blobs","bloom","aurora","gradient","meteors","shader"].includes(t)) },
+  { value: "3d",         label: "3D",         icon: <Box className="size-3.5" />,        match: (c) => c.categorySlug === "three-d-components" || c.tags.some((t) => ["3d","threejs","webgl","globe","orbit","orbital","canvas"].includes(t)) },
+  { value: "motion",     label: "Motion",     icon: <Zap className="size-3.5" />,        match: (c) => c.categorySlug === "motion-effects" || c.tags.some((t) => ["magnetic","spring","cursor","spotlight","trails","parallax","framer-motion","animation","animated"].includes(t)) },
+  { value: "cards",      label: "Cards",      icon: <CreditCard className="size-3.5" />, match: (c) => ["cards","bento-grids"].includes(c.categorySlug) || c.tags.some((t) => ["card","cards","bento","tilt","glass","stack"].includes(t)) },
+  { value: "forms",      label: "Forms",      icon: <FileText className="size-3.5" />,   match: (c) => ["login-forms","signup-forms","contact-sections"].includes(c.categorySlug) || c.tags.some((t) => ["form","forms","input","auth","validation","signup"].includes(t)) },
+  { value: "navigation", label: "Navigation", icon: <Compass className="size-3.5" />,   match: (c) => ["navbars","footers","sidebars","dashboards"].includes(c.categorySlug) || c.tags.some((t) => ["dock","navigation","navbar"].includes(t)) },
+  { value: "ai",         label: "AI",         icon: <Brain className="size-3.5" />,      match: (c) => c.categorySlug === "ai-components" || c.tags.some((t) => ["ai","copilot","chat"].includes(t)) },
+];
 
 const SORT_OPTIONS: { value: SortMode; label: string; icon: React.ReactNode }[] = [
   { value: "all",      label: "All",      icon: <LayoutGrid className="size-3" /> },
@@ -69,10 +91,13 @@ function ComponentsPageInner() {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortMode>("all");
   const [access, setAccess] = React.useState<AccessMode>("all");
+  const [typeFilter, setTypeFilter] = React.useState<TypeFilter>("all");
   const reduce = useReducedMotion() === true;
   const { category, query, premiumOnly, commitParams } = useLibraryExplorerSidebar();
 
   const normalizedQuery = query.trim().toLowerCase();
+
+  const typeFilterDef = TYPE_FILTERS.find((f) => f.value === typeFilter)!;
 
   const filteredComponents = React.useMemo(() => {
     return libraryComponents.filter((comp) => {
@@ -87,9 +112,10 @@ function ComponentsPageInner() {
         `${comp.name} ${comp.description} ${comp.categorySlug} ${comp.tags.join(" ")}`
           .toLowerCase()
           .includes(normalizedQuery);
-      return categoryMatch && sidebarPremiumMatch && accessMatch && searchMatch;
+      const typeMatch = typeFilter === "all" || typeFilterDef.match(comp);
+      return categoryMatch && sidebarPremiumMatch && accessMatch && searchMatch && typeMatch;
     });
-  }, [category, normalizedQuery, premiumOnly, access]);
+  }, [category, normalizedQuery, premiumOnly, access, typeFilter, typeFilterDef]);
 
   const visibleComponents = React.useMemo(() => {
     if (sort === "trending") {
@@ -106,11 +132,12 @@ function ComponentsPageInner() {
   }, [filteredComponents, sort]);
 
   const hasActiveFilters =
-    (category && category !== "all") || premiumOnly || normalizedQuery || access !== "all";
+    (category && category !== "all") || premiumOnly || normalizedQuery || access !== "all" || typeFilter !== "all";
 
   const clearAll = () => {
     setSort("all");
     setAccess("all");
+    setTypeFilter("all");
     commitParams({ cat: null, premium: null, q: null });
   };
 
@@ -229,6 +256,29 @@ function ComponentsPageInner() {
                 </button>
               )}
             </div>
+          </div>
+
+          {/* ── Type filter pills ── */}
+          <div className="mb-8 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
+            {TYPE_FILTERS.map(({ value, label, icon }) => {
+              const active = typeFilter === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setTypeFilter(value)}
+                  className={cn(
+                    "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150",
+                    active
+                      ? "border-foreground bg-foreground text-background shadow-sm"
+                      : "border-border/60 bg-background/60 text-muted-foreground hover:border-foreground/30 hover:bg-muted hover:text-foreground dark:bg-white/[0.04] dark:hover:bg-white/[0.08]",
+                  )}
+                >
+                  {icon}
+                  {label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Active sidebar-filter chips (category / query) */}

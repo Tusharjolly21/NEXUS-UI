@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Download, Volume2 } from "lucide-react";
 import { Terminal, type TerminalCommand, type TerminalTheme } from "./terminal";
 import { cn } from "@/lib/utils";
 
@@ -98,7 +98,26 @@ export function TerminalDemo() {
         </div>
       </div>
 
-      <div className="mt-8 flex h-[min(560px,70vh)] w-full flex-col">
+      {/* Sound download notice */}
+      <div className="mt-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800/40 dark:bg-amber-950/30">
+        <Volume2 className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden />
+        <div className="flex-1 text-sm text-amber-800 dark:text-amber-300">
+          <span className="font-medium">Keyboard sounds require a sound file.</span>{" "}
+          Download <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/50">sound.ogg</code> and
+          place it in <code className="rounded bg-amber-100 px-1 py-0.5 font-mono text-xs dark:bg-amber-900/50">public/sounds/sound.ogg</code> in your project.
+          Without it the terminal falls back to a synthetic click.
+        </div>
+        <a
+          href="/sounds/sound.ogg"
+          download="sound.ogg"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-600 active:scale-95"
+        >
+          <Download className="size-3.5" aria-hidden />
+          Download
+        </a>
+      </div>
+
+      <div className="mt-6 flex h-[min(560px,70vh)] w-full flex-col">
         <Terminal
           className="min-h-0 flex-1"
           fillHeight
@@ -114,6 +133,7 @@ export function TerminalDemo() {
           delayBetweenCommands={900}
           showControls
           showSoundToggle
+          simpleSoundUrl="/sounds/sound.ogg"
         />
       </div>
     </section>

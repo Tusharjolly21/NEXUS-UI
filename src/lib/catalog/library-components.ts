@@ -1266,7 +1266,10 @@ export function MagneticHeadline() {
     animationKinds: ["hover", "spring"],
     dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewThreeDFolder,
-    reactSource: `"use client";
+    previewSections: [
+      {
+        Preview: Previews.PreviewThreeDFolder,
+        reactSource: `"use client";
 
 import { ThreeDFolder } from "@/components/three-d-folder";
 
@@ -1292,6 +1295,38 @@ export function FolderShowcase() {
     </div>
   );
 }`,
+      },
+      {
+        Preview: Previews.PreviewThreeDFolderMini,
+        reactSource: `"use client";
+
+import { ThreeDFolder } from "@/components/three-d-folder";
+
+export function FolderShowcaseMini() {
+  return (
+    <div className="grid min-h-[520px] items-center gap-8 rounded-3xl bg-zinc-50 p-8 md:grid-cols-2 dark:bg-zinc-950">
+      <ThreeDFolder
+        title="Launch Assets"
+        size="sm"
+        folderBackColor="#fb7185"
+        folderFrontColor="#facc15"
+        folderTabColor="#f97316"
+      />
+
+      <div>
+        <p className="text-sm font-medium uppercase tracking-[0.24em] text-rose-500">Portfolio folder</p>
+        <h2 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">
+          Hover the folder to reveal stacked project previews.
+        </h2>
+        <p className="mt-4 text-zinc-600 dark:text-zinc-400">
+          Use size="sm" for a compact folder — great for sidebars, dashboards, or anywhere space is tight.
+        </p>
+      </div>
+    </div>
+  );
+}`,
+      },
+    ],
     tailwindSource: tw,
     registryCliName: "three-d-folder",
     props: [
@@ -1300,7 +1335,93 @@ export function FolderShowcase() {
       { name: "folderBackColor", type: "string", defaultValue: "\"#fb7185\"", description: "Back panel color." },
       { name: "folderFrontColor", type: "string", defaultValue: "\"#fbbf24\"", description: "Front panel color." },
       { name: "folderTabColor", type: "string", defaultValue: "\"#f97316\"", description: "Folder tab color." },
+      { name: "size", type: "\"sm\" | \"md\"", defaultValue: "\"md\"", description: "Folder scale — sm renders at 60% for dense grid layouts." },
       { name: "className", type: "string", description: "Optional classes for the card wrapper." },
+    ],
+  },
+  {
+    slug: "draggable-card-stack",
+    name: "Draggable Card Stack",
+    description:
+      "Shuffled deck of portrait cards on a dark surface. Drag or fling the top card to send it to the back; press ← to pull the bottom card to the front. Supports images and videos, hover overlay, auto-play, and fully configurable stack geometry.",
+    categorySlug: "cards",
+    tags: ["drag", "cards", "stack", "framer-motion", "interactive", "gesture", "spring", "3d"],
+    premium: false,
+    trendingScore: 115,
+    createdAt: "2026-05-19",
+    animationKinds: ["spring", "hover", "gesture" as AnimationKind],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewDraggableCardStack,
+    reactSource: `"use client";
+
+import { DraggableCardStack } from "@/components/draggable-card-stack";
+
+export function CardStackDemo() {
+  return <DraggableCardStack />;
+}`,
+    tailwindSource: tw,
+    registryCliName: "draggable-card-stack",
+    props: [
+      { name: "cards",              type: "StackCard[]", description: "Array of cards. Each card has id, optional title/subtitle, a media URL, and an optional type (\"image\" | \"video\")." },
+      { name: "cardWidth",          type: "number",  defaultValue: "300",   description: "Card width in px." },
+      { name: "cardHeight",         type: "number",  defaultValue: "420",   description: "Card height in px." },
+      { name: "borderRadius",       type: "number",  defaultValue: "24",    description: "Card corner radius in px." },
+      { name: "shadowStrength",     type: "number",  defaultValue: "1",     description: "Drop-shadow intensity from 0 (none) to 1 (full)." },
+      { name: "stackOffset",        type: "number",  defaultValue: "0",     description: "Vertical Y offset in px per depth level — fans out the stack." },
+      { name: "maxRotation",        type: "number",  defaultValue: "14",    description: "Maximum resting rotation in degrees for stack cards." },
+      { name: "depthScale",         type: "number",  defaultValue: "0.04",  description: "Scale reduction per depth level (e.g. 0.04 = 4% smaller per card behind)." },
+      { name: "showOverlay",        type: "boolean", defaultValue: "true",  description: "Show a gradient overlay with title and subtitle on hover over the top card." },
+      { name: "hoverScale",         type: "number",  defaultValue: "1.03",  description: "Scale applied to the top card on hover." },
+      { name: "transitionDuration", type: "number",  defaultValue: "0.25",  description: "Duration in seconds for the overlay fade and hover scale transitions." },
+      { name: "autoPlay",           type: "boolean", defaultValue: "false", description: "Automatically cycle cards at the given interval." },
+      { name: "autoInterval",       type: "number",  defaultValue: "3000",  description: "Auto-play interval in milliseconds." },
+      { name: "className",          type: "string",  description: "Optional classes for the outer wrapper." },
+    ],
+  },
+  {
+    slug: "card-carousel-3d",
+    name: "3D Card Carousel",
+    description:
+      "Cylindrical 3D card carousel — cards arranged in a circle on the Z axis, rotating continuously or on scroll. Radius, perspective, item size, speed, and direction are all configurable.",
+    categorySlug: "cards",
+    tags: ["3d", "carousel", "scroll", "framer-motion", "interactive", "cards", "animation"],
+    premium: false,
+    trendingScore: 112,
+    createdAt: "2026-05-19",
+    animationKinds: ["scroll", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewCardCarousel3D,
+    reactSource: `"use client";
+
+import { CardCarousel3D } from "@/components/card-carousel-3d";
+
+export function CarouselDemo() {
+  return (
+    <CardCarousel3D
+      radius={500}
+      itemWidth={280}
+      itemHeight={380}
+      perspective={1000}
+      autoRotate
+      autoSpeed={1}
+      scrollSpeed={1}
+      direction="cw"
+    />
+  );
+}`,
+    tailwindSource: tw,
+    registryCliName: "card-carousel-3d",
+    props: [
+      { name: "cards", type: "CarouselCard[]", description: "Array of cards with id, name, price, and image URL." },
+      { name: "radius", type: "number", defaultValue: "380", description: "Carousel cylinder radius in px (200–1000)." },
+      { name: "itemWidth", type: "number", defaultValue: "280", description: "Card width in px (200–800)." },
+      { name: "itemHeight", type: "number", defaultValue: "380", description: "Card height in px (200–800)." },
+      { name: "perspective", type: "number", defaultValue: "1000", description: "CSS perspective depth in px (500–3000)." },
+      { name: "autoRotate", type: "boolean", defaultValue: "true", description: "Enable continuous auto-rotation." },
+      { name: "autoSpeed", type: "number", defaultValue: "1", description: "Auto-rotation speed multiplier (0.1–5)." },
+      { name: "scrollSpeed", type: "number", defaultValue: "1", description: "Wheel/drag speed multiplier (0.1–5)." },
+      { name: "direction", type: "\"cw\" | \"ccw\"", defaultValue: "\"cw\"", description: "Rotation direction — clockwise or counterclockwise." },
+      { name: "className", type: "string", description: "Optional classes for the outer wrapper." },
     ],
   },
   {
