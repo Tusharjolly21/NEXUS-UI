@@ -1533,7 +1533,8 @@ export function PreviewTerminal({
         showControls={false}
         showSoundToggle={!compact}
         enableSound={!compact}
-        simpleSoundUrl={!compact ? "/sounds/sound.ogg" : undefined}
+        soundSpriteUrl={!compact ? "/sounds/sound.ogg" : undefined}
+        soundSpriteConfigUrl={!compact ? "/sounds/sprite-config.json" : undefined}
         username="user"
         hostname="Nexus-Macbook"
         commands={[

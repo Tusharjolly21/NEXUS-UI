@@ -268,7 +268,6 @@ export function Terminal({
   const { ref, inView } = useInViewport<HTMLDivElement>();
   const [soundOn, setSoundOn] = React.useState(enableSound);
   const soundOnRef = React.useRef(soundOn);
-  soundOnRef.current = soundOn;
 
   const spriteSfx = React.useMemo(
     () =>
@@ -281,14 +280,9 @@ export function Terminal({
   );
 
   React.useEffect(() => {
+    soundOnRef.current = soundOn;
     spriteSfx.setMuted(!soundOn);
   }, [soundOn, spriteSfx]);
-
-  React.useEffect(() => {
-    setSoundOn(enableSound);
-    soundOnRef.current = enableSound;
-    spriteSfx.setMuted(!enableSound);
-  }, [enableSound, spriteSfx]);
 
   const [state, setState] = React.useState<RunState>("idle");
   const [audioPrimed, setAudioPrimed] = React.useState(false);
@@ -471,7 +465,7 @@ export function Terminal({
       } while (!ac.signal.aborted);
       if (!ac.signal.aborted) setState("done");
     } catch (e) {
-      if ((e as any)?.name !== "AbortError") {
+      if (!(e instanceof DOMException && e.name === "AbortError")) {
         setState("idle");
       }
     }
@@ -480,8 +474,11 @@ export function Terminal({
   React.useEffect(() => {
     if (!autoStart) return;
     if (!inView) return;
-    void start();
+    const id = window.setTimeout(() => {
+      void start();
+    }, 0);
     return () => {
+      window.clearTimeout(id);
       abortRef.current?.abort();
     };
   }, [autoStart, inView, start]);
@@ -799,4 +796,3 @@ export function Terminal({
     </motion.div>
   );
 }
-

@@ -133,10 +133,10 @@ export function TerminalDemo() {
           delayBetweenCommands={900}
           showControls
           showSoundToggle
-          simpleSoundUrl="/sounds/sound.ogg"
+          soundSpriteUrl="/sounds/sound.ogg"
+          soundSpriteConfigUrl="/sounds/sprite-config.json"
         />
       </div>
     </section>
   );
 }
-
