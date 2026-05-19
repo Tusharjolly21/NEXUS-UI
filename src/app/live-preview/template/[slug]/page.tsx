@@ -15,6 +15,7 @@ import { StartupLandingPage } from "@/components/templates/startup-landing-page"
 import { ClauraAgencyPage } from "@/components/templates/claura-agency-page";
 import { OceanFlowPage } from "@/components/templates/ocean-flow-page";
 import { PulseLandingPage } from "@/components/templates/pulse-landing-page";
+import { AetherPortfolioPage } from "@/components/templates/aether-portfolio-page";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -60,6 +61,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><OceanFlowPage /></ThemeReceiver>;
   } else if (tmpl.slug === "pulse-landing") {
     return <ThemeReceiver><PulseLandingPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "aether-portfolio") {
+    return <ThemeReceiver><AetherPortfolioPage /></ThemeReceiver>;
   }
 
   return (

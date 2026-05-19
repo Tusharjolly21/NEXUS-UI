@@ -1,8 +1,5 @@
 import { ImageResponse } from "next/og";
-const siteConfig = {
-  name: "Nexus UI",
-  tagline: "Motion-native UI components for Next.js",
-};
+import { siteConfig } from "@/lib/seo";
 
 export const runtime = "nodejs"; //changed edge to nodejs for better image rendering performance
 
@@ -10,6 +7,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const title = searchParams.get("title") ?? siteConfig.name;
   const description = searchParams.get("description") ?? siteConfig.tagline;
+  const domain = siteConfig.url.replace(/^https?:\/\//, "");
   const type = searchParams.get("type") ?? "";
 
   return new ImageResponse(
@@ -113,7 +111,7 @@ export async function GET(request: Request) {
             letterSpacing: "-0.01em",
           }}
         >
-          nexus-ui.com
+          {domain}
         </span>
       </div>
 
@@ -198,10 +196,10 @@ export async function GET(request: Request) {
           }}
         >
           <span style={{ fontSize: 14, color: "rgba(255,255,255,0.25)" }}>
-            Motion-native UI components for Next.js
+            {siteConfig.tagline}
           </span>
           <span style={{ fontSize: 14, color: "rgba(255,255,255,0.18)" }}>
-            nexus-ui.com
+            {domain}
           </span>
         </div>
       </div>

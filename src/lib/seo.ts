@@ -4,11 +4,27 @@ import { getSiteUrl } from "@/lib/env";
 const site = getSiteUrl();
 
 export const siteConfig = {
-  name: "Nexus-UI",
+  name: "Nexus UI",
+  shortName: "Nexus UI",
   tagline: "Motion-built UI for ambitious product teams.",
   description:
-    "Browse animated components, production templates, and blocks. Copy code, ship faster, and upgrade with premium access.",
+    "Browse animated React components, production Next.js templates, and UI blocks. Copy-paste TypeScript, ship faster, and unlock premium access.",
   url: site,
+  twitterHandle: "@nexus_ui",
+  keywords: [
+    "React components",
+    "Next.js components",
+    "animated UI components",
+    "Framer Motion",
+    "Tailwind CSS",
+    "UI library",
+    "component library",
+    "landing page templates",
+    "Next.js templates",
+    "TypeScript",
+    "shadcn/ui",
+    "motion components",
+  ],
 };
 
 export function createMetadata(override: Metadata = {}): Metadata {
@@ -19,7 +35,6 @@ export function createMetadata(override: Metadata = {}): Metadata {
     metadataBase = new URL("http://localhost:3000");
   }
 
-  // Extract plain strings for OG image construction
   const titleStr =
     typeof override.title === "string" ? override.title : siteConfig.name;
   const descStr =
@@ -33,7 +48,6 @@ export function createMetadata(override: Metadata = {}): Metadata {
   }).toString()}`;
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: titleStr }];
 
-  // Separate openGraph and twitter from the rest so we can deep-merge them
   const { openGraph: overrideOg, twitter: overrideTwitter, ...rest } = override;
 
   return {
@@ -43,6 +57,11 @@ export function createMetadata(override: Metadata = {}): Metadata {
       template: `%s · ${siteConfig.name}`,
     },
     description: siteConfig.description,
+    keywords: siteConfig.keywords,
+    authors: [{ name: siteConfig.name, url: siteConfig.url }],
+    creator: siteConfig.name,
+    publisher: siteConfig.name,
+    category: "technology",
     ...rest,
     openGraph: {
       title: titleStr,
@@ -56,6 +75,8 @@ export function createMetadata(override: Metadata = {}): Metadata {
     },
     twitter: {
       card: "summary_large_image",
+      site: siteConfig.twitterHandle,
+      creator: siteConfig.twitterHandle,
       title: titleStr,
       description: descStr,
       images: [ogImageUrl],

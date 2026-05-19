@@ -74,6 +74,11 @@ const ScenePulseLazy = React.lazy(() =>
     default: m.ScenePulse,
   })),
 );
+const SceneAetherPortfolioLazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/aether-portfolio-scene").then((m) => ({
+    default: m.SceneAetherPortfolio,
+  })),
+);
 
 const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
   "saas-launch-aurora": SceneSaaSLaunchLazy,
@@ -92,6 +97,7 @@ const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType
   "startup-landing-page": SceneStartupLandingPageLazy,
   "ocean-flow": SceneOceanFlowLazy,
   "pulse-landing": ScenePulseLazy,
+  "aether-portfolio": SceneAetherPortfolioLazy,
 };
 
 export function TemplateSceneLoader({ slug }: { slug: string }) {
