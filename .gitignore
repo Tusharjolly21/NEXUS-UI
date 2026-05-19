@@ -40,8 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# large third-party terminal sprite (fetch with npm run sounds:fetch)
-public/sounds/sound.ogg
 
 # local settings (can opt-in for committing if needed)
 .claude/settings.json
