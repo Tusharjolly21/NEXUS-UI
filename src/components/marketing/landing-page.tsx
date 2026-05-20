@@ -419,13 +419,13 @@ function Hero() {
               shuffleSpeed={30}
               iterations={10}
               revealDelay={400}
-              className=" bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent "
+              className="block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark: text-violet-500 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-600 sm:dark:via-fuchsia-500 sm:dark:to-indigo-500"
               scrambleClassName="text-fuchsia-500 dark:text-fuchsia-300"
             />
           </span>
         </motion.h1>
         {/* bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent */}
-        {/* block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark:text-violet-300 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-300 sm:dark:via-fuchsia-300 sm:dark:to-indigo-300 */}
+        {/* block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark:text-violet-300 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-600 sm:dark:via-fuchsia-500 sm:dark:to-indigo-500 */}
 
         {/* Subtitle */}
         <motion.p
