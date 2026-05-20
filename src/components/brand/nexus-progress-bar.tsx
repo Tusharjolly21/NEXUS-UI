@@ -129,13 +129,12 @@ export function NexusProgressBar() {
         alignItems: "center",
         justifyContent: "center",
         pointerEvents: "none",
-        // subtle dark veil so the loader reads clearly on any page
-        background: "rgba(8,8,10,0.35)",
+        background: "color-mix(in oklch, var(--background) 65%, transparent)",
         backdropFilter: "blur(2px)",
         WebkitBackdropFilter: "blur(2px)",
       }}
     >
-      <div style={{ color: "#ECE7DF" }}>
+      <div style={{ color: "var(--foreground)" }}>
         <NavConverge size={80} />
       </div>
     </div>

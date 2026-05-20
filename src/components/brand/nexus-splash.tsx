@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 // ─────────────────────────────────────────────────────────────────
 function ConvergeLoader({
   size = 120,
-  color = "#ECE7DF",
+  color = "var(--foreground)",
   accent = "oklch(0.86 0.13 215)",
   dur = "1.8s",
   id = "splash",
@@ -113,7 +113,7 @@ export function NexusSplash() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        background: "#08080A",
+        background: "var(--background)",
         opacity: phase === "fading" ? 0 : 1,
         transition: "opacity 600ms cubic-bezier(0.4,0,0.2,1)",
         pointerEvents: phase === "fading" ? "none" : "auto",
