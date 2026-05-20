@@ -82,7 +82,12 @@ function loadGeoData(cb: (pts: LonLat[]) => void) {
       _geoCbs.forEach((fn) => fn(pts));
       _geoCbs.length = 0;
     })
-    .catch(() => { _geoLoading = false; _geoCbs.length = 0; });
+    .catch(() => {
+      _geoCache = [];
+      _geoLoading = false;
+      _geoCbs.forEach((fn) => fn([]));
+      _geoCbs.length = 0;
+    });
 }
 
 // ── Projection ────────────────────────────────────────────────────────────────

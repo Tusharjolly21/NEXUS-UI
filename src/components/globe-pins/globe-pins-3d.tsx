@@ -1065,8 +1065,7 @@ export function GlobePins3D({
       };
     }
 
-    init().catch((error) => {
-      console.error("Failed to initialize GlobePins3D:", error);
+    init().catch(() => {
       setLoading(false);
     });
 

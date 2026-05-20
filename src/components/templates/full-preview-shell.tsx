@@ -176,15 +176,19 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
   };
 
   const handleDownload = async () => {
-    const res = await fetch(`/api/download/template?slug=${tmpl.slug}`);
-    if (!res.ok) return;
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${tmpl.slug}.zip`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const res = await fetch(`/api/download/template?slug=${tmpl.slug}`);
+      if (!res.ok) return;
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${tmpl.slug}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      // Download is optional in preview mode.
+    }
   };
 
   const toggleTheme = () => {

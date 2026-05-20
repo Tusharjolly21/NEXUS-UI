@@ -8,6 +8,26 @@ import { NexusProgressBar } from "@/components/brand/nexus-progress-bar";
 import { NexusSplash } from "@/components/brand/nexus-splash";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
+  React.useEffect(() => {
+    function handleUnhandledRejection(event: PromiseRejectionEvent) {
+      const reason = event.reason;
+      if (
+        reason instanceof TypeError &&
+        reason.message.toLowerCase() === "failed to fetch"
+      ) {
+        event.preventDefault();
+      }
+    }
+
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+    return () => {
+      window.removeEventListener(
+        "unhandledrejection",
+        handleUnhandledRejection,
+      );
+    };
+  }, []);
+
   return (
     <ThemeProvider>
       <TooltipProvider>

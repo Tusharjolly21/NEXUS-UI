@@ -14,6 +14,7 @@ import {
   Lock,
   Monitor,
   Package,
+  RotateCcw,
   Zap,
 } from "lucide-react";
 
@@ -36,6 +37,79 @@ const DEMO_SLUGS = new Set([
   "text-reveal-card",
   "typewriter-effect",
 ]);
+
+const PROP_CONTROL_LIMIT = 8;
+
+function getEditableProps(props: PropDoc[] = []) {
+  return props
+    .filter((prop) => {
+      const type = prop.type.toLowerCase();
+      if (/^on[A-Z]/.test(prop.name)) return false;
+      if (["className", "style", "children"].includes(prop.name)) return false;
+      if (type.includes("reactnode") || type.includes("=>")) return false;
+      if (type.includes("[]") || type.includes("array") || type.includes("object") || type.includes("partial<")) {
+        return false;
+      }
+      return isBooleanProp(prop) || isNumberProp(prop) || isUnionProp(prop) || isStringProp(prop);
+    })
+    .slice(0, PROP_CONTROL_LIMIT);
+}
+
+function isBooleanProp(prop: PropDoc) {
+  return prop.type === "boolean";
+}
+
+function isNumberProp(prop: PropDoc) {
+  return prop.type === "number";
+}
+
+function isStringProp(prop: PropDoc) {
+  return prop.type === "string" || prop.type === "string | undefined";
+}
+
+function isUnionProp(prop: PropDoc) {
+  return /"[^"]+"/.test(prop.type) && prop.type.includes("|");
+}
+
+function unionOptions(type: string) {
+  return [...type.matchAll(/"([^"]+)"/g)].map((match) => match[1]).slice(0, 6);
+}
+
+function cleanDefaultValue(prop: PropDoc) {
+  if (!prop.defaultValue) {
+    if (isBooleanProp(prop)) return false;
+    if (isNumberProp(prop)) return 0;
+    const option = unionOptions(prop.type)[0];
+    return option ?? "";
+  }
+
+  const value = prop.defaultValue.trim();
+  if (isBooleanProp(prop)) return value === "true";
+  if (isNumberProp(prop)) return Number.parseFloat(value) || 0;
+  const quoted = value.match(/^"([\s\S]*)"$/);
+  return quoted?.[1] ?? value;
+}
+
+function propValueToCode(value: unknown, prop: PropDoc) {
+  if (isBooleanProp(prop)) return value ? `{true}` : `{false}`;
+  if (isNumberProp(prop)) return `{${Number(value)}}`;
+  return JSON.stringify(String(value));
+}
+
+function toPascalCase(value: string) {
+  return value
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .split(/\s+/)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join("");
+}
+
+function getImportName(code: string, fallbackName: string) {
+  const namedImport = code.match(/import\s*\{\s*([A-Za-z0-9_]+)/);
+  if (namedImport?.[1]) return namedImport[1];
+  return toPascalCase(fallbackName);
+}
 import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { getComponentCategoryLabel, type ComponentCategorySlug } from "@/lib/catalog/taxonomy";
 import { Badge } from "@/components/ui/badge";
@@ -48,6 +122,14 @@ import {
 } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CodeBlock } from "@/components/code-block/code-block";
+import { cn } from "@/lib/utils";
+
+type PropDoc = {
+  name: string;
+  type: string;
+  description: string;
+  defaultValue?: string;
+};
 
 // ── tiny copy button ────────────────────────────────────────────────
 function CopyBtn({ text }: { text: string }) {
@@ -174,6 +256,233 @@ function InstallSidebar({
   );
 }
 
+function PropsPlayground({
+  props,
+  importName,
+}: {
+  props?: PropDoc[];
+  importName: string;
+}) {
+  const editableProps = React.useMemo(() => getEditableProps(props), [props]);
+  const defaults = React.useMemo(
+    () =>
+      Object.fromEntries(
+        editableProps.map((prop) => [prop.name, cleanDefaultValue(prop)]),
+      ) as Record<string, unknown>,
+    [editableProps],
+  );
+  const [values, setValues] = React.useState<Record<string, unknown>>(
+    () => defaults,
+  );
+
+  const usageCode = React.useMemo(() => {
+    if (!editableProps.length) return "";
+
+    const lines = editableProps.map((prop) => {
+      const value = values[prop.name] ?? cleanDefaultValue(prop);
+      return `  ${prop.name}=${propValueToCode(value, prop)}`;
+    });
+
+    return `<${importName}\n${lines.join("\n")}\n/>`;
+  }, [editableProps, importName, values]);
+
+  if (!editableProps.length) return null;
+
+  return (
+    <section className="mt-7 overflow-hidden rounded-3xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950">
+      <div className="relative border-b border-border/70 bg-[radial-gradient(circle_at_12%_10%,rgba(124,58,237,0.14),transparent_30%),linear-gradient(135deg,rgba(250,250,250,0.95),rgba(244,244,245,0.72))] px-5 py-5 dark:bg-[radial-gradient(circle_at_12%_10%,rgba(168,85,247,0.18),transparent_30%),linear-gradient(135deg,rgba(24,24,27,0.96),rgba(9,9,11,0.78))] sm:px-6">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.09] dark:opacity-[0.16]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+          }}
+        />
+        <div className="relative flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-300">
+              Playground
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+              Shape the component before you copy it.
+            </h3>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
+              Adjust the important props for this component and grab JSX that matches your choices.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setValues(defaults)}
+            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/85 px-3 py-2 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur transition hover:text-foreground dark:bg-zinc-950/70"
+          >
+            <RotateCcw className="size-3.5" />
+            Reset props
+          </button>
+        </div>
+      </div>
+
+      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.62fr)]">
+        <div className="p-4 sm:p-5 lg:p-6">
+          <div className="grid gap-3 md:grid-cols-2">
+            {editableProps.map((prop) => (
+              <PropControl
+                key={prop.name}
+                prop={prop}
+                value={values[prop.name] ?? cleanDefaultValue(prop)}
+                onChange={(value) =>
+                  setValues((current) => ({ ...current, [prop.name]: value }))
+                }
+              />
+            ))}
+          </div>
+        </div>
+
+        <aside className="border-t border-border/70 bg-zinc-950 text-zinc-100 lg:border-l lg:border-t-0">
+          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400">
+                Generated JSX
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">
+                Copy this into your page.
+              </p>
+            </div>
+            <CopyBtn text={usageCode} />
+          </div>
+          <pre className="max-h-[360px] overflow-auto p-4 font-mono text-[12px] leading-6 text-zinc-100">
+            {usageCode}
+          </pre>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function PropControl({
+  prop,
+  value,
+  onChange,
+}: {
+  prop: PropDoc;
+  value: unknown;
+  onChange: (value: unknown) => void;
+}) {
+  const label = (
+    <div className="min-w-0">
+      <p className="truncate font-mono text-xs font-semibold text-foreground">
+        {prop.name}
+      </p>
+      <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">
+        {prop.description}
+      </p>
+    </div>
+  );
+
+  if (isBooleanProp(prop)) {
+    return (
+      <label className="flex min-h-28 items-start justify-between gap-3 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
+        {label}
+        <button
+          type="button"
+          aria-pressed={Boolean(value)}
+          onClick={() => onChange(!value)}
+          className={cn(
+            "relative h-6 w-11 shrink-0 rounded-full border transition",
+            value
+              ? "border-primary/40 bg-primary"
+              : "border-border bg-muted",
+          )}
+        >
+          <span
+            className={cn(
+              "absolute top-1/2 size-4 -translate-y-1/2 rounded-full bg-white shadow transition",
+              value ? "left-6" : "left-1",
+            )}
+          />
+        </button>
+      </label>
+    );
+  }
+
+  if (isUnionProp(prop)) {
+    const options = unionOptions(prop.type);
+    return (
+      <div className="min-h-28 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
+        {label}
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {options.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onChange(option)}
+              className={cn(
+                "rounded-lg border px-2.5 py-1 text-[11px] font-medium transition",
+                value === option
+                  ? "border-primary/40 bg-primary text-primary-foreground"
+                  : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isNumberProp(prop)) {
+    return (
+      <label className="min-h-28 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
+        <div className="flex items-start justify-between gap-3">
+          {label}
+          <input
+            type="number"
+            value={Number(value)}
+            onChange={(event) => onChange(Number(event.target.value))}
+            className="h-9 w-24 shrink-0 rounded-lg border border-border bg-background px-2 font-mono text-xs text-foreground outline-none transition focus:border-primary"
+          />
+        </div>
+        <input
+          type="range"
+          min={0}
+          max={Math.max(Number(value) * 2 || 10, 10)}
+          step={Number(value) % 1 === 0 ? 1 : 0.1}
+          value={Number(value)}
+          onChange={(event) => onChange(Number(event.target.value))}
+          className="mt-3 w-full accent-primary"
+        />
+      </label>
+    );
+  }
+
+  const isColor =
+    prop.name.toLowerCase().includes("color") ||
+    String(value).startsWith("#");
+
+  return (
+    <label className="min-h-28 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
+      {label}
+      <div className="mt-3 flex gap-2">
+        {isColor && /^#[0-9a-fA-F]{6}$/.test(String(value)) && (
+          <input
+            type="color"
+            value={String(value)}
+            onChange={(event) => onChange(event.target.value)}
+            className="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
+          />
+        )}
+        <input
+          type="text"
+          value={String(value)}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-xs text-foreground outline-none transition focus:border-primary"
+        />
+      </div>
+    </label>
+  );
+}
+
 // ── main client component ───────────────────────────────────────────
 export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: string; isPremium?: boolean }) {
   const comp = getLibraryComponent(slug);
@@ -255,6 +564,8 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
               title={section.title ?? (comp.previewSections!.length > 1 ? `${comp.name} — Variant ${i + 1}` : comp.name)}
               code={section.reactSource}
               slug={comp.slug}
+              props={comp.props}
+              importName={getImportName(section.reactSource, comp.name)}
               dependencies={comp.dependencies}
               animationKinds={comp.animationKinds}
               registryCliName={comp.registryCliName}
@@ -270,6 +581,8 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
           title={comp.name}
           code={comp.reactSource ?? ""}
           slug={comp.slug}
+          props={comp.props}
+          importName={getImportName(comp.reactSource ?? "", comp.name)}
           dependencies={comp.dependencies}
           animationKinds={comp.animationKinds}
           locked={codeIsLocked}
@@ -323,6 +636,8 @@ function PreviewCodeSection({
   title,
   code,
   slug,
+  props,
+  importName,
   dependencies,
   animationKinds,
   registryCliName,
@@ -333,6 +648,8 @@ function PreviewCodeSection({
   title: string;
   code: string;
   slug: string;
+  props?: PropDoc[];
+  importName: string;
   dependencies: string[];
   animationKinds: string[];
   registryCliName?: string;
@@ -446,6 +763,12 @@ function PreviewCodeSection({
           )}
         </TabsContent>
       </Tabs>
+
+      <PropsPlayground
+        key={`${slug}-${importName}`}
+        props={props}
+        importName={importName}
+      />
 
     </section>
   );
