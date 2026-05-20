@@ -16,6 +16,44 @@ const REGISTRY_CLI_NAME = {
   "gooey-search-input": "gooey-input",
 };
 
+const SOURCE_COMPONENT_NAME = {
+  "mac-keyboard": "keyboard",
+};
+
+const SOURCE_ALIAS_SHIMS = {
+  "mac-keyboard": `export { MacKeyboard, usePhysicalKeyboard } from "./keyboard";
+export type { KeyboardProps } from "./keyboard";
+export type { KeyDef, KeyKind, SoundVariant } from "./keyboard/keyboard-layout";
+`,
+};
+
+const STANDARD_SHADCN_UI_DEPS = new Set([
+  "accordion",
+  "avatar",
+  "badge",
+  "button",
+  "calendar",
+  "card",
+  "checkbox",
+  "command",
+  "dialog",
+  "dropdown-menu",
+  "input",
+  "input-group",
+  "label",
+  "navigation-menu",
+  "popover",
+  "scroll-area",
+  "select",
+  "separator",
+  "sheet",
+  "switch",
+  "table",
+  "tabs",
+  "textarea",
+  "tooltip",
+]);
+
 function extractBlocks(ts) {
   const re = /  \{\n    slug: "([^"]+)"/g;
   const hits = [];
@@ -62,14 +100,25 @@ function extractDependencies(block) {
     .filter(Boolean);
 }
 
+function extractRegistryCliName(slug, block) {
+  const m = block.match(/registryCliName:\s*"([^"]+)"/);
+  return m?.[1] ?? REGISTRY_CLI_NAME[slug] ?? slug;
+}
+
 function registryDepsForReactSource(src) {
-  const deps = [];
-  if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.push("utils");
-  return deps;
+  const deps = new Set();
+  if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
+
+  for (const match of src.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
+    const dependency = match[1];
+    if (STANDARD_SHADCN_UI_DEPS.has(dependency)) deps.add(dependency);
+  }
+
+  return [...deps];
 }
 
 function buildSnippetItem(slug, block) {
-  const cliName = REGISTRY_CLI_NAME[slug] ?? slug;
+  const cliName = extractRegistryCliName(slug, block);
   const reactSource = extractReactSource(block);
   if (!reactSource) {
     console.warn(`Skipping ${slug}: could not extract reactSource`);
@@ -99,6 +148,158 @@ function buildSnippetItem(slug, block) {
 }
 
 const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
+
+function isRegistrySourceFile(filePath) {
+  if (!/\.(tsx|ts)$/.test(filePath)) return false;
+  const base = path.basename(filePath);
+  return !["demo.tsx", "preview.tsx"].includes(base);
+}
+
+function readRegistryFile(filePath, cliName) {
+  let content = fs.readFileSync(filePath, "utf8");
+
+  content = content
+    .split("\n")
+    .filter((line) => !/from "\.\/(demo|preview)"/.test(line))
+    .join("\n");
+
+  if (cliName === "interactive-globe-explorer") {
+    content = content.replace(
+      'globeTextureUrl = "/images/earth-blue-marble.jpg"',
+      'globeTextureUrl = "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"',
+    );
+  }
+
+  return content.endsWith("\n") ? content : `${content}\n`;
+}
+
+function registryFileType(filePath, target) {
+  if (target.startsWith("components/ui/")) return "registry:ui";
+  return filePath.endsWith(".tsx") ? "registry:component" : "registry:lib";
+}
+
+function addRegistryFile(files, sourcePath, target, cliName) {
+  if (files.has(target)) return;
+
+  files.set(target, {
+    path: `next-ui/${target.replace(/^components\//, "")}`,
+    type: registryFileType(sourcePath, target),
+    target,
+    content: readRegistryFile(sourcePath, cliName),
+  });
+}
+
+function collectDirectoryFiles(baseDir) {
+  const entries = fs.readdirSync(baseDir, { withFileTypes: true });
+  const files = [];
+
+  for (const entry of entries) {
+    const next = path.join(baseDir, entry.name);
+    if (entry.isDirectory()) {
+      files.push(...collectDirectoryFiles(next));
+      continue;
+    }
+    if (entry.isFile() && isRegistrySourceFile(next)) files.push(next);
+  }
+
+  return files.sort();
+}
+
+function collectSourceFiles(cliName, files, seenComponents) {
+  if (seenComponents.has(cliName)) return;
+  seenComponents.add(cliName);
+
+  const componentDir = path.join(root, "src", "components", cliName);
+  const componentFile = path.join(root, "src", "components", `${cliName}.tsx`);
+  const hasDir = fs.existsSync(componentDir) && fs.statSync(componentDir).isDirectory();
+  const hasFile = fs.existsSync(componentFile) && fs.statSync(componentFile).isFile();
+
+  if (!hasDir && !hasFile) return;
+
+  if (hasDir) {
+    for (const filePath of collectDirectoryFiles(componentDir)) {
+      const relative = path.relative(componentDir, filePath);
+      addRegistryFile(
+        files,
+        filePath,
+        path.join("components", cliName, relative).replaceAll(path.sep, "/"),
+        cliName,
+      );
+    }
+  }
+
+  if (hasFile) {
+    addRegistryFile(files, componentFile, `components/${cliName}.tsx`, cliName);
+  }
+}
+
+function collectCustomUiFile(name, files, seenUi) {
+  if (seenUi.has(name) || STANDARD_SHADCN_UI_DEPS.has(name)) return;
+  seenUi.add(name);
+
+  const filePath = path.join(root, "src", "components", "ui", `${name}.tsx`);
+  if (!fs.existsSync(filePath)) return;
+
+  addRegistryFile(files, filePath, `components/ui/${name}.tsx`, name);
+}
+
+function collectImportedLocalFiles(files, seenComponents, seenUi) {
+  let changed = true;
+
+  while (changed) {
+    changed = false;
+    const before = files.size;
+
+    for (const file of [...files.values()]) {
+      for (const match of file.content.matchAll(/@\/components\/(?!ui\/)([a-z0-9-]+)/g)) {
+        collectSourceFiles(match[1], files, seenComponents);
+      }
+
+      for (const match of file.content.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
+        collectCustomUiFile(match[1], files, seenUi);
+      }
+    }
+
+    changed = files.size > before;
+  }
+}
+
+function buildSourceBackedItem(slug, block) {
+  const cliName = extractRegistryCliName(slug, block);
+  const sourceName = SOURCE_COMPONENT_NAME[cliName] ?? cliName;
+  const files = new Map();
+  const seenComponents = new Set();
+  const seenUi = new Set();
+
+  collectSourceFiles(sourceName, files, seenComponents);
+  if (files.size === 0) return null;
+
+  if (sourceName !== cliName && SOURCE_ALIAS_SHIMS[cliName]) {
+    files.set(`components/${cliName}.tsx`, {
+      path: `next-ui/${cliName}.tsx`,
+      type: "registry:component",
+      target: `components/${cliName}.tsx`,
+      content: SOURCE_ALIAS_SHIMS[cliName],
+    });
+  }
+
+  collectImportedLocalFiles(files, seenComponents, seenUi);
+
+  const content = [...files.values()].map((file) => file.content).join("\n");
+  const dependencies = extractDependencies(block);
+  const registryDependencies = registryDepsForReactSource(content);
+
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: cliName,
+    type: "registry:component",
+    title: extractName(block),
+    description: extractDescription(block),
+    dependencies,
+    registryDependencies,
+    files: [...files.values()],
+  };
+}
 
 function buildTerminalItem() {
   const terminalPath = path.join(root, "src", "components", "terminal", "terminal.tsx");
@@ -263,6 +464,44 @@ function buildSparklesItem() {
   };
 }
 
+function buildInteractiveGlobeExplorerItem() {
+  const base = path.join(root, "src", "components", "interactive-globe-explorer");
+  const componentPath = path.join(base, "interactive-globe-explorer.tsx");
+  const indexPath = path.join(base, "index.ts");
+  const componentContent = fs
+    .readFileSync(componentPath, "utf8")
+    .replace(
+      'globeTextureUrl = "/images/earth-blue-marble.jpg"',
+      'globeTextureUrl = "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"',
+    );
+  const indexContent = fs.readFileSync(indexPath, "utf8");
+
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: "interactive-globe-explorer",
+    type: "registry:component",
+    title: "Interactive Globe Explorer",
+    description:
+      "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+    dependencies: ["react-globe.gl", "three", "lucide-react"],
+    registryDependencies: ["button", "utils"],
+    files: [
+      {
+        path: "next-ui/interactive-globe-explorer/interactive-globe-explorer.tsx",
+        type: "registry:component",
+        target: "components/interactive-globe-explorer/interactive-globe-explorer.tsx",
+        content: componentContent,
+      },
+      {
+        path: "next-ui/interactive-globe-explorer/index.ts",
+        type: "registry:lib",
+        target: "components/interactive-globe-explorer/index.ts",
+        content: indexContent,
+      },
+    ],
+  };
+}
+
 function buildGooeyItem() {
   const p = path.join(root, "src", "components", "gooey-input", "gooey-input.tsx");
   const content = fs.readFileSync(p, "utf8");
@@ -292,6 +531,13 @@ const items = [];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {
+  const block = bySlug.get(slug);
+  const sourceBackedItem = buildSourceBackedItem(slug, block);
+  if (sourceBackedItem) {
+    items.push(sourceBackedItem);
+    continue;
+  }
+
   if (slug === "terminal") {
     items.push(buildTerminalItem());
     continue;
@@ -316,7 +562,10 @@ for (const { slug } of blocks) {
     items.push(buildSparklesItem());
     continue;
   }
-  const block = bySlug.get(slug);
+  if (slug === "interactive-globe-explorer") {
+    items.push(buildInteractiveGlobeExplorerItem());
+    continue;
+  }
   const item = buildSnippetItem(slug, block);
   if (item) items.push(item);
 }

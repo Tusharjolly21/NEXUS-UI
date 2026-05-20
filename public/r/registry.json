@@ -18,6 +18,10 @@
         {
           "path": "next-ui/cinematic-logo-cloud.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/ui/marquee.tsx",
+          "type": "registry:ui"
         }
       ]
     },
@@ -35,7 +39,11 @@
       ],
       "files": [
         {
-          "path": "next-ui/phone-input.tsx",
+          "path": "next-ui/phone-input/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/phone-input/phone-input.tsx",
           "type": "registry:component"
         }
       ]
@@ -224,8 +232,25 @@
         "framer-motion",
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils",
+        "input",
+        "label",
+        "button"
+      ],
       "files": [
+        {
+          "path": "next-ui/signup-form/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/signup-form/login-form.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/signup-form/signup-form.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/signup-form.tsx",
           "type": "registry:component"
@@ -359,8 +384,12 @@
       ],
       "files": [
         {
-          "path": "next-ui/glow-button.tsx",
+          "path": "next-ui/glow-button/glow-button.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glow-button/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -372,10 +401,16 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/word-magnet.tsx",
+          "path": "next-ui/word-magnet/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/word-magnet/word-magnet.tsx",
           "type": "registry:component"
         }
       ]
@@ -389,10 +424,16 @@
         "framer-motion",
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/three-d-folder.tsx",
+          "path": "next-ui/three-d-folder/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/three-d-folder/three-d-folder.tsx",
           "type": "registry:component"
         }
       ]
@@ -405,11 +446,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/draggable-card-stack.tsx",
+          "path": "next-ui/draggable-card-stack/draggable-card-stack.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/draggable-card-stack/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -421,11 +468,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/card-carousel-3d.tsx",
+          "path": "next-ui/card-carousel-3d/card-carousel-3d.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/card-carousel-3d/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -438,10 +491,48 @@
         "framer-motion",
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/real-time-cursors.tsx",
+          "path": "next-ui/real-time-cursors/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/real-time-cursors/real-time-cursors.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/code-block/code-block.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/chat-messages/chat-messages.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/chat-messages/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/card-stack-rotator/card-stack-rotator.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/encrypted-text/encrypted-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/encrypted-text/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/typewriter-effect/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/typewriter-effect/typewriter-effect.tsx",
           "type": "registry:component"
         }
       ]
@@ -529,7 +620,7 @@
       "name": "gooey-input",
       "type": "registry:component",
       "title": "Gooey Search Input",
-      "description": "Expandable search pill with SVG gooey filter and Framer Motion layout transitions.",
+      "description": "Expandable pill search with a detached icon bubble merged through an SVG goo filter and spring layout.",
       "dependencies": [
         "framer-motion",
         "lucide-react"
@@ -538,6 +629,14 @@
         "utils"
       ],
       "files": [
+        {
+          "path": "next-ui/gooey-input/gooey-input.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/gooey-input/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/gooey-input.tsx",
           "type": "registry:component"
@@ -548,7 +647,7 @@
       "name": "terminal",
       "type": "registry:component",
       "title": "Interactive Terminal",
-      "description": "macOS-style terminal with typewriter commands, output sequencing, optional Aceternity sprite audio.",
+      "description": "macOS-style terminal window with typewriter commands, cursor blink, output sequencing, and optional sound.",
       "dependencies": [
         "framer-motion"
       ],
@@ -557,12 +656,20 @@
       ],
       "files": [
         {
-          "path": "next-ui/terminal.tsx",
+          "path": "next-ui/terminal/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/terminal/sprite-audio.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/terminal/terminal.tsx",
           "type": "registry:component"
         },
         {
-          "path": "next-ui/terminal-sprite-audio.ts",
-          "type": "registry:lib"
+          "path": "next-ui/terminal.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -579,6 +686,14 @@
       ],
       "files": [
         {
+          "path": "next-ui/squiggly-text/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/squiggly-text/squiggly-text.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/squiggly-text.tsx",
           "type": "registry:component"
         }
@@ -588,7 +703,7 @@
       "name": "floating-dock",
       "type": "registry:component",
       "title": "Nexus floating dock",
-      "description": "Bottom-centered macOS-style dock with pointer-driven magnification, glass pill, tooltips, and mobile sheet menu.",
+      "description": "Bottom-centered macOS-style dock with pointer-driven magnification, neighbor scaling, glass pill chrome, tooltips, and a touch-friendly expandable mobile menu.",
       "dependencies": [
         "framer-motion",
         "lucide-react"
@@ -597,14 +712,6 @@
         "utils"
       ],
       "files": [
-        {
-          "path": "next-ui/floating-dock/types.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/floating-dock/icon-container.tsx",
-          "type": "registry:component"
-        },
         {
           "path": "next-ui/floating-dock/floating-dock-desktop.tsx",
           "type": "registry:component"
@@ -618,11 +725,19 @@
           "type": "registry:component"
         },
         {
+          "path": "next-ui/floating-dock/icon-container.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/floating-dock/index.ts",
           "type": "registry:lib"
         },
         {
-          "path": "next-ui/floating-dock-import.tsx",
+          "path": "next-ui/floating-dock/types.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/floating-dock.tsx",
           "type": "registry:component"
         }
       ]
@@ -631,7 +746,7 @@
       "name": "stateful-button",
       "type": "registry:component",
       "title": "Stateful message button",
-      "description": "Animated async button with idle → loading → success transitions, click guarding, and smooth icon/text motion.",
+      "description": "Animated async button with idle → loading → success transitions, built-in click guarding, and smooth icon/text motion.",
       "dependencies": [
         "framer-motion",
         "lucide-react"
@@ -640,6 +755,14 @@
         "utils"
       ],
       "files": [
+        {
+          "path": "next-ui/stateful-button/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/stateful-button/stateful-button.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/stateful-button.tsx",
           "type": "registry:component"
@@ -650,7 +773,7 @@
       "name": "sparkles",
       "type": "registry:component",
       "title": "Sparkles field",
-      "description": "Configurable animated particle field for hero highlights, card backgrounds, and decorative UI layers.",
+      "description": "Configurable animated particle field for hero highlights, card backgrounds, and decorative UI layers with optional pointer interaction.",
       "dependencies": [
         "framer-motion"
       ],
@@ -658,6 +781,14 @@
         "utils"
       ],
       "files": [
+        {
+          "path": "next-ui/sparkles/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/sparkles/sparkles.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/sparkles.tsx",
           "type": "registry:component"
@@ -672,8 +803,18 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
+        {
+          "path": "next-ui/text-generate-effect/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/text-generate-effect/text-generate-effect.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/text-generate-effect.tsx",
           "type": "registry:component"
@@ -688,8 +829,18 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
+        {
+          "path": "next-ui/background-gradient/background-gradient.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/background-gradient/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/background-gradient.tsx",
           "type": "registry:component"
@@ -704,10 +855,16 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/typewriter-effect.tsx",
+          "path": "next-ui/typewriter-effect/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/typewriter-effect/typewriter-effect.tsx",
           "type": "registry:component"
         }
       ]
@@ -720,10 +877,16 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/text-reveal-card.tsx",
+          "path": "next-ui/text-reveal-card/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/text-reveal-card/text-reveal-card.tsx",
           "type": "registry:component"
         }
       ]
@@ -737,11 +900,25 @@
         "framer-motion",
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/glowing-effect-cards.tsx",
+          "path": "next-ui/glowing-effect-cards/GlowingCard.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/GlowingCardsLayout.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/GlowingEffect.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -753,11 +930,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/infinite-moving-cards.tsx",
+          "path": "next-ui/infinite-moving-cards/InfiniteMovingCards.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/infinite-moving-cards/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -769,10 +952,16 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/meteors.tsx",
+          "path": "next-ui/meteors/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/meteors/meteors.tsx",
           "type": "registry:component"
         }
       ]
@@ -785,11 +974,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/background-boxes.tsx",
+          "path": "next-ui/background-boxes/background-boxes.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/background-boxes/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -801,11 +996,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/encrypted-text.tsx",
+          "path": "next-ui/encrypted-text/encrypted-text.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/encrypted-text/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -817,8 +1018,30 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
+        {
+          "path": "next-ui/keyboard/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/keyboard/keyboard-key.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/keyboard/keyboard-layout.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/keyboard/keyboard.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/keyboard/use-keyboard-sound.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/mac-keyboard.tsx",
           "type": "registry:component"
@@ -833,11 +1056,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/images-badge.tsx",
+          "path": "next-ui/images-badge/images-badge.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/images-badge/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -849,11 +1078,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/dot-grid-hero.tsx",
+          "path": "next-ui/dot-grid-hero/dot-grid-hero.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dot-grid-hero/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -865,10 +1100,16 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/starfield-hero.tsx",
+          "path": "next-ui/starfield-hero/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/starfield-hero/starfield-hero.tsx",
           "type": "registry:component"
         }
       ]
@@ -881,11 +1122,17 @@
       "dependencies": [
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/compare.tsx",
+          "path": "next-ui/compare/compare.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/compare/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -898,11 +1145,17 @@
         "framer-motion",
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/expandable-cards.tsx",
+          "path": "next-ui/expandable-cards/expandable-cards.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/expandable-cards/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -919,8 +1172,12 @@
       ],
       "files": [
         {
-          "path": "next-ui/animated-select-headline.tsx",
+          "path": "next-ui/animated-select-headline/animated-select-headline.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-select-headline/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -937,7 +1194,11 @@
       ],
       "files": [
         {
-          "path": "next-ui/warp-speed-card.tsx",
+          "path": "next-ui/warp-speed-card/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/warp-speed-card/warp-speed-card.tsx",
           "type": "registry:component"
         }
       ]
@@ -956,8 +1217,12 @@
       ],
       "files": [
         {
-          "path": "next-ui/circular-carousel.tsx",
+          "path": "next-ui/circular-carousel/circular-carousel.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/circular-carousel/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -975,8 +1240,12 @@
       ],
       "files": [
         {
-          "path": "next-ui/chat-messages.tsx",
+          "path": "next-ui/chat-messages/chat-messages.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/chat-messages/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -993,7 +1262,11 @@
       ],
       "files": [
         {
-          "path": "next-ui/shader-flow.tsx",
+          "path": "next-ui/shader-flow/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/shader-flow/shader-flow.tsx",
           "type": "registry:component"
         }
       ]
@@ -1012,8 +1285,12 @@
       ],
       "files": [
         {
-          "path": "next-ui/ask-nexus-input.tsx",
+          "path": "next-ui/ask-nexus-input/ask-nexus-input.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/ask-nexus-input/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -1028,7 +1305,11 @@
       ],
       "files": [
         {
-          "path": "next-ui/globe-pins.tsx",
+          "path": "next-ui/globe-pins/globe-pins-3d.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/globe-pins/globe-pins.tsx",
           "type": "registry:component"
         }
       ]
@@ -1043,10 +1324,17 @@
         "three",
         "lucide-react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils",
+        "button"
+      ],
       "files": [
         {
-          "path": "next-ui/interactive-globe-explorer.tsx",
+          "path": "next-ui/interactive-globe-explorer/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/interactive-globe-explorer/interactive-globe-explorer.tsx",
           "type": "registry:component"
         }
       ]
@@ -1075,8 +1363,18 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
+        {
+          "path": "next-ui/animated-countdown/animated-countdown.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-countdown/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/animated-countdown.tsx",
           "type": "registry:component"
@@ -1091,8 +1389,18 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
+        {
+          "path": "next-ui/shooting-stars-grid/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/shooting-stars-grid/shooting-stars-grid.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/shooting-stars-grid.tsx",
           "type": "registry:component"
@@ -1107,8 +1415,18 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
+        {
+          "path": "next-ui/hover-highlight-text/hover-highlight-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/hover-highlight-text/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/hover-highlight-text.tsx",
           "type": "registry:component"
@@ -1123,10 +1441,16 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/motion-layer-scroller.tsx",
+          "path": "next-ui/motion-layer-scroller/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/motion-layer-scroller/motion-layer-scroller.tsx",
           "type": "registry:component"
         }
       ]
@@ -1139,11 +1463,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/animated-bento-grid.tsx",
+          "path": "next-ui/animated-bento-grid/animated-bento-grid.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-bento-grid/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -1155,11 +1485,17 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
       "files": [
         {
-          "path": "next-ui/bento-grid-skeleton.tsx",
+          "path": "next-ui/bento-grid-skeleton/bento-grid-skeleton.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/bento-grid-skeleton/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -1174,7 +1510,7 @@
       ],
       "files": [
         {
-          "path": "next-ui/scrolling-testimonials.tsx",
+          "path": "next-ui/scrolling-testimonials/scrolling-testimonials.tsx",
           "type": "registry:component"
         }
       ]
@@ -1188,7 +1524,7 @@
       "registryDependencies": [],
       "files": [
         {
-          "path": "next-ui/spectra-frame.tsx",
+          "path": "next-ui/spectra-frame/spectra-frame.tsx",
           "type": "registry:component"
         }
       ]
@@ -1202,8 +1538,33 @@
       "registryDependencies": [],
       "files": [
         {
-          "path": "next-ui/profile-orbit.tsx",
+          "path": "next-ui/profile-orbit/profile-orbit.tsx",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "command-palette",
+      "type": "registry:component",
+      "title": "Command Palette",
+      "description": "Animated command palette with ⌘K shortcut, grouped navigation/actions/theme commands, backdrop blur overlay, and Framer Motion enter/exit transitions.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "cmdk"
+      ],
+      "registryDependencies": [
+        "utils",
+        "command"
+      ],
+      "files": [
+        {
+          "path": "next-ui/command-palette/command-palette.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/command-palette/index.ts",
+          "type": "registry:lib"
         }
       ]
     }
