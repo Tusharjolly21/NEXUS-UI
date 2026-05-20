@@ -2,7 +2,7 @@
  * GET /api/registry/[name]
  *
  * The endpoint the shadcn CLI hits when a user runs:
- *   npx shadcn@latest add @next-ui/component-name
+ *   npx shadcn@latest add @nexus-labs/component-name
  *
  * Flow:
  *  1. Look up the component in the catalog

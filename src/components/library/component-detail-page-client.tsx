@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import {
   ArrowUpRight,
   Check,
@@ -82,7 +83,7 @@ function InstallSidebar({
   animationKinds: string[];
 }) {
   const name = registryCliName ?? slug;
-  const shadcnAddCmd = `npx shadcn@latest add @next-ui/${name}`;
+  const shadcnAddCmd = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${name}`;
   const installCmd = `npm install ${dependencies.join(" ")}`;
 
   return (

@@ -1851,7 +1851,7 @@ export function TerminalExample() {
         { input: "pnpm dev", runDelayMs: 650, output: [{ text: "ready - http://localhost:3000", tone: "success" }] },
         { input: "git push origin main", runDelayMs: 700, output: [{ text: "main -> main", tone: "success" }] },
         { input: "deploy --prod", runDelayMs: 800, output: [{ text: "live on nexus-ui.com", tone: "success" }] },
-        { input: "npx shadcn@latest add @next-ui/gooey-input", runDelayMs: 600, output: [{ text: "✔ component added", tone: "success" }] },
+        { input: "npx shadcn@latest add @nexus-labs/gooey-input", runDelayMs: 600, output: [{ text: "✔ component added", tone: "success" }] },
       ]}
     />
   );

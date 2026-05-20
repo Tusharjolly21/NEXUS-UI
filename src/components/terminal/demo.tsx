@@ -42,7 +42,7 @@ const script: TerminalCommand[] = [
     ],
   },
   {
-    input: "npx shadcn@latest add @next-ui/gooey-input",
+    input: "npx shadcn@latest add @nexus-labs/gooey-input",
     runDelayMs: 800,
     output: [
       { text: "fetching registry…", tone: "muted" },

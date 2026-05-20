@@ -13,7 +13,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "CLI",
   description:
-    "Use the shadcn/ui CLI for primitives, install catalog pieces via the @next-ui registry, or paste snippets from component pages.",
+    "Use the shadcn/ui CLI for primitives, install catalog pieces via the @nexus-labs registry, or paste snippets from component pages.",
   alternates: { canonical: "/docs/cli" },
 });
 
@@ -52,7 +52,7 @@ npx shadcn@latest add dialog tabs`}</DocPre>
 npx shadcn@latest add card -c ./apps/web`}</DocPre>
       </DocSection>
 
-      <DocSection title="@next-ui registry (shadcn add)">
+      <DocSection title="@nexus-labs registry (shadcn add)">
         <p className="text-sm text-muted-foreground">
           You do <span className="font-medium text-foreground">not</span> need a public host to try this. Next.js serves
           files from <code className={docInlineCodeClass}>public/r/</code>, so with Nexus-UI running locally (
@@ -62,14 +62,14 @@ npx shadcn@latest add card -c ./apps/web`}</DocPre>
           port if your dev server uses something other than 3000):
         </p>
         <DocPre>{`"registries": {
-  "@next-ui": "http://127.0.0.1:3000/r/{name}.json"
+  "@nexus-labs": "http://127.0.0.1:3000/r/{name}.json"
 }`}</DocPre>
         <p className="text-sm text-muted-foreground">
           Keep Nexus-UI&apos;s dev server running while you run the add command in the other app. Initialize shadcn
           there if needed (<code className={docInlineCodeClass}>npx shadcn@latest init</code>), then:
         </p>
-        <DocPre>{`npx shadcn@latest add @next-ui/terminal
-npx shadcn@latest add @next-ui/gooey-input`}</DocPre>
+        <DocPre>{`npx shadcn@latest add @nexus-labs/terminal
+npx shadcn@latest add @nexus-labs/gooey-input`}</DocPre>
         <p className="text-sm text-muted-foreground">
           The CLI installs declared dependencies (for example <code className={docInlineCodeClass}>framer-motion</code>), pulls <code className={docInlineCodeClass}>utils</code>{" "}
           from the default shadcn registry if needed, and writes files under your components alias. Registries are built from{" "}
