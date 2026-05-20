@@ -37,6 +37,7 @@ export interface Database {
           role?: "user" | "admin";
           updated_at?: string;
         };
+        Relationships: [];
       };
       bookmarks: {
         Row: {
@@ -60,6 +61,7 @@ export interface Database {
           slug?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       orders: {
         Row: {
@@ -101,6 +103,7 @@ export interface Database {
           currency?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       subscriptions: {
         Row: {
@@ -139,6 +142,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
         };
+        Relationships: [];
       };
       webhook_events: {
         Row: {
@@ -156,6 +160,7 @@ export interface Database {
           event_name?: string;
           processed_at?: string;
         };
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

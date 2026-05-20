@@ -43,6 +43,39 @@ function usePreviewScale() {
   return { ref, scale };
 }
 
+// Defers rendering until the card is near the viewport — prevents 50+ simultaneous
+// preview animations from running on page load when most cards are below the fold.
+function useIsNearViewport(rootMargin = "300px") {
+  const sentinelRef = React.useRef<HTMLDivElement | null>(null);
+  const [isNear, setIsNear] = React.useState(false);
+
+  React.useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+
+    // If IntersectionObserver is not available (SSR / old browser), reveal immediately.
+    if (typeof IntersectionObserver === "undefined") {
+      setIsNear(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsNear(true);
+          observer.disconnect(); // fire once, then stop watching
+        }
+      },
+      { rootMargin },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [rootMargin]);
+
+  return { sentinelRef, isNear };
+}
+
 export function ComponentCardPreview({
   Preview,
   hasVariants = false,
@@ -52,9 +85,13 @@ export function ComponentCardPreview({
   onSelectVariant,
 }: ComponentCardPreviewProps) {
   const { ref, scale } = usePreviewScale();
+  const { sentinelRef, isNear } = useIsNearViewport();
 
   return (
     <div className="relative shrink-0 overflow-hidden">
+      {/* Invisible sentinel that sits at the top of the card for IntersectionObserver */}
+      <div ref={sentinelRef} className="absolute inset-x-0 top-0 h-px" aria-hidden />
+
       <div
         ref={ref}
         className="relative isolate aspect-square w-full overflow-hidden rounded-[24px] border border-black/5 bg-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:border-white/10"
@@ -89,7 +126,13 @@ export function ComponentCardPreview({
                 transformOrigin: "center",
               }}
             >
-              <Preview compact />
+              {isNear ? (
+                <Preview compact />
+              ) : (
+                // Skeleton placeholder — exact same dimensions as the live preview.
+                // Shown until the card scrolls near the viewport.
+                <div className="h-full w-full rounded-[24px] bg-zinc-900/60" />
+              )}
             </div>
           </div>
         ) : (

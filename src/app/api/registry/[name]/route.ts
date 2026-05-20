@@ -21,7 +21,7 @@ import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
-import { parseApiToken, canAccessComponent } from "@/lib/entitlements";
+import { parseApiToken, adminCanAccessComponent } from "@/lib/entitlements";
 
 type Params = { params: Promise<{ name: string }> };
 
@@ -66,8 +66,8 @@ export async function GET(_req: Request, { params }: Params) {
     );
   }
 
-  // ── 4. Entitlement check ─────────────────────────────────────────
-  const allowed = await canAccessComponent(userId, name);
+  // ── 4. Entitlement check (service-role, bypasses RLS) ───────────
+  const allowed = await adminCanAccessComponent(userId, name);
 
   if (!allowed) {
     return new NextResponse(

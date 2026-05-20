@@ -30,8 +30,29 @@ import {
 import { cn } from "@/lib/utils";
 import { useDiscovery } from "@/hooks/use-discovery";
 import { buttonVariants } from "@/components/ui/button";
-import { ComponentCardPreview } from "@/components/library/component-card-preview";
+import dynamic from "next/dynamic";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+// These block slugs are surfaced inside the /components page so users discover
+// them without switching to the Blocks tab.
+const BLOCKS_IN_COMPONENTS = new Set([
+  "block-interactive-dots",
+  "block-why-choose-us",
+  "block-faq-folder-card",
+]);
+
+
+// Deferred — keeps card-preview code out of the initial JS bundle.
+// The skeleton matches the card's aspect-square shape so there's no layout shift.
+const ComponentCardPreview = dynamic(
+  () => import("@/components/library/component-card-preview").then((m) => ({ default: m.ComponentCardPreview })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="aspect-square w-full animate-pulse rounded-[24px] bg-zinc-900/60" />
+    ),
+  },
+);
 import {
   Sheet,
   SheetContent,
@@ -111,7 +132,10 @@ function buildBaseFeed(view: ExplorerView): FeedItem[] {
     searchBlob: `${t.title} ${t.description} ${t.tags.join(" ")}`,
     tags: t.tags,
   }));
-  if (view === "components") return comp;
+  if (view === "components") {
+    const featuredBlocks = blk.filter((b) => BLOCKS_IN_COMPONENTS.has(b.slug));
+    return [...comp, ...featuredBlocks];
+  }
   if (view === "blocks") return blk;
   return [...comp, ...blk, ...tmpl];
 }
@@ -156,14 +180,23 @@ function ComponentCard({
 
   const hasVariants = !!sections && sections.length > 1;
 
+  // Derive destination explicitly from kind.
+  // Components that are sub-sections of a block redirect straight to that block page.
+  const dest =
+    item.kind === "block"
+      ? `/blocks/${item.slug}`
+      : item.kind === "template"
+        ? `/templates/${item.slug}`
+        : `/components/${item.slug}`;
+
   return (
     <div className="group relative">
       <div
         role="link"
         tabIndex={0}
         className="block h-full cursor-pointer rounded-[24px] outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-        onClick={() => router.push(item.href)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(item.href); }}
+        onClick={() => router.push(dest)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") router.push(dest); }}
       >
         <motion.article
           initial={reduceMotion ? false : { opacity: 0, y: 16 }}
@@ -220,6 +253,15 @@ function ComponentCard({
           </div>
         </motion.article>
       </div>
+
+      {/* Blocks badge */}
+      {item.kind === "block" && (
+        <div className="absolute left-5 top-5 z-20 pointer-events-none">
+          <span className="inline-flex items-center rounded-md border border-indigo-400/30 bg-black/75 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 backdrop-blur-sm">
+            Blocks
+          </span>
+        </div>
+      )}
 
       {/* Favorite button */}
       <button

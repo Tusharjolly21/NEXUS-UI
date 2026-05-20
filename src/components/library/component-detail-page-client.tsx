@@ -8,7 +8,9 @@ import {
   ChevronRight,
   Code2,
   Copy,
+  Crown,
   Expand,
+  Lock,
   Monitor,
   Package,
   Zap,
@@ -172,9 +174,11 @@ function InstallSidebar({
 }
 
 // ── main client component ───────────────────────────────────────────
-export function ComponentDetailPageClient({ slug }: { slug: string }) {
+export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: string; isPremium?: boolean }) {
   const comp = getLibraryComponent(slug);
   if (!comp) return null;
+
+  const codeIsLocked = comp.premium && !isPremium;
 
   const categoryLabel = getComponentCategoryLabel(comp.categorySlug as ComponentCategorySlug);
 
@@ -247,13 +251,14 @@ export function ComponentDetailPageClient({ slug }: { slug: string }) {
           return (
             <PreviewCodeSection
               key={i}
-              title={comp.previewSections!.length > 1 ? `${comp.name} — Variant ${i + 1}` : comp.name}
+              title={section.title ?? (comp.previewSections!.length > 1 ? `${comp.name} — Variant ${i + 1}` : comp.name)}
               code={section.reactSource}
               slug={comp.slug}
               dependencies={comp.dependencies}
               animationKinds={comp.animationKinds}
               registryCliName={comp.registryCliName}
               className={i > 0 ? "mt-16" : undefined}
+              locked={codeIsLocked}
             >
               <SectionPreview compact={false} />
             </PreviewCodeSection>
@@ -266,6 +271,7 @@ export function ComponentDetailPageClient({ slug }: { slug: string }) {
           slug={comp.slug}
           dependencies={comp.dependencies}
           animationKinds={comp.animationKinds}
+          locked={codeIsLocked}
           registryCliName={comp.registryCliName}
         >
           <comp.Preview compact={false} />
@@ -320,6 +326,7 @@ function PreviewCodeSection({
   animationKinds,
   registryCliName,
   className,
+  locked = false,
   children,
 }: {
   title: string;
@@ -329,6 +336,7 @@ function PreviewCodeSection({
   animationKinds: string[];
   registryCliName?: string;
   className?: string;
+  locked?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -342,8 +350,8 @@ function PreviewCodeSection({
               <Monitor className="size-4" />
               Preview
             </TabsTrigger>
-            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base">
-              <Code2 className="size-4" />
+            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled={locked}>
+              {locked ? <Lock className="size-4" /> : <Code2 className="size-4" />}
               Code
             </TabsTrigger>
           </TabsList>
@@ -366,34 +374,75 @@ function PreviewCodeSection({
         </TabsContent>
 
         <TabsContent value="code" className="mt-4">
-          <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-            <InstallSidebar
-              slug={slug}
-              registryCliName={registryCliName}
-              dependencies={dependencies}
-              animationKinds={animationKinds}
-            />
-            <div className="h-[600px] xl:h-[700px]">
-              <CodeBlock
-                code={code}
-                language="tsx"
-                theme="dark"
-                header={{
-                  enabled: true,
-                  showDots: true,
-                  title: `${title}.tsx`,
-                  copy: {
-                    enabled: true,
-                    label: "Copy code",
-                    copiedLabel: "Copied",
-                    copiedDurationMs: 1400,
-                  },
-                }}
-                codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-                border={{ radius: "16px" }}
-              />
+          {locked ? (
+            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-muted/20">
+              {/* Blurred code preview behind the paywall */}
+              <div className="pointer-events-none select-none blur-sm" aria-hidden>
+                <CodeBlock
+                  code={code}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: true, showDots: true, title: `${title}.tsx`, copy: { enabled: false, label: "", copiedLabel: "", copiedDurationMs: 0 } }}
+                  codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+                  border={{ radius: "16px" }}
+                />
+              </div>
+              {/* Paywall overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-background/60 backdrop-blur-[2px]">
+                <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-background shadow-lg">
+                  <Crown className="size-6 text-amber-500" />
+                </div>
+                <div className="text-center">
+                  <p className="text-base font-semibold text-foreground">Pro component</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Upgrade to access the full source code</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:opacity-90"
+                  >
+                    <Crown className="size-4" />
+                    Upgrade to Pro
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                  >
+                    View plans
+                  </Link>
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+              <InstallSidebar
+                slug={slug}
+                registryCliName={registryCliName}
+                dependencies={dependencies}
+                animationKinds={animationKinds}
+              />
+              <div className="h-150 xl:h-175">
+                <CodeBlock
+                  code={code}
+                  language="tsx"
+                  theme="dark"
+                  header={{
+                    enabled: true,
+                    showDots: true,
+                    title: `${title}.tsx`,
+                    copy: {
+                      enabled: true,
+                      label: "Copy code",
+                      copiedLabel: "Copied",
+                      copiedDurationMs: 1400,
+                    },
+                  }}
+                  codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+                  border={{ radius: "16px" }}
+                />
+              </div>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

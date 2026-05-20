@@ -12,6 +12,7 @@
  */
 
 import { createClient } from "@/lib/supabase/server";
+import { getAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
 
 type Order = Database["public"]["Tables"]["orders"]["Row"];
@@ -160,6 +161,64 @@ export async function canAccessTemplate(
 export async function hasPremiumAccess(userId: string): Promise<boolean> {
   if (await hasLifetimeAccess(userId)) return true;
   if (await hasActiveSubscription(userId)) return true;
+  return false;
+}
+
+// ── Admin entitlement checks (bypass RLS — for API token auth) ────────────────
+
+/**
+ * These variants use the service-role key and bypass RLS.
+ * Use ONLY in server-side API routes where the caller authenticates
+ * via an API token (not a browser session), so no auth.uid() is present.
+ */
+
+async function adminHasLifetimeAccess(userId: string): Promise<boolean> {
+  const admin = getAdminClient();
+  const { data } = await admin
+    .from("orders")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("product_type", "lifetime")
+    .eq("status", "paid")
+    .limit(1)
+    .maybeSingle();
+  return data !== null;
+}
+
+async function adminHasActiveSubscription(userId: string): Promise<boolean> {
+  const admin = getAdminClient();
+  const { data } = await admin
+    .from("subscriptions")
+    .select("id")
+    .eq("user_id", userId)
+    .in("status", ["active", "past_due"])
+    .limit(1)
+    .maybeSingle();
+  return data !== null;
+}
+
+async function adminHasPurchasedComponent(userId: string, slug: string): Promise<boolean> {
+  const admin = getAdminClient();
+  const { data } = await admin
+    .from("orders")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("product_type", "component")
+    .eq("product_slug", slug)
+    .eq("status", "paid")
+    .limit(1)
+    .maybeSingle();
+  return data !== null;
+}
+
+/**
+ * Entitlement check for API-token-authenticated requests (shadcn CLI).
+ * Uses service role key — bypasses RLS.
+ */
+export async function adminCanAccessComponent(userId: string, slug: string): Promise<boolean> {
+  if (await adminHasLifetimeAccess(userId)) return true;
+  if (await adminHasActiveSubscription(userId)) return true;
+  if (await adminHasPurchasedComponent(userId, slug)) return true;
   return false;
 }
 

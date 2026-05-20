@@ -134,10 +134,11 @@ export function PricingSection() {
 
   async function checkout(tier: "pro" | "lifetime") {
     try {
-      const res = await fetch("/api/stripe/checkout", {
+      const plan = tier === "pro" ? "annual" : "lifetime";
+      const res = await fetch("/api/lemonsqueezy/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tier }),
+        body: JSON.stringify({ plan }),
       });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) { toast.error(data.error ?? "Checkout unavailable"); return; }

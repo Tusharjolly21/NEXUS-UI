@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { getLibraryComponent, libraryComponents } from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
+import { createClient } from "@/lib/supabase/server";
+import { hasPremiumAccess } from "@/lib/entitlements";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -26,6 +28,10 @@ export default async function ComponentDetailPage({ params }: Props) {
   const { slug } = await params;
   const item = getLibraryComponent(slug);
   if (!item) notFound();
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isPremium = user ? await hasPremiumAccess(user.id) : false;
 
   const softwareJsonLd = {
     "@context": "https://schema.org",
@@ -52,7 +58,7 @@ export default async function ComponentDetailPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <ComponentDetailPageClient slug={slug} />
+      <ComponentDetailPageClient slug={slug} isPremium={isPremium} />
     </>
   );
 }

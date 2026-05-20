@@ -28,6 +28,7 @@ export type LibraryComponent = {
    * Preview / Code tab block instead of the shared single-tab layout.
    */
   previewSections?: Array<{
+    title?: string;
     Preview: ComponentType<{ compact?: boolean }>;
     reactSource: string;
   }>;
@@ -970,7 +971,11 @@ export function SplitSignup() {
       { name: "onSocialLogin", type: "(provider: \"github\" | \"apple\" | \"google\") => void", description: "Called when a social provider button is clicked." },
     ],
     Preview: Previews.PreviewSignupForm,
-    reactSource: `"use client";
+    previewSections: [
+      {
+        title: "Signup Form",
+        Preview: Previews.PreviewSignupForm,
+        reactSource: `"use client";
 
 import { SignupForm, type SignupFormValues } from "@/components/signup-form";
 
@@ -981,6 +986,28 @@ export function AuthSignupCard() {
 
   return <SignupForm onSubmit={createAccount} />;
 }`,
+      },
+      {
+        title: "Login Form",
+        Preview: Previews.PreviewLoginForm,
+        reactSource: `"use client";
+
+import { LoginForm, type LoginFormValues } from "@/components/signup-form/login-form";
+
+export function AuthLoginCard() {
+  async function signIn(values: LoginFormValues) {
+    await new Promise<void>((resolve) => setTimeout(resolve, 1200));
+  }
+
+  return (
+    <LoginForm
+      onSubmit={signIn}
+      onForgotPassword={() => console.log("forgot password")}
+    />
+  );
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
   {
@@ -5614,70 +5641,6 @@ export function Hero() {
     tailwindSource: tw,
   },
   {
-    slug: "interactive-dots",
-    name: "Interactive Dots",
-    description: "Mouse-reactive canvas field of dots and connecting lines. Dots repel from the cursor with configurable physics — great for immersive hero backgrounds.",
-    categorySlug: "background-effects",
-    tags: ["canvas", "cursor", "dots", "background", "interactive", "hero"],
-    premium: false,
-    trendingScore: 82,
-    createdAt: "2026-03-22",
-    animationKinds: ["hover"],
-    dependencies: [],
-    Preview: Previews.PreviewInteractiveDots,
-    reactSource: `"use client";
-
-import { InteractiveDots } from "@/components/interactive-dots";
-
-export function DotsBackground() {
-  return (
-    <InteractiveDots
-      mode="lines"
-      dotSpacing={28}
-      dotSize={2}
-      interactionRadius={105}
-      repulsionStrength={34}
-      lineDistance={58}
-      className="h-screen w-full"
-    />
-  );
-}`,
-    tailwindSource: tw,
-  },
-  {
-    slug: "layered-wave-background",
-    name: "Layered Wave Background",
-    description: "Multiple sine-wave layers with configurable gradient colors, speed, and blur. Produces a flowing, liquid ambient backdrop for any section.",
-    categorySlug: "background-effects",
-    tags: ["wave", "gradient", "background", "ambient", "animated", "hero"],
-    premium: false,
-    trendingScore: 86,
-    createdAt: "2026-04-02",
-    animationKinds: ["gradient"],
-    dependencies: [],
-    Preview: Previews.PreviewLayeredWaveBackground,
-    reactSource: `"use client";
-
-import { LayeredWaveBackground } from "@/components/layered-wave-background";
-
-export function WaveHero() {
-  return (
-    <LayeredWaveBackground
-      gradientColors={["#7c3aed", "#06b6d4", "#ec4899"]}
-      backgroundColor="#020617"
-      waveLayers={5}
-      speed="medium"
-      className="min-h-screen"
-    >
-      <div className="flex min-h-screen items-center justify-center">
-        <h1 className="text-5xl font-semibold text-white">Your hero content</h1>
-      </div>
-    </LayeredWaveBackground>
-  );
-}`,
-    tailwindSource: tw,
-  },
-  {
     slug: "motion-layer-scroller",
     name: "Motion Layer Scroller",
     description: "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
@@ -5756,27 +5719,6 @@ const cards = [
 
 export function SkeletonGrid() {
   return <BentoGridSkeleton cards={cards} />;
-}`,
-    tailwindSource: tw,
-  },
-  {
-    slug: "why-choose-us-bento",
-    name: "Why Choose Us Bento",
-    description: "Full-page feature bento with animated tiles showcasing product advantages. Rich motion entrance effects and a polished dark aesthetic out of the box.",
-    categorySlug: "feature-sections",
-    tags: ["bento", "features", "marketing", "section", "framer-motion", "dark"],
-    premium: false,
-    trendingScore: 87,
-    createdAt: "2026-04-25",
-    animationKinds: ["scroll", "spring"],
-    dependencies: ["framer-motion"],
-    Preview: Previews.PreviewWhyChooseUs,
-    reactSource: `"use client";
-
-import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";
-
-export function WhyChooseUsSection() {
-  return <WhyChooseUsBento />;
 }`,
     tailwindSource: tw,
   },

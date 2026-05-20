@@ -37,6 +37,8 @@ import {
   SearchableFaqSection,
 } from "@/components/blocks/faq-folder-card";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { createClient } from "@/lib/supabase/server";
+import { hasPremiumAccess } from "@/lib/entitlements";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -70,6 +72,11 @@ export default async function BlockDetailPage({ params }: Props) {
       { "@type": "ListItem", position: 3, name: block.name, item: `${siteConfig.url}/blocks/${slug}` },
     ],
   };
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isPremium = user ? await hasPremiumAccess(user.id) : false;
+  const locked = block.premium && !isPremium;
+
   const Preview = block.Preview;
   const code = await getBlockCode(block.slug, block.reactSource);
   const isInteractiveBackgroundCard = block.slug === "block-interactive-dots";
@@ -147,7 +154,7 @@ export default async function BlockDetailPage({ params }: Props) {
 
       {isInteractiveBackgroundCard ? (
         <>
-          <PreviewCodeSection title="Interactive Dots" code={code}>
+          <PreviewCodeSection title="Interactive Dots" code={code} locked={locked}>
             <InteractiveDotsHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
@@ -155,6 +162,7 @@ export default async function BlockDetailPage({ params }: Props) {
             code={layeredWaveCode}
             usageCode={LAYERED_WAVE_USAGE}
             className="mt-16"
+            locked={locked}
           >
             <LayeredWaveHeroCustomizer />
           </PreviewCodeSection>
@@ -163,6 +171,7 @@ export default async function BlockDetailPage({ params }: Props) {
             code={particleNoiseCode}
             usageCode={PARTICLE_NOISE_USAGE}
             className="mt-16"
+            locked={locked}
           >
             <ParticleNoiseHeroCustomizer />
           </PreviewCodeSection>
@@ -171,6 +180,7 @@ export default async function BlockDetailPage({ params }: Props) {
             code={wavyLinesCode}
             usageCode={WAVY_LINES_USAGE}
             className="mt-16"
+            locked={locked}
           >
             <div className="relative h-full min-h-full overflow-hidden rounded-lg bg-[#031412]">
               <WavyLines
@@ -198,31 +208,31 @@ export default async function BlockDetailPage({ params }: Props) {
           </PreviewCodeSection>
         </>
       ) : isAnimatedBentoCard ? (
-        <PreviewCodeSection title={block.name} code={code}>
+        <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <BentoHeroCustomizer />
         </PreviewCodeSection>
       ) : isBentoSkeletonCard ? (
-        <PreviewCodeSection title={block.name} code={code}>
+        <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <BentoGridSkeletonHeroCustomizer />
         </PreviewCodeSection>
       ) : isMotionLayerScrollerCard ? (
-        <PreviewCodeSection title={block.name} code={code}>
+        <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <MotionLayerScrollerHeroCustomizer />
         </PreviewCodeSection>
       ) : isBentoShowcaseCard ? (
-        <PreviewCodeSection title={block.name} code={code}>
+        <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <BentoShowcaseHeroCustomizer />
         </PreviewCodeSection>
       ) : isWhyChooseUsCard ? (
         <>
-          <PreviewCodeSection title={block.name} code={code} locked>
+          <PreviewCodeSection title={block.name} code={code} locked={locked}>
             <WhyChooseUsBentoHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
             title="ATS Bento Grid"
             code={atsBentoCode}
             usageCode={ATS_BENTO_USAGE}
-            locked
+            locked={locked}
             className="mt-16"
           >
             <AtsBentoGridHeroCustomizer />
@@ -231,7 +241,7 @@ export default async function BlockDetailPage({ params }: Props) {
             title="Spotlight Bento Grid"
             code={spotlightCode}
             usageCode={SPOTLIGHT_BENTO_USAGE}
-            locked
+            locked={locked}
             className="mt-16"
           >
             <SpotlightBentoGridCustomizer />
@@ -239,13 +249,14 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isFaqFolderCard ? (
         <>
-          <PreviewCodeSection title="Questions & Answers FAQ" code={code}>
+          <PreviewCodeSection title="Questions & Answers FAQ" code={code} locked={locked}>
             <FaqFolderCard />
           </PreviewCodeSection>
           <PreviewCodeSection
             title="Searchable FAQ"
             code={code}
             className="mt-16"
+            locked={locked}
           >
             <SearchableFaqSection />
           </PreviewCodeSection>
@@ -253,12 +264,13 @@ export default async function BlockDetailPage({ params }: Props) {
             title="Chat FAQ"
             code={code}
             className="mt-16"
+            locked={locked}
           >
             <ChatFaqSection />
           </PreviewCodeSection>
         </>
       ) : (
-        <PreviewCodeSection title={block.name} code={code}>
+        <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <Preview />
         </PreviewCodeSection>
       )}
@@ -366,15 +378,27 @@ function PreviewCodeSection({
         <TabsContent value="code" className="mt-4">
           {locked ? (
             <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-muted/30 p-8">
-              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <div className="flex size-12 items-center justify-center rounded-2xl border border-border/50 bg-muted/50 shadow-inner">
-                  <Lock className="size-5 text-muted-foreground" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/60 backdrop-blur-[2px]">
+                <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-background shadow-lg">
+                  <Lock className="size-6 text-amber-500" />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-semibold text-muted-foreground">Code access locked</p>
-                  <p className="mt-1 text-xs text-muted-foreground/60">
-                    Code will be available soon. Stay tuned for updates.
-                  </p>
+                  <p className="text-base font-semibold text-foreground">Pro block</p>
+                  <p className="mt-1 text-sm text-muted-foreground">Upgrade to access the full source code</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Link
+                    href="/pricing"
+                    className="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:opacity-90"
+                  >
+                    Upgrade to Pro
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+                  >
+                    View plans
+                  </Link>
                 </div>
               </div>
               <div

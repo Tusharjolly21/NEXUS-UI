@@ -22,6 +22,7 @@ import {
   Zap,
 } from "lucide-react";
 import { libraryComponents } from "@/lib/catalog/library-components";
+import { blocks } from "@/lib/catalog/blocks";
 import {
   COMPONENT_CATEGORIES,
   getComponentCategoryLabel,
@@ -52,6 +53,9 @@ type AccessMode = "all" | "free" | "pro";
 type TypeFilter = "all" | "text" | "background" | "3d" | "motion" | "cards" | "forms" | "navigation" | "ai";
 
 const CATEGORY_ORDER = COMPONENT_CATEGORIES.map((c) => c.slug) as ComponentCategorySlug[];
+
+const FEATURED_BLOCK_SLUGS = ["block-interactive-dots", "block-why-choose-us", "block-faq-folder-card"];
+const featuredBlocks = blocks.filter((b) => FEATURED_BLOCK_SLUGS.includes(b.slug));
 
 type TypeFilterDef = { value: TypeFilter; label: string; icon: React.ReactNode; match: (comp: (typeof libraryComponents)[number]) => boolean };
 const TYPE_FILTERS: TypeFilterDef[] = [
@@ -241,9 +245,9 @@ function ComponentsPageInner() {
             <div className="ml-auto flex items-center gap-3">
               <span className="hidden text-xs text-muted-foreground sm:inline">
                 <span className="font-semibold tabular-nums text-foreground">
-                  {visibleComponents.length}
+                  {visibleComponents.length + featuredBlocks.length}
                 </span>{" "}
-                component{visibleComponents.length !== 1 && "s"}
+                component{visibleComponents.length + featuredBlocks.length !== 1 && "s"}
               </span>
 
               {hasActiveFilters && (
@@ -319,11 +323,77 @@ function ComponentsPageInner() {
                   isTrending={sort === "trending" && index < 5}
                 />
               ))}
+              {featuredBlocks.map((block, i) => (
+                <BlockCard
+                  key={block.slug}
+                  block={block}
+                  index={visibleComponents.length + i}
+                  reduceMotion={reduce}
+                />
+              ))}
             </section>
           )}
         </main>
       </div>
     </div>
+  );
+}
+
+function BlockCard({
+  block,
+  index,
+  reduceMotion,
+}: {
+  block: (typeof featuredBlocks)[number];
+  index: number;
+  reduceMotion: boolean;
+}) {
+  return (
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
+      className="group relative h-full"
+    >
+      <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-black/7 bg-white shadow-[0_2px_16px_-4px_rgba(15,23,42,0.10)] transition-all duration-300 hover:border-black/12 hover:shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-[#151517] dark:shadow-none dark:hover:border-white/14">
+        {/* Preview */}
+        <div className="relative p-3 pb-0">
+          <ComponentCardPreview Preview={block.Preview} />
+          <div className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-md border border-indigo-400/30 bg-black/75 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 backdrop-blur-sm">
+            Blocks
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="flex flex-1 flex-col px-5 pb-4 pt-5">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <h2 className="line-clamp-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-slate-800 dark:text-white">
+              {block.name}
+            </h2>
+            <span className="mt-0.5 shrink-0 text-[13px] font-medium text-slate-400 dark:text-white/40">
+              {block.category}
+            </span>
+          </div>
+          <p className="line-clamp-2 text-[13px] leading-[1.6] text-slate-400 dark:text-white/40">
+            {block.description}
+          </p>
+        </div>
+
+        {/* CTA */}
+        <div className="border-t border-black/5 px-5 py-4 dark:border-white/6">
+          <p className="w-full text-center text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 transition-colors duration-200 group-hover:text-slate-900 dark:text-white/60 dark:group-hover:text-white">
+            View Block
+          </p>
+        </div>
+      </div>
+
+      <Link
+        href={`/blocks/${block.slug}`}
+        className="absolute inset-0 rounded-[24px]"
+        aria-label={`Open ${block.name}`}
+      />
+    </motion.div>
   );
 }
 

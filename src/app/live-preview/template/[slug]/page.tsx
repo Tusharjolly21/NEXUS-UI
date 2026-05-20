@@ -1,21 +1,64 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
-import { SimplisticSaaSPage } from "@/components/templates/simplistic-saas-page";
-import { LandingPage } from "@/components/marketing/landing-page";
-import { NovaLandingPage } from "@/components/templates/nova-landing-page";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 import { ThemeReceiver } from "@/components/templates/theme-receiver";
-import { TalentHubPage } from "@/components/templates/talent-hub-page";
-import { SynapseAIPage } from "@/components/templates/synapse-ai-page";
-import { OrionAIPage } from "@/components/templates/orion-ai-ops";
-import { HelixAIPlatformPage } from "@/components/templates/helix-ai-platform";
-import { StartupLandingPage } from "@/components/templates/startup-landing-page";
-import { ClauraAgencyPage } from "@/components/templates/claura-agency-page";
-import { OceanFlowPage } from "@/components/templates/ocean-flow-page";
-import { PulseLandingPage } from "@/components/templates/pulse-landing-page";
-import { AetherPortfolioPage } from "@/components/templates/aether-portfolio-page";
+
+// Each template is its own dynamic chunk — only the matching slug's JS is sent to the browser.
+const TemplateFallback = () => (
+  <div className="min-h-screen animate-pulse bg-background" aria-hidden />
+);
+
+const SimplisticSaaSPage = dynamic(
+  () => import("@/components/templates/simplistic-saas-page").then((m) => ({ default: m.SimplisticSaaSPage })),
+  { loading: TemplateFallback },
+);
+const LandingPage = dynamic(
+  () => import("@/components/marketing/landing-page").then((m) => ({ default: m.LandingPage })),
+  { loading: TemplateFallback },
+);
+const NovaLandingPage = dynamic(
+  () => import("@/components/templates/nova-landing-page").then((m) => ({ default: m.NovaLandingPage })),
+  { loading: TemplateFallback },
+);
+const TalentHubPage = dynamic(
+  () => import("@/components/templates/talent-hub-page").then((m) => ({ default: m.TalentHubPage })),
+  { loading: TemplateFallback },
+);
+const SynapseAIPage = dynamic(
+  () => import("@/components/templates/synapse-ai-page").then((m) => ({ default: m.SynapseAIPage })),
+  { loading: TemplateFallback },
+);
+const OrionAIPage = dynamic(
+  () => import("@/components/templates/orion-ai-ops").then((m) => ({ default: m.OrionAIPage })),
+  { loading: TemplateFallback },
+);
+const HelixAIPlatformPage = dynamic(
+  () => import("@/components/templates/helix-ai-platform").then((m) => ({ default: m.HelixAIPlatformPage })),
+  { loading: TemplateFallback },
+);
+const StartupLandingPage = dynamic(
+  () => import("@/components/templates/startup-landing-page").then((m) => ({ default: m.StartupLandingPage })),
+  { loading: TemplateFallback },
+);
+const ClauraAgencyPage = dynamic(
+  () => import("@/components/templates/claura-agency-page").then((m) => ({ default: m.ClauraAgencyPage })),
+  { loading: TemplateFallback },
+);
+const OceanFlowPage = dynamic(
+  () => import("@/components/templates/ocean-flow-page").then((m) => ({ default: m.OceanFlowPage })),
+  { loading: TemplateFallback },
+);
+const PulseLandingPage = dynamic(
+  () => import("@/components/templates/pulse-landing-page").then((m) => ({ default: m.PulseLandingPage })),
+  { loading: TemplateFallback },
+);
+const AetherPortfolioPage = dynamic(
+  () => import("@/components/templates/aether-portfolio-page").then((m) => ({ default: m.AetherPortfolioPage })),
+  { loading: TemplateFallback },
+);
 
 type Props = { params: Promise<{ slug: string }> };
 

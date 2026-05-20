@@ -133,11 +133,13 @@ export function LibraryExplorerSidebarProvider({
 
   const viewParam = searchParams.get("view") as ExplorerView | null;
   const view: ExplorerView =
-    viewParam === "components" || viewParam === "blocks"
+    viewParam === "components" || viewParam === "blocks" || viewParam === "all"
       ? viewParam
       : pathname === "/blocks"
         ? "blocks"
-        : "all";
+        : pathname === "/components"
+          ? "components"
+          : "all";
 
   const [query, setQuery] = React.useState(searchParams.get("q") ?? "");
   const category = searchParams.get("cat") ?? "all";
