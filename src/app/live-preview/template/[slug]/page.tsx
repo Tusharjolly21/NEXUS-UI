@@ -59,6 +59,34 @@ const AetherPortfolioPage = dynamic(
   () => import("@/components/templates/aether-portfolio-page").then((m) => ({ default: m.AetherPortfolioPage })),
   { loading: TemplateFallback },
 );
+const SaasLaunchAuroraPage = dynamic(
+  () => import("@/components/templates/saas-launch-aurora-page"),
+  { loading: TemplateFallback },
+);
+const AiStartupForgePage = dynamic(
+  () => import("@/components/templates/ai-startup-forge-page"),
+  { loading: TemplateFallback },
+);
+const DevPortfolioVectorPage = dynamic(
+  () => import("@/components/templates/dev-portfolio-vector-page"),
+  { loading: TemplateFallback },
+);
+const AgencyStudioDeckPage = dynamic(
+  () => import("@/components/templates/agency-studio-deck-page"),
+  { loading: TemplateFallback },
+);
+const DashboardAuroraAnalyticsPage = dynamic(
+  () => import("@/components/templates/dashboard-aurora-analytics-page"),
+  { loading: TemplateFallback },
+);
+const ProductivityOrbitSuitePage = dynamic(
+  () => import("@/components/templates/productivity-orbit-suite-page"),
+  { loading: TemplateFallback },
+);
+const OrbitAIPage = dynamic(
+  () => import("@/components/templates/orbit-ai-page"),
+  { loading: TemplateFallback },
+);
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -106,6 +134,20 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><PulseLandingPage /></ThemeReceiver>;
   } else if (tmpl.slug === "aether-portfolio") {
     return <ThemeReceiver><AetherPortfolioPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "saas-launch-aurora") {
+    return <ThemeReceiver><SaasLaunchAuroraPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "ai-startup-forge") {
+    return <ThemeReceiver><AiStartupForgePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "dev-portfolio-vector") {
+    return <ThemeReceiver><DevPortfolioVectorPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "agency-studio-deck") {
+    return <ThemeReceiver><AgencyStudioDeckPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "dashboard-aurora-analytics") {
+    return <ThemeReceiver><DashboardAuroraAnalyticsPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "productivity-orbit-suite") {
+    return <ThemeReceiver><ProductivityOrbitSuitePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "orbit-ai-page") {
+    return <ThemeReceiver><OrbitAIPage /></ThemeReceiver>;
   }
 
   return (

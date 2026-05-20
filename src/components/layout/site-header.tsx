@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, LayoutDashboard, ShoppingBag, LogOut, User, Key, CreditCard } from "lucide-react";
+import { Menu, X, LayoutDashboard, ShoppingBag, LogOut, User, Key, CreditCard, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { cn } from "@/lib/utils";
@@ -29,7 +29,7 @@ const NAV_LINKS = [
   { href: "/blog", label: "Blog" },
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({ isPremium = false }: { isPremium?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = React.useState(false);
@@ -133,12 +133,27 @@ export function SiteHeader() {
                         "gap-2 rounded-lg border-border/60 bg-background/80 text-[13px] font-medium text-foreground hover:bg-accent",
                       )}
                     >
-                      <User className="size-3.5 shrink-0 text-muted-foreground" />
+                      {isPremium ? (
+                        <Crown className="size-3.5 shrink-0 text-amber-500" />
+                      ) : (
+                        <User className="size-3.5 shrink-0 text-muted-foreground" />
+                      )}
                       <span className="max-w-28 truncate">{displayName}</span>
+                      {isPremium && (
+                        <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-500">
+                          PRO
+                        </span>
+                      )}
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" sideOffset={8} className="w-52">
-                      <div className="px-2.5 py-2 text-xs text-muted-foreground truncate">
-                        {user.email}
+                      <div className="px-2.5 py-2">
+                        <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        {isPremium && (
+                          <span className="mt-1 inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500">
+                            <Crown className="size-2.5" />
+                            Pro Member
+                          </span>
+                        )}
                       </div>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
@@ -187,16 +202,18 @@ export function SiteHeader() {
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* Get premium CTA still shown */}
-                  <Link
-                    href="/pricing"
-                    className={cn(
-                      buttonVariants({ size: "sm" }),
-                      "rounded-full border-transparent bg-foreground px-4 text-[13px] font-semibold text-background hover:bg-foreground/90",
-                    )}
-                  >
-                    Get premium
-                  </Link>
+                  {/* Show upgrade only for non-premium users */}
+                  {!isPremium && (
+                    <Link
+                      href="/pricing"
+                      className={cn(
+                        buttonVariants({ size: "sm" }),
+                        "rounded-full border-transparent bg-foreground px-4 text-[13px] font-semibold text-background hover:bg-foreground/90",
+                      )}
+                    >
+                      Get premium
+                    </Link>
+                  )}
                 </>
               ) : (
                 <>
@@ -311,9 +328,12 @@ export function SiteHeader() {
               {user ? (
                 <>
                   <div className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-muted/40 px-4 py-2.5">
-                    <User className="size-4 shrink-0 text-muted-foreground" />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                    {isPremium ? <Crown className="size-4 shrink-0 text-amber-500" /> : <User className="size-4 shrink-0 text-muted-foreground" />}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
+                        {isPremium && <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-500">PRO</span>}
+                      </div>
                       <p className="truncate text-xs text-muted-foreground">{user.email}</p>
                     </div>
                   </div>
@@ -356,6 +376,7 @@ export function SiteHeader() {
                     )}
                   >
                     <CreditCard className="size-4" /> Billing
+                    {isPremium && <span className="ml-auto rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-500">PRO</span>}
                   </Link>
                   <Link
                     href="/dashboard/profile"

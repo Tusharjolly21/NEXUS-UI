@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "three-d-folder",
+  "type": "registry:component",
+  "title": "3D Folder",
+  "description": "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
+  "dependencies": [
+    "framer-motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/three-d-folder.tsx",
+      "type": "registry:component",
+      "target": "components/three-d-folder.tsx",
+      "content": "\"use client\";\n\nimport { ThreeDFolder } from \"@/components/three-d-folder\";\n\nexport function FolderShowcase() {\n  return (\n    <div className=\"grid min-h-[520px] items-center gap-8 rounded-3xl bg-zinc-50 p-8 md:grid-cols-2 dark:bg-zinc-950\">\n      <ThreeDFolder\n        title=\"Launch Assets\"\n        folderBackColor=\"#fb7185\"\n        folderFrontColor=\"#facc15\"\n        folderTabColor=\"#f97316\"\n      />\n\n      <div>\n        <p className=\"text-sm font-medium uppercase tracking-[0.24em] text-rose-500\">Portfolio folder</p>\n        <h2 className=\"mt-4 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white\">\n          Hover the folder to reveal stacked project previews.\n        </h2>\n        <p className=\"mt-4 text-zinc-600 dark:text-zinc-400\">\n          Use it for case studies, campaign assets, product shots, or any compact visual archive.\n        </p>\n      </div>\n    </div>\n  );\n}`,\n      },\n      {\n        Preview: Previews.PreviewThreeDFolderMini,\n        reactSource: `\"use client\";\n\nimport { ThreeDFolder } from \"@/components/three-d-folder\";\n\nexport function FolderShowcaseMini() {\n  return (\n    <div className=\"grid min-h-[520px] items-center gap-8 rounded-3xl bg-zinc-50 p-8 md:grid-cols-2 dark:bg-zinc-950\">\n      <ThreeDFolder\n        title=\"Launch Assets\"\n        size=\"sm\"\n        folderBackColor=\"#fb7185\"\n        folderFrontColor=\"#facc15\"\n        folderTabColor=\"#f97316\"\n      />\n\n      <div>\n        <p className=\"text-sm font-medium uppercase tracking-[0.24em] text-rose-500\">Portfolio folder</p>\n        <h2 className=\"mt-4 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white\">\n          Hover the folder to reveal stacked project previews.\n        </h2>\n        <p className=\"mt-4 text-zinc-600 dark:text-zinc-400\">\n          Use size=\"sm\" for a compact folder — great for sidebars, dashboards, or anywhere space is tight.\n        </p>\n      </div>\n    </div>\n  );\n}\n"
+    }
+  ]
+}

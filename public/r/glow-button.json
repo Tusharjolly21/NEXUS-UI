@@ -1,0 +1,22 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "glow-button",
+  "type": "registry:component",
+  "title": "Glow Button",
+  "description": "Framer-style glowing CTA button with expanding shadow, radial border sweep, glass edge, and animated arrow.",
+  "dependencies": [
+    "framer-motion",
+    "lucide-react"
+  ],
+  "registryDependencies": [
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "next-ui/glow-button.tsx",
+      "type": "registry:component",
+      "target": "components/glow-button.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { ArrowRight } from \"lucide-react\";\nimport { motion } from \"framer-motion\";\nimport { cn } from \"@/lib/utils\";\n\ntype GlowButtonProps = {\n  children?: React.ReactNode;\n  href?: string;\n  className?: string;\n  innerClassName?: string;\n  background?: string;\n  textColor?: string;\n  arrowColor?: string;\n  radius?: number;\n  glow?: string;\n  borderColor?: string;\n  openInNewTab?: boolean;\n} & Omit<React.ComponentPropsWithoutRef<typeof motion.a>, \"children\" | \"href\" | \"color\">;\n\nexport function GlowButton({\n  children = \"Get Started Now\",\n  href = \"#\",\n  className,\n  innerClassName,\n  background = \"rgb(0, 0, 0)\",\n  textColor = \"rgb(255, 255, 255)\",\n  arrowColor = \"rgb(255, 255, 255)\",\n  radius = 8,\n  glow = \"0px 20px 50px 4px rgba(255, 255, 255, 0.25)\",\n  borderColor = \"rgba(255, 255, 255, 0.25)\",\n  openInNewTab = false,\n  ...props\n}: GlowButtonProps) {\n  const rounded = \\`\\${radius}px\\`;\n  const target = openInNewTab ? \"_blank\" : undefined;\n  const rel = openInNewTab ? \"noreferrer noopener\" : undefined;\n\n  return (\n    <motion.a\n      href={href}\n      target={target}\n      rel={rel}\n      initial=\"rest\"\n      animate=\"rest\"\n      whileHover=\"hover\"\n      className={cn(\"relative inline-flex cursor-pointer items-center justify-center overflow-visible no-underline\", className)}\n      {...props}\n    >\n      <motion.span\n        aria-hidden\n        variants={{\n          rest: { scale: 0.4, boxShadow: glow },\n          hover: { scale: 1, boxShadow: \"0px 7px 20px 0px rgba(255, 255, 255, 0.25)\" },\n        }}\n        transition={{ type: \"spring\", duration: 1, bounce: 0 }}\n        className=\"absolute inset-0 z-0 origin-bottom\"\n        style={{ borderRadius: rounded, backgroundColor: \"transparent\" }}\n      />\n\n      <span className=\"relative z-10 inline-flex items-center justify-center overflow-hidden p-px\" style={{ borderRadius: rounded, backgroundColor: \"rgba(255, 255, 255, 0.05)\" }}>\n        <motion.span\n          aria-hidden\n          variants={{\n            rest: { left: \"30%\", width: \"40%\" },\n            hover: { left: \"0%\", width: \"100%\" },\n          }}\n          transition={{ type: \"spring\", duration: 1, bounce: 0 }}\n          className=\"absolute bottom-0 z-10 h-1/2\"\n          style={{\n            borderRadius: rounded,\n            background: \"radial-gradient(50% 200% at 50% 50%, rgba(255,255,255,0.1) 0%, rgb(255,255,255) 52%, rgba(255,255,255,0.1) 100%)\",\n          }}\n        />\n        <span\n          aria-hidden\n          className=\"absolute inset-0 z-0 backdrop-blur-[10px]\"\n          style={{\n            borderRadius: rounded,\n            background: \"radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.47) 0%, rgba(171,171,171,0.4) 100%)\",\n          }}\n        />\n        <span aria-hidden className=\"pointer-events-none absolute inset-0 z-10\" style={{ borderRadius: rounded, border: \\`1px solid \\${borderColor}\\` }} />\n        <span className={cn(\"relative z-20 inline-flex items-center justify-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm leading-none\", innerClassName)} style={{ borderRadius: rounded, background, color: textColor }}>\n          <span>{children}</span>\n          <span className=\"grid size-5 place-items-center overflow-hidden\">\n            <motion.span variants={{ rest: { x: 0 }, hover: { x: [0, 4, 0] } }} transition={{ duration: 0.8, ease: \"easeInOut\" }}>\n              <ArrowRight className=\"size-5\" style={{ color: arrowColor, strokeWidth: 1.5 }} />\n            </motion.span>\n          </span>\n        </span>\n      </span>\n    </motion.a>\n  );\n}\n"
+    }
+  ]
+}

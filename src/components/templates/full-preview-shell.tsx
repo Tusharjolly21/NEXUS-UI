@@ -8,6 +8,7 @@ import {
   Check,
   Code,
   Copy,
+  Download,
   Eye,
   ExternalLink,
   Lock,
@@ -159,7 +160,8 @@ function LockedCodeRow({ w }: { w: string }) {
   return <div className={`h-3 rounded-full bg-zinc-800 opacity-60 ${w}`} />;
 }
 
-export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
+export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: MarketplaceTemplate; isPremium?: boolean }) {
+  const codeIsLocked = tmpl.premium && !isPremium;
   const [mode, setMode] = React.useState<"preview" | "code">("preview");
   const [viewport, setViewport] = React.useState<"desktop" | "tablet" | "mobile">("desktop");
   const [copied, setCopied] = React.useState(false);
@@ -171,6 +173,18 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
     navigator.clipboard.writeText(code).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = async () => {
+    const res = await fetch(`/api/download/template?slug=${tmpl.slug}`);
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${tmpl.slug}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const toggleTheme = () => {
@@ -237,22 +251,33 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
                     src/app/(template)/{tmpl.slug}/page.tsx
                   </span>
                 </div>
-                <button
-                  onClick={handleCopyCode}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="size-3.5 text-emerald-400" />
-                      <span className="text-emerald-400">Copied</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="size-3.5" />
-                      Copy
-                    </>
+                <div className="flex items-center gap-2">
+                  {!codeIsLocked && (
+                    <button
+                      onClick={handleDownload}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+                    >
+                      <Download className="size-3.5" />
+                      Download
+                    </button>
                   )}
-                </button>
+                  <button
+                    onClick={handleCopyCode}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-1.5 text-xs text-zinc-300 transition hover:bg-zinc-800 hover:text-white"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="size-3.5 text-emerald-400" />
+                        <span className="text-emerald-400">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="size-3.5" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Code + sidebar */}
@@ -293,15 +318,15 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
                     {code}
                   </pre>
 
-                  {tmpl.premium && (
+                  {codeIsLocked && (
                     <div className="absolute inset-x-0 bottom-0 flex flex-col items-center justify-end pb-8 pt-32 bg-linear-to-t from-zinc-950 via-zinc-950/90 to-transparent">
                       <div className="rounded-2xl border border-zinc-700/60 bg-zinc-900 px-6 py-5 text-center shadow-2xl max-w-xs">
                         <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-amber-500/10 border border-amber-500/30">
                           <Lock className="size-5 text-amber-400" />
                         </div>
-                        <p className="text-sm font-semibold text-white">Full source unlocked</p>
+                        <p className="text-sm font-semibold text-white">Pro template</p>
                         <p className="mt-1 text-xs text-zinc-400">
-                          Get All-Access to download every file, component, and config.
+                          Upgrade to access the full source code for this template.
                         </p>
                         <Link
                           href="/pricing"
@@ -324,8 +349,10 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
               </div>
 
               <div className="border-t border-zinc-800 bg-zinc-900/40 px-4 py-2 text-center text-[11px] text-zinc-500">
-                {tmpl.premium
+                {codeIsLocked
                   ? "Full source · All-Access license · Instant download after purchase"
+                  : tmpl.premium
+                  ? "Full source included · All-Access license · Copy and deploy"
                   : "MIT license · Zero attribution required · Ready to deploy"}
               </div>
             </div>
@@ -376,7 +403,7 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
             >
               <Code className="size-3" />
               Code
-              {tmpl.premium && <Lock className="ml-0.5 size-2.5 text-amber-500/80" />}
+              {codeIsLocked && <Lock className="ml-0.5 size-2.5 text-amber-500/80" />}
             </button>
           </div>
 
@@ -417,13 +444,23 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
             >
               <ExternalLink className="size-3.5" />
             </button>
-            <Link
-              href="/pricing"
-              title="Get All-Access"
-              className="hidden rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground dark:hover:bg-white/5 sm:inline-flex"
-            >
-              <ShoppingCart className="size-3.5" />
-            </Link>
+            {!codeIsLocked ? (
+              <button
+                onClick={handleDownload}
+                title="Download source code"
+                className="hidden rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground dark:hover:bg-white/5 sm:inline-flex"
+              >
+                <Download className="size-3.5" />
+              </button>
+            ) : (
+              <Link
+                href="/pricing"
+                title="Get All-Access"
+                className="hidden rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground dark:hover:bg-white/5 sm:inline-flex"
+              >
+                <ShoppingCart className="size-3.5" />
+              </Link>
+            )}
             <button
               onClick={toggleTheme}
               title="Toggle theme"
@@ -433,16 +470,18 @@ export function FullPreviewShell({ tmpl }: { tmpl: MarketplaceTemplate }) {
             </button>
           </div>
 
-          {/* Purchase pill */}
-          <div className="pl-1">
-            <Link
-              href="/pricing"
-              className="inline-flex items-center gap-1 rounded-full bg-zinc-950 px-3 py-1.5 text-xs font-semibold text-white shadow transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:gap-1.5 sm:px-4"
-            >
-              <Sparkles className="size-3 fill-current text-amber-400 dark:text-amber-500 sm:size-3.5" />
-              All Access
-            </Link>
-          </div>
+          {/* Purchase pill — only for non-premium users */}
+          {codeIsLocked && (
+            <div className="pl-1">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-1 rounded-full bg-zinc-950 px-3 py-1.5 text-xs font-semibold text-white shadow transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:gap-1.5 sm:px-4"
+              >
+                <Sparkles className="size-3 fill-current text-amber-400 dark:text-amber-500 sm:size-3.5" />
+                All Access
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

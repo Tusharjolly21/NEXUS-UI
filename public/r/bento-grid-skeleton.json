@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "bento-grid-skeleton",
+  "type": "registry:component",
+  "title": "Bento Grid Skeleton",
+  "description": "Bento grid with animated skeleton placeholder tiles — chat, dashboard, avatar, workflow, calendar, and code variants. Perfect for loading states.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/bento-grid-skeleton.tsx",
+      "type": "registry:component",
+      "target": "components/bento-grid-skeleton.tsx",
+      "content": "\"use client\";\n\nimport { BentoGridSkeleton } from \"@/components/bento-grid-skeleton\";\n\nconst cards = [\n  { id: \"1\", title: \"Chat activity\", tag: \"Live\", span: \"2x1\", skeletonType: \"chat\" },\n  { id: \"2\", title: \"Dashboard\", tag: \"Stats\", span: \"1x1\", skeletonType: \"dashboard\" },\n];\n\nexport function SkeletonGrid() {\n  return <BentoGridSkeleton cards={cards} />;\n}\n"
+    }
+  ]
+}

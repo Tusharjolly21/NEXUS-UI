@@ -57,11 +57,11 @@ export function parseApiToken(token: string): string | null {
 
 /**
  * Returns true if the user has an active subscription (annual plan).
- * "Active" means status = 'active' or 'past_due' (grace period).
+ * Uses admin client to bypass RLS — safe because userId comes from verified session.
  */
 async function hasActiveSubscription(userId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const admin = getAdminClient();
+  const { data } = await admin
     .from("subscriptions")
     .select("id")
     .eq("user_id", userId)
@@ -73,10 +73,11 @@ async function hasActiveSubscription(userId: string): Promise<boolean> {
 
 /**
  * Returns true if the user has a lifetime order (one-time full access).
+ * Uses admin client to bypass RLS — safe because userId comes from verified session.
  */
 async function hasLifetimeAccess(userId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const admin = getAdminClient();
+  const { data } = await admin
     .from("orders")
     .select("id")
     .eq("user_id", userId)
@@ -91,8 +92,8 @@ async function hasLifetimeAccess(userId: string): Promise<boolean> {
  * Returns true if the user purchased this specific component à la carte.
  */
 async function hasPurchasedComponent(userId: string, slug: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const admin = getAdminClient();
+  const { data } = await admin
     .from("orders")
     .select("id")
     .eq("user_id", userId)
@@ -108,8 +109,8 @@ async function hasPurchasedComponent(userId: string, slug: string): Promise<bool
  * Returns true if the user purchased this specific template à la carte.
  */
 async function hasPurchasedTemplate(userId: string, slug: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { data } = await supabase
+  const admin = getAdminClient();
+  const { data } = await admin
     .from("orders")
     .select("id")
     .eq("user_id", userId)

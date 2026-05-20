@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { ChevronRight, Expand, Lock, Monitor } from "lucide-react";
+import { ChevronRight, Code2, Expand, Lock, Monitor } from "lucide-react";
 import { getBlock, blocks } from "@/lib/catalog/blocks";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -287,10 +287,21 @@ export default async function BlockDetailPage({ params }: Props) {
           </div>
         </div>
         <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 dark:bg-white/[0.04]">
-          <p className="text-sm font-semibold text-foreground">Code access enabled</p>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Use the Code tab above to inspect and copy this block while you test the flow.
-          </p>
+          {locked ? (
+            <>
+              <p className="text-sm font-semibold text-foreground">Pro block</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Upgrade to Pro to access the full source code for this block.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-semibold text-foreground">Code access enabled</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Use the Code tab above to inspect and copy this block into your project.
+              </p>
+            </>
+          )}
         </div>
       </section>
       </main>
@@ -349,7 +360,7 @@ function PreviewCodeSection({
               Preview
             </TabsTrigger>
             <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled={locked}>
-              <Lock className="size-4" />
+              {locked ? <Lock className="size-4" /> : <Code2 className="size-4" />}
               Code
             </TabsTrigger>
           </TabsList>

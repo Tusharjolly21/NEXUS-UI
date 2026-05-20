@@ -41,6 +41,7 @@ export async function POST(req: Request) {
   const signature = hdrs.get("x-signature") ?? "";
 
   if (!verifyWebhookSignature(rawBody, signature)) {
+    console.error("[webhook] Invalid signature — check LEMONSQUEEZY_WEBHOOK_SECRET matches LS dashboard");
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
@@ -75,23 +76,19 @@ export async function POST(req: Request) {
       if (!userId) break;
 
       const isLifetime = String(attr.variant_id) === process.env.LEMONSQUEEZY_VARIANT_LIFETIME;
+      const isAnnual = String(attr.variant_id) === process.env.LEMONSQUEEZY_VARIANT_ANNUAL;
 
       await supabase.from("orders").insert({
         user_id: userId,
         ls_order_id: event.data.id,
         ls_product_id: String(attr.product_id),
         ls_variant_id: String(attr.variant_id),
-        product_type: isLifetime ? "lifetime" : "component",
+        product_type: isLifetime ? "lifetime" : isAnnual ? "lifetime" : "component",
         status: "paid",
         amount_cents: attr.total,
         currency: attr.currency ?? "USD",
       });
-
-      // Mark profile as premium
-      await supabase
-        .from("profiles")
-        .update({ is_premium: true })
-        .eq("id", userId);
+      console.log(`[webhook] order_created user=${userId} variant=${attr.variant_id} lifetime=${isLifetime}`);
       break;
     }
 
@@ -100,29 +97,6 @@ export async function POST(req: Request) {
         .from("orders")
         .update({ status: "refunded" })
         .eq("ls_order_id", event.data.id);
-
-      // Re-check if user still has another active access before removing premium
-      if (userId) {
-        const { data: activeOrder } = await supabase
-          .from("orders")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("status", "paid")
-          .limit(1)
-          .maybeSingle();
-
-        const { data: activeSub } = await supabase
-          .from("subscriptions")
-          .select("id")
-          .eq("user_id", userId)
-          .in("status", ["active", "past_due"])
-          .limit(1)
-          .maybeSingle();
-
-        if (!activeOrder && !activeSub) {
-          await supabase.from("profiles").update({ is_premium: false }).eq("id", userId);
-        }
-      }
       break;
     }
 
@@ -139,8 +113,7 @@ export async function POST(req: Request) {
         renews_at: attr.renews_at,
         ends_at: attr.ends_at,
       });
-
-      await supabase.from("profiles").update({ is_premium: true }).eq("id", userId);
+      console.log(`[webhook] subscription_created user=${userId} status=${attr.status}`);
       break;
     }
 
@@ -183,9 +156,7 @@ export async function POST(req: Request) {
           .limit(1)
           .maybeSingle();
 
-        if (!activeOrder) {
-          await supabase.from("profiles").update({ is_premium: false }).eq("id", userId);
-        }
+        // no-op: access is derived from orders/subscriptions tables directly
       }
       break;
     }

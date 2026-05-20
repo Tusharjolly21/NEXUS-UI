@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "animated-bento-grid",
+  "type": "registry:component",
+  "title": "Animated Bento Grid",
+  "description": "Feature showcase bento grid with entrance animations and configurable column spans. Each tile supports custom content, tags, and motion entrance delays.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/animated-bento-grid.tsx",
+      "type": "registry:component",
+      "target": "components/animated-bento-grid.tsx",
+      "content": "\"use client\";\n\nimport { AnimatedBentoGrid } from \"@/components/animated-bento-grid\";\n\nconst items = [\n  { id: \"1\", title: \"Ship faster\", description: \"Production components, zero setup.\", tag: \"DX\", span: \"2x1\" },\n  { id: \"2\", title: \"Motion-native\", description: \"Framer Motion built in.\", tag: \"Anim\", span: \"1x1\" },\n];\n\nexport function FeatureGrid() {\n  return <AnimatedBentoGrid items={items} columns={3} />;\n}\n"
+    }
+  ]
+}

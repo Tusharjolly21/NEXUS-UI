@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "word-magnet",
+  "type": "registry:component",
+  "title": "Word Magnet",
+  "description": "Cursor-reactive text where whole words gently repel from the pointer and spring back without splitting letters.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/word-magnet.tsx",
+      "type": "registry:component",
+      "target": "components/word-magnet.tsx",
+      "content": "\"use client\";\n\nimport { WordMagnet } from \"@/components/word-magnet\";\n\nexport function MagneticHeadline() {\n  return (\n    <div className=\"flex min-h-[420px] items-center justify-center rounded-3xl bg-zinc-50 px-6 dark:bg-zinc-950\">\n      <WordMagnet\n        text=\"Move your cursor through this magnetic headline and watch every word gently drift aside before snapping back into a clean readable rhythm\"\n        radius={130}\n        force={0.45}\n        damping={28}\n        returnDelay={360}\n        className=\"max-w-5xl text-5xl font-semibold tracking-[-0.03em] text-zinc-950 dark:text-white\"\n      />\n    </div>\n  );\n}\n"
+    }
+  ]
+}

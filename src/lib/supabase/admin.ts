@@ -26,7 +26,10 @@ export function getAdminClient() {
   return createServerClient<Database>(url, key, {
     cookies: {
       getAll: () => [],
-      setAll: (_cookies, _headers) => {},
+      setAll: () => {},
+    },
+    global: {
+      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
     },
   });
 }

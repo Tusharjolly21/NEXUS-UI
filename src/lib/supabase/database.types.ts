@@ -9,36 +9,6 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          email: string | null;
-          full_name: string | null;
-          avatar_url: string | null;
-          is_premium: boolean;
-          role: "user" | "admin";
-          updated_at: string;
-        };
-        Insert: {
-          id: string;
-          email?: string | null;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          is_premium?: boolean;
-          role?: "user" | "admin";
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          email?: string | null;
-          full_name?: string | null;
-          avatar_url?: string | null;
-          is_premium?: boolean;
-          role?: "user" | "admin";
-          updated_at?: string;
-        };
-        Relationships: [];
-      };
       bookmarks: {
         Row: {
           id: string;

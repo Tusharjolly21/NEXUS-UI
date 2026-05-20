@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "card-carousel-3d",
+  "type": "registry:component",
+  "title": "3D Card Carousel",
+  "description": "Cylindrical 3D card carousel — cards arranged in a circle on the Z axis, rotating continuously or on scroll. Radius, perspective, item size, speed, and direction are all configurable.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/card-carousel-3d.tsx",
+      "type": "registry:component",
+      "target": "components/card-carousel-3d.tsx",
+      "content": "\"use client\";\n\nimport { CardCarousel3D } from \"@/components/card-carousel-3d\";\n\nexport function CarouselDemo() {\n  return (\n    <CardCarousel3D\n      radius={500}\n      itemWidth={280}\n      itemHeight={380}\n      perspective={1000}\n      autoRotate\n      autoSpeed={1}\n      scrollSpeed={1}\n      direction=\"cw\"\n    />\n  );\n}\n"
+    }
+  ]
+}

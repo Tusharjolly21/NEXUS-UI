@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "draggable-card-stack",
+  "type": "registry:component",
+  "title": "Draggable Card Stack",
+  "description": "Shuffled deck of portrait cards on a dark surface. Drag or fling the top card to send it to the back; press ← to pull the bottom card to the front. Supports images and videos, hover overlay, auto-play, and fully configurable stack geometry.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/draggable-card-stack.tsx",
+      "type": "registry:component",
+      "target": "components/draggable-card-stack.tsx",
+      "content": "\"use client\";\n\nimport { DraggableCardStack } from \"@/components/draggable-card-stack\";\n\nexport function CardStackDemo() {\n  return <DraggableCardStack />;\n}\n"
+    }
+  ]
+}

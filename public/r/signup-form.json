@@ -14,7 +14,7 @@
       "path": "next-ui/signup-form.tsx",
       "type": "registry:component",
       "target": "components/signup-form.tsx",
-      "content": "\"use client\";\n\nimport { SignupForm, type SignupFormValues } from \"@/components/signup-form\";\n\nexport function AuthSignupCard() {\n  async function createAccount(values: SignupFormValues) {\n    await new Promise<void>((resolve) => setTimeout(resolve, 1200));\n  }\n\n  return <SignupForm onSubmit={createAccount} />;\n}\n"
+      "content": "\"use client\";\n\nimport { SignupForm, type SignupFormValues } from \"@/components/signup-form\";\n\nexport function AuthSignupCard() {\n  async function createAccount(values: SignupFormValues) {\n    await new Promise<void>((resolve) => setTimeout(resolve, 1200));\n  }\n\n  return <SignupForm onSubmit={createAccount} />;\n}`,\n      },\n      {\n        title: \"Login Form\",\n        Preview: Previews.PreviewLoginForm,\n        reactSource: `\"use client\";\n\nimport { LoginForm, type LoginFormValues } from \"@/components/signup-form/login-form\";\n\nexport function AuthLoginCard() {\n  async function signIn(values: LoginFormValues) {\n    await new Promise<void>((resolve) => setTimeout(resolve, 1200));\n  }\n\n  return (\n    <LoginForm\n      onSubmit={signIn}\n      onForgotPassword={() => console.log(\"forgot password\")}\n    />\n  );\n}\n"
     }
   ]
 }

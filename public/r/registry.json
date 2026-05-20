@@ -346,6 +346,107 @@
       ]
     },
     {
+      "name": "glow-button",
+      "type": "registry:component",
+      "title": "Glow Button",
+      "description": "Framer-style glowing CTA button with expanding shadow, radial border sweep, glass edge, and animated arrow.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/glow-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "word-magnet",
+      "type": "registry:component",
+      "title": "Word Magnet",
+      "description": "Cursor-reactive text where whole words gently repel from the pointer and spring back without splitting letters.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/word-magnet.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "three-d-folder",
+      "type": "registry:component",
+      "title": "3D Folder",
+      "description": "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/three-d-folder.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "draggable-card-stack",
+      "type": "registry:component",
+      "title": "Draggable Card Stack",
+      "description": "Shuffled deck of portrait cards on a dark surface. Drag or fling the top card to send it to the back; press ← to pull the bottom card to the front. Supports images and videos, hover overlay, auto-play, and fully configurable stack geometry.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/draggable-card-stack.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "card-carousel-3d",
+      "type": "registry:component",
+      "title": "3D Card Carousel",
+      "description": "Cylindrical 3D card carousel — cards arranged in a circle on the Z axis, rotating continuously or on scroll. Radius, perspective, item size, speed, and direction are all configurable.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/card-carousel-3d.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "real-time-cursors",
+      "type": "registry:component",
+      "title": "Real-Time Cursors",
+      "description": "Collaborative workspace preview with animated teammate cursors, code review cards, and simulated live presence trails.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/real-time-cursors.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "editorial-blog-rail",
       "type": "registry:component",
       "title": "Editorial Blog Rail",
@@ -928,6 +1029,162 @@
       "files": [
         {
           "path": "next-ui/globe-pins.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "scroll-reveal-text",
+      "type": "registry:component",
+      "title": "Scroll Reveal Text",
+      "description": "Premium scroll-linked text reveal — words, characters, or lines emerge from muted gray to bright white as the user scrolls, with optional blur dissolve and staggered cascade.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/scroll-reveal-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-countdown",
+      "type": "registry:component",
+      "title": "Animated Countdown",
+      "description": "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/animated-countdown.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "shooting-stars-grid",
+      "type": "registry:component",
+      "title": "Shooting Stars Grid",
+      "description": "Animated dot grid with diagonal shooting star streaks and glowing nodes. A dramatic yet subtle background for hero sections and feature blocks.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/shooting-stars-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "hover-highlight-text",
+      "type": "registry:component",
+      "title": "Hover Highlight Text",
+      "description": "Cursor-tracked SVG spotlight that reveals outlined text beneath a base layer. Smooth spring physics follow the mouse for a cinematic hover effect.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/hover-highlight-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "motion-layer-scroller",
+      "type": "registry:component",
+      "title": "Motion Layer Scroller",
+      "description": "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/motion-layer-scroller.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-bento-grid",
+      "type": "registry:component",
+      "title": "Animated Bento Grid",
+      "description": "Feature showcase bento grid with entrance animations and configurable column spans. Each tile supports custom content, tags, and motion entrance delays.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/animated-bento-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "bento-grid-skeleton",
+      "type": "registry:component",
+      "title": "Bento Grid Skeleton",
+      "description": "Bento grid with animated skeleton placeholder tiles — chat, dashboard, avatar, workflow, calendar, and code variants. Perfect for loading states.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/bento-grid-skeleton.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "scrolling-testimonials",
+      "type": "registry:component",
+      "title": "Scrolling Testimonials",
+      "description": "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
+      "dependencies": [],
+      "registryDependencies": [
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/scrolling-testimonials.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "spectra-frame",
+      "type": "registry:component",
+      "title": "Spectra Frame",
+      "description": "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/spectra-frame.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "profile-orbit",
+      "type": "registry:component",
+      "title": "Profile Orbit",
+      "description": "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/profile-orbit.tsx",
           "type": "registry:component"
         }
       ]

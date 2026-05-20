@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "motion-layer-scroller",
+  "type": "registry:component",
+  "title": "Motion Layer Scroller",
+  "description": "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
+  "dependencies": [
+    "framer-motion"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/motion-layer-scroller.tsx",
+      "type": "registry:component",
+      "target": "components/motion-layer-scroller.tsx",
+      "content": "\"use client\";\n\nimport { MotionLayerScroller } from \"@/components/motion-layer-scroller\";\n\nexport function ParallaxScene() {\n  return (\n    <MotionLayerScroller\n      scrollHeight={600}\n      layers={[\n        { id: \"bg\", yRange: [0, -60], content: <BackgroundLayer /> },\n        { id: \"mid\", yRange: [0, -30], content: <MidLayer /> },\n        { id: \"fg\", yRange: [0, 20], content: <ForegroundLayer /> },\n      ]}\n    />\n  );\n}\n"
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutGrid, Layers, FileCode2, Crown, ArrowRight } from "lucide-react";
+import { LayoutGrid, Layers, FileCode2, Crown, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
+import { hasPremiumAccess } from "@/lib/entitlements";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -32,6 +33,8 @@ export default async function DashboardPage() {
     redirect("/login?next=/dashboard");
   }
 
+  const isPremium = await hasPremiumAccess(user.id);
+
   const displayName =
     user.user_metadata?.full_name ??
     user.user_metadata?.name ??
@@ -43,13 +46,29 @@ export default async function DashboardPage() {
   return (
     <div className="px-4 py-6 sm:px-8 sm:py-10">
       {/* Heading */}
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Welcome back, {firstName}
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          Browse components and templates
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Welcome back, {firstName}
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            Browse components and templates
+          </p>
+        </div>
+        {isPremium ? (
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-500">
+            <CheckCircle2 className="size-3.5" />
+            Pro Member
+          </div>
+        ) : (
+          <Link
+            href="/pricing"
+            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-500 transition hover:bg-amber-500/20"
+          >
+            <Sparkles className="size-3.5" />
+            Upgrade to Pro
+          </Link>
+        )}
       </div>
 
       {/* Stat cards */}

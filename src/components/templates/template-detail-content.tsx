@@ -8,11 +8,13 @@ import {
   ArrowUpRight,
   Check,
   ChevronRight,
+  Copy,
   ExternalLink,
   Mail,
   ShoppingCart,
   Sparkles,
   Tag,
+  Terminal,
   X,
 } from "lucide-react";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
@@ -144,6 +146,25 @@ function featureDesc(f: string) {
   return FEATURE_COPY[f] ?? "Production-ready and fully customisable out of the box.";
 }
 
+// ─── Copyable command chip ────────────────────────────────────────────────────
+function CopyableCommand({ cmd }: { cmd: string }) {
+  const [copied, setCopied] = React.useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(cmd).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      onClick={copy}
+      className="flex w-full items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 font-mono text-[11px] text-zinc-300 transition hover:bg-zinc-900 hover:text-white"
+    >
+      <span className="truncate"><span className="text-zinc-600 mr-1.5">$</span>{cmd}</span>
+      {copied ? <Check className="size-3 shrink-0 text-emerald-400" /> : <Copy className="size-3 shrink-0 text-zinc-600" />}
+    </button>
+  );
+}
+
 // ─── Add-to-Cart modal ────────────────────────────────────────────────────────
 function AddToCartModal({
   tmpl,
@@ -271,9 +292,10 @@ function AddToCartModal({
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
-export function TemplateDetailContent({ tmpl }: { tmpl: MarketplaceTemplate }) {
+export function TemplateDetailContent({ tmpl, isPremium = false }: { tmpl: MarketplaceTemplate; isPremium?: boolean }) {
   const reduce = useReducedMotion() === true;
   const [cartOpen, setCartOpen] = React.useState(false);
+  const hasAccess = isPremium || !tmpl.premium;
   const previewHref = `/template-preview/${tmpl.slug}`;
   const pageLabels = tmpl.pageLabels?.length ? tmpl.pageLabels : tmpl.pages.slice(0, 4);
   const features = tmpl.features ?? [];
@@ -355,13 +377,21 @@ export function TemplateDetailContent({ tmpl }: { tmpl: MarketplaceTemplate }) {
                 Live Preview
                 <ArrowUpRight className="size-3.5" />
               </a>
-              {tmpl.premium ? (
-                <button
-                  onClick={() => setCartOpen(true)}
+              {hasAccess ? (
+                <Link
+                  href={`/template-preview/${tmpl.slug}`}
                   className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
                 >
+                  <Check className="size-4" />
+                  Access Template
+                </Link>
+              ) : tmpl.premium ? (
+                <button
+                  onClick={() => setCartOpen(true)}
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
+                >
                   <ShoppingCart className="size-4" />
-                  Add to Cart
+                  Add to Cart — $49
                 </button>
               ) : (
                 <Link
@@ -391,6 +421,70 @@ export function TemplateDetailContent({ tmpl }: { tmpl: MarketplaceTemplate }) {
               reduce={reduce}
             />
           ))}
+        </div>
+      </section>
+
+      {/* ════════ HOW TO RUN ════════ */}
+      <section className="border-t border-border/30">
+        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45 }}
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <Terminal className="size-4 text-primary" />
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">Get started</p>
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">Run it on your machine</h2>
+            <p className="text-sm text-muted-foreground mb-8 max-w-xl">
+              Download the template, install dependencies, and have a fully working Next.js app running locally in under 2 minutes.
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { step: "01", title: "Download ZIP", desc: hasAccess ? 'Click "Access Template" → switch to Code tab → hit Download' : "Purchase the template to get the full source ZIP", icon: "↓" },
+                { step: "02", title: "Install deps", desc: "Open a terminal in the project folder and run the install command", cmd: "npm install" },
+                { step: "03", title: "Start dev server", desc: "Spin up the local development server with hot reload", cmd: "npm run dev" },
+                { step: "04", title: "Open browser", desc: "Visit the local URL and start customising the template", cmd: "localhost:3000" },
+              ].map(({ step, title, desc, cmd, icon }) => (
+                <div key={step} className="relative rounded-2xl border border-border/50 bg-muted/10 p-5 dark:bg-white/[0.02]">
+                  <span className="mb-3 inline-block font-mono text-[10px] font-bold text-primary/60 tracking-widest">{step}</span>
+                  <h3 className="font-semibold text-foreground mb-1.5">{title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">{desc}</p>
+                  {cmd && (
+                    <CopyableCommand cmd={cmd} />
+                  )}
+                  {icon && !cmd && (
+                    <span className="text-2xl text-muted-foreground/30">{icon}</span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 rounded-2xl border border-border/40 bg-zinc-950 dark:bg-zinc-900/60 overflow-hidden">
+              <div className="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900 px-4 py-2.5">
+                <span className="size-2.5 rounded-full bg-red-400/80" />
+                <span className="size-2.5 rounded-full bg-yellow-400/80" />
+                <span className="size-2.5 rounded-full bg-green-400/80" />
+                <span className="ml-2 font-mono text-[11px] text-zinc-400">terminal</span>
+              </div>
+              <div className="p-5 font-mono text-[13px] space-y-1.5">
+                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">npx</span> <span className="text-zinc-200">create-next-app@latest my-app</span></p>
+                <p><span className="text-zinc-500">$</span> <span className="text-zinc-400"># copy template files into my-app/src/</span></p>
+                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">cd</span> <span className="text-zinc-200">my-app</span></p>
+                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">npm</span> <span className="text-zinc-200">install framer-motion lucide-react @studio-freight/lenis</span></p>
+                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">npm</span> <span className="text-zinc-200">run dev</span></p>
+                <p className="pt-1"><span className="text-zinc-500">→</span> <span className="text-cyan-400">Ready</span> <span className="text-zinc-400">on http://localhost:3000</span></p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-xs text-muted-foreground">
+              Requires <span className="font-medium text-foreground">Node.js 18+</span> and <span className="font-medium text-foreground">npm 9+</span>.
+              Stack: {tmpl.techStack.join(", ")}.
+            </p>
+          </motion.div>
         </div>
       </section>
 
@@ -470,10 +564,18 @@ export function TemplateDetailContent({ tmpl }: { tmpl: MarketplaceTemplate }) {
                 <ExternalLink className="size-3.5" />
                 Live Preview
               </a>
-              {tmpl.premium ? (
+              {hasAccess ? (
+                <Link
+                  href={`/template-preview/${tmpl.slug}`}
+                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
+                >
+                  <Check className="size-4" />
+                  Access Template
+                </Link>
+              ) : tmpl.premium ? (
                 <button
                   onClick={() => setCartOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
                 >
                   <ShoppingCart className="size-4" />
                   Add to Cart — $49

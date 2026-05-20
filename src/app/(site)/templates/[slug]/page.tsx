@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { TemplateDetailContent } from "@/components/templates/template-detail-content";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { createClient } from "@/lib/supabase/server";
+import { hasPremiumAccess } from "@/lib/entitlements";
+
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -27,6 +31,10 @@ export default async function TemplateDetailPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isPremium = user ? await hasPremiumAccess(user.id) : false;
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -40,7 +48,7 @@ export default async function TemplateDetailPage({ params }: Props) {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <TemplateDetailContent tmpl={tmpl} />
+      <TemplateDetailContent tmpl={tmpl} isPremium={isPremium} />
     </>
   );
 }

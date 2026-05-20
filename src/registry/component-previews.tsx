@@ -3225,7 +3225,7 @@ const SAMPLE_CODE_HTML = `<!DOCTYPE html>
 </html>`;
 
 const SAMPLE_CODE_JSON = `{
-  "name": "nexus-ui",
+  "name": "nexus-labs",
   "version": "1.0.0",
   "dependencies": {
     "react": "^18.0.0",

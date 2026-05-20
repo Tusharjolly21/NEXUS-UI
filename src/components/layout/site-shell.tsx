@@ -1,10 +1,24 @@
 import { SiteFooter } from "@/components/layout/site-footer";
-import { Navbar } from "@/components/navbar";
+import { SiteHeader } from "@/components/layout/site-header";
+import { createClient } from "@/lib/supabase/server";
+import { hasPremiumAccess } from "@/lib/entitlements";
+import { isSupabaseConfigured } from "@/lib/env";
 
-export function SiteShell({ children }: { children: React.ReactNode }) {
+export async function SiteShell({ children }: { children: React.ReactNode }) {
+  let isPremium = false;
+  if (isSupabaseConfigured()) {
+    try {
+      const supabase = await createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) isPremium = await hasPremiumAccess(user.id);
+    } catch {
+      // non-fatal — header degrades gracefully
+    }
+  }
+
   return (
     <div className="flex min-h-dvh flex-col">
-      <Navbar />
+      <SiteHeader isPremium={isPremium} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </div>

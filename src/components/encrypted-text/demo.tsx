@@ -253,7 +253,7 @@ export function EncryptedTextDemo() {
             <div className="rounded-xl border border-border/70 bg-zinc-950 px-4 py-3 font-mono text-sm text-green-400">
               <span className="text-muted-foreground">$ </span>
               <EncryptedText
-                text="npm install @nexus-ui/core"
+                text="npm install @nexus-labs/core"
                 trigger="load"
                 loop
                 loopDelay={4000}

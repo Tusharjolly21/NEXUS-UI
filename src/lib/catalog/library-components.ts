@@ -5363,7 +5363,7 @@ export function CodeBlockLight() {
 
 import { CodeBlock } from "@/components/code-block/code-block";
 
-const json = \`{ "name": "nexus-ui", "version": "1.0.0" }\`;
+const json = \`{ "name": "nexus-labs", "version": "1.0.0" }\`;
 
 export function CodeBlockJson() {
   return (
