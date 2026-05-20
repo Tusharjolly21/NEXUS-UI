@@ -93,6 +93,15 @@ import { CardCarousel3D } from "@/components/card-carousel-3d";
 import { DraggableCardStack } from "@/components/draggable-card-stack";
 import { RealTimeCursors } from "@/components/real-time-cursors";
 import { CommandPalette } from "@/components/command-palette";
+import { InteractiveGlobeExplorer } from "@/components/interactive-globe-explorer";
+
+export function PreviewInteractiveGlobeExplorer() {
+  return (
+    <div className="h-[620px] w-full overflow-hidden rounded-3xl bg-background">
+      <InteractiveGlobeExplorer className="h-full rounded-3xl" />
+    </div>
+  );
+}
 
 export function PreviewCommandPalette() {
   return (

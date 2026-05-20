@@ -5307,6 +5307,48 @@ export function GlobePins3DExample() {
     ],
   },
   {
+    slug: "interactive-globe-explorer",
+    name: "Interactive Globe Explorer",
+    description:
+      "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+    categorySlug: "three-d-components",
+    tags: [
+      "globe",
+      "map",
+      "3d",
+      "location",
+      "scroll",
+      "interactive",
+      "copy",
+      "tooltip",
+      "webgl",
+    ],
+    premium: false,
+    trendingScore: 225,
+    createdAt: "2026-05-20T00:00:00.000Z",
+    animationKinds: ["3d", "scroll", "hover"],
+    dependencies: ["react-globe.gl", "three", "lucide-react"],
+    Preview: Previews.PreviewInteractiveGlobeExplorer,
+    previewShell: "plain",
+    registryCliName: "interactive-globe-explorer",
+    reactSource: `"use client";
+
+import { InteractiveGlobeExplorer } from "@/components/interactive-globe-explorer";
+
+export function InteractiveGlobeExplorerDemo() {
+  return (
+    <InteractiveGlobeExplorer className="h-[680px]" />
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "locations", type: "GlobeLocation[]", description: "Locations with id, name, lat, lng, address, and email. Defaults to 20 global office locations." },
+      { name: "initialLocationId", type: "string", description: "Optional id of the city focused when the globe initializes.", defaultValue: "\"4\" (London)" },
+      { name: "globeTextureUrl", type: "string", description: "Path to the globe texture image used by react-globe.gl.", defaultValue: "\"/images/earth-blue-marble.jpg\"" },
+      { name: "className", type: "string", description: "Extra classes on the rounded component shell." },
+    ],
+  },
+  {
     name: "Code Block",
     slug: "code-block",
     description: "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",

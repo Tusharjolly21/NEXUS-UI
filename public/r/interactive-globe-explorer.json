@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "interactive-globe-explorer",
+  "type": "registry:component",
+  "title": "Interactive Globe Explorer",
+  "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+  "dependencies": [
+    "react-globe.gl",
+    "three",
+    "lucide-react"
+  ],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "next-ui/interactive-globe-explorer.tsx",
+      "type": "registry:component",
+      "target": "components/interactive-globe-explorer.tsx",
+      "content": "\"use client\";\n\nimport { InteractiveGlobeExplorer } from \"@/components/interactive-globe-explorer\";\n\nexport function InteractiveGlobeExplorerDemo() {\n  return (\n    <InteractiveGlobeExplorer className=\"h-[680px]\" />\n  );\n}\n"
+    }
+  ]
+}

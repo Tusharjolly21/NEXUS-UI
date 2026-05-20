@@ -48,6 +48,8 @@ export interface EncryptedTextProps {
   as?: "span" | "p" | "h1" | "h2" | "h3" | "div";
   /** Called once every character has locked in. */
   onComplete?: () => void;
+  /**ClassName applied to scrambling (unlocked) characters. Defaults to primary/cyan glow. */
+  scrambleClassName?: string;
 }
 
 export function EncryptedText({
@@ -63,6 +65,7 @@ export function EncryptedText({
   loopDelay = 2000,
   as: Tag = "span",
   onComplete,
+  scrambleClassName,
 }: EncryptedTextProps) {
   const reduceMotion = useReducedMotion();
   const rootRef = React.useRef<HTMLElement>(null);
@@ -200,7 +203,7 @@ export function EncryptedText({
           aria-hidden="true"
           className={cn(
             "inline-block transition-colors duration-75",
-            s.locked ? "text-current" : "text-primary dark:text-cyan-400",
+            s.locked ? "text-current" : (scrambleClassName ?? "text-primary dark:text-cyan-400"),
           )}
           style={
             !s.locked
