@@ -284,7 +284,7 @@ export function PricingSection() {
               <button
                 type="button"
                 onClick={() => checkout("pro")}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
               >
                 <Sparkles className="size-4 text-amber-400" />
                 Get Pro — $99
@@ -329,7 +329,7 @@ export function PricingSection() {
               <button
                 type="button"
                 onClick={() => checkout("lifetime")}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
+                className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-foreground py-3 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
               >
                 <Sparkles className="size-4 text-amber-400" />
                 Get Lifetime Access — $149
@@ -513,7 +513,7 @@ export function PricingSection() {
             <div className="flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
               <button
                 onClick={() => checkout("lifetime")}
-                className="inline-flex items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background shadow-lg transition hover:bg-foreground/90"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-7 py-3 text-sm font-semibold text-background shadow-lg transition hover:bg-foreground/90"
               >
                 <Sparkles className="size-4 text-amber-400" />
                 Get All-Access — $149

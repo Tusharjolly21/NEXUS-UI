@@ -24,8 +24,6 @@ export async function createCheckout(opts: CheckoutOptions): Promise<string> {
       type: "checkouts",
       attributes: {
         checkout_options: {
-          success_url: opts.successUrl,
-          cancel_url: opts.cancelUrl,
           button_color: "#18181b",
         },
         checkout_data: {
