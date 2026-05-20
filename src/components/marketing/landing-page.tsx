@@ -158,14 +158,50 @@ const FEATURED_CAROUSEL_SLUGS = [
 ];
 
 const EDGE_GLOBE_PINS = [
-  { id: "london", country: "United Kingdom", city: "London", lat: 51.5074, lon: -0.1278 },
-  { id: "new-york", country: "United States", city: "New York", lat: 40.7128, lon: -74.006 },
+  {
+    id: "london",
+    country: "United Kingdom",
+    city: "London",
+    lat: 51.5074,
+    lon: -0.1278,
+  },
+  {
+    id: "new-york",
+    country: "United States",
+    city: "New York",
+    lat: 40.7128,
+    lon: -74.006,
+  },
   { id: "mumbai", country: "India", city: "Mumbai", lat: 19.076, lon: 72.8777 },
   { id: "tokyo", country: "Japan", city: "Tokyo", lat: 35.6762, lon: 139.6503 },
-  { id: "sydney", country: "Australia", city: "Sydney", lat: -33.8688, lon: 151.2093 },
-  { id: "cape-town", country: "South Africa", city: "Cape Town", lat: -33.9249, lon: 18.4241 },
-  { id: "sao-paulo", country: "Brazil", city: "Sao Paulo", lat: -23.5505, lon: -46.6333 },
-  { id: "dubai", country: "United Arab Emirates", city: "Dubai", lat: 25.2048, lon: 55.2708 },
+  {
+    id: "sydney",
+    country: "Australia",
+    city: "Sydney",
+    lat: -33.8688,
+    lon: 151.2093,
+  },
+  {
+    id: "cape-town",
+    country: "South Africa",
+    city: "Cape Town",
+    lat: -33.9249,
+    lon: 18.4241,
+  },
+  {
+    id: "sao-paulo",
+    country: "Brazil",
+    city: "Sao Paulo",
+    lat: -23.5505,
+    lon: -46.6333,
+  },
+  {
+    id: "dubai",
+    country: "United Arab Emirates",
+    city: "Dubai",
+    lat: 25.2048,
+    lon: 55.2708,
+  },
 ];
 
 const EDGE_GLOBE_CONNECTIONS = [
@@ -235,13 +271,7 @@ function ScrollProgress() {
   );
 }
 
-function FastCountUp({
-  to,
-  suffix = "+",
-}: {
-  to: number;
-  suffix?: string;
-}) {
+function FastCountUp({ to, suffix = "+" }: { to: number; suffix?: string }) {
   const [value, setValue] = React.useState(0);
   const reduce = useReducedMotion() === true;
 
@@ -389,11 +419,13 @@ function Hero() {
               shuffleSpeed={30}
               iterations={10}
               revealDelay={400}
-              className="block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark:text-violet-300 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-300 sm:dark:via-fuchsia-300 sm:dark:to-indigo-300"
+              className=" bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent "
               scrambleClassName="text-fuchsia-500 dark:text-fuchsia-300"
             />
           </span>
         </motion.h1>
+        {/* bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent */}
+        {/* block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark:text-violet-300 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-300 sm:dark:via-fuchsia-300 sm:dark:to-indigo-300 */}
 
         {/* Subtitle */}
         <motion.p
@@ -402,8 +434,8 @@ function Hero() {
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.14 }}
           className="mx-auto max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl"
         >
-          Stop worrying about UI. You focus on your backend and logic —
-          we handle the frontend.
+          Stop worrying about UI. You focus on your backend and logic — we
+          handle the frontend.
         </motion.p>
 
         {/* Stats row */}
@@ -419,7 +451,9 @@ function Hero() {
             { value: "Free", label: "to start" },
           ].map(({ value, label }) => (
             <div key={label} className="text-center">
-              <p className="text-2xl font-bold tracking-tight text-foreground">{value}</p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">
+                {value}
+              </p>
               <p className="text-xs text-muted-foreground">{label}</p>
             </div>
           ))}
@@ -514,8 +548,7 @@ function TrustedBy() {
                 Built to fit the tools your team already uses
               </p>
               <h2 className="mt-3 max-w-2xl text-2xl font-bold tracking-tight text-zinc-950 dark:text-white md:text-3xl">
-                Modern frontend tools, design systems, and deployment
-                workflows.
+                Modern frontend tools, design systems, and deployment workflows.
               </h2>
             </div>
             <div className="grid grid-cols-3 gap-2 text-center">
@@ -588,25 +621,49 @@ function NexusMosaicSection() {
         </ViewportFade>
 
         <div className="relative mt-16 grid gap-5 md:grid-cols-6 lg:h-[1120px] lg:grid-cols-12 lg:gap-0">
-          <MosaicPanel className="md:col-span-3 lg:absolute lg:left-0 lg:top-14 lg:h-[600px] lg:w-[30%]" delay={0.02}>
+          <MosaicPanel
+            className="md:col-span-3 lg:absolute lg:left-0 lg:top-14 lg:h-[600px] lg:w-[30%]"
+            delay={0.02}
+          >
             <SignupMini />
           </MosaicPanel>
-          <MosaicPanel className="md:col-span-3 lg:absolute lg:right-4 lg:top-0 lg:h-[480px] lg:w-[63%]" delay={0.08} featured>
+          <MosaicPanel
+            className="md:col-span-3 lg:absolute lg:right-4 lg:top-0 lg:h-[480px] lg:w-[63%]"
+            delay={0.08}
+            featured
+          >
             <BrowserTemplateMini />
           </MosaicPanel>
-          <MosaicPanel className="md:col-span-3 lg:absolute lg:left-[34%] lg:top-[420px] lg:h-[300px] lg:w-[29%]" delay={0.14}>
+          <MosaicPanel
+            className="md:col-span-3 lg:absolute lg:left-[34%] lg:top-[420px] lg:h-[300px] lg:w-[29%]"
+            delay={0.14}
+          >
             <GlobeMini />
           </MosaicPanel>
-          <MosaicPanel className="md:col-span-3 lg:absolute lg:right-[2%] lg:top-[510px] lg:h-[300px] lg:w-[33%]" delay={0.2}>
+          <MosaicPanel
+            className="md:col-span-3 lg:absolute lg:right-[2%] lg:top-[510px] lg:h-[300px] lg:w-[33%]"
+            delay={0.2}
+          >
             <TestimonialMini />
           </MosaicPanel>
-          <MosaicPanel className="md:col-span-3 lg:absolute lg:left-[8%] lg:top-[750px] lg:h-[330px] lg:w-[34%]" delay={0.26} featured>
+          <MosaicPanel
+            className="md:col-span-3 lg:absolute lg:left-[8%] lg:top-[750px] lg:h-[330px] lg:w-[34%]"
+            delay={0.26}
+            featured
+          >
             <WorldMapMini />
           </MosaicPanel>
-          <MosaicPanel className="md:col-span-3 lg:absolute lg:left-[45%] lg:top-[770px] lg:h-[285px] lg:w-[25%]" delay={0.32}>
+          <MosaicPanel
+            className="md:col-span-3 lg:absolute lg:left-[45%] lg:top-[770px] lg:h-[285px] lg:w-[25%]"
+            delay={0.32}
+          >
             <InterviewMini />
           </MosaicPanel>
-          <MosaicPanel className="md:col-span-6 lg:absolute lg:right-0 lg:top-[850px] lg:h-[350px] lg:w-[36%]" delay={0.38} featured>
+          <MosaicPanel
+            className="md:col-span-6 lg:absolute lg:right-0 lg:top-[850px] lg:h-[350px] lg:w-[36%]"
+            delay={0.38}
+            featured
+          >
             <AiImageMini />
           </MosaicPanel>
         </div>
@@ -661,7 +718,9 @@ function SignupMini() {
         <div className="mt-6 space-y-4">
           {["Full name", "Email address", "Password"].map((label, i) => (
             <label key={label} className="block">
-              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+              <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
+                {label}
+              </span>
               <div className="mt-2 flex h-11 items-center rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-400 dark:border-white/10 dark:bg-white/5 dark:text-zinc-500">
                 {i === 0
                   ? "Jane Doe"
@@ -679,7 +738,9 @@ function SignupMini() {
         </button>
         <p className="text-center text-xs text-zinc-500 dark:text-zinc-400">
           Already have an account?{" "}
-          <span className="font-medium text-violet-600 dark:text-violet-300">Sign in</span>
+          <span className="font-medium text-violet-600 dark:text-violet-300">
+            Sign in
+          </span>
         </p>
         <div className="flex items-center gap-3 text-[11px] text-zinc-400 dark:text-zinc-500">
           <span className="h-px flex-1 bg-zinc-200 dark:bg-white/10" />
@@ -764,10 +825,8 @@ function BrowserTemplateMini() {
                     </>
                   ) : line.includes("Nexus-ui") ? (
                     <>
-                      <span>  brand: </span>
-                      <span className="text-emerald-300">
-                        {"'Nexus-ui'"}
-                      </span>
+                      <span> brand: </span>
+                      <span className="text-emerald-300">{"'Nexus-ui'"}</span>
                       <span>,</span>
                     </>
                   ) : line.includes("midnight") ||
@@ -886,9 +945,9 @@ function TestimonialMini() {
         “
       </p>
       <p className="mt-3 flex-1 text-[15px] font-medium leading-7 text-zinc-800 dark:text-zinc-100">
-        Nexus-ui gave our product pages a visual language we could maintain.
-        The team stopped rebuilding the same sections and started shipping
-        better experiments every week.
+        Nexus-ui gave our product pages a visual language we could maintain. The
+        team stopped rebuilding the same sections and started shipping better
+        experiments every week.
       </p>
       <div className="mt-5 flex items-center gap-3 border-t border-zinc-200/70 pt-4 dark:border-white/10">
         <div className="grid size-10 place-items-center rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 text-xs font-bold text-white">
@@ -913,8 +972,8 @@ function WorldMapMini() {
       <div className="relative z-10 max-w-sm">
         <h3 className="text-xl font-semibold">All over the world</h3>
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-        A distributed Nexus-ui team building, reviewing, and shipping across every time
-        zone.
+          A distributed Nexus-ui team building, reviewing, and shipping across
+          every time zone.
         </p>
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
@@ -963,8 +1022,14 @@ function InterviewMini() {
         Ask about DSA or Dev, we don&apos;t care.
       </p>
       <div className="mt-6 grid grid-cols-2 gap-3">
-        {["bg-gradient-to-br from-sky-100 to-violet-100", "bg-gradient-to-br from-amber-100 to-rose-100"].map((tone, i) => (
-          <div key={tone} className={cn("relative h-28 overflow-hidden rounded-xl", tone)}>
+        {[
+          "bg-gradient-to-br from-sky-100 to-violet-100",
+          "bg-gradient-to-br from-amber-100 to-rose-100",
+        ].map((tone, i) => (
+          <div
+            key={tone}
+            className={cn("relative h-28 overflow-hidden rounded-xl", tone)}
+          >
             <Video className="absolute right-3 top-3 size-4 text-zinc-500" />
             <div className="absolute bottom-4 left-1/2 size-14 -translate-x-1/2 rounded-full bg-white/70" />
             <div className="absolute bottom-0 left-1/2 h-12 w-20 -translate-x-1/2 rounded-t-full bg-zinc-900/80" />
@@ -979,8 +1044,12 @@ function InterviewMini() {
           JS
         </div>
         <div>
-          <p className="text-sm font-semibold text-zinc-950 dark:text-white">Jane Smith</p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">Data Scientist</p>
+          <p className="text-sm font-semibold text-zinc-950 dark:text-white">
+            Jane Smith
+          </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Data Scientist
+          </p>
         </div>
       </div>
     </div>
@@ -1011,8 +1080,8 @@ function AiImageMini() {
           Image generation at your fingertips
         </h3>
         <p className="mt-4 max-w-sm text-sm leading-relaxed text-zinc-600">
-          Create dreamy Nexus-ui campaign visuals, product scenes, and launch assets from
-          a single prompt.
+          Create dreamy Nexus-ui campaign visuals, product scenes, and launch
+          assets from a single prompt.
         </p>
       </div>
       <MapPin className="absolute bottom-20 left-8 size-5 text-fuchsia-500" />
@@ -1145,10 +1214,7 @@ function FeaturedComponents() {
           </p>
         </ViewportFade>
 
-        <div
-          ref={rootRef}
-          className="relative mt-14 min-h-[620px]"
-        >
+        <div ref={rootRef} className="relative mt-14 min-h-[620px]">
           {!items || !activeItem ? (
             <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
               <div className="h-[520px] animate-pulse rounded-3xl border border-zinc-200 bg-zinc-100/70 dark:border-white/10 dark:bg-white/[0.04]" />
@@ -1187,7 +1253,9 @@ function FeaturedComponents() {
                     variant="outline"
                     className="border-violet-500/25 bg-violet-500/10 text-violet-700 dark:text-violet-200"
                   >
-                    {activeItem.premium ? "Premium component" : "Free component"}
+                    {activeItem.premium
+                      ? "Premium component"
+                      : "Free component"}
                   </Badge>
                   <h3 className="relative mt-5 text-3xl font-bold tracking-tight">
                     {activeItem.name}
