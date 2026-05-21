@@ -36,6 +36,12 @@ import {
   FaqFolderCard,
   SearchableFaqSection,
 } from "@/components/blocks/faq-folder-card";
+import {
+  CenteredContactForm,
+  GlobalSignalContact,
+  GradientProofContact,
+  ImageStoryContact,
+} from "@/components/blocks/contact-page";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
@@ -86,6 +92,7 @@ export default async function BlockDetailPage({ params }: Props) {
   const isBentoShowcaseCard = block.slug === "block-bento-showcase";
   const isWhyChooseUsCard = block.slug === "block-why-choose-us";
   const isFaqFolderCard = block.slug === "block-faq-folder-card";
+  const isContactPageCard = block.slug === "block-contact-page";
   const layeredWaveCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/layered-wave-background/layered-wave-background.tsx", "")
     : "";
@@ -117,6 +124,7 @@ export default async function BlockDetailPage({ params }: Props) {
       <header>
         <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
           {block.name}
+          <span className="sr-only"> — UI Block</span>
         </h1>
         <p className="mt-4 max-w-3xl text-xl leading-8 text-muted-foreground">
           {block.description}
@@ -269,6 +277,36 @@ export default async function BlockDetailPage({ params }: Props) {
             <ChatFaqSection />
           </PreviewCodeSection>
         </>
+      ) : isContactPageCard ? (
+        <>
+          <PreviewCodeSection title="Global Signal Contact" code={code} locked={locked}>
+            <GlobalSignalContact />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Centered Intake Contact"
+            code={code}
+            className="mt-16"
+            locked={locked}
+          >
+            <CenteredContactForm />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Gradient Proof Contact"
+            code={code}
+            className="mt-16"
+            locked={locked}
+          >
+            <GradientProofContact />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Image Story Contact"
+            code={code}
+            className="mt-16"
+            locked={locked}
+          >
+            <ImageStoryContact />
+          </PreviewCodeSection>
+        </>
       ) : (
         <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <Preview />
@@ -314,6 +352,7 @@ async function getBlockCode(slug: string, fallback: string) {
     "block-interactive-dots": "src/components/interactive-dots/interactive-dots.tsx",
     "block-why-choose-us": "src/components/blocks/animated-bento-grid.tsx",
     "block-faq-folder-card": "src/components/blocks/faq-folder-card.tsx",
+    "block-contact-page": "src/components/blocks/contact-page.tsx",
   };
 
   const sourcePath = sourceBySlug[slug];
@@ -429,26 +468,30 @@ function PreviewCodeSection({
               </div>
             </div>
           ) : (
-            <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
+            <div className="grid max-w-full gap-4 overflow-hidden xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
               <UsageSnippet code={usageCode ?? defaultUsageForTitle(title)} />
-              <CodeBlock
-                code={code}
-                language="tsx"
-                theme="dark"
-                header={{
-                  enabled: true,
-                  showDots: true,
-                  title: `${title}.tsx`,
-                  copy: {
-                    enabled: true,
-                    label: "Copy code",
-                    copiedLabel: "Copied",
-                    copiedDurationMs: 1400,
-                  },
-                }}
-                codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-                border={{ radius: "16px" }}
-              />
+              <div className="min-w-0 max-w-full overflow-hidden rounded-2xl">
+                <div className="max-h-[720px] max-w-full overflow-auto">
+                  <CodeBlock
+                    code={code}
+                    language="tsx"
+                    theme="dark"
+                    header={{
+                      enabled: true,
+                      showDots: true,
+                      title: `${title}.tsx`,
+                      copy: {
+                        enabled: true,
+                        label: "Copy code",
+                        copiedLabel: "Copied",
+                        copiedDurationMs: 1400,
+                      },
+                    }}
+                    codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+                    border={{ radius: "16px" }}
+                  />
+                </div>
+              </div>
             </div>
           )}
         </TabsContent>
@@ -467,6 +510,7 @@ function defaultUsageForTitle(title: string) {
   if (title === "ATS Bento Grid") return ATS_BENTO_USAGE;
   if (title === "Spotlight Bento Grid") return SPOTLIGHT_BENTO_USAGE;
   if (title === "Aurora Wavy Lines") return WAVY_LINES_USAGE;
+  if (title.includes("Contact")) return CONTACT_PAGE_USAGE;
   return `<${title.replaceAll(" ", "")} />`;
 }
 
@@ -568,6 +612,24 @@ const SPOTLIGHT_BENTO_USAGE = `import SpotlightBentoGrid from "@/components/bloc
 
 export default function Page() {
   return <SpotlightBentoGrid />;
+}`;
+
+const CONTACT_PAGE_USAGE = `import {
+  CenteredContactForm,
+  GlobalSignalContact,
+  GradientProofContact,
+  ImageStoryContact,
+} from "@/components/blocks/contact-page";
+
+export default function ContactPage() {
+  return (
+    <main className="space-y-10 bg-background p-4 sm:p-8">
+      <GlobalSignalContact />
+      <CenteredContactForm />
+      <GradientProofContact />
+      <ImageStoryContact />
+    </main>
+  );
 }`;
 
 const LAYERED_WAVE_USAGE = `<section className="relative min-h-[640px] overflow-hidden">

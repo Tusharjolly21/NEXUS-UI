@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import { LandingPage } from "@/components/marketing/landing-page";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
-export const metadata: Metadata = createMetadata({
-  alternates: { canonical: "/" },
-});
+export const metadata: Metadata = {
+  ...createMetadata({ alternates: { canonical: "/" } }),
+  title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}` },
+};
 
 const FAQ_ITEMS = [
   {
@@ -46,10 +47,7 @@ export default function Home() {
     url: siteConfig.url,
     potentialAction: {
       "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${siteConfig.url}/search?q={search_term_string}`,
-      },
+      target: `${siteConfig.url}/search?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
   };
@@ -69,10 +67,60 @@ export default function Home() {
     "@type": "Organization",
     name: siteConfig.name,
     url: siteConfig.url,
-    logo: `${siteConfig.url}/icon.svg`,
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteConfig.url}/icon.svg`,
+      width: 512,
+      height: 512,
+    },
     sameAs: [
       `https://twitter.com/${siteConfig.twitterHandle.replace("@", "")}`,
     ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      url: `${siteConfig.url}/contact`,
+      email: "contact@nexus-ui.com",
+    },
+  };
+
+  const localBusinessJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    name: siteConfig.name,
+    description: siteConfig.description,
+    url: siteConfig.url,
+    logo: `${siteConfig.url}/icon.svg`,
+    image: `${siteConfig.url}/api/og?title=Nexus+UI&description=React+UI+Components+%26+Next.js+Templates`,
+    priceRange: "Free–$$",
+    openingHours: "Mo-Su 00:00-23:59",
+    sameAs: [
+      `https://twitter.com/${siteConfig.twitterHandle.replace("@", "")}`,
+    ],
+    hasOfferCatalog: {
+      "@type": "OfferCatalog",
+      name: "UI Component Plans",
+      itemListElement: [
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Free Tier",
+            description: "Access to free React components, templates, and UI blocks",
+          },
+          price: "0",
+          priceCurrency: "USD",
+        },
+        {
+          "@type": "Offer",
+          itemOffered: {
+            "@type": "Service",
+            name: "Pro Plan",
+            description: "Unlimited access to all premium animated React components, Next.js templates, and UI blocks with commercial license",
+          },
+        },
+      ],
+    },
   };
 
   const softwareAppJsonLd = {
@@ -95,6 +143,7 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd) }} />
       <LandingPage />
     </>

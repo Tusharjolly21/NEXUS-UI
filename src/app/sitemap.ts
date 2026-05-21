@@ -3,9 +3,9 @@ import { siteConfig } from "@/lib/seo";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
-import { getPostSlugs } from "@/lib/blog";
+import { getAllPosts } from "@/lib/blog";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url;
   const now = new Date();
 
@@ -15,6 +15,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/blocks`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/templates`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${base}/contact`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
     { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
     { url: `${base}/docs/installation`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/docs/install-nextjs`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
@@ -44,9 +45,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  const blogRoutes: MetadataRoute.Sitemap = getPostSlugs().map((slug) => ({
-    url: `${base}/blog/${slug}`,
-    lastModified: now,
+  const allPosts = await getAllPosts();
+  const blogRoutes: MetadataRoute.Sitemap = allPosts.map((post) => ({
+    url: `${base}/blog/${post.slug}`,
+    lastModified: post.date ? new Date(post.date) : now,
     changeFrequency: "monthly",
     priority: 0.6,
   }));

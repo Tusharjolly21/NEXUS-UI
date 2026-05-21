@@ -1,0 +1,38 @@
+# Nexus UI
+> React UI Components & Next.js Templates
+
+Nexus UI is a premium UI component library offering 100+ animated React components, production-ready Next.js templates, and copy-paste UI blocks built with Tailwind CSS, Framer Motion, and TypeScript. Designed for developers shipping SaaS products, landing pages, and marketing sites faster.
+
+## Product
+
+- [Components](/components): 100+ animated React components including motion effects, 3D, backgrounds, cards, forms, and navigation
+- [Blocks](/blocks): Production-ready UI blocks for Next.js landing pages — hero sections, pricing grids, testimonials, CTAs
+- [Templates](/templates): Full-page Next.js templates for SaaS — animated landing pages, pricing flows, and dashboards
+- [Pricing](/pricing): Free tier available; Pro plan unlocks premium components and templates
+
+## Documentation
+
+- [Installation Guide](/docs/installation): How to install and set up Nexus UI in a Next.js project
+- [Install Next.js](/docs/install-nextjs): Step-by-step Next.js setup
+- [Install Tailwind CSS](/docs/install-tailwindcss): Tailwind CSS configuration guide
+- [Add Utilities](/docs/add-utilities): Adding utility functions and helpers
+- [CLI Usage](/docs/cli): Using the Nexus UI CLI to add components via shadcn
+
+## Blog
+
+- [Blog](/blog): Guides on motion design, Tailwind composition, and shipping SaaS landing pages
+
+## Technology Stack
+
+- Framework: Next.js (App Router)
+- Styling: Tailwind CSS
+- Animation: Framer Motion
+- Language: TypeScript
+- Registry: shadcn/ui compatible (`npx shadcn@latest add https://nexus-ui.com/r/<component>.json`)
+
+## Contact
+
+- Website: https://nexus-ui.com
+- Twitter/X: https://twitter.com/nexus_ui
+- GitHub: https://github.com/nexus-ui
+- Support: /contact

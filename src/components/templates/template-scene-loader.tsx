@@ -5,6 +5,11 @@ import * as React from "react";
 const SceneSaaSLaunchLazy = React.lazy(() =>
   import("@/registry/template-scenes/scenes/saas-launch-aurora").then((m) => ({ default: m.SceneSaaSLaunch })),
 );
+const SceneNexusAiLaunchLazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/nexus-ai-launch-scene").then((m) => ({
+    default: m.SceneNexusAiLaunch,
+  })),
+);
 const SceneAIStartupLazy = React.lazy(() =>
   import("@/registry/template-scenes/scenes/ai-startup-forge").then((m) => ({ default: m.SceneAIStartup })),
 );
@@ -81,6 +86,7 @@ const SceneAetherPortfolioLazy = React.lazy(() =>
 );
 
 const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  "nexus-ai-launch": SceneNexusAiLaunchLazy,
   "saas-launch-aurora": SceneSaaSLaunchLazy,
   "ai-startup-forge": SceneAIStartupLazy,
   "dev-portfolio-vector": ScenePortfolioDevLazy,

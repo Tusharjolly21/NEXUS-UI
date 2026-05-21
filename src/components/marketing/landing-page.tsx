@@ -434,8 +434,8 @@ function Hero() {
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.14 }}
           className="mx-auto max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl"
         >
-          Stop worrying about UI. You focus on your backend and logic — we
-          handle the frontend.
+          100+ animated React components, Next.js templates, and Tailwind UI
+          blocks. Copy-paste TypeScript, ship your product faster.
         </motion.p>
 
         {/* Stats row */}

@@ -76,29 +76,9 @@ const AiStartupForgePage = nextDynamic(
   () => import("@/components/templates/ai-startup-forge-page"),
   { loading: TemplateFallback },
 );
-const DevPortfolioVectorPage = nextDynamic(
-  () => import("@/components/templates/dev-portfolio-vector-page"),
-  { loading: TemplateFallback },
-);
-const AgencyStudioDeckPage = nextDynamic(
-  () => import("@/components/templates/agency-studio-deck-page"),
-  { loading: TemplateFallback },
-);
-const DashboardAuroraAnalyticsPage = nextDynamic(
-  () => import("@/components/templates/dashboard-aurora-analytics-page"),
-  { loading: TemplateFallback },
-);
-const ProductivityOrbitSuitePage = nextDynamic(
-  () => import("@/components/templates/productivity-orbit-suite-page"),
-  { loading: TemplateFallback },
-);
 const OrbitAIPage = nextDynamic(
   () => import("@/components/templates/orbit-ai-page"),
   { loading: TemplateFallback },
-);
-const YourBrandHeroPage = nextDynamic(
-  () => import("@/components/templates/yourbrand-hero-page"),
-  { loading: TemplateFallback, ssr: false },
 );
 
 type Props = { params: Promise<{ slug: string }> };
@@ -153,18 +133,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><SaasLaunchAuroraPage /></ThemeReceiver>;
   } else if (tmpl.slug === "ai-startup-forge") {
     return <ThemeReceiver><AiStartupForgePage /></ThemeReceiver>;
-  } else if (tmpl.slug === "dev-portfolio-vector") {
-    return <ThemeReceiver><DevPortfolioVectorPage /></ThemeReceiver>;
-  } else if (tmpl.slug === "agency-studio-deck") {
-    return <ThemeReceiver><AgencyStudioDeckPage /></ThemeReceiver>;
-  } else if (tmpl.slug === "dashboard-aurora-analytics") {
-    return <ThemeReceiver><DashboardAuroraAnalyticsPage /></ThemeReceiver>;
-  } else if (tmpl.slug === "productivity-orbit-suite") {
-    return <ThemeReceiver><ProductivityOrbitSuitePage /></ThemeReceiver>;
   } else if (tmpl.slug === "orbit-ai-page") {
     return <ThemeReceiver><OrbitAIPage /></ThemeReceiver>;
-  } else if (tmpl.slug === "yourbrand-hero") {
-    return <YourBrandHeroPage />;
   }
 
   return (

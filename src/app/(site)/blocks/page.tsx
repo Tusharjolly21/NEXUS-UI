@@ -38,6 +38,7 @@ const CATEGORY_NOTES: Record<BlockCategory, string> = {
   "Logo clouds": "Trust bands for partners, users, and ecosystem proof.",
   "Stats sections": "Numerical proof points with restrained, dashboard-like polish.",
   "CTA sections": "Closing sections for trials, demos, waitlists, and upgrades.",
+  "Contact sections": "Complete contact pages with forms, proof, location signals, and support context.",
   "Interactive backgrounds": "Responsive motion fields for hero backdrops, feature cards, and product storytelling.",
   "FAQ sections": "Supportive answer layouts tuned for scannability.",
   "Blog sections": "Editorial rails for content hubs and announcement pages.",
@@ -119,7 +120,7 @@ function BlocksPageInner() {
         <main className="mx-auto w-full max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10 lg:py-16 xl:px-14">
           <section className="pb-16 lg:pb-24">
             <h1 className="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
-              Blocks
+              UI Blocks for Next.js
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
               Clean, minimal shadcn compatible blocks for polished product pages.

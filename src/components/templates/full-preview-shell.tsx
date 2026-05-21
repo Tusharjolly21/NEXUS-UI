@@ -24,6 +24,30 @@ import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 import { cn } from "@/lib/utils";
 
 function getTemplateCode(tmpl: MarketplaceTemplate): string {
+  if (tmpl.slug === "nexus-ai-launch") {
+    return `// ${tmpl.title} — Production Template
+// Stack: ${tmpl.techStack.join(", ")}
+// Pages: ${tmpl.pages.join(", ")}
+
+import type { Metadata } from "next";
+import { NexusAiLaunchTemplatePage } from "@/components/templates/nexus-ai-launch-template-page";
+
+export const metadata: Metadata = {
+  title: "Asteria AI — Launch with a page that converts",
+  description:
+    "A modern AI launch landing page with animated hero, bento proof, workflow, testimonials, FAQ, and cinematic media.",
+  openGraph: {
+    title: "Asteria AI",
+    description: "Turn a messy idea into a launch page that feels inevitable.",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+};
+
+export default function HomePage() {
+  return <NexusAiLaunchTemplatePage />;
+}`;
+  }
+
   if (tmpl.slug === "talent-hub-landing") {
     return `// ${tmpl.title} — Production Template
 // Stack: ${tmpl.techStack.join(", ")}

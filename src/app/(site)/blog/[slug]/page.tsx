@@ -32,6 +32,52 @@ export default async function BlogPostPage({ params }: Props) {
   const post = await getPost(slug);
   if (!post) notFound();
 
+  const dateIso = post.frontmatter.date
+    ? new Date(post.frontmatter.date).toISOString()
+    : undefined;
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.frontmatter.title,
+    description: post.frontmatter.description,
+    url: `${siteConfig.url}/blog/${slug}`,
+    ...(dateIso && { datePublished: dateIso, dateModified: dateIso }),
+    image: {
+      "@type": "ImageObject",
+      url: `${siteConfig.url}/api/og?${new URLSearchParams({
+        title: post.frontmatter.title,
+        description: (post.frontmatter.description ?? "").slice(0, 120),
+        type: "article",
+      }).toString()}`,
+      width: 1200,
+      height: 630,
+    },
+    author: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteConfig.url}/icon.svg`,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${siteConfig.url}/blog/${slug}`,
+    },
+    isPartOf: {
+      "@type": "Blog",
+      name: `${siteConfig.name} Blog`,
+      url: `${siteConfig.url}/blog`,
+    },
+  };
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -44,6 +90,7 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
     <ArticleChrome>
       <article className="mx-auto max-w-3xl px-4 py-14">

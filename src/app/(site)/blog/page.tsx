@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight, BookOpen, Rss } from "lucide-react";
 import { getAllPosts } from "@/lib/blog";
 import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
+import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
@@ -15,7 +15,35 @@ export const metadata: Metadata = createMetadata({
 export default async function BlogIndexPage() {
   const posts = await getAllPosts();
 
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: `${siteConfig.name} Blog`,
+    description: "Guides on motion design, Tailwind, and shipping SaaS landing pages.",
+    url: `${siteConfig.url}/blog`,
+    publisher: {
+      "@type": "Organization",
+      name: siteConfig.name,
+      url: siteConfig.url,
+      logo: { "@type": "ImageObject", url: `${siteConfig.url}/icon.svg` },
+    },
+    ...(posts.length > 0 && {
+      blogPost: posts.map((p) => ({
+        "@type": "BlogPosting",
+        headline: p.title,
+        description: p.description,
+        url: `${siteConfig.url}/blog/${p.slug}`,
+        ...(p.date && { datePublished: new Date(p.date).toISOString() }),
+      })),
+    }),
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
+      />
     <div className="mx-auto max-w-3xl space-y-12 px-4 py-10 md:py-14">
 
       {/* ── Hero ── */}
@@ -104,5 +132,6 @@ export default async function BlogIndexPage() {
       </div>
 
     </div>
+    </>
   );
 }

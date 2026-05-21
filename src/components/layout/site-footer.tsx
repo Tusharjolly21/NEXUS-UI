@@ -21,6 +21,7 @@ const FOOTER_LINKS = {
   Account: [
     { href: "/login", label: "Sign in" },
     { href: "/dashboard", label: "Dashboard" },
+    { href: "/contact", label: "Contact" },
   ],
 } as const;
 

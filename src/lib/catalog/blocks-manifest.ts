@@ -11,6 +11,7 @@ export type BlockCategory =
   | "Logo clouds"
   | "Stats sections"
   | "CTA sections"
+  | "Contact sections"
   | "Interactive backgrounds"
   | "FAQ sections"
   | "Blog sections";
@@ -84,6 +85,21 @@ export default function Page() {
       <ChatFaqSection items={faqs} />
     </>
   );
+}`,
+  },
+  {
+    slug: "block-contact-page",
+    name: "Contact Page",
+    description:
+      "A polished contact page block with map-led reach, centered intake, testimonial proof, and image-backed launch support layouts.",
+    category: "Contact sections",
+    tags: ["contact", "forms", "map", "testimonial", "landing page", "framer-motion"],
+    premium: false,
+    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story"],
+    reactSource: `import ContactPageBlock from "@/components/blocks/contact-page";
+
+export default function Page() {
+  return <ContactPageBlock />;
 }`,
   },
 ];

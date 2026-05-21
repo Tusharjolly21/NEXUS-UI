@@ -26,11 +26,6 @@ const SLUG_TO_FILE: Record<string, string> = {
   "ocean-flow":                 "ocean-flow-page.tsx",
   "saas-launch-aurora":         "saas-launch-aurora-page.tsx",
   "ai-startup-forge":           "ai-startup-forge-page.tsx",
-  "dev-portfolio-vector":       "dev-portfolio-vector-page.tsx",
-  "agency-studio-deck":         "agency-studio-deck-page.tsx",
-  "dashboard-aurora-analytics": "dashboard-aurora-analytics-page.tsx",
-  "productivity-orbit-suite":   "productivity-orbit-suite-page.tsx",
-  "yourbrand-hero":             "yourbrand-hero-page.tsx",
 };
 
 // Extra component files some templates depend on
@@ -57,7 +52,6 @@ const SLUG_EXTRA_DEPS: Record<string, string[]> = {
     "src/components/ui/accordion.tsx",
     "src/components/ui/button.tsx",
   ],
-  "yourbrand-hero":           ["src/components/templates/yourbrand-dotted-sphere.tsx"],
   "ocean-flow":               ["src/components/infinite-moving-cards/InfiniteMovingCards.tsx"],
   "simplistic-saas-template": [
     "src/components/infinite-moving-cards/InfiniteMovingCards.tsx",
@@ -236,11 +230,6 @@ body { background: var(--background); color: var(--foreground); }
   }
   if (extras.some(e => e.includes("keyboard"))) {
     deps["use-keyboard-sound"] = "^1.0.0";
-  }
-  if (slug === "yourbrand-hero") {
-    deps["three"] = "^0.184.0";
-    deps["@react-three/fiber"] = "^8.0.0";
-    deps["@react-three/drei"] = "^9.0.0";
   }
 
   zip.file("package.json", JSON.stringify({

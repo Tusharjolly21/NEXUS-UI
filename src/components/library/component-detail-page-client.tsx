@@ -512,6 +512,7 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
       <header>
         <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
           {comp.name}
+          <span className="sr-only"> — React Component</span>
         </h1>
         <p className="mt-4 max-w-3xl text-xl leading-8 text-muted-foreground">
           {comp.description}

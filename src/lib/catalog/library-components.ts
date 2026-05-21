@@ -1387,7 +1387,7 @@ export function MagneticHeadline() {
   },
   {
     slug: "three-d-folder",
-    name: "3D Folder",
+    name: "3D Folder Card",
     description:
       "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
     categorySlug: "cards",
@@ -6307,6 +6307,126 @@ export function CommandPaletteDemo() {
     props: [
       { name: "className", type: "string", description: "Optional className for the root wrapper." },
     ],
+  },
+  {
+    slug: "image-trail",
+    name: "Image Trail",
+    registryCliName: "image-trail",
+    resourceLinks: [{ label: "Live demo", href: "/demos/image-trail" }],
+    description:
+      "A cursor trail that cycles through a configurable image array as you move, with fade-blur transitions and an optional magnetic repulsion effect.",
+    categorySlug: "motion-effects",
+    tags: ["cursor", "trail", "images", "magnetic", "motion", "interactive"],
+    premium: false,
+    trendingScore: 118,
+    createdAt: "2026-05-21",
+    animationKinds: ["hover", "magnetic", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "images", type: "ImageTrailImage[]", description: "Array of { src, alt? } objects cycled through as the trail." },
+      { name: "spacing", type: "number", defaultValue: "40", description: "Minimum cursor travel (px) before spawning the next image." },
+      { name: "duration", type: "number", defaultValue: "1000", description: "How long (ms) each image stays visible before fading out." },
+      { name: "imageSize", type: "number", defaultValue: "120", description: "Width and height of each trail image (px)." },
+      { name: "cornerRadius", type: "number", defaultValue: "8", description: "Border radius of each trail image (px)." },
+      { name: "fadeInDuration", type: "number", defaultValue: "0.3", description: "Fade-in animation duration (seconds)." },
+      { name: "fadeOutDuration", type: "number", defaultValue: "0.5", description: "Fade-out animation duration (seconds)." },
+      { name: "fadeInBlur", type: "number", defaultValue: "0", description: "Blur applied to each image on entry (px)." },
+      { name: "fadeOutBlur", type: "number", defaultValue: "6", description: "Blur applied to each image on exit (px)." },
+      { name: "smoothness", type: "number", defaultValue: "0.7", description: "Lerp factor (0–1) — lower values produce silkier entry animation." },
+      { name: "magneticEffect", type: "boolean", defaultValue: "false", description: "Enable magnetic repulsion — trail images push toward the cursor." },
+      { name: "magneticRadius", type: "number", defaultValue: "100", description: "Max distance (px) at which the magnetic force acts." },
+      { name: "magneticStrength", type: "number", defaultValue: "0.3", description: "Strength multiplier of the magnetic force (0–1)." },
+      { name: "className", type: "string", description: "className for the root container (set width, height, background here)." },
+      { name: "children", type: "React.ReactNode", description: "Optional foreground content rendered above the trail layer." },
+    ],
+    Preview: Previews.PreviewImageTrail,
+    reactSource: `"use client";
+
+import { ImageTrail } from "@/components/image-trail";
+
+const IMAGES = [
+  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
+  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
+  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
+  { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300&q=80", alt: "Autumn" },
+];
+
+export function ImageTrailExample() {
+  return (
+    <ImageTrail
+      images={IMAGES}
+      spacing={36}
+      duration={900}
+      imageSize={120}
+      cornerRadius={10}
+      fadeOutBlur={6}
+      className="h-96 w-full rounded-2xl border border-border bg-muted/20"
+    >
+      <div className="pointer-events-none flex h-full items-center justify-center">
+        <p className="select-none text-sm text-muted-foreground/50">Move cursor here</p>
+      </div>
+    </ImageTrail>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "With magnetic effect",
+        code: `"use client";
+
+import { ImageTrail } from "@/components/image-trail";
+
+const IMAGES = [
+  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
+  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
+  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
+];
+
+export function MagneticTrailExample() {
+  return (
+    <ImageTrail
+      images={IMAGES}
+      spacing={28}
+      duration={1100}
+      imageSize={100}
+      cornerRadius={50}
+      fadeOutBlur={8}
+      magneticEffect
+      magneticStrength={0.35}
+      magneticRadius={120}
+      className="h-96 w-full rounded-2xl border border-border bg-muted/20"
+    />
+  );
+}`,
+      },
+    ],
+    tailwindSource: `"use client";
+
+import { ImageTrail } from "@/components/image-trail";
+
+const IMAGES = [
+  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
+  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
+  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
+  { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300&q=80", alt: "Autumn" },
+];
+
+export function ImageTrailExample() {
+  return (
+    <ImageTrail
+      images={IMAGES}
+      spacing={36}
+      duration={900}
+      imageSize={120}
+      cornerRadius={10}
+      fadeOutBlur={6}
+      className="h-96 w-full rounded-2xl border border-border bg-muted/20"
+    >
+      <div className="pointer-events-none flex h-full items-center justify-center">
+        <p className="select-none text-sm text-muted-foreground/50">Move cursor here</p>
+      </div>
+    </ImageTrail>
+  );
+}`,
   },
 ];
 

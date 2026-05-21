@@ -10,6 +10,7 @@ const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
   "block-interactive-dots": Previews.PreviewInteractiveDots,
   "block-why-choose-us": Previews.PreviewWhyChooseUs,
   "block-faq-folder-card": Previews.PreviewFaqFolderCard,
+  "block-contact-page": Previews.PreviewContactPageBlock,
 };
 
 export const blocks: MarketplaceBlock[] = blocksManifest.map((b) => {

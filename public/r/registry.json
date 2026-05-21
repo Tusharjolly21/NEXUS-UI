@@ -1673,6 +1673,29 @@
           "type": "registry:lib"
         }
       ]
+    },
+    {
+      "name": "image-trail",
+      "type": "registry:component",
+      "title": "Image Trail",
+      "description": "A cursor trail that cycles through a configurable image array as you move, with fade-blur transitions and an optional magnetic repulsion effect.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/image-trail/image-trail.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/image-trail/index.ts",
+          "type": "registry:lib"
+        }
+      ]
     }
   ]
 }

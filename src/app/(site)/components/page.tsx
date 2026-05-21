@@ -186,7 +186,7 @@ function ComponentsPageInner() {
           {/* Heading */}
           <section className="pb-10 lg:pb-14">
             <h1 className="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
-              Components
+              React UI Components
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
               Production-ready UI components for modern product interfaces.

@@ -44,6 +44,7 @@ const BLOCK_CATEGORIES: BlockCategory[] = [
   "Logo clouds",
   "Stats sections",
   "CTA sections",
+  "Contact sections",
   "Interactive backgrounds",
   "FAQ sections",
   "Blog sections",

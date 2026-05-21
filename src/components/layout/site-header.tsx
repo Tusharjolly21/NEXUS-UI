@@ -27,17 +27,16 @@ const NAV_LINKS = [
   { href: "/blocks", label: "Blocks" },
   { href: "/pricing", label: "Pricing" },
   { href: "/blog", label: "Blog" },
+  { href: "/contact", label: "Contact" },
 ] as const;
 
 export function SiteHeader({ isPremium = false }: { isPremium?: boolean }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mounted, setMounted] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [user, setUser] = React.useState<SupabaseUser | null>(null);
 
   React.useEffect(() => {
-    setMounted(true);
     if (!isSupabaseConfigured()) return;
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null));
@@ -60,10 +59,6 @@ export function SiteHeader({ isPremium = false }: { isPremium?: boolean }) {
     user?.user_metadata?.name ??
     user?.email?.split("@")[0] ??
     "Account";
-
-  React.useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   if (pathname?.startsWith("/templates/")) {
     return null;
@@ -240,53 +235,40 @@ export function SiteHeader({ isPremium = false }: { isPremium?: boolean }) {
             </div>
 
             {/* Mobile hamburger */}
-            {mounted ? (
-              <button
-                type="button"
-                aria-label={mobileOpen ? "Close menu" : "Open menu"}
-                aria-expanded={mobileOpen}
-                onClick={() => setMobileOpen((v) => !v)}
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                  "lg:hidden size-9 rounded-lg text-muted-foreground hover:text-foreground",
+            <button
+              type="button"
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((v) => !v)}
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "icon" }),
+                "lg:hidden size-9 rounded-lg text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {mobileOpen ? (
+                  <motion.span
+                    key="close"
+                    initial={{ rotate: -45, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 45, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <X className="size-4" />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="open"
+                    initial={{ rotate: 45, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -45, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Menu className="size-4" />
+                  </motion.span>
                 )}
-              >
-                <AnimatePresence mode="wait" initial={false}>
-                  {mobileOpen ? (
-                    <motion.span
-                      key="close"
-                      initial={{ rotate: -45, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: 45, opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <X className="size-4" />
-                    </motion.span>
-                  ) : (
-                    <motion.span
-                      key="open"
-                      initial={{ rotate: 45, opacity: 0 }}
-                      animate={{ rotate: 0, opacity: 1 }}
-                      exit={{ rotate: -45, opacity: 0 }}
-                      transition={{ duration: 0.15 }}
-                    >
-                      <Menu className="size-4" />
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </button>
-            ) : (
-              <button
-                type="button"
-                aria-label="Open menu"
-                className={cn(
-                  buttonVariants({ variant: "ghost", size: "icon" }),
-                  "lg:hidden size-9 rounded-lg text-muted-foreground",
-                )}
-              >
-                <Menu className="size-4" />
-              </button>
-            )}
+              </AnimatePresence>
+            </button>
           </div>
         </div>
       </header>
