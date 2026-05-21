@@ -3,7 +3,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { blocks } from "@/lib/catalog/blocks";
 
 export const metadata: Metadata = createMetadata({
-  title: "Blocks",
+  title: "Next.js UI Blocks",
   description:
     "Production-ready UI blocks for Next.js landing pages — hero sections, pricing grids, testimonials, CTAs, and more. shadcn/ui compatible.",
   alternates: { canonical: "/blocks" },

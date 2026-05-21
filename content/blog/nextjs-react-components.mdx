@@ -6,7 +6,7 @@ date: "2026-05-21"
 
 ## Why component architecture matters
 
-React components are the building blocks of every modern web application. Whether you are building a SaaS landing page, a customer dashboard, or a public marketing site, the components you choose determine both the quality of your user interfaces and the speed at which your team can ship.
+React components are the building blocks of every modern web application. Whether you are building a SaaS landing page, a customer dashboard, or a public marketing site, the components you choose determine both the quality of your user interfaces and the speed at which your team can ship. Nexus UI's [component library](/components) and [UI blocks](/blocks) are built specifically for this stack.
 
 Next.js adds a critical layer on top of React by giving each component a rendering context. A component can run on the server — taking advantage of server side rendering — or it can stay fully client side, using the browser to manage interactivity and state. This distinction shapes how you organise your component catalogue and how your react applications perform in production.
 
@@ -26,7 +26,7 @@ The React ecosystem offers a wide range of libraries and frameworks for building
 
 **Radix UI** — low-level accessible primitives that ship without visual styles. If you want complete control over every visual decision, Radix gives you the correct keyboard navigation and ARIA semantics while letting you style everything from scratch.
 
-**Framer Motion** — the standard animation library for react applications that need smooth, physics-based transitions. Framer Motion integrates cleanly with the Next.js App Router and respects the user's reduced-motion preference out of the box.
+**Framer Motion** — the standard animation library for react applications that need smooth, physics-based transitions. Framer Motion integrates cleanly with the Next.js App Router and respects the user's reduced-motion preference out of the box. See the [typewriter effect](/components/typewriter-effect) and [text generate effect](/components/text-generate-effect) for production examples.
 
 The key question when evaluating libraries and frameworks is ownership. Libraries that deliver source code you copy into your project — like shadcn/ui — give you full control over styling, behaviour, and future upgrades. Libraries that ship as compiled packages require you to work within their constraints and accept their dependency tree.
 
@@ -61,3 +61,5 @@ When choosing react components for a production project, consider:
 Start with a Next.js project bootstrapped via `create-next-app`, add Tailwind CSS, then layer in shadcn/ui components and Framer Motion for the building blocks that need animation. This stack gives you server side rendering by default, client side interactivity where you need it, and a clean TypeScript-first design system to build from.
 
 The result is a component catalogue you own and fully understand — one that makes every new page faster to deliver and easier to maintain as your react applications grow.
+
+To get started immediately, browse [Next.js and React components](/components), explore ready-made [landing page sections](/blocks), or pick a [full-page template](/templates) to use as a starting point. The [installation guide](/docs/installation) walks through adding Nexus UI components to an existing project in under five minutes.

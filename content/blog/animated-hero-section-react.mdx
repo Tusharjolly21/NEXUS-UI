@@ -1,0 +1,163 @@
+---
+title: "Animated Hero Sections in React and Next.js"
+description: "Techniques for building animated hero sections in React: background effects, entrance animations, typewriter text, and Framer Motion patterns that work in production Next.js apps."
+date: "2026-05-10"
+---
+
+The hero section is the highest-value real estate on any landing page. It is the first thing visitors see, and it determines whether they stay or leave. An animated hero can communicate that a product is polished and modern within the first two seconds. This guide covers the techniques and components for building animated hero sections in React and Next.js. To skip straight to working code, browse the [hero section components](/components) in the Nexus UI library.
+
+## What makes a hero animation effective
+
+A hero animation should do one of three things: communicate product quality through visual polish, establish spatial depth that makes the page feel three-dimensional, or draw attention to the primary call-to-action. Animations that serve none of these purposes are distracting rather than helpful.
+
+The most effective hero animations are subtle. A background that gradually shifts colour, text that fades in with a slight upward movement, or a spotlight that follows the cursor — these all add polish without demanding the visitor's attention at the expense of the headline.
+
+## Background effect components
+
+The background is the easiest layer to animate without disrupting the foreground content. Nexus UI includes several background components designed for hero sections:
+
+**Aurora gradients** simulate the appearance of the aurora borealis using layered CSS gradients with blur and animation. The [hero aurora spotlight](/components/hero-aurora-spotlight) component ships a production-ready version of this effect. They work well for developer tools, AI products, and anything targeting a technical audience because they feel sophisticated without being loud.
+
+**Particle systems** render dozens or hundreds of small animated elements that create a sense of motion and depth. The key parameter is density: too many particles feel chaotic, too few feel empty. 40–80 particles for a full-viewport hero is a practical starting point.
+
+**Dot grids and beam effects** use CSS grid or SVG patterns to add structural texture to an otherwise flat background. See the [dot grid hero](/components/dot-grid-hero) and [interactive dots block](/blocks/block-interactive-dots) for copy-paste implementations. These read as technical and precise — good for data products, infrastructure tools, and component libraries.
+
+**Layered wave backgrounds** animate SVG or canvas wave forms that scroll or pulse slowly. They create a softer, more organic feel that suits design tools, creative platforms, and consumer products.
+
+All of these work as backdrop components positioned absolutely behind the hero content:
+
+```tsx
+"use client";
+
+export function Hero() {
+  return (
+    <section className="relative min-h-screen overflow-hidden">
+      <AuroraBackground className="absolute inset-0" />
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+        <HeroContent />
+      </div>
+    </section>
+  );
+}
+```
+
+The `relative` on the section and `absolute inset-0` on the background, combined with `relative z-10` on the content, is the standard layer stack. Everything else is a variation on this pattern.
+
+## Entrance animations for hero text
+
+Text that fades in as the page loads signals that the page has finished rendering and is ready to interact with. The standard pattern is a staggered entrance: the headline appears first, then the subheading, then the CTA buttons.
+
+```tsx
+"use client";
+
+import { motion } from "framer-motion";
+
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0 },
+};
+
+export function HeroContent() {
+  return (
+    <motion.div
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.1, delayChildren: 0.1 } },
+      }}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
+      <motion.h1 variants={item} transition={{ duration: 0.5 }}>
+        Build animated React UIs
+      </motion.h1>
+      <motion.p variants={item} transition={{ duration: 0.5 }}>
+        Copy-paste components for Next.js with Framer Motion and Tailwind CSS.
+      </motion.p>
+      <motion.div variants={item} transition={{ duration: 0.4 }} className="flex gap-3">
+        <PrimaryButton />
+        <SecondaryButton />
+      </motion.div>
+    </motion.div>
+  );
+}
+```
+
+Keep the `delayChildren` short — 0.1s to 0.15s. Users should not have to wait for content to appear. The animation should feel like the page is revealing itself, not loading.
+
+## Typewriter effects
+
+Typewriter animations work well in hero sections for products that serve multiple use cases. Nexus UI's [typewriter effect component](/components/typewriter-effect) handles all three phases out of the box — see the [live demo](/demos/typewriter-effect). Instead of a static headline, the text types through several completions of a sentence stem:
+
+```tsx
+// "Build landing pages for..."
+// → "...SaaS products."
+// → "...developer tools."
+// → "...AI applications."
+```
+
+The implementation needs to handle three phases: typing, pause, and deleting. Each phase requires precise timing to feel natural rather than mechanical:
+
+- Typing: 40–60ms per character
+- Pause at completion: 1500–2000ms
+- Deleting: 20–30ms per character (faster than typing)
+- Pause before next string: 300–500ms
+
+Nexus UI's typewriter component handles all three phases with configurable speed and an accessible `aria-live` region so screen readers announce the changing content.
+
+## Spotlight and cursor-reactive effects
+
+A spotlight effect that responds to cursor movement adds interactivity to an otherwise static hero without requiring the user to take an action. The implementation uses `mousemove` events to update a radial gradient position:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+export function SpotlightHero() {
+  const [position, setPosition] = useState({ x: 50, y: 50 });
+
+  return (
+    <section
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        setPosition({
+          x: ((e.clientX - rect.left) / rect.width) * 100,
+          y: ((e.clientY - rect.top) / rect.height) * 100,
+        });
+      }}
+      style={{
+        background: `radial-gradient(circle at ${position.x}% ${position.y}%, rgba(139,92,246,0.15) 0%, transparent 50%)`,
+      }}
+      className="relative min-h-screen"
+    >
+      {children}
+    </section>
+  );
+}
+```
+
+The radial gradient position follows the cursor with zero lag because it updates through a CSS custom property or inline style, not a Framer Motion animation. For a softer follow effect, use a `useSpring` from Framer Motion to smooth the position updates with spring physics.
+
+## Performance considerations for hero animations
+
+Hero animations run immediately on page load, before the user has had a chance to scroll. This makes them more performance-sensitive than scroll-triggered animations.
+
+- **Avoid animating properties that trigger layout** (`width`, `height`, `top`, `left`) at mount. Use `transform` and `opacity` exclusively.
+- **Defer non-critical animations** with a short delay: a background gradient that starts animating 200ms after mount gives the browser time to finish the critical rendering path first.
+- **Use `will-change: transform`** on continuously-animated background elements to promote them to their own compositor layer. Remove it from elements that stop animating.
+- **Preload background images** used in hero sections with a `<link rel="preload">` tag in your Next.js layout to prevent the layout shift that occurs when a large background image loads late.
+
+The goal is a hero that feels alive and considered without being the thing that makes your Lighthouse performance score drop below 90.
+
+## Accessibility
+
+Animated hero sections need two accessibility considerations:
+
+1. **Reduced motion**: Wrap all entrance animations in a `useReducedMotion` check. For background effects that animate continuously (aurora, particles, waves), provide a static fallback — a gradient screenshot or a solid colour — when reduced motion is preferred.
+
+2. **Headings**: The hero `<h1>` must be visible to screen readers and must not be obscured by `aria-hidden` or CSS visibility tricks used for the animation. Animate the containing element, not the heading itself, to avoid brief moments where the content is invisible to assistive technology.
+
+A well-built animated hero section is one that improves the experience for sighted users while adding no barriers for users who rely on screen readers or prefer not to see motion.
+
+Ready to build? Browse the full range of hero components — [aurora spotlight](/components/hero-aurora-spotlight), [starfield hero](/components/starfield-hero), [dot grid hero](/components/dot-grid-hero) — or see background effects in action in the [background gradient demo](/demos/background-gradient) and [background boxes demo](/demos/background-boxes).

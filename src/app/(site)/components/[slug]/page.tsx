@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const item = getLibraryComponent(slug);
   if (!item) return {};
   return createMetadata({
-    title: item.name,
+    title: `${item.name} — Animated React Component`,
     description: item.description,
     openGraph: { title: `${item.name} · ${siteConfig.name}` },
     alternates: { canonical: `/components/${slug}` },

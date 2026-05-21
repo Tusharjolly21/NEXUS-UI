@@ -1,19 +1,109 @@
 ---
-title: "Tailwind layouts for premium SaaS"
-description: "Spacing, radii, and glass surfaces that read as high-end product craft."
+title: "Tailwind CSS layouts for premium SaaS landing pages"
+description: "Spacing systems, glass surfaces, dark mode tokens, and typography rhythm for Next.js landing pages that read as high-end product craft."
 date: "2026-04-18"
 ---
 
-## Density without noise
+The difference between a SaaS landing page that feels polished and one that feels generic is rarely about custom illustrations or advanced animations. It comes down to a handful of repeatable decisions: consistent spacing, intentional surface layering, legible typography, and a dark mode that was designed rather than inverted. This post covers the Tailwind patterns we use in every Nexus UI landing page build. See the patterns in action in our [UI blocks library](/blocks).
 
-Premium SaaS interfaces balance information density with calm whitespace. Use consistent radii (`rounded-2xl` / `rounded-3xl`) and translucent surfaces instead of flat gray fills.
+## Spacing: density without noise
 
-### Layered borders
+Premium interfaces balance information density with generous whitespace. The temptation on a SaaS landing page is to fill every available pixel with features and copy. The result is a page that reads as busy rather than confident.
 
-Combine `border-white/10` with `bg-white/5` and `backdrop-blur-xl` for glass panels. Add an inner highlight with `shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]`.
+The practical rule is to set section padding significantly higher than you think necessary, then cut back only if content is genuinely getting lost. For most sections this means:
 
-### Typography rhythm
+```tsx
+// Section wrapper
+<section className="px-4 py-20 sm:px-6 md:py-28 xl:px-14">
 
-Pair a tight display size on heroes with relaxed body copy. Keep line length between 60–78 characters for long-form marketing.
+// Internal content max-width
+<div className="mx-auto max-w-4xl">
+```
 
-Use OKLCH neutrals for smoother gradients and cleaner dark mode transitions.
+Use consistent vertical rhythm between headings and their supporting copy. A `space-y-5` or `space-y-6` gap between an `h2` and its first paragraph reads as intentional. A gap that varies section to section reads as assembled rather than designed.
+
+## Surface layering with translucent panels
+
+Flat gray fills read as placeholder UI. Glass morphism — translucent backgrounds with backdrop blur — adds perceived depth and matches the visual language of premium macOS and iOS apps that developer audiences use daily.
+
+The three-layer pattern for a glass card:
+
+```tsx
+<div className="
+  rounded-3xl
+  border border-white/10
+  bg-white/[0.04]
+  shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+  backdrop-blur-xl
+">
+```
+
+The `border-white/10` creates a subtle edge highlight. The `bg-white/[0.04]` is barely-there fill that separates the panel from the background without creating visual weight. The inner shadow adds a top-edge highlight that mimics the light refraction of physical glass. The `backdrop-blur-xl` gives the impression of depth even against flat backgrounds.
+
+Scale the opacity values based on context. Cards on dark backgrounds: `bg-white/[0.04]` to `bg-white/[0.06]`. Modals and overlays on light backgrounds: `bg-white/80` to `bg-white/95`. The goal is to feel like the surface is in front of something, not painted on top of it.
+
+## Radii: choose two and use them everywhere
+
+Mixing `rounded-lg`, `rounded-xl`, `rounded-2xl`, and `rounded-3xl` arbitrarily on the same page creates the impression that no one made a decision. Pick two radius values and assign them to a conceptual hierarchy:
+
+- **Large radius** (`rounded-2xl` or `rounded-3xl`) for sections, cards, and modals — container elements
+- **Medium radius** (`rounded-xl`) for interactive elements like buttons, badges, and input fields
+- **Small radius** (`rounded-lg` or `rounded-md`) for code snippets, tooltips, and inline tags
+
+Consistency at this level reads as craft because most developers skip it.
+
+## Dark mode: design it, don't invert it
+
+The most common dark mode mistake is wrapping the light theme in `dark:` overrides reactively rather than designing the dark theme with intention. An inverted light theme has shadows in the wrong places, text contrast that breaks at unusual combinations, and backgrounds that are too dark to show depth.
+
+Nexus UI uses semantic color tokens built on OKLCH. OKLCH gives perceptually uniform colour mixing, which means dark mode gradients and blended surfaces look right rather than muddy:
+
+```css
+/* Light */
+--background: oklch(0.98 0 0);
+--foreground: oklch(0.09 0 0);
+--muted: oklch(0.94 0 0);
+
+/* Dark */
+--background: oklch(0.09 0 0);
+--foreground: oklch(0.96 0 0);
+--muted: oklch(0.14 0 0);
+```
+
+For backgrounds with subtle layering, use multiple low-opacity white/black values rather than named grey shades. `bg-white/[0.04]` dark mode and `bg-black/[0.03]` light mode react correctly to whatever background they sit on. `bg-zinc-900` does not.
+
+## Typography rhythm
+
+Two scales, used with restraint:
+
+- **Display size** (4xl–6xl) for hero headings only. Tight tracking (`tracking-tight`), short line length.
+- **Body size** (sm–base) for everything else. Relaxed leading (`leading-7` or `leading-8`), 60–78 character line length for readability.
+
+The classic mistake is using a display size for section headings throughout the page. A `text-4xl` heading above every feature section creates a page where everything shouts. Use `text-2xl` or `text-3xl` for section headings. Reserve the large sizes for the hero where they earn their visual weight.
+
+For muted supporting text, use `text-muted-foreground` rather than a hardcoded grey. This automatically adapts to dark mode without additional overrides.
+
+## Feature cards: bento grid patterns
+
+The 2×3 or 3×2 bento grid is the standard layout for product feature sections because it packs information efficiently without requiring the visitor to scroll a long list. Nexus UI's [animated bento grid](/components/animated-bento-grid) and [bento grid skeleton](/components/bento-grid-skeleton) components use a combination of `grid-cols` and `col-span` to create visual rhythm:
+
+```tsx
+<div className="grid gap-4 md:grid-cols-3">
+  <div className="col-span-2 ...">Large feature card</div>
+  <div className="col-span-1 ...">Stat card</div>
+  <div className="col-span-1 ...">Stat card</div>
+  <div className="col-span-2 ...">Large feature card</div>
+</div>
+```
+
+Alternating the wide-narrow order between rows creates diagonal visual movement that draws the eye downward through the section.
+
+For a ready-made glass card implementation, see the [nebula glass card](/components/nebula-glass-card) component.
+
+## Combining patterns
+
+The glass panel, consistent radii, and OKLCH tokens compose cleanly because they work at different levels of the visual hierarchy. Changing the radius system does not break the surface layering. Adjusting the dark mode tokens does not affect spacing. This independence is what makes iterating on a component-based Tailwind layout significantly faster than maintaining equivalent CSS modules or styled-components.
+
+Ship the spacing constants and radius decisions as a design token comment at the top of your layout file. Conventions you write down once get applied consistently. Conventions that live in the author's head get violated the first time someone else adds a section.
+
+Browse complete landing page sections in the [UI blocks library](/blocks), or see a full page example in the [why choose us block](/blocks/block-why-choose-us). For the full component catalogue, visit [Nexus UI components](/components).

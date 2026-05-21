@@ -1,16 +1,66 @@
 ---
-title: "How we structure landing pages at Nexus-UI"
-description: "A repeatable section map for developer-first marketing sites."
+title: "How we structure landing pages at Nexus UI"
+description: "A repeatable section map for developer-first marketing sites: what goes where, why each section earns its position, and how to ship the whole page as composable blocks."
 date: "2026-03-22"
 ---
 
+Every landing page is a conversion funnel. The sections you choose, and the order you place them, directly determine how many visitors understand your product well enough to sign up, buy, or contact you. This is the section structure we use for every landing page built with Nexus UI components.
+
 ## The section stack
+
+Every page follows the same backbone:
 
 1. **Hero** — promise, proof, primary CTA, secondary exploration CTA.
 2. **Social proof** — logos, metrics, or compliance callouts.
-3. **Product depth** — bento or split layouts showing workflows.
+3. **Product depth** — bento or split layouts showing real workflows.
 4. **Templates or components** — show the actual UI, not abstract icons.
 5. **Pricing** — transparent tiers with a highlighted recommendation.
 6. **FAQ + final CTA** — remove last objections and re-state the bet.
 
 Ship each section as an isolated block so you can reorder or A/B test without rewiring the entire page.
+
+## Why each section earns its position
+
+### Hero
+
+The hero has one job: tell visitors whether they are in the right place within three seconds. State the product category clearly before the value proposition. "Animated React components for Next.js" is more indexable than "The UI kit that moves."
+
+Include a primary CTA and a lower-commitment alternative — "Start free" and "Browse components" are a common pairing. The secondary CTA keeps visitors who are not ready to convert but are still worth retaining on the page.
+
+### Social proof
+
+Place logos or metrics immediately after the hero, not after your feature section. Visitors make a trust judgement early. A row of recognisable brand logos or a stat like "used in 1,200 projects" converts that moment from doubt into credibility before you ask the visitor to pay attention to your features.
+
+Keep this section scannable. Logo clouds work better than testimonial cards at this position — save detailed quotes for later in the page.
+
+### Product depth
+
+This is where you justify the headline claim. [Bento grid layouts](/components/animated-bento-grid) work well here because they let you show multiple distinct capabilities in a single view without requiring the visitor to scroll through a long feature list. Pair each capability with a real screenshot or animated preview rather than an icon.
+
+The most common mistake at this position is writing about features rather than outcomes. "Framer Motion animations built in" is a feature. "Components that feel polished on first install" is the outcome that feature enables. Write the outcome first.
+
+### Templates and live components
+
+Developer audiences are sceptical of marketing claims. Showing the actual components — interactive, real, copy-pasteable — converts better than describing them. Embed a live preview section that lets visitors see a component working before they click through to its detail page.
+
+This section also serves an SEO function. Each component preview rendered on the page creates additional crawlable text that reinforces your keyword profile for searches like "animated hero section React" or "Next.js pricing block."
+
+### Pricing
+
+Put pricing on the homepage. Hiding it behind a separate page creates unnecessary friction and signals that the pricing might be embarrassing. A three-tier layout with the recommended plan visually highlighted is the standard because it works: it anchors the high tier to make the middle tier feel reasonable.
+
+For developer tools, the free tier matters as much as the paid tiers. The free tier converts visitors into users, and users eventually become paying customers. Make the free tier limits explicit — developers will find the limits anyway, and being upfront builds trust.
+
+### FAQ and final CTA
+
+Visitors who reach the bottom of the page have spent time with your product. They are interested but have objections. Use the [FAQ accordion block](/blocks/block-faq-folder-card) to surface and neutralise the five or six questions that actually stop people from signing up. Then re-state the primary CTA with slightly different framing — "Get started free" at the top, "Copy your first component" at the bottom.
+
+## Shipping as composable blocks
+
+Nexus UI ships each section as a standalone React component you can drop into any Next.js page. [Hero blocks](/blocks/block-interactive-dots), pricing sections, [logo clouds](/components/cinematic-logo-cloud), [FAQ accordions](/blocks/block-faq-folder-card), and CTA footers are each self-contained: their own Tailwind styles, their own Framer Motion animations, their own TypeScript props interface.
+
+This means you can assemble a complete landing page from individual [UI blocks](/blocks) in an afternoon, then iterate on each section independently. Swap a pricing layout without touching the hero. Test two FAQ sections simultaneously. Replace the logo cloud with a [testimonial carousel](/components/scrolling-testimonials) when you have enough customer quotes.
+
+The architecture enforces what good landing page structure already requires: each section should have a clear, independent purpose. If you cannot isolate a section into a standalone component, it is probably trying to do too much.
+
+Browse the full [component catalog](/components) or jump straight into the [blocks library](/blocks) to start assembling your landing page.

@@ -1,25 +1,143 @@
 ---
-title: "Designing scroll choreography in React"
-description: "Practical patterns for scroll-linked motion that stays smooth and accessible."
+title: "Designing scroll choreography in React with Framer Motion"
+description: "Practical patterns for scroll-linked animation in React and Next.js: whileInView entrance effects, useScroll parallax, performance trade-offs, and accessibility."
 date: "2026-05-01"
 ---
 
-## Why scroll choreography matters
+Scroll choreography is the sequencing of animations as a user moves down a page. When done well, it guides attention and creates a sense of depth. When overdone, it becomes disorienting and tanks performance on mid-range devices. This guide covers the patterns that work reliably in production Next.js apps with Framer Motion. For a library of pre-built scroll-animated sections, browse the [Nexus UI component catalog](/components).
 
-Scroll-linked animations help users understand hierarchy and pacing. The trick is to keep work off the main thread where possible and respect reduced motion.
+## Why scroll-linked animation matters
 
-### Start with primitives
+A static page treats every element as equally important. A page with scroll choreography can establish hierarchy — the hero announces the product, feature cards unfold progressively, social proof arrives after the user is already engaged. The motion becomes a pacing mechanism rather than decoration.
 
-Use `whileInView` for enter animations and `useScroll` + `useTransform` for parallax accents. Avoid animating expensive properties like `box-shadow` at large radii.
+The challenge is that scroll events fire at 60fps or more, and any expensive work in the scroll handler causes jank that users notice immediately. Framer Motion's approach — driving animations through a reactive `MotionValue` rather than event listeners — keeps the work off the main thread for transform and opacity properties.
 
-### Accessibility
+## whileInView for entrance animations
 
-Pair motion with opacity or translate — not color contrast alone. Gate intense effects behind `prefers-reduced-motion`.
+The simplest pattern is the entrance animation: an element is invisible until it enters the viewport, then animates in. Framer Motion's `whileInView` prop handles this without any manual IntersectionObserver wiring:
 
 ```tsx
-const shouldReduce =
-  typeof window !== "undefined" &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+<motion.div
+  initial={{ opacity: 0, y: 24 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-80px" }}
+  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+>
+  {children}
+</motion.div>
 ```
 
-Ship fewer, higher-quality interactions instead of animating everything.
+The `viewport.once` flag prevents the animation from replaying every time the element scrolls in and out of view — almost always the right choice for content sections. The `margin` value controls how far inside the viewport the element must be before triggering; a negative margin fires the animation slightly earlier, which makes content feel responsive rather than delayed.
+
+Nexus UI's [scroll reveal text](/components/scroll-reveal-text) and [motion layer scroller](/components/motion-layer-scroller) components are built on exactly this pattern.
+
+### Staggering children
+
+For lists or grids, stagger the children so they cascade rather than all appearing simultaneously:
+
+```tsx
+<motion.div
+  variants={{
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+  }}
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true }}
+>
+  {items.map((item) => (
+    <motion.div
+      key={item.id}
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+      }}
+    >
+      {item.content}
+    </motion.div>
+  ))}
+</motion.div>
+```
+
+Keep stagger delays small — 60–100ms per item is the maximum before the sequence starts feeling slow. For grids with 6+ items, cap the total stagger duration around 400ms regardless of item count.
+
+## useScroll and useTransform for parallax
+
+For effects tied to the scroll position — parallax backgrounds, progress bars, sticky section headers — use `useScroll` paired with `useTransform`:
+
+```tsx
+const { scrollYProgress } = useScroll({
+  target: sectionRef,
+  offset: ["start end", "end start"],
+});
+
+const y = useTransform(scrollYProgress, [0, 1], ["0%", "-20%"]);
+
+return (
+  <section ref={sectionRef}>
+    <motion.div style={{ y }} className="absolute inset-0">
+      <BackgroundImage />
+    </motion.div>
+    {children}
+  </section>
+);
+```
+
+The `offset` parameter defines when the scroll progress starts and ends relative to the target element and the viewport. `"start end"` means "when the top of the element reaches the bottom of the viewport" — i.e., when it first becomes visible. `"end start"` means "when the bottom of the element leaves the top of the viewport."
+
+### Keep parallax subtle
+
+A `y` range of -15% to -25% of the element height is the practical maximum for parallax effects without causing layout disorientation. Deeper parallax values look impressive in isolation but cause motion sickness when combined with other scrolling content on the same page.
+
+## Performance: what to animate and what to avoid
+
+Transform properties (`x`, `y`, `scale`, `rotate`) and `opacity` are composited by the browser and do not trigger layout recalculation. They are safe to animate at 60fps.
+
+Properties that trigger layout (`width`, `height`, `padding`, `margin`, `top`, `left`) cause the browser to recalculate the position of every affected element on every frame. Animating these properties at scroll speed will cause jank on any device.
+
+Properties that trigger paint (`color`, `background`, `box-shadow` at large blur radii, `border-radius` during active animation) are moderately expensive. You can animate them, but be conservative with the complexity — a `box-shadow` with a 60px blur on a large element repainted 60 times per second will show up in your performance profile.
+
+```tsx
+// Fast — compositor only
+<motion.div style={{ y, opacity, scale }} />
+
+// Slow — triggers layout recalc on every scroll event
+<motion.div style={{ height }} />
+```
+
+## Accessibility: reduced motion
+
+Gate all scroll animations behind `prefers-reduced-motion`. Framer Motion's `useReducedMotion` hook makes this straightforward:
+
+```tsx
+function AnimatedSection({ children }: { children: React.ReactNode }) {
+  const shouldReduce = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={shouldReduce ? false : { opacity: 0, y: 24 }}
+      whileInView={shouldReduce ? {} : { opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5 }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+When `shouldReduce` is true, pass `false` to `initial` to render the element in its final state immediately. This ensures users who prefer reduced motion see the content without any delay or invisible content flash.
+
+For parallax effects, disable the transform entirely under reduced motion rather than just reducing the range — vestibular disorders can be triggered even by small amounts of motion tied to scrolling.
+
+## Patterns to avoid
+
+**Animating every element.** Choose two or three focal elements per section and animate those. Animating everything simultaneously creates visual noise, not hierarchy.
+
+**Long delays before content appears.** If a heading takes 600ms to fade in after the section enters the viewport, users will have already scrolled past it. Keep entrance delays under 200ms from the trigger point.
+
+**Scroll-jacking.** Overriding the default scroll behaviour to create custom scroll experiences (snap points, velocity-based navigation) reliably produces accessibility complaints and device compatibility issues. Framer Motion's scroll utilities work with native scrolling, not against it.
+
+The goal is a page that feels considered rather than busy — motion that reinforces the content hierarchy rather than distracting from it.
+
+Ready to ship scroll-animated sections without building from scratch? Browse [animated React components](/components) or jump to a specific pattern like the [tracing spotlight panel](/components/tracing-spotlight-panel) or [animated bento grid](/components/animated-bento-grid).

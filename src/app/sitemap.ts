@@ -5,6 +5,15 @@ import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
 import { getAllPosts } from "@/lib/blog";
 
+const DEMO_SLUGS = [
+  "background-boxes", "background-gradient", "encrypted-text",
+  "floating-dock", "glowing-effect-cards", "gooey-input",
+  "image-trail", "infinite-moving-cards", "keyboard",
+  "meteors", "signup-form", "sparkles", "squiggly-text",
+  "stateful-button", "terminal", "text-generate-effect",
+  "text-reveal-card", "typewriter-effect",
+];
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url;
   const now = new Date();
@@ -17,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "yearly", priority: 0.5 },
     { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.7 },
+    { url: `${base}/template`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/docs/installation`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
     { url: `${base}/docs/install-nextjs`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
     { url: `${base}/docs/install-tailwindcss`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
@@ -53,5 +63,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes];
+  const demoRoutes: MetadataRoute.Sitemap = DEMO_SLUGS.map((slug) => ({
+    url: `${base}/demos/${slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  return [...staticRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes, ...demoRoutes];
 }

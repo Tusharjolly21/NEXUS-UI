@@ -1,0 +1,193 @@
+---
+title: "Framer Motion Animations in Next.js: A Complete Guide"
+description: "How to add Framer Motion animations to a Next.js App Router project: entrance effects, layout animations, exit animations, and performance patterns with Server and Client Components."
+date: "2026-05-15"
+---
+
+Framer Motion is the standard animation library for React applications, and it integrates cleanly with the Next.js App Router. This guide covers the practical setup, the component patterns that work well in production, and the common pitfalls you will encounter when mixing server components with animated client components. If you prefer ready-made components, Nexus UI ships a full [library of Framer Motion components](/components) for Next.js.
+
+## Setting up Framer Motion in Next.js
+
+Install Framer Motion as a dependency:
+
+```bash
+npm install framer-motion
+```
+
+Because Framer Motion components use browser APIs and React hooks, they must run on the client side. In Next.js App Router, any component that uses `motion` needs either the `"use client"` directive or must be imported from a file that has it:
+
+```tsx
+"use client";
+
+import { motion } from "framer-motion";
+
+export function AnimatedCard({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+The pattern that keeps your bundle lean: keep server components responsible for data fetching and HTML structure, and wrap only the animated elements in thin client components. A page that is 90% server-rendered with a few animated client wrappers will always outperform a page that is entirely client-rendered.
+
+## Entrance animations
+
+The most common use case is animating elements as they mount. Framer Motion's `initial` and `animate` props control the start and end states:
+
+```tsx
+<motion.div
+  initial={{ opacity: 0, scale: 0.96 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.35 }}
+>
+  <HeroContent />
+</motion.div>
+```
+
+For staggered lists, use `variants` on the parent to sequence children automatically:
+
+```tsx
+const container = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07 },
+  },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
+};
+
+<motion.ul variants={container} initial="hidden" animate="visible">
+  {features.map((f) => (
+    <motion.li key={f.id} variants={item}>
+      {f.content}
+    </motion.li>
+  ))}
+</motion.ul>
+```
+
+## Scroll-triggered animations with whileInView
+
+For elements below the fold, use `whileInView` to trigger the animation only when the element enters the viewport. Nexus UI's [scroll reveal text](/components/scroll-reveal-text) and [motion layer scroller](/components/motion-layer-scroller) are built on this pattern.
+
+```tsx
+<motion.section
+  initial={{ opacity: 0, y: 24 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, margin: "-100px" }}
+  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+>
+  <FeatureSection />
+</motion.section>
+```
+
+The `viewport.once: true` flag prevents the animation from re-triggering each time the element enters and exits the viewport. The `margin` value extends the viewport boundary — a negative value means the element must be further inside the viewport before triggering.
+
+## Exit animations with AnimatePresence
+
+Framer Motion can animate elements as they unmount, but only when they are wrapped in `AnimatePresence`:
+
+```tsx
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+
+export function Toast({ visible, message }: { visible: boolean; message: string }) {
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.2 }}
+          className="fixed top-4 right-4 rounded-xl bg-foreground px-4 py-2 text-background"
+        >
+          {message}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+```
+
+`AnimatePresence` watches its children for unmounting and delays removal until the `exit` animation completes. This is essential for modal dialogs, toast notifications, dropdown menus, and any component that conditionally renders based on state.
+
+## Layout animations
+
+One of Framer Motion's most powerful features is layout animation — automatically interpolating between two different rendered sizes or positions when a component updates:
+
+```tsx
+<motion.div layout className="flex flex-wrap gap-2">
+  {tags.map((tag) => (
+    <motion.span key={tag.id} layout className="rounded-full bg-muted px-3 py-1 text-sm">
+      {tag.label}
+    </motion.span>
+  ))}
+</motion.div>
+```
+
+Adding `layout` to both the container and the children means that when tags are added, removed, or reordered, Framer Motion automatically animates the transition from the old layout to the new one. This works for widths, heights, positions, and any combination.
+
+## Gesture animations
+
+Framer Motion's `whileHover` and `whileTap` props add interactive feedback without state management:
+
+```tsx
+<motion.button
+  whileHover={{ scale: 1.02 }}
+  whileTap={{ scale: 0.98 }}
+  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+  className="rounded-full bg-foreground px-6 py-2.5 text-background"
+>
+  Get started
+</motion.button>
+```
+
+Spring transitions (`type: "spring"`) feel more natural than eased transitions for interactive feedback because they respond to velocity. A stiffness of 400 and damping of 25 produces a quick, snappy response that matches button press expectations.
+
+## Reduced motion
+
+Always respect the user's motion preferences. Framer Motion provides `useReducedMotion` for this:
+
+```tsx
+"use client";
+
+import { motion, useReducedMotion } from "framer-motion";
+
+export function AnimatedHero() {
+  const reduce = useReducedMotion();
+
+  return (
+    <motion.div
+      initial={reduce ? false : { opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: reduce ? 0 : 0.5 }}
+    >
+      <HeroContent />
+    </motion.div>
+  );
+}
+```
+
+When `useReducedMotion` returns `true`, pass `false` to `initial` so the element renders in its final state immediately. Users who have set `prefers-reduced-motion: reduce` see no animation delay and no invisible content.
+
+## Performance checklist
+
+- Animate only `opacity`, `x`, `y`, `scale`, `rotate` — these are compositor-safe
+- Avoid animating `width`, `height`, `padding`, `top`, `left` at scroll frequency
+- Use `will-change: transform` sparingly, only for elements that animate continuously
+- Wrap animated sections in `React.memo` if they receive frequently-changing parent props
+- Use `viewport.once: true` on `whileInView` to prevent repeated animation work on scroll
+
+Framer Motion and Next.js together give you a production-ready animation system that stays performant, accessible, and maintainable as your application grows.
+
+For production-ready examples, see the [sparkles effect](/components/sparkles), [animated bento grid](/components/animated-bento-grid), and [hero interactive dots block](/blocks/block-interactive-dots). Or browse the full [animated component library](/components) to find pre-built Framer Motion components ready to drop into your Next.js project.
