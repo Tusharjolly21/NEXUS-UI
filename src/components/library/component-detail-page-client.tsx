@@ -111,6 +111,7 @@ function getImportName(code: string, fallbackName: string) {
   return toPascalCase(fallbackName);
 }
 import { getLibraryComponent } from "@/lib/catalog/library-components";
+import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { getComponentCategoryLabel, type ComponentCategorySlug } from "@/lib/catalog/taxonomy";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -628,7 +629,40 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
           )}
         </div>
       </section>
+
+      <ComponentAbout slug={comp.slug} name={comp.name} />
     </main>
+  );
+}
+
+function ComponentAbout({ slug, name }: { slug: string; name: string }) {
+  const desc = componentDescriptions[slug];
+  if (!desc) return null;
+
+  return (
+    <section className="mt-16 border-t border-border/50 pt-10">
+      <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+        About {name}
+      </h2>
+      <p className="mt-4 max-w-4xl text-base leading-8 text-muted-foreground">
+        {desc.about}
+      </p>
+      <div className="mt-8">
+        <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
+          Common use cases
+        </h3>
+        <ul className="mt-4 flex flex-wrap gap-3">
+          {desc.useCases.map((uc) => (
+            <li
+              key={uc}
+              className="rounded-xl border border-border/70 bg-muted/40 px-4 py-2 text-sm text-muted-foreground dark:bg-white/[0.04]"
+            >
+              {uc}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }
 
