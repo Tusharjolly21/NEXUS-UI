@@ -79,7 +79,6 @@ export default function Home() {
     contactPoint: {
       "@type": "ContactPoint",
       contactType: "customer support",
-      url: `${siteConfig.url}/contact`,
       email: "contact@nexus-ui.com",
     },
   };
@@ -90,8 +89,8 @@ export default function Home() {
     name: siteConfig.name,
     description: siteConfig.description,
     applicationCategory: "DeveloperApplication",
-    operatingSystem: "Web",
-    url: siteConfig.url,
+    operatingSystem: "any",
+    sameAs: siteConfig.url,
     offers: {
       "@type": "Offer",
       price: "0",

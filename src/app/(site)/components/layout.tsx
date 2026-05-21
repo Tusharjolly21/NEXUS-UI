@@ -22,7 +22,7 @@ export default function ComponentsLayout({ children }: { children: React.ReactNo
       "@type": "ListItem",
       position: i + 1,
       name: c.name,
-      url: `${siteConfig.url}/components/${c.slug}`,
+      item: `${siteConfig.url}/components/${c.slug}`,
     })),
   };
 

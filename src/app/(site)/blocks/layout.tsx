@@ -22,7 +22,7 @@ export default function BlocksLayout({ children }: { children: React.ReactNode }
       "@type": "ListItem",
       position: i + 1,
       name: b.name,
-      url: `${siteConfig.url}/blocks/${b.slug}`,
+      item: `${siteConfig.url}/blocks/${b.slug}`,
     })),
   };
 

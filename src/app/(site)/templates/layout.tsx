@@ -22,7 +22,7 @@ export default function TemplatesLayout({ children }: { children: React.ReactNod
       "@type": "ListItem",
       position: i + 1,
       name: t.title,
-      url: `${siteConfig.url}/templates/${t.slug}`,
+      item: `${siteConfig.url}/templates/${t.slug}`,
     })),
   };
 

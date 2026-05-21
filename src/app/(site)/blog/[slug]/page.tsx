@@ -65,6 +65,8 @@ export default async function BlogPostPage({ params }: Props) {
       logo: {
         "@type": "ImageObject",
         url: `${siteConfig.url}/icon.svg`,
+        width: 512,
+        height: 512,
       },
     },
     mainEntityOfPage: {
