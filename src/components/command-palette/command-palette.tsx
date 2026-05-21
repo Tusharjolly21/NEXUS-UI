@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search, Home, LayoutDashboard, Settings, User,
   FilePlus, FolderPlus, UserPlus, Moon, Sparkles, Copy,
+  type LucideProps,
 } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Command as CmdkRoot } from "cmdk";
@@ -22,7 +23,7 @@ export type CommandPaletteProps = { className?: string };
 type CommandEntry = {
   label: string;
   description: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<LucideProps>;
   action: string;
   value: string;
 };
