@@ -7,10 +7,12 @@ export type { BlockCategory, BlockManifestEntry };
 export type MarketplaceBlock = BlockManifestEntry & { Preview: ComponentType };
 
 const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
+  "block-logo-clouds": Previews.PreviewLogoCloudMarquee,
   "block-interactive-dots": Previews.PreviewInteractiveDots,
   "block-why-choose-us": Previews.PreviewWhyChooseUs,
   "block-faq-folder-card": Previews.PreviewFaqFolderCard,
   "block-contact-page": Previews.PreviewContactPageBlock,
+  "block-sidebar": Previews.PreviewSimpleSidebar,
 };
 
 export const blocks: MarketplaceBlock[] = blocksManifest.map((b) => {

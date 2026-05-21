@@ -42,6 +42,7 @@ const CATEGORY_NOTES: Record<BlockCategory, string> = {
   "Interactive backgrounds": "Responsive motion fields for hero backdrops, feature cards, and product storytelling.",
   "FAQ sections": "Supportive answer layouts tuned for scannability.",
   "Blog sections": "Editorial rails for content hubs and announcement pages.",
+  Navigation: "Sidebar and nav patterns for dashboards, docs, and product layouts.",
 };
 
 const CATEGORY_ORDER = Object.keys(CATEGORY_NOTES) as BlockCategory[];

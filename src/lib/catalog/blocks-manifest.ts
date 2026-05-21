@@ -14,7 +14,8 @@ export type BlockCategory =
   | "Contact sections"
   | "Interactive backgrounds"
   | "FAQ sections"
-  | "Blog sections";
+  | "Blog sections"
+  | "Navigation";
 
 export type BlockManifestEntry = {
   slug: string;
@@ -28,6 +29,42 @@ export type BlockManifestEntry = {
 };
 
 export const blocksManifest: BlockManifestEntry[] = [
+  {
+    slug: "block-logo-clouds",
+    name: "Brand Logo Animation",
+    description:
+      "Six production-ready animated logo cloud variants: blur-flip grid, hover-reveal blur, infinite marquee, cursor spotlight, periodic swap, and minimal single row.",
+    category: "Logo clouds",
+    tags: ["logos", "brands", "marquee", "spotlight", "animation", "framer-motion"],
+    premium: false,
+    variants: [
+      "Blur Flip Grid",
+      "Blur Hover Reveal",
+      "Infinite Marquee",
+      "Cursor Spotlight",
+      "Swap Animation",
+      "Single Row Lift",
+    ],
+    reactSource: `import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
+import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
+import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";
+import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
+import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
+import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
+
+export default function Page() {
+  return (
+    <>
+      <LogosBlurFlip />
+      <LogoCloudBlur />
+      <LogoCloudMarquee />
+      <LogoCloudSpotlight />
+      <LogoCloudSwap />
+      <LogoCloudSingleRow />
+    </>
+  );
+}`,
+  },
   {
     slug: "block-interactive-dots",
     name: "Interactive Background Card",
@@ -83,6 +120,29 @@ export default function Page() {
       <FaqFolderCard items={faqs} />
       <SearchableFaqSection items={faqs} />
       <ChatFaqSection items={faqs} />
+    </>
+  );
+}`,
+  },
+  {
+    slug: "block-sidebar",
+    name: "Sidebar",
+    description:
+      "Navigation sidebar blocks for dashboards and product layouts. Includes a simple hover sidebar and a collapsible icon-only sidebar with animated width transitions.",
+    category: "Navigation",
+    tags: ["sidebar", "navigation", "collapsible", "dashboard", "framer-motion"],
+    premium: false,
+    variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar"],
+    reactSource: `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
+import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
+import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
+
+export default function Page() {
+  return (
+    <>
+      <SimpleSidebar />
+      <CollapsibleSidebar />
+      <GroupedSidebar />
     </>
   );
 }`,

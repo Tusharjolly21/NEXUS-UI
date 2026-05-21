@@ -754,6 +754,26 @@ export const componentDescriptions: Record<string, ComponentDescription> = {
       "Visual product feature galleries",
     ],
   },
+  "avatar-group": {
+    about:
+      "Avatar Group renders a horizontally overlapping stack of user avatars with per-avatar entrance animations and hover effects powered by Framer Motion. Each avatar supports a photo via `src`, with automatic color-coded initials fallback when no image is provided. Name tooltips with enter/exit animations appear on hover. Four entrance animation styles — flip, slide, scale, and bounce — stagger across the group on mount, and four hover styles — scale, lift, rotate, and up — make the hovered avatar stand out from the stack. Use it for social proof strips, team sections, collaborator counts, and anywhere a list of people needs to be communicated compactly.",
+    useCases: [
+      "Social proof strips on pricing and landing pages",
+      "Team member and collaborator count displays",
+      "Active user and community size indicators",
+      "Comment and reaction participant lists",
+    ],
+  },
+  "feature-tools-card": {
+    about:
+      "The Feature Tools Card is a dark glass bento card with five integration icon slots arranged in a symmetric sm–md–lg–md–sm pyramid, a conic-gradient orbit ring that rotates continuously, and 3-D tilt and magnetic icon effects driven by cursor position — all with zero animation library dependencies. Move the mouse over the card to feel the tilt physics; hover near any icon to watch it magnetically follow the cursor. Icons default to GitHub, Notion, Gmail, Slack, and Google Drive but accept any React node, so product-specific SVGs or `<img>` tags slot straight in. Use it in integration and features sections to communicate that your platform connects with the tools your visitors already use.",
+    useCases: [
+      "Integration and partner showcase sections",
+      "SaaS feature sections highlighting connected tools",
+      "Platform capability bento grids",
+      "Product landing page feature cards",
+    ],
+  },
   "command-palette": {
     about:
       "The Command Palette is an animated command interface triggered by the ⌘K keyboard shortcut. It opens with a Framer Motion spring animation and closes with an exit transition coordinated by AnimatePresence. Commands are grouped into navigation, action, and theme sections, and are filterable by keyboard input in real time. A backdrop blur overlay dims the page behind the palette. A production-ready implementation of the command palette pattern for keyboard-first application navigation.",

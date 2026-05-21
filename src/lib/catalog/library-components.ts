@@ -6428,6 +6428,699 @@ export function ImageTrailExample() {
   );
 }`,
   },
+  {
+    slug: "avatar-group",
+    name: "Avatar Group",
+    description: "Overlapping avatar stack with per-avatar entrance animations (flip, slide, scale, bounce), four hover styles, name tooltips, and automatic color-coded fallback initials when no image is supplied.",
+    categorySlug: "motion-effects",
+    tags: ["avatar", "group", "users", "social proof", "tooltip", "framer-motion", "spring", "overlap"],
+    premium: false,
+    trendingScore: 115,
+    createdAt: "2026-05-21T00:00:00.000Z",
+    animationKinds: ["spring", "hover"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewAvatarGroup,
+    props: [
+      { name: "size", type: "number", description: "Avatar diameter in px.", defaultValue: "40" },
+      { name: "overlap", type: "number", description: "Pixel overlap between adjacent avatars.", defaultValue: "10" },
+      { name: "showTooltips", type: "boolean", description: "Show name tooltip on hover.", defaultValue: "true" },
+      { name: "hoverAnimation", type: '"scale" | "lift" | "rotate" | "up" | "none"', description: "Animation applied to the avatar under the cursor.", defaultValue: '"lift"' },
+      { name: "hoverScale", type: "number", description: "Scale multiplier applied on hover.", defaultValue: "1.1" },
+      { name: "entranceAnimation", type: '"none" | "fade" | "flip" | "slide" | "scale" | "bounce"', description: "Entrance animation for each avatar on mount.", defaultValue: '"scale"' },
+      { name: "entranceStagger", type: "number", description: "Delay in seconds between each avatar's entrance.", defaultValue: "0.05" },
+    ],
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export interface AvatarData {
+  src?: string;
+  alt?: string;
+  fallback: string;
+  tooltip?: string;
+  bgColor?: string;
+}
+
+export interface AvatarGroupProps {
+  avatars: AvatarData[];
+  size?: number;
+  overlap?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  showTooltips?: boolean;
+  hoverAnimation?: "scale" | "lift" | "rotate" | "up" | "none";
+  hoverScale?: number;
+  entranceAnimation?: "none" | "fade" | "flip" | "slide" | "scale" | "bounce";
+  entranceStagger?: number;
+  className?: string;
+}
+
+const SPRING = { type: "spring" as const, stiffness: 400, damping: 18, mass: 0.8 };
+
+const DEFAULT_COLOURS = [
+  "#06b6d4", "#8b5cf6", "#10b981", "#f59e0b",
+  "#d946ef", "#0ea5e9", "#f43f5e", "#14b8a6",
+];
+
+function entranceInitial(type: AvatarGroupProps["entranceAnimation"]) {
+  switch (type) {
+    case "flip":   return { rotateY: -90, scale: 0.8, opacity: 0 };
+    case "slide":  return { x: 16, opacity: 0 };
+    case "scale":  return { scale: 0.8, opacity: 0 };
+    case "bounce": return { scale: 0.8, y: 16, opacity: 0 };
+    case "fade":   return { opacity: 0 };
+    default:       return false as const;
+  }
+}
+
+function entranceFinal(type: AvatarGroupProps["entranceAnimation"]) {
+  switch (type) {
+    case "flip":   return { rotateY: 0, scale: 1, opacity: 1 };
+    case "slide":  return { x: 0, opacity: 1 };
+    case "scale":  return { scale: 1, opacity: 1 };
+    case "bounce": return { scale: 1, y: 0, opacity: 1 };
+    case "fade":   return { opacity: 1 };
+    default:       return {};
+  }
+}
+
+function hoverTarget(type: AvatarGroupProps["hoverAnimation"], scale: number) {
+  switch (type) {
+    case "scale":  return { scale };
+    case "lift":   return { y: -4, scale };
+    case "rotate": return { rotate: 5, scale };
+    case "up":     return { y: -8 };
+    default:       return undefined;
+  }
+}
+
+export function AvatarGroup({
+  avatars,
+  size = 40,
+  overlap = 10,
+  borderWidth = 2,
+  borderColor,
+  showTooltips = true,
+  hoverAnimation = "lift",
+  hoverScale = 1.1,
+  entranceAnimation = "scale",
+  entranceStagger = 0.05,
+  className,
+}: AvatarGroupProps) {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const reduce = useReducedMotion();
+
+  const step = size - overlap;
+  const totalWidth = avatars.length > 0
+    ? avatars.length * size - (avatars.length - 1) * overlap
+    : 0;
+
+  const initial = reduce ? false : entranceInitial(entranceAnimation);
+  const finalState = entranceFinal(entranceAnimation);
+  const hoverAnim = reduce ? undefined : hoverTarget(hoverAnimation, hoverScale);
+
+  return (
+    <div
+      className={cn("relative", className)}
+      style={{ width: totalWidth, height: size }}
+    >
+      {avatars.map((avatar, index) => {
+        const bgColor = avatar.bgColor ?? DEFAULT_COLOURS[index % DEFAULT_COLOURS.length];
+        return (
+          <motion.div
+            key={index}
+            className="absolute top-0 select-none"
+            style={{
+              left: index * step,
+              width: size,
+              height: size,
+              zIndex: hoveredIndex === index ? avatars.length + 10 : avatars.length - index,
+            }}
+            initial={initial}
+            animate={finalState}
+            transition={{ ...SPRING, delay: reduce ? 0 : entranceStagger * index }}
+            whileHover={hoverAnim}
+            onHoverStart={() => setHoveredIndex(index)}
+            onHoverEnd={() => setHoveredIndex(null)}
+          >
+            <div
+              className={cn(
+                "flex items-center justify-center rounded-full overflow-hidden cursor-pointer",
+                !borderColor && "ring-2 ring-background dark:ring-zinc-900",
+              )}
+              style={{
+                width: size,
+                height: size,
+                backgroundColor: bgColor,
+                ...(borderColor ? { boxShadow: \`0 0 0 \${borderWidth}px \${borderColor}\` } : {}),
+              }}
+            >
+              {avatar.src ? (
+                <img src={avatar.src} alt={avatar.alt ?? avatar.tooltip ?? avatar.fallback}
+                  width={size} height={size} className="h-full w-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    const sib = e.currentTarget.nextElementSibling as HTMLElement | null;
+                    if (sib) sib.style.display = "flex";
+                  }}
+                />
+              ) : null}
+              <span className="flex items-center justify-center w-full h-full font-semibold text-white"
+                style={{ fontSize: size * 0.35, display: avatar.src ? "none" : "flex" }}>
+                {avatar.fallback}
+              </span>
+            </div>
+
+            {showTooltips && avatar.tooltip && (
+              <AnimatePresence>
+                {hoveredIndex === index && (
+                  <motion.div key="tip"
+                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 4 }} transition={{ duration: 0.15 }}
+                    className="pointer-events-none absolute z-50"
+                    style={{ bottom: size + 6, left: "50%", transform: "translateX(-50%)" }}
+                  >
+                    <div className="rounded bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white whitespace-nowrap dark:bg-zinc-700">
+                      {avatar.tooltip}
+                    </div>
+                    <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-700" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            )}
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ── Usage example ─────────────────────────────────────────────────────────────
+export function SocialProofAvatars() {
+  return (
+    <AvatarGroup
+      avatars={[
+        { fallback: "PS", tooltip: "Priya Sharma",   bgColor: "#06b6d4" },
+        { fallback: "JK", tooltip: "James Kowalski", bgColor: "#8b5cf6" },
+        { fallback: "SC", tooltip: "Sofia Chen",     bgColor: "#10b981" },
+        { fallback: "MR", tooltip: "Marcus Reid",    bgColor: "#f59e0b" },
+        { fallback: "AN", tooltip: "Aisha Nkosi",    bgColor: "#d946ef" },
+      ]}
+      size={40}
+      overlap={10}
+      hoverAnimation="lift"
+      entranceAnimation="scale"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "feature-tools-card",
+    name: "Feature Tools Card",
+    description: "A dark glass card with five magnetic icon slots, a rotating conic-gradient orbit ring, and 3-D tilt physics. Swap the default integration icons for any SVG or image.",
+    categorySlug: "cards",
+    tags: ["card", "icons", "integrations", "tilt", "3d", "magnetic", "orbit", "glassmorphism"],
+    premium: false,
+    trendingScore: 130,
+    createdAt: "2026-05-21T00:00:00.000Z",
+    animationKinds: ["3d", "hover", "spring"],
+    dependencies: [],
+    Preview: Previews.PreviewFeatureToolsCard,
+    props: [
+      { name: "title", type: "string", description: "Card heading text.", defaultValue: '"Feature Block Animated Card"' },
+      { name: "description", type: "string", description: "Supporting description below the heading.", defaultValue: '"A card that showcases a set of tools your platform connects with."' },
+      { name: "cardBg", type: "string", description: "CSS background value for the card surface.", defaultValue: '"rgba(40,40,40,0.70)"' },
+      { name: "enableTilt", type: "boolean", description: "Enable 3-D perspective tilt on mouse move.", defaultValue: "true" },
+      { name: "tiltStrength", type: "number", description: "Max tilt rotation in degrees.", defaultValue: "8" },
+      { name: "enableMagnetic", type: "boolean", description: "Enable magnetic icon attraction toward cursor.", defaultValue: "true" },
+      { name: "magneticStrength", type: "number", description: "Magnetic pull multiplier (0–1).", defaultValue: "0.4" },
+      { name: "magneticRadius", type: "number", description: "Cursor distance in px at which magnetic pull begins.", defaultValue: "120" },
+      { name: "enableOrbit", type: "boolean", description: "Show the conic-gradient orbit ring.", defaultValue: "true" },
+      { name: "orbitSpeed", type: "number", description: "Orbit ring full-rotation duration in seconds.", defaultValue: "18" },
+      { name: "orbitColor", type: "string", description: "CSS color for the orbit sweep segments.", defaultValue: '"rgba(255,255,255,0.18)"' },
+    ],
+    reactSource: `"use client";
+
+import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+
+const ORBIT_KEYFRAMES = \`@keyframes ftc-orbit-spin { to { transform: rotate(360deg); } }\`;
+
+// ── default icons ──────────────────────────────────────────────────────────────
+function GithubIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="w-full h-full">
+      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+    </svg>
+  );
+}
+
+function NotionIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="w-full h-full">
+      <path fillRule="evenodd" clipRule="evenodd" d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466l1.823 1.447zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933l3.222-.187z" />
+    </svg>
+  );
+}
+
+function GmailIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full">
+      <path d="M3.5 5.5h17A1.5 1.5 0 0 1 22 7v10a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 17V7a1.5 1.5 0 0 1 1.5-1.5z" fill="#FFFFFF" />
+      <path d="M22 7v10a1.5 1.5 0 0 1-1.5 1.5h-2V10.66L22 7z" fill="#4285F4" />
+      <path d="M2 7v10a1.5 1.5 0 0 0 1.5 1.5h2V10.66L2 7z" fill="#34A853" />
+      <path d="M5.5 18.5V10.66L12 14.5l6.5-3.84v7.84h-13z" fill="#EA4335" />
+      <path d="M22 7L12 13.5 2 7l1-1.5h18L22 7z" fill="#FBBC04" />
+    </svg>
+  );
+}
+
+function SlackIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full">
+      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" fill="#E01E5A" />
+      <path d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z" fill="#36C5F0" />
+      <path d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z" fill="#2EB67D" />
+      <path d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E" />
+    </svg>
+  );
+}
+
+function DriveIcon() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full">
+      <path d="M7.71 3.5L1.15 15l3.42 6 6.55-11.5z" fill="#0066DA" />
+      <path d="M16.29 3.5H7.71l6.55 11.5h8.59z" fill="#FFC107" />
+      <path d="M22.85 15h-8.59l-3.16 5.5h8.31z" fill="#1B872B" />
+      <path d="M14.26 15l-3.14-5.5L7.71 3.5l3.42 6h.01l3.12 5.5z" fill="#EA4335" />
+      <path d="M22.85 15l-3.14-5.5h-5.45l3.14 5.5z" fill="#188038" />
+    </svg>
+  );
+}
+
+export interface FeatureToolsCardProps {
+  title?: string;
+  description?: string;
+  cardBg?: string;
+  icon1?: React.ReactNode;
+  icon2?: React.ReactNode;
+  icon3?: React.ReactNode;
+  icon4?: React.ReactNode;
+  icon5?: React.ReactNode;
+  enableTilt?: boolean;
+  tiltStrength?: number;
+  enableMagnetic?: boolean;
+  magneticStrength?: number;
+  magneticRadius?: number;
+  enableOrbit?: boolean;
+  orbitSpeed?: number;
+  orbitColor?: string;
+  className?: string;
+}
+
+export function FeatureToolsCard({
+  title = "Feature Block Animated Card",
+  description = "A card that showcases a set of tools your platform connects with.",
+  cardBg = "rgba(40,40,40,0.70)",
+  icon1, icon2, icon3, icon4, icon5,
+  enableTilt = true,
+  tiltStrength = 8,
+  enableMagnetic = true,
+  magneticStrength = 0.4,
+  magneticRadius = 120,
+  enableOrbit = true,
+  orbitSpeed = 18,
+  orbitColor = "rgba(255,255,255,0.18)",
+  className,
+}: FeatureToolsCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const magnetRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    function onMove(e: MouseEvent) {
+      const rect = card!.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      if (enableTilt) {
+        const rx = ((my - rect.height / 2) / (rect.height / 2)) * -tiltStrength;
+        const ry = ((mx - rect.width / 2) / (rect.width / 2)) * tiltStrength;
+        card!.style.transform = \`perspective(900px) rotateX(\${rx}deg) rotateY(\${ry}deg)\`;
+      }
+      if (enableMagnetic) {
+        magnetRefs.current.forEach((m) => {
+          if (!m) return;
+          const r = m.getBoundingClientRect();
+          const cx = r.left + r.width / 2 - rect.left;
+          const cy = r.top + r.height / 2 - rect.top;
+          const dx = mx - cx;
+          const dy = my - cy;
+          const dist = Math.hypot(dx, dy);
+          if (dist < magneticRadius) {
+            const pull = (1 - dist / magneticRadius) * magneticStrength;
+            m.style.transform = \`translate(\${dx * pull}px, \${dy * pull}px)\`;
+          } else {
+            m.style.transform = "translate(0,0)";
+          }
+        });
+      }
+    }
+    function onLeave() {
+      if (enableTilt) card!.style.transform = "perspective(900px) rotateX(0) rotateY(0)";
+      if (enableMagnetic) magnetRefs.current.forEach((m) => { if (m) m.style.transform = "translate(0,0)"; });
+    }
+    card.addEventListener("mousemove", onMove);
+    card.addEventListener("mouseleave", onLeave);
+    return () => { card.removeEventListener("mousemove", onMove); card.removeEventListener("mouseleave", onLeave); };
+  }, [enableTilt, tiltStrength, enableMagnetic, magneticStrength, magneticRadius]);
+
+  const icons = [
+    { node: icon1 ?? <GithubIcon />, size: "w-8 h-8",  iconSize: "w-4 h-4" },
+    { node: icon2 ?? <NotionIcon />, size: "w-12 h-12", iconSize: "w-6 h-6" },
+    { node: icon3 ?? <GmailIcon />,  size: "w-16 h-16", iconSize: "w-8 h-8" },
+    { node: icon4 ?? <SlackIcon />,  size: "w-12 h-12", iconSize: "w-6 h-6" },
+    { node: icon5 ?? <DriveIcon />,  size: "w-8 h-8",  iconSize: "w-4 h-4" },
+  ];
+
+  return (
+    <div
+      ref={cardRef}
+      className={cn("w-full max-w-sm rounded-xl p-8", className)}
+      style={{
+        background: cardBg,
+        border: "1px solid rgba(255,255,255,0.10)",
+        boxShadow: "inset 2px 4px 16px 0px rgba(248,248,248,0.06)",
+        transformStyle: "preserve-3d",
+        transition: "transform 0.2s ease-out",
+        willChange: "transform",
+      }}
+    >
+      <style>{ORBIT_KEYFRAMES}</style>
+      <div
+        className="relative h-80 rounded-xl overflow-hidden"
+        style={{
+          background: cardBg,
+          WebkitMaskImage: "radial-gradient(50% 50% at 50% 50%, white 0%, transparent 100%)",
+          maskImage: "radial-gradient(50% 50% at 50% 50%, white 0%, transparent 100%)",
+        }}
+      >
+        {enableOrbit && (
+          <div
+            className="pointer-events-none absolute top-1/2 left-1/2 rounded-full"
+            style={{
+              width: 280, height: 280, marginTop: -140, marginLeft: -140,
+              background: \`conic-gradient(from 0deg, transparent 0%, \${orbitColor} 25%, transparent 50%, \${orbitColor} 75%, transparent 100%)\`,
+              WebkitMask: "radial-gradient(circle, transparent 56%, black 58%, black 80%, transparent 82%)",
+              mask: "radial-gradient(circle, transparent 56%, black 58%, black 80%, transparent 82%)",
+              animation: \`ftc-orbit-spin \${orbitSpeed}s linear infinite\`,
+              zIndex: 1,
+            }}
+          />
+        )}
+        <div className="relative z-10 flex h-full items-center justify-center">
+          <div className="flex flex-row items-center justify-center gap-2">
+            {icons.map(({ node, size, iconSize }, i) => (
+              <div
+                key={i}
+                ref={(el) => { magnetRefs.current[i] = el; }}
+                className="inline-flex"
+                style={{ transition: "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)", willChange: "transform" }}
+              >
+                <div className={cn("rounded-full flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-350 hover:scale-110", size)}
+                  style={{ background: "rgba(248,248,248,0.01)", boxShadow: "inset 0px 0px 8px 0px rgba(248,248,248,0.25), 0px 32px 24px -16px rgba(0,0,0,0.40)" }}
+                >
+                  <span className={cn("pointer-events-none", iconSize)}>{node}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <h3 className="mt-2 pt-2 text-lg font-semibold tracking-tight text-white">{title}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-white/50">{description}</p>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "link-preview",
+    name: "Link Preview",
+    description:
+      "Hover-triggered image tooltip that transforms inline text links into cinematic visual previews. Spring-animated entrance with blur, scale, mouse-tracking tilt, and a soft floating glide — perfect for blogs, portfolios, and product pages.",
+    categorySlug: "motion-effects",
+    tags: ["tooltip", "hover", "link", "preview", "framer-motion", "blog", "animation"],
+    premium: false,
+    trendingScore: 88,
+    createdAt: "2025-05-21T00:00:00.000Z",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewLinkPreview,
+    previewShell: "plain",
+    props: [
+      { name: "href", type: "string", description: "Destination URL — internal path or external https:// link." },
+      { name: "image", type: "string", description: "Image URL to display inside the preview card." },
+      { name: "title", type: "string", description: "Optional label shown beneath the card alongside the hostname.", defaultValue: "undefined" },
+      { name: "children", type: "React.ReactNode", description: "The visible link text rendered inline." },
+      { name: "width", type: "number", description: "Preview card width in px.", defaultValue: "320" },
+      { name: "height", type: "number", description: "Preview card height in px.", defaultValue: "200" },
+      { name: "delay", type: "number", description: "Entrance animation delay in seconds.", defaultValue: "0.08" },
+      { name: "className", type: "string", description: "Extra className applied to the anchor element.", defaultValue: "undefined" },
+      { name: "previewClassName", type: "string", description: "Extra className applied to the tooltip wrapper.", defaultValue: "undefined" },
+      { name: "openInNewTab", type: "boolean", description: "Opens the link in a new tab when true.", defaultValue: "true" },
+    ],
+    reactSource: `"use client";
+
+import * as React from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
+import {
+  motion,
+  AnimatePresence,
+  useSpring,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export type LinkPreviewProps = {
+  href: string;
+  image: string;
+  title?: string;
+  children: React.ReactNode;
+  width?: number;
+  height?: number;
+  delay?: number;
+  className?: string;
+  previewClassName?: string;
+  openInNewTab?: boolean;
+};
+
+function getHostname(href: string): string {
+  try {
+    return new URL(href).hostname.replace(/^www\\./, "");
+  } catch {
+    return "";
+  }
+}
+
+export function LinkPreview({
+  href,
+  image,
+  title,
+  children,
+  width = 320,
+  height = 200,
+  delay = 0.08,
+  className,
+  previewClassName,
+  openInNewTab = true,
+}: LinkPreviewProps) {
+  const [isVisible, setIsVisible] = React.useState(false);
+  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+  const [anchorPos, setAnchorPos] = React.useState({ top: 0, left: 0 });
+
+  const anchorRef = React.useRef<HTMLAnchorElement>(null);
+
+  const mouseXRaw = useMotionValue(0);
+  const springX = useSpring(mouseXRaw, { stiffness: 90, damping: 16, mass: 0.6 });
+  const rotateZ = useTransform(springX, [-1, 1], [-5, 5]);
+  const shiftX = useTransform(springX, [-1, 1], [-12, 12]);
+
+  React.useEffect(() => {
+    setMounted(true);
+    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
+  }, []);
+
+  React.useEffect(() => {
+    setImageLoaded(false);
+    setImageError(false);
+  }, [image]);
+
+  function captureAnchorPos() {
+    const el = anchorRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setAnchorPos({ top: rect.top, left: rect.left + rect.width / 2 });
+  }
+
+  function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
+    const el = anchorRef.current;
+    if (!el) return;
+    const { left, width: w } = el.getBoundingClientRect();
+    mouseXRaw.set(((e.clientX - left) / w) * 2 - 1);
+  }
+
+  function handleMouseEnter() { captureAnchorPos(); setIsVisible(true); }
+  function handleMouseLeave() { setIsVisible(false); mouseXRaw.set(0); }
+  function handleTouchStart(e: React.TouchEvent) {
+    e.preventDefault();
+    captureAnchorPos();
+    setIsVisible((v) => !v);
+  }
+
+  const hostname = getHostname(href);
+  const tooltipTop = anchorPos.top - height - 56;
+
+  const tooltip = (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          key={\`link-preview-\${href}\`}
+          initial={{ opacity: 0, y: 14, scale: 0.92, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, y: 10, scale: 0.94, filter: "blur(6px)", transition: { duration: 0.15, ease: "easeIn" } }}
+          transition={{
+            type: "spring",
+            stiffness: 250,
+            damping: 22,
+            mass: 0.65,
+            delay,
+            filter: { type: "tween", duration: 0.2, ease: "easeOut", delay },
+            opacity: { type: "tween", duration: 0.18, ease: "easeOut", delay },
+          }}
+          style={{
+            position: "fixed",
+            top: tooltipTop,
+            left: anchorPos.left,
+            marginLeft: -(width / 2),
+            x: shiftX,
+            rotateZ,
+            width,
+            transformOrigin: "bottom center",
+            zIndex: 9999,
+          }}
+          className={cn("pointer-events-none", previewClassName)}
+        >
+          <motion.div
+            animate={{ y: [0, -4, 0] }}
+            transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
+          >
+            <div
+              className={cn(
+                "relative overflow-hidden rounded-2xl border bg-white",
+                "border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]",
+                "dark:border-white/[0.10] dark:bg-neutral-900",
+                "dark:shadow-[0_8px_30px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)]",
+              )}
+              style={{ width, height }}
+            >
+              {!imageError ? (
+                <>
+                  {!imageLoaded && (
+                    <div className="absolute inset-0 animate-pulse bg-neutral-100 dark:bg-neutral-800" />
+                  )}
+                  <img
+                    src={image}
+                    alt={title ?? "Link preview"}
+                    width={width}
+                    height={height}
+                    draggable={false}
+                    className={cn(
+                      "h-full w-full object-cover transition-opacity duration-300",
+                      imageLoaded ? "opacity-100" : "opacity-0",
+                    )}
+                    onLoad={() => setImageLoaded(true)}
+                    onError={() => setImageError(true)}
+                  />
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/[0.07] dark:ring-white/[0.07]" />
+                </>
+              ) : (
+                <div className="flex h-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-100 px-6 dark:from-violet-950/40 dark:via-indigo-950/30 dark:to-purple-950/40">
+                  <div className="size-12 rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 shadow-lg shadow-violet-400/30" />
+                  <div className="space-y-2.5 text-center">
+                    <div className="mx-auto h-3 w-32 rounded-full bg-violet-200/80 dark:bg-violet-700/50" />
+                    <div className="mx-auto h-2 w-24 rounded-full bg-indigo-200/60 dark:bg-indigo-800/40" />
+                    <div className="mx-auto h-2 w-16 rounded-full bg-purple-100/80 dark:bg-purple-800/30" />
+                  </div>
+                  {hostname && (
+                    <span className="font-mono text-[11px] text-violet-400/80 dark:text-violet-500/70">
+                      {hostname}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {(title || hostname) && (
+              <div className="mt-2.5 flex items-center gap-2 px-0.5">
+                {title && (
+                  <span className="flex-1 truncate text-[11px] font-semibold leading-none text-neutral-700 dark:text-neutral-300">
+                    {title}
+                  </span>
+                )}
+                {hostname && (
+                  <span className="shrink-0 font-mono text-[10px] text-neutral-400 dark:text-neutral-600">
+                    {hostname}
+                  </span>
+                )}
+              </div>
+            )}
+
+            <div className="absolute -bottom-[7px] left-1/2 size-3.5 -translate-x-1/2 rotate-45 rounded-sm border-b border-r border-neutral-200/80 bg-white dark:border-white/[0.10] dark:bg-neutral-900" />
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      <Link
+        ref={anchorRef}
+        href={href}
+        {...(openInNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        onMouseEnter={isTouchDevice ? undefined : handleMouseEnter}
+        onMouseLeave={isTouchDevice ? undefined : handleMouseLeave}
+        onMouseMove={isTouchDevice ? undefined : handleMouseMove}
+        onTouchStart={isTouchDevice ? handleTouchStart : undefined}
+        className={cn(
+          "relative inline font-semibold",
+          "text-neutral-800 dark:text-neutral-100",
+          "underline decoration-violet-400/60 decoration-[1.5px] underline-offset-[3px]",
+          "transition-colors duration-150",
+          "hover:text-violet-600 hover:decoration-violet-500",
+          "dark:hover:text-violet-400 dark:hover:decoration-violet-400",
+          className,
+        )}
+      >
+        {children}
+      </Link>
+      {mounted && createPortal(tooltip, document.body)}
+    </>
+  );
+}
+
+export default LinkPreview;`,
+    tailwindSource: tw,
+  },
 ];
 
 export function getLibraryComponent(slug: string) {

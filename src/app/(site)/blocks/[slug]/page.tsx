@@ -42,6 +42,15 @@ import {
   GradientProofContact,
   ImageStoryContact,
 } from "@/components/blocks/contact-page";
+import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
+import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
+import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
+import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
+import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
+import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";
+import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
+import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
+import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
@@ -93,6 +102,8 @@ export default async function BlockDetailPage({ params }: Props) {
   const isWhyChooseUsCard = block.slug === "block-why-choose-us";
   const isFaqFolderCard = block.slug === "block-faq-folder-card";
   const isContactPageCard = block.slug === "block-contact-page";
+  const isSidebarCard = block.slug === "block-sidebar";
+  const isLogoCloudCard = block.slug === "block-logo-clouds";
   const layeredWaveCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/layered-wave-background/layered-wave-background.tsx", "")
     : "";
@@ -107,6 +118,27 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
   const spotlightCode = isWhyChooseUsCard
     ? await readSourceFile("src/components/blocks/spotlight-bento-grid.tsx", "")
+    : "";
+  const collapsibleSidebarCode = isSidebarCard
+    ? await readSourceFile("src/components/blocks/sidebar/collapsible-sidebar.tsx", "")
+    : "";
+  const groupedSidebarCode = isSidebarCard
+    ? await readSourceFile("src/components/blocks/sidebar/grouped-sidebar.tsx", "")
+    : "";
+  const logoBlurCode = isLogoCloudCard
+    ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-blur.tsx", "")
+    : "";
+  const logoMarqueeCode = isLogoCloudCard
+    ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-marquee.tsx", "")
+    : "";
+  const logoSpotlightCode = isLogoCloudCard
+    ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-spotlight.tsx", "")
+    : "";
+  const logoSwapCode = isLogoCloudCard
+    ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-swap.tsx", "")
+    : "";
+  const logoSingleRowCode = isLogoCloudCard
+    ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-single-row.tsx", "")
     : "";
 
   return (
@@ -307,6 +339,81 @@ export default async function BlockDetailPage({ params }: Props) {
             <ImageStoryContact />
           </PreviewCodeSection>
         </>
+      ) : isSidebarCard ? (
+        <>
+          <PreviewCodeSection title="Simple Sidebar with Hover" code={code} locked={locked}>
+            <SimpleSidebar />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Collapsible Sidebar"
+            code={collapsibleSidebarCode}
+            usageCode={COLLAPSIBLE_SIDEBAR_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <CollapsibleSidebar />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Grouped Sidebar"
+            code={groupedSidebarCode}
+            usageCode={GROUPED_SIDEBAR_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <GroupedSidebar />
+          </PreviewCodeSection>
+        </>
+      ) : isLogoCloudCard ? (
+        <>
+          <PreviewCodeSection title="Blur Flip Grid" code={code} locked={locked}>
+            <LogosBlurFlip />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Blur Hover Reveal"
+            code={logoBlurCode}
+            usageCode={LOGO_BLUR_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <LogoCloudBlur />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Infinite Marquee"
+            code={logoMarqueeCode}
+            usageCode={LOGO_MARQUEE_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <LogoCloudMarquee />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Cursor Spotlight"
+            code={logoSpotlightCode}
+            usageCode={LOGO_SPOTLIGHT_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <LogoCloudSpotlight />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Swap Animation"
+            code={logoSwapCode}
+            usageCode={LOGO_SWAP_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <LogoCloudSwap />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Single Row Lift"
+            code={logoSingleRowCode}
+            usageCode={LOGO_SINGLE_ROW_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <LogoCloudSingleRow />
+          </PreviewCodeSection>
+        </>
       ) : (
         <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <Preview />
@@ -353,6 +460,8 @@ async function getBlockCode(slug: string, fallback: string) {
     "block-why-choose-us": "src/components/blocks/animated-bento-grid.tsx",
     "block-faq-folder-card": "src/components/blocks/faq-folder-card.tsx",
     "block-contact-page": "src/components/blocks/contact-page.tsx",
+    "block-sidebar": "src/components/blocks/sidebar/simple-sidebar.tsx",
+    "block-logo-clouds": "src/components/blocks/logo-clouds/logos-blur-flip.tsx",
   };
 
   const sourcePath = sourceBySlug[slug];
@@ -511,6 +620,15 @@ function defaultUsageForTitle(title: string) {
   if (title === "Spotlight Bento Grid") return SPOTLIGHT_BENTO_USAGE;
   if (title === "Aurora Wavy Lines") return WAVY_LINES_USAGE;
   if (title.includes("Contact")) return CONTACT_PAGE_USAGE;
+  if (title === "Simple Sidebar with Hover") return `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";\n\nexport default function Page() {\n  return <SimpleSidebar />;\n}`;
+  if (title === "Collapsible Sidebar") return COLLAPSIBLE_SIDEBAR_USAGE;
+  if (title === "Grouped Sidebar") return GROUPED_SIDEBAR_USAGE;
+  if (title === "Blur Flip Grid") return `import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";\n\nexport default function Page() {\n  return <LogosBlurFlip />;\n}`;
+  if (title === "Blur Hover Reveal") return LOGO_BLUR_USAGE;
+  if (title === "Infinite Marquee") return LOGO_MARQUEE_USAGE;
+  if (title === "Cursor Spotlight") return LOGO_SPOTLIGHT_USAGE;
+  if (title === "Swap Animation") return LOGO_SWAP_USAGE;
+  if (title === "Single Row Lift") return LOGO_SINGLE_ROW_USAGE;
   return `<${title.replaceAll(" ", "")} />`;
 }
 
@@ -677,3 +795,47 @@ const PARTICLE_NOISE_USAGE = `<section className="relative min-h-[640px] overflo
     <p className="mt-4 max-w-xl text-white/70">Place your page content above the particle field.</p>
   </div>
 </section>`;
+
+const COLLAPSIBLE_SIDEBAR_USAGE = `import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
+
+export default function Page() {
+  return <CollapsibleSidebar />;
+}`;
+
+const GROUPED_SIDEBAR_USAGE = `import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
+
+export default function Page() {
+  return <GroupedSidebar />;
+}`;
+
+const LOGO_BLUR_USAGE = `import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
+
+export default function Page() {
+  return <LogoCloudBlur />;
+}`;
+
+const LOGO_MARQUEE_USAGE = `// npm install react-fast-marquee
+import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";
+
+export default function Page() {
+  return <LogoCloudMarquee />;
+}`;
+
+const LOGO_SPOTLIGHT_USAGE = `import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
+
+export default function Page() {
+  return <LogoCloudSpotlight />;
+}`;
+
+const LOGO_SWAP_USAGE = `import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
+
+export default function Page() {
+  return <LogoCloudSwap />;
+}`;
+
+const LOGO_SINGLE_ROW_USAGE = `import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
+
+export default function Page() {
+  return <LogoCloudSingleRow />;
+}`;
+

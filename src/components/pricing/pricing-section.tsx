@@ -19,6 +19,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { AvatarGroup } from "@/components/avatar-group";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const FREE_FEATURES = [
@@ -113,20 +114,17 @@ const FAQ_ITEMS = [
   },
 ];
 
-// ─── Avatar placeholder ────────────────────────────────────────────────────────
-const AVATAR_INITIALS = ["PS", "JK", "SC", "MR", "AN", "TR", "LF", "DV"];
-const AVATAR_COLOURS = [
-  "bg-cyan-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500",
-  "bg-fuchsia-500", "bg-sky-500", "bg-rose-500", "bg-teal-500",
+// ─── Social proof avatars ──────────────────────────────────────────────────────
+const SOCIAL_AVATARS = [
+  { fallback: "PS", tooltip: "Priya Sharma",   bgColor: "#06b6d4" },
+  { fallback: "JK", tooltip: "James Kowalski", bgColor: "#8b5cf6" },
+  { fallback: "SC", tooltip: "Sofia Chen",     bgColor: "#10b981" },
+  { fallback: "MR", tooltip: "Marcus Reid",    bgColor: "#f59e0b" },
+  { fallback: "AN", tooltip: "Aisha Nkosi",    bgColor: "#d946ef" },
+  { fallback: "TR", tooltip: "Tomás Reyes",    bgColor: "#0ea5e9" },
+  { fallback: "LF", tooltip: "Lena Fischer",   bgColor: "#f43f5e" },
+  { fallback: "DV", tooltip: "Diego Varela",   bgColor: "#14b8a6" },
 ];
-
-function Avatar({ i }: { i: number }) {
-  return (
-    <div className={cn("flex size-7 items-center justify-center rounded-full text-[9px] font-bold text-white ring-2 ring-background", AVATAR_COLOURS[i % AVATAR_COLOURS.length])}>
-      {AVATAR_INITIALS[i % AVATAR_INITIALS.length]}
-    </div>
-  );
-}
 
 // ─── Pricing section ─────────────────────────────────────────────────────────
 export function PricingSection() {
@@ -186,9 +184,15 @@ export function PricingSection() {
 
             {/* Social proof strip */}
             <div className="flex flex-col items-center gap-3 pt-2 sm:flex-row sm:justify-center">
-              <div className="flex -space-x-2">
-                {[...Array(8)].map((_, i) => <Avatar key={i} i={i} />)}
-              </div>
+              <AvatarGroup
+                avatars={SOCIAL_AVATARS}
+                size={28}
+                overlap={8}
+                hoverAnimation="lift"
+                entranceAnimation="scale"
+                entranceStagger={0.04}
+                showTooltips
+              />
               <div className="text-left">
                 <div className="flex items-center gap-0.5">
                   {[...Array(5)].map((_, i) => (
@@ -448,9 +452,14 @@ export function PricingSection() {
                 </div>
                 <p className="text-sm leading-relaxed text-foreground">&ldquo;{t.quote}&rdquo;</p>
                 <div className="mt-4 flex items-center gap-2.5">
-                  <div className={cn("flex size-7 items-center justify-center rounded-full text-[9px] font-bold text-white", AVATAR_COLOURS[i % AVATAR_COLOURS.length])}>
-                    {t.author.split(" ").map((n) => n[0]).join("")}
-                  </div>
+                  <AvatarGroup
+                    avatars={[{ fallback: t.author.split(" ").map((n) => n[0]).join(""), tooltip: t.author, bgColor: SOCIAL_AVATARS[i % SOCIAL_AVATARS.length].bgColor }]}
+                    size={28}
+                    overlap={0}
+                    entranceAnimation="none"
+                    hoverAnimation="lift"
+                    showTooltips
+                  />
                   <div>
                     <p className="text-xs font-semibold text-foreground">{t.author}</p>
                     <p className="text-[10px] text-muted-foreground">{t.role}</p>

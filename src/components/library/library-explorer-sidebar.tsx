@@ -48,6 +48,7 @@ const BLOCK_CATEGORIES: BlockCategory[] = [
   "Interactive backgrounds",
   "FAQ sections",
   "Blog sections",
+  "Navigation",
 ];
 
 const animations: AnimationKind[] = [
