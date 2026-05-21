@@ -33,6 +33,7 @@ import {
   Settings,
   HelpCircle,
   Search,
+  type LucideProps,
 } from "lucide-react";
 
 // ─── Navbar ──────────────────────────────────────────────────────────────────
@@ -92,7 +93,7 @@ function NavItemMini({
   hasSubmenu,
   color,
 }: {
-  icon: React.ElementType;
+  icon: React.ComponentType<LucideProps>;
   label: string;
   badge?: number;
   active?: boolean;

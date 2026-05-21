@@ -17,6 +17,7 @@ import {
   BarChart2,
   Globe,
   Mail,
+  type LucideProps,
 } from "lucide-react";
 
 // ─── Lenis smooth scroll hook ────────────────────────────────────────────────
@@ -109,7 +110,7 @@ const LOGO_CLOUD = [
 ];
 
 type MetricItem = {
-  icon: React.ElementType;
+  icon: React.ComponentType<LucideProps>;
   label: string;
   value: number;
   suffix: string;

@@ -23,13 +23,14 @@ import {
   Activity,
   MousePointerClick,
   Clock,
+  type LucideProps,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface NavItem {
   label: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<LucideProps>;
   active?: boolean;
 }
 
@@ -38,7 +39,7 @@ interface KPI {
   value: string;
   delta: string;
   deltaPositive: boolean;
-  icon: React.ElementType;
+  icon: React.ComponentType<LucideProps>;
 }
 
 interface BarDatum {

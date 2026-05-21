@@ -31,6 +31,7 @@ import {
   Star,
   TrendingUp,
   Zap,
+  type LucideProps,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -1076,7 +1077,7 @@ const BENEFITS_R = [
   { icon: BarChart3, title: "Automate more", desc: "Chain agents into complex multi-step orchestrations." },
 ];
 
-function BenefitCard({ icon: Icon, title, desc, delay, from }: { icon: React.ElementType; title: string; desc: string; delay: number; from: "left" | "right" }) {
+function BenefitCard({ icon: Icon, title, desc, delay, from }: { icon: React.ComponentType<LucideProps>; title: string; desc: string; delay: number; from: "left" | "right" }) {
   return (
     <FadeUp delay={delay} from={from}>
       <motion.div
