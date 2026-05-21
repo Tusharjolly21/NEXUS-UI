@@ -1,91 +1,104 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 import { ThemeReceiver } from "@/components/templates/theme-receiver";
+
+export const dynamic = "force-dynamic";
 
 // Each template is its own dynamic chunk — only the matching slug's JS is sent to the browser.
 const TemplateFallback = () => (
   <div className="min-h-screen animate-pulse bg-background" aria-hidden />
 );
 
-const SimplisticSaaSPage = dynamic(
+const SimplisticSaaSPage = nextDynamic(
   () => import("@/components/templates/simplistic-saas-page").then((m) => ({ default: m.SimplisticSaaSPage })),
   { loading: TemplateFallback },
 );
-const LandingPage = dynamic(
+const NexusAiLaunchTemplatePage = nextDynamic(
+  () =>
+    import("@/components/templates/nexus-ai-launch-template-page").then((m) => ({
+      default: m.NexusAiLaunchTemplatePage,
+    })),
+  { loading: TemplateFallback },
+);
+const LandingPage = nextDynamic(
   () => import("@/components/marketing/landing-page").then((m) => ({ default: m.LandingPage })),
   { loading: TemplateFallback },
 );
-const NovaLandingPage = dynamic(
+const NovaLandingPage = nextDynamic(
   () => import("@/components/templates/nova-landing-page").then((m) => ({ default: m.NovaLandingPage })),
   { loading: TemplateFallback },
 );
-const TalentHubPage = dynamic(
+const TalentHubPage = nextDynamic(
   () => import("@/components/templates/talent-hub-page").then((m) => ({ default: m.TalentHubPage })),
   { loading: TemplateFallback },
 );
-const SynapseAIPage = dynamic(
+const SynapseAIPage = nextDynamic(
   () => import("@/components/templates/synapse-ai-page").then((m) => ({ default: m.SynapseAIPage })),
   { loading: TemplateFallback },
 );
-const OrionAIPage = dynamic(
+const OrionAIPage = nextDynamic(
   () => import("@/components/templates/orion-ai-ops").then((m) => ({ default: m.OrionAIPage })),
   { loading: TemplateFallback },
 );
-const HelixAIPlatformPage = dynamic(
+const HelixAIPlatformPage = nextDynamic(
   () => import("@/components/templates/helix-ai-platform").then((m) => ({ default: m.HelixAIPlatformPage })),
   { loading: TemplateFallback },
 );
-const StartupLandingPage = dynamic(
+const StartupLandingPage = nextDynamic(
   () => import("@/components/templates/startup-landing-page").then((m) => ({ default: m.StartupLandingPage })),
   { loading: TemplateFallback },
 );
-const ClauraAgencyPage = dynamic(
+const ClauraAgencyPage = nextDynamic(
   () => import("@/components/templates/claura-agency-page").then((m) => ({ default: m.ClauraAgencyPage })),
   { loading: TemplateFallback },
 );
-const OceanFlowPage = dynamic(
+const OceanFlowPage = nextDynamic(
   () => import("@/components/templates/ocean-flow-page").then((m) => ({ default: m.OceanFlowPage })),
   { loading: TemplateFallback },
 );
-const PulseLandingPage = dynamic(
+const PulseLandingPage = nextDynamic(
   () => import("@/components/templates/pulse-landing-page").then((m) => ({ default: m.PulseLandingPage })),
   { loading: TemplateFallback },
 );
-const AetherPortfolioPage = dynamic(
+const AetherPortfolioPage = nextDynamic(
   () => import("@/components/templates/aether-portfolio-page").then((m) => ({ default: m.AetherPortfolioPage })),
   { loading: TemplateFallback },
 );
-const SaasLaunchAuroraPage = dynamic(
+const SaasLaunchAuroraPage = nextDynamic(
   () => import("@/components/templates/saas-launch-aurora-page"),
   { loading: TemplateFallback },
 );
-const AiStartupForgePage = dynamic(
+const AiStartupForgePage = nextDynamic(
   () => import("@/components/templates/ai-startup-forge-page"),
   { loading: TemplateFallback },
 );
-const DevPortfolioVectorPage = dynamic(
+const DevPortfolioVectorPage = nextDynamic(
   () => import("@/components/templates/dev-portfolio-vector-page"),
   { loading: TemplateFallback },
 );
-const AgencyStudioDeckPage = dynamic(
+const AgencyStudioDeckPage = nextDynamic(
   () => import("@/components/templates/agency-studio-deck-page"),
   { loading: TemplateFallback },
 );
-const DashboardAuroraAnalyticsPage = dynamic(
+const DashboardAuroraAnalyticsPage = nextDynamic(
   () => import("@/components/templates/dashboard-aurora-analytics-page"),
   { loading: TemplateFallback },
 );
-const ProductivityOrbitSuitePage = dynamic(
+const ProductivityOrbitSuitePage = nextDynamic(
   () => import("@/components/templates/productivity-orbit-suite-page"),
   { loading: TemplateFallback },
 );
-const OrbitAIPage = dynamic(
+const OrbitAIPage = nextDynamic(
   () => import("@/components/templates/orbit-ai-page"),
   { loading: TemplateFallback },
+);
+const YourBrandHeroPage = nextDynamic(
+  () => import("@/components/templates/yourbrand-hero-page"),
+  { loading: TemplateFallback, ssr: false },
 );
 
 type Props = { params: Promise<{ slug: string }> };
@@ -110,7 +123,9 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  if (tmpl.slug === "simplistic-saas-template") {
+  if (tmpl.slug === "nexus-ai-launch") {
+    return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "simplistic-saas-template") {
     return <ThemeReceiver><SimplisticSaaSPage /></ThemeReceiver>;
   } else if (tmpl.slug === "saas-launch-aurora") {
     return <ThemeReceiver><LandingPage /></ThemeReceiver>;
@@ -148,6 +163,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><ProductivityOrbitSuitePage /></ThemeReceiver>;
   } else if (tmpl.slug === "orbit-ai-page") {
     return <ThemeReceiver><OrbitAIPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "yourbrand-hero") {
+    return <YourBrandHeroPage />;
   }
 
   return (

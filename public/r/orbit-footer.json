@@ -5,7 +5,9 @@
   "title": "Orbit Footer",
   "description": "Compact footer with balanced columns and developer-first links.",
   "dependencies": [],
-  "registryDependencies": [],
+  "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json"
+  ],
   "files": [
     {
       "path": "next-ui/orbit-footer.tsx",

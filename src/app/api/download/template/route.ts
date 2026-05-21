@@ -11,6 +11,7 @@ const TEMPLATES_DIR = path.join(ROOT, "src", "components", "templates");
 
 // Maps slug → main component file
 const SLUG_TO_FILE: Record<string, string> = {
+  "nexus-ai-launch":            "nexus-ai-launch-template-page.tsx",
   "talent-hub-landing":         "talent-hub-page.tsx",
   "startup-landing-page":       "startup-landing-page.tsx",
   "nova-landing-page":          "nova-landing-page.tsx",
@@ -29,10 +30,34 @@ const SLUG_TO_FILE: Record<string, string> = {
   "agency-studio-deck":         "agency-studio-deck-page.tsx",
   "dashboard-aurora-analytics": "dashboard-aurora-analytics-page.tsx",
   "productivity-orbit-suite":   "productivity-orbit-suite-page.tsx",
+  "yourbrand-hero":             "yourbrand-hero-page.tsx",
 };
 
 // Extra component files some templates depend on
 const SLUG_EXTRA_DEPS: Record<string, string[]> = {
+  "nexus-ai-launch": [
+    "src/components/animated-bento-grid/index.ts",
+    "src/components/animated-bento-grid/animated-bento-grid.tsx",
+    "src/components/background-gradient/index.ts",
+    "src/components/background-gradient/background-gradient.tsx",
+    "src/components/hover-highlight-text/index.ts",
+    "src/components/hover-highlight-text/hover-highlight-text.tsx",
+    "src/components/infinite-moving-cards/index.ts",
+    "src/components/infinite-moving-cards/InfiniteMovingCards.tsx",
+    "src/components/meteors/index.ts",
+    "src/components/meteors/meteors.tsx",
+    "src/components/sparkles/index.ts",
+    "src/components/sparkles/sparkles.tsx",
+    "src/components/stateful-button/index.ts",
+    "src/components/stateful-button/stateful-button.tsx",
+    "src/components/text-generate-effect/index.ts",
+    "src/components/text-generate-effect/text-generate-effect.tsx",
+    "src/components/brand/index.ts",
+    "src/components/brand/nexus-mark.tsx",
+    "src/components/ui/accordion.tsx",
+    "src/components/ui/button.tsx",
+  ],
+  "yourbrand-hero":           ["src/components/templates/yourbrand-dotted-sphere.tsx"],
   "ocean-flow":               ["src/components/infinite-moving-cards/InfiniteMovingCards.tsx"],
   "simplistic-saas-template": [
     "src/components/infinite-moving-cards/InfiniteMovingCards.tsx",
@@ -206,8 +231,16 @@ body { background: var(--background); color: var(--foreground); }
   if (tmpl.techStack.some(t => t.toLowerCase().includes("lenis"))) {
     deps["@studio-freight/lenis"] = "^1.0.42";
   }
+  if (slug === "nexus-ai-launch") {
+    deps["@base-ui/react"] = "^1.4.1";
+  }
   if (extras.some(e => e.includes("keyboard"))) {
     deps["use-keyboard-sound"] = "^1.0.0";
+  }
+  if (slug === "yourbrand-hero") {
+    deps["three"] = "^0.184.0";
+    deps["@react-three/fiber"] = "^8.0.0";
+    deps["@react-three/drei"] = "^9.0.0";
   }
 
   zip.file("package.json", JSON.stringify({

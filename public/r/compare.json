@@ -8,6 +8,7 @@
     "lucide-react"
   ],
   "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json",
     "utils"
   ],
   "files": [

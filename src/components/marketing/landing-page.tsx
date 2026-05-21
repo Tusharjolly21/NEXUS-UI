@@ -1326,18 +1326,28 @@ function FeaturedComponents() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 {items.map((item, index) => (
-                  <button
+                  <div
                     key={item.slug}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setActiveIndex(index)}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" && event.key !== " ") return;
+                      event.preventDefault();
+                      setActiveIndex(index);
+                    }}
                     className={cn(
-                      "group rounded-2xl border p-3 text-left transition-all duration-300",
+                      "group cursor-pointer rounded-2xl border p-3 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-zinc-950",
                       index === activeIndex
                         ? "border-violet-500/50 bg-violet-500/10 shadow-lg shadow-violet-500/10"
                         : "border-zinc-200 bg-white/75 hover:-translate-y-1 hover:border-zinc-300 hover:bg-white dark:border-white/10 dark:bg-white/[0.035] dark:hover:border-white/20 dark:hover:bg-white/[0.06]",
                     )}
                   >
-                    <div className="relative h-24 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-white/10 dark:bg-zinc-950">
+                    <div
+                      className="relative h-24 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-100 dark:border-white/10 dark:bg-zinc-950"
+                      inert
+                      aria-hidden="true"
+                    >
                       <div className="origin-top-left scale-[0.38] sm:scale-[0.34]">
                         <item.Preview />
                       </div>
@@ -1348,7 +1358,7 @@ function FeaturedComponents() {
                     <p className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-400">
                       {item.tags[0] ?? "Component"}
                     </p>
-                  </button>
+                  </div>
                 ))}
               </div>
             </>

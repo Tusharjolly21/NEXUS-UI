@@ -5,7 +5,9 @@
   "title": "Profile Orbit",
   "description": "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
   "dependencies": [],
-  "registryDependencies": [],
+  "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json"
+  ],
   "files": [
     {
       "path": "next-ui/profile-orbit/profile-orbit.tsx",

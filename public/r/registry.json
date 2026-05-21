@@ -4,6 +4,14 @@
   "homepage": "http://127.0.0.1:3000",
   "items": [
     {
+      "name": "nexus-font",
+      "type": "registry:font",
+      "title": "Nexus UI Inter Font",
+      "description": "Inter font setup used by Nexus UI components so installed components match the preview typography.",
+      "registryDependencies": [],
+      "files": []
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
@@ -12,6 +20,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -35,6 +44,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -56,7 +66,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/hero-aurora-spotlight.tsx",
@@ -72,7 +84,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/bento-signal-grid.tsx",
@@ -88,7 +102,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/nebula-glass-card.tsx",
@@ -104,7 +120,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/float-glass-navbar.tsx",
@@ -118,7 +136,9 @@
       "title": "Orbit Footer",
       "description": "Compact footer with balanced columns and developer-first links.",
       "dependencies": [],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/orbit-footer.tsx",
@@ -134,7 +154,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/depth-testimonials.tsx",
@@ -151,7 +173,9 @@
         "framer-motion",
         "react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/toggle-pricing-pro.tsx",
@@ -167,7 +191,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/beam-sweep-field.tsx",
@@ -183,7 +209,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/vector-tilt-scene.tsx",
@@ -199,7 +227,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/glass-login-stack.tsx",
@@ -215,7 +245,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/split-signup-convert.tsx",
@@ -233,6 +265,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils",
         "input",
         "label",
@@ -265,7 +298,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/workbench-sidebar.tsx",
@@ -281,7 +316,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/pulse-dashboard-kpis.tsx",
@@ -297,7 +334,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/orbital-loader.tsx",
@@ -313,7 +352,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/milestone-timeline.tsx",
@@ -329,7 +370,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/lattice-feature-grid.tsx",
@@ -346,7 +389,9 @@
         "framer-motion",
         "react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/motion-faq-disclosure.tsx",
@@ -362,7 +407,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/nebula-cta-glow.tsx",
@@ -380,6 +427,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -402,6 +450,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -425,6 +474,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -447,6 +497,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -469,6 +520,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -492,6 +544,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -543,7 +596,9 @@
       "title": "Editorial Blog Rail",
       "description": "Featured article plus compact secondary headlines for content hubs.",
       "dependencies": [],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/editorial-blog-rail.tsx",
@@ -559,7 +614,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/split-contact-glass.tsx",
@@ -575,7 +632,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/svg-noise-shader.tsx",
@@ -591,7 +650,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/tracing-spotlight-panel.tsx",
@@ -608,7 +669,9 @@
         "framer-motion",
         "react"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/forge-ai-command-bar.tsx",
@@ -626,6 +689,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -652,6 +716,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -682,6 +747,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -709,6 +775,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -752,6 +819,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -778,6 +846,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -804,6 +873,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -830,6 +900,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -856,6 +927,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -878,6 +950,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -901,6 +974,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -931,6 +1005,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -953,6 +1028,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -975,6 +1051,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -997,6 +1074,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1019,6 +1097,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1057,6 +1136,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1079,6 +1159,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1101,6 +1182,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1123,6 +1205,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1146,6 +1229,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1168,6 +1252,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1190,6 +1275,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1213,6 +1299,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1236,6 +1323,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1258,6 +1346,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1281,6 +1370,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1301,6 +1391,7 @@
       "description": "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
       "dependencies": [],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1325,6 +1416,7 @@
         "lucide-react"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils",
         "button"
       ],
@@ -1347,7 +1439,9 @@
       "dependencies": [
         "framer-motion"
       ],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/scroll-reveal-text.tsx",
@@ -1364,6 +1458,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1390,6 +1485,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1416,6 +1512,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1442,6 +1539,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1464,6 +1562,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1486,6 +1585,7 @@
         "framer-motion"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1506,6 +1606,7 @@
       "description": "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
       "dependencies": [],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils"
       ],
       "files": [
@@ -1521,7 +1622,9 @@
       "title": "Spectra Frame",
       "description": "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
       "dependencies": [],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/spectra-frame/spectra-frame.tsx",
@@ -1535,7 +1638,9 @@
       "title": "Profile Orbit",
       "description": "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
       "dependencies": [],
-      "registryDependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json"
+      ],
       "files": [
         {
           "path": "next-ui/profile-orbit/profile-orbit.tsx",
@@ -1554,6 +1659,7 @@
         "cmdk"
       ],
       "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
         "utils",
         "command"
       ],

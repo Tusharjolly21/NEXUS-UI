@@ -6,6 +6,7 @@
   "description": "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
   "dependencies": [],
   "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json",
     "utils"
   ],
   "files": [

@@ -5,7 +5,9 @@
   "title": "Editorial Blog Rail",
   "description": "Featured article plus compact secondary headlines for content hubs.",
   "dependencies": [],
-  "registryDependencies": [],
+  "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json"
+  ],
   "files": [
     {
       "path": "next-ui/editorial-blog-rail.tsx",

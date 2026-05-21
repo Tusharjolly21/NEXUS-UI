@@ -7,7 +7,9 @@
   "dependencies": [
     "framer-motion"
   ],
-  "registryDependencies": [],
+  "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json"
+  ],
   "files": [
     {
       "path": "next-ui/beam-sweep-field.tsx",

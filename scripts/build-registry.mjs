@@ -10,6 +10,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const outDir = path.join(root, "public", "r");
 const catalogPath = path.join(root, "src", "lib", "catalog", "library-components.ts");
+const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
+const NEXUS_FONT_REGISTRY_DEP = "https://nexus-ui.com/r/nexus-font.json";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
 const REGISTRY_CLI_NAME = {
@@ -107,6 +109,7 @@ function extractRegistryCliName(slug, block) {
 
 function registryDepsForReactSource(src) {
   const deps = new Set();
+  deps.add(NEXUS_FONT_REGISTRY_DEP);
   if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
 
   for (const match of src.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
@@ -115,6 +118,35 @@ function registryDepsForReactSource(src) {
   }
 
   return [...deps];
+}
+
+function buildNexusFontItem() {
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: NEXUS_FONT_REGISTRY_NAME,
+    type: "registry:font",
+    title: "Nexus UI Inter Font",
+    description:
+      "Inter font setup used by Nexus UI components so installed components match the preview typography.",
+    font: {
+      family: "Inter",
+      provider: "google",
+      import:
+        "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+      variable: "--font-sans",
+      weight: ["100 900"],
+      subsets: ["latin"],
+      selector: "body",
+    },
+    cssVars: {
+      theme: {
+        "--font-sans":
+          "'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+        "--font-mono": "ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Monaco, Consolas, monospace",
+        "--font-heading": "var(--font-sans)",
+      },
+    },
+  };
 }
 
 function buildSnippetItem(slug, block) {
@@ -527,7 +559,7 @@ function buildGooeyItem() {
 const catalogTs = fs.readFileSync(catalogPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
-const items = [];
+const items = [buildNexusFontItem()];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {
@@ -581,7 +613,7 @@ const registryIndex = {
     description: it.description,
     dependencies: it.dependencies,
     registryDependencies: it.registryDependencies ?? [],
-    files: it.files.map((f) => ({ path: f.path, type: f.type })),
+    files: (it.files ?? []).map((f) => ({ path: f.path, type: f.type })),
   })),
 };
 

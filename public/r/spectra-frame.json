@@ -5,7 +5,9 @@
   "title": "Spectra Frame",
   "description": "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
   "dependencies": [],
-  "registryDependencies": [],
+  "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json"
+  ],
   "files": [
     {
       "path": "next-ui/spectra-frame/spectra-frame.tsx",

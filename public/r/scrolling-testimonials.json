@@ -6,6 +6,7 @@
   "description": "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
   "dependencies": [],
   "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json",
     "utils"
   ],
   "files": [

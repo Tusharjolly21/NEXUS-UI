@@ -8,7 +8,9 @@
     "framer-motion",
     "react"
   ],
-  "registryDependencies": [],
+  "registryDependencies": [
+    "https://nexus-ui.com/r/nexus-font.json"
+  ],
   "files": [
     {
       "path": "next-ui/motion-faq-disclosure.tsx",
