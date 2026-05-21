@@ -1447,6 +1447,76 @@ function Faq() {
   );
 }
 
+// ── Why Nexus UI ───────────────────────────────────────────────────────────────
+
+const WHY_ITEMS = [
+  {
+    heading: "Copy-paste ownership",
+    body: "Every component is delivered as plain TypeScript JSX you paste directly into your project. There is no proprietary runtime, no wrapper API, and no vendor lock-in. You own the code from the moment you copy it, and you can modify every class, prop, and animation timing without fighting an abstraction layer.",
+  },
+  {
+    heading: "Built for Next.js App Router",
+    body: "Components are written around Next.js 14+ App Router conventions. Client boundaries are placed only where interactive motion is necessary, so server components stay server components. You get full RSC compatibility, correct streaming behavior, and the smallest possible JavaScript bundle on the client.",
+  },
+  {
+    heading: "Production-grade Framer Motion",
+    body: "Animations are authored with Framer Motion and respect the user's reduced-motion preference out of the box. Every transition uses physics-based spring curves instead of hardcoded easing, so interactions feel natural across devices. Performance is prioritized with will-change hints and GPU-accelerated transforms.",
+  },
+  {
+    heading: "shadcn/ui compatible",
+    body: "The component design language is built on top of shadcn/ui tokens and Tailwind CSS design primitives. If you already have a shadcn/ui project, you can drop in Nexus UI components without changing your global CSS. Dark mode is handled through the same CSS variable layer you already control.",
+  },
+  {
+    heading: "Full-page Next.js templates",
+    body: "Templates go beyond component kits — they are complete, deployable Next.js pages that combine hero sections, pricing blocks, FAQ accordions, testimonial rails, and CTA sections into a cohesive product story. Each template is audited for Core Web Vitals before it ships, so you start with a high Lighthouse score.",
+  },
+  {
+    heading: "Free to start, no card required",
+    body: "The free tier gives you access to a growing set of open-source components, full documentation, and the CLI installer. Premium unlocks every animated component, all templates, priority support, and a commercial license for client projects. You can evaluate the entire library before committing to a subscription.",
+  },
+];
+
+function WhyNexusUI() {
+  const reduce = useReducedMotion() === true;
+  return (
+    <section className="border-t border-border/50 bg-background py-24 md:py-32">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <ViewportFade className="mx-auto max-w-2xl text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-muted-foreground">
+            Why Nexus UI
+          </p>
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            Everything you need to ship a polished product
+          </h2>
+          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            Nexus UI is a React component library and Next.js template collection
+            designed specifically for developers who want production-quality UI
+            without spending weeks on design polish. Every piece is built with
+            Tailwind CSS, Framer Motion, and TypeScript — the same stack your
+            team already uses.
+          </p>
+        </ViewportFade>
+
+        <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {WHY_ITEMS.map((item, i) => (
+            <motion.div
+              key={item.heading}
+              initial={reduce ? false : { opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ delay: i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="rounded-2xl border border-border/60 bg-muted/20 p-7 dark:bg-white/[0.025]"
+            >
+              <h3 className="text-base font-semibold text-foreground">{item.heading}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ── CTA Footer ─────────────────────────────────────────────────────────────────
 
 function CtaFooter() {
@@ -1558,6 +1628,7 @@ export function LandingPage() {
         <TrustedBy />
         <FeaturedComponents />
         <TestimonialWallSection />
+        <WhyNexusUI />
         <Faq />
         <CtaFooter />
       </div>

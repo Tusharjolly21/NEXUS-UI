@@ -84,45 +84,6 @@ export default function Home() {
     },
   };
 
-  const localBusinessJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
-    name: siteConfig.name,
-    description: siteConfig.description,
-    url: siteConfig.url,
-    logo: `${siteConfig.url}/icon.svg`,
-    image: `${siteConfig.url}/api/og?title=Nexus+UI&description=React+UI+Components+%26+Next.js+Templates`,
-    priceRange: "Free–$$",
-    openingHours: "Mo-Su 00:00-23:59",
-    sameAs: [
-      `https://twitter.com/${siteConfig.twitterHandle.replace("@", "")}`,
-    ],
-    hasOfferCatalog: {
-      "@type": "OfferCatalog",
-      name: "UI Component Plans",
-      itemListElement: [
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "Free Tier",
-            description: "Access to free React components, templates, and UI blocks",
-          },
-          price: "0",
-          priceCurrency: "USD",
-        },
-        {
-          "@type": "Offer",
-          itemOffered: {
-            "@type": "Service",
-            name: "Pro Plan",
-            description: "Unlimited access to all premium animated React components, Next.js templates, and UI blocks with commercial license",
-          },
-        },
-      ],
-    },
-  };
-
   const softwareAppJsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
@@ -143,7 +104,6 @@ export default function Home() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareAppJsonLd) }} />
       <LandingPage />
     </>

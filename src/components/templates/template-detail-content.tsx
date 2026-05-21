@@ -90,7 +90,7 @@ function ScreenshotCard({
       )}
     >
       {/* Thumbnail viewport — no chrome */}
-      <div className="relative h-64 overflow-hidden">
+      <div className="relative h-64 overflow-hidden" aria-hidden="true">
         <div className="pointer-events-none origin-top-left scale-[0.42] w-[238%] will-change-transform">
           <TemplateSceneLoader slug={slug} />
         </div>
@@ -227,7 +227,7 @@ function AddToCartModal({
             {/* Product row */}
             <div className="flex items-start gap-3 pb-5 border-b border-zinc-100 dark:border-zinc-800">
               {/* Tiny preview thumbnail */}
-              <div className="relative size-16 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shrink-0 dark:border-zinc-700 dark:bg-zinc-800">
+              <div className="relative size-16 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shrink-0 dark:border-zinc-700 dark:bg-zinc-800" aria-hidden="true">
                 <div className="origin-top-left scale-[0.12] w-[833%] will-change-transform pointer-events-none">
                   <TemplateSceneLoader slug={tmpl.slug} />
                 </div>
@@ -342,7 +342,10 @@ export function TemplateDetailContent({ tmpl, isPremium = false }: { tmpl: Marke
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{tmpl.title}</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+            {tmpl.title}
+            <span className="sr-only"> — Next.js Template</span>
+          </h1>
 
           {/* Description */}
           <p className="text-base leading-relaxed text-muted-foreground max-w-2xl">{tmpl.description}</p>

@@ -1,0 +1,63 @@
+---
+title: "Next.js and React Components: A Practical Guide"
+description: "How to choose, install, and ship Next.js and React components that improve developer experience, support server side rendering, and scale with your application."
+date: "2026-05-21"
+---
+
+## Why component architecture matters
+
+React components are the building blocks of every modern web application. Whether you are building a SaaS landing page, a customer dashboard, or a public marketing site, the components you choose determine both the quality of your user interfaces and the speed at which your team can ship.
+
+Next.js adds a critical layer on top of React by giving each component a rendering context. A component can run on the server — taking advantage of server side rendering — or it can stay fully client side, using the browser to manage interactivity and state. This distinction shapes how you organise your component catalogue and how your react applications perform in production.
+
+## Server components and client components in Next.js
+
+The Next.js App Router, available from version 13 onwards, defaults all components to server components. This means your UI renders on the server as plain HTML before reaching the browser. Server side rendering improves time-to-first-byte, reduces layout shift, and makes content immediately indexable by search engines.
+
+When a component needs interactivity — click events, animations, local state — you opt into the client side by adding `"use client"` at the top of the file. That component and everything it imports will hydrate in the browser after the initial server-rendered HTML arrives.
+
+For developer experience, the practical rule is simple: keep as much logic as possible on the server, and push only the interactive parts to the client. This keeps your JavaScript bundle lean and your user experience fast on every device and network condition.
+
+## Choosing between libraries and frameworks
+
+The React ecosystem offers a wide range of libraries and frameworks for building user interfaces. The most practical choices for production Next.js projects are:
+
+**shadcn/ui** — unstyled, accessible react components built on Radix UI primitives and Tailwind CSS. You own the source code directly, which means no runtime dependency and no version lock-in. This is the base layer most teams should start with.
+
+**Radix UI** — low-level accessible primitives that ship without visual styles. If you want complete control over every visual decision, Radix gives you the correct keyboard navigation and ARIA semantics while letting you style everything from scratch.
+
+**Framer Motion** — the standard animation library for react applications that need smooth, physics-based transitions. Framer Motion integrates cleanly with the Next.js App Router and respects the user's reduced-motion preference out of the box.
+
+The key question when evaluating libraries and frameworks is ownership. Libraries that deliver source code you copy into your project — like shadcn/ui — give you full control over styling, behaviour, and future upgrades. Libraries that ship as compiled packages require you to work within their constraints and accept their dependency tree.
+
+## Building modular react components
+
+A well-structured library treats each piece as an independent building block. Hero sections, pricing blocks, navigation bars, and CTA panels are each isolated components that you can swap, restyle, or A/B test without rewriting the page around them.
+
+This modularity is the core advantage of component-first development in Next.js. You compose user interfaces from small, tested, self-contained pieces rather than writing monolithic page templates. When a design decision changes, you update one component, and every page that uses it reflects the change without further work.
+
+For teams shipping product pages quickly, this approach also reduces onboarding time. A new engineer can understand a single component without needing to understand the entire page.
+
+## Animation and motion
+
+Framer Motion integrates cleanly with both server and client components in Next.js. All animations are client side by definition — they run in the browser after hydration — so components that use `motion.div` or animation hooks need the `"use client"` directive.
+
+A pattern that improves developer experience considerably: keep the server component responsible for data fetching and HTML structure, then wrap only the animated element in a thin client component that handles the motion logic. This preserves the performance benefit of server side rendering while still delivering smooth, engaging user experience.
+
+## What to evaluate in a component library
+
+When choosing react components for a production project, consider:
+
+**TypeScript support.** Type-safe props catch an entire class of runtime errors before the browser sees them. This matters especially in larger react applications where prop interfaces evolve over time.
+
+**Tailwind CSS compatibility.** Utility-first styling integrates with Next.js without additional configuration and produces minimal CSS at build time.
+
+**Accessibility defaults.** Keyboard navigation, focus management, and ARIA roles should be correct out of the box. Retrofitting accessibility into components is significantly harder than starting with it.
+
+**App Router compatibility.** Libraries written before Next.js 13 may use patterns — global state, singleton providers, imperative DOM manipulation — that conflict with server components.
+
+## Shipping your first components
+
+Start with a Next.js project bootstrapped via `create-next-app`, add Tailwind CSS, then layer in shadcn/ui components and Framer Motion for the building blocks that need animation. This stack gives you server side rendering by default, client side interactivity where you need it, and a clean TypeScript-first design system to build from.
+
+The result is a component catalogue you own and fully understand — one that makes every new page faster to deliver and easier to maintain as your react applications grow.

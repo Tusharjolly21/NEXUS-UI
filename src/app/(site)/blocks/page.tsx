@@ -247,7 +247,9 @@ function BlockCard({
           href={`/blocks/${block.slug}`}
           className="absolute inset-0 rounded-[28px]"
           aria-label={`Open ${block.name}`}
-        />
+        >
+          <span className="sr-only">View {block.name}</span>
+        </Link>
       </div>
     </motion.div>
   );

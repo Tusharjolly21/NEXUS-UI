@@ -66,7 +66,9 @@ export default async function BlogIndexPage() {
 
           <p className="max-w-xl text-[15px] leading-relaxed text-muted-foreground">
             In-depth articles on motion design, Tailwind composition, and how we think about
-            developer-first marketing pages.
+            developer-first marketing pages. We cover Framer Motion patterns, Next.js App Router
+            techniques, copy-paste component architecture, and the design decisions behind
+            building production SaaS landing pages with TypeScript.
           </p>
 
           {posts.length > 0 && (

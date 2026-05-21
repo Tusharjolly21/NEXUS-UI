@@ -246,6 +246,70 @@ export default function ContactPage() {
             );
           })}
         </div>
+
+        {/* ── What we help with ── */}
+        <div className="mt-16 rounded-3xl border border-border/60 bg-muted/20 px-6 py-10 dark:bg-white/[0.025] sm:px-10">
+          <h2 className="text-2xl font-bold tracking-tight text-foreground">
+            What we help with
+          </h2>
+          <p className="mt-3 max-w-3xl text-base leading-relaxed text-muted-foreground">
+            Nexus UI is a premium animated component library for Next.js, built around Tailwind CSS and Framer
+            Motion. Our support covers the full lifecycle of using the library — from first install through
+            production deployment.
+          </p>
+
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <p className="text-sm font-semibold text-foreground">Registry and installation</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Nexus UI ships via a custom shadcn registry. We can help you configure the{" "}
+                <code className="rounded bg-muted px-1 py-0.5 text-xs font-mono">components.json</code> file,
+                resolve peer dependency conflicts, and get the first component rendering correctly in your Next.js
+                App Router project.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Premium access and licensing</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Premium components and full-page templates are gated behind a one-time license. If your token is
+                not working, you need a team seat, or you have questions about what is included in your plan,
+                reach out and we will sort it out same day.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Template customization</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Nexus UI templates are complete Next.js pages with Framer Motion animations, responsive layouts,
+                and Tailwind styling. We can advise on adapting color schemes, swapping copy, replacing sections,
+                and wiring templates into an existing project structure.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Motion and animation questions</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                All animations in Nexus UI are authored with Framer Motion and respect the user&apos;s
+                reduced-motion preference. If you want to adjust timing, easing, or trigger behavior — or if an
+                animation is conflicting with your layout — we are happy to walk through the approach.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Bug reports</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Found a visual regression, a TypeScript error, or unexpected behavior in a specific component?
+                Include the component slug, your Next.js and Tailwind versions, and a minimal reproduction if
+                possible. We triage component bugs as high priority.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">Custom builds and partnerships</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                Need a bespoke landing page, dashboard, or motion-driven interface built to your brand? We take
+                on a limited number of custom projects each quarter. For agency partnerships, educational
+                licensing, or marketplace integrations, use the partnerships channel above.
+              </p>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
   );
