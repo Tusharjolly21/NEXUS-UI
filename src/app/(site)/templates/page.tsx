@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createMetadata } from "@/lib/seo";
@@ -18,8 +18,7 @@ export default async function TemplatesPage() {
   let isPremium = false;
   if (isSupabaseConfigured()) {
     try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = await getCachedUser();
       if (user) isPremium = await hasPremiumAccess(user.id);
     } catch {
       // non-fatal

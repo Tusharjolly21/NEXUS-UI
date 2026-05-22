@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "three-d-folder",
   "type": "registry:component",
-  "title": "3D Folder",
+  "title": "3D Folder Card",
   "description": "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
   "dependencies": [
     "framer-motion",

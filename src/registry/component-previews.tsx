@@ -88,6 +88,7 @@ import { ProfileOrbit } from "@/components/profile-orbit/profile-orbit";
 import { GlowButton } from "@/components/glow-button";
 import { FaqFolderCard } from "@/components/blocks/faq-folder-card";
 import { ContactPageBlockPreview } from "@/components/blocks/contact-page";
+import { TextAnimationsBlockPreview } from "@/components/blocks/text-animations";
 import { WordMagnet } from "@/components/word-magnet";
 import { ThreeDFolder } from "@/components/three-d-folder";
 import { CardCarousel3D } from "@/components/card-carousel-3d";
@@ -96,6 +97,7 @@ import { RealTimeCursors } from "@/components/real-time-cursors";
 import { CommandPalette } from "@/components/command-palette";
 import { InteractiveGlobeExplorer } from "@/components/interactive-globe-explorer";
 import { ImageTrail } from "@/components/image-trail";
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
 import { FeatureToolsCard } from "@/components/feature-tools-card";
 import { AvatarGroup } from "@/components/avatar-group";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
@@ -1231,6 +1233,10 @@ export function PreviewFaqFolderCard() {
 
 export function PreviewContactPageBlock() {
   return <ContactPageBlockPreview />;
+}
+
+export function PreviewTextAnimationsBlock() {
+  return <TextAnimationsBlockPreview />;
 }
 
 export function PreviewSimpleSidebar() {
@@ -4285,6 +4291,54 @@ export function PreviewImageTrail({ compact = true }: { compact?: boolean } = {}
           </p>
         </div>
       </ImageTrail>
+    </div>
+  );
+}
+
+export function PreviewCursorTextReveal({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div className={cn("w-full", compact ? "h-[420px]" : "h-[560px]")}>
+      <CursorTextReveal
+        baseText="The first rule of motion is clarity."
+        revealText="The second rule is feeling."
+        maskSize={compact ? 190 : 310}
+        initialMaskSize={compact ? 92 : 0}
+        smoothness={0.16}
+        enableGlow={false}
+        showAmbient={false}
+        showGrid={false}
+        fontSize={compact ? "clamp(2rem, 7vw, 4.8rem)" : "clamp(3rem, 7vw, 7rem)"}
+        revealBackgroundClassName="bg-black"
+        baseTextClassName="text-zinc-950"
+        revealTextClassName="text-white"
+        containerClassName="h-full min-h-0 rounded-3xl border-zinc-200 bg-white text-zinc-950 shadow-sm"
+      />
+    </div>
+  );
+}
+
+export function PreviewCursorTextRevealImage({ compact = true }: { compact?: boolean } = {}) {
+  return (
+    <div className={cn("w-full", compact ? "h-[420px]" : "h-[560px]")}>
+      <CursorTextReveal
+        baseText="We chase moments in time to feel alive."
+        revealText="We keep the moments we usually ignore."
+        backgroundImage="https://images.unsplash.com/photo-1730874829217-f7f666e94822?auto=format&fit=crop&w=1800&q=85"
+        backgroundPosition="42% center"
+        mode="image"
+        revealImage="https://images.unsplash.com/photo-1649787652660-df5ac7c91532?auto=format&fit=crop&w=1800&q=85"
+        revealImagePosition="center"
+        maskSize={compact ? 215 : 340}
+        initialMaskSize={compact ? 90 : 0}
+        smoothness={0.2}
+        enableGlow={false}
+        showAmbient={false}
+        showGrid={false}
+        fontSize={compact ? "clamp(2rem, 7vw, 4.4rem)" : "clamp(3rem, 7vw, 6.5rem)"}
+        baseTextClassName="text-white/45"
+        revealTextClassName="text-white drop-shadow-[0_12px_34px_rgba(0,0,0,0.45)]"
+        containerClassName="h-full min-h-0 rounded-3xl border-white/10 bg-zinc-950 shadow-2xl shadow-black/50"
+      />
     </div>
   );
 }

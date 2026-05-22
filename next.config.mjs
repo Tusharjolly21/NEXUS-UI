@@ -14,13 +14,19 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  poweredByHeader: false,
+  compress: true,
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" },
+      { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "cdn.jsdelivr.net" },
     ],
+  },
+  experimental: {
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   async redirects() {
     return [

@@ -1,9 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getLibraryComponent, libraryComponents } from "@/lib/catalog/library-components";
+import {
+  getLibraryComponent,
+  getPreviewExportName,
+  libraryComponents,
+} from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -29,8 +33,7 @@ export default async function ComponentDetailPage({ params }: Props) {
   const item = getLibraryComponent(slug);
   if (!item) notFound();
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   const isPremium = user ? await hasPremiumAccess(user.id) : false;
 
   const softwareJsonLd = {
@@ -49,16 +52,53 @@ export default async function ComponentDetailPage({ params }: Props) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
-      { "@type": "ListItem", position: 2, name: "Components", item: `${siteConfig.url}/components` },
-      { "@type": "ListItem", position: 3, name: item.name, item: `${siteConfig.url}/components/${slug}` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Components",
+        item: `${siteConfig.url}/components`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: item.name,
+        item: `${siteConfig.url}/components/${slug}`,
+      },
     ],
   };
 
+  const serializedPreviewSections = item.previewSections?.map((s) => ({
+    title: s.title,
+    reactSource: s.reactSource,
+    previewExportName: getPreviewExportName(s.Preview),
+  }));
+
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <ComponentDetailPageClient slug={slug} isPremium={isPremium} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <ComponentDetailPageClient
+        slug={slug}
+        isPremium={isPremium}
+        name={item.name}
+        description={item.description}
+        categorySlug={item.categorySlug}
+        animationKinds={item.animationKinds}
+        tags={item.tags}
+        premium={item.premium}
+        registryCliName={item.registryCliName}
+        dependencies={item.dependencies}
+        reactSource={item.reactSource}
+        props={item.props}
+        previewExportName={getPreviewExportName(item.Preview)}
+        serializedPreviewSections={serializedPreviewSections}
+      />
     </>
   );
 }

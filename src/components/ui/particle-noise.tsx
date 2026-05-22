@@ -209,8 +209,8 @@ export function ParticleNoise({
     }
 
     function loop(now: number) {
-      if (!visibleRef.current) {
-        frameRef.current = requestAnimationFrame(loop);
+      if (!visibleRef.current || document.hidden) {
+        frameRef.current = null;
         return;
       }
       draw(now);
@@ -232,9 +232,19 @@ export function ParticleNoise({
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(container);
 
+    function onVisibilityChange() {
+      if (!document.hidden && visibleRef.current && frameRef.current === null) {
+        frameRef.current = requestAnimationFrame(loop);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     const intersectionObserver = new IntersectionObserver(
       ([entry]) => {
         visibleRef.current = entry?.isIntersecting ?? true;
+        if (visibleRef.current && !document.hidden && frameRef.current === null) {
+          frameRef.current = requestAnimationFrame(loop);
+        }
       },
       { threshold: 0.01 },
     );
@@ -252,6 +262,7 @@ export function ParticleNoise({
       if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       container.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerleave", onPointerLeave);
     };

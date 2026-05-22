@@ -12,6 +12,7 @@ export type BlockCategory =
   | "Stats sections"
   | "CTA sections"
   | "Contact sections"
+  | "Text Animations"
   | "Interactive backgrounds"
   | "FAQ sections"
   | "Blog sections"
@@ -29,6 +30,47 @@ export type BlockManifestEntry = {
 };
 
 export const blocksManifest: BlockManifestEntry[] = [
+  {
+    slug: "block-text-animations",
+    name: "Text Animations",
+    description:
+      "A collection of reusable animated text sections for headings and paragraphs, including flipping words, typewriter text, blur fade reveals, and AI-style generation with sound.",
+    category: "Text Animations",
+    tags: ["text", "animation", "typewriter", "blur", "framer-motion", "hero"],
+    premium: true,
+    variants: [
+      "Typewriter Heading",
+      "Typewriter Effect",
+      "Blur Fade In",
+      "Generate Typewriter with Sound",
+    ],
+    reactSource: `import {
+  TextAnimationBlurFadeIn,
+  TextAnimationTypewriterEffect,
+  TextGenerateTypewriter,
+  TypewriterHeading,
+} from "@/components/blocks/text-animations";
+
+export default function Page() {
+  return (
+    <main className="space-y-10 bg-background p-6">
+      <TypewriterHeading
+        text="Built with Next.js"
+        description="Create stunning animations that bring your website to life. Elevate your user experience with smooth transitions and eye-catching effects that captivate visitors and keep them engaged."
+      />
+      <TextAnimationTypewriterEffect
+        texts={["Launch a polished hero.", "Write less styling.", "Ship faster."]}
+      />
+      <TextAnimationBlurFadeIn
+        text="Reusable motion primitives for headings, paragraphs, and product storytelling."
+        once={false}
+        repeat
+      />
+      <TextGenerateTypewriter text="Nexus-ui is generating a clean, production-ready landing section with sound." />
+    </main>
+  );
+}`,
+  },
   {
     slug: "block-logo-clouds",
     name: "Brand Logo Animation",

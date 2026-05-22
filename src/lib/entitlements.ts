@@ -160,9 +160,11 @@ export async function canAccessTemplate(
  * Used to show/hide upgrade banners.
  */
 export async function hasPremiumAccess(userId: string): Promise<boolean> {
-  if (await hasLifetimeAccess(userId)) return true;
-  if (await hasActiveSubscription(userId)) return true;
-  return false;
+  const [lifetime, subscription] = await Promise.all([
+    hasLifetimeAccess(userId),
+    hasActiveSubscription(userId),
+  ]);
+  return lifetime || subscription;
 }
 
 // ── Admin entitlement checks (bypass RLS — for API token auth) ────────────────

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { FullPreviewShell } from "@/components/templates/full-preview-shell";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +30,7 @@ export default async function TemplatePreviewPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   const isPremium = user ? await hasPremiumAccess(user.id) : false;
 
   return <FullPreviewShell tmpl={tmpl} isPremium={isPremium} />;

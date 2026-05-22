@@ -110,8 +110,8 @@ function getImportName(code: string, fallbackName: string) {
   if (namedImport?.[1]) return namedImport[1];
   return toPascalCase(fallbackName);
 }
-import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
+import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { getComponentCategoryLabel, type ComponentCategorySlug } from "@/lib/catalog/taxonomy";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -485,13 +485,48 @@ function PropControl({
 }
 
 // ── main client component ───────────────────────────────────────────
-export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: string; isPremium?: boolean }) {
-  const comp = getLibraryComponent(slug);
-  if (!comp) return null;
+type SerializedSection = {
+  title?: string;
+  reactSource: string;
+  previewExportName: string;
+};
 
-  const codeIsLocked = comp.premium && !isPremium;
+type ComponentDetailProps = {
+  slug: string;
+  isPremium?: boolean;
+  name: string;
+  description: string;
+  categorySlug: string;
+  animationKinds: string[];
+  tags: string[];
+  premium: boolean;
+  registryCliName?: string;
+  dependencies: string[];
+  reactSource?: string;
+  props?: PropDoc[];
+  previewExportName: string;
+  serializedPreviewSections?: SerializedSection[];
+};
 
-  const categoryLabel = getComponentCategoryLabel(comp.categorySlug as ComponentCategorySlug);
+export function ComponentDetailPageClient({
+  slug,
+  isPremium = false,
+  name,
+  description,
+  categorySlug,
+  animationKinds,
+  tags,
+  premium,
+  registryCliName,
+  dependencies,
+  reactSource,
+  props,
+  previewExportName,
+  serializedPreviewSections,
+}: ComponentDetailProps) {
+  const codeIsLocked = premium && !isPremium;
+
+  const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
 
   return (
     <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
@@ -501,28 +536,28 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
         </Link>
         <ChevronRight className="size-3.5" />
         <Link
-          href={`/components?cat=${comp.categorySlug}`}
+          href={`/components?cat=${categorySlug}`}
           className="transition hover:text-foreground"
         >
           {categoryLabel}
         </Link>
         <ChevronRight className="size-3.5" />
-        <span className="font-medium text-foreground">{comp.name}</span>
+        <span className="font-medium text-foreground">{name}</span>
       </nav>
 
       <header>
         <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-          {comp.name}
+          {name}
           <span className="sr-only"> — React Component</span>
         </h1>
         <p className="mt-4 max-w-3xl text-xl leading-8 text-muted-foreground">
-          {comp.description}
+          {description}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Badge variant="outline" className="border-border/70 bg-muted/50 text-muted-foreground">
             {categoryLabel}
           </Badge>
-          {comp.animationKinds.map((kind) => (
+          {animationKinds.map((kind) => (
             <Badge
               key={kind}
               variant="outline"
@@ -531,7 +566,7 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
               {kind}
             </Badge>
           ))}
-          {comp.tags.map((tag) => (
+          {tags.map((tag) => (
             <Badge
               key={tag}
               variant="outline"
@@ -557,40 +592,42 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
         </AccordionItem>
       </Accordion>
 
-      {comp.previewSections ? (
-        comp.previewSections.map((section, i) => {
-          const SectionPreview = section.Preview;
-          return (
-            <PreviewCodeSection
-              key={i}
-              title={section.title ?? (comp.previewSections!.length > 1 ? `${comp.name} — Variant ${i + 1}` : comp.name)}
-              code={section.reactSource}
-              slug={comp.slug}
-              props={comp.props}
-              importName={getImportName(section.reactSource, comp.name)}
-              dependencies={comp.dependencies}
-              animationKinds={comp.animationKinds}
-              registryCliName={comp.registryCliName}
-              className={i > 0 ? "mt-16" : undefined}
-              locked={codeIsLocked}
-            >
-              <SectionPreview compact={false} />
-            </PreviewCodeSection>
-          );
-        })
+      {serializedPreviewSections ? (
+        serializedPreviewSections.map((section, i) => (
+          <PreviewCodeSection
+            key={i}
+            title={
+              section.title ??
+              (serializedPreviewSections.length > 1
+                ? `${name} — Variant ${i + 1}`
+                : name)
+            }
+            code={section.reactSource}
+            slug={slug}
+            props={props}
+            importName={getImportName(section.reactSource, name)}
+            dependencies={dependencies}
+            animationKinds={animationKinds}
+            registryCliName={registryCliName}
+            className={i > 0 ? "mt-16" : undefined}
+            locked={codeIsLocked}
+          >
+            <DynamicPreview exportName={section.previewExportName} compact={false} />
+          </PreviewCodeSection>
+        ))
       ) : (
         <PreviewCodeSection
-          title={comp.name}
-          code={comp.reactSource ?? ""}
-          slug={comp.slug}
-          props={comp.props}
-          importName={getImportName(comp.reactSource ?? "", comp.name)}
-          dependencies={comp.dependencies}
-          animationKinds={comp.animationKinds}
+          title={name}
+          code={reactSource ?? ""}
+          slug={slug}
+          props={props}
+          importName={getImportName(reactSource ?? "", name)}
+          dependencies={dependencies}
+          animationKinds={animationKinds}
           locked={codeIsLocked}
-          registryCliName={comp.registryCliName}
+          registryCliName={registryCliName}
         >
-          <comp.Preview compact={false} />
+          <DynamicPreview exportName={previewExportName} compact={false} />
         </PreviewCodeSection>
       )}
 
@@ -598,8 +635,8 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
         <div>
           <h2 className="text-lg font-semibold text-foreground">Animation effects</h2>
           <div className="mt-3 flex flex-wrap gap-2">
-            {comp.animationKinds.length > 0 ? (
-              comp.animationKinds.map((kind) => (
+            {animationKinds.length > 0 ? (
+              animationKinds.map((kind) => (
                 <Badge key={kind} variant="outline" className="border-border/70 text-muted-foreground">
                   {kind}
                 </Badge>
@@ -616,9 +653,9 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
             Use the Code tab above to inspect and copy this component into your project.
           </p>
-          {DEMO_SLUGS.has(comp.slug) && (
+          {DEMO_SLUGS.has(slug) && (
             <Link
-              href={`/demos/${comp.slug}`}
+              href={`/demos/${slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-foreground"
@@ -630,7 +667,7 @@ export function ComponentDetailPageClient({ slug, isPremium = false }: { slug: s
         </div>
       </section>
 
-      <ComponentAbout slug={comp.slug} name={comp.name} />
+      <ComponentAbout slug={slug} name={name} />
     </main>
   );
 }

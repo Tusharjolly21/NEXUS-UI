@@ -12,6 +12,29 @@
       "files": []
     },
     {
+      "name": "cursor-text-reveal",
+      "type": "registry:component",
+      "title": "Cursor Text Reveal",
+      "description": "An immersive cursor-following spotlight that reveals alternate text, gradients, or imagery beneath perfectly aligned headline layers.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cursor-text-reveal/cursor-text-reveal.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cursor-text-reveal/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
@@ -467,7 +490,7 @@
     {
       "name": "three-d-folder",
       "type": "registry:component",
-      "title": "3D Folder",
+      "title": "3D Folder Card",
       "description": "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
       "dependencies": [
         "framer-motion",
@@ -1694,6 +1717,69 @@
         {
           "path": "next-ui/image-trail/index.ts",
           "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "avatar-group",
+      "type": "registry:component",
+      "title": "Avatar Group",
+      "description": "Overlapping avatar stack with per-avatar entrance animations (flip, slide, scale, bounce), four hover styles, name tooltips, and automatic color-coded fallback initials when no image is supplied.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/avatar-group/avatar-group.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/avatar-group/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "feature-tools-card",
+      "type": "registry:component",
+      "title": "Feature Tools Card",
+      "description": "A dark glass card with five magnetic icon slots, a rotating conic-gradient orbit ring, and 3-D tilt physics. Swap the default integration icons for any SVG or image.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/feature-tools-card/feature-tools-card.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/feature-tools-card/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "link-preview",
+      "type": "registry:component",
+      "title": "Link Preview",
+      "description": "Hover-triggered image tooltip that transforms inline text links into cinematic visual previews. Spring-animated entrance with blur, scale, mouse-tracking tilt, and a soft floating glide — perfect for blogs, portfolios, and product pages.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/link-preview/link-preview.tsx",
+          "type": "registry:component"
         }
       ]
     }

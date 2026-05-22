@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import type { Database } from "@/lib/supabase/database.types";
 
 export async function createClient() {
@@ -26,7 +27,14 @@ export async function createClient() {
       },
     },
     global: {
-      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
+      fetch: (input, init) => fetch(input, { ...init }),
     },
   });
 }
+
+/** Deduplicated auth check — one Supabase round-trip per server request regardless of how many server components call it. */
+export const getCachedUser = cache(async () => {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  return data.user;
+});

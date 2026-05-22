@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { parseAsString, useQueryStates } from "nuqs";
 import { ArrowUpRight, Crown, Search } from "lucide-react";
 import { blocks, type BlockCategory } from "@/lib/catalog/blocks";
 import { libraryComponents } from "@/lib/catalog/library-components";
@@ -45,6 +46,7 @@ const BLOCK_CATEGORIES: BlockCategory[] = [
   "Stats sections",
   "CTA sections",
   "Contact sections",
+  "Text Animations",
   "Interactive backgrounds",
   "FAQ sections",
   "Blog sections",
@@ -124,16 +126,27 @@ export function useLibraryExplorerSidebar() {
   return ctx;
 }
 
+const CATALOG_PARSERS = {
+  view: parseAsString.withDefault(""),
+  cat: parseAsString.withDefault("all"),
+  bcat: parseAsString.withDefault(""),
+  sort: parseAsString.withDefault("trending"),
+  q: parseAsString.withDefault(""),
+  premium: parseAsString.withDefault(""),
+};
+
 export function LibraryExplorerSidebarProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [params, setParams] = useQueryStates(CATALOG_PARSERS, {
+    scroll: false,
+    history: "push",
+  });
 
-  const viewParam = searchParams.get("view") as ExplorerView | null;
+  const viewParam = params.view as ExplorerView | "";
   const view: ExplorerView =
     viewParam === "components" || viewParam === "blocks" || viewParam === "all"
       ? viewParam
@@ -143,58 +156,53 @@ export function LibraryExplorerSidebarProvider({
           ? "components"
           : "all";
 
-  const [query, setQuery] = React.useState(searchParams.get("q") ?? "");
-  const category = searchParams.get("cat") ?? "all";
-  const bcat = searchParams.get("bcat") ?? "";
-  const sort = (searchParams.get("sort") as CatalogSort | null) ?? "trending";
+  const [query, setQuery] = React.useState(params.q);
+  const category = params.cat;
+  const bcat = params.bcat;
+  const sort = (params.sort as CatalogSort) || "trending";
   const [animFilter, setAnimFilter] = React.useState<AnimationKind[]>([]);
-  const [premiumOnly, setPremiumOnly] = React.useState(
-    searchParams.get("premium") === "1",
-  );
+  const premiumOnly = params.premium === "1";
 
   const categoryCounts = useCategoryCounts();
   const blockCategoryCounts = useBlockCategoryCounts();
   const totalComponents = libraryComponents.length;
   const totalBlocks = blocks.length;
 
+  // Sync URL -> local query (browser back/forward navigation)
   React.useEffect(() => {
-    const id = window.setTimeout(() => {
-      setQuery(searchParams.get("q") ?? "");
-      setPremiumOnly(searchParams.get("premium") === "1");
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, [searchParams]);
+    setQuery(params.q);
+  }, [params.q]);
 
   const commitParams = React.useCallback(
     (next: Record<string, string | null | undefined>, replace = false) => {
-      const params = new URLSearchParams(searchParams.toString());
-      Object.entries(next).forEach(([k, v]) => {
-        if (v === null || v === undefined || v === "" || v === "all")
-          params.delete(k);
-        else params.set(k, v);
-      });
-      const qs = params.toString();
-      const basePath = getCatalogBasePath(pathname);
-      const url = qs ? `${basePath}?${qs}` : basePath;
-      if (replace) router.replace(url);
-      else router.push(url);
+      const updates: Partial<Record<keyof typeof CATALOG_PARSERS, string | null>> = {};
+      for (const [k, v] of Object.entries(next)) {
+        updates[k as keyof typeof CATALOG_PARSERS] =
+          v === null || v === undefined || v === "" || v === "all" ? null : v;
+      }
+      setParams(updates, { history: replace ? "replace" : "push" });
     },
-    [pathname, router, searchParams],
+    [setParams],
   );
 
   const buildHref = React.useCallback(
     (updates: Record<string, string | null | undefined>) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const p = new URLSearchParams();
+      if (params.view) p.set("view", params.view);
+      if (params.cat && params.cat !== "all") p.set("cat", params.cat);
+      if (params.bcat) p.set("bcat", params.bcat);
+      if (params.sort && params.sort !== "trending") p.set("sort", params.sort);
+      if (params.q) p.set("q", params.q);
+      if (params.premium) p.set("premium", params.premium);
       for (const [k, v] of Object.entries(updates)) {
-        if (v === null || v === undefined || v === "" || v === "all")
-          params.delete(k);
-        else params.set(k, v);
+        if (v === null || v === undefined || v === "" || v === "all") p.delete(k);
+        else p.set(k, v);
       }
-      const qs = params.toString();
+      const qs = p.toString();
       const basePath = getCatalogBasePath(pathname);
       return qs ? `${basePath}?${qs}` : basePath;
     },
-    [pathname, searchParams],
+    [pathname, params],
   );
 
   const setExplorerView = React.useCallback(

@@ -343,7 +343,7 @@ function Hero() {
   const isDark = !mounted || resolvedTheme !== "light";
 
   return (
-    <section className="relative isolate flex min-h-[78dvh] flex-col items-center justify-center overflow-hidden border-b border-border bg-[#f7fbff] px-4 py-20 text-center dark:bg-black md:py-28">
+    <section className="relative isolate flex min-h-[78dvh] h-full flex-col items-center justify-center overflow-hidden border-b border-border bg-[#f7fbff] px-4 py-20 text-center dark:bg-black md:py-28">
       {/* Particle Noise — light mode: animate only when theme is light */}
       <ParticleNoise
         positionX={0}
@@ -396,7 +396,7 @@ function Hero() {
         >
           <Badge className="gap-1.5 border border-violet-500/25 bg-violet-500/10 px-4 py-1.5 text-sm font-medium shadow-sm shadow-violet-500/10">
             <SparklesIcon className="size-3.5 shrink-0 text-violet-500 dark:text-violet-300" />
-            <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-indigo-300">
+            <span className="bg-linear-to-r from-violet-600 via-fuchsia-500 to-indigo-500 bg-clip-text text-transparent dark:from-violet-300 dark:via-fuchsia-300 dark:to-indigo-300">
               Built for the AI generation of developers
             </span>
           </Badge>
@@ -1489,11 +1489,11 @@ function WhyNexusUI() {
             Everything you need to ship a polished product
           </h2>
           <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-            Nexus UI is a React component library and Next.js template collection
-            designed specifically for developers who want production-quality UI
-            without spending weeks on design polish. Every piece is built with
-            Tailwind CSS, Framer Motion, and TypeScript — the same stack your
-            team already uses.
+            Nexus UI is a React component library and Next.js template
+            collection designed specifically for developers who want
+            production-quality UI without spending weeks on design polish. Every
+            piece is built with Tailwind CSS, Framer Motion, and TypeScript —
+            the same stack your team already uses.
           </p>
         </ViewportFade>
 
@@ -1504,11 +1504,19 @@ function WhyNexusUI() {
               initial={reduce ? false : { opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
-              transition={{ delay: i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              transition={{
+                delay: i * 0.07,
+                duration: 0.45,
+                ease: [0.22, 1, 0.36, 1],
+              }}
               className="rounded-2xl border border-border/60 bg-muted/20 p-7 dark:bg-white/[0.025]"
             >
-              <h3 className="text-base font-semibold text-foreground">{item.heading}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{item.body}</p>
+              <h3 className="text-base font-semibold text-foreground">
+                {item.heading}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {item.body}
+              </p>
             </motion.div>
           ))}
         </div>

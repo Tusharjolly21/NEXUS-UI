@@ -125,13 +125,14 @@ async function loadLand(): Promise<LandCollection> {
   if (landCache) return landCache;
 
   const urls = [
+    "/world-atlas-110m.json",
     "https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json",
     "https://unpkg.com/world-atlas@2/land-110m.json",
   ];
 
   for (const url of urls) {
     try {
-      const response = await fetch(url, { cache: "force-cache" });
+      const response = await fetch(url);
 
       if (!response.ok) continue;
 

@@ -157,7 +157,31 @@ function ParticleField({
       particlesRef.current = buildParticles(W, H);
     }
 
+    const isVisibleRef = { current: true };
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        isVisibleRef.current = e?.isIntersecting ?? true;
+        if (isVisibleRef.current && !document.hidden && !rafRef.current) {
+          rafRef.current = requestAnimationFrame(draw);
+        }
+      },
+      { threshold: 0.01 },
+    );
+    io.observe(cvs);
+
+    function onVisibilityChange() {
+      if (!document.hidden && isVisibleRef.current && !rafRef.current) {
+        rafRef.current = requestAnimationFrame(draw);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     function draw() {
+      if (document.hidden || !isVisibleRef.current) {
+        rafRef.current = 0;
+        return;
+      }
       c.clearRect(0, 0, W, H);
 
       const mx      = mouseRef.current.x;
@@ -230,6 +254,8 @@ function ParticleField({
     return () => {
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [
     dotGap, interactionRadius, repulsionStrength,

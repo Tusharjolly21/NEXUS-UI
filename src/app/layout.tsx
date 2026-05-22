@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { AppProviders } from "@/components/providers/app-providers";
 import { createMetadata } from "@/lib/seo";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -6,10 +7,12 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
-/**
- * No `next/font/google` here — it can block `next dev` / compile when font metadata
- * fetches stall (offline VPN, IPv6, corporate proxy). Fonts come from `globals.css` stacks.
- */
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 export const metadata: Metadata = createMetadata();
 
 export const viewport: Viewport = {
@@ -25,12 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" className={`dark ${inter.variable}`} suppressHydrationWarning>
       <head>
         <script
           id="nexus-ui-theme-init"
           dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
         />
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <link
+            rel="preconnect"
+            href={new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin}
+          />
+        )}
       </head>
       <body
         suppressHydrationWarning

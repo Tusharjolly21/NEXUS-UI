@@ -150,7 +150,33 @@ function StarfieldCanvas({
 
     let t0 = performance.now();
 
+    const isVisibleRef = { current: true };
+
+    const io = new IntersectionObserver(
+      ([e]) => {
+        isVisibleRef.current = e?.isIntersecting ?? true;
+        if (isVisibleRef.current && !document.hidden && !rafRef.current) {
+          t0 = performance.now();
+          rafRef.current = requestAnimationFrame(draw);
+        }
+      },
+      { threshold: 0.01 },
+    );
+    io.observe(el);
+
+    function onVisibilityChange() {
+      if (!document.hidden && isVisibleRef.current && !rafRef.current) {
+        t0 = performance.now();
+        rafRef.current = requestAnimationFrame(draw);
+      }
+    }
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     function draw(now: number) {
+      if (document.hidden || !isVisibleRef.current) {
+        rafRef.current = 0;
+        return;
+      }
       const elapsed = (now - t0) / 1000;
       c.clearRect(0, 0, W, H);
 
@@ -256,6 +282,8 @@ function StarfieldCanvas({
     return () => {
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [particleCount, interactionRadius, baseRgb, activeRgb, springK, damping, reduceMotion]);
 

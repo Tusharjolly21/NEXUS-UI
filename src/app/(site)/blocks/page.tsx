@@ -39,6 +39,7 @@ const CATEGORY_NOTES: Record<BlockCategory, string> = {
   "Stats sections": "Numerical proof points with restrained, dashboard-like polish.",
   "CTA sections": "Closing sections for trials, demos, waitlists, and upgrades.",
   "Contact sections": "Complete contact pages with forms, proof, location signals, and support context.",
+  "Text Animations": "Animated heading and paragraph sections for hero copy, SaaS pages, and storytelling layouts.",
   "Interactive backgrounds": "Responsive motion fields for hero backdrops, feature cards, and product storytelling.",
   "FAQ sections": "Supportive answer layouts tuned for scannability.",
   "Blog sections": "Editorial rails for content hubs and announcement pages.",

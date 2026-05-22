@@ -6,7 +6,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 import { ThemeReceiver } from "@/components/templates/theme-receiver";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 86400;
 
 // Each template is its own dynamic chunk — only the matching slug's JS is sent to the browser.
 const TemplateFallback = () => (

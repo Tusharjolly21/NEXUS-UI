@@ -42,6 +42,12 @@ import {
   GradientProofContact,
   ImageStoryContact,
 } from "@/components/blocks/contact-page";
+import {
+  TextAnimationBlurFadeIn,
+  TextAnimationTypewriterEffect,
+  TextGenerateTypewriter,
+  TypewriterHeading,
+} from "@/components/blocks/text-animations";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
@@ -102,6 +108,7 @@ export default async function BlockDetailPage({ params }: Props) {
   const isWhyChooseUsCard = block.slug === "block-why-choose-us";
   const isFaqFolderCard = block.slug === "block-faq-folder-card";
   const isContactPageCard = block.slug === "block-contact-page";
+  const isTextAnimationsCard = block.slug === "block-text-animations";
   const isSidebarCard = block.slug === "block-sidebar";
   const isLogoCloudCard = block.slug === "block-logo-clouds";
   const layeredWaveCode = isInteractiveBackgroundCard
@@ -139,6 +146,15 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
   const logoSingleRowCode = isLogoCloudCard
     ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-single-row.tsx", "")
+    : "";
+  const typewriterEffectCode = isTextAnimationsCard
+    ? await readSourceFile("src/components/blocks/text-animations/text-animation-typewriter-effect.tsx", "")
+    : "";
+  const blurFadeInCode = isTextAnimationsCard
+    ? await readSourceFile("src/components/blocks/text-animations/text-animation-blur-fade-in.tsx", "")
+    : "";
+  const textGenerateCode = isTextAnimationsCard
+    ? await readSourceFile("src/components/blocks/text-animations/text-generate-typewriter.tsx", "")
     : "";
 
   return (
@@ -339,6 +355,39 @@ export default async function BlockDetailPage({ params }: Props) {
             <ImageStoryContact />
           </PreviewCodeSection>
         </>
+      ) : isTextAnimationsCard ? (
+        <>
+          <PreviewCodeSection title="Typewriter Heading" code={code} usageCode={TYPEWRITER_HEADING_USAGE} locked={locked}>
+            <FlippingWordsDemo />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Text Animation Typewriter Effect"
+            code={typewriterEffectCode}
+            usageCode={TYPEWRITER_EFFECT_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <TypewriterEffectDemo />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Text Animation Blur Fade In"
+            code={blurFadeInCode}
+            usageCode={BLUR_FADE_IN_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <BlurFadeInDemo />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Text Generate Typewriter with typing sound"
+            code={textGenerateCode}
+            usageCode={TEXT_GENERATE_TYPEWRITER_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <TextGenerateTypewriterDemo />
+          </PreviewCodeSection>
+        </>
       ) : isSidebarCard ? (
         <>
           <PreviewCodeSection title="Simple Sidebar with Hover" code={code} locked={locked}>
@@ -454,12 +503,119 @@ export default async function BlockDetailPage({ params }: Props) {
   );
 }
 
+function FlippingWordsDemo() {
+  return (
+    <section className="grid h-full min-h-full w-full overflow-hidden bg-[#f7f7f8] p-6 text-zinc-950 lg:grid-cols-[1.08fr_0.92fr] lg:p-12">
+      <div className="flex flex-col justify-end pb-10 lg:pb-24">
+        <TypewriterHeading
+          text="Built with Next.js"
+          description="Create stunning animations that bring your website to life. Elevate your user experience with smooth transitions and eye-catching effects that captivate visitors and keep them engaged."
+          typingSpeed={92}
+          startDelay={300}
+        />
+        <div className="mt-12">
+          <p className="text-sm font-medium text-zinc-500">Trusted by builders shipping with</p>
+          <div className="mt-5 flex flex-wrap gap-5 text-sm font-semibold text-zinc-800">
+            <span>Nexus-ui</span>
+            <span>Gamity</span>
+            <span>Host IT</span>
+            <span>Asteroid Kit</span>
+          </div>
+        </div>
+      </div>
+      <div className="hidden items-end justify-center pb-4 lg:flex">
+        <div className="relative h-[590px] w-[300px] rounded-[3rem] border-[14px] border-black bg-white p-4 shadow-2xl shadow-zinc-950/20">
+          <div className="absolute left-1/2 top-5 h-7 w-28 -translate-x-1/2 rounded-full bg-black" />
+          <div className="mt-16 space-y-3">
+            {[
+              ["🚀", "Getting Started", "Learn how to build your first animation in minutes"],
+              ["⚡", "Advanced Techniques", "Take animations to the next level with pro tips"],
+              ["⚙️", "Performance Tips", "Optimize motion for smooth rendering"],
+              ["📚", "Animation Library", "Browse reusable text effects"],
+              ["🌟", "Community Showcase", "See what others are building"],
+            ].map(([icon, title, copy]) => (
+              <div key={title} className="rounded-2xl bg-white p-3.5 shadow-lg shadow-zinc-950/10">
+                <div className="flex gap-2.5">
+                  <span className="shrink-0">{icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold">{title}</p>
+                    <p className="mt-1 text-xs leading-5 text-zinc-500">{copy}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function TypewriterEffectDemo() {
+  return (
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-zinc-950 p-6 text-white">
+      <div className="w-full max-w-4xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/30">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-200/70">Typewriter</p>
+        <div className="mt-8 min-h-[8rem]">
+          <TextAnimationTypewriterEffect
+            texts={[
+              "Launch a sharper hero section.",
+              "Write less styling.",
+              "Ship motion that feels premium.",
+            ]}
+            className="text-4xl text-white sm:text-6xl"
+            delay={400}
+          />
+        </div>
+        <p className="mt-8 max-w-2xl text-lg leading-8 text-white/55">
+          Loop through product messages with controlled typing, deleting,
+          blinking cursor, and no layout jump.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function BlurFadeInDemo() {
+  return (
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-white p-6 text-zinc-950 dark:bg-zinc-950 dark:text-white">
+      <div className="w-full max-w-4xl rounded-[2rem] border border-zinc-200 bg-zinc-50 p-8 dark:border-white/10 dark:bg-white/[0.04]">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-500">Blur fade in</p>
+        <TextAnimationBlurFadeIn
+          text={"Every word arrives with intent.\nEvery sentence feels composed.\nEvery section earns attention."}
+          by="word"
+          stagger={0.045}
+          once={false}
+          repeat
+          className="mt-8 text-4xl leading-tight text-zinc-900 dark:text-white sm:text-6xl"
+        />
+      </div>
+    </section>
+  );
+}
+
+function TextGenerateTypewriterDemo() {
+  return (
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#05070d] p-6">
+      <div className="w-full max-w-3xl">
+        <TextGenerateTypewriter
+          text="Nexus-ui is generating a production-ready hero section with animated text, clean spacing, responsive layout, and a subtle synced typing sound."
+          startOnView
+          typingSpeed={48}
+          volume={0.22}
+        />
+      </div>
+    </section>
+  );
+}
+
 async function getBlockCode(slug: string, fallback: string) {
   const sourceBySlug: Record<string, string> = {
     "block-interactive-dots": "src/components/interactive-dots/interactive-dots.tsx",
     "block-why-choose-us": "src/components/blocks/animated-bento-grid.tsx",
     "block-faq-folder-card": "src/components/blocks/faq-folder-card.tsx",
     "block-contact-page": "src/components/blocks/contact-page.tsx",
+    "block-text-animations": "src/components/blocks/text-animations/typewriter-heading.tsx",
     "block-sidebar": "src/components/blocks/sidebar/simple-sidebar.tsx",
     "block-logo-clouds": "src/components/blocks/logo-clouds/logos-blur-flip.tsx",
   };
@@ -620,6 +776,10 @@ function defaultUsageForTitle(title: string) {
   if (title === "Spotlight Bento Grid") return SPOTLIGHT_BENTO_USAGE;
   if (title === "Aurora Wavy Lines") return WAVY_LINES_USAGE;
   if (title.includes("Contact")) return CONTACT_PAGE_USAGE;
+  if (title === "Typewriter Heading") return TYPEWRITER_HEADING_USAGE;
+  if (title === "Text Animation Typewriter Effect") return TYPEWRITER_EFFECT_USAGE;
+  if (title === "Text Animation Blur Fade In") return BLUR_FADE_IN_USAGE;
+  if (title === "Text Generate Typewriter with typing sound") return TEXT_GENERATE_TYPEWRITER_USAGE;
   if (title === "Simple Sidebar with Hover") return `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";\n\nexport default function Page() {\n  return <SimpleSidebar />;\n}`;
   if (title === "Collapsible Sidebar") return COLLAPSIBLE_SIDEBAR_USAGE;
   if (title === "Grouped Sidebar") return GROUPED_SIDEBAR_USAGE;
@@ -750,6 +910,57 @@ export default function ContactPage() {
   );
 }`;
 
+const TYPEWRITER_HEADING_USAGE = `import { TypewriterHeading } from "@/components/blocks/text-animations";
+
+export default function Hero() {
+  return (
+    <TypewriterHeading
+      text="Built with Next.js"
+      description="Create stunning animations that bring your website to life. Elevate your user experience with smooth transitions and eye-catching effects that captivate visitors and keep them engaged."
+    />
+  );
+}`;
+
+const TYPEWRITER_EFFECT_USAGE = `import { TextAnimationTypewriterEffect } from "@/components/blocks/text-animations";
+
+export default function HeroCopy() {
+  return (
+    <TextAnimationTypewriterEffect
+      texts={["Launch a sharper hero.", "Write less styling.", "Ship faster."]}
+      loop
+      showCursor
+    />
+  );
+}`;
+
+const BLUR_FADE_IN_USAGE = `import { TextAnimationBlurFadeIn } from "@/components/blocks/text-animations";
+
+export default function SectionIntro() {
+  return (
+    <TextAnimationBlurFadeIn
+      text="Reusable motion primitives for headings, paragraphs, and product storytelling."
+      by="word"
+      once={false}
+      repeat
+      stagger={0.035}
+    />
+  );
+}`;
+
+const TEXT_GENERATE_TYPEWRITER_USAGE = `import { TextGenerateTypewriter } from "@/components/blocks/text-animations";
+
+export default function AiDraft() {
+  return (
+      <TextGenerateTypewriter
+        text="Nexus-ui is generating a production-ready landing section with sound."
+        soundSrc="/sounds/sound.ogg"
+      startOnView
+      typingSpeed={22}
+      volume={0.18}
+    />
+  );
+}`;
+
 const LAYERED_WAVE_USAGE = `<section className="relative min-h-[640px] overflow-hidden">
   <LayeredWaveBackground
     gradientColors={["#7c3aed", "#06b6d4", "#ec4899"]}
@@ -838,4 +1049,3 @@ const LOGO_SINGLE_ROW_USAGE = `import LogoCloudSingleRow from "@/components/bloc
 export default function Page() {
   return <LogoCloudSingleRow />;
 }`;
-

@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ArrowRight,
   Box,
@@ -92,6 +93,10 @@ export function ComponentsCatalog() {
   );
 }
 
+type GridItem =
+  | { type: "component"; comp: (typeof libraryComponents)[number]; index: number }
+  | { type: "block"; block: (typeof featuredBlocks)[number]; index: number };
+
 function ComponentsPageInner() {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortMode>("all");
@@ -99,6 +104,11 @@ function ComponentsPageInner() {
   const [typeFilter, setTypeFilter] = React.useState<TypeFilter>("all");
   const reduce = useReducedMotion() === true;
   const { category, query, premiumOnly, commitParams } = useLibraryExplorerSidebar();
+
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const gridRef = React.useRef<HTMLDivElement>(null);
+  const [cols, setCols] = React.useState(3);
+  const [scrollMargin, setScrollMargin] = React.useState(0);
 
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -146,13 +156,59 @@ function ComponentsPageInner() {
     commitParams({ cat: null, premium: null, q: null });
   };
 
+  // Track columns from scroll container width
+  React.useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const w = entry?.contentRect.width ?? 0;
+      setCols(w >= 1024 ? 3 : w >= 640 ? 2 : 1);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Group all grid items into rows
+  const allItems = React.useMemo<GridItem[]>(() => [
+    ...visibleComponents.map((comp, i) => ({ type: "component" as const, comp, index: i })),
+    ...featuredBlocks.map((block, i) => ({ type: "block" as const, block, index: visibleComponents.length + i })),
+  ], [visibleComponents]);
+
+  const rows = React.useMemo(() => {
+    const result: GridItem[][] = [];
+    for (let i = 0; i < allItems.length; i += cols) {
+      result.push(allItems.slice(i, i + cols));
+    }
+    return result;
+  }, [allItems, cols]);
+
+  // Measure how far the grid sits below the top of the scroll container
+  React.useLayoutEffect(() => {
+    const grid = gridRef.current;
+    const scroll = scrollRef.current;
+    if (!grid || !scroll) return;
+    const margin =
+      grid.getBoundingClientRect().top -
+      scroll.getBoundingClientRect().top +
+      scroll.scrollTop;
+    setScrollMargin(margin);
+  }, [visibleComponents.length, category, premiumOnly, normalizedQuery]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 440,
+    overscan: 3,
+    scrollMargin,
+  });
+
   return (
     <div className="flex h-[calc(100dvh-4rem)] overflow-hidden lg:flex-row">
       <aside className="relative hidden w-[272px] shrink-0 border-r border-border/40 lg:flex lg:flex-col">
         <LibraryExplorerSidebarDesktopChrome />
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+      <div ref={scrollRef} className="flex min-w-0 flex-1 flex-col overflow-y-auto">
         {/* Mobile top bar */}
         <div className="sticky top-0 z-20 flex items-center gap-2 border-b border-border bg-background/95 px-4 py-2 backdrop-blur-md lg:hidden">
           <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
@@ -315,25 +371,45 @@ function ComponentsPageInner() {
               </p>
             </div>
           ) : (
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-              {visibleComponents.map((comp, index) => (
-                <ComponentCard
-                  key={comp.slug}
-                  comp={comp}
-                  index={index}
-                  reduceMotion={reduce}
-                  isTrending={sort === "trending" && index < 5}
-                />
+            <div
+              ref={gridRef}
+              style={{ position: "relative", height: rowVirtualizer.getTotalSize() }}
+            >
+              {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 sm:gap-5 sm:pb-5 lg:grid-cols-3"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    transform: `translateY(${virtualRow.start - scrollMargin}px)`,
+                  }}
+                >
+                  {rows[virtualRow.index]?.map((item) =>
+                    item.type === "component" ? (
+                      <ComponentCard
+                        key={item.comp.slug}
+                        comp={item.comp}
+                        index={item.index}
+                        reduceMotion={reduce}
+                        isTrending={sort === "trending" && item.index < 5}
+                      />
+                    ) : (
+                      <BlockCard
+                        key={item.block.slug}
+                        block={item.block}
+                        index={item.index}
+                        reduceMotion={reduce}
+                      />
+                    ),
+                  )}
+                </div>
               ))}
-              {featuredBlocks.map((block, i) => (
-                <BlockCard
-                  key={block.slug}
-                  block={block}
-                  index={visibleComponents.length + i}
-                  reduceMotion={reduce}
-                />
-              ))}
-            </section>
+            </div>
           )}
 
           {/* ── About the library ── */}
@@ -456,11 +532,12 @@ function BlockCard({
   index: number;
   reduceMotion: boolean;
 }) {
+  const animate = !reduceMotion && index < 9;
   return (
     <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+      initial={animate ? { opacity: 0, y: 16 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      transition={animate ? { delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
       whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
       className="group relative h-full"
     >
@@ -518,11 +595,12 @@ function ComponentCard({
   reduceMotion: boolean;
   isTrending?: boolean;
 }) {
+  const animate = !reduceMotion && index < 9;
   return (
     <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+      initial={animate ? { opacity: 0, y: 16 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      transition={animate ? { delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
       whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
       className="group relative h-full"
     >

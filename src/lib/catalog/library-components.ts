@@ -45,6 +45,170 @@ const tw = `Use Tailwind utility composition with rounded-3xl, border-white/10, 
 
 export const libraryComponents: LibraryComponent[] = [
   {
+    slug: "cursor-text-reveal",
+    name: "Cursor Text Reveal",
+    registryCliName: "cursor-text-reveal",
+    resourceLinks: [{ label: "Live demo", href: "/demos/cursor-text-reveal" }],
+    description:
+      "An immersive cursor-following spotlight that reveals alternate text, gradients, or imagery beneath perfectly aligned headline layers.",
+    categorySlug: "motion-effects",
+    tags: ["cursor", "text", "reveal", "spotlight", "mask", "hero", "framer-motion"],
+    premium: true,
+    trendingScore: 142,
+    createdAt: "2026-05-22",
+    animationKinds: ["hover", "spring", "magnetic"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewCursorTextReveal,
+    previewSections: [
+      {
+        title: "Text Reveal",
+        Preview: Previews.PreviewCursorTextReveal,
+        reactSource: `"use client";
+
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
+
+export function TextRevealExample() {
+  return (
+    <CursorTextReveal
+      baseText="The first rule of motion is clarity."
+      revealText="The second rule is feeling."
+      maskSize={310}
+      smoothness={0.16}
+      enableGlow={false}
+      showAmbient={false}
+      showGrid={false}
+      revealBackgroundClassName="bg-black"
+      baseTextClassName="text-zinc-950"
+      revealTextClassName="text-white"
+      containerClassName="border-zinc-200 bg-white text-zinc-950 shadow-sm"
+    />
+  );
+}`,
+      },
+      {
+        title: "Image Reveal",
+        Preview: Previews.PreviewCursorTextRevealImage,
+        reactSource: `"use client";
+
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
+
+export function ImageRevealExample() {
+  return (
+    <CursorTextReveal
+      baseText="We chase moments in time to feel alive."
+      revealText="We keep the moments we usually ignore."
+      backgroundImage="https://images.unsplash.com/photo-1730874829217-f7f666e94822?auto=format&fit=crop&w=1800&q=85"
+      backgroundPosition="42% center"
+      mode="image"
+      revealImage="https://images.unsplash.com/photo-1649787652660-df5ac7c91532?auto=format&fit=crop&w=1800&q=85"
+      revealImagePosition="center"
+      maskSize={340}
+      smoothness={0.2}
+      enableGlow={false}
+      showAmbient={false}
+      showGrid={false}
+      baseTextClassName="text-white/45"
+      revealTextClassName="text-white drop-shadow-[0_12px_34px_rgba(0,0,0,0.45)]"
+    />
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
+
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
+
+export function CursorTextRevealExample() {
+  return (
+    <CursorTextReveal
+      baseText="The first rule of motion is clarity."
+      revealText="The second rule is feeling."
+      maskSize={310}
+      smoothness={0.16}
+      enableGlow={false}
+      showAmbient={false}
+      showGrid={false}
+      revealBackgroundClassName="bg-black"
+      baseTextClassName="text-zinc-950"
+      revealTextClassName="text-white"
+      containerClassName="border-zinc-200 bg-white text-zinc-950 shadow-sm"
+    />
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Image reveal",
+        code: `"use client";
+
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
+
+export function ImageRevealExample() {
+  return (
+    <CursorTextReveal
+      baseText="We chase moments in time to feel alive."
+      revealText="We keep the moments we usually ignore."
+      backgroundImage="https://images.unsplash.com/photo-1730874829217-f7f666e94822?auto=format&fit=crop&w=1800&q=85"
+      backgroundPosition="42% center"
+      mode="image"
+      revealImage="https://images.unsplash.com/photo-1649787652660-df5ac7c91532?auto=format&fit=crop&w=1800&q=85"
+      revealImagePosition="center"
+      maskSize={340}
+      smoothness={0.2}
+      enableGlow={false}
+      showAmbient={false}
+      showGrid={false}
+      baseTextClassName="text-white/45"
+      revealTextClassName="text-white drop-shadow-[0_12px_34px_rgba(0,0,0,0.45)]"
+    />
+  );
+}`,
+      },
+    ],
+    tailwindSource: `"use client";
+
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
+
+export function CursorTextRevealExample() {
+  return (
+    <CursorTextReveal
+      baseText="The first rule of motion is clarity."
+      revealText="The second rule is feeling."
+      maskSize={310}
+      smoothness={0.16}
+      enableGlow={false}
+      showAmbient={false}
+      showGrid={false}
+      revealBackgroundClassName="bg-black"
+      baseTextClassName="text-zinc-950"
+      revealTextClassName="text-white"
+      containerClassName="border-zinc-200 bg-white text-zinc-950 shadow-sm"
+    />
+  );
+}`,
+    props: [
+      { name: "baseText", type: "string", description: "Primary text layer visible by default." },
+      { name: "revealText", type: "string", description: "Secondary text revealed inside the circular cursor mask." },
+      { name: "backgroundImage", type: "string", description: "Optional full-card background image for cinematic image reveals." },
+      { name: "backgroundPosition", type: "string", defaultValue: '"center"', description: "CSS background-position for the full-card background image." },
+      { name: "revealImage", type: "string", description: "Image URL used in image reveal mode." },
+      { name: "revealImagePosition", type: "string", defaultValue: '"center"', description: "CSS background-position for the image revealed inside the cursor mask." },
+      { name: "mode", type: '"text" | "image"', defaultValue: '"text"', description: "Reveal text or an image/texture layer beneath the base text." },
+      { name: "maskSize", type: "number", defaultValue: "240", description: "Expanded circular spotlight radius in pixels." },
+      { name: "initialMaskSize", type: "number", defaultValue: "0", description: "Resting mask size before hover or after leave." },
+      { name: "smoothness", type: "number", defaultValue: "0.18", description: "Spring response for cursor tracking. Lower values feel snappier." },
+      { name: "fontSize", type: "string", defaultValue: '"clamp(2.75rem, 8vw, 8rem)"', description: "CSS font-size applied to both aligned text layers." },
+      { name: "align", type: '"left" | "center" | "right"', defaultValue: '"center"', description: "Text alignment and horizontal placement." },
+      { name: "enableGlow", type: "boolean", defaultValue: "true", description: "Show a soft circular glow around the spotlight edge." },
+      { name: "showAmbient", type: "boolean", defaultValue: "true", description: "Render the built-in radial color wash behind the text." },
+      { name: "showGrid", type: "boolean", defaultValue: "true", description: "Render the built-in subtle grid overlay." },
+      { name: "revealBackgroundClassName", type: "string", description: "ClassName for a masked reveal backdrop, useful for solid black spotlight circles." },
+      { name: "baseTextClassName", type: "string", description: "ClassName applied to the default text layer." },
+      { name: "revealTextClassName", type: "string", description: "ClassName applied to the revealed text layer." },
+      { name: "containerClassName", type: "string", description: "ClassName for the outer section." },
+      { name: "className", type: "string", description: "ClassName for the inner content wrapper." },
+    ],
+  },
+  {
     slug: "cinematic-logo-cloud",
     name: "Cinematic Logo Cloud",
     description: "A staggered blur-fade entrance animation for brand logos. Uses framer-motion and fully semantic responsive layouts.",
@@ -7125,4 +7289,15 @@ export default LinkPreview;`,
 
 export function getLibraryComponent(slug: string) {
   return libraryComponents.find((c) => c.slug === slug) ?? null;
+}
+
+/** Server-only: resolve a Preview ComponentType to its export name in component-previews.tsx */
+export function getPreviewExportName(
+  preview: ComponentType<{ compact?: boolean }> | null | undefined,
+): string {
+  if (!preview) return "";
+  for (const [key, val] of Object.entries(Previews)) {
+    if (val === preview) return key;
+  }
+  return "";
 }

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { TemplateDetailContent } from "@/components/templates/template-detail-content";
 import { createMetadata, siteConfig } from "@/lib/seo";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
@@ -31,8 +31,7 @@ export default async function TemplateDetailPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getCachedUser();
   const isPremium = user ? await hasPremiumAccess(user.id) : false;
 
   const breadcrumbJsonLd = {
