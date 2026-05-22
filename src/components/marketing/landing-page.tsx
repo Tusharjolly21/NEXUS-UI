@@ -409,17 +409,17 @@ function Hero() {
           transition={{ duration: 0.72, ease: [0.22, 1, 0.36, 1], delay: 0.06 }}
           className="text-[2.6rem] font-bold leading-[1.12] tracking-tight text-foreground sm:text-5xl md:text-6xl lg:text-[4.5rem]"
         >
-          <span className="block">Yes, you can build</span>
+          <span className="block">The ultimate animated</span>
           <span className="block">
-            all of this{" "}
+            {"React\u00A0UI\u00A0"}
             <EncryptedText
-              text={"using\u00A0AI."}
+              text={"library."}
               trigger="load"
               speed={60}
               shuffleSpeed={30}
               iterations={10}
               revealDelay={400}
-              className="block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark: text-violet-500 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-600 sm:dark:via-fuchsia-500 sm:dark:to-indigo-500"
+              className="block whitespace-nowrap font-sans font-bold tracking-tight text-violet-600 dark:text-violet-500 sm:inline sm:bg-gradient-to-r sm:from-violet-600 sm:via-fuchsia-500 sm:to-indigo-500 sm:bg-clip-text sm:text-transparent sm:dark:from-violet-600 sm:dark:via-fuchsia-500 sm:dark:to-indigo-500"
               scrambleClassName="text-fuchsia-500 dark:text-fuchsia-300"
             />
           </span>
@@ -434,8 +434,9 @@ function Hero() {
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.14 }}
           className="mx-auto max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl"
         >
-          100+ animated React components, Next.js templates, and Tailwind UI
-          blocks. Copy-paste TypeScript, ship your product faster.
+          Nexus UI is the world&apos;s largest collection of animated React
+          components, Next.js templates, and Tailwind CSS UI blocks. Copy,
+          paste, and ship.
         </motion.p>
 
         {/* Stats row */}

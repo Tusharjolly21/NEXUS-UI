@@ -12,6 +12,29 @@
       "files": []
     },
     {
+      "name": "cinematic-card-deck",
+      "type": "registry:component",
+      "title": "Cinematic Card Deck",
+      "description": "A scroll-linked 3D card stack with depth, ambient glow, progress dots, cursor parallax, and optional image-backed cards.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cinematic-card-deck/cinematic-card-deck.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cinematic-card-deck/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cursor-text-reveal",
       "type": "registry:component",
       "title": "Cursor Text Reveal",

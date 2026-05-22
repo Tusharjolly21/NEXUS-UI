@@ -45,6 +45,78 @@ const tw = `Use Tailwind utility composition with rounded-3xl, border-white/10, 
 
 export const libraryComponents: LibraryComponent[] = [
   {
+    slug: "cinematic-card-deck",
+    name: "Cinematic Card Deck",
+    registryCliName: "cinematic-card-deck",
+    description:
+      "A scroll-linked 3D card stack with depth, ambient glow, progress dots, cursor parallax, and optional image-backed cards.",
+    categorySlug: "cards",
+    tags: ["cards", "scroll", "3d", "stack", "framer-motion", "parallax"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-05-22",
+    animationKinds: ["scroll", "3d", "parallax", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewCinematicCardDeck,
+    reactSource: `"use client";
+
+import { CinematicCardDeck } from "@/components/cinematic-card-deck";
+
+const cards = [
+  {
+    title: "Launch Systems",
+    description:
+      "Ship cohesive landing pages with reusable sections, shared spacing rules, and motion that feels designed from the first scroll.",
+    tag: "Foundation",
+    cardColor: "#0A0A0A",
+    accentColor: "#FF6B4A",
+    imageUrl: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Motion Stories",
+    description:
+      "Layer cards, depth, and scroll-linked perspective to turn feature explanations into a cinematic product narrative.",
+    tag: "Animation",
+    cardColor: "#1A1235",
+    accentColor: "#A78BFF",
+    imageUrl: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Fast Interfaces",
+    description:
+      "GPU-friendly transforms keep the deck smooth while content stays readable, responsive, and ready for production pages.",
+    tag: "Engineering",
+    cardColor: "#0C2340",
+    accentColor: "#4ADBFF",
+    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
+  },
+];
+
+export function CinematicCardDeckDemo() {
+  return (
+    <CinematicCardDeck
+      cards={cards}
+      intensity="cinematic"
+      sectionHeight={360}
+      cardWidth={520}
+      cardHeight={360}
+    />
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "cards", type: "CinematicDeckCard[]", description: "Cards to render in the scroll-linked deck." },
+      { name: "intensity", type: '"subtle" | "standard" | "cinematic"', defaultValue: '"standard"', description: "Controls depth, rotation, blur, and exit drama." },
+      { name: "exitDirection", type: '"up" | "down"', defaultValue: '"up"', description: "Direction cards fly away while scrolling." },
+      { name: "cardWidth", type: "number", defaultValue: "520", description: "Card width in pixels." },
+      { name: "cardHeight", type: "number", defaultValue: "360", description: "Card height in pixels." },
+      { name: "sectionHeight", type: "number", defaultValue: "400", description: "Scroll distance in viewport heights." },
+      { name: "smoothing", type: "number", defaultValue: "0.7", description: "Spring smoothing for scroll progress." },
+      { name: "showProgress", type: "boolean", defaultValue: "true", description: "Show side progress dots." },
+      { name: "showAmbientGlow", type: "boolean", defaultValue: "true", description: "Show accent-colored glow behind the active card." },
+    ],
+  },
+  {
     slug: "cursor-text-reveal",
     name: "Cursor Text Reveal",
     registryCliName: "cursor-text-reveal",
