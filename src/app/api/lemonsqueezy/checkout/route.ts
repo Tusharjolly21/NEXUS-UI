@@ -49,6 +49,7 @@ export async function POST(req: Request) {
         ? `${origin}/templates/${body.templateSlug}?checkout=cancel`
         : `${origin}/pricing?checkout=cancel`,
       customData,
+      embed: true,
     });
 
     return NextResponse.json({ url: checkoutUrl });

@@ -17,6 +17,7 @@ export type CheckoutOptions = {
   successUrl: string;
   cancelUrl: string;
   customData?: Record<string, string>;
+  embed?: boolean;
 };
 
 export async function createCheckout(opts: CheckoutOptions): Promise<string> {
@@ -26,6 +27,7 @@ export async function createCheckout(opts: CheckoutOptions): Promise<string> {
       attributes: {
         checkout_options: {
           button_color: "#18181b",
+          embed: opts.embed ?? false,
         },
         checkout_data: {
           email: opts.email ?? undefined,

@@ -327,8 +327,74 @@ function ContactForm({
   dense?: boolean;
   className?: string;
 }) {
+  const [fields, setFields] = React.useState({ name: "", email: "", company: "", message: "" });
+  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = React.useState("");
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    setFields((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
+      const data = await res.json() as { success?: boolean; error?: string };
+      if (!res.ok) {
+        setErrorMsg(data.error ?? "Something went wrong.");
+        setStatus("error");
+      } else {
+        setStatus("success");
+        setFields({ name: "", email: "", company: "", message: "" });
+      }
+    } catch {
+      setErrorMsg("Network error. Please try again.");
+      setStatus("error");
+    }
+  }
+
+  if (status === "success") {
+    return (
+      <div className={cn("mx-auto max-w-2xl", className)}>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center dark:border-emerald-500/20 dark:bg-emerald-500/8"
+        >
+          <div className="grid size-12 place-items-center rounded-full border border-emerald-200 bg-white shadow dark:border-emerald-500/30 dark:bg-emerald-500/10">
+            <Send className="size-5 text-emerald-600 dark:text-emerald-400" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-zinc-950 dark:text-white">Message sent</p>
+            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">We&apos;ll get back to you within 24 hours.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setStatus("idle")}
+            className="text-xs font-medium text-zinc-400 underline underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-300"
+          >
+            Send another message
+          </button>
+        </motion.div>
+      </div>
+    );
+  }
+
+  const fieldKeys = [
+    { key: "name" as const, label: "Name", placeholder: "Maya Srinivasan", type: "text" },
+    { key: "email" as const, label: "Work email", placeholder: "maya@northstar.dev", type: "email" },
+    { key: "company" as const, label: "Company", placeholder: "Northstar Labs", type: "text" },
+  ];
+
   return (
-    <form className={cn("mx-auto max-w-2xl", className)}>
+    <form onSubmit={handleSubmit} className={cn("mx-auto max-w-2xl", className)}>
       <p className="text-sm font-medium uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
         {eyebrow}
       </p>
@@ -344,16 +410,21 @@ function ContactForm({
         {description}
       </p>
       <div className={cn(dense ? "mt-5 space-y-3.5" : "mt-7 space-y-4 sm:mt-8 sm:space-y-5")}>
-        {baseFields.map((field) => (
-          <label key={field.label} className="block">
+        {fieldKeys.map((field) => (
+          <label key={field.key} className="block">
             <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               {field.label}
             </span>
             <input
-              type={field.type ?? "text"}
+              name={field.key}
+              type={field.type}
+              value={fields[field.key]}
+              onChange={handleChange}
               placeholder={field.placeholder}
+              required={field.key !== "company"}
+              disabled={status === "loading"}
               className={cn(
-                "mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3.5 text-sm text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-zinc-950/70 dark:text-white dark:placeholder:text-zinc-600 sm:px-4 sm:text-base",
+                "mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3.5 text-sm text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 disabled:opacity-60 dark:border-white/10 dark:bg-zinc-950/70 dark:text-white dark:placeholder:text-zinc-600 sm:px-4 sm:text-base",
                 dense ? "h-10" : "h-11 sm:h-12",
               )}
             />
@@ -364,26 +435,49 @@ function ContactForm({
             Message
           </span>
           <textarea
+            name="message"
+            value={fields.message}
+            onChange={handleChange}
             placeholder="Share the goal, deadline, and what a great outcome looks like."
+            required
+            disabled={status === "loading"}
             className={cn(
-              "mt-2 w-full resize-none rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 dark:border-white/10 dark:bg-zinc-950/70 dark:text-white dark:placeholder:text-zinc-600 sm:px-4 sm:text-base",
+              "mt-2 w-full resize-none rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 disabled:opacity-60 dark:border-white/10 dark:bg-zinc-950/70 dark:text-white dark:placeholder:text-zinc-600 sm:px-4 sm:text-base",
               dense ? "min-h-20" : "min-h-28 sm:min-h-32",
             )}
           />
         </label>
       </div>
+
+      {status === "error" && (
+        <p className="mt-3 text-sm font-medium text-red-600 dark:text-red-400">{errorMsg}</p>
+      )}
+
       <motion.button
-        type="button"
-        whileHover={{ y: -2 }}
-        whileTap={{ scale: 0.98 }}
+        type="submit"
+        disabled={status === "loading"}
+        whileHover={status !== "loading" ? { y: -2 } : undefined}
+        whileTap={status !== "loading" ? { scale: 0.98 } : undefined}
         className={cn(
-          "inline-flex h-12 w-full items-center justify-center gap-2 bg-zinc-950 px-6 text-sm font-semibold text-white shadow-lg shadow-zinc-950/15 transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:w-auto",
+          "inline-flex h-12 w-full items-center justify-center gap-2 bg-zinc-950 px-6 text-sm font-semibold text-white shadow-lg shadow-zinc-950/15 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:w-auto",
           dense ? "mt-4" : "mt-7",
           roundedButton ? "sm:w-full rounded-full" : "rounded-xl",
         )}
       >
-        {buttonLabel}
-        <Send className="size-4" />
+        {status === "loading" ? (
+          <>
+            <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            Sending…
+          </>
+        ) : (
+          <>
+            {buttonLabel}
+            <Send className="size-4" />
+          </>
+        )}
       </motion.button>
     </form>
   );

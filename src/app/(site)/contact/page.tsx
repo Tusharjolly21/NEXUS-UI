@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+"use client";
+
+import * as React from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -17,14 +19,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { createMetadata } from "@/lib/seo";
-
-export const metadata: Metadata = createMetadata({
-  title: "Contact",
-  description:
-    "Contact Nexus UI for component support, licensing questions, template help, and partnership requests.",
-  alternates: { canonical: "/contact" },
-});
 
 const contactChannels = [
   {
@@ -58,6 +52,43 @@ const supportDetails = [
 ] as const;
 
 export default function ContactPage() {
+  const [fields, setFields] = React.useState({ name: "", email: "", topic: "", message: "" });
+  const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = React.useState("");
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    setFields((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    setErrorMsg("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: fields.name,
+          email: fields.email,
+          company: fields.topic,
+          message: fields.message,
+        }),
+      });
+      const data = await res.json() as { success?: boolean; error?: string };
+      if (!res.ok) {
+        setErrorMsg(data.error ?? "Something went wrong. Please try again.");
+        setStatus("error");
+      } else {
+        setStatus("success");
+        setFields({ name: "", email: "", topic: "", message: "" });
+      }
+    } catch {
+      setErrorMsg("Network error. Please try again.");
+      setStatus("error");
+    }
+  }
+
   return (
     <main className="relative overflow-hidden bg-background text-foreground">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.12),transparent_34%),radial-gradient(circle_at_12%_44%,rgba(14,165,233,0.10),transparent_28%),radial-gradient(circle,rgba(24,24,27,0.08)_1px,transparent_1px)] bg-[size:auto,auto,30px_30px] dark:bg-[radial-gradient(circle_at_50%_0%,rgba(139,92,246,0.18),transparent_34%),radial-gradient(circle_at_12%_44%,rgba(34,211,238,0.10),transparent_28%),radial-gradient(circle,rgba(255,255,255,0.08)_1px,transparent_1px)]" />
@@ -76,15 +107,6 @@ export default function ContactPage() {
             interface? Send the details and we will help you find the cleanest path.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Link
-              href="mailto:contact@nexus-ui.com"
-              className={cn(
-                buttonVariants(),
-                "h-11 rounded-full bg-foreground px-6 text-background hover:bg-foreground/90",
-              )}
-            >
-              Email Nexus UI <ArrowRight className="size-4" />
-            </Link>
             <Link
               href="/docs/installation"
               className={cn(
@@ -150,73 +172,119 @@ export default function ContactPage() {
             <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-violet-500/15 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-28 left-8 size-56 rounded-full bg-sky-500/10 blur-3xl" />
 
-            <form
-              action="mailto:contact@nexus-ui.com"
-              method="post"
-              encType="text/plain"
-              className="relative grid gap-5"
-            >
-              <div>
-                <p className="text-lg font-semibold tracking-tight">Send a message</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  This opens your email app with the message details ready to send.
-                </p>
+            {status === "success" ? (
+              <div className="relative flex flex-col items-center gap-4 py-16 text-center">
+                <div className="grid size-14 place-items-center rounded-full border border-emerald-200 bg-emerald-50 dark:border-emerald-500/20 dark:bg-emerald-500/10">
+                  <Send className="size-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold">Message sent</p>
+                  <p className="mt-1 text-sm text-muted-foreground">We&apos;ll get back to you within 24 hours.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setStatus("idle")}
+                  className="text-xs font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                >
+                  Send another message
+                </button>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="relative grid gap-5">
+                <div>
+                  <p className="text-lg font-semibold tracking-tight">Send a message</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Fill in the details and we&apos;ll reply within 24 hours.
+                  </p>
+                </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={fields.name}
+                      onChange={handleChange}
+                      autoComplete="name"
+                      placeholder="Ariana Reed"
+                      required
+                      disabled={status === "loading"}
+                      className="h-11 rounded-2xl bg-background/70 px-4 dark:bg-white/[0.04]"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={fields.email}
+                      onChange={handleChange}
+                      autoComplete="email"
+                      placeholder="you@company.com"
+                      required
+                      disabled={status === "loading"}
+                      className="h-11 rounded-2xl bg-background/70 px-4 dark:bg-white/[0.04]"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid gap-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="topic">Topic</Label>
                   <Input
-                    id="name"
-                    name="name"
-                    autoComplete="name"
-                    placeholder="Ariana Reed"
+                    id="topic"
+                    name="topic"
+                    value={fields.topic}
+                    onChange={handleChange}
+                    placeholder="Registry install help, custom section, billing..."
+                    disabled={status === "loading"}
                     className="h-11 rounded-2xl bg-background/70 px-4 dark:bg-white/[0.04]"
                   />
                 </div>
+
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="you@company.com"
-                    className="h-11 rounded-2xl bg-background/70 px-4 dark:bg-white/[0.04]"
+                  <Label htmlFor="message">Message</Label>
+                  <Textarea
+                    id="message"
+                    name="message"
+                    value={fields.message}
+                    onChange={handleChange}
+                    placeholder="Tell us what you are trying to ship, where you are stuck, or what you want Nexus UI to help with."
+                    required
+                    disabled={status === "loading"}
+                    className="min-h-40 resize-none rounded-2xl bg-background/70 px-4 py-3 dark:bg-white/[0.04]"
                   />
                 </div>
-              </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="topic">Topic</Label>
-                <Input
-                  id="topic"
-                  name="topic"
-                  placeholder="Registry install help, custom section, billing..."
-                  className="h-11 rounded-2xl bg-background/70 px-4 dark:bg-white/[0.04]"
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="message">Message</Label>
-                <Textarea
-                  id="message"
-                  name="message"
-                  placeholder="Tell us what you are trying to ship, where you are stuck, or what you want Nexus UI to help with."
-                  className="min-h-40 resize-none rounded-2xl bg-background/70 px-4 py-3 dark:bg-white/[0.04]"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className={cn(
-                  buttonVariants(),
-                  "h-11 w-full rounded-full bg-foreground text-background hover:bg-foreground/90 sm:w-fit sm:px-7",
+                {status === "error" && (
+                  <p className="text-sm font-medium text-red-600 dark:text-red-400">{errorMsg}</p>
                 )}
-              >
-                Prepare email <Send className="size-4" />
-              </button>
-            </form>
+
+                <button
+                  type="submit"
+                  disabled={status === "loading"}
+                  className={cn(
+                    buttonVariants(),
+                    "h-11 w-full rounded-full bg-foreground text-background hover:bg-foreground/90 disabled:opacity-70 sm:w-fit sm:px-7",
+                  )}
+                >
+                  {status === "loading" ? (
+                    <>
+                      <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send message <Send className="size-4" />
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </div>
         </div>
 
@@ -247,7 +315,6 @@ export default function ContactPage() {
           })}
         </div>
 
-        {/* ── What we help with ── */}
         <div className="mt-16 rounded-3xl border border-border/60 bg-muted/20 px-6 py-10 dark:bg-white/[0.025] sm:px-10">
           <h2 className="text-2xl font-bold tracking-tight text-foreground">
             What we help with

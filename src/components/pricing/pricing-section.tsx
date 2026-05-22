@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Script from "next/script";
 import { toast } from "sonner";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
@@ -126,6 +127,13 @@ const SOCIAL_AVATARS = [
   { fallback: "DV", tooltip: "Diego Varela",   bgColor: "#14b8a6" },
 ];
 
+declare global {
+  interface Window {
+    createLemonSqueezy?: () => void;
+    LemonSqueezy?: { Url: { Open: (url: string) => void } };
+  }
+}
+
 // ─── Pricing section ─────────────────────────────────────────────────────────
 export function PricingSection() {
   const reduce = useReducedMotion() === true;
@@ -140,8 +148,12 @@ export function PricingSection() {
       });
       const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok) { toast.error(data.error ?? "Checkout unavailable"); return; }
-      if (data.url) window.location.href = data.url;
-      else toast.error("No checkout URL returned");
+      if (data.url) {
+        window.createLemonSqueezy?.();
+        window.LemonSqueezy?.Url.Open(data.url);
+      } else {
+        toast.error("No checkout URL returned");
+      }
     } catch {
       toast.error("Network error");
     }
@@ -149,6 +161,7 @@ export function PricingSection() {
 
   return (
     <div className="bg-background">
+      <Script src="https://app.lemonsqueezy.com/js/lemon.js" strategy="lazyOnload" />
 
       {/* ═══════════════════════════════════════
           HERO
