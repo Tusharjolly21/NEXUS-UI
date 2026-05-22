@@ -56,7 +56,15 @@ export function createMetadata(override: Metadata = {}): Metadata {
   }).toString()}`;
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: titleStr }];
 
-  const { openGraph: overrideOg, twitter: overrideTwitter, ...rest } = override;
+  const { openGraph: overrideOg, twitter: overrideTwitter, icons: overrideIcons, ...rest } = override;
+
+  const icons = overrideIcons ?? {
+    icon: [
+      { url: "/icon", sizes: "32x32", type: "image/png" },
+      { url: "/icon2", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-icon", sizes: "180x180", type: "image/png" }],
+  };
 
   return {
     metadataBase,
@@ -81,6 +89,7 @@ export function createMetadata(override: Metadata = {}): Metadata {
         "max-video-preview": -1,
       },
     },
+    icons,
     ...rest,
     openGraph: {
       title: titleStr,
