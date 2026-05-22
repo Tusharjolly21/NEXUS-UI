@@ -58,6 +58,8 @@ export function SiteFooter() {
                 href="https://github.com"
                 className="transition-colors hover:text-foreground"
                 aria-label="GitHub"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <Code2 className="size-[18px]" />
               </Link>
@@ -65,6 +67,8 @@ export function SiteFooter() {
                 href="https://x.com"
                 className="transition-colors hover:text-foreground"
                 aria-label="X / Twitter"
+                target="_blank"
+                rel="noopener noreferrer"
               >
                 <ExternalLink className="size-[18px]" />
               </Link>

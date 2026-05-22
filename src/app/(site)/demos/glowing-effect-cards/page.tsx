@@ -5,6 +5,7 @@ import { GlowingEffectCardsDemo } from "@/components/glowing-effect-cards";
 export const metadata: Metadata = createMetadata({
   title: "Glowing effect cards demo",
   description: "Cursor-reactive glowing border cards in a responsive 2-1-2 layout.",
+  alternates: { canonical: "/demos/glowing-effect-cards" },
 });
 
 export default function GlowingEffectCardsDemoPage() {

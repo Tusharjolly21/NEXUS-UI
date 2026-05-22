@@ -21,10 +21,12 @@ import {
 const DEMO_SLUGS = new Set([
   "background-boxes",
   "background-gradient",
+  "cursor-text-reveal",
   "encrypted-text",
   "floating-dock",
   "glowing-effect-cards",
   "gooey-input",
+  "image-trail",
   "infinite-moving-cards",
   "keyboard",
   "meteors",

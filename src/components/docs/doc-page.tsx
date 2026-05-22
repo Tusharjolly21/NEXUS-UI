@@ -1,6 +1,37 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/lib/seo";
+
+export function TechArticleJsonLd({
+  title,
+  description,
+  slug,
+  datePublished = "2026-03-01",
+}: {
+  title: string;
+  description: string;
+  slug: string;
+  datePublished?: string;
+}) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: title,
+    description,
+    url: `${siteConfig.url}/docs/${slug}`,
+    datePublished,
+    author: { "@type": "Organization", name: "Nexus UI", url: siteConfig.url },
+    publisher: { "@type": "Organization", name: "Nexus UI", url: siteConfig.url },
+    proficiencyLevel: "Beginner",
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
 
 export const docPreClass =
   "overflow-x-auto rounded-xl border border-border bg-muted p-4 text-[13px] leading-relaxed text-foreground/90 dark:bg-zinc-950 dark:text-muted-foreground";

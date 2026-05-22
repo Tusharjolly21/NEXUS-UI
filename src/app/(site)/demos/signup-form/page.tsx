@@ -5,6 +5,7 @@ import { SignupFormDemo } from "@/components/signup-form";
 export const metadata: Metadata = createMetadata({
   title: "Signup form demo",
   description: "Customizable signup/auth form with shadcn inputs and motion polish.",
+  alternates: { canonical: "/demos/signup-form" },
 });
 
 export default function SignupFormDemoPage() {

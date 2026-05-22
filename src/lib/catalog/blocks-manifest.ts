@@ -34,9 +34,9 @@ export const blocksManifest: BlockManifestEntry[] = [
     slug: "block-text-animations",
     name: "Text Animations",
     description:
-      "A collection of reusable animated text sections for headings and paragraphs, including flipping words, typewriter text, blur fade reveals, and AI-style generation with sound.",
+      "Text animation React components built with Tailwind CSS and Framer Motion. Includes flipping words, typewriter text, blur fade reveals, and AI-style generation — copy-paste ready for Next.js.",
     category: "Text Animations",
-    tags: ["text", "animation", "typewriter", "blur", "framer-motion", "hero"],
+    tags: ["text animation react", "text animation react component", "text animation react tailwind", "text animation react motion", "typewriter", "blur", "framer-motion", "hero"],
     premium: true,
     variants: [
       "Typewriter Heading",
@@ -110,9 +110,10 @@ export default function Page() {
   {
     slug: "block-interactive-dots",
     name: "Interactive Background Card",
-    description: "Interactive hero backgrounds with cursor fields, layered waves, particle noise, and premium motion depth.",
+    description:
+      "Background animation components for websites built with React and Framer Motion. CSS background animations including cursor fields, layered waves, particle noise, and aurora effects — drop into any Next.js hero section.",
     category: "Interactive backgrounds",
-    tags: ["background", "cursor", "canvas", "waves", "particles"],
+    tags: ["background animation for website", "background animation css", "background animation react", "interactive background", "cursor", "canvas", "waves", "particles"],
     premium: true,
     variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise", "Aurora Wavy Lines"],
     reactSource: `export { InteractiveDots } from "@/components/interactive-dots";
@@ -170,9 +171,9 @@ export default function Page() {
     slug: "block-sidebar",
     name: "Sidebar",
     description:
-      "Navigation sidebar blocks for dashboards and product layouts. Includes a simple hover sidebar and a collapsible icon-only sidebar with animated width transitions.",
+      "Sidebar component React Tailwind CSS — animated navigation sidebars for dashboards and product layouts. Includes simple hover sidebar, collapsible icon-only sidebar, and grouped sidebar built with Framer Motion.",
     category: "Navigation",
-    tags: ["sidebar", "navigation", "collapsible", "dashboard", "framer-motion"],
+    tags: ["sidebar component react", "sidebar component react tailwind", "sidebar ui component react", "collapsible sidebar react", "navigation", "dashboard", "framer-motion"],
     premium: false,
     variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar"],
     reactSource: `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";

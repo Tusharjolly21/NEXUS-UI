@@ -43,7 +43,7 @@ const cardData = [
   },
 ];
 
-export function TextAnimationsBlock({ className }: { className?: string }) {
+export function TextAnimationsBlock({ className, muteSound = false }: { className?: string; muteSound?: boolean }) {
   return (
     <section
       className={cn(
@@ -101,6 +101,7 @@ export function TextAnimationsBlock({ className }: { className?: string }) {
                 text="Nexus-ui is preparing a polished section with animated copy, clear hierarchy, and production-ready motion."
                 startOnView
                 typingSpeed={48}
+                muted={muteSound}
                 className="min-h-[260px] rounded-2xl p-4"
               />
             </PreviewTile>
@@ -130,7 +131,7 @@ export function TextAnimationsBlockPreview() {
   return (
     <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-zinc-950">
       <div className="absolute left-1/2 top-1/2 w-[980px] -translate-x-1/2 -translate-y-1/2 scale-[0.45]">
-        <TextAnimationsBlock className="min-h-[700px] overflow-hidden rounded-3xl p-6" />
+        <TextAnimationsBlock className="min-h-[700px] overflow-hidden rounded-3xl p-6" muteSound />
       </div>
     </div>
   );

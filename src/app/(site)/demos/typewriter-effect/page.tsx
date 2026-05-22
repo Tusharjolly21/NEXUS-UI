@@ -5,6 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Typewriter effect demo",
   description: "Premium typewriter text animation with cursor, loop, deleting, and semantic heading support.",
+  alternates: { canonical: "/demos/typewriter-effect" },
 });
 
 export default function TypewriterEffectDemoPage() {

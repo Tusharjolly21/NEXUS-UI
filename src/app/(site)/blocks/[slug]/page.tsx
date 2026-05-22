@@ -84,6 +84,17 @@ export default async function BlockDetailPage({ params }: Props) {
   const block = getBlock(slug);
   if (!block) notFound();
 
+  const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    name: block.name,
+    description: block.description,
+    programmingLanguage: "TypeScript",
+    runtimePlatform: "Next.js",
+    url: `${siteConfig.url}/blocks/${slug}`,
+    isAccessibleForFree: !block.premium,
+  };
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -159,6 +170,7 @@ export default async function BlockDetailPage({ params }: Props) {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
       <nav className="mb-7 flex items-center gap-1 text-sm text-muted-foreground">

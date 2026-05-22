@@ -6,6 +6,7 @@ import {
   DocPageShell,
   DocPre,
   DocSection,
+  TechArticleJsonLd,
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
@@ -19,7 +20,13 @@ export const metadata: Metadata = createMetadata({
 
 export default function CliDocsPage() {
   return (
-    <DocPageShell>
+    <>
+      <TechArticleJsonLd
+        title="CLI"
+        description="Use the shadcn/ui CLI for primitives, install catalog pieces via the @nexus-labs registry, or paste snippets from component pages."
+        slug="cli"
+      />
+      <DocPageShell>
       <DocPageHeader
         title="CLI"
         description="Nexus-UI ships hand-written React and Tailwind you copy from each component page. For primitives (button, dialog, tabs), the shadcn/ui CLI remains the fastest way to align with the same stack this project uses."
@@ -115,5 +122,6 @@ npx shadcn@latest add @nexus-labs/gooey-input`}</DocPre>
         </Link>
       </p>
     </DocPageShell>
+    </>
   );
 }

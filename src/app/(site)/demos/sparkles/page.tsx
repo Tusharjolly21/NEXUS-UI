@@ -5,6 +5,7 @@ import { SparklesPreview } from "@/components/sparkles";
 export const metadata: Metadata = createMetadata({
   title: "Sparkles demo",
   description: "Configurable animated sparkles for hero backgrounds, cards, and decorative UI layers.",
+  alternates: { canonical: "/demos/sparkles" },
 });
 
 export default function SparklesDemoPage() {

@@ -6,6 +6,7 @@ import {
   DocPageShell,
   DocPre,
   DocSection,
+  TechArticleJsonLd,
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
@@ -18,7 +19,13 @@ export const metadata: Metadata = createMetadata({
 
 export default function InstallTailwindPage() {
   return (
-    <DocPageShell>
+    <>
+      <TechArticleJsonLd
+        title="Install Tailwind CSS"
+        description="Add Tailwind CSS v4 with PostCSS to a Next.js app — aligned with Nexus-UI globals and shadcn-style tokens."
+        slug="install-tailwindcss"
+      />
+      <DocPageShell>
       <DocPageHeader
         title="Install Tailwind CSS"
         description="Nexus-UI uses Tailwind v4 with the PostCSS plugin, CSS-first configuration, and shared design tokens. Follow these steps on a fresh Next.js app or compare with this repository’s postcss.config and globals."
@@ -76,5 +83,6 @@ export default function InstallTailwindPage() {
         </Link>
       </p>
     </DocPageShell>
+    </>
   );
 }

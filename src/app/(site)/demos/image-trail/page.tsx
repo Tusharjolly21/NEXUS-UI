@@ -5,6 +5,7 @@ import { ImageTrailDemo } from "@/components/image-trail";
 export const metadata: Metadata = createMetadata({
   title: "Image Trail demo",
   description: "Cursor trail that cycles through images with fade, blur, and optional magnetic pull.",
+  alternates: { canonical: "/demos/image-trail" },
 });
 
 export default function ImageTrailDemoPage() {

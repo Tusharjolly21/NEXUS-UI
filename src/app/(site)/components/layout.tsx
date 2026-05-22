@@ -3,9 +3,9 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { libraryComponents } from "@/lib/catalog/library-components";
 
 export const metadata: Metadata = createMetadata({
-  title: "Components",
+  title: "Free React UI Components",
   description:
-    "Browse animated React components for Next.js — heroes, inputs, carousels, text effects, and more. Copy-paste TypeScript, free and premium.",
+    "Free animated React components for Next.js — text effects, backgrounds, sidebars, inputs, and more. Copy-paste TypeScript, free and premium.",
   alternates: { canonical: "/components" },
 });
 

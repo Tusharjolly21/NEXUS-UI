@@ -3,9 +3,9 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { blocks } from "@/lib/catalog/blocks";
 
 export const metadata: Metadata = createMetadata({
-  title: "Next.js UI Blocks",
+  title: "Free Next.js UI Blocks — Hero, Pricing, Text Animations & More",
   description:
-    "Production-ready UI blocks for Next.js landing pages — hero sections, pricing grids, testimonials, CTAs, and more. shadcn/ui compatible.",
+    "Free Next.js UI blocks — hero sections, pricing, testimonials, text animations, and background animations. Built with Tailwind CSS and Framer Motion.",
   alternates: { canonical: "/blocks" },
 });
 

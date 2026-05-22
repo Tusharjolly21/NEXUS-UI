@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DocFooterNav, docInlineCodeClass } from "@/components/docs/doc-page";
+import { DocFooterNav, TechArticleJsonLd, docInlineCodeClass } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -12,7 +12,13 @@ export const metadata: Metadata = createMetadata({
 
 export default function InstallationPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-12 px-4 py-14">
+    <>
+      <TechArticleJsonLd
+        title="Installation"
+        description="Run Nexus-UI locally: Node, dependencies, environment variables, and optional Supabase plus Stripe."
+        slug="installation"
+      />
+      <div className="mx-auto max-w-3xl space-y-12 px-4 py-14">
       <div>
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary/80">Docs</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
@@ -138,5 +144,6 @@ export default function InstallationPage() {
         </Link>
       </p>
     </div>
+    </>
   );
 }

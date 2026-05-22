@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createMetadata } from "@/lib/seo";
+import { templates } from "@/lib/catalog/templates";
 import TemplatesPageClient from "./templates-client";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata({
-  title: "Templates",
+  title: "Free Next.js Landing Page Templates — SaaS & Marketing",
   description:
-    "Full-page Next.js templates built for production SaaS. Animated landing pages, pricing flows, and dashboards you can copy and ship.",
+    "Free Next.js landing page templates for SaaS and marketing. Animated, production-ready, built with Tailwind CSS and Framer Motion. Copy and ship.",
   alternates: { canonical: "/templates" },
 });
 
@@ -25,5 +27,17 @@ export default async function TemplatesPage() {
     }
   }
 
-  return <TemplatesPageClient isPremium={isPremium} />;
+  return (
+    <>
+      {/* Server-rendered index for search engine discovery. Hidden visually. */}
+      <ul aria-hidden className="sr-only">
+        {templates.map((t) => (
+          <li key={t.slug}>
+            <Link href={`/templates/${t.slug}`}>{t.title}</Link>
+          </li>
+        ))}
+      </ul>
+      <TemplatesPageClient isPremium={isPremium} />
+    </>
+  );
 }

@@ -6,6 +6,7 @@ import {
   DocPageShell,
   DocPre,
   DocSection,
+  TechArticleJsonLd,
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
@@ -18,7 +19,13 @@ export const metadata: Metadata = createMetadata({
 
 export default function AddUtilitiesPage() {
   return (
-    <DocPageShell>
+    <>
+      <TechArticleJsonLd
+        title="Add utilities"
+        description="Install clsx, tailwind-merge, and a cn() helper — the same composition pattern Nexus-UI uses across components."
+        slug="add-utilities"
+      />
+      <DocPageShell>
       <DocPageHeader
         title="Add utilities"
         description="Utility helpers keep className composition predictable when variants, state, and Tailwind strings collide. Nexus-UI uses clsx plus tailwind-merge behind a single cn() export."
@@ -68,5 +75,6 @@ export function cn(...inputs: ClassValue[]) {
         </Link>
       </p>
     </DocPageShell>
+    </>
   );
 }

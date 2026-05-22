@@ -6,6 +6,7 @@ export const metadata: Metadata = createMetadata({
   title: "Mac Keyboard",
   description:
     "Interactive Mac-style keyboard with synthesised mechanical sounds, Framer Motion key-press animations, and physical keyboard input sync.",
+  alternates: { canonical: "/demos/keyboard" },
 });
 
 export default function KeyboardDemoPage() {

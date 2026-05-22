@@ -3,9 +3,9 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { templates } from "@/lib/catalog/templates";
 
 export const metadata: Metadata = createMetadata({
-  title: "Next.js Landing Page Templates",
+  title: "Free Next.js Landing Page Templates — SaaS & Marketing",
   description:
-    "Full-page Next.js templates built for production SaaS. Animated landing pages, pricing flows, and dashboards you can copy and ship.",
+    "Free Next.js landing page templates for SaaS and marketing. Animated, production-ready, built with Tailwind CSS and Framer Motion. Copy and ship.",
   alternates: { canonical: "/templates" },
 });
 

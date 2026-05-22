@@ -5,6 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Background boxes demo",
   description: "Interactive full-width box grid background with hover highlight and glow ripple.",
+  alternates: { canonical: "/demos/background-boxes" },
 });
 
 export default function BackgroundBoxesDemoPage() {

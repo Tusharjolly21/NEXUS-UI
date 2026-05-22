@@ -6,33 +6,16 @@ const site = getSiteUrl();
 export const siteConfig = {
   name: "Nexus UI",
   shortName: "Nexus UI",
-  tagline: "React UI Components & Next.js Templates",
+  // Shown in the browser tab and Google title link — keep under 60 chars
+  tagline: "Free React UI Components & Next.js Templates",
+  // Shown as Google snippet — keep under 155 chars
   description:
-    "Browse animated React components, production Next.js templates, and UI blocks. Copy-paste TypeScript, ship faster, and unlock premium access.",
+    "Free React components and Next.js templates built with Tailwind CSS and Framer Motion. Copy-paste animated UI blocks and ship faster.",
   url: site,
   twitterHandle: "@nexus_ui",
-  keywords: [
-    "React components",
-    "Next.js components",
-    "animated UI components",
-    "Framer Motion components",
-    "Tailwind CSS UI",
-    "UI component library",
-    "React component library",
-    "landing page templates",
-    "Next.js templates",
-    "TypeScript UI kit",
-    "shadcn/ui components",
-    "motion components",
-    "cursor effects React",
-    "dark mode React components",
-    "copy paste React components",
-    "SaaS landing page template",
-    "UI blocks Next.js",
-    "animated landing page",
-    "interactive UI components",
-    "framer motion examples",
-  ],
+  // NOTE: Google explicitly does NOT use the <meta name="keywords"> tag.
+  // Keywords are intentionally omitted — focus effort on titles, descriptions,
+  // headings, and structured data instead (per Google SEO Starter Guide).
 };
 
 export function createMetadata(override: Metadata = {}): Metadata {
@@ -73,7 +56,6 @@ export function createMetadata(override: Metadata = {}): Metadata {
       template: `%s · ${siteConfig.name}`,
     },
     description: siteConfig.description,
-    keywords: siteConfig.keywords,
     authors: [{ name: siteConfig.name, url: siteConfig.url }],
     creator: siteConfig.name,
     publisher: siteConfig.name,

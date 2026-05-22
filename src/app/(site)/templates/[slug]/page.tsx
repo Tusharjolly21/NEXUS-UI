@@ -34,6 +34,21 @@ export default async function TemplateDetailPage({ params }: Props) {
   const user = await getCachedUser();
   const isPremium = user ? await hasPremiumAccess(user.id) : false;
 
+  const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: tmpl.title,
+    description: tmpl.description,
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Web",
+    url: `${siteConfig.url}/templates/${slug}`,
+    offers: {
+      "@type": "Offer",
+      price: tmpl.premium ? undefined : "0",
+      priceCurrency: "USD",
+    },
+  };
+
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -46,6 +61,7 @@ export default async function TemplateDetailPage({ params }: Props) {
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <TemplateDetailContent tmpl={tmpl} isPremium={isPremium} />
     </>

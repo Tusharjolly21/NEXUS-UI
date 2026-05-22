@@ -5,6 +5,7 @@ import { GooeyInputDemo } from "@/components/gooey-input";
 export const metadata: Metadata = createMetadata({
   title: "Gooey input demo",
   description: "Expandable search pill with SVG gooey filter and detached icon bubble.",
+  alternates: { canonical: "/demos/gooey-input" },
 });
 
 export default function GooeyInputDemoPage() {

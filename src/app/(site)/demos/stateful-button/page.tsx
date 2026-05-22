@@ -5,6 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Stateful button demo",
   description: "Animated idle/loading/success/error button with async-safe state handling.",
+  alternates: { canonical: "/demos/stateful-button" },
 });
 
 export default function StatefulButtonDemoPage() {

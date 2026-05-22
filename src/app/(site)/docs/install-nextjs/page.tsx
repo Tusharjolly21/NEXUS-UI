@@ -6,6 +6,7 @@ import {
   DocPageShell,
   DocPre,
   DocSection,
+  TechArticleJsonLd,
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
@@ -18,7 +19,13 @@ export const metadata: Metadata = createMetadata({
 
 export default function InstallNextjsPage() {
   return (
-    <DocPageShell>
+    <>
+      <TechArticleJsonLd
+        title="Install Next.js"
+        description="Create a new Next.js App Router project with TypeScript — the baseline Nexus-UI expects."
+        slug="install-nextjs"
+      />
+      <DocPageShell>
       <DocPageHeader
         title="Install Next.js"
         description="Nexus-UI targets the App Router, TypeScript, and modern React. Start from Create Next App, then layer Tailwind and UI primitives in the following guides."
@@ -77,5 +84,6 @@ npm run dev`}</DocPre>
         </Link>
       </p>
     </DocPageShell>
+    </>
   );
 }

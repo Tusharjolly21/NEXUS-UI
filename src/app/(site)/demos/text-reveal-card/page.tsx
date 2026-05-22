@@ -5,6 +5,7 @@ import { TextRevealCardDemo } from "@/components/text-reveal-card";
 export const metadata: Metadata = createMetadata({
   title: "Text reveal card demo",
   description: "Premium mousemove-driven reveal card with hidden bottom content and spotlight interaction.",
+  alternates: { canonical: "/demos/text-reveal-card" },
 });
 
 export default function TextRevealCardDemoPage() {

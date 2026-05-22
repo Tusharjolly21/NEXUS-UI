@@ -5,6 +5,7 @@ import { TextGenerateEffectDemo } from "@/components/text-generate-effect";
 export const metadata: Metadata = createMetadata({
   title: "Text generate effect demo",
   description: "Staggered word/character/line text reveal with blur and upward motion.",
+  alternates: { canonical: "/demos/text-generate-effect" },
 });
 
 export default function TextGenerateEffectDemoPage() {

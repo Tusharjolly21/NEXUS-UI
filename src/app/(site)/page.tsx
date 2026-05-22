@@ -69,9 +69,9 @@ export default function Home() {
     url: siteConfig.url,
     logo: {
       "@type": "ImageObject",
-      url: `${siteConfig.url}/icon.svg`,
-      width: 512,
-      height: 512,
+      url: `${siteConfig.url}/icon2`,
+      width: 192,
+      height: 192,
     },
     sameAs: [
       `https://twitter.com/${siteConfig.twitterHandle.replace("@", "")}`,
@@ -87,10 +87,10 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: siteConfig.name,
+    url: siteConfig.url,
     description: siteConfig.description,
     applicationCategory: "DeveloperApplication",
-    operatingSystem: "any",
-    sameAs: siteConfig.url,
+    operatingSystem: "Web",
     offers: {
       "@type": "Offer",
       price: "0",

@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = createMetadata({
-  title: "Blog",
-  description: "Guides on motion design, Tailwind, and shipping SaaS landing pages.",
+  title: "Blog — Framer Motion, Tailwind CSS & Next.js Guides",
+  description: "Guides on Framer Motion, Tailwind CSS, and shipping Next.js SaaS landing pages. Motion design patterns, copy-paste components, and developer tips.",
   alternates: { canonical: "/blog" },
 });
 
@@ -25,7 +25,7 @@ export default async function BlogIndexPage() {
       "@type": "Organization",
       name: siteConfig.name,
       url: siteConfig.url,
-      logo: { "@type": "ImageObject", url: `${siteConfig.url}/icon.svg`, width: 512, height: 512 },
+      logo: { "@type": "ImageObject", url: `${siteConfig.url}/icon2`, width: 192, height: 192 },
     },
     ...(posts.length > 0 && {
       blogPost: posts.map((p) => ({

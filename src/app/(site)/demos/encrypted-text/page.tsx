@@ -6,6 +6,7 @@ export const metadata: Metadata = createMetadata({
   title: "Encrypted Text",
   description:
     "Animated text component that reveals the final string through a futuristic gibberish decoding effect.",
+  alternates: { canonical: "/demos/encrypted-text" },
 });
 
 export default function EncryptedTextDemoPage() {
