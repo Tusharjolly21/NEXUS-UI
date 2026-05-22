@@ -48,6 +48,12 @@ import {
   TextGenerateTypewriter,
   TypewriterHeading,
 } from "@/components/blocks/text-animations";
+import {
+  BlogContentCentered,
+  BlogContentEditorial,
+  BlogHeaderFeaturedPosts,
+  BlogContentWithToc,
+} from "@/components/blocks/blog-content-sections";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
@@ -120,6 +126,7 @@ export default async function BlockDetailPage({ params }: Props) {
   const isFaqFolderCard = block.slug === "block-faq-folder-card";
   const isContactPageCard = block.slug === "block-contact-page";
   const isTextAnimationsCard = block.slug === "block-text-animations";
+  const isBlogContentSectionsCard = block.slug === "block-blog-content-sections";
   const isSidebarCard = block.slug === "block-sidebar";
   const isLogoCloudCard = block.slug === "block-logo-clouds";
   const layeredWaveCode = isInteractiveBackgroundCard
@@ -166,6 +173,15 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
   const textGenerateCode = isTextAnimationsCard
     ? await readSourceFile("src/components/blocks/text-animations/text-generate-typewriter.tsx", "")
+    : "";
+  const blogContentWithTocCode = isBlogContentSectionsCard
+    ? await readSourceFile("src/components/blocks/blog-content-sections/blog-content-with-toc.tsx", "")
+    : "";
+  const blogContentEditorialCode = isBlogContentSectionsCard
+    ? await readSourceFile("src/components/blocks/blog-content-sections/blog-content-editorial.tsx", "")
+    : "";
+  const blogHeaderFeaturedPostsCode = isBlogContentSectionsCard
+    ? await readSourceFile("src/components/blocks/blog-content-sections/blog-header-featured-posts.tsx", "")
     : "";
 
   return (
@@ -400,6 +416,44 @@ export default async function BlockDetailPage({ params }: Props) {
             <TextGenerateTypewriterDemo />
           </PreviewCodeSection>
         </>
+      ) : isBlogContentSectionsCard ? (
+        <>
+          <PreviewCodeSection
+            title="Blog Content Centered"
+            code={code}
+            usageCode={BLOG_CONTENT_CENTERED_USAGE}
+            locked={locked}
+          >
+            <BlogContentCentered />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Blog Content With TOC"
+            code={blogContentWithTocCode}
+            usageCode={BLOG_CONTENT_WITH_TOC_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <BlogContentWithToc />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Blog Content Editorial"
+            code={blogContentEditorialCode}
+            usageCode={BLOG_CONTENT_EDITORIAL_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <BlogContentEditorial />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Blog Header Featured Posts"
+            code={blogHeaderFeaturedPostsCode}
+            usageCode={BLOG_HEADER_FEATURED_POSTS_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <BlogHeaderFeaturedPosts />
+          </PreviewCodeSection>
+        </>
       ) : isSidebarCard ? (
         <>
           <PreviewCodeSection title="Simple Sidebar with Hover" code={code} locked={locked}>
@@ -628,6 +682,7 @@ async function getBlockCode(slug: string, fallback: string) {
     "block-faq-folder-card": "src/components/blocks/faq-folder-card.tsx",
     "block-contact-page": "src/components/blocks/contact-page.tsx",
     "block-text-animations": "src/components/blocks/text-animations/typewriter-heading.tsx",
+    "block-blog-content-sections": "src/components/blocks/blog-content-sections/blog-content-centered.tsx",
     "block-sidebar": "src/components/blocks/sidebar/simple-sidebar.tsx",
     "block-logo-clouds": "src/components/blocks/logo-clouds/logos-blur-flip.tsx",
   };
@@ -792,6 +847,10 @@ function defaultUsageForTitle(title: string) {
   if (title === "Text Animation Typewriter Effect") return TYPEWRITER_EFFECT_USAGE;
   if (title === "Text Animation Blur Fade In") return BLUR_FADE_IN_USAGE;
   if (title === "Text Generate Typewriter with typing sound") return TEXT_GENERATE_TYPEWRITER_USAGE;
+  if (title === "Blog Content Centered") return BLOG_CONTENT_CENTERED_USAGE;
+  if (title === "Blog Content With TOC") return BLOG_CONTENT_WITH_TOC_USAGE;
+  if (title === "Blog Content Editorial") return BLOG_CONTENT_EDITORIAL_USAGE;
+  if (title === "Blog Header Featured Posts") return BLOG_HEADER_FEATURED_POSTS_USAGE;
   if (title === "Simple Sidebar with Hover") return `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";\n\nexport default function Page() {\n  return <SimpleSidebar />;\n}`;
   if (title === "Collapsible Sidebar") return COLLAPSIBLE_SIDEBAR_USAGE;
   if (title === "Grouped Sidebar") return GROUPED_SIDEBAR_USAGE;
@@ -969,6 +1028,42 @@ export default function AiDraft() {
       startOnView
       typingSpeed={22}
       volume={0.18}
+    />
+  );
+}`;
+
+const BLOG_CONTENT_CENTERED_USAGE = `import { BlogContentCentered } from "@/components/blocks/blog-content-sections";
+
+export default function PostPage() {
+  return (
+    <BlogContentCentered
+      title="The Future of Artificial Intelligence"
+      author="Ava Sterling"
+      date="February 14, 2026"
+    />
+  );
+}`;
+
+const BLOG_CONTENT_WITH_TOC_USAGE = `import { BlogContentWithToc } from "@/components/blocks/blog-content-sections";
+
+export default function PostPage() {
+  return <BlogContentWithToc />;
+}`;
+
+const BLOG_CONTENT_EDITORIAL_USAGE = `import { BlogContentEditorial } from "@/components/blocks/blog-content-sections";
+
+export default function EditorialPost() {
+  return <BlogContentEditorial />;
+}`;
+
+const BLOG_HEADER_FEATURED_POSTS_USAGE = `import { BlogHeaderFeaturedPosts } from "@/components/blocks/blog-content-sections";
+
+export default function BlogIndex() {
+  return (
+    <BlogHeaderFeaturedPosts
+      eyebrow="Our blog"
+      title="Resources and insights"
+      description="The latest industry notes, interviews, technologies, and resources for modern product teams."
     />
   );
 }`;

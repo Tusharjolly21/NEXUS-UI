@@ -13,6 +13,7 @@ const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
   "block-why-choose-us": Previews.PreviewWhyChooseUs,
   "block-faq-folder-card": Previews.PreviewFaqFolderCard,
   "block-contact-page": Previews.PreviewContactPageBlock,
+  "block-blog-content-sections": Previews.PreviewBlogContentSectionsBlock,
   "block-sidebar": Previews.PreviewSimpleSidebar,
 };
 
