@@ -16,6 +16,7 @@ export type CheckoutOptions = {
   email?: string;
   successUrl: string;
   cancelUrl: string;
+  customData?: Record<string, string>;
 };
 
 export async function createCheckout(opts: CheckoutOptions): Promise<string> {
@@ -28,7 +29,7 @@ export async function createCheckout(opts: CheckoutOptions): Promise<string> {
         },
         checkout_data: {
           email: opts.email ?? undefined,
-          custom: { user_id: opts.userId },
+          custom: { user_id: opts.userId, ...opts.customData },
         },
         product_options: {
           redirect_url: opts.successUrl,

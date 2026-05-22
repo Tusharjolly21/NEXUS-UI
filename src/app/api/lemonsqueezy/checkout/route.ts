@@ -10,27 +10,45 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "You must be signed in to purchase." }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({})) as { plan?: "annual" | "lifetime" };
+  const body = await req.json().catch(() => ({})) as {
+    plan?: "annual" | "lifetime" | "template";
+    templateSlug?: string;
+  };
   const plan = body.plan ?? "lifetime";
 
-  const variantId =
-    plan === "annual"
+  let variantId: string | undefined;
+  let successUrl: string;
+  let customData: Record<string, string> | undefined;
+
+  const origin = new URL(req.url).origin;
+
+  if (plan === "template") {
+    const slug = body.templateSlug;
+    if (!slug) return NextResponse.json({ error: "Missing templateSlug." }, { status: 400 });
+    variantId = process.env.LEMONSQUEEZY_VARIANT_TEMPLATE;
+    successUrl = `${origin}/templates/${slug}?checkout=success`;
+    customData = { template_slug: slug };
+  } else {
+    variantId = plan === "annual"
       ? process.env.LEMONSQUEEZY_VARIANT_ANNUAL
       : process.env.LEMONSQUEEZY_VARIANT_LIFETIME;
+    successUrl = `${origin}/dashboard?checkout=success&plan=${plan}`;
+  }
 
   if (!variantId) {
     return NextResponse.json({ error: "Payment not configured." }, { status: 501 });
   }
-
-  const origin = new URL(req.url).origin;
 
   try {
     const checkoutUrl = await createCheckout({
       variantId,
       userId: user.id,
       email: user.email,
-      successUrl: `${origin}/dashboard?checkout=success&plan=${plan}`,
-      cancelUrl: `${origin}/pricing?checkout=cancel`,
+      successUrl,
+      cancelUrl: plan === "template"
+        ? `${origin}/templates/${body.templateSlug}?checkout=cancel`
+        : `${origin}/pricing?checkout=cancel`,
+      customData,
     });
 
     return NextResponse.json({ url: checkoutUrl });

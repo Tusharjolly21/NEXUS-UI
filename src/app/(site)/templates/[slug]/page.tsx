@@ -4,11 +4,11 @@ import { getTemplate, templates } from "@/lib/catalog/templates";
 import { TemplateDetailContent } from "@/components/templates/template-detail-content";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { getCachedUser } from "@/lib/supabase/server";
-import { hasPremiumAccess } from "@/lib/entitlements";
+import { canAccessTemplate } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ checkout?: string }> };
 
 export function generateStaticParams() {
   return templates.map((t) => ({ slug: t.slug }));
@@ -26,13 +26,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function TemplateDetailPage({ params }: Props) {
+export default async function TemplateDetailPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { checkout } = await searchParams;
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
   const user = await getCachedUser();
-  const isPremium = user ? await hasPremiumAccess(user.id) : false;
+  const hasAccess = user ? await canAccessTemplate(user.id, slug) : false;
+  const checkoutPending = checkout === "success" && !hasAccess;
 
   const softwareJsonLd = {
     "@context": "https://schema.org",
@@ -44,7 +46,7 @@ export default async function TemplateDetailPage({ params }: Props) {
     url: `${siteConfig.url}/templates/${slug}`,
     offers: {
       "@type": "Offer",
-      price: tmpl.premium ? undefined : "0",
+      price: tmpl.premium ? "49" : "0",
       priceCurrency: "USD",
     },
   };
@@ -63,7 +65,7 @@ export default async function TemplateDetailPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <TemplateDetailContent tmpl={tmpl} isPremium={isPremium} />
+      <TemplateDetailContent tmpl={tmpl} isPremium={hasAccess} checkoutPending={checkoutPending} />
     </>
   );
 }

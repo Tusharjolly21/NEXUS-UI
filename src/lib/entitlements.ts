@@ -156,6 +156,25 @@ export async function canAccessTemplate(
 }
 
 /**
+ * Returns the set of template slugs the user has purchased individually.
+ * Returns null if the user has lifetime/subscription access (meaning all templates are accessible).
+ */
+export async function getOwnedTemplateSlugs(userId: string): Promise<Set<string> | null> {
+  if (await hasLifetimeAccess(userId)) return null;
+  if (await hasActiveSubscription(userId)) return null;
+
+  const admin = getAdminClient();
+  const { data } = await admin
+    .from("orders")
+    .select("product_slug")
+    .eq("user_id", userId)
+    .eq("product_type", "template")
+    .eq("status", "paid");
+
+  return new Set((data ?? []).map((r) => r.product_slug).filter(Boolean) as string[]);
+}
+
+/**
  * Broad check: does this user have ANY premium access?
  * Used to show/hide upgrade banners.
  */

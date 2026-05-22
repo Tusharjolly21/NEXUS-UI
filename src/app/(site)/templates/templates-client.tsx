@@ -35,17 +35,18 @@ import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 type FilterCat = "all" | TemplateCategory;
 const ALL_CATS = ["all", ...Array.from(new Set(templates.map((t) => t.category)))] as FilterCat[];
 
-export default function TemplatesPageClient({ isPremium = false }: { isPremium?: boolean }) {
+export default function TemplatesPageClient({ isPremium = false, ownedSlugs = [] }: { isPremium?: boolean; ownedSlugs?: string[] }) {
   return (
     <React.Suspense fallback={<CatalogSkeleton />}>
       <LibraryExplorerSidebarProvider>
-        <TemplatesPageInner isPremium={isPremium} />
+        <TemplatesPageInner isPremium={isPremium} ownedSlugs={ownedSlugs} />
       </LibraryExplorerSidebarProvider>
     </React.Suspense>
   );
 }
 
-function TemplatesPageInner({ isPremium }: { isPremium: boolean }) {
+function TemplatesPageInner({ isPremium, ownedSlugs }: { isPremium: boolean; ownedSlugs: string[] }) {
+  const ownedSet = React.useMemo(() => new Set(ownedSlugs), [ownedSlugs]);
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [cat, setCat] = React.useState<FilterCat>("all");
   const reduce = useReducedMotion() === true;
@@ -227,7 +228,7 @@ function TemplatesPageInner({ isPremium }: { isPremium: boolean }) {
                         Live Preview
                         <ArrowUpRight className="size-3" />
                       </a>
-                      {tmpl.premium && isPremium ? (
+                      {tmpl.premium && (isPremium || ownedSet.has(tmpl.slug)) ? (
                         <Link
                           href={`/templates/${tmpl.slug}`}
                           className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"

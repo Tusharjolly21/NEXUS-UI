@@ -3,7 +3,7 @@ import JSZip from "jszip";
 import fs from "fs/promises";
 import path from "path";
 import { createClient } from "@/lib/supabase/server";
-import { hasPremiumAccess } from "@/lib/entitlements";
+import { canAccessTemplate } from "@/lib/entitlements";
 import { getTemplate } from "@/lib/catalog/templates";
 
 const ROOT = process.cwd();
@@ -83,10 +83,10 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Premium check
+  // Access check — lifetime, active subscription, or individual template purchase
   if (tmpl.premium) {
-    const premium = await hasPremiumAccess(user.id);
-    if (!premium) return NextResponse.json({ error: "Premium required" }, { status: 403 });
+    const access = await canAccessTemplate(user.id, slug);
+    if (!access) return NextResponse.json({ error: "Purchase required" }, { status: 403 });
   }
 
   const componentFile = SLUG_TO_FILE[slug];

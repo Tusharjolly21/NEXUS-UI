@@ -10,7 +10,6 @@ import {
   ChevronRight,
   Copy,
   ExternalLink,
-  Mail,
   ShoppingCart,
   Sparkles,
   Tag,
@@ -173,8 +172,8 @@ function AddToCartModal({
   tmpl: MarketplaceTemplate;
   onClose: () => void;
 }) {
-  const [email, setEmail] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
 
   // Close on Escape
   React.useEffect(() => {
@@ -189,11 +188,30 @@ function AddToCartModal({
     return () => { document.body.style.overflow = ""; };
   }, []);
 
-  const handleCheckout = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCheckout = async () => {
     setLoading(true);
-    // Redirect to pricing / Stripe after brief delay
-    setTimeout(() => { window.location.href = "/pricing"; }, 600);
+    setError(null);
+    try {
+      const res = await fetch("/api/lemonsqueezy/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: "template", templateSlug: tmpl.slug }),
+      });
+      const data = await res.json() as { url?: string; error?: string };
+      if (res.status === 401) {
+        window.location.href = `/login?next=/templates/${tmpl.slug}`;
+        return;
+      }
+      if (!res.ok || !data.url) {
+        setError(data.error ?? "Something went wrong. Please try again.");
+        setLoading(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setError("Network error. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -247,42 +265,35 @@ function AddToCartModal({
             {/* Order summary */}
             <div className="py-4 text-center space-y-1">
               <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                Paying a total of <span className="font-bold text-zinc-900 dark:text-white">$49</span> for <span className="font-bold text-zinc-900 dark:text-white">1 product</span>
+                One-time payment of <span className="font-bold text-zinc-900 dark:text-white">$49</span> — this template only
               </p>
               <p className="text-xs text-zinc-400">
-                Download with{" "}
+                Need all templates?{" "}
                 <Link href="/pricing" onClick={onClose} className="font-semibold text-zinc-600 underline dark:text-zinc-300">
-                  All Access
-                </Link>{" "}
-                instead?
+                  Get All-Access for $149
+                </Link>
               </p>
             </div>
 
-            {/* Checkout form */}
-            <form onSubmit={handleCheckout} className="space-y-3">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-400" />
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-white py-2.5 pl-9 pr-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-900/8 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500 dark:focus:border-zinc-500"
-                />
-              </div>
+            {/* Error */}
+            {error && (
+              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-xs text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
+                {error}
+              </p>
+            )}
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
-              >
-                {loading ? "Redirecting…" : "Checkout"}
-              </button>
-            </form>
+            {/* Checkout button */}
+            <button
+              type="button"
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              {loading ? "Redirecting to checkout…" : "Purchase — $49"}
+            </button>
 
             <p className="mt-3 text-center text-[11px] text-zinc-400">
-              The above email will be used to create your account. You will be redirected to Stripe to complete your purchase.
+              You&apos;ll be redirected to Lemon Squeezy to complete your purchase securely.
             </p>
           </div>
         </motion.div>
@@ -291,8 +302,42 @@ function AddToCartModal({
   );
 }
 
+// ─── Purchase-pending banner (polls until webhook fires) ──────────────────────
+function CheckoutPendingBanner({ slug }: { slug: string }) {
+  const [dots, setDots] = React.useState(".");
+
+  // Animated ellipsis
+  React.useEffect(() => {
+    const id = setInterval(() => setDots((d) => (d.length >= 3 ? "." : d + ".")), 500);
+    return () => clearInterval(id);
+  }, []);
+
+  // Poll: reload every 3 s until access is granted (server re-renders with hasAccess=true)
+  React.useEffect(() => {
+    const id = setInterval(() => {
+      window.location.reload();
+    }, 3000);
+    return () => clearInterval(id);
+  }, [slug]);
+
+  return (
+    <div className="sticky top-0 z-40 flex items-center justify-center gap-3 border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
+      <span className="inline-block size-2 animate-pulse rounded-full bg-emerald-500" />
+      Confirming your purchase{dots} Access will unlock automatically.
+    </div>
+  );
+}
+
 // ─── Main component ────────────────────────────────────────────────────────────
-export function TemplateDetailContent({ tmpl, isPremium = false }: { tmpl: MarketplaceTemplate; isPremium?: boolean }) {
+export function TemplateDetailContent({
+  tmpl,
+  isPremium = false,
+  checkoutPending = false,
+}: {
+  tmpl: MarketplaceTemplate;
+  isPremium?: boolean;
+  checkoutPending?: boolean;
+}) {
   const reduce = useReducedMotion() === true;
   const [cartOpen, setCartOpen] = React.useState(false);
   const hasAccess = isPremium || !tmpl.premium;
@@ -302,6 +347,7 @@ export function TemplateDetailContent({ tmpl, isPremium = false }: { tmpl: Marke
 
   return (
     <div className="bg-background">
+      {checkoutPending && <CheckoutPendingBanner slug={tmpl.slug} />}
       {cartOpen && <AddToCartModal tmpl={tmpl} onClose={() => setCartOpen(false)} />}
 
       {/* ════════ BREADCRUMB ════════ */}

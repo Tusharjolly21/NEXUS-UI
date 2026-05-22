@@ -4,7 +4,7 @@ import { getTemplate, templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { FullPreviewShell } from "@/components/templates/full-preview-shell";
 import { getCachedUser } from "@/lib/supabase/server";
-import { hasPremiumAccess } from "@/lib/entitlements";
+import { canAccessTemplate } from "@/lib/entitlements";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ export default async function TemplatePreviewPage({ params }: Props) {
   if (!tmpl) notFound();
 
   const user = await getCachedUser();
-  const isPremium = user ? await hasPremiumAccess(user.id) : false;
+  const isPremium = user ? await canAccessTemplate(user.id, slug) : false;
 
   return <FullPreviewShell tmpl={tmpl} isPremium={isPremium} />;
 }

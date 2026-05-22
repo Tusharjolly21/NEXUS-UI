@@ -7,12 +7,14 @@ export const dynamic = "force-dynamic";
 
 type LsOrderAttributes = {
   store_id: number;
-  product_id: number;
-  variant_id: number;
   status: string;
   total: number;
   currency: string;
   refunded: boolean;
+  first_order_item: {
+    product_id: number;
+    variant_id: number;
+  };
 };
 
 type LsSubscriptionAttributes = {
@@ -27,7 +29,7 @@ type LsSubscriptionAttributes = {
 type LsEvent = {
   meta: {
     event_name: string;
-    custom_data?: { user_id?: string };
+    custom_data?: { user_id?: string; template_slug?: string };
   };
   data: {
     id: string;
@@ -75,20 +77,36 @@ export async function POST(req: Request) {
       const attr = event.data.attributes as LsOrderAttributes;
       if (!userId) break;
 
-      const isLifetime = String(attr.variant_id) === process.env.LEMONSQUEEZY_VARIANT_LIFETIME;
-      const isAnnual = String(attr.variant_id) === process.env.LEMONSQUEEZY_VARIANT_ANNUAL;
+      const variantStr = String(attr.first_order_item.variant_id);
+      const isLifetime = variantStr === process.env.LEMONSQUEEZY_VARIANT_LIFETIME;
+      const isAnnual   = variantStr === process.env.LEMONSQUEEZY_VARIANT_ANNUAL;
+      const isTemplate = variantStr === process.env.LEMONSQUEEZY_VARIANT_TEMPLATE;
+      const templateSlug = event.meta.custom_data?.template_slug ?? null;
+
+      let productType: "lifetime" | "template" | "component";
+      let productSlug: string | null = null;
+
+      if (isLifetime || isAnnual) {
+        productType = "lifetime";
+      } else if (isTemplate && templateSlug) {
+        productType = "template";
+        productSlug = templateSlug;
+      } else {
+        productType = "component";
+      }
 
       await supabase.from("orders").insert({
         user_id: userId,
         ls_order_id: event.data.id,
-        ls_product_id: String(attr.product_id),
-        ls_variant_id: String(attr.variant_id),
-        product_type: isLifetime ? "lifetime" : isAnnual ? "lifetime" : "component",
+        ls_product_id: String(attr.first_order_item.product_id),
+        ls_variant_id: variantStr,
+        product_type: productType,
+        product_slug: productSlug,
         status: "paid",
         amount_cents: attr.total,
         currency: attr.currency ?? "USD",
       });
-      console.log(`[webhook] order_created user=${userId} variant=${attr.variant_id} lifetime=${isLifetime}`);
+      console.log(`[webhook] order_created user=${userId} variant=${variantStr} type=${productType} slug=${productSlug}`);
       break;
     }
 
