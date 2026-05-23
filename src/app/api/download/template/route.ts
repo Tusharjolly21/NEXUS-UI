@@ -11,6 +11,7 @@ const TEMPLATES_DIR = path.join(ROOT, "src", "components", "templates");
 
 // Maps slug → main component file
 const SLUG_TO_FILE: Record<string, string> = {
+  "noir-studio":                 "moon-studio-page.tsx",
   "nexus-ai-launch":            "nexus-ai-launch-template-page.tsx",
   "talent-hub-landing":         "talent-hub-page.tsx",
   "startup-landing-page":       "startup-landing-page.tsx",

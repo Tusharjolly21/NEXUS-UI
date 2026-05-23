@@ -80,6 +80,10 @@ const OrbitAIPage = nextDynamic(
   () => import("@/components/templates/orbit-ai-page"),
   { loading: TemplateFallback },
 );
+const NoirStudioTemplatePage = nextDynamic(
+  () => import("@/components/templates/moon-studio-page"),
+  { loading: TemplateFallback },
+);
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -105,6 +109,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
 
   if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "noir-studio") {
+    return <ThemeReceiver><NoirStudioTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "simplistic-saas-template") {
     return <ThemeReceiver><SimplisticSaaSPage /></ThemeReceiver>;
   } else if (tmpl.slug === "saas-launch-aurora") {

@@ -98,6 +98,29 @@ export default function HomePage() {
 }`;
   }
 
+  if (tmpl.slug === "noir-studio") {
+    return `// ${tmpl.title} — Production Template
+// Stack: ${tmpl.techStack.join(", ")}
+// Pages: ${tmpl.pages.join(", ")}
+
+import type { Metadata } from "next";
+import MoonStudioPage from "@/components/templates/moon-studio-page";
+
+export const metadata: Metadata = {
+  title: "NOVA STUDIO — Building Lasting Digital Connections",
+  description: "NOVA STUDIO is a creative agency specializing in building, launching, and revitalizing brand identities with impactful branding solutions.",
+  openGraph: {
+    title: "NOVA STUDIO",
+    description: "Building lasting digital connections.",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+};
+
+export default function HomePage() {
+  return <MoonStudioPage />;
+}`;
+  }
+
   if (tmpl.slug === "nova-landing-page") {
     return `// ${tmpl.title} — Production Template
 // Stack: ${tmpl.techStack.join(", ")}

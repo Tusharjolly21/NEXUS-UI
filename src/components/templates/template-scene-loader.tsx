@@ -84,8 +84,14 @@ const SceneAetherPortfolioLazy = React.lazy(() =>
     default: m.SceneAetherPortfolio,
   })),
 );
+const SceneNoirStudioLazy = React.lazy(() =>
+  import("@/registry/template-scenes/scenes/noir-studio-scene").then((m) => ({
+    default: m.SceneNoirStudio,
+  })),
+);
 
 const LAZY_BY_SLUG: Record<string, React.LazyExoticComponent<React.ComponentType>> = {
+  "noir-studio": SceneNoirStudioLazy,
   "nexus-ai-launch": SceneNexusAiLaunchLazy,
   "saas-launch-aurora": SceneSaaSLaunchLazy,
   "ai-startup-forge": SceneAIStartupLazy,

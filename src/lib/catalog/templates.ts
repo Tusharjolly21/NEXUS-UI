@@ -32,6 +32,44 @@ export type MarketplaceTemplate = {
 
 export const templates: MarketplaceTemplate[] = [
   {
+    slug: "noir-studio",
+    title: "NOVA STUDIO — Creative Agency",
+    description:
+      "A stunning, premium agency landing page featuring a transitioning glassmorphic navbar, mega-dropdowns, decoupled planet scale and text scroll zoom, gapless white-out section transition, tall portrait team framing, and a giant footer wordmark.",
+    category: "Agency",
+    tags: ["agency", "studio", "portfolio", "branding", "scroll", "marquee", "editorial"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 275,
+    createdAt: "2026-05-23",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS v4", "Framer Motion", "Lenis", "Lucide Icons"],
+    pages: ["/", "/work", "/about", "/news"],
+    sections: [
+      "Morphing Glassmorphic Navbar",
+      "Decoupled Planet Zoom Hero",
+      "Studio Intro",
+      "Selected Work Floating Collage",
+      "Ghost Branding Transition",
+      "Asymmetric Gallery Grid",
+      "Inline Team Portraits",
+      "Client Logo Row",
+      "Latest News Ticker Stack",
+      "Giant Footer Outro Wordmark",
+    ],
+    pageLabels: ["Hero", "Work", "Team", "News"],
+    features: [
+      "Duo-mode morphing navbar from top header to floating glassmorphic pill capsule",
+      "Detailed 2-column mega-dropdown grids for STUDIO and SERVICES with micro-hover states",
+      "Scroll-scrubbed decoupled planet scale and exponential text zoom targeting the 'S' stroke",
+      "100% gapless organic scroll transition to Section 2 white canvas with zero black track gaps",
+      "Lenis smooth scroll with perfectly synchronized animation progress and mobile syncTouch",
+      "Perfect vertical headshot portrait frames for symmetrical, head-crop-free team grid",
+      "Responsive accordion drawer menu for mobile and tablet devices",
+      "Giant outro wordmark with dynamic responsive spacing preventing letters from clipping",
+      "Clean, elegant typography and modern minimalist layouts",
+    ],
+  },
+  {
     slug: "nexus-ai-launch",
     title: "Asteria AI Launch",
     description:
