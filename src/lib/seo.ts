@@ -42,7 +42,9 @@ export function createMetadata(override: Metadata = {}): Metadata {
   const { openGraph: overrideOg, twitter: overrideTwitter, icons: overrideIcons, ...rest } = override;
 
   const icons = overrideIcons ?? {
+    shortcut: [{ url: "/favicon.ico" }],
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon", sizes: "32x32", type: "image/png" },
       { url: "/icon2", sizes: "192x192", type: "image/png" },
     ],
