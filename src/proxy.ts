@@ -11,6 +11,11 @@ function isLinkPrefetch(request: NextRequest): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/favicon.ico") {
+    return NextResponse.rewrite(new URL("/icon", request.url));
+  }
+
   const isProtected = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
   const fetchDest = request.headers.get("sec-fetch-dest");
   const isDocumentRequest = !fetchDest || fetchDest === "document";
@@ -94,6 +99,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/favicon.ico",
     "/dashboard/:path*",
     "/admin/:path*",
   ],
