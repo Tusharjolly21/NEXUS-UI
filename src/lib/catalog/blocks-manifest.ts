@@ -209,15 +209,16 @@ export default function Page() {
     slug: "block-blog-content-sections",
     name: "Blog Content Sections",
     description:
-      "Content sections for single blog posts with centered articles, sticky table-of-contents layouts, editorial story sections, and featured blog index layouts.",
+      "Content sections for single blog posts with centered articles, sticky table-of-contents layouts, editorial story sections, featured blog indexes, and interactive blog cards.",
     category: "Blog sections",
-    tags: ["blog", "article", "content", "toc", "editorial", "featured posts", "single post", "seo"],
+    tags: ["blog", "article", "content", "toc", "editorial", "featured posts", "blog card", "single post", "seo"],
     premium: false,
-    variants: ["Blog Content Centered", "Blog Content With TOC", "Blog Content Editorial", "Blog Header Featured Posts"],
+    variants: ["Blog Content Centered", "Blog Content With TOC", "Blog Content Editorial", "Blog Header Featured Posts", "Blog Hover Image Card"],
     reactSource: `import {
   BlogContentCentered,
   BlogContentEditorial,
   BlogHeaderFeaturedPosts,
+  BlogHoverImageCardShowcase,
   BlogContentWithToc,
 } from "@/components/blocks/blog-content-sections";
 
@@ -228,6 +229,7 @@ export default function BlogPage() {
       <BlogContentWithToc />
       <BlogContentEditorial />
       <BlogHeaderFeaturedPosts />
+      <BlogHoverImageCardShowcase />
     </main>
   );
 }`,

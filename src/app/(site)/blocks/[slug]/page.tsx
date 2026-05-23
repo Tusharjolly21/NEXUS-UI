@@ -52,6 +52,7 @@ import {
   BlogContentCentered,
   BlogContentEditorial,
   BlogHeaderFeaturedPosts,
+  BlogHoverImageCardShowcase,
   BlogContentWithToc,
 } from "@/components/blocks/blog-content-sections";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
@@ -182,6 +183,9 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
   const blogHeaderFeaturedPostsCode = isBlogContentSectionsCard
     ? await readSourceFile("src/components/blocks/blog-content-sections/blog-header-featured-posts.tsx", "")
+    : "";
+  const blogHoverImageCardCode = isBlogContentSectionsCard
+    ? await readSourceFile("src/components/blocks/blog-content-sections/blog-hover-image-card.tsx", "")
     : "";
 
   return (
@@ -452,6 +456,15 @@ export default async function BlockDetailPage({ params }: Props) {
             locked={locked}
           >
             <BlogHeaderFeaturedPosts />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Blog Hover Image Card"
+            code={blogHoverImageCardCode}
+            usageCode={BLOG_HOVER_IMAGE_CARD_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <BlogHoverImageCardShowcase />
           </PreviewCodeSection>
         </>
       ) : isSidebarCard ? (
@@ -851,6 +864,7 @@ function defaultUsageForTitle(title: string) {
   if (title === "Blog Content With TOC") return BLOG_CONTENT_WITH_TOC_USAGE;
   if (title === "Blog Content Editorial") return BLOG_CONTENT_EDITORIAL_USAGE;
   if (title === "Blog Header Featured Posts") return BLOG_HEADER_FEATURED_POSTS_USAGE;
+  if (title === "Blog Hover Image Card") return BLOG_HOVER_IMAGE_CARD_USAGE;
   if (title === "Simple Sidebar with Hover") return `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";\n\nexport default function Page() {\n  return <SimpleSidebar />;\n}`;
   if (title === "Collapsible Sidebar") return COLLAPSIBLE_SIDEBAR_USAGE;
   if (title === "Grouped Sidebar") return GROUPED_SIDEBAR_USAGE;
@@ -1064,6 +1078,19 @@ export default function BlogIndex() {
       eyebrow="Our blog"
       title="Resources and insights"
       description="The latest industry notes, interviews, technologies, and resources for modern product teams."
+    />
+  );
+}`;
+
+const BLOG_HOVER_IMAGE_CARD_USAGE = `import { BlogHoverImageCard } from "@/components/blocks/blog-content-sections";
+
+export default function BlogCardExample() {
+  return (
+    <BlogHoverImageCard
+      author="Noah Williams"
+      title="Designing launch pages with reusable UI systems"
+      tag="Design Systems"
+      date="23 May '26"
     />
   );
 }`;

@@ -210,3 +210,17 @@ html.dark {
 @keyframes lf-spin-slow {
   to { transform: rotate(360deg); }
 }
+
+/* VS Code Dark+ token colors for sugar-high — used by DocPre */
+.doc-code-block {
+  --sh-keyword:     #569cd6;
+  --sh-string:      #ce9178;
+  --sh-comment:     #6a9955;
+  --sh-class:       #4ec9b0;
+  --sh-property:    #9cdcfe;
+  --sh-identifier:  #d4d4d4;
+  --sh-sign:        #d4d4d4;
+  --sh-jsxliterals: #ce9178;
+  --sh-entity:      #9cdcfe;
+  color:            #d4d4d4;
+}

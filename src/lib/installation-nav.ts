@@ -1,5 +1,6 @@
 export const INSTALLATION_NAV = [
-  { href: "/docs/installation", label: "Nexus-UI setup", external: false as const },
+  { href: "/docs/introduction", label: "Introduction", external: false as const },
+  { href: "/docs/installation", label: "Quick Start", external: false as const },
   {
     href: "/docs/install-nextjs",
     label: "Install Next.js",
@@ -19,16 +20,6 @@ export const INSTALLATION_NAV = [
     href: "/docs/cli",
     label: "CLI",
     external: false as const,
-  },
-  {
-    href: "https://ui.shadcn.com/docs/installation/next",
-    label: "Add shadcn/ui",
-    external: true as const,
-  },
-  {
-    href: "https://motion.dev/docs/react-installation",
-    label: "Framer Motion",
-    external: true as const,
   },
 ] as const;
 

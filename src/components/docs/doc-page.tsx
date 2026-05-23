@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useState, useCallback } from "react";
+import { Check, Copy } from "lucide-react";
+import { highlight } from "sugar-high";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/lib/seo";
 
@@ -59,10 +64,40 @@ export function DocSection({ title, children }: { title: string; children: React
 }
 
 export function DocPre({ children }: { children: string }) {
+  const [copied, setCopied] = useState(false);
+  const highlighted = highlight(children);
+
+  const copy = useCallback(() => {
+    navigator.clipboard.writeText(children).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [children]);
+
   return (
-    <pre className={docPreClass}>
-      <code>{children}</code>
-    </pre>
+    <div className="group relative">
+      <pre className="doc-code-block overflow-x-auto rounded-xl border border-[#3e3e3e] bg-[#1e1e1e] p-4 text-[13px] leading-relaxed">
+        <code dangerouslySetInnerHTML={{ __html: highlighted }} />
+      </pre>
+      <button
+        onClick={copy}
+        aria-label={copied ? "Copied" : "Copy code"}
+        className={cn(
+          "absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-md border transition-all duration-200",
+          "border-[#3e3e3e] bg-[#2d2d2d] text-[#858585]",
+          "opacity-0 group-hover:opacity-100",
+          copied
+            ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
+            : "hover:border-[#555] hover:bg-[#3a3a3a] hover:text-[#d4d4d4]",
+        )}
+      >
+        {copied ? (
+          <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+        ) : (
+          <Copy className="h-3.5 w-3.5" />
+        )}
+      </button>
+    </div>
   );
 }
 

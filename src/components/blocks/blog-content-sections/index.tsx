@@ -1,10 +1,11 @@
 "use client";
 
-import { FileText, ListTree, Newspaper, PanelsTopLeft } from "lucide-react";
+import { FileText, ImageIcon, ListTree, Newspaper, PanelsTopLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BlogContentCentered } from "./blog-content-centered";
 import { BlogContentEditorial } from "./blog-content-editorial";
 import { BlogHeaderFeaturedPosts } from "./blog-header-featured-posts";
+import { BlogHoverImageCardShowcase } from "./blog-hover-image-card";
 import { BlogContentWithToc } from "./blog-content-with-toc";
 
 export { BlogContentCentered } from "./blog-content-centered";
@@ -13,6 +14,8 @@ export { BlogContentEditorial } from "./blog-content-editorial";
 export type { BlogContentEditorialProps } from "./blog-content-editorial";
 export { BlogHeaderFeaturedPosts } from "./blog-header-featured-posts";
 export type { BlogHeaderFeaturedPostsProps } from "./blog-header-featured-posts";
+export { BlogHoverImageCard, BlogHoverImageCardShowcase } from "./blog-hover-image-card";
+export type { BlogHoverImageCardProps } from "./blog-hover-image-card";
 export { BlogContentWithToc } from "./blog-content-with-toc";
 export type { BlogContentWithTocProps } from "./blog-content-with-toc";
 
@@ -36,6 +39,11 @@ const variants = [
     title: "Blog Header Featured Posts",
     description: "Featured hero story, category tabs, article grid, and pagination.",
     icon: PanelsTopLeft,
+  },
+  {
+    title: "Blog Hover Image Card",
+    description: "A compact editorial card with a sliding author image and arrow hover state.",
+    icon: ImageIcon,
   },
 ];
 
@@ -64,7 +72,7 @@ export function BlogContentSectionsBlock({ className }: { className?: string }) 
             </p>
           </div>
 
-          <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             {variants.map((item) => {
               const Icon = item.icon;
               return (
@@ -79,7 +87,7 @@ export function BlogContentSectionsBlock({ className }: { className?: string }) 
             })}
           </div>
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-5 lg:grid-cols-2 xl:grid-cols-5">
             <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
               <div className="h-[520px] overflow-hidden">
                 <BlogContentCentered className="h-full min-h-full" />
@@ -98,6 +106,11 @@ export function BlogContentSectionsBlock({ className }: { className?: string }) 
             <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
               <div className="h-[520px] overflow-hidden">
                 <BlogHeaderFeaturedPosts className="h-full min-h-full" />
+              </div>
+            </div>
+            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
+              <div className="h-[520px] overflow-hidden">
+                <BlogHoverImageCardShowcase className="h-full min-h-full" />
               </div>
             </div>
           </div>

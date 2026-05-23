@@ -726,7 +726,7 @@ function SignupMini() {
                 {i === 0
                   ? "Jane Doe"
                   : i === 1
-                    ? "jane@nexus-ui.dev"
+                    ? "jane@nexus-ui.com"
                     : "••••••••"}
               </div>
             </label>

@@ -74,7 +74,7 @@ npm run dev`}</DocPre>
       </DocSection>
 
       <DocFooterNav
-        prev={{ href: "/docs/installation", label: "Nexus-UI setup" }}
+        prev={{ href: "/docs/installation", label: "Quick Start" }}
         next={{ href: "/docs/install-tailwindcss", label: "Install Tailwind CSS" }}
       />
 
