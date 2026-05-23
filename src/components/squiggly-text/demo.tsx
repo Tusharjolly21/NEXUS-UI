@@ -62,9 +62,9 @@ export function SquigglyTextDemo() {
     <div className="mx-auto max-w-4xl space-y-16 px-4 py-14">
       <header className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Squiggly text</p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Stepped SVG displacement
-        </h1>
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Multiple <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">feTurbulence</code>{" "}
           presets cycled on a timer with a Motion-friendly cadence.

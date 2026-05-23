@@ -126,7 +126,7 @@ export function ExpandableCardsDemo() {
   return (
     <div className="mx-auto max-w-5xl space-y-8 px-4 py-12">
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Expandable Cards</h1>
+        <h2 className="text-2xl font-bold tracking-tight text-foreground">Expandable Cards</h2>
         <p className="text-sm text-muted-foreground">
           Click any card to expand it and see the full details.
         </p>

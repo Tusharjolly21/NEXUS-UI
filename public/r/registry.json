@@ -81,6 +81,29 @@
       ]
     },
     {
+      "name": "step-flow",
+      "type": "registry:component",
+      "title": "Step Flow",
+      "description": "A responsive four-step process section with a sliding highlight, animated image swaps, and hover or click step selection.",
+      "dependencies": [
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/step-flow/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/step-flow/step-flow.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "phone-input",
       "type": "registry:component",
       "title": "Phone Input",

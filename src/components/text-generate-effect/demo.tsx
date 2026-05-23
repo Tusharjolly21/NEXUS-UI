@@ -12,9 +12,9 @@ export function TextGenerateEffectDemo() {
     <section className="mx-auto max-w-5xl space-y-10 px-4 py-14">
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Text animation</p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Text Generate Effect
-        </h1>
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Staggered text reveal for hero headings and paragraphs with word, character, or line animation modes.
         </p>

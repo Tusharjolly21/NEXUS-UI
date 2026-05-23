@@ -12,6 +12,7 @@ export const metadata: Metadata = createMetadata({
 export default function KeyboardDemoPage() {
   return (
     <main className="min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/15 to-background">
+      <h1 className="sr-only">Mac Keyboard</h1>
       <KeyboardDemo />
     </main>
   );

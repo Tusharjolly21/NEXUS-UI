@@ -15,9 +15,9 @@ export function AnimatedCountdownDemo() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">
           Countdown
         </p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Animated countdown timer
-        </h1>
+        </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Real-time launch, event, sale, and campaign countdowns with animated number transitions.
         </p>

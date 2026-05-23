@@ -483,6 +483,72 @@ export function CinematicLogoCloud({
     ]
   },
   {
+    slug: "step-flow",
+    name: "Step Flow",
+    registryCliName: "step-flow",
+    description:
+      "A responsive four-step process section with a sliding highlight, animated image swaps, and hover or click step selection.",
+    categorySlug: "feature-sections",
+    tags: ["steps", "process", "feature", "hover", "motion", "framer-motion"],
+    premium: true,
+    trendingScore: 96,
+    createdAt: "2026-05-23",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewStepFlow,
+    reactSource: `"use client";
+
+import { StepFlow } from "@/components/step-flow";
+
+const steps = [
+  {
+    serial: "01",
+    title: "Audit the idea",
+    description: "Collect the messy notes, user goals, and brand cues before a single section is built.",
+    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    serial: "02",
+    title: "Sketch the system",
+    description: "Turn the direction into reusable layout rules, component states, and rhythm.",
+    image: "https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    serial: "03",
+    title: "Layer the motion",
+    description: "Add transitions that guide attention without making the page feel busy.",
+    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=85",
+  },
+  {
+    serial: "04",
+    title: "Ship the page",
+    description: "Package a polished, responsive experience your users can copy into production.",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=85",
+  },
+];
+
+export function StepFlowDemo() {
+  return (
+    <StepFlow
+      steps={steps}
+      highlightColor="rgb(229 229 229)"
+      className="mx-auto max-w-6xl"
+    />
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "steps", type: "StepFlowItem[]", description: "Process steps with serial number, title, optional description, and image URL." },
+      { name: "defaultStep", type: "number", defaultValue: "0", description: "Initial active step index." },
+      { name: "highlightColor", type: "string", defaultValue: '"rgb(229 229 229)"', description: "Color used by the moving active step panel." },
+      { name: "autoPlay", type: "boolean", defaultValue: "false", description: "Automatically advance through steps." },
+      { name: "autoPlayInterval", type: "number", defaultValue: "3500", description: "Delay between auto-play step changes in milliseconds." },
+      { name: "className", type: "string", description: "ClassName for the outer section." },
+      { name: "textClassName", type: "string", description: "ClassName for the step list column." },
+      { name: "imageClassName", type: "string", description: "ClassName for the image preview column." },
+    ],
+  },
+  {
     slug: "phone-input",
     name: "Phone Input",
     description: "A modern animated phone number input with country selector and validation.",

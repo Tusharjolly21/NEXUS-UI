@@ -18,9 +18,9 @@ export function ImageTrailDemo() {
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">
           Motion Effects
         </p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Image Trail
-        </h1>
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           A cursor trail that cycles through images as you move. Configure spacing,
           duration, size, magnetic pull, and blur transitions.

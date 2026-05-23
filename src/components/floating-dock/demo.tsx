@@ -27,9 +27,9 @@ export function FloatingDockDemo() {
       <div className="mx-auto max-w-3xl space-y-8 px-4 py-14 sm:py-16">
         <header className="space-y-3 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">Navigation</p>
-          <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             Floating dock
-          </h1>
+          </h2>
           <p className="text-sm leading-relaxed text-muted-foreground">
             macOS-style magnification on desktop; compact menu on small screens. Resize the viewport or move the
             pointer across the dock to feel the springy neighbor scaling.

@@ -39,7 +39,14 @@ export function createMetadata(override: Metadata = {}): Metadata {
   }).toString()}`;
   const ogImages = [{ url: ogImageUrl, width: 1200, height: 630, alt: titleStr }];
 
-  const { openGraph: overrideOg, twitter: overrideTwitter, icons: overrideIcons, ...rest } = override;
+  const { openGraph: overrideOg, twitter: overrideTwitter, icons: overrideIcons, alternates, ...rest } = override;
+
+  // Derive canonical path from alternates.canonical so OG URL matches the page, not the homepage.
+  const canonicalPath =
+    typeof alternates?.canonical === "string" ? alternates.canonical : undefined;
+  const pageUrl = canonicalPath
+    ? `${siteConfig.url.replace(/\/$/, "")}${canonicalPath}`
+    : siteConfig.url;
 
   const icons = overrideIcons ?? {
     shortcut: [{ url: "/favicon.ico" }],
@@ -74,11 +81,12 @@ export function createMetadata(override: Metadata = {}): Metadata {
       },
     },
     icons,
+    alternates,
     ...rest,
     openGraph: {
       title: titleStr,
       description: descStr,
-      url: siteConfig.url,
+      url: pageUrl,
       siteName: siteConfig.name,
       locale: "en_US",
       type: "website",

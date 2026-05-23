@@ -60,9 +60,9 @@ export function InfiniteMovingCardsDemo() {
     <section className="mx-auto max-w-6xl space-y-10 px-4 py-14">
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Motion</p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Infinite Moving Cards
-        </h1>
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Seamless marquee-style card loops for testimonials, logos, product highlights, and showcase rails.
         </p>

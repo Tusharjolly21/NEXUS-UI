@@ -7,9 +7,9 @@ export function ScrollRevealButtonDemo() {
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-14">
       <header className="space-y-3 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Buttons</p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Scroll Reveal Button
-        </h1>
+        </h2>
         <p className="text-sm text-muted-foreground">
           A download button that animates through icon → confirmation states before resetting.
         </p>

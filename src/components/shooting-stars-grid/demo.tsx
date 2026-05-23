@@ -12,9 +12,9 @@ export function ShootingStarsGridDemo() {
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-700 dark:text-cyan-200">
             Shooting Stars Grid
           </p>
-          <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
+          <h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
             Build interfaces that feel alive
-          </h1>
+          </h2>
           <p className="mt-5 max-w-2xl text-balance text-sm leading-6 text-zinc-600 sm:text-base dark:text-zinc-300">
             A calm grid background with ambient stars and straight grid-line runners for premium hero sections.
           </p>

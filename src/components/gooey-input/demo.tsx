@@ -18,9 +18,9 @@ export function GooeyInputDemo() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
           Motion + SVG filter
         </p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Gooey search input
-        </h1>
+        </h2>
         <p className="text-pretty text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
           Collapsed pill expands on focus; the search icon sits in a detached bubble and merges with the field through
           a gooey blur. Click the bubble or tab into the field to try it.

@@ -69,7 +69,7 @@ export default function Home() {
     url: siteConfig.url,
     logo: {
       "@type": "ImageObject",
-      url: `${siteConfig.url}/icon2`,
+      url: `${siteConfig.url}/nexus-ui-logo.png`,
       width: 192,
       height: 192,
     },

@@ -297,9 +297,9 @@ export function ImagesBadgeDemo() {
           <Sparkles className="size-3.5" />
           Social proof component
         </div>
-        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Images Badge
-        </h1>
+        </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Stacked images with per-card rotation that fan open on hover in a
           natural arc. Supports circular avatars, rounded thumbnails, and custom labels.

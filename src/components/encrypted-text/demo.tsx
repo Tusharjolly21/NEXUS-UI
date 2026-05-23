@@ -94,9 +94,9 @@ export function EncryptedTextDemo() {
           <Zap className="size-3.5" />
           Motion Effects
         </div>
-        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Encrypted Text
-        </h1>
+        </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Characters shuffle through gibberish before locking into the final string — a
           futuristic reveal effect for hero headings, buttons, and beyond.

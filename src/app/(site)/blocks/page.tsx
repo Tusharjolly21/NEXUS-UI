@@ -7,7 +7,7 @@ import { BlocksCatalog } from "./_catalog";
 export const metadata: Metadata = createMetadata({
   title: "UI Blocks for Next.js — Tailwind CSS & Framer Motion",
   description:
-    "Production-ready UI blocks for Next.js — hero sections, pricing, testimonials, feature grids, and more. Built with Tailwind CSS and Framer Motion. Free and premium.",
+    "Production-ready UI blocks for Next.js — hero sections, pricing, testimonials, feature grids. Built with Tailwind CSS and Framer Motion. Free and premium.",
   alternates: { canonical: "/blocks" },
 });
 

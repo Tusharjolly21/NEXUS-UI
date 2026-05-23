@@ -232,9 +232,9 @@ export function InteractiveStarfieldHeroDemo() {
           <Sparkles className="size-3.5" />
           Canvas hero component
         </div>
-        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Interactive Starfield Hero
-        </h1>
+        </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Dark hero section with a cursor-reactive starfield. Hundreds of glowing
           particles stretch, brighten, and rotate toward the cursor — built on

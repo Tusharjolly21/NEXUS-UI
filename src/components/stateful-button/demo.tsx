@@ -19,9 +19,9 @@ export function StatefulButtonDemo() {
     <div className="mx-auto max-w-3xl space-y-8 px-4 py-14">
       <header className="space-y-3 text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Buttons</p>
-        <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Stateful button
-        </h1>
+        </h2>
         <p className="text-sm text-muted-foreground">
           Three states (idle, loading, success) with optional error handling and reset timing.
         </p>

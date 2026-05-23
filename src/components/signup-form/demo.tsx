@@ -15,9 +15,9 @@ export function SignupFormDemo() {
     <section className="mx-auto max-w-5xl space-y-8 px-4 py-14">
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Forms</p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
           Signup Form
-        </h1>
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           Customizable auth form built with shadcn input/label and subtle framer-motion transitions.
         </p>

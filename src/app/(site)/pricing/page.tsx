@@ -4,7 +4,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...createMetadata({
-    description: "Free and premium plans for the Nexus UI React component library. Unlock animated Next.js components, full-page templates, and UI blocks with a one-time license.",
+    description: "Free and premium plans for Nexus UI. Unlock all animated components, Next.js templates, and UI blocks with a one-time license. No subscription.",
     alternates: { canonical: "/pricing" },
   }),
   title: { absolute: "Pricing — Nexus UI React Component Library" },

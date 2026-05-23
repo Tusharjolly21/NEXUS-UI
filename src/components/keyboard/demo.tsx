@@ -350,9 +350,9 @@ export function KeyboardDemo() {
           <KeyboardIcon className="size-3.5" />
           Interactive component
         </div>
-        <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+        <h2 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Mac Keyboard
-        </h1>
+        </h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
           Click keys or type on your physical keyboard. Spring animations,
           real-time key highlighting, and optional Web Audio synthesis.

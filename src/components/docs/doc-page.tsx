@@ -19,6 +19,7 @@ export function TechArticleJsonLd({
   slug: string;
   datePublished?: string;
 }) {
+  const ogImage = `${siteConfig.url}/api/og?${new URLSearchParams({ title, description: description.slice(0, 120) }).toString()}`;
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
@@ -26,9 +27,16 @@ export function TechArticleJsonLd({
     description,
     url: `${siteConfig.url}/docs/${slug}`,
     datePublished,
+    image: { "@type": "ImageObject", url: ogImage, width: 1200, height: 630 },
     author: { "@type": "Organization", name: "Nexus UI", url: siteConfig.url },
-    publisher: { "@type": "Organization", name: "Nexus UI", url: siteConfig.url },
+    publisher: {
+      "@type": "Organization",
+      name: "Nexus UI",
+      url: siteConfig.url,
+      logo: { "@type": "ImageObject", url: `${siteConfig.url}/nexus-ui-logo.png`, width: 192, height: 192 },
+    },
     proficiencyLevel: "Beginner",
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteConfig.url}/docs/${slug}` },
   };
   return (
     <script
