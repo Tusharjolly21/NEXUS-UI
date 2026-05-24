@@ -151,12 +151,26 @@ const CLIENT_LOGOS = [
 
 function useLenis() {
   React.useEffect(() => {
-    let lenis: any = null;
+    type LenisInstance = {
+      raf: (time: number) => void;
+      destroy: () => void;
+    };
+    type LenisConstructor = new (options: {
+      lerp: number;
+      duration: number;
+      smoothWheel: boolean;
+      syncTouch: boolean;
+    }) => LenisInstance;
+
+    let lenis: LenisInstance | null = null;
     let rafId = 0;
 
     import("@studio-freight/lenis")
       .then((mod) => {
-        const LenisClass = (mod.default ?? (mod as any).Lenis) as any;
+        const maybeModule = mod as { default?: LenisConstructor; Lenis?: LenisConstructor };
+        const LenisClass = maybeModule.default ?? maybeModule.Lenis;
+        if (!LenisClass) return;
+
         lenis = new LenisClass({
           lerp: 0.08,
           duration: 1.3,
@@ -214,21 +228,52 @@ function Reveal({
 function HeroSection({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [activeDropdown, setActiveDropdown] = React.useState<"studio" | "services" | null>(null);
-  
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"],
-  });
+  const scrollYProgress = useMotionValue(0);
+
+  React.useEffect(() => {
+    let rafId = 0;
+
+    const updateProgress = () => {
+      const node = containerRef.current;
+      if (!node) return;
+
+      const rect = node.getBoundingClientRect();
+      const scrollTop = window.scrollY || window.pageYOffset;
+      const start = scrollTop + rect.top;
+      const distance = Math.max(1, node.offsetHeight - window.innerHeight);
+      const next = Math.min(1, Math.max(0, (scrollTop - start) / distance));
+
+      scrollYProgress.set(next);
+    };
+
+    const requestUpdate = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateProgress);
+    };
+
+    updateProgress();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("orientationchange", requestUpdate);
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+      window.removeEventListener("orientationchange", requestUpdate);
+    };
+  }, [scrollYProgress]);
 
   // Planet scales linearly from 1.0 to 1.5 following the critical specification
   const planetScale = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 0.9, 1.0], [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]);
   
   // Text scales to much higher decoupled points (peak 80x) to make the stroke of "S" zoom right through the screen
   const textScale = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 0.9, 1.0], [1, 4, 12, 24, 48, 80]);
-  
-  // Mathematically perfect straight line displacement scaled for the 80x zoom, keeping the stroke of "S" locked in the center
-  const textX = useTransform(textScale, (s) => `${-(s - 1) * 3.04}vw`);
-  const textY = useTransform(textScale, (s) => `${-(s - 1) * 1.58}vh`);
+
+  // Keep the zoom path tied directly to scroll progress. Chaining these from
+  // textScale can lag behind Lenis while reversing near the top in production.
+  const textX = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 0.9, 1.0], ["0vw", "-9.12vw", "-33.44vw", "-69.92vw", "-142.88vw", "-240.16vw"]);
+  const textY = useTransform(scrollYProgress, [0, 0.25, 0.5, 0.75, 0.9, 1.0], ["0vh", "-4.74vh", "-17.38vh", "-36.34vh", "-74.26vh", "-124.82vh"]);
 
   // Custom opacity mappings to smooth out the transition into Section 2
   const navOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
@@ -431,9 +476,9 @@ function HeroSection({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
           style={{ opacity: surroundingsOpacity }}
         />
 
-        {/* Layer 2 — Giant display type (Single horizontal line, vertically and horizontally stretched, spanning edge-to-edge) */}
+        {/* Layer 2 — SVG wordmark. Rendering it as one graphic prevents glyph fragments on reverse scroll. */}
         <motion.div
-          className="absolute inset-x-0 bottom-0 z-10 text-white flex justify-center items-end h-[70vh] pb-1"
+          className="absolute inset-x-0 bottom-[4vh] z-10 flex justify-center text-white"
           style={{
             scale: textScale,
             x: textX,
@@ -441,9 +486,22 @@ function HeroSection({ onOpenMobileMenu }: { onOpenMobileMenu: () => void }) {
             transformOrigin: "center center",
           }}
         >
-          <div className="moon-hero-font leading-[0.72] font-black uppercase select-none w-full whitespace-nowrap text-center">
-            NOVA<span className="inline-block w-[1.5vw]" />STUDIO
-          </div>
+          <svg
+            className="moon-hero-wordmark h-auto w-[132vw] max-w-none select-none overflow-visible"
+            viewBox="0 0 1200 230"
+            aria-label="NOVA STUDIO"
+            role="img"
+          >
+            <text
+              x="600"
+              y="175"
+              textAnchor="middle"
+              textLength="1160"
+              lengthAdjust="spacingAndGlyphs"
+            >
+              NOVA STUDIO
+            </text>
+          </svg>
         </motion.div>
 
       </motion.div>
@@ -1458,6 +1516,18 @@ export default function MoonStudioPage() {
           transform-origin: bottom center;
           will-change: transform;
           display: inline-block;
+        }
+
+        .moon-hero-wordmark text {
+          fill: currentColor;
+          font-family: 'League Gothic', 'Impact', sans-serif;
+          font-size: 190px;
+          font-weight: 900;
+          letter-spacing: -0.015em;
+          transform: scaleY(1.72);
+          transform-origin: 600px 175px;
+          paint-order: fill;
+          shape-rendering: geometricPrecision;
         }
 
         .moon-outro-font {

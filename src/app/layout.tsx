@@ -8,6 +8,8 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
+const GOOGLE_TAG_ID = "G-LNN2CTHENQ";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -48,6 +50,18 @@ export default function RootLayout({
         className="min-h-dvh bg-background text-foreground antialiased selection:bg-primary/25 selection:text-foreground"
       >
         <AppProviders>{children}</AppProviders>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-tag" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GOOGLE_TAG_ID}');
+          `}
+        </Script>
         <Analytics />
         <SpeedInsights />
       </body>

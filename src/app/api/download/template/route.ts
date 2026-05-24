@@ -27,6 +27,7 @@ const SLUG_TO_FILE: Record<string, string> = {
   "ocean-flow":                 "ocean-flow-page.tsx",
   "saas-launch-aurora":         "saas-launch-aurora-page.tsx",
   "ai-startup-forge":           "ai-startup-forge-page.tsx",
+  "macbook-pro-showcase":       "gsap-macbook-landing-page.tsx",
 };
 
 // Extra component files some templates depend on
@@ -61,6 +62,25 @@ const SLUG_EXTRA_DEPS: Record<string, string[]> = {
     "src/components/keyboard/keyboard-layout.ts",
     "src/components/keyboard/use-keyboard-sound.ts",
     "src/components/keyboard/index.ts",
+  ],
+  "macbook-pro-showcase": [
+    "src/components/templates/gsap-macbook-landing/index.css",
+    "src/components/templates/gsap-macbook-landing/constants/index.ts",
+    "src/components/templates/gsap-macbook-landing/store/index.ts",
+    "src/components/templates/gsap-macbook-landing/components/NavBar.tsx",
+    "src/components/templates/gsap-macbook-landing/components/Hero.tsx",
+    "src/components/templates/gsap-macbook-landing/components/ProductViewer.tsx",
+    "src/components/templates/gsap-macbook-landing/components/Showcase.tsx",
+    "src/components/templates/gsap-macbook-landing/components/Performance.tsx",
+    "src/components/templates/gsap-macbook-landing/components/Features.tsx",
+    "src/components/templates/gsap-macbook-landing/components/Highlights.tsx",
+    "src/components/templates/gsap-macbook-landing/components/Footer.tsx",
+    "src/components/templates/gsap-macbook-landing/components/models/Macbook-14.tsx",
+    "src/components/templates/gsap-macbook-landing/components/models/Macbook-16.tsx",
+    "src/components/templates/gsap-macbook-landing/components/models/Macbook.tsx",
+    "src/components/templates/gsap-macbook-landing/components/three/ModelSwitcher.tsx",
+    "src/components/templates/gsap-macbook-landing/components/three/StudioLights.tsx",
+    "src/components/templates/gsap-macbook-landing/hooks/useMediaQuery.ts",
   ],
 };
 

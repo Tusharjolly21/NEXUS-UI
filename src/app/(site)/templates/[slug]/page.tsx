@@ -18,6 +18,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const t = getTemplate(slug);
   if (!t) return {};
+
+  if (slug === "macbook-pro-showcase") {
+    return createMetadata({
+      title: "Cinematic MacBook Launch",
+      description:
+        "An immersive MacBook Pro product template with GSAP scroll choreography, interactive 3D configuration, performance animations, and cinematic media.",
+      openGraph: {
+        title: "Cinematic MacBook Launch",
+        description:
+          "A cinematic Next.js product template with GSAP scroll animation and interactive 3D MacBook sections.",
+      },
+      alternates: { canonical: "/templates/macbook-pro-showcase" },
+    });
+  }
+
   return createMetadata({
     title: `${t.title} — Next.js Landing Page Template`,
     description: t.description,

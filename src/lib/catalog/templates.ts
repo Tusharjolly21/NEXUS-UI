@@ -658,6 +658,41 @@ export const templates: MarketplaceTemplate[] = [
       "Scroll-aware transparent-to-frosted navbar",
     ],
   },
+  {
+    slug: "macbook-pro-showcase",
+    title: "Cinematic MacBook Launch",
+    description:
+      "An immersive, high-performance product landing page featuring interactive 3D model configuration (Space Gray & Silver, 14\" & 16\" scaling), scroll-driven masked video zoom highlights, performance metric grids, and dynamic video texture mapping.",
+    category: "Startup Landing Pages",
+    tags: ["apple", "gsap", "threejs", "r3f", "3d", "product-launch", "scrolltrigger"],
+    difficulty: "Advanced",
+    premium: true,
+    trendingScore: 295,
+    createdAt: "2026-05-24",
+    techStack: ["Next.js", "TypeScript", "Tailwind CSS v4", "GSAP", "@gsap/react", "Three.js", "React Three Fiber", "Zustand"],
+    pages: ["/", "/macbook"],
+    sections: [
+      "Translucent Header Navigation",
+      "Cinematic Video Hero",
+      "Interactive 3D Product Configurator",
+      "Scroll-Masked Showcase Film",
+      "Parallax Performance Spec Grid",
+      "Interactive Video Feature Loop",
+      "Apple Highlight Masonry Grid",
+      "Apple Store Outlet Outro",
+    ],
+    pageLabels: ["Landing", "Configurator", "Specs", "Features"],
+    features: [
+      "Custom Apple-style header navigation with blur and hover state translations",
+      "Smooth video playback playbackRate speed acceleration in Hero view",
+      "Fully interactive 3D MacBook Pro configurator with real-time model swapping",
+      "Zustand state integration for dynamic color selection (Silver / Space Gray)",
+      "Zustand state integration for interactive size configurations (14 inch / 16 inch)",
+      "High-performance GSAP ScrollTrigger timeline animations throughout",
+      "Perspective screen video texture mapping dynamically updating on group rotations",
+      "Custom responsive grid layouts and robust mobile/tablet layout support",
+    ],
+  },
 ];
 
 export function getTemplate(slug: string) {

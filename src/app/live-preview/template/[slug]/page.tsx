@@ -84,6 +84,10 @@ const NoirStudioTemplatePage = nextDynamic(
   () => import("@/components/templates/moon-studio-page"),
   { loading: TemplateFallback },
 );
+const GsapMacbookLandingPage = nextDynamic(
+  () => import("@/components/templates/gsap-macbook-landing-page"),
+  { loading: TemplateFallback },
+);
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -141,6 +145,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><AiStartupForgePage /></ThemeReceiver>;
   } else if (tmpl.slug === "orbit-ai-page") {
     return <ThemeReceiver><OrbitAIPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "macbook-pro-showcase") {
+    return <ThemeReceiver><GsapMacbookLandingPage /></ThemeReceiver>;
   }
 
   return (

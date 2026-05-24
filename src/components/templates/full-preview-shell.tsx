@@ -121,6 +121,29 @@ export default function HomePage() {
 }`;
   }
 
+  if (tmpl.slug === "macbook-pro-showcase") {
+    return `// ${tmpl.title} — Production Template
+// Stack: ${tmpl.techStack.join(", ")}
+// Pages: ${tmpl.pages.join(", ")}
+
+import type { Metadata } from "next";
+import GsapMacbookLandingPage from "@/components/templates/gsap-macbook-landing-page";
+
+export const metadata: Metadata = {
+  title: "Cinematic MacBook Launch",
+  description: "An immersive product landing page featuring interactive 3D model configuration (Space Gray & Silver, 14\\" & 16\\"), GSAP scroll-driven animations, and performance metric collages.",
+  openGraph: {
+    title: "Cinematic MacBook Launch",
+    description: "Immersive GSAP product showcase.",
+    images: [{ url: "/og.png", width: 1200, height: 630 }],
+  },
+};
+
+export default function HomePage() {
+  return <GsapMacbookLandingPage />;
+}`;
+  }
+
   if (tmpl.slug === "nova-landing-page") {
     return `// ${tmpl.title} — Production Template
 // Stack: ${tmpl.techStack.join(", ")}
