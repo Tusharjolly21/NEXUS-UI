@@ -8,15 +8,17 @@ Source: https://sketchfab.com/3d-models/macbook-pro-m3-16-inch-2024-8e34fc2b3031
 Title: macbook pro M3 16 inch 2024
 */
 
-import React, {useEffect} from 'react'
+import React, {useEffect, useRef} from 'react'
 import {useGLTF} from '@react-three/drei'
+import {useFrame} from '@react-three/fiber'
 import useMacbookStore from "../../store/index";
 import {noChangeParts} from "../../constants/index";
-import {BufferGeometry, Color, Material, Mesh, Object3D} from "three";
+import {BufferGeometry, Color, MeshBasicMaterial, Material, Mesh, Object3D, VideoTexture, SRGBColorSpace} from "three";
 
 type MacbookModelProps = {
     scale?: number;
     position?: [number, number, number];
+    videoEl?: HTMLVideoElement | null;
 };
 
 type GltfResult = {
@@ -34,9 +36,10 @@ const paintMaterial = (material: Material | Material[], color: string) => {
     });
 };
 
-export default function MacbookModel(props: MacbookModelProps) {
+export default function MacbookModel({ videoEl, ...props }: MacbookModelProps) {
     const { color } = useMacbookStore();
-  const { nodes, materials, scene} = useGLTF('/models/macbook-transformed.glb') as unknown as GltfResult
+    const { nodes, materials, scene} = useGLTF('/models/macbook-transformed.glb') as unknown as GltfResult;
+    const screenMatRef = useRef<MeshBasicMaterial>(null);
 
     useEffect(() => {
         scene.traverse((child) => {
@@ -48,31 +51,63 @@ export default function MacbookModel(props: MacbookModelProps) {
         });
     }, [color, scene]);
 
-  return (
-    <group {...props} dispose={null}>
-      <mesh geometry={nodes.Object_10.geometry} material={materials.PaletteMaterial001} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_16.geometry} material={materials.zhGRTuGrQoJflBD} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_20.geometry} material={materials.PaletteMaterial002} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_22.geometry} material={materials.lmWQsEjxpsebDlK} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_30.geometry} material={materials.LtEafgAVRolQqRw} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_32.geometry} material={materials.iyDJFXmHelnMTbD} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_34.geometry} material={materials.eJObPwhgFzvfaoZ} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_38.geometry} material={materials.nDsMUuDKliqGFdU} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_42.geometry} material={materials.CRQixVLpahJzhJc} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_48.geometry} material={materials.YYwBgwvcyZVOOAA} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_54.geometry} material={materials.SLGkCohDDelqXBu} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_58.geometry} material={materials.WnHKXHhScfUbJQi} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_66.geometry} material={materials.fNHiBfcxHUJCahl} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_74.geometry} material={materials.LpqXZqhaGCeSzdu} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_82.geometry} material={materials.gMtYExgrEUqPfln} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_96.geometry} material={materials.PaletteMaterial003} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_107.geometry} material={materials.JvMFZolVCdpPqjj} rotation={[Math.PI / 2, 0, 0]} />
-      <mesh geometry={nodes.Object_123.geometry} rotation={[Math.PI / 2, 0, 0]}>
-          <meshBasicMaterial color="#050505" />
-      </mesh>
-      <mesh geometry={nodes.Object_127.geometry} material={materials.ZCDwChwkbBfITSW} rotation={[Math.PI / 2, 0, 0]} />
-    </group>
-  )
+    useEffect(() => {
+        const mat = screenMatRef.current;
+        if (!mat) return;
+        if (!videoEl) {
+            const old = mat.map;
+            mat.map = null;
+            mat.color.set('#050505');
+            mat.needsUpdate = true;
+            old?.dispose();
+            return;
+        }
+        const texture = new VideoTexture(videoEl);
+        texture.colorSpace = SRGBColorSpace;
+        texture.flipY = false;
+        const old = mat.map;
+        mat.map = texture;
+        mat.color.set(0xffffff);
+        mat.needsUpdate = true;
+        old?.dispose();
+        return () => {
+            mat.map = null;
+            mat.needsUpdate = true;
+            texture.dispose();
+        };
+    }, [videoEl]);
+
+    // Force the VideoTexture to upload a new frame on every render tick
+    useFrame(() => {
+        const tex = screenMatRef.current?.map;
+        if (tex instanceof VideoTexture) tex.needsUpdate = true;
+    });
+
+    return (
+        <group {...props} dispose={null}>
+            <mesh geometry={nodes.Object_10.geometry} material={materials.PaletteMaterial001} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_16.geometry} material={materials.zhGRTuGrQoJflBD} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_20.geometry} material={materials.PaletteMaterial002} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_22.geometry} material={materials.lmWQsEjxpsebDlK} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_30.geometry} material={materials.LtEafgAVRolQqRw} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_32.geometry} material={materials.iyDJFXmHelnMTbD} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_34.geometry} material={materials.eJObPwhgFzvfaoZ} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_38.geometry} material={materials.nDsMUuDKliqGFdU} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_42.geometry} material={materials.CRQixVLpahJzhJc} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_48.geometry} material={materials.YYwBgwvcyZVOOAA} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_54.geometry} material={materials.SLGkCohDDelqXBu} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_58.geometry} material={materials.WnHKXHhScfUbJQi} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_66.geometry} material={materials.fNHiBfcxHUJCahl} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_74.geometry} material={materials.LpqXZqhaGCeSzdu} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_82.geometry} material={materials.gMtYExgrEUqPfln} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_96.geometry} material={materials.PaletteMaterial003} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_107.geometry} material={materials.JvMFZolVCdpPqjj} rotation={[Math.PI / 2, 0, 0]} />
+            <mesh geometry={nodes.Object_123.geometry} rotation={[Math.PI / 2, 0, 0]}>
+                <meshBasicMaterial ref={screenMatRef} color="#050505" />
+            </mesh>
+            <mesh geometry={nodes.Object_127.geometry} material={materials.ZCDwChwkbBfITSW} rotation={[Math.PI / 2, 0, 0]} />
+        </group>
+    );
 }
 
 useGLTF.preload('/models/macbook-transformed.glb')
