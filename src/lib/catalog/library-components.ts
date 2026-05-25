@@ -7178,7 +7178,7 @@ export function FeatureToolsCard({
     tags: ["tooltip", "hover", "link", "preview", "framer-motion", "blog", "animation"],
     premium: false,
     trendingScore: 88,
-    createdAt: "2025-05-21T00:00:00.000Z",
+    createdAt: "2026-05-21T00:00:00.000Z",
     animationKinds: ["hover", "spring"],
     dependencies: ["framer-motion"],
     Preview: Previews.PreviewLinkPreview,
