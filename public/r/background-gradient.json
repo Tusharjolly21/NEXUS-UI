@@ -5,7 +5,8 @@
   "title": "Background Gradient",
   "description": "Animated gradient wrapper with soft glow and blur for cards, buttons, and hero sections.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -28,7 +29,7 @@
       "path": "next-ui/background-gradient.tsx",
       "type": "registry:component",
       "target": "components/background-gradient.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/background-gradient` here before directory index. */\nexport type { BackgroundGradientProps } from \"./background-gradient/background-gradient\";\nexport { BackgroundGradient } from \"./background-gradient/background-gradient\";\nexport { BackgroundGradientDemo } from \"./background-gradient/demo\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/background-gradient` here before directory index. */\nexport type { BackgroundGradientProps } from \"./background-gradient/background-gradient\";\nexport { BackgroundGradient } from \"./background-gradient/background-gradient\";\n"
     }
   ]
 }

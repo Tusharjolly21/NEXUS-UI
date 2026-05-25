@@ -4,7 +4,9 @@
   "type": "registry:component",
   "title": "Scrolling Testimonials",
   "description": "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
-  "dependencies": [],
+  "dependencies": [
+    "react"
+  ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
     "utils"

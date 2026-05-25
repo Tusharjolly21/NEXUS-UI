@@ -5,7 +5,8 @@
   "title": "Mac Keyboard",
   "description": "Fully interactive Mac-style keyboard with Web Audio synthesised click sounds, Framer Motion keycap animations, and real-time physical keyboard highlighting.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

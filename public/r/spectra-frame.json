@@ -4,7 +4,9 @@
   "type": "registry:component",
   "title": "Spectra Frame",
   "description": "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
-  "dependencies": [],
+  "dependencies": [
+    "react"
+  ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json"
   ],

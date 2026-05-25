@@ -5,7 +5,8 @@
   "title": "Animated Select Headline",
   "description": "A cycling word headline where each active word is highlighted with a Figma-style selection rectangle — thin border with corner handles — using blur-fade transitions.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

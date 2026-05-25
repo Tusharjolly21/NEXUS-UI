@@ -5,7 +5,10 @@
   "title": "Link Preview",
   "description": "Hover-triggered image tooltip that transforms inline text links into cinematic visual previews. Spring-animated entrance with blur, scale, mouse-tracking tilt, and a soft floating glide — perfect for blogs, portfolios, and product pages.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react",
+    "react-dom",
+    "next"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

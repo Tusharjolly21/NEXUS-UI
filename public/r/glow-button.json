@@ -6,7 +6,8 @@
   "description": "Framer-style glowing CTA button with expanding shadow, radial border sweep, glass edge, and animated arrow.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

@@ -652,6 +652,40 @@ export default function GsapMacbookLandingPage() {
           z-index: 40;
         }
 
+        .macbook-landing-page #features .feature-media-display {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: min(34vw, 500px);
+          aspect-ratio: 16 / 9;
+          transform: translate(-50%, -72%);
+          overflow: hidden;
+          border-radius: 5px;
+          background-color: #050505;
+          pointer-events: none;
+        }
+
+        .macbook-landing-page #features .feature-media-display video {
+          position: absolute;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0;
+          transition: opacity 180ms ease-out;
+        }
+
+        .macbook-landing-page #features .feature-media-display video.active {
+          opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+          .macbook-landing-page #features .feature-media-display {
+            width: min(58vw, 480px);
+            transform: translate(-50%, -66%);
+          }
+        }
+
         .macbook-landing-page #features .box {
           max-width: 320px;
           position: absolute;

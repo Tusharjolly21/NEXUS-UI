@@ -5,7 +5,8 @@
   "title": "Background Boxes",
   "description": "Interactive full-width box grid background with cursor-follow highlight, optional glow, and smooth ripple transitions.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

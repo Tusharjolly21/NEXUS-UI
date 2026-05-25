@@ -5,7 +5,8 @@
   "title": "Warp Speed Card",
   "description": "A focused warp-speed effect — hover a single phrase to reveal a dark space scene with streaking beams confined to the text's bounding box. The text itself stays static; the effect lives entirely behind it.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

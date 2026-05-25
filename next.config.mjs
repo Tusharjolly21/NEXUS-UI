@@ -11,11 +11,43 @@ const securityHeaders = [
   { key: "Referrer-Policy", value: "origin-when-cross-origin" },
   // Restricts browser feature access — reduces attack surface
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  // Content Security Policy — mitigates XSS and data injection attacks
+  {
+    key: "Content-Security-Policy",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https://images.unsplash.com https://i.pravatar.cc https://picsum.photos https://cdn.jsdelivr.net https://www.google-analytics.com",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' blob: https://*.supabase.co https://api.lemonsqueezy.com https://www.google-analytics.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com",
+      "worker-src 'self' blob:",
+      "frame-src 'self' https://*.lemonsqueezy.com https://checkout.stripe.com",
+      "frame-ancestors 'self'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "object-src 'none'",
+    ].join("; "),
+  },
 ];
 
 const nextConfig = {
   poweredByHeader: false,
   compress: true,
+  outputFileTracingIncludes: {
+    "/api/download/template": [
+      "./package.json",
+      "./src/app/globals.css",
+      "./src/components/**/*",
+      "./src/lib/utils.ts",
+      "./public/templates/**/*",
+      "./public/videos/**/*",
+      "./public/models/**/*",
+      "./public/fonts/**/*",
+      "./public/*.{png,jpg,jpeg,webp,svg}",
+    ],
+    "/api/registry/[name]": ["./.generated/registry/**/*.json"],
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [

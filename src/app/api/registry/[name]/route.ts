@@ -15,6 +15,7 @@
  *  - Token is never logged
  *  - No user data is returned in error responses
  *  - Free components bypass auth entirely (no unnecessary latency)
+ *  - Rate limited to prevent abuse
  */
 
 import { NextResponse } from "next/server";
@@ -22,11 +23,28 @@ import { readFile } from "fs/promises";
 import path from "path";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { parseApiToken, adminCanAccessComponent } from "@/lib/entitlements";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ name: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
   const { name } = await params;
+
+  // Rate limit: 60 requests per IP per minute (generous for CLI batch installs)
+  const ip = getClientIp(_req);
+  const rl = rateLimit(`registry:${ip}`, 60, 60_000);
+  if (!rl.success) {
+    return new NextResponse(
+      JSON.stringify({ error: "Too many requests. Please wait and try again." }),
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "application/json",
+          "Retry-After": String(Math.ceil(rl.reset / 1000)),
+        },
+      },
+    );
+  }
 
   // ── 1. Resolve component metadata ───────────────────────────────
   const component = getLibraryComponent(name);
@@ -57,6 +75,7 @@ export async function GET(_req: Request, { params }: Params) {
     );
   }
 
+  // Resolve token to user ID
   const userId = parseApiToken(token);
 
   if (!userId) {
@@ -67,7 +86,7 @@ export async function GET(_req: Request, { params }: Params) {
   }
 
   // ── 4. Entitlement check (service-role, bypasses RLS) ───────────
-  const allowed = await adminCanAccessComponent(userId, name);
+  const allowed = await adminCanAccessComponent(userId, component.slug);
 
   if (!allowed) {
     return new NextResponse(
@@ -85,7 +104,7 @@ export async function GET(_req: Request, { params }: Params) {
 
 async function serveRegistryFile(name: string): Promise<NextResponse> {
   try {
-    const filePath = path.join(process.cwd(), "public", "r", `${name}.json`);
+    const filePath = path.join(process.cwd(), ".generated", "registry", `${name}.json`);
     const contents = await readFile(filePath, "utf-8");
 
     return new NextResponse(contents, {

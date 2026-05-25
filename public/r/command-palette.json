@@ -7,7 +7,9 @@
   "dependencies": [
     "framer-motion",
     "lucide-react",
-    "cmdk"
+    "cmdk",
+    "react",
+    "@radix-ui/react-dialog"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

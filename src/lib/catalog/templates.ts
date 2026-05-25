@@ -28,6 +28,18 @@ export type MarketplaceTemplate = {
   sections: string[];
   features: string[];
   pageLabels: string[];
+  /** 
+   * Preview screenshot images for this template.
+   * - `hero`: Main preview shown on the /templates listing page (full landing page screenshot)
+   * - `sections`: Array of 4 section screenshots shown on the detail page
+   * 
+   * Image paths are relative to /public, e.g. "/templates/noir-studio/hero.webp"
+   * Convention: /public/templates/{slug}/hero.webp and /public/templates/{slug}/section-{1-4}.webp
+   */
+  previewImages?: {
+    hero: string;
+    sections: string[];
+  };
 };
 
 export const templates: MarketplaceTemplate[] = [
@@ -57,6 +69,15 @@ export const templates: MarketplaceTemplate[] = [
       "Giant Footer Outro Wordmark",
     ],
     pageLabels: ["Hero", "Work", "Team", "News"],
+    previewImages: {
+      hero: "/templates/noir-studio/hero.webp",
+      sections: [
+        "/templates/noir-studio/section-1-v2.webp",
+        "/templates/noir-studio/section-2-v2.webp",
+        "/templates/noir-studio/section-3-v2.webp",
+        "/templates/noir-studio/section-4-v2.webp",
+      ],
+    },
     features: [
       "Duo-mode morphing navbar from top header to floating glassmorphic pill capsule",
       "Detailed 2-column mega-dropdown grids for STUDIO and SERVICES with micro-hover states",
@@ -95,6 +116,15 @@ export const templates: MarketplaceTemplate[] = [
       "Gradient CTA",
     ],
     pageLabels: ["Hero", "Features", "Workflow", "FAQ"],
+    previewImages: {
+      hero: "/templates/nexus-ai-launch/hero.webp",
+      sections: [
+        "/templates/nexus-ai-launch/section-1-v2.webp",
+        "/templates/nexus-ai-launch/section-2-v2.webp",
+        "/templates/nexus-ai-launch/section-3-v2.webp",
+        "/templates/nexus-ai-launch/section-4-v2.webp",
+      ],
+    },
     features: [
       "Built from local Nexus UI components",
       "TextGenerateEffect animated hero copy",
@@ -124,6 +154,15 @@ export const templates: MarketplaceTemplate[] = [
     pages: ["/", "/pricing", "/changelog", "/login"],
     sections: ["Hero", "Logo cloud", "Bento", "Testimonials", "Pricing", "FAQ", "CTA"],
     pageLabels: ["Landing", "Pricing", "Changelog", "Login"],
+    previewImages: {
+      hero: "/templates/saas-launch-aurora/hero.webp",
+      sections: [
+        "/templates/saas-launch-aurora/section-1-v2.webp",
+        "/templates/saas-launch-aurora/section-2-v2.webp",
+        "/templates/saas-launch-aurora/section-3-v2.webp",
+        "/templates/saas-launch-aurora/section-4-v2.webp",
+      ],
+    },
     features: [
       "Animated hero with particle physics",
       "Social proof logo carousel",
@@ -149,6 +188,15 @@ export const templates: MarketplaceTemplate[] = [
     pages: ["/", "/product", "/security", "/signup"],
     sections: ["Hero", "AI demo", "Integrations", "Security", "Pricing", "FAQ"],
     pageLabels: ["Home", "Product", "Security", "Sign Up"],
+    previewImages: {
+      hero: "/templates/ai-startup-forge/hero.webp",
+      sections: [
+        "/templates/ai-startup-forge/section-1-v2.webp",
+        "/templates/ai-startup-forge/section-2-v2.webp",
+        "/templates/ai-startup-forge/section-3-v2.webp",
+        "/templates/ai-startup-forge/section-4-v2.webp",
+      ],
+    },
     features: [
       "Prompt rail interactive demo",
       "Model trust + security section",
@@ -185,6 +233,15 @@ export const templates: MarketplaceTemplate[] = [
       "CTA Pre-Footer",
     ],
     pageLabels: ["Hero", "Pricing", "Resources", "Login"],
+    previewImages: {
+      hero: "/templates/simplistic-saas-template/hero.webp",
+      sections: [
+        "/templates/simplistic-saas-template/section-1-v2.webp",
+        "/templates/simplistic-saas-template/section-2-v2.webp",
+        "/templates/simplistic-saas-template/section-3-v2.webp",
+        "/templates/simplistic-saas-template/section-4-v2.webp",
+      ],
+    },
     features: [
       "AI agent hero with live motion effects",
       "Asymmetrical bento feature grid",
@@ -221,6 +278,15 @@ export const templates: MarketplaceTemplate[] = [
       "Minimal Footer",
     ],
     pageLabels: ["Hero", "Features", "Showcase", "CTA"],
+    previewImages: {
+      hero: "/templates/orbit-ai-page/hero.webp",
+      sections: [
+        "/templates/orbit-ai-page/section-1-v2.webp",
+        "/templates/orbit-ai-page/section-2-v2.webp",
+        "/templates/orbit-ai-page/section-3-v2.webp",
+        "/templates/orbit-ai-page/section-4-v2.webp",
+      ],
+    },
     features: [
       "Dark-mode-first futuristic aesthetic",
       "Framer motion workspace 3D mockup",
@@ -257,6 +323,15 @@ export const templates: MarketplaceTemplate[] = [
       "Multi-Column Footer",
     ],
     pageLabels: ["Hero", "Departments", "Process", "Pricing"],
+    previewImages: {
+      hero: "/templates/talent-hub-landing/hero.webp",
+      sections: [
+        "/templates/talent-hub-landing/section-1-v2.webp",
+        "/templates/talent-hub-landing/section-2-v2.webp",
+        "/templates/talent-hub-landing/section-3-v2.webp",
+        "/templates/talent-hub-landing/section-4-v2.webp",
+      ],
+    },
     features: [
       "Deep indigo #13139C brand system",
       "Floating emoji hero animations",
@@ -295,6 +370,15 @@ export const templates: MarketplaceTemplate[] = [
       "Footer",
     ],
     pageLabels: ["Hero", "How It Works", "Features", "CTA"],
+    previewImages: {
+      hero: "/templates/synapse-ai-platform/hero.webp",
+      sections: [
+        "/templates/synapse-ai-platform/section-1-v2.webp",
+        "/templates/synapse-ai-platform/section-2-v2.webp",
+        "/templates/synapse-ai-platform/section-3-v2.webp",
+        "/templates/synapse-ai-platform/section-4-v2.webp",
+      ],
+    },
     features: [
       "Orange-accented light-mode design",
       "App dashboard mockup in hero",
@@ -331,6 +415,15 @@ export const templates: MarketplaceTemplate[] = [
       "Footer with Newsletter",
     ],
     pageLabels: ["Hero", "Features", "Pricing", "FAQ"],
+    previewImages: {
+      hero: "/templates/helix-ai-platform/hero.webp",
+      sections: [
+        "/templates/helix-ai-platform/section-1-v2.webp",
+        "/templates/helix-ai-platform/section-2-v2.webp",
+        "/templates/helix-ai-platform/section-3-v2.webp",
+        "/templates/helix-ai-platform/section-4-v2.webp",
+      ],
+    },
     features: [
       "Pure black/white editorial aesthetic",
       "Perspective-tilted Linear-style task tracker mockup",
@@ -372,6 +465,15 @@ export const templates: MarketplaceTemplate[] = [
       "Footer",
     ],
     pageLabels: ["Hero", "Features", "Workflow", "Pricing"],
+    previewImages: {
+      hero: "/templates/orion-ai-ops/hero.webp",
+      sections: [
+        "/templates/orion-ai-ops/section-1-v2.webp",
+        "/templates/orion-ai-ops/section-2-v2.webp",
+        "/templates/orion-ai-ops/section-3-v2.webp",
+        "/templates/orion-ai-ops/section-4-v2.webp",
+      ],
+    },
     features: [
       "Indigo enterprise brand system",
       "Scroll-driven 3D kanban board hero",
@@ -422,6 +524,15 @@ export const templates: MarketplaceTemplate[] = [
       "Footer",
     ],
     pageLabels: ["Hero", "Features", "Pricing", "FAQ"],
+    previewImages: {
+      hero: "/templates/startup-landing-page/hero.webp",
+      sections: [
+        "/templates/startup-landing-page/section-1-v2.webp",
+        "/templates/startup-landing-page/section-2-v2.webp",
+        "/templates/startup-landing-page/section-3-v2.webp",
+        "/templates/startup-landing-page/section-4-v2.webp",
+      ],
+    },
     features: [
       "3D Transforms",
       "A11y Optimized",
@@ -472,6 +583,15 @@ export const templates: MarketplaceTemplate[] = [
       "Minimal Footer",
     ],
     pageLabels: ["Hero", "Features", "Studio", "Pricing"],
+    previewImages: {
+      hero: "/templates/nova-landing-page/hero.webp",
+      sections: [
+        "/templates/nova-landing-page/section-1-v2.webp",
+        "/templates/nova-landing-page/section-2-v2.webp",
+        "/templates/nova-landing-page/section-3-v2.webp",
+        "/templates/nova-landing-page/section-4-v2.webp",
+      ],
+    },
     features: [
       "Apple.com-inspired light-mode layout",
       "Lenis smooth scroll integration",
@@ -512,6 +632,15 @@ export const templates: MarketplaceTemplate[] = [
       "FAQ",
     ],
     pageLabels: ["Landing"],
+    previewImages: {
+      hero: "/templates/claura-agency/hero.webp",
+      sections: [
+        "/templates/claura-agency/section-1-v2.webp",
+        "/templates/claura-agency/section-2-v2.webp",
+        "/templates/claura-agency/section-3-v2.webp",
+        "/templates/claura-agency/section-4-v2.webp",
+      ],
+    },
     features: [
       "Warm #f5f0eb off-white background throughout",
       "Serif (Georgia) headings, sans-serif body",
@@ -558,6 +687,15 @@ export const templates: MarketplaceTemplate[] = [
       "Multi-Column Footer",
     ],
     pageLabels: ["Hero", "AI Section", "Roadmap", "Integrations"],
+    previewImages: {
+      hero: "/templates/pulse-landing/hero.webp",
+      sections: [
+        "/templates/pulse-landing/section-1-v2.webp",
+        "/templates/pulse-landing/section-2-v2.webp",
+        "/templates/pulse-landing/section-3-v2.webp",
+        "/templates/pulse-landing/section-4-v2.webp",
+      ],
+    },
     features: [
       "3D perspective-transformed dashboard mockup in hero",
       "Scroll-driven parallax on hero stage",
@@ -599,6 +737,15 @@ export const templates: MarketplaceTemplate[] = [
       "Live Clock Footer with Giant Marquee",
     ],
     pageLabels: ["Hero", "Work", "Process", "Contact"],
+    previewImages: {
+      hero: "/templates/aether-portfolio/hero.webp",
+      sections: [
+        "/templates/aether-portfolio/section-1-v2.webp",
+        "/templates/aether-portfolio/section-2-v2.webp",
+        "/templates/aether-portfolio/section-3-v2.webp",
+        "/templates/aether-portfolio/section-4-v2.webp",
+      ],
+    },
     features: [
       "Deep near-black #09090c background",
       "Warm champagne-gold #c5a57b accent — no neon, no bright tones",
@@ -643,6 +790,15 @@ export const templates: MarketplaceTemplate[] = [
       "Footer with Link Grid",
     ],
     pageLabels: ["Landing", "Gear", "Technology", "Journal"],
+    previewImages: {
+      hero: "/templates/ocean-flow/hero.webp",
+      sections: [
+        "/templates/ocean-flow/section-1-v2.webp",
+        "/templates/ocean-flow/section-2-v2.webp",
+        "/templates/ocean-flow/section-3-v2.webp",
+        "/templates/ocean-flow/section-4-v2.webp",
+      ],
+    },
     features: [
       "Dark navy deep-ocean colour palette",
       "Parallax scroll hero with animated ripple rings",
@@ -682,6 +838,15 @@ export const templates: MarketplaceTemplate[] = [
       "Apple Store Outlet Outro",
     ],
     pageLabels: ["Landing", "Configurator", "Specs", "Features"],
+    previewImages: {
+      hero: "/templates/macbook-pro-showcase/hero.webp",
+      sections: [
+        "/templates/macbook-pro-showcase/section-1-v2.webp",
+        "/templates/macbook-pro-showcase/section-2-v2.webp",
+        "/templates/macbook-pro-showcase/section-3-v2.webp",
+        "/templates/macbook-pro-showcase/section-4-v2.webp",
+      ],
+    },
     features: [
       "Custom Apple-style header navigation with blur and hover state translations",
       "Smooth video playback playbackRate speed acceleration in Hero view",

@@ -5,7 +5,8 @@
   "title": "Meteor Effect",
   "description": "Animated diagonal meteor beams with glow heads and trailing streaks, designed as a reusable background layer for cards and hero sections.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

@@ -5,7 +5,8 @@
   "title": "3D Card Carousel",
   "description": "Cylindrical 3D card carousel — cards arranged in a circle on the Z axis, rotating continuously or on scroll. Radius, perspective, item size, speed, and direction are all configurable.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

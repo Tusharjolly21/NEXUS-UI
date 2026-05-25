@@ -16,7 +16,7 @@ export default async function DashboardApiKeyPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/dashboard/api-key");
 
-  const apiKey = `nxs_${user.id.replace(/-/g, "").slice(0, 32)}`;
+  const apiKey = `nxs_${user.id.replace(/-/g, "")}`;
 
   return (
     <div className="px-4 py-6 sm:px-8 sm:py-10">

@@ -6,7 +6,8 @@
   "description": "Animated async button with idle → loading → success transitions, built-in click guarding, and smooth icon/text motion.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -29,7 +30,7 @@
       "path": "next-ui/stateful-button.tsx",
       "type": "registry:component",
       "target": "components/stateful-button.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/stateful-button` before directory index. */\nexport type { StatefulButtonProps } from \"./stateful-button/stateful-button\";\nexport { StatefulButton } from \"./stateful-button/stateful-button\";\nexport { StatefulButtonDemo } from \"./stateful-button/demo\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/stateful-button` before directory index. */\nexport type { StatefulButtonProps } from \"./stateful-button/stateful-button\";\nexport { StatefulButton } from \"./stateful-button/stateful-button\";\n"
     }
   ]
 }

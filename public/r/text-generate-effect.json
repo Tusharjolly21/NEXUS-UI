@@ -5,7 +5,8 @@
   "title": "Text Generate Effect",
   "description": "Animated text reveal that fades words, characters, or lines into view with optional blur and upward motion.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -28,7 +29,7 @@
       "path": "next-ui/text-generate-effect.tsx",
       "type": "registry:component",
       "target": "components/text-generate-effect.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/text-generate-effect` to file before directory. */\nexport type {\n  TextGenerateMode,\n  TextGenerateAs,\n  TextGenerateTrigger,\n  TextGenerateEffectProps,\n} from \"./text-generate-effect/text-generate-effect\";\nexport { TextGenerateEffect } from \"./text-generate-effect/text-generate-effect\";\nexport { TextGenerateEffectDemo } from \"./text-generate-effect/demo\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/text-generate-effect` to file before directory. */\nexport type {\n  TextGenerateMode,\n  TextGenerateAs,\n  TextGenerateTrigger,\n  TextGenerateEffectProps,\n} from \"./text-generate-effect/text-generate-effect\";\nexport { TextGenerateEffect } from \"./text-generate-effect/text-generate-effect\";\n"
     }
   ]
 }

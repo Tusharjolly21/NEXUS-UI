@@ -2,94 +2,244 @@ import { NextRequest, NextResponse } from "next/server";
 import JSZip from "jszip";
 import fs from "fs/promises";
 import path from "path";
+import { Readable } from "stream";
 import { createClient } from "@/lib/supabase/server";
 import { canAccessTemplate } from "@/lib/entitlements";
 import { getTemplate } from "@/lib/catalog/templates";
+import { rateLimit } from "@/lib/rate-limit";
 
 const ROOT = process.cwd();
-const TEMPLATES_DIR = path.join(ROOT, "src", "components", "templates");
+const TEMPLATE_SOURCE_ROOT = "src/components/templates";
+const INSPECTABLE_SOURCE_PATTERN = /\.(?:css|json|mjs|js|jsx|ts|tsx)$/i;
+const PUBLIC_ASSET_PATTERN =
+  /(?:["'`(])\/([^"'`()\s?#]+?\.(?:glb|gltf|jpe?g|json|mp3|mp4|ogg|otf|png|svg|wav|webm|webp|woff2?))(?:[?#][^"'`()\s]*)?(?=["'`)])/gi;
 
-// Maps slug → main component file
 const SLUG_TO_FILE: Record<string, string> = {
-  "noir-studio":                 "moon-studio-page.tsx",
-  "nexus-ai-launch":            "nexus-ai-launch-template-page.tsx",
-  "talent-hub-landing":         "talent-hub-page.tsx",
-  "startup-landing-page":       "startup-landing-page.tsx",
-  "nova-landing-page":          "nova-landing-page.tsx",
-  "simplistic-saas-template":   "simplistic-saas-page.tsx",
-  "orbit-ai-page":              "orbit-ai-page.tsx",
-  "synapse-ai-platform":        "synapse-ai-page.tsx",
-  "helix-ai-platform":          "helix-ai-platform.tsx",
-  "orion-ai-ops":               "orion-ai-ops.tsx",
-  "pulse-landing":              "pulse-landing-page.tsx",
-  "aether-portfolio":           "aether-portfolio-page.tsx",
-  "claura-agency":              "claura-agency-page.tsx",
-  "ocean-flow":                 "ocean-flow-page.tsx",
-  "saas-launch-aurora":         "saas-launch-aurora-page.tsx",
-  "ai-startup-forge":           "ai-startup-forge-page.tsx",
-  "macbook-pro-showcase":       "gsap-macbook-landing-page.tsx",
+  "noir-studio": "noir-studio-template-page.tsx",
+  "nexus-ai-launch": "nexus-ai-launch-template-page.tsx",
+  "talent-hub-landing": "talent-hub-page.tsx",
+  "startup-landing-page": "startup-landing-page.tsx",
+  "nova-landing-page": "nova-landing-page.tsx",
+  "simplistic-saas-template": "simplistic-saas-page.tsx",
+  "orbit-ai-page": "orbit-ai-page.tsx",
+  "synapse-ai-platform": "synapse-ai-page.tsx",
+  "helix-ai-platform": "helix-ai-platform.tsx",
+  "orion-ai-ops": "orion-ai-ops.tsx",
+  "pulse-landing": "pulse-landing-page.tsx",
+  "aether-portfolio": "aether-portfolio-page.tsx",
+  "claura-agency": "claura-agency-page.tsx",
+  "ocean-flow": "ocean-flow-page.tsx",
+  "saas-launch-aurora": "saas-launch-aurora-page.tsx",
+  "ai-startup-forge": "ai-startup-forge-page.tsx",
+  "macbook-pro-showcase": "gsap-macbook-landing-page.tsx",
 };
 
-// Extra component files some templates depend on
-const SLUG_EXTRA_DEPS: Record<string, string[]> = {
-  "nexus-ai-launch": [
-    "src/components/animated-bento-grid/index.ts",
-    "src/components/animated-bento-grid/animated-bento-grid.tsx",
-    "src/components/background-gradient/index.ts",
-    "src/components/background-gradient/background-gradient.tsx",
-    "src/components/hover-highlight-text/index.ts",
-    "src/components/hover-highlight-text/hover-highlight-text.tsx",
-    "src/components/infinite-moving-cards/index.ts",
-    "src/components/infinite-moving-cards/InfiniteMovingCards.tsx",
-    "src/components/meteors/index.ts",
-    "src/components/meteors/meteors.tsx",
-    "src/components/sparkles/index.ts",
-    "src/components/sparkles/sparkles.tsx",
-    "src/components/stateful-button/index.ts",
-    "src/components/stateful-button/stateful-button.tsx",
-    "src/components/text-generate-effect/index.ts",
-    "src/components/text-generate-effect/text-generate-effect.tsx",
-    "src/components/brand/index.ts",
-    "src/components/brand/nexus-mark.tsx",
-    "src/components/ui/accordion.tsx",
-    "src/components/ui/button.tsx",
-  ],
-  "ocean-flow":               ["src/components/infinite-moving-cards/InfiniteMovingCards.tsx"],
-  "simplistic-saas-template": [
-    "src/components/infinite-moving-cards/InfiniteMovingCards.tsx",
-    "src/components/keyboard/keyboard.tsx",
-    "src/components/keyboard/keyboard-key.tsx",
-    "src/components/keyboard/keyboard-layout.ts",
-    "src/components/keyboard/use-keyboard-sound.ts",
-    "src/components/keyboard/index.ts",
-  ],
-  "macbook-pro-showcase": [
-    "src/components/templates/gsap-macbook-landing/index.css",
-    "src/components/templates/gsap-macbook-landing/constants/index.ts",
-    "src/components/templates/gsap-macbook-landing/store/index.ts",
-    "src/components/templates/gsap-macbook-landing/components/NavBar.tsx",
-    "src/components/templates/gsap-macbook-landing/components/Hero.tsx",
-    "src/components/templates/gsap-macbook-landing/components/ProductViewer.tsx",
-    "src/components/templates/gsap-macbook-landing/components/Showcase.tsx",
-    "src/components/templates/gsap-macbook-landing/components/Performance.tsx",
-    "src/components/templates/gsap-macbook-landing/components/Features.tsx",
-    "src/components/templates/gsap-macbook-landing/components/Highlights.tsx",
-    "src/components/templates/gsap-macbook-landing/components/Footer.tsx",
-    "src/components/templates/gsap-macbook-landing/components/models/Macbook-14.tsx",
-    "src/components/templates/gsap-macbook-landing/components/models/Macbook-16.tsx",
-    "src/components/templates/gsap-macbook-landing/components/models/Macbook.tsx",
-    "src/components/templates/gsap-macbook-landing/components/three/ModelSwitcher.tsx",
-    "src/components/templates/gsap-macbook-landing/components/three/StudioLights.tsx",
-    "src/components/templates/gsap-macbook-landing/hooks/useMediaQuery.ts",
-  ],
+// Some templates include a dedicated source bundle in addition to files reachable from the page entry.
+const ASSOCIATED_SOURCE_DIRECTORIES: Record<string, string[]> = {
+  "macbook-pro-showcase": ["src/components/templates/gsap-macbook-landing"],
 };
 
-async function readFile(filePath: string): Promise<string | null> {
+type RootPackageJson = {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+};
+
+type TemplateFiles = {
+  assets: Set<string>;
+  packages: Set<string>;
+  sources: Set<string>;
+};
+
+function toPosixPath(filePath: string) {
+  return filePath.split(path.sep).join("/");
+}
+
+function isWithinRoot(absolutePath: string) {
+  return absolutePath === ROOT || absolutePath.startsWith(`${ROOT}${path.sep}`);
+}
+
+async function readTextFile(relativePath: string): Promise<string | null> {
   try {
-    return await fs.readFile(filePath, "utf-8");
+    return await fs.readFile(path.join(ROOT, relativePath), "utf8");
   } catch {
     return null;
   }
+}
+
+async function isFile(absolutePath: string) {
+  try {
+    return (await fs.stat(absolutePath)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+async function addFile(zip: JSZip, relativePath: string) {
+  try {
+    const contents = await fs.readFile(path.join(ROOT, relativePath));
+    zip.file(relativePath, contents);
+  } catch {
+    // Missing optional images should not prevent the source archive from downloading.
+  }
+}
+
+async function listFiles(relativeDirectory: string): Promise<string[]> {
+  const absoluteDirectory = path.join(ROOT, relativeDirectory);
+  try {
+    const entries = await fs.readdir(absoluteDirectory, { withFileTypes: true });
+    const files = await Promise.all(
+      entries.map(async (entry) => {
+        const relativePath = toPosixPath(path.join(relativeDirectory, entry.name));
+        return entry.isDirectory() ? listFiles(relativePath) : [relativePath];
+      }),
+    );
+    return files.flat();
+  } catch {
+    return [];
+  }
+}
+
+function getImportedSpecifiers(source: string) {
+  const specifiers = new Set<string>();
+  const staticImports =
+    /(?:^|\n)\s*(?:import|export)\s+(?:type\s+)?(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']/gm;
+  const dynamicImports = /\bimport\(\s*["']([^"']+)["']\s*\)/g;
+
+  for (const expression of [staticImports, dynamicImports]) {
+    for (const match of source.matchAll(expression)) {
+      specifiers.add(match[1]);
+    }
+  }
+
+  return specifiers;
+}
+
+function getPackageName(specifier: string) {
+  if (
+    specifier.startsWith(".") ||
+    specifier.startsWith("/") ||
+    specifier.startsWith("@/") ||
+    specifier.startsWith("node:")
+  ) {
+    return null;
+  }
+
+  if (specifier.startsWith("@")) {
+    return specifier.split("/").slice(0, 2).join("/");
+  }
+
+  return specifier.split("/")[0];
+}
+
+async function resolveLocalImport(sourcePath: string, specifier: string) {
+  let absoluteBase: string | null = null;
+
+  if (specifier.startsWith("@/")) {
+    absoluteBase = path.join(ROOT, "src", specifier.slice(2));
+  } else if (specifier.startsWith(".")) {
+    absoluteBase = path.resolve(path.dirname(path.join(ROOT, sourcePath)), specifier);
+  }
+
+  if (!absoluteBase || !isWithinRoot(absoluteBase)) return null;
+
+  const candidates = [
+    absoluteBase,
+    `${absoluteBase}.ts`,
+    `${absoluteBase}.tsx`,
+    `${absoluteBase}.js`,
+    `${absoluteBase}.jsx`,
+    `${absoluteBase}.mjs`,
+    `${absoluteBase}.css`,
+    `${absoluteBase}.json`,
+    path.join(absoluteBase, "index.ts"),
+    path.join(absoluteBase, "index.tsx"),
+    path.join(absoluteBase, "index.js"),
+    path.join(absoluteBase, "index.jsx"),
+    path.join(absoluteBase, "index.css"),
+  ];
+
+  for (const candidate of candidates) {
+    if (await isFile(candidate)) return toPosixPath(path.relative(ROOT, candidate));
+  }
+
+  return null;
+}
+
+async function collectTemplateFiles(entryPath: string, slug: string): Promise<TemplateFiles> {
+  const files: TemplateFiles = {
+    assets: new Set<string>(),
+    packages: new Set<string>(),
+    sources: new Set<string>(),
+  };
+  const bundledDirectoryFiles = (
+    await Promise.all((ASSOCIATED_SOURCE_DIRECTORIES[slug] ?? []).map(listFiles))
+  ).flat();
+  const queue = [entryPath, ...bundledDirectoryFiles];
+
+  while (queue.length > 0) {
+    const currentPath = queue.shift();
+    if (!currentPath || files.sources.has(currentPath)) continue;
+
+    const contents = await fs.readFile(path.join(ROOT, currentPath)).catch(() => null);
+    if (!contents) continue;
+    files.sources.add(currentPath);
+
+    if (!INSPECTABLE_SOURCE_PATTERN.test(currentPath)) continue;
+    const source = contents.toString("utf8");
+
+    for (const match of source.matchAll(PUBLIC_ASSET_PATTERN)) {
+      const publicPath = `public/${match[1]}`;
+      if (await isFile(path.join(ROOT, publicPath))) files.assets.add(publicPath);
+    }
+
+    for (const specifier of getImportedSpecifiers(source)) {
+      if (specifier.startsWith(".") || specifier.startsWith("@/")) {
+        const dependencyPath = await resolveLocalImport(currentPath, specifier);
+        if (dependencyPath) queue.push(dependencyPath);
+        continue;
+      }
+
+      const packageName = getPackageName(specifier);
+      if (packageName) files.packages.add(packageName);
+    }
+  }
+
+  return files;
+}
+
+function getTemplatePageImport(componentSource: string, componentImportPath: string) {
+  if (/\bexport\s+default\b/.test(componentSource)) {
+    return `import TemplatePage from "${componentImportPath}";`;
+  }
+
+  const namedExports = Array.from(
+    componentSource.matchAll(/\bexport\s+(?:async\s+)?(?:function|const)\s+(\w+)/g),
+    (match) => match[1],
+  );
+  const pageExport =
+    namedExports.find((exportName) => /(?:Page|Template)$/.test(exportName)) ??
+    namedExports[namedExports.length - 1];
+
+  if (!pageExport) throw new Error("The template component does not export a renderable page.");
+  return `import { ${pageExport} as TemplatePage } from "${componentImportPath}";`;
+}
+
+function versionsFor(
+  names: Iterable<string>,
+  packageJson: RootPackageJson,
+  fallbacks: Record<string, string> = {},
+) {
+  return Object.fromEntries(
+    Array.from(names)
+      .sort()
+      .map((name) => [
+        name,
+        packageJson.dependencies?.[name] ??
+          packageJson.devDependencies?.[name] ??
+          fallbacks[name] ??
+          "latest",
+      ]),
+  );
 }
 
 export async function GET(request: NextRequest) {
@@ -99,80 +249,76 @@ export async function GET(request: NextRequest) {
   const tmpl = getTemplate(slug);
   if (!tmpl) return NextResponse.json({ error: "Template not found" }, { status: 404 });
 
-  // Auth check
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  // Access check — lifetime, active subscription, or individual template purchase
+  const rl = rateLimit(`download:${user.id}`, 10, 60_000);
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "Too many download requests. Please wait before trying again." },
+      { status: 429 },
+    );
+  }
+
   if (tmpl.premium) {
     const access = await canAccessTemplate(user.id, slug);
     if (!access) return NextResponse.json({ error: "Purchase required" }, { status: 403 });
   }
 
   const componentFile = SLUG_TO_FILE[slug];
+  if (!componentFile) {
+    return NextResponse.json({ error: "Template source not available" }, { status: 404 });
+  }
+
+  const entryPath = `${TEMPLATE_SOURCE_ROOT}/${componentFile}`;
+  const componentSource = await readTextFile(entryPath);
+  if (!componentSource) {
+    return NextResponse.json({ error: "Template source not available" }, { status: 404 });
+  }
+
+  const rootPackage = JSON.parse(
+    (await readTextFile("package.json")) ?? "{}",
+  ) as RootPackageJson;
   const zip = new JSZip();
+  const collected = await collectTemplateFiles(entryPath, slug);
 
-  // ── 1. Main template component ───────────────────────────────────────────────
-  if (componentFile) {
-    const content = await readFile(path.join(TEMPLATES_DIR, componentFile));
-    if (content) {
-      // Rewrite @/ imports to relative paths inside the zip
-      const rewritten = content
-        .replace(/@\/lib\/utils/g, "@/lib/utils")
-        .replace(/@\/components\/infinite-moving-cards\/InfiniteMovingCards/g,
-          "@/components/infinite-moving-cards/InfiniteMovingCards")
-        .replace(/@\/components\/keyboard/g, "@/components/keyboard");
-      zip.file(`src/components/${slug}/${componentFile}`, rewritten);
-    }
+  for (const sourcePath of collected.sources) await addFile(zip, sourcePath);
+  for (const assetPath of collected.assets) await addFile(zip, assetPath);
+  for (const screenshotPath of await listFiles(`public/templates/${slug}`)) {
+    await addFile(zip, screenshotPath);
   }
 
-  // ── 2. lib/utils.ts ──────────────────────────────────────────────────────────
-  const utilsContent = await readFile(path.join(ROOT, "src", "lib", "utils.ts"));
-  if (utilsContent) zip.file("src/lib/utils.ts", utilsContent);
-
-  // ── 3. Extra dependency files ────────────────────────────────────────────────
-  const extras = SLUG_EXTRA_DEPS[slug] ?? [];
-  for (const relPath of extras) {
-    const content = await readFile(path.join(ROOT, relPath));
-    if (content) zip.file(relPath, content);
-  }
-
-  // ── 4. app/page.tsx ──────────────────────────────────────────────────────────
-  const componentName = componentFile
-    ? componentFile.replace(".tsx", "").replace(".ts", "")
-    : slug;
-
-  // Derive the exported function name from the file
-  const componentSource = componentFile
-    ? await readFile(path.join(TEMPLATES_DIR, componentFile))
-    : null;
-  const exportMatch = componentSource?.match(/export default function (\w+)/);
-  const exportName = exportMatch?.[1] ?? "TemplatePage";
+  const componentImportPath = `@/components/templates/${componentFile.replace(/\.[^.]+$/, "")}`;
+  const pageImport = getTemplatePageImport(componentSource, componentImportPath);
+  const title = JSON.stringify(tmpl.title);
+  const description = JSON.stringify(tmpl.description);
 
   zip.file("src/app/page.tsx", `import type { Metadata } from "next";
-import ${exportName} from "@/components/${slug}/${componentName}";
+${pageImport}
 
 export const metadata: Metadata = {
-  title: "${tmpl.title}",
-  description: "${tmpl.description}",
+  title: ${title},
+  description: ${description},
 };
 
 export default function HomePage() {
-  return <${exportName} />;
+  return <TemplatePage />;
 }
 `);
 
-  // ── 5. app/layout.tsx ────────────────────────────────────────────────────────
   zip.file("src/app/layout.tsx", `import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "${tmpl.title}",
-  description: "${tmpl.description}",
+  title: ${title},
+  description: ${description},
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="min-h-dvh bg-background text-foreground antialiased">
@@ -183,130 +329,92 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 }
 `);
 
-  // ── 6. app/globals.css ───────────────────────────────────────────────────────
-  zip.file("src/app/globals.css", `@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-@import "tailwindcss";
-@import "tw-animate-css";
+  const globals = await readTextFile("src/app/globals.css");
+  if (globals) zip.file("src/app/globals.css", globals);
 
-@custom-variant dark (&:is(.dark *));
+  const runtimePackageNames = new Set([
+    "next",
+    "react",
+    "react-dom",
+    "shadcn",
+    "tw-animate-css",
+    ...collected.packages,
+  ]);
+  const developmentPackageNames = new Set([
+    "@tailwindcss/postcss",
+    "@types/node",
+    "@types/react",
+    "@types/react-dom",
+    "postcss",
+    "tailwindcss",
+    "typescript",
+  ]);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, monospace;
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-card: var(--card);
-  --color-accent: var(--accent);
-}
+  zip.file(
+    "package.json",
+    JSON.stringify(
+      {
+        name: slug,
+        version: "0.1.0",
+        private: true,
+        scripts: {
+          dev: "next dev",
+          build: "next build",
+          start: "next start",
+        },
+        dependencies: versionsFor(runtimePackageNames, rootPackage),
+        devDependencies: versionsFor(developmentPackageNames, rootPackage, { postcss: "^8" }),
+      },
+      null,
+      2,
+    ),
+  );
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --border: oklch(0.922 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --card: oklch(1 0 0);
-  --accent: oklch(0.97 0 0);
-}
+  zip.file(
+    "tsconfig.json",
+    JSON.stringify(
+      {
+        compilerOptions: {
+          target: "ES2017",
+          lib: ["dom", "dom.iterable", "esnext"],
+          allowJs: true,
+          skipLibCheck: true,
+          strict: true,
+          noEmit: true,
+          esModuleInterop: true,
+          module: "esnext",
+          moduleResolution: "bundler",
+          resolveJsonModule: true,
+          isolatedModules: true,
+          jsx: "preserve",
+          incremental: true,
+          plugins: [{ name: "next" }],
+          paths: { "@/*": ["./src/*"] },
+        },
+        include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+        exclude: ["node_modules"],
+      },
+      null,
+      2,
+    ),
+  );
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --border: oklch(0.269 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --card: oklch(0.205 0 0);
-  --accent: oklch(0.269 0 0);
-}
-
-* { border-color: var(--border); }
-body { background: var(--background); color: var(--foreground); }
-`);
-
-  // ── 7. package.json ──────────────────────────────────────────────────────────
-  const deps: Record<string, string> = {
-    "next": "^15.0.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "framer-motion": "^12.0.0",
-    "lucide-react": "^0.511.0",
-    "clsx": "^2.1.1",
-    "tailwind-merge": "^2.5.4",
-  };
-
-  if (tmpl.techStack.some(t => t.toLowerCase().includes("lenis"))) {
-    deps["@studio-freight/lenis"] = "^1.0.42";
-  }
-  if (slug === "nexus-ai-launch") {
-    deps["@base-ui/react"] = "^1.4.1";
-  }
-  if (extras.some(e => e.includes("keyboard"))) {
-    deps["use-keyboard-sound"] = "^1.0.0";
-  }
-
-  zip.file("package.json", JSON.stringify({
-    name: slug,
-    version: "0.1.0",
-    private: true,
-    scripts: {
-      dev: "next dev",
-      build: "next build",
-      start: "next start",
-    },
-    dependencies: deps,
-    devDependencies: {
-      "@types/node": "^22",
-      "@types/react": "^19",
-      "@types/react-dom": "^19",
-      "typescript": "^5",
-      "tailwindcss": "^4",
-      "tw-animate-css": "^1.2.5",
-      "@tailwindcss/postcss": "^4",
-      "postcss": "^8",
-    },
-  }, null, 2));
-
-  // ── 8. tsconfig.json ─────────────────────────────────────────────────────────
-  zip.file("tsconfig.json", JSON.stringify({
-    compilerOptions: {
-      target: "ES2017",
-      lib: ["dom", "dom.iterable", "esnext"],
-      allowJs: true,
-      skipLibCheck: true,
-      strict: true,
-      noEmit: true,
-      esModuleInterop: true,
-      module: "esnext",
-      moduleResolution: "bundler",
-      resolveJsonModule: true,
-      isolatedModules: true,
-      jsx: "preserve",
-      incremental: true,
-      plugins: [{ name: "next" }],
-      paths: { "@/*": ["./src/*"] },
-    },
-    include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-    exclude: ["node_modules"],
-  }, null, 2));
-
-  // ── 9. next.config.ts ────────────────────────────────────────────────────────
   zip.file("next.config.ts", `import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" },
+      { protocol: "https", hostname: "picsum.photos" },
+      { protocol: "https", hostname: "cdn.jsdelivr.net" },
+    ],
+  },
+};
 
 export default nextConfig;
 `);
 
-  // ── 10. postcss.config.mjs ───────────────────────────────────────────────────
   zip.file("postcss.config.mjs", `const config = {
   plugins: {
     "@tailwindcss/postcss": {},
@@ -316,10 +424,11 @@ export default nextConfig;
 export default config;
 `);
 
-  // ── 11. README.md ────────────────────────────────────────────────────────────
   zip.file("README.md", `# ${tmpl.title}
 
 ${tmpl.description}
+
+This download includes the template page, its local Nexus UI component dependencies, referenced public assets, and preview images.
 
 ## Stack
 ${tmpl.techStack.join(", ")}
@@ -343,15 +452,19 @@ ${tmpl.sections.join(", ")}
 Downloaded from [Nexus UI](https://nexus-ui.com)
 `);
 
-  // ── Generate zip ─────────────────────────────────────────────────────────────
-  const zipBuffer = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+  // Media-heavy templates exceed buffered function response limits in production.
+  const zipNodeStream = zip.generateNodeStream({
+    type: "nodebuffer",
+    streamFiles: true,
+    compression: "DEFLATE",
+  }) as unknown as Readable;
+  const zipStream = Readable.toWeb(zipNodeStream) as ReadableStream<Uint8Array>;
 
-  return new NextResponse(zipBuffer.buffer as ArrayBuffer, {
+  return new NextResponse(zipStream, {
     status: 200,
     headers: {
       "Content-Type": "application/zip",
       "Content-Disposition": `attachment; filename="${slug}.zip"`,
-      "Content-Length": String(zipBuffer.byteLength),
     },
   });
 }

@@ -5,7 +5,8 @@
   "title": "RippleLine squiggly text",
   "description": "Hero-grade headline with an animated wave underline, turbulence + Gaussian blur + displacement, optional glyph micro-warp, and reduced-motion fallbacks.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -28,7 +29,7 @@
       "path": "next-ui/squiggly-text.tsx",
       "type": "registry:component",
       "target": "components/squiggly-text.tsx",
-      "content": "/** Re-export shim: `@/components/squiggly-text` resolves here or to the directory. */\nexport type { SquigglyTextProps, SquigglyWordProps, SquigglyDrinksHeadlineProps } from \"./squiggly-text/squiggly-text\";\nexport { SquigglyText, SquigglyWord, SquigglyDrinksHeadline } from \"./squiggly-text/squiggly-text\";\nexport { SquigglyTextDemo } from \"./squiggly-text/demo\";\n"
+      "content": "/** Re-export shim: `@/components/squiggly-text` resolves here or to the directory. */\nexport type { SquigglyTextProps, SquigglyWordProps, SquigglyDrinksHeadlineProps } from \"./squiggly-text/squiggly-text\";\nexport { SquigglyText, SquigglyWord, SquigglyDrinksHeadline } from \"./squiggly-text/squiggly-text\";\n"
     }
   ]
 }

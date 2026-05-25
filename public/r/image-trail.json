@@ -5,7 +5,8 @@
   "title": "Image Trail",
   "description": "A cursor trail that cycles through a configurable image array as you move, with fade-blur transitions and an optional magnetic repulsion effect.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

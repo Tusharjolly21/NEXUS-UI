@@ -6,7 +6,8 @@
   "description": "An animated orbital carousel with smooth active-card transitions.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

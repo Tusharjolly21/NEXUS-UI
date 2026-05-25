@@ -5,7 +5,8 @@
   "title": "Hover Highlight Text",
   "description": "Cursor-tracked SVG spotlight that reveals outlined text beneath a base layer. Smooth spring physics follow the mouse for a cinematic hover effect.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

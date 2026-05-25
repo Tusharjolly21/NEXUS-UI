@@ -6,7 +6,8 @@
   "description": "Animated chat message bubbles with typing indicators and sequential reveal.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

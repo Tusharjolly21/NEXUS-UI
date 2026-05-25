@@ -5,7 +5,8 @@
   "title": "Images Badge",
   "description": "Stacked avatar/image pill that fans open on hover — ideal for team badges, social proof, avatar groups, and template galleries.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

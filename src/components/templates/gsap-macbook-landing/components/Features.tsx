@@ -2,38 +2,36 @@ import {Canvas} from "@react-three/fiber";
 import StudioLights from "./three/StudioLights";
 import {features, featureSequence} from "../constants/index";
 import clsx from "clsx";
-import {Suspense, useEffect, useRef} from "react";
+import {Suspense, useRef, useState} from "react";
 import {Html} from "@react-three/drei";
 import MacbookModel from "./models/Macbook";
 import {useMediaQuery} from "../hooks/useMediaQuery";
-import useMacbookStore from "../store/index";
 import {useGSAP} from "@gsap/react";
 import gsap from 'gsap';
 import {Group} from "three";
 
-const ModelScroll = () => {
+const ModelScroll = ({ onFeatureChange }: { onFeatureChange: (index: number) => void }) => {
     const groupRef = useRef<Group>(null);
     const isMobile = useMediaQuery({ query: '(max-width: 1024px)'})
-    const { setTexture } = useMacbookStore();
-
-    // Pre-load all feature videos during component mount
-    useEffect(() => {
-        featureSequence.forEach((feature) => {
-            const v = document.createElement('video');
-
-            Object.assign(v, {
-                src: feature.videoPath,
-                muted: true,
-                playsInline: true,
-                preload: 'auto',
-                crossOrigin: 'anonymous',
-            });
-
-            v.load();
-        })
-    }, []);
+    const activeFeatureRef = useRef(0);
 
     useGSAP(() => {
+        const syncVideo = (progress: number) => {
+            const index = Math.min(
+                featureSequence.length - 1,
+                Math.floor(progress * featureSequence.length)
+            );
+
+            if (activeFeatureRef.current !== index) {
+                activeFeatureRef.current = index;
+                onFeatureChange(index);
+            }
+        };
+
+        if (groupRef.current) {
+            gsap.set(groupRef.current.rotation, { y: -0.28 });
+        }
+
         // 3D MODEL ROTATION ANIMATION
         const modelTimeline = gsap.timeline({
             scrollTrigger: {
@@ -52,42 +50,35 @@ const ModelScroll = () => {
                 start: 'top center',
                 end: 'bottom  top',
                 scrub: 1,
+                onUpdate: (self) => syncVideo(self.progress),
             }
         })
 
-        // 3D SPIN
+        // Keep the display readable while the hardware turns gently in space.
         if(groupRef.current) {
-            modelTimeline.to(groupRef.current.rotation, { y: Math.PI * 2, ease: 'power1.inOut'})
+            modelTimeline.to(groupRef.current.rotation, { y: 0.28, ease: 'power1.inOut'})
         }
 
-        // Content & Texture Sync
         timeline
-            .call(() => setTexture('/videos/feature-1.mp4'))
             .to('.box1', { opacity: 1, y: 0, delay: 1 })
-
-            .call(() => setTexture('/videos/feature-2.mp4'))
             .to('.box2', { opacity: 1, y: 0 })
-
-            .call(() => setTexture('/videos/feature-3.mp4'))
             .to('.box3', { opacity: 1, y: 0 })
-
-            .call(() => setTexture('/videos/feature-4.mp4'))
             .to('.box4', { opacity: 1, y: 0})
-
-            .call(() => setTexture('/videos/feature-5.mp4'))
             .to('.box5', { opacity: 1, y: 0 })
-    }, []);
+    }, [onFeatureChange]);
 
     return (
         <group ref={groupRef}>
             <Suspense fallback={<Html><h1 className="text-white text-3xl uppercase">Loading...</h1></Html>}>
-                <MacbookModel scale={isMobile ? 0.05 : 0.08} position={[0, -1, 0]} />
+                <MacbookModel scale={isMobile ? 0.07 : 0.115} position={[0, -0.7, 0]} />
             </Suspense>
         </group>
     )
 }
 
 const Features = () => {
+    const [activeFeature, setActiveFeature] = useState(0);
+
     return (
         <section id="features">
             <h2>See it all in a new light.</h2>
@@ -95,7 +86,24 @@ const Features = () => {
             <Canvas id="f-canvas" camera={{}}>
                 <StudioLights />
                 <ambientLight intensity={0.5} />
-                <ModelScroll />
+                <ModelScroll onFeatureChange={setActiveFeature} />
+                <Html fullscreen>
+                    <div className="feature-media-display">
+                        {featureSequence.map((feature, index) => (
+                            <video
+                                key={feature.videoPath}
+                                className={clsx(index === activeFeature && 'active')}
+                                src={feature.videoPath}
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                preload="auto"
+                                aria-hidden="true"
+                            />
+                        ))}
+                    </div>
+                </Html>
             </Canvas>
 
             <div className="absolute inset-0">

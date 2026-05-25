@@ -4,7 +4,9 @@
   "type": "registry:component",
   "title": "Profile Orbit",
   "description": "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
-  "dependencies": [],
+  "dependencies": [
+    "react"
+  ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json"
   ],

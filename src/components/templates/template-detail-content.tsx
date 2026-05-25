@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
@@ -68,11 +69,13 @@ function ScreenshotCard({
   index,
   slug,
   reduce,
+  imageSrc,
 }: {
   label: string;
   index: number;
   slug: string;
   reduce: boolean;
+  imageSrc?: string;
 }) {
   const theme = PAGE_BG[index % PAGE_BG.length];
 
@@ -88,11 +91,21 @@ function ScreenshotCard({
         "shadow-xl shadow-black/30",
       )}
     >
-      {/* Thumbnail viewport — no chrome */}
+      {/* Thumbnail viewport */}
       <div className="relative h-64 overflow-hidden" aria-hidden="true">
-        <div className="pointer-events-none origin-top-left scale-[0.42] w-[238%] will-change-transform">
-          <TemplateSceneLoader slug={slug} />
-        </div>
+        {imageSrc ? (
+          <Image
+            src={imageSrc}
+            alt={`${label} section preview`}
+            fill
+            className="object-cover object-top"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          <div className="pointer-events-none origin-top-left scale-[0.42] w-[238%] will-change-transform">
+            <TemplateSceneLoader slug={slug} />
+          </div>
+        )}
       </div>
 
       {/* Label */}
@@ -343,6 +356,11 @@ export function TemplateDetailContent({
   const hasAccess = isPremium || !tmpl.premium;
   const previewHref = `/template-preview/${tmpl.slug}`;
   const pageLabels = tmpl.pageLabels?.length ? tmpl.pageLabels : tmpl.pages.slice(0, 4);
+  const previewCount = Math.min(tmpl.previewImages?.sections.length ?? pageLabels.length, 4);
+  const previewLabels = Array.from(
+    { length: previewCount },
+    (_, index) => pageLabels[index] ?? tmpl.sections[index] ?? `Preview ${index + 1}`,
+  );
   const features = tmpl.features ?? [];
 
   return (
@@ -455,19 +473,20 @@ export function TemplateDetailContent({
         </motion.div>
       </section>
 
-      {/* ════════ 4 PAGE SCREENSHOTS ════════ */}
+      {/* ════════ 4 TEMPLATE PREVIEWS ════════ */}
       <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
         <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          {pageLabels.length} pages included
+          {previewLabels.length} previews included
         </p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {pageLabels.slice(0, 4).map((label, i) => (
+          {previewLabels.map((label, i) => (
             <ScreenshotCard
               key={label}
               label={label}
               index={i}
               slug={tmpl.slug}
               reduce={reduce}
+              imageSrc={tmpl.previewImages?.sections?.[i]}
             />
           ))}
         </div>

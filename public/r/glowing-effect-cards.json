@@ -6,7 +6,8 @@
   "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for premium SaaS sections and dashboards.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

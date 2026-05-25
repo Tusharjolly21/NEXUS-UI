@@ -4,7 +4,9 @@
   "type": "registry:component",
   "title": "Feature Tools Card",
   "description": "A dark glass card with five magnetic icon slots, a rotating conic-gradient orbit ring, and 3-D tilt physics. Swap the default integration icons for any SVG or image.",
-  "dependencies": [],
+  "dependencies": [
+    "react"
+  ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
     "utils"

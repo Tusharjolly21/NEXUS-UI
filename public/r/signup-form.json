@@ -6,7 +6,8 @@
   "description": "Customizable signup form built on shadcn input + label with subtle framer-motion transitions and async submit states.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -38,7 +39,7 @@
       "path": "next-ui/signup-form.tsx",
       "type": "registry:component",
       "target": "components/signup-form.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/signup-form` to this file before the directory. */\nexport type { SignupFormProps, SignupFormValues } from \"./signup-form/signup-form\";\nexport { SignupForm } from \"./signup-form/signup-form\";\nexport { SignupFormDemo } from \"./signup-form/demo\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/signup-form` to this file before the directory. */\nexport type { SignupFormProps, SignupFormValues } from \"./signup-form/signup-form\";\nexport { SignupForm } from \"./signup-form/signup-form\";\n"
     }
   ]
 }

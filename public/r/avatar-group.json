@@ -5,7 +5,8 @@
   "title": "Avatar Group",
   "description": "Overlapping avatar stack with per-avatar entrance animations (flip, slide, scale, bounce), four hover styles, name tooltips, and automatic color-coded fallback initials when no image is supplied.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

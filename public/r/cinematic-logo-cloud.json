@@ -5,7 +5,8 @@
   "title": "Cinematic Logo Cloud",
   "description": "A staggered blur-fade entrance animation for brand logos. Uses framer-motion and fully semantic responsive layouts.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

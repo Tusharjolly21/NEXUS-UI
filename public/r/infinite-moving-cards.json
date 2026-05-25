@@ -5,7 +5,8 @@
   "title": "Infinite Moving Cards",
   "description": "Customizable infinite marquee of cards with seamless looping, direction controls, hover pause, and optional custom rendering.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

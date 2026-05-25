@@ -5,7 +5,8 @@
   "title": "Motion Layer Scroller",
   "description": "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

@@ -5,7 +5,8 @@
   "title": "Encrypted Text",
   "description": "Characters shuffle through gibberish before locking into the final string — a futuristic cyber decoding reveal for hero headings, buttons, badges, and nav links.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

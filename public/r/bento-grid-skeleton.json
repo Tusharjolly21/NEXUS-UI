@@ -5,7 +5,8 @@
   "title": "Bento Grid Skeleton",
   "description": "Bento grid with animated skeleton placeholder tiles — chat, dashboard, avatar, workflow, calendar, and code variants. Perfect for loading states.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

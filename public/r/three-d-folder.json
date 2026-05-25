@@ -6,7 +6,8 @@
   "description": "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

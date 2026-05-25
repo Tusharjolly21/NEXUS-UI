@@ -6,7 +6,8 @@
   "description": "Responsive card grid where clicking a card smoothly expands it into a full-detail overlay with image, description, and a CTA button.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

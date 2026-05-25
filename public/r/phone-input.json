@@ -6,7 +6,8 @@
   "description": "A modern animated phone number input with country selector and validation.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

@@ -5,7 +5,8 @@
   "title": "Typewriter Effect",
   "description": "Character-by-character typewriter text animation with blinking cursor, optional deleting, looping, and semantic heading support.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

@@ -28,6 +28,16 @@ function looksLikeSpam(name: string, message: string): boolean {
   return false;
 }
 
+/** Escape HTML special characters to prevent injection in notification emails. */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => null)) as ContactBody | null;
 
@@ -93,17 +103,22 @@ export async function POST(req: Request) {
 
   if (resendKey && notifyEmail) {
     const resend = new Resend(resendKey);
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeCompany = escapeHtml(company);
+    const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
+
     const { error: emailError } = await resend.emails.send({
       from: "Nexus-UI <contact@nexus-ui.com>",
       to: notifyEmail,
       replyTo: email,
       subject: `New contact from ${name}${company ? ` @ ${company}` : ""}`,
       html: `
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>
-        ${company ? `<p><strong>Topic:</strong> ${company}</p>` : ""}
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
+        ${safeCompany ? `<p><strong>Topic:</strong> ${safeCompany}</p>` : ""}
         <hr />
-        <p>${message.replace(/\n/g, "<br />")}</p>
+        <p>${safeMessage}</p>
       `,
     });
     if (emailError) {

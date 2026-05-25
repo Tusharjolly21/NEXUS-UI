@@ -5,7 +5,8 @@
   "title": "Animated Bento Grid",
   "description": "Feature showcase bento grid with entrance animations and configurable column spans. Each tile supports custom content, tags, and motion entrance delays.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

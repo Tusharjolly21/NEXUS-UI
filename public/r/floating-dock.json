@@ -6,7 +6,9 @@
   "description": "Bottom-centered macOS-style dock with pointer-driven magnification, neighbor scaling, glass pill chrome, tooltips, and a touch-friendly expandable mobile menu.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react",
+    "next"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -53,7 +55,7 @@
       "path": "next-ui/floating-dock.tsx",
       "type": "registry:component",
       "target": "components/floating-dock.tsx",
-      "content": "/** Re-export shim for `@/components/floating-dock`. */\nexport type { FloatingDockItem, FloatingDockProps } from \"./floating-dock/floating-dock\";\nexport {\n  FloatingDock,\n  FloatingDockDesktop,\n  FloatingDockMobile,\n  IconContainer,\n} from \"./floating-dock/floating-dock\";\nexport { FloatingDockDemo } from \"./floating-dock/demo\";\n"
+      "content": "/** Re-export shim for `@/components/floating-dock`. */\nexport type { FloatingDockItem, FloatingDockProps } from \"./floating-dock/floating-dock\";\nexport {\n  FloatingDock,\n  FloatingDockDesktop,\n  FloatingDockMobile,\n  IconContainer,\n} from \"./floating-dock/floating-dock\";\n"
     }
   ]
 }

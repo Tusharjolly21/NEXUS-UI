@@ -6,7 +6,8 @@
   "description": "Expandable pill search with a detached icon bubble merged through an SVG goo filter and spring layout.",
   "dependencies": [
     "framer-motion",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -29,7 +30,7 @@
       "path": "next-ui/gooey-input.tsx",
       "type": "registry:component",
       "target": "components/gooey-input.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/gooey-input` to this file before the directory. */\nexport type { GooeyInputProps } from \"./gooey-input/gooey-input\";\nexport { GooeyInput } from \"./gooey-input/gooey-input\";\nexport { GooeyInputDemo } from \"./gooey-input/demo\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/gooey-input` to this file before the directory. */\nexport type { GooeyInputProps } from \"./gooey-input/gooey-input\";\nexport { GooeyInput } from \"./gooey-input/gooey-input\";\n"
     }
   ]
 }

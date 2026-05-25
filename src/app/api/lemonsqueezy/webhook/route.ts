@@ -162,20 +162,6 @@ export async function POST(req: Request) {
         .from("subscriptions")
         .update({ status: "expired", updated_at: new Date().toISOString() })
         .eq("ls_subscription_id", event.data.id);
-
-      // Remove premium if no other access
-      if (userId) {
-        const { data: activeOrder } = await supabase
-          .from("orders")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("status", "paid")
-          .eq("product_type", "lifetime")
-          .limit(1)
-          .maybeSingle();
-
-        // no-op: access is derived from orders/subscriptions tables directly
-      }
       break;
     }
 

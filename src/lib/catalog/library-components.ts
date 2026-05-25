@@ -7425,8 +7425,14 @@ export default LinkPreview;`,
   },
 ];
 
-export function getLibraryComponent(slug: string) {
-  return libraryComponents.find((c) => c.slug === slug) ?? null;
+export function getLibraryComponent(slugOrRegistryName: string) {
+  return (
+    libraryComponents.find(
+      (component) =>
+        component.slug === slugOrRegistryName ||
+        component.registryCliName === slugOrRegistryName,
+    ) ?? null
+  );
 }
 
 /** Server-only: resolve a Preview ComponentType to its export name in component-previews.tsx */

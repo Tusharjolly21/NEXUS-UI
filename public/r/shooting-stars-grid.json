@@ -5,7 +5,10 @@
   "title": "Shooting Stars Grid",
   "description": "Animated dot grid with diagonal shooting star streaks and glowing nodes. A dramatic yet subtle background for hero sections and feature blocks.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react",
+    "next",
+    "lucide-react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

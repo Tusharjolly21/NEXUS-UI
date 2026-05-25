@@ -1,5 +1,5 @@
 /**
- * Emits shadcn-compatible registry JSON under public/r/ for every catalog component.
+ * Emits a complete server registry and public JSON only for free catalog components.
  * @see https://ui.shadcn.com/docs/registry/registry-item-json
  */
 import fs from "node:fs";
@@ -8,8 +8,11 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
-const outDir = path.join(root, "public", "r");
+const publicOutDir = path.join(root, "public", "r");
+const serverOutDir = path.join(root, ".generated", "registry");
 const catalogPath = path.join(root, "src", "lib", "catalog", "library-components.ts");
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencies ?? {}));
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
 const NEXUS_FONT_REGISTRY_DEP = "https://nexus-ui.com/r/nexus-font.json";
 
@@ -102,6 +105,10 @@ function extractDependencies(block) {
     .filter(Boolean);
 }
 
+function isPremiumBlock(block) {
+  return /\bpremium:\s*true\b/.test(block);
+}
+
 function extractRegistryCliName(slug, block) {
   const m = block.match(/registryCliName:\s*"([^"]+)"/);
   return m?.[1] ?? REGISTRY_CLI_NAME[slug] ?? slug;
@@ -158,24 +165,24 @@ function buildSnippetItem(slug, block) {
   }
   const title = extractName(block);
   const description = extractDescription(block);
-  const dependencies = extractDependencies(block);
-  const registryDependencies = registryDepsForReactSource(reactSource);
+  const files = new Map();
+  files.set(`components/${cliName}.tsx`, {
+    path: `next-ui/${cliName}.tsx`,
+    type: "registry:component",
+    target: `components/${cliName}.tsx`,
+    content: `${reactSource.trim()}\n`,
+  });
+  collectImportedLocalFiles(files, new Set(), new Set());
+  const contents = [...files.values()].map((file) => file.content).join("\n");
   return {
     $schema: "https://ui.shadcn.com/schema/registry-item.json",
     name: cliName,
     type: "registry:component",
     title,
     description,
-    dependencies,
-    registryDependencies,
-    files: [
-      {
-        path: `next-ui/${cliName}.tsx`,
-        type: "registry:component",
-        target: `components/${cliName}.tsx`,
-        content: `${reactSource.trim()}\n`,
-      },
-    ],
+    dependencies: extractDependencies(block),
+    registryDependencies: registryDepsForReactSource(contents),
+    files: [...files.values()],
   };
 }
 
@@ -192,7 +199,7 @@ function readRegistryFile(filePath, cliName) {
 
   content = content
     .split("\n")
-    .filter((line) => !/from "\.\/(demo|preview)"/.test(line))
+    .filter((line) => !/\bfrom ["'][^"']*\/(?:demo|preview)["']/.test(line))
     .join("\n");
 
   if (cliName === "interactive-globe-explorer") {
@@ -283,7 +290,7 @@ function collectImportedLocalFiles(files, seenComponents, seenUi) {
     const before = files.size;
 
     for (const file of [...files.values()]) {
-      for (const match of file.content.matchAll(/@\/components\/(?!ui\/)([a-z0-9-]+)/g)) {
+      for (const match of file.content.matchAll(/@\/components\/(?!ui\/)([a-zA-Z0-9_./-]+)/g)) {
         collectSourceFiles(match[1], files, seenComponents);
       }
 
@@ -331,6 +338,29 @@ function buildSourceBackedItem(slug, block) {
     registryDependencies,
     files: [...files.values()],
   };
+}
+
+function detectedPackageDependencies(item) {
+  if (!item.files?.length) return item;
+
+  const dependencies = new Set(item.dependencies ?? []);
+  const contents = item.files.map((file) => file.content ?? "").join("\n");
+  const importSpecifiers = [
+    ...contents.matchAll(/\bfrom\s+["']([^"']+)["']/g),
+    ...contents.matchAll(/\bimport\(\s*["']([^"']+)["']\s*\)/g),
+  ].map((match) => match[1]);
+
+  for (const specifier of importSpecifiers) {
+    if (specifier.startsWith(".") || specifier.startsWith("@/") || specifier.startsWith("/")) {
+      continue;
+    }
+    const packageName = specifier.startsWith("@")
+      ? specifier.split("/").slice(0, 2).join("/")
+      : specifier.split("/")[0];
+    if (PROJECT_RUNTIME_DEPENDENCIES.has(packageName)) dependencies.add(packageName);
+  }
+
+  return { ...item, dependencies: [...dependencies] };
 }
 
 function buildTerminalItem() {
@@ -602,25 +632,48 @@ for (const { slug } of blocks) {
   if (item) items.push(item);
 }
 
-const registryIndex = {
-  $schema: "https://ui.shadcn.com/schema/registry.json",
-  name: "next-ui",
-  homepage,
-  items: items.map((it) => ({
-    name: it.name,
-    type: it.type,
-    title: it.title,
-    description: it.description,
-    dependencies: it.dependencies,
-    registryDependencies: it.registryDependencies ?? [],
-    files: (it.files ?? []).map((f) => ({ path: f.path, type: f.type })),
-  })),
-};
+const completedItems = items.map(detectedPackageDependencies);
 
-fs.mkdirSync(outDir, { recursive: true });
-for (const it of items) {
-  fs.writeFileSync(path.join(outDir, `${it.name}.json`), `${JSON.stringify(it, null, 2)}\n`);
+function buildRegistryIndex(registryItems) {
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry.json",
+    name: "next-ui",
+    homepage,
+    items: registryItems.map((it) => ({
+      name: it.name,
+      type: it.type,
+      title: it.title,
+      description: it.description,
+      dependencies: it.dependencies,
+      registryDependencies: it.registryDependencies ?? [],
+      files: (it.files ?? []).map((f) => ({ path: f.path, type: f.type })),
+    })),
+  };
 }
-fs.writeFileSync(path.join(outDir, "registry.json"), `${JSON.stringify(registryIndex, null, 2)}\n`);
 
-console.log(`Wrote ${items.length} registry items to public/r/ and registry.json`);
+function writeRegistry(destination, registryItems) {
+  fs.rmSync(destination, { recursive: true, force: true });
+  fs.mkdirSync(destination, { recursive: true });
+  for (const item of registryItems) {
+    fs.writeFileSync(path.join(destination, `${item.name}.json`), `${JSON.stringify(item, null, 2)}\n`);
+  }
+  fs.writeFileSync(
+    path.join(destination, "registry.json"),
+    `${JSON.stringify(buildRegistryIndex(registryItems), null, 2)}\n`,
+  );
+}
+
+const publicNames = new Set([
+  NEXUS_FONT_REGISTRY_NAME,
+  ...blocks
+    .filter((block) => !isPremiumBlock(block.text))
+    .map((block) => extractRegistryCliName(block.slug, block.text)),
+]);
+const publicItems = completedItems.filter((item) => publicNames.has(item.name));
+
+writeRegistry(serverOutDir, completedItems);
+writeRegistry(publicOutDir, publicItems);
+
+console.log(
+  `Wrote ${completedItems.length - 1} registry items to .generated/registry and ${publicItems.length - 1} free items to public/r.`,
+);

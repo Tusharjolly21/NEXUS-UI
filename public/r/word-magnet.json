@@ -5,7 +5,8 @@
   "title": "Word Magnet",
   "description": "Cursor-reactive text where whole words gently repel from the pointer and spring back without splitting letters.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

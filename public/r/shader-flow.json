@@ -5,7 +5,8 @@
   "title": "Shader Flow",
   "description": "A soft animated shader-style background with flowing gradient motion.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

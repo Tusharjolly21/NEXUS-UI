@@ -5,7 +5,8 @@
   "title": "Interactive Terminal",
   "description": "macOS-style terminal window with typewriter commands, cursor blink, output sequencing, and optional sound.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -34,7 +35,7 @@
       "path": "next-ui/terminal.tsx",
       "type": "registry:component",
       "target": "components/terminal.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/terminal` to this file before the directory. */\nexport type { TerminalTheme, TerminalLine, TerminalCommand, TerminalProps } from \"./terminal/terminal\";\nexport { Terminal } from \"./terminal/terminal\";\nexport { TerminalDemo } from \"./terminal/demo\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/terminal` to this file before the directory. */\nexport type { TerminalTheme, TerminalLine, TerminalCommand, TerminalProps } from \"./terminal/terminal\";\nexport { Terminal } from \"./terminal/terminal\";\n"
     }
   ]
 }

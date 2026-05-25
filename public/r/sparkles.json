@@ -5,7 +5,8 @@
   "title": "Sparkles field",
   "description": "Configurable animated particle field for hero highlights, card backgrounds, and decorative UI layers with optional pointer interaction.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",
@@ -28,7 +29,7 @@
       "path": "next-ui/sparkles.tsx",
       "type": "registry:component",
       "target": "components/sparkles.tsx",
-      "content": "/** Re-export shim: some bundlers resolve `@/components/sparkles` to this file before the directory. */\nexport type { SparklesProps } from \"./sparkles/sparkles\";\nexport { Sparkles } from \"./sparkles/sparkles\";\nexport { SparklesPreview } from \"./sparkles/preview\";\n"
+      "content": "/** Re-export shim: some bundlers resolve `@/components/sparkles` to this file before the directory. */\nexport type { SparklesProps } from \"./sparkles/sparkles\";\nexport { Sparkles } from \"./sparkles/sparkles\";\n"
     }
   ]
 }

@@ -1,11 +1,38 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured, getAdminEmails } from "@/lib/env";
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  // Defense-in-depth: server-side auth check in addition to middleware
+  if (!isSupabaseConfigured()) {
+    redirect("/login");
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?next=/admin");
+  }
+
+  const admins = getAdminEmails();
+  const email = user.email?.toLowerCase() ?? "";
+  const isAdmin =
+    admins.includes(email) ||
+    (user.user_metadata as { role?: string } | undefined)?.role === "admin";
+
+  if (!isAdmin) {
+    redirect("/");
+  }
+
   return (
     <div className="min-h-dvh bg-background">
       <header className="border-b border-border bg-muted/40 backdrop-blur-xl dark:bg-black/50">
