@@ -60,17 +60,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
-  async redirects() {
-    return [
-      // Permanent redirect from bare domain to www — fixes 307 temporary redirects
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "nexus-ui.com" }],
-        destination: "https://www.nexus-ui.com/:path*",
-        permanent: true,
-      },
-    ];
-  },
   async headers() {
     return [
       {

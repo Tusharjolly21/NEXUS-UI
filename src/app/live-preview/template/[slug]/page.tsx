@@ -88,6 +88,10 @@ const GsapMacbookLandingPage = nextDynamic(
   () => import("@/components/templates/gsap-macbook-landing-page"),
   { loading: TemplateFallback },
 );
+const LaunchfolioPortfolioPage = nextDynamic(
+  () => import("@/components/templates/launchfolio-portfolio-page").then((m) => ({ default: m.LaunchfolioPortfolioPage })),
+  { loading: TemplateFallback },
+);
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -147,6 +151,8 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><OrbitAIPage /></ThemeReceiver>;
   } else if (tmpl.slug === "macbook-pro-showcase") {
     return <ThemeReceiver><GsapMacbookLandingPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "launchfolio-portfolio") {
+    return <ThemeReceiver><LaunchfolioPortfolioPage /></ThemeReceiver>;
   }
 
   return (
