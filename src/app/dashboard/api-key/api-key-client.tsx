@@ -23,7 +23,7 @@ export function ApiKeyClient({ apiKey }: { apiKey: string }) {
   const componentsJson = `{
   "registries": {
     "@nexus-labs": {
-      "url": "https://nexus-ui.com/api/registry/{name}",
+      "url": "https://www.nexus-ui.com/api/registry/{name}",
       "headers": {
         "Authorization": "Bearer ${apiKey}"
       }
@@ -34,7 +34,7 @@ export function ApiKeyClient({ apiKey }: { apiKey: string }) {
   const maskedComponentsJson = `{
   "registries": {
     "@nexus-labs": {
-      "url": "https://nexus-ui.com/api/registry/{name}",
+      "url": "https://www.nexus-ui.com/api/registry/{name}",
       "headers": {
         "Authorization": "Bearer ••••••••••••••••••••"
       }

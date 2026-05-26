@@ -161,7 +161,7 @@ export function cn(...inputs: ClassValue[]) {
           </ul>
           <DocPre>{`// components.json
 "registries": {
-  "@nexus-labs": "https://nexus-ui.com/api/registry/{name}"
+  "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
 }`}</DocPre>
           <DocPre>{`npx shadcn@latest add @nexus-labs/wheel-selector`}</DocPre>
           <p className="text-sm text-muted-foreground">

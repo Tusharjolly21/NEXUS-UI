@@ -65,7 +65,7 @@ npx shadcn@latest add card -c ./apps/web`}</DocPre>
           <code className={docInlineCodeClass}>components.json</code>:
         </p>
         <DocPre>{`"registries": {
-  "@nexus-labs": "https://nexus-ui.com/api/registry/{name}"
+  "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
 }`}</DocPre>
         <p className="text-sm text-muted-foreground">
           Then pull any free component or block by its install name:
@@ -87,7 +87,7 @@ npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
         </p>
         <DocPre>{`"registries": {
   "@nexus-labs": {
-    "url": "https://nexus-ui.com/api/registry/{name}",
+    "url": "https://www.nexus-ui.com/api/registry/{name}",
     "headers": {
       "Authorization": "Bearer YOUR_NEXUS_API_KEY"
     }
