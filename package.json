@@ -19,7 +19,8 @@
     "build": "npm run registry:build && next build --webpack",
     "build:turbo": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "add": "shadcn add"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",
