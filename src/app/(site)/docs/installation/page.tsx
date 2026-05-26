@@ -159,9 +159,27 @@ export function cn(...inputs: ClassValue[]) {
               </span>
             </li>
           </ul>
-          <DocPre>{`// components.json
-"registries": {
-  "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
+          <DocPre>{`{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
+  }
 }`}</DocPre>
           <DocPre>{`npx shadcn@latest add @nexus-labs/wheel-selector`}</DocPre>
           <p className="text-sm text-muted-foreground">

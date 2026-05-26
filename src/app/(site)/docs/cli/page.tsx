@@ -64,8 +64,27 @@ npx shadcn@latest add card -c ./apps/web`}</DocPre>
           Add the Nexus UI hosted registry to your project&apos;s{" "}
           <code className={docInlineCodeClass}>components.json</code>:
         </p>
-        <DocPre>{`"registries": {
-  "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
+        <DocPre>{`{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
+  }
 }`}</DocPre>
         <p className="text-sm text-muted-foreground">
           Then pull any free component or block by its install name:
@@ -85,11 +104,30 @@ npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
           Premium components and blocks use the same registry endpoint with the API key from your
           Nexus UI dashboard:
         </p>
-        <DocPre>{`"registries": {
-  "@nexus-labs": {
-    "url": "https://www.nexus-ui.com/api/registry/{name}",
-    "headers": {
-      "Authorization": "Bearer YOUR_NEXUS_API_KEY"
+        <DocPre>{`{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@nexus-labs": {
+      "url": "https://www.nexus-ui.com/api/registry/{name}",
+      "headers": {
+        "Authorization": "Bearer YOUR_NEXUS_API_KEY"
+      }
     }
   }
 }`}</DocPre>
