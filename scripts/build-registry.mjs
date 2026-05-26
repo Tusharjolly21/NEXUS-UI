@@ -14,7 +14,7 @@ const catalogPath = path.join(root, "src", "lib", "catalog", "library-components
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencies ?? {}));
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
-const NEXUS_FONT_REGISTRY_DEP = "https://nexus-ui.com/api/registry/nexus-font";
+const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
 const REGISTRY_CLI_NAME = {
@@ -116,7 +116,7 @@ function extractRegistryCliName(slug, block) {
 
 function registryDepsForReactSource(src) {
   const deps = new Set();
-  deps.add(NEXUS_FONT_REGISTRY_DEP);
+  deps.add(`${homepage}/api/registry/nexus-font`);
   if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
 
   for (const match of src.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
@@ -184,8 +184,6 @@ function buildSnippetItem(slug, block) {
     files: [...files.values()],
   };
 }
-
-const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 function isRegistrySourceFile(filePath) {
   if (!/\.(tsx|ts)$/.test(filePath)) return false;

@@ -12,7 +12,7 @@
     "react"
   ],
   "registryDependencies": [
-    "https://nexus-ui.com/api/registry/nexus-font",
+    "https://www.nexus-ui.com/api/registry/nexus-font",
     "utils",
     "command"
   ],
