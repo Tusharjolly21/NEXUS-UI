@@ -76,8 +76,6 @@ import { ShaderFlow } from "@/components/shader-flow";
 import { AnimatedCountdown } from "@/components/animated-countdown";
 import { ShootingStarsGrid } from "@/components/shooting-stars-grid";
 import { HoverHighlightText } from "@/components/hover-highlight-text";
-import { GlobePins } from "@/components/globe-pins/globe-pins";
-import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
 import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rotator";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { InteractiveDots } from "@/components/interactive-dots";
@@ -2440,69 +2438,19 @@ export function PreviewBackgroundBoxes({
   compact = true,
 }: { compact?: boolean } = {}) {
   return (
-    <div
+    <BackgroundBoxes
+      rows={80}
+      cols={60}
+      boxWidth={64}
+      boxHeight={32}
+      borderColor="#374151"
+      showCrosses
+      crossColor="#374151"
       className={cn(
-        "flex items-center justify-center overflow-hidden rounded-xl",
-        compact ? "min-h-[380px] max-h-[380px]" : "min-h-[600px] py-12",
+        "w-full bg-zinc-950",
+        compact ? "h-[420px]" : "h-[600px]",
       )}
-    >
-      <BackgroundBoxes
-        rows={compact ? 16 : 14}
-        columns={compact ? 28 : 24}
-        boxSize={compact ? 22 : 24}
-        highlightColor="hsl(210 100% 90% / 1)"
-        defaultColor="hsl(222 55% 18% / 0.35)"
-        borderColor="hsl(217 44% 29% / 0.62)"
-        neighborRipple={false}
-        animatePulse={false}
-        gridClassName={cn(
-          "origin-center scale-[1.18]",
-          compact
-            ? "rotate-[7deg] skew-x-[-8deg]"
-            : "rotate-[8deg] skew-x-[-7deg]",
-        )}
-        className={cn(
-          "w-full overflow-hidden rounded-2xl border border-blue-950/70 bg-gradient-to-b from-[#070f2b] via-[#0a1740] to-[#081638]",
-          compact ? "h-[390px]" : "h-[560px]",
-          compact ? "max-w-2xl" : "max-w-4xl",
-        )}
-      >
-        <div
-          data-bgboxes-content="true"
-          className={cn(
-            "pointer-events-none mx-auto flex w-full items-center justify-center text-center text-slate-100",
-            compact ? "min-h-[390px] px-4" : "min-h-[560px] px-10",
-          )}
-        >
-          <div
-            className={cn(
-              "pointer-events-auto inline-block rounded-md px-2 py-1.5",
-              compact ? "max-w-[20rem]" : "max-w-2xl",
-            )}
-          >
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-300/80">
-              Background Boxes
-            </p>
-            <h3
-              className={cn(
-                "mt-2 font-semibold tracking-tight text-white",
-                compact ? "text-xl" : "text-3xl",
-              )}
-            >
-              Tailwind is Awesome
-            </h3>
-            <p
-              className={cn(
-                "mt-2 text-slate-300/85",
-                compact ? "text-xs leading-relaxed" : "text-sm leading-relaxed",
-              )}
-            >
-              Hover only reacts on the grid area, not on text.
-            </p>
-          </div>
-        </div>
-      </BackgroundBoxes>
-    </div>
+    />
   );
 }
 
@@ -3203,116 +3151,6 @@ export function PreviewShaderFlow({
     >
       <div className="h-full w-full max-w-4xl">
         <ShaderFlow showContent />
-      </div>
-    </div>
-  );
-}
-
-export function PreviewGlobePinsDefault() {
-  return (
-    <div
-      className="relative w-full h-full bg-[#111] overflow-hidden"
-      style={{ minHeight: 360 }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <GlobePins
-          showLabels
-          rotationSpeed={60}
-          className="preview-force-active w-[320px] h-[320px]"
-        />
-      </div>
-    </div>
-  );
-}
-
-export function PreviewGlobePinsBloom() {
-  return (
-    <div
-      className="relative w-full h-full bg-black overflow-hidden"
-      style={{ minHeight: 360 }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <GlobePins
-          bloom
-          showLabels={false}
-          rotationSpeed={60}
-          className="preview-force-active w-[320px] h-[320px]"
-        />
-      </div>
-    </div>
-  );
-}
-
-export function PreviewGlobePins({
-  compact = true,
-}: { compact?: boolean } = {}) {
-  return (
-    <div
-      className="relative w-full h-full bg-[#111] overflow-hidden"
-      style={{ minHeight: 360 }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <GlobePins
-          showLabels={false}
-          rotationSpeed={60}
-          className="preview-force-active w-[320px] h-[320px]"
-        />
-      </div>
-    </div>
-  );
-}
-
-export function PreviewGlobePins3DDefault() {
-  return (
-    <div
-      className="relative w-full h-full bg-[#0a1a20] overflow-hidden"
-      style={{ minHeight: 400 }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <GlobePins3D
-          showLabels
-          rotationSpeed={0.03}
-          className="preview-force-active w-full h-full"
-        />
-      </div>
-    </div>
-  );
-}
-
-export function PreviewGlobePins3DBloom() {
-  return (
-    <div
-      className="relative w-full h-full bg-black overflow-hidden"
-      style={{ minHeight: 400 }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <GlobePins3D
-          bloom
-          enablePostFX
-          fxIntensity={0.6}
-          showLabels={false}
-          rotationSpeed={0.03}
-          className="preview-force-active w-full h-full"
-        />
-      </div>
-    </div>
-  );
-}
-
-export function PreviewGlobePins3D({
-  compact = true,
-}: { compact?: boolean } = {}) {
-  return (
-    <div
-      className="relative w-full h-full bg-[#0a1a20] overflow-hidden"
-      style={{ minHeight: 400 }}
-    >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <GlobePins3D
-          showLabels={false}
-          rotationSpeed={0.03}
-          className="preview-force-active w-full h-full"
-        />
       </div>
     </div>
   );

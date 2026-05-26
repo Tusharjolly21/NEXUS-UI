@@ -18,7 +18,7 @@ const securityHeaders = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://i.pravatar.cc https://picsum.photos https://cdn.jsdelivr.net https://www.google-analytics.com",
+      "img-src 'self' data: blob: https://images.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://www.google-analytics.com",
       "font-src 'self' https://fonts.gstatic.com",
       "connect-src 'self' blob: https://*.supabase.co https://api.lemonsqueezy.com https://www.google-analytics.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com",
       "worker-src 'self' blob:",

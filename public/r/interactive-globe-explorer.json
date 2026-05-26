@@ -2,14 +2,14 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "interactive-globe-explorer",
   "type": "registry:component",
-  "title": "Interactive Globe Explorer",
+  "title": "Ask Nexus Input",
   "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
   "dependencies": [
-    "react-globe.gl",
-    "three",
+    "framer-motion",
     "lucide-react",
     "react",
-    "next"
+    "next",
+    "react-globe.gl"
   ],
   "registryDependencies": [
     "http://127.0.0.1:3000/api/registry/nexus-font",

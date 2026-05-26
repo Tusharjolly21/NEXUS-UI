@@ -12,34 +12,20 @@ export function BackgroundBoxesDemo() {
           Background Boxes
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Full-width interactive box grid with subtle hover ripple, glow, and clean layering for foreground content.
+          Isometric animated grid with hover color effects and cross markers.
         </p>
       </div>
 
       <BackgroundBoxes
-        rows={14}
-        columns={24}
-        boxSize={24}
-        highlightColor="hsl(210 100% 90% / 1)"
-        defaultColor="hsl(222 55% 18% / 0.35)"
-        borderColor="hsl(217 44% 29% / 0.62)"
-        neighborRipple={false}
-        animatePulse={false}
-        gridClassName="origin-center scale-[1.18] rotate-[8deg] skew-x-[-7deg]"
-        className="h-[560px] w-full overflow-hidden rounded-2xl border border-blue-950/70 bg-gradient-to-b from-[#070f2b] via-[#0a1740] to-[#081638]"
-      >
-        <div className="pointer-events-none mx-auto flex h-full w-full items-center justify-center px-10 text-center text-slate-100">
-          <div data-bgboxes-content="true" className="pointer-events-auto inline-block max-w-2xl rounded-md px-2 py-1.5">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-300/80">Background Boxes</p>
-            <h2 className="mt-2 text-balance text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              Tailwind is Awesome
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300/85 sm:text-base">
-              Hover only reacts on the grid area, not on text.
-            </p>
-          </div>
-        </div>
-      </BackgroundBoxes>
+        rows={80}
+        cols={60}
+        boxWidth={64}
+        boxHeight={32}
+        borderColor="#374151"
+        showCrosses
+        crossColor="#374151"
+        className="h-140 w-full rounded-2xl border border-zinc-800 bg-zinc-950"
+      />
     </section>
   );
 }

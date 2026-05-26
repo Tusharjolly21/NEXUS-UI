@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/accordion";
 import { InfiniteMovingCards } from "@/components/infinite-moving-cards/InfiniteMovingCards";
 import { EncryptedText } from "@/components/encrypted-text";
-import { GlobePins3D } from "@/components/globe-pins/globe-pins-3d";
 import { cn } from "@/lib/utils";
 
 const MotionLink = motion.create(Link);
@@ -979,21 +978,15 @@ function WorldMapMini() {
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
       <div className="absolute -bottom-20 left-1/2 h-80 w-80 -translate-x-1/2 overflow-hidden rounded-full bg-black shadow-[0_30px_100px_-44px_rgba(14,165,233,0.9)] ring-1 ring-sky-400/20">
-        <GlobePins3D
-          pins={EDGE_GLOBE_PINS}
-          connections={EDGE_GLOBE_CONNECTIONS}
-          showLabels={false}
-          rotationSpeed={0.04}
-          dotColor="#7dd3fc"
-          dotOpacity={0.68}
-          dotSize={0.01}
-          pinColor="#38bdf8"
-          pinSize={0.026}
-          trailColor="#a78bfa"
-          maxCanvasSize={320}
-          dpr={1.25}
-          fpsCap={24}
-          className="preview-force-active h-full w-full"
+        <div
+          className="h-full w-full rounded-full"
+          style={{
+            background: [
+              "radial-gradient(ellipse 60% 55% at 38% 38%, rgba(56,189,248,0.55) 0%, transparent 65%)",
+              "radial-gradient(ellipse 80% 80% at 50% 50%, rgba(14,30,64,0.95) 0%, #000 100%)",
+            ].join(", "),
+            boxShadow: "inset 0 0 60px 10px rgba(14,165,233,0.18)",
+          }}
         />
       </div>
       <div className="absolute bottom-5 left-6 right-6 z-20 flex flex-wrap gap-1.5">

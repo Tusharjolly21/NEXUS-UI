@@ -1166,14 +1166,13 @@
       "name": "background-boxes",
       "type": "registry:component",
       "title": "Background Boxes",
-      "description": "Interactive full-width box grid background with cursor-follow highlight, optional glow, and smooth ripple transitions.",
+      "description": "Animated isometric grid background with hover color effects and cross markers. Fully configurable skew, scale, box dimensions, and colors.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1496,66 +1495,16 @@
       ]
     },
     {
-      "name": "ask-nexus-input",
+      "name": "interactive-globe-explorer",
       "type": "registry:component",
       "title": "Ask Nexus Input",
-      "description": "A bold \\",
+      "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
-      ],
-      "files": [
-        {
-          "path": "next-ui/ask-nexus-input/ask-nexus-input.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/ask-nexus-input/index.ts",
-          "type": "registry:lib"
-        }
-      ]
-    },
-    {
-      "name": "globe-pins",
-      "type": "registry:component",
-      "title": "Globe Pins",
-      "description": "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
-      "dependencies": [
-        "three",
-        "topojson-client",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
-      ],
-      "files": [
-        {
-          "path": "next-ui/globe-pins/globe-pins-3d.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/globe-pins/globe-pins.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "interactive-globe-explorer",
-      "type": "registry:component",
-      "title": "Interactive Globe Explorer",
-      "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
-      "dependencies": [
-        "react-globe.gl",
-        "three",
-        "lucide-react",
         "react",
-        "next"
+        "next",
+        "react-globe.gl"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",

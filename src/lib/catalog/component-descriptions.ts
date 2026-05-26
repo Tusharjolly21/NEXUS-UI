@@ -594,26 +594,6 @@ export const componentDescriptions: Record<string, ComponentDescription> = {
       "AI product hero section inputs",
     ],
   },
-  "globe-pins": {
-    about:
-      "Globe Pins renders a rotating 3D globe on canvas from real world-atlas GeoJSON geodata, with interactive location pins displaying name, address, and contact labels. Animated arc connections draw between pins to illustrate relationships or routes. A bloom/glow rendering mode adds atmospheric depth to the globe sphere. Use it to visualize global customer locations, server regions, or worldwide product reach on a marketing or product page.",
-    useCases: [
-      "Global customer and user location displays",
-      "Server and infrastructure region maps",
-      "International product reach visualizations",
-      "Partnership and office location displays",
-    ],
-  },
-  "globe-pins-3d": {
-    about:
-      "Globe Pins 3D is an interactive Three.js globe with auto-rotation, location pins with label overlays, animated arc trails between locations, optional bloom post-processing, and OrbitControls for drag-to-rotate and pinch-to-zoom. More interactive than the canvas variant — users can explore the globe freely. Ideal for prominent hero sections where global scale is a core value proposition, or for interactive product showcase sections.",
-    useCases: [
-      "Hero section globe displays",
-      "Interactive product showcase sections",
-      "Geographic data visualizations",
-      "Global reach and scale demonstrations",
-    ],
-  },
   "interactive-globe-explorer": {
     about:
       "The Interactive Globe Explorer is the most feature-complete globe variant, with hover-state country highlighting, data label overlays, scroll-driven entrance animation, and full OrbitControls. Countries highlight on cursor hover with a color fill transition and display a data label. The scroll-driven entrance rotates and scales the globe into view from below the fold. Best for data products, analytics platforms, and any product where geographic scope is a selling point.",

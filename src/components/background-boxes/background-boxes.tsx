@@ -1,186 +1,134 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
-export type BackgroundBoxesProps = {
-  children?: React.ReactNode;
+export interface BackgroundBoxesProps {
   rows?: number;
-  columns?: number;
-  boxSize?: number;
-  className?: string;
-  boxClassName?: string;
-  gridClassName?: string;
-  highlightColor?: string;
-  defaultColor?: string;
+  cols?: number;
+  boxWidth?: number;
+  boxHeight?: number;
   borderColor?: string;
-  enableGlow?: boolean;
-  interactive?: boolean;
-  neighborRipple?: boolean;
-  animatePulse?: boolean;
-};
-
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-
-function hashString(value: string) {
-  let hash = 2166136261;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i);
-    hash = Math.imul(hash, 16777619);
-  }
-  return hash >>> 0;
+  borderWidth?: number;
+  showCrosses?: boolean;
+  crossColor?: string;
+  hoverColors?: string[];
+  skewX?: number;
+  skewY?: number;
+  scale?: number;
+  rotation?: number;
+  translateX?: number;
+  translateY?: number;
+  className?: string;
 }
 
-function createSeededRandom(seed: number) {
-  let t = seed >>> 0;
-  return function rand() {
-    t += 0x6d2b79f5;
-    let n = Math.imul(t ^ (t >>> 15), 1 | t);
-    n ^= n + Math.imul(n ^ (n >>> 7), 61 | n);
-    return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
-  };
-}
+const DEFAULT_HOVER_COLORS = [
+  "#7DD3FC", "#F9A8D4", "#86EFAC", "#FDE047", "#FCA5A5",
+  "#D8B4FE", "#93C5FD", "#A5B4FC", "#C4B5FD",
+];
 
 export function BackgroundBoxes({
-  children,
-  rows = 10,
-  columns,
-  boxSize = 44,
+  rows = 150,
+  cols = 100,
+  boxWidth = 64,
+  boxHeight = 32,
+  borderColor = "#374151",
+  borderWidth = 1,
+  showCrosses = true,
+  crossColor = "#374151",
+  hoverColors = DEFAULT_HOVER_COLORS,
+  skewX = -48,
+  skewY = 14,
+  scale = 0.675,
+  rotation = 0,
+  translateX = -40,
+  translateY = -60,
   className,
-  boxClassName,
-  gridClassName,
-  highlightColor = "#22d3ee",
-  defaultColor = "transparent",
-  borderColor = "hsl(var(--border) / 0.45)",
-  enableGlow = true,
-  interactive = true,
-  neighborRipple = false,
-  animatePulse = false,
 }: BackgroundBoxesProps) {
-  const reduceMotion = useReducedMotion() === true;
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const [computedColumns, setComputedColumns] = React.useState(columns ?? 12);
-  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
+  const rowsArray = React.useMemo(() => new Array(rows).fill(1), [rows]);
+  const colsArray = React.useMemo(() => new Array(cols).fill(1), [cols]);
 
-  React.useEffect(() => {
-    if (columns) {
-      setComputedColumns(columns);
-      return;
-    }
+  const getRandomColor = () =>
+    hoverColors[Math.floor(Math.random() * hoverColors.length)];
 
-    const node = containerRef.current;
-    if (!node) return;
-
-    const updateColumns = () => {
-      const width = node.getBoundingClientRect().width;
-      const next = clamp(Math.floor(width / Math.max(16, boxSize)), 4, 40);
-      setComputedColumns(next);
-    };
-
-    updateColumns();
-    const observer = new ResizeObserver(updateColumns);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [boxSize, columns]);
-
-  const totalBoxes = rows * computedColumns;
-
-  const seedOpacities = React.useMemo(() => {
-    const seed = hashString(
-      [rows, computedColumns, boxSize, borderColor, defaultColor].join("|"),
-    );
-    const rand = createSeededRandom(seed);
-    return Array.from({ length: totalBoxes }, () => 0.08 + rand() * 0.18);
-  }, [borderColor, boxSize, computedColumns, defaultColor, rows, totalBoxes]);
-
-  const getDistance = React.useCallback(
-    (index: number) => {
-      if (hoveredIndex == null) return Number.POSITIVE_INFINITY;
-      const colA = hoveredIndex % computedColumns;
-      const rowA = Math.floor(hoveredIndex / computedColumns);
-      const colB = index % computedColumns;
-      const rowB = Math.floor(index / computedColumns);
-      return Math.max(Math.abs(colA - colB), Math.abs(rowA - rowB));
-    },
-    [computedColumns, hoveredIndex]
-  );
+  const transform = `translate(${translateX}%, ${translateY}%) skewX(${skewX}deg) skewY(${skewY}deg) scale(${scale}) rotate(${rotation}deg) translateZ(0)`;
 
   return (
     <div
-      ref={containerRef}
-      className={cn("relative w-full overflow-hidden", className)}
+      className={className}
+      style={{ position: "relative", overflow: "hidden" }}
     >
       <div
-        className={cn(
-          "absolute inset-0 z-0",
-          interactive ? "pointer-events-auto" : "pointer-events-none",
-          gridClassName,
-        )}
         style={{
-          display: "grid",
-          gridTemplateColumns: `repeat(${computedColumns}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
+          position: "absolute",
+          left: "25%",
+          top: "-25%",
+          display: "flex",
+          transform,
+          width: "100%",
+          height: "100%",
+          zIndex: 0,
+          padding: "16px",
         }}
-        onMouseLeave={() => setHoveredIndex(null)}
       >
-        {Array.from({ length: totalBoxes }, (_, index) => {
-          const distance = getDistance(index);
-          const isActive = interactive && distance === 0;
-          const isNeighbor = interactive && neighborRipple && distance > 0 && distance <= 2;
-          const rippleOpacity = isActive ? 0.92 : isNeighbor ? Math.max(0.2, 0.65 - distance * 0.2) : 0;
-          const baseOpacity = seedOpacities[index] ?? 0.12;
-          const hasHoverFocus = interactive && hoveredIndex != null;
-          const activeOpacity = Math.max(baseOpacity, rippleOpacity);
-          const pulsePeak = clamp(baseOpacity + 0.08, 0, 1);
-
-          return (
-            <motion.div
-              key={index}
-              data-bgboxes-cell-index={index}
-              className={cn("relative border", boxClassName)}
-              style={{
-                borderColor,
-                backgroundColor: defaultColor,
-              }}
-              onMouseEnter={interactive ? () => setHoveredIndex(index) : undefined}
-              initial={false}
-              animate={{
-                opacity:
-                  animatePulse && !reduceMotion && !hasHoverFocus
-                    ? [baseOpacity, pulsePeak, baseOpacity]
-                    : activeOpacity,
-                backgroundColor: interactive && (isActive || isNeighbor) ? highlightColor : defaultColor,
-                scale: reduceMotion ? 1 : interactive && isActive ? 1.03 : 1,
-              }}
-              transition={{
-                duration: reduceMotion ? 0.1 : animatePulse && !hasHoverFocus ? 2.5 : 0.35,
-                ease: "easeOut",
-                repeat: animatePulse && !reduceMotion && !hasHoverFocus ? Infinity : 0,
-                repeatType: "reverse",
-                delay: animatePulse && !reduceMotion && !hasHoverFocus ? (index % computedColumns) * 0.06 : 0,
-              }}
-            >
-              {enableGlow && interactive && (isActive || isNeighbor) ? (
-                <motion.div
-                  className="absolute inset-0"
-                  style={{
-                    boxShadow: `0 0 24px ${highlightColor}`,
-                  }}
-                  animate={{
-                    opacity: isActive ? 0.45 : 0.22,
-                  }}
-                  transition={{ duration: reduceMotion ? 0.1 : 0.25 }}
-                />
-              ) : null}
-            </motion.div>
-          );
-        })}
-      </div>
-
-      <div className="pointer-events-none relative z-20">
-        {children}
+        {rowsArray.map((_, i) => (
+          <motion.div
+            key={`row${i}`}
+            style={{
+              width: `${boxWidth}px`,
+              height: `${boxHeight}px`,
+              borderLeft: `${borderWidth}px solid ${borderColor}`,
+              position: "relative",
+            }}
+          >
+            {colsArray.map((_, j) => (
+              <motion.div
+                key={`col${j}`}
+                whileHover={{
+                  backgroundColor: getRandomColor(),
+                  transition: { duration: 0 },
+                }}
+                animate={{ transition: { duration: 2 } }}
+                style={{
+                  width: `${boxWidth}px`,
+                  height: `${boxHeight}px`,
+                  borderRight: `${borderWidth}px solid ${borderColor}`,
+                  borderTop: `${borderWidth}px solid ${borderColor}`,
+                  position: "relative",
+                }}
+              >
+                {showCrosses && j % 2 === 0 && i % 2 === 0 ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    style={{
+                      position: "absolute",
+                      height: "24px",
+                      width: "40px",
+                      top: "-14px",
+                      left: "-22px",
+                      color: crossColor,
+                      strokeWidth: "1px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v12m6-6H6"
+                    />
+                  </svg>
+                ) : null}
+              </motion.div>
+            ))}
+          </motion.div>
+        ))}
       </div>
     </div>
   );
 }
+
+export default BackgroundBoxes;
