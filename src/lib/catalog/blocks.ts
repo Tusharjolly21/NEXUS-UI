@@ -7,6 +7,7 @@ export type { BlockCategory, BlockManifestEntry };
 export type MarketplaceBlock = BlockManifestEntry & { Preview: ComponentType };
 
 const PREVIEW_BY_SLUG: Record<string, ComponentType> = {
+  "block-pricing-section": Previews.PreviewPricingPlanSelector,
   "block-text-animations": Previews.PreviewTextAnimationsBlock,
   "block-logo-clouds": Previews.PreviewLogoCloudMarquee,
   "block-interactive-dots": Previews.PreviewInteractiveDots,

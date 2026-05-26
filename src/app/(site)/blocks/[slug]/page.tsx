@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { ChevronRight, Code2, Expand, Lock, Monitor } from "lucide-react";
-import { getBlock, blocks } from "@/lib/catalog/blocks";
+import { ChevronRight, Code2, Expand, File, Folder, Lock, Monitor } from "lucide-react";
+import { getBlock, blocks, type BlockManifestEntry } from "@/lib/catalog/blocks";
 import { Badge } from "@/components/ui/badge";
 import {
   Accordion,
@@ -55,6 +55,12 @@ import {
   BlogHoverImageCardShowcase,
   BlogContentWithToc,
 } from "@/components/blocks/blog-content-sections";
+import {
+  AdvancedPricingColumns,
+  PricingPlanGrid,
+  RadioPlanPricing,
+  SpotlightPricingCards,
+} from "@/components/blocks/pricing-section";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
@@ -65,6 +71,7 @@ import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotl
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
 import { createClient } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 
@@ -115,6 +122,7 @@ export default async function BlockDetailPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser();
   const isPremium = user ? await hasPremiumAccess(user.id) : false;
   const locked = block.premium && !isPremium;
+  const installDetails = getBlockInstallDetails(block.slug, block.registryCliName ?? block.slug);
 
   const Preview = block.Preview;
   const code = await getBlockCode(block.slug, block.reactSource);
@@ -128,6 +136,7 @@ export default async function BlockDetailPage({ params }: Props) {
   const isContactPageCard = block.slug === "block-contact-page";
   const isTextAnimationsCard = block.slug === "block-text-animations";
   const isBlogContentSectionsCard = block.slug === "block-blog-content-sections";
+  const isPricingSectionCard = block.slug === "block-pricing-section";
   const isSidebarCard = block.slug === "block-sidebar";
   const isLogoCloudCard = block.slug === "block-logo-clouds";
   const layeredWaveCode = isInteractiveBackgroundCard
@@ -187,6 +196,9 @@ export default async function BlockDetailPage({ params }: Props) {
   const blogHoverImageCardCode = isBlogContentSectionsCard
     ? await readSourceFile("src/components/blocks/blog-content-sections/blog-hover-image-card.tsx", "")
     : "";
+  const billingPricingVariantsCode = isPricingSectionCard
+    ? await readSourceFile("src/components/blocks/pricing-section/billing-pricing-variants.tsx", "")
+    : "";
 
   return (
     <>
@@ -231,11 +243,7 @@ export default async function BlockDetailPage({ params }: Props) {
             Installation
           </AccordionTrigger>
           <AccordionContent className="rounded-b-xl border border-t-0 border-border/50 bg-muted/25 px-5 py-4 text-sm text-muted-foreground dark:bg-white/[0.03]">
-            <p>
-              Copy the component code from the Code tab and place it in your
-              components directory. The preview below shows the block in a realistic
-              hero section container.
-            </p>
+            <BlockInstallation block={block} details={installDetails} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -467,6 +475,44 @@ export default async function BlockDetailPage({ params }: Props) {
             <BlogHoverImageCardShowcase />
           </PreviewCodeSection>
         </>
+      ) : isPricingSectionCard ? (
+        <>
+          <PreviewCodeSection
+            title="Radio Plan Selector"
+            code={code}
+            usageCode={RADIO_PLAN_PRICING_USAGE}
+            locked={locked}
+          >
+            <RadioPlanPricing />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Four Tier Billing Switch"
+            code={billingPricingVariantsCode}
+            usageCode={PRICING_PLAN_GRID_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <PricingPlanGrid />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Advanced Pricing Columns"
+            code={billingPricingVariantsCode}
+            usageCode={ADVANCED_PRICING_COLUMNS_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <AdvancedPricingColumns />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Spotlight Pricing Cards"
+            code={billingPricingVariantsCode}
+            usageCode={SPOTLIGHT_PRICING_CARDS_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <SpotlightPricingCards />
+          </PreviewCodeSection>
+        </>
       ) : isSidebarCard ? (
         <>
           <PreviewCodeSection title="Simple Sidebar with Hover" code={code} locked={locked}>
@@ -688,6 +734,247 @@ function TextGenerateTypewriterDemo() {
   );
 }
 
+type BlockInstallDetails = {
+  registryName: string;
+  files: string[];
+  notes: string[];
+};
+
+const BLOCK_INSTALL_FILES: Record<string, string[]> = {
+  "block-pricing-section": [
+    "components/blocks/pricing-section/billing-pricing-variants.tsx",
+    "components/blocks/pricing-section/index.ts",
+    "components/blocks/pricing-section/radio-plan-pricing.tsx",
+  ],
+  "block-text-animations": [
+    "components/blocks/text-animations/index.tsx",
+    "components/blocks/text-animations/text-animation-blur-fade-in.tsx",
+    "components/blocks/text-animations/text-animation-flipping-words.tsx",
+    "components/blocks/text-animations/text-animation-typewriter-effect.tsx",
+    "components/blocks/text-animations/text-generate-typewriter.tsx",
+    "components/blocks/text-animations/typewriter-heading.tsx",
+  ],
+  "block-logo-clouds": [
+    "components/blocks/logo-clouds/logo-cloud-blur.tsx",
+    "components/blocks/logo-clouds/logo-cloud-marquee.tsx",
+    "components/blocks/logo-clouds/logo-cloud-single-row.tsx",
+    "components/blocks/logo-clouds/logo-cloud-spotlight.tsx",
+    "components/blocks/logo-clouds/logo-cloud-swap.tsx",
+    "components/blocks/logo-clouds/logos-blur-flip.tsx",
+    "components/blocks/logo-clouds/logos.tsx",
+  ],
+  "block-interactive-dots": [
+    "components/interactive-dots/index.ts",
+    "components/interactive-dots/interactive-dots.tsx",
+    "components/layered-wave-background/index.ts",
+    "components/layered-wave-background/layered-wave-background.tsx",
+    "components/particle-noise/index.ts",
+    "components/particle-noise/particle-noise.tsx",
+    "components/wavy-lines/index.ts",
+    "components/wavy-lines/wavy-lines.tsx",
+  ],
+  "block-why-choose-us": [
+    "components/blocks/animated-bento-grid.tsx",
+    "components/blocks/ats-bento-grid.tsx",
+    "components/blocks/spotlight-bento-grid.tsx",
+  ],
+  "block-faq-folder-card": ["components/blocks/faq-folder-card.tsx"],
+  "block-sidebar": [
+    "components/blocks/sidebar/collapsible-sidebar.tsx",
+    "components/blocks/sidebar/grouped-sidebar.tsx",
+    "components/blocks/sidebar/simple-sidebar.tsx",
+  ],
+  "block-contact-page": [
+    "components/blocks/contact-page.tsx",
+    "components/brand/nexus-mark.tsx",
+  ],
+  "block-blog-content-sections": [
+    "components/blocks/blog-content-sections/blog-content-centered.tsx",
+    "components/blocks/blog-content-sections/blog-content-editorial.tsx",
+    "components/blocks/blog-content-sections/blog-content-with-toc.tsx",
+    "components/blocks/blog-content-sections/blog-header-featured-posts.tsx",
+    "components/blocks/blog-content-sections/blog-hover-image-card.tsx",
+    "components/blocks/blog-content-sections/index.tsx",
+  ],
+};
+
+const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
+  "block-text-animations": [
+    "TextGenerateTypewriter plays /sounds/sound.ogg by default. Add your own audio file at public/sounds/sound.ogg or pass a different soundSrc value.",
+  ],
+  "block-why-choose-us": [
+    "SpotlightBentoGrid renders Unsplash images with next/image. Add images.unsplash.com to images.remotePatterns in next.config.mjs before using that variant.",
+  ],
+  "block-contact-page": [
+    "The supplied contact form posts to /api/contact. Create that route in your app or replace the submit handler with your own form service.",
+  ],
+};
+
+function getBlockInstallDetails(slug: string, registryName: string): BlockInstallDetails {
+  return {
+    registryName,
+    files: BLOCK_INSTALL_FILES[slug] ?? [],
+    notes: BLOCK_INSTALL_NOTES[slug] ?? [],
+  };
+}
+
+function BlockInstallation({
+  block,
+  details,
+}: {
+  block: BlockManifestEntry;
+  details: BlockInstallDetails;
+}) {
+  const config = block.premium
+    ? `"registries": {
+  "${SHADCN_REGISTRY_SCOPE}": {
+    "url": "${shadcnRegistryUrl()}",
+    "headers": {
+      "Authorization": "Bearer YOUR_NEXUS_API_KEY"
+    }
+  }
+}`
+    : `"registries": {
+  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"
+}`;
+  const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${details.registryName}`;
+
+  return (
+    <div className="space-y-6">
+      <p className="max-w-3xl leading-6">
+        Install the complete <span className="font-medium text-foreground">{block.name}</span> family
+        with its {block.variants.length} {block.variants.length === 1 ? "variant" : "variants"}.
+        The registry command adds the source files, required utility imports, and npm packages used by this block.
+      </p>
+
+      <ol className="space-y-5">
+        <InstallationStep number="1" title="Prepare a shadcn project">
+          <p>
+            Use a Next.js project with Tailwind CSS and the <span className="font-mono text-foreground">@/</span> alias.
+            If shadcn is not configured yet, run:
+          </p>
+          <InstallCode value="npx shadcn@latest init" />
+        </InstallationStep>
+
+        <InstallationStep number="2" title={block.premium ? "Connect the registry with your API key" : "Connect the Nexus UI registry"}>
+          <p>
+            Merge this entry into the <span className="font-mono text-foreground">registries</span> field
+            of your <span className="font-mono text-foreground">components.json</span> file.
+          </p>
+          {block.premium && (
+            <p className="mt-2">
+              Replace <span className="font-mono text-foreground">YOUR_NEXUS_API_KEY</span> with the key from your Nexus UI dashboard.
+            </p>
+          )}
+          <InstallCode value={config} />
+        </InstallationStep>
+
+        <InstallationStep number="3" title="Install the full block family">
+          <p>
+            Run this command from your project root. It installs every variant shown on this page.
+          </p>
+          <InstallCode value={command} />
+        </InstallationStep>
+
+        {details.files.length > 0 && (
+          <InstallationStep number="4" title="Files added to your project">
+            <p>The component package installs these block source files:</p>
+            <BlockFileTree files={details.files} />
+          </InstallationStep>
+        )}
+
+        <InstallationStep number={details.files.length > 0 ? "5" : "4"} title="Import a variant and render it">
+          <p>
+            Open the <span className="font-medium text-foreground">Code</span> tab under the variant you want,
+            then use its provided import and JSX example in your page.
+          </p>
+        </InstallationStep>
+      </ol>
+
+      {details.notes.length > 0 && (
+        <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4">
+          <p className="font-medium text-foreground">Required setup for this block</p>
+          <ul className="mt-3 space-y-2 leading-6">
+            {details.notes.map((note) => (
+              <li key={note} className="flex gap-2">
+                <span className="text-amber-500">-</span>
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function InstallationStep({
+  number,
+  title,
+  children,
+}: {
+  number: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <li className="grid gap-3 sm:grid-cols-[2rem_minmax(0,1fr)]">
+      <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+        {number}
+      </span>
+      <div className="space-y-1.5 leading-6">
+        <h3 className="font-semibold text-foreground">{title}</h3>
+        {children}
+      </div>
+    </li>
+  );
+}
+
+function InstallCode({ value }: { value: string }) {
+  return (
+    <pre className="mt-3 overflow-x-auto rounded-xl border border-border bg-background p-4 font-mono text-xs leading-6 text-foreground">
+      {value}
+    </pre>
+  );
+}
+
+function BlockFileTree({ files }: { files: string[] }) {
+  const rows: Array<{ depth: number; label: string; type: "folder" | "file" }> = [];
+  let previousFolders: string[] = [];
+
+  for (const file of [...files].sort()) {
+    const parts = file.split("/");
+    const folders = parts.slice(0, -1);
+
+    folders.forEach((folder, index) => {
+      if (folder !== previousFolders[index]) {
+        rows.push({ depth: index, label: folder, type: "folder" });
+      }
+    });
+    rows.push({ depth: folders.length, label: parts.at(-1) ?? file, type: "file" });
+    previousFolders = folders;
+  }
+
+  return (
+    <div className="mt-3 rounded-xl border border-border bg-background p-4 font-mono text-xs text-foreground">
+      {rows.map((row, index) => (
+        <div
+          key={`${row.type}-${row.label}-${index}`}
+          className="flex items-center gap-2 py-0.5"
+          style={{ paddingLeft: `${row.depth * 16}px` }}
+        >
+          {row.type === "folder" ? (
+            <Folder className="size-3.5 shrink-0 text-sky-500" />
+          ) : (
+            <File className="size-3.5 shrink-0 text-muted-foreground" />
+          )}
+          <span>{row.label}{row.type === "folder" ? "/" : ""}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 async function getBlockCode(slug: string, fallback: string) {
   const sourceBySlug: Record<string, string> = {
     "block-interactive-dots": "src/components/interactive-dots/interactive-dots.tsx",
@@ -696,6 +983,7 @@ async function getBlockCode(slug: string, fallback: string) {
     "block-contact-page": "src/components/blocks/contact-page.tsx",
     "block-text-animations": "src/components/blocks/text-animations/typewriter-heading.tsx",
     "block-blog-content-sections": "src/components/blocks/blog-content-sections/blog-content-centered.tsx",
+    "block-pricing-section": "src/components/blocks/pricing-section/radio-plan-pricing.tsx",
     "block-sidebar": "src/components/blocks/sidebar/simple-sidebar.tsx",
     "block-logo-clouds": "src/components/blocks/logo-clouds/logos-blur-flip.tsx",
   };
@@ -759,10 +1047,10 @@ function PreviewCodeSection({
         </div>
 
         <TabsContent value="preview" className="mt-4">
-          <div className="rounded-2xl bg-muted/80 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-white/[0.06] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-            <div className="relative h-[620px] overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950 md:h-[720px] xl:h-[860px]">
-              <div className="absolute inset-4 overflow-hidden rounded-lg bg-background dark:bg-zinc-950 sm:inset-6">
-                <div className="h-full w-full [&>*]:!h-full [&>*]:!min-h-full [&>*]:!w-full [&>*]:!max-w-none [&>*]:!rounded-lg">
+          <div className="min-w-0 overflow-hidden rounded-2xl bg-muted/80 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-white/[0.06] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+            <div className="relative isolate h-[620px] min-w-0 overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm [contain:paint] dark:border-white/10 dark:bg-zinc-950 md:h-[720px] xl:h-[860px]">
+              <div className="absolute inset-4 min-w-0 overflow-hidden rounded-lg bg-background [contain:paint] dark:bg-zinc-950 sm:inset-6">
+                <div className="h-full min-h-0 w-full min-w-0 overflow-hidden [&>*]:!h-full [&>*]:!min-h-0 [&>*]:!w-full [&>*]:!max-w-none [&>*]:!overflow-hidden [&>*]:!rounded-lg">
                   {children}
                 </div>
               </div>
@@ -865,6 +1153,10 @@ function defaultUsageForTitle(title: string) {
   if (title === "Blog Content Editorial") return BLOG_CONTENT_EDITORIAL_USAGE;
   if (title === "Blog Header Featured Posts") return BLOG_HEADER_FEATURED_POSTS_USAGE;
   if (title === "Blog Hover Image Card") return BLOG_HOVER_IMAGE_CARD_USAGE;
+  if (title === "Radio Plan Selector") return RADIO_PLAN_PRICING_USAGE;
+  if (title === "Four Tier Billing Switch") return PRICING_PLAN_GRID_USAGE;
+  if (title === "Advanced Pricing Columns") return ADVANCED_PRICING_COLUMNS_USAGE;
+  if (title === "Spotlight Pricing Cards") return SPOTLIGHT_PRICING_CARDS_USAGE;
   if (title === "Simple Sidebar with Hover") return `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";\n\nexport default function Page() {\n  return <SimpleSidebar />;\n}`;
   if (title === "Collapsible Sidebar") return COLLAPSIBLE_SIDEBAR_USAGE;
   if (title === "Grouped Sidebar") return GROUPED_SIDEBAR_USAGE;
@@ -1093,6 +1385,40 @@ export default function BlogCardExample() {
       date="23 May '26"
     />
   );
+}`;
+
+const RADIO_PLAN_PRICING_USAGE = `import { RadioPlanPricing } from "@/components/blocks/pricing-section";
+
+export default function PricingSection() {
+  return (
+    <RadioPlanPricing
+      theme="ivory"
+      plans={[
+        { id: "monthly", label: "Monthly", subtitle: "Flexible billing", price: 10.59, period: "/mo", includedFeatureCount: 5 },
+        { id: "yearly", label: "Yearly", subtitle: "Best value", price: 8.59, period: "/mo", badge: "Best Value", includedFeatureCount: 7 },
+        { id: "lifetime", label: "Lifetime", subtitle: "One time purchase", price: 90.59, period: "one-time", includedFeatureCount: 8 },
+      ]}
+      features={["AI advisor full time", "Unlimited auto tracking", "Priority customer support", "Enhanced security"]}
+    />
+  );
+}`;
+
+const PRICING_PLAN_GRID_USAGE = `import { PricingPlanGrid } from "@/components/blocks/pricing-section";
+
+export default function PricingSection() {
+  return <PricingPlanGrid />;
+}`;
+
+const ADVANCED_PRICING_COLUMNS_USAGE = `import { AdvancedPricingColumns } from "@/components/blocks/pricing-section";
+
+export default function PricingSection() {
+  return <AdvancedPricingColumns />;
+}`;
+
+const SPOTLIGHT_PRICING_CARDS_USAGE = `import { SpotlightPricingCards } from "@/components/blocks/pricing-section";
+
+export default function PricingSection() {
+  return <SpotlightPricingCards />;
 }`;
 
 const LAYERED_WAVE_USAGE = `<section className="relative min-h-[640px] overflow-hidden">

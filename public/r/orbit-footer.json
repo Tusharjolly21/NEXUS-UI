@@ -6,7 +6,7 @@
   "description": "Compact footer with balanced columns and developer-first links.",
   "dependencies": [],
   "registryDependencies": [
-    "https://nexus-ui.com/r/nexus-font.json"
+    "https://nexus-ui.com/api/registry/nexus-font"
   ],
   "files": [
     {

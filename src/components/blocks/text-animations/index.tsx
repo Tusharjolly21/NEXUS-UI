@@ -8,6 +8,7 @@ import { TextAnimationBlurFadeIn } from "./text-animation-blur-fade-in";
 import { TextAnimationFlippingWords } from "./text-animation-flipping-words";
 import { TextAnimationTypewriterEffect } from "./text-animation-typewriter-effect";
 import { TextGenerateTypewriter } from "./text-generate-typewriter";
+import { TypewriterHeading } from "./typewriter-heading";
 
 export { TextAnimationBlurFadeIn } from "./text-animation-blur-fade-in";
 export type { TextAnimationBlurFadeInProps } from "./text-animation-blur-fade-in";
@@ -129,9 +130,15 @@ export function TextAnimationsBlock({ className, muteSound = false }: { classNam
 
 export function TextAnimationsBlockPreview() {
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-zinc-950">
-      <div className="absolute left-1/2 top-1/2 w-[980px] -translate-x-1/2 -translate-y-1/2 scale-[0.45]">
-        <TextAnimationsBlock className="min-h-[700px] overflow-hidden rounded-3xl p-6" muteSound />
+    <div className="relative flex h-[320px] w-full items-center overflow-hidden rounded-3xl bg-[#f7f7f8] px-8">
+      <div className="w-full origin-left scale-[0.72] sm:scale-[0.78]">
+        <TypewriterHeading
+          text="Motion-native interfaces."
+          description="Typewriter headings for polished hero sections."
+          typingSpeed={54}
+          startDelay={120}
+          loop
+        />
       </div>
     </div>
   );

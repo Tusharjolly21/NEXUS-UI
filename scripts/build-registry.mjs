@@ -14,7 +14,7 @@ const catalogPath = path.join(root, "src", "lib", "catalog", "library-components
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencies ?? {}));
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
-const NEXUS_FONT_REGISTRY_DEP = "https://nexus-ui.com/r/nexus-font.json";
+const NEXUS_FONT_REGISTRY_DEP = "https://nexus-ui.com/api/registry/nexus-font";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
 const REGISTRY_CLI_NAME = {
@@ -136,13 +136,12 @@ function buildNexusFontItem() {
     description:
       "Inter font setup used by Nexus UI components so installed components match the preview typography.",
     font: {
-      family: "Inter",
+      family: "'Inter Variable', sans-serif",
       provider: "google",
-      import:
-        "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+      import: "Inter",
       variable: "--font-sans",
-      weight: ["100 900"],
       subsets: ["latin"],
+      dependency: "@fontsource-variable/inter",
       selector: "body",
     },
     cssVars: {
@@ -586,6 +585,106 @@ function buildGooeyItem() {
   };
 }
 
+const BLOCK_REGISTRY_PACKAGES = [
+  {
+    name: "pricing-section",
+    title: "Pricing Section",
+    description:
+      "Four interactive pricing layouts with radio selection, animated monthly and yearly billing transitions, and configurable feature lists.",
+    premium: false,
+    components: ["blocks/pricing-section"],
+  },
+  {
+    name: "text-animations",
+    title: "Text Animations",
+    description:
+      "Animated headings and generated text components with typewriter and blur reveal motion.",
+    premium: true,
+    components: ["blocks/text-animations"],
+  },
+  {
+    name: "logo-clouds",
+    title: "Brand Logo Animation",
+    description:
+      "A complete set of animated logo cloud layouts including marquee, spotlight, swapping, and blur variants.",
+    premium: false,
+    components: ["blocks/logo-clouds"],
+  },
+  {
+    name: "interactive-backgrounds",
+    title: "Interactive Background Card",
+    description:
+      "Interactive dot, layered wave, particle noise, and wavy line backgrounds for immersive sections.",
+    premium: true,
+    components: ["interactive-dots", "layered-wave-background", "particle-noise", "wavy-lines"],
+  },
+  {
+    name: "why-choose-us-bento",
+    title: "Why Choose Us Bento Grid",
+    description:
+      "Animated feature, ATS, and spotlight bento-grid block variants.",
+    premium: true,
+    components: ["blocks/animated-bento-grid", "blocks/ats-bento-grid", "blocks/spotlight-bento-grid"],
+  },
+  {
+    name: "faq-folder-card",
+    title: "FAQ Folder Card",
+    description:
+      "FAQ block layouts with searchable and chat-style animated variants.",
+    premium: true,
+    components: ["blocks/faq-folder-card"],
+  },
+  {
+    name: "sidebar",
+    title: "Sidebar",
+    description:
+      "Simple, collapsible, and grouped animated sidebar navigation layouts.",
+    premium: false,
+    components: ["blocks/sidebar"],
+  },
+  {
+    name: "contact-page",
+    title: "Contact Page",
+    description:
+      "Contact block variants with forms, social links, imagery, and the included Nexus mark.",
+    premium: false,
+    components: ["blocks/contact-page"],
+  },
+  {
+    name: "blog-content-sections",
+    title: "Blog Content Sections",
+    description:
+      "Centered article, table-of-contents, editorial, featured post, and hover-card blog sections.",
+    premium: false,
+    components: ["blocks/blog-content-sections"],
+  },
+];
+
+function buildBlockCollectionItem(blockPackage) {
+  const cliName = blockPackage.name;
+  const files = new Map();
+  const seenComponents = new Set();
+  const seenUi = new Set();
+
+  for (const component of blockPackage.components) {
+    collectSourceFiles(component, files, seenComponents);
+  }
+
+  collectImportedLocalFiles(files, seenComponents, seenUi);
+  const contents = [...files.values()].map((file) => file.content).join("\n");
+
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: cliName,
+    type: "registry:component",
+    title: blockPackage.title,
+    description: blockPackage.description,
+    dependencies: [],
+    registryDependencies: registryDepsForReactSource(contents),
+    files: [...files.values()],
+  };
+}
+
 const catalogTs = fs.readFileSync(catalogPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
@@ -632,6 +731,10 @@ for (const { slug } of blocks) {
   if (item) items.push(item);
 }
 
+for (const blockPackage of BLOCK_REGISTRY_PACKAGES) {
+  items.push(buildBlockCollectionItem(blockPackage));
+}
+
 const completedItems = items.map(detectedPackageDependencies);
 
 function buildRegistryIndex(registryItems) {
@@ -665,6 +768,9 @@ function writeRegistry(destination, registryItems) {
 
 const publicNames = new Set([
   NEXUS_FONT_REGISTRY_NAME,
+  ...BLOCK_REGISTRY_PACKAGES
+    .filter((blockPackage) => !blockPackage.premium)
+    .map((blockPackage) => blockPackage.name),
   ...blocks
     .filter((block) => !isPremiumBlock(block.text))
     .map((block) => extractRegistryCliName(block.slug, block.text)),

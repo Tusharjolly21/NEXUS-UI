@@ -20,6 +20,7 @@ export type BlockCategory =
 
 export type BlockManifestEntry = {
   slug: string;
+  registryCliName?: string;
   name: string;
   description: string;
   category: BlockCategory;
@@ -31,7 +32,24 @@ export type BlockManifestEntry = {
 
 export const blocksManifest: BlockManifestEntry[] = [
   {
+    slug: "block-pricing-section",
+    registryCliName: "pricing-section",
+    name: "Pricing Section",
+    description:
+      "Interactive pricing layouts with radio selection, monthly and yearly billing transitions, animated prices, and dynamic feature comparisons.",
+    category: "Pricing blocks",
+    tags: ["pricing", "plans", "comparison", "subscription", "framer-motion"],
+    premium: false,
+    variants: ["Radio Plan Selector", "Four Tier Billing Switch", "Advanced Pricing Columns", "Spotlight Pricing Cards"],
+    reactSource: `import { RadioPlanPricing } from "@/components/blocks/pricing-section";
+
+export default function PricingPage() {
+  return <RadioPlanPricing />;
+}`,
+  },
+  {
     slug: "block-text-animations",
+    registryCliName: "text-animations",
     name: "Text Animations",
     description:
       "Text animation React components built with Tailwind CSS and Framer Motion. Includes flipping words, typewriter text, blur fade reveals, and AI-style generation — copy-paste ready for Next.js.",
@@ -73,6 +91,7 @@ export default function Page() {
   },
   {
     slug: "block-logo-clouds",
+    registryCliName: "logo-clouds",
     name: "Brand Logo Animation",
     description:
       "Six production-ready animated logo cloud variants: blur-flip grid, hover-reveal blur, infinite marquee, cursor spotlight, periodic swap, and minimal single row.",
@@ -109,6 +128,7 @@ export default function Page() {
   },
   {
     slug: "block-interactive-dots",
+    registryCliName: "interactive-backgrounds",
     name: "Interactive Background Card",
     description:
       "Background animation components for websites built with React and Framer Motion. CSS background animations including cursor fields, layered waves, particle noise, and aurora effects — drop into any Next.js hero section.",
@@ -121,6 +141,7 @@ export { WavyLines } from "@/components/wavy-lines";`,
   },
   {
     slug: "block-why-choose-us",
+    registryCliName: "why-choose-us-bento",
     name: "Why Choose Us Bento Grid",
     description: "Animated feature bento collection with mentoring cards, ATS scoring, upload flows, interview scheduling, and progress tracking.",
     category: "Feature grids",
@@ -131,6 +152,7 @@ export { WavyLines } from "@/components/wavy-lines";`,
   },
   {
     slug: "block-faq-folder-card",
+    registryCliName: "faq-folder-card",
     name: "FAQ Folder Card",
     description:
       "A collection of FAQ sections with editable data, searchable categories, and chat-style animated answers.",
@@ -169,6 +191,7 @@ export default function Page() {
   },
   {
     slug: "block-sidebar",
+    registryCliName: "sidebar",
     name: "Sidebar",
     description:
       "Sidebar component React Tailwind CSS — animated navigation sidebars for dashboards and product layouts. Includes simple hover sidebar, collapsible icon-only sidebar, and grouped sidebar built with Framer Motion.",
@@ -192,6 +215,7 @@ export default function Page() {
   },
   {
     slug: "block-contact-page",
+    registryCliName: "contact-page",
     name: "Contact Page",
     description:
       "A polished contact page block with map-led reach, centered intake, testimonial proof, and image-backed launch support layouts.",
@@ -207,6 +231,7 @@ export default function Page() {
   },
   {
     slug: "block-blog-content-sections",
+    registryCliName: "blog-content-sections",
     name: "Blog Content Sections",
     description:
       "Content sections for single blog posts with centered articles, sticky table-of-contents layouts, editorial story sections, featured blog indexes, and interactive blog cards.",

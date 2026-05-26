@@ -122,10 +122,9 @@ export function BlogContentSectionsBlock({ className }: { className?: string }) 
 
 export function BlogContentSectionsBlockPreview() {
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-zinc-950">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(124,58,237,0.18),transparent_30%),radial-gradient(circle_at_80%_78%,rgba(14,165,233,0.16),transparent_28%)]" />
-      <div className="absolute left-1/2 top-1/2 w-[1040px] -translate-x-1/2 -translate-y-1/2 scale-[0.42]">
-        <BlogContentSectionsBlock className="min-h-[740px] overflow-hidden rounded-3xl p-6" />
+    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-[#f7f7f7] dark:bg-zinc-950">
+      <div className="absolute left-1/2 top-0 w-[760px] -translate-x-1/2 scale-[0.52] origin-top">
+        <BlogContentCentered className="h-[620px] min-h-0 overflow-hidden rounded-3xl py-10" />
       </div>
     </div>
   );

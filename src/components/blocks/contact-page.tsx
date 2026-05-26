@@ -12,20 +12,8 @@ import {
   MessageCircle,
   Send,
 } from "lucide-react";
-import { NexusMark } from "@/components/brand";
+import { NexusMark } from "@/components/brand/nexus-mark";
 import { cn } from "@/lib/utils";
-
-type ContactFormField = {
-  label: string;
-  placeholder: string;
-  type?: React.HTMLInputTypeAttribute;
-};
-
-const baseFields: ContactFormField[] = [
-  { label: "Name", placeholder: "Maya Srinivasan" },
-  { label: "Work email", placeholder: "maya@northstar.dev", type: "email" },
-  { label: "Company", placeholder: "Northstar Labs" },
-];
 
 export function ContactPageBlock({ className }: { className?: string }) {
   return (
@@ -277,34 +265,9 @@ export function ImageStoryContact({ className }: { className?: string }) {
 
 export function ContactPageBlockPreview() {
   return (
-    <div className="relative h-[320px] overflow-hidden rounded-3xl bg-white text-zinc-950 dark:bg-zinc-950">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(14,165,233,0.16),transparent_30%),radial-gradient(circle_at_82%_78%,rgba(168,85,247,0.18),transparent_28%)]" />
-      <div className="absolute left-5 top-5 w-[46%] rounded-2xl border border-zinc-200 bg-white p-4 shadow-xl shadow-zinc-950/10 dark:border-white/10 dark:bg-white/8">
-        <div className="grid size-8 place-items-center rounded-xl bg-sky-50 text-sky-500 dark:bg-sky-400/10">
-          <Mail className="size-4" />
-        </div>
-        <p className="mt-8 text-xl font-semibold tracking-tight dark:text-white">
-          Let&apos;s shape the next interface.
-        </p>
-        <div className="mt-4 h-20 overflow-hidden">
-          <IndiaPulseMap compact />
-        </div>
-      </div>
-      <div className="absolute right-5 top-7 w-[44%] rounded-2xl border border-zinc-200 bg-zinc-50 p-4 shadow-xl shadow-zinc-950/10 dark:border-white/10 dark:bg-white/8">
-        <div className="h-3 w-20 rounded-full bg-zinc-900 dark:bg-white" />
-        <div className="mt-5 space-y-2">
-          <div className="h-8 rounded-lg border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-950/60" />
-          <div className="h-8 rounded-lg border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-950/60" />
-          <div className="h-16 rounded-lg border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-950/60" />
-        </div>
-        <div className="mt-3 h-8 rounded-full bg-zinc-950 dark:bg-white" />
-      </div>
-      <div className="absolute bottom-5 left-[38%] h-28 w-[34%] rounded-2xl bg-gradient-to-br from-fuchsia-500 via-rose-400 to-amber-300 p-3 shadow-2xl shadow-pink-500/20">
-        <div className="rounded-xl border border-white/25 bg-white/20 p-3 text-white backdrop-blur">
-          <p className="text-2xl leading-none">&ldquo;</p>
-          <div className="mt-2 h-2 w-24 rounded-full bg-white/80" />
-          <div className="mt-2 h-2 w-16 rounded-full bg-white/55" />
-        </div>
+    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-white text-zinc-950 dark:bg-zinc-950">
+      <div className="absolute left-1/2 top-1/2 w-[1240px] -translate-x-1/2 -translate-y-1/2 scale-[0.39]">
+        <GlobalSignalContact className="min-h-[760px] rounded-[28px] p-10" />
       </div>
     </div>
   );

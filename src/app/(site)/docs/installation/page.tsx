@@ -29,42 +29,27 @@ export default function InstallationPage() {
       <DocPageShell>
         <DocPageHeader
           title="Quick Start"
-          description="From zero to your first Nexus UI component in five steps. You'll create a Next.js app, wire Tailwind CSS v4, add the cn() helper, initialize shadcn/ui, and drop in a component."
+          description="From zero to your first Nexus UI component in six steps. Create a Next.js app with Tailwind and an import alias, initialize shadcn/ui, connect the registry, and install a component."
         />
 
         <DocSection title="1. Create a Next.js project">
           <p className="text-sm text-muted-foreground">
             Nexus UI targets the App Router with TypeScript. Scaffold a new project:
           </p>
-          <DocPre>{`npx create-next-app@latest my-app --typescript --eslint
+          <DocPre>{`npx create-next-app@latest my-app --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 cd my-app`}</DocPre>
           <p className="text-sm text-muted-foreground">
-            When prompted, choose{" "}
-            <strong className="font-medium text-foreground">App Router</strong>, enable the{" "}
-            <strong className="font-medium text-foreground">src/ directory</strong>, and set the
-            import alias to <code className={docInlineCodeClass}>@/*</code> — this matches every
-            Nexus UI component import.
+            This command sets up the App Router, TypeScript, Tailwind CSS, ESLint, a{" "}
+            <code className={docInlineCodeClass}>src/</code> directory, and the{" "}
+            <code className={docInlineCodeClass}>@/*</code> alias used by Nexus UI imports.
           </p>
         </DocSection>
 
-        <DocSection title="2. Install Tailwind CSS v4">
+        <DocSection title="2. Confirm Tailwind CSS v4">
           <p className="text-sm text-muted-foreground">
-            Install Tailwind and its PostCSS adapter:
-          </p>
-          <DocPre>{`npm install tailwindcss @tailwindcss/postcss`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            Create <code className={docInlineCodeClass}>postcss.config.mjs</code> at the project
-            root:
-          </p>
-          <DocPre>{`export default {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-};`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            Then import Tailwind at the top of{" "}
-            <code className={docInlineCodeClass}>src/app/globals.css</code> and add your design
-            tokens:
+            The create command above already installs Tailwind. Confirm that{" "}
+            <code className={docInlineCodeClass}>src/app/globals.css</code> starts with the
+            Tailwind import, then add or customize tokens as your design needs:
           </p>
           <DocPre>{`@import "tailwindcss";
 
@@ -176,10 +161,9 @@ export function cn(...inputs: ClassValue[]) {
           </ul>
           <DocPre>{`// components.json
 "registries": {
-  "@nexus-labs": "https://nexus-ui.com/r/{name}.json"
+  "@nexus-labs": "https://nexus-ui.com/api/registry/{name}"
 }`}</DocPre>
-          <DocPre>{`npx shadcn@latest add @nexus-labs/terminal
-npx shadcn@latest add @nexus-labs/gooey-input`}</DocPre>
+          <DocPre>{`npx shadcn@latest add @nexus-labs/wheel-selector`}</DocPre>
           <p className="text-sm text-muted-foreground">
             The CLI installs declared dependencies (e.g.{" "}
             <code className={docInlineCodeClass}>framer-motion</code>), pulls the{" "}
@@ -189,6 +173,11 @@ npx shadcn@latest add @nexus-labs/gooey-input`}</DocPre>
               CLI guide
             </Link>{" "}
             for full details.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Premium components and blocks use the same API endpoint with your Nexus UI API key
+            supplied as an Authorization header. The installation panel on each premium item
+            provides that configuration.
           </p>
         </DocSection>
 

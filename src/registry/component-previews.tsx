@@ -90,6 +90,7 @@ import { FaqFolderCard } from "@/components/blocks/faq-folder-card";
 import { ContactPageBlockPreview } from "@/components/blocks/contact-page";
 import { TextAnimationsBlockPreview } from "@/components/blocks/text-animations";
 import { BlogContentSectionsBlockPreview } from "@/components/blocks/blog-content-sections";
+import { RadioPlanPricingPreview } from "@/components/blocks/pricing-section";
 import { WordMagnet } from "@/components/word-magnet";
 import { ThreeDFolder } from "@/components/three-d-folder";
 import { CardCarousel3D } from "@/components/card-carousel-3d";
@@ -1279,6 +1280,10 @@ export function PreviewTextAnimationsBlock() {
 
 export function PreviewBlogContentSectionsBlock() {
   return <BlogContentSectionsBlockPreview />;
+}
+
+export function PreviewPricingPlanSelector() {
+  return <RadioPlanPricingPreview />;
 }
 
 export function PreviewSimpleSidebar() {

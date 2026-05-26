@@ -22,8 +22,8 @@ export function ApiKeyClient({ apiKey }: { apiKey: string }) {
 
   const componentsJson = `{
   "registries": {
-    "@nexus": {
-      "url": "https://nexus-ui.com/registry/{name}.json",
+    "@nexus-labs": {
+      "url": "https://nexus-ui.com/api/registry/{name}",
       "headers": {
         "Authorization": "Bearer ${apiKey}"
       }
@@ -33,8 +33,8 @@ export function ApiKeyClient({ apiKey }: { apiKey: string }) {
 
   const maskedComponentsJson = `{
   "registries": {
-    "@nexus": {
-      "url": "https://nexus-ui.com/registry/{name}.json",
+    "@nexus-labs": {
+      "url": "https://nexus-ui.com/api/registry/{name}",
       "headers": {
         "Authorization": "Bearer ••••••••••••••••••••"
       }
@@ -155,7 +155,7 @@ export function ApiKeyClient({ apiKey }: { apiKey: string }) {
             {(visible ? componentsJson : maskedComponentsJson)
               .split("\n")
               .map((line, i) => {
-                const isKey = line.includes('"registries"') || line.includes('"@nexus"');
+                const isKey = line.includes('"registries"') || line.includes('"@nexus-labs"');
                 const isUrl = line.includes('"url"');
                 const isHeader = line.includes('"headers"') || line.includes('"Authorization"');
                 const isBearer = line.includes("Bearer");
@@ -190,7 +190,7 @@ export function ApiKeyClient({ apiKey }: { apiKey: string }) {
             <span className="text-zinc-500">$</span>{" "}
             <span className="text-emerald-400">npx</span>{" "}
             <span className="text-sky-400">shadcn@latest</span>{" "}
-            <span className="text-zinc-100">add @nexus/component-name</span>
+            <span className="text-zinc-100">add @nexus-labs/component-name</span>
           </pre>
         </div>
         <p className="mt-3 text-sm text-muted-foreground">

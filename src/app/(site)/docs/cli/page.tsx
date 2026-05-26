@@ -65,19 +65,35 @@ npx shadcn@latest add card -c ./apps/web`}</DocPre>
           <code className={docInlineCodeClass}>components.json</code>:
         </p>
         <DocPre>{`"registries": {
-  "@nexus-labs": "https://nexus-ui.com/r/{name}.json"
+  "@nexus-labs": "https://nexus-ui.com/api/registry/{name}"
 }`}</DocPre>
         <p className="text-sm text-muted-foreground">
-          Then pull any component by its slug:
+          Then pull any free component or block by its install name:
         </p>
-        <DocPre>{`npx shadcn@latest add @nexus-labs/terminal
-npx shadcn@latest add @nexus-labs/gooey-input`}</DocPre>
+        <DocPre>{`npx shadcn@latest add @nexus-labs/wheel-selector
+npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
         <p className="text-sm text-muted-foreground">
           The CLI installs declared dependencies (e.g.{" "}
           <code className={docInlineCodeClass}>framer-motion</code>), pulls the{" "}
           <code className={docInlineCodeClass}>utils</code> helper if missing, and writes files under
           your components alias.
         </p>
+      </DocSection>
+
+      <DocSection title="Install premium items">
+        <p className="text-sm text-muted-foreground">
+          Premium components and blocks use the same registry endpoint with the API key from your
+          Nexus UI dashboard:
+        </p>
+        <DocPre>{`"registries": {
+  "@nexus-labs": {
+    "url": "https://nexus-ui.com/api/registry/{name}",
+    "headers": {
+      "Authorization": "Bearer YOUR_NEXUS_API_KEY"
+    }
+  }
+}`}</DocPre>
+        <DocPre>{`npx shadcn@latest add @nexus-labs/text-animations`}</DocPre>
       </DocSection>
 
       <DocSection title="Nexus UI catalog workflow">

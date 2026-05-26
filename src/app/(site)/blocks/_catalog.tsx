@@ -193,18 +193,16 @@ function BlockCard({
       initial={reduceMotion ? false : { opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index * 0.035, 0.28), duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-      className="h-full"
+      className="h-full min-w-0"
     >
       <div
         id={block.slug}
         className="group relative flex h-full flex-col overflow-hidden rounded-[28px] bg-muted/55 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:bg-muted/70 hover:shadow-2xl hover:shadow-foreground/10 dark:bg-white/5.5 dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)] dark:hover:bg-white/7.5"
       >
-        <div className="relative p-2.5">
-          <div className="relative h-[260px] overflow-hidden rounded-[22px] border border-border/70 bg-zinc-950 shadow-inner sm:h-[300px] xl:h-[320px] dark:border-white/10">
-            <div className="pointer-events-none absolute inset-0 grid place-items-center">
-              <div className="w-full origin-center scale-[1.18]">
-                <Preview />
-              </div>
+        <div className="relative min-w-0 p-2.5">
+          <div className="relative isolate h-[280px] w-full min-w-0 overflow-hidden rounded-[22px] border border-border/70 bg-zinc-950 shadow-inner [contain:paint] sm:h-[300px] xl:h-[320px] dark:border-white/10">
+            <div className="pointer-events-none absolute inset-0 min-h-0 min-w-0 overflow-hidden [&>*]:!h-full [&>*]:!min-h-0 [&>*]:!w-full [&>*]:!max-w-none [&>*]:!overflow-hidden [&>*]:!rounded-none">
+              <Preview />
             </div>
             <div className="absolute right-4 top-4 grid size-10 place-items-center rounded-full border border-border/60 bg-background/95 text-amber-500 shadow-lg shadow-black/10 dark:border-white/10 dark:bg-zinc-950/90">
               <Sparkles className="size-5 fill-current" />
@@ -212,7 +210,7 @@ function BlockCard({
           </div>
         </div>
 
-        <div className="px-8 pb-8 pt-5">
+        <div className="flex flex-1 flex-col px-8 pb-8 pt-5">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-3xl font-semibold tracking-tight text-foreground">
               {block.name}
@@ -224,7 +222,7 @@ function BlockCard({
           <p className="mt-4 max-w-xl text-lg leading-8 text-muted-foreground">
             {block.description}
           </p>
-          <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
             <Badge variant="outline" className="border-border/70 bg-background/70 text-muted-foreground dark:bg-white/[0.04]">
               {block.category}
             </Badge>

@@ -22,6 +22,7 @@ import { NextResponse } from "next/server";
 import { readFile } from "fs/promises";
 import path from "path";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
+import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { parseApiToken, adminCanAccessComponent } from "@/lib/entitlements";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -29,6 +30,7 @@ type Params = { params: Promise<{ name: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
   const { name } = await params;
+  const isPublicRegistryAsset = name === "nexus-font";
 
   // Rate limit: 60 requests per IP per minute (generous for CLI batch installs)
   const ip = getClientIp(_req);
@@ -48,14 +50,15 @@ export async function GET(_req: Request, { params }: Params) {
 
   // ── 1. Resolve component metadata ───────────────────────────────
   const component = getLibraryComponent(name);
+  const block = blocksManifest.find((item) => item.registryCliName === name);
 
-  // Unknown component → 404
-  if (!component) {
+  // Unknown package → 404
+  if (!component && !block && !isPublicRegistryAsset) {
     return new NextResponse("Component not found", { status: 404 });
   }
 
   // ── 2. Free components — no auth required ────────────────────────
-  if (!component.premium) {
+  if (isPublicRegistryAsset || !(component?.premium ?? block?.premium ?? true)) {
     return serveRegistryFile(name);
   }
 
@@ -86,7 +89,7 @@ export async function GET(_req: Request, { params }: Params) {
   }
 
   // ── 4. Entitlement check (service-role, bypasses RLS) ───────────
-  const allowed = await adminCanAccessComponent(userId, component.slug);
+  const allowed = await adminCanAccessComponent(userId, component?.slug ?? block!.slug);
 
   if (!allowed) {
     return new NextResponse(

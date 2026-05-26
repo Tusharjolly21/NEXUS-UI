@@ -5,16 +5,14 @@
   "title": "Nexus UI Inter Font",
   "description": "Inter font setup used by Nexus UI components so installed components match the preview typography.",
   "font": {
-    "family": "Inter",
+    "family": "'Inter Variable', sans-serif",
     "provider": "google",
-    "import": "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    "import": "Inter",
     "variable": "--font-sans",
-    "weight": [
-      "100 900"
-    ],
     "subsets": [
       "latin"
     ],
+    "dependency": "@fontsource-variable/inter",
     "selector": "body"
   },
   "cssVars": {
