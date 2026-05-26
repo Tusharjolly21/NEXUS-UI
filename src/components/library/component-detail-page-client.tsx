@@ -284,7 +284,7 @@ function HowToUse({
 }) {
   const registryName = registryCliName ?? slug;
   const registryCommand = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}`;
-  const registryConfig = `"registries": {\n  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"\n}`;
+  const registryConfig = `{\n  "$schema": "https://ui.shadcn.com/schema.json",\n  "style": "default",\n  "rsc": true,\n  "tsx": true,\n  "tailwind": {\n    "css": "src/app/globals.css",\n    "baseColor": "neutral",\n    "cssVariables": true,\n    "prefix": ""\n  },\n  "aliases": {\n    "components": "@/components",\n    "utils": "@/lib/utils",\n    "ui": "@/components/ui",\n    "lib": "@/lib",\n    "hooks": "@/hooks"\n  },\n  "registries": {\n    "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"\n  }\n}`;
   const extraLibraries = getExtraLibraries(dependencies);
   const exampleImport = getExampleImport(usageSource, registryImport, registryName, name);
   const manualDependencyStep = extraLibraries.length > 0 ? 4 : null;
@@ -313,8 +313,9 @@ function HowToUse({
             </p>
             <CommandSnippet command="npx shadcn@latest init" />
             <p className="mt-4 text-sm leading-6 text-muted-foreground">
-              Then merge this registry entry into your existing{" "}
-              <span className="font-mono text-foreground">components.json</span> file:
+              Then replace your{" "}
+              <span className="font-mono text-foreground">components.json</span> with this (or add the{" "}
+              <span className="font-mono text-foreground">registries</span> key to your existing one):
             </p>
             <CommandSnippet command={registryConfig} />
           </div>
@@ -371,13 +372,12 @@ function HowToUse({
             {importStep}
           </span>
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Import and render it</h3>
+            <h3 className="text-sm font-semibold text-foreground">Copy the example into your page</h3>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Import the installed component into your page or section. Open the{" "}
-              <span className="font-medium text-foreground">Code</span> tab below for the
-              complete JSX example and available props.
+              Switch to the <span className="font-medium text-foreground">Code</span> tab, copy the example, and paste it into{" "}
+              <span className="font-mono text-foreground">app/page.tsx</span>:
             </p>
-            <CommandSnippet command={exampleImport} />
+            <CommandSnippet command={`// app/page.tsx\n${exampleImport}\n\nexport default function Page() {\n  return (\n    <main>\n      <${getImportName(exampleImport, name)} />\n    </main>\n  );\n}`} />
           </div>
         </li>
       </ol>

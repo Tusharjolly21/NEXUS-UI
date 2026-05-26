@@ -826,16 +826,54 @@ function BlockInstallation({
   details: BlockInstallDetails;
 }) {
   const config = block.premium
-    ? `"registries": {
-  "${SHADCN_REGISTRY_SCOPE}": {
-    "url": "${shadcnRegistryUrl()}",
-    "headers": {
-      "Authorization": "Bearer YOUR_NEXUS_API_KEY"
+    ? `{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "${SHADCN_REGISTRY_SCOPE}": {
+      "url": "${shadcnRegistryUrl()}",
+      "headers": {
+        "Authorization": "Bearer YOUR_NEXUS_API_KEY"
+      }
     }
   }
 }`
-    : `"registries": {
-  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"
+    : `{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "css": "src/app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"
+  }
 }`;
   const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${details.registryName}`;
 
@@ -858,14 +896,10 @@ function BlockInstallation({
 
         <InstallationStep number="2" title={block.premium ? "Connect the registry with your API key" : "Connect the Nexus UI registry"}>
           <p>
-            Merge this entry into the <span className="font-mono text-foreground">registries</span> field
-            of your <span className="font-mono text-foreground">components.json</span> file.
+            Replace your <span className="font-mono text-foreground">components.json</span> with this,
+            or add the <span className="font-mono text-foreground">registries</span> key to your existing one.
+            {block.premium && <> Replace <span className="font-mono text-foreground">YOUR_NEXUS_API_KEY</span> with the key from your Nexus UI dashboard.</>}
           </p>
-          {block.premium && (
-            <p className="mt-2">
-              Replace <span className="font-mono text-foreground">YOUR_NEXUS_API_KEY</span> with the key from your Nexus UI dashboard.
-            </p>
-          )}
           <InstallCode value={config} />
         </InstallationStep>
 
@@ -883,10 +917,15 @@ function BlockInstallation({
           </InstallationStep>
         )}
 
-        <InstallationStep number={details.files.length > 0 ? "5" : "4"} title="Import a variant and render it">
+        <InstallationStep number={details.files.length > 0 ? "5" : "4"} title="Copy the example into your page">
           <p>
-            Open the <span className="font-medium text-foreground">Code</span> tab under the variant you want,
-            then use its provided import and JSX example in your page.
+            Switch to the <span className="font-medium text-foreground">Code</span> tab on the variant you want.
+            On the left you&apos;ll see a ready-to-use snippet — copy it and paste it into{" "}
+            <span className="font-mono text-foreground">app/page.tsx</span>:
+          </p>
+          <InstallCode value={`// app/page.tsx\nimport YourBlock from "@/components/...";\n\nexport default function Page() {\n  return (\n    <main>\n      <YourBlock />\n    </main>\n  );\n}`} />
+          <p className="mt-2 text-xs leading-5">
+            The exact import path is shown in the Code tab sidebar for each variant.
           </p>
         </InstallationStep>
       </ol>

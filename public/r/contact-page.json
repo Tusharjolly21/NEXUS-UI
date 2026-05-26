@@ -11,7 +11,7 @@
     "topojson-client"
   ],
   "registryDependencies": [
-    "https://www.nexus-ui.com/api/registry/nexus-font",
+    "http://127.0.0.1:3000/api/registry/nexus-font",
     "utils"
   ],
   "files": [
