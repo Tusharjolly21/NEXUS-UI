@@ -170,6 +170,7 @@ export function LibraryExplorerSidebarProvider({
 
   // Sync URL -> local query (browser back/forward navigation)
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- mirrors external browser history into the editable search input
     setQuery(params.q);
   }, [params.q]);
 
@@ -284,15 +285,17 @@ function FilterFields({ compact }: { compact?: boolean }) {
           </SelectContent>
         </Select>
       </div>
-      <label className="flex cursor-pointer items-center gap-2 text-[13px] text-muted-foreground">
-        <Checkbox
-          checked={premiumOnly}
-          onCheckedChange={(v) =>
-            commitParams({ premium: v === true ? "1" : null })
-          }
-        />
-        Premium only
-      </label>
+      {view !== "components" && (
+        <label className="flex cursor-pointer items-center gap-2 text-[13px] text-muted-foreground">
+          <Checkbox
+            checked={premiumOnly}
+            onCheckedChange={(v) =>
+              commitParams({ premium: v === true ? "1" : null })
+            }
+          />
+          Premium only
+        </label>
+      )}
       {(view === "components" || view === "all") && (
         <div className="space-y-2">
           <Label className="text-[11px] uppercase tracking-wider text-muted-foreground">

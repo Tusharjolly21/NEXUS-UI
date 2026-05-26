@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
+import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
 import {
   ArrowUpRight,
   Check,
@@ -11,6 +11,8 @@ import {
   Copy,
   Crown,
   Expand,
+  File,
+  Folder,
   Lock,
   Monitor,
   Package,
@@ -155,6 +157,234 @@ function CopyBtn({ text }: { text: string }) {
   );
 }
 
+const INCLUDED_PROJECT_PACKAGES = new Set(["next", "react", "react-dom"]);
+
+function getExtraLibraries(dependencies: string[]) {
+  return Array.from(
+    new Set(dependencies.filter((dependency) => !INCLUDED_PROJECT_PACKAGES.has(dependency))),
+  );
+}
+
+function formatFolderStructure(files: string[]) {
+  const lines: string[] = [];
+  let previousFolders: string[] = [];
+
+  for (const file of [...files].sort()) {
+    const parts = file.split("/").filter(Boolean);
+    const folders = parts.slice(0, -1);
+
+    folders.forEach((folder, index) => {
+      if (previousFolders[index] !== folder) {
+        lines.push(`${"  ".repeat(index)}${folder}/`);
+      }
+    });
+
+    lines.push(`${"  ".repeat(folders.length)}${parts.at(-1)}`);
+    previousFolders = folders;
+  }
+
+  return lines.join("\n");
+}
+
+function getFolderStructureRows(files: string[]) {
+  const rows: Array<{ depth: number; label: string; type: "folder" | "file" }> = [];
+  let previousFolders: string[] = [];
+
+  for (const file of [...files].sort()) {
+    const parts = file.split("/").filter(Boolean);
+    const folders = parts.slice(0, -1);
+
+    folders.forEach((folder, index) => {
+      if (previousFolders[index] !== folder) {
+        rows.push({ depth: index, label: folder, type: "folder" });
+      }
+    });
+
+    const filename = parts.at(-1);
+    if (filename) {
+      rows.push({ depth: folders.length, label: filename, type: "file" });
+    }
+    previousFolders = folders;
+  }
+
+  return rows;
+}
+
+function getExampleImport(
+  source: string | undefined,
+  registryImport: string | undefined,
+  registryName: string,
+  name: string,
+) {
+  const componentImport = source?.match(
+    /^import\s+[^;\n]+\s+from\s+["']@\/components\/[^"']+["'];?/m,
+  )?.[0];
+
+  return componentImport ?? registryImport ?? `import { ${toPascalCase(name)} } from "@/components/${registryName}";`;
+}
+
+function CommandSnippet({ command }: { command: string }) {
+  return (
+    <div className="relative mt-3 rounded-xl border border-border bg-background/80 dark:bg-black/20">
+      <pre className="overflow-auto p-3 pr-20 font-mono text-xs leading-relaxed text-foreground">
+        {command}
+      </pre>
+      <div className="absolute right-2 top-2">
+        <CopyBtn text={command} />
+      </div>
+    </div>
+  );
+}
+
+function FolderStructureSnippet({ files }: { files: string[] }) {
+  const tree = formatFolderStructure(files);
+  const rows = getFolderStructureRows(files);
+
+  return (
+    <div className="relative mt-3 rounded-xl border border-border bg-background/80 p-3 pr-20 dark:bg-black/20">
+      <div className="space-y-1 font-mono text-xs leading-relaxed text-foreground">
+        {rows.map((row, index) => (
+          <div
+            key={`${row.type}-${row.depth}-${row.label}-${index}`}
+            className="flex items-center gap-2"
+            style={{ paddingLeft: `${row.depth * 16}px` }}
+          >
+            {row.type === "folder" ? (
+              <Folder className="size-3.5 shrink-0 text-sky-500" />
+            ) : (
+              <File className="size-3.5 shrink-0 text-muted-foreground" />
+            )}
+            <span>{row.label}{row.type === "folder" ? "/" : ""}</span>
+          </div>
+        ))}
+      </div>
+      <div className="absolute right-2 top-2">
+        <CopyBtn text={tree} />
+      </div>
+    </div>
+  );
+}
+
+function HowToUse({
+  name,
+  slug,
+  registryCliName,
+  dependencies,
+  installedFiles,
+  registryImport,
+  usageSource,
+}: {
+  name: string;
+  slug: string;
+  registryCliName?: string;
+  dependencies: string[];
+  installedFiles: string[];
+  registryImport?: string;
+  usageSource?: string;
+}) {
+  const registryName = registryCliName ?? slug;
+  const registryCommand = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}`;
+  const registryConfig = `"registries": {\n  "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"\n}`;
+  const extraLibraries = getExtraLibraries(dependencies);
+  const exampleImport = getExampleImport(usageSource, registryImport, registryName, name);
+  const manualDependencyStep = extraLibraries.length > 0 ? 4 : null;
+  const importStep = extraLibraries.length > 0 ? 5 : 4;
+
+  return (
+    <section aria-labelledby="how-to-use-heading">
+      <h2 id="how-to-use-heading" className="text-xl font-semibold text-foreground">
+        How to use
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+        Follow these steps to add {name} to a Next.js project. The shown file structure is
+        generated from this component&apos;s installation package.
+      </p>
+
+      <ol className="mt-5 divide-y divide-border/60 rounded-xl border border-border/60 bg-background/55">
+        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
+          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+            1
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Prepare your project</h3>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Use a project with Tailwind CSS and the <span className="font-mono text-foreground">@/</span>{" "}
+              import alias configured. If shadcn is not set up yet, initialize it once:
+            </p>
+            <CommandSnippet command="npx shadcn@latest init" />
+            <p className="mt-4 text-sm leading-6 text-muted-foreground">
+              Then merge this registry entry into your existing{" "}
+              <span className="font-mono text-foreground">components.json</span> file:
+            </p>
+            <CommandSnippet command={registryConfig} />
+          </div>
+        </li>
+
+        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
+          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+            2
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Add the component files</h3>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Run the registry command from your project root. It installs the component,
+              required utilities, and package dependencies for you.
+            </p>
+            <CommandSnippet command={registryCommand} />
+          </div>
+        </li>
+
+        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
+          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+            3
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Installed folder structure</h3>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Files are written through the aliases in your <span className="font-mono text-foreground">components.json</span>.
+              With the standard <span className="font-mono text-foreground">@/components</span> alias, this component adds:
+            </p>
+            <FolderStructureSnippet files={installedFiles} />
+          </div>
+        </li>
+
+        {manualDependencyStep && (
+          <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
+            <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+              {manualDependencyStep}
+            </span>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground">
+                Manual copy only: install libraries
+              </h3>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                Skip this step when using the registry command above. Run it only if you
+                manually create and paste the component files.
+              </p>
+              <CommandSnippet command={`npm install ${extraLibraries.join(" ")}`} />
+            </div>
+          </li>
+        )}
+
+        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
+          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
+            {importStep}
+          </span>
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Import and render it</h3>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Import the installed component into your page or section. Open the{" "}
+              <span className="font-medium text-foreground">Code</span> tab below for the
+              complete JSX example and available props.
+            </p>
+            <CommandSnippet command={exampleImport} />
+          </div>
+        </li>
+      </ol>
+    </section>
+  );
+}
+
 // ── install sidebar (matches the screenshot) ────────────────────────
 function InstallSidebar({
   slug,
@@ -169,7 +399,8 @@ function InstallSidebar({
 }) {
   const name = registryCliName ?? slug;
   const shadcnAddCmd = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${name}`;
-  const installCmd = `npm install ${dependencies.join(" ")}`;
+  const extraLibraries = getExtraLibraries(dependencies);
+  const installCmd = `npm install ${extraLibraries.join(" ")}`;
 
   return (
     <div className="space-y-5 rounded-2xl border border-border bg-card/80 p-5 shadow-sm dark:bg-white/[0.03]">
@@ -194,7 +425,7 @@ function InstallSidebar({
       <Separator />
 
       {/* npm packages */}
-      {dependencies.length > 0 && (
+      {extraLibraries.length > 0 && (
         <>
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -221,7 +452,7 @@ function InstallSidebar({
               Dependencies
             </p>
             <ul className="space-y-1.5">
-              {dependencies.map((d) => (
+              {extraLibraries.map((d) => (
                 <li
                   key={d}
                   className="rounded-lg border border-border/70 bg-background/60 px-2.5 py-1.5 font-mono text-[11px] text-foreground dark:bg-black/20"
@@ -504,6 +735,8 @@ type ComponentDetailProps = {
   premium: boolean;
   registryCliName?: string;
   dependencies: string[];
+  installedFiles: string[];
+  registryImport?: string;
   reactSource?: string;
   props?: PropDoc[];
   previewExportName: string;
@@ -521,12 +754,15 @@ export function ComponentDetailPageClient({
   premium,
   registryCliName,
   dependencies,
+  installedFiles,
+  registryImport,
   reactSource,
   props,
   previewExportName,
   serializedPreviewSections,
 }: ComponentDetailProps) {
   const codeIsLocked = premium && !isPremium;
+  const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
 
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
 
@@ -585,11 +821,16 @@ export function ComponentDetailPageClient({
           <AccordionTrigger className="rounded-xl bg-muted/70 px-5 py-4 text-2xl font-semibold text-foreground no-underline hover:bg-muted hover:no-underline dark:bg-white/[0.06] dark:hover:bg-white/[0.08]">
             Installation
           </AccordionTrigger>
-          <AccordionContent className="rounded-b-xl border border-t-0 border-border/50 bg-muted/25 px-5 py-4 text-sm text-muted-foreground dark:bg-white/[0.03]">
-            <p>
-              Copy the component code from the Code tab and place it in your components directory.
-              The preview below shows the component in a realistic context.
-            </p>
+          <AccordionContent className="rounded-b-xl border border-t-0 border-border/50 bg-muted/25 px-5 py-5 text-sm text-muted-foreground dark:bg-white/[0.03]">
+            <HowToUse
+              name={name}
+              slug={slug}
+              registryCliName={registryCliName}
+              dependencies={dependencies}
+              installedFiles={installedFiles}
+              registryImport={registryImport}
+              usageSource={usageSource}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

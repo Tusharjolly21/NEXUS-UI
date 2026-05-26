@@ -8,8 +8,8 @@
     "framer-motion",
     "lucide-react",
     "cmdk",
-    "react",
-    "@radix-ui/react-dialog"
+    "@radix-ui/react-dialog",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

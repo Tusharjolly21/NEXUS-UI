@@ -47,6 +47,7 @@ const nextConfig = {
       "./public/*.{png,jpg,jpeg,webp,svg}",
     ],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
+    "/components/[slug]": ["./.generated/registry/**/*.json"],
   },
   images: {
     formats: ["image/avif", "image/webp"],

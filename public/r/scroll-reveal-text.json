@@ -3,7 +3,7 @@
   "name": "scroll-reveal-text",
   "type": "registry:component",
   "title": "Scroll Reveal Text",
-  "description": "Premium scroll-linked text reveal — words, characters, or lines emerge from muted gray to bright white as the user scrolls, with optional blur dissolve and staggered cascade.",
+  "description": "Scroll-linked text reveal where words, characters, or lines emerge from muted gray to bright white with optional blur dissolve and staggered cascade.",
   "dependencies": [
     "framer-motion",
     "react"

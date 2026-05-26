@@ -220,14 +220,6 @@ function ComponentCard({
               }}
               onSelectVariant={setActiveIdx}
             />
-            {/* Premium badge */}
-            {item.premium && (
-              <div className="absolute left-5 top-5">
-                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                  <Crown className="size-2.5" /> Pro
-                </span>
-              </div>
-            )}
           </div>
 
           {/* Card body */}

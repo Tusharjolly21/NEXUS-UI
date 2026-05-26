@@ -6,8 +6,8 @@
   "description": "Cinematic hero section with a Canvas-rendered dot grid that reacts to cursor proximity — dots scale, brighten, and return to rest with a smooth radial glow spotlight.",
   "dependencies": [
     "framer-motion",
-    "react",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

@@ -15,7 +15,7 @@
       "path": "next-ui/vector-tilt-scene.tsx",
       "type": "registry:component",
       "target": "components/vector-tilt-scene.tsx",
-      "content": "// Same implementation as Nebula Glass Card — tune perspective and lighting for scene-scale layouts.\n"
+      "content": "\"use client\";\n\nimport { motion, useMotionValue, useSpring, useTransform } from \"framer-motion\";\n\nexport function VectorTiltScene() {\n  const x = useMotionValue(0);\n  const y = useMotionValue(0);\n  const rotateX = useSpring(useTransform(y, [-60, 60], [12, -12]), {\n    stiffness: 240,\n    damping: 22,\n  });\n  const rotateY = useSpring(useTransform(x, [-60, 60], [-12, 12]), {\n    stiffness: 240,\n    damping: 22,\n  });\n\n  return (\n    <motion.div\n      style={{ rotateX, rotateY, transformPerspective: 1100 }}\n      onMouseMove={(event) => {\n        const bounds = event.currentTarget.getBoundingClientRect();\n        x.set(event.clientX - bounds.left - bounds.width / 2);\n        y.set(event.clientY - bounds.top - bounds.height / 2);\n      }}\n      onMouseLeave={() => {\n        x.set(0);\n        y.set(0);\n      }}\n      className=\"rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8 shadow-2xl\"\n    >\n      <p className=\"text-xs uppercase tracking-[0.18em] text-cyan-300\">Scene depth</p>\n      <h3 className=\"mt-4 text-2xl font-semibold text-white\">Vector Tilt Scene</h3>\n      <p className=\"mt-2 text-sm text-zinc-400\">\n        A spring-driven glass panel for dimensional product highlights.\n      </p>\n    </motion.div>\n  );\n}\n"
     }
   ]
 }

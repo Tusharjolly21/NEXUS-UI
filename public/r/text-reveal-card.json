@@ -3,7 +3,7 @@
   "name": "text-reveal-card",
   "type": "registry:component",
   "title": "Text Reveal Card",
-  "description": "Interactive premium card with mouse-follow spotlight and bottom reveal content for features, case studies, and portfolio sections.",
+  "description": "Interactive spotlight card with mouse-follow glow and bottom reveal content for features, case studies, and portfolio sections.",
   "dependencies": [
     "framer-motion",
     "react"

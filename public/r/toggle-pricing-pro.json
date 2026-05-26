@@ -2,7 +2,7 @@
   "$schema": "https://ui.shadcn.com/schema/registry-item.json",
   "name": "toggle-pricing-pro",
   "type": "registry:component",
-  "title": "Toggle Pricing Pro",
+  "title": "Toggle Pricing",
   "description": "Annual/monthly toggle with spring knob and contextual savings callout.",
   "dependencies": [
     "framer-motion",

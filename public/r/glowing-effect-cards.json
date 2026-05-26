@@ -3,7 +3,7 @@
   "name": "glowing-effect-cards",
   "type": "registry:component",
   "title": "Glowing Effect Cards",
-  "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for premium SaaS sections and dashboards.",
+  "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for refined SaaS sections and dashboards.",
   "dependencies": [
     "framer-motion",
     "lucide-react",

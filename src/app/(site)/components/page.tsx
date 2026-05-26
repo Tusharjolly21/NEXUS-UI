@@ -7,7 +7,7 @@ import { ComponentsCatalog } from "./_catalog";
 export const metadata: Metadata = createMetadata({
   title: "Free React UI Components — Tailwind CSS & Framer Motion",
   description:
-    "Free React UI components built with Tailwind CSS and Framer Motion. Text animations, backgrounds, sidebars, and more for Next.js. Copy-paste, free and pro.",
+    "Free React UI components built with Tailwind CSS and Framer Motion. Text animations, backgrounds, sidebars, and more for Next.js. Copy-paste and use freely.",
   alternates: { canonical: "/components" },
 });
 

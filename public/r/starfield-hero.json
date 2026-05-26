@@ -6,8 +6,8 @@
   "description": "Dark hero section with a cursor-reactive starfield. Hundreds of glowing particles stretch, brighten, and rotate toward the cursor — built on Canvas + requestAnimationFrame at 60 fps.",
   "dependencies": [
     "framer-motion",
-    "react",
-    "lucide-react"
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
     "https://nexus-ui.com/r/nexus-font.json",

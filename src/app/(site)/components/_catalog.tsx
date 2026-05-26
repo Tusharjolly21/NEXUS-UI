@@ -17,7 +17,6 @@ import {
   LayoutGrid,
   PanelLeft,
   Search,
-  Sparkles,
   Type,
   X,
   Zap,
@@ -50,7 +49,6 @@ import { cn } from "@/lib/utils";
 import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 
 type SortMode = "all" | "trending" | "newest";
-type AccessMode = "all" | "free" | "pro";
 type TypeFilter = "all" | "text" | "background" | "3d" | "motion" | "cards" | "forms" | "navigation" | "ai";
 
 const CATEGORY_ORDER = COMPONENT_CATEGORIES.map((c) => c.slug) as ComponentCategorySlug[];
@@ -77,12 +75,6 @@ const SORT_OPTIONS: { value: SortMode; label: string; icon: React.ReactNode }[] 
   { value: "newest",   label: "Newest",   icon: <Clock className="size-3" /> },
 ];
 
-const ACCESS_OPTIONS: { value: AccessMode; label: string; icon?: React.ReactNode }[] = [
-  { value: "all",  label: "All" },
-  { value: "free", label: "Free" },
-  { value: "pro",  label: "Pro", icon: <Sparkles className="size-3" /> },
-];
-
 export function ComponentsCatalog() {
   return (
     <React.Suspense fallback={<CatalogSkeleton />}>
@@ -100,10 +92,9 @@ type GridItem =
 function ComponentsPageInner() {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortMode>("all");
-  const [access, setAccess] = React.useState<AccessMode>("all");
   const [typeFilter, setTypeFilter] = React.useState<TypeFilter>("all");
   const reduce = useReducedMotion() === true;
-  const { category, query, premiumOnly, commitParams } = useLibraryExplorerSidebar();
+  const { category, query, commitParams } = useLibraryExplorerSidebar();
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const gridRef = React.useRef<HTMLDivElement>(null);
@@ -117,20 +108,15 @@ function ComponentsPageInner() {
   const filteredComponents = React.useMemo(() => {
     return libraryComponents.filter((comp) => {
       const categoryMatch = !category || category === "all" || comp.categorySlug === category;
-      const sidebarPremiumMatch = !premiumOnly || comp.premium;
-      const accessMatch =
-        access === "free" ? !comp.premium :
-        access === "pro"  ?  comp.premium :
-        true;
       const searchMatch =
         !normalizedQuery ||
         `${comp.name} ${comp.description} ${comp.categorySlug} ${comp.tags.join(" ")}`
           .toLowerCase()
           .includes(normalizedQuery);
       const typeMatch = typeFilter === "all" || typeFilterDef.match(comp);
-      return categoryMatch && sidebarPremiumMatch && accessMatch && searchMatch && typeMatch;
+      return categoryMatch && searchMatch && typeMatch;
     });
-  }, [category, normalizedQuery, premiumOnly, access, typeFilter, typeFilterDef]);
+  }, [category, normalizedQuery, typeFilter, typeFilterDef]);
 
   const visibleComponents = React.useMemo(() => {
     if (sort === "trending") {
@@ -147,11 +133,10 @@ function ComponentsPageInner() {
   }, [filteredComponents, sort]);
 
   const hasActiveFilters =
-    (category && category !== "all") || premiumOnly || normalizedQuery || access !== "all" || typeFilter !== "all";
+    (category && category !== "all") || normalizedQuery || typeFilter !== "all";
 
   const clearAll = () => {
     setSort("all");
-    setAccess("all");
     setTypeFilter("all");
     commitParams({ cat: null, premium: null, q: null });
   };
@@ -192,8 +177,9 @@ function ComponentsPageInner() {
       scroll.getBoundingClientRect().top +
       scroll.scrollTop;
     setScrollMargin(margin);
-  }, [visibleComponents.length, category, premiumOnly, normalizedQuery]);
+  }, [visibleComponents.length, category, normalizedQuery]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- virtualization intentionally supplies imperative measurement helpers
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
@@ -248,7 +234,7 @@ function ComponentsPageInner() {
               Animated building blocks for modern user interfaces. Every component is built for the
               Next.js App Router, supports server side rendering, ships with full TypeScript types,
               and is compatible with shadcn/ui. Improve developer experience with copy-paste
-              react components — free and pro tiers available.
+              react components, available free to use.
             </p>
           </section>
 
@@ -265,31 +251,6 @@ function ComponentsPageInner() {
                     "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-150",
                     sort === value
                       ? "bg-background text-foreground shadow-sm dark:bg-white/10"
-                      : "text-muted-foreground hover:bg-background/60 hover:text-foreground dark:hover:bg-white/5",
-                  )}
-                >
-                  {icon}
-                  {label}
-                </button>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div className="h-5 w-px shrink-0 bg-border/60" />
-
-            {/* Access group */}
-            <div className="flex items-center gap-1">
-              {ACCESS_OPTIONS.map(({ value, label, icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setAccess(value)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-150",
-                    access === value
-                      ? value === "pro"
-                        ? "bg-amber-500/15 text-amber-600 shadow-sm dark:text-amber-400"
-                        : "bg-background text-foreground shadow-sm dark:bg-white/10"
                       : "text-muted-foreground hover:bg-background/60 hover:text-foreground dark:hover:bg-white/5",
                   )}
                 >
@@ -345,7 +306,7 @@ function ComponentsPageInner() {
           </div>
 
           {/* Active sidebar-filter chips (category / query) */}
-          {(category && category !== "all" || premiumOnly || normalizedQuery) && (
+          {(category && category !== "all" || normalizedQuery) && (
             <div className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               Showing{" "}
               <span className="font-medium text-foreground">{visibleComponents.length}</span>{" "}
@@ -354,9 +315,6 @@ function ComponentsPageInner() {
                 <Badge variant="outline" className="border-border/70 text-muted-foreground">
                   {getComponentCategoryLabel(category as ComponentCategorySlug)}
                 </Badge>
-              )}
-              {premiumOnly && (
-                <Badge className="bg-foreground text-background">Premium only</Badge>
               )}
             </div>
           )}
@@ -367,7 +325,7 @@ function ComponentsPageInner() {
               <Search className="mx-auto size-10 text-muted-foreground/30" />
               <p className="mt-4 text-base font-semibold text-foreground">No components found</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Try another category, search, or access filter.
+                Try another category, search, or type filter.
               </p>
             </div>
           ) : (
@@ -615,11 +573,6 @@ function ComponentCard({
             <div className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold text-orange-400 backdrop-blur-sm">
               <Flame className="size-3 fill-current" />
               {index === 0 ? "Hot" : "Trending"}
-            </div>
-          )}
-          {comp.premium && (
-            <div className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-md border border-white/10 bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-amber-400 backdrop-blur-sm">
-              <Sparkles className="size-2.5 fill-current" /> Pro
             </div>
           )}
         </div>

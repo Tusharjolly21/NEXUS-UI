@@ -12,6 +12,79 @@
       "files": []
     },
     {
+      "name": "wheel-selector",
+      "type": "registry:component",
+      "title": "Wheel Selector",
+      "description": "An interactive radial navigation dial for services, features, or portfolio items with drag, wheel, and click input plus a responsive mobile arch.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/wheel-selector/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/wheel-selector/wheel-selector.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "cinematic-card-deck",
+      "type": "registry:component",
+      "title": "Cinematic Card Deck",
+      "description": "A scroll-linked 3D card stack with depth, ambient glow, progress dots, cursor parallax, and optional image-backed cards.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cinematic-card-deck/cinematic-card-deck.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cinematic-card-deck/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "cursor-text-reveal",
+      "type": "registry:component",
+      "title": "Cursor Text Reveal",
+      "description": "An immersive cursor-following spotlight that reveals alternate text, gradients, or imagery beneath perfectly aligned headline layers.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cursor-text-reveal/cursor-text-reveal.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cursor-text-reveal/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
@@ -32,6 +105,30 @@
         {
           "path": "next-ui/ui/marquee.tsx",
           "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "step-flow",
+      "type": "registry:component",
+      "title": "Step Flow",
+      "description": "A responsive four-step process section with a sliding highlight, animated image swaps, and hover or click step selection.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "https://nexus-ui.com/r/nexus-font.json",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/step-flow/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/step-flow/step-flow.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -169,7 +266,7 @@
     {
       "name": "toggle-pricing-pro",
       "type": "registry:component",
-      "title": "Toggle Pricing Pro",
+      "title": "Toggle Pricing",
       "description": "Annual/monthly toggle with spring knob and contextual savings callout.",
       "dependencies": [
         "framer-motion",
@@ -964,7 +1061,7 @@
       "name": "text-reveal-card",
       "type": "registry:component",
       "title": "Text Reveal Card",
-      "description": "Interactive premium card with mouse-follow spotlight and bottom reveal content for features, case studies, and portfolio sections.",
+      "description": "Interactive spotlight card with mouse-follow glow and bottom reveal content for features, case studies, and portfolio sections.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -988,7 +1085,7 @@
       "name": "glowing-effect-cards",
       "type": "registry:component",
       "title": "Glowing Effect Cards",
-      "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for premium SaaS sections and dashboards.",
+      "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for refined SaaS sections and dashboards.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
@@ -1184,8 +1281,8 @@
       "description": "Cinematic hero section with a Canvas-rendered dot grid that reacts to cursor proximity — dots scale, brighten, and return to rest with a smooth radial glow spotlight.",
       "dependencies": [
         "framer-motion",
-        "react",
-        "lucide-react"
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
         "https://nexus-ui.com/r/nexus-font.json",
@@ -1209,8 +1306,8 @@
       "description": "Dark hero section with a cursor-reactive starfield. Hundreds of glowing particles stretch, brighten, and rotate toward the cursor — built on Canvas + requestAnimationFrame at 60 fps.",
       "dependencies": [
         "framer-motion",
-        "react",
-        "lucide-react"
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
         "https://nexus-ui.com/r/nexus-font.json",
@@ -1429,9 +1526,9 @@
       "title": "Globe Pins",
       "description": "A rotating 3-D globe rendered on canvas from real world-atlas geo data, with location pins showing name, address, and phone labels, animated arc connections, and a bloom/glow mode.",
       "dependencies": [
-        "react",
         "three",
-        "topojson-client"
+        "topojson-client",
+        "react"
       ],
       "registryDependencies": [
         "https://nexus-ui.com/r/nexus-font.json",
@@ -1480,7 +1577,7 @@
       "name": "scroll-reveal-text",
       "type": "registry:component",
       "title": "Scroll Reveal Text",
-      "description": "Premium scroll-linked text reveal — words, characters, or lines emerge from muted gray to bright white as the user scrolls, with optional blur dissolve and staggered cascade.",
+      "description": "Scroll-linked text reveal where words, characters, or lines emerge from muted gray to bright white with optional blur dissolve and staggered cascade.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1535,9 +1632,9 @@
       "description": "Animated dot grid with diagonal shooting star streaks and glowing nodes. A dramatic yet subtle background for hero sections and feature blocks.",
       "dependencies": [
         "framer-motion",
+        "lucide-react",
         "react",
-        "next",
-        "lucide-react"
+        "next"
       ],
       "registryDependencies": [
         "https://nexus-ui.com/r/nexus-font.json",
@@ -1722,8 +1819,8 @@
         "framer-motion",
         "lucide-react",
         "cmdk",
-        "react",
-        "@radix-ui/react-dialog"
+        "@radix-ui/react-dialog",
+        "react"
       ],
       "registryDependencies": [
         "https://nexus-ui.com/r/nexus-font.json",

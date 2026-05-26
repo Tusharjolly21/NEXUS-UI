@@ -45,6 +45,103 @@ const tw = `Use Tailwind utility composition with rounded-3xl, border-white/10, 
 
 export const libraryComponents: LibraryComponent[] = [
   {
+    slug: "wheel-selector",
+    name: "Wheel Selector",
+    registryCliName: "wheel-selector",
+    description:
+      "An interactive radial navigation dial for services, features, or portfolio items with drag, wheel, and click input plus a responsive mobile arch.",
+    categorySlug: "feature-sections",
+    tags: ["wheel", "radial", "navigation", "services", "portfolio", "drag", "responsive", "framer-motion"],
+    premium: false,
+    trendingScore: 152,
+    createdAt: "2026-05-26",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion", "lucide-react"],
+    Preview: Previews.PreviewWheelSelector,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { WheelSelector, type WheelItem } from "@/components/wheel-selector";
+
+const services: WheelItem[] = [
+  {
+    id: "strategy",
+    label: "Strategy",
+    subtitle: "Direction",
+    title: "Product Strategy",
+    description: "Position products with a clear story and roadmap.",
+    icon: "compass",
+    accentColor: "#38bdf8",
+    ctaHref: "#strategy",
+  },
+  {
+    id: "design",
+    label: "Design",
+    subtitle: "Craft",
+    title: "Experience Design",
+    description: "Create interfaces people understand immediately.",
+    icon: "pen",
+    accentColor: "#f97316",
+    ctaHref: "#design",
+  },
+  {
+    id: "research",
+    label: "Insights",
+    subtitle: "Learn",
+    title: "User Research",
+    description: "Turn user signals into confident product decisions.",
+    icon: "analytics",
+    accentColor: "#8b5cf6",
+    ctaHref: "#research",
+  },
+];
+
+export function ServicesWheel() {
+  return (
+    <WheelSelector
+      items={services}
+      theme="obsidian"
+      contentMode="detailed"
+      showTicks
+      showCounter
+      autoRotate
+      autoRotateInterval={4500}
+    />
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "items", type: "WheelItem[]", description: "Content entries with title, subtitle, description, accent, icon or uploaded icon URL, image, and CTA values." },
+      { name: "theme", type: "\"obsidian\" | \"midnight\" | \"arctic\" | \"ember\" | \"custom\"", defaultValue: "\"obsidian\"", description: "Curated color treatment or fully overridden custom colors." },
+      { name: "variant", type: "\"responsive\" | \"desktop\" | \"mobile\"", defaultValue: "\"responsive\"", description: "Responsive ring-to-arch behavior or a forced presentation variant." },
+      { name: "contentMode", type: "\"minimal\" | \"detailed\" | \"hidden\"", defaultValue: "\"detailed\"", description: "Amount of supporting content shown beside the dial." },
+      { name: "ringRadius", type: "number", defaultValue: "186", description: "Desktop ring radius in pixels, clamped between 100 and 400." },
+      { name: "tickCount", type: "number", defaultValue: "48", description: "Number of dial perimeter tick marks, clamped from 10 to 80." },
+      { name: "showTicks", type: "boolean", defaultValue: "true", description: "Display the animated perimeter tick marks." },
+      { name: "showCounter", type: "boolean", defaultValue: "true", description: "Display the animated selection counter in the hub or arch." },
+      { name: "showCTA", type: "boolean", defaultValue: "false", description: "Enable per-item call-to-action links globally." },
+      { name: "autoRotate", type: "boolean", defaultValue: "false", description: "Advance selection automatically until a user interacts." },
+      { name: "autoRotateInterval", type: "number", defaultValue: "4500", description: "Automatic advancement interval in milliseconds, from 1000 to 15000." },
+      { name: "animationSpeed", type: "\"slow\" | \"medium\" | \"fast\"", defaultValue: "\"medium\"", description: "Transition pace for wheel positions and content changes." },
+      { name: "backgroundColor", type: "string", description: "Override the component background color." },
+      { name: "accentColor", type: "string", description: "Default accent when an item does not provide its own accentColor." },
+      { name: "textColor", type: "string", description: "Override title and primary text color." },
+      { name: "mutedTextColor", type: "string", description: "Override secondary copy color." },
+      { name: "cardColor", type: "string", description: "Override dial node and center hub color." },
+      { name: "ringStrokeColor", type: "string", description: "Override ring, border, and inactive tick color." },
+      { name: "ctaBackgroundColor", type: "string", description: "Custom CTA background color." },
+      { name: "ctaTextColor", type: "string", description: "Custom CTA text color." },
+      { name: "ctaBorderColor", type: "string", description: "Custom CTA border color." },
+      { name: "titleFontFamily", type: "string", description: "Independent typeface for selected item titles." },
+      { name: "bodyFontFamily", type: "string", description: "Independent typeface for description copy." },
+      { name: "labelFontFamily", type: "string", description: "Independent typeface for labels, CTA, and counters." },
+      { name: "fontFamily", type: "string", description: "Base typeface fallback for the entire component." },
+      { name: "activeIndex", type: "number", description: "Optional controlled selected index." },
+      { name: "onActiveChange", type: "(index: number) => void", description: "Called whenever wheel, drag, or click navigation changes selection." },
+      { name: "className", type: "string", description: "Extra classes on the component shell." },
+    ],
+  },
+  {
     slug: "cinematic-card-deck",
     name: "Cinematic Card Deck",
     registryCliName: "cinematic-card-deck",
@@ -52,7 +149,7 @@ export const libraryComponents: LibraryComponent[] = [
       "A scroll-linked 3D card stack with depth, ambient glow, progress dots, cursor parallax, and optional image-backed cards.",
     categorySlug: "cards",
     tags: ["cards", "scroll", "3d", "stack", "framer-motion", "parallax"],
-    premium: true,
+    premium: false,
     trendingScore: 148,
     createdAt: "2026-05-22",
     animationKinds: ["scroll", "3d", "parallax", "spring"],
@@ -125,7 +222,7 @@ export function CinematicCardDeckDemo() {
       "An immersive cursor-following spotlight that reveals alternate text, gradients, or imagery beneath perfectly aligned headline layers.",
     categorySlug: "motion-effects",
     tags: ["cursor", "text", "reveal", "spotlight", "mask", "hero", "framer-motion"],
-    premium: true,
+    premium: false,
     trendingScore: 142,
     createdAt: "2026-05-22",
     animationKinds: ["hover", "spring", "magnetic"],
@@ -490,7 +587,7 @@ export function CinematicLogoCloud({
       "A responsive four-step process section with a sliding highlight, animated image swaps, and hover or click step selection.",
     categorySlug: "feature-sections",
     tags: ["steps", "process", "feature", "hover", "motion", "framer-motion"],
-    premium: true,
+    premium: false,
     trendingScore: 96,
     createdAt: "2026-05-23",
     animationKinds: ["hover", "spring", "layout"],
@@ -1116,7 +1213,7 @@ export function DepthTestimonials({ quotes }: { quotes: string[] }) {
   },
   {
     slug: "toggle-pricing-pro",
-    name: "Toggle Pricing Pro",
+    name: "Toggle Pricing",
     description: "Annual/monthly toggle with spring knob and contextual savings callout.",
     categorySlug: "pricing-sections",
     tags: ["billing", "motion"],
@@ -1182,7 +1279,44 @@ export function BeamField() {
     animationKinds: ["3d", "spring"],
     dependencies: ["framer-motion"],
     Preview: Previews.PreviewCardTilt,
-    reactSource: `// Same implementation as Nebula Glass Card — tune perspective and lighting for scene-scale layouts.`,
+    reactSource: `"use client";
+
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+
+export function VectorTiltScene() {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-60, 60], [12, -12]), {
+    stiffness: 240,
+    damping: 22,
+  });
+  const rotateY = useSpring(useTransform(x, [-60, 60], [-12, 12]), {
+    stiffness: 240,
+    damping: 22,
+  });
+
+  return (
+    <motion.div
+      style={{ rotateX, rotateY, transformPerspective: 1100 }}
+      onMouseMove={(event) => {
+        const bounds = event.currentTarget.getBoundingClientRect();
+        x.set(event.clientX - bounds.left - bounds.width / 2);
+        y.set(event.clientY - bounds.top - bounds.height / 2);
+      }}
+      onMouseLeave={() => {
+        x.set(0);
+        y.set(0);
+      }}
+      className="rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8 shadow-2xl"
+    >
+      <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Scene depth</p>
+      <h3 className="mt-4 text-2xl font-semibold text-white">Vector Tilt Scene</h3>
+      <p className="mt-2 text-sm text-zinc-400">
+        A spring-driven glass panel for dimensional product highlights.
+      </p>
+    </motion.div>
+  );
+}`,
     tailwindSource: tw,
   },
   {
@@ -1259,7 +1393,7 @@ export function SplitSignup() {
     previewShell: "plain",
     props: [
       { name: "title", type: "string", defaultValue: "\"Create your account\"", description: "Main heading displayed at the top." },
-      { name: "subtitle", type: "string", defaultValue: "\"Start building premium interfaces with motion-first components.\"", description: "Supporting text below the title." },
+      { name: "subtitle", type: "string", defaultValue: "\"Start building polished interfaces with motion-first components.\"", description: "Supporting text below the title." },
       { name: "submitLabel", type: "string", defaultValue: "\"Create account\"", description: "Button label in idle state." },
       { name: "loadingLabel", type: "string", defaultValue: "\"Creating account...\"", description: "Button label while submit is pending." },
       { name: "successLabel", type: "string", defaultValue: "\"Account created\"", description: "Button label after successful submit." },
@@ -2594,7 +2728,7 @@ export function HeroTypewriterHeading() {
   return (
     <TypewriterEffect
       as="h1"
-      text="Build premium SaaS surfaces with cinematic motion."
+      text="Build polished SaaS surfaces with cinematic motion."
       typingSpeed={45}
       pauseDuration={1500}
       className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl"
@@ -2612,7 +2746,7 @@ export function HeroTypewriterHeading() {
   return (
     <TypewriterEffect
       as="h1"
-      text="Build premium SaaS surfaces with cinematic motion."
+      text="Build polished SaaS surfaces with cinematic motion."
       typingSpeed={45}
       pauseDuration={1500}
       className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl"
@@ -2653,7 +2787,7 @@ export function RotatingTypewriterWords() {
       { label: "Live demo", href: "/demos/text-reveal-card" },
     ],
     description:
-      "Interactive premium card with mouse-follow spotlight and bottom reveal content for features, case studies, and portfolio sections.",
+      "Interactive spotlight card with mouse-follow glow and bottom reveal content for features, case studies, and portfolio sections.",
     categorySlug: "cards",
     tags: ["card", "reveal", "hover", "spotlight", "portfolio"],
     premium: false,
@@ -2746,7 +2880,7 @@ export function PortfolioRevealCard() {
     registryCliName: "glowing-effect-cards",
     resourceLinks: [{ label: "Live demo", href: "/demos/glowing-effect-cards" }],
     description:
-      "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for premium SaaS sections and dashboards.",
+      "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for refined SaaS sections and dashboards.",
     categorySlug: "cards",
     tags: ["glow", "cards", "cursor", "interactive", "layout"],
     premium: false,
@@ -2848,7 +2982,7 @@ export function CustomGlowContainer() {
       { name: "cardClassName", type: "string", description: "Class names applied to each card container." },
       { name: "gap", type: "number", defaultValue: "16", description: "Spacing in pixels between cards." },
       { name: "loop", type: "boolean", defaultValue: "true", description: "Enables seamless infinite looping via duplicated items." },
-      { name: "showGradientMask", type: "boolean", defaultValue: "true", description: "Shows edge fade masks for premium marquee framing." },
+      { name: "showGradientMask", type: "boolean", defaultValue: "true", description: "Shows edge fade masks for polished marquee framing." },
       { name: "renderItem", type: "(item, index) => React.ReactNode", description: "Custom renderer for complete card UI control." },
     ],
     Preview: Previews.PreviewInfiniteMovingCards,
@@ -2993,7 +3127,7 @@ export function PricingMeteorCard() {
     <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#050911] p-6 text-white">
       <Meteors number={18} minDuration={3} maxDuration={6} angle={218} className="absolute inset-0" />
       <div className="relative z-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-sky-200/80">Pro plan</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-sky-200/80">Team plan</p>
         <h3 className="mt-2 text-2xl font-semibold">$49/mo</h3>
       </div>
     </div>
@@ -3076,7 +3210,7 @@ export function HeroBackgroundBoxes() {
     >
       <div className="mx-auto flex min-h-[340px] max-w-3xl flex-col items-center justify-center px-6 py-10 text-center">
         <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Premium interactive grid background
+          Interactive grid background
         </h2>
         <p className="mt-3 text-sm text-muted-foreground">
           Use as hero, section, or card background with subtle cursor-follow highlights.
@@ -3363,7 +3497,7 @@ export function WideSpreadBadge() {
     trendingScore: 97,
     createdAt: "2026-05-14",
     animationKinds: ["hover", "gradient"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     previewShell: "plain",
     props: [
       { name: "title",             type: "string",   defaultValue: '"Build interfaces\\nthat ship."', description: "Hero heading. Use \\n for line breaks." },
@@ -3452,7 +3586,7 @@ export function RoseHero() {
     <DotGridHero
       title={"Beautiful UX\\nstarts here."}
       subtitle="Craft interfaces your users will love.
-Premium components, zero compromise."
+Polished components, zero compromise."
       primaryCTA={{ label: "Explore now",  href: "#" }}
       secondaryCTA={{ label: "See pricing", href: "#" }}
       dotGap={30}
@@ -3480,7 +3614,7 @@ Premium components, zero compromise."
     trendingScore: 98,
     createdAt: "2026-05-14",
     animationKinds: ["hover", "spring"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     previewShell: "plain",
     props: [
       { name: "title",             type: "string",    defaultValue: '"Ship faster.\\nBuild better."', description: "Hero heading — use \\n for line breaks." },
@@ -3563,7 +3697,7 @@ export function EmberStormHero() {
   return (
     <InteractiveStarfieldHero
       title={"Beautiful UX\\nstarts here."}
-      subtitle="Craft interfaces your users will love. Premium components, zero compromise."
+      subtitle="Craft interfaces your users will love. Polished components, zero compromise."
       primaryCTA={{ label: "Explore now",  href: "#" }}
       secondaryCTA={{ label: "See pricing", href: "#" }}
       particleCount={180}
@@ -4219,7 +4353,7 @@ export interface ChatMessagesProps {
 const DEFAULT_MESSAGES: ChatMessage[] = [
   { id: "1", sender: "assistant", content: "Hello! I'm your Nexus AI assistant. How can I help you build something amazing today?" },
   { id: "2", sender: "user", content: "I want to create a beautiful landing page for my SaaS product." },
-  { id: "3", sender: "assistant", content: "Great choice! Nexus UI has everything you need — animated components, premium styling, and easy integration. What feature would you like to showcase first?" },
+  { id: "3", sender: "assistant", content: "Great choice! Nexus UI has everything you need — animated components, polished styling, and easy integration. What feature would you like to showcase first?" },
   { id: "4", sender: "user", content: "I need something that will impress investors during pitch meetings." },
   { id: "5", sender: "assistant", content: "Perfect. I'd recommend our Hero Aurora Spotlight combined with the Cinematic Logo Cloud. They create a stunning first impression that showcases both innovation and credibility." },
   { id: "6", sender: "user", content: "Can I see how they look together?" },
@@ -4784,7 +4918,7 @@ function ForegroundContent() {
         transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mt-6 max-w-lg text-base text-white/60 sm:text-lg"
       >
-        Premium animated components built with Framer Motion and Tailwind CSS.
+        Polished animated components built with Framer Motion and Tailwind CSS.
         Copy, paste, and ship beautiful interfaces in minutes.
       </motion.p>
 
@@ -5190,7 +5324,7 @@ export default function Demo() {
     trendingScore: 210,
     createdAt: "2026-05-17T00:00:00.000Z",
     animationKinds: ["3d"],
-    dependencies: [],
+    dependencies: ["three", "topojson-client"],
     Preview: Previews.PreviewGlobePins,
     previewSections: [
       {
@@ -5754,7 +5888,7 @@ export function CodeBlockExample() {
   {
     name: "Card Stack Rotator",
     slug: "card-stack-rotator",
-    description: "A premium stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
+    description: "A polished stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
     categorySlug: "testimonials",
     tags: ["testimonials", "carousel", "cards", "motion", "stack"],
     premium: false,
@@ -5807,7 +5941,7 @@ export function CardStackRotatorDemo() {
     slug: "scroll-reveal-text",
     name: "Scroll Reveal Text",
     description:
-      "Premium scroll-linked text reveal — words, characters, or lines emerge from muted gray to bright white as the user scrolls, with optional blur dissolve and staggered cascade.",
+      "Scroll-linked text reveal where words, characters, or lines emerge from muted gray to bright white with optional blur dissolve and staggered cascade.",
     categorySlug: "motion-effects",
     tags: ["scroll", "text", "reveal", "animation", "typography", "blur", "framer-motion", "storytelling"],
     premium: false,
@@ -5929,7 +6063,7 @@ export function LaunchCountdown() {
     trendingScore: 85,
     createdAt: "2026-04-05",
     animationKinds: ["gradient", "scroll"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewShootingStarsGrid,
     detailPreviews: [Previews.PreviewShootingStarsGridHero],
     reactSource: `"use client";
@@ -6242,7 +6376,7 @@ import { ScrollingTestimonials } from "@/components/scrolling-testimonials/scrol
 const TESTIMONIALS = [
   { id: "1", quote: "Shipped our entire landing page in a weekend. The animation quality is genuinely best-in-class.", name: "Sarah Chen", role: "Head of Design", company: "Vercel", rating: 5 },
   { id: "2", quote: "Finally a component library that respects the craft. Motion feels intentional, never gimmicky.", name: "Marcus Rodriguez", role: "Senior Engineer", company: "Linear", rating: 5 },
-  { id: "3", quote: "Copy-paste components that actually look premium out of the box. Our conversion rate went up 18%.", name: "Aisha Patel", role: "Design Systems Lead", company: "Stripe", rating: 5 },
+  { id: "3", quote: "Copy-paste components that actually look polished out of the box. Our conversion rate went up 18%.", name: "Aisha Patel", role: "Design Systems Lead", company: "Stripe", rating: 5 },
   { id: "4", quote: "The attention to detail in every component is remarkable. Accessibility is built in from the start.", name: "James Kim", role: "Engineering Manager", company: "Notion", rating: 5 },
   { id: "5", quote: "We replaced three different component libraries with Nexus UI. Cleaner code, better performance.", name: "Elena Vasquez", role: "CTO", company: "Raycast", rating: 5 },
   { id: "6", quote: "Dark mode, responsive, and animated right out of the box. This saved our team two weeks.", name: "David Park", role: "Founder", company: "Resend", rating: 5 },
@@ -6590,7 +6724,7 @@ export function ProfileOrbitDemo() {
     trendingScore: 88,
     createdAt: "2026-05-18",
     animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react", "cmdk"],
+    dependencies: ["framer-motion", "lucide-react", "cmdk", "@radix-ui/react-dialog"],
     Preview: Previews.PreviewCommandPalette,
     tailwindSource: `"use client";
 
