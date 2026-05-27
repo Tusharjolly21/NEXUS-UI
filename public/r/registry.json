@@ -12,6 +12,30 @@
       "files": []
     },
     {
+      "name": "scroll-progress-bar",
+      "type": "registry:component",
+      "title": "Scroll Progress Bar",
+      "description": "A minimal vertical progress rail that fills smoothly as a target section moves through the viewport or a scrollable container.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/scroll-progress-bar/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/scroll-progress-bar/scroll-progress-bar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "wheel-selector",
       "type": "registry:component",
       "title": "Wheel Selector",
@@ -1495,16 +1519,41 @@
       ]
     },
     {
-      "name": "interactive-globe-explorer",
+      "name": "ask-nexus-input",
       "type": "registry:component",
       "title": "Ask Nexus Input",
-      "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+      "description": "A bold \\",
       "dependencies": [
         "framer-motion",
         "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/ask-nexus-input/ask-nexus-input.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/ask-nexus-input/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "interactive-globe-explorer",
+      "type": "registry:component",
+      "title": "Interactive Globe Explorer",
+      "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+      "dependencies": [
+        "react-globe.gl",
+        "three",
+        "lucide-react",
         "react",
-        "next",
-        "react-globe.gl"
+        "next"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",

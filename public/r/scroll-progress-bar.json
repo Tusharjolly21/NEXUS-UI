@@ -1,0 +1,29 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "scroll-progress-bar",
+  "type": "registry:component",
+  "title": "Scroll Progress Bar",
+  "description": "A minimal vertical progress rail that fills smoothly as a target section moves through the viewport or a scrollable container.",
+  "dependencies": [
+    "framer-motion",
+    "react"
+  ],
+  "registryDependencies": [
+    "http://127.0.0.1:3000/api/registry/nexus-font",
+    "utils"
+  ],
+  "files": [
+    {
+      "path": "next-ui/scroll-progress-bar/index.ts",
+      "type": "registry:lib",
+      "target": "components/scroll-progress-bar/index.ts",
+      "content": "export { ScrollProgressBar } from \"./scroll-progress-bar\";\nexport type { ScrollProgressBarProps } from \"./scroll-progress-bar\";\n"
+    },
+    {
+      "path": "next-ui/scroll-progress-bar/scroll-progress-bar.tsx",
+      "type": "registry:component",
+      "target": "components/scroll-progress-bar/scroll-progress-bar.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport {\n  motion,\n  useReducedMotion,\n  useScroll,\n  useSpring,\n  useTransform,\n  type MotionValue,\n} from \"framer-motion\";\nimport { cn } from \"@/lib/utils\";\n\nexport type ScrollProgressBarProps = {\n  targetRef?: React.RefObject<HTMLElement | null>;\n  containerRef?: React.RefObject<HTMLElement | null>;\n  progress?: MotionValue<number>;\n  backgroundColor?: string;\n  fillColor?: string;\n  height?: number | string;\n  width?: number | string;\n  markerCount?: number;\n  markerSize?: number;\n  showMarkers?: boolean;\n  stiffness?: number;\n  damping?: number;\n  className?: string;\n  ariaLabel?: string;\n};\n\nfunction ProgressMarker({\n  index,\n  total,\n  progress,\n  fillColor,\n  backgroundColor,\n  size,\n}: {\n  index: number;\n  total: number;\n  progress: MotionValue<number>;\n  fillColor: string;\n  backgroundColor: string;\n  size: number;\n}) {\n  const threshold = total <= 1 ? 0 : index / (total - 1);\n  const markerColor = useTransform(progress, (value) =>\n    value + 0.004 >= threshold ? fillColor : backgroundColor,\n  );\n  const markerScale = useTransform(progress, (value) =>\n    Math.abs(value - threshold) < 0.1 ? 1.16 : 1,\n  );\n\n  return (\n    <motion.span\n      aria-hidden\n      className=\"absolute left-1/2 z-10 rounded-full border-2 border-current\"\n      style={{\n        backgroundColor: markerColor,\n        borderColor: markerColor,\n        height: size,\n        top: `${threshold * 100}%`,\n        width: size,\n        x: \"-50%\",\n        y: \"-50%\",\n        scale: markerScale,\n      }}\n    />\n  );\n}\n\nexport function ScrollProgressBar({\n  targetRef,\n  containerRef,\n  progress,\n  backgroundColor = \"#dddddd\",\n  fillColor = \"#770bf4\",\n  height = 206,\n  width = 2,\n  markerCount = 4,\n  markerSize = 10,\n  showMarkers = true,\n  stiffness = 150,\n  damping = 26,\n  className,\n  ariaLabel = \"Section scroll progress\",\n}: ScrollProgressBarProps) {\n  const prefersReducedMotion = useReducedMotion() === true;\n  const { scrollYProgress } = useScroll(\n    targetRef\n      ? {\n          container: containerRef,\n          target: targetRef,\n          offset: [\"start start\", \"end end\"],\n        }\n      : { container: containerRef },\n  );\n  const rawProgress = progress ?? scrollYProgress;\n  const smoothProgress = useSpring(rawProgress, {\n    stiffness,\n    damping,\n    mass: 0.22,\n  });\n\n  return (\n    <div\n      role=\"progressbar\"\n      aria-label={ariaLabel}\n      aria-valuemin={0}\n      aria-valuemax={100}\n      className={cn(\"relative\", className)}\n      style={{ height, width }}\n    >\n      <span\n        aria-hidden\n        className=\"absolute inset-0 overflow-hidden rounded-full\"\n        style={{ backgroundColor }}\n      >\n        <motion.span\n          className=\"absolute inset-0 block origin-top rounded-full\"\n          style={{\n            backgroundColor: fillColor,\n            scaleY: prefersReducedMotion ? rawProgress : smoothProgress,\n          }}\n        />\n      </span>\n      {showMarkers &&\n        Array.from({ length: Math.max(0, markerCount) }).map((_, index) => (\n          <ProgressMarker\n            key={index}\n            index={index}\n            total={markerCount}\n            progress={prefersReducedMotion ? rawProgress : smoothProgress}\n            fillColor={fillColor}\n            backgroundColor={backgroundColor}\n            size={markerSize}\n          />\n        ))}\n    </div>\n  );\n}\n"
+    }
+  ]
+}

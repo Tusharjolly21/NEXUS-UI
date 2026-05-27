@@ -45,6 +45,70 @@ const tw = `Use Tailwind utility composition with rounded-3xl, border-white/10, 
 
 export const libraryComponents: LibraryComponent[] = [
   {
+    slug: "scroll-progress-bar",
+    name: "Scroll Progress Bar",
+    registryCliName: "scroll-progress-bar",
+    description:
+      "A minimal vertical progress rail that fills smoothly as a target section moves through the viewport or a scrollable container.",
+    categorySlug: "motion-effects",
+    tags: ["scroll", "progress", "indicator", "section", "framer-motion", "navigation"],
+    premium: false,
+    trendingScore: 154,
+    createdAt: "2026-05-27",
+    animationKinds: ["scroll", "spring"],
+    dependencies: ["framer-motion"],
+    Preview: Previews.PreviewScrollProgressBar,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import * as React from "react";
+import { ScrollProgressBar } from "@/components/scroll-progress-bar";
+
+export function StorySection() {
+  const sectionRef = React.useRef<HTMLElement>(null);
+
+  return (
+    <section ref={sectionRef} className="relative flex gap-10 py-24">
+      <aside className="sticky top-24 h-fit">
+        <ScrollProgressBar
+          targetRef={sectionRef}
+          fillColor="#770bf4"
+          backgroundColor="#dddddd"
+          height={206}
+          markerCount={4}
+        />
+      </aside>
+      <div className="max-w-xl space-y-24">
+        <h2 className="text-5xl font-semibold">A guided product story.</h2>
+        <p className="text-lg text-neutral-500">
+          Add long-form feature content here. The progress bar fills while
+          this section travels through the viewport.
+        </p>
+        <p className="text-lg text-neutral-500">
+          Keep scrolling to connect each chapter with a quiet visual cue.
+        </p>
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+    props: [
+      { name: "targetRef", type: "React.RefObject<HTMLElement | null>", description: "Section whose viewport progress drives the fill. Omit it to track the page or supplied container." },
+      { name: "containerRef", type: "React.RefObject<HTMLElement | null>", description: "Optional scrollable parent when the bar lives inside a panel rather than the document." },
+      { name: "progress", type: "MotionValue<number>", description: "Optional custom normalized progress value that overrides scroll tracking." },
+      { name: "fillColor", type: "string", defaultValue: '"#770bf4"', description: "Active filler color." },
+      { name: "backgroundColor", type: "string", defaultValue: '"#dddddd"', description: "Inactive rail color." },
+      { name: "height", type: "number | string", defaultValue: "206", description: "Height of the progress rail." },
+      { name: "width", type: "number | string", defaultValue: "2", description: "Width of the progress rail." },
+      { name: "markerCount", type: "number", defaultValue: "4", description: "Number of milestone circles rendered along the rail." },
+      { name: "markerSize", type: "number", defaultValue: "10", description: "Circle diameter in pixels." },
+      { name: "showMarkers", type: "boolean", defaultValue: "true", description: "Show or hide milestone circles on the rail." },
+      { name: "stiffness", type: "number", defaultValue: "150", description: "Spring stiffness used to smooth scroll progress." },
+      { name: "damping", type: "number", defaultValue: "26", description: "Spring damping used to settle the filler movement." },
+      { name: "className", type: "string", description: "Additional classes on the rail wrapper." },
+    ],
+  },
+  {
     slug: "wheel-selector",
     name: "Wheel Selector",
     registryCliName: "wheel-selector",

@@ -4,6 +4,16 @@ export type ComponentDescription = {
 };
 
 export const componentDescriptions: Record<string, ComponentDescription> = {
+  "scroll-progress-bar": {
+    about:
+      "Scroll Progress Bar is a slender vertical progress rail for long-form page sections. It listens to a target section or scrollable container with Framer Motion scroll values, then smooths the fill movement through spring physics. Colors and dimensions are configurable, making it useful as a restrained orientation cue beside editorial narratives, feature walkthroughs, and case studies.",
+    useCases: [
+      "Long-form feature walkthroughs",
+      "Case study and portfolio narratives",
+      "Documentation chapter indicators",
+      "Scroll-linked product story sections",
+    ],
+  },
   "cinematic-logo-cloud": {
     about:
       "The Cinematic Logo Cloud renders client logos in a staggered blur-fade entrance animation built with Framer Motion, with three variants — responsive grid, infinite horizontal marquee, and named marquee — covering every social proof layout. Each logo fades in sequentially, creating a choreographed reveal that frames your customer list as polished rather than functional. Compatible with Next.js App Router and dark mode via CSS custom properties, it ships with 11 pre-mapped brand logos and accepts any custom image or text-only entry. Drop it directly below the hero section to establish credibility before visitors reach the feature section.",
