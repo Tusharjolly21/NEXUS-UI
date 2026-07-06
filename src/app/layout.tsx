@@ -33,6 +33,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${inter.variable}`} suppressHydrationWarning>
       <head>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6537827972143266"
+     crossorigin="anonymous"></script>
         <Script
           id="nexus-ui-theme-init"
           strategy="beforeInteractive"
