@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function SearchPage() {
   return (
     <Suspense
-      fallback={<div className="mx-auto max-w-6xl px-4 py-16 text-sm text-zinc-400">Loading search…</div>}
+      fallback={<div className="min-h-[60vh]" aria-busy="true" />}
     >
       <SearchExplorer />
     </Suspense>

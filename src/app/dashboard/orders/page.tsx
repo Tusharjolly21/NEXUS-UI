@@ -60,7 +60,7 @@ export default async function DashboardOrdersPage() {
   return (
     <div className="px-4 py-6 sm:px-8 sm:py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Your Orders</h1>
+        <h1 className="pg-display text-[clamp(36px,5vw,52px)] text-foreground">Your Orders</h1>
         <p className="mt-1 text-muted-foreground">Purchases and active subscriptions</p>
       </div>
 
@@ -91,7 +91,7 @@ export default async function DashboardOrdersPage() {
 
           {/* Active subscription card */}
           {subscription && (
-            <div className="rounded-2xl border border-border bg-card p-6">
+            <div className="pg-float rounded-tile border-0 bg-card p-6">
               <div className="mb-4 flex items-center gap-2">
                 <RefreshCw className="size-4 text-muted-foreground" />
                 <h2 className="font-semibold text-foreground">Subscription</h2>
@@ -139,7 +139,7 @@ export default async function DashboardOrdersPage() {
 
           {/* One-time orders */}
           {orders.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card">
+            <div className="pg-float rounded-tile border-0 bg-card">
               <div className="flex items-center gap-2 border-b border-border px-6 py-4">
                 <Receipt className="size-4 text-muted-foreground" />
                 <h2 className="font-semibold text-foreground">One-time purchases</h2>

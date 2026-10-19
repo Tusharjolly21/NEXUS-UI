@@ -1,16 +1,18 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Rss } from "lucide-react";
-import { getAllPosts } from "@/lib/blog";
 import type { Metadata } from "next";
+import { Band, PillLink, RainbowWord } from "@/components/site";
+import { getAllPosts } from "@/lib/blog";
+import { formatPostDate } from "@/lib/format-post-date";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
-import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = createMetadata({
   title: "Blog — Framer Motion, Tailwind CSS & Next.js Guides",
   description: "Guides on Framer Motion, Tailwind CSS, and shipping Next.js SaaS landing pages. Motion design patterns, copy-paste components, and developer tips.",
   alternates: { canonical: "/blog" },
 });
+
+const TINTS = ["bg-tint-violet", "bg-tint-sky", "bg-tint-peach", "bg-tint-mint", "bg-tint-butter", "bg-tint-pink"];
 
 export default async function BlogIndexPage() {
   const posts = await getAllPosts();
@@ -40,100 +42,78 @@ export default async function BlogIndexPage() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
-      />
-    <div className="mx-auto max-w-3xl space-y-12 px-4 py-10 md:py-14">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }} />
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden rounded-3xl border border-border/60 bg-muted/25 px-6 py-10 dark:bg-white/[0.025] sm:px-10 sm:py-12">
-        <div className="pointer-events-none absolute -right-20 -top-20 size-64 rounded-full bg-primary/6 blur-[72px]" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
-
-        <div className="relative space-y-4">
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-[11px] font-semibold text-primary ">
-            <Rss className="size-3.5" />
-            Guides & essays
-          </div>
-
-          <h1 className="text-balance text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Deep dives on{" "}
-            <span className="text-foreground">
-              motion & shipping
-            </span>
-          </h1>
-
-          <p className="max-w-xl text-[15px] leading-relaxed text-muted-foreground">
-            In-depth articles on motion design, Tailwind composition, and how we think about
-            developer-first marketing pages. We cover Framer Motion patterns, Next.js App Router
-            techniques, copy-paste component architecture, and the design decisions behind
-            building production SaaS landing pages with TypeScript.
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-12 pt-[136px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px]">
+          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Guides</h1>
+          <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
+            How to build landing pages with real <RainbowWord>motion</RainbowWord>: Framer Motion patterns, Tailwind
+            layouts and the Next.js details that make them ship.
           </p>
+        </div>
+      </section>
 
-          {posts.length > 0 && (
-            <p className="text-[12px] text-muted-foreground">
-              <span className="font-medium text-foreground">{posts.length}</span>{" "}
-              {posts.length === 1 ? "article" : "articles"}
+      <section aria-label="Articles" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          {posts.length === 0 ? (
+            <p className="rounded-tile bg-card px-6 py-16 text-center text-[17px] text-muted-foreground">
+              No guides yet. In the meantime,{" "}
+              <Link href="/components" className="font-semibold text-foreground underline underline-offset-4">
+                browse the components
+              </Link>
+              .
             </p>
+          ) : (
+            <ul className="grid gap-5 md:grid-cols-2">
+              {posts.map((p, i) => (
+                <li key={p.slug} className={cn(i === 0 && "md:col-span-2")}>
+                  <Link
+                    href={`/blog/${p.slug}`}
+                    className="pg-float group flex h-full flex-col rounded-tile bg-card p-3 transition-transform duration-150 hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                  >
+                    <div className={cn("rounded-[20px] px-6 pb-6 pt-16", TINTS[i % TINTS.length], i === 0 && "md:pt-28")}>
+                      <h2
+                        className={cn(
+                          "pg-display text-foreground",
+                          i === 0 ? "max-w-[760px] text-[clamp(30px,4vw,44px)] leading-[1.05]" : "text-[26px] leading-[1.1]",
+                        )}
+                      >
+                        {p.title}
+                      </h2>
+                    </div>
+                    <div className="flex flex-1 flex-col px-4 pb-3 pt-5">
+                      <p className={cn("leading-relaxed text-muted-foreground", i === 0 ? "max-w-[720px] text-[17px]" : "text-[15px]")}>
+                        {p.description}
+                      </p>
+                      {p.date ? (
+                        <p className="mt-auto pt-5 text-[13.5px] font-medium text-muted-foreground">
+                          <time dateTime={p.date}>{formatPostDate(p.date)}</time>
+                        </p>
+                      ) : null}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </section>
 
-      {/* ── Posts list ── */}
-      {posts.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-border/70 bg-muted/20 px-6 py-16 text-center dark:bg-white/[0.02]">
-          <BookOpen className="mx-auto size-10 text-muted-foreground/40" />
-          <p className="mt-4 text-sm font-medium text-foreground">No posts yet</p>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            Check back soon — new guides are on the way.
-          </p>
+      <Band tint="mint">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">Read enough?</h2>
+            <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
+              Every technique in these guides has a component you can install in one line.
+            </p>
+          </div>
+          <PillLink href="/components" className="shrink-0">
+            Browse components
+          </PillLink>
         </div>
-      ) : (
-        <div className="space-y-4">
-          {posts.map((p) => (
-            <Link
-              key={p.slug}
-              href={`/blog/${p.slug}`}
-              className="group block rounded-2xl border border-border/60 bg-background/80 p-5 transition-all duration-200 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 dark:bg-white/[0.03] dark:hover:border-primary/20"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0 space-y-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-                    {p.date}
-                  </p>
-                  <h2 className="text-lg font-bold leading-snug tracking-tight text-foreground transition-colors group-hover:text-primary">
-                    {p.title}
-                  </h2>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {p.description}
-                  </p>
-                </div>
-                <ArrowRight className="mt-1 size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* ── Bottom CTA ── */}
-      <div className="flex flex-col items-center gap-3 border-t border-border/50 pt-8 text-center sm:flex-row sm:justify-between sm:text-left">
-        <p className="text-sm text-muted-foreground">
-          Want to ship faster? Explore the component catalog.
-        </p>
-        <Link
-          href="/components"
-          className={cn(
-            buttonVariants({ size: "sm" }),
-            "shrink-0 rounded-full bg-foreground text-background hover:bg-foreground/90",
-          )}
-        >
-          Browse catalog
-          <ArrowRight className="ml-1.5 size-3.5" />
-        </Link>
-      </div>
-
-    </div>
+      </Band>
     </>
   );
 }

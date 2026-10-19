@@ -1,23 +1,18 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutGrid, Layers, FileCode2, Crown, ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
-import { hasPremiumAccess } from "@/lib/entitlements";
+import { getOwnedTemplateSlugs, hasPremiumAccess } from "@/lib/entitlements";
+import { blocksManifest } from "@/lib/catalog/blocks-manifest";
+import { CATALOG_COUNTS } from "@/lib/catalog/counts";
+import { PillLink } from "@/components/site/pill-link";
 import { cn } from "@/lib/utils";
-import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard – Nexus UI",
+  title: "Dashboard — Nexus UI",
   description: "Your Nexus UI dashboard.",
 };
-
-const STATS = [
-  { count: 55, label: "Free components", icon: LayoutGrid },
-  { count: 9, label: "Premium blocks", icon: Layers },
-  { count: 15, label: "Website templates", icon: FileCode2 },
-  { count: 0, label: "Templates owned", icon: Crown },
-] as const;
 
 export default async function DashboardPage() {
   if (!isSupabaseConfigured()) {
@@ -34,92 +29,76 @@ export default async function DashboardPage() {
   }
 
   const isPremium = await hasPremiumAccess(user.id);
+  const owned = isPremium ? null : await getOwnedTemplateSlugs(user.id);
+  const templatesYours = isPremium ? CATALOG_COUNTS.templates : (owned?.size ?? 0);
+  const blocksYours = isPremium ? CATALOG_COUNTS.blocks : blocksManifest.filter((b) => !b.premium).length;
 
   const displayName =
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email?.split("@")[0] ??
-    "there";
+    user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email?.split("@")[0] ?? "there";
+  const firstName = String(displayName).split(" ")[0];
 
-  const firstName = displayName.split(" ")[0];
+  const stats = [
+    { value: CATALOG_COUNTS.components, of: CATALOG_COUNTS.components, label: "Components you can use", tint: "bg-tint-violet" },
+    { value: blocksYours, of: CATALOG_COUNTS.blocks, label: "Blocks you can use", tint: "bg-tint-sky" },
+    { value: templatesYours, of: CATALOG_COUNTS.templates, label: "Templates you own", tint: "bg-tint-butter" },
+  ];
 
   return (
-    <div className="px-4 py-6 sm:px-8 sm:py-10">
-      {/* Heading */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
-            Welcome back, {firstName}
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Browse components and templates
-          </p>
+    <div className="px-4 py-8 sm:px-8 sm:py-12">
+      <div className="mx-auto max-w-[960px]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h1 className="pg-display text-[clamp(36px,5vw,52px)] text-foreground">Hi, {firstName}</h1>
+            <p className="mt-2 text-[17px] text-muted-foreground">
+              {isPremium ? "Your plan includes every template and block." : "You're on the free plan."}
+            </p>
+          </div>
+          {isPremium ? (
+            <span className="rounded-full bg-tint-mint px-3.5 py-1.5 text-[13px] font-semibold text-[#126b3a] dark:text-[#7ee2a8]">
+              Paid plan active
+            </span>
+          ) : (
+            <PillLink href="/pricing" size="sm">
+              Compare plans
+            </PillLink>
+          )}
         </div>
-        {isPremium ? (
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-500">
-            <CheckCircle2 className="size-3.5" />
-            Pro Member
-          </div>
-        ) : (
-          <Link
-            href="/pricing"
-            className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-500 transition hover:bg-amber-500/20"
-          >
-            <Sparkles className="size-3.5" />
-            Upgrade to Pro
-          </Link>
-        )}
-      </div>
 
-      {/* Stat cards */}
-      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {STATS.map(({ count, label, icon: Icon }) => (
-          <div
-            key={label}
-            className="rounded-xl border border-border bg-card p-5"
-          >
-            <Icon className="size-4 text-muted-foreground" />
-            <p className="mt-2 text-3xl font-bold text-foreground">{count}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{label}</p>
-          </div>
-        ))}
-      </div>
+        <ul className="mt-8 grid gap-4 sm:grid-cols-3">
+          {stats.map((s) => (
+            <li key={s.label} className={cn("rounded-tile p-6", s.tint)}>
+              <p className="text-[40px] font-bold leading-none tracking-[-0.04em] text-foreground">
+                {s.value}
+                {s.value !== s.of ? <span className="text-[20px] font-semibold text-muted-foreground"> of {s.of}</span> : null}
+              </p>
+              <p className="mt-2 text-[14.5px] text-body">{s.label}</p>
+            </li>
+          ))}
+        </ul>
 
-      {/* Link cards */}
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Link
-          href="/components"
-          className={cn(
-            "group flex flex-col gap-2 rounded-xl border border-border bg-card p-6 transition-colors hover:bg-accent/50",
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">
-              Browse Components
-            </h2>
-            <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Explore 55+ free UI components ready to copy and use in your projects.
-          </p>
-        </Link>
-
-        <Link
-          href="/templates"
-          className={cn(
-            "group flex flex-col gap-2 rounded-xl border border-border bg-card p-6 transition-colors hover:bg-accent/50",
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">
-              Browse Templates
-            </h2>
-            <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Discover 15 full website templates for your next project.
-          </p>
-        </Link>
+        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          {[
+            { href: "/components", title: "Browse components", body: `All ${CATALOG_COUNTS.components} are free, with a one-line install.` },
+            {
+              href: "/templates",
+              title: isPremium || templatesYours ? "Open your templates" : "Browse templates",
+              body: isPremium || templatesYours
+                ? "Every template page has a Download source button for what you own."
+                : `${CATALOG_COUNTS.templates} complete landing pages with live previews.`,
+            },
+            { href: "/dashboard/orders", title: "Orders", body: "Receipts for everything you've bought." },
+            { href: "/dashboard/api-key", title: "API tokens", body: "A token for installing premium items with the shadcn CLI." },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="pg-float rounded-tile bg-card p-6 transition-transform hover:-translate-y-0.5 motion-reduce:transition-none"
+            >
+              <h2 className="text-[17px] font-semibold text-foreground">{l.title}</h2>
+              <p className="mt-1.5 text-[14.5px] leading-relaxed text-muted-foreground">{l.body}</p>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

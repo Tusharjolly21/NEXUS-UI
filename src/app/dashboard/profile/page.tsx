@@ -39,7 +39,7 @@ export default async function DashboardProfilePage() {
     <div className="px-4 py-6 sm:px-8 sm:py-10">
       {/* Heading */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
+        <h1 className="pg-display text-[clamp(36px,5vw,52px)] text-foreground">
           Account Settings
         </h1>
         <p className="mt-1 text-muted-foreground">
@@ -49,7 +49,7 @@ export default async function DashboardProfilePage() {
 
       <div className="flex flex-col gap-6">
         {/* Avatar card */}
-        <div className="flex items-center gap-5 rounded-2xl border border-border bg-card p-6">
+        <div className="flex items-center gap-5 pg-float rounded-tile border-0 bg-card p-6">
           <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-muted text-xl font-bold text-foreground">
             {avatarLetter}
           </div>
@@ -63,7 +63,7 @@ export default async function DashboardProfilePage() {
         </div>
 
         {/* Account information card */}
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="pg-float rounded-tile border-0 bg-card p-6">
           <h2 className="mb-4 font-semibold text-foreground">
             Account Information
           </h2>
@@ -95,7 +95,7 @@ export default async function DashboardProfilePage() {
         </div>
 
         {/* Quick links card */}
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="pg-float rounded-tile border-0 bg-card p-6">
           <h2 className="mb-4 font-semibold text-foreground">Quick Links</h2>
           <div className="flex gap-3">
             <Link

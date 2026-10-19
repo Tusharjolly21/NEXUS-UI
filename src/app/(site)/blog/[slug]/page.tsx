@@ -2,7 +2,10 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getPost, getPostSlugs } from "@/lib/blog";
+import { ChevronRight } from "lucide-react";
 import { ArticleChrome } from "@/components/blog/article-chrome";
+import { PillLink } from "@/components/site";
+import { formatPostDate } from "@/lib/format-post-date";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -94,17 +97,49 @@ export default async function BlogPostPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-    <ArticleChrome>
-      <article className="mx-auto max-w-3xl px-4 py-14">
-        <Link href="/blog" className="text-xs text-primary transition-colors hover:text-foreground">
-          ← All guides
-        </Link>
-        <p className="mt-4 text-xs uppercase tracking-widest text-muted-foreground">{post.frontmatter.date}</p>
-        <h1 className="mt-2 text-4xl font-semibold text-foreground">{post.frontmatter.title}</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{post.frontmatter.description}</p>
-        <div className="mt-10">{post.content}</div>
-      </article>
-    </ArticleChrome>
+      <ArticleChrome>
+        <article>
+          <header className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-14 pt-[136px]">
+            <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+            <div className="relative mx-auto max-w-[760px]">
+              <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
+                <Link href="/blog" className="hover:text-foreground">
+                  Guides
+                </Link>
+                {post.frontmatter.date ? (
+                  <>
+                    <ChevronRight className="size-3.5" aria-hidden />
+                    <time dateTime={post.frontmatter.date}>{formatPostDate(post.frontmatter.date)}</time>
+                  </>
+                ) : null}
+              </nav>
+              <h1 className="pg-display mt-6 text-[clamp(38px,6vw,60px)] leading-[1.04] text-foreground">
+                {post.frontmatter.title}
+              </h1>
+              {post.frontmatter.description ? (
+                <p className="mt-5 text-[19px] leading-[1.55] text-muted-foreground">{post.frontmatter.description}</p>
+              ) : null}
+            </div>
+          </header>
+          <div className="px-4 pb-24">
+            <div className="mx-auto max-w-[760px] [&>*:first-child]:mt-0">{post.content}</div>
+          </div>
+        </article>
+      </ArticleChrome>
+
+      <section className="px-4 pb-24">
+        <div className="mx-auto flex max-w-[760px] flex-col gap-4 rounded-tile bg-tint-sky p-7 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-[17px] font-semibold text-foreground">Build it with the components from this guide.</p>
+          <div className="flex shrink-0 gap-2">
+            <PillLink href="/components" size="sm">
+              Browse components
+            </PillLink>
+            <PillLink href="/blog" variant="white" size="sm">
+              More guides
+            </PillLink>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

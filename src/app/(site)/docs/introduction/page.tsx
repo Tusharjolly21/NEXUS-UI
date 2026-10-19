@@ -8,6 +8,7 @@ import {
   TechArticleJsonLd,
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
+import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
@@ -48,7 +49,7 @@ export default function IntroductionPage() {
             <Link href="/components" className="text-primary underline-offset-4 hover:underline">
               component catalog
             </Link>{" "}
-            of 50+ animated primitives, a{" "}
+            of {CATALOG_COUNTS.components} animated components, a{" "}
             <Link href="/blocks" className="text-primary underline-offset-4 hover:underline">
               block catalog
             </Link>{" "}
@@ -63,13 +64,13 @@ export default function IntroductionPage() {
         <DocSection title="Tech stack">
           <ul className="space-y-2 text-sm text-muted-foreground">
             {[
-              ["Next.js 15 App Router", "File-based routing, server components, and edge-ready deployment"],
+              ["Next.js App Router", "File-based routing, server components, and edge-ready deployment"],
               ["TypeScript", "Strict mode throughout — every component and hook is fully typed"],
               ["Tailwind CSS v4", "CSS-first config, PostCSS plugin, and OKLCH design tokens"],
               ["Framer Motion", "Spring physics, scroll-linked animations, and AnimatePresence transitions"],
               ["shadcn/ui", "Radix-powered primitives — button, dialog, tabs, and more"],
               ["Supabase (optional)", "Auth, user profiles, and bookmarks for gated content"],
-              ["Stripe / LemonSqueezy (optional)", "Premium template checkout and webhook handling"],
+              ["Lemon Squeezy (optional)", "Template and plan checkout with webhook handling"],
             ].map(([name, desc]) => (
               <li key={name} className="flex gap-2">
                 <span className="mt-0.5 shrink-0 text-primary">—</span>
@@ -85,7 +86,7 @@ export default function IntroductionPage() {
 
         <DocSection title="Component catalog">
           <p className="text-sm leading-relaxed text-muted-foreground">
-            50+ animated components spanning backgrounds, cards, text effects, inputs, navigation,
+            {CATALOG_COUNTS.components} animated components spanning backgrounds, cards, text effects, inputs, navigation,
             media, and data display — all with live previews and copy-ready React source on each detail
             page.
           </p>
