@@ -9,6 +9,7 @@ import {
 } from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
+import { allGalleryItems } from "@/lib/catalog/gallery-items";
 import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 
@@ -144,6 +145,10 @@ export default async function ComponentDetailPage({ params }: Props) {
     ],
   };
 
+  const galleryItems = allGalleryItems();
+  const self = galleryItems.find((g) => g.slug === slug);
+  const related = self ? galleryItems.filter((g) => g.group === self.group && g.slug !== slug).slice(0, 4) : [];
+
   const serializedPreviewSections = item.previewSections?.map((s) => ({
     title: s.title,
     reactSource: s.reactSource,
@@ -177,6 +182,8 @@ export default async function ComponentDetailPage({ params }: Props) {
         props={item.props}
         previewExportName={getPreviewExportName(item.Preview)}
         serializedPreviewSections={serializedPreviewSections}
+        tint={self?.tint}
+        related={related}
       />
     </>
   );
