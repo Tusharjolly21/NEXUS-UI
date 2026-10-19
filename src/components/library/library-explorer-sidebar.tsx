@@ -433,11 +433,19 @@ function SidebarNav({ onPick }: { onPick?: () => void }) {
           {BLOCK_CATEGORIES.map((cat, index) => {
             const count = blockCategoryCounts.get(cat) ?? 0;
             if (count === 0) return null;
-            const active = view === "blocks" && bcat === cat;
+            // A one-block category links straight to that block's crawlable page; the
+            // `?bcat=` filter is robots-blocked and would only show the same single block.
+            const onlyBlock = count === 1 ? blocks.find((b) => b.category === cat) : undefined;
+            const href = onlyBlock
+              ? `/blocks/${onlyBlock.slug}`
+              : buildHref({ view: "blocks", bcat: cat, cat: null });
+            const active = onlyBlock
+              ? pathname === href
+              : view === "blocks" && bcat === cat;
             return (
               <Link
                 key={cat}
-                href={buildHref({ view: "blocks", bcat: cat, cat: null })}
+                href={href}
                 onClick={onPick}
                 className={cn(
                   "flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] leading-snug transition",

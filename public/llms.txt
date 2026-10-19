@@ -28,11 +28,10 @@ Nexus UI is a premium UI component library offering 100+ animated React componen
 - Styling: Tailwind CSS
 - Animation: Framer Motion
 - Language: TypeScript
-- Registry: shadcn/ui compatible (`npx shadcn@latest add https://nexus-ui.com/r/<component>.json`)
+- Registry: shadcn/ui compatible (`npx shadcn@latest add https://www.nexus-ui.com/r/<component>.json`)
 
 ## Contact
 
-- Website: https://nexus-ui.com
+- Website: https://www.nexus-ui.com
 - Twitter/X: https://twitter.com/nexus_ui
-- GitHub: https://github.com/nexus-ui
 - Support: /contact
