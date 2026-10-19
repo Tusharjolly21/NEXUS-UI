@@ -12,25 +12,77 @@ import {
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Add utilities",
+  // Searchers arrive asking what cn() is and how clsx and tailwind-merge differ — lead with that.
+  title: "cn() in Tailwind: clsx + tailwind-merge Setup",
   description:
-    "Install clsx, tailwind-merge, and a cn() helper — the className utility every Nexus UI component relies on for conditional Tailwind class merging.",
+    "What cn() is in Tailwind CSS, how clsx and tailwind-merge differ, and how to set up the cn() helper in Next.js — the className utility every Nexus UI component uses.",
   alternates: { canonical: "/docs/add-utilities" },
 });
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "What is cn() in Tailwind CSS?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "cn() is a small helper, usually in lib/utils.ts, that combines clsx and tailwind-merge: clsx builds a className string from conditional values, and tailwind-merge removes conflicting Tailwind utilities so the last one wins. It is not part of Tailwind itself; shadcn/ui popularised it.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "What is the difference between clsx and tailwind-merge?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "clsx only joins class names and drops falsy values. tailwind-merge understands Tailwind utility groups and removes earlier classes that conflict with later ones, e.g. twMerge('p-4 p-6') returns 'p-6'. cn() runs clsx first, then tailwind-merge.",
+      },
+    },
+  ],
+};
 
 export default function AddUtilitiesPage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <TechArticleJsonLd
-        title="Add utilities"
+        title="cn() in Tailwind: clsx + tailwind-merge Setup"
         description="Install clsx, tailwind-merge, and a cn() helper — the same composition pattern Nexus UI uses across components."
         slug="add-utilities"
       />
       <DocPageShell>
         <DocPageHeader
-          title="Add utilities"
+          title="Add utilities: the cn() helper"
           description="Utility helpers keep className composition predictable when variants, state, and Tailwind strings collide. Nexus UI uses clsx plus tailwind-merge behind a single cn() export — and Motion for all animation."
         />
+
+        <DocSection title="What is cn() in Tailwind?">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            <code className={docInlineCodeClass}>cn()</code> is not part of Tailwind CSS — it is a
+            two-line helper that most React + Tailwind codebases (and every shadcn/ui project) keep in{" "}
+            <code className={docInlineCodeClass}>lib/utils.ts</code>. It takes any mix of strings,
+            conditionals, arrays, and objects, builds one className with{" "}
+            <code className={docInlineCodeClass}>clsx</code>, then removes conflicting Tailwind
+            utilities with <code className={docInlineCodeClass}>tailwind-merge</code>.
+          </p>
+        </DocSection>
+
+        <DocSection title="clsx vs tailwind-merge">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            They solve different problems, which is why <code className={docInlineCodeClass}>cn()</code>{" "}
+            uses both. <code className={docInlineCodeClass}>clsx</code> only joins class names and drops
+            falsy values — it knows nothing about Tailwind.{" "}
+            <code className={docInlineCodeClass}>tailwind-merge</code> knows Tailwind&apos;s utility
+            groups, so when two classes target the same property it keeps the last one.
+          </p>
+          <DocPre>{`clsx("p-4", isActive && "p-6")     // → "p-4 p-6"  (both kept)
+twMerge("p-4 p-6")                  // → "p-6"      (conflict resolved)
+cn("p-4", isActive && "p-6")        // → "p-6"      (clsx, then twMerge)`}</DocPre>
+        </DocSection>
 
         <DocSection title="1. Install dependencies">
           <p className="text-sm text-muted-foreground">
