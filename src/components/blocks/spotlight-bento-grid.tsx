@@ -6,68 +6,42 @@ import {
   LayoutGroup,
   AnimatePresence,
   useReducedMotion,
+  type Variants,
 } from "framer-motion";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
-const SPRING = { type: "spring" as const, bounce: 0.12, duration: 0.45 };
+// ── Motion ───────────────────────────────────────────────────────────────────
+
+const SPRING_UI = { type: "spring", stiffness: 420, damping: 34 } as const;
+const SPRING_LAYOUT = { type: "spring", stiffness: 230, damping: 30 } as const;
+
+const RISE: Variants = {
+  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring", stiffness: 240, damping: 30 } },
+};
+const FADE: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4 } },
+};
+const STAGGER = (stagger: number, delayChildren = 0): Variants => ({
+  hidden: {},
+  visible: { transition: { staggerChildren: stagger, delayChildren } },
+});
 
 // ── product images ────────────────────────────────────────────────────────
 
 const MACBOOK_IMG =
-  // "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?fm=jpg&q=85&w=900&auto=format&fit=crop";
   "https://images.unsplash.com/photo-1540726811314-7648cc1b4426?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
 
 const IPHONE_IMG =
-  // "https://images.unsplash.com/photo-1576103200868-2dd3eec3f333?fm=jpg&q=85&w=900&auto=format&fit=crop";
   "https://images.unsplash.com/photo-1604671368394-2240d0b1bb6c?q=80&w=2831&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
 const MACBOOK_PRO_IMG =
   "https://images.unsplash.com/photo-1605784401368-5af1d9d6c4dc?fm=jpg&q=85&w=900&auto=format&fit=crop";
 
 const IPAD_IMG =
-  // "https://images.unsplash.com/photo-1651747137395-065bd3af97bb?fm=jpg&q=85&w=900&auto=format&fit=crop";
   "https://images.unsplash.com/photo-1587033411391-5d9e51cce126?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
-
-// ── image visual ──────────────────────────────────────────────────────────────
-
-function ProductImage({
-  src,
-  alt,
-  objectFit = "contain",
-  className,
-}: {
-  src: string;
-  alt: string;
-  objectFit?: "contain" | "cover";
-  className?: string;
-}) {
-  const reduced = useReducedMotion();
-  const [loaded, setLoaded] = React.useState(false);
-  return (
-    <div
-      className={`relative h-full w-full overflow-hidden ${className ?? ""}`}
-    >
-      <motion.div
-        className="absolute inset-0"
-        animate={reduced ? {} : { scale: [1, 1.06, 1] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-      >
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-cover transition-opacity duration-700"
-          style={{ objectFit }}
-          onLoad={() => setLoaded(true)}
-          priority={false}
-        />
-      </motion.div>
-      {!loaded && (
-        <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-white/5 to-white/10" />
-      )}
-    </div>
-  );
-}
 
 // ── card data ─────────────────────────────────────────────────────────────────
 
@@ -76,11 +50,9 @@ interface CardDef {
   tag: string;
   title: string;
   description: string;
-  bg?: string;
-  glow: string;
-  visual: React.ReactElement;
-  imgSrc?: string;
-  imgAlt?: string;
+  stat: { value: string; unit: string; label: string };
+  imgSrc: string;
+  imgAlt: string;
 }
 
 const CARDS: CardDef[] = [
@@ -89,60 +61,40 @@ const CARDS: CardDef[] = [
     tag: "Laptop",
     title: "Atlas 16",
     description:
-      "A 16-inch workstation with a 22-hour battery, a silent fan curve and a display calibrated for colour work.",
-    glow: "#6366f1",
+      "A 16-inch workstation with a silent fan curve and a display calibrated for colour work.",
+    stat: { value: "22", unit: "hrs", label: "battery life" },
     imgSrc: MACBOOK_PRO_IMG,
     imgAlt: "A 16-inch laptop on a desk",
-    visual: (
-      <ProductImage
-        src={MACBOOK_PRO_IMG}
-        alt="A 16-inch laptop on a desk"
-        className="h-full w-full"
-      />
-    ),
   },
   {
     id: "realtime-insights",
     tag: "Phone",
     title: "Pocket Pro",
     description:
-      "A brushed-aluminium phone with a three-lens camera that holds detail from midday sun to candlelight.",
-    glow: "#10b981",
+      "Brushed aluminium and a three-lens camera that holds detail from midday sun to candlelight.",
+    stat: { value: "48", unit: "MP", label: "main camera" },
     imgSrc: IPHONE_IMG,
     imgAlt: "A phone held in one hand",
-    visual: (
-      <ProductImage src={IPHONE_IMG} alt="A phone held in one hand" className="h-full w-full" />
-    ),
   },
   {
     id: "seamless-sync",
     tag: "Laptop",
     title: "Atlas Air 13",
     description:
-      "Eleven millimetres thin, no fan at all, and a battery that lasts a full working day with change to spare.",
-    glow: "#8b5cf6",
+      "No fan at all, and a battery that lasts a full working day with change to spare.",
+    stat: { value: "11", unit: "mm", label: "thin" },
     imgSrc: MACBOOK_IMG,
     imgAlt: "A thin laptop, half open",
-    visual: (
-      <ProductImage
-        src={MACBOOK_IMG}
-        alt="A thin laptop, half open"
-        className="h-full w-full"
-      />
-    ),
   },
   {
     id: "personalized-workflow",
     tag: "Tablet",
     title: "Slate 11",
     description:
-      "An 11-inch tablet with a matte, paper-like screen and a stylus that charges when it snaps to the side.",
-    glow: "#f97316",
+      "A matte, paper-like screen and a stylus that charges when it snaps to the side.",
+    stat: { value: "9", unit: "ms", label: "pen latency" },
     imgSrc: IPAD_IMG,
     imgAlt: "A tablet with a stylus",
-    visual: (
-      <ProductImage src={IPAD_IMG} alt="A tablet with a stylus" className="h-full w-full" />
-    ),
   },
 ];
 
@@ -184,109 +136,189 @@ const ACTIVE_LAYOUTS: Record<number, Layout[]> = {
   ],
 };
 
-// ── single card ───────────────────────────────────────────────────────────────
+// ── pieces ────────────────────────────────────────────────────────────────────
 
-function SpotlightCardItem({
-  card,
-  isActive,
-  hasAnyActive,
-  mobile = false,
-}: {
-  card: CardDef;
-  isActive: boolean;
-  hasAnyActive: boolean;
-  mobile?: boolean;
-}) {
-  const dimmed = hasAnyActive && !isActive && !mobile;
+function ProductImage({ src, alt, active }: { src: string; alt: string; active: boolean }) {
+  const reduced = useReducedMotion() === true;
+  const [loaded, setLoaded] = React.useState(false);
 
   return (
-    <div
-      className="relative h-[280px] w-full overflow-hidden rounded-[20px]"
-      style={{
-        background: card.bg ?? "rgba(255,255,255,0.04)",
-        border: `1px solid ${isActive ? `${card.glow}55` : "rgba(255,255,255,0.07)"}`,
-        boxShadow: isActive
-          ? `0 0 0 1px ${card.glow}28, 0 8px 64px 0 ${card.glow}22`
-          : "none",
-        filter: dimmed ? "saturate(0.15) brightness(0.42)" : "none",
-        transition:
-          "filter 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease",
-      }}
+    <motion.div
+      layout
+      className="absolute inset-0 bg-[#e8e8ed] dark:bg-[#2c2c2e]"
+      transition={SPRING_LAYOUT}
     >
-      {/* Ambient glow blob */}
-      <div
-        className="pointer-events-none absolute size-44 rounded-full"
-        style={{
-          background: card.glow,
-          filter: "blur(72px)",
-          opacity: isActive ? 0.28 : 0.1,
-          top: "30%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          transition: "opacity 0.35s ease",
-        }}
-      />
-
-      {/* Abstract visual */}
-      <div
+      <motion.div
         className="absolute inset-0"
-        style={{
-          opacity: isActive || mobile ? 1 : 0.5,
-          transition: "opacity 0.35s ease",
-        }}
+        animate={{ scale: active && !reduced ? 1.04 : 1 }}
+        transition={SPRING_LAYOUT}
       >
-        {card.visual}
-      </div>
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(max-width: 768px) 100vw, 60vw"
+          className={cn("object-cover transition-opacity duration-700", loaded ? "opacity-100" : "opacity-0")}
+          onLoad={() => setLoaded(true)}
+          priority={false}
+        />
+      </motion.div>
+    </motion.div>
+  );
+}
 
-      {/* Bottom gradient overlay */}
+function StatLine({ stat }: { stat: CardDef["stat"] }) {
+  return (
+    <p className="flex flex-wrap items-baseline gap-x-1.5 font-semibold leading-none tracking-[-0.04em] text-[#1d1d1f] dark:text-[#f5f5f7]">
+      <span className="text-[40px] tabular-nums">{stat.value}</span>
+      <span className="text-[20px] tracking-[-0.02em]">{stat.unit}</span>
+      <span className="ml-1 text-[13px] font-normal tracking-normal text-[#6e6e73] dark:text-[#a1a1a6]">{stat.label}</span>
+    </p>
+  );
+}
+
+const SURFACE =
+  "bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]";
+
+/** Top scrim for narrow tiles, side scrim for the spotlit one. Both fade from the tile colour. */
+function Scrims({ active }: { active: boolean }) {
+  return (
+    <>
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5"
-        style={{
-          background:
-            "linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)",
-          opacity: isActive || mobile ? 1 : 0,
-          transition: "opacity 0.3s ease",
-        }}
-      />
-
-      {/* Text reveal */}
-      <AnimatePresence>
-        {(isActive || mobile) && (
-          <motion.div
-            className="absolute inset-x-0 bottom-0 p-5"
-            initial={mobile ? false : { opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 8 }}
-            transition={SPRING}
-          >
-            <span
-              className="mb-2.5 inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-              style={{
-                background: `${card.glow}22`,
-                color: card.glow,
-                border: `1px solid ${card.glow}44`,
-              }}
-            >
-              {card.tag}
-            </span>
-            <h3 className="text-[15px] font-semibold leading-snug text-white">
-              {card.title}
-            </h3>
-            <p className="mt-1 text-sm leading-relaxed text-white/55">
-              {card.description}
-            </p>
-          </motion.div>
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-x-0 top-0 h-[68%] bg-gradient-to-b from-white via-white/85 to-transparent transition-opacity duration-500 dark:from-[#1c1c1e] dark:via-[#1c1c1e]/85",
+          active ? "opacity-0" : "opacity-100",
         )}
-      </AnimatePresence>
-    </div>
+      />
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-y-0 left-0 w-[72%] bg-gradient-to-r from-white via-white/90 to-transparent transition-opacity duration-500 dark:from-[#1c1c1e] dark:via-[#1c1c1e]/90",
+          active ? "opacity-100" : "opacity-0",
+        )}
+      />
+    </>
+  );
+}
+
+// ── desktop tile ─────────────────────────────────────────────────────────────
+
+function SpotlightTile({
+  card,
+  layout,
+  isActive,
+  dimmed,
+  onActivate,
+  onDeactivate,
+}: {
+  card: CardDef;
+  layout: Layout;
+  isActive: boolean;
+  dimmed: boolean;
+  onActivate: () => void;
+  onDeactivate: () => void;
+}) {
+  const reduced = useReducedMotion() === true;
+
+  return (
+    <motion.div
+      layout
+      variants={reduced ? FADE : RISE}
+      transition={SPRING_LAYOUT}
+      onHoverStart={onActivate}
+      onHoverEnd={onDeactivate}
+      onFocus={onActivate}
+      onBlur={onDeactivate}
+      tabIndex={0}
+      role="group"
+      aria-label={`${card.title}, ${card.tag.toLowerCase()}`}
+      style={{ gridColumn: `span ${layout.span}`, order: layout.order, borderRadius: 28 }}
+      className={cn(
+        "relative h-[280px] min-w-0 cursor-default overflow-hidden outline-offset-2 transition-shadow duration-500 focus-visible:outline-2 focus-visible:outline-[#0071e3] lg:h-[300px]",
+        SURFACE,
+        isActive &&
+          "shadow-[0_0_0_1px_rgba(0,0,0,.05),0_30px_60px_-30px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.12),0_30px_60px_-30px_rgba(0,0,0,.9)]",
+      )}
+    >
+      <div className={cn("absolute inset-0 transition-opacity duration-500", dimmed ? "opacity-55" : "opacity-100")}>
+        <ProductImage src={card.imgSrc} alt={card.imgAlt} active={isActive} />
+        <Scrims active={isActive} />
+
+        <motion.div layout="position" transition={SPRING_LAYOUT} className="absolute inset-x-0 top-0 p-6 lg:p-7">
+          <p className="text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">{card.tag}</p>
+          <h3 className="mt-1 text-[24px] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">
+            {card.title}
+          </h3>
+          <AnimatePresence initial={false}>
+            {isActive ? (
+              <motion.div
+                key="detail"
+                className="max-w-[44%]"
+                initial={reduced ? { opacity: 0 } : { opacity: 0, y: 10, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { ...SPRING_UI, delay: reduced ? 0 : 0.08 } }}
+                exit={reduced ? { opacity: 0 } : { opacity: 0, y: 6, filter: "blur(4px)", transition: { duration: 0.15 } }}
+              >
+                <div className="mt-5">
+                  <StatLine stat={card.stat} />
+                </div>
+                <p className="mt-4 text-pretty text-[15px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6]">
+                  {card.description}
+                </p>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ── mobile tile ──────────────────────────────────────────────────────────────
+
+function StackedTile({ card }: { card: CardDef }) {
+  const reduced = useReducedMotion() === true;
+  return (
+    <motion.article
+      variants={reduced ? FADE : RISE}
+      className={cn("relative h-[360px] overflow-hidden rounded-[28px]", SURFACE)}
+    >
+      <ProductImage src={card.imgSrc} alt={card.imgAlt} active={false} />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[78%] bg-gradient-to-b from-white via-white/90 to-transparent dark:from-[#1c1c1e] dark:via-[#1c1c1e]/90"
+      />
+      <div className="relative p-6">
+        <p className="text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">{card.tag}</p>
+        <h3 className="mt-1 text-[24px] font-semibold leading-[1.1] tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">
+          {card.title}
+        </h3>
+        <div className="mt-4">
+          <StatLine stat={card.stat} />
+        </div>
+        <p className="mt-3 text-pretty text-[15px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6]">{card.description}</p>
+      </div>
+    </motion.article>
   );
 }
 
 // ── main export ───────────────────────────────────────────────────────────────
 
-export default function SpotlightBentoGrid() {
+export interface SpotlightBentoGridProps {
+  /** Section headline. Pass an empty string to hide the header. */
+  title?: string;
+  description?: string;
+  className?: string;
+}
+
+export default function SpotlightBentoGrid({
+  title = "Find the one that fits.",
+  description = "Four devices, one family. Hover a tile to bring it forward.",
+  className,
+}: SpotlightBentoGridProps = {}) {
   const [activeIdx, setActiveIdx] = React.useState<number | null>(null);
-  const reduced = useReducedMotion();
+  const reduced = useReducedMotion() === true;
+  const rise = reduced ? FADE : RISE;
   const layouts =
     activeIdx === null || reduced
       ? DEFAULT_LAYOUTS
@@ -294,48 +326,62 @@ export default function SpotlightBentoGrid() {
   const id = React.useId();
 
   return (
-    <div className="p-6 sm:p-8">
-      {/* Desktop: interactive spotlight grid */}
-      <LayoutGroup id={id}>
-        <div
-          className="hidden gap-3 md:grid"
-          style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
-        >
-          {CARDS.map((card, i) => (
-            <motion.div
-              key={card.id}
-              layout
-              transition={SPRING}
-              style={{
-                gridColumn: `span ${layouts[i].span}`,
-                order: layouts[i].order,
-              }}
-              onHoverStart={() => setActiveIdx(i)}
-              onHoverEnd={() => setActiveIdx(null)}
-              className="min-w-0"
+    <section className={cn("w-full bg-[#f5f5f7] px-4 py-14 dark:bg-black sm:px-6 sm:py-20", className)}>
+      <motion.div
+        className="mx-auto w-full max-w-5xl"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={STAGGER(0.07)}
+      >
+        {title ? (
+          <div className="mb-8 sm:mb-10">
+            <motion.h2
+              variants={rise}
+              className="text-balance text-[32px] font-semibold leading-[1.07] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-[44px]"
             >
-              <SpotlightCardItem
-                card={card}
-                isActive={activeIdx === i}
-                hasAnyActive={activeIdx !== null}
-              />
-            </motion.div>
-          ))}
-        </div>
-      </LayoutGroup>
+              {title}
+            </motion.h2>
+            {description ? (
+              <motion.p
+                variants={rise}
+                className="mt-3 max-w-lg text-pretty text-[17px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6]"
+              >
+                {description}
+              </motion.p>
+            ) : null}
+          </div>
+        ) : null}
 
-      {/* Mobile: stacked */}
-      <div className="flex flex-col gap-3 md:hidden">
-        {CARDS.map((card) => (
-          <SpotlightCardItem
-            key={card.id}
-            card={card}
-            isActive={false}
-            hasAnyActive={false}
-            mobile
-          />
-        ))}
-      </div>
-    </div>
+        {/* Desktop: interactive spotlight grid */}
+        <LayoutGroup id={id}>
+          <motion.div
+            variants={STAGGER(0.07)}
+            className="hidden gap-4 md:grid"
+            style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}
+            onMouseLeave={() => setActiveIdx(null)}
+          >
+            {CARDS.map((card, i) => (
+              <SpotlightTile
+                key={card.id}
+                card={card}
+                layout={layouts[i]}
+                isActive={activeIdx === i}
+                dimmed={activeIdx !== null && activeIdx !== i}
+                onActivate={() => setActiveIdx(i)}
+                onDeactivate={() => setActiveIdx((current) => (current === i ? null : current))}
+              />
+            ))}
+          </motion.div>
+        </LayoutGroup>
+
+        {/* Mobile: stacked */}
+        <motion.div variants={STAGGER(0.07)} className="flex flex-col gap-3 md:hidden">
+          {CARDS.map((card) => (
+            <StackedTile key={card.id} card={card} />
+          ))}
+        </motion.div>
+      </motion.div>
+    </section>
   );
 }

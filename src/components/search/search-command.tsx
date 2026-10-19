@@ -326,16 +326,37 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
   const listId = `${uid}-list`;
   const optionId = (i: number) => `${uid}-opt-${i}`;
 
+  // Spotlight-style: the panel grows out of a soft blur with a small spring settle, the contents
+  // follow a beat later, and closing is a quick ease-in shrink so it gets out of the way.
   const panelMotion = reduce
-    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0, transition: { duration: 0.12 } } }
     : {
-        initial: { opacity: 0, scale: 0.96, y: -10 },
-        animate: { opacity: 1, scale: 1, y: 0 },
-        exit: { opacity: 0, scale: 0.97, y: -6, transition: { duration: 0.14, ease: [0.4, 0, 1, 1] as const } },
+        initial: { opacity: 0, scale: 0.92, y: -18, filter: "blur(10px)" },
+        animate: { opacity: 1, scale: 1, y: 0, filter: "blur(0px)" },
+        exit: {
+          opacity: 0,
+          scale: 0.96,
+          y: -8,
+          filter: "blur(6px)",
+          transition: { duration: 0.16, ease: [0.4, 0, 1, 1] as const },
+        },
       };
   const panelSpring: Transition = reduce
     ? { duration: 0.15 }
-    : { type: "spring", stiffness: 480, damping: 34, mass: 0.8 };
+    : {
+        type: "spring",
+        stiffness: 380,
+        damping: 28,
+        mass: 0.9,
+        opacity: { duration: 0.18, ease: "easeOut" },
+        filter: { duration: 0.26, ease: "easeOut" },
+      };
+  const contentMotion = reduce
+    ? {}
+    : {
+        initial: { opacity: 0, y: 6 },
+        animate: { opacity: 1, y: 0, transition: { delay: 0.08, duration: 0.24, ease: [0.16, 1, 0.3, 1] as const } },
+      };
   const pillSpring: Transition = reduce ? { duration: 0 } : { type: "spring", stiffness: 560, damping: 40, mass: 0.6 };
 
   const offsets = sections.reduce<number[]>((acc, s, i) => {
@@ -350,11 +371,11 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
           {/* Dimmed, softly blurred backdrop */}
           <motion.div
             aria-hidden
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-0 bg-black/20 backdrop-blur-[3px] dark:bg-black/50"
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: reduce ? "blur(0px)" : "blur(8px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)", transition: { duration: 0.18 } }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 bg-black/25 dark:bg-black/55"
           />
 
           {/* Panel */}
@@ -424,7 +445,7 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
 
             <div className="h-px shrink-0 bg-foreground/[0.07]" />
 
-            <div className="flex min-h-0">
+            <motion.div {...contentMotion} className="flex min-h-0">
               {/* Results */}
               <motion.div
                 ref={listRef}
@@ -632,7 +653,7 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
                   </AnimatePresence>
                 </div>
               )}
-            </div>
+            </motion.div>
 
             {/* Footer */}
             <div className="flex h-10 shrink-0 items-center justify-between gap-4 border-t border-foreground/[0.07] px-4 text-[12px] text-muted-foreground">

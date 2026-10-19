@@ -3,26 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { ChevronRight, Code2, Expand, File, Folder, Lock, Monitor } from "lucide-react";
+import { ArrowUpRight, ChevronRight, File, Folder } from "lucide-react";
 import { getBlock, blocks, type BlockManifestEntry } from "@/lib/catalog/blocks";
-import { Badge } from "@/components/ui/badge";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { CodeBlock } from "@/components/code-block/code-block";
 import { InteractiveDotsHeroCustomizer } from "@/components/library/interactive-dots-hero-customizer";
 import { LayeredWaveHeroCustomizer } from "@/components/library/layered-wave-hero-customizer";
 import { ParticleNoiseHeroCustomizer } from "@/components/library/particle-noise-hero-customizer";
-import { WavyLines } from "@/components/wavy-lines";
 import { BentoHeroCustomizer } from "@/components/library/bento-hero-customizer";
 import { BentoGridSkeletonHeroCustomizer } from "@/components/library/bento-grid-skeleton-hero-customizer";
 import { MotionLayerScrollerHeroCustomizer } from "@/components/library/motion-layer-scroller-hero-customizer";
@@ -30,7 +15,6 @@ import { BentoShowcaseHeroCustomizer } from "@/components/library/bento-showcase
 import { WhyChooseUsBentoHeroCustomizer } from "@/components/library/why-choose-us-bento-hero-customizer";
 import { AtsBentoGridHeroCustomizer } from "@/components/library/ats-bento-grid-hero-customizer";
 import { SpotlightBentoGridCustomizer } from "@/components/library/spotlight-bento-grid-customizer";
-import { UsageSnippet } from "@/components/library/usage-snippet";
 import {
   ChatFaqSection,
   FaqFolderCard,
@@ -42,12 +26,6 @@ import {
   GradientProofContact,
   ImageStoryContact,
 } from "@/components/blocks/contact-page";
-import {
-  TextAnimationBlurFadeIn,
-  TextAnimationTypewriterEffect,
-  TextGenerateTypewriter,
-  TypewriterHeading,
-} from "@/components/blocks/text-animations";
 import {
   BlogContentCentered,
   BlogContentEditorial,
@@ -75,6 +53,17 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
 import { createClient } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
+import { InstallCard, RainbowWord } from "@/components/site";
+import { variantAnchor, variantsOf } from "@/lib/catalog/block-variants";
+import {
+  AuroraWavyLinesDemo,
+  BlurFadeInDemo,
+  CheckoutStage,
+  FlippingWordsDemo,
+  TextGenerateTypewriterDemo,
+  TypewriterEffectDemo,
+} from "@/registry/blocks/block-variants";
+import { BlockSection } from "./_section";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -126,6 +115,10 @@ export default async function BlockDetailPage({ params }: Props) {
   const installDetails = getBlockInstallDetails(block.slug, block.registryCliName ?? block.slug);
 
   const Preview = block.Preview;
+  const sections = variantsOf(block.slug);
+  const [titleLead, ...titleWords] = block.name.split(" ");
+  const titleRest = titleWords.join(" ");
+  const installCommand = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${installDetails.registryName}`;
   const code = await getBlockCode(block.slug, block.reactSource);
   const isInteractiveBackgroundCard = block.slug === "block-interactive-dots";
   const isAnimatedBentoCard = block.slug === "block-animated-bento";
@@ -212,12 +205,19 @@ export default async function BlockDetailPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[128px]">
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-12 pt-[128px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[1152px]">
           <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
-            <Link href="/blocks" className="hover:text-foreground">
+            <Link href="/blocks" className="rounded hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               Blocks
+            </Link>
+            <ChevronRight className="size-3.5" aria-hidden />
+            <Link
+              href={`/blocks?block=${block.slug}`}
+              className="rounded hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {block.category}
             </Link>
             <ChevronRight className="size-3.5" aria-hidden />
             <span aria-current="page" className="font-medium text-foreground">
@@ -225,40 +225,80 @@ export default async function BlockDetailPage({ params }: Props) {
             </span>
           </nav>
           <h1 className="pg-display mt-6 text-[clamp(44px,8vw,76px)] text-foreground">
-            {block.name}
+            <RainbowWord>{titleLead}</RainbowWord>
+            {titleRest ? ` ${titleRest}` : null}
             <span className="sr-only"> — UI Block</span>
           </h1>
           <p className="mt-5 max-w-[680px] text-[19px] leading-[1.55] text-muted-foreground">{block.description}</p>
           <ul className="mt-6 flex flex-wrap gap-2" aria-label="About this block">
-            <li className={block.premium ? "rounded-full bg-foreground px-3 py-1 text-[13px] font-semibold text-background" : "rounded-full bg-tint-mint px-3 py-1 text-[13px] font-semibold text-[#126b3a]"}>
+            <li
+              className={
+                block.premium
+                  ? "rounded-full bg-[#1d1d1f] px-3 py-1 text-[13px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]"
+                  : "rounded-full bg-[#34c759]/12 px-3 py-1 text-[13px] font-semibold text-[#248a3d] dark:text-[#30d158]"
+              }
+            >
               {block.premium ? "Pro" : "Free"}
             </li>
             <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">{block.category}</li>
             <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">
-              {block.variants.length} {block.variants.length === 1 ? "variant" : "variants"}
+              {sections.length || block.variants.length} {(sections.length || block.variants.length) === 1 ? "section" : "sections"}
             </li>
           </ul>
         </div>
       </section>
 
       <main className="mx-auto w-full max-w-[1184px] px-4 pb-24">
-      <Accordion defaultValue={[]}>
-        <AccordionItem value="installation" className="border-0">
-          <AccordionTrigger className="pg-float rounded-tile bg-card px-6 py-5 text-[20px] font-semibold text-foreground no-underline hover:no-underline">
-            Installation
-          </AccordionTrigger>
-          <AccordionContent className="mt-2 rounded-tile bg-card px-6 py-5 text-[15px] text-muted-foreground">
-            <BlockInstallation block={block} details={installDetails} />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)]">
+          <nav aria-label="Sections in this block" className="rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
+            <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">In this block</h2>
+            <p className="mt-1 text-[14px] text-muted-foreground">Jump to a section. Each one has its own preview and code.</p>
+            <ol className="mt-4 grid gap-1 sm:grid-cols-2">
+              {sections.map((v, i) => (
+                <li key={v.id}>
+                  <a
+                    href={`#${variantAnchor(v.title)}`}
+                    className="group flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-foreground/[0.07] text-[12px] font-semibold tabular-nums text-muted-foreground">
+                      {i + 1}
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{v.title}</span>
+                    <ArrowUpRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
 
+          <aside aria-label="Install" className="rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
+            <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">Install</h2>
+            <p className="mt-1 text-[14px] text-muted-foreground">
+              {locked
+                ? "One command adds every section. Pro blocks need your API key in the registry settings."
+                : "One command adds every section and its dependencies."}
+            </p>
+            <InstallCard wrap command={installCommand} className="mt-4" />
+            <details className="group mt-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between rounded-[12px] px-1 py-2 text-[14px] font-medium text-link [&::-webkit-details-marker]:hidden">
+                Full setup guide
+                <ChevronRight className="size-4 transition-transform duration-200 group-open:rotate-90" aria-hidden />
+              </summary>
+              <div className="mt-2 text-[14px] text-muted-foreground">
+                <BlockInstallation block={block} details={installDetails} />
+              </div>
+            </details>
+          </aside>
+        </div>
+
+        <div className="mt-20 space-y-24">
       {isInteractiveBackgroundCard ? (
         <>
-          <PreviewCodeSection title="Interactive Dots" code={code} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Interactive Dots" code={code} locked={locked}>
             <InteractiveDotsHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Layered Wave Background"
             code={layeredWaveCode}
             usageCode={LAYERED_WAVE_USAGE}
@@ -268,6 +308,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <LayeredWaveHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Particle Noise"
             code={particleNoiseCode}
             usageCode={PARTICLE_NOISE_USAGE}
@@ -277,56 +318,39 @@ export default async function BlockDetailPage({ params }: Props) {
             <ParticleNoiseHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Aurora Wavy Lines"
             code={wavyLinesCode}
             usageCode={WAVY_LINES_USAGE}
             className="mt-16"
             locked={locked}
           >
-            <div className="relative h-full min-h-full overflow-hidden rounded-lg bg-[#031412]">
-              <WavyLines
-                lineColor="#5eead4"
-                backgroundColorStart="#031413"
-                backgroundColorEnd="#123c2d"
-                speed={1.35}
-                radius={12}
-                className="h-full min-h-full w-full"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_42%,transparent_0%,rgba(0,0,0,.18)_46%,rgba(0,0,0,.72)_100%)]" />
-              <div className="pointer-events-none absolute bottom-8 left-8 max-w-sm">
-                <p className="text-[13px] font-medium text-teal-50/70">Tidal · Ocean sensor network</p>
-                <p className="mt-3 text-balance text-3xl font-semibold tracking-[-0.03em] text-white">
-                  Readings from 4,000 buoys, live.
-                </p>
-                <p className="mt-3 text-pretty text-sm leading-6 text-teal-50/70">
-                  Swell, temperature and salinity, streamed every ninety seconds.
-                </p>
-              </div>
-            </div>
+            <AuroraWavyLinesDemo />
           </PreviewCodeSection>
         </>
       ) : isAnimatedBentoCard ? (
-        <PreviewCodeSection title={block.name} code={code} locked={locked}>
+        <PreviewCodeSection block={block.slug} title={block.name} code={code} locked={locked}>
           <BentoHeroCustomizer />
         </PreviewCodeSection>
       ) : isBentoSkeletonCard ? (
-        <PreviewCodeSection title={block.name} code={code} locked={locked}>
+        <PreviewCodeSection block={block.slug} title={block.name} code={code} locked={locked}>
           <BentoGridSkeletonHeroCustomizer />
         </PreviewCodeSection>
       ) : isMotionLayerScrollerCard ? (
-        <PreviewCodeSection title={block.name} code={code} locked={locked}>
+        <PreviewCodeSection block={block.slug} title={block.name} code={code} locked={locked}>
           <MotionLayerScrollerHeroCustomizer />
         </PreviewCodeSection>
       ) : isBentoShowcaseCard ? (
-        <PreviewCodeSection title={block.name} code={code} locked={locked}>
+        <PreviewCodeSection block={block.slug} title={block.name} code={code} locked={locked}>
           <BentoShowcaseHeroCustomizer />
         </PreviewCodeSection>
       ) : isWhyChooseUsCard ? (
         <>
-          <PreviewCodeSection title={block.name} code={code} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Mentorship Bento" code={code} locked={locked}>
             <WhyChooseUsBentoHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="ATS Bento Grid"
             code={atsBentoCode}
             usageCode={ATS_BENTO_USAGE}
@@ -336,6 +360,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <AtsBentoGridHeroCustomizer />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Spotlight Bento Grid"
             code={spotlightCode}
             usageCode={SPOTLIGHT_BENTO_USAGE}
@@ -347,10 +372,11 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isFaqFolderCard ? (
         <>
-          <PreviewCodeSection title="Questions & Answers FAQ" code={code} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Questions & Answers FAQ" code={code} locked={locked}>
             <FaqFolderCard />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Searchable FAQ"
             code={code}
             className="mt-16"
@@ -359,6 +385,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <SearchableFaqSection />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Chat FAQ"
             code={code}
             className="mt-16"
@@ -369,10 +396,11 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isContactPageCard ? (
         <>
-          <PreviewCodeSection title="Global Signal Contact" code={code} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Global Signal Contact" code={code} locked={locked}>
             <GlobalSignalContact />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Centered Intake Contact"
             code={code}
             className="mt-16"
@@ -381,6 +409,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <CenteredContactForm />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Gradient Proof Contact"
             code={code}
             className="mt-16"
@@ -389,6 +418,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <GradientProofContact />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Image Story Contact"
             code={code}
             className="mt-16"
@@ -399,10 +429,11 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isTextAnimationsCard ? (
         <>
-          <PreviewCodeSection title="Typewriter Heading" code={code} usageCode={TYPEWRITER_HEADING_USAGE} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Typewriter Heading" code={code} usageCode={TYPEWRITER_HEADING_USAGE} locked={locked}>
             <FlippingWordsDemo />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Text Animation Typewriter Effect"
             code={typewriterEffectCode}
             usageCode={TYPEWRITER_EFFECT_USAGE}
@@ -412,6 +443,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <TypewriterEffectDemo />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Text Animation Blur Fade In"
             code={blurFadeInCode}
             usageCode={BLUR_FADE_IN_USAGE}
@@ -421,6 +453,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <BlurFadeInDemo />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Text Generate Typewriter with typing sound"
             code={textGenerateCode}
             usageCode={TEXT_GENERATE_TYPEWRITER_USAGE}
@@ -433,6 +466,7 @@ export default async function BlockDetailPage({ params }: Props) {
       ) : isBlogContentSectionsCard ? (
         <>
           <PreviewCodeSection
+            block={block.slug}
             title="Blog Content Centered"
             code={code}
             usageCode={BLOG_CONTENT_CENTERED_USAGE}
@@ -441,6 +475,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <BlogContentCentered />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Blog Content With TOC"
             code={blogContentWithTocCode}
             usageCode={BLOG_CONTENT_WITH_TOC_USAGE}
@@ -450,6 +485,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <BlogContentWithToc />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Blog Content Editorial"
             code={blogContentEditorialCode}
             usageCode={BLOG_CONTENT_EDITORIAL_USAGE}
@@ -459,6 +495,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <BlogContentEditorial />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Blog Header Featured Posts"
             code={blogHeaderFeaturedPostsCode}
             usageCode={BLOG_HEADER_FEATURED_POSTS_USAGE}
@@ -468,6 +505,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <BlogHeaderFeaturedPosts />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Blog Hover Image Card"
             code={blogHoverImageCardCode}
             usageCode={BLOG_HOVER_IMAGE_CARD_USAGE}
@@ -480,6 +518,7 @@ export default async function BlockDetailPage({ params }: Props) {
       ) : isPricingSectionCard ? (
         <>
           <PreviewCodeSection
+            block={block.slug}
             title="Radio Plan Selector"
             code={code}
             usageCode={RADIO_PLAN_PRICING_USAGE}
@@ -488,6 +527,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <RadioPlanPricing />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Four Tier Billing Switch"
             code={billingPricingVariantsCode}
             usageCode={PRICING_PLAN_GRID_USAGE}
@@ -497,6 +537,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <PricingPlanGrid />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Advanced Pricing Columns"
             code={billingPricingVariantsCode}
             usageCode={ADVANCED_PRICING_COLUMNS_USAGE}
@@ -506,6 +547,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <AdvancedPricingColumns />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Spotlight Pricing Cards"
             code={billingPricingVariantsCode}
             usageCode={SPOTLIGHT_PRICING_CARDS_USAGE}
@@ -517,10 +559,11 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isSidebarCard ? (
         <>
-          <PreviewCodeSection title="Simple Sidebar with Hover" code={code} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Simple Sidebar with Hover" code={code} locked={locked}>
             <SimpleSidebar />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Collapsible Sidebar"
             code={collapsibleSidebarCode}
             usageCode={COLLAPSIBLE_SIDEBAR_USAGE}
@@ -530,6 +573,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <CollapsibleSidebar />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Grouped Sidebar"
             code={groupedSidebarCode}
             usageCode={GROUPED_SIDEBAR_USAGE}
@@ -541,10 +585,11 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isLogoCloudCard ? (
         <>
-          <PreviewCodeSection title="Blur Flip Grid" code={code} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Blur Flip Grid" code={code} locked={locked}>
             <LogosBlurFlip />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Blur Hover Reveal"
             code={logoBlurCode}
             usageCode={LOGO_BLUR_USAGE}
@@ -554,6 +599,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <LogoCloudBlur />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Infinite Marquee"
             code={logoMarqueeCode}
             usageCode={LOGO_MARQUEE_USAGE}
@@ -563,6 +609,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <LogoCloudMarquee />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Cursor Spotlight"
             code={logoSpotlightCode}
             usageCode={LOGO_SPOTLIGHT_USAGE}
@@ -572,6 +619,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <LogoCloudSpotlight />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Swap Animation"
             code={logoSwapCode}
             usageCode={LOGO_SWAP_USAGE}
@@ -581,6 +629,7 @@ export default async function BlockDetailPage({ params }: Props) {
             <LogoCloudSwap />
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Single Row Lift"
             code={logoSingleRowCode}
             usageCode={LOGO_SINGLE_ROW_USAGE}
@@ -592,12 +641,13 @@ export default async function BlockDetailPage({ params }: Props) {
         </>
       ) : isCheckoutMomentsCard ? (
         <>
-          <PreviewCodeSection title="Pay & Confirm" code={code} usageCode={CHECKOUT_PAY_USAGE} locked={locked}>
+          <PreviewCodeSection block={block.slug} title="Pay & Confirm" code={code} usageCode={CHECKOUT_PAY_USAGE} locked={locked}>
             <CheckoutStage>
               <PayAndConfirm />
             </CheckoutStage>
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Verify Payment"
             code={verifyPaymentCode}
             usageCode={CHECKOUT_VERIFY_USAGE}
@@ -609,6 +659,7 @@ export default async function BlockDetailPage({ params }: Props) {
             </CheckoutStage>
           </PreviewCodeSection>
           <PreviewCodeSection
+            block={block.slug}
             title="Tip & Rate"
             code={tipAndRateCode}
             usageCode={CHECKOUT_TIP_USAGE}
@@ -621,149 +672,49 @@ export default async function BlockDetailPage({ params }: Props) {
           </PreviewCodeSection>
         </>
 ) : (
-        <PreviewCodeSection title={block.name} code={code} locked={locked}>
+        <PreviewCodeSection block={block.slug} title={block.name} code={code} locked={locked}>
           <Preview />
         </PreviewCodeSection>
       )}
 
-      <section className="mt-10 grid gap-4 border-t border-border/50 pt-8 md:grid-cols-2">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Variants</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {block.variants.map((variant) => (
-              <Badge key={variant} variant="outline" className="border-border/70 text-muted-foreground">
-                {variant}
-              </Badge>
-            ))}
+        </div>
+
+        <section aria-label="More blocks" className="mt-24 border-t border-border pt-10">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2 className="text-[28px] font-semibold tracking-[-0.025em] text-foreground">More blocks</h2>
+            <Link href="/blocks" className="text-[15px] text-link hover:underline hover:underline-offset-4">
+              See the whole wall ›
+            </Link>
           </div>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 dark:bg-white/[0.04]">
-          {locked ? (
-            <>
-              <p className="text-sm font-semibold text-foreground">Pro block</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Upgrade to Pro to access the full source code for this block.
-              </p>
-            </>
-          ) : (
-            <>
-              <p className="text-sm font-semibold text-foreground">Code access enabled</p>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Use the Code tab above to inspect and copy this block into your project.
-              </p>
-            </>
-          )}
-        </div>
-      </section>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {blocks
+              .filter((b) => b.slug !== block.slug)
+              .map((b) => (
+                <li key={b.slug}>
+                  <Link
+                    href={`/blocks/${b.slug}`}
+                    className="group flex items-center justify-between gap-3 rounded-[20px] bg-card px-5 py-4 shadow-[0_0_0_0.5px_var(--border)] transition-shadow hover:shadow-[0_0_0_0.5px_var(--border),0_14px_30px_-18px_rgba(0,0,0,0.3)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-[16px] font-semibold tracking-[-0.01em] text-foreground">{b.name}</span>
+                      <span className="block text-[13px] text-muted-foreground">
+                        {variantsOf(b.slug).length || b.variants.length} sections · {b.premium ? "Pro" : "Free"}
+                      </span>
+                    </span>
+                    <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </section>
       </main>
     </>
   );
 }
 
-function FlippingWordsDemo() {
-  const notes = [
-    ["Oct 14", "Branch previews", "Every pull request gets its own URL, torn down on merge."],
-    ["Oct 07", "Faster cold starts", "Median boot fell from 410 ms to 160 ms on the new runtime."],
-    ["Sep 30", "Audit log export", "Stream every workspace event to your own bucket as JSONL."],
-    ["Sep 22", "Keyboard-first search", "Press / anywhere to jump to a project, page, or teammate."],
-  ];
-  return (
-    <section className="grid h-full min-h-full w-full overflow-hidden bg-[#f5f5f7] px-5 py-10 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7] sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:p-14">
-      <div className="flex flex-col justify-center">
-        <p className="text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Changelog</p>
-        <TypewriterHeading
-          text="Release notes people read."
-          description="Ship a headline that types itself out, then let the summary settle in underneath. The layout is reserved up front, so nothing below it jumps."
-          typingSpeed={78}
-          startDelay={300}
-          cursorColor="#0071e3"
-          className="mt-3"
-        />
-        <div className="mt-8 flex flex-wrap items-center gap-3">
-          <span className="inline-flex h-11 items-center rounded-full bg-[#0071e3] px-5 text-[15px] font-medium text-white">
-            Read the latest
-          </span>
-          <span className="inline-flex h-11 items-center rounded-full bg-[#e8e8ed] px-5 text-[15px] font-medium text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#f5f5f7]">
-            Subscribe by email
-          </span>
-        </div>
-      </div>
-      <ol className="mt-10 hidden flex-col justify-center gap-2 lg:mt-0 lg:flex">
-        {notes.map(([date, title, copy]) => (
-          <li key={title} className="grid grid-cols-[64px_1fr] gap-4 rounded-[20px] bg-white p-4 shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
-            <span className="pt-0.5 text-[12.5px] tabular-nums text-[#86868b] dark:text-[#98989d]">{date}</span>
-            <span>
-              <span className="block text-[15px] font-semibold tracking-[-0.01em]">{title}</span>
-              <span className="mt-1 block text-[13.5px] leading-5 text-[#6e6e73] dark:text-[#a1a1a6]">{copy}</span>
-            </span>
-          </li>
-        ))}
-      </ol>
-    </section>
-  );
-}
 
-function TypewriterEffectDemo() {
-  return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-black px-5 py-12 text-[#f5f5f7] sm:px-8">
-      <div className="w-full max-w-3xl">
-        <p className="text-[13px] font-medium text-[#a1a1a6]">Hosting for small teams</p>
-        <h3 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-5xl">
-          Push to main.
-        </h3>
-        <div className="mt-2 min-h-[2.6em] text-[34px] leading-[1.05] sm:text-5xl">
-          <TextAnimationTypewriterEffect
-            texts={["Preview every branch.", "Roll back in one click.", "Sleep through deploys."]}
-            className="text-[34px] text-[#86868b] sm:text-5xl"
-            delay={500}
-          />
-        </div>
-        <p className="mt-8 max-w-xl text-pretty text-[16px] leading-7 text-[#a1a1a6]">
-          Cycles through short claims, typing and deleting each one. The line keeps its height, so the copy below
-          never shifts.
-        </p>
-      </div>
-    </section>
-  );
-}
 
-function BlurFadeInDemo() {
-  return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-white px-5 py-12 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7] sm:px-8">
-      <div className="w-full max-w-3xl">
-        <p className="text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">From the founders</p>
-        <TextAnimationBlurFadeIn
-          text={"We built the tool we kept wishing for.\nIt does fewer things than the others.\nEach of them, properly."}
-          by="word"
-          stagger={0.045}
-          once={false}
-          repeat
-          className="mt-5 text-[30px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-5xl"
-        />
-        <p className="mt-8 text-[14px] text-[#6e6e73] dark:text-[#a1a1a6]">Ana Ruiz and Tom Becker, co-founders</p>
-      </div>
-    </section>
-  );
-}
 
-function TextGenerateTypewriterDemo() {
-  return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#f5f5f7] px-5 py-12 dark:bg-black sm:px-8">
-      <div className="w-full max-w-2xl">
-        <div className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md bg-[#0071e3] px-4 py-3 text-[15px] text-white">
-          Why did churn go up last quarter?
-        </div>
-        <TextGenerateTypewriter
-          text="Churn rose 1.8 points, almost entirely from annual plans that renewed in August. Most of those accounts never invited a second teammate, so the fastest lever is an invite prompt in week one."
-          startOnView
-          typingSpeed={40}
-          volume={0.22}
-          className="mt-4"
-        />
-      </div>
-    </section>
-  );
-}
 
 type BlockInstallDetails = {
   registryName: string;
@@ -975,12 +926,12 @@ function BlockInstallation({
       </ol>
 
       {details.notes.length > 0 && (
-        <div className="rounded-xl border border-amber-500/20 bg-amber-500/[0.06] p-4">
+        <div className="rounded-[16px] bg-[#ff9500]/10 p-4">
           <p className="font-medium text-foreground">Required setup for this block</p>
           <ul className="mt-3 space-y-2 leading-6">
             {details.notes.map((note) => (
               <li key={note} className="flex gap-2">
-                <span className="text-amber-500">-</span>
+                <span className="text-[#ff9500]" aria-hidden>•</span>
                 <span>{note}</span>
               </li>
             ))}
@@ -1015,7 +966,7 @@ function InstallationStep({
 
 function InstallCode({ value }: { value: string }) {
   return (
-    <pre className="mt-3 overflow-x-auto rounded-xl border border-border bg-background p-4 font-mono text-xs leading-6 text-foreground">
+    <pre className="mt-3 overflow-x-auto rounded-[14px] bg-foreground/[0.04] p-4 font-mono text-xs leading-6 text-foreground">
       {value}
     </pre>
   );
@@ -1039,7 +990,7 @@ function BlockFileTree({ files }: { files: string[] }) {
   }
 
   return (
-    <div className="mt-3 rounded-xl border border-border bg-background p-4 font-mono text-xs text-foreground">
+    <div className="mt-3 rounded-[14px] bg-foreground/[0.04] p-4 font-mono text-xs text-foreground">
       {rows.map((row, index) => (
         <div
           key={`${row.type}-${row.label}-${index}`}
@@ -1047,7 +998,7 @@ function BlockFileTree({ files }: { files: string[] }) {
           style={{ paddingLeft: `${row.depth * 16}px` }}
         >
           {row.type === "folder" ? (
-            <Folder className="size-3.5 shrink-0 text-sky-500" />
+            <Folder className="size-3.5 shrink-0 text-[#0071e3] dark:text-[#2997ff]" />
           ) : (
             <File className="size-3.5 shrink-0 text-muted-foreground" />
           )}
@@ -1087,14 +1038,16 @@ async function readSourceFile(sourcePath: string, fallback: string) {
   }
 }
 
+/** One section of the page, numbered and anchored to match its tile on the blocks wall. */
 function PreviewCodeSection({
+  block,
   title,
   code,
   usageCode,
-  className,
   children,
   locked = false,
 }: {
+  block: string;
   title: string;
   code: string;
   usageCode?: string;
@@ -1102,118 +1055,20 @@ function PreviewCodeSection({
   children: React.ReactNode;
   locked?: boolean;
 }) {
+  const sections = variantsOf(block);
+  const at = sections.findIndex((v) => v.title === title);
   return (
-    <section className={className ?? "mt-14"}>
-      <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-        {title}
-      </h2>
-
-      <Tabs defaultValue="preview" className="mt-7 gap-0">
-        <div className="flex items-end justify-between gap-3">
-          <TabsList className="h-11 rounded-xl bg-muted p-1">
-            <TabsTrigger value="preview" className="h-9 gap-2 rounded-lg px-4 text-base">
-              <Monitor className="size-4" />
-              Preview
-            </TabsTrigger>
-            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled={locked}>
-              {locked ? <Lock className="size-4" /> : <Code2 className="size-4" />}
-              Code
-            </TabsTrigger>
-          </TabsList>
-
-          <button
-            type="button"
-            aria-label="Full screen preview"
-            className="grid size-10 place-items-center rounded-xl border border-border/70 bg-background text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-white/[0.04]"
-          >
-            <Expand className="size-4" />
-          </button>
-        </div>
-
-        <TabsContent value="preview" className="mt-4">
-          <div className="min-w-0 overflow-hidden rounded-2xl bg-muted/80 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-white/[0.06] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-            <div className="relative isolate h-[620px] min-w-0 overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm [contain:paint] dark:border-white/10 dark:bg-black md:h-[720px] xl:h-[860px]">
-              <div className="absolute inset-4 min-w-0 overflow-hidden rounded-lg bg-background [contain:paint] dark:bg-black sm:inset-6">
-                <div className="h-full min-h-0 w-full min-w-0 overflow-hidden [&>*]:!h-full [&>*]:!min-h-0 [&>*]:!w-full [&>*]:!max-w-none [&>*]:!overflow-hidden [&>*]:!rounded-lg">
-                  {children}
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="code" className="mt-4">
-          {locked ? (
-            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-muted/30 p-8">
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/60 backdrop-blur-[2px]">
-                <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-background shadow-lg">
-                  <Lock className="size-6 text-amber-500" />
-                </div>
-                <div className="text-center">
-                  <p className="text-base font-semibold text-foreground">Pro block</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Upgrade to access the full source code</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/pricing"
-                    className="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:opacity-90"
-                  >
-                    Upgrade to Pro
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-                  >
-                    View plans
-                  </Link>
-                </div>
-              </div>
-              <div
-                className="h-48 w-full blur-xl filter"
-                aria-hidden
-                contentEditable={false}
-                suppressContentEditableWarning
-              >
-                <CodeBlock
-                  code={code}
-                  language="tsx"
-                  theme="dark"
-                  header={{ enabled: false }}
-                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
-                  border={{ radius: "16px" }}
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="grid max-w-full gap-4 overflow-hidden xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-              <UsageSnippet code={usageCode ?? defaultUsageForTitle(title)} />
-              <div className="min-w-0 max-w-full overflow-hidden rounded-2xl">
-                <div className="max-h-[720px] max-w-full overflow-auto">
-                  <CodeBlock
-                    code={code}
-                    language="tsx"
-                    theme="dark"
-                    header={{
-                      enabled: true,
-                      showDots: true,
-                      title: `${title}.tsx`,
-                      copy: {
-                        enabled: true,
-                        label: "Copy code",
-                        copiedLabel: "Copied",
-                        copiedDurationMs: 1400,
-                      },
-                    }}
-                    codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-                    border={{ radius: "16px" }}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-    </section>
+    <BlockSection
+      id={variantAnchor(title)}
+      index={at === -1 ? 1 : at + 1}
+      total={Math.max(1, sections.length)}
+      title={title}
+      code={code}
+      usageCode={usageCode ?? defaultUsageForTitle(title)}
+      locked={locked}
+    >
+      {children}
+    </BlockSection>
   );
 }
 
@@ -1595,11 +1450,6 @@ export default function Page() {
 }`;
 
 /** Centres a Checkout Moments card on the Playground page grey. */
-function CheckoutStage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)] content-center justify-items-center overflow-y-auto bg-[#f5f5f7] p-4 sm:p-6 dark:bg-[#0b0b10]">{children}</div>
-  );
-}
 
 const CHECKOUT_PAY_USAGE = `"use client";
 

@@ -179,6 +179,86 @@
   "bg": "#ffffff",
   "coverage": 0.12
  },
+ "backgrounds-aurora-lines": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   146,
+   1260,
+   672
+  ],
+  "bg": "#000000",
+  "coverage": 0.86
+ },
+ "backgrounds-interactive-dots": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   14,
+   12,
+   1256,
+   792
+  ],
+  "bg": null,
+  "coverage": 1
+ },
+ "backgrounds-layered-wave": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   10,
+   1260,
+   840
+  ],
+  "bg": null,
+  "coverage": 1
+ },
+ "backgrounds-particle-noise": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   10,
+   1260,
+   840
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
+ },
  "beam-sweep-field": {
   "canvas": [
    960,
@@ -219,6 +299,26 @@
   "bg": null,
   "coverage": 0.25
  },
+ "bento-ats": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   64,
+   102,
+   1154,
+   1036
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "bento-grid-skeleton": {
   "canvas": [
    1200,
@@ -239,6 +339,26 @@
   "bg": null,
   "coverage": 0.99
  },
+ "bento-mentorship": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   226,
+   74,
+   830,
+   924
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "bento-signal-grid": {
   "canvas": [
    1200,
@@ -258,6 +378,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.46
+ },
+ "bento-spotlight": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   128,
+   236,
+   1026,
+   736
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "block-blog-content-sections": {
   "canvas": [
@@ -459,6 +599,106 @@
   "bg": "#ffffff",
   "coverage": 1
  },
+ "blog-centered": {
+  "canvas": [
+   1280,
+   1100
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1100
+  ],
+  "content": [
+   210,
+   102,
+   862,
+   974
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "blog-editorial": {
+  "canvas": [
+   1280,
+   1600
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1600
+  ],
+  "content": [
+   40,
+   80,
+   1202,
+   1182
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "blog-featured-posts": {
+  "canvas": [
+   1280,
+   1600
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1600
+  ],
+  "content": [
+   40,
+   86,
+   1202,
+   1504
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "blog-hover-card": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   128,
+   218,
+   1000,
+   428
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "blog-toc": {
+  "canvas": [
+   1280,
+   1100
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1100
+  ],
+  "content": [
+   104,
+   100,
+   1046,
+   984
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
  "card-carousel-3d": {
   "canvas": [
    1100,
@@ -518,6 +758,66 @@
   ],
   "bg": null,
   "coverage": 0.22
+ },
+ "checkout-pay": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   440,
+   130,
+   402,
+   600
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "checkout-tip": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   440,
+   164,
+   402,
+   548
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "checkout-verify": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   440,
+   252,
+   402,
+   372
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "cinematic-card-deck": {
   "canvas": [
@@ -638,6 +938,86 @@
   ],
   "bg": "#0c0c0c",
   "coverage": 0.12
+ },
+ "contact-centered": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   112,
+   218,
+   982,
+   766
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "contact-global-signal": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   48,
+   40,
+   1194,
+   798
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "contact-gradient-proof": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   40,
+   40,
+   1176,
+   780
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "contact-image-story": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   10,
+   216,
+   1208,
+   974
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "copy-button": {
   "canvas": [
@@ -898,6 +1278,66 @@
   ],
   "bg": "#18181e",
   "coverage": 0.4
+ },
+ "faq-chat": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   24,
+   24,
+   1232,
+   640
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "faq-folder": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   24,
+   24,
+   1232,
+   522
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "faq-searchable": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   210,
+   56,
+   862,
+   876
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "feature-tools-card": {
   "canvas": [
@@ -1259,6 +1699,26 @@
   "bg": "#f6f6f6",
   "coverage": 0.98
  },
+ "island-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   338,
+   230,
+   284,
+   260
+  ],
+  "content": [
+   348,
+   240,
+   264,
+   240
+  ],
+  "bg": null,
+  "coverage": 0.03
+ },
  "lattice-feature-grid": {
   "canvas": [
    1200,
@@ -1319,6 +1779,126 @@
   "bg": "#ffffff",
   "coverage": 1
  },
+ "logos-blur-flip": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   126,
+   102,
+   1020,
+   260
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.99
+ },
+ "logos-blur-reveal": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   240,
+   102,
+   816,
+   362
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "logos-marquee": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   102,
+   1260,
+   316
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.99
+ },
+ "logos-single-row": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   230,
+   84,
+   824,
+   80
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "logos-spotlight": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   192,
+   102,
+   898,
+   498
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "logos-swap": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   154,
+   102,
+   986,
+   218
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
  "mac-keyboard": {
   "canvas": [
    1100,
@@ -1338,6 +1918,26 @@
   ],
   "bg": null,
   "coverage": 0.31
+ },
+ "magnify-dock": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   284,
+   370,
+   392,
+   52
+  ],
+  "content": [
+   294,
+   380,
+   372,
+   32
+  ],
+  "bg": null,
+  "coverage": 0.02
  },
  "meteors": {
   "canvas": [
@@ -1459,6 +2059,26 @@
   "bg": "#0c0c0c",
   "coverage": 1
  },
+ "notification-stack": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   316,
+   400,
+   332,
+   110
+  ],
+  "content": [
+   326,
+   410,
+   294,
+   88
+  ],
+  "bg": null,
+  "coverage": 0.01
+ },
  "orbit-footer": {
   "canvas": [
    960,
@@ -1578,6 +2198,86 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.15
+ },
+ "pricing-advanced-columns": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   140,
+   246,
+   1002,
+   730
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "pricing-four-tier": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   80,
+   194,
+   1122,
+   836
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "pricing-radio-plan": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   20,
+   148,
+   1240,
+   598
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "pricing-spotlight-cards": {
+  "canvas": [
+   1280,
+   1200
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   1200
+  ],
+  "content": [
+   140,
+   194,
+   1000,
+   882
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
  },
  "profile-orbit": {
   "canvas": [
@@ -1837,6 +2537,66 @@
    682
   ],
   "bg": "#fcfcff",
+  "coverage": 1
+ },
+ "sidebar-collapsible": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   18,
+   16,
+   1248,
+   830
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "sidebar-grouped": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   18,
+   16,
+   1248,
+   830
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "sidebar-simple": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   16,
+   18,
+   1250,
+   828
+  ],
+  "bg": "#f6f6f6",
   "coverage": 1
  },
  "signup-form": {
@@ -2119,6 +2879,46 @@
   "bg": null,
   "coverage": 0.58
  },
+ "text-blur-fade-in": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   256,
+   250,
+   714,
+   362
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "text-generate": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   304,
+   272,
+   674,
+   334
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
  "text-generate-effect": {
   "canvas": [
    960,
@@ -2158,6 +2958,46 @@
   ],
   "bg": null,
   "coverage": 0.2
+ },
+ "text-typewriter-effect": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   258,
+   284,
+   558,
+   294
+  ],
+  "bg": "#000000",
+  "coverage": 1
+ },
+ "text-typewriter-heading": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   56,
+   250,
+   1170,
+   366
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "three-d-folder": {
   "canvas": [
@@ -2338,6 +3178,26 @@
   ],
   "bg": null,
   "coverage": 0.06
+ },
+ "upload-chips": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   280,
+   214,
+   400,
+   228
+  ],
+  "content": [
+   290,
+   224,
+   380,
+   208
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.12
  },
  "upload-dropzone": {
   "canvas": [

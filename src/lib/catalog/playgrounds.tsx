@@ -44,6 +44,10 @@ import { ProgressButton } from "@/components/progress-button";
 import { CopyChip } from "@/components/copy-button";
 import { AnimatedIcons } from "@/components/animated-icons";
 import { FolderPeek } from "@/components/folder-peek";
+import { MagnifyDock } from "@/components/magnify-dock";
+import { UploadChips } from "@/components/upload-chips";
+import { NotificationStack } from "@/components/notification-stack";
+import { IslandMorph } from "@/components/island-morph";
 
 /**
  * Live props playgrounds for component detail pages (Bencho-style "tweak and copy").
@@ -878,6 +882,34 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "title", label: "Title", options: ["Brand assets", "Launch kit", "Invoices"], defaultValue: "Brand assets" },
     ],
     render: (v) => <FolderPeek color={v.color as string} title={v.title as string} />,
+  },
+  "magnify-dock": {
+    componentName: "MagnifyDock",
+    importPath: "@/components/magnify-dock",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false }],
+    render: (v) => <MagnifyDock key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "upload-chips": {
+    componentName: "UploadChips",
+    importPath: "@/components/upload-chips",
+    defaultFill: "light",
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <UploadChips accent={v.accent as string} />,
+  },
+  "notification-stack": {
+    componentName: "NotificationStack",
+    importPath: "@/components/notification-stack",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Push samples", defaultValue: false }],
+    render: (v) => <NotificationStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "island-morph": {
+    componentName: "IslandMorph",
+    importPath: "@/components/island-morph",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false }],
+    render: (v) => <IslandMorph key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
 };
 

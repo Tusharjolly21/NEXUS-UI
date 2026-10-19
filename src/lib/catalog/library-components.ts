@@ -8717,6 +8717,142 @@ export function ProjectFolders() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "magnify-dock",
+    name: "Magnify Dock",
+    registryCliName: "magnify-dock",
+    description:
+      "A macOS-style app dock: icons swell as the pointer passes over them, show a label above, bounce when launched and keep a running dot underneath.",
+    categorySlug: "navbars",
+    tags: ["dock", "macos", "magnify", "app icons", "launcher", "toolbar", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 157,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "press", "spring", "magnetic"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "apps", type: "DockApp[]", description: "Each app has id, label, bg (any CSS background) and glyph (an icon)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps an invisible pointer across the dock until someone hovers it." },
+    ],
+    Preview: Previews.PreviewMagnifyDock,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MagnifyDock } from "@/components/magnify-dock";
+
+export function AppDock() {
+  return (
+    <div className="fixed inset-x-0 bottom-4 flex justify-center">
+      <MagnifyDock />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "upload-chips",
+    name: "Upload Chips",
+    registryCliName: "upload-chips",
+    description:
+      "A drop zone that lifts and tints while you drag over it, then turns every file into a chip with a filling progress bar, a progress ring and a check when it lands.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "file upload", "dropzone", "progress", "drag and drop", "attachments", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "upload", type: "(file: File | { name: string; size: number }, onProgress: (p: number) => void) => Promise<void>", description: "Upload one file and report progress from 0 to 1. Simulated if left out." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Drag highlight, progress and check colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drops sample files in by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewUploadChips,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { UploadChips } from "@/components/upload-chips";
+
+export function Attachments() {
+  return (
+    <UploadChips
+      upload={(file, onProgress) =>
+        new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.onprogress = (e) => onProgress(e.loaded / e.total);
+          xhr.onload = () => resolve();
+          xhr.onerror = reject;
+          xhr.open("POST", "/api/upload");
+          xhr.send(file as File);
+        })
+      }
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "notification-stack",
+    name: "Notification Stack",
+    registryCliName: "notification-stack",
+    description:
+      "Toasts that pile into a neat stack, spread out while hovered (pausing their timers), swipe away sideways, and turn a loading toast into a success when the work finishes.",
+    categorySlug: "cards",
+    tags: ["toast", "notifications", "stack", "swipe", "promise", "sonner", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 150,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pushes sample toasts by itself until someone presses a trigger." },
+    ],
+    Preview: Previews.PreviewNotificationStack,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { NotificationStack } from "@/components/notification-stack";
+
+export function NotificationsDemo() {
+  return (
+    <div className="mx-auto max-w-md py-10">
+      <NotificationStack />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "island-morph",
+    name: "Island Morph",
+    registryCliName: "island-morph",
+    description:
+      "A black pill that morphs between a timer, an incoming call and a full music player, with each state's content blurring in once the shape lands.",
+    categorySlug: "motion-effects",
+    tags: ["dynamic island", "morph", "live activity", "music player", "call", "timer", "ios", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 152,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through idle, timer, call and music until a control is pressed." },
+    ],
+    Preview: Previews.PreviewIslandMorph,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { IslandMorph } from "@/components/island-morph";
+
+export function PhoneMockupTop() {
+  return (
+    <div className="flex justify-center pt-4">
+      <IslandMorph autoplay />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 export function getLibraryComponent(slugOrRegistryName: string) {
