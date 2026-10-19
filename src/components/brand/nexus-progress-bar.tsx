@@ -107,8 +107,10 @@ export function NexusProgressBar() {
       }
       start();
     };
-    document.addEventListener("click", handleClick, { capture: true });
-    return () => document.removeEventListener("click", handleClick, { capture: true });
+    // Bubble phase, after React's handlers: links whose click was cancelled (opened a dialog or the
+    // inspector instead of navigating) have defaultPrevented set by then and don't start the bar.
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
   }, [start, pathname]);
 
   useEffect(() => {

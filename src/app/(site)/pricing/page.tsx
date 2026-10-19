@@ -8,7 +8,7 @@ import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 
-const { components, templates, blocks } = CATALOG_COUNTS;
+const { components, freeComponents, proComponents, templates, blocks } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 
 const TEMPLATE_PRICE = 49;
@@ -17,7 +17,7 @@ const ALL_ACCESS_PRICE = 149;
 
 export const metadata: Metadata = {
   ...createMetadata({
-    description: `Every Nexus UI component is free. Pro ($${PRO_PRICE} for 12 months) and All-Access ($${ALL_ACCESS_PRICE} once) unlock the source of all ${templates} Next.js templates and the premium blocks.`,
+    description: `${freeComponents} Nexus UI components are free. Pro ($${PRO_PRICE} for 12 months) and All-Access ($${ALL_ACCESS_PRICE} once) unlock the ${proComponents} Pro components, the source of all ${templates} Next.js templates and the premium blocks.`,
     alternates: { canonical: "/pricing" },
   }),
   title: { absolute: "Pricing — Nexus UI" },
@@ -37,9 +37,9 @@ const PLANS: Plan[] = [
     name: "Starter",
     price: "$0",
     term: "free forever",
-    pitch: "Every component, free to use anywhere.",
+    pitch: "The free components, free to use anywhere.",
     features: [
-      `All ${components} components with full source`,
+      `${freeComponents} components with full source`,
       `${freeBlocks} of the ${blocks} section blocks`,
       `Live previews of all ${templates} templates`,
       "Commercial and client projects",
@@ -54,6 +54,7 @@ const PLANS: Plan[] = [
     featured: true,
     features: [
       "Everything in Starter",
+      `All ${components} components, including ${proComponents} Pro`,
       `Full source of all ${templates} templates`,
       `All ${blocks} section blocks`,
       "Every update for 12 months",
@@ -77,7 +78,7 @@ const PLANS: Plan[] = [
 
 type Cell = string | boolean;
 const COMPARE: [string, Cell, Cell, Cell][] = [
-  ["Animated components", `All ${components}`, `All ${components}`, `All ${components}`],
+  ["Animated components", `${freeComponents} free`, `All ${components}`, `All ${components}`],
   ["Section blocks", `${freeBlocks} free`, `All ${blocks}`, `All ${blocks}`],
   ["Template source", "Preview only", true, true],
   ["Commercial and client use", true, true, true],
@@ -88,8 +89,8 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
 
 const FAQ = [
   {
-    q: "Are the components really free?",
-    a: `Yes, all ${components} of them, with full source, for personal, commercial and client projects. Plans only unlock the template source and the premium blocks.`,
+    q: "Are the components free?",
+    a: `${freeComponents} of the ${components} are free, with full source, for personal, commercial and client projects. Pro unlocks the other ${proComponents}: you can preview every one of them, but their source, install and playground come with Pro, along with the template source and the premium blocks.`,
   },
   {
     q: "What's the difference between Pro and All-Access?",

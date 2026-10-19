@@ -360,6 +360,7 @@ function toItem(c: LibraryComponent): GalleryItem | null {
     fit: getTileFit(c.slug),
     install: c.registryCliName ?? c.slug,
     isNew: NEWEST - (Date.parse(c.createdAt) || 0) < NEW_WINDOW_MS,
+    premium: c.premium,
     demo: SELF_DEMO.has(c.slug) ? null : DRAG.has(c.slug) ? "drag" : WANDER.has(c.slug) ? "wander" : null,
   };
 }

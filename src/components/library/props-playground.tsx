@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { Check, Copy, Play, RotateCcw } from "lucide-react";
+import { Check, Copy, Lock, Play, RotateCcw } from "lucide-react";
 import type {
   Playground,
   PlaygroundControl,
   PlaygroundValues,
 } from "@/lib/catalog/playgrounds";
 import { cn } from "@/lib/utils";
+import { ProLock, useProAccess } from "@/components/pro/pro-access";
 
 type Fill = "light" | "dark";
 
@@ -189,11 +190,15 @@ export function LivePropsPlayground({
   playground,
   name,
   description,
+  locked = false,
 }: {
   playground: Playground;
   name: string;
   description: string;
+  /** Pro component without access: the preview plays, the controls and code ask for Pro. */
+  locked?: boolean;
 }) {
+  const { requestUpgrade } = useProAccess();
   const [values, setValues] = React.useState(() => initialValues(playground.controls));
   const [fill, setFill] = React.useState<Fill>(playground.defaultFill ?? "light");
   const [view, setView] = React.useState<"preview" | "code">("preview");
@@ -204,6 +209,7 @@ export function LivePropsPlayground({
   const isDirty = playground.controls.some((c) => values[c.prop] !== c.defaultValue);
 
   const copy = async () => {
+    if (locked) return requestUpgrade(name);
     try {
       await navigator.clipboard.writeText(snippet);
       setCopied(true);
@@ -244,7 +250,7 @@ export function LivePropsPlayground({
                 key={v}
                 type="button"
                 aria-pressed={view === v}
-                onClick={() => setView(v)}
+                onClick={() => (v === "code" && locked ? requestUpgrade(name) : setView(v))}
                 className={cn(
                   "h-7 rounded-full px-3 text-xs capitalize transition-colors",
                   view === v
@@ -288,6 +294,7 @@ export function LivePropsPlayground({
           </p>
         </div>
 
+        <ProLock locked={locked} name={name} label="Edit it with Pro" className="mt-1 rounded-2xl">
         {playground.lightOnly ? null : (
           <div className="mt-5 flex items-center justify-between">
             <span className="text-[13px] text-foreground/75">Fill</span>
@@ -306,6 +313,8 @@ export function LivePropsPlayground({
           ))}
         </div>
 
+        </ProLock>
+
         <div className="mt-6 grid gap-2">
           <button
             type="button"
@@ -321,8 +330,8 @@ export function LivePropsPlayground({
             onClick={copy}
             className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-foreground text-sm font-medium text-background transition hover:bg-foreground/90"
           >
-            {copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
-            {copied ? "Copied" : "Copy code"}
+            {locked ? <Lock className="size-3.5" /> : copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
+            {locked ? "Copy code with Pro" : copied ? "Copied" : "Copy code"}
           </button>
         </div>
       </aside>

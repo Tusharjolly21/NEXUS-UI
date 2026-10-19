@@ -9,13 +9,21 @@ import { buildSnippet, ControlRow, initialValues, Segmented } from "@/components
 import type { Playground, PlaygroundValues } from "@/lib/catalog/playgrounds";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { cn } from "@/lib/utils";
+import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { FitPreview } from "./fit-preview";
 import { INTERACTION_FILTERS, TINT_CLASSES, type GalleryItem } from "./types";
 
 const INTERACTION_LABELS = Object.fromEntries(INTERACTION_FILTERS.map((f) => [f.value, f.label]));
 const SITE = "https://www.nexus-ui.com";
 
-type Usage = { usage: string; props: { name: string; type: string; description: string; defaultValue?: string }[]; dependencies: string[]; premium: boolean };
+type Usage = {
+  usage: string;
+  props: { name: string; type: string; description: string; defaultValue?: string }[];
+  dependencies: string[];
+  premium: boolean;
+  /** The server withheld the code: Pro component, no access. */
+  locked?: boolean;
+};
 type RegistryFile = { path: string; target?: string; content: string };
 
 /** Values the visitor changed, as URL params, so a shared link opens with the same settings. */
@@ -162,7 +170,12 @@ function Inspector({ item }: { item: GalleryItem }) {
   const [fileIndex, setFileIndex] = React.useState(0);
   const [openSection, setOpenSection] = React.useState<"install" | "usage" | "source">("usage");
   const [shared, share] = useCopied();
-  const [prompted, prompt] = useCopied(2200);
+  const [prompted, copyPrompt] = useCopied(2200);
+  const { requestUpgrade } = useProAccess();
+  // The UI lock follows the visitor's plan; the server's answer (usage.locked) wins when it says no.
+  const locked = useLocked(item.premium) || !!usage?.locked;
+  const prompt = (text: string) => (locked ? requestUpgrade(item.name) : copyPrompt(text));
+  const pickView = (v: "preview" | "code") => (v === "code" && locked ? requestUpgrade(item.name) : setView(v));
 
   // Load the live controls (heavy: imports every playground component) only when inspecting.
   React.useEffect(() => {
@@ -354,7 +367,7 @@ function Inspector({ item }: { item: GalleryItem }) {
                 aria-selected={view === v}
                 aria-label={label}
                 title={label}
-                onClick={() => setView(v)}
+                onClick={() => pickView(v)}
                 className={cn(
                   "grid h-8 w-9 place-items-center rounded-full transition-colors",
                   view === v
@@ -422,13 +435,33 @@ function Inspector({ item }: { item: GalleryItem }) {
                 {INTERACTION_LABELS[i]}
               </li>
             ))}
-            <li className="rounded-full bg-tint-mint px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] dark:text-[#7be3a6]">Free</li>
+            {item.premium ? (
+              <li>
+                <ProBadge />
+              </li>
+            ) : (
+              <li className="rounded-full bg-tint-mint px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] dark:text-[#7be3a6]">Free</li>
+            )}
             {item.isNew ? (
               <li className="rounded-full bg-card px-2.5 py-1 text-[12px] font-semibold text-[#bf4800] shadow-[0_0_0_0.5px_var(--border)] dark:text-[#ff9f0a]">New</li>
             ) : null}
           </ul>
 
-          {playground ? (
+          {locked ? (
+            <div className="mt-5 rounded-2xl bg-muted/60 p-4">
+              <p className="text-[14px] font-semibold text-foreground">Preview only</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                Tweaking, the code and the install for {item.name} come with Pro.
+              </p>
+              <button
+                type="button"
+                onClick={() => requestUpgrade(item.name)}
+                className="mt-3 inline-flex h-9 items-center rounded-full bg-action px-4 text-[13.5px] font-semibold text-white transition-colors hover:bg-action-hover"
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+          ) : playground ? (
             <div className="mt-5 space-y-2">
               {playground.lightOnly ? null : (
                 <div className="flex min-h-9 items-center justify-between gap-2">
@@ -483,7 +516,7 @@ function Inspector({ item }: { item: GalleryItem }) {
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-foreground text-[14px] font-semibold text-background transition-opacity hover:opacity-90"
           >
             {prompted ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
-            <span aria-live="polite">{prompted ? "Copied — paste into your agent" : "Copy prompt"}</span>
+            <span aria-live="polite">{prompted ? "Copied — paste into your agent" : locked ? "Copy prompt with Pro" : "Copy prompt"}</span>
           </button>
           <Link
             href={`/components/${item.slug}`}

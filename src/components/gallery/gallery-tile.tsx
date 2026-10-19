@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Lock, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { demoScript, FitPreview } from "./fit-preview";
 import { TINT_CLASSES, type GalleryItem } from "./types";
 
@@ -68,6 +69,8 @@ export function GalleryTile({
   const [run, setRun] = React.useState(0);
   const href = hrefProp ?? `/components/${item.slug}`;
   const opensPage = !!hrefProp && !onOpen;
+  const locked = useLocked(item.premium);
+  const { requestUpgrade } = useProAccess();
   const { fit } = item;
   const dark = fit.dark;
   const demo = React.useMemo(
@@ -75,8 +78,10 @@ export function GalleryTile({
     [item.demo, fit.canvas, fit.focus],
   );
 
-  const open = (e: React.MouseEvent) => {
-    if (!onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+  // The name always leads to the page (preview is free to see); the inspector is for tweaking
+  // and copying, so on a locked tile it opens the upgrade dialog instead.
+  const openName = (e: React.MouseEvent) => {
+    if (locked || !onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     onOpen(item.slug);
   };
@@ -107,6 +112,8 @@ export function GalleryTile({
         )}
       />
 
+      {item.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute right-4 top-4" /> : null}
+
       {item.isNew ? (
         <span
           className={cn(
@@ -127,7 +134,7 @@ export function GalleryTile({
       >
         <Link
           href={href}
-          onClick={open}
+          onClick={openName}
           className={cn(
             "pointer-events-auto max-w-[70%] truncate rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
             chip,
@@ -146,18 +153,27 @@ export function GalleryTile({
           >
             <RotateCcw className="size-3.5" aria-hidden />
           </button>
-          <Link
-            href={href}
-            onClick={open}
-            aria-label={opensPage ? `Open ${item.name}` : `Open ${item.name} in the inspector`}
-            title={opensPage ? "Open" : "Tweak and copy"}
-            className={cn(
-              "grid size-8 place-items-center rounded-full transition-colors",
-              "bg-action text-white hover:bg-action-hover",
-            )}
-          >
-            {opensPage ? <ArrowUpRight className="size-3.5" aria-hidden /> : <SlidersHorizontal className="size-3.5" aria-hidden />}
-          </Link>
+          {locked && !opensPage ? (
+            <button
+              type="button"
+              onClick={() => requestUpgrade(item.name)}
+              aria-label={`Unlock ${item.name} with Pro`}
+              title="Unlock with Pro"
+              className="grid size-8 place-items-center rounded-full bg-action text-white transition-colors hover:bg-action-hover"
+            >
+              <Lock className="size-3.5" aria-hidden />
+            </button>
+          ) : (
+            <Link
+              href={href}
+              onClick={openName}
+              aria-label={opensPage ? `Open ${item.name}` : `Open ${item.name} in the inspector`}
+              title={opensPage ? "Open" : "Tweak and copy"}
+              className="grid size-8 place-items-center rounded-full bg-action text-white transition-colors hover:bg-action-hover"
+            >
+              {opensPage ? <ArrowUpRight className="size-3.5" aria-hidden /> : <SlidersHorizontal className="size-3.5" aria-hidden />}
+            </Link>
+          )}
         </div>
       </div>
     </div>

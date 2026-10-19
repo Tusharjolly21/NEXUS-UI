@@ -78,7 +78,7 @@ export default async function DashboardPage() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-2">
           {[
-            { href: "/components", title: "Browse components", body: `All ${CATALOG_COUNTS.components} are free, with a one-line install.` },
+            { href: "/components", title: "Browse components", body: isPremium ? `All ${CATALOG_COUNTS.components} are yours, with a one-line install.` : `${CATALOG_COUNTS.freeComponents} free, ${CATALOG_COUNTS.proComponents} more with Pro.` },
             {
               href: "/templates",
               title: isPremium || templatesYours ? "Open your templates" : "Browse templates",

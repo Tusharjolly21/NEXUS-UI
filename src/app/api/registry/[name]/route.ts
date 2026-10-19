@@ -27,6 +27,7 @@ import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { resolveApiToken, adminCanAccessComponent } from "@/lib/entitlements";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { sessionCanAccessComponent } from "@/lib/component-access";
 
 type Params = { params: Promise<{ name: string }> };
 
@@ -71,6 +72,12 @@ export async function GET(_req: Request, { params }: Params) {
     : null;
 
   if (!token) {
+    // The site's own inspector asks with the browser session instead of a CLI token. Same
+    // entitlement check, same private no-store response; cross-origin pages can't read it (no CORS).
+    const slug = component?.slug ?? block?.slug;
+    if (slug && (await sessionCanAccessComponent(slug, true))) {
+      return serveRegistryFile(name, "private");
+    }
     return new NextResponse(
       JSON.stringify({
         error: "Unauthorized",

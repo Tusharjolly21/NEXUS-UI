@@ -23,6 +23,8 @@ export type GalleryItem = {
   install: string;
   /** Added in the last few weeks. */
   isNew: boolean;
+  /** Pro component: previews for everyone, code and controls only with Pro. */
+  premium: boolean;
   /**
    * Ghost-cursor demo the tile plays on its own: `wander` glides over hover effects, `drag` pulls a
    * handle across. Null when the preview already demonstrates itself or needs no pointer.
