@@ -120,10 +120,13 @@ export function OtpInput({
   const locked = status === "verifying" || status === "success" || status === "done";
   const activeIndex = Math.min(code.length, length - 1);
   const center = (length - 1) / 2;
+  // The row keeps the width of its boxes even after they leave, so the Verified pill stays centred.
+  const gapAfter = (i: number) => (i === length - 1 ? 0 : i === length / 2 - 1 ? 22 : 10);
+  const rowWidth = Array.from({ length }, (_, i) => 54 + gapAfter(i)).reduce((a, b) => a + b, 0);
 
   return (
     <div className="flex flex-col items-center gap-6 [--otp-box:#ffffff] [--otp-ink:#1d1d1f] [--otp-line:#d2d2d7] [--otp-line-on:#aeaeb2] dark:[--otp-box:#2c2c2e] dark:[--otp-ink:#f5f5f7] dark:[--otp-line:#48484a] dark:[--otp-line-on:#7c7c80]">
-      <motion.div animate={shake} className="relative flex h-[66px] items-center">
+      <motion.div animate={shake} className="relative flex h-[66px] items-center" style={{ width: rowWidth }}>
         <AnimatePresence initial={false}>
           {status !== "done" &&
             Array.from({ length }).map((_, i) => {
@@ -146,7 +149,7 @@ export function OtpInput({
                   style={{
                     backgroundColor: isSuccess ? accent : "var(--otp-box)",
                     transitionDelay: isSuccess ? `${i * 50}ms` : "0ms",
-                    marginRight: i === length - 1 ? 0 : i === length / 2 - 1 ? 22 : 10,
+                    marginRight: gapAfter(i),
                     boxShadow: isError
                       ? "inset 0 0 0 2px #ff3b30, 0 0 0 5px rgba(255,59,48,.10)"
                       : filled
