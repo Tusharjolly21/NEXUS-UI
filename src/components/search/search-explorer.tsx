@@ -3,13 +3,13 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Heart, Search } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Blocks, ChevronRight, Component, Heart, LayoutTemplate, Search, X, type LucideIcon } from "lucide-react";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
 import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { useDiscovery } from "@/hooks/use-discovery";
-import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { PlanTag } from "@/components/site/pastel-tile";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ type ItemKind = "component" | "template" | "block";
 type Kind = "all" | ItemKind;
 
 const KIND_LABEL: Record<ItemKind, string> = { component: "Component", template: "Template", block: "Block" };
-const KIND_TINT: Record<ItemKind, string> = { component: "bg-tint-violet", template: "bg-tint-butter", block: "bg-tint-sky" };
+const KIND_ICON: Record<ItemKind, LucideIcon> = { component: Component, template: LayoutTemplate, block: Blocks };
 
 function hrefFor(kind: ItemKind, slug: string) {
   if (kind === "component") return `/components/${slug}`;
@@ -59,7 +59,7 @@ const ALL: Result[] = [
 
 const TITLES = new Map(ALL.map((r) => [`${r.kind}:${r.slug}`, r.title]));
 const KINDS: { value: Kind; label: string }[] = [
-  { value: "all", label: "Everything" },
+  { value: "all", label: "All" },
   { value: "component", label: "Components" },
   { value: "template", label: "Templates" },
   { value: "block", label: "Blocks" },
@@ -68,6 +68,9 @@ const KINDS: { value: Kind; label: string }[] = [
 export function SearchExplorer() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const reduce = useReducedMotion();
+  const uid = React.useId();
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const [q, setQ] = React.useState(searchParams.get("q") ?? "");
   const kindParam = searchParams.get("kind");
   const kind: Kind = KINDS.some((k) => k.value === kindParam) ? (kindParam as Kind) : "all";
@@ -103,12 +106,17 @@ export function SearchExplorer() {
   const results = kind === "all" ? matching : matching.filter((r) => r.kind === kind);
   const favSet = new Set(favorites.map((f) => `${f.kind}:${f.slug}`));
 
+  const pillSpring = reduce ? { duration: 0 } : { type: "spring" as const, stiffness: 500, damping: 36 };
+
   return (
     <>
-      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-8 pt-[136px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
         <div className="relative mx-auto max-w-[1152px]">
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Search</h1>
+          <p className="mt-4 max-w-[560px] text-[17px] leading-[1.5] text-muted-foreground">
+            Every component, template and block in one place. Search by name, tag or the kind of section you need.
+          </p>
           <form
             role="search"
             className="mt-8 max-w-[720px]"
@@ -120,84 +128,155 @@ export function SearchExplorer() {
             <label htmlFor="search-q" className="sr-only">
               Search components, templates and blocks
             </label>
-            <div className="pg-float flex h-[60px] items-center gap-3 rounded-full bg-card px-6">
-              <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+            <div className="flex h-14 items-center gap-3 rounded-[14px] bg-card px-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_32px_-20px_rgba(0,0,0,0.3)] ring-1 ring-border transition-[box-shadow] duration-200 focus-within:ring-2 focus-within:ring-action sm:h-[60px] sm:px-5">
+              <Search className="size-5 shrink-0 text-muted-foreground" strokeWidth={1.9} aria-hidden />
               <input
+                ref={inputRef}
                 id="search-q"
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Pricing, hero, globe, dock…"
                 autoFocus
-                className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-foreground outline-none placeholder:text-muted-foreground"
+                autoComplete="off"
+                spellCheck={false}
+                className="h-full min-w-0 flex-1 bg-transparent text-[17px] tracking-[-0.01em] text-foreground caret-action outline-none placeholder:text-muted-foreground/80 sm:text-[19px] [&::-webkit-search-cancel-button]:hidden"
               />
+              {q && (
+                <button
+                  type="button"
+                  aria-label="Clear search"
+                  onClick={() => {
+                    setQ("");
+                    if (urlQ) pushParams({ q: null });
+                    inputRef.current?.focus();
+                  }}
+                  className="grid size-[22px] shrink-0 place-items-center rounded-full bg-foreground/[0.18] text-background transition-colors hover:bg-foreground/[0.3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  <X className="size-3" strokeWidth={3} aria-hidden />
+                </button>
+              )}
             </div>
           </form>
-          <ChipRail className="mt-5">
-            {KINDS.map((k) => (
-              <Chip key={k.value} active={kind === k.value} onClick={() => pushParams({ kind: k.value })}>
-                {k.label}
-                <span className="text-[12px] opacity-60">{counts[k.value]}</span>
-              </Chip>
-            ))}
-          </ChipRail>
+
+          {/* Segmented filter by type */}
+          <div className="mt-5 max-w-full overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div
+              role="tablist"
+              aria-label="Filter by type"
+              className="inline-flex rounded-[10px] bg-muted p-[3px] dark:bg-[#3a3a3c]"
+            >
+              {KINDS.map((k) => {
+                const selected = kind === k.value;
+                return (
+                  <motion.button
+                    key={k.value}
+                    type="button"
+                    role="tab"
+                    aria-selected={selected}
+                    onClick={() => pushParams({ kind: k.value })}
+                    whileTap={reduce ? undefined : { scale: 0.97 }}
+                    className={cn(
+                      "relative inline-flex h-8 shrink-0 items-center gap-1.5 rounded-[8px] px-3.5 text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                      selected ? "text-foreground" : "text-foreground/60 hover:text-foreground",
+                    )}
+                  >
+                    {selected && (
+                      <motion.span
+                        layoutId={`${uid}-seg`}
+                        transition={pillSpring}
+                        aria-hidden
+                        className="absolute inset-0 rounded-[8px] bg-card shadow-[0_2px_6px_rgba(0,0,0,0.1),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#636366]"
+                      />
+                    )}
+                    <span className="relative">{k.label}</span>
+                    <span className="relative text-[12px] tabular-nums text-muted-foreground">{counts[k.value]}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </section>
 
       <section className="px-4 pb-24">
         <div className="mx-auto grid max-w-[1152px] grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div>
-            <p className="text-[14px] text-muted-foreground" aria-live="polite">
+            <p className="text-[13.5px] text-muted-foreground" aria-live="polite">
               {results.length} {results.length === 1 ? "result" : "results"}
               {needle ? ` for “${q.trim()}”` : ""}
             </p>
             {results.length ? (
-              <ul className="pg-float mt-3 divide-y divide-border/60 overflow-hidden rounded-tile bg-card">
-                {results.map((r) => {
+              <ul className="mt-3 overflow-hidden rounded-[22px] bg-card shadow-[0_12px_32px_-22px_rgba(0,0,0,0.3)] ring-1 ring-border">
+                {results.map((r, i) => {
                   const key = `${r.kind}:${r.slug}`;
                   const saved = favSet.has(key);
+                  const Icon = KIND_ICON[r.kind];
                   return (
-                    <li key={key} className="flex items-center gap-3 px-4 py-3 sm:px-5">
+                    <li
+                      key={key}
+                      className="group relative flex items-center gap-2 pl-3 pr-2 transition-colors hover:bg-foreground/[0.03] sm:gap-3 sm:pl-4 sm:pr-3"
+                    >
+                      {i > 0 && (
+                        <span aria-hidden className="absolute inset-x-0 top-0 ml-[60px] h-px bg-border sm:ml-[68px]" />
+                      )}
                       <Link
                         href={hrefFor(r.kind, r.slug)}
-                        className="flex min-w-0 flex-1 items-center gap-4 rounded-xl py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                        className="flex min-w-0 flex-1 items-center gap-3 rounded-[12px] py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:gap-4"
                       >
-                        <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold text-foreground", KIND_TINT[r.kind])}>
-                          {KIND_LABEL[r.kind]}
+                        <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-muted text-foreground/70 transition-colors group-hover:text-foreground">
+                          <Icon className="size-[18px]" strokeWidth={1.8} aria-hidden />
                         </span>
                         <span className="min-w-0">
-                          <span className="block truncate text-[16px] font-semibold text-foreground">{r.title}</span>
-                          <span className="block truncate text-[13.5px] text-muted-foreground">{r.meta}</span>
+                          <span className="block truncate text-[15.5px] font-semibold tracking-[-0.01em] text-foreground">
+                            {r.title}
+                          </span>
+                          <span className="block truncate text-[13px] text-muted-foreground">
+                            {KIND_LABEL[r.kind]} · {r.meta}
+                          </span>
                         </span>
                       </Link>
-                      <PlanTag pro={r.premium} />
+                      <span className="max-[400px]:hidden">
+                        <PlanTag pro={r.premium} />
+                      </span>
                       <button
                         type="button"
                         aria-pressed={saved}
                         aria-label={saved ? `Remove ${r.title} from favourites` : `Save ${r.title} to favourites`}
                         onClick={() => toggleFavorite(r.kind, r.slug)}
                         className={cn(
-                          "grid size-9 shrink-0 place-items-center rounded-full transition-colors hover:bg-muted",
-                          saved ? "text-[#ff3b8d]" : "text-muted-foreground",
+                          "grid size-9 shrink-0 place-items-center rounded-full transition-colors hover:bg-foreground/[0.06] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                          saved ? "text-[#ff3b30]" : "text-muted-foreground hover:text-foreground",
                         )}
                       >
                         <Heart className={cn("size-4", saved && "fill-current")} aria-hidden />
                       </button>
+                      <ChevronRight
+                        className="hidden size-4 shrink-0 text-foreground/25 transition-transform duration-200 group-hover:translate-x-0.5 sm:block"
+                        aria-hidden
+                      />
                     </li>
                   );
                 })}
               </ul>
             ) : (
-              <div className="pg-float mt-3 rounded-tile bg-card px-6 py-14 text-center">
-                <p className="text-[17px] font-semibold text-foreground">Nothing matches “{q.trim()}”</p>
-                <p className="mt-1 text-[15px] text-muted-foreground">Try a shorter word, or look through everything instead.</p>
+              <div className="mt-3 flex flex-col items-center rounded-[22px] bg-card px-6 py-14 text-center ring-1 ring-border">
+                <span className="grid size-12 place-items-center rounded-[14px] bg-muted text-muted-foreground">
+                  <Search className="size-5" strokeWidth={1.9} aria-hidden />
+                </span>
+                <p className="mt-4 text-[17px] font-semibold tracking-[-0.01em] text-foreground">
+                  Nothing matches “{q.trim()}”
+                </p>
+                <p className="mt-1 max-w-[380px] text-[15px] leading-[1.5] text-muted-foreground">
+                  Try a shorter word, a tag like “scroll”, or a section like “pricing”.
+                </p>
                 <button
                   type="button"
                   onClick={() => {
                     setQ("");
                     pushParams({ q: null, kind: null });
                   }}
-                  className="pg-glass mt-5 rounded-full bg-card px-4 py-2 text-[13.5px] font-semibold text-foreground"
+                  className="mt-5 h-10 rounded-full bg-action px-5 text-[14px] font-medium text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                 >
                   Clear search
                 </button>
@@ -206,43 +285,58 @@ export function SearchExplorer() {
           </div>
 
           <aside className="grid content-start gap-5">
-            <div className="rounded-tile bg-tint-pink p-6">
-              <h2 className="text-[17px] font-semibold text-foreground">Favourites</h2>
+            <SideCard title="Favourites">
               {favorites.length ? (
-                <ul className="mt-3 space-y-1.5">
+                <ul className="-mx-2 mt-2">
                   {favorites.slice(0, 8).map((f) => (
                     <li key={`${f.kind}-${f.slug}`}>
-                      <Link href={hrefFor(f.kind, f.slug)} className="text-[15px] text-foreground underline-offset-4 hover:underline">
-                        {TITLES.get(`${f.kind}:${f.slug}`) ?? f.slug}
-                      </Link>
+                      <SideLink href={hrefFor(f.kind, f.slug)}>{TITLES.get(`${f.kind}:${f.slug}`) ?? f.slug}</SideLink>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-2 text-[14.5px] leading-relaxed text-body">
+                <p className="mt-1.5 text-[14px] leading-[1.5] text-muted-foreground">
                   Tap the heart on a result to keep it here. Favourites stay in this browser.
                 </p>
               )}
-            </div>
-            <div className="rounded-tile bg-tint-mint p-6">
-              <h2 className="text-[17px] font-semibold text-foreground">Recently viewed</h2>
+            </SideCard>
+            <SideCard title="Recently viewed">
               {recent.length ? (
-                <ul className="mt-3 space-y-1.5">
+                <ul className="-mx-2 mt-2">
                   {recent.slice(0, 8).map((slug) => (
                     <li key={slug}>
-                      <Link href={`/components/${slug}`} className="text-[15px] text-foreground underline-offset-4 hover:underline">
-                        {TITLES.get(`component:${slug}`) ?? slug}
-                      </Link>
+                      <SideLink href={`/components/${slug}`}>{TITLES.get(`component:${slug}`) ?? slug}</SideLink>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="mt-2 text-[14.5px] leading-relaxed text-body">Components you open show up here.</p>
+                <p className="mt-1.5 text-[14px] leading-[1.5] text-muted-foreground">Components you open show up here.</p>
               )}
-            </div>
+            </SideCard>
           </aside>
         </div>
       </section>
     </>
+  );
+}
+
+function SideCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-[22px] bg-card p-5 ring-1 ring-border">
+      <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-foreground">{title}</h2>
+      {children}
+    </div>
+  );
+}
+
+function SideLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center justify-between gap-2 rounded-[10px] px-2 py-1.5 text-[14.5px] text-foreground transition-colors hover:bg-foreground/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
+      <span className="truncate">{children}</span>
+      <ChevronRight className="size-3.5 shrink-0 text-foreground/25 transition-colors group-hover:text-foreground/50" aria-hidden />
+    </Link>
   );
 }
