@@ -15,6 +15,7 @@ import {
   Folder,
   Lock,
   Monitor,
+  SlidersHorizontal,
   Package,
   RotateCcw,
   Zap,
@@ -128,6 +129,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { cn } from "@/lib/utils";
+import { getPlayground } from "@/lib/catalog/playgrounds";
+import { LivePropsPlayground } from "@/components/library/props-playground";
 
 type PropDoc = {
   name: string;
@@ -845,6 +848,8 @@ export function ComponentDetailPageClient({
                 ? `${name} — Variant ${i + 1}`
                 : name)
             }
+            description={description}
+            showLivePlayground={i === 0}
             code={section.reactSource}
             slug={slug}
             props={props}
@@ -861,6 +866,7 @@ export function ComponentDetailPageClient({
       ) : (
         <PreviewCodeSection
           title={name}
+          description={description}
           code={reactSource ?? ""}
           slug={slug}
           props={props}
@@ -949,6 +955,8 @@ function ComponentAbout({ slug, name }: { slug: string; name: string }) {
 // ── preview + code tabs ─────────────────────────────────────────────
 function PreviewCodeSection({
   title,
+  description,
+  showLivePlayground = true,
   code,
   slug,
   props,
@@ -961,6 +969,8 @@ function PreviewCodeSection({
   children,
 }: {
   title: string;
+  description: string;
+  showLivePlayground?: boolean;
   code: string;
   slug: string;
   props?: PropDoc[];
@@ -972,13 +982,22 @@ function PreviewCodeSection({
   locked?: boolean;
   children: React.ReactNode;
 }) {
+  // Components with a curated live playground open on it (Bencho-style: tweak, watch, copy)
+  const livePlayground = showLivePlayground ? getPlayground(slug) : undefined;
+
   return (
     <section className={className ?? "mt-14"}>
       <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
 
-      <Tabs defaultValue="preview" className="mt-7 gap-0">
+      <Tabs defaultValue={livePlayground ? "playground" : "preview"} className="mt-7 gap-0">
         <div className="flex items-end justify-between gap-3">
           <TabsList className="h-11 rounded-xl bg-muted p-1">
+            {livePlayground && (
+              <TabsTrigger value="playground" className="h-9 gap-2 rounded-lg px-4 text-base">
+                <SlidersHorizontal className="size-4" />
+                Playground
+              </TabsTrigger>
+            )}
             <TabsTrigger value="preview" className="h-9 gap-2 rounded-lg px-4 text-base">
               <Monitor className="size-4" />
               Preview
@@ -999,6 +1018,16 @@ function PreviewCodeSection({
             <Expand className="size-4" />
           </Link>
         </div>
+
+        {livePlayground && (
+          <TabsContent value="playground" className="mt-4">
+            <LivePropsPlayground
+              playground={livePlayground}
+              name={title}
+              description={description}
+            />
+          </TabsContent>
+        )}
 
         <TabsContent value="preview" className="mt-4">
           <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950">
@@ -1079,11 +1108,13 @@ function PreviewCodeSection({
         </TabsContent>
       </Tabs>
 
-      <PropsPlayground
-        key={`${slug}-${importName}`}
-        props={props}
-        importName={importName}
-      />
+      {!livePlayground && (
+        <PropsPlayground
+          key={`${slug}-${importName}`}
+          props={props}
+          importName={importName}
+        />
+      )}
 
     </section>
   );

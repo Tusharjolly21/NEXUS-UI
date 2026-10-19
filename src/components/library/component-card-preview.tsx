@@ -12,13 +12,21 @@ type ComponentCardPreviewProps = {
   variantCount?: number;
   onCycleVariant?: () => void;
   onSelectVariant?: (index: number) => void;
+  /**
+   * `inset` (default) renders the preview as a rounded square floating inside a gridded frame.
+   * `bleed` fills a 4:3 tile edge to edge — used by the Bencho-style catalog wall, where the
+   * surrounding card supplies the rounding.
+   */
+  frame?: "inset" | "bleed";
 };
 
-const CANVAS_WIDTH = 1040;
-const CANVAS_HEIGHT = 1040;
-const PREVIEW_INSET_SCALE = 0.9;
+const FRAMES = {
+  inset: { width: 1040, height: 1040, insetScale: 0.9 },
+  bleed: { width: 1280, height: 960, insetScale: 1 },
+} as const;
 
-function usePreviewScale() {
+function usePreviewScale(frame: keyof typeof FRAMES) {
+  const { width: canvasWidth, height: canvasHeight, insetScale } = FRAMES[frame];
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [scale, setScale] = React.useState(0.5);
 
@@ -29,7 +37,7 @@ function usePreviewScale() {
     const update = () => {
       const width = node.clientWidth;
       const height = node.clientHeight;
-      const next = Math.min(width / CANVAS_WIDTH, height / CANVAS_HEIGHT) * PREVIEW_INSET_SCALE;
+      const next = Math.min(width / canvasWidth, height / canvasHeight) * insetScale;
       setScale(Math.max(0.2, Math.min(next, 1)));
     };
 
@@ -38,7 +46,7 @@ function usePreviewScale() {
     observer.observe(node);
 
     return () => observer.disconnect();
-  }, []);
+  }, [canvasWidth, canvasHeight, insetScale]);
 
   return { ref, scale };
 }
@@ -83,8 +91,11 @@ export function ComponentCardPreview({
   variantCount = 0,
   onCycleVariant,
   onSelectVariant,
+  frame = "inset",
 }: ComponentCardPreviewProps) {
-  const { ref, scale } = usePreviewScale();
+  const { ref, scale } = usePreviewScale(frame);
+  const canvas = FRAMES[frame];
+  const bleed = frame === "bleed";
   const { sentinelRef, isNear } = useIsNearViewport();
 
   return (
@@ -94,9 +105,14 @@ export function ComponentCardPreview({
 
       <div
         ref={ref}
-        className="relative isolate aspect-square w-full overflow-hidden rounded-[24px] border border-black/5 bg-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:border-white/10"
+        className={cn(
+          "relative isolate w-full overflow-hidden",
+          bleed
+            ? "aspect-[4/3] bg-zinc-950"
+            : "aspect-square rounded-[24px] border border-black/5 bg-black shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:border-white/10",
+        )}
       >
-        <div className="lf-grid absolute inset-0 opacity-20" />
+        {!bleed && <div className="lf-grid absolute inset-0 opacity-20" />}
         <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
         {Preview ? (
@@ -118,10 +134,14 @@ export function ComponentCardPreview({
             }}
           >
             <div
-              className="absolute left-1/2 top-1/2 flex items-center justify-center overflow-hidden [&>*]:!h-full [&>*]:!min-h-full [&>*]:!w-full [&>*]:!max-w-none [&>*]:!rounded-[24px] [&_canvas]:!h-full [&_canvas]:!w-full [&_img]:!h-full [&_img]:!w-full [&_img]:!object-cover [&_img]:!object-center [&_img]:!transition-transform [&_img]:!duration-500 group-hover:[&_img]:!scale-[1.04]"
+              className={cn(
+                "absolute left-1/2 top-1/2 flex items-center justify-center overflow-hidden [&>*]:!h-full [&>*]:!min-h-full [&>*]:!w-full [&>*]:!max-w-none",
+                bleed ? "[&>*]:!rounded-none" : "[&>*]:!rounded-[24px]",
+                "[&_canvas]:!h-full [&_canvas]:!w-full [&_img]:!h-full [&_img]:!w-full [&_img]:!object-cover [&_img]:!object-center [&_img]:!transition-transform [&_img]:!duration-500 group-hover:[&_img]:!scale-[1.04]",
+              )}
               style={{
-                width: CANVAS_WIDTH,
-                height: CANVAS_HEIGHT,
+                width: canvas.width,
+                height: canvas.height,
                 transform: `translate(-50%, -50%) scale(${scale})`,
                 transformOrigin: "center",
               }}
@@ -131,7 +151,7 @@ export function ComponentCardPreview({
               ) : (
                 // Skeleton placeholder — exact same dimensions as the live preview.
                 // Shown until the card scrolls near the viewport.
-                <div className="h-full w-full rounded-[24px] bg-zinc-900/60" />
+                <div className={cn("h-full w-full bg-zinc-900/60", !bleed && "rounded-[24px]")} />
               )}
             </div>
           </div>
