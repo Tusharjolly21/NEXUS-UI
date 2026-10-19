@@ -249,7 +249,7 @@ function AccessPanel({
             </PillLink>
           </div>
           <p className="mt-5 border-t border-border/60 pt-4 text-[14px] leading-relaxed text-muted-foreground">
-            Every template comes with Pro, ${PRO_PRICE} once.{" "}
+            Every template comes with Pro, ${PRO_PRICE} for 12 months.{" "}
             <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
               Compare plans
             </Link>

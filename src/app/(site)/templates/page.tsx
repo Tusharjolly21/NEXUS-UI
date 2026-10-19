@@ -75,7 +75,7 @@ export default async function TemplatesPage() {
                 Want more than one?
               </h2>
               <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-                A single template is $49. Pro unlocks all {templates.length} with full source for $99, once.
+                A single template is $49. Pro unlocks all {templates.length} for 12 months at $99, and All-Access unlocks them for good at $149.
               </p>
             </div>
           )}
