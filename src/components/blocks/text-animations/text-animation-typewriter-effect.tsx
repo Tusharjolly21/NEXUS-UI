@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type TextAnimationTypewriterEffectProps = {
@@ -33,11 +33,13 @@ export function TextAnimationTypewriterEffect({
   const [charIndex, setCharIndex] = React.useState(0);
   const [deleting, setDeleting] = React.useState(false);
   const [ready, setReady] = React.useState(delay <= 0);
+  const reduceMotion = useReducedMotion();
   const currentText = entries[textIndex] ?? "";
-  const renderedText = currentText.slice(0, charIndex);
+  // reduced motion: no typing, the first line simply stands
+  const renderedText = reduceMotion ? (entries[0] ?? "") : currentText.slice(0, charIndex);
 
   React.useEffect(() => {
-    if (entries.length === 0) return;
+    if (entries.length === 0 || reduceMotion) return;
 
     if (!ready) {
       const timer = window.setTimeout(() => setReady(true), delay);
@@ -79,6 +81,7 @@ export function TextAnimationTypewriterEffect({
     entries.length,
     loop,
     ready,
+    reduceMotion,
     textIndex,
     typingSpeed,
   ]);
@@ -90,13 +93,14 @@ export function TextAnimationTypewriterEffect({
         className,
       )}
     >
-      <span>{renderedText}</span>
-      {showCursor && (
+      <span className="sr-only">{entries.join(" ")}</span>
+      <span aria-hidden>{renderedText}</span>
+      {showCursor && !reduceMotion && (
         <motion.span
           aria-hidden
           animate={{ opacity: [1, 1, 0, 0, 1] }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="ml-1 inline-block text-blue-500"
+          className="ml-1 inline-block opacity-60"
         >
           {cursor}
         </motion.span>

@@ -458,6 +458,18 @@ function HeroSection() {
 
 // ─── Logo Cloud ───────────────────────────────────────────────────────────────
 
+/** Fictional customer wordmarks, each set in its own type so the row reads as distinct brands. */
+const PULSE_CUSTOMERS: { name: string; className: string; mark?: React.ReactNode }[] = [
+  { name: "Halyard", className: "text-xl font-semibold tracking-tight", mark: <Triangle className="h-4 w-4 fill-current" /> },
+  { name: "LOOMWORK", className: "text-sm font-bold tracking-[0.22em]" },
+  { name: "brightline", className: "text-xl font-medium italic tracking-tight" },
+  { name: "Ferrous", className: "text-xl font-black tracking-tighter", mark: <span className="h-3.5 w-3.5 rounded-sm bg-current" /> },
+  { name: "Quill & Co", className: "text-lg font-light tracking-wide" },
+  { name: "tessellate", className: "font-mono text-lg" },
+  { name: "Northbeam", className: "text-xl font-semibold", mark: <span className="h-3.5 w-3.5 rounded-full border-2 border-current" /> },
+  { name: "ORBITAL", className: "text-base font-extrabold tracking-[0.12em]" },
+];
+
 function LogoCloudSection() {
   return (
     <div className="relative z-20 pb-24 pt-8" style={{ backgroundColor: "#09090B" }}>
@@ -483,10 +495,10 @@ function LogoCloudSection() {
             className="group relative cursor-pointer"
           >
             <div className="grid grid-cols-2 items-center justify-items-center gap-x-16 gap-y-10 transition-all duration-300 group-hover:blur-[2.5px] group-hover:opacity-50 md:grid-cols-4">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="flex items-center gap-2 text-xl font-semibold text-white">
-                  <Triangle className="h-5 w-5 fill-white" />
-                  Vercel
+              {PULSE_CUSTOMERS.map((c) => (
+                <div key={c.name} className={`flex items-center gap-2 text-zinc-200 whitespace-nowrap ${c.className}`}>
+                  {c.mark}
+                  {c.name}
                 </div>
               ))}
             </div>
@@ -761,11 +773,11 @@ function AISection() {
                 Connect Pulse to your favorite AI tools including Cursor, Claude, ChatGPT, and more.
               </p>
               <div className="rounded-xl border border-zinc-800/60 bg-zinc-900/30 p-5 font-mono text-sm">
-                <p className="mb-3 text-zinc-700">//mcp.pulse.app/sse</p>
+                <p className="mb-3 text-zinc-600">{"//mcp.pulse.app/sse"}</p>
                 <div className="mb-6 space-y-1">
-                  <p><span className="text-orange-400/70">"mcpServers"</span><span className="text-zinc-500">: {"{"}</span></p>
-                  <p className="pl-4"><span className="text-orange-400/70">"pulse"</span><span className="text-zinc-500">: {"{"}</span></p>
-                  <p className="pl-8"><span className="text-orange-400/70">"command"</span><span className="text-zinc-500">: </span><span className="text-green-400/70">"npx"</span></p>
+                  <p><span className="text-orange-400/70">&quot;mcpServers&quot;</span><span className="text-zinc-500">: {"{"}</span></p>
+                  <p className="pl-4"><span className="text-orange-400/70">&quot;pulse&quot;</span><span className="text-zinc-500">: {"{"}</span></p>
+                  <p className="pl-8"><span className="text-orange-400/70">&quot;command&quot;</span><span className="text-zinc-500">: </span><span className="text-green-400/70">&quot;npx&quot;</span></p>
                 </div>
                 <div className="rounded-lg bg-zinc-800/40 p-4">
                   <div className="mb-4 flex items-center gap-2">
@@ -812,7 +824,7 @@ function ProductDirectionSection() {
         </h2>
         <p className="mb-16 max-w-md text-lg text-zinc-400">
           <span className="font-medium text-white">Align every engineer around a shared shipping plan.</span> Map,
-          manage, and track all engineering initiatives with Pulse's visual roadmapping tools.
+          manage, and track all engineering initiatives with Pulse&apos;s visual roadmapping tools.
         </p>
 
         {/* 3D Timeline */}

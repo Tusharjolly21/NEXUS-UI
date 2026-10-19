@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { CheckCircle2, Sparkles, Upload, Video } from "lucide-react";
+import { CheckCircle2, Upload, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type UploadState = {
@@ -17,26 +17,10 @@ export interface AtsBentoGridProps {
 }
 
 const candidateCards = [
-  {
-    name: "Mateo",
-    score: 87,
-    src: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=520&q=80",
-  },
-  {
-    name: "Oliver",
-    score: 89,
-    src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=520&q=80",
-  },
-  {
-    name: "Julian",
-    score: 70,
-    src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=520&q=80",
-  },
-  {
-    name: "Sofia",
-    score: 98,
-    src: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=520&q=80",
-  },
+  { name: "Mateo Alvarez", role: "Senior frontend engineer", score: 87, skills: ["React", "Design systems", "A11y"] },
+  { name: "Oliver Brandt", role: "Full-stack engineer", score: 81, skills: ["Node", "Postgres", "Next.js"] },
+  { name: "Priya Raman", role: "Staff product engineer", score: 94, skills: ["TypeScript", "Mentoring", "Perf"] },
+  { name: "Sofia Lindqvist", role: "Frontend engineer", score: 76, skills: ["Vue", "Testing", "CSS"] },
 ];
 
 const progressSteps = ["Applied", "Screening", "Interview", "Offer", "Hired"];
@@ -70,40 +54,47 @@ function CandidateTile({
   active: boolean;
 }) {
   const reduce = useReducedMotion() === true;
+  const initials = candidate.name
+    .split(" ")
+    .map((part) => part[0])
+    .join("");
 
   return (
     <motion.div
       className={cn(
-        "group relative aspect-[0.82] overflow-hidden rounded-xl bg-zinc-200 shadow-sm",
-        active && "ring-2 ring-blue-600 ring-offset-2 ring-offset-white",
+        "relative flex items-center gap-3 rounded-xl border bg-white p-3 transition-colors duration-300",
+        active ? "border-zinc-900 shadow-[0_10px_30px_-12px_rgba(15,23,42,0.35)]" : "border-zinc-200/80",
       )}
-      initial={reduce ? false : { opacity: 0, y: 12, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        delay: 0.12 + index * 0.08,
-        duration: 0.45,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      whileHover={reduce ? undefined : { y: -3 }}
+      initial={reduce ? false : { opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 + index * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      <img
-        src={candidate.src}
-        alt={`${candidate.name} candidate portrait`}
+      <span
+        aria-hidden
         className={cn(
-          "h-full w-full object-cover transition duration-500 group-hover:scale-105",
-          active ? "grayscale-0 opacity-100" : "grayscale opacity-45",
+          "grid size-9 shrink-0 place-items-center rounded-full text-[12px] font-semibold",
+          active ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600",
         )}
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/10" />
-      {active ? (
-        <motion.div
-          className="absolute bottom-5 left-1/2 -translate-x-1/2 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-zinc-950 shadow-[0_12px_35px_rgba(15,23,42,0.18)]"
-          animate={reduce ? undefined : { y: [0, -4, 0] }}
-          transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-        >
-          score {candidate.score}
-        </motion.div>
-      ) : null}
+      >
+        {initials}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] font-semibold text-zinc-950">{candidate.name}</p>
+        <p className="truncate text-[12px] text-zinc-500">{candidate.role}</p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {candidate.skills.map((skill) => (
+            <span key={skill} className="rounded-md bg-zinc-100 px-1.5 py-0.5 text-[10.5px] font-medium text-zinc-600">
+              {skill}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="text-right">
+        <p className={cn("text-[18px] font-semibold tabular-nums", active ? "text-zinc-950" : "text-zinc-400")}>
+          {candidate.score}
+        </p>
+        <p className="text-[10.5px] text-zinc-400">match</p>
+      </div>
     </motion.div>
   );
 }
@@ -124,10 +115,10 @@ function ScorePicturesCard() {
   return (
     <BentoCard
       className="md:col-span-4"
-      title="Generate scores based on pictures"
-      description="Rate your candidate's looks. As real as ATS scores."
+      title="Match against the role, not the résumé format"
+      description="Each applicant is scored on the skills the job asks for, with the evidence one click away."
     >
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-2.5">
         {candidateCards.map((candidate, index) => (
           <CandidateTile
             key={candidate.name}
@@ -148,7 +139,7 @@ function ProgressCard() {
     <BentoCard
       className="md:col-span-4 md:row-span-1"
       title="Track progress"
-      description="Track every step of the candidate's journey, from initial application to rejected appraisal."
+      description="See where every candidate is, from application to offer, without chasing the team for updates."
     >
       <div className="relative -mx-4 mt-7 min-h-[180px] overflow-hidden px-4">
         <div className="absolute inset-x-0 bottom-0 top-5 bg-[linear-gradient(90deg,rgba(24,24,27,0.06)_1px,transparent_1px)] bg-[size:44px_100%]" />
@@ -180,11 +171,8 @@ function ProgressCard() {
           animate={reduce ? undefined : { y: [0, -4, 0] }}
           transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
         >
-          Application Submitted
+          Application submitted
         </motion.div>
-        <span className="absolute left-[20%] top-[7.7rem] text-xs text-zinc-400">
-          Nexus
-        </span>
         <motion.div
           className="absolute right-[25%] top-32 rounded-xl border border-zinc-200 bg-white px-5 py-3 text-sm font-medium text-zinc-700 shadow-[0_16px_40px_rgba(15,23,42,0.1)]"
           animate={reduce ? undefined : { y: [0, 5, 0] }}
@@ -203,8 +191,8 @@ function InterviewCard() {
   return (
     <BentoCard
       className="md:col-span-4"
-      title="Schedule interviews seamlessly"
-      description="Ask about DSA or roles, we don't care."
+      title="Schedule interviews in one step"
+      description="Panels pick from shared availability; candidates get one link and a calendar invite."
     >
       <div className="relative mt-8 grid grid-cols-2 gap-4">
         <div className="absolute -left-8 top-4 h-px w-10 bg-blue-500/40" />
@@ -260,8 +248,8 @@ function ResumeUploadCard() {
   return (
     <BentoCard
       className="md:col-span-4 md:row-span-2"
-      title="Easy upload resumes manually"
-      description="One-click drag and drop candidates' resumes."
+      title="Drop in résumés from anywhere"
+      description="Drag files in, or forward them by email. Parsing and scoring start straight away."
     >
       <button
         type="button"
@@ -286,7 +274,7 @@ function ResumeUploadCard() {
           handleFiles(event.dataTransfer.files);
         }}
         className={cn(
-          "group relative -mx-4 mt-8 flex min-h-[480px] w-[calc(100%+2rem)] flex-col items-center justify-center overflow-hidden rounded-b-2xl border-t border-zinc-100 bg-zinc-50 text-center transition",
+          "group relative -mx-4 mt-8 flex min-h-[360px] w-[calc(100%+2rem)] flex-col items-center justify-center overflow-hidden rounded-b-2xl border-t border-zinc-100 bg-zinc-50 text-center transition",
           dragging ? "bg-white" : "hover:bg-white",
         )}
       >
@@ -335,7 +323,7 @@ function ResumeUploadCard() {
           </p>
           <p className="mt-1 text-xs leading-5 text-zinc-500">
             {file
-              ? `${formatSize(file.size)} ready for scoring`
+              ? `${formatSize(file.size)}, ready for scoring`
               : "PDF, DOCX, or TXT files are supported."}
           </p>
         </div>
@@ -380,21 +368,21 @@ function BentoCard({
 }
 
 export function AtsBentoGrid({
-  title = "The perfect ATS score platform",
-  description = "Get the most accurate details on your candidate with our state of the art, blazing fast, absolutely zero fact based ATS score generator.",
+  title = "Hire on evidence, not instinct",
+  description = "Screen applicants against the skills a role needs, keep every stage moving, and give your panel the same picture of each candidate.",
   className,
 }: AtsBentoGridProps) {
   return (
     <section
       className={cn(
-        "relative flex min-h-[960px] w-full items-center justify-center overflow-hidden bg-[#f4f4f3] px-5 py-16 text-zinc-950",
+        "relative flex w-full items-center justify-center overflow-hidden bg-[#f4f4f3] px-5 py-16 text-zinc-950 sm:py-24",
         className,
       )}
     >
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.95),rgba(244,244,245,0.35)_45%,rgba(250,250,250,0.9)_100%)]" />
 
       <div className="relative w-full max-w-7xl">
-        <div className="mb-24 max-w-2xl">
+        <div className="mb-12 max-w-2xl">
           <h2 className="text-4xl font-semibold tracking-[-0.03em] text-zinc-950 sm:text-5xl">
             {title}
           </h2>
@@ -412,21 +400,6 @@ export function AtsBentoGrid({
           <ResumeUploadCard />
         </div>
 
-        <div className="mx-auto mt-36 flex w-fit items-center gap-4 rounded-full border border-zinc-200 bg-white/90 p-2 text-base text-zinc-500 shadow-[0_16px_60px_rgba(15,23,42,0.08)] backdrop-blur">
-          <span className="px-4">← Blocks</span>
-          <span className="h-7 w-px bg-zinc-200" />
-          <span className="font-semibold text-zinc-950">
-            three-column-bento-grid
-          </span>
-          <span className="rounded-full border border-zinc-200 px-2 py-0.5 text-sm font-medium text-zinc-950">
-            Pro
-          </span>
-          <span className="h-7 w-px bg-zinc-200" />
-          <Sparkles className="size-5 text-zinc-500" />
-          <span className="rounded-full bg-zinc-950 px-5 py-2 text-white shadow-inner">
-            All Access
-          </span>
-        </div>
       </div>
     </section>
   );

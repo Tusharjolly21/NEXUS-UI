@@ -251,6 +251,20 @@ export default function GsapMacbookLandingPage() {
           margin: 0 auto;
         }
 
+        /* gradient wordmark line under the product name */
+        .macbook-landing-page #hero div p.hero-tagline {
+          margin: 6px auto 0;
+          font-size: clamp(22px, 3vw, 40px);
+          font-weight: 600;
+          letter-spacing: -0.02em;
+          line-height: 1.1;
+          color: transparent;
+          background: linear-gradient(90deg, #38bdf8 0%, #a855f7 38%, #ef4444 70%, #f97316 100%);
+          -webkit-background-clip: text;
+          background-clip: text;
+          filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.45));
+        }
+
         .macbook-landing-page #hero video {
           margin: 0 auto;
         }
@@ -845,7 +859,7 @@ export default function GsapMacbookLandingPage() {
           }
         }
 
-        .macbook-landing-page #highlights .masonry .right-column .apple-gradient {
+        .macbook-landing-page #highlights .masonry .right-column .ai-gradient {
           padding: 40px;
           border-radius: 24px;
           display: flex;
@@ -857,7 +871,7 @@ export default function GsapMacbookLandingPage() {
           border: 3px solid transparent;
         }
 
-        .macbook-landing-page #highlights .masonry .right-column .apple-gradient::before {
+        .macbook-landing-page #highlights .masonry .right-column .ai-gradient::before {
           content: "";
           pointer-events: none;
           position: absolute;
@@ -868,20 +882,20 @@ export default function GsapMacbookLandingPage() {
           background: linear-gradient(91deg, #0096ff 0%, #bb64ff 42%, #f2416b 74%, #eb7500 100%);
         }
 
-        .macbook-landing-page #highlights .masonry .right-column .apple-gradient p {
+        .macbook-landing-page #highlights .masonry .right-column .ai-gradient p {
           font-weight: 600;
           font-size: 20px;
         }
         @media (min-width: 1024px) {
-          .macbook-landing-page #highlights .masonry .right-column .apple-gradient p {
+          .macbook-landing-page #highlights .masonry .right-column .ai-gradient p {
             font-size: 24px;
           }
-          .macbook-landing-page #highlights .masonry .right-column .apple-gradient p {
+          .macbook-landing-page #highlights .masonry .right-column .ai-gradient p {
             font-size: 30px;
           }
         }
 
-        .macbook-landing-page #highlights .masonry .right-column .apple-gradient p span {
+        .macbook-landing-page #highlights .masonry .right-column .ai-gradient p span {
           background: linear-gradient(91deg, #0096ff 0%, #bb64ff 42%, #f2416b 74%, #eb7500 100%);
           background-clip: text;
           -webkit-background-clip: text;

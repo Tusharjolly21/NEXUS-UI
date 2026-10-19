@@ -130,10 +130,10 @@ import type { Metadata } from "next";
 import GsapMacbookLandingPage from "@/components/templates/gsap-macbook-landing-page";
 
 export const metadata: Metadata = {
-  title: "Cinematic MacBook Launch",
-  description: "An immersive product landing page featuring interactive 3D model configuration (Space Gray & Silver, 14\\" & 16\\"), GSAP scroll-driven animations, and performance metric collages.",
+  title: "Halcyon — Cinematic Product Launch",
+  description: "An immersive product landing page featuring interactive 3D model configuration (Graphite & Silver, 14\\" & 16\\"), GSAP scroll-driven animations, and performance metric collages.",
   openGraph: {
-    title: "Cinematic MacBook Launch",
+    title: "Halcyon — Cinematic Product Launch",
     description: "Immersive GSAP product showcase.",
     images: [{ url: "/og.png", width: 1200, height: 630 }],
   },

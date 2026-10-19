@@ -28,11 +28,11 @@ function SearchTrigger({ onClick, variant = "default" }: { onClick: () => void; 
         type="button"
         onClick={onClick}
         aria-label="Search components"
-        className="group inline-flex h-9 items-center gap-2 rounded-full bg-white/[0.08] pl-3 pr-1.5 text-[13.5px] text-white/70 transition-colors hover:bg-white/[0.14] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+        className="group inline-flex h-9 items-center gap-2 rounded-full bg-foreground/[0.06] pl-3 pr-1.5 text-[13.5px] text-foreground/60 transition-colors hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
         <Search className="size-4 shrink-0" aria-hidden />
         <span className="hidden sm:inline">Search</span>
-        <kbd className="ml-1 hidden rounded-full bg-white/10 px-2 py-0.5 font-sans text-[11px] text-white/60 sm:inline">⌘K</kbd>
+        <kbd className="ml-1 hidden rounded-full bg-foreground/[0.07] px-2 py-0.5 font-sans text-[11px] text-foreground/55 sm:inline">⌘K</kbd>
       </button>
     );
   }

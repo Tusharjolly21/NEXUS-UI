@@ -12,15 +12,12 @@ import {
 import {
   BookOpen,
   CheckCircle2,
-  Cpu,
   DollarSign,
   Download,
-  Gauge,
   Home,
   LayoutGrid,
   Layers,
   Search,
-  Shield,
   Sparkles,
   User,
   Volume2,
@@ -40,6 +37,21 @@ import { InfiniteMovingCards } from "@/components/infinite-moving-cards";
 import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
 import { TypewriterEffect } from "@/components/typewriter-effect";
 import { cn } from "@/lib/utils";
+import { KpiStrip } from "@/components/pulse-dashboard-kpis";
+import { LatticeFeatures } from "@/components/lattice-feature-grid";
+import { BentoSignals } from "@/components/bento-signal-grid";
+import { OrbitalLoader } from "@/components/orbital-loader";
+import { BeamField } from "@/components/beam-sweep-field";
+import { HeroAurora } from "@/components/hero-aurora-spotlight";
+import { OrbitFooter } from "@/components/orbit-footer";
+import { EditorialRail } from "@/components/editorial-blog-rail";
+import { SplitSignup } from "@/components/split-signup-convert";
+import { WorkbenchSidebar } from "@/components/workbench-sidebar";
+import { DepthTestimonials } from "@/components/depth-testimonials";
+import { MotionFaq } from "@/components/motion-faq-disclosure";
+import { SplitContact } from "@/components/split-contact-glass";
+import { GlassLogin } from "@/components/glass-login-stack";
+import { MilestoneTimeline } from "@/components/milestone-timeline";
 import {
   SquigglyDrinksHeadline,
   SquigglyText,
@@ -591,66 +603,17 @@ const KB_CODE_TO_CHAR: Record<string, string> = Object.fromEntries(
 );
 
 export function PreviewHeroAurora() {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  function onMove(e: React.MouseEvent<HTMLDivElement>) {
-    const r = e.currentTarget.getBoundingClientRect();
-    mouseX.set(e.clientX - r.left);
-    mouseY.set(e.clientY - r.top);
-  }
-  const spotlight = useMotionTemplate`radial-gradient(420px circle at ${mouseX}px ${mouseY}px, rgba(56,189,248,0.35), transparent 60%)`;
-
   return (
-    <div
-      onMouseMove={onMove}
-      className="relative isolate h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950"
-    >
-      <div className="lf-aurora absolute inset-0 opacity-80" />
-      <motion.div
-        style={{ backgroundImage: spotlight }}
-        className="absolute inset-0"
-      />
-      <div className="relative flex h-full flex-col justify-end p-6">
-        <p className="text-xs font-medium uppercase tracking-[0.2em] text-foreground/55">
-          Nexus-UI
-        </p>
-        <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-          Ship cinematic interfaces.
-        </h3>
-      </div>
+    <div className="flex h-full min-h-[560px] w-full items-center justify-center p-6">
+      <HeroAurora className="max-w-[980px]" />
     </div>
   );
 }
 
 export function PreviewBentoMetrics() {
-  const items = [
-    { label: "Latency", value: "42ms", icon: Gauge },
-    { label: "Uptime", value: "99.99%", icon: Shield },
-    { label: "Signals", value: "1.2M", icon: Sparkles },
-    { label: "Edge", value: "12 regions", icon: Cpu },
-  ];
   return (
-    <div className="grid h-[220px] grid-cols-2 gap-3 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      {items.map((it, i) => (
-        <motion.div
-          key={it.label}
-          initial={{ opacity: 0, y: 10 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.05 }}
-          className="lf-glass relative overflow-hidden rounded-2xl p-3"
-        >
-          <it.icon className="size-4 text-foreground/60" />
-          <p className="mt-3 text-xs text-zinc-400">{it.label}</p>
-          <p className="text-lg font-semibold text-white">{it.value}</p>
-          <motion.div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-foreground/5 via-transparent to-foreground/5"
-            animate={{ opacity: [0.35, 0.75, 0.35] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
-        </motion.div>
-      ))}
+    <div className="flex h-full min-h-[440px] w-full items-center justify-center p-6">
+      <BentoSignals className="max-w-[900px]" />
     </div>
   );
 }
@@ -777,27 +740,8 @@ export function PreviewPricingToggle() {
 
 export function PreviewLoaderOrbit() {
   return (
-    <div className="flex h-[220px] items-center justify-center rounded-3xl border border-white/10 bg-zinc-950">
-      <div className="relative size-28">
-        <motion.span
-          className="absolute inset-0 rounded-full border border-white/10"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.span
-          className="absolute inset-2 rounded-full border border-foreground/15"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.span
-          className="absolute inset-6 rounded-full bg-gradient-to-br from-foreground/10 to-foreground/10 blur-xl"
-          animate={{ scale: [1, 1.08, 1], opacity: [0.55, 0.9, 0.55] }}
-          transition={{ duration: 2.2, repeat: Infinity }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-white">
-          LF
-        </div>
-      </div>
+    <div className="flex h-full min-h-[300px] w-full items-center justify-center p-6">
+      <OrbitalLoader />
     </div>
   );
 }
@@ -866,153 +810,41 @@ export function PreviewAiBar() {
 }
 
 export function PreviewTimeline() {
-  const steps = ["Design", "Animate", "Ship"];
   return (
-    <div className="h-[220px] rounded-3xl border border-white/10 bg-zinc-950 p-5">
-      <div className="relative pl-4">
-        <div className="absolute top-1 bottom-1 left-[9px] w-px bg-white/10" />
-        {steps.map((s, i) => (
-          <motion.div
-            key={s}
-            initial={{ opacity: 0, x: -6 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.08 }}
-            className="relative mb-6 flex items-center gap-3"
-          >
-            <span className="size-2 rounded-full bg-foreground/60" />
-            <div>
-              <p className="text-sm font-semibold text-white">{s}</p>
-              <p className="text-xs text-zinc-500">Step {i + 1}</p>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+    <div className="flex h-full min-h-[520px] w-full items-center justify-center p-6">
+      <MilestoneTimeline className="max-w-[720px]" />
     </div>
   );
 }
 
 export function PreviewFaq() {
-  const [open, setOpen] = React.useState(0);
-  const qs = [
-    { q: "Can I use this commercially?", a: "Yes, with the premium license." },
-    {
-      q: "Does it work with App Router?",
-      a: "Built for Next.js App Router + RSC.",
-    },
-  ];
   return (
-    <div className="space-y-2 rounded-3xl border border-white/10 bg-zinc-950 p-4">
-      {qs.map((item, i) => (
-        <button
-          key={item.q}
-          type="button"
-          onClick={() => setOpen(i)}
-          className="w-full rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-left"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-medium text-white">{item.q}</p>
-            <motion.span
-              animate={{ rotate: open === i ? 90 : 0 }}
-              className="text-xs text-zinc-400"
-            >
-              ▸
-            </motion.span>
-          </div>
-          {open === i ? (
-            <motion.p
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mt-2 text-xs text-zinc-400"
-            >
-              {item.a}
-            </motion.p>
-          ) : null}
-        </button>
-      ))}
+    <div className="flex h-full min-h-[480px] w-full items-center justify-center p-6">
+      <MotionFaq className="max-w-[940px]" />
     </div>
   );
 }
 
 export function PreviewTestimonialStack() {
   return (
-    <div className="relative h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-4">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="absolute left-4 right-4 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl"
-          style={{ top: 16 + i * 18 }}
-          initial={{ y: 20, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 - i * 0.15 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.08 }}
-        >
-          <p className="text-sm text-white">
-            “
-            {i === 0
-              ? "The motion primitives are absurdly polished."
-              : i === 1
-                ? "Feels like Linear met a motion lab."
-                : "We shipped our launch page in a weekend."}
-            ”
-          </p>
-          <p className="mt-2 text-xs text-zinc-400">
-            Engineering lead · Series B SaaS
-          </p>
-        </motion.div>
-      ))}
+    <div className="flex h-full min-h-[520px] w-full items-center justify-center p-6">
+      <DepthTestimonials className="max-w-[760px]" />
     </div>
   );
 }
 
 export function PreviewLoginGlass() {
   return (
-    <div className="flex h-[220px] items-center justify-center rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-950 to-zinc-900 p-4">
-      <motion.form
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm space-y-3 rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl"
-      >
-        <p className="text-sm font-semibold text-white">Welcome back</p>
-        <input
-          className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none"
-          placeholder="you@company.com"
-        />
-        <input
-          className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none"
-          placeholder="••••••••"
-          type="password"
-        />
-        <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          className="w-full rounded-xl bg-foreground py-2 text-sm font-semibold text-background"
-        >
-          Continue
-        </motion.button>
-      </motion.form>
+    <div className="flex h-full min-h-[560px] w-full items-center justify-center p-6">
+      <GlassLogin className="max-w-[880px]" />
     </div>
   );
 }
 
 export function PreviewFooterMini() {
   return (
-    <div className="flex h-[220px] flex-col justify-between rounded-3xl border border-white/10 bg-zinc-950 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="size-7 rounded-full bg-gradient-to-br from-zinc-500 to-zinc-700" />
-          <span className="text-sm font-semibold text-white">Nexus-UI</span>
-        </div>
-        <div className="flex gap-3 text-xs text-zinc-400">
-          <span>Docs</span>
-          <span>Changelog</span>
-          <span>Status</span>
-        </div>
-      </div>
-      <div className="flex items-end justify-between border-t border-white/10 pt-4 text-xs text-zinc-500">
-        <p>© {new Date().getFullYear()} Nexus-UI</p>
-        <p className="text-foreground/55">Built for builders</p>
-      </div>
+    <div className="flex h-full min-h-[440px] w-full items-center justify-center p-6">
+      <OrbitFooter className="max-w-[980px]" />
     </div>
   );
 }
@@ -1044,26 +876,56 @@ export function PreviewShaderNoise() {
 
 export function PreviewSidebarShell() {
   return (
-    <div className="grid h-[220px] grid-cols-[92px_1fr] gap-3 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-2">
-        {["LF", "Inbox", "Ship", "Labs"].map((t, i) => (
-          <motion.div
-            key={t}
-            whileHover={{ x: 2 }}
-            className={`rounded-xl px-2 py-2 text-[11px] font-medium ${
-              i === 0 ? "bg-white/10 text-white" : "text-zinc-400"
-            }`}
-          >
-            {t}
-          </motion.div>
-        ))}
-      </div>
-      <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-3">
-        <p className="text-xs text-zinc-400">Workspace</p>
-        <p className="mt-2 text-sm font-semibold text-white">
-          Motion dashboard shell
-        </p>
-        <div className="mt-3 h-20 rounded-xl border border-white/10 bg-black/30" />
+    <div className="flex h-full min-h-[560px] w-full items-center justify-center p-6">
+      <div className="flex h-[672px] w-full max-w-[920px] gap-2 rounded-[28px] border border-zinc-200/80 bg-zinc-100 p-2 dark:border-white/10 dark:bg-zinc-900">
+        <WorkbenchSidebar />
+        <div className="min-w-0 flex-1 rounded-[22px] bg-white p-6 dark:bg-zinc-950">
+          <p className="text-[12.5px] text-zinc-500 dark:text-zinc-400">Northwind · Overview</p>
+          <p className="mt-1 text-[22px] font-semibold tracking-[-0.03em] text-zinc-950 dark:text-white">Good morning, Ada</p>
+          <div className="mt-5 grid grid-cols-3 gap-3">
+            {[
+              { k: "Deploys", v: "128", d: "+12%" },
+              { k: "Open issues", v: "23", d: "-4" },
+              { k: "Build time", v: "41s", d: "-8s" },
+            ].map((c) => (
+              <div key={c.k} className="rounded-2xl border border-zinc-200/80 p-4 dark:border-white/10">
+                <p className="text-[12px] text-zinc-500 dark:text-zinc-400">{c.k}</p>
+                <p className="mt-1 text-[24px] font-semibold tabular-nums tracking-[-0.03em] text-zinc-950 dark:text-white">{c.v}</p>
+                <p className="text-[12px] font-medium text-emerald-600 dark:text-emerald-400">{c.d} this week</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 rounded-2xl border border-zinc-200/80 p-4 dark:border-white/10">
+            <p className="text-[13px] font-medium text-zinc-950 dark:text-white">Recent activity</p>
+            <ul className="mt-3 space-y-3 text-[13px] text-zinc-600 dark:text-zinc-400">
+              {[
+                ["Mei merged", "Pricing page v3", "2m"],
+                ["Tomás deployed", "api@1.18.0 to production", "18m"],
+                ["Jonah opened", "Dark mode for charts", "1h"],
+              ].map(([who, what, when]) => (
+                <li key={what} className="flex items-center justify-between gap-3">
+                  <span className="truncate"><span className="font-medium text-zinc-950 dark:text-white">{who}</span> {what}</span>
+                  <span className="shrink-0 tabular-nums text-zinc-400">{when}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="mt-3 rounded-2xl border border-zinc-200/80 p-4 dark:border-white/10">
+            <div className="flex items-center justify-between">
+              <p className="text-[13px] font-medium text-zinc-950 dark:text-white">Deploys per day</p>
+              <p className="text-[12px] text-zinc-500 dark:text-zinc-400">Last 14 days</p>
+            </div>
+            <div className="mt-3 flex h-24 items-end gap-1.5">
+              {[34, 52, 41, 66, 48, 72, 58, 44, 80, 62, 75, 54, 88, 70].map((v, i) => (
+                <span
+                  key={i}
+                  className={cn("flex-1 rounded-t-[4px]", i === 12 ? "bg-indigo-500" : "bg-zinc-200 dark:bg-white/10")}
+                  style={{ height: `${v}%` }}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1071,76 +933,24 @@ export function PreviewSidebarShell() {
 
 export function PreviewDashboardKpi() {
   return (
-    <div className="grid h-[220px] grid-cols-3 gap-3 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      {[
-        { k: "Activation", v: "64%" },
-        { k: "Retention", v: "81%" },
-        { k: "Latency", v: "38ms" },
-      ].map((c) => (
-        <motion.div
-          key={c.k}
-          whileHover={{ y: -2 }}
-          className="rounded-2xl border border-white/10 bg-white/5 p-3"
-        >
-          <p className="text-[11px] text-zinc-400">{c.k}</p>
-          <p className="mt-3 text-2xl font-semibold text-white">{c.v}</p>
-          <div className="mt-3 h-10 rounded-lg bg-gradient-to-r from-muted/60 to-muted/40" />
-        </motion.div>
-      ))}
+    <div className="flex h-full min-h-[300px] w-full items-center justify-center p-6">
+      <KpiStrip className="max-w-[960px]" />
     </div>
   );
 }
 
 export function PreviewBlogRail() {
   return (
-    <div className="grid h-[220px] grid-cols-2 gap-3 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-        <p className="text-xs text-foreground/55">Guide</p>
-        <p className="mt-2 text-sm font-semibold text-white">
-          Designing scroll choreography
-        </p>
-        <p className="mt-2 text-xs text-zinc-500">12 min read</p>
-      </div>
-      <div className="space-y-2">
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="rounded-xl border border-white/10 bg-black/30 p-2"
-          >
-            <div className="h-2 w-24 rounded bg-white/10" />
-            <div className="mt-2 h-2 w-16 rounded bg-white/5" />
-          </div>
-        ))}
-      </div>
+    <div className="flex h-full min-h-[440px] w-full items-center justify-center p-6">
+      <EditorialRail className="max-w-[980px]" />
     </div>
   );
 }
 
 export function PreviewContactSplit() {
   return (
-    <div className="grid h-[220px] grid-cols-2 gap-3 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-        <p className="text-sm font-semibold text-white">Talk with the team</p>
-        <p className="mt-2 text-xs text-zinc-300">
-          We help teams adopt motion systems safely.
-        </p>
-      </div>
-      <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
-        <input
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-xs text-white"
-          placeholder="Name"
-        />
-        <input
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-xs text-white"
-          placeholder="Email"
-        />
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          className="w-full rounded-lg bg-white py-1 text-xs font-semibold text-zinc-900"
-        >
-          Request access
-        </motion.button>
-      </div>
+    <div className="flex h-full min-h-[520px] w-full items-center justify-center p-6">
+      <SplitContact className="max-w-[940px]" />
     </div>
   );
 }
@@ -1260,8 +1070,8 @@ export function PreviewRealTimeCursors() {
 
 export function PreviewFaqFolderCard() {
   return (
-    <div className="relative h-[320px] overflow-hidden rounded-3xl bg-white">
-      <div className="absolute left-1/2 top-1/2 w-[920px] -translate-x-1/2 -translate-y-1/2 scale-[0.72]">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white">
+      <div data-tile-focus className="w-[940px] shrink-0">
         <FaqFolderCard className="p-0" />
       </div>
     </div>
@@ -1285,9 +1095,10 @@ export function PreviewPricingPlanSelector() {
 }
 
 export function PreviewSimpleSidebar() {
+  // real size; the tall gallery tile frames the left of it (tile-fit.config.json focus): the sidebar and the first cards
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-white dark:bg-neutral-950">
-      <div className="absolute left-1/2 top-1/2 w-[820px] -translate-x-1/2 -translate-y-1/2 scale-[0.62]">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-neutral-100 dark:bg-neutral-900">
+      <div data-tile-focus className="w-[1000px] shrink-0 [&>div]:!h-[800px] [&>div]:shadow-[0_24px_60px_-30px_rgba(0,0,0,0.35)]">
         <SimpleSidebar />
       </div>
     </div>
@@ -1316,29 +1127,8 @@ export function PreviewGroupedSidebar() {
 
 export function PreviewSignupSplit() {
   return (
-    <div className="grid h-[220px] grid-cols-2 gap-3 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
-        <p className="text-sm font-semibold text-white">
-          Create your workspace
-        </p>
-        <p className="mt-2 text-xs text-zinc-400">Invite engineers later.</p>
-      </div>
-      <div className="space-y-2 rounded-2xl border border-white/10 bg-white/5 p-3">
-        <input
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-xs text-white"
-          placeholder="Work email"
-        />
-        <input
-          className="w-full rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-xs text-white"
-          placeholder="Password"
-        />
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          className="w-full rounded-lg bg-foreground/20 py-1 text-xs font-semibold text-zinc-950"
-        >
-          Continue
-        </motion.button>
-      </div>
+    <div className="flex h-full min-h-[480px] w-full items-center justify-center p-6">
+      <SplitSignup className="max-w-[920px]" />
     </div>
   );
 }
@@ -1446,72 +1236,50 @@ export function PreviewLoginForm({ compact = true }: { compact?: boolean } = {})
 }
 
 export function PreviewFeatureGrid() {
-  const feats = ["Tokens", "Motion", "A11y", "SEO"];
   return (
-    <div className="grid h-[220px] grid-cols-2 gap-2 rounded-3xl border border-white/10 bg-zinc-950 p-3">
-      {feats.map((f, i) => (
-        <motion.div
-          key={f}
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: i * 0.05 }}
-          className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-3"
-        >
-          <p className="text-sm font-semibold text-white">{f}</p>
-          <p className="mt-1 text-xs text-zinc-400">
-            Production-ready defaults.
-          </p>
-        </motion.div>
-      ))}
+    <div className="flex h-full min-h-[560px] w-full items-center justify-center p-6">
+      <LatticeFeatures className="max-w-[900px]" />
     </div>
   );
 }
 
 export function PreviewBeamSweep() {
   return (
-    <div className="relative h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950">
-      <div className="lf-grid absolute inset-0 opacity-35" />
-      <motion.div
-        className="absolute inset-y-8 w-[2px] rounded-full bg-gradient-to-b from-transparent via-cyan-300 to-transparent shadow-[0_0_40px_rgba(34,211,238,0.55)]"
-        animate={{ left: ["8%", "86%", "30%", "8%"] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="relative flex h-full items-center justify-center text-center">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-foreground/55">
-            Background
-          </p>
-          <p className="mt-2 text-sm font-semibold text-white">
-            Beam sweep field
-          </p>
-        </div>
-      </div>
+    <div className="flex h-full min-h-[440px] w-full items-center justify-center p-6">
+      <BeamField className="max-w-[960px]" />
     </div>
   );
 }
 
 export function PreviewInteractiveDots() {
   return (
-    <div className="relative h-[220px] overflow-hidden rounded-3xl border border-white/10 bg-zinc-950">
+    <div className="relative flex h-[220px] w-full items-center justify-center overflow-hidden bg-[#05070d]">
       <InteractiveDots
         mode="lines"
-        dotSpacing={28}
-        dotSize={2}
-        interactionRadius={105}
-        repulsionStrength={34}
-        lineDistance={58}
-        lineOpacity={0.28}
-        showToggle
-        className="h-full min-h-0 rounded-3xl border-0"
+        dotSpacing={30}
+        dotSize={2.2}
+        interactionRadius={130}
+        repulsionStrength={44}
+        lineDistance={70}
+        lineOpacity={0.32}
+        showToggle={false}
+        className="!absolute inset-0 h-full min-h-0 rounded-none border-0"
       />
-      <div className="pointer-events-none absolute bottom-4 left-4">
-        <p className="text-xs uppercase tracking-[0.22em] text-white/45">
-          Interactive
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,transparent,rgba(0,0,0,0.55)_80%)]" />
+      <div data-tile-focus className="pointer-events-none relative flex h-[820px] w-[560px] shrink-0 flex-col justify-end pb-16">
+        <p className="w-fit rounded-full border border-white/15 bg-white/[0.06] px-3 py-1 text-[14px] font-medium text-white/75">
+          Fieldwork 2.0 is out
         </p>
-        <p className="mt-1 text-sm font-semibold text-white">
-          Cursor dot field
+        <h2 className="mt-5 text-[52px] font-semibold leading-[1.02] tracking-[-0.04em] text-white">
+          See where your users actually look.
+        </h2>
+        <p className="mt-5 text-[18px] leading-7 text-white/65">
+          Attention maps for every page, and which part of the layout is doing the work.
         </p>
+        <div className="mt-7 flex gap-3">
+          <span className="rounded-full bg-white px-5 py-2.5 text-[15px] font-semibold text-zinc-950">Start free trial</span>
+          <span className="rounded-full border border-white/15 px-5 py-2.5 text-[15px] font-semibold text-white">Watch demo</span>
+        </div>
       </div>
     </div>
   );
@@ -3033,7 +2801,7 @@ export function PreviewAnimatedSelectHeadline() {
 export function PreviewWarpSpeedCard() {
   return (
     <WarpSpeedCard className="w-full overflow-hidden rounded-3xl border border-gray-200 dark:border-white/10 shadow-sm">
-      <div className="px-8 py-12 text-center">
+      <div className="flex h-full min-h-[260px] flex-col items-center justify-center px-8 py-12 text-center">
         <h2 className="text-3xl font-bold leading-tight tracking-tight text-gray-950 sm:text-4xl">
           Build amazing websites
           <br />
@@ -3508,25 +3276,11 @@ const WhyChooseUsBento = React.lazy(
 
 export function PreviewWhyChooseUs() {
   return (
-    <div className="relative h-[220px] w-full overflow-hidden rounded-2xl bg-zinc-50">
-      <React.Suspense fallback={null}>
-        <div
-          style={{
-            transformOrigin: "top left",
-            transform: "scale(0.42)",
-            width: "238%",
-            height: "524px",
-            pointerEvents: "none",
-          }}
-        >
+    <div className="relative flex h-[220px] w-full items-start justify-center overflow-hidden bg-white dark:bg-zinc-950">
+      <div data-tile-focus className="pointer-events-none mt-6 h-[820px] w-[1180px] shrink-0 overflow-hidden">
+        <React.Suspense fallback={null}>
           <WhyChooseUsBento />
-        </div>
-      </React.Suspense>
-      {/* Subtle overlay label */}
-      <div className="pointer-events-none absolute bottom-3 left-3">
-        <p className="text-[10px] font-semibold text-zinc-500">
-          6 animated cards
-        </p>
+        </React.Suspense>
       </div>
     </div>
   );
@@ -4408,9 +4162,11 @@ export function PreviewLogoCloudBlur() {
 
 export function PreviewLogoCloudMarquee() {
   return (
-    <LogoCloudPreviewShell>
-      <LogoCloudMarquee />
-    </LogoCloudPreviewShell>
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white dark:bg-neutral-950">
+      <div data-tile-focus className="w-[1040px] shrink-0">
+        <LogoCloudMarquee className="py-8 sm:py-8" />
+      </div>
+    </div>
   );
 }
 
@@ -4439,3 +4195,18 @@ export function PreviewLogoCloudSingleRow() {
     </LogoCloudPreviewShell>
   );
 }
+
+// Signature interactions (Oct 2026): each preview lives in its own module.
+export * from "./signature/tick-slider";
+export * from "./signature/time-scrubber";
+export * from "./signature/slide-to-confirm";
+export * from "./signature/emoji-reactions";
+export * from "./signature/like-burst";
+export * from "./signature/toast-stack";
+export * from "./signature/upload-dropzone";
+export * from "./signature/hold-to-record";
+export * from "./signature/cursor-buddy";
+export * from "./signature/dot-sphere";
+export * from "./signature/dynamic-island";
+export * from "./signature/checkout-moments";
+export * from "./signature/motion-kit";

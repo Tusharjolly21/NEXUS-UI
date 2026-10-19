@@ -4,8 +4,8 @@ import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...createMetadata({
-    title: "Cinematic MacBook Launch",
-    description: "An immersive product landing page featuring interactive 3D model configuration (Space Gray & Silver, 14\" & 16\"), GSAP scroll-driven animations, and performance metric collages.",
+    title: "Halcyon — Cinematic Product Launch",
+    description: "An immersive product landing page featuring interactive 3D model configuration (Graphite & Silver, 14\" & 16\"), GSAP scroll-driven animations, and performance metric collages.",
     alternates: { canonical: "/macbook" },
   }),
 };

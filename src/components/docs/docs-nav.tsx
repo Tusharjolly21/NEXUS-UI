@@ -58,8 +58,8 @@ export function DocsNav() {
                   href={p.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "block rounded-full px-3 py-2 text-[15px] transition-colors",
-                    active ? "bg-foreground font-medium text-background" : "text-body hover:bg-card hover:text-foreground",
+                    "block rounded-[10px] px-3 py-2 text-[14.5px] transition-colors",
+                    active ? "bg-foreground/[0.07] font-medium text-foreground" : "text-body hover:bg-foreground/[0.04] hover:text-foreground",
                   )}
                 >
                   {p.label}
@@ -72,7 +72,7 @@ export function DocsNav() {
         <ul className="mt-2 space-y-0.5">
           {BROWSE.map((p) => (
             <li key={p.href}>
-              <Link href={p.href} className="block rounded-full px-3 py-2 text-[15px] text-body transition-colors hover:bg-card hover:text-foreground">
+              <Link href={p.href} className="block rounded-[10px] px-3 py-2 text-[14.5px] text-body transition-colors hover:bg-foreground/[0.04] hover:text-foreground">
                 {p.label}
               </Link>
             </li>

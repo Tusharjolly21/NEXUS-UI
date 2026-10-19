@@ -14,8 +14,8 @@ import {
 import { getPlayground } from "@/lib/catalog/playgrounds";
 import { LivePropsPlayground } from "@/components/library/props-playground";
 import { CodeBlock } from "@/components/code-block/code-block";
-import { GalleryTile } from "@/components/gallery/gallery-tile";
-import { SHAPE_CLASSES, TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
+import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
+import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
@@ -204,7 +204,7 @@ function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?:
 
 function CodeSnippet({ code }: { code: string }) {
   return (
-    <div className="relative mt-3 rounded-2xl bg-[#17171c]">
+    <div className="relative mt-3 rounded-2xl bg-[#1d1d1f]">
       <pre className="overflow-auto p-4 pr-24 font-mono text-[12.5px] leading-relaxed text-[#e6e6ea]">{code}</pre>
       <div className="absolute right-3 top-3">
         <CopyBtn text={code} dark />
@@ -439,7 +439,7 @@ function PropsPlayground({ props, importName }: { props?: PropDoc[]; importName:
             />
           ))}
         </div>
-        <div className="flex flex-col overflow-hidden rounded-tile bg-[#17171c] text-[#e6e6ea] lg:sticky lg:top-24 lg:self-start">
+        <div className="flex flex-col overflow-hidden rounded-tile bg-[#1d1d1f] text-[#e6e6ea] lg:sticky lg:top-24 lg:self-start">
           <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
             <p className="text-[13px] font-medium text-white">Your JSX</p>
             <CopyBtn text={usageCode} dark />
@@ -527,7 +527,7 @@ function PropControl({ prop, value, onChange }: { prop: PropDoc; value: unknown;
           step={Number(value) % 1 === 0 ? 1 : 0.1}
           value={Number(value)}
           onChange={(event) => onChange(Number(event.target.value))}
-          className="mt-3 w-full accent-[#17171c] dark:accent-white"
+          className="mt-3 w-full accent-[#1d1d1f] dark:accent-white"
         />
       </div>
     );
@@ -580,7 +580,7 @@ function PropsTable({ props }: { props?: PropDoc[] }) {
             {props.map((p) => (
               <tr key={p.name} className="border-b border-border last:border-0">
                 <td className="px-6 py-3.5 font-mono text-[13px] font-semibold text-foreground">{p.name}</td>
-                <td className="px-6 py-3.5 font-mono text-[12.5px] text-rainbow-violet">{p.type}</td>
+                <td className="px-6 py-3.5 font-mono text-[12.5px] text-link">{p.type}</td>
                 <td className="px-6 py-3.5 font-mono text-[12.5px] text-muted-foreground">{p.defaultValue ?? "—"}</td>
                 <td className="px-6 py-3.5 text-body">{p.description}</td>
               </tr>
@@ -858,13 +858,13 @@ export function ComponentDetailPageClient({
           {related.length ? (
             <section aria-labelledby="related-heading" className="mt-20">
               <SectionTitle id="related-heading">More {categoryLabel.toLowerCase()}</SectionTitle>
-              <ul className="mt-8 grid grid-flow-dense auto-rows-[190px] grid-cols-2 gap-4 lg:grid-cols-4">
+              <TileGrid className="mt-8">
                 {related.map((item) => (
-                  <li key={item.slug} className={SHAPE_CLASSES[item.shape === "large" ? "tall" : item.shape]}>
+                  <TileCell key={item.slug} item={item}>
                     <GalleryTile item={item} />
-                  </li>
+                  </TileCell>
                 ))}
-              </ul>
+              </TileGrid>
             </section>
           ) : null}
         </div>

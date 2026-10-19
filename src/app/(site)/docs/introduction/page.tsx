@@ -46,15 +46,15 @@ export default function IntroductionPage() {
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">
             The library is organized into three layers: a{" "}
-            <Link href="/components" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/components" className="text-link underline-offset-4 hover:underline">
               component catalog
             </Link>{" "}
             of {CATALOG_COUNTS.components} animated components, a{" "}
-            <Link href="/blocks" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/blocks" className="text-link underline-offset-4 hover:underline">
               block catalog
             </Link>{" "}
             of multi-variant page sections, and a{" "}
-            <Link href="/templates" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/templates" className="text-link underline-offset-4 hover:underline">
               template marketplace
             </Link>{" "}
             of full landing-page compositions.
@@ -141,7 +141,7 @@ export default function IntroductionPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             Browse the full catalog →{" "}
-            <Link href="/components" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/components" className="text-link underline-offset-4 hover:underline">
               /components
             </Link>
           </p>
@@ -175,7 +175,7 @@ export default function IntroductionPage() {
           </ul>
           <p className="text-sm text-muted-foreground">
             Browse blocks →{" "}
-            <Link href="/blocks" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/blocks" className="text-link underline-offset-4 hover:underline">
               /blocks
             </Link>
           </p>
@@ -218,7 +218,7 @@ export default function IntroductionPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             Browse templates →{" "}
-            <Link href="/templates" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/templates" className="text-link underline-offset-4 hover:underline">
               /templates
             </Link>
           </p>
@@ -258,7 +258,7 @@ export default function IntroductionPage() {
           </ul>
           <p className="text-sm text-muted-foreground">
             See the{" "}
-            <Link href="/docs/cli" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/docs/cli" className="text-link underline-offset-4 hover:underline">
               CLI guide
             </Link>{" "}
             for full registry setup instructions.
@@ -273,28 +273,28 @@ export default function IntroductionPage() {
           <ol className="space-y-2 text-sm text-muted-foreground">
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">1.</span>
-              <Link href="/docs/installation" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/docs/installation" className="text-link underline-offset-4 hover:underline">
                 Nexus-UI setup
               </Link>
               {" — create a Next.js app, add Tailwind, cn(), shadcn/ui, and your first component"}
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">2.</span>
-              <Link href="/docs/install-nextjs" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/docs/install-nextjs" className="text-link underline-offset-4 hover:underline">
                 Install Next.js
               </Link>
               {" — create a fresh App Router project as your target app"}
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">3.</span>
-              <Link href="/docs/install-tailwindcss" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/docs/install-tailwindcss" className="text-link underline-offset-4 hover:underline">
                 Install Tailwind CSS
               </Link>
               {" — add Tailwind v4 with PostCSS and shared design tokens"}
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">4.</span>
-              <Link href="/docs/add-utilities" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/docs/add-utilities" className="text-link underline-offset-4 hover:underline">
                 Add utilities
               </Link>
               {" — install clsx, tailwind-merge, and wire the "}
@@ -303,7 +303,7 @@ export default function IntroductionPage() {
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">5.</span>
-              <Link href="/docs/cli" className="text-primary underline-offset-4 hover:underline">
+              <Link href="/docs/cli" className="text-link underline-offset-4 hover:underline">
                 CLI
               </Link>
               {" — initialize shadcn/ui and pull components via the @nexus-labs registry"}

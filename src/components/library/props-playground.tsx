@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 type Fill = "light" | "dark";
 
-function initialValues(controls: PlaygroundControl[]): PlaygroundValues {
+export function initialValues(controls: PlaygroundControl[]): PlaygroundValues {
   return Object.fromEntries(controls.map((c) => [c.prop, c.defaultValue]));
 }
 
@@ -20,7 +20,7 @@ function formatNumber(value: number, step: number) {
   return value.toFixed(decimals);
 }
 
-function buildSnippet(playground: Playground, values: PlaygroundValues) {
+export function buildSnippet(playground: Playground, values: PlaygroundValues) {
   const changed = playground.controls
     .filter((c) => values[c.prop] !== c.defaultValue)
     .map((c) => {
@@ -83,7 +83,7 @@ function RangeControl({
   );
 }
 
-function Segmented<T extends string>({
+export function Segmented<T extends string>({
   options,
   value,
   onChange,
@@ -95,7 +95,7 @@ function Segmented<T extends string>({
   label: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-0.5 rounded-full bg-foreground/[0.05] p-0.5">
+    <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-0.5 rounded-[10px] bg-foreground/[0.07] p-[3px]">
       {options.map((option) => (
         <button
           key={option}
@@ -104,9 +104,9 @@ function Segmented<T extends string>({
           aria-checked={value === option}
           onClick={() => onChange(option)}
           className={cn(
-            "h-7 rounded-full px-2.5 text-xs capitalize transition-colors",
+            "h-7 rounded-[8px] px-2.5 text-xs capitalize transition-colors",
             value === option
-              ? "bg-background font-medium text-foreground shadow-sm"
+              ? "bg-card font-medium text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
@@ -117,7 +117,7 @@ function Segmented<T extends string>({
   );
 }
 
-function ControlRow({
+export function ControlRow({
   control,
   value,
   onChange,
@@ -288,10 +288,12 @@ export function LivePropsPlayground({
           </p>
         </div>
 
-        <div className="mt-5 flex items-center justify-between">
-          <span className="text-[13px] text-foreground/75">Fill</span>
-          <Segmented label="Fill" options={["light", "dark"] as const} value={fill} onChange={setFill} />
-        </div>
+        {playground.lightOnly ? null : (
+          <div className="mt-5 flex items-center justify-between">
+            <span className="text-[13px] text-foreground/75">Fill</span>
+            <Segmented label="Fill" options={["light", "dark"] as const} value={fill} onChange={setFill} />
+          </div>
+        )}
 
         <div className="mt-3 space-y-2">
           {playground.controls.map((control) => (

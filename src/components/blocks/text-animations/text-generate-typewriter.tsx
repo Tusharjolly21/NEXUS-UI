@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { RotateCcw, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -58,8 +58,10 @@ export function TextGenerateTypewriter({
   const [localMuted, setLocalMuted] = React.useState(muted);
   const [audioUnlocked, setAudioUnlocked] = React.useState(false);
   const localMutedRef = React.useRef(localMuted);
-  const isTyping = started && index < text.length;
-  const renderedText = text.slice(0, index);
+  const reduceMotion = useReducedMotion();
+  const isTyping = started && !reduceMotion && index < text.length;
+  // with reduced motion the full answer is shown at once, without the typing or the sound
+  const renderedText = reduceMotion ? text : text.slice(0, index);
 
   React.useEffect(() => {
     const audio = new Audio(soundSrc);
@@ -203,18 +205,23 @@ export function TextGenerateTypewriter({
       }}
       onClick={start}
       className={cn(
-        "relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-5 text-white shadow-2xl shadow-black/30 sm:p-6",
+        "relative overflow-hidden rounded-3xl border border-white/10 bg-[#0d0d10] p-5 text-white shadow-[0_24px_60px_-28px_rgba(0,0,0,0.6)] sm:p-6",
         className,
       )}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(59,130,246,0.18),transparent_34%),radial-gradient(circle_at_80%_80%,rgba(168,85,247,0.16),transparent_34%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.055)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.055)_1px,transparent_1px)] bg-[size:32px_32px] opacity-20" />
-
       <div className="relative">
         <div className="mb-5 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-200/70">AI draft</p>
-            <p className="mt-1 text-sm text-white/45">Generated response</p>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span
+              aria-hidden
+              className={cn(
+                "size-2 shrink-0 rounded-full",
+                isTyping ? "animate-pulse bg-emerald-400" : "bg-white/30",
+              )}
+            />
+            <p className="truncate text-[13px] font-medium text-white/70">
+              {isTyping ? "Writing a reply…" : started ? "Reply ready" : "Ready to write"}
+            </p>
           </div>
           {showControls && (
             <div className="flex items-center gap-2">
@@ -228,7 +235,7 @@ export function TextGenerateTypewriter({
                     return next;
                   });
                 }}
-                className="grid size-9 place-items-center rounded-full border border-white/10 bg-white/8 text-white/70 transition hover:bg-white/12 hover:text-white"
+                className="grid size-9 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-white/70 transition hover:bg-white/[0.12] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
                 aria-label={localMuted ? "Unmute typing sound" : "Mute typing sound"}
               >
                 {localMuted ? <VolumeX className="size-4" /> : <Volume2 className="size-4" />}
@@ -239,7 +246,7 @@ export function TextGenerateTypewriter({
                   event.stopPropagation();
                   replay();
                 }}
-                className="inline-flex h-9 items-center gap-2 rounded-full border border-white/10 bg-white px-3 text-xs font-semibold text-zinc-950 transition hover:bg-blue-50"
+                className="inline-flex h-9 items-center gap-2 rounded-full bg-white px-3.5 text-[13px] font-semibold text-zinc-950 transition hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0d0d10]"
               >
                 <RotateCcw className="size-3.5" />
                 Replay
@@ -255,20 +262,24 @@ export function TextGenerateTypewriter({
               event.stopPropagation();
               start();
             }}
-            className="mb-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-blue-50"
+            className="mb-4 rounded-full bg-white px-4 py-2 text-sm font-semibold text-zinc-950 transition hover:bg-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
             Start typing
           </button>
         ) : null}
 
-        <p className="min-h-[9.5rem] whitespace-pre-wrap text-xl font-medium leading-8 text-white/88 sm:text-2xl sm:leading-9">
+        <p className="sr-only">{text}</p>
+        <p
+          aria-hidden
+          className="min-h-[9.5rem] whitespace-pre-wrap text-pretty text-xl font-medium leading-8 tracking-[-0.01em] text-white/90 sm:text-2xl sm:leading-9"
+        >
           {renderedText}
-          {showCursor && (
+          {showCursor && !reduceMotion && (
             <motion.span
               aria-hidden
               animate={{ opacity: [1, 0, 1] }}
               transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-              className="ml-1 inline-block text-blue-300"
+              className="ml-0.5 inline-block text-emerald-300"
             >
               |
             </motion.span>

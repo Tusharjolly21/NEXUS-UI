@@ -28,8 +28,8 @@ export function BlogContentEditorial({ className }: BlogContentEditorialProps) {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_16%,rgba(124,58,237,0.24),transparent_32%),radial-gradient(circle_at_82%_76%,rgba(14,165,233,0.20),transparent_34%)]" />
           <div className="relative flex h-full flex-col justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-200/70">
-                Nexus Field Notes
+              <p className="text-[13px] font-medium text-violet-200/80">
+                Field notes, issue 14
               </p>
               <h1 className="mt-6 max-w-xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
                 Designing AI products people can actually trust.
@@ -48,7 +48,7 @@ export function BlogContentEditorial({ className }: BlogContentEditorialProps) {
               ].map(([value, label]) => (
                 <div key={label} className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                   <p className="text-lg font-semibold">{value}</p>
-                  <p className="mt-1 text-xs uppercase tracking-[0.18em] text-white/38">{label}</p>
+                  <p className="mt-1 text-[12px] text-white/55">{label}</p>
                 </div>
               ))}
             </div>

@@ -23,90 +23,96 @@ export type FaqFolderCardProps = {
 
 const DEFAULT_FAQS: FaqItem[] = [
   {
-    question: "What services do you offer?",
+    question: "How long does a typical project take?",
     answer:
-      "Use this card for product questions, onboarding answers, support content, or any reusable FAQ list. Replace the data array with your own entries.",
+      "Most marketing sites ship in four to six weeks. Product work runs in two-week cycles, and you see a working build at the end of each one.",
   },
   {
-    question: "How often can I update the FAQs?",
+    question: "Do you work alongside in-house teams?",
     answer:
-      "As often as you need. Pass a new items array from a config file, CMS, API response, or static page data.",
+      "Often. We work in your repository and your tools, pair with your designers and engineers, and leave documentation behind so the team can carry it on.",
   },
   {
-    question: "Can I add many questions?",
+    question: "What does it cost to get started?",
     answer:
-      "Yes. The component maps over the array, keeps the same row animation, and opens one item at a time for a tidy FAQ experience.",
+      "Discovery is a fixed two-week engagement. After it you get a scoped plan with a price for each milestone, before any build work begins.",
   },
   {
-    question: "Does this include the code section?",
+    question: "Can you take over an existing codebase?",
     answer:
-      "Yes. The block detail page reads this component file, so the Preview and Code tabs stay aligned with the real implementation.",
+      "Yes. We start with a short audit of the code, performance and accessibility, then agree with you what to fix first.",
   },
 ];
 
 const SEARCHABLE_FAQS: FaqItem[] = [
   {
-    question: "What is this FAQ section for?",
+    question: "How do I invite my team?",
     answer:
-      "Use it for pricing pages, onboarding flows, help centers, SaaS landing pages, or product support sections.",
-    tag: "General",
+      "Open Settings, then Members, and paste their email addresses. Invites expire after seven days and you can resend them from the same screen.",
+    tag: "Account",
   },
   {
-    question: "Can I filter questions by category?",
+    question: "Can I change plans in the middle of a cycle?",
     answer:
-      "Yes. Add a tag value to each FAQ item and the tabs are generated automatically from your data.",
-    tag: "General",
+      "Yes. Upgrades apply straight away and we charge the prorated difference. Downgrades take effect at your next renewal.",
+    tag: "Billing",
   },
   {
-    question: "Can users search answers too?",
+    question: "Do you offer refunds?",
     answer:
-      "The search field checks both question and answer text, so visitors can find relevant content quickly.",
-    tag: "Support",
+      "Annual plans can be refunded in full within 14 days of purchase. Write to billing@relay.app and we process it within two working days.",
+    tag: "Billing",
   },
   {
-    question: "Can more than one answer stay open?",
+    question: "How do I export my data?",
     answer:
-      "This version keeps one answer open at a time for a clean, focused layout. You can adjust the state logic if needed.",
-    tag: "Support",
+      "Go to Settings, then Data, and choose CSV or JSON. Large workspaces are emailed to you as a download link.",
+    tag: "Account",
   },
   {
-    question: "Does the animation match the card?",
+    question: "Is two-factor sign-in available?",
     answer:
-      "Rows use the same smooth timing, subtle border transition, expanding answer area, and rotating plus icon.",
-    tag: "Motion",
+      "Every plan includes two-factor sign-in with an authenticator app. Admins can require it for the whole workspace.",
+    tag: "Security",
+  },
+  {
+    question: "Where is my data stored?",
+    answer:
+      "In the EU or the US, whichever you pick when you create the workspace. Data is encrypted at rest and in transit.",
+    tag: "Security",
   },
 ];
 
 const CHAT_FAQS: FaqItem[] = [
   {
-    question: "How does the guided FAQ work?",
+    question: "When will my first box ship?",
     answer:
-      "Each question behaves like an incoming chat prompt. Select one and the answer arrives as a focused reply, so visitors never feel buried in a long support page.",
+      "Orders placed before noon leave the roastery the same day. Most addresses get them in two to three days, and you'll get a tracking link by email.",
   },
   {
-    question: "Can I add my own support topics?",
+    question: "Can I pause my subscription?",
     answer:
-      "Yes. Add as many question and answer pairs as you need in the data array. The layout keeps the same staggered message rhythm automatically.",
+      "Any time, from your account page. Pause for a week or a few months; we email you three days before the next roast so nothing arrives by surprise.",
   },
   {
-    question: "Will answers feel instant?",
+    question: "Which grind should I choose?",
     answer:
-      "The reply includes a short typing beat before the response slides in from the right, which makes the interaction feel conversational without slowing people down.",
+      "Tell us how you brew and we grind for it: fine for espresso, medium for pour-over, coarse for a French press. Or take whole beans and grind at home.",
   },
   {
-    question: "Can this match my brand?",
+    question: "What if I don't like a coffee?",
     answer:
-      "Swap the background, bubble colors, text styles, spacing, and accent outline to fit SaaS, ecommerce, finance, or help-center pages.",
+      "Tell us within 14 days and we send a different one free. Your notes also tune what we pick for your next box.",
   },
   {
-    question: "Does it work on mobile?",
+    question: "Do you ship outside the country?",
     answer:
-      "Yes. The question stack and answer panel collapse cleanly so the chat remains easy to tap and read on smaller screens.",
+      "We ship to the EU, the UK and Canada. Duties are included in the price you see at checkout.",
   },
   {
-    question: "Where should I use it?",
+    question: "Is the packaging recyclable?",
     answer:
-      "Use it on landing pages, pricing pages, onboarding flows, or anywhere static FAQs need a warmer, more interactive touch.",
+      "The bags are compostable and the box is recycled cardboard. The one-way valve is the only part to take off first.",
   },
 ];
 
@@ -131,10 +137,10 @@ const appearSide = {
 export function FaqFolderCard({
   items = DEFAULT_FAQS,
   eyebrow = "FAQ",
-  title = "Questions & Answers",
-  description = "Have more questions? Do not hesitate to reach out. Add, remove, or reorder FAQ entries from one data array.",
-  phone = "+41 123 456 123",
-  email = "hello@example.com",
+  title = "Questions, answered",
+  description = "The things clients ask before we start. If yours isn't here, call or write and a designer will reply the same day.",
+  phone = "+44 20 7946 0321",
+  email = "studio@northfield.design",
   className,
 }: FaqFolderCardProps) {
   const [open, setOpen] = React.useState(0);
@@ -325,17 +331,12 @@ export function SearchableFaqSection({
         transition={{ duration: 0.45, ease: [0.44, 0, 0.56, 1] }}
         className="mx-auto w-full max-w-[900px] rounded-[28px] border border-slate-200 bg-white p-5 shadow-[0_18px_60px_rgba(15,23,42,.08)] sm:p-8"
       >
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-slate-500">
-          <span className="size-1.5 rounded-full bg-emerald-500" />
-          FAQ
-        </div>
-
         <div className="mt-4">
           <h3 className="text-3xl font-semibold tracking-[-0.04em] text-slate-950">
-            Frequently Asked Questions
+            Help centre
           </h3>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-            Everything visitors need to know. Search, filter by category, and expand each answer with a smooth accordion motion.
+            Answers about your account, billing and security. Search, or pick a topic.
           </p>
         </div>
 
@@ -344,7 +345,7 @@ export function SearchableFaqSection({
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search questions..."
+            placeholder="Search the help centre"
             className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100"
           />
         </div>
@@ -394,13 +395,13 @@ export function SearchableFaqSection({
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-slate-50 px-5 py-4">
           <div>
             <p className="text-sm font-medium text-slate-950">Still have questions?</p>
-            <p className="mt-0.5 text-xs text-slate-500">Use this footer for a contact or support CTA.</p>
+            <p className="mt-0.5 text-xs text-slate-500">Our support team replies within four working hours.</p>
           </div>
           <a
             href="mailto:hello@example.com"
             className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-900 transition hover:bg-slate-100"
           >
-            Contact Support →
+            Message support
           </a>
         </div>
       </motion.div>

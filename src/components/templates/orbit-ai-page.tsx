@@ -30,7 +30,7 @@ import {
 
 function useLenis() {
   React.useEffect(() => {
-    let lenis: any = null;
+    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
     let rafId: number;
     import("@studio-freight/lenis")
       .then((mod) => {
@@ -38,7 +38,7 @@ function useLenis() {
         const LenisClass = (mod.default ?? (mod as any).Lenis) as any;
         lenis = new LenisClass({ lerp: 0.08 });
         function raf(time: number) {
-          lenis.raf(time);
+          lenis?.raf(time);
           rafId = requestAnimationFrame(raf);
         }
         rafId = requestAnimationFrame(raf);
@@ -230,144 +230,168 @@ function Navbar() {
 
 // ─── Typewriter Hero ─────────────────────────────────────────────────────────
 
-const TYPEWRITER_WORDS = ["writes", "reviews", "ships", "deploys", "tests"];
+const SATELLITES = [
+  { ring: 0, start: 20, icon: Eye, label: "Reviewing #482", tone: "bg-cyan-400" },
+  { ring: 1, start: 140, icon: FlaskConical, label: "Writing 3 tests", tone: "bg-emerald-400" },
+  { ring: 1, start: 320, icon: Shield, label: "Secret scan clean", tone: "bg-emerald-400" },
+  { ring: 2, start: 230, icon: GitMerge, label: "Rebasing on main", tone: "bg-amber-300" },
+  { ring: 2, start: 60, icon: Files, label: "Refactor: 14 files", tone: "bg-cyan-400" },
+];
+const RINGS = [
+  { r: 30, period: 46 },
+  { r: 41, period: 70 },
+  { r: 50, period: 96 },
+];
+
+/** Agents circling a repository. Each ring turns at its own speed; labels stay upright. */
+function OrbitSystem() {
+  return (
+    <div className="relative mx-auto aspect-square w-full max-w-[540px]" aria-hidden>
+      <style>{`
+        @keyframes orbit-spin { to { transform: rotate(360deg); } }
+        @keyframes orbit-spin-rev { to { transform: rotate(-360deg); } }
+        @media (prefers-reduced-motion: reduce) { .orbit-ring, .orbit-upright { animation: none !important; } }
+      `}</style>
+      <div className="absolute inset-[18%] rounded-full bg-[radial-gradient(closest-side,rgba(6,182,212,0.16),transparent)]" />
+      {RINGS.map((ring, ri) => (
+        <div
+          key={ri}
+          className="absolute rounded-full border border-dashed border-white/[0.09]"
+          style={{ inset: `${50 - ring.r}%` }}
+        />
+      ))}
+
+      {/* Repository core */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
+        <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/30 bg-[#0a1014] shadow-[0_0_60px_-10px_rgba(6,182,212,0.5)]">
+          <OrbitIcon size={40} />
+        </div>
+        <span className="font-mono text-xs text-zinc-400">acme/api</span>
+      </div>
+
+      {SATELLITES.map((s, i) => {
+        const ring = RINGS[s.ring];
+        const Icon = s.icon;
+        const delay = -(s.start / 360) * ring.period;
+        return (
+          <div
+            key={i}
+            className="orbit-ring absolute inset-0"
+            style={{ animation: `orbit-spin ${ring.period}s linear infinite`, animationDelay: `${delay}s` }}
+          >
+            <div className="absolute left-1/2" style={{ top: `${50 - ring.r}%` }}>
+              <div
+                className="orbit-upright -translate-x-1/2 -translate-y-1/2"
+                style={{ animation: `orbit-spin-rev ${ring.period}s linear infinite`, animationDelay: `${delay}s` }}
+              >
+                <div className="flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-[#0b0f12]/95 py-1.5 pl-1.5 pr-3 text-xs text-zinc-200 shadow-lg shadow-black/50 backdrop-blur">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06]">
+                    <Icon size={12} className="text-cyan-300" />
+                  </span>
+                  {s.label}
+                  <span className={`h-1.5 w-1.5 rounded-full ${s.tone}`} />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 function HeroSection() {
-  const [wordIndex, setWordIndex] = React.useState(0);
-
-  React.useEffect(() => {
-    const interval = setInterval(() => {
-      setWordIndex((i) => (i + 1) % TYPEWRITER_WORDS.length);
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const wordVariants: Variants = {
-    enter: { opacity: 0, y: 12 },
-    center: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
-    },
-    exit: {
-      opacity: 0,
-      y: -12,
-      transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
-    },
-  };
-
   return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center pt-24 pb-16 px-6 overflow-hidden">
-      {/* Radial glow background */}
+    <section className="relative overflow-hidden px-6 pt-32 pb-20 lg:pt-36">
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 30%, rgba(6,182,212,0.08) 0%, transparent 70%)",
-        }}
-      />
-
-      {/* Grid pattern */}
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        className="absolute inset-0 pointer-events-none opacity-[0.035]"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
           backgroundSize: "60px 60px",
+          maskImage: "radial-gradient(ellipse at 70% 40%, black 10%, transparent 65%)",
+          WebkitMaskImage: "radial-gradient(ellipse at 70% 40%, black 10%, transparent 65%)",
         }}
       />
 
-      <div className="relative max-w-5xl mx-auto text-center z-10">
-        {/* Badge */}
+      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
+        <div>
+          <motion.a
+            href="#"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-300 hover:border-white/20 transition-colors"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
+            Orbit agents now run on self-hosted runners
+          </motion.a>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-7 text-[2.75rem] sm:text-6xl lg:text-[3.6rem] font-semibold leading-[1.03] tracking-[-0.035em] text-white text-balance"
+          >
+            Five agents in orbit around every pull request.
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-6 max-w-lg text-lg leading-relaxed text-zinc-400"
+          >
+            Orbit reviews, tests, refactors, scans and rebases while you keep typing. You approve the diff; it does
+            the rest.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            className="mt-9 flex flex-col gap-3 sm:flex-row"
+          >
+            <a
+              href="#"
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-cyan-400 px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-cyan-300"
+            >
+              Connect a repository <ArrowRight size={14} />
+            </a>
+            <a
+              href="#"
+              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/15 px-6 py-3 text-sm text-white transition-colors hover:border-white/30 hover:bg-white/5"
+            >
+              <Terminal size={14} /> Watch a 2-minute run
+            </a>
+          </motion.div>
+
+          <motion.dl
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+            className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-white/10 pt-6"
+          >
+            {[
+              ["10M+", "lines reviewed"],
+              ["< 80ms", "inline latency"],
+              ["SOC 2", "Type II"],
+            ].map(([v, l]) => (
+              <div key={l}>
+                <dt className="sr-only">{l}</dt>
+                <dd className="text-xl font-semibold tracking-tight text-white tabular-nums">{v}</dd>
+                <dd className="mt-1 text-xs text-zinc-500">{l}</dd>
+              </div>
+            ))}
+          </motion.dl>
+        </div>
+
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
+          initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/5 mb-8"
+          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
-          <Zap size={12} className="text-cyan-400" />
-          <span className="text-xs text-cyan-400 font-medium tracking-wide">
-            Now in public beta
-          </span>
-        </motion.div>
-
-        {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-          className="text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-tight tracking-tight mb-6"
-        >
-          The AI that{" "}
-          <span className="relative inline-block min-w-[200px] text-cyan-400">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={TYPEWRITER_WORDS[wordIndex]}
-                variants={wordVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="inline-block"
-              >
-                {TYPEWRITER_WORDS[wordIndex]}
-              </motion.span>
-            </AnimatePresence>
-          </span>
-          <br />
-          your code
-        </motion.h1>
-
-        {/* Subtext */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed"
-        >
-          Orbit runs autonomously inside your dev environment — no context switching,
-          no prompts, just results.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16"
-        >
-          <a
-            href="#"
-            className="px-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-semibold rounded-md text-sm transition-all duration-200 flex items-center gap-2"
-          >
-            Start for free <ArrowRight size={14} />
-          </a>
-          <a
-            href="#"
-            className="px-6 py-3 border border-white/20 text-white hover:border-white/40 hover:bg-white/5 rounded-md text-sm transition-all duration-200 flex items-center gap-2"
-          >
-            Watch demo
-          </a>
-        </motion.div>
-
-        {/* Trust stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-12"
-        >
-          {[
-            { value: "10M+", label: "lines generated" },
-            { value: "< 80ms", label: "response time" },
-            { value: "SOC 2 Type II", label: "certified" },
-          ].map((stat) => (
-            <div key={stat.label} className="flex flex-col items-center gap-1">
-              <span className="text-white font-bold text-xl">{stat.value}</span>
-              <span className="text-zinc-500 text-xs tracking-wide uppercase">
-                {stat.label}
-              </span>
-            </div>
-          ))}
+          <OrbitSystem />
         </motion.div>
       </div>
     </section>
@@ -470,8 +494,8 @@ function WorkspaceMockup() {
 
       <div className="max-w-5xl mx-auto">
         <Reveal className="text-center mb-12">
-          <p className="text-xs text-cyan-400 uppercase tracking-widest mb-3 font-medium">
-            Your environment. Supercharged.
+          <p className="text-sm text-cyan-400 mb-3 font-medium">
+            Inside your editor
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white">
             AI that lives inside your editor
@@ -594,7 +618,7 @@ function WorkflowSection() {
     <section className="py-24 px-6 relative" ref={sectionRef}>
       <div className="max-w-6xl mx-auto">
         <Reveal className="text-center mb-16">
-          <p className="text-xs text-cyan-400 uppercase tracking-widest mb-3 font-medium">
+          <p className="text-sm text-cyan-400 mb-3 font-medium">
             Workflow
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white">How Orbit works</h2>
@@ -700,7 +724,7 @@ function FeatureGrid() {
     <section className="py-24 px-6">
       <div className="max-w-6xl mx-auto">
         <Reveal className="text-center mb-16">
-          <p className="text-xs text-cyan-400 uppercase tracking-widest mb-3 font-medium">
+          <p className="text-sm text-cyan-400 mb-3 font-medium">
             Capabilities
           </p>
           <h2 className="text-3xl sm:text-4xl font-bold text-white">
@@ -823,7 +847,7 @@ function SplitShowcase() {
         {/* Row 1 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <Reveal className="order-2 md:order-1">
-            <p className="text-xs text-cyan-400 uppercase tracking-widest mb-3 font-medium">
+            <p className="text-sm text-cyan-400 mb-3 font-medium">
               Seamless
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
@@ -858,7 +882,7 @@ function SplitShowcase() {
             <TestRunnerMockup />
           </Reveal>
           <Reveal delay={0.1}>
-            <p className="text-xs text-cyan-400 uppercase tracking-widest mb-3 font-medium">
+            <p className="text-sm text-cyan-400 mb-3 font-medium">
               Automated
             </p>
             <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
@@ -866,7 +890,7 @@ function SplitShowcase() {
             </h2>
             <p className="text-zinc-400 text-sm leading-relaxed mb-6">
               Every function Orbit writes or modifies ships with a comprehensive test suite.
-              Unit, integration, and edge-case coverage — generated from your codebase's own
+              Unit, integration, and edge-case coverage — generated from your codebase&apos;s own
               patterns and idioms.
             </p>
             <ul className="flex flex-col gap-3">
@@ -943,9 +967,9 @@ function CTASection() {
                 <div className="w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center">
                   <Check size={22} className="text-green-400" />
                 </div>
-                <p className="text-white font-semibold">You're on the list!</p>
+                <p className="text-white font-semibold">You&apos;re on the list!</p>
                 <p className="text-zinc-500 text-sm">
-                  We'll reach out to{" "}
+                  We&apos;ll reach out to{" "}
                   <span className="text-cyan-400">{email}</span> when your spot is ready.
                 </p>
               </motion.div>
@@ -1028,7 +1052,7 @@ function Footer() {
           {/* Columns */}
           {columns.map((col) => (
             <div key={col.heading}>
-              <p className="text-white text-xs font-semibold mb-4 uppercase tracking-wider">
+              <p className="text-white text-sm font-medium mb-4">
                 {col.heading}
               </p>
               <ul className="flex flex-col gap-2.5">

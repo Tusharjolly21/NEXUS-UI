@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckCircle2, Eye, EyeOff, Github, Loader2 } from "lucide-react";
+import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
+import { GithubIcon } from "./brand-icons";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -300,7 +301,7 @@ export function SignupForm({
               disabled={isLoading}
               onClick={() => onSocialLogin?.("github")}
             >
-              <Github className="size-4" aria-hidden />
+              <GithubIcon className="size-4" aria-hidden />
               GitHub
             </Button>
             <Button

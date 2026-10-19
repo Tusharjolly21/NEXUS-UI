@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type TextAnimationBlurFadeInProps = {
@@ -37,13 +37,28 @@ export function TextAnimationBlurFadeIn({
   const inView = useInView(rootRef, { once, margin: "-80px" });
   const [cycle, setCycle] = React.useState(0);
   const pieces = React.useMemo(() => splitText(text, by), [by, text]);
+  const reduceMotion = useReducedMotion();
   const runDuration = delay * 1000 + pieces.length * stagger * 1000 + duration * 1000 + repeatDelay;
 
   React.useEffect(() => {
-    if (!repeat || !inView) return;
+    if (!repeat || !inView || reduceMotion) return;
     const timer = window.setTimeout(() => setCycle((value) => value + 1), runDuration);
     return () => window.clearTimeout(timer);
-  }, [inView, repeat, runDuration, cycle]);
+  }, [inView, repeat, runDuration, cycle, reduceMotion]);
+
+  if (reduceMotion) {
+    return (
+      <p
+        ref={rootRef}
+        className={cn(
+          "max-w-3xl whitespace-pre-line text-pretty text-2xl font-medium leading-relaxed text-zinc-700 dark:text-zinc-200 sm:text-3xl",
+          className,
+        )}
+      >
+        {text}
+      </p>
+    );
+  }
 
   return (
     <motion.p
@@ -68,7 +83,15 @@ export function TextAnimationBlurFadeIn({
       {pieces.map((piece, index) => {
         const isWhitespace = /^\s+$/.test(piece);
 
-        if (isWhitespace) return <React.Fragment key={`${piece}-${index}`}>{piece}</React.Fragment>;
+        if (isWhitespace) {
+          // keep the line breaks written into the text
+          const breaks = piece.split("\n").length - 1;
+          return (
+            <React.Fragment key={`${piece}-${index}`}>
+              {breaks > 0 ? Array.from({ length: breaks }, (_, i) => <br key={i} />) : piece}
+            </React.Fragment>
+          );
+        }
 
         return (
           <motion.span

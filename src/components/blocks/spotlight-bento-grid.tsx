@@ -11,7 +11,7 @@ import Image from "next/image";
 
 const SPRING = { type: "spring" as const, bounce: 0.12, duration: 0.45 };
 
-// ── Apple product images ────────────────────────────────────────────────────────
+// ── product images ────────────────────────────────────────────────────────
 
 const MACBOOK_IMG =
   // "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?fm=jpg&q=85&w=900&auto=format&fit=crop";
@@ -86,62 +86,62 @@ interface CardDef {
 const CARDS: CardDef[] = [
   {
     id: "smart-interface",
-    tag: "MacBook Pro",
-    title: "MacBook Pro",
+    tag: "Laptop",
+    title: "Atlas 16",
     description:
-      "The most powerful MacBook Pro ever. M3 Pro and M3 Max deliver exceptional performance for demanding workflows.",
+      "A 16-inch workstation with a 22-hour battery, a silent fan curve and a display calibrated for colour work.",
     glow: "#6366f1",
     imgSrc: MACBOOK_PRO_IMG,
-    imgAlt: "MacBook Pro",
+    imgAlt: "A 16-inch laptop on a desk",
     visual: (
       <ProductImage
         src={MACBOOK_PRO_IMG}
-        alt="MacBook Pro"
+        alt="A 16-inch laptop on a desk"
         className="h-full w-full"
       />
     ),
   },
   {
     id: "realtime-insights",
-    tag: "iPhone",
-    title: "iPhone Pro",
+    tag: "Phone",
+    title: "Pocket Pro",
     description:
-      "Titanium design. A17 Pro chip. Camera system that captures your most epic shots in any light.",
+      "A brushed-aluminium phone with a three-lens camera that holds detail from midday sun to candlelight.",
     glow: "#10b981",
     imgSrc: IPHONE_IMG,
-    imgAlt: "iPhone",
+    imgAlt: "A phone held in one hand",
     visual: (
-      <ProductImage src={IPHONE_IMG} alt="iPhone" className="h-full w-full" />
+      <ProductImage src={IPHONE_IMG} alt="A phone held in one hand" className="h-full w-full" />
     ),
   },
   {
     id: "seamless-sync",
-    tag: "MacBook Air",
-    title: "MacBook Air",
+    tag: "Laptop",
+    title: "Atlas Air 13",
     description:
-      "Supercharged by M3. Impossibly thin. Remarkably fast. Built for Apple Intelligence and all-day battery.",
+      "Eleven millimetres thin, no fan at all, and a battery that lasts a full working day with change to spare.",
     glow: "#8b5cf6",
     imgSrc: MACBOOK_IMG,
-    imgAlt: "MacBook Air",
+    imgAlt: "A thin laptop, half open",
     visual: (
       <ProductImage
         src={MACBOOK_IMG}
-        alt="MacBook Air"
+        alt="A thin laptop, half open"
         className="h-full w-full"
       />
     ),
   },
   {
     id: "personalized-workflow",
-    tag: "iPad Pro",
-    title: "iPad Pro",
+    tag: "Tablet",
+    title: "Slate 11",
     description:
-      "The ultimate iPad experience. M4 chip, nano-texture display option, and Apple Pencil Pro support.",
+      "An 11-inch tablet with a matte, paper-like screen and a stylus that charges when it snaps to the side.",
     glow: "#f97316",
     imgSrc: IPAD_IMG,
-    imgAlt: "iPad Pro",
+    imgAlt: "A tablet with a stylus",
     visual: (
-      <ProductImage src={IPAD_IMG} alt="iPad Pro" className="h-full w-full" />
+      <ProductImage src={IPAD_IMG} alt="A tablet with a stylus" className="h-full w-full" />
     ),
   },
 ];

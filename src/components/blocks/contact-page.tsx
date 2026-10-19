@@ -5,17 +5,45 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   ArrowUpRight,
   Building2,
-  Github,
-  Linkedin,
   Mail,
   MapPin,
   MessageCircle,
   Send,
 } from "lucide-react";
 import { NexusMark } from "@/components/brand/nexus-mark";
+
+/** Inline brand marks: lucide-react 1.x no longer ships brand icons. */
+function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+    </svg>
+  );
+}
+
+function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z" />
+    </svg>
+  );
+}
 import { cn } from "@/lib/utils";
 
-export function ContactPageBlock({ className }: { className?: string }) {
+export type ContactFormValues = { name: string; email: string; company: string; message: string };
+
+/**
+ * Sends a contact form. Resolve to show the success state; throw (or resolve `{ error }`) to show
+ * the message under the form. When no handler is given the forms simulate a successful send, so
+ * the block works in any project before it is wired to a backend.
+ */
+export type ContactSubmitHandler = (values: ContactFormValues) => Promise<void | { error?: string }>;
+
+type ContactVariantProps = { className?: string; onSubmit?: ContactSubmitHandler };
+
+const simulateSend: ContactSubmitHandler = () => new Promise((resolve) => setTimeout(resolve, 900));
+
+export function ContactPageBlock({ className, onSubmit }: ContactVariantProps) {
   return (
     <div
       className={cn(
@@ -23,17 +51,17 @@ export function ContactPageBlock({ className }: { className?: string }) {
         className,
       )}
     >
-      <GlobalSignalContact />
-      <CenteredContactForm />
-      <GradientProofContact />
-      <ImageStoryContact />
+      <GlobalSignalContact onSubmit={onSubmit} />
+      <CenteredContactForm onSubmit={onSubmit} />
+      <GradientProofContact onSubmit={onSubmit} />
+      <ImageStoryContact onSubmit={onSubmit} />
     </div>
   );
 }
 
 export default ContactPageBlock;
 
-export function GlobalSignalContact({ className }: { className?: string }) {
+export function GlobalSignalContact({ className, onSubmit }: ContactVariantProps) {
   return (
     <AnimatedShell
       className={cn(
@@ -46,22 +74,22 @@ export function GlobalSignalContact({ className }: { className?: string }) {
           <div className="grid size-12 place-items-center rounded-2xl border border-zinc-200 bg-white shadow-[0_14px_32px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-white/8 sm:size-14">
             <Mail className="size-5 text-sky-500 sm:size-6" />
           </div>
-          <p className="mt-8 text-xs font-medium uppercase tracking-[0.22em] text-sky-600 dark:text-sky-300 sm:mt-12 sm:text-sm">
-            Global studio
+          <p className="mt-8 text-sm font-medium text-sky-600 dark:text-sky-300 sm:mt-12">
+            A studio across three time zones
           </p>
           <h2 className="mt-4 max-w-xl text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white sm:text-5xl lg:text-6xl">
             Let&apos;s shape the next interface.
           </h2>
           <p className="mt-5 max-w-xl text-base leading-7 text-zinc-600 dark:text-zinc-400 sm:mt-6 sm:text-lg sm:leading-8">
-            Send your product brief, launch notes, or messy idea. The Nexus-ui
-            team will turn it into a clean direction for your next build.
+            Send a product brief, launch notes or a rough idea. A designer and an
+            engineer read every message and reply with a concrete next step.
           </p>
           <div className="mt-7 flex flex-col gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-3">
-            <span>hello@nexus-ui.com</span>
+            <span>hello@northfield.design</span>
             <span className="hidden text-zinc-300 dark:text-zinc-700 sm:inline">/</span>
-            <span>+91 98765 43210</span>
+            <span>+44 20 7946 0321</span>
             <span className="hidden text-zinc-300 dark:text-zinc-700 sm:inline">/</span>
-            <span>support in 24 hours</span>
+            <span>Replies within a working day</span>
           </div>
         </div>
         <IndiaPulseMap />
@@ -71,6 +99,7 @@ export function GlobalSignalContact({ className }: { className?: string }) {
         <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:28px_28px] dark:opacity-30 dark:[background-image:linear-gradient(rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.10)_1px,transparent_1px)]" />
         <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white via-white/80 to-transparent dark:from-zinc-950 dark:via-zinc-950/70" />
         <ContactForm
+          onSubmit={onSubmit}
           eyebrow="Project request"
           title="Tell us what you want to build"
           description="A few details are enough. We will reply with a practical next step, not a sales maze."
@@ -83,7 +112,7 @@ export function GlobalSignalContact({ className }: { className?: string }) {
   );
 }
 
-export function CenteredContactForm({ className }: { className?: string }) {
+export function CenteredContactForm({ className, onSubmit }: ContactVariantProps) {
   return (
     <AnimatedShell
       className={cn(
@@ -99,33 +128,46 @@ export function CenteredContactForm({ className }: { className?: string }) {
       />
 
       <div className="relative z-10 grid w-full max-w-6xl gap-8 md:grid-cols-[0.72fr_minmax(0,1fr)] md:items-stretch">
-        <div className="flex items-start justify-start md:min-h-[620px] md:pl-10 md:pt-10 lg:pl-16 lg:pt-14">
-          <div className="flex items-center gap-3 rounded-2xl border border-zinc-200 bg-white/82 p-2.5 pr-4 shadow-2xl shadow-zinc-950/10 backdrop-blur dark:border-white/10 dark:bg-white/8">
+        <div className="flex flex-col justify-center md:pl-6 lg:pl-12">
+          <div className="flex items-center gap-3">
             <div className="grid size-11 place-items-center rounded-xl bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
               <NexusMark size={20} />
             </div>
-            <div>
-              <p className="text-sm font-semibold leading-tight text-zinc-950 dark:text-white">Nexus-ui</p>
-              <p className="text-xs leading-tight text-zinc-500 dark:text-zinc-400">contact desk</p>
-            </div>
+            <p className="text-sm font-semibold text-zinc-950 dark:text-white">Northfield</p>
           </div>
+          <h2 className="mt-8 max-w-sm text-4xl font-semibold tracking-[-0.03em] text-zinc-950 dark:text-white sm:text-5xl">
+            Say hello. A real person reads it.
+          </h2>
+          <dl className="mt-10 grid max-w-sm gap-5 text-sm">
+            {[
+              ["New projects", "hello@northfield.design"],
+              ["Existing clients", "Your Slack channel, or support@northfield.design"],
+              ["Office hours", "Monday to Friday, 9:00 to 18:00 GMT"],
+            ].map(([label, value]) => (
+              <div key={label} className="border-t border-zinc-200 pt-4 dark:border-white/10">
+                <dt className="text-zinc-500 dark:text-zinc-400">{label}</dt>
+                <dd className="mt-1 font-medium text-zinc-950 dark:text-white">{value}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <div className="w-full max-w-lg self-center rounded-[24px] border border-zinc-200 bg-white/92 p-5 shadow-2xl shadow-zinc-950/8 backdrop-blur dark:border-white/10 dark:bg-zinc-900/80 dark:shadow-black/30 sm:rounded-[28px] sm:p-8">
           <ContactForm
+            onSubmit={onSubmit}
             eyebrow="Quick hello"
-            title="Send a clean, focused note."
-            description="Questions, partnerships, custom components, launch help. Put it here and we will route it to the right person."
+            title="What can we help with?"
+            description="Questions, partnerships or a project you want to start. We route every note to the right person."
             buttonLabel="Start the conversation"
             roundedButton
             dense
           />
           <div className="mt-7 flex items-center justify-center gap-4 border-t border-zinc-200 pt-6 text-zinc-500 dark:border-white/10 dark:text-zinc-400">
-            {[Github, Linkedin, MessageCircle].map((Icon, index) => (
+            {[GithubIcon, LinkedinIcon, MessageCircle].map((Icon, index) => (
               <motion.a
                 key={index}
                 href="#"
-                aria-label="Nexus-ui social link"
+                aria-label={["GitHub", "LinkedIn", "Chat"][index]}
                 whileHover={{ y: -3, scale: 1.04 }}
                 className="grid size-10 place-items-center rounded-full border border-zinc-200 bg-zinc-50 transition hover:border-zinc-300 hover:text-zinc-950 dark:border-white/10 dark:bg-white/5 dark:hover:text-white"
               >
@@ -139,7 +181,7 @@ export function CenteredContactForm({ className }: { className?: string }) {
   );
 }
 
-export function GradientProofContact({ className }: { className?: string }) {
+export function GradientProofContact({ className, onSubmit }: ContactVariantProps) {
   return (
     <AnimatedShell
       className={cn(
@@ -164,8 +206,8 @@ export function GradientProofContact({ className }: { className?: string }) {
           >
             <p className="text-5xl font-serif leading-none text-white/75 sm:text-6xl">&ldquo;</p>
             <p className="mt-4 text-xl font-semibold leading-8 tracking-tight sm:text-2xl sm:leading-10">
-              Nexus-ui helped us turn a vague redesign into a launchable system.
-              The contact flow alone doubled qualified demo notes in a week.
+              Northfield turned a vague redesign into a system we could launch.
+              The new contact flow doubled qualified demo requests in a week.
             </p>
             <div className="mt-10 flex items-center gap-4">
               <div className="grid size-14 place-items-center rounded-full border border-white/30 bg-white/20 text-sm font-bold">
@@ -187,6 +229,7 @@ export function GradientProofContact({ className }: { className?: string }) {
 
       <div className="flex items-center">
         <ContactForm
+          onSubmit={onSubmit}
           eyebrow="Customer success"
           title="Need help designing a better intake flow?"
           description="Share the workflow, audience, and deadline. We will suggest a component path that fits your product."
@@ -199,7 +242,7 @@ export function GradientProofContact({ className }: { className?: string }) {
   );
 }
 
-export function ImageStoryContact({ className }: { className?: string }) {
+export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) {
   return (
     <AnimatedShell
       className={cn(
@@ -246,13 +289,14 @@ export function ImageStoryContact({ className }: { className?: string }) {
               <NexusMark size={20} />
             </div>
             <div>
-              <p className="text-sm font-semibold text-zinc-950 dark:text-white">Nexus-ui</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">contact studio</p>
+              <p className="text-sm font-semibold text-zinc-950 dark:text-white">Northfield</p>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">Launch support</p>
             </div>
           </div>
           <ContactForm
-            eyebrow="Launch support"
-            title="Write to the people building the pieces."
+            onSubmit={onSubmit}
+            eyebrow="Talk to the team"
+            title="Write to the people who build it."
             description="Tell us where your page feels stuck. We can help with layout, motion, conversion details, or full section composition."
             buttonLabel="Send message"
             dense
@@ -265,15 +309,16 @@ export function ImageStoryContact({ className }: { className?: string }) {
 
 export function ContactPageBlockPreview() {
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-white text-zinc-950 dark:bg-zinc-950">
-      <div className="absolute left-1/2 top-1/2 w-[1240px] -translate-x-1/2 -translate-y-1/2 scale-[0.39]">
-        <GlobalSignalContact className="min-h-[760px] rounded-[28px] p-10" />
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white text-zinc-950 dark:bg-zinc-950">
+      <div data-tile-focus className="w-[1040px] shrink-0">
+        <CenteredContactForm className="rounded-[28px] border border-zinc-200/80 dark:border-white/10" />
       </div>
     </div>
   );
 }
 
-function ContactForm({
+export function ContactForm({
+  onSubmit = simulateSend,
   eyebrow,
   title,
   description,
@@ -282,6 +327,8 @@ function ContactForm({
   dense = false,
   className,
 }: {
+  /** Called with the field values on submit. Defaults to a simulated send. */
+  onSubmit?: ContactSubmitHandler;
   eyebrow: string;
   title: string;
   description: string;
@@ -303,21 +350,16 @@ function ContactForm({
     setStatus("loading");
     setErrorMsg("");
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
-      });
-      const data = await res.json() as { success?: boolean; error?: string };
-      if (!res.ok) {
-        setErrorMsg(data.error ?? "Something went wrong.");
+      const result = await onSubmit(fields);
+      if (result && result.error) {
+        setErrorMsg(result.error);
         setStatus("error");
       } else {
         setStatus("success");
         setFields({ name: "", email: "", company: "", message: "" });
       }
-    } catch {
-      setErrorMsg("Network error. Please try again.");
+    } catch (err) {
+      setErrorMsg(err instanceof Error && err.message ? err.message : "Couldn't send that. Please try again.");
       setStatus("error");
     }
   }
@@ -358,7 +400,7 @@ function ContactForm({
 
   return (
     <form onSubmit={handleSubmit} className={cn("mx-auto max-w-2xl", className)}>
-      <p className="text-sm font-medium uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+      <p className="text-sm font-medium text-violet-600 dark:text-violet-300">
         {eyebrow}
       </p>
       <h3

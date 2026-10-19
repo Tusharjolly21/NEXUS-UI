@@ -73,18 +73,18 @@ export default function Page() {
   return (
     <main className="space-y-10 bg-background p-6">
       <TypewriterHeading
-        text="Built with Next.js"
-        description="Create stunning animations that bring your website to life. Elevate your user experience with smooth transitions and eye-catching effects that captivate visitors and keep them engaged."
+        text="Release notes people read."
+        description="Type out a headline, hold it, and let the summary settle in underneath."
       />
       <TextAnimationTypewriterEffect
-        texts={["Launch a polished hero.", "Write less styling.", "Ship faster."]}
+        texts={["Preview every branch.", "Roll back in one click.", "Sleep through deploys."]}
       />
       <TextAnimationBlurFadeIn
-        text="Reusable motion primitives for headings, paragraphs, and product storytelling."
+        text="We built the tool we kept wishing for. It does fewer things than the others."
         once={false}
         repeat
       />
-      <TextGenerateTypewriter text="Nexus-ui is generating a clean, production-ready landing section with sound." />
+      <TextGenerateTypewriter text="Churn rose 1.8 points, almost entirely from annual plans that renewed in August." />
     </main>
   );
 }`,
@@ -255,6 +255,34 @@ export default function BlogPage() {
       <BlogContentEditorial />
       <BlogHeaderFeaturedPosts />
       <BlogHoverImageCardShowcase />
+    </main>
+  );
+}`,
+  },
+  {
+    slug: "block-checkout-moments",
+    registryCliName: "checkout-moments",
+    name: "Checkout Moments",
+    description:
+      "The three moments around a payment as finished sections: an order summary you pay by sliding, a one-time-code approval step, and a tip-and-rate card after delivery.",
+    category: "CTA sections",
+    tags: ["checkout", "payment", "slide to pay", "3d secure", "otp", "tip", "rating", "order summary", "framer-motion"],
+    premium: true,
+    variants: ["Pay & Confirm", "Verify Payment", "Tip & Rate"],
+    reactSource: `"use client";
+
+import { PayAndConfirm, TipAndRate, VerifyPayment } from "@/components/blocks/checkout-moments";
+
+async function charge(totalCents: number) {
+  await fetch("/api/pay", { method: "POST", body: JSON.stringify({ totalCents }) });
+}
+
+export default function CheckoutPage() {
+  return (
+    <main className="grid min-h-screen place-items-center gap-10 bg-[#f5f5f7] p-6 dark:bg-[#0b0b10]">
+      <PayAndConfirm merchant="Studio Supply" onPay={charge} receiptEmail="you@studio.co" />
+      <VerifyPayment destination="•••• 42" amount={12840} verify={async (code) => code === "424242"} />
+      <TipAndRate courier="Maya Chen" orderTotal={4200} />
     </main>
   );
 }`,

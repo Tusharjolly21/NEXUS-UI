@@ -115,7 +115,7 @@ export default function Home() {
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PillLink href="/components">Browse components</PillLink>
             <PillLink href="#gallery" variant="white" className="pl-2.5">
-              <span className="grid size-6 place-items-center rounded-full bg-foreground text-background" aria-hidden>
+              <span className="grid size-6 place-items-center rounded-full bg-action text-white" aria-hidden>
                 <Play className="size-3 fill-current" />
               </span>
               See it move
@@ -134,9 +134,9 @@ export default function Home() {
             aside={
               <Link
                 href="/components"
-                className="shrink-0 text-[14px] font-medium text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
+                className="shrink-0 text-[15px] text-link hover:underline hover:underline-offset-4"
               >
-                Browse all {CATALOG_COUNTS.components} components
+                Browse all {CATALOG_COUNTS.components} components ›
               </Link>
             }
           />
@@ -224,7 +224,7 @@ export default function Home() {
             <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Before you start</h2>
             <p className="mt-4 text-[18px] text-muted-foreground">
               Something else?{" "}
-              <Link href="/contact" className="text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground">
+              <Link href="/contact" className="text-link hover:underline hover:underline-offset-4">
                 Write to us
               </Link>
               .
@@ -246,8 +246,8 @@ export default function Home() {
 
       {/* Closing */}
       <section className="px-4 pb-24">
-        <div className="relative mx-auto max-w-[1152px] overflow-hidden rounded-tile bg-[linear-gradient(to_right_bottom,var(--tint-peach),var(--tint-violet)_50%,var(--tint-sky))] px-6 py-24 text-center sm:py-28">
-          <h2 className="pg-display mx-auto max-w-[720px] text-[clamp(40px,7vw,64px)] leading-[1.02] text-foreground">
+        <div className="relative mx-auto max-w-[1152px] overflow-hidden rounded-tile bg-[#1d1d1f] px-6 py-24 text-center sm:py-28 dark:bg-card">
+          <h2 className="pg-display mx-auto max-w-[720px] text-[clamp(40px,7vw,64px)] leading-[1.02] text-[#f5f5f7]">
             Start with the component you need today.
           </h2>
           <div className="mt-9">

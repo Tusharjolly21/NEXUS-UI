@@ -6,7 +6,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LOGOS } from "./logos";
+import { LOGOS, LogoLockup } from "./logos";
 
 export type LogoEntry = {
   icon: React.ReactNode;
@@ -27,8 +27,7 @@ const WIPE_DURATION = 0.92;
 const WIPE_TIMES = [0, 0.4, 1];
 
 const DEFAULT_LOGOS: LogoEntry[] = LOGOS.map((l) => ({
-  icon: <l.Icon className="h-8 w-8" style={{ color: l.color }} aria-hidden="true" />,
-  name: l.name,
+  icon: <LogoLockup logo={l} className="text-[18px] sm:text-[20px]" />,
   id: l.name,
 }));
 
@@ -49,7 +48,8 @@ function LogoItem({
 }) {
   return (
     <motion.div
-      aria-label={logo.name ?? "Logo"}
+      role={logo.name ? "img" : undefined}
+      aria-label={logo.name}
       animate={
         isWaving
           ? {
@@ -103,9 +103,9 @@ function LogoItem({
         filter: "blur(0px)",
         transition: { type: "spring", stiffness: 340, damping: 24 },
       }}
-      className="flex w-18 shrink-0 cursor-default flex-col items-center gap-2 sm:w-22.5"
+      className="flex shrink-0 cursor-default flex-col items-center gap-2 text-neutral-700 dark:text-neutral-300"
     >
-      <span className="flex h-9 w-9 items-center justify-center sm:h-10 sm:w-10">{logo.icon}</span>
+      <span className="flex h-9 min-w-9 items-center justify-center sm:h-10 sm:min-w-10">{logo.icon}</span>
       {logo.name && (
         <span className="select-none whitespace-nowrap text-[10px] font-medium tracking-wide text-neutral-400 dark:text-neutral-600 sm:text-[11px]">
           {logo.name}
@@ -117,8 +117,8 @@ function LogoItem({
 
 export default function LogoCloudSwap({
   logos = DEFAULT_LOGOS,
-  title = "Trusted by the best companies",
-  subtitle = "The world's most ambitious teams build with our platform.",
+  title = "Chosen by teams who sweat the details",
+  subtitle = "Each of these replaced three tools with one.",
   interval = 3200,
   stagger = 0.11,
   className,
@@ -133,17 +133,17 @@ export default function LogoCloudSwap({
   return (
     <section className={cn("w-full bg-white px-4 py-12 dark:bg-neutral-950 sm:py-16", className)}>
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-neutral-900 sm:text-3xl dark:text-white">
+        <h2 className="text-balance text-[26px] font-semibold leading-[1.15] tracking-[-0.025em] text-neutral-950 md:text-[34px] dark:text-white">
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">{subtitle}</p>
+          <p className="mt-3 text-[15px] text-neutral-500 dark:text-neutral-400">{subtitle}</p>
         )}
       </div>
 
       <div className="mx-auto mt-10 max-w-5xl sm:mt-12">
         {/* Desktop: single flex row */}
-        <div className="hidden items-center justify-center gap-4 sm:flex sm:flex-wrap sm:gap-6 md:gap-8 lg:gap-10">
+        <div className="hidden items-center justify-center sm:flex sm:flex-wrap sm:gap-x-10 sm:gap-y-8 lg:gap-x-12">
           {logos.map((logo, i) => (
             <LogoItem
               key={logo.id ?? i}
@@ -158,7 +158,7 @@ export default function LogoCloudSwap({
         </div>
 
         {/* Mobile: 3-col grid */}
-        <div className="grid grid-cols-3 place-items-center gap-y-6 sm:hidden">
+        <div className="grid grid-cols-2 place-items-center gap-x-4 gap-y-7 sm:hidden">
           {logos.map((logo, i) => (
             <LogoItem
               key={logo.id ?? i}

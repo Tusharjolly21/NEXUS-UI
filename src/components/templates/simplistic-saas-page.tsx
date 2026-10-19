@@ -25,6 +25,51 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// Custom Animated Laptop Component for the Platforms Section
+function AnimatedLaptopMockup({ variants }: { variants: Variants }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["0 1", "0.6 1"] // Starts opening when enters viewport, fully open when 60% in view
+  });
+  
+  // Animate lid from closed (flat, folded down towards the user) to open (standing up)
+  // rotateX: 90deg makes the top fold towards the user over the keyboard.
+  const rotateX = useTransform(scrollYProgress, [0, 1], [90, 0]);
+
+  return (
+    <motion.div variants={variants} ref={ref} className="flex flex-col items-center group cursor-pointer [perspective:1500px]">
+      <div className="relative mt-8 md:mt-0 transition-transform group-hover:-translate-y-2 duration-500 flex flex-col items-center [transform-style:preserve-3d]">
+        
+        {/* Lid (Screen) */}
+        <motion.div 
+          style={{ rotateX, transformOrigin: "bottom" }}
+          className="w-56 h-36 rounded-t-xl border-[6px] border-zinc-200 bg-black dark:border-zinc-800 flex flex-col relative shadow-2xl z-20 overflow-hidden"
+        >
+          <div className="flex-1 bg-white dark:bg-zinc-950 flex flex-col items-center justify-center relative border-t border-zinc-300 dark:border-zinc-700">
+            <div className="absolute top-1 left-1/2 -translate-x-1/2 size-1 bg-zinc-800 rounded-full" />
+            <div className="absolute inset-x-2 bottom-0 top-5 bg-white dark:bg-zinc-900 border border-zinc-100 border-b-0 dark:border-zinc-800 flex items-center justify-center overflow-hidden rounded-t-sm shadow-inner">
+              <div className="w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:12px_12px]" />
+            </div>
+          </div>
+          {/* Display bezel base */}
+          <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
+             <span className="text-[4px] font-bold text-zinc-500">Laptop Pro</span>
+          </div>
+        </motion.div>
+        
+        {/* Base (Keyboard deck front edge) */}
+        <div className="w-64 h-3 bg-zinc-300 dark:bg-zinc-700 rounded-b-xl relative shadow-xl border-t border-zinc-400 dark:border-zinc-600 flex justify-center items-start z-10 -mt-[1px]">
+          {/* Trackpad notch */}
+          <div className="w-12 h-[2px] bg-zinc-400 dark:bg-zinc-800 rounded-b-md mt-[1px]"></div>
+        </div>
+      </div>
+      <h4 className="mt-8 font-bold text-zinc-950 text-sm dark:text-white">Full control at your desk</h4>
+      <p className="mt-2 text-xs text-zinc-500 text-center max-w-[200px]">Build, debug, and deploy agents with powerful desktop tools.</p>
+    </motion.div>
+  );
+}
+
 export function SimplisticSaaSPage() {
   const reduce = useReducedMotion() === true;
   const [activeFaq, setActiveFaq] = React.useState<number | null>(0);
@@ -148,51 +193,6 @@ export function SimplisticSaaSPage() {
       filter: "blur(0px)", 
       transition: { duration: 1.0, ease: easeOutExpo } 
     }
-  };
-
-  // Custom Animated Laptop Component for the Platforms Section
-  const AnimatedLaptopMockup = () => {
-    const ref = React.useRef<HTMLDivElement>(null);
-    const { scrollYProgress } = useScroll({
-      target: ref,
-      offset: ["0 1", "0.6 1"] // Starts opening when enters viewport, fully open when 60% in view
-    });
-    
-    // Animate lid from closed (flat, folded down towards the user) to open (standing up)
-    // rotateX: 90deg makes the top fold towards the user over the keyboard.
-    const rotateX = useTransform(scrollYProgress, [0, 1], [90, 0]);
-
-    return (
-      <motion.div variants={itemVariants} ref={ref} className="flex flex-col items-center group cursor-pointer [perspective:1500px]">
-        <div className="relative mt-8 md:mt-0 transition-transform group-hover:-translate-y-2 duration-500 flex flex-col items-center [transform-style:preserve-3d]">
-          
-          {/* Lid (Screen) */}
-          <motion.div 
-            style={{ rotateX, transformOrigin: "bottom" }}
-            className="w-56 h-36 rounded-t-xl border-[6px] border-zinc-200 bg-black dark:border-zinc-800 flex flex-col relative shadow-2xl z-20 overflow-hidden"
-          >
-            <div className="flex-1 bg-white dark:bg-zinc-950 flex flex-col items-center justify-center relative border-t border-zinc-300 dark:border-zinc-700">
-              <div className="absolute top-1 left-1/2 -translate-x-1/2 size-1 bg-zinc-800 rounded-full" />
-              <div className="absolute inset-x-2 bottom-0 top-5 bg-white dark:bg-zinc-900 border border-zinc-100 border-b-0 dark:border-zinc-800 flex items-center justify-center overflow-hidden rounded-t-sm shadow-inner">
-                <div className="w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:12px_12px]" />
-              </div>
-            </div>
-            {/* Display bezel base */}
-            <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-               <span className="text-[4px] font-bold text-zinc-500">MacBook Pro</span>
-            </div>
-          </motion.div>
-          
-          {/* Base (Keyboard deck front edge) */}
-          <div className="w-64 h-3 bg-zinc-300 dark:bg-zinc-700 rounded-b-xl relative shadow-xl border-t border-zinc-400 dark:border-zinc-600 flex justify-center items-start z-10 -mt-[1px]">
-            {/* Trackpad notch */}
-            <div className="w-12 h-[2px] bg-zinc-400 dark:bg-zinc-800 rounded-b-md mt-[1px]"></div>
-          </div>
-        </div>
-        <h4 className="mt-8 font-bold text-zinc-950 text-sm dark:text-white">Full control at your desk</h4>
-        <p className="mt-2 text-xs text-zinc-500 text-center max-w-[200px]">Build, debug, and deploy agents with powerful desktop tools.</p>
-      </motion.div>
-    );
   };
 
   return (
@@ -373,7 +373,7 @@ export function SimplisticSaaSPage() {
                       Workspace
                     </p>
                     {(["Issues", "Projects", "Views"] as const).map((label) => {
-                      const lower = label.toLowerCase() as any;
+                      const lower = label.toLowerCase() as Lowercase<typeof label>;
                       return (
                         <button
                           key={label}
@@ -541,7 +541,7 @@ export function SimplisticSaaSPage() {
             whileInView="visible"
             viewport={{ once: true, margin: "-50px" }}
             variants={{
-              visible: { transition: { staggerChildren: 0.1 } },
+              visible: { transition: { staggerChildren: 0.05 } },
               hidden: {}
             }}
             className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 transition-all"
@@ -555,7 +555,7 @@ export function SimplisticSaaSPage() {
                     opacity: 1, 
                     y: 0, 
                     filter: "blur(0px)", 
-                    transition: { duration: 1.2, ease: easeOutExpo } 
+                    transition: { duration: 0.7, ease: easeOutExpo } 
                   }
                 }}
                 className="flex min-w-[100px] sm:min-w-[120px] items-center justify-center px-2"
@@ -639,7 +639,7 @@ export function SimplisticSaaSPage() {
 
               <div className="relative z-10 mt-6 rounded-2xl bg-zinc-50 p-4 border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800">
                 <p className="text-[11px] text-zinc-500 leading-relaxed dark:text-zinc-400">
-                  "Setting up auth took us 10 minutes instead of 2 weeks. The SDK just works out of the box with zero configuration. Our team shipped the entire login flow before lunch."
+                  &ldquo;Setting up auth took us 10 minutes instead of 2 weeks. The SDK just works out of the box with zero configuration. Our team shipped the entire login flow before lunch.&rdquo;
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" className="size-6 rounded-full" alt="User" />
@@ -954,8 +954,8 @@ export function SimplisticSaaSPage() {
                 <p className="mt-2 text-xs text-zinc-500 text-center max-w-[200px]">Monitor workflows and receive real-time alerts on the go.</p>
               </motion.div>
 
-              {/* Laptop Mockup (Animated 3D MacBook) */}
-              <AnimatedLaptopMockup />
+              {/* Laptop mockup (animated 3D) */}
+              <AnimatedLaptopMockup variants={itemVariants} />
 
               {/* Tablet Mockup */}
               <motion.div variants={itemVariants} className="flex flex-col items-center group cursor-pointer">

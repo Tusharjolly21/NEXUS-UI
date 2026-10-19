@@ -13,6 +13,27 @@ import { EncryptedText } from "@/components/encrypted-text";
 import { TypewriterEffect } from "@/components/typewriter-effect";
 import { TextGenerateEffect } from "@/components/text-generate-effect";
 import { GooeyInput } from "@/components/gooey-input";
+import { TickSlider } from "@/components/tick-slider";
+import { TimeScrubber } from "@/components/time-scrubber";
+import { SlideToConfirm } from "@/components/slide-to-confirm";
+import { EmojiReactions } from "@/components/emoji-reactions";
+import { LikeBurst } from "@/components/like-burst";
+import { ToastStack } from "@/components/toast-stack";
+import { UploadDropzone } from "@/components/upload-dropzone";
+import { HoldToRecord } from "@/components/hold-to-record";
+import { CursorBuddy } from "@/components/cursor-buddy";
+import { DotSphere } from "@/components/dot-sphere";
+import { DynamicIsland } from "@/components/dynamic-island";
+import { OtpInput } from "@/components/otp-input";
+import { RadioCards } from "@/components/radio-cards";
+import { HoldToConfirm } from "@/components/hold-to-confirm";
+import { BeforeAfter } from "@/components/before-after";
+import { PriceOdometer } from "@/components/price-odometer";
+import { PasswordStrength } from "@/components/password-strength";
+import { TiltPass } from "@/components/tilt-pass";
+import { AnimatedTabs } from "@/components/animated-tabs";
+import { SharedElementCards } from "@/components/shared-element-cards";
+import { RotatingHeadline } from "@/components/rotating-headline";
 
 /**
  * Live props playgrounds for component detail pages (Bencho-style "tweak and copy").
@@ -46,6 +67,8 @@ export type Playground = {
   snippetBaseProps?: string[];
   /** Which surface the stage starts on. */
   defaultFill?: "light" | "dark";
+  /** Designed for light surfaces only: the stage stays light in dark mode and the Fill switch is hidden. */
+  lightOnly?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
 };
 
@@ -68,6 +91,12 @@ const TRAIL_IMAGES = [
 ];
 
 const TYPEWRITER_LINES = ["Ship faster.", "Build better.", "Delight users."];
+
+const DEMO_TOASTS = [
+  { id: "t1", type: "success" as const, title: "Invoice sent", description: "acme@studio.co will get it shortly." },
+  { id: "t2", type: "info" as const, title: "Draft saved", description: "Last edit 2 seconds ago.", action: { label: "Undo" } },
+  { id: "t3", type: "error" as const, title: "Payment declined", description: "Try another card.", action: { label: "Retry" } },
+];
 
 export const playgrounds: Record<string, Playground> = {
   "avatar-group": {
@@ -400,6 +429,356 @@ export const playgrounds: Record<string, Playground> = {
         gooeyBlur={v.gooeyBlur as number}
       />
     ),
+  },
+
+  "tick-slider": {
+    componentName: "TickSlider",
+    importPath: "@/components/tick-slider",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "ticks", label: "Ticks", min: 12, max: 60, step: 1, defaultValue: 36 },
+      { kind: "range", prop: "step", label: "Step", min: 1, max: 25, step: 1, defaultValue: 1 },
+      { kind: "range", prop: "magnify", label: "Wave", min: 0, max: 1.2, step: 0.05, unit: "×", defaultValue: 0.55 },
+      { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#17181a", "#6d5cff", "#0ea5e9", "#16a34a", "#f97316"], defaultValue: "#17181a" },
+      { kind: "toggle", prop: "showValue", label: "Number", defaultValue: true },
+    ],
+    render: (v, fill) => (
+      <TickSlider
+        ticks={v.ticks as number}
+        step={v.step as number}
+        magnify={v.magnify as number}
+        size={v.size as "md"}
+        accent={fill === "dark" && v.accent === "#17181a" ? "#ffffff" : (v.accent as string)}
+        showValue={v.showValue as boolean}
+      />
+    ),
+  },
+  "time-scrubber": {
+    componentName: "TimeScrubber",
+    importPath: "@/components/time-scrubber",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "interval", label: "Snap", min: 5, max: 30, step: 5, unit: "min", defaultValue: 15 },
+      { kind: "select", prop: "format", label: "Format", options: ["12h", "24h"], defaultValue: "12h" },
+      { kind: "range", prop: "density", label: "Spread", min: 0.8, max: 3, step: 0.1, unit: "px", defaultValue: 1.6 },
+      { kind: "color", prop: "accent", label: "Needle", options: ["#ef4444", "#17181a", "#6d5cff", "#0ea5e9", "#f97316"], defaultValue: "#ef4444" },
+    ],
+    render: (v) => (
+      <TimeScrubber
+        interval={v.interval as number}
+        format={v.format as "12h"}
+        density={v.density as number}
+        accent={v.accent as string}
+      />
+    ),
+  },
+  "slide-to-confirm": {
+    componentName: "SlideToConfirm",
+    importPath: "@/components/slide-to-confirm",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { kind: "range", prop: "threshold", label: "Threshold", min: 0.5, max: 1, step: 0.05, defaultValue: 0.9 },
+      { kind: "range", prop: "resetAfter", label: "Reset after", min: 0, max: 5000, step: 100, unit: "ms", defaultValue: 2200 },
+      { kind: "color", prop: "successColor", label: "Success", options: ["#16a34a", "#17181a", "#6d5cff", "#0ea5e9", "#f97316"], defaultValue: "#16a34a" },
+      { kind: "select", prop: "label", label: "Label", options: ["Slide to confirm", "Slide to pay", "Slide to unlock"], defaultValue: "Slide to confirm" },
+    ],
+    render: (v) => (
+      <SlideToConfirm
+        size={v.size as "md"}
+        threshold={v.threshold as number}
+        resetAfter={v.resetAfter as number}
+        successColor={v.successColor as string}
+        label={v.label as string}
+        onConfirm={() => new Promise<void>((resolve) => setTimeout(resolve, 900))}
+      />
+    ),
+  },
+  "emoji-reactions": {
+    componentName: "EmojiReactions",
+    importPath: "@/components/emoji-reactions",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#5b8def", "#6d5cff", "#ff3b5c", "#10b981", "#f59e0b"], defaultValue: "#5b8def" },
+      { kind: "select", prop: "message", label: "Message", options: ["Shipped the new onboarding flow", "Lunch at 1?", "v2 is live"], defaultValue: "Shipped the new onboarding flow" },
+    ],
+    render: (v) => <EmojiReactions accent={v.accent as string} message={v.message as string} />,
+  },
+  "like-burst": {
+    componentName: "LikeBurst",
+    importPath: "@/components/like-burst",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "color", label: "Color", options: ["#ff3b5c", "#ff7a1a", "#6d5cff", "#10b981", "#17181a"], defaultValue: "#ff3b5c" },
+      { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { kind: "range", prop: "burst", label: "Burst", min: 0, max: 20, step: 1, defaultValue: 10 },
+      { kind: "range", prop: "defaultCount", label: "Count", min: 0, max: 99999, step: 1, defaultValue: 1299 },
+      { kind: "toggle", prop: "defaultLiked", label: "Start liked", defaultValue: false },
+    ],
+    render: (v) => (
+      <LikeBurst
+        key={`${v.defaultCount}-${v.defaultLiked}`}
+        color={v.color as string}
+        size={v.size as "md"}
+        burst={v.burst as number}
+        defaultCount={v.defaultCount as number}
+        defaultLiked={v.defaultLiked as boolean}
+      />
+    ),
+  },
+  "toast-stack": {
+    componentName: "ToastStack",
+    importPath: "@/components/toast-stack",
+    snippetBaseProps: ["toasts={toasts}", "onDismiss={dismiss}"],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "expand", label: "Expand", options: ["hover", "always"], defaultValue: "hover" },
+      { kind: "select", prop: "position", label: "Grow from", options: ["bottom", "top"], defaultValue: "bottom" },
+      { kind: "range", prop: "max", label: "Visible", min: 1, max: 3, step: 1, defaultValue: 3 },
+      { kind: "range", prop: "width", label: "Width", min: 280, max: 420, step: 4, unit: "px", defaultValue: 340 },
+    ],
+    render: (v) => (
+      <ToastStack
+        toasts={DEMO_TOASTS}
+        onDismiss={() => {}}
+        expand={v.expand as "hover"}
+        position={v.position as "bottom"}
+        max={v.max as number}
+        width={v.width as number}
+      />
+    ),
+  },
+  "upload-dropzone": {
+    componentName: "UploadDropzone",
+    importPath: "@/components/upload-dropzone",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "multiple", label: "Multiple", defaultValue: true },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#6d5cff", "#2563eb", "#16a34a", "#ea580c", "#db2777"], defaultValue: "#6d5cff" },
+      { kind: "select", prop: "title", label: "Title", options: ["Drag a file here", "Drop your files", "Add attachments"], defaultValue: "Drag a file here" },
+      { kind: "select", prop: "hint", label: "Hint", options: ["Up to 5 MB", "PNG, JPG or MP4", "Max 10 files"], defaultValue: "Up to 5 MB" },
+      { kind: "toggle", prop: "disabled", label: "Disabled", defaultValue: false },
+    ],
+    render: (v) => (
+      <UploadDropzone
+        multiple={v.multiple as boolean}
+        accent={v.accent as string}
+        title={v.title as string}
+        hint={v.hint as string}
+        disabled={v.disabled as boolean}
+        initialFiles={[{ name: "mood.png", size: 1240000, type: "image/png", progress: 1 }]}
+      />
+    ),
+  },
+  "hold-to-record": {
+    componentName: "HoldToRecord",
+    importPath: "@/components/hold-to-record",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#ef4444", "#6d5cff", "#2563eb", "#16a34a", "#17181a"], defaultValue: "#ef4444" },
+      { kind: "range", prop: "cancelDistance", label: "Cancel distance", min: 40, max: 160, step: 5, unit: "px", defaultValue: 90 },
+      { kind: "range", prop: "maxDuration", label: "Max length", min: 5000, max: 60000, step: 1000, unit: "ms", defaultValue: 60000 },
+      { kind: "range", prop: "minDuration", label: "Min hold", min: 0, max: 1500, step: 50, unit: "ms", defaultValue: 400 },
+      { kind: "select", prop: "label", label: "Label", options: ["Hold to record", "Hold to talk", "Record a note"], defaultValue: "Hold to record" },
+    ],
+    render: (v) => (
+      <HoldToRecord
+        accent={v.accent as string}
+        cancelDistance={v.cancelDistance as number}
+        maxDuration={v.maxDuration as number}
+        minDuration={v.minDuration as number}
+        label={v.label as string}
+      />
+    ),
+  },
+  "cursor-buddy": {
+    componentName: "CursorBuddy",
+    importPath: "@/components/cursor-buddy",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "shape", label: "Shape", options: ["squircle", "pill", "circle"], defaultValue: "squircle" },
+      { kind: "select", prop: "fill", label: "Fill", options: ["light", "dark"], defaultValue: "light" },
+      { kind: "select", prop: "eyes", label: "Eyes", options: ["dots", "slits", "squares"], defaultValue: "dots" },
+      { kind: "range", prop: "follow", label: "Follow", min: 0, max: 100, step: 1, defaultValue: 60 },
+      { kind: "range", prop: "size", label: "Size", min: 60, max: 200, step: 2, unit: "px", defaultValue: 120 },
+      { kind: "range", prop: "sleepAfter", label: "Sleep after", min: 0, max: 20000, step: 500, unit: "ms", defaultValue: 9000 },
+    ],
+    render: (v) => (
+      <CursorBuddy
+        shape={v.shape as "squircle"}
+        fill={v.fill as "light"}
+        eyes={v.eyes as "dots"}
+        follow={v.follow as number}
+        size={v.size as number}
+        sleepAfter={v.sleepAfter as number}
+      />
+    ),
+  },
+  "dot-sphere": {
+    componentName: "DotSphere",
+    importPath: "@/components/dot-sphere",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "dots", label: "Dots", min: 80, max: 1200, step: 20, defaultValue: 420 },
+      { kind: "range", prop: "radius", label: "Radius", min: 60, max: 200, step: 2, unit: "px", defaultValue: 130 },
+      { kind: "range", prop: "repel", label: "Repel", min: 0, max: 100, step: 1, defaultValue: 55 },
+      { kind: "range", prop: "speed", label: "Spin", min: 0, max: 100, step: 1, defaultValue: 30 },
+      { kind: "range", prop: "dotSize", label: "Dot size", min: 1, max: 8, step: 0.2, unit: "px", defaultValue: 3.4 },
+      { kind: "toggle", prop: "interactive", label: "Interactive", defaultValue: true },
+    ],
+    render: (v) => (
+      <DotSphere
+        dots={v.dots as number}
+        radius={v.radius as number}
+        repel={v.repel as number}
+        speed={v.speed as number}
+        dotSize={v.dotSize as number}
+        interactive={v.interactive as boolean}
+      />
+    ),
+  },
+  "dynamic-island": {
+    componentName: "DynamicIsland",
+    importPath: "@/components/dynamic-island",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultState", label: "Activity", options: ["idle", "timer", "music", "call"], defaultValue: "timer" },
+      { kind: "range", prop: "timerSeconds", label: "Timer", min: 10, max: 1800, step: 10, unit: "s", defaultValue: 300 },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#ff9f0a", "#30d158", "#0a84ff", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
+      { kind: "range", prop: "cycle", label: "Auto cycle", min: 0, max: 8000, step: 500, unit: "ms", defaultValue: 0 },
+    ],
+    render: (v) => (
+      <DynamicIsland
+        key={v.defaultState as string}
+        defaultState={v.defaultState as "timer"}
+        timerSeconds={v.timerSeconds as number}
+        accent={v.accent as string}
+        cycle={v.cycle as number}
+      />
+    ),
+  },
+  "otp-input": {
+    componentName: "OtpInput",
+    importPath: "@/components/otp-input",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "length", label: "Digits", min: 4, max: 8, step: 2, defaultValue: 6 },
+    ],
+    render: (v) => (
+      <OtpInput key={v.length as number} accent={v.accent as string} length={v.length as number} verify={(c) => c.startsWith("4829")} />
+    ),
+  },
+  "radio-cards": {
+    componentName: "RadioCards",
+    importPath: "@/components/radio-cards",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <RadioCards accent={v.accent as string} />,
+  },
+  "hold-to-confirm": {
+    componentName: "HoldToConfirm",
+    importPath: "@/components/hold-to-confirm",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "color", label: "Color", options: ["#ff3b30", "#1d1d1f", "#0071e3", "#ff375f", "#30b158"], defaultValue: "#ff3b30" },
+      { kind: "range", prop: "holdMs", label: "Hold for", min: 600, max: 4000, step: 100, unit: "ms", defaultValue: 1500 },
+      { kind: "select", prop: "label", label: "Label", options: ["Hold to Delete", "Hold to Archive", "Hold to Leave"], defaultValue: "Hold to Delete" },
+    ],
+    render: (v) => <HoldToConfirm color={v.color as string} holdMs={v.holdMs as number} label={v.label as string} />,
+  },
+  "before-after": {
+    componentName: "BeforeAfter",
+    importPath: "@/components/before-after",
+    snippetBaseProps: ['before={<img src="/before.jpg" alt="" className="h-full w-full object-cover" />}', 'after={<img src="/after.jpg" alt="" className="h-full w-full object-cover" />}'],
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "select", prop: "beforeLabel", label: "Before label", options: ["Before", "Original", "Raw"], defaultValue: "Before" },
+      { kind: "select", prop: "afterLabel", label: "After label", options: ["After", "Edited", "Graded"], defaultValue: "After" },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[520px]">
+        <BeforeAfter
+          beforeLabel={v.beforeLabel as string}
+          afterLabel={v.afterLabel as string}
+          before={<div className="h-full w-full bg-[linear-gradient(180deg,#9a9a9a,#d6d6d6_60%,#5c5c5c)]" />}
+          after={<div className="h-full w-full bg-[linear-gradient(180deg,#7fb3e8,#f6d9b8_60%,#3e5f7e)]" />}
+        />
+      </div>
+    ),
+  },
+  "price-odometer": {
+    componentName: "PriceOdometer",
+    importPath: "@/components/price-odometer",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "monthlyRate", label: "Monthly / seat", min: 5, max: 60, step: 1, defaultValue: 15 },
+      { kind: "range", prop: "yearlyRate", label: "Yearly / seat", min: 4, max: 50, step: 1, defaultValue: 12 },
+      { kind: "range", prop: "maxSeats", label: "Max seats", min: 10, max: 500, step: 10, defaultValue: 100 },
+    ],
+    render: (v) => (
+      <PriceOdometer
+        accent={v.accent as string}
+        monthlyRate={v.monthlyRate as number}
+        yearlyRate={v.yearlyRate as number}
+        maxSeats={v.maxSeats as number}
+      />
+    ),
+  },
+  "password-strength": {
+    componentName: "PasswordStrength",
+    importPath: "@/components/password-strength",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <PasswordStrength accent={v.accent as string} />,
+  },
+  "tilt-pass": {
+    componentName: "TiltPass",
+    importPath: "@/components/tilt-pass",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "select", prop: "title", label: "Title", options: ["Founders Pass", "Backstage", "Season Ticket"], defaultValue: "Founders Pass" },
+      { kind: "select", prop: "name", label: "Holder", options: ["Alex Rivera", "Sam Okafor", "Mina Park"], defaultValue: "Alex Rivera" },
+      { kind: "toggle", prop: "autoplay", label: "Float on its own", defaultValue: false },
+    ],
+    render: (v) => <TiltPass title={v.title as string} name={v.name as string} autoplay={v.autoplay as boolean} />,
+  },
+  "animated-tabs": {
+    componentName: "AnimatedTabs",
+    importPath: "@/components/animated-tabs",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "color", prop: "accent", label: "Switch", options: ["#34c759", "#0071e3", "#ff375f", "#ff9f0a", "#1d1d1f"], defaultValue: "#34c759" }],
+    render: (v) => <AnimatedTabs accent={v.accent as string} />,
+  },
+  "shared-element-cards": {
+    componentName: "SharedElementCards",
+    importPath: "@/components/shared-element-cards",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false }],
+    render: (v) => <SharedElementCards key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "rotating-headline": {
+    componentName: "RotatingHeadline",
+    importPath: "@/components/rotating-headline",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "lead", label: "Lead", options: ["Built to", "Made to", "Designed to"], defaultValue: "Built to" },
+      { kind: "range", prop: "interval", label: "Swap every", min: 800, max: 4000, step: 100, unit: "ms", defaultValue: 2000 },
+    ],
+    render: (v) => <RotatingHeadline accent={v.accent as string} lead={v.lead as string} interval={v.interval as number} />,
   },
 };
 

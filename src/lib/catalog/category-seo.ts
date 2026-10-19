@@ -21,6 +21,14 @@ type CategoryCopy = {
 };
 
 const CATEGORY_COPY: Partial<Record<ComponentCategorySlug, CategoryCopy>> = {
+  "inputs-controls": {
+    title: "Interactive React Input & Control Components",
+    description:
+      "Free interactive React controls — sliders, scrubbers, swipe-to-confirm, reactions, uploads and voice input — built with Tailwind CSS and Framer Motion.",
+    heading: "Input & Control Components",
+    intro:
+      "Small controls with real weight: drag a slider and feel it snap, swipe to confirm, hold to record. Every one works with mouse, touch and keyboard, and respects prefers-reduced-motion.",
+  },
   "motion-effects": {
     title: "React Text Animation & Motion Effect Components",
     description:

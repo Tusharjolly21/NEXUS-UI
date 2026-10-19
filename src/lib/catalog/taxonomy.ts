@@ -23,6 +23,7 @@ export const COMPONENT_CATEGORIES = [
   { slug: "motion-effects", label: "Motion Effects" },
   { slug: "ai-components", label: "AI Components" },
   { slug: "logo-clouds", label: "Logo Clouds" },
+  { slug: "inputs-controls", label: "Inputs & Controls" },
 ] as const;
 
 export type ComponentCategorySlug = (typeof COMPONENT_CATEGORIES)[number]["slug"];
@@ -67,6 +68,11 @@ export const COMPONENT_SIDEBAR_SECTIONS: {
     slugs: ["timelines"],
   },
   {
+    id: "controls",
+    label: "Inputs & controls",
+    slugs: ["inputs-controls"],
+  },
+  {
     id: "forms",
     label: "Forms & auth",
     slugs: ["login-forms", "signup-forms", "contact-sections"],
@@ -107,7 +113,13 @@ export type AnimationKind =
   | "layout"
   | "3d"
   | "gradient"
-  | "magnetic";
+  | "magnetic"
+  /** Grab and move: sliders, scrubbers, swipe-to-confirm. */
+  | "drag"
+  /** Press, hold or click to trigger a reaction. */
+  | "press"
+  /** Typing or pasting text. */
+  | "type";
 
 export type CatalogSort = "trending" | "newest";
 

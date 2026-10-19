@@ -9,16 +9,39 @@ import {
   useTransform,
   useSpring,
 } from "framer-motion";
+import {
+  Award,
+  BarChart3,
+  Brain,
+  Building2,
+  ClipboardList,
+  Cog,
+  DollarSign,
+  FolderOpen,
+  Globe2,
+  Handshake,
+  HeartHandshake,
+  Megaphone,
+  MessagesSquare,
+  PhoneCall,
+  Rocket,
+  Search,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ── Lenis smooth scroll (lerp: 0.1 matching Assistantly) ─────────────────────
 function useLenis() {
   React.useEffect(() => {
-    let lenis: any = null;
+    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
     let rafId: number;
     import("@studio-freight/lenis").then(({ default: Lenis }) => {
-      lenis = new Lenis({ lerp: 0.1, smoothWheel: true });
-      const raf = (t: number) => { lenis.raf(t); rafId = requestAnimationFrame(raf); };
+      lenis = new Lenis({ lerp: 0.1, smoothWheel: true } as ConstructorParameters<typeof Lenis>[0]);
+      const raf = (t: number) => { lenis?.raf(t); rafId = requestAnimationFrame(raf); };
       rafId = requestAnimationFrame(raf);
     });
     return () => { if (lenis) lenis.destroy(); if (rafId) cancelAnimationFrame(rafId); };
@@ -62,7 +85,7 @@ function SplitReveal({
     <span ref={ref} className={cn("inline", className)} style={style} aria-label={text}>
       {words.map((word, wi) => (
         <span key={wi} className="inline-block whitespace-nowrap">
-          {word.split("").map((char, ci) => {
+          {Array.from(word).map((char, ci) => {
             const idx = words.slice(0, wi).join("").length + wi + ci;
             return (
               <motion.span
@@ -187,6 +210,50 @@ function Marquee({ items, speed = 35 }: { items: string[]; speed?: number }) {
   );
 }
 
+
+// ── Icon glyphs: the content keeps short emoji keys; they render as line icons ─
+const GLYPHS: Record<string, LucideIcon> = {
+  "🗂️": FolderOpen, "⚙️": Cog, "📣": Megaphone, "💬": MessagesSquare, "🎯": Target, "💵": DollarSign,
+  "🔍": Search, "🚀": Rocket, "📊": BarChart3, "🌐": Globe2, "🏢": Building2, "💰": DollarSign,
+  "🥇": Award, "🤝": Handshake, "💖": HeartHandshake, "✨": Sparkles, "🔎": Search, "🧠": Brain,
+  "📞": PhoneCall, "📋": ClipboardList, "📈": TrendingUp, "🏆": Award, "💙": HeartHandshake, "⚡": Zap,
+};
+
+function Glyph({ e, size = 44, tone = "light" }: { e: string; size?: number; tone?: "light" | "dark" }) {
+  const Icon = GLYPHS[e] ?? Sparkles;
+  return (
+    <span
+      className="inline-flex shrink-0 items-center justify-center rounded-xl"
+      style={{
+        width: size,
+        height: size,
+        background: tone === "dark" ? "rgba(255,255,255,0.14)" : "rgba(19,19,156,0.07)",
+        color: tone === "dark" ? "#fff" : C.brand,
+      }}
+    >
+      <Icon size={Math.round(size * 0.45)} strokeWidth={1.75} />
+    </span>
+  );
+}
+
+/** The TalentHub mark: a horn-like spark, standing in for the unicorn. */
+function TalentMark({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
+      <rect width="24" height="24" rx="7" fill={C.brand} />
+      <path d="M8 18 15.5 5.5 14 13h3.5L9.5 18.5z" fill="#fff" opacity=".95" />
+      <circle cx="17.5" cy="7" r="1.4" fill={C.lav} />
+    </svg>
+  );
+}
+
+const HERO_CANDIDATES = [
+  { name: "Maria Santos", role: "Executive Assistant · Manila", tone: "#4A4FFD", pos: { left: "4%", top: "22%" } },
+  { name: "Diego Ramírez", role: "Video Editor · Bogotá", tone: "#0EA5E9", pos: { left: "8%", top: "62%" } },
+  { name: "Ana Lopez", role: "Bookkeeper · Cebu", tone: "#13139C", pos: { right: "5%", top: "26%" } },
+  { name: "Lucas Pereira", role: "Ops Manager · São Paulo", tone: "#7C3AED", pos: { right: "7%", top: "64%" } },
+];
+
 // ── Differentiator card: flips bg white→indigo on hover (Assistantly pattern) ─
 function DiffCard({ emoji, num, title, desc }: { emoji: string; num: string; title: string; desc: string }) {
   const [hovered, setHovered] = React.useState(false);
@@ -200,7 +267,7 @@ function DiffCard({ emoji, num, title, desc }: { emoji: string; num: string; tit
       style={{ borderColor: hovered ? C.brandB : C.border }}
     >
       <div className="flex items-start justify-between">
-        <span className="text-3xl">{emoji}</span>
+        <Glyph e={emoji} tone={hovered ? "dark" : "light"} />
         <motion.span
           animate={{ color: hovered ? C.lav : C.muted }}
           className="font-mono text-[10px] font-semibold"
@@ -342,7 +409,7 @@ function DeptSlider() {
             className="flex w-72 shrink-0 flex-col rounded-2xl border p-7"
             style={{ background: d.color, borderColor: C.border, scrollSnapAlign: "start" }}
           >
-            <span className="text-3xl">{d.emoji}</span>
+            <Glyph e={d.emoji} />
             <h3 className="mt-3 text-[20px] font-extrabold">{d.title}</h3>
             <div className="mt-2 flex flex-wrap gap-1.5">
               {d.roles.map(r => (
@@ -428,7 +495,7 @@ export function TalentHubPage() {
       >
         <div className="mx-auto flex h-14.5 max-w-300 items-center justify-between px-6 lg:px-8">
           <a href="#" className="flex items-center gap-2.5">
-            <span className="text-xl">🦄</span>
+            <TalentMark size={26} />
             <span className="text-[16px] font-extrabold tracking-tight" style={{ color: C.brand }}>TalentHub</span>
           </a>
 
@@ -489,21 +556,24 @@ export function TalentHubPage() {
         className="relative overflow-hidden px-6 pb-28 pt-36 text-center lg:px-8 lg:pb-36 lg:pt-48"
         style={{ background: `radial-gradient(70% 50% at 50% 0%, ${C.lavSoft} 0%, ${C.bg} 70%)` }}
       >
-        {/* Floating emoji strip with parallax (Assistantly floating elements) */}
-        <motion.div
-          style={{ y: smoothY }}
-          className="pointer-events-none absolute inset-x-0 top-24 flex justify-center gap-8 select-none"
-          aria-hidden
-        >
-          {["🦄", "💰", "🚀", "✨", "🏆", "🤝", "⚡", "🎯"].map((e, i) => (
-            <motion.span
-              key={i}
-              className="text-2xl lg:text-3xl opacity-70"
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 3.5 + i * 0.25, repeat: Infinity, ease: "easeInOut", delay: i * 0.18 }}
+        {/* Placed candidates drifting either side of the headline */}
+        <motion.div style={{ y: smoothY }} className="pointer-events-none absolute inset-0 hidden select-none lg:block" aria-hidden>
+          {HERO_CANDIDATES.map((c, i) => (
+            <motion.div
+              key={c.name}
+              className="absolute flex items-center gap-3 rounded-2xl border bg-white/90 py-2.5 pl-2.5 pr-4 shadow-[0_12px_40px_rgba(19,19,156,0.10)] backdrop-blur"
+              style={{ borderColor: C.border, ...c.pos }}
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 5 + i * 0.6, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
             >
-              {e}
-            </motion.span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-bold text-white" style={{ background: c.tone }}>
+                {c.name[0]}
+              </span>
+              <span className="text-left">
+                <span className="block text-[13px] font-bold" style={{ color: C.ink }}>{c.name}</span>
+                <span className="block text-[11px]" style={{ color: C.muted }}>{c.role}</span>
+              </span>
+            </motion.div>
           ))}
         </motion.div>
 
@@ -513,7 +583,7 @@ export function TalentHubPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[12px] font-bold uppercase tracking-widest"
+            className="mb-8 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[13px] font-semibold"
             style={{ borderColor: C.lav, color: C.brand, background: C.lavSoft }}
           >
             <span className="size-1.5 animate-pulse rounded-full" style={{ background: C.brand }} />
@@ -530,7 +600,7 @@ export function TalentHubPage() {
             </span>
             <span className="block overflow-hidden">
               <SplitReveal
-                text="Unicorn Talent 🦄"
+                text="Unicorn Talent"
                 delay={0.22}
                 style={{
                   background: `linear-gradient(135deg, ${C.brand} 0%, #5B5BF5 100%)`,
@@ -614,8 +684,8 @@ export function TalentHubPage() {
         <div className="mx-auto max-w-300">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
             <Reveal>
-              <div className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-widest" style={{ background: C.lavSoft, color: C.brand }}>
-                ✦ Our Approach
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ background: C.lavSoft, color: C.brand }}>
+                Our Approach
               </div>
               <h2 className="mt-4 font-extrabold tracking-tight" style={{ fontSize: "clamp(32px, 5vw, 60px)", lineHeight: 1.05, letterSpacing: "-0.025em" }}>
                 <SplitReveal text="More Than Staffing —" delay={0} stagger={0.018} />
@@ -645,7 +715,7 @@ export function TalentHubPage() {
                     className="h-full rounded-2xl border p-5 transition"
                     style={{ borderColor: C.border, background: C.bgCard }}
                   >
-                    <span className="text-2xl">{p.emoji}</span>
+                    <Glyph e={p.emoji} size={40} />
                     <p className="mt-2 text-[15px] font-bold">{p.title}</p>
                     <p className="mt-1 text-[13px] leading-relaxed" style={{ color: C.muted }}>{p.desc}</p>
                   </motion.div>
@@ -681,7 +751,7 @@ export function TalentHubPage() {
                   className="flex h-full flex-col rounded-2xl border p-7"
                   style={{ background: C.bg, borderColor: C.border }}
                 >
-                  <span className="text-3xl">{card.emoji}</span>
+                  <Glyph e={card.emoji} />
                   <h3 className="mt-4 text-[18px] font-extrabold">{card.title}</h3>
                   <p className="mt-2 text-[14px] leading-relaxed" style={{ color: C.muted }}>{card.desc}</p>
                 </motion.div>
@@ -695,15 +765,15 @@ export function TalentHubPage() {
       <section id="unicorns" className="relative overflow-hidden px-6 py-28 lg:px-8 lg:py-36">
         <div className="mx-auto max-w-300">
           <Reveal className="mb-14">
-            <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-widest" style={{ background: C.lavSoft, color: C.brand }}>
-              ✦ Departments
+            <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ background: C.lavSoft, color: C.brand }}>
+              Departments
             </div>
             <h2 className="mt-4 font-extrabold tracking-tight" style={{ fontSize: "clamp(30px, 4.5vw, 56px)", letterSpacing: "-0.025em" }}>
               From Admin to Ops —<br />The Right Unicorn, Every Time
             </h2>
             <p className="mt-4 max-w-2xl text-[16px]" style={{ color: C.muted }}>
               Hire across departments — from day-to-day support to specialized roles.{" "}
-              <span className="font-bold" style={{ color: C.ink }}>💰 Most roles: $2,500–$3,000 / month</span>
+              <span className="font-bold" style={{ color: C.ink }}>Most roles: $2,500–$3,000 / month</span>
             </p>
           </Reveal>
 
@@ -715,8 +785,8 @@ export function TalentHubPage() {
       <section className="px-6 py-28 lg:px-8 lg:py-36" style={{ background: C.bgSoft }}>
         <div className="mx-auto max-w-300">
           <Reveal className="mb-14 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-widest" style={{ background: C.lavSoft, color: C.brand }}>
-              ✦ What Sets Us Apart
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ background: C.lavSoft, color: C.brand }}>
+              What Sets Us Apart
             </div>
             <h2 className="font-extrabold tracking-tight" style={{ fontSize: "clamp(30px, 4.5vw, 56px)", letterSpacing: "-0.025em" }}>
               What Makes TalentHub Different
@@ -745,8 +815,8 @@ export function TalentHubPage() {
       <section id="process" className="px-6 py-28 lg:px-8 lg:py-36">
         <div className="mx-auto max-w-300">
           <Reveal className="mb-14 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-widest" style={{ background: C.lavSoft, color: C.brand }}>
-              ✦ How It Works
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ background: C.lavSoft, color: C.brand }}>
+              How It Works
             </div>
             <h2 className="font-extrabold tracking-tight" style={{ fontSize: "clamp(30px, 4.5vw, 56px)", letterSpacing: "-0.025em" }}>
               Our Proven Hiring Process
@@ -781,7 +851,7 @@ export function TalentHubPage() {
                   }}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl">{s.emoji}</span>
+                    <Glyph e={s.emoji} size={40} />
                     <span className="font-mono text-[11px] font-bold" style={{ color: C.brand }}>{s.step}</span>
                   </div>
                   <h3 className="mt-3 text-[16px] font-extrabold">{s.title}</h3>
@@ -806,8 +876,8 @@ export function TalentHubPage() {
         <GradualBlur position="top" />
         <div className="mx-auto max-w-300">
           <Reveal className="mb-14 text-center">
-            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-widest" style={{ background: C.lavSoft, color: C.brand }}>
-              ✦ What Our Clients Say
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ background: C.lavSoft, color: C.brand }}>
+              What Our Clients Say
             </div>
             <h2 className="font-extrabold tracking-tight" style={{ fontSize: "clamp(30px, 4.5vw, 56px)", letterSpacing: "-0.025em" }}>
               Real Results, Real Teams
@@ -824,7 +894,7 @@ export function TalentHubPage() {
               className="mx-auto max-w-3xl rounded-3xl border p-10 text-center"
               style={{ background: C.bg, borderColor: C.border }}
             >
-              <span className="text-4xl">{TESTIMONIALS[activeTestimonial].emoji}</span>
+              <Glyph e={TESTIMONIALS[activeTestimonial].emoji} size={52} />
               <p className="mx-auto mt-6 max-w-2xl text-[20px] font-semibold leading-snug" style={{ color: C.ink }}>
                 &ldquo;{TESTIMONIALS[activeTestimonial].quote}&rdquo;
               </p>
@@ -874,8 +944,8 @@ export function TalentHubPage() {
         <div className="mx-auto max-w-300">
           <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
             <Reveal className="lg:col-span-4">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[12px] font-bold uppercase tracking-widest" style={{ background: C.lavSoft, color: C.brand }}>
-                ✦ FAQ
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-[13px] font-semibold" style={{ background: C.lavSoft, color: C.brand }}>
+                FAQ
               </div>
               <h2 className="mt-2 font-extrabold tracking-tight" style={{ fontSize: "clamp(28px, 4vw, 52px)", letterSpacing: "-0.025em" }}>
                 Frequently<br />Asked Questions
@@ -912,11 +982,11 @@ export function TalentHubPage() {
         <GradualBlur position="top" />
         <Reveal>
           <motion.span
-            className="inline-block text-6xl"
-            animate={{ rotate: [0, 8, -8, 0] }}
+            className="inline-block"
+            animate={{ rotate: [0, 6, -6, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            🦄
+            <TalentMark size={64} />
           </motion.span>
           <h2
             className="mx-auto mt-5 font-extrabold tracking-tight"
@@ -957,7 +1027,7 @@ export function TalentHubPage() {
           <div className="grid grid-cols-2 gap-10 md:grid-cols-6">
             <div className="col-span-2">
               <a href="#" className="flex items-center gap-2">
-                <span className="text-2xl">🦄</span>
+                <TalentMark size={28} />
                 <span className="text-[16px] font-extrabold tracking-tight" style={{ color: C.brand }}>TalentHub</span>
               </a>
               <p className="mt-4 max-w-xs text-[13px] leading-relaxed" style={{ color: C.muted }}>

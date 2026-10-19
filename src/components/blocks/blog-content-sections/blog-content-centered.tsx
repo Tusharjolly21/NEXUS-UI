@@ -144,7 +144,7 @@ function ArticleBody({
         <p className="mt-5 text-sm">
           For more research notes, visit{" "}
           <a href="#" className="font-semibold text-zinc-950 underline underline-offset-4 dark:text-white">
-            Nexus Research Center
+            Northfield Research
           </a>
           .
         </p>

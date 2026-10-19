@@ -1,0 +1,19 @@
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="cut" maskUnits="userSpaceOnUse" x="0" y="0" width="1920" height="1080">
+      <rect width="1920" height="1080" fill="white"/>
+      <g transform="translate(98 0)">
+      <!-- Halcyon mark: a ring broken by a rising arc -->
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M690 540c0 110.5-89.5 200-200 200S290 650.5 290 540s89.5-200 200-200 200 89.5 200 200Zm-56 0c0 79.5-64.5 144-144 144S346 619.5 346 540s64.5-144 144-144 144 64.5 144 144Z" fill="black"/>
+      <path d="M402 600c38-92 132-150 232-138l-6 52c-74-9-144 34-172 103l-54-17Z" fill="black"/>
+      <!-- H -->
+      <rect x="800" y="360" width="62" height="360" rx="6" fill="black"/>
+      <rect x="1010" y="360" width="62" height="360" rx="6" fill="black"/>
+      <rect x="850" y="512" width="172" height="58" fill="black"/>
+      <!-- 2 -->
+      <path d="M1170 452c8-62 62-100 132-100 76 0 132 46 132 114 0 46-24 80-70 122l-104 96h178v56h-270v-50l150-140c34-32 50-56 50-84 0-34-28-58-66-58-40 0-66 22-72 58l-60-14Z" fill="black"/>
+      </g>
+    </mask>
+  </defs>
+  <rect width="1920" height="1080" fill="black" mask="url(#cut)"/>
+</svg>
