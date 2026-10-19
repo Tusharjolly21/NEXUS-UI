@@ -158,11 +158,11 @@ html.dark {
     color-scheme: dark;
   }
   html {
-    @apply overflow-x-hidden;
+    @apply overflow-x-clip;
     scrollbar-gutter: stable;
   }
   body {
-    @apply overflow-x-hidden bg-background font-sans text-foreground antialiased;
+    @apply overflow-x-clip bg-background font-sans text-foreground antialiased;
   }
   *,
   *::before,
