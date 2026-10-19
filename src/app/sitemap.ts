@@ -57,6 +57,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/templates`,               lastModified: latestTemplate.createdAt },
     { url: `${base}/pricing`,                 lastModified: "2026-04-01" },
     { url: `${base}/contact`,                 lastModified: "2026-01-01" },
+    { url: `${base}/privacy`,                 lastModified: "2026-10-19" },
+    { url: `${base}/terms`,                   lastModified: "2026-10-19" },
     { url: `${base}/blog`,                    lastModified: allPosts[0]?.date ?? "2026-01-01" },
     { url: `${base}/docs/introduction`,        lastModified: "2026-03-01" },
     { url: `${base}/docs/installation`,       lastModified: "2026-03-01" },
