@@ -87,9 +87,6 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
-  // template previews render their own full-page chrome
-  if (pathname.startsWith("/templates/")) return null;
-
   const isActive = (href: string, match?: string) => {
     const base = match ?? href;
     return pathname === base || pathname.startsWith(base + "/");

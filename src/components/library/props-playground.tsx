@@ -148,7 +148,7 @@ function ControlRow({
         >
           <span
             className={cn(
-              "absolute top-0.5 size-5 rounded-full bg-background shadow-sm transition-transform",
+              "absolute left-0 top-0.5 size-5 rounded-full bg-background shadow-sm transition-transform",
               value ? "translate-x-[18px]" : "translate-x-0.5",
             )}
           />
