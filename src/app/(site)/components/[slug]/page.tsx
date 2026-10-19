@@ -8,6 +8,7 @@ import {
   libraryComponents,
 } from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
@@ -97,9 +98,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const item = getLibraryComponent(slug);
   if (!item) return {};
+  const seo = COMPONENT_SEO[item.slug];
   return createMetadata({
-    title: `${item.name} — Animated React Component`,
-    description: item.description,
+    title: seo?.title ?? `${item.name} — Animated React Component`,
+    description: seo?.description ?? item.description,
     openGraph: { title: `${item.name} · ${siteConfig.name}` },
     alternates: { canonical: `/components/${item.slug}` },
   });
