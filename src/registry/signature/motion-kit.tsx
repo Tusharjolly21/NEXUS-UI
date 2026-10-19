@@ -27,6 +27,10 @@ import { ProgressButton } from "@/components/progress-button";
 import { CopyDemo } from "@/components/copy-button";
 import { AnimatedIcons } from "@/components/animated-icons";
 import { FolderPeek } from "@/components/folder-peek";
+import { MagnifyDock } from "@/components/magnify-dock";
+import { UploadChips } from "@/components/upload-chips";
+import { NotificationStack } from "@/components/notification-stack";
+import { IslandMorph } from "@/components/island-morph";
 
 function Stage({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -251,6 +255,42 @@ export function PreviewFolderPeek({ compact = false }: { compact?: boolean } = {
   return (
     <Stage>
       <FolderPeek autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewMagnifyDock({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <MagnifyDock autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewUploadChips({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <UploadChips autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewNotificationStack({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <NotificationStack autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewIslandMorph({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <IslandMorph autoplay />
     </Stage>
   );
 }

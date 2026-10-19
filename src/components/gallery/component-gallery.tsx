@@ -8,6 +8,7 @@ import { ComponentModal } from "./component-modal";
 import { GalleryTile, TileCell, TileGrid } from "./gallery-tile";
 import { INTERACTION_FILTERS, type GalleryItem, type Interaction } from "./types";
 import { useUrlParam } from "./use-url-param";
+import { Pagination, scrollToTop, usePage } from "./pagination";
 
 export type CategoryFilter = { id: string; label: string };
 
@@ -22,6 +23,7 @@ export function ComponentGallery({
   limit,
   mobileLimit,
   aside,
+  pageSize = 24,
 }: {
   items: GalleryItem[];
   /** Category chips; omit to hide them. */
@@ -33,6 +35,8 @@ export function ComponentGallery({
   mobileLimit?: number;
   /** Shown at the right of the filter row (e.g. a "Browse all" link). */
   aside?: React.ReactNode;
+  /** Tiles per page when there is no `limit`. */
+  pageSize?: number;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
   const [category, setCategory] = React.useState("all");
@@ -47,7 +51,15 @@ export function ComponentGallery({
       (category === "all" || i.group === category) &&
       (!needle || `${i.name} ${i.description} ${i.categoryLabel}`.toLowerCase().includes(needle)),
   );
-  const shown = !filtering && limit ? matches.slice(0, limit) : matches;
+  const paged = !(limit && !filtering);
+  const pageCount = paged ? Math.max(1, Math.ceil(matches.length / pageSize)) : 1;
+  const [page, setPage] = usePage(pageCount);
+  const gridTop = React.useRef<HTMLDivElement>(null);
+  const shown = !paged ? matches.slice(0, limit) : matches.slice((page - 1) * pageSize, page * pageSize);
+  const goTo = (next: number) => {
+    setPage(next);
+    scrollToTop(gridTop.current);
+  };
   const openItem = openSlug ? (items.find((i) => i.slug === openSlug) ?? null) : null;
   const counts = React.useMemo(() => {
     const c = new Map<string, number>();
@@ -59,18 +71,22 @@ export function ComponentGallery({
     setInteraction("all");
     setCategory("all");
     setQuery("");
+    setPage(1);
   };
 
   return (
     <>
-      <div className="flex flex-col gap-3">
+      <div ref={gridTop} className="flex flex-col gap-3">
         {searchable ? (
           <label className="pg-float flex h-[52px] max-w-[560px] items-center gap-3 rounded-full bg-card px-5">
             <Search className="size-[18px] shrink-0 text-muted-foreground" aria-hidden />
             <span className="sr-only">Search components</span>
             <input
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
               placeholder={`Search ${items.length} components`}
               className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
             />
@@ -85,7 +101,14 @@ export function ComponentGallery({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <ChipRail>
             {INTERACTION_FILTERS.filter((f) => f.value === "all" || counts.get(f.value)).map((f) => (
-              <Chip key={f.value} active={interaction === f.value} onClick={() => setInteraction(f.value)}>
+              <Chip
+                key={f.value}
+                active={interaction === f.value}
+                onClick={() => {
+                  setInteraction(f.value);
+                  setPage(1);
+                }}
+              >
                 {f.label}
                 {f.value !== "all" ? (
                   <span className={cn("tabular-nums text-[12px]", interaction === f.value ? "text-background/60" : "text-muted-foreground")}>
@@ -107,11 +130,26 @@ export function ComponentGallery({
 
         {categories ? (
           <ChipRail>
-            <Chip active={category === "all"} onClick={() => setCategory("all")} className="py-1.5 text-[13px]">
+            <Chip
+              active={category === "all"}
+              onClick={() => {
+                setCategory("all");
+                setPage(1);
+              }}
+              className="py-1.5 text-[13px]"
+            >
               Every category
             </Chip>
             {categories.map((c) => (
-              <Chip key={c.id} active={category === c.id} onClick={() => setCategory(c.id)} className="py-1.5 text-[13px]">
+              <Chip
+                key={c.id}
+                active={category === c.id}
+                onClick={() => {
+                  setCategory(c.id);
+                  setPage(1);
+                }}
+                className="py-1.5 text-[13px]"
+              >
                 {c.label}
               </Chip>
             ))}
@@ -127,7 +165,9 @@ export function ComponentGallery({
             </TileCell>
           ))}
         </TileGrid>
-      ) : (
+      ) : null}
+      {shown.length && paged ? <Pagination page={page} pageCount={pageCount} onChange={goTo} label="Component pages" className="mt-12" /> : null}
+      {shown.length ? null : (
         <div className="mt-6 rounded-tile bg-card px-6 py-16 text-center">
           <p className="text-[17px] font-semibold text-foreground">No components match.</p>
           <p className="mt-1 text-[15px] text-muted-foreground">Try another word, or clear the filters.</p>

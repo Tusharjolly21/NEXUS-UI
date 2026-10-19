@@ -4210,3 +4210,4 @@ export * from "./signature/dot-sphere";
 export * from "./signature/dynamic-island";
 export * from "./signature/checkout-moments";
 export * from "./signature/motion-kit";
+export * from "./blocks/block-variants";

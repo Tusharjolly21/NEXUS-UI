@@ -2772,6 +2772,98 @@
       ]
     },
     {
+      "name": "magnify-dock",
+      "type": "registry:component",
+      "title": "Magnify Dock",
+      "description": "A macOS-style app dock: icons swell as the pointer passes over them, show a label above, bounce when launched and keep a running dot underneath.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/magnify-dock/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/magnify-dock/magnify-dock.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "upload-chips",
+      "type": "registry:component",
+      "title": "Upload Chips",
+      "description": "A drop zone that lifts and tints while you drag over it, then turns every file into a chip with a filling progress bar, a progress ring and a check when it lands.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/upload-chips/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/upload-chips/upload-chips.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "notification-stack",
+      "type": "registry:component",
+      "title": "Notification Stack",
+      "description": "Toasts that pile into a neat stack, spread out while hovered (pausing their timers), swipe away sideways, and turn a loading toast into a success when the work finishes.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/notification-stack/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/notification-stack/notification-stack.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "island-morph",
+      "type": "registry:component",
+      "title": "Island Morph",
+      "description": "A black pill that morphs between a timer, an incoming call and a full music player, with each state's content blurring in once the shape lands.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/island-morph/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/island-morph/island-morph.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "pricing-section",
       "type": "registry:component",
       "title": "Pricing Section",

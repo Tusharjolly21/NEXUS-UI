@@ -84,6 +84,10 @@ const SELF_DEMO = new Set([
   "copy-button",
   "animated-icons",
   "folder-peek",
+  "magnify-dock",
+  "upload-chips",
+  "notification-stack",
+  "island-morph",
 ]);
 
 /** Hover effects that look like nothing until a pointer passes over them. */
@@ -152,6 +156,10 @@ const TINT_OF: Record<string, TileTint> = {
   "copy-button": "violet",
   "animated-icons": "pink",
   "folder-peek": "butter",
+  "magnify-dock": "sky",
+  "upload-chips": "mint",
+  "notification-stack": "peach",
+  "island-morph": "violet",
   "avatar-group": "sky",
   "stateful-button": "mint",
   "gooey-search-input": "mint",

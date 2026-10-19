@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { demoScript, FitPreview } from "./fit-preview";
 import { TINT_CLASSES, type GalleryItem } from "./types";
@@ -52,9 +52,22 @@ export function TileCell({ item, className, children }: { item: GalleryItem; cla
  * visible on touch screens. The name is a real link to the component's page; `onOpen` turns it into
  * "open the inspector" when JavaScript is running.
  */
-export function GalleryTile({ item, onOpen }: { item: GalleryItem; onOpen?: (slug: string) => void }) {
+export function GalleryTile({
+  item,
+  onOpen,
+  href: hrefProp,
+  badge,
+}: {
+  item: GalleryItem;
+  onOpen?: (slug: string) => void;
+  /** Where the name and the action button go. Defaults to the component page. */
+  href?: string;
+  /** Small tag shown next to the name, such as Pro. */
+  badge?: React.ReactNode;
+}) {
   const [run, setRun] = React.useState(0);
-  const href = `/components/${item.slug}`;
+  const href = hrefProp ?? `/components/${item.slug}`;
+  const opensPage = !!hrefProp && !onOpen;
   const { fit } = item;
   const dark = fit.dark;
   const demo = React.useMemo(
@@ -123,6 +136,7 @@ export function GalleryTile({ item, onOpen }: { item: GalleryItem; onOpen?: (slu
           {item.name}
         </Link>
         <div className="pointer-events-auto flex items-center gap-1.5">
+          {badge}
           <button
             type="button"
             onClick={() => setRun((r) => r + 1)}
@@ -135,14 +149,14 @@ export function GalleryTile({ item, onOpen }: { item: GalleryItem; onOpen?: (slu
           <Link
             href={href}
             onClick={open}
-            aria-label={`Open ${item.name} in the inspector`}
-            title="Tweak and copy"
+            aria-label={opensPage ? `Open ${item.name}` : `Open ${item.name} in the inspector`}
+            title={opensPage ? "Open" : "Tweak and copy"}
             className={cn(
               "grid size-8 place-items-center rounded-full transition-colors",
               "bg-action text-white hover:bg-action-hover",
             )}
           >
-            <SlidersHorizontal className="size-3.5" aria-hidden />
+            {opensPage ? <ArrowUpRight className="size-3.5" aria-hidden /> : <SlidersHorizontal className="size-3.5" aria-hidden />}
           </Link>
         </div>
       </div>

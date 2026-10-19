@@ -3,10 +3,10 @@ import Link from "next/link";
 import type { TileTint } from "@/components/gallery/types";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { blocks } from "@/lib/catalog/blocks";
-import { getPreviewExportName } from "@/lib/catalog/library-components";
+import { blockVariants, variantAnchor } from "@/lib/catalog/block-variants";
 import { getTileFit } from "@/lib/catalog/tile-fit";
 import { createMetadata } from "@/lib/seo";
-import { BlocksGallery, type BlockItem, type BlockSlot } from "./_catalog";
+import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog";
 
 export const metadata: Metadata = createMetadata({
   title: "UI Blocks for Next.js — Tailwind CSS & Framer Motion",
@@ -14,43 +14,79 @@ export const metadata: Metadata = createMetadata({
   alternates: { canonical: "/blocks" },
 });
 
+/** Wall order: the liveliest blocks first. */
+const ORDER = [
+  "block-pricing-section",
+  "block-checkout-moments",
+  "block-why-choose-us",
+  "block-logo-clouds",
+  "block-faq-folder-card",
+  "block-sidebar",
+  "block-contact-page",
+  "block-interactive-dots",
+  "block-text-animations",
+  "block-blog-content-sections",
+];
+
+/** Shorter chip labels than the block names. */
+const CHIP_NAME: Record<string, string> = {
+  "block-pricing-section": "Pricing",
+  "block-checkout-moments": "Checkout",
+  "block-why-choose-us": "Feature bentos",
+  "block-logo-clouds": "Logo clouds",
+  "block-faq-folder-card": "FAQ",
+  "block-sidebar": "Sidebars",
+  "block-contact-page": "Contact",
+  "block-interactive-dots": "Backgrounds",
+  "block-text-animations": "Text animations",
+  "block-blog-content-sections": "Blog",
+};
+
 const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];
 
-/**
- * Wall order and footprint for each block, chosen for what the section looks like: wide marquees
- * run wide, sidebars and dot fields run tall, bentos and pricing get the big tiles.
- */
-const LAYOUT: { slug: string; slot: BlockSlot; tint: TileTint }[] = [
-  { slug: "block-pricing-section", slot: "big", tint: "violet" },
-  { slug: "block-interactive-dots", slot: "tall", tint: "mint" },
-  { slug: "block-logo-clouds", slot: "wide", tint: "butter" },
-  { slug: "block-checkout-moments", slot: "card", tint: "peach" },
-  { slug: "block-sidebar", slot: "tall", tint: "sky" },
-  { slug: "block-why-choose-us", slot: "big", tint: "pink" },
-  { slug: "block-faq-folder-card", slot: "half", tint: "mint" },
-  { slug: "block-contact-page", slot: "half", tint: "violet" },
-  { slug: "block-text-animations", slot: "card", tint: "sky" },
-  { slug: "block-blog-content-sections", slot: "wide", tint: "butter" },
-];
-const LAYOUT_OF = new Map(LAYOUT.map((l, i) => [l.slug, { ...l, order: i }]));
-
 export default function BlocksPage() {
-  const items: BlockItem[] = blocks
-    .map((b, i) => ({
-      slug: b.slug,
-      name: b.name,
-      description: b.description,
-      category: b.category,
-      premium: b.premium,
-      variants: b.variants.length,
-      exportName: getPreviewExportName(b.Preview),
-      tint: LAYOUT_OF.get(b.slug)?.tint ?? TINTS[i % TINTS.length],
-      slot: LAYOUT_OF.get(b.slug)?.slot ?? "card",
-      isNew: b.slug === "block-checkout-moments",
-      fit: getTileFit(b.slug),
-    }))
-    .sort((a, b) => (LAYOUT_OF.get(a.slug)?.order ?? 99) - (LAYOUT_OF.get(b.slug)?.order ?? 99));
-  const free = items.filter((b) => !b.premium).length;
+  const bySlug = new Map(blocks.map((b) => [b.slug, b]));
+  const rank = (slug: string) => {
+    const i = ORDER.indexOf(slug);
+    return i === -1 ? 99 : i;
+  };
+
+  // Interleave the blocks so the wall mixes sections instead of running one block after another.
+  const queues = [...new Set(blockVariants.map((v) => v.block))]
+    .sort((a, b) => rank(a) - rank(b))
+    .map((slug) => blockVariants.filter((v) => v.block === slug));
+  const ordered = [];
+  for (let round = 0; queues.some((q) => q.length > round); round++) {
+    for (const q of queues) if (q[round]) ordered.push(q[round]);
+  }
+
+  const items: BlockTileItem[] = ordered.map((v, i) => {
+    const block = bySlug.get(v.block)!;
+    return {
+      slug: v.id,
+      name: v.title,
+      description: block.description,
+      categoryLabel: block.category,
+      group: "blocks",
+      interactions: [],
+      exportName: v.exportName,
+      tint: TINTS[i % TINTS.length],
+      fit: getTileFit(v.id),
+      install: block.registryCliName ?? block.slug,
+      isNew: v.block === "block-checkout-moments",
+      demo: null,
+      block: v.block,
+      premium: block.premium,
+      href: `/blocks/${v.block}#${variantAnchor(v.title)}`,
+    };
+  });
+
+  const filters: BlockFilter[] = queues.map((q) => ({
+    slug: q[0].block,
+    name: CHIP_NAME[q[0].block] ?? bySlug.get(q[0].block)!.name,
+    count: q.length,
+  }));
+  const free = blocks.filter((b) => !b.premium).length;
 
   return (
     <>
@@ -60,14 +96,14 @@ export default function BlocksPage() {
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Blocks</h1>
           <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
             Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: pricing, FAQ, contact, logo
-            clouds and more. {free} of the {items.length} are free.
+            clouds and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
           </p>
         </div>
       </section>
 
       <section aria-label="Block gallery" className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
-          <BlocksGallery items={items} />
+          <BlocksGallery items={items} filters={filters} />
         </div>
       </section>
 
