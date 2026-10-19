@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, type Transition, type Variants } from "framer-motion";
 import { Check, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -129,8 +129,8 @@ const spotlightPlans = [
     copy: "For indie makers trying out AI for the first time.",
     monthly: "$199",
     yearly: "$1,910",
-    periodMonthly: "/ Month",
-    periodYearly: "/ Year",
+    periodMonthly: "/month",
+    periodYearly: "/year",
     action: "Start a free trial",
     features: ["120 projects per month", "Unlimited workspaces", "Two model choices", "History and export", "Email support", "1 member seat"],
   },
@@ -139,8 +139,8 @@ const spotlightPlans = [
     copy: "For teams that need more power and flexibility.",
     monthly: "$499",
     yearly: "$4,790",
-    periodMonthly: "/ Month",
-    periodYearly: "/ Year",
+    periodMonthly: "/month",
+    periodYearly: "/year",
     action: "Get started",
     featured: true,
     features: ["Unlimited projects", "Unlimited workspaces", "Every model included", "History and export", "Priority support", "10 member seats"],
@@ -150,204 +150,307 @@ const spotlightPlans = [
     copy: "For large organizations with custom needs.",
     monthly: "Custom",
     yearly: "Custom",
-    periodMonthly: "/ Month",
-    periodYearly: "/ Year",
+    periodMonthly: "/month",
+    periodYearly: "/year",
     action: "Contact sales",
     features: ["Everything in Pro", "Custom integrations", "A named account manager", "SSO and SAML", "24/7 phone support", "Unlimited member seats"],
   },
 ];
 
+const UI_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34 };
+const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+const primaryButton = cn(
+  "inline-flex h-11 w-full items-center justify-center rounded-full bg-[#0071e3] px-5 text-[15px] font-medium text-white transition-colors hover:bg-[#0077ed]",
+  focusRing,
+);
+const secondaryButton = cn(
+  "inline-flex h-11 w-full items-center justify-center rounded-full bg-[#e8e8ed] px-5 text-[15px] font-medium text-[#1d1d1f] transition-colors hover:bg-[#dcdce1]",
+  "dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:hover:bg-[#3a3a3c]",
+  focusRing,
+);
+
+/** Staggered on-view entrance shared by the three sections. */
+function useReveal() {
+  const reduce = useReducedMotion();
+  const container: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: reduce ? 0 : 0.07, delayChildren: 0.04 } },
+  };
+  const item: Variants = reduce
+    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.2 } } }
+    : {
+        hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+        show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring", stiffness: 260, damping: 30 } },
+      };
+  return { container, item, reduce };
+}
+
+/** Apple-style segmented control: a white pill slides between Monthly and Yearly. */
 function BillingToggle({
   cycle,
   onChange,
-  inverse = false,
-  id,
+  className,
 }: {
   cycle: BillingCycle;
   onChange: (cycle: BillingCycle) => void;
-  inverse?: boolean;
-  id: string;
+  className?: string;
 }) {
+  const id = React.useId();
+  const reduce = useReducedMotion();
+
   return (
     <div
-      className={cn(
-        "relative inline-flex items-center rounded-lg p-1 text-sm",
-        inverse ? "bg-white/10 text-white/65" : "bg-zinc-100 text-zinc-500",
-      )}
+      role="radiogroup"
       aria-label="Billing frequency"
+      className={cn("relative inline-flex rounded-[10px] bg-[#e8e8ed] p-[3px] text-[14px] dark:bg-[#3a3a3c]", className)}
     >
-      {(["monthly", "yearly"] as const).map((value) => (
-        <button
-          key={value}
-          type="button"
-          onClick={() => onChange(value)}
-          className={cn(
-            "relative min-w-[74px] rounded-md px-4 py-2 font-medium capitalize",
-            cycle === value && (inverse ? "text-zinc-950" : "text-white"),
-          )}
-        >
-          {cycle === value && (
-            <motion.span
-              layoutId={`billing-toggle-${id}`}
-              className={cn("absolute inset-0 rounded-md", inverse ? "bg-white" : "bg-zinc-950")}
-              transition={{ type: "spring", stiffness: 430, damping: 34 }}
-            />
-          )}
-          <span className="relative z-10">{value}</span>
-        </button>
-      ))}
+      {(["monthly", "yearly"] as const).map((value) => {
+        const active = cycle === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(value)}
+            className={cn(
+              "relative h-8 min-w-[96px] rounded-[8px] px-4 font-medium transition-colors",
+              active ? "text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7]",
+              focusRing,
+            )}
+          >
+            {active ? (
+              <motion.span
+                layoutId={`${id}-pill`}
+                aria-hidden
+                className="absolute inset-0 rounded-[8px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]"
+                transition={reduce ? { duration: 0 } : UI_SPRING}
+              />
+            ) : null}
+            <span className="relative z-10">{value === "monthly" ? "Monthly" : "Yearly"}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }
 
+/** Swaps between the monthly and yearly value: the old one lifts out blurred, the new one rises in. */
 function SwitchingText({
   cycle,
   monthly,
   yearly,
   className,
+  delay = 0,
 }: {
   cycle: BillingCycle;
   monthly: string;
   yearly: string;
   className?: string;
+  delay?: number;
 }) {
+  const reduce = useReducedMotion();
+  const value = cycle === "monthly" ? monthly : yearly;
+
   return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.span
-        key={cycle}
-        initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        exit={{ opacity: 0, y: -10, filter: "blur(5px)" }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className={className}
-      >
-        {cycle === "monthly" ? monthly : yearly}
-      </motion.span>
-    </AnimatePresence>
+    <span className="relative inline-flex">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span
+          key={value}
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(6px)" }}
+          transition={reduce ? { duration: 0.15 } : { type: "spring", stiffness: 380, damping: 32, delay }}
+          className={cn("inline-block whitespace-nowrap", className)}
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
+    </span>
   );
 }
 
 function FeatureItem({ children, pale = false }: { children: React.ReactNode; pale?: boolean }) {
   return (
-    <li className={cn("flex items-start gap-2.5 text-[12px] leading-5", pale ? "text-white/80" : "text-zinc-600")}>
-      <span className={cn("mt-[3px] flex size-3.5 shrink-0 items-center justify-center rounded-full", pale ? "bg-white text-zinc-800" : "bg-zinc-600 text-white")}>
-        <Check className="size-2.5 stroke-[3]" />
-      </span>
+    <li className={cn("flex items-start gap-2.5 text-[14px] leading-[1.45]", pale ? "text-white/80" : "text-[#1d1d1f] dark:text-[#f5f5f7]")}>
+      <Check
+        aria-hidden
+        strokeWidth={2.25}
+        className={cn("mt-[2px] size-4 shrink-0", pale ? "text-[#2997ff]" : "text-[#0071e3] dark:text-[#2997ff]")}
+      />
       <span>{children}</span>
     </li>
   );
 }
 
+function SectionHeader({
+  title,
+  copy,
+  cycle,
+  onCycle,
+  item,
+}: {
+  title: string;
+  copy: string;
+  cycle: BillingCycle;
+  onCycle: (cycle: BillingCycle) => void;
+  item: Variants;
+}) {
+  return (
+    <header className="mx-auto mb-10 flex max-w-xl flex-col items-center text-center">
+      <motion.h2
+        variants={item}
+        className="text-balance text-[32px] font-semibold leading-[1.08] tracking-[-0.03em] text-[#1d1d1f] sm:text-[40px] dark:text-[#f5f5f7]"
+      >
+        {title}
+      </motion.h2>
+      <motion.p variants={item} className="mt-3 text-pretty text-[17px] leading-[1.5] text-[#6e6e73] dark:text-[#a1a1a6]">
+        {copy}
+      </motion.p>
+      <motion.div variants={item} className="mt-6 flex flex-col items-center gap-2">
+        <BillingToggle cycle={cycle} onChange={onCycle} />
+        <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Save about 20% when you pay yearly.</span>
+      </motion.div>
+    </header>
+  );
+}
+
 export function PricingPlanGrid() {
   const [cycle, setCycle] = React.useState<BillingCycle>("monthly");
+  const { container, item } = useReveal();
 
   return (
-    <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f7f7f7] px-4 py-8 text-zinc-950 sm:px-8">
-      <div className="w-full max-w-[1040px]">
-        <header className="mx-auto mb-8 max-w-lg text-center">
-          <h2 className="text-3xl font-semibold tracking-[-0.02em]">Plans that grow with your audience</h2>
-          <p className="mt-3 text-sm leading-6 text-zinc-500">
-            Start on the plan that fits the channels you run today. Switch tiers whenever you like and we prorate the difference.
-          </p>
-          <div className="mt-6">
-            <BillingToggle cycle={cycle} onChange={setCycle} id="plan-grid" />
-          </div>
-        </header>
-        <div className="grid gap-3 md:grid-cols-4">
+    <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f5f5f7] px-4 py-14 text-[#1d1d1f] sm:px-8 dark:bg-black dark:text-[#f5f5f7]">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        className="w-full max-w-[1120px]"
+      >
+        <SectionHeader
+          title="Plans that grow with your audience"
+          copy="Start on the plan that fits the channels you run today. Switch tiers whenever you like and we prorate the difference."
+          cycle={cycle}
+          onCycle={setCycle}
+          item={item}
+        />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {gridPlans.map((plan, index) => (
             <motion.article
               key={plan.label}
-              initial={false}
-              animate={{ y: plan.featured ? -2 : 0 }}
-              transition={{ duration: 0.3, delay: index * 0.035 }}
+              variants={item}
               className={cn(
-                "flex min-h-[390px] flex-col rounded-lg p-5",
-                plan.featured ? "bg-[#182032] text-white shadow-xl" : "border border-zinc-100 bg-white",
+                "relative flex min-h-[420px] flex-col rounded-[24px] bg-white p-6 dark:bg-[#1c1c1e]",
+                plan.featured
+                  ? "shadow-[0_0_0_2px_#0071e3,0_20px_40px_-24px_rgba(0,0,0,.25)]"
+                  : "shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]",
               )}
             >
-              <h3 className={cn("text-sm font-semibold", plan.featured ? "text-white/90" : "text-zinc-700")}>{plan.label}</h3>
-              <div className="mt-4 flex min-h-10 items-center text-[30px] font-semibold tracking-normal">
-                <SwitchingText cycle={cycle} monthly={plan.monthly} yearly={plan.yearly} />
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-[17px] font-semibold tracking-[-0.015em]">{plan.label}</h3>
+                {plan.featured ? (
+                  <span className="text-[12px] font-semibold text-[#0071e3] dark:text-[#2997ff]">Most popular</span>
+                ) : null}
               </div>
-              <p className={cn("mt-4 min-h-10 text-[12px] leading-5", plan.featured ? "text-white/62" : "text-zinc-500")}>{plan.copy}</p>
-              <ul className="mb-6 mt-6 space-y-2">
+              <div className="mt-4 flex min-h-10 items-center text-[32px] font-semibold tracking-[-0.03em] tabular-nums">
+                <SwitchingText cycle={cycle} monthly={plan.monthly} yearly={plan.yearly} delay={index * 0.04} />
+              </div>
+              <p className="mt-2 min-h-[42px] text-[14px] leading-[1.5] text-[#6e6e73] dark:text-[#a1a1a6]">{plan.copy}</p>
+              <ul className="mb-7 mt-6 space-y-2.5 border-t border-black/[0.08] pt-5 dark:border-white/[0.1]">
                 {plan.features.map((feature) => (
-                  <FeatureItem key={feature} pale={plan.featured}>{feature}</FeatureItem>
+                  <FeatureItem key={feature}>{feature}</FeatureItem>
                 ))}
               </ul>
-              <button
+              <motion.button
                 type="button"
-                className={cn(
-                  "mt-auto rounded-full px-4 py-2.5 text-xs font-semibold",
-                  plan.featured ? "bg-white text-zinc-900" : "bg-black text-white",
-                )}
+                whileTap={{ scale: 0.97 }}
+                className={cn("mt-auto", plan.featured ? primaryButton : secondaryButton)}
               >
                 {plan.action}
-              </button>
+              </motion.button>
             </motion.article>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 export function AdvancedPricingColumns() {
   const [cycle, setCycle] = React.useState<BillingCycle>("monthly");
+  const { container, item } = useReveal();
 
   return (
-    <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f8f8f8] px-4 py-7 text-zinc-900">
-      <div className="w-full max-w-[940px]">
-        <header className="mx-auto mb-7 flex max-w-xl flex-col items-center text-center">
-          <h2 className="text-[30px] font-semibold tracking-[-0.02em]">Pay for the questions you ask</h2>
-          <p className="mt-2 max-w-md text-sm leading-6 text-zinc-500">
-            Every plan reads from the same warehouse. Upgrade when you need more seats, history or real-time data.
-          </p>
-          <div className="mt-5">
-            <BillingToggle cycle={cycle} onChange={setCycle} id="advanced" />
-          </div>
-        </header>
+    <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f5f5f7] px-4 py-14 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7]">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        className="w-full max-w-[1000px]"
+      >
+        <SectionHeader
+          title="Pay for the questions you ask"
+          copy="Every plan reads from the same warehouse. Upgrade when you need more seats, history or real-time data."
+          cycle={cycle}
+          onCycle={setCycle}
+          item={item}
+        />
         <div className="grid gap-4 md:grid-cols-3">
           {comparisonPlans.map((plan, index) => (
             <motion.article
               key={plan.label}
-              layout
-              initial={false}
-              animate={{ y: plan.badge ? -4 : 0 }}
-              transition={{ type: "spring", stiffness: 280, damping: 26, delay: index * 0.03 }}
-              className="flex min-h-[405px] flex-col rounded-[18px] border border-zinc-100 bg-white p-3 shadow-[0_1px_1px_rgba(0,0,0,0.03)]"
+              variants={item}
+              className="flex min-h-[440px] flex-col rounded-[28px] bg-white p-2 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
             >
-              <div className="rounded-[13px] border border-zinc-200 bg-white p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">{plan.label}</h3>
-                  {plan.badge && <span className="rounded-full bg-zinc-900 px-3 py-1 text-[10px] font-medium text-white">{plan.badge}</span>}
+              <div className="rounded-[22px] bg-[#f5f5f7] p-5 dark:bg-[#2c2c2e]">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-[17px] font-semibold tracking-[-0.015em]">{plan.label}</h3>
+                  {plan.badge ? (
+                    <span className="rounded-full bg-[#0071e3]/10 px-2.5 py-0.5 text-[12px] font-semibold text-[#0066cc] dark:bg-[#2997ff]/15 dark:text-[#2997ff]">
+                      {plan.badge}
+                    </span>
+                  ) : null}
                 </div>
-                <div className="mt-7 flex items-baseline gap-1">
-                  <span className="text-lg text-zinc-500">$</span>
+                <div className="mt-6 flex items-baseline gap-1">
+                  <span className="text-[20px] font-semibold text-[#6e6e73] dark:text-[#a1a1a6]">$</span>
                   <SwitchingText
                     cycle={cycle}
                     monthly={plan.monthly}
                     yearly={plan.yearly}
-                    className="text-[48px] font-semibold leading-none"
+                    delay={index * 0.04}
+                    className="text-[44px] font-semibold leading-none tracking-[-0.035em] tabular-nums"
                   />
-                  <span className="text-xs text-zinc-500">/{cycle === "monthly" ? "month" : "year"}</span>
+                  <SwitchingText
+                    cycle={cycle}
+                    monthly="/month"
+                    yearly="/year"
+                    delay={index * 0.04 + 0.03}
+                    className="text-[14px] text-[#6e6e73] dark:text-[#a1a1a6]"
+                  />
                 </div>
-                <button type="button" className={cn("mt-7 w-full rounded-md py-2.5 text-xs font-semibold transition-colors", plan.badge ? "bg-zinc-950 text-white hover:bg-zinc-800" : "border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50")}>
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.97 }}
+                  className={cn("mt-6", plan.badge ? primaryButton : cn(secondaryButton, "bg-white dark:bg-[#3a3a3c] dark:hover:bg-[#48484a]"))}
+                >
                   Get {plan.label}
-                </button>
+                </motion.button>
               </div>
-              <ul
-                className="space-y-2 px-2 pt-7"
-              >
-                {plan.features.map((feature) => <FeatureItem key={feature}>{feature}</FeatureItem>)}
+              <ul className="space-y-2.5 px-4 pt-6">
+                {plan.features.map((feature) => (
+                  <FeatureItem key={feature}>{feature}</FeatureItem>
+                ))}
               </ul>
               {plan.inherited.length > 0 && (
-                <div className="mt-5 border-t border-zinc-200 px-2 pt-4">
-                  <Plus className="mx-auto mb-4 size-3.5 text-zinc-700" />
+                <div className="mx-4 mt-6 border-t border-black/[0.08] pb-4 pt-4 dark:border-white/[0.1]">
                   <ul className="space-y-2">
                     {plan.inherited.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-[12px] font-medium text-zinc-700">
-                        <span className="flex size-3.5 items-center justify-center rounded-full bg-zinc-900 text-white"><Check className="size-2.5 stroke-[3]" /></span>
+                      <li key={feature} className="flex items-center gap-2.5 text-[14px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">
+                        <span className="grid size-4 place-items-center rounded-full bg-[#e8e8ed] text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#f5f5f7]">
+                          <Plus aria-hidden className="size-3" strokeWidth={2.5} />
+                        </span>
                         {feature}
                       </li>
                     ))}
@@ -357,70 +460,90 @@ export function AdvancedPricingColumns() {
             </motion.article>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 export function SpotlightPricingCards() {
   const [cycle, setCycle] = React.useState<BillingCycle>("monthly");
+  const { container, item } = useReveal();
 
   return (
-    <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f7f7f7] px-4 py-7 text-zinc-950">
-      <div className="w-full max-w-[900px]">
-        <header className="mx-auto mb-8 max-w-sm text-center">
-          <h2 className="text-balance text-[32px] font-medium leading-[1.04] tracking-[-0.03em] sm:text-[40px]">One assistant, three ways to run it</h2>
-          <p className="mt-5 text-sm leading-6 text-zinc-500">Start on Hobby for free for 14 days. Every plan keeps your history when you move up.</p>
-          <div className="mt-5">
-            <BillingToggle cycle={cycle} onChange={setCycle} id="spotlight" />
-          </div>
-        </header>
+    <section className="flex h-full w-full items-center justify-center overflow-hidden bg-white px-4 py-14 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7]">
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
+        className="w-full max-w-[1000px]"
+      >
+        <SectionHeader
+          title="One assistant, three ways to run it"
+          copy="Start on Hobby for free for 14 days. Every plan keeps your history when you move up."
+          cycle={cycle}
+          onCycle={setCycle}
+          item={item}
+        />
         <div className="grid items-stretch gap-4 md:grid-cols-3">
           {spotlightPlans.map((plan, index) => (
             <motion.article
               key={plan.label}
-              initial={false}
-              animate={{ y: plan.featured ? -4 : 0, scale: plan.featured ? 1.01 : 1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 27, delay: index * 0.035 }}
+              variants={item}
               className={cn(
-                "flex min-h-[390px] flex-col rounded-[18px] border p-5",
-                plan.featured ? "border-zinc-800 bg-[#191919] text-white shadow-xl" : "border-zinc-100 bg-white",
+                "flex min-h-[460px] flex-col rounded-[28px] p-7",
+                plan.featured
+                  ? "bg-[#1d1d1f] text-[#f5f5f7] shadow-[0_30px_60px_-30px_rgba(0,0,0,.5)] md:-my-3 md:py-10 dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.12)]"
+                  : "bg-[#f5f5f7] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]",
               )}
             >
-              <div className={cn("rounded-[13px] border p-5", plan.featured ? "border-zinc-700 bg-[#262626]" : "border-zinc-100 bg-white shadow-sm")}>
-                <h3 className="text-lg font-semibold">{plan.label}</h3>
-                <p className={cn("mt-2 min-h-10 text-[12px] leading-5", plan.featured ? "text-white/56" : "text-zinc-500")}>{plan.copy}</p>
-              </div>
-              <div className="mt-7 flex items-baseline gap-2">
-                <SwitchingText cycle={cycle} monthly={plan.monthly} yearly={plan.yearly} className="text-[40px] font-medium leading-none" />
+              <h3 className="text-[21px] font-semibold tracking-[-0.02em]">{plan.label}</h3>
+              <p className={cn("mt-2 min-h-[42px] text-[14px] leading-[1.5]", plan.featured ? "text-white/60" : "text-[#6e6e73] dark:text-[#a1a1a6]")}>
+                {plan.copy}
+              </p>
+              <div className="mt-8 flex items-baseline gap-1.5">
+                <SwitchingText
+                  cycle={cycle}
+                  monthly={plan.monthly}
+                  yearly={plan.yearly}
+                  delay={index * 0.04}
+                  className="text-[44px] font-semibold leading-none tracking-[-0.035em] tabular-nums"
+                />
                 {plan.monthly !== "Custom" ? (
-                  <span className={cn("text-xs", plan.featured ? "text-white/45" : "text-zinc-500")}>
-                    {cycle === "monthly" ? plan.periodMonthly : plan.periodYearly}
-                  </span>
+                  <SwitchingText
+                    cycle={cycle}
+                    monthly={plan.periodMonthly}
+                    yearly={plan.periodYearly}
+                    delay={index * 0.04 + 0.03}
+                    className={cn("text-[14px]", plan.featured ? "text-white/50" : "text-[#6e6e73] dark:text-[#a1a1a6]")}
+                  />
                 ) : null}
               </div>
-              <button
+              <motion.button
                 type="button"
+                whileTap={{ scale: 0.97 }}
                 className={cn(
-                  "mt-5 w-full rounded-full border py-3 text-xs font-medium",
-                  plan.featured ? "border-transparent bg-[#5548ef] text-white" : "border-zinc-100 bg-white text-zinc-600 shadow-sm",
+                  "mt-7",
+                  plan.featured ? primaryButton : cn(secondaryButton, "bg-white hover:bg-white/70 dark:bg-[#2c2c2e]"),
                 )}
               >
                 {plan.action}
-              </button>
-              <div className={cn("my-5 border-t border-dashed", plan.featured ? "border-white/15" : "border-zinc-200")} />
-              <p className={cn("mb-3 text-[12px] font-medium", plan.featured ? "text-white/60" : "text-zinc-500")}>
+              </motion.button>
+              <div className={cn("my-7 border-t", plan.featured ? "border-white/[0.12]" : "border-black/[0.08] dark:border-white/[0.1]")} />
+              <p className={cn("mb-3 text-[13px] font-semibold", plan.featured ? "text-white/60" : "text-[#6e6e73] dark:text-[#a1a1a6]")}>
                 Includes
               </p>
-              <ul
-                className="space-y-2"
-              >
-                {plan.features.map((feature) => <FeatureItem key={feature} pale={plan.featured}>{feature}</FeatureItem>)}
+              <ul className="space-y-2.5">
+                {plan.features.map((feature) => (
+                  <FeatureItem key={feature} pale={plan.featured}>
+                    {feature}
+                  </FeatureItem>
+                ))}
               </ul>
             </motion.article>
           ))}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

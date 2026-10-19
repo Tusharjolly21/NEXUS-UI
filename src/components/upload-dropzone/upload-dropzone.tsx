@@ -177,7 +177,7 @@ export function UploadDropzone({
   initialFiles,
   title = "Drag a file here",
   hint,
-  accent = "#6d5cff",
+  accent = "#0071e3",
   disabled = false,
   className,
 }: UploadDropzoneProps) {

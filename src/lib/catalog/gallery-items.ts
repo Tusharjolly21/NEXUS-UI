@@ -74,6 +74,16 @@ const SELF_DEMO = new Set([
   "animated-tabs",
   "shared-element-cards",
   "rotating-headline",
+  "stretch-nav",
+  "feedback-pill",
+  "stagger-menu",
+  "ruler-picker",
+  "elastic-stepper",
+  "todo-list",
+  "progress-button",
+  "copy-button",
+  "animated-icons",
+  "folder-peek",
 ]);
 
 /** Hover effects that look like nothing until a pointer passes over them. */
@@ -132,6 +142,16 @@ const TINT_OF: Record<string, TileTint> = {
   "animated-tabs": "mint",
   "shared-element-cards": "peach",
   "rotating-headline": "pink",
+  "stretch-nav": "sky",
+  "feedback-pill": "violet",
+  "stagger-menu": "peach",
+  "ruler-picker": "butter",
+  "elastic-stepper": "mint",
+  "todo-list": "sky",
+  "progress-button": "mint",
+  "copy-button": "violet",
+  "animated-icons": "pink",
+  "folder-peek": "butter",
   "avatar-group": "sky",
   "stateful-button": "mint",
   "gooey-search-input": "mint",
@@ -140,6 +160,9 @@ const TINT_OF: Record<string, TileTint> = {
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "animated-icons",
+  "ruler-picker",
+  "stretch-nav",
   "hold-to-confirm",
   "price-odometer",
   "slide-to-confirm",

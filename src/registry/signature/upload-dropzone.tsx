@@ -132,7 +132,7 @@ export function PreviewUploadDropzone({ compact = false }: { compact?: boolean }
               </span>
               <span className="text-[12px] font-medium text-[#17181A] dark:text-neutral-100">{ghostName}</span>
               {ghostCount > 1 ? (
-                <span className="absolute -right-2 -top-2 grid size-5 place-items-center rounded-full bg-[#6d5cff] text-[10px] font-bold text-white">
+                <span className="absolute -right-2 -top-2 grid size-5 place-items-center rounded-full bg-[#0071e3] text-[10px] font-bold text-white">
                   {ghostCount}
                 </span>
               ) : null}
@@ -141,7 +141,7 @@ export function PreviewUploadDropzone({ compact = false }: { compact?: boolean }
           <svg width="22" height="24" viewBox="0 0 22 24" className="absolute left-1 top-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
             <path
               d="M3 2.2v17.6c0 .7.8 1 1.3.5l4.2-4.3 2.9 6.3c.2.5.8.7 1.3.5l2-.9c.5-.2.7-.8.5-1.3l-2.9-6.2h6c.7 0 1-.8.5-1.3L4.3 1.7C3.8 1.2 3 1.5 3 2.2Z"
-              fill="#6d5cff"
+              fill="#0071e3"
               stroke="white"
               strokeWidth="1.5"
               strokeLinejoin="round"

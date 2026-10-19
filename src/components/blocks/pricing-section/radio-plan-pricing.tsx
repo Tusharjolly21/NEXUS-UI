@@ -1,8 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion } from "framer-motion";
-import { ArrowRight, Check, Minus } from "lucide-react";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type Transition,
+  type Variants,
+} from "framer-motion";
+import { Check, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type PricingTheme = "ivory" | "slate" | "midnight" | "ember" | "custom";
@@ -31,6 +40,11 @@ export type RadioPlanPricingProps = {
   currency?: string;
   defaultSelectedPlan?: string;
   layout?: PricingLayout;
+  /**
+   * `ivory` (default) follows the page: light, or dark under a `.dark` ancestor.
+   * `slate` is always light, `midnight` always dark, `ember` dark with an orange accent,
+   * and `custom` starts from `ivory` and takes the colour props below.
+   */
   theme?: PricingTheme;
   backgroundColor?: string;
   cardBackgroundColor?: string;
@@ -54,63 +68,82 @@ export type RadioPlanPricingProps = {
 };
 
 type Palette = {
+  page: string;
   background: string;
   card: string;
+  selected: string;
   primary: string;
   secondary: string;
   accent: string;
   ctaText: string;
-  selected: string;
-  inactive: string;
   border: string;
 };
 
-const THEME_PALETTES: Record<Exclude<PricingTheme, "custom">, Palette> = {
-  ivory: {
-    background: "#f5f4f0",
-    card: "#ffffff",
-    primary: "#18191c",
-    secondary: "#777a84",
-    accent: "#1d1e22",
-    ctaText: "#ffffff",
-    selected: "#f1f1ee",
-    inactive: "#ffffff",
-    border: "#d9d8d3",
-  },
+/** Fixed palettes. `ivory` is not here: it is the adaptive light/dark palette set with classes below. */
+const FIXED_PALETTES: Record<"slate" | "midnight" | "ember", Palette> = {
   slate: {
-    background: "#dfe4ea",
-    card: "#f6f7f9",
-    primary: "#121a25",
-    secondary: "#647184",
-    accent: "#35516e",
+    page: "#f5f5f7",
+    background: "#ffffff",
+    card: "#f5f5f7",
+    selected: "#ffffff",
+    primary: "#1d1d1f",
+    secondary: "#6e6e73",
+    accent: "#0071e3",
     ctaText: "#ffffff",
-    selected: "#e6ebf1",
-    inactive: "#f6f7f9",
-    border: "#bfccd8",
+    border: "rgba(0,0,0,0.08)",
   },
   midnight: {
-    background: "#10131a",
-    card: "#191d27",
-    primary: "#f5f7ff",
-    secondary: "#9198aa",
-    accent: "#718bff",
+    page: "#000000",
+    background: "#1c1c1e",
+    card: "#2c2c2e",
+    selected: "#2c2c2e",
+    primary: "#f5f5f7",
+    secondary: "#a1a1a6",
+    accent: "#0071e3",
     ctaText: "#ffffff",
-    selected: "#202736",
-    inactive: "#181c25",
-    border: "#303746",
+    border: "rgba(255,255,255,0.1)",
   },
   ember: {
-    background: "#211511",
-    card: "#2b1c17",
-    primary: "#fff3ec",
-    secondary: "#bf9482",
-    accent: "#f06d42",
-    ctaText: "#fff8f4",
-    selected: "#35221a",
-    inactive: "#2a1b16",
-    border: "#543428",
+    page: "#000000",
+    background: "#1c1c1e",
+    card: "#2c2c2e",
+    selected: "#2c2c2e",
+    primary: "#f5f5f7",
+    secondary: "#a1a1a6",
+    accent: "#ff9500",
+    ctaText: "#1d1d1f",
+    border: "rgba(255,255,255,0.1)",
   },
 };
+
+/** Adaptive palette: Apple light by default, Apple dark under `.dark`. */
+const ADAPTIVE_VARS = cn(
+  "[--rp-page:#f5f5f7] [--rp-bg:#ffffff] [--rp-card:#f5f5f7] [--rp-sel:#ffffff] [--rp-ink:#1d1d1f] [--rp-sub:#6e6e73]",
+  "[--rp-accent:#0071e3] [--rp-cta:#ffffff] [--rp-line:rgba(0,0,0,0.08)]",
+  "dark:[--rp-page:#000000] dark:[--rp-bg:#1c1c1e] dark:[--rp-card:#2c2c2e] dark:[--rp-sel:#2c2c2e]",
+  "dark:[--rp-ink:#f5f5f7] dark:[--rp-sub:#a1a1a6] dark:[--rp-line:rgba(255,255,255,0.1)]",
+);
+
+const VAR_NAMES: Record<keyof Palette, string> = {
+  page: "--rp-page",
+  background: "--rp-bg",
+  card: "--rp-card",
+  selected: "--rp-sel",
+  primary: "--rp-ink",
+  secondary: "--rp-sub",
+  accent: "--rp-accent",
+  ctaText: "--rp-cta",
+  border: "--rp-line",
+};
+
+function paletteVars(palette: Partial<Palette>) {
+  const vars: Record<string, string> = {};
+  (Object.keys(VAR_NAMES) as (keyof Palette)[]).forEach((key) => {
+    const value = palette[key];
+    if (value) vars[VAR_NAMES[key]] = value;
+  });
+  return vars as React.CSSProperties;
+}
 
 export const DEFAULT_PRICING_FEATURES = [
   "A finance advisor on call",
@@ -157,93 +190,60 @@ export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
   },
 ];
 
-const SPEEDS: Record<PricingTransitionSpeed, number> = {
-  slow: 0.55,
-  medium: 0.38,
-  fast: 0.22,
+const SPRINGS: Record<PricingTransitionSpeed, Transition> = {
+  slow: { type: "spring", stiffness: 220, damping: 30 },
+  medium: { type: "spring", stiffness: 380, damping: 32 },
+  fast: { type: "spring", stiffness: 500, damping: 36 },
 };
 
-function AnimatedPrice({
+const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+
+/** The selected plan's price, counting from the previous price to the new one on a spring. */
+function RollingPrice({
   value,
-  active,
+  currency,
   duration,
   fontFamily,
 }: {
   value: number;
-  active: boolean;
+  currency: string;
   duration: number;
   fontFamily?: string;
 }) {
-  const reduceMotion = useReducedMotion();
-  const counter = useMotionValue(active ? 0 : value);
-  const [current, setCurrent] = React.useState(active ? 0 : value);
+  const reduce = useReducedMotion();
+  const counter = useMotionValue(value);
+  const whole = useTransform(counter, (v) => Math.max(0, v).toFixed(2).split(".")[0]);
+  const decimals = useTransform(counter, (v) => Math.max(0, v).toFixed(2).split(".")[1]);
 
   React.useEffect(() => {
-    if (!active) {
+    if (reduce || duration <= 0) {
       counter.set(value);
       return;
     }
-
-    if (reduceMotion) {
-      counter.set(value);
-      return;
-    }
-
-    counter.set(0);
-    const unsubscribe = counter.on("change", setCurrent);
-    const controls = animate(counter, value, {
-      duration,
-      ease: [0.22, 1, 0.36, 1],
-    });
-
-    return () => {
-      controls.stop();
-      unsubscribe();
-    };
-  }, [active, counter, duration, reduceMotion, value]);
-
-  const displayedValue = active && !reduceMotion ? current : value;
-  const [whole, decimals] = displayedValue.toFixed(2).split(".");
+    const controls = animate(counter, value, { type: "spring", duration, bounce: 0 });
+    return () => controls.stop();
+  }, [counter, duration, reduce, value]);
 
   return (
     <span className="inline-flex items-baseline tabular-nums" style={{ fontFamily }}>
-      <span className="text-[clamp(2rem,3.1vw,3.15rem)] font-medium leading-none">{whole}</span>
-      <span className="text-[clamp(1.25rem,1.7vw,1.85rem)] font-medium leading-none">.{decimals}</span>
+      <span className="sr-only">
+        {currency}
+        {value.toFixed(2)}
+      </span>
+      <span aria-hidden className="inline-flex items-baseline">
+        <span className="mr-0.5 text-[22px] font-semibold text-[var(--rp-sub)]">{currency}</span>
+        <motion.span className="text-[44px] font-semibold leading-none tracking-[-0.035em]">{whole}</motion.span>
+        <motion.span className="text-[22px] font-semibold tracking-[-0.02em]">
+          <span>.</span>
+          <motion.span>{decimals}</motion.span>
+        </motion.span>
+      </span>
     </span>
   );
 }
 
-function resolvePalette({
-  theme,
-  backgroundColor,
-  cardBackgroundColor,
-  primaryTextColor,
-  secondaryTextColor,
-  accentColor,
-  ctaTextColor,
-}: Pick<
-  RadioPlanPricingProps,
-  | "theme"
-  | "backgroundColor"
-  | "cardBackgroundColor"
-  | "primaryTextColor"
-  | "secondaryTextColor"
-  | "accentColor"
-  | "ctaTextColor"
->) {
-  const base = theme === "custom" ? THEME_PALETTES.ivory : THEME_PALETTES[theme ?? "ivory"];
-
-  if (theme !== "custom") return base;
-
-  return {
-    ...base,
-    background: backgroundColor ?? base.background,
-    card: cardBackgroundColor ?? base.card,
-    primary: primaryTextColor ?? base.primary,
-    secondary: secondaryTextColor ?? base.secondary,
-    accent: accentColor ?? base.accent,
-    ctaText: ctaTextColor ?? base.ctaText,
-  };
+function formatPrice(price: number, currency: string) {
+  return `${currency}${price.toFixed(2)}`;
 }
 
 export function RadioPlanPricing({
@@ -263,9 +263,9 @@ export function RadioPlanPricing({
   secondaryTextColor,
   accentColor,
   ctaTextColor,
-  outerRadius = 34,
+  outerRadius = 28,
   optionRadius = 18,
-  padding = 34,
+  padding = 36,
   shadowIntensity = 0.14,
   showBorder = true,
   transitionSpeed = "medium",
@@ -277,6 +277,8 @@ export function RadioPlanPricing({
   showPlanBadges = true,
   className,
 }: RadioPlanPricingProps) {
+  const reduce = useReducedMotion();
+  const uid = React.useId();
   const visiblePlans = plans.slice(0, 6);
   const visibleFeatures = features.slice(0, 12);
   const firstPlanId = visiblePlans[0]?.id ?? "";
@@ -285,118 +287,170 @@ export function RadioPlanPricing({
     : firstPlanId;
   const [selectedId, setSelectedId] = React.useState(initialPlanId);
   const selectedPlan = visiblePlans.find((plan) => plan.id === selectedId) ?? visiblePlans[0];
-  const palette = resolvePalette({
-    theme,
-    backgroundColor,
-    cardBackgroundColor,
-    primaryTextColor,
-    secondaryTextColor,
-    accentColor,
-    ctaTextColor,
-  });
-  const duration = SPEEDS[transitionSpeed];
+  const spring = SPRINGS[transitionSpeed];
   const includedCount = Math.min(selectedPlan?.includedFeatureCount ?? 0, visibleFeatures.length);
-  const borderStyle = showBorder ? `1px solid ${palette.border}` : "none";
-  const panelShadow = `0 ${Math.round(18 + shadowIntensity * 42)}px ${Math.round(
-    38 + shadowIntensity * 74,
-  )}px rgba(0, 0, 0, ${Math.min(0.34, shadowIntensity + 0.08)})`;
+
+  const themeVars =
+    theme === "custom"
+      ? paletteVars({
+          background: backgroundColor,
+          card: cardBackgroundColor,
+          selected: cardBackgroundColor,
+          primary: primaryTextColor,
+          secondary: secondaryTextColor,
+          accent: accentColor,
+          ctaText: ctaTextColor,
+        })
+      : theme === "ivory"
+        ? {}
+        : paletteVars(FIXED_PALETTES[theme]);
+
+  const shadowAlpha = Math.max(0, Math.min(0.6, shadowIntensity * 2));
+  const panelShadow = [
+    showBorder ? "0 0 0 1px var(--rp-line)" : null,
+    `0 1px 2px rgba(0,0,0,${(shadowAlpha * 0.15).toFixed(3)})`,
+    `0 30px 60px -30px rgba(0,0,0,${shadowAlpha.toFixed(3)})`,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  const container: Variants = {
+    hidden: {},
+    show: { transition: { staggerChildren: reduce ? 0 : 0.06, delayChildren: 0.05 } },
+  };
+  const item: Variants = reduce
+    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.2 } } }
+    : {
+        hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+        show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring", stiffness: 260, damping: 30 } },
+      };
 
   if (!selectedPlan) return null;
+
+  const padStyle = { padding: `clamp(20px, 3vw, ${padding}px)` };
 
   return (
     <section
       className={cn(
-        "flex h-full min-h-[550px] w-full items-center justify-center overflow-hidden bg-[#111112] p-3 sm:p-6",
+        ADAPTIVE_VARS,
+        "flex h-full min-h-[550px] w-full items-center justify-center overflow-hidden bg-[var(--rp-page)] p-3 text-[var(--rp-ink)] sm:p-6",
         className,
       )}
-      style={{ fontFamily: bodyFontFamily }}
+      style={{ ...themeVars, fontFamily: bodyFontFamily }}
     >
-      <div
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "-80px" }}
         className={cn(
-          "grid w-full max-w-[1320px] overflow-hidden",
-          layout === "desktop" && "grid-cols-[0.96fr_1.04fr]",
+          "grid w-full max-w-[1320px] overflow-hidden bg-[var(--rp-bg)]",
+          layout === "desktop" && "grid-cols-[0.92fr_1.08fr]",
           layout === "mobile" && "grid-cols-1",
-          layout === "responsive" && "grid-cols-1 lg:grid-cols-[0.96fr_1.04fr]",
+          layout === "responsive" && "grid-cols-1 lg:grid-cols-[0.92fr_1.08fr]",
         )}
-        style={{
-          backgroundColor: palette.background,
-          border: borderStyle,
-          borderRadius: outerRadius,
-          boxShadow: panelShadow,
-          color: palette.primary,
-        }}
+        style={{ borderRadius: outerRadius, boxShadow: panelShadow }}
       >
+        {/* Features */}
         <div
           className={cn(
-            "flex min-w-0 flex-col",
+            "flex min-w-0 flex-col border-[var(--rp-line)]",
             layout === "mobile" && "order-2 border-t",
             layout === "desktop" && "border-r",
             layout === "responsive" && "order-2 border-t lg:order-1 lg:border-r lg:border-t-0",
           )}
-          style={{
-            borderColor: palette.border,
-            padding: `clamp(24px, 3vw, ${padding}px)`,
-          }}
+          style={padStyle}
         >
-          <PanelHeader title={featuresTitle} subtitle={featuresSubtitle} palette={palette} fontFamily={headingFontFamily} />
-          <ul className="mt-6 grid flex-1 content-start gap-3.5 sm:mt-7 sm:gap-4">
+          <motion.div variants={item}>
+            <PanelHeader title={featuresTitle} subtitle={featuresSubtitle} fontFamily={headingFontFamily} />
+          </motion.div>
+
+          <motion.ul variants={item} className="mt-6 grid flex-1 content-start gap-1 sm:mt-7">
             {visibleFeatures.map((feature, index) => {
               const included = index < includedCount;
+              const cascade = reduce ? { duration: 0.15 } : { ...spring, delay: index * 0.025 };
 
               return (
-                <motion.li
-                  key={feature}
-                  animate={{ opacity: included ? 1 : 0.45 }}
-                  transition={{ duration }}
-                  className="flex min-w-0 items-center gap-4 text-[15px] font-medium sm:text-[16px]"
-                  style={{ color: included ? palette.primary : palette.secondary }}
-                >
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.span
-                      key={included ? "check" : "minus"}
-                      initial={{ scale: 0.72, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.72, opacity: 0 }}
-                      transition={{ duration }}
-                      className="flex size-7 shrink-0 items-center justify-center rounded-full"
-                      style={{
-                        border: `2px solid ${included ? palette.accent : palette.secondary}`,
-                        color: included ? palette.accent : palette.secondary,
-                      }}
-                    >
-                      {included ? <Check className="size-4 stroke-[2.5]" /> : <Minus className="size-4 stroke-[2.5]" />}
-                    </motion.span>
-                  </AnimatePresence>
-                  <span className="truncate">{feature}</span>
-                </motion.li>
+                <li key={feature} className="flex min-w-0 items-center gap-3 py-[7px]">
+                  <span className="relative grid size-[22px] shrink-0 place-items-center">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      <motion.span
+                        key={included ? "on" : "off"}
+                        initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.5 }}
+                        transition={cascade}
+                        className={cn(
+                          "grid size-[22px] place-items-center rounded-full",
+                          included ? "bg-[var(--rp-accent)] text-[var(--rp-cta)]" : "bg-[var(--rp-card)] text-[var(--rp-sub)]",
+                        )}
+                      >
+                        {included ? (
+                          <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
+                        ) : (
+                          <Minus className="size-3.5" strokeWidth={2.25} aria-hidden />
+                        )}
+                      </motion.span>
+                    </AnimatePresence>
+                  </span>
+                  <motion.span
+                    animate={{ opacity: included ? 1 : 0.5 }}
+                    transition={cascade}
+                    className="min-w-0 truncate text-[15px] leading-[1.45] sm:text-[16px]"
+                  >
+                    {feature}
+                    <span className="sr-only">{included ? " (included)" : " (not included)"}</span>
+                  </motion.span>
+                </li>
               );
             })}
-          </ul>
-          <div className="mt-6 flex items-center gap-3 text-sm" style={{ color: palette.secondary }}>
-            <motion.span
-              key={includedCount}
-              initial={{ scale: 0.72, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration }}
-              className="flex size-7 items-center justify-center rounded-full text-xs font-semibold"
-              style={{ backgroundColor: `${palette.accent}14`, border: `1px solid ${palette.border}`, color: palette.accent }}
-            >
-              {includedCount}
-            </motion.span>
-            <span>of {visibleFeatures.length} features included</span>
-          </div>
+          </motion.ul>
+
+          <motion.div variants={item} className="mt-6">
+            <div className="flex items-baseline justify-between text-[13px] text-[var(--rp-sub)]">
+              <span>
+                <span className="relative inline-flex overflow-hidden align-bottom font-semibold text-[var(--rp-ink)] tabular-nums">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={includedCount}
+                      initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(4px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(4px)" }}
+                      transition={spring}
+                      className="inline-block"
+                    >
+                      {includedCount}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>{" "}
+                of {visibleFeatures.length} features included
+              </span>
+            </div>
+            <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-[var(--rp-card)]">
+              <motion.div
+                className="h-full rounded-full bg-[var(--rp-accent)]"
+                initial={false}
+                animate={{ width: `${visibleFeatures.length ? (includedCount / visibleFeatures.length) * 100 : 0}%` }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 30 }}
+              />
+            </div>
+          </motion.div>
         </div>
 
+        {/* Plans */}
         <div
           className={cn(
             "flex min-w-0 flex-col",
             layout === "mobile" && "order-1",
             layout === "responsive" && "order-1 lg:order-2",
           )}
-          style={{ padding: `clamp(24px, 3vw, ${padding}px)` }}
+          style={padStyle}
         >
-          <PanelHeader title={plansTitle} subtitle={plansSubtitle} palette={palette} fontFamily={headingFontFamily} />
-          <fieldset className="mt-6 grid flex-1 gap-3 sm:mt-7 sm:gap-4">
+          <motion.div variants={item}>
+            <PanelHeader title={plansTitle} subtitle={plansSubtitle} fontFamily={headingFontFamily} />
+          </motion.div>
+
+          <motion.fieldset variants={item} className="mt-6 grid flex-1 content-start gap-3 sm:mt-7">
             <legend className="sr-only">Select your pricing plan</legend>
             {visiblePlans.map((plan) => {
               const selected = plan.id === selectedPlan.id;
@@ -404,116 +458,130 @@ export function RadioPlanPricing({
               return (
                 <motion.label
                   key={plan.id}
-                  layout
-                  animate={{ scale: selected ? 1 : 0.99 }}
-                  transition={{ duration }}
-                  className="relative flex cursor-pointer overflow-hidden p-4 sm:px-6 sm:py-5"
+                  whileTap={reduce ? undefined : { scale: 0.985 }}
+                  transition={spring}
+                  className={cn(
+                    "relative flex cursor-pointer items-center gap-4 px-4 py-4 transition-colors duration-200 sm:px-5 sm:py-[18px]",
+                    "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#0071e3]",
+                    selected ? "bg-[var(--rp-sel)]" : "bg-[var(--rp-card)] hover:brightness-[0.98] dark:hover:brightness-110",
+                  )}
                   style={{
-                    backgroundColor: selected ? palette.selected : palette.card,
-                    border: selected ? `2px solid ${palette.accent}` : borderStyle,
                     borderRadius: optionRadius,
                     boxShadow: selected
-                      ? `0 12px 28px ${palette.accent}18`
-                      : "0 8px 16px rgba(0, 0, 0, 0.04)",
+                      ? "0 2px 6px rgba(0,0,0,0.06), 0 12px 24px -12px rgba(0,0,0,0.18)"
+                      : "inset 0 0 0 1px var(--rp-line)",
                   }}
                 >
-                  {selected && (
+                  {selected ? (
                     <motion.span
-                      layoutId="pricing-accent-edge"
-                      className="absolute bottom-5 left-0 top-5 w-[4px] rounded-r-full"
-                      style={{ backgroundColor: palette.accent }}
-                      transition={{ duration }}
+                      layoutId={`${uid}-ring`}
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0"
+                      style={{ borderRadius: optionRadius, boxShadow: "inset 0 0 0 2px var(--rp-accent)" }}
+                      transition={reduce ? { duration: 0 } : spring}
                     />
-                  )}
+                  ) : null}
                   <input
                     type="radio"
-                    name="pricing-plan"
+                    name={`${uid}-plan`}
                     value={plan.id}
                     checked={selected}
                     onChange={() => setSelectedId(plan.id)}
                     className="sr-only"
                   />
                   <span
-                    className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border-2"
-                    style={{
-                      borderColor: selected ? palette.accent : palette.border,
-                      boxShadow: selected ? `0 0 0 7px ${palette.accent}14` : undefined,
-                    }}
-                  >
-                    {selected && (
-                      <motion.span
-                        layoutId="pricing-radio-dot"
-                        className="size-3.5 rounded-full"
-                        style={{ backgroundColor: palette.accent }}
-                      />
+                    aria-hidden
+                    className={cn(
+                      "relative grid size-[22px] shrink-0 place-items-center rounded-full transition-[background-color,box-shadow] duration-200",
+                      selected ? "bg-[var(--rp-accent)]" : "bg-[var(--rp-bg)] shadow-[inset_0_0_0_1.5px_var(--rp-line)]",
                     )}
+                  >
+                    <motion.span
+                      className="size-2 rounded-full bg-[var(--rp-cta)]"
+                      initial={false}
+                      animate={{ scale: selected ? 1 : 0, opacity: selected ? 1 : 0 }}
+                      transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
+                    />
                   </span>
-                  <span className="ml-4 min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-                      <span className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-                        <span className="text-[16px] font-semibold sm:text-lg">{plan.label}</span>
-                        {plan.subtitle && <span className="text-sm sm:text-base" style={{ color: palette.secondary }}>— {plan.subtitle}</span>}
-                      </span>
-                      {showPlanBadges && plan.badge && (
-                        <span
-                          className="rounded-full border px-2.5 py-0.5 text-[11.5px] font-semibold"
-                          style={{
-                            backgroundColor: `${palette.card}b8`,
-                            borderColor: palette.border,
-                            color: palette.primary,
-                            backdropFilter: "blur(10px)",
-                          }}
-                        >
+
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="text-[17px] font-semibold tracking-[-0.015em]">{plan.label}</span>
+                      {showPlanBadges && plan.badge ? (
+                        <span className="rounded-full bg-[color-mix(in_srgb,var(--rp-accent)_12%,transparent)] px-2 py-0.5 text-[12px] font-semibold text-[var(--rp-accent)]">
                           {plan.badge}
                         </span>
-                      )}
+                      ) : null}
                     </span>
-                    <span className="mt-3 flex items-baseline gap-2">
-                      <span className="text-lg" style={{ color: palette.secondary }}>{currency}</span>
-                      <AnimatedPrice
-                        value={plan.price}
-                        active={selected}
-                        duration={priceAnimationDuration}
-                        fontFamily={priceFontFamily}
-                      />
-                      {plan.period && (
-                        <span
-                          className={cn("text-sm sm:text-base", plan.period === "one-time" && "rounded-md px-2 py-1 text-xs")}
-                          style={{
-                            color: palette.secondary,
-                            backgroundColor: plan.period === "one-time" ? `${palette.secondary}12` : undefined,
-                          }}
-                        >
-                          {plan.period}
-                        </span>
-                      )}
+                    {plan.subtitle ? (
+                      <span className="mt-0.5 block truncate text-[14px] text-[var(--rp-sub)]">{plan.subtitle}</span>
+                    ) : null}
+                  </span>
+
+                  <span className="shrink-0 text-right">
+                    <span
+                      className="block text-[17px] font-semibold tracking-[-0.015em] tabular-nums"
+                      style={{ fontFamily: priceFontFamily }}
+                    >
+                      {formatPrice(plan.price, currency)}
                     </span>
+                    {plan.period ? (
+                      <span className="block text-[13px] text-[var(--rp-sub)]">
+                        {plan.period}
+                      </span>
+                    ) : null}
                   </span>
                 </motion.label>
               );
             })}
-          </fieldset>
-          {showCTA && (
-            <motion.a
-              key={selectedPlan.id}
-              href={selectedPlan.ctaHref ?? "#"}
-              initial={{ opacity: 0.84 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration }}
-              className="group relative mt-6 flex min-h-14 items-center justify-center gap-3 overflow-hidden rounded-[16px] px-6 text-base font-semibold sm:mt-8"
-              style={{ backgroundColor: palette.accent, color: palette.ctaText }}
-            >
-              <motion.span
-                className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/20"
-                animate={{ left: ["-50%", "125%"] }}
-                transition={{ duration: 1.25, ease: "easeInOut", repeat: Infinity, repeatDelay: 2 }}
-              />
-              <span className="relative">{selectedPlan.ctaLabel ?? "Get Started"}</span>
-              <ArrowRight className="relative size-5 transition-transform duration-300 group-hover:translate-x-1" />
-            </motion.a>
-          )}
+          </motion.fieldset>
+
+          <motion.div
+            variants={item}
+            className="mt-6 flex flex-col gap-4 border-t border-[var(--rp-line)] pt-6 sm:flex-row sm:items-end sm:justify-between"
+          >
+            <div className="min-w-0">
+              <p className="text-[13px] text-[var(--rp-sub)]">
+                {selectedPlan.label}
+                {selectedPlan.period ? ` · ${selectedPlan.period}` : ""}
+              </p>
+              <div className="mt-1" aria-live="polite">
+                <RollingPrice
+                  value={selectedPlan.price}
+                  currency={currency}
+                  duration={priceAnimationDuration}
+                  fontFamily={priceFontFamily}
+                />
+              </div>
+            </div>
+
+            {showCTA ? (
+              <motion.a
+                href={selectedPlan.ctaHref ?? "#"}
+                whileTap={reduce ? undefined : { scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                className={cn(
+                  "relative inline-flex h-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--rp-accent)] px-6 text-[17px] font-medium text-[var(--rp-cta)] transition-[filter] hover:brightness-110",
+                  focusRing,
+                )}
+              >
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span
+                    key={selectedPlan.id}
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(6px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(6px)" }}
+                    transition={spring}
+                    className="inline-block whitespace-nowrap"
+                  >
+                    {selectedPlan.ctaLabel ?? "Get started"}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.a>
+            ) : null}
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
@@ -521,23 +589,21 @@ export function RadioPlanPricing({
 function PanelHeader({
   title,
   subtitle,
-  palette,
   fontFamily,
 }: {
   title: string;
   subtitle: string;
-  palette: Palette;
   fontFamily?: string;
 }) {
   return (
     <header>
-      <h2 className="flex items-center gap-4 text-[clamp(1.4rem,2.2vw,2rem)] font-medium leading-tight" style={{ fontFamily }}>
-        <span className="size-2.5 rounded-full" style={{ backgroundColor: palette.secondary }} />
+      <h2
+        className="text-[clamp(1.5rem,2.3vw,2rem)] font-semibold leading-[1.1] tracking-[-0.03em]"
+        style={{ fontFamily }}
+      >
         {title}
       </h2>
-      <p className="ml-[26px] mt-3 text-sm leading-6 sm:text-[15px]" style={{ color: palette.secondary }}>
-        {subtitle}
-      </p>
+      <p className="mt-2 text-[15px] leading-[1.5] text-[var(--rp-sub)] sm:text-[17px]">{subtitle}</p>
     </header>
   );
 }
@@ -545,9 +611,9 @@ function PanelHeader({
 export function RadioPlanPricingPreview() {
   // drawn at its real size; the gallery frames the `data-tile-focus` box into each tile
   return (
-    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-[#111112]">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-[#f5f5f7] dark:bg-black">
       <div data-tile-focus className="w-[1080px] shrink-0">
-        <RadioPlanPricing layout="desktop" padding={32} outerRadius={30} optionRadius={17} />
+        <RadioPlanPricing layout="desktop" padding={32} outerRadius={28} optionRadius={18} />
       </div>
     </div>
   );

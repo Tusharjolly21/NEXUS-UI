@@ -1,122 +1,291 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-
-// ── Types ──────────────────────────────────────────────────────────────────────
-
-type ChatMsg = { from: "them" | "me"; text: string };
+import * as React from "react";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type Variants,
+} from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // ── Data ───────────────────────────────────────────────────────────────────────
 
+type ChatMsg = { from: "them" | "me"; text: string };
+
 const ACCOUNTABILITY_MSGS: ChatMsg[] = [
-  { from: "them", text: "did you finish the graphs set?" },
-  { from: "me",   text: "14 of 15. the last one is a beast" },
-  { from: "them", text: "send me your approach before standup?" },
-  { from: "me",   text: "sharing it now" },
+  { from: "them", text: "Did you finish the graphs set?" },
+  { from: "me", text: "14 of 15. The last one is a beast." },
+  { from: "them", text: "Send me your approach before standup?" },
 ];
 
 const ENCOURAGEMENT_MSGS: ChatMsg[] = [
-  { from: "them", text: "an hour on this DP problem and I'm stuck" },
-  { from: "me",   text: "what's your recurrence so far?" },
-  { from: "them", text: "dp[i] = best ending at i, but it's off by one" },
-  { from: "me",   text: "try: best using the first i items" },
+  { from: "them", text: "An hour on this DP problem and I'm stuck." },
+  { from: "me", text: "What's your recurrence so far?" },
+  { from: "them", text: "dp[i] = best ending at i, but it's off by one." },
+  { from: "me", text: "Try: best using the first i items." },
 ];
 
 const MENTORS = [
-  { name: "Priya N.",  role: "Staff Engineer, payments",   img: 1  },
-  { name: "Emily R.",  role: "Engineering Manager",        img: 5  },
-  { name: "Daniel K.", role: "Principal Engineer",         img: 8  },
-  { name: "Tomás L.",  role: "Senior SWE, infra",          img: 12 },
-  { name: "Sara M.",   role: "Hiring manager, 120+ loops", img: 16 },
-  { name: "Kenji O.",  role: "Tech Lead, mobile",          img: 20 },
+  { name: "Priya Nair", role: "Staff engineer, payments", slot: "Tue 7:30 pm" },
+  { name: "Emily Ross", role: "Engineering manager", slot: "Wed 6:00 pm" },
+  { name: "Daniel Kim", role: "Principal engineer", slot: "Thu 8:15 pm" },
+  { name: "Sara Moreno", role: "Hiring manager, 120+ loops", slot: "Sat 10:00 am" },
 ] as const;
 
-const ORBIT_CFG = [
-  { img: 4,  rx: 80, ry: 56, startDeg: 0,   dur: 7.2, delay: 0    },
-  { img: 6,  rx: 76, ry: 62, startDeg: 60,  dur: 6.8, delay: -1.1 },
-  { img: 9,  rx: 82, ry: 58, startDeg: 120, dur: 7.5, delay: -2.3 },
-  { img: 13, rx: 74, ry: 64, startDeg: 180, dur: 6.5, delay: -3.4 },
-  { img: 17, rx: 84, ry: 60, startDeg: 240, dur: 7.0, delay: -4.5 },
-  { img: 19, rx: 78, ry: 62, startDeg: 300, dur: 6.9, delay: -5.2 },
+const COHORT = ["Alex Chen", "Jordan Lee", "Sam Patel", "Taylor Brooks", "Morgan Diaz", "Riley Park"] as const;
+
+const PARTICIPANTS = ["Alex Chen", "Jordan Lee", "Sam Patel", "Taylor Brooks", "Morgan Diaz"] as const;
+
+const WEEK = [
+  { day: "M", value: 4 },
+  { day: "T", value: 6 },
+  { day: "W", value: 3 },
+  { day: "T", value: 7 },
+  { day: "F", value: 5 },
+  { day: "S", value: 9 },
+  { day: "S", value: 4 },
 ] as const;
+const TODAY = 5;
+const WEEK_MAX = 9;
 
-const PARTICIPANTS = [
-  { name: "Alex",   img: 3  },
-  { name: "Jordan", img: 7  },
-  { name: "Sam",    img: 11 },
-  { name: "Taylor", img: 15 },
-  { name: "Morgan", img: 18 },
-] as const;
+// Cohort ring positions, rounded so server and client render identical markup.
+const RING_RADIUS = 74;
+const RING = COHORT.map((_, i) => {
+  const a = ((-90 + i * 60) * Math.PI) / 180;
+  return { x: Math.round(Math.cos(a) * RING_RADIUS * 100) / 100, y: Math.round(Math.sin(a) * RING_RADIUS * 100) / 100 };
+});
 
-const TASKS = [
-  "Two-pointer set · 6 problems",
-  "Mock interview with Priya, 7:30 pm",
-  "Re-read system design notes",
-] as const;
+// ── Motion ─────────────────────────────────────────────────────────────────────
 
-const CALENDAR = [28, 29, 30, 31, 1, 2] as const;
-const HIGHLIGHTED_DATE = 1;
+const SPRING_UI = { type: "spring", stiffness: 420, damping: 34 } as const;
+const SPRING_SOFT = { type: "spring", stiffness: 240, damping: 30 } as const;
 
-// ── Orbit keyframes (computed once at module load) ─────────────────────────────
+const RISE: Variants = {
+  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: SPRING_SOFT },
+};
+const FADE: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4 } },
+};
+const STAGGER = (stagger: number, delayChildren = 0): Variants => ({
+  hidden: {},
+  visible: { transition: { staggerChildren: stagger, delayChildren } },
+});
 
-function buildOrbitKeyframes(rx: number, ry: number, startDeg: number, steps = 24) {
-  const xs: number[] = [];
-  const ys: number[] = [];
-  for (let i = 0; i <= steps; i++) {
-    const a = (2 * Math.PI * i) / steps + (startDeg * Math.PI) / 180;
-    xs.push(Math.cos(a) * rx);
-    ys.push(Math.sin(a) * ry);
-  }
-  return { xs, ys };
+function useRise() {
+  return useReducedMotion() ? FADE : RISE;
 }
 
-const ORBIT_KF = ORBIT_CFG.map((c) => buildOrbitKeyframes(c.rx, c.ry, c.startDeg));
+// ── Small parts ────────────────────────────────────────────────────────────────
 
-// ── Hook: infinite stepped loop ────────────────────────────────────────────────
-
-function useChatLoop(count: number, staggerMs: number, reduced: boolean) {
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    if (reduced) return;
-    const id = setInterval(() => setStep((s) => s + 1), staggerMs);
-    return () => clearInterval(id);
-  }, [count, staggerMs, reduced]);
-
-  const TOTAL = count + 2; // extra beats for a natural pause before loop
-  return {
-    visibleCount: reduced ? count : Math.min(step % TOTAL, count),
-    cycleKey: Math.floor(step / TOTAL),
-  };
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2);
 }
 
-// ── Shared bubble renderer ─────────────────────────────────────────────────────
+function Monogram({ name, size = 36, accent = false, className }: { name: string; size?: number; accent?: boolean; className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "grid shrink-0 select-none place-items-center rounded-full font-semibold tracking-[-0.01em] text-white",
+        accent
+          ? "bg-[#0071e3]"
+          : "bg-gradient-to-b from-[#a1a1a6] to-[#86868b] dark:from-[#636366] dark:to-[#48484a]",
+        className,
+      )}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.36) }}
+    >
+      {accent ? "You" : initials(name)}
+    </span>
+  );
+}
 
-function ChatBubble({
-  msg,
-  avatarImg,
+function CountUp({ to, className }: { to: number; className?: string }) {
+  const ref = React.useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const reduced = useReducedMotion();
+  const value = useMotionValue(0);
+  const display = useTransform(value, (v) => Math.round(v).toLocaleString("en-US"));
+
+  React.useEffect(() => {
+    if (!inView) return;
+    if (reduced) {
+      value.set(to);
+      return;
+    }
+    const controls = animate(value, to, { type: "spring", duration: 1.6, bounce: 0, delay: 0.25 });
+    return () => controls.stop();
+  }, [inView, reduced, to, value]);
+
+  return (
+    <span ref={ref} className={cn("tabular-nums", className)}>
+      <span className="sr-only">{to}</span>
+      <motion.span aria-hidden="true">{display}</motion.span>
+    </span>
+  );
+}
+
+/** Title, big figure and caption: the Apple feature-tile lockup. */
+function TileCopy({
+  title,
+  figure,
+  unit,
+  caption,
+  inverse = false,
+  className,
 }: {
-  msg: ChatMsg;
-  avatarImg: number;
+  title: string;
+  figure: React.ReactNode;
+  unit?: string;
+  caption: string;
+  inverse?: boolean;
+  className?: string;
 }) {
   return (
-    <div className={`flex items-end gap-1.5 ${msg.from === "me" ? "flex-row-reverse" : ""}`}>
-      {msg.from === "them" && (
-        <img
-          src={`https://i.pravatar.cc/80?img=${avatarImg}`}
-          alt=""
-          width={28}
-          height={28}
-          className="size-7 shrink-0 rounded-full"
-        />
+    <div className={className}>
+      <h3 className={cn("text-[15px] font-semibold tracking-[-0.01em]", inverse ? "text-[#f5f5f7]" : "text-[#1d1d1f] dark:text-[#f5f5f7]")}>
+        {title}
+      </h3>
+      <p
+        className={cn(
+          "mt-3 flex items-baseline gap-1.5 font-semibold leading-none tracking-[-0.04em]",
+          inverse ? "text-[#f5f5f7]" : "text-[#1d1d1f] dark:text-[#f5f5f7]",
+        )}
+      >
+        <span className="text-[56px] sm:text-[64px]">{figure}</span>
+        {unit ? <span className="text-[24px] tracking-[-0.025em] sm:text-[28px]">{unit}</span> : null}
+      </p>
+      <p
+        className={cn(
+          "mt-3 max-w-[30ch] text-pretty text-[15px] leading-[1.47]",
+          inverse ? "text-[#a1a1a6]" : "text-[#6e6e73] dark:text-[#a1a1a6]",
+        )}
+      >
+        {caption}
+      </p>
+    </div>
+  );
+}
+
+// ── Tile shell ─────────────────────────────────────────────────────────────────
+
+function Tile({
+  className,
+  inverse = false,
+  children,
+}: {
+  className?: string;
+  inverse?: boolean;
+  children: React.ReactNode;
+}) {
+  const rise = useRise();
+  return (
+    <motion.article
+      variants={rise}
+      className={cn(
+        "group relative flex min-w-0 flex-col overflow-hidden rounded-[28px] p-6 transition-shadow duration-500 ease-out sm:p-7",
+        inverse
+          ? "bg-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05)] hover:shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_48px_-24px_rgba(0,0,0,.45)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
+          : "bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05)] hover:shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] dark:hover:shadow-[0_0_0_1px_rgba(255,255,255,.12),0_24px_48px_-24px_rgba(0,0,0,.8)]",
+        className,
       )}
+    >
+      {children}
+    </motion.article>
+  );
+}
+
+// ── Tile 1: Mentors ────────────────────────────────────────────────────────────
+
+function MentorList() {
+  const id = React.useId();
+  const rise = useRise();
+  const [active, setActive] = React.useState(0);
+
+  return (
+    <motion.ul
+      variants={STAGGER(0.06, 0.2)}
+      onMouseLeave={() => setActive(0)}
+      className="w-full rounded-[20px] bg-[#f5f5f7] p-1.5 dark:bg-[#2c2c2e] sm:w-[320px] sm:shrink-0"
+    >
+      {MENTORS.map((m, i) => (
+        <motion.li key={m.name} variants={rise} onMouseEnter={() => setActive(i)} className="relative">
+          {active === i ? (
+            <motion.span
+              layoutId={`${id}-mentor`}
+              transition={SPRING_UI}
+              className="absolute inset-0 rounded-[14px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.08),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#3a3a3c] dark:shadow-none"
+            />
+          ) : null}
+          <div className="relative flex items-center gap-3 px-3 py-2.5">
+            <Monogram name={m.name} size={34} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-[#1d1d1f] dark:text-[#f5f5f7]">{m.name}</p>
+              <p className="truncate text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">{m.role}</p>
+            </div>
+            <span className="shrink-0 text-[12px] tabular-nums text-[#86868b] dark:text-[#98989d]">{m.slot}</span>
+          </div>
+        </motion.li>
+      ))}
+    </motion.ul>
+  );
+}
+
+// ── Tile 2: Cohort ring ────────────────────────────────────────────────────────
+
+function CohortRing() {
+  const reduced = useReducedMotion();
+  const variants: Variants = reduced
+    ? {
+        hidden: (i: number) => ({ opacity: 0, x: RING[i].x, y: RING[i].y }),
+        visible: (i: number) => ({ opacity: 1, x: RING[i].x, y: RING[i].y, transition: { duration: 0.4 } }),
+      }
+    : {
+        hidden: { opacity: 0, x: 0, y: 0, scale: 0.4 },
+        visible: (i: number) => ({
+          opacity: 1,
+          x: RING[i].x,
+          y: RING[i].y,
+          scale: 1,
+          transition: { type: "spring", stiffness: 220, damping: 20, delay: 0.3 + i * 0.05 },
+        }),
+      };
+
+  return (
+    <div className="relative mx-auto mt-6 grid size-[196px] place-items-center" aria-hidden="true">
+      <span className="absolute size-[148px] rounded-full border border-black/[0.08] dark:border-white/[0.1]" />
+      {COHORT.map((name, i) => (
+        <motion.span key={name} custom={i} variants={variants} className="absolute">
+          <Monogram name={name} size={38} className="ring-[3px] ring-white dark:ring-[#1c1c1e]" />
+        </motion.span>
+      ))}
+      <Monogram name="You" size={52} accent className="relative ring-4 ring-white dark:ring-[#1c1c1e]" />
+    </div>
+  );
+}
+
+// ── Tiles 3 and 4: Messages ────────────────────────────────────────────────────
+
+function Bubble({ msg }: { msg: ChatMsg }) {
+  return (
+    <div className={cn("flex", msg.from === "me" ? "justify-end" : "justify-start")}>
       <span
-        className={`max-w-[80%] rounded-2xl px-3 py-1.5 text-xs leading-snug ${
+        className={cn(
+          "max-w-[85%] rounded-[18px] px-3.5 py-2 text-[14px] leading-[1.35]",
           msg.from === "me"
-            ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-            : "bg-zinc-100 text-zinc-800 dark:bg-white/10 dark:text-zinc-100"
-        }`}
+            ? "bg-[#0071e3] text-white"
+            : "bg-[#e9e9eb] text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#f5f5f7]",
+        )}
       >
         {msg.text}
       </span>
@@ -124,439 +293,321 @@ function ChatBubble({
   );
 }
 
-// ── Card 1: Steady — full conversation visible at once ────────────────────────
-
-function StaticChatVisual({
-  messages,
-  avatarImg,
-}: {
-  messages: ChatMsg[];
-  avatarImg: number;
-}) {
+function StaticChat({ messages }: { messages: ChatMsg[] }) {
+  const reduced = useReducedMotion();
+  const pop: Variants = reduced
+    ? FADE
+    : {
+        hidden: { opacity: 0, y: 10, scale: 0.92, filter: "blur(4px)" },
+        visible: { opacity: 1, y: 0, scale: 1, filter: "blur(0px)", transition: SPRING_UI },
+      };
   return (
-    <div className="flex h-full flex-col justify-end gap-3 pb-1">
+    <motion.div variants={STAGGER(0.12, 0.3)} className="mt-auto flex flex-col gap-1.5 pt-6">
       {messages.map((msg, i) => (
-        <ChatBubble key={i} msg={msg} avatarImg={avatarImg} />
+        <motion.div key={i} variants={pop} style={{ originX: msg.from === "me" ? 1 : 0 }}>
+          <Bubble msg={msg} />
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }
 
-// ── Card 2: Live — messages appear one by one and loop ────────────────────────
+type Frame = { count: number; typing: boolean };
 
-function LiveChatVisual({
-  messages,
-  avatarImg,
-}: {
-  messages: ChatMsg[];
-  avatarImg: number;
-}) {
-  const reduced = useReducedMotion() ?? false;
-  const { visibleCount, cycleKey } = useChatLoop(messages.length, 1400, reduced);
+function buildTimeline(messages: ChatMsg[]): Frame[] {
+  const frames: Frame[] = [{ count: 0, typing: false }];
+  messages.forEach((msg, i) => {
+    if (msg.from === "them") frames.push({ count: i, typing: true });
+    frames.push({ count: i + 1, typing: false });
+  });
+  // hold the finished thread for a few beats before it starts over
+  frames.push({ count: messages.length, typing: false }, { count: messages.length, typing: false });
+  return frames;
+}
+
+function TypingDots() {
+  const reduced = useReducedMotion();
+  return (
+    <span className="inline-flex items-center gap-1 rounded-[18px] bg-[#e9e9eb] px-3.5 py-3 dark:bg-[#3a3a3c]">
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          className="size-1.5 rounded-full bg-[#86868b] dark:bg-[#98989d]"
+          animate={reduced ? undefined : { opacity: [0.35, 1, 0.35], y: [0, -2, 0] }}
+          transition={{ duration: 1, repeat: Infinity, delay: i * 0.16, ease: "easeInOut" }}
+        />
+      ))}
+    </span>
+  );
+}
+
+function LiveChat({ messages }: { messages: ChatMsg[] }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-40px" });
+  const reduced = useReducedMotion();
+  const timeline = React.useMemo(() => buildTimeline(messages), [messages]);
+  const [step, setStep] = React.useState(0);
+
+  React.useEffect(() => {
+    if (reduced || !inView) return;
+    const id = window.setInterval(() => setStep((s) => s + 1), 1100);
+    return () => window.clearInterval(id);
+  }, [inView, reduced]);
+
+  const frame: Frame = reduced ? { count: messages.length, typing: false } : timeline[step % timeline.length];
+  const cycle = Math.floor(step / timeline.length);
 
   return (
-    <div className="flex h-full flex-col justify-end gap-3 pb-1">
-      <AnimatePresence mode="popLayout">
-        {messages.slice(0, visibleCount).map((msg, i) => (
+    <div ref={ref} className="relative mt-auto flex min-h-[188px] flex-col justify-end gap-1.5 pt-6" aria-hidden="true">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {messages.slice(0, frame.count).map((msg, i) => (
           <motion.div
-            key={`${cycleKey}-${i}`}
-            initial={reduced ? false : { opacity: 0, y: 10, scale: 0.88 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.15 } }}
-            transition={{ type: "spring", stiffness: 320, damping: 26 }}
+            key={`${cycle}-${i}`}
+            layout={!reduced}
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.92, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, filter: reduced ? "blur(0px)" : "blur(4px)", transition: { duration: 0.2 } }}
+            transition={SPRING_UI}
+            style={{ originX: msg.from === "me" ? 1 : 0 }}
           >
-            <ChatBubble msg={msg} avatarImg={avatarImg} />
+            <Bubble msg={msg} />
           </motion.div>
         ))}
+        {frame.typing ? (
+          <motion.div
+            key={`${cycle}-typing-${frame.count}`}
+            layout={!reduced}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.12 } }}
+            transition={SPRING_UI}
+            style={{ originX: 0 }}
+          >
+            <TypingDots />
+          </motion.div>
+        ) : null}
       </AnimatePresence>
     </div>
   );
 }
 
-// ── Card 3: Orbiting avatars ───────────────────────────────────────────────────
+// ── Tile 5: Live room ──────────────────────────────────────────────────────────
 
-function OrbitVisual() {
-  const reduced = useReducedMotion() ?? false;
+function LiveRoom() {
+  const id = React.useId();
+  const ref = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-40px" });
+  const reduced = useReducedMotion();
+  const [speaker, setSpeaker] = React.useState(0);
 
-  return (
-    <div className="relative flex h-full items-center justify-center">
-      {/* Pulsing ring around center avatar */}
-      <motion.div
-        className="absolute rounded-full border-2 border-zinc-900/20 dark:border-white/25"
-        style={{ width: 68, height: 68 }}
-        animate={reduced ? {} : { scale: [1, 1.35, 1], opacity: [0.5, 0, 0.5] }}
-        transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-      />
+  React.useEffect(() => {
+    if (reduced || !inView) return;
+    const t = window.setInterval(() => setSpeaker((s) => (s + 1) % PARTICIPANTS.length), 2600);
+    return () => window.clearInterval(t);
+  }, [inView, reduced]);
 
-      {/* Center avatar */}
-      <img
-        src="https://i.pravatar.cc/80?img=2"
-        alt=""
-        width={56}
-        height={56}
-        className="relative z-10 size-14 rounded-full border-2 border-white shadow-md dark:border-zinc-900"
-      />
-
-      {/* Peripheral avatars with organic elliptical float */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        {ORBIT_CFG.map((cfg, i) => (
-          <motion.img
-            key={i}
-            src={`https://i.pravatar.cc/80?img=${cfg.img}`}
-            alt=""
-            width={36}
-            height={36}
-            className="absolute size-9 rounded-full border-2 border-white shadow-sm dark:border-zinc-900"
-            initial={{ x: ORBIT_KF[i].xs[0], y: ORBIT_KF[i].ys[0] }}
-            animate={
-              reduced
-                ? { x: ORBIT_KF[i].xs[0], y: ORBIT_KF[i].ys[0] }
-                : { x: ORBIT_KF[i].xs, y: ORBIT_KF[i].ys }
-            }
-            transition={
-              reduced
-                ? {}
-                : {
-                    duration: cfg.dur,
-                    delay: cfg.delay,
-                    repeat: Infinity,
-                    ease: "linear",
-                  }
-            }
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Card 4: Mentor marquee ─────────────────────────────────────────────────────
-
-function MentorPill({ m }: { m: (typeof MENTORS)[number] }) {
-  return (
-    <div className="flex shrink-0 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 py-2 shadow-sm dark:border-white/10 dark:bg-zinc-900">
-      <img
-        src={`https://i.pravatar.cc/80?img=${m.img}`}
-        alt=""
-        width={32}
-        height={32}
-        className="size-8 rounded-full"
-      />
-      <div className="min-w-0">
-        <p className="text-xs font-semibold leading-tight text-zinc-800 dark:text-zinc-100">{m.name}</p>
-        <p className="truncate text-[11px] leading-tight text-zinc-500 dark:text-zinc-400">{m.role}</p>
-      </div>
-    </div>
-  );
-}
-
-function MentorMarquee() {
-  const reduced = useReducedMotion() ?? false;
-  const dup = [...MENTORS, ...MENTORS];
+  const name = PARTICIPANTS[speaker];
 
   return (
-    <div
-      className="flex h-full flex-col justify-center gap-2.5 overflow-hidden"
-      style={{
-        WebkitMaskImage:
-          "linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%)",
-        maskImage:
-          "linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%)",
-      }}
-    >
-      {/* Row 1 — left to right */}
-      <div className="overflow-hidden">
-        <motion.div
-          className="flex w-max gap-2.5"
-          animate={reduced ? {} : { x: ["0%", "-50%"] }}
-          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-        >
-          {dup.map((m, i) => (
-            <MentorPill key={i} m={m} />
-          ))}
-        </motion.div>
-      </div>
-
-      {/* Row 2 — right to left */}
-      <div className="overflow-hidden">
-        <motion.div
-          className="flex w-max gap-2.5"
-          animate={reduced ? {} : { x: ["-50%", "0%"] }}
-          transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-        >
-          {dup.map((m, i) => (
-            <MentorPill key={i} m={m} />
-          ))}
-        </motion.div>
-      </div>
-    </div>
-  );
-}
-
-// ── Card 5: Video call window ──────────────────────────────────────────────────
-
-function VideoCallVisual() {
-  const reduced = useReducedMotion() ?? false;
-  const [featured, setFeatured] = useState(0);
-
-  useEffect(() => {
-    if (reduced) return;
-    const id = setInterval(
-      () => setFeatured((f) => (f + 1) % PARTICIPANTS.length),
-      2500,
-    );
-    return () => clearInterval(id);
-  }, [reduced]);
-
-  const tiles = PARTICIPANTS.filter((_, i) => i !== featured).slice(0, 4);
-
-  return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
-      {/* Call header */}
-      <div className="flex shrink-0 items-center gap-2 border-b border-zinc-700/60 px-3 py-2">
-        <span className="size-1.5 rounded-full bg-red-500" aria-hidden="true" />
-        <span className="text-[11px] font-medium text-zinc-300">Open room · Graphs & DP</span>
-        <span className="ml-auto text-[11px] tabular-nums text-zinc-500">6 here</span>
-      </div>
-
-      {/* Featured speaker */}
-      <div className="relative flex-1 overflow-hidden bg-zinc-800">
-        <AnimatePresence>
+    <div ref={ref} className="mt-8 flex flex-1 flex-col gap-2" aria-hidden="true">
+      <div className="relative grid min-h-[176px] flex-1 place-items-center overflow-hidden rounded-[20px] bg-[#2c2c2e]">
+        <AnimatePresence mode="popLayout" initial={false}>
           <motion.div
-            key={featured}
-            className="absolute inset-0 flex flex-col items-center justify-center"
-            initial={reduced ? false : { opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
+            key={name}
+            className="flex flex-col items-center gap-3"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, y: "40%", filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={reduced ? { opacity: 0 } : { opacity: 0, y: "-40%", filter: "blur(8px)" }}
+            transition={SPRING_SOFT}
           >
-            <img
-              src={`https://i.pravatar.cc/80?img=${PARTICIPANTS[featured].img}`}
-              alt=""
-              width={64}
-              height={64}
-              className="size-16 rounded-full border-2 border-white/20"
-            />
-            <div className="mt-2 rounded bg-black/50 px-2 py-0.5 text-[10px] text-white/80">
-              {PARTICIPANTS[featured].name}
-            </div>
+            <Monogram name={name} size={72} className="from-[#8e8e93] to-[#636366] dark:from-[#8e8e93] dark:to-[#636366]" />
+            <span className="rounded-full bg-black/40 px-2.5 py-1 text-[12px] font-medium text-[#f5f5f7]">{name}</span>
           </motion.div>
         </AnimatePresence>
       </div>
+      <div className="grid grid-cols-5 gap-2">
+        {PARTICIPANTS.map((p, i) => (
+          <div key={p} className="relative grid aspect-square place-items-center rounded-[14px] bg-[#2c2c2e]">
+            {speaker === i ? (
+              <motion.span
+                layoutId={`${id}-speaker`}
+                transition={SPRING_UI}
+                className="absolute inset-0 rounded-[14px] shadow-[inset_0_0_0_2px_#0071e3]"
+              />
+            ) : null}
+            <Monogram name={p} size={26} className="from-[#8e8e93] to-[#636366] dark:from-[#8e8e93] dark:to-[#636366]" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      {/* Tile row */}
-      <div className="flex shrink-0 gap-1 border-t border-zinc-700/60 p-1.5">
-        {tiles.map((p) => (
-          <div
-            key={p.img}
-            className="relative flex-1 overflow-hidden rounded-lg bg-zinc-800"
-            style={{ aspectRatio: "4/3" }}
-          >
-            <img
-              src={`https://i.pravatar.cc/80?img=${p.img}`}
-              alt=""
-              className="h-full w-full object-cover"
+// ── Tile 6: Weekly progress ────────────────────────────────────────────────────
+
+function WeekBars() {
+  const reduced = useReducedMotion();
+  const bar: Variants = reduced
+    ? FADE
+    : {
+        hidden: { scaleY: 0, opacity: 0 },
+        visible: (i: number) => ({
+          scaleY: 1,
+          opacity: 1,
+          transition: { type: "spring", stiffness: 260, damping: 24, delay: 0.3 + i * 0.05 },
+        }),
+      };
+  const rise = useRise();
+
+  return (
+    <div className="w-full sm:w-[340px] sm:shrink-0">
+      <motion.div
+        variants={rise}
+        className="mb-4 flex items-center gap-2.5 rounded-[14px] bg-[#f5f5f7] px-3.5 py-2.5 dark:bg-[#2c2c2e]"
+      >
+        <span className="size-2 shrink-0 rounded-full bg-[#34c759]" aria-hidden="true" />
+        <p className="min-w-0 truncate text-[13px] text-[#1d1d1f] dark:text-[#f5f5f7]">
+          Mock interview with Priya <span className="text-[#86868b] dark:text-[#98989d]">at 7:30 pm</span>
+        </p>
+      </motion.div>
+      <div className="flex h-[132px] items-end gap-2" role="img" aria-label="Problems solved per day this week, peaking at 9 on Saturday">
+        {WEEK.map((d, i) => (
+          <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
+            {i === TODAY ? (
+              <motion.span variants={rise} className="text-[12px] font-semibold tabular-nums text-[#0071e3] dark:text-[#2997ff]">
+                {d.value}
+              </motion.span>
+            ) : null}
+            <motion.span
+              custom={i}
+              variants={bar}
+              className={cn(
+                "block w-full origin-bottom rounded-[8px]",
+                i === TODAY ? "bg-[#0071e3]" : "bg-[#e8e8ed] dark:bg-[#3a3a3c]",
+              )}
+              style={{ height: `${Math.round((d.value / WEEK_MAX) * 100)}%` }}
             />
-            {/* Mute icon */}
-            <div className="absolute bottom-0.5 left-1" aria-hidden="true">
-              <svg width="9" height="9" viewBox="0 0 9 9" fill="none">
-                <rect x="3" y="1" width="3" height="4" rx="1.5" fill="rgba(255,255,255,0.5)" />
-                <path
-                  d="M1.5 5.5c0 1.65 1.34 3 3 3s3-1.35 3-3"
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth="0.8"
-                  fill="none"
-                />
-                <line x1="4.5" y1="8.5" x2="4.5" y2="9" stroke="rgba(255,255,255,0.5)" strokeWidth="0.8" />
-              </svg>
-            </div>
           </div>
         ))}
       </div>
-    </div>
-  );
-}
-
-// ── Card 6: Calendar strip + animated task pills ───────────────────────────────
-
-function AnimatedCheckmark({ visible }: { visible: boolean }) {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <circle cx="8" cy="8" r="7" stroke="#22c55e" strokeWidth="1.5" />
-      <motion.path
-        d="M5 8.5L7 10.5L11 6"
-        stroke="#22c55e"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        fill="none"
-        initial={{ pathLength: 0 }}
-        animate={{ pathLength: visible ? 1 : 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-      />
-    </svg>
-  );
-}
-
-function CalendarTasksVisual() {
-  const reduced = useReducedMotion() ?? false;
-  const { visibleCount, cycleKey } = useChatLoop(TASKS.length, 1200, reduced);
-
-  return (
-    <div className="flex h-full flex-col">
-      {/* Date strip */}
-      <div className="flex gap-1">
-        {CALENDAR.map((d) => (
-          <div
-            key={d}
-            className={`flex flex-1 flex-col items-center rounded-xl py-2 ${
-              d === HIGHLIGHTED_DATE
-                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                : "bg-zinc-100 text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400"
-            }`}
+      <div className="mt-2 flex gap-2" aria-hidden="true">
+        {WEEK.map((d, i) => (
+          <span
+            key={i}
+            className={cn(
+              "flex-1 text-center text-[12px]",
+              i === TODAY ? "font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#86868b] dark:text-[#98989d]",
+            )}
           >
-            <span className="text-[9px] leading-none opacity-60">
-              {d > 20 ? "Dec" : "Jan"}
-            </span>
-            <span className="mt-0.5 text-sm font-bold leading-none">{d}</span>
-          </div>
+            {d.day}
+          </span>
         ))}
       </div>
-
-      {/* Separator */}
-      <div className="my-3 border-t border-zinc-100 dark:border-white/10" />
-
-      {/* Animated task pills — slide up, no horizontal drift */}
-      <div className="flex flex-col gap-2 overflow-hidden">
-        <AnimatePresence>
-          {TASKS.slice(0, visibleCount).map((task, i) => (
-            <motion.div
-              key={`${cycleKey}-${i}`}
-              initial={reduced ? false : { opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, transition: { duration: 0.15 } }}
-              transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              className="flex w-full items-center gap-2.5 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.04]"
-            >
-              <AnimatedCheckmark visible />
-              <span className="truncate text-xs font-medium text-zinc-700 dark:text-zinc-200">{task}</span>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-      </div>
     </div>
-  );
-}
-
-// ── Card wrapper ───────────────────────────────────────────────────────────────
-
-interface BentoCardProps {
-  title: string;
-  description: string;
-  index: number;
-  className?: string;
-  children: React.ReactNode;
-}
-
-function BentoCard({ title, description, index, className, children }: BentoCardProps) {
-  return (
-    <motion.article
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{
-        delay: index * 0.06,
-        duration: 0.5,
-        ease: [0.22, 1, 0.36, 1],
-      }}
-      className={`flex flex-col rounded-[26px] border border-zinc-200/80 bg-zinc-50 p-2 dark:border-white/10 dark:bg-white/[0.03] ${className ?? ""}`}
-    >
-      <div className="relative min-h-[220px] flex-1 overflow-hidden rounded-[20px] border border-zinc-200/70 bg-white p-4 dark:border-white/[0.06] dark:bg-zinc-950">
-        {children}
-      </div>
-      <div className="px-3 pb-3 pt-4">
-        <h3 className="text-[16px] font-semibold tracking-[-0.01em] text-zinc-900 dark:text-white">{title}</h3>
-        <p className="mt-1 max-w-md text-pretty text-[14px] leading-6 text-zinc-500 dark:text-zinc-400">{description}</p>
-      </div>
-    </motion.article>
   );
 }
 
 // ── Main export ────────────────────────────────────────────────────────────────
 
 export default function WhyChooseUsBento() {
+  const rise = useRise();
+
   return (
-    <section className="bg-white px-4 py-16 dark:bg-zinc-950 sm:px-6 sm:py-20 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="grid gap-4 md:grid-cols-[1.2fr_1fr] md:items-end">
-          <h2 className="text-balance text-[32px] font-semibold leading-[1.06] tracking-[-0.035em] text-zinc-950 dark:text-white sm:text-[44px]">
-            Interview prep goes faster with people in your corner
-          </h2>
-          <p className="max-w-md text-pretty text-[16px] leading-7 text-zinc-500 dark:text-zinc-400 md:justify-self-end md:pb-1.5">
+    <section className="bg-[#f5f5f7] px-4 py-16 dark:bg-black sm:px-6 sm:py-24 lg:px-8">
+      <motion.div
+        className="mx-auto max-w-6xl"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={STAGGER(0.08)}
+      >
+        <div className="grid gap-4 md:grid-cols-[1.25fr_1fr] md:items-end">
+          <motion.h2
+            variants={rise}
+            className="text-balance text-[34px] font-semibold leading-[1.07] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-[48px]"
+          >
+            Interview prep goes faster with people in your corner.
+          </motion.h2>
+          <motion.p
+            variants={rise}
+            className="max-w-md text-pretty text-[17px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6] md:justify-self-end md:pb-2"
+          >
             Daily practice, a cohort at your level, and engineers who have sat on the other side of the table.
-          </p>
+          </motion.p>
         </div>
 
-        <div className="mt-10 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 sm:mt-12">
-          <BentoCard
-            title="Mentors who have hired"
-            description="Weekly 1:1s with staff engineers and managers who run real interview loops."
-            index={0}
-            className="md:col-span-2"
-          >
-            <MentorMarquee />
-          </BentoCard>
+        <motion.div variants={STAGGER(0.07)} className="mt-10 grid grid-cols-1 gap-3 sm:mt-14 sm:gap-4 md:grid-cols-2 lg:grid-cols-6">
+          <Tile className="md:col-span-2 lg:col-span-4">
+            <div className="flex h-full flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+              <TileCopy
+                title="Mentors who have hired"
+                figure={<CountUp to={140} />}
+                caption="Staff engineers and hiring managers who run real interview loops, on call for weekly 1:1s."
+              />
+              <MentorList />
+            </div>
+          </Tile>
 
-          <BentoCard
-            title="A cohort at your level"
-            description="Six people, same target roles, same timeline. You meet every morning."
-            index={1}
-          >
-            <OrbitVisual />
-          </BentoCard>
+          <Tile className="lg:col-span-2">
+            <TileCopy
+              title="A cohort at your level"
+              figure="6"
+              unit="people"
+              caption="Same target roles, same timeline. You meet every morning."
+            />
+            <CohortRing />
+          </Tile>
 
-          <BentoCard
-            title="Live doubt-clearing"
-            description="Drop into an open room, share your screen, and get unstuck in minutes instead of days."
-            index={2}
-            className="lg:row-span-2"
-          >
-            <VideoCallVisual />
-          </BentoCard>
+          <Tile className="lg:col-span-2">
+            <TileCopy
+              title="Someone checks in"
+              figure="Daily"
+              caption="Your cohort sees your streak and asks about the set you promised to finish."
+            />
+            <StaticChat messages={ACCOUNTABILITY_MSGS} />
+          </Tile>
 
-          <BentoCard
-            title="Someone checks in"
-            description="Your cohort sees your streak and asks about the set you promised to finish."
-            index={3}
-          >
-            <StaticChatVisual messages={ACCOUNTABILITY_MSGS} avatarImg={10} />
-          </BentoCard>
+          <Tile className="lg:col-span-2">
+            <TileCopy
+              title="Help before you give up"
+              figure="24/7"
+              caption="Ask the group when a problem stalls you. Someone has solved it before."
+            />
+            <LiveChat messages={ENCOURAGEMENT_MSGS} />
+          </Tile>
 
-          <BentoCard
-            title="Help before you give up"
-            description="Ask the group when a problem stalls you. Someone has solved it before."
-            index={4}
-          >
-            <LiveChatVisual messages={ENCOURAGEMENT_MSGS} avatarImg={14} />
-          </BentoCard>
+          <Tile inverse className="lg:col-span-2 lg:row-span-2">
+            <div className="flex items-center gap-2 text-[13px] font-medium text-[#a1a1a6]">
+              <span className="relative flex size-2">
+                <span className="absolute inset-0 animate-ping rounded-full bg-[#ff3b30] opacity-60 motion-reduce:animate-none" />
+                <span className="relative size-2 rounded-full bg-[#ff3b30]" />
+              </span>
+              Open room, graphs and DP
+            </div>
+            <TileCopy
+              inverse
+              className="mt-5"
+              title="Live doubt-clearing"
+              figure="4"
+              unit="min"
+              caption="Median time to get unstuck. Drop in, share your screen, and talk it through."
+            />
+            <LiveRoom />
+          </Tile>
 
-          <BentoCard
-            title="Progress you can see"
-            description="Problems solved, mock interviews booked, and a reminder before every session."
-            index={5}
-            className="md:col-span-2"
-          >
-            <CalendarTasksVisual />
-          </BentoCard>
-        </div>
-      </div>
+          <Tile className="md:col-span-2 lg:col-span-4">
+            <div className="flex h-full flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
+              <TileCopy
+                title="Progress you can see"
+                figure={<CountUp to={38} />}
+                unit="solved"
+                caption="Problems this month, mock interviews booked, and a reminder before every session."
+              />
+              <WeekBars />
+            </div>
+          </Tile>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

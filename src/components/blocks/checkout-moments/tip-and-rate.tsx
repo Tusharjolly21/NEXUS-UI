@@ -1,11 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Heart, Loader2, Star } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Check, Heart, Loader2, Star } from "lucide-react";
 import { TickSlider } from "@/components/tick-slider";
 import { cn } from "@/lib/utils";
-import { formatMoney, GhostButton, hairline, InkButton, MomentCard, Money, muted, StepSwap } from "./moment-card";
+import { ACCENT, focusRing, formatMoney, GhostButton, hairline, InkButton, MomentCard, Money, muted, StepSwap } from "./moment-card";
 
 export type TipAndRateProps = {
   /** Who delivered, shown with their initials. */
@@ -26,10 +26,11 @@ export type TipAndRateProps = {
 
 const LABELS = ["", "Not great", "Could be better", "Good", "Great", "Perfect"];
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+const UI_SPRING = { type: "spring", stiffness: 420, damping: 34 } as const;
 
 /**
- * A post-purchase card: rate with springy stars, tip with preset chips or a tick slider (the two
- * stay in sync), pick compliments, then a send button that resolves into a thank-you.
+ * A post-purchase card: rate with springy stars, tip with a segmented preset control or a tick
+ * slider (the two stay in sync), pick compliments, then a send button that resolves into a thank-you.
  */
 export function TipAndRate({
   courier = "Maya Chen",
@@ -43,6 +44,7 @@ export function TipAndRate({
   className,
 }: TipAndRateProps) {
   const reduce = useReducedMotion();
+  const uid = React.useId();
   const [rating, setRating] = React.useState(0);
   const [hover, setHover] = React.useState(0);
   const [tip, setTip] = React.useState(Math.round((orderTotal * (presets[1] ?? 0.15)) / 100));
@@ -66,6 +68,14 @@ export function TipAndRate({
   };
 
   const shown = hover || rating;
+  const buttonLabel =
+    state === "sending"
+      ? "sending"
+      : rating === 0
+        ? "Rate to continue"
+        : tip > 0
+          ? `Send feedback and ${formatMoney(tip * 100, currency)}`
+          : "Send feedback";
 
   return (
     <MomentCard label={`Rate your delivery with ${courier}`} className={className}>
@@ -74,12 +84,12 @@ export function TipAndRate({
           <div className="flex flex-col items-center py-6 text-center">
             <motion.span
               aria-hidden
-              className="grid size-16 place-items-center rounded-full bg-[#ff3b5c]/12"
+              className="grid size-16 place-items-center rounded-full bg-[#ff3b30]/12"
               initial={reduce ? false : { scale: 0.4, rotate: -12 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 380, damping: 14 }}
             >
-              <Heart className="size-7 fill-[#ff3b5c] text-[#ff3b5c]" />
+              <Heart className="size-7 fill-[#ff3b30] text-[#ff3b30]" />
             </motion.span>
             <h3 className="mt-4 text-[20px] font-semibold tracking-[-0.02em]">Thanks for the love</h3>
             <p className={cn("mt-1 max-w-[280px] text-[14px] leading-relaxed", muted)}>
@@ -92,7 +102,7 @@ export function TipAndRate({
         ) : (
           <>
             <header className="flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-full bg-[linear-gradient(135deg,#ffd6a5,#ffadad)] text-[14px] font-semibold text-[#5c2b1f]">
+              <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#e8e8ed] text-[14px] font-semibold text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#f5f5f7]">
                 {initials}
               </span>
               <div className="min-w-0">
@@ -102,9 +112,10 @@ export function TipAndRate({
             </header>
 
             <div className="mt-5" role="radiogroup" aria-label="Rating">
-              <div className="flex items-center gap-1" onPointerLeave={() => setHover(0)}>
+              <div className="flex items-center gap-0.5" onPointerLeave={() => setHover(0)}>
                 {[1, 2, 3, 4, 5].map((n) => {
                   const on = n <= shown;
+                  const filled = n <= rating;
                   return (
                     <motion.button
                       key={n}
@@ -115,34 +126,49 @@ export function TipAndRate({
                       onPointerEnter={() => setHover(n)}
                       onClick={() => setRating(n)}
                       whileTap={reduce ? undefined : { scale: 0.8 }}
-                      animate={reduce ? undefined : { scale: rating === n ? [1, 1.25, 1] : 1 }}
-                      transition={{ duration: 0.3 }}
-                      className="grid size-10 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-[#17171c] dark:focus-visible:outline-white"
+                      animate={reduce ? undefined : { scale: filled ? [1, 1.28, 1] : 1 }}
+                      transition={{ scale: { duration: 0.38, ease: [0.22, 1, 0.36, 1], delay: filled ? (n - 1) * 0.045 : 0 } }}
+                      className={cn("grid size-10 place-items-center rounded-full", focusRing)}
                     >
                       <Star
                         className={cn(
                           "size-7 transition-colors duration-150",
-                          on ? "fill-[#ffb020] text-[#ffb020]" : "text-[#17171c]/20 dark:text-white/20",
+                          on ? "fill-[#ff9500] text-[#ff9500]" : "text-[#d2d2d7] dark:text-[#48484a]",
                         )}
-                        strokeWidth={1.6}
+                        strokeWidth={1.75}
                       />
                     </motion.button>
                   );
                 })}
-                <span className={cn("ml-2 text-[13.5px] font-medium", shown ? "" : muted)} aria-live="polite">
-                  {LABELS[shown] || "Tap to rate"}
+                <span className={cn("relative ml-2 grid overflow-hidden text-[14px] font-medium", shown ? "" : muted)} aria-live="polite">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span
+                      key={shown}
+                      className="block whitespace-nowrap"
+                      initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(4px)" }}
+                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                      exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(4px)" }}
+                      transition={reduce ? { duration: 0.12 } : UI_SPRING}
+                    >
+                      {LABELS[shown] || "Tap to rate"}
+                    </motion.span>
+                  </AnimatePresence>
                 </span>
               </div>
             </div>
 
             <div className={cn("mt-5 border-t pt-5", hairline)}>
               <div className="flex items-baseline justify-between">
-                <p className="text-[14px] font-semibold">Add a tip</p>
+                <p className="text-[15px] font-semibold">Add a tip</p>
                 <span className="text-[24px] font-semibold tracking-[-0.03em]">
                   <Money cents={tip * 100} currency={currency} />
                 </span>
               </div>
-              <div className="mt-3 grid grid-cols-4 gap-2">
+              <div
+                role="group"
+                aria-label="Tip presets"
+                className="mt-3 grid grid-cols-4 rounded-[12px] bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]"
+              >
                 {[0, ...presets].map((p) => {
                   const amount = Math.round((orderTotal * p) / 100);
                   const active = tip === amount;
@@ -153,14 +179,28 @@ export function TipAndRate({
                       aria-pressed={active}
                       onClick={() => setTip(amount)}
                       className={cn(
-                        "h-11 rounded-2xl text-[13px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#17171c] dark:focus-visible:outline-white",
-                        active
-                          ? "bg-[#17171c] text-white dark:bg-white dark:text-[#17171c]"
-                          : "bg-[#17171c]/[0.05] hover:bg-[#17171c]/[0.09] dark:bg-white/[0.07] dark:hover:bg-white/[0.12]",
+                        "relative h-11 rounded-[9px] text-[13px] font-semibold transition-colors",
+                        active ? "text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7]",
+                        focusRing,
                       )}
                     >
-                      {p === 0 ? "None" : `${Math.round(p * 100)}%`}
-                      {p > 0 ? <span className={cn("block text-[11px] font-medium", active ? "opacity-70" : muted)}>{currency}{amount}</span> : null}
+                      {active ? (
+                        <motion.span
+                          layoutId={`${uid}-tip`}
+                          aria-hidden
+                          className="absolute inset-0 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]"
+                          transition={reduce ? { duration: 0 } : UI_SPRING}
+                        />
+                      ) : null}
+                      <span className="relative z-10 block leading-tight">
+                        {p === 0 ? "None" : `${Math.round(p * 100)}%`}
+                        {p > 0 ? (
+                          <span className={cn("block text-[11px] font-medium", active ? "text-[#6e6e73] dark:text-[#d1d1d6]" : "")}>
+                            {currency}
+                            {amount}
+                          </span>
+                        ) : null}
+                      </span>
                     </button>
                   );
                 })}
@@ -176,6 +216,7 @@ export function TipAndRate({
                 ticks={58}
                 size="sm"
                 showValue={false}
+                accent={ACCENT}
               />
             </div>
 
@@ -184,38 +225,64 @@ export function TipAndRate({
                 const on = picked.includes(c);
                 return (
                   <li key={c}>
-                    <button
+                    <motion.button
+                      layout={!reduce}
                       type="button"
                       aria-pressed={on}
                       onClick={() => setPicked((list) => (on ? list.filter((x) => x !== c) : [...list, c]))}
+                      whileTap={reduce ? undefined : { scale: 0.95 }}
+                      transition={UI_SPRING}
                       className={cn(
-                        "h-8 rounded-full border px-3 text-[12.5px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#17171c] dark:focus-visible:outline-white",
+                        "inline-flex h-8 items-center gap-1 rounded-full border px-3 text-[13px] font-medium transition-colors",
                         on
-                          ? "border-transparent bg-[#16a34a]/12 text-[#15803d] dark:text-[#4ade80]"
-                          : cn(hairline, "hover:bg-[#17171c]/[0.04] dark:hover:bg-white/[0.05]"),
+                          ? "border-transparent bg-[#0071e3]/10 text-[#0066cc] dark:bg-[#2997ff]/15 dark:text-[#2997ff]"
+                          : cn(hairline, "hover:bg-black/[0.03] dark:hover:bg-white/[0.05]"),
+                        focusRing,
                       )}
                     >
-                      {on ? "✓ " : ""}
-                      {c}
-                    </button>
+                      <AnimatePresence initial={false}>
+                        {on ? (
+                          <motion.span
+                            key="check"
+                            className="inline-flex overflow-hidden"
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: "auto", opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            transition={reduce ? { duration: 0.1 } : UI_SPRING}
+                          >
+                            <Check className="size-3.5" strokeWidth={2.5} aria-hidden />
+                          </motion.span>
+                        ) : null}
+                      </AnimatePresence>
+                      <motion.span layout={!reduce ? "position" : false} transition={UI_SPRING}>
+                        {c}
+                      </motion.span>
+                    </motion.button>
                   </li>
                 );
               })}
             </ul>
 
             <InkButton className="mt-6" onClick={send} disabled={rating === 0 || state === "sending"}>
-              {state === "sending" ? (
-                <>
-                  <Loader2 className="size-4 animate-spin" aria-hidden />
-                  Sending…
-                </>
-              ) : rating === 0 ? (
-                "Rate to continue"
-              ) : tip > 0 ? (
-                `Send feedback and ${formatMoney(tip * 100, currency)}`
-              ) : (
-                "Send feedback"
-              )}
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={state === "sending" ? "sending" : rating === 0 ? "rate" : tip > 0 ? "tip" : "plain"}
+                  className="inline-flex items-center gap-2"
+                  initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(4px)" }}
+                  transition={reduce ? { duration: 0.12 } : UI_SPRING}
+                >
+                  {state === "sending" ? (
+                    <>
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                      Sending…
+                    </>
+                  ) : (
+                    buttonLabel
+                  )}
+                </motion.span>
+              </AnimatePresence>
             </InkButton>
           </>
         )}

@@ -1,410 +1,681 @@
 "use client";
 
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Eye, Search, Sparkles, X, Zap } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion, type Transition } from "framer-motion";
+import {
+  ArrowRight,
+  Blocks,
+  BookOpen,
+  Component,
+  CornerDownLeft,
+  LayoutTemplate,
+  Search,
+  X,
+  type LucideIcon,
+} from "lucide-react";
 import { libraryComponents } from "@/lib/catalog/library-components";
+import { templates } from "@/lib/catalog/templates";
+import { blocks } from "@/lib/catalog/blocks";
+import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
+import { DOCS_PAGES } from "@/components/docs/docs-nav";
 import { cn } from "@/lib/utils";
 
-/* ── Category colour map ───────────────────────────────────────────────────── */
-const CAT_COLORS: Record<string, string> = {
-  animations: "bg-violet-500/15 text-violet-400 border-violet-500/25",
-  buttons: "bg-sky-500/15 text-sky-400 border-sky-500/25",
-  inputs: "bg-emerald-500/15 text-emerald-400 border-emerald-500/25",
-  navigation: "bg-amber-500/15 text-amber-400 border-amber-500/25",
-  cards: "bg-rose-500/15 text-rose-400 border-rose-500/25",
-  loaders: "bg-cyan-500/15 text-cyan-400 border-cyan-500/25",
-  effects: "bg-fuchsia-500/15 text-fuchsia-400 border-fuchsia-500/25",
+/* ── Index ─────────────────────────────────────────────────────────────────── */
+
+type Kind = "component" | "template" | "block" | "doc";
+
+type Entry = {
+  id: string;
+  kind: Kind;
+  title: string;
+  subtitle: string;
+  description: string;
+  href: string;
+  premium: boolean;
+  score: number;
+  tags: string[];
+  haystack: string;
+  Preview?: React.ComponentType<{ compact?: boolean }>;
 };
-const catColor = (slug: string) =>
-  CAT_COLORS[slug] ?? "bg-zinc-700/40 text-zinc-400 border-zinc-600/40";
+
+const KIND_ICON: Record<Kind, LucideIcon> = {
+  component: Component,
+  template: LayoutTemplate,
+  block: Blocks,
+  doc: BookOpen,
+};
+
+const COMPONENTS: Entry[] = libraryComponents.map((c) => {
+  const category = getComponentCategoryLabel(c.categorySlug);
+  return {
+    id: `component:${c.slug}`,
+    kind: "component",
+    title: c.name,
+    subtitle: category,
+    description: c.description,
+    href: `/components/${c.slug}`,
+    premium: c.premium,
+    score: c.trendingScore,
+    tags: c.tags,
+    haystack: `${c.name} ${c.slug} ${c.tags.join(" ")} ${c.categorySlug} ${category} ${c.description}`.toLowerCase(),
+    Preview: c.Preview,
+  };
+});
+
+const TEMPLATES: Entry[] = templates.map((t) => ({
+  id: `template:${t.slug}`,
+  kind: "template",
+  title: t.title.split(" — ")[0],
+  subtitle: t.category,
+  description: t.description,
+  href: `/templates/${t.slug}`,
+  premium: t.premium,
+  score: t.trendingScore,
+  tags: t.tags,
+  haystack: `${t.title} ${t.description} ${t.category} ${t.tags.join(" ")}`.toLowerCase(),
+}));
+
+const BLOCKS: Entry[] = blocks.map((b) => ({
+  id: `block:${b.slug}`,
+  kind: "block",
+  title: b.name,
+  subtitle: b.category,
+  description: b.description,
+  href: `/blocks/${b.slug}`,
+  premium: b.premium,
+  score: b.premium ? 70 : 50,
+  tags: b.tags,
+  haystack: `${b.name} ${b.description} ${b.category} ${b.tags.join(" ")}`.toLowerCase(),
+  Preview: b.Preview,
+}));
+
+const DOCS: Entry[] = DOCS_PAGES.map((d, i) => ({
+  id: `doc:${d.href}`,
+  kind: "doc",
+  title: d.label,
+  subtitle: "Docs",
+  description: "Setup and usage guides for Nexus UI.",
+  href: d.href,
+  premium: false,
+  score: DOCS_PAGES.length - i,
+  tags: [],
+  haystack: `${d.label} docs documentation guide ${d.href}`.toLowerCase(),
+}));
+
+const POPULAR = [...COMPONENTS].sort((a, b) => b.score - a.score).slice(0, 5);
+
+const GROUPS: { kind: Kind; label: string; source: Entry[]; limit: number }[] = [
+  { kind: "component", label: "Components", source: COMPONENTS, limit: 8 },
+  { kind: "template", label: "Templates", source: TEMPLATES, limit: 4 },
+  { kind: "block", label: "Blocks", source: BLOCKS, limit: 4 },
+  { kind: "doc", label: "Docs", source: DOCS, limit: 4 },
+];
+
+const SUGGESTIONS = ["pricing", "dock", "sidebar", "marquee"];
+
+function rank(entry: Entry, needle: string) {
+  const title = entry.title.toLowerCase();
+  if (title === needle) return 4;
+  if (title.startsWith(needle)) return 3;
+  if (title.split(/\s+/).some((w) => w.startsWith(needle))) return 2;
+  return entry.haystack.includes(needle) ? 1 : 0;
+}
+
+type Section = { id: string; label: string; items: Entry[] };
+
+function buildSections(needle: string): Section[] {
+  if (!needle) {
+    return [
+      { id: "popular", label: "Popular components", items: POPULAR },
+      { id: "start", label: "Get started", items: DOCS.slice(0, 3) },
+    ];
+  }
+  return GROUPS.map((g) => ({
+    id: g.kind,
+    label: g.label,
+    items: g.source
+      .map((e) => ({ e, r: rank(e, needle) }))
+      .filter((x) => x.r > 0)
+      .sort((a, b) => b.r - a.r || b.e.score - a.e.score)
+      .slice(0, g.limit)
+      .map((x) => x.e),
+  })).filter((s) => s.items.length > 0);
+}
+
+/* ── Hydration-safe "is client" flag (for the body portal) ─────────────────── */
+const noopSubscribe = () => () => {};
+function useIsClient() {
+  return React.useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+}
 
 /* ── Search trigger button ─────────────────────────────────────────────────── */
-function SearchTrigger({ onClick, variant = "default" }: { onClick: () => void; variant?: "default" | "capsule" }) {
+function SearchTrigger({
+  onClick,
+  variant = "default",
+  buttonRef,
+}: {
+  onClick: () => void;
+  variant?: "default" | "capsule";
+  buttonRef?: React.Ref<HTMLButtonElement>;
+}) {
   if (variant === "capsule") {
     return (
       <button
+        ref={buttonRef}
         type="button"
         onClick={onClick}
         aria-label="Search components"
-        className="group inline-flex h-9 items-center gap-2 rounded-full bg-foreground/[0.06] pl-3 pr-1.5 text-[13.5px] text-foreground/60 transition-colors hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        aria-haspopup="dialog"
+        className="group inline-flex h-9 items-center gap-2 rounded-full bg-foreground/[0.06] pl-3 pr-1.5 text-[13.5px] text-foreground/60 transition-colors duration-200 hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring active:bg-foreground/[0.12]"
       >
-        <Search className="size-4 shrink-0" aria-hidden />
+        <Search className="size-4 shrink-0" strokeWidth={2} aria-hidden />
         <span className="hidden sm:inline">Search</span>
-        <kbd className="ml-1 hidden rounded-full bg-foreground/[0.07] px-2 py-0.5 font-sans text-[11px] text-foreground/55 sm:inline">⌘K</kbd>
+        <kbd className="ml-1 hidden rounded-full bg-foreground/[0.07] px-2 py-0.5 font-sans text-[11px] text-foreground/55 transition-colors group-hover:text-foreground/70 sm:inline">
+          ⌘K
+        </kbd>
       </button>
     );
   }
   return (
     <button
+      ref={buttonRef}
       type="button"
       onClick={onClick}
       aria-label="Open search"
-      className={cn(
-        "group inline-flex h-9 items-center gap-2.5 rounded-lg border border-border/70 bg-muted/20 px-3",
-        "text-sm text-muted-foreground transition-all duration-200",
-        "hover:border-primary/30 hover:bg-muted/50 hover:text-foreground",
-        "dark:bg-white/3 dark:hover:border-primary/20",
-      )}
+      aria-haspopup="dialog"
+      className="group inline-flex h-9 items-center gap-2.5 rounded-full bg-foreground/[0.06] pl-3 pr-1.5 text-[13.5px] text-muted-foreground transition-colors duration-200 hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
-      <Search className="size-3.5 shrink-0 transition-colors duration-200 group-hover:text-primary" />
-      <span className="hidden text-xs md:inline">Search components…</span>
-      <span className="flex items-center gap-0.5">
-        <kbd className="rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-sm dark:bg-white/5">
-          ⌘
-        </kbd>
-        <kbd className="rounded border border-border/60 bg-background px-1.5 py-0.5 font-mono text-[10px] shadow-sm dark:bg-white/5">
-          K
-        </kbd>
-      </span>
+      <Search className="size-4 shrink-0" strokeWidth={2} aria-hidden />
+      <span className="hidden md:inline">Search components…</span>
+      <kbd className="rounded-full bg-foreground/[0.07] px-2 py-0.5 font-sans text-[11px] text-foreground/55">⌘K</kbd>
     </button>
   );
 }
 
-/* ── Two-panel command palette ─────────────────────────────────────────────── */
+function Key({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="inline-grid h-[18px] min-w-[18px] place-items-center rounded-[5px] bg-foreground/[0.07] px-1 font-sans text-[11px] font-medium text-foreground/60">
+      {children}
+    </kbd>
+  );
+}
+
+/* ── Spotlight-style command palette ───────────────────────────────────────── */
 export function SearchCommand({ variant = "default" }: { variant?: "default" | "capsule" } = {}) {
   const router = useRouter();
+  const isClient = useIsClient();
+  const reduce = useReducedMotion();
+  const uid = React.useId();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const modalRef = React.useRef<HTMLDivElement>(null);
+  const listRef = React.useRef<HTMLDivElement>(null);
+  const triggerRef = React.useRef<HTMLButtonElement>(null);
+  const openRef = React.useRef(false);
+
+  React.useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  /* Opening resets the palette here, in the event path, instead of in an effect. */
+  const openPalette = React.useCallback(() => {
+    if (openRef.current) {
+      inputRef.current?.select();
+      return;
+    }
+    setQuery("");
+    setActiveIdx(0);
+    setOpen(true);
+  }, []);
+
+  const close = React.useCallback((restoreFocus = true) => {
+    setOpen(false);
+    if (restoreFocus) triggerRef.current?.focus({ preventScroll: true });
+  }, []);
 
   /* Close on click outside */
   React.useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (modalRef.current && !modalRef.current.contains(e.target as Node)) close();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [open, close]);
 
-  /* Keyboard shortcut: ⌘K / Ctrl+K / / */
+  /* Keyboard shortcut: ⌘K / Ctrl+K / "/" and Escape */
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        setOpen(true);
+        openPalette();
+        return;
       }
-      if (e.key === "/" && !["input", "textarea"].includes(
-        (e.target as HTMLElement | null)?.tagName?.toLowerCase() ?? "",
-      )) {
+      const target = e.target as HTMLElement | null;
+      const typing =
+        ["input", "textarea", "select"].includes(target?.tagName?.toLowerCase() ?? "") || !!target?.isContentEditable;
+      if (e.key === "/" && !typing) {
         e.preventDefault();
-        setOpen(true);
+        openPalette();
+        return;
       }
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape" && openRef.current) close();
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [openPalette, close]);
 
+  /* Focus the field once the panel is mounted */
   React.useEffect(() => {
-    if (open) {
-      setQuery("");
-      setActiveIdx(0);
-      const id = setTimeout(() => inputRef.current?.focus(), 60);
-      return () => clearTimeout(id);
-    }
+    if (!open) return;
+    const id = requestAnimationFrame(() => inputRef.current?.focus());
+    return () => cancelAnimationFrame(id);
   }, [open]);
 
   const needle = query.trim().toLowerCase();
+  const sections = React.useMemo(() => buildSections(needle), [needle]);
+  const flat = React.useMemo(() => sections.flatMap((s) => s.items), [sections]);
+  const active = flat.length ? Math.min(activeIdx, flat.length - 1) : -1;
+  const activeItem = active >= 0 ? flat[active] : null;
 
-  const popular = React.useMemo(
-    () => [...libraryComponents].sort((a, b) => b.trendingScore - a.trendingScore).slice(0, 8),
-    [],
-  );
+  /* Keep the highlighted row in view */
+  React.useEffect(() => {
+    if (!open || active < 0) return;
+    const list = listRef.current;
+    if (!list) return;
+    if (active === 0) {
+      list.scrollTop = 0;
+      return;
+    }
+    list.querySelector<HTMLElement>(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
 
-  const results = React.useMemo(() => {
-    if (!needle) return popular;
-    return [...libraryComponents]
-      .filter(
-        (c) =>
-          c.name.toLowerCase().includes(needle) ||
-          c.slug.toLowerCase().includes(needle) ||
-          c.tags.some((t) => t.toLowerCase().includes(needle)) ||
-          c.categorySlug.toLowerCase().includes(needle),
-      )
-      .sort((a, b) => b.trendingScore - a.trendingScore)
-      .slice(0, 12);
-  }, [needle, popular]);
+  const go = (href: string) => {
+    close(false);
+    router.push(href);
+  };
+  const searchAll = () => go(needle ? `/search?q=${encodeURIComponent(query.trim())}` : "/search");
 
-  React.useEffect(() => setActiveIdx(0), [needle]);
+  const setQueryAndReset = (value: string) => {
+    setQuery(value);
+    setActiveIdx(0);
+  };
 
-  const activeItem = results[activeIdx] ?? null;
-
-  const onKeyDown = (e: React.KeyboardEvent) => {
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIdx((i) => Math.min(i + 1, results.length - 1));
+      if (flat.length) setActiveIdx(Math.min(active + 1, flat.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      setActiveIdx((i) => Math.max(i - 1, 0));
-    } else if (e.key === "Enter" && activeItem) {
-      setOpen(false);
-      router.push(`/components/${activeItem.slug}`);
+      if (flat.length) setActiveIdx(Math.max(active - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      if (activeItem) go(activeItem.href);
+      else if (needle) searchAll();
     }
   };
 
-  return (
-    <>
-      <SearchTrigger onClick={() => setOpen(true)} variant={variant} />
+  const listId = `${uid}-list`;
+  const optionId = (i: number) => `${uid}-opt-${i}`;
 
-      <AnimatePresence>
-        {open && (
+  const panelMotion = reduce
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
+    : {
+        initial: { opacity: 0, scale: 0.96, y: -10 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.97, y: -6, transition: { duration: 0.14, ease: [0.4, 0, 1, 1] as const } },
+      };
+  const panelSpring: Transition = reduce
+    ? { duration: 0.15 }
+    : { type: "spring", stiffness: 480, damping: 34, mass: 0.8 };
+  const pillSpring: Transition = reduce ? { duration: 0 } : { type: "spring", stiffness: 560, damping: 40, mass: 0.6 };
+
+  const offsets = sections.reduce<number[]>((acc, s, i) => {
+    acc.push(i === 0 ? 0 : acc[i - 1] + sections[i - 1].items.length);
+    return acc;
+  }, []);
+
+  const palette = (
+    <AnimatePresence>
+      {open && (
+        <motion.div key="search-root" className="fixed inset-0 z-[100] flex items-start justify-center px-4 pt-[12vh] max-sm:pt-4">
+          {/* Dimmed, softly blurred backdrop */}
           <motion.div
-            key="search-backdrop"
+            aria-hidden
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[6vh]"
+            transition={{ duration: 0.2 }}
+            className="absolute inset-0 bg-black/20 backdrop-blur-[3px] dark:bg-black/50"
+          />
+
+          {/* Panel */}
+          <motion.div
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Search Nexus UI"
+            {...panelMotion}
+            transition={panelSpring}
+            style={{ transformOrigin: "50% 0%" }}
+            className="pg-frost relative z-10 flex w-full max-w-[640px] flex-col overflow-hidden rounded-[22px] text-foreground ring-1 ring-border shadow-[0_0_0_0.5px_rgba(0,0,0,0.04),0_24px_70px_-12px_rgba(0,0,0,0.38),0_8px_24px_-10px_rgba(0,0,0,0.2)] md:max-w-[860px]"
           >
-            {/* Overlay */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+            {/* Input row */}
+            <div className="flex h-[62px] shrink-0 items-center gap-3 px-5">
+              <Search className="size-[22px] shrink-0 text-foreground/45" strokeWidth={1.9} aria-hidden />
+              <label htmlFor={`${uid}-input`} className="sr-only">
+                Search components, templates, blocks and docs
+              </label>
+              <input
+                id={`${uid}-input`}
+                ref={inputRef}
+                type="text"
+                role="combobox"
+                aria-expanded={flat.length > 0}
+                aria-controls={listId}
+                aria-autocomplete="list"
+                aria-activedescendant={active >= 0 ? optionId(active) : undefined}
+                autoComplete="off"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="Search Nexus UI"
+                value={query}
+                onChange={(e) => setQueryAndReset(e.target.value)}
+                onKeyDown={onKeyDown}
+                className="h-full min-w-0 flex-1 bg-transparent text-[21px] tracking-[-0.015em] text-foreground caret-action outline-none placeholder:text-foreground/35"
+              />
+              <AnimatePresence initial={false}>
+                {query && (
+                  <motion.button
+                    key="clear"
+                    type="button"
+                    aria-label="Clear search"
+                    initial={{ opacity: 0, scale: 0.6 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.6 }}
+                    transition={reduce ? { duration: 0.1 } : { type: "spring", stiffness: 600, damping: 32 }}
+                    onClick={() => {
+                      setQueryAndReset("");
+                      inputRef.current?.focus();
+                    }}
+                    className="grid size-[22px] shrink-0 place-items-center rounded-full bg-foreground/[0.18] text-background transition-colors hover:bg-foreground/[0.3] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <X className="size-3" strokeWidth={3} aria-hidden />
+                  </motion.button>
+                )}
+              </AnimatePresence>
+              <button
+                type="button"
+                onClick={() => close()}
+                aria-label="Close search"
+                className="hidden shrink-0 rounded-[6px] bg-foreground/[0.07] px-1.5 py-0.5 text-[11px] font-medium text-foreground/55 transition-colors hover:bg-foreground/[0.12] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:block"
+              >
+                esc
+              </button>
+            </div>
 
-            {/* Palette */}
-            <motion.div
-              key="search-modal"
-              initial={{ opacity: 0, scale: 0.95, y: -16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -16 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              ref={modalRef}
-              className="relative z-10 flex w-full max-w-5xl overflow-hidden rounded-2xl border border-white/10 bg-zinc-950 shadow-[0_32px_80px_-8px_rgba(0,0,0,0.85)]"
-            >
-              {/* Top accent line */}
-              <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/80 to-transparent" />
+            <div className="h-px shrink-0 bg-foreground/[0.07]" />
 
-              {/* ── LEFT: search + results ── */}
-              <div className="flex min-w-0 flex-1 flex-col border-r border-white/8">
+            <div className="flex min-h-0">
+              {/* Results */}
+              <motion.div
+                ref={listRef}
+                layoutScroll
+                id={listId}
+                role="listbox"
+                aria-label="Results"
+                className="max-h-[min(420px,calc(100dvh-12vh-140px))] min-w-0 flex-1 overflow-y-auto overscroll-contain p-2 max-sm:max-h-[calc(100dvh-140px)]"
+              >
+                {!needle && (
+                  <div className="flex flex-wrap items-center gap-1.5 px-3 pb-2 pt-1.5 text-[13px] text-muted-foreground">
+                    <span className="mr-0.5">Try</span>
+                    {SUGGESTIONS.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setQueryAndReset(s);
+                          inputRef.current?.focus();
+                        }}
+                        className="rounded-full bg-foreground/[0.06] px-2.5 py-0.5 text-[12.5px] text-foreground/75 transition-colors hover:bg-foreground/[0.1] hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                {/* Search input */}
-                <div className="flex items-center gap-3 border-b border-white/8 px-5 py-4">
-                  <Search className="size-4 shrink-0 text-zinc-400" />
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    placeholder="Search components, tags, effects…"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={onKeyDown}
-                    className="flex-1 bg-transparent text-sm text-white placeholder:text-zinc-500 focus:outline-none"
-                  />
-                  {query && (
+                {flat.length === 0 ? (
+                  <div className="flex flex-col items-center px-6 py-12 text-center">
+                    <span className="grid size-11 place-items-center rounded-[12px] bg-foreground/[0.06] text-foreground/45">
+                      <Search className="size-5" strokeWidth={1.9} aria-hidden />
+                    </span>
+                    <p className="mt-4 text-[15px] font-semibold text-foreground">
+                      No results for &ldquo;{query.trim()}&rdquo;
+                    </p>
+                    <p className="mt-1 max-w-[340px] text-[13px] leading-[1.5] text-muted-foreground">
+                      Try a name like &ldquo;dock&rdquo;, a tag like &ldquo;scroll&rdquo;, or a kind of section like &ldquo;pricing&rdquo;.
+                    </p>
                     <button
                       type="button"
-                      onClick={() => { setQuery(""); inputRef.current?.focus(); }}
-                      className="rounded-md p-1 text-zinc-500 transition hover:text-zinc-200"
+                      onClick={searchAll}
+                      className="mt-4 inline-flex items-center gap-1 text-[13px] font-medium text-link hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                     >
-                      <X className="size-3.5" />
+                      Search everything <ArrowRight className="size-3.5" aria-hidden />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setOpen(false)}
-                    className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 font-mono text-[11px] text-zinc-500 transition hover:bg-white/10 hover:text-zinc-200"
-                  >
-                    esc
-                  </button>
-                </div>
-
-                {/* Section label */}
-                <p className="px-5 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-600">
-                  {needle
-                    ? `${results.length} result${results.length !== 1 ? "s" : ""}`
-                    : "Trending components"}
-                </p>
-
-                {/* Results */}
-                <div className="max-h-105 overflow-y-auto pb-3">
-                  {results.length === 0 ? (
-                    <div className="flex flex-col items-center gap-3 py-12">
-                      <Search className="size-9 text-zinc-700" />
-                      <p className="text-sm text-zinc-500">Nothing found for &ldquo;{query}&rdquo;</p>
-                    </div>
-                  ) : (
-                    results.map((item, idx) => {
-                      const isActive = idx === activeIdx;
-                      return (
-                        <button
-                          key={item.slug}
-                          type="button"
-                          onMouseEnter={() => setActiveIdx(idx)}
-                          onClick={() => {
-                            setOpen(false);
-                            router.push(`/components/${item.slug}`);
-                          }}
-                          className={cn(
-                            "flex w-full items-center gap-3 px-5 py-2.5 text-left transition-colors",
-                            isActive ? "bg-white/7" : "hover:bg-white/4",
-                          )}
-                        >
-                          {/* Category icon */}
-                          <span
-                            className={cn(
-                              "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-[11px] font-bold",
-                              catColor(item.categorySlug),
-                            )}
+                  </div>
+                ) : (
+                  sections.map((section, sectionIdx) => (
+                    <div key={section.id} role="group" aria-labelledby={`${uid}-h-${section.id}`} className="pb-1">
+                      <div
+                        id={`${uid}-h-${section.id}`}
+                        className="px-3 pb-1 pt-2.5 text-[12px] font-semibold text-muted-foreground"
+                      >
+                        {section.label}
+                      </div>
+                      {section.items.map((item, itemIdx) => {
+                        const idx = offsets[sectionIdx] + itemIdx;
+                        const isActive = idx === active;
+                        const Icon = KIND_ICON[item.kind];
+                        return (
+                          <div
+                            key={item.id}
+                            id={optionId(idx)}
+                            data-index={idx}
+                            role="option"
+                            aria-selected={isActive}
+                            onMouseMove={() => {
+                              if (!isActive) setActiveIdx(idx);
+                            }}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => go(item.href)}
+                            className="relative flex h-11 cursor-default select-none items-center gap-3 rounded-[10px] px-2.5"
                           >
-                            {item.categorySlug.slice(0, 2).toUpperCase()}
-                          </span>
-
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-medium leading-tight text-zinc-100">{item.name}</p>
-                              {item.premium && <Sparkles className="size-3 shrink-0 text-amber-400" />}
-                            </div>
-                            <p className="mt-0.5 truncate text-[11px] text-zinc-500">{item.description}</p>
-                          </div>
-
-                          <AnimatePresence>
                             {isActive && (
-                              <motion.div
-                                initial={{ opacity: 0, x: -4 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -4 }}
-                                transition={{ duration: 0.12 }}
-                              >
-                                <ArrowUpRight className="size-4 text-zinc-400" />
-                              </motion.div>
+                              <motion.span
+                                layoutId={`${uid}-highlight`}
+                                transition={pillSpring}
+                                className="absolute inset-0 rounded-[10px] bg-action"
+                                aria-hidden
+                              />
                             )}
-                          </AnimatePresence>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
+                            <span
+                              className={cn(
+                                "relative grid size-7 shrink-0 place-items-center rounded-[8px] transition-colors duration-150",
+                                isActive ? "bg-white/20 text-white" : "bg-foreground/[0.06] text-foreground/70",
+                              )}
+                            >
+                              <Icon className="size-4" strokeWidth={1.85} aria-hidden />
+                            </span>
+                            <span className="relative flex min-w-0 flex-1 items-baseline gap-2">
+                              <span
+                                className={cn(
+                                  "truncate text-[14.5px] font-medium tracking-[-0.01em]",
+                                  isActive ? "text-white" : "text-foreground",
+                                )}
+                              >
+                                {item.title}
+                              </span>
+                              <span
+                                className={cn(
+                                  "hidden truncate text-[13px] min-[400px]:inline",
+                                  isActive ? "text-white/75" : "text-muted-foreground",
+                                )}
+                              >
+                                {item.subtitle}
+                              </span>
+                            </span>
+                            {item.premium && (
+                              <span
+                                className={cn(
+                                  "relative shrink-0 rounded-full px-1.5 py-px text-[10.5px] font-semibold",
+                                  isActive ? "bg-white/20 text-white" : "bg-foreground/[0.07] text-foreground/60",
+                                )}
+                              >
+                                Pro
+                              </span>
+                            )}
+                            <CornerDownLeft
+                              className={cn(
+                                "relative size-3.5 shrink-0 transition-opacity duration-150",
+                                isActive ? "text-white/80 opacity-100" : "opacity-0",
+                              )}
+                              strokeWidth={2}
+                              aria-hidden
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
+                )}
+              </motion.div>
 
-                {/* Footer hints */}
-                <div className="mt-auto flex items-center gap-5 border-t border-white/8 bg-white/2 px-5 py-2.5 text-[11px] text-zinc-600">
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-white/10 bg-white/6 px-1.5 py-0.5 font-mono text-[9px] text-zinc-400">↑</kbd>
-                    <kbd className="rounded border border-white/10 bg-white/6 px-1.5 py-0.5 font-mono text-[9px] text-zinc-400">↓</kbd>
-                    navigate
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-white/10 bg-white/6 px-1.5 py-0.5 font-mono text-[9px] text-zinc-400">↵</kbd>
-                    open
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-white/10 bg-white/6 px-1.5 py-0.5 font-mono text-[9px] text-zinc-400">/</kbd>
-                    search
-                  </span>
-                  <span className="ml-auto flex items-center gap-1.5">
-                    <Zap className="size-3 text-primary" />
-                    {libraryComponents.length} components
-                  </span>
-                </div>
-              </div>
-
-              {/* ── RIGHT: component detail panel ── */}
-              <div className="hidden w-96 shrink-0 flex-col sm:flex">
-                <AnimatePresence mode="wait">
-                  {activeItem && (
+              {/* Preview pane (md+) */}
+              {activeItem && (
+                <div className="hidden w-[320px] shrink-0 flex-col border-l border-foreground/[0.07] p-3 md:flex">
+                  <AnimatePresence mode="wait" initial={false}>
                     <motion.div
-                      key={activeItem.slug}
+                      key={activeItem.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      transition={{ duration: 0.14 }}
-                      className="flex flex-1 flex-col"
+                      transition={{ duration: 0.12 }}
+                      className="flex min-h-0 flex-1 flex-col"
                     >
-                      {/* Live component preview */}
-                      <div className="flex-1 overflow-hidden border-b border-white/8 bg-zinc-900">
-                        <div className="flex h-7 items-center gap-1.5 border-b border-white/8 bg-zinc-900/80 px-3">
-                          <span className="size-2 rounded-full bg-red-500/60" />
-                          <span className="size-2 rounded-full bg-yellow-500/60" />
-                          <span className="size-2 rounded-full bg-green-500/60" />
-                          <span className="ml-auto font-mono text-[9px] text-zinc-600">preview</span>
-                        </div>
-                        <div className="relative h-64 overflow-hidden">
-                          <div className="pointer-events-none absolute inset-x-0 top-0 w-full">
-                            <React.Suspense
-                              fallback={
-                                <div className="h-16 w-32 animate-pulse rounded-lg bg-white/5" />
-                              }
-                            >
-                              <activeItem.Preview compact />
-                            </React.Suspense>
+                      <div className="relative h-[188px] shrink-0 overflow-hidden rounded-[14px] bg-background ring-1 ring-border">
+                        {activeItem.Preview ? (
+                          <>
+                            <div inert aria-hidden className="pointer-events-none absolute inset-x-0 top-0 w-full">
+                              <React.Suspense fallback={<div className="m-4 h-16 w-32 animate-pulse rounded-[10px] bg-foreground/[0.06]" />}>
+                                <activeItem.Preview compact />
+                              </React.Suspense>
+                            </div>
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-background to-transparent" />
+                          </>
+                        ) : (
+                          <div className="grid h-full place-items-center">
+                            <span className="grid size-14 place-items-center rounded-[14px] bg-foreground/[0.06] text-foreground/55">
+                              {React.createElement(KIND_ICON[activeItem.kind], {
+                                className: "size-7",
+                                strokeWidth: 1.6,
+                                "aria-hidden": true,
+                              })}
+                            </span>
                           </div>
-                          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-linear-to-t from-zinc-900 to-transparent" />
-                        </div>
+                        )}
                       </div>
 
-                      {/* Metadata */}
-                      <div className="flex flex-1 flex-col bg-zinc-900/40 p-4">
-                        <p className="text-sm font-semibold leading-snug text-zinc-100">
-                          {activeItem.name}
+                      <div className="mt-3 flex min-h-0 flex-1 flex-col px-1">
+                        <p className="text-[15px] font-semibold leading-snug tracking-[-0.015em] text-foreground">
+                          {activeItem.title}
                         </p>
-                        <p className="mt-1 text-[11px] leading-relaxed text-zinc-500 line-clamp-2">
+                        <p className="mt-0.5 text-[12.5px] text-muted-foreground">
+                          {activeItem.subtitle}
+                          {activeItem.kind !== "doc" && <> · {activeItem.premium ? "Pro" : "Free"}</>}
+                        </p>
+                        <p className="mt-2 line-clamp-3 text-[13px] leading-[1.5] text-foreground/75">
                           {activeItem.description}
                         </p>
-
-                        <div className="mt-3 flex flex-wrap gap-1.5">
-                          <span className={cn("rounded-full border px-2 py-0.5 text-[10px]", catColor(activeItem.categorySlug))}>
-                            {activeItem.categorySlug}
-                          </span>
-                          {activeItem.premium ? (
-                            <span className="inline-flex items-center gap-0.5 rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] text-amber-400">
-                              <Sparkles className="size-2.5" />
-                              Premium
-                            </span>
-                          ) : (
-                            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                              Free
-                            </span>
-                          )}
-                        </div>
-
                         {activeItem.tags.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-1">
+                          <div className="mt-2.5 flex flex-wrap gap-1">
                             {activeItem.tags.slice(0, 4).map((tag) => (
                               <span
                                 key={tag}
-                                className="rounded-md border border-white/8 bg-white/4 px-1.5 py-0.5 text-[10px] text-zinc-500"
+                                className="rounded-full bg-foreground/[0.06] px-2 py-0.5 text-[11.5px] text-foreground/60"
                               >
                                 {tag}
                               </span>
                             ))}
                           </div>
                         )}
-
-                        {/* Actions */}
-                        <div className="mt-auto pt-4 flex gap-2">
+                        <div className="mt-auto pt-3">
                           <button
                             type="button"
-                            onClick={() => {
-                              setOpen(false);
-                              router.push(`/components/${activeItem.slug}`);
-                            }}
-                            className="flex-1 rounded-lg bg-white/10 py-2 text-center text-xs font-semibold text-zinc-100 transition hover:bg-white/15"
+                            onClick={() => go(activeItem.href)}
+                            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-action px-4 text-[13px] font-medium text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                           >
-                            View component
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOpen(false);
-                              router.push(`/components/${activeItem.slug}`);
-                            }}
-                            className="flex items-center justify-center gap-1 rounded-lg border border-white/10 px-3 py-2 text-xs text-zinc-400 transition hover:bg-white/5 hover:text-zinc-200"
-                          >
-                            <Eye className="size-3.5" />
+                            Open
+                            <CornerDownLeft className="size-3.5" strokeWidth={2} aria-hidden />
                           </button>
                         </div>
                       </div>
                     </motion.div>
-                  )}
-                </AnimatePresence>
+                  </AnimatePresence>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex h-10 shrink-0 items-center justify-between gap-4 border-t border-foreground/[0.07] px-4 text-[12px] text-muted-foreground">
+              <div className="hidden items-center gap-3 sm:flex">
+                <span className="flex items-center gap-1.5">
+                  <Key>↑</Key>
+                  <Key>↓</Key>
+                  Move
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Key>↵</Key>
+                  Open
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Key>esc</Key>
+                  Close
+                </span>
               </div>
-            </motion.div>
+              {needle ? (
+                <button
+                  type="button"
+                  onClick={searchAll}
+                  className="ml-auto inline-flex min-w-0 items-center gap-1 font-medium text-link hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  <span className="truncate">All results for &ldquo;{query.trim()}&rdquo;</span>
+                  <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                </button>
+              ) : (
+                <span className="ml-auto tabular-nums">
+                  {COMPONENTS.length} components · {TEMPLATES.length} templates · {BLOCKS.length} blocks
+                </span>
+              )}
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  return (
+    <>
+      <SearchTrigger onClick={openPalette} variant={variant} buttonRef={triggerRef} />
+      {isClient ? createPortal(palette, document.body) : null}
     </>
   );
 }

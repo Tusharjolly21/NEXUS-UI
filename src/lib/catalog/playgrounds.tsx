@@ -34,6 +34,16 @@ import { TiltPass } from "@/components/tilt-pass";
 import { AnimatedTabs } from "@/components/animated-tabs";
 import { SharedElementCards } from "@/components/shared-element-cards";
 import { RotatingHeadline } from "@/components/rotating-headline";
+import { StretchNav } from "@/components/stretch-nav";
+import { FeedbackPill } from "@/components/feedback-pill";
+import { StaggerMenu } from "@/components/stagger-menu";
+import { RulerPicker } from "@/components/ruler-picker";
+import { ElasticStepper } from "@/components/elastic-stepper";
+import { TodoList } from "@/components/todo-list";
+import { ProgressButton } from "@/components/progress-button";
+import { CopyChip } from "@/components/copy-button";
+import { AnimatedIcons } from "@/components/animated-icons";
+import { FolderPeek } from "@/components/folder-peek";
 
 /**
  * Live props playgrounds for component detail pages (Bencho-style "tweak and copy").
@@ -440,7 +450,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "step", label: "Step", min: 1, max: 25, step: 1, defaultValue: 1 },
       { kind: "range", prop: "magnify", label: "Wave", min: 0, max: 1.2, step: 0.05, unit: "×", defaultValue: 0.55 },
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
-      { kind: "color", prop: "accent", label: "Accent", options: ["#17181a", "#6d5cff", "#0ea5e9", "#16a34a", "#f97316"], defaultValue: "#17181a" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#17181a", "#0071e3", "#0ea5e9", "#16a34a", "#f97316"], defaultValue: "#17181a" },
       { kind: "toggle", prop: "showValue", label: "Number", defaultValue: true },
     ],
     render: (v, fill) => (
@@ -462,7 +472,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "interval", label: "Snap", min: 5, max: 30, step: 5, unit: "min", defaultValue: 15 },
       { kind: "select", prop: "format", label: "Format", options: ["12h", "24h"], defaultValue: "12h" },
       { kind: "range", prop: "density", label: "Spread", min: 0.8, max: 3, step: 0.1, unit: "px", defaultValue: 1.6 },
-      { kind: "color", prop: "accent", label: "Needle", options: ["#ef4444", "#17181a", "#6d5cff", "#0ea5e9", "#f97316"], defaultValue: "#ef4444" },
+      { kind: "color", prop: "accent", label: "Needle", options: ["#ef4444", "#17181a", "#0071e3", "#0ea5e9", "#f97316"], defaultValue: "#ef4444" },
     ],
     render: (v) => (
       <TimeScrubber
@@ -481,7 +491,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { kind: "range", prop: "threshold", label: "Threshold", min: 0.5, max: 1, step: 0.05, defaultValue: 0.9 },
       { kind: "range", prop: "resetAfter", label: "Reset after", min: 0, max: 5000, step: 100, unit: "ms", defaultValue: 2200 },
-      { kind: "color", prop: "successColor", label: "Success", options: ["#16a34a", "#17181a", "#6d5cff", "#0ea5e9", "#f97316"], defaultValue: "#16a34a" },
+      { kind: "color", prop: "successColor", label: "Success", options: ["#16a34a", "#17181a", "#0071e3", "#0ea5e9", "#f97316"], defaultValue: "#16a34a" },
       { kind: "select", prop: "label", label: "Label", options: ["Slide to confirm", "Slide to pay", "Slide to unlock"], defaultValue: "Slide to confirm" },
     ],
     render: (v) => (
@@ -500,7 +510,7 @@ export const playgrounds: Record<string, Playground> = {
     importPath: "@/components/emoji-reactions",
     defaultFill: "light",
     controls: [
-      { kind: "color", prop: "accent", label: "Accent", options: ["#5b8def", "#6d5cff", "#ff3b5c", "#10b981", "#f59e0b"], defaultValue: "#5b8def" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#5b8def", "#0071e3", "#ff3b5c", "#10b981", "#f59e0b"], defaultValue: "#5b8def" },
       { kind: "select", prop: "message", label: "Message", options: ["Shipped the new onboarding flow", "Lunch at 1?", "v2 is live"], defaultValue: "Shipped the new onboarding flow" },
     ],
     render: (v) => <EmojiReactions accent={v.accent as string} message={v.message as string} />,
@@ -510,7 +520,7 @@ export const playgrounds: Record<string, Playground> = {
     importPath: "@/components/like-burst",
     defaultFill: "light",
     controls: [
-      { kind: "color", prop: "color", label: "Color", options: ["#ff3b5c", "#ff7a1a", "#6d5cff", "#10b981", "#17181a"], defaultValue: "#ff3b5c" },
+      { kind: "color", prop: "color", label: "Color", options: ["#ff3b5c", "#ff7a1a", "#0071e3", "#10b981", "#17181a"], defaultValue: "#ff3b5c" },
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { kind: "range", prop: "burst", label: "Burst", min: 0, max: 20, step: 1, defaultValue: 10 },
       { kind: "range", prop: "defaultCount", label: "Count", min: 0, max: 99999, step: 1, defaultValue: 1299 },
@@ -555,7 +565,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "toggle", prop: "multiple", label: "Multiple", defaultValue: true },
-      { kind: "color", prop: "accent", label: "Accent", options: ["#6d5cff", "#2563eb", "#16a34a", "#ea580c", "#db2777"], defaultValue: "#6d5cff" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#2563eb", "#16a34a", "#ea580c", "#db2777"], defaultValue: "#0071e3" },
       { kind: "select", prop: "title", label: "Title", options: ["Drag a file here", "Drop your files", "Add attachments"], defaultValue: "Drag a file here" },
       { kind: "select", prop: "hint", label: "Hint", options: ["Up to 5 MB", "PNG, JPG or MP4", "Max 10 files"], defaultValue: "Up to 5 MB" },
       { kind: "toggle", prop: "disabled", label: "Disabled", defaultValue: false },
@@ -576,7 +586,7 @@ export const playgrounds: Record<string, Playground> = {
     importPath: "@/components/hold-to-record",
     defaultFill: "light",
     controls: [
-      { kind: "color", prop: "accent", label: "Accent", options: ["#ef4444", "#6d5cff", "#2563eb", "#16a34a", "#17181a"], defaultValue: "#ef4444" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#ef4444", "#0071e3", "#2563eb", "#16a34a", "#17181a"], defaultValue: "#ef4444" },
       { kind: "range", prop: "cancelDistance", label: "Cancel distance", min: 40, max: 160, step: 5, unit: "px", defaultValue: 90 },
       { kind: "range", prop: "maxDuration", label: "Max length", min: 5000, max: 60000, step: 1000, unit: "ms", defaultValue: 60000 },
       { kind: "range", prop: "minDuration", label: "Min hold", min: 0, max: 1500, step: 50, unit: "ms", defaultValue: 400 },
@@ -769,6 +779,105 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "interval", label: "Swap every", min: 800, max: 4000, step: 100, unit: "ms", defaultValue: 2000 },
     ],
     render: (v) => <RotatingHeadline accent={v.accent as string} lead={v.lead as string} interval={v.interval as number} />,
+  },
+  "stretch-nav": {
+    componentName: "StretchNav",
+    importPath: "@/components/stretch-nav",
+    defaultFill: "light",
+    controls: [{ kind: "range", prop: "defaultIndex", label: "Start at", min: 0, max: 4, step: 1, defaultValue: 0 }],
+    render: (v) => <StretchNav key={v.defaultIndex as number} defaultIndex={v.defaultIndex as number} />,
+  },
+  "feedback-pill": {
+    componentName: "FeedbackPill",
+    importPath: "@/components/feedback-pill",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "label", label: "Label", options: ["Feedback", "Report a bug", "Suggest"], defaultValue: "Feedback" },
+    ],
+    render: (v) => <FeedbackPill accent={v.accent as string} label={v.label as string} />,
+  },
+  "stagger-menu": {
+    componentName: "StaggerMenu",
+    importPath: "@/components/stagger-menu",
+    defaultFill: "light",
+    controls: [{ kind: "select", prop: "label", label: "Label", options: ["Share", "Export", "More"], defaultValue: "Share" }],
+    render: (v) => (
+      <div className="flex justify-center pt-6">
+        <StaggerMenu label={v.label as string} />
+      </div>
+    ),
+  },
+  "ruler-picker": {
+    componentName: "RulerPicker",
+    importPath: "@/components/ruler-picker",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Needle", options: ["#ff9f0a", "#0071e3", "#ff375f", "#30b158", "#1d1d1f"], defaultValue: "#ff9f0a" },
+      { kind: "range", prop: "max", label: "Max", min: 30, max: 180, step: 15, defaultValue: 90 },
+      { kind: "range", prop: "defaultValue", label: "Start at", min: 0, max: 60, step: 5, defaultValue: 25 },
+    ],
+    render: (v) => (
+      <RulerPicker
+        key={`${v.max}-${v.defaultValue}`}
+        accent={v.accent as string}
+        max={v.max as number}
+        defaultValue={v.defaultValue as number}
+      />
+    ),
+  },
+  "elastic-stepper": {
+    componentName: "ElasticStepper",
+    importPath: "@/components/elastic-stepper",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "max", label: "Max", min: 3, max: 12, step: 1, defaultValue: 8 },
+      { kind: "select", prop: "label", label: "Label", options: ["Guests", "Seats", "Tickets"], defaultValue: "Guests" },
+    ],
+    render: (v) => <ElasticStepper key={v.max as number} accent={v.accent as string} max={v.max as number} label={v.label as string} />,
+  },
+  "todo-list": {
+    componentName: "TodoList",
+    importPath: "@/components/todo-list",
+    defaultFill: "light",
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <TodoList accent={v.accent as string} />,
+  },
+  "progress-button": {
+    componentName: "ProgressButton",
+    importPath: "@/components/progress-button",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "label", label: "Label", options: ["Download", "Export", "Install"], defaultValue: "Download" },
+    ],
+    render: (v) => <ProgressButton accent={v.accent as string} label={v.label as string} />,
+  },
+  "copy-button": {
+    componentName: "CopyChip",
+    importPath: "@/components/copy-button",
+    snippetBaseProps: ['value="inv_3fK9xQ2Lq7"'],
+    defaultFill: "light",
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <CopyChip value="inv_3fK9xQ2Lq7" display="inv_3fK9…2Lq7" accent={v.accent as string} />,
+  },
+  "animated-icons": {
+    componentName: "AnimatedIcons",
+    importPath: "@/components/animated-icons",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false }],
+    render: (v) => <AnimatedIcons key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "folder-peek": {
+    componentName: "FolderPeek",
+    importPath: "@/components/folder-peek",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "color", label: "Folder", options: ["#0071e3", "#34c759", "#ff9f0a", "#ff375f", "#8e8e93"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "title", label: "Title", options: ["Brand assets", "Launch kit", "Invoices"], defaultValue: "Brand assets" },
+    ],
+    render: (v) => <FolderPeek color={v.color as string} title={v.title as string} />,
   },
 };
 

@@ -1,16 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import {
-  ArrowUpRight,
-  Building2,
-  Mail,
-  MapPin,
-  MessageCircle,
-  Send,
-} from "lucide-react";
-import { NexusMark } from "@/components/brand/nexus-mark";
+import { AnimatePresence, motion, useReducedMotion, type Transition, type Variants } from "framer-motion";
+import { ArrowUpRight, Building2, Mail, MapPin, MessageCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /** Inline brand marks: lucide-react 1.x no longer ships brand icons. */
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -28,7 +21,6 @@ function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-import { cn } from "@/lib/utils";
 
 export type ContactFormValues = { name: string; email: string; company: string; message: string };
 
@@ -43,11 +35,53 @@ type ContactVariantProps = { className?: string; onSubmit?: ContactSubmitHandler
 
 const simulateSend: ContactSubmitHandler = () => new Promise((resolve) => setTimeout(resolve, 900));
 
+const UI_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34 };
+const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+const ink = "text-[#1d1d1f] dark:text-[#f5f5f7]";
+const secondary = "text-[#6e6e73] dark:text-[#a1a1a6]";
+const tertiary = "text-[#86868b] dark:text-[#98989d]";
+const cardShadow =
+  "shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]";
+
+/** Shared reveal variants: children rise in, unblurring, one after another. */
+function useRevealItem(): Variants {
+  const reduce = useReducedMotion();
+  return reduce
+    ? { hidden: { opacity: 0 }, show: { opacity: 1, transition: { duration: 0.2 } } }
+    : {
+        hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+        show: { opacity: 1, y: 0, filter: "blur(0px)", transition: { type: "spring", stiffness: 260, damping: 30 } },
+      };
+}
+
+function Reveal({ children, className }: { children: React.ReactNode; className?: string }) {
+  const item = useRevealItem();
+  return (
+    <motion.div variants={item} className={className}>
+      {children}
+    </motion.div>
+  );
+}
+
+function Monogram({ letter = "N", className }: { letter?: string; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "grid size-10 shrink-0 place-items-center rounded-[12px] bg-[#1d1d1f] text-[17px] font-semibold tracking-[-0.02em] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]",
+        className,
+      )}
+    >
+      {letter}
+    </span>
+  );
+}
+
 export function ContactPageBlock({ className, onSubmit }: ContactVariantProps) {
   return (
     <div
       className={cn(
-        "min-h-full w-full space-y-10 overflow-y-auto bg-white p-4 text-zinc-950 dark:bg-zinc-950 dark:text-white sm:p-6 lg:p-8",
+        "min-h-full w-full space-y-10 overflow-y-auto bg-white p-4 text-[#1d1d1f] sm:p-6 lg:p-8 dark:bg-black dark:text-[#f5f5f7]",
         className,
       )}
     >
@@ -65,94 +99,105 @@ export function GlobalSignalContact({ className, onSubmit }: ContactVariantProps
   return (
     <AnimatedShell
       className={cn(
-        "grid gap-8 overflow-hidden rounded-[24px] border border-zinc-200 bg-[radial-gradient(circle_at_18%_14%,rgba(56,189,248,0.10),transparent_30%),linear-gradient(180deg,#ffffff,#f8fafc)] p-4 shadow-2xl shadow-zinc-950/5 dark:border-white/10 dark:bg-[radial-gradient(circle_at_18%_14%,rgba(56,189,248,0.16),transparent_30%),linear-gradient(180deg,#09090b,#050507)] dark:shadow-black/30 sm:rounded-[28px] sm:p-6 lg:min-h-[760px] lg:grid-cols-[0.95fr_1.15fr] lg:p-10",
+        "grid gap-8 overflow-hidden rounded-[28px] bg-[#f5f5f7] p-4 sm:p-6 lg:min-h-[760px] lg:grid-cols-[0.95fr_1.1fr] lg:p-10 dark:bg-[#1c1c1e]",
+        ink,
         className,
       )}
     >
-      <div className="flex flex-col justify-between lg:min-h-[620px]">
+      <div className="flex min-w-0 flex-col justify-between px-1 pt-2 sm:px-2 lg:min-h-[620px]">
         <div>
-          <div className="grid size-12 place-items-center rounded-2xl border border-zinc-200 bg-white shadow-[0_14px_32px_rgba(15,23,42,0.10)] dark:border-white/10 dark:bg-white/8 sm:size-14">
-            <Mail className="size-5 text-sky-500 sm:size-6" />
-          </div>
-          <p className="mt-8 text-sm font-medium text-sky-600 dark:text-sky-300 sm:mt-12">
-            A studio across three time zones
-          </p>
-          <h2 className="mt-4 max-w-xl text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white sm:text-5xl lg:text-6xl">
-            Let&apos;s shape the next interface.
-          </h2>
-          <p className="mt-5 max-w-xl text-base leading-7 text-zinc-600 dark:text-zinc-400 sm:mt-6 sm:text-lg sm:leading-8">
-            Send a product brief, launch notes or a rough idea. A designer and an
-            engineer read every message and reply with a concrete next step.
-          </p>
-          <div className="mt-7 flex flex-col gap-2 text-sm font-medium text-zinc-500 dark:text-zinc-400 sm:mt-8 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-3">
-            <span>hello@northfield.design</span>
-            <span className="hidden text-zinc-300 dark:text-zinc-700 sm:inline">/</span>
-            <span>+44 20 7946 0321</span>
-            <span className="hidden text-zinc-300 dark:text-zinc-700 sm:inline">/</span>
-            <span>Replies within a working day</span>
-          </div>
+          <Reveal>
+            <span className="grid size-12 place-items-center rounded-[14px] bg-white text-[#0071e3] shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#2c2c2e] dark:text-[#2997ff] dark:shadow-none">
+              <Mail className="size-5" strokeWidth={1.75} aria-hidden />
+            </span>
+          </Reveal>
+          <Reveal>
+            <p className={cn("mt-8 text-[17px] font-semibold sm:mt-10", tertiary)}>A studio across three time zones</p>
+          </Reveal>
+          <Reveal>
+            <h2 className="mt-2 max-w-xl text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-[52px] lg:text-[60px]">
+              Let&apos;s shape the next interface.
+            </h2>
+          </Reveal>
+          <Reveal>
+            <p className={cn("mt-5 max-w-xl text-[17px] leading-[1.5] sm:text-[19px]", secondary)}>
+              Send a product brief, launch notes or a rough idea. A designer and an engineer read every message and
+              reply with a concrete next step.
+            </p>
+          </Reveal>
+          <Reveal>
+            <ul className="mt-7 flex flex-col gap-2.5 text-[15px] sm:flex-row sm:flex-wrap sm:gap-x-6">
+              <li>
+                <a href="mailto:hello@northfield.design" className={cn("rounded text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}>
+                  hello@northfield.design
+                </a>
+              </li>
+              <li>
+                <a href="tel:+442079460321" className={cn("rounded text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}>
+                  +44 20 7946 0321
+                </a>
+              </li>
+              <li className={secondary}>Replies within a working day</li>
+            </ul>
+          </Reveal>
         </div>
-        <IndiaPulseMap />
+        <Reveal>
+          <IndiaPulseMap />
+        </Reveal>
       </div>
 
-      <div className="relative overflow-hidden rounded-[24px] border border-zinc-200 bg-zinc-50/90 p-5 shadow-inner dark:border-white/10 dark:bg-white/[0.04] sm:p-8 lg:p-10">
-        <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(15,23,42,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.06)_1px,transparent_1px)] [background-size:28px_28px] dark:opacity-30 dark:[background-image:linear-gradient(rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.10)_1px,transparent_1px)]" />
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white via-white/80 to-transparent dark:from-zinc-950 dark:via-zinc-950/70" />
+      <Reveal className={cn("relative rounded-[24px] bg-white p-5 sm:p-8 lg:p-10 dark:bg-[#2c2c2e]/60", cardShadow)}>
         <ContactForm
           onSubmit={onSubmit}
           eyebrow="Project request"
           title="Tell us what you want to build"
           description="A few details are enough. We will reply with a practical next step, not a sales maze."
           buttonLabel="Send request"
-          className="relative z-10"
           dense
         />
-      </div>
+      </Reveal>
     </AnimatedShell>
   );
 }
 
 export function CenteredContactForm({ className, onSubmit }: ContactVariantProps) {
+  const reduce = useReducedMotion();
   return (
     <AnimatedShell
       className={cn(
-        "relative grid min-h-[620px] place-items-center overflow-hidden rounded-[24px] border border-zinc-200 bg-white p-4 py-10 dark:border-white/10 dark:bg-zinc-950 sm:rounded-[28px] sm:p-6 md:min-h-[760px]",
+        "relative grid min-h-[620px] place-items-center overflow-hidden rounded-[28px] bg-white p-4 py-10 shadow-[0_0_0_1px_rgba(0,0,0,.06)] sm:p-6 md:min-h-[760px] dark:bg-black dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]",
+        ink,
         className,
       )}
     >
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(124,58,237,0.10),transparent_34%),radial-gradient(circle_at_78%_76%,rgba(14,165,233,0.12),transparent_28%)]" />
-      <motion.div
-        animate={{ y: [0, 14, 0], rotate: [0, -2, 0] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute bottom-[12%] right-[14%] hidden size-32 rounded-full bg-sky-400/10 blur-sm sm:block"
-      />
-
-      <div className="relative z-10 grid w-full max-w-6xl gap-8 md:grid-cols-[0.72fr_minmax(0,1fr)] md:items-stretch">
+      <div className="relative z-10 grid w-full max-w-6xl gap-10 md:grid-cols-[0.75fr_minmax(0,1fr)] md:items-stretch">
         <div className="flex flex-col justify-center md:pl-6 lg:pl-12">
-          <div className="flex items-center gap-3">
-            <div className="grid size-11 place-items-center rounded-xl bg-zinc-950 text-white dark:bg-white dark:text-zinc-950">
-              <NexusMark size={20} />
-            </div>
-            <p className="text-sm font-semibold text-zinc-950 dark:text-white">Northfield</p>
-          </div>
-          <h2 className="mt-8 max-w-sm text-4xl font-semibold tracking-[-0.03em] text-zinc-950 dark:text-white sm:text-5xl">
-            Say hello. A real person reads it.
-          </h2>
-          <dl className="mt-10 grid max-w-sm gap-5 text-sm">
-            {[
-              ["New projects", "hello@northfield.design"],
-              ["Existing clients", "Your Slack channel, or support@northfield.design"],
-              ["Office hours", "Monday to Friday, 9:00 to 18:00 GMT"],
-            ].map(([label, value]) => (
-              <div key={label} className="border-t border-zinc-200 pt-4 dark:border-white/10">
-                <dt className="text-zinc-500 dark:text-zinc-400">{label}</dt>
-                <dd className="mt-1 font-medium text-zinc-950 dark:text-white">{value}</dd>
-              </div>
-            ))}
-          </dl>
+          <Reveal className="flex items-center gap-3">
+            <Monogram />
+            <p className="text-[15px] font-semibold">Northfield</p>
+          </Reveal>
+          <Reveal>
+            <h2 className="mt-8 max-w-sm text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-[48px]">
+              Say hello. A real person reads it.
+            </h2>
+          </Reveal>
+          <Reveal>
+            <dl className="mt-10 grid max-w-sm gap-0 text-[15px]">
+              {[
+                ["New projects", "hello@northfield.design"],
+                ["Existing clients", "Your Slack channel, or support@northfield.design"],
+                ["Office hours", "Monday to Friday, 9:00 to 18:00 GMT"],
+              ].map(([label, value]) => (
+                <div key={label} className="border-t border-black/[0.08] py-4 dark:border-white/[0.1]">
+                  <dt className={cn("text-[13px]", tertiary)}>{label}</dt>
+                  <dd className="mt-1 font-medium">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </Reveal>
         </div>
 
-        <div className="w-full max-w-lg self-center rounded-[24px] border border-zinc-200 bg-white/92 p-5 shadow-2xl shadow-zinc-950/8 backdrop-blur dark:border-white/10 dark:bg-zinc-900/80 dark:shadow-black/30 sm:rounded-[28px] sm:p-8">
+        <Reveal className="w-full max-w-lg self-center rounded-[28px] bg-[#f5f5f7] p-5 sm:p-8 dark:bg-[#1c1c1e]">
           <ContactForm
             onSubmit={onSubmit}
             eyebrow="Quick hello"
@@ -162,72 +207,128 @@ export function CenteredContactForm({ className, onSubmit }: ContactVariantProps
             roundedButton
             dense
           />
-          <div className="mt-7 flex items-center justify-center gap-4 border-t border-zinc-200 pt-6 text-zinc-500 dark:border-white/10 dark:text-zinc-400">
+          <div className="mt-7 flex items-center justify-center gap-3 border-t border-black/[0.08] pt-6 dark:border-white/[0.1]">
             {[GithubIcon, LinkedinIcon, MessageCircle].map((Icon, index) => (
               <motion.a
                 key={index}
                 href="#"
                 aria-label={["GitHub", "LinkedIn", "Chat"][index]}
-                whileHover={{ y: -3, scale: 1.04 }}
-                className="grid size-10 place-items-center rounded-full border border-zinc-200 bg-zinc-50 transition hover:border-zinc-300 hover:text-zinc-950 dark:border-white/10 dark:bg-white/5 dark:hover:text-white"
+                whileHover={reduce ? undefined : { y: -2 }}
+                whileTap={reduce ? undefined : { scale: 0.94 }}
+                transition={UI_SPRING}
+                className={cn(
+                  "grid size-10 place-items-center rounded-full bg-[#e8e8ed] text-[#1d1d1f] transition-colors hover:bg-[#dcdce1] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:hover:bg-[#3a3a3c]",
+                  focusRing,
+                )}
               >
-                <Icon className="size-4" />
+                <Icon className="size-4" strokeWidth={1.75} aria-hidden />
               </motion.a>
             ))}
           </div>
-        </div>
+        </Reveal>
       </div>
     </AnimatedShell>
   );
 }
 
+const PROOF_QUOTES = [
+  {
+    quote: "Northfield turned a vague redesign into a system we could launch. The new contact flow doubled qualified demo requests in a week.",
+    name: "Ira Kapoor",
+    role: "Growth lead, Orbitstack",
+  },
+  {
+    quote: "They asked better questions about our customers than we did. The intake form now does half of our sales team's first call.",
+    name: "Tomas Lindqvist",
+    role: "Head of product, Fernway",
+  },
+  {
+    quote: "Six weeks from first call to launch, and nothing about it felt rushed. Our support inbox got quieter the day it went live.",
+    name: "Amara Osei",
+    role: "Founder, Lumen Ledger",
+  },
+];
+
 export function GradientProofContact({ className, onSubmit }: ContactVariantProps) {
+  const reduce = useReducedMotion();
+  const [index, setIndex] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const quote = PROOF_QUOTES[index];
+
+  React.useEffect(() => {
+    if (reduce || paused) return;
+    const timer = window.setTimeout(() => setIndex((i) => (i + 1) % PROOF_QUOTES.length), 6500);
+    return () => window.clearTimeout(timer);
+  }, [index, paused, reduce]);
+
   return (
     <AnimatedShell
       className={cn(
-        "grid gap-8 overflow-hidden rounded-[24px] border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-zinc-950 sm:rounded-[28px] sm:p-6 lg:min-h-[780px] lg:grid-cols-[0.95fr_1fr] lg:p-10",
+        "grid gap-8 overflow-hidden rounded-[28px] bg-white p-4 shadow-[0_0_0_1px_rgba(0,0,0,.06)] sm:p-6 lg:min-h-[780px] lg:grid-cols-[0.95fr_1fr] lg:p-10 dark:bg-black dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]",
+        ink,
         className,
       )}
     >
-      <div className="relative min-h-[430px] overflow-hidden rounded-[24px] bg-[radial-gradient(circle_at_18%_12%,#ff4da6,transparent_34%),radial-gradient(circle_at_70%_64%,#facc15,transparent_38%),linear-gradient(135deg,#7c3aed,#fb7185_48%,#f59e0b)] p-5 text-white shadow-2xl shadow-pink-500/20 sm:min-h-[520px] sm:rounded-[28px] sm:p-8">
-        <motion.div
-          animate={{ x: ["-12%", "10%", "-12%"], y: ["-8%", "6%", "-8%"] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute inset-0 bg-[radial-gradient(circle_at_35%_35%,rgba(255,255,255,0.26),transparent_22%)]"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.11)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.11)_1px,transparent_1px)] bg-[size:34px_34px] opacity-30" />
-        <div className="relative flex h-full items-center justify-center">
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.7 }}
-            className="w-full max-w-lg rounded-[22px] border border-white/24 bg-white/16 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:rounded-[24px] sm:p-10"
-          >
-            <p className="text-5xl font-serif leading-none text-white/75 sm:text-6xl">&ldquo;</p>
-            <p className="mt-4 text-xl font-semibold leading-8 tracking-tight sm:text-2xl sm:leading-10">
-              Northfield turned a vague redesign into a system we could launch.
-              The new contact flow doubled qualified demo requests in a week.
-            </p>
-            <div className="mt-10 flex items-center gap-4">
-              <div className="grid size-14 place-items-center rounded-full border border-white/30 bg-white/20 text-sm font-bold">
-                IK
-              </div>
-              <div>
-                <p className="font-semibold">Ira Kapoor</p>
-                <p className="text-sm text-white/72">Growth Lead, OrbitStack</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-        <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 gap-2">
-          <span className="h-2 w-8 rounded-full bg-white" />
-          <span className="size-2 rounded-full bg-white/45" />
-          <span className="size-2 rounded-full bg-white/45" />
-        </div>
-      </div>
+      <Reveal className="relative flex min-h-[460px] flex-col justify-between overflow-hidden rounded-[24px] bg-[#1d1d1f] p-6 text-[#f5f5f7] sm:min-h-[540px] sm:p-10 dark:bg-[#1c1c1e]">
+        <p className="text-[17px] font-semibold text-white/60">What teams say after launch</p>
 
-      <div className="flex items-center">
+        <figure
+          className="relative my-10 grid flex-1 items-center"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={index}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, y: -24, filter: "blur(8px)" }}
+              transition={reduce ? { duration: 0.2 } : { type: "spring", stiffness: 220, damping: 30 }}
+            >
+              <blockquote className="text-pretty text-[24px] font-semibold leading-[1.25] tracking-[-0.025em] sm:text-[32px]">
+                &ldquo;{quote.quote}&rdquo;
+              </blockquote>
+              <figcaption className="mt-8 flex items-center gap-3">
+                <span className="grid size-11 place-items-center rounded-full bg-white/10 text-[14px] font-semibold">
+                  {quote.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .join("")}
+                </span>
+                <span>
+                  <span className="block text-[15px] font-semibold">{quote.name}</span>
+                  <span className="block text-[13px] text-white/60">{quote.role}</span>
+                </span>
+              </figcaption>
+            </motion.div>
+          </AnimatePresence>
+        </figure>
+
+        <div className="flex items-center gap-2" role="group" aria-label="Choose a testimonial">
+          {PROOF_QUOTES.map((item, i) => {
+            const active = i === index;
+            return (
+              <button
+                key={item.name}
+                type="button"
+                aria-label={`Show testimonial from ${item.name}`}
+                aria-pressed={active}
+                onClick={() => setIndex(i)}
+                className={cn("flex h-6 items-center rounded-full", focusRing)}
+              >
+                <motion.span
+                  className={cn("block h-2 rounded-full", active ? "bg-white" : "bg-white/30 hover:bg-white/50")}
+                  initial={false}
+                  animate={{ width: active ? 28 : 8 }}
+                  transition={reduce ? { duration: 0 } : UI_SPRING}
+                />
+              </button>
+            );
+          })}
+        </div>
+      </Reveal>
+
+      <Reveal className="flex items-center px-1 sm:px-4 lg:px-6">
         <ContactForm
           onSubmit={onSubmit}
           eyebrow="Customer success"
@@ -237,7 +338,7 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
           className="w-full"
           roundedButton
         />
-      </div>
+      </Reveal>
     </AnimatedShell>
   );
 }
@@ -246,7 +347,8 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
   return (
     <AnimatedShell
       className={cn(
-        "grid overflow-hidden rounded-[24px] border border-zinc-200 bg-white dark:border-white/10 dark:bg-zinc-950 sm:rounded-[28px] lg:min-h-[780px] lg:grid-cols-2",
+        "grid overflow-hidden rounded-[28px] bg-[#f5f5f7] lg:min-h-[780px] lg:grid-cols-2 dark:bg-[#1c1c1e]",
+        ink,
         className,
       )}
     >
@@ -257,40 +359,30 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
             "url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80')",
         }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.22)_1px,transparent_1px)] bg-[size:5px_5px] mix-blend-soft-light" />
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/10 via-transparent to-zinc-950/35" />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.7 }}
-          className="absolute left-4 right-4 top-1/2 -translate-y-1/2 rounded-[22px] border border-white/55 bg-white/88 p-5 shadow-2xl shadow-zinc-950/20 backdrop-blur sm:left-8 sm:right-8 sm:p-8 lg:left-12 lg:right-auto lg:w-[560px]"
-        >
-          <p className="text-xl font-semibold leading-8 tracking-tight text-zinc-950 sm:text-3xl sm:leading-10">
-            &ldquo;Our launch page finally feels like the product: fast, composed,
-            and unmistakably ours.&rdquo;
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/35 to-transparent" />
+        <Reveal className="absolute inset-x-4 bottom-4 rounded-[22px] bg-white/80 p-5 shadow-[0_20px_40px_-24px_rgba(0,0,0,.4)] backdrop-blur-xl backdrop-saturate-150 sm:inset-x-8 sm:bottom-8 sm:p-7 lg:right-auto lg:w-[520px] dark:bg-[#1c1c1e]/80">
+          <p className="text-[21px] font-semibold leading-[1.3] tracking-[-0.02em] sm:text-[26px]">
+            &ldquo;Our launch page finally feels like the product: fast, composed, and unmistakably ours.&rdquo;
           </p>
-          <div className="mt-8 flex items-center gap-4">
-            <div className="grid size-12 place-items-center rounded-full bg-zinc-950 text-sm font-bold text-white">
+          <div className="mt-6 flex items-center gap-3">
+            <span className="grid size-11 place-items-center rounded-full bg-[#1d1d1f] text-[14px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
               SN
-            </div>
+            </span>
             <div>
-              <p className="font-semibold text-zinc-950">Sana Noor</p>
-              <p className="text-sm text-zinc-500">Founder, Meadow AI</p>
+              <p className="text-[15px] font-semibold">Sana Noor</p>
+              <p className={cn("text-[13px]", secondary)}>Founder, Meadow AI</p>
             </div>
           </div>
-        </motion.div>
+        </Reveal>
       </div>
 
-      <div className="flex items-center p-5 sm:p-10 lg:p-14">
-        <div className="w-full max-w-lg rounded-[24px] border border-zinc-200 bg-white/92 p-5 shadow-2xl shadow-zinc-950/8 backdrop-blur dark:border-white/10 dark:bg-zinc-900/80 dark:shadow-black/30 sm:rounded-[28px] sm:p-6 lg:mx-auto">
-          <div className="mb-5 flex items-center gap-3">
-            <div className="grid size-10 place-items-center rounded-2xl border border-zinc-200 bg-white text-zinc-950 shadow-lg shadow-zinc-950/10 dark:border-white/10 dark:bg-white dark:text-zinc-950">
-              <NexusMark size={20} />
-            </div>
+      <div className="flex items-center p-4 sm:p-10 lg:p-14">
+        <Reveal className={cn("w-full max-w-lg rounded-[28px] bg-white p-5 sm:p-7 lg:mx-auto dark:bg-black", cardShadow)}>
+          <div className="mb-6 flex items-center gap-3">
+            <Monogram />
             <div>
-              <p className="text-sm font-semibold text-zinc-950 dark:text-white">Northfield</p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">Launch support</p>
+              <p className="text-[15px] font-semibold">Northfield</p>
+              <p className={cn("text-[13px]", tertiary)}>Launch support</p>
             </div>
           </div>
           <ContactForm
@@ -301,7 +393,7 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
             buttonLabel="Send message"
             dense
           />
-        </div>
+        </Reveal>
       </div>
     </AnimatedShell>
   );
@@ -309,11 +401,38 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
 
 export function ContactPageBlockPreview() {
   return (
-    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white text-zinc-950 dark:bg-zinc-950">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7]">
       <div data-tile-focus className="w-[1040px] shrink-0">
-        <CenteredContactForm className="rounded-[28px] border border-zinc-200/80 dark:border-white/10" />
+        <CenteredContactForm className="rounded-[28px]" />
       </div>
     </div>
+  );
+}
+
+/** A check that draws itself in a soft green disc. */
+function SentMark() {
+  const reduce = useReducedMotion();
+  return (
+    <motion.span
+      aria-hidden
+      className="grid size-14 place-items-center rounded-full bg-[#34c759]/15"
+      initial={reduce ? false : { scale: 0.6, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 420, damping: 18 }}
+    >
+      <svg width={28} height={28} viewBox="0 0 24 24" fill="none">
+        <motion.path
+          d="M5 12.5l4.5 4.5L19 7.5"
+          stroke="#34c759"
+          strokeWidth={2.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          initial={reduce ? false : { pathLength: 0 }}
+          animate={{ pathLength: 1 }}
+          transition={{ duration: 0.45, delay: 0.12, ease: "easeOut" }}
+        />
+      </svg>
+    </motion.span>
   );
 }
 
@@ -333,10 +452,14 @@ export function ContactForm({
   title: string;
   description: string;
   buttonLabel: string;
+  /** Stretch the submit button to the full width of the form. */
   roundedButton?: boolean;
+  /** Tighter spacing for forms that sit inside a card. */
   dense?: boolean;
   className?: string;
 }) {
+  const reduce = useReducedMotion();
+  const uid = React.useId();
   const [fields, setFields] = React.useState({ name: "", email: "", company: "", message: "" });
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = React.useState("");
@@ -364,255 +487,220 @@ export function ContactForm({
     }
   }
 
-  if (status === "success") {
-    return (
-      <div className={cn("mx-auto max-w-2xl", className)}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="flex flex-col items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center dark:border-emerald-500/20 dark:bg-emerald-500/8"
-        >
-          <div className="grid size-12 place-items-center rounded-full border border-emerald-200 bg-white shadow dark:border-emerald-500/30 dark:bg-emerald-500/10">
-            <Send className="size-5 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p className="text-base font-semibold text-zinc-950 dark:text-white">Message sent</p>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">We&apos;ll get back to you within 24 hours.</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setStatus("idle")}
-            className="text-xs font-medium text-zinc-400 underline underline-offset-2 hover:text-zinc-600 dark:hover:text-zinc-300"
-          >
-            Send another message
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
-
   const fieldKeys = [
-    { key: "name" as const, label: "Name", placeholder: "Maya Srinivasan", type: "text" },
-    { key: "email" as const, label: "Work email", placeholder: "maya@northstar.dev", type: "email" },
-    { key: "company" as const, label: "Company", placeholder: "Northstar Labs", type: "text" },
+    { key: "name" as const, label: "Name", placeholder: "Maya Srinivasan", type: "text", autoComplete: "name" },
+    { key: "email" as const, label: "Work email", placeholder: "maya@northstar.dev", type: "email", autoComplete: "email" },
+    { key: "company" as const, label: "Company", placeholder: "Northstar Labs", type: "text", autoComplete: "organization" },
   ];
 
+  const fieldClass = cn(
+    "mt-1.5 w-full rounded-[12px] bg-white px-3.5 text-[16px] text-[#1d1d1f] shadow-[inset_0_0_0_1px_rgba(0,0,0,.12)] outline-none transition-shadow placeholder:text-[#a1a1a6]",
+    "focus:shadow-[inset_0_0_0_1px_#0071e3,0_0_0_3px_rgba(0,113,227,.25)] disabled:opacity-60",
+    "dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,.1)] dark:placeholder:text-[#8e8e93] dark:focus:shadow-[inset_0_0_0_1px_#2997ff,0_0_0_3px_rgba(41,151,255,.3)]",
+  );
+
+  const swap = {
+    initial: reduce ? { opacity: 0 } : { opacity: 0, y: 12, filter: "blur(6px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    exit: reduce ? { opacity: 0 } : { opacity: 0, y: -12, filter: "blur(6px)" },
+    transition: reduce ? { duration: 0.15 } : { type: "spring" as const, stiffness: 320, damping: 32 },
+  };
+
   return (
-    <form onSubmit={handleSubmit} className={cn("mx-auto max-w-2xl", className)}>
-      <p className="text-sm font-medium text-violet-600 dark:text-violet-300">
-        {eyebrow}
-      </p>
-      <h3
-        className={cn(
-          "mt-3 text-2xl font-semibold tracking-tight text-zinc-950 dark:text-white",
-          dense ? "sm:text-2xl lg:text-3xl" : "sm:text-4xl",
-        )}
-      >
-        {title}
-      </h3>
-      <p className={cn("max-w-xl text-sm leading-6 text-zinc-600 dark:text-zinc-400", dense ? "mt-3" : "mt-4 sm:text-base sm:leading-7")}>
-        {description}
-      </p>
-      <div className={cn(dense ? "mt-5 space-y-3.5" : "mt-7 space-y-4 sm:mt-8 sm:space-y-5")}>
-        {fieldKeys.map((field) => (
-          <label key={field.key} className="block">
-            <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-              {field.label}
-            </span>
-            <input
-              name={field.key}
-              type={field.type}
-              value={fields[field.key]}
-              onChange={handleChange}
-              placeholder={field.placeholder}
-              required={field.key !== "company"}
-              disabled={status === "loading"}
-              className={cn(
-                "mt-2 w-full rounded-xl border border-zinc-200 bg-white px-3.5 text-sm text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 disabled:opacity-60 dark:border-white/10 dark:bg-zinc-950/70 dark:text-white dark:placeholder:text-zinc-600 sm:px-4 sm:text-base",
-                dense ? "h-10" : "h-11 sm:h-12",
-              )}
-            />
-          </label>
-        ))}
-        <label className="block">
-          <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Message
-          </span>
-          <textarea
-            name="message"
-            value={fields.message}
-            onChange={handleChange}
-            placeholder="Share the goal, deadline, and what a great outcome looks like."
-            required
-            disabled={status === "loading"}
-            className={cn(
-              "mt-2 w-full resize-none rounded-xl border border-zinc-200 bg-white px-3.5 py-3 text-sm text-zinc-950 shadow-sm outline-none transition placeholder:text-zinc-400 focus:border-violet-400 focus:ring-4 focus:ring-violet-500/10 disabled:opacity-60 dark:border-white/10 dark:bg-zinc-950/70 dark:text-white dark:placeholder:text-zinc-600 sm:px-4 sm:text-base",
-              dense ? "min-h-20" : "min-h-28 sm:min-h-32",
-            )}
-          />
-        </label>
-      </div>
-
-      {status === "error" && (
-        <p className="mt-3 text-sm font-medium text-red-600 dark:text-red-400">{errorMsg}</p>
-      )}
-
-      <motion.button
-        type="submit"
-        disabled={status === "loading"}
-        whileHover={status !== "loading" ? { y: -2 } : undefined}
-        whileTap={status !== "loading" ? { scale: 0.98 } : undefined}
-        className={cn(
-          "inline-flex h-12 w-full items-center justify-center gap-2 bg-zinc-950 px-6 text-sm font-semibold text-white shadow-lg shadow-zinc-950/15 transition hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:w-auto",
-          dense ? "mt-4" : "mt-7",
-          roundedButton ? "sm:w-full rounded-full" : "rounded-xl",
-        )}
-      >
-        {status === "loading" ? (
-          <>
-            <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-            </svg>
-            Sending…
-          </>
+    <motion.div
+      layout={!reduce}
+      transition={{ type: "spring", stiffness: 260, damping: 32 }}
+      className={cn("mx-auto max-w-2xl", ink, className)}
+    >
+      <AnimatePresence mode="popLayout" initial={false}>
+        {status === "success" ? (
+          <motion.div
+            key="sent"
+            {...swap}
+            role="status"
+            className="flex flex-col items-center gap-4 rounded-[20px] bg-[#f5f5f7] px-6 py-12 text-center dark:bg-[#2c2c2e]"
+          >
+            <SentMark />
+            <div>
+              <p className="text-[21px] font-semibold tracking-[-0.02em]">Message sent</p>
+              <p className={cn("mt-1 text-[15px]", secondary)}>We&apos;ll get back to you within 24 hours.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setStatus("idle")}
+              className={cn("rounded text-[15px] font-medium text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}
+            >
+              Send another message ›
+            </button>
+          </motion.div>
         ) : (
-          <>
-            {buttonLabel}
-            <Send className="size-4" />
-          </>
+          <motion.form key="form" {...swap} onSubmit={handleSubmit}>
+            <p className={cn("text-[15px] font-semibold", tertiary)}>{eyebrow}</p>
+            <h3
+              className={cn(
+                "mt-1.5 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em]",
+                dense ? "lg:text-[32px]" : "sm:text-[40px]",
+              )}
+            >
+              {title}
+            </h3>
+            <p className={cn("max-w-xl text-[15px] leading-[1.5]", secondary, dense ? "mt-3" : "mt-4 sm:text-[17px]")}>
+              {description}
+            </p>
+            <div className={cn(dense ? "mt-6 space-y-3.5" : "mt-8 space-y-4")}>
+              <div className={cn("grid gap-3.5", !dense && "sm:grid-cols-2 sm:gap-4")}>
+                {fieldKeys.map((field) => (
+                  <div key={field.key} className={cn(!dense && field.key === "company" && "sm:col-span-2")}>
+                    <label htmlFor={`${uid}-${field.key}`} className="text-[13px] font-medium">
+                      {field.label}
+                      {field.key === "company" ? <span className={cn("font-normal", tertiary)}> (optional)</span> : null}
+                    </label>
+                    <input
+                      id={`${uid}-${field.key}`}
+                      name={field.key}
+                      type={field.type}
+                      autoComplete={field.autoComplete}
+                      value={fields[field.key]}
+                      onChange={handleChange}
+                      placeholder={field.placeholder}
+                      required={field.key !== "company"}
+                      disabled={status === "loading"}
+                      className={cn(fieldClass, dense ? "h-11" : "h-12")}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div>
+                <label htmlFor={`${uid}-message`} className="text-[13px] font-medium">
+                  Message
+                </label>
+                <textarea
+                  id={`${uid}-message`}
+                  name="message"
+                  value={fields.message}
+                  onChange={handleChange}
+                  placeholder="Share the goal, deadline, and what a great outcome looks like."
+                  required
+                  disabled={status === "loading"}
+                  className={cn(fieldClass, "resize-none py-3", dense ? "min-h-24" : "min-h-32")}
+                />
+              </div>
+            </div>
+
+            <AnimatePresence initial={false}>
+              {status === "error" ? (
+                <motion.p
+                  key="error"
+                  role="alert"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={reduce ? { duration: 0.15 } : { type: "spring", stiffness: 300, damping: 30 }}
+                  className="overflow-hidden pt-3 text-[14px] font-medium text-[#ff3b30]"
+                >
+                  {errorMsg}
+                </motion.p>
+              ) : null}
+            </AnimatePresence>
+
+            <motion.button
+              type="submit"
+              disabled={status === "loading"}
+              whileTap={status !== "loading" && !reduce ? { scale: 0.97 } : undefined}
+              transition={UI_SPRING}
+              className={cn(
+                "relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full bg-[#0071e3] px-6 text-[17px] font-medium text-white transition-colors hover:bg-[#0077ed] disabled:cursor-not-allowed disabled:opacity-80",
+                focusRing,
+                dense ? "mt-5" : "mt-7",
+                roundedButton ? "sm:w-full" : "sm:w-auto sm:min-w-[200px]",
+              )}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                {status === "loading" ? (
+                  <motion.span
+                    key="sending"
+                    className="inline-flex items-center gap-2"
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(4px)" }}
+                    transition={UI_SPRING}
+                  >
+                    <svg className="size-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                      <path className="opacity-90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M22 12a10 10 0 0 0-10-10" />
+                    </svg>
+                    Sending…
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="idle"
+                    className="inline-block"
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(4px)" }}
+                    transition={UI_SPRING}
+                  >
+                    {buttonLabel}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </motion.form>
         )}
-      </motion.button>
-    </form>
+      </AnimatePresence>
+    </motion.div>
   );
 }
 
+/** "We are here" marker on a dotted world map: a blue pin with soft rings breathing out of it. */
 function IndiaPulseMap({ compact = false }: { compact?: boolean }) {
+  const reduce = useReducedMotion();
   const marker = compact ? { x: 548, y: 124, labelY: 42 } : { x: 552, y: 126, labelY: 34 };
   const labelWidth = compact ? 104 : 116;
-  const beamTop = marker.labelY + 34;
-  const impactY = marker.y;
+  const stemTop = marker.labelY + 36;
 
   return (
-    <div className={cn("relative w-full", compact ? "h-24" : "mt-10 h-72 sm:mt-12 sm:h-[30rem]")}>
+    <div className={cn("relative w-full", compact ? "h-24" : "mt-10 h-72 sm:mt-12 sm:h-[26rem]")}>
       <WorldAtlasCanvas compact={compact} />
-      <svg
-        viewBox="0 0 760 280"
-        className="absolute inset-0 h-full w-full"
-        role="img"
-        aria-label="World map marker pointing to India"
-      >
-        <defs>
-          <linearGradient id="contact-line-gradient" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#dbeafe" stopOpacity="0.18" />
-            <stop offset="16%" stopColor="#bfdbfe" stopOpacity="0.95" />
-            <stop offset="62%" stopColor="#60a5fa" stopOpacity="1" />
-            <stop offset="100%" stopColor="#2563eb" stopOpacity="0.92" />
-          </linearGradient>
-          <linearGradient id="contact-beam-core" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#eff6ff" stopOpacity="0" />
-            <stop offset="12%" stopColor="#bfdbfe" stopOpacity="0.72" />
-            <stop offset="70%" stopColor="#60a5fa" stopOpacity="0.64" />
-            <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.22" />
-          </linearGradient>
-          <radialGradient id="contact-label-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.45" />
-            <stop offset="58%" stopColor="#60a5fa" stopOpacity="0.16" />
-            <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
-          </radialGradient>
-          <radialGradient id="contact-pulse-gradient">
-            <stop offset="0%" stopColor="#7dd3fc" stopOpacity="0.42" />
-            <stop offset="56%" stopColor="#60a5fa" stopOpacity="0.16" />
-            <stop offset="100%" stopColor="#60a5fa" stopOpacity="0" />
-          </radialGradient>
-          <filter id="contact-blue-glow" x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feColorMatrix
-              in="blur"
-              type="matrix"
-              values="0 0 0 0 0.1 0 0 0 0 0.46 0 0 0 0 1 0 0 0 0.75 0"
-            />
-            <feMerge>
-              <feMergeNode />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
-
-        <ellipse
-          cx={marker.x}
-          cy={impactY + 1}
-          rx={compact ? 26 : 54}
-          ry={compact ? 7 : 14}
-          fill="#0ea5e9"
-          opacity={compact ? 0.1 : 0.16}
-        />
-        <ellipse
-          cx={marker.x}
-          cy={impactY + 1}
-          rx={compact ? 17 : 34}
-          ry={compact ? 5 : 10}
-          fill="none"
-          stroke="#60a5fa"
-          strokeWidth="1.2"
-          opacity="0.28"
-        />
-        <ellipse
-          cx={marker.x}
-          cy={beamTop}
-          rx={compact ? 42 : 76}
-          ry={compact ? 5 : 8}
-          fill="url(#contact-label-glow)"
-        />
-        <path
-          d={`M ${marker.x} ${beamTop} L ${marker.x} ${impactY}`}
-          stroke="url(#contact-beam-core)"
-          strokeWidth={compact ? 10 : 22}
+      <svg viewBox="0 0 760 280" className="absolute inset-0 h-full w-full" role="img" aria-label="World map marker pointing to India">
+        <motion.line
+          x1={marker.x}
+          x2={marker.x}
+          y1={stemTop}
+          y2={marker.y}
+          stroke="#0071e3"
+          strokeWidth={compact ? 1 : 1.5}
           strokeLinecap="round"
-          opacity={compact ? 0.58 : 0.72}
-          filter="url(#contact-blue-glow)"
-        />
-        <path
-          d={`M ${marker.x} ${beamTop} L ${marker.x} ${impactY}`}
-          stroke="url(#contact-line-gradient)"
-          strokeWidth={compact ? 1.8 : 3}
-          strokeLinecap="round"
-          opacity="1"
-          filter="url(#contact-blue-glow)"
-        />
-        <path
-          d={`M ${marker.x - (compact ? 2.5 : 4)} ${beamTop + 8} L ${marker.x - (compact ? 1.2 : 2)} ${impactY - 3}`}
-          stroke="#bfdbfe"
-          strokeWidth={compact ? 0.7 : 1.1}
-          strokeLinecap="round"
-          opacity="0.72"
+          initial={reduce ? false : { pathLength: 0 }}
+          whileInView={{ pathLength: 1 }}
+          viewport={{ once: true }}
+          transition={{ type: "spring", stiffness: 120, damping: 24, delay: 0.3 }}
         />
         <foreignObject x={marker.x - labelWidth / 2} y={marker.labelY} width={labelWidth} height="40">
-          <div className="relative flex overflow-hidden rounded-xl bg-zinc-200/90 px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-[0_10px_30px_rgba(59,130,246,0.14)] backdrop-blur dark:bg-white/14 dark:text-zinc-200">
-            <span className="relative z-10 mx-auto">We are here</span>
-            <span className="pointer-events-none absolute inset-x-3 bottom-0 h-[3px] rounded-full bg-gradient-to-r from-transparent via-sky-300/85 to-transparent blur-[0.5px]" />
-            <span className="pointer-events-none absolute inset-x-6 bottom-0 h-3 bg-sky-400/15 blur-md" />
+          <div className="flex justify-center">
+            <span className="rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_6px_16px_-6px_rgba(0,0,0,.2)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
+              We are here
+            </span>
           </div>
         </foreignObject>
 
-        {[0, 0.85].map((delay, index) => (
-          <motion.circle
-            key={index}
-            cx={marker.x}
-            cy={impactY}
-            r={compact ? 2.6 : 4}
-            fill="none"
-            stroke="url(#contact-pulse-gradient)"
-            strokeWidth={compact ? 5 : 10}
-            initial={{ scaleX: 0.18, scaleY: 0.08, opacity: 0.9 }}
-            animate={{ scaleX: compact ? 9 : 18, scaleY: compact ? 2.8 : 4.8, opacity: 0 }}
-            transition={{ duration: 2.15, repeat: Infinity, delay, ease: "easeOut" }}
-            style={{ transformOrigin: `${marker.x}px ${impactY}px` }}
-          />
-        ))}
-        <circle cx={marker.x} cy={impactY} r={compact ? 6 : 11} fill="#60a5fa" opacity="0.13" />
-        <circle cx={marker.x} cy={impactY} r={compact ? 2 : 3.5} fill="#3b82f6" filter="url(#contact-blue-glow)" />
+        {reduce
+          ? null
+          : [0, 1.1].map((delay) => (
+              <motion.circle
+                key={delay}
+                cx={marker.x}
+                cy={marker.y}
+                r={compact ? 4 : 6}
+                fill="#0071e3"
+                initial={{ scale: 1, opacity: 0.28 }}
+                animate={{ scale: compact ? 4 : 6, opacity: 0 }}
+                transition={{ duration: 2.2, repeat: Infinity, delay, ease: [0.22, 1, 0.36, 1] }}
+                style={{ transformOrigin: `${marker.x}px ${marker.y}px` }}
+              />
+            ))}
+        <circle cx={marker.x} cy={marker.y} r={compact ? 4 : 6} fill="#ffffff" />
+        <circle cx={marker.x} cy={marker.y} r={compact ? 2.6 : 4} fill="#0071e3" />
       </svg>
     </div>
   );
@@ -695,7 +783,6 @@ function WorldAtlasCanvas({ compact }: { compact: boolean }) {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, width, height);
       ctx.fillStyle = getComputedStyle(wrapper).getPropertyValue("--contact-map-fill").trim();
-      ctx.strokeStyle = getComputedStyle(wrapper).getPropertyValue("--contact-map-edge").trim();
 
       const mapWidth = width * (compact ? 1.1 : 1.04);
       const mapHeight = height * (compact ? 0.84 : 0.76);
@@ -710,7 +797,6 @@ function WorldAtlasCanvas({ compact }: { compact: boolean }) {
       }
 
       ctx.save();
-      ctx.globalAlpha = compact ? 0.72 : 0.96;
       for (const polygon of polygons) {
         ctx.beginPath();
         polygon.forEach((ring) => {
@@ -718,8 +804,7 @@ function WorldAtlasCanvas({ compact }: { compact: boolean }) {
 
           ring.forEach(([lon, lat], index) => {
             const point = project(lon, lat);
-            const shouldBreak =
-              previousPoint && Math.abs(point.x - previousPoint.x) > mapWidth * 0.45;
+            const shouldBreak = previousPoint && Math.abs(point.x - previousPoint.x) > mapWidth * 0.45;
 
             if (index === 0 || shouldBreak) ctx.moveTo(point.x, point.y);
             else ctx.lineTo(point.x, point.y);
@@ -741,19 +826,26 @@ function WorldAtlasCanvas({ compact }: { compact: boolean }) {
       resizeObserver.observe(wrapperRef.current);
     }
 
+    // redraw when the page switches between light and dark
+    const themeObserver = new MutationObserver(() => {
+      void draw();
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+
     return () => {
       cancelled = true;
       resizeObserver?.disconnect();
+      themeObserver.disconnect();
     };
   }, [compact]);
 
   return (
     <div
       ref={wrapperRef}
-      className="absolute inset-0 [--contact-map-edge:transparent] [--contact-map-fill:rgba(82,82,91,0.34)] dark:[--contact-map-edge:transparent] dark:[--contact-map-fill:rgba(255,255,255,0.18)]"
+      className="absolute inset-0 [--contact-map-fill:rgba(0,0,0,0.13)] dark:[--contact-map-fill:rgba(255,255,255,0.16)]"
     >
       <canvas ref={canvasRef} className="h-full w-full" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/40 to-transparent dark:from-zinc-950 dark:via-zinc-950/35" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#f5f5f7] to-transparent dark:from-[#1c1c1e]" />
     </div>
   );
 }
@@ -766,13 +858,17 @@ function AnimatedShell({
   className?: string;
 }) {
   const reduce = useReducedMotion() === true;
+  const container: Variants = {
+    hidden: { opacity: reduce ? 0 : 1 },
+    show: { opacity: 1, transition: { staggerChildren: reduce ? 0 : 0.06, delayChildren: 0.05 } },
+  };
 
   return (
     <motion.section
-      initial={reduce ? false : { opacity: 0, y: 24 }}
-      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      variants={container}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, margin: "-80px" }}
       className={className}
     >
       {children}
@@ -793,11 +889,11 @@ export function ContactMiniMetric() {
         return (
           <div
             key={item.label}
-            className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-white/10 dark:bg-white/5"
+            className="rounded-[20px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
           >
-            <Icon className="size-4 text-sky-500" />
-            <p className="mt-4 text-2xl font-semibold text-zinc-950 dark:text-white">{item.value}</p>
-            <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{item.label}</p>
+            <Icon className="size-5 text-[#0071e3] dark:text-[#2997ff]" strokeWidth={1.75} aria-hidden />
+            <p className="mt-4 text-[28px] font-semibold tracking-[-0.03em] text-[#1d1d1f] dark:text-[#f5f5f7]">{item.value}</p>
+            <p className="mt-1 text-[14px] text-[#6e6e73] dark:text-[#a1a1a6]">{item.label}</p>
           </div>
         );
       })}

@@ -2542,6 +2542,236 @@
       ]
     },
     {
+      "name": "stretch-nav",
+      "type": "registry:component",
+      "title": "Stretch Nav",
+      "description": "A pill navigation whose active capsule moves its leading edge first and lets the trailing edge catch up, so it stretches towards the next item and snaps back to size, with a soft hover pill that follows the pointer.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/stretch-nav/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/stretch-nav/stretch-nav.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "feedback-pill",
+      "type": "registry:component",
+      "title": "Feedback Pill",
+      "description": "A small Feedback pill that morphs into a note form, shows a spinner in the Send button while it posts, then shrinks into a thank-you before folding back into the pill.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/feedback-pill/feedback-pill.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/feedback-pill/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "stagger-menu",
+      "type": "registry:component",
+      "title": "Stagger Menu",
+      "description": "A share menu that unfolds from its button with the items arriving one after another, a highlight that glides between rows, arrow-key navigation, and a button label that rolls to confirm what you picked.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/stagger-menu/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/stagger-menu/stagger-menu.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "ruler-picker",
+      "type": "registry:component",
+      "title": "Ruler Picker",
+      "description": "A duration picker you fling like a ruler: it glides with momentum and snaps to whole units, the big number rolls in the direction you moved, and presets spring the ruler into place.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/ruler-picker/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/ruler-picker/ruler-picker.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "elastic-stepper",
+      "type": "registry:component",
+      "title": "Elastic Stepper",
+      "description": "A plus / minus stepper whose number rolls up or down, with a dot track that stretches to the current value and a rubber-band bounce when you push past either limit.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/elastic-stepper/elastic-stepper.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/elastic-stepper/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "todo-list",
+      "type": "registry:component",
+      "title": "Todo List",
+      "description": "A task list where ticking a task draws a check, strikes the text through and drops it out of the list into a Completed drawer with a counter that pops, plus quick add and undo.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/todo-list/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/todo-list/todo-list.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "progress-button",
+      "type": "registry:component",
+      "title": "Progress Button",
+      "description": "A button that becomes its own progress bar: it stretches, fills as the work runs with a live percentage, then turns green with a drawn check and a new label.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/progress-button/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/progress-button/progress-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "copy-button",
+      "type": "registry:component",
+      "title": "Copy Button",
+      "description": "Two copy controls: an ID chip whose icon morphs into a check under a ripple and a Copied tooltip, and a command line whose button rolls from Copy to Copied.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/copy-button/copy-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/copy-button/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "animated-icons",
+      "type": "registry:component",
+      "title": "Animated Icons",
+      "description": "Eight toggle icons with their own small stories: menu to close, play morphing into pause, a heart that bursts, a bell that rings, sun turning to moon, a bookmark that fills, sound muting and a lock that springs open.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/animated-icons/animated-icons.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-icons/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "folder-peek",
+      "type": "registry:component",
+      "title": "Folder Peek",
+      "description": "A folder that tips its front panel back on hover or focus while a document, a photo and a chart fan out of it, then tuck back in when you leave.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/folder-peek/folder-peek.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/folder-peek/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "pricing-section",
       "type": "registry:component",
       "title": "Pricing Section",
@@ -2663,10 +2893,6 @@
         {
           "path": "next-ui/blocks/contact-page.tsx",
           "type": "registry:component"
-        },
-        {
-          "path": "next-ui/brand/nexus-mark.tsx",
-          "type": "registry:component"
         }
       ]
     },
@@ -2676,8 +2902,8 @@
       "title": "Blog Content Sections",
       "description": "Centered article, table-of-contents, editorial, featured post, and hover-card blog sections.",
       "dependencies": [
-        "framer-motion",
         "react",
+        "framer-motion",
         "lucide-react"
       ],
       "registryDependencies": [

@@ -17,6 +17,16 @@ import { TiltPass } from "@/components/tilt-pass";
 import { AnimatedTabs } from "@/components/animated-tabs";
 import { SharedElementCards } from "@/components/shared-element-cards";
 import { RotatingHeadline } from "@/components/rotating-headline";
+import { StretchNav } from "@/components/stretch-nav";
+import { FeedbackPill } from "@/components/feedback-pill";
+import { StaggerMenu } from "@/components/stagger-menu";
+import { RulerPicker } from "@/components/ruler-picker";
+import { ElasticStepper } from "@/components/elastic-stepper";
+import { TodoList } from "@/components/todo-list";
+import { ProgressButton } from "@/components/progress-button";
+import { CopyDemo } from "@/components/copy-button";
+import { AnimatedIcons } from "@/components/animated-icons";
+import { FolderPeek } from "@/components/folder-peek";
 
 function Stage({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
@@ -151,6 +161,96 @@ export function PreviewRotatingHeadline({ compact = false }: { compact?: boolean
   return (
     <Stage>
       <RotatingHeadline />
+    </Stage>
+  );
+}
+
+export function PreviewStretchNav({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <StretchNav autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewFeedbackPill({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <FeedbackPill autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewStaggerMenu({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <div className="flex justify-center pt-6"><StaggerMenu autoplay /></div>
+    </Stage>
+  );
+}
+
+export function PreviewRulerPicker({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <RulerPicker autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewElasticStepper({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <ElasticStepper autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewTodoList({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <TodoList autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewProgressButton({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <ProgressButton autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewCopyButton({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <CopyDemo autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewAnimatedIcons({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <AnimatedIcons autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewFolderPeek({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <FolderPeek autoplay />
     </Stage>
   );
 }
