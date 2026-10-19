@@ -188,6 +188,8 @@ function buildSnippetItem(slug, block) {
 function isRegistrySourceFile(filePath) {
   if (!/\.(tsx|ts)$/.test(filePath)) return false;
   const base = path.basename(filePath);
+  // Skip dotfiles: macOS writes binary AppleDouble twins (`._foo.tsx`) on non-APFS drives
+  if (base.startsWith(".")) return false;
   return !["demo.tsx", "preview.tsx"].includes(base);
 }
 
