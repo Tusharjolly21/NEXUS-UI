@@ -93,16 +93,16 @@ export function BeforeAfter({ before, after, beforeLabel = "Before", afterLabel 
         </motion.div>
       </div>
 
-      <div role="group" aria-label="Jump to" className="relative grid w-[270px] grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px]">
+      <div role="group" aria-label="Jump to" className="relative grid w-[270px] grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
         {(["Before", "Split", "After"] as const).map((l, i) => (
           <button
             key={l}
             type="button"
             onClick={() => jump([100, 50, 0][i], i as 0 | 1 | 2)}
-            className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]"
+            className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]"
           >
             {mode === i && (
-              <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />
+              <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white dark:bg-[#636366] shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />
             )}
             {l}
           </button>

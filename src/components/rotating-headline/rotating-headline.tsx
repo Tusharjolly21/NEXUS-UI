@@ -32,7 +32,7 @@ export function RotatingHeadline({
 
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">
-      <h2 key={`h${run}`} className="m-0 flex flex-wrap items-baseline justify-center gap-x-[0.25em] text-[56px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#1d1d1f]">
+      <h2 key={`h${run}`} className="m-0 flex flex-wrap items-baseline justify-center gap-x-[0.25em] text-[56px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7]">
         {leadWords.map((w, k) => (
           <motion.span
             key={w + k}
@@ -65,7 +65,7 @@ export function RotatingHeadline({
         </motion.span>
       </h2>
 
-      <p key={`p${run}`} className="m-0 max-w-[360px] text-[17px] leading-[1.45] tracking-[-0.01em] text-[#6e6e73]">
+      <p key={`p${run}`} className="m-0 max-w-[360px] text-[17px] leading-[1.45] tracking-[-0.01em] text-[#6e6e73] dark:text-[#a1a1a6]">
         {subWords.map((w, k) => (
           <motion.span
             key={w + k}
@@ -84,7 +84,7 @@ export function RotatingHeadline({
         onClick={() => setRun((r) => r + 1)}
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.95 }}
-        className="relative overflow-hidden rounded-full bg-[#1d1d1f] px-5 py-2.5 text-[14px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
+        className="relative overflow-hidden rounded-full bg-[#1d1d1f] px-5 py-2.5 text-[14px] font-medium text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
       >
         <motion.span
           aria-hidden="true"

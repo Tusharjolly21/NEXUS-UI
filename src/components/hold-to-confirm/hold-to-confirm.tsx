@@ -103,12 +103,12 @@ export function HoldToConfirm({
   }, [autoplay]);
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center gap-6 [--htc-track:#e8e8ed] [--htc-ink:#1d1d1f] dark:[--htc-track:#3a3a3c] dark:[--htc-ink:#f5f5f7]">
       <div className="relative flex h-[58px] justify-center">
         <motion.button
           type="button"
           aria-label={label}
-          animate={{ width: done ? 58 : 300, backgroundColor: done ? color : "#e8e8ed" }}
+          animate={{ width: done ? 58 : 300 }}
           transition={{ type: "spring", stiffness: 260, damping: 24 }}
           whileTap={done ? undefined : { scale: 0.97 }}
           onPointerDown={(e) => { if (e.button === 0) press(); }}
@@ -123,7 +123,7 @@ export function HoldToConfirm({
           onKeyUp={release}
           onContextMenu={(e) => e.preventDefault()}
           className="relative h-[58px] touch-none select-none overflow-hidden rounded-full text-[17px] font-semibold tracking-[-0.01em] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4"
-          style={{ color, outlineColor: color }}
+          style={{ color, outlineColor: color, backgroundColor: done ? color : "var(--htc-track)", transition: "background-color .35s" }}
         >
           <motion.span className="absolute inset-0 origin-left" style={{ scaleX: progress, background: color }} />
           <AnimatePresence initial={false}>
@@ -157,7 +157,7 @@ export function HoldToConfirm({
                 key={i}
                 aria-hidden="true"
                 className="pointer-events-none absolute left-1/2 top-1/2 -ml-1 -mt-1 h-2 w-2 rounded-full"
-                style={{ background: p.dark ? "#1d1d1f" : color }}
+                style={{ background: p.dark ? "var(--htc-ink)" : color }}
                 initial={{ x: 0, y: 0, opacity: 1, scale: 1.2 }}
                 animate={{ x: p.x, y: p.y, opacity: 0, scale: 0.2 }}
                 transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1], delay: 0.15 }}
@@ -176,7 +176,7 @@ export function HoldToConfirm({
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 12, opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 320, damping: 24, delay: 0.25 }}
-              className="flex h-[52px] items-center gap-3.5 rounded-full bg-[#1d1d1f] pl-5 pr-2 text-[15px] font-medium text-white shadow-[0_18px_40px_-18px_rgba(0,0,0,.45)]"
+              className="flex h-[52px] items-center gap-3.5 rounded-full bg-[#1d1d1f] pl-5 pr-2 text-[15px] font-medium text-white shadow-[0_18px_40px_-18px_rgba(0,0,0,.45)] dark:bg-[#3a3a3c]"
             >
               {left > 0 ? doneLabel : "Deleted for good"}
               <button type="button" onClick={undo} className="inline-flex h-[38px] items-center gap-2 rounded-full bg-white/15 pl-2 pr-3.5 font-semibold hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
@@ -188,7 +188,7 @@ export function HoldToConfirm({
               </button>
             </motion.div>
           ) : (
-            <motion.span key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] text-[#86868b]">
+            <motion.span key="hint" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[13px] text-[#86868b] dark:text-[#98989d]">
               Press and hold. Let go early to cancel.
             </motion.span>
           )}
