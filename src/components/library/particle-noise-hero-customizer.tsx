@@ -71,22 +71,19 @@ export function ParticleNoiseHeroCustomizer() {
         />
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_52%_32%,transparent,rgba(0,0,0,0.28)_55%,rgba(0,0,0,0.72)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
-            Particle noise
-          </p>
-          <h2 className="mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Terrain-like particles flowing through a noise field.
+          <p className="text-[14px] font-medium text-white/65">Strata terrain API</p>
+          <h2 className="mt-4 max-w-3xl text-balance text-4xl font-semibold leading-[1.04] tracking-[-0.035em] text-white sm:text-5xl lg:text-6xl">
+            Elevation data for every hillside on Earth.
           </h2>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/66 sm:text-lg">
-            A regular dot grid displaced by smooth noise into soft wave ridges,
-            tuned for dark Framer-like generative hero sections.
+          <p className="mt-5 max-w-xl text-pretty text-base leading-7 text-white/70 sm:text-lg">
+            Ten-metre terrain tiles, refreshed monthly and served from the edge with a single request.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <button className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-black/20">
-              Explore visuals
+            <button type="button" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-black/20">
+              Get an API key
             </button>
-            <button className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-md">
-              See motion
+            <button type="button" className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-md">
+              Browse the map
             </button>
           </div>
         </div>
@@ -102,7 +99,7 @@ export function ParticleNoiseHeroCustomizer() {
 
         <div className="mt-6 space-y-5">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
               Palette
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -112,7 +109,7 @@ export function ParticleNoiseHeroCustomizer() {
                   type="button"
                   onClick={() => setPalette(item)}
                   className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium transition",
+                    "rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     palette.name === item.name
                       ? "border-foreground/25 bg-foreground text-background"
                       : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
@@ -125,7 +122,7 @@ export function ParticleNoiseHeroCustomizer() {
           </div>
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
               Speed
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -135,7 +132,7 @@ export function ParticleNoiseHeroCustomizer() {
                   type="button"
                   onClick={() => setSpeed(item)}
                   className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium capitalize transition",
+                    "rounded-xl border px-3 py-2 text-xs font-medium capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     speed === item
                       ? "border-foreground/25 bg-foreground text-background"
                       : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",

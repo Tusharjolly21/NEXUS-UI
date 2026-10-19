@@ -61,6 +61,7 @@ import {
   RadioPlanPricing,
   SpotlightPricingCards,
 } from "@/components/blocks/pricing-section";
+import { PayAndConfirm, TipAndRate, VerifyPayment } from "@/components/blocks/checkout-moments";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
@@ -139,6 +140,7 @@ export default async function BlockDetailPage({ params }: Props) {
   const isPricingSectionCard = block.slug === "block-pricing-section";
   const isSidebarCard = block.slug === "block-sidebar";
   const isLogoCloudCard = block.slug === "block-logo-clouds";
+  const isCheckoutMomentsCard = block.slug === "block-checkout-moments";
   const layeredWaveCode = isInteractiveBackgroundCard
     ? await readSourceFile("src/components/layered-wave-background/layered-wave-background.tsx", "")
     : "";
@@ -195,6 +197,12 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
   const blogHoverImageCardCode = isBlogContentSectionsCard
     ? await readSourceFile("src/components/blocks/blog-content-sections/blog-hover-image-card.tsx", "")
+    : "";
+  const verifyPaymentCode = isCheckoutMomentsCard
+    ? await readSourceFile("src/components/blocks/checkout-moments/verify-payment.tsx", "")
+    : "";
+  const tipAndRateCode = isCheckoutMomentsCard
+    ? await readSourceFile("src/components/blocks/checkout-moments/tip-and-rate.tsx", "")
     : "";
   const billingPricingVariantsCode = isPricingSectionCard
     ? await readSourceFile("src/components/blocks/pricing-section/billing-pricing-variants.tsx", "")
@@ -286,15 +294,12 @@ export default async function BlockDetailPage({ params }: Props) {
               />
               <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_48%_42%,transparent_0%,rgba(0,0,0,.18)_46%,rgba(0,0,0,.72)_100%)]" />
               <div className="pointer-events-none absolute bottom-8 left-8 max-w-sm">
-                <p className="text-xs uppercase tracking-[0.24em] text-teal-100/55">
-                  WebGL motion
+                <p className="text-[13px] font-medium text-teal-50/70">Tidal · Ocean sensor network</p>
+                <p className="mt-3 text-balance text-3xl font-semibold tracking-[-0.03em] text-white">
+                  Readings from 4,000 buoys, live.
                 </p>
-                <p className="mt-3 text-3xl font-semibold tracking-tight text-white">
-                  Aurora lines for immersive sections
-                </p>
-                <p className="mt-3 text-sm leading-6 text-teal-50/60">
-                  Animated shader waves with a cooler emerald palette and smooth
-                  flowing depth.
+                <p className="mt-3 text-pretty text-sm leading-6 text-teal-50/70">
+                  Swell, temperature and salinity, streamed every ninety seconds.
                 </p>
               </div>
             </div>
@@ -585,7 +590,37 @@ export default async function BlockDetailPage({ params }: Props) {
             <LogoCloudSingleRow />
           </PreviewCodeSection>
         </>
-      ) : (
+      ) : isCheckoutMomentsCard ? (
+        <>
+          <PreviewCodeSection title="Pay & Confirm" code={code} usageCode={CHECKOUT_PAY_USAGE} locked={locked}>
+            <CheckoutStage>
+              <PayAndConfirm />
+            </CheckoutStage>
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Verify Payment"
+            code={verifyPaymentCode}
+            usageCode={CHECKOUT_VERIFY_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <CheckoutStage>
+              <VerifyPayment hint="Demo code: 424242" />
+            </CheckoutStage>
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            title="Tip & Rate"
+            code={tipAndRateCode}
+            usageCode={CHECKOUT_TIP_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <CheckoutStage>
+              <TipAndRate />
+            </CheckoutStage>
+          </PreviewCodeSection>
+        </>
+) : (
         <PreviewCodeSection title={block.name} code={code} locked={locked}>
           <Preview />
         </PreviewCodeSection>
@@ -626,72 +661,66 @@ export default async function BlockDetailPage({ params }: Props) {
 }
 
 function FlippingWordsDemo() {
+  const notes = [
+    ["Oct 14", "Branch previews", "Every pull request gets its own URL, torn down on merge."],
+    ["Oct 07", "Faster cold starts", "Median boot fell from 410 ms to 160 ms on the new runtime."],
+    ["Sep 30", "Audit log export", "Stream every workspace event to your own bucket as JSONL."],
+    ["Sep 22", "Keyboard-first search", "Press / anywhere to jump to a project, page, or teammate."],
+  ];
   return (
-    <section className="grid h-full min-h-full w-full overflow-hidden bg-[#f7f7f8] p-6 text-zinc-950 lg:grid-cols-[1.08fr_0.92fr] lg:p-12">
-      <div className="flex flex-col justify-end pb-10 lg:pb-24">
+    <section className="grid h-full min-h-full w-full overflow-hidden bg-[#f6f6f4] px-5 py-10 text-zinc-950 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:p-14">
+      <div className="flex flex-col justify-center">
+        <p className="text-[13px] font-medium text-zinc-500">Changelog</p>
         <TypewriterHeading
-          text="Built with Next.js"
-          description="Create stunning animations that bring your website to life. Elevate your user experience with smooth transitions and eye-catching effects that captivate visitors and keep them engaged."
-          typingSpeed={92}
+          text="Release notes people read."
+          description="Ship a headline that types itself out, then let the summary settle in underneath. The layout is reserved up front, so nothing below it jumps."
+          typingSpeed={78}
           startDelay={300}
+          cursorColor="#ff5a36"
+          className="mt-3"
         />
-        <div className="mt-12">
-          <p className="text-sm font-medium text-zinc-500">Trusted by builders shipping with</p>
-          <div className="mt-5 flex flex-wrap gap-5 text-sm font-semibold text-zinc-800">
-            <span>Nexus-ui</span>
-            <span>Gamity</span>
-            <span>Host IT</span>
-            <span>Asteroid Kit</span>
-          </div>
+        <div className="mt-8 flex flex-wrap items-center gap-3">
+          <span className="inline-flex h-11 items-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white">
+            Read the latest
+          </span>
+          <span className="inline-flex h-11 items-center rounded-full border border-zinc-300 px-5 text-sm font-semibold text-zinc-800">
+            Subscribe by email
+          </span>
         </div>
       </div>
-      <div className="hidden items-end justify-center pb-4 lg:flex">
-        <div className="relative h-[590px] w-[300px] rounded-[3rem] border-[14px] border-black bg-white p-4 shadow-2xl shadow-zinc-950/20">
-          <div className="absolute left-1/2 top-5 h-7 w-28 -translate-x-1/2 rounded-full bg-black" />
-          <div className="mt-16 space-y-3">
-            {[
-              ["🚀", "Getting Started", "Learn how to build your first animation in minutes"],
-              ["⚡", "Advanced Techniques", "Take animations to the next level with pro tips"],
-              ["⚙️", "Performance Tips", "Optimize motion for smooth rendering"],
-              ["📚", "Animation Library", "Browse reusable text effects"],
-              ["🌟", "Community Showcase", "See what others are building"],
-            ].map(([icon, title, copy]) => (
-              <div key={title} className="rounded-2xl bg-white p-3.5 shadow-lg shadow-zinc-950/10">
-                <div className="flex gap-2.5">
-                  <span className="shrink-0">{icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold">{title}</p>
-                    <p className="mt-1 text-xs leading-5 text-zinc-500">{copy}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ol className="mt-10 hidden flex-col justify-center gap-2 lg:mt-0 lg:flex">
+        {notes.map(([date, title, copy]) => (
+          <li key={title} className="grid grid-cols-[64px_1fr] gap-4 rounded-2xl border border-zinc-200/80 bg-white p-4">
+            <span className="pt-0.5 font-mono text-[12px] text-zinc-400">{date}</span>
+            <span>
+              <span className="block text-[15px] font-semibold tracking-[-0.01em]">{title}</span>
+              <span className="mt-1 block text-[13.5px] leading-5 text-zinc-500">{copy}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 }
 
 function TypewriterEffectDemo() {
   return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-zinc-950 p-6 text-white">
-      <div className="w-full max-w-4xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-8 shadow-2xl shadow-black/30">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-200/70">Typewriter</p>
-        <div className="mt-8 min-h-[8rem]">
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#0d0d10] px-5 py-12 text-white sm:px-8">
+      <div className="w-full max-w-3xl">
+        <p className="text-[13px] font-medium text-white/50">Hosting for small teams</p>
+        <h3 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-5xl">
+          Push to main.
+        </h3>
+        <div className="mt-2 min-h-[2.6em] text-[34px] leading-[1.05] sm:text-5xl">
           <TextAnimationTypewriterEffect
-            texts={[
-              "Launch a sharper hero section.",
-              "Write less styling.",
-              "Ship motion that feels premium.",
-            ]}
-            className="text-4xl text-white sm:text-6xl"
-            delay={400}
+            texts={["Preview every branch.", "Roll back in one click.", "Sleep through deploys."]}
+            className="text-[34px] text-white/55 sm:text-5xl"
+            delay={500}
           />
         </div>
-        <p className="mt-8 max-w-2xl text-lg leading-8 text-white/55">
-          Loop through product messages with controlled typing, deleting,
-          blinking cursor, and no layout jump.
+        <p className="mt-8 max-w-xl text-pretty text-[16px] leading-7 text-white/55">
+          Cycles through short claims, typing and deleting each one. The line keeps its height, so the copy below
+          never shifts.
         </p>
       </div>
     </section>
@@ -700,17 +729,18 @@ function TypewriterEffectDemo() {
 
 function BlurFadeInDemo() {
   return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-white p-6 text-zinc-950 dark:bg-zinc-950 dark:text-white">
-      <div className="w-full max-w-4xl rounded-[2rem] border border-zinc-200 bg-zinc-50 p-8 dark:border-white/10 dark:bg-white/[0.04]">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-500">Blur fade in</p>
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-white px-5 py-12 text-zinc-950 dark:bg-zinc-950 dark:text-white sm:px-8">
+      <div className="w-full max-w-3xl">
+        <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400">From the founders</p>
         <TextAnimationBlurFadeIn
-          text={"Every word arrives with intent.\nEvery sentence feels composed.\nEvery section earns attention."}
+          text={"We built the tool we kept wishing for.\nIt does fewer things than the others.\nEach of them, properly."}
           by="word"
           stagger={0.045}
           once={false}
           repeat
-          className="mt-8 text-4xl leading-tight text-zinc-900 dark:text-white sm:text-6xl"
+          className="mt-5 text-[30px] font-semibold leading-[1.15] tracking-[-0.03em] text-zinc-900 dark:text-white sm:text-5xl"
         />
+        <p className="mt-8 text-[14px] text-zinc-500 dark:text-zinc-400">Ana Ruiz and Tom Becker, co-founders</p>
       </div>
     </section>
   );
@@ -718,13 +748,17 @@ function BlurFadeInDemo() {
 
 function TextGenerateTypewriterDemo() {
   return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#05070d] p-6">
-      <div className="w-full max-w-3xl">
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#f6f6f4] px-5 py-12 dark:bg-zinc-950 sm:px-8">
+      <div className="w-full max-w-2xl">
+        <div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-zinc-950 px-4 py-3 text-[15px] text-white dark:bg-white dark:text-zinc-950">
+          Why did churn go up last quarter?
+        </div>
         <TextGenerateTypewriter
-          text="Nexus-ui is generating a production-ready hero section with animated text, clean spacing, responsive layout, and a subtle synced typing sound."
+          text="Churn rose 1.8 points, almost entirely from annual plans that renewed in August. Most of those accounts never invited a second teammate, so the fastest lever is an invite prompt in week one."
           startOnView
-          typingSpeed={48}
+          typingSpeed={40}
           volume={0.22}
+          className="mt-4"
         />
       </div>
     </section>
@@ -738,6 +772,17 @@ type BlockInstallDetails = {
 };
 
 const BLOCK_INSTALL_FILES: Record<string, string[]> = {
+  "block-checkout-moments": [
+    "components/blocks/checkout-moments/index.ts",
+    "components/blocks/checkout-moments/moment-card.tsx",
+    "components/blocks/checkout-moments/pay-and-confirm.tsx",
+    "components/blocks/checkout-moments/tip-and-rate.tsx",
+    "components/blocks/checkout-moments/verify-payment.tsx",
+    "components/one-time-code/one-time-code.tsx",
+    "components/slide-to-confirm/slide-to-confirm.tsx",
+    "components/tick-slider/tick-slider.tsx",
+    "components/toast-stack/toast-stack.tsx",
+  ],
   "block-pricing-section": [
     "components/blocks/pricing-section/billing-pricing-variants.tsx",
     "components/blocks/pricing-section/index.ts",
@@ -796,6 +841,9 @@ const BLOCK_INSTALL_FILES: Record<string, string[]> = {
 };
 
 const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
+  "block-checkout-moments": [
+    "The sections ship with demo handlers (a timed fake charge, and 424242 as the right code). Pass onPay, verify and onSubmit to wire them to your payment provider.",
+  ],
   "block-text-animations": [
     "TextGenerateTypewriter plays /sounds/sound.ogg by default. Add your own audio file at public/sounds/sound.ogg or pass a different soundSrc value.",
   ],
@@ -803,7 +851,7 @@ const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
     "SpotlightBentoGrid renders Unsplash images with next/image. Add images.unsplash.com to images.remotePatterns in next.config.mjs before using that variant.",
   ],
   "block-contact-page": [
-    "The supplied contact form posts to /api/contact. Create that route in your app or replace the submit handler with your own form service.",
+    "The forms simulate a successful send out of the box. Pass an async onSubmit(values) to any contact variant to post to your own API or form service; throw or return { error } to show a message.",
   ],
 };
 
@@ -1022,6 +1070,7 @@ async function getBlockCode(slug: string, fallback: string) {
     "block-pricing-section": "src/components/blocks/pricing-section/radio-plan-pricing.tsx",
     "block-sidebar": "src/components/blocks/sidebar/simple-sidebar.tsx",
     "block-logo-clouds": "src/components/blocks/logo-clouds/logos-blur-flip.tsx",
+    "block-checkout-moments": "src/components/blocks/checkout-moments/pay-and-confirm.tsx",
   };
 
   const sourcePath = sourceBySlug[slug];
@@ -1544,4 +1593,61 @@ const LOGO_SINGLE_ROW_USAGE = `import LogoCloudSingleRow from "@/components/bloc
 
 export default function Page() {
   return <LogoCloudSingleRow />;
+}`;
+
+/** Centres a Checkout Moments card on the Playground page grey. */
+function CheckoutStage({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)] content-center justify-items-center overflow-y-auto bg-[#f5f5f7] p-4 sm:p-6 dark:bg-[#0b0b10]">{children}</div>
+  );
+}
+
+const CHECKOUT_PAY_USAGE = `"use client";
+
+import { PayAndConfirm } from "@/components/blocks/checkout-moments";
+
+export default function Checkout() {
+  return (
+    <PayAndConfirm
+      merchant="Studio Supply"
+      product={{ name: "Ceramic Pour-Over Set", variant: "Sand · 2 cups", price: 6400 }}
+      onPay={async (totalCents) => {
+        await fetch("/api/pay", { method: "POST", body: JSON.stringify({ totalCents }) });
+      }}
+    />
+  );
+}`;
+
+const CHECKOUT_VERIFY_USAGE = `"use client";
+
+import { VerifyPayment } from "@/components/blocks/checkout-moments";
+
+export default function Approve() {
+  return (
+    <VerifyPayment
+      destination="•••• 42"
+      amount={12840}
+      verify={async (code) => {
+        const res = await fetch("/api/verify", { method: "POST", body: JSON.stringify({ code }) });
+        return res.ok;
+      }}
+      onApproved={() => window.location.assign("/thanks")}
+    />
+  );
+}`;
+
+const CHECKOUT_TIP_USAGE = `"use client";
+
+import { TipAndRate } from "@/components/blocks/checkout-moments";
+
+export default function Feedback() {
+  return (
+    <TipAndRate
+      courier="Maya Chen"
+      orderTotal={4200}
+      onSubmit={async (feedback) => {
+        await fetch("/api/feedback", { method: "POST", body: JSON.stringify(feedback) });
+      }}
+    />
+  );
 }`;

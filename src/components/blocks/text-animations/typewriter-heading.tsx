@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type TypewriterHeadingProps = {
@@ -27,8 +27,9 @@ export function TypewriterHeading({
 }: TypewriterHeadingProps) {
   const [index, setIndex] = React.useState(0);
   const [started, setStarted] = React.useState(false);
-  const visibleText = text.slice(0, index);
-  const showDot = showCursor && started;
+  const reduceMotion = useReducedMotion();
+  const visibleText = reduceMotion ? text : text.slice(0, index);
+  const showDot = showCursor && (started || !!reduceMotion);
 
   React.useEffect(() => {
     const resetTimer = window.setTimeout(() => {
@@ -44,7 +45,7 @@ export function TypewriterHeading({
   }, [startDelay, text]);
 
   React.useEffect(() => {
-    if (!started) return;
+    if (!started || reduceMotion) return;
 
     if (index < text.length) {
       const char = text[index] ?? "";
@@ -65,16 +66,19 @@ export function TypewriterHeading({
     }, 1400);
 
     return () => window.clearTimeout(timer);
-  }, [index, loop, startDelay, started, text, typingSpeed]);
+  }, [index, loop, reduceMotion, startDelay, started, text, typingSpeed]);
 
   return (
     <div className={cn("w-full max-w-4xl", className)}>
-      <h1 className="grid max-w-4xl text-left text-5xl font-black leading-[1.02] tracking-[-0.045em] text-zinc-950 sm:text-6xl lg:text-7xl">
+      <h1
+        aria-label={text}
+        className="grid max-w-4xl text-left text-[44px] font-semibold leading-[1.02] tracking-[-0.045em] text-zinc-950 sm:text-6xl lg:text-7xl"
+      >
         <span className="invisible col-start-1 row-start-1 select-none" aria-hidden>
           {text}
           {showCursor ? <CursorDot color={cursorColor} /> : null}
         </span>
-        <span className="col-start-1 row-start-1">
+        <span aria-hidden className="col-start-1 row-start-1">
           {visibleText}
           {showDot ? <CursorDot color={cursorColor} /> : null}
         </span>
@@ -83,9 +87,9 @@ export function TypewriterHeading({
       {description ? (
         <motion.p
           initial={{ opacity: 0, y: 10 }}
-          animate={started ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+          animate={started || reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
           transition={{ delay: 0.15, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-5 max-w-3xl text-left text-lg leading-8 text-zinc-600 sm:text-xl sm:leading-9"
+          className="mt-5 max-w-2xl text-pretty text-left text-[17px] leading-7 text-zinc-600 sm:text-xl sm:leading-8"
         >
           {description}
         </motion.p>
@@ -95,10 +99,11 @@ export function TypewriterHeading({
 }
 
 function CursorDot({ color }: { color: string }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.span
       aria-hidden
-      animate={{ opacity: [1, 0.38, 1], scale: [1, 0.86, 1] }}
+      animate={reduceMotion ? undefined : { opacity: [1, 0.38, 1], scale: [1, 0.86, 1] }}
       transition={{ duration: 0.95, repeat: Infinity, ease: "easeInOut" }}
       className="ml-1.5 inline-block size-[0.18em] rounded-full align-baseline"
       style={{ backgroundColor: color }}

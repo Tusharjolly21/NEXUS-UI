@@ -5,8 +5,8 @@ import { Search, X } from "lucide-react";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { cn } from "@/lib/utils";
 import { ComponentModal } from "./component-modal";
-import { GalleryTile } from "./gallery-tile";
-import { INTERACTION_FILTERS, SHAPE_CLASSES, type GalleryItem, type Interaction } from "./types";
+import { GalleryTile, TileCell, TileGrid } from "./gallery-tile";
+import { INTERACTION_FILTERS, type GalleryItem, type Interaction } from "./types";
 import { useUrlParam } from "./use-url-param";
 
 export type CategoryFilter = { id: string; label: string };
@@ -49,6 +49,11 @@ export function ComponentGallery({
   );
   const shown = !filtering && limit ? matches.slice(0, limit) : matches;
   const openItem = openSlug ? (items.find((i) => i.slug === openSlug) ?? null) : null;
+  const counts = React.useMemo(() => {
+    const c = new Map<string, number>();
+    for (const i of items) for (const k of i.interactions) c.set(k, (c.get(k) ?? 0) + 1);
+    return c;
+  }, [items]);
 
   const clear = () => {
     setInteraction("all");
@@ -79,13 +84,25 @@ export function ComponentGallery({
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <ChipRail>
-            {INTERACTION_FILTERS.map((f) => (
+            {INTERACTION_FILTERS.filter((f) => f.value === "all" || counts.get(f.value)).map((f) => (
               <Chip key={f.value} active={interaction === f.value} onClick={() => setInteraction(f.value)}>
                 {f.label}
+                {f.value !== "all" ? (
+                  <span className={cn("tabular-nums text-[12px]", interaction === f.value ? "text-background/60" : "text-muted-foreground")}>
+                    {counts.get(f.value)}
+                  </span>
+                ) : null}
               </Chip>
             ))}
           </ChipRail>
-          {aside}
+          <div className="flex shrink-0 items-center gap-4">
+            {filtering ? (
+              <p className="text-[13px] tabular-nums text-muted-foreground" aria-live="polite">
+                {matches.length} of {items.length}
+              </p>
+            ) : null}
+            {aside}
+          </div>
         </div>
 
         {categories ? (
@@ -103,13 +120,13 @@ export function ComponentGallery({
       </div>
 
       {shown.length ? (
-        <ul className="mt-6 grid grid-flow-dense auto-rows-[190px] grid-cols-2 gap-4 lg:grid-cols-4">
+        <TileGrid className="mt-6">
           {shown.map((item, i) => (
-            <li key={item.slug} className={cn(SHAPE_CLASSES[item.shape], !filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
+            <TileCell key={item.slug} item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
               <GalleryTile item={item} onOpen={setOpenSlug} />
-            </li>
+            </TileCell>
           ))}
-        </ul>
+        </TileGrid>
       ) : (
         <div className="mt-6 rounded-tile bg-card px-6 py-16 text-center">
           <p className="text-[17px] font-semibold text-foreground">No components match.</p>

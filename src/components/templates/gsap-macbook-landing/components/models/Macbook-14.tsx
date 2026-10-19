@@ -37,7 +37,7 @@ export default function MacbookModel14(props: MacbookModelProps) {
     const { color } = useMacbookStore();
   const { nodes, materials, scene } = useGLTF('/models/macbook-14-transformed.glb') as unknown as GltfResult;
 
-  const baseTexture = useTexture('/screen.png');
+  const baseTexture = useTexture('/halcyon-screen.webp');
   const texture = useMemo(() => {
     const nextTexture = baseTexture.clone();
     nextTexture.colorSpace = SRGBColorSpace;

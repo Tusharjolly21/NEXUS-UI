@@ -97,6 +97,12 @@ npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
           <code className={docInlineCodeClass}>utils</code> helper if missing, and writes files under
           your components alias.
         </p>
+        <p className="text-sm text-muted-foreground">
+          Skipped the <code className={docInlineCodeClass}>registries</code> step? Without it the CLI
+          can&apos;t resolve <code className={docInlineCodeClass}>@nexus-labs/…</code>. Install any free item
+          straight from its URL instead:
+        </p>
+        <DocPre>{`npx shadcn@latest add https://www.nexus-ui.com/api/registry/wheel-selector`}</DocPre>
       </DocSection>
 
       <DocSection title="Install premium items">

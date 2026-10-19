@@ -10,26 +10,26 @@ type ChatMsg = { from: "them" | "me"; text: string };
 // ── Data ───────────────────────────────────────────────────────────────────────
 
 const ACCOUNTABILITY_MSGS: ChatMsg[] = [
-  { from: "them", text: "did you build the navbar feature?" },
-  { from: "me",   text: "yes i did, raised a PR for the same" },
-  { from: "them", text: "can you point me to that PR?" },
-  { from: "me",   text: "sure thing, here's the link." },
+  { from: "them", text: "did you finish the graphs set?" },
+  { from: "me",   text: "14 of 15. the last one is a beast" },
+  { from: "them", text: "send me your approach before standup?" },
+  { from: "me",   text: "sharing it now" },
 ];
 
 const ENCOURAGEMENT_MSGS: ChatMsg[] = [
-  { from: "them", text: "Not able to solve this problem, please help" },
-  { from: "me",   text: "How did you approach the problem?" },
-  { from: "them", text: "Let's jump on a call to discuss this." },
-  { from: "me",   text: "Did you try reproducing the problem?" },
+  { from: "them", text: "an hour on this DP problem and I'm stuck" },
+  { from: "me",   text: "what's your recurrence so far?" },
+  { from: "them", text: "dp[i] = best ending at i, but it's off by one" },
+  { from: "me",   text: "try: best using the first i items" },
 ];
 
 const MENTORS = [
-  { name: "Dwayne",  role: "Principal Engineer",       img: 1  },
-  { name: "Emily",   role: "Staff Engineer",            img: 5  },
-  { name: "Healey",  role: "Senior Developer",          img: 8  },
-  { name: "Brandon", role: "Senior Software Engineer",  img: 12 },
-  { name: "Sara",    role: "Engineering Manager",       img: 16 },
-  { name: "Marcus",  role: "Tech Lead",                 img: 20 },
+  { name: "Priya N.",  role: "Staff Engineer, payments",   img: 1  },
+  { name: "Emily R.",  role: "Engineering Manager",        img: 5  },
+  { name: "Daniel K.", role: "Principal Engineer",         img: 8  },
+  { name: "Tomás L.",  role: "Senior SWE, infra",          img: 12 },
+  { name: "Sara M.",   role: "Hiring manager, 120+ loops", img: 16 },
+  { name: "Kenji O.",  role: "Tech Lead, mobile",          img: 20 },
 ] as const;
 
 const ORBIT_CFG = [
@@ -50,9 +50,9 @@ const PARTICIPANTS = [
 ] as const;
 
 const TASKS = [
-  "Complete DB integration",
-  "Review code",
-  "Sync up with team",
+  "Two-pointer set · 6 problems",
+  "Mock interview with Priya, 7:30 pm",
+  "Re-read system design notes",
 ] as const;
 
 const CALENDAR = [28, 29, 30, 31, 1, 2] as const;
@@ -105,7 +105,7 @@ function ChatBubble({
       {msg.from === "them" && (
         <img
           src={`https://i.pravatar.cc/80?img=${avatarImg}`}
-          alt="peer avatar"
+          alt=""
           width={28}
           height={28}
           className="size-7 shrink-0 rounded-full"
@@ -114,8 +114,8 @@ function ChatBubble({
       <span
         className={`max-w-[80%] rounded-2xl px-3 py-1.5 text-xs leading-snug ${
           msg.from === "me"
-            ? "bg-blue-500 text-white"
-            : "bg-zinc-100 text-zinc-800"
+            ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+            : "bg-zinc-100 text-zinc-800 dark:bg-white/10 dark:text-zinc-100"
         }`}
       >
         {msg.text}
@@ -182,7 +182,7 @@ function OrbitVisual() {
     <div className="relative flex h-full items-center justify-center">
       {/* Pulsing ring around center avatar */}
       <motion.div
-        className="absolute rounded-full border-2 border-blue-400/40"
+        className="absolute rounded-full border-2 border-zinc-900/20 dark:border-white/25"
         style={{ width: 68, height: 68 }}
         animate={reduced ? {} : { scale: [1, 1.35, 1], opacity: [0.5, 0, 0.5] }}
         transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
@@ -191,10 +191,10 @@ function OrbitVisual() {
       {/* Center avatar */}
       <img
         src="https://i.pravatar.cc/80?img=2"
-        alt="you"
+        alt=""
         width={56}
         height={56}
-        className="relative z-10 size-14 rounded-full border-2 border-white shadow-md"
+        className="relative z-10 size-14 rounded-full border-2 border-white shadow-md dark:border-zinc-900"
       />
 
       {/* Peripheral avatars with organic elliptical float */}
@@ -203,10 +203,10 @@ function OrbitVisual() {
           <motion.img
             key={i}
             src={`https://i.pravatar.cc/80?img=${cfg.img}`}
-            alt={`peer ${i + 1}`}
+            alt=""
             width={36}
             height={36}
-            className="absolute size-9 rounded-full border-2 border-white shadow-sm"
+            className="absolute size-9 rounded-full border-2 border-white shadow-sm dark:border-zinc-900"
             initial={{ x: ORBIT_KF[i].xs[0], y: ORBIT_KF[i].ys[0] }}
             animate={
               reduced
@@ -234,17 +234,17 @@ function OrbitVisual() {
 
 function MentorPill({ m }: { m: (typeof MENTORS)[number] }) {
   return (
-    <div className="flex shrink-0 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 py-2 shadow-sm">
+    <div className="flex shrink-0 items-center gap-2 rounded-xl border border-zinc-200 bg-white px-2.5 py-2 shadow-sm dark:border-white/10 dark:bg-zinc-900">
       <img
         src={`https://i.pravatar.cc/80?img=${m.img}`}
-        alt={m.name}
+        alt=""
         width={32}
         height={32}
         className="size-8 rounded-full"
       />
       <div className="min-w-0">
-        <p className="text-xs font-semibold leading-tight text-zinc-800">{m.name}</p>
-        <p className="truncate text-[10px] leading-tight text-zinc-400">{m.role}</p>
+        <p className="text-xs font-semibold leading-tight text-zinc-800 dark:text-zinc-100">{m.name}</p>
+        <p className="truncate text-[11px] leading-tight text-zinc-500 dark:text-zinc-400">{m.role}</p>
       </div>
     </div>
   );
@@ -311,13 +311,12 @@ function VideoCallVisual() {
   const tiles = PARTICIPANTS.filter((_, i) => i !== featured).slice(0, 4);
 
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-zinc-700 bg-zinc-900">
-      {/* Browser chrome */}
-      <div className="flex shrink-0 items-center gap-1.5 border-b border-zinc-700/60 px-3 py-2">
-        <span className="size-2.5 rounded-full bg-red-500" aria-hidden="true" />
-        <span className="size-2.5 rounded-full bg-yellow-400" aria-hidden="true" />
-        <span className="size-2.5 rounded-full bg-green-500" aria-hidden="true" />
-        <span className="ml-2 text-[10px] text-zinc-400">meeting.nexus.io</span>
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900">
+      {/* Call header */}
+      <div className="flex shrink-0 items-center gap-2 border-b border-zinc-700/60 px-3 py-2">
+        <span className="size-1.5 rounded-full bg-red-500" aria-hidden="true" />
+        <span className="text-[11px] font-medium text-zinc-300">Open room · Graphs & DP</span>
+        <span className="ml-auto text-[11px] tabular-nums text-zinc-500">6 here</span>
       </div>
 
       {/* Featured speaker */}
@@ -333,7 +332,7 @@ function VideoCallVisual() {
           >
             <img
               src={`https://i.pravatar.cc/80?img=${PARTICIPANTS[featured].img}`}
-              alt={PARTICIPANTS[featured].name}
+              alt=""
               width={64}
               height={64}
               className="size-16 rounded-full border-2 border-white/20"
@@ -355,7 +354,7 @@ function VideoCallVisual() {
           >
             <img
               src={`https://i.pravatar.cc/80?img=${p.img}`}
-              alt={p.name}
+              alt=""
               className="h-full w-full object-cover"
             />
             {/* Mute icon */}
@@ -419,8 +418,8 @@ function CalendarTasksVisual() {
             key={d}
             className={`flex flex-1 flex-col items-center rounded-xl py-2 ${
               d === HIGHLIGHTED_DATE
-                ? "bg-blue-500 text-white"
-                : "bg-zinc-100 text-zinc-500"
+                ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
+                : "bg-zinc-100 text-zinc-500 dark:bg-white/[0.06] dark:text-zinc-400"
             }`}
           >
             <span className="text-[9px] leading-none opacity-60">
@@ -432,7 +431,7 @@ function CalendarTasksVisual() {
       </div>
 
       {/* Separator */}
-      <div className="my-3 border-t border-zinc-100" />
+      <div className="my-3 border-t border-zinc-100 dark:border-white/10" />
 
       {/* Animated task pills — slide up, no horizontal drift */}
       <div className="flex flex-col gap-2 overflow-hidden">
@@ -444,10 +443,10 @@ function CalendarTasksVisual() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, transition: { duration: 0.15 } }}
               transition={{ type: "spring", stiffness: 300, damping: 28 }}
-              className="flex w-full items-center gap-2.5 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5"
+              className="flex w-full items-center gap-2.5 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2.5 dark:border-white/10 dark:bg-white/[0.04]"
             >
               <AnimatedCheckmark visible />
-              <span className="truncate text-xs font-medium text-zinc-700">{task}</span>
+              <span className="truncate text-xs font-medium text-zinc-700 dark:text-zinc-200">{task}</span>
             </motion.div>
           ))}
         </AnimatePresence>
@@ -462,27 +461,31 @@ interface BentoCardProps {
   title: string;
   description: string;
   index: number;
+  className?: string;
   children: React.ReactNode;
 }
 
-function BentoCard({ title, description, index, children }: BentoCardProps) {
+function BentoCard({ title, description, index, className, children }: BentoCardProps) {
   return (
-    <motion.div
+    <motion.article
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{
-        delay: index * 0.08,
+        delay: index * 0.06,
         duration: 0.5,
         ease: [0.22, 1, 0.36, 1],
       }}
+      className={`flex flex-col rounded-[26px] border border-zinc-200/80 bg-zinc-50 p-2 dark:border-white/10 dark:bg-white/[0.03] ${className ?? ""}`}
     >
-      <div className="h-[220px] overflow-hidden">{children}</div>
-      <div className="mt-4">
-        <h3 className="font-semibold text-zinc-900">{title}</h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">{description}</p>
+      <div className="relative min-h-[220px] flex-1 overflow-hidden rounded-[20px] border border-zinc-200/70 bg-white p-4 dark:border-white/[0.06] dark:bg-zinc-950">
+        {children}
       </div>
-    </motion.div>
+      <div className="px-3 pb-3 pt-4">
+        <h3 className="text-[16px] font-semibold tracking-[-0.01em] text-zinc-900 dark:text-white">{title}</h3>
+        <p className="mt-1 max-w-md text-pretty text-[14px] leading-6 text-zinc-500 dark:text-zinc-400">{description}</p>
+      </div>
+    </motion.article>
   );
 }
 
@@ -490,63 +493,65 @@ function BentoCard({ title, description, index, children }: BentoCardProps) {
 
 export default function WhyChooseUsBento() {
   return (
-    <section className="px-4 py-16 sm:px-6 lg:px-8">
+    <section className="bg-white px-4 py-16 dark:bg-zinc-950 sm:px-6 sm:py-20 lg:px-8">
       <div className="mx-auto max-w-6xl">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
-            Why choose us over others?
+        <div className="grid gap-4 md:grid-cols-[1.2fr_1fr] md:items-end">
+          <h2 className="text-balance text-[32px] font-semibold leading-[1.06] tracking-[-0.035em] text-zinc-950 dark:text-white sm:text-[44px]">
+            Interview prep goes faster with people in your corner
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-zinc-500">
-            More than just coding practice — get mentorship, peer support, and
-            everything you need to ace your tech interviews.
+          <p className="max-w-md text-pretty text-[16px] leading-7 text-zinc-500 dark:text-zinc-400 md:justify-self-end md:pb-1.5">
+            Daily practice, a cohort at your level, and engineers who have sat on the other side of the table.
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 sm:mt-12">
           <BentoCard
-            title="Accountability"
-            description="Stay committed to your DSA journey with regular check-ins and community support to keep you on track."
+            title="Mentors who have hired"
+            description="Weekly 1:1s with staff engineers and managers who run real interview loops."
             index={0}
-          >
-            <StaticChatVisual messages={ACCOUNTABILITY_MSGS} avatarImg={10} />
-          </BentoCard>
-
-          <BentoCard
-            title="Encouragement"
-            description="Get motivated by peers and mentors when things get tough. Stay on track and don't give up!"
-            index={1}
-          >
-            <LiveChatVisual messages={ENCOURAGEMENT_MSGS} avatarImg={14} />
-          </BentoCard>
-
-          <BentoCard
-            title="Peer Groups in Same Boat"
-            description="Learn alongside others facing the same challenges and goals. You're not alone in this journey!"
-            index={2}
-          >
-            <OrbitVisual />
-          </BentoCard>
-
-          <BentoCard
-            title="Mentorship"
-            description="Get guidance from experienced engineers who've been there and cleared top tech interviews."
-            index={3}
+            className="md:col-span-2"
           >
             <MentorMarquee />
           </BentoCard>
 
           <BentoCard
-            title="Doubt Clearing Hangouts"
-            description="Ask questions and clear doubts in live interactive sessions. No question is too small!"
-            index={4}
+            title="A cohort at your level"
+            description="Six people, same target roles, same timeline. You meet every morning."
+            index={1}
+          >
+            <OrbitVisual />
+          </BentoCard>
+
+          <BentoCard
+            title="Live doubt-clearing"
+            description="Drop into an open room, share your screen, and get unstuck in minutes instead of days."
+            index={2}
+            className="lg:row-span-2"
           >
             <VideoCallVisual />
           </BentoCard>
 
           <BentoCard
-            title="Progress Tracking & Reminders"
-            description="Stay on track with automated progress tracking and helpful reminders to keep you consistent."
+            title="Someone checks in"
+            description="Your cohort sees your streak and asks about the set you promised to finish."
+            index={3}
+          >
+            <StaticChatVisual messages={ACCOUNTABILITY_MSGS} avatarImg={10} />
+          </BentoCard>
+
+          <BentoCard
+            title="Help before you give up"
+            description="Ask the group when a problem stalls you. Someone has solved it before."
+            index={4}
+          >
+            <LiveChatVisual messages={ENCOURAGEMENT_MSGS} avatarImg={14} />
+          </BentoCard>
+
+          <BentoCard
+            title="Progress you can see"
+            description="Problems solved, mock interviews booked, and a reminder before every session."
             index={5}
+            className="md:col-span-2"
           >
             <CalendarTasksVisual />
           </BentoCard>

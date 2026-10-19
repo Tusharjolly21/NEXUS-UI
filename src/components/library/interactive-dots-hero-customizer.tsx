@@ -11,6 +11,7 @@ const PRESETS = [
     activeDotColor: "rgba(125, 211, 252, 0.95)",
     lineColor: "rgba(125, 211, 252, 0.72)",
     backgroundColor: "#05070d",
+    light: false,
   },
   {
     name: "Violet",
@@ -18,6 +19,7 @@ const PRESETS = [
     activeDotColor: "rgba(244, 114, 182, 0.95)",
     lineColor: "rgba(168, 85, 247, 0.72)",
     backgroundColor: "#090612",
+    light: false,
   },
   {
     name: "Ice",
@@ -25,6 +27,7 @@ const PRESETS = [
     activeDotColor: "rgba(14, 165, 233, 0.85)",
     lineColor: "rgba(14, 165, 233, 0.45)",
     backgroundColor: "#f8fafc",
+    light: true,
   },
 ] as const;
 
@@ -42,7 +45,7 @@ export function InteractiveDotsHeroCustomizer() {
 
   return (
     <div className="grid h-full min-h-full w-full overflow-hidden rounded-lg bg-background lg:grid-cols-[1fr_320px]">
-      <div className="relative min-h-[560px] overflow-hidden bg-zinc-950 lg:min-h-full">
+      <div className="relative min-h-[560px] overflow-hidden lg:min-h-full" style={{ backgroundColor: preset.backgroundColor }}>
         <InteractiveDots
           mode={mode}
           dotSize={dotSize}
@@ -59,24 +62,48 @@ export function InteractiveDotsHeroCustomizer() {
           className="h-full min-h-full rounded-none border-0"
         />
 
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,transparent,rgba(0,0,0,0.48)_78%)]" />
-        <div className="absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
-            Interactive background
+        <div
+          className={cn(
+            "pointer-events-none absolute inset-0",
+            preset.light
+              ? "bg-[radial-gradient(circle_at_50%_20%,transparent,rgba(248,250,252,0.7)_78%)]"
+              : "bg-[radial-gradient(circle_at_50%_20%,transparent,rgba(0,0,0,0.48)_78%)]",
+          )}
+        />
+        <div className={cn("pointer-events-none absolute inset-x-0 bottom-0 p-6 sm:p-10 lg:p-14", preset.light ? "text-zinc-950" : "text-white")}>
+          <p
+            className={cn(
+              "inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[13px] font-medium",
+              preset.light ? "border-zinc-900/10 bg-white/70 text-zinc-600" : "border-white/15 bg-white/[0.06] text-white/70",
+            )}
+          >
+            <span className="size-1.5 rounded-full bg-current" />
+            Fieldwork 2.0 is out
           </p>
-          <h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Build a hero that reacts to every move.
+          <h2 className="mt-5 max-w-3xl text-balance text-4xl font-semibold leading-[1.04] tracking-[-0.035em] sm:text-5xl lg:text-6xl">
+            See where your users actually look.
           </h2>
-          <p className="mt-5 max-w-2xl text-base leading-7 text-white/66 sm:text-lg">
-            A responsive dot field with soft cursor repulsion, proximity lines,
-            and physics-like return motion for polished SaaS and portfolio heroes.
+          <p className={cn("mt-5 max-w-xl text-pretty text-base leading-7 sm:text-lg", preset.light ? "text-zinc-600" : "text-white/65")}>
+            Fieldwork maps attention across every page, then tells you which part of the layout is doing the work.
           </p>
           <div className="pointer-events-auto mt-7 flex flex-wrap gap-3">
-            <button className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-black/20">
-              Start building
+            <button
+              type="button"
+              className={cn(
+                "rounded-full px-5 py-2.5 text-sm font-semibold",
+                preset.light ? "bg-zinc-950 text-white" : "bg-white text-zinc-950",
+              )}
+            >
+              Start free trial
             </button>
-            <button className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-md">
-              View preview
+            <button
+              type="button"
+              className={cn(
+                "rounded-full border px-5 py-2.5 text-sm font-semibold backdrop-blur-md",
+                preset.light ? "border-zinc-900/15 bg-white/60 text-zinc-900" : "border-white/15 bg-white/[0.08] text-white",
+              )}
+            >
+              Watch the 2-minute demo
             </button>
           </div>
         </div>
@@ -91,15 +118,15 @@ export function InteractiveDotsHeroCustomizer() {
           <button
             type="button"
             onClick={() => setMode((value) => (value === "dots" ? "lines" : "dots"))}
-            className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-muted/70"
+            className="rounded-full border border-border bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {mode === "dots" ? "Dots" : "Dot Lines"}
+            {mode === "dots" ? "Dots" : "Lines"}
           </button>
         </div>
 
         <div className="mt-6 space-y-5">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
               Preset
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -109,7 +136,7 @@ export function InteractiveDotsHeroCustomizer() {
                   type="button"
                   onClick={() => setPreset(item)}
                   className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium transition",
+                    "rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     preset.name === item.name
                       ? "border-foreground/25 bg-foreground text-background"
                       : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",

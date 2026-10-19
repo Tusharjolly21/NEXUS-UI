@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type TextAnimationFlippingWordsProps = {
@@ -31,6 +31,8 @@ export function TextAnimationFlippingWords({
   const ws = React.useMemo(() => words.filter(Boolean), [words]);
   const longest = ws.reduce((a, b) => (b.length > a.length ? b : a), "");
 
+  const reduceMotion = useReducedMotion();
+
   // ── State ──────────────────────────────────────────────────────────
   const [idx, setIdx] = React.useState(0);
   const [phase, setPhase] = React.useState<"showing" | "exiting" | "entering">("showing");
@@ -42,9 +44,15 @@ export function TextAnimationFlippingWords({
   const containerRef = React.useRef<HTMLSpanElement>(null); // relative wrapper
   const textRef      = React.useRef<HTMLSpanElement>(null); // inline-flex letter wrapper (real width!)
 
-  const wsRef    = React.useRef(ws);    wsRef.current = ws;
-  const idxRef   = React.useRef(idx);   idxRef.current = idx;
-  const phaseRef = React.useRef(phase); phaseRef.current = phase;
+  const wsRef    = React.useRef(ws);
+  const idxRef   = React.useRef(idx);
+  const phaseRef = React.useRef(phase);
+  // keep the latest values for the timers; synced before the phase effects below run
+  React.useLayoutEffect(() => {
+    wsRef.current = ws;
+    idxRef.current = idx;
+    phaseRef.current = phase;
+  });
 
   // ── Measure the rendered text (textRef is inline, gives real width) ─
   function snap() {
@@ -64,7 +72,7 @@ export function TextAnimationFlippingWords({
   React.useEffect(() => {
     if (phase !== "showing") return;
     snap(); // dot may need repositioning after word settled
-    if (ws.length <= 1) return;
+    if (ws.length <= 1 || reduceMotion) return;
     const t = setTimeout(() => setPhase("exiting"), HOLD_MS);
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,7 +133,7 @@ export function TextAnimationFlippingWords({
   return (
     <h2
       className={cn(
-        "flex flex-wrap items-baseline gap-x-[0.26em] font-black tracking-tight",
+        "flex flex-wrap items-baseline gap-x-[0.26em] font-semibold tracking-[-0.04em]",
         className,
       )}
     >
@@ -142,7 +150,6 @@ export function TextAnimationFlippingWords({
         {/* Animated letters — absolute, left-aligned */}
         <span
           className="absolute left-0 top-0 bottom-0 flex items-baseline"
-          aria-live="polite"
           aria-label={currentWord}
         >
           {/* textRef on the inline-flex so getBoundingClientRect gives real text width */}

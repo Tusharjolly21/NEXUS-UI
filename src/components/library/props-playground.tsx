@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 type Fill = "light" | "dark";
 
-function initialValues(controls: PlaygroundControl[]): PlaygroundValues {
+export function initialValues(controls: PlaygroundControl[]): PlaygroundValues {
   return Object.fromEntries(controls.map((c) => [c.prop, c.defaultValue]));
 }
 
@@ -20,7 +20,7 @@ function formatNumber(value: number, step: number) {
   return value.toFixed(decimals);
 }
 
-function buildSnippet(playground: Playground, values: PlaygroundValues) {
+export function buildSnippet(playground: Playground, values: PlaygroundValues) {
   const changed = playground.controls
     .filter((c) => values[c.prop] !== c.defaultValue)
     .map((c) => {
@@ -83,7 +83,7 @@ function RangeControl({
   );
 }
 
-function Segmented<T extends string>({
+export function Segmented<T extends string>({
   options,
   value,
   onChange,
@@ -117,7 +117,7 @@ function Segmented<T extends string>({
   );
 }
 
-function ControlRow({
+export function ControlRow({
   control,
   value,
   onChange,

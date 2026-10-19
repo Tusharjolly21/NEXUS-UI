@@ -42,7 +42,7 @@ export function BlogHoverImageCard({
       whileHover="hover"
       animate="rest"
       className={cn(
-        "group relative flex h-[425px] w-full max-w-[300px] cursor-pointer flex-col gap-4 overflow-hidden rounded-[14px] bg-white text-zinc-950",
+        "group relative flex h-[425px] w-full max-w-[300px] cursor-pointer flex-col gap-4 overflow-hidden rounded-[14px] bg-white text-zinc-950 dark:bg-zinc-950 dark:text-white",
         className,
       )}
     >
@@ -71,7 +71,7 @@ export function BlogHoverImageCard({
         >
           <Corner className="left-0 top-0 rotate-0" />
           <div className="flex h-[100px] w-full">
-            <div className="flex h-[100px] w-20 items-center justify-center rounded-bl-xl rounded-tr-xl bg-white">
+            <div className="flex h-[100px] w-20 items-center justify-center rounded-bl-xl rounded-tr-xl bg-white dark:bg-zinc-950">
               <div
                 className="h-20 w-[60px] rounded-md bg-cover bg-center"
                 style={{ backgroundImage: `url('${hoverImage}')` }}
@@ -88,8 +88,8 @@ export function BlogHoverImageCard({
 
       <div className="space-y-4">
         <div className="space-y-4">
-          <p className="text-sm text-zinc-400">{author}</p>
-          <h3 className="line-clamp-2 text-lg font-medium leading-snug text-zinc-700">
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{author}</p>
+          <h3 className="line-clamp-2 text-lg font-medium leading-snug text-zinc-800 dark:text-zinc-100">
             {title}
           </h3>
         </div>
@@ -103,7 +103,7 @@ export function BlogHoverImageCard({
           >
             {tag}
           </span>
-          <span className="min-w-0 flex-1 truncate px-1.5 py-1.5 text-sm text-zinc-900">
+          <span className="min-w-0 flex-1 truncate px-1.5 py-1.5 text-sm text-zinc-900 dark:text-zinc-300">
             {date}
           </span>
           <motion.span
@@ -133,7 +133,7 @@ export function BlogHoverImageCardShowcase({ className }: { className?: string }
         className,
       )}
     >
-      <div className="grid w-full max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid w-full max-w-5xl justify-items-center gap-6 sm:grid-cols-2 sm:justify-items-stretch lg:grid-cols-3">
         <BlogHoverImageCard
           author="Noah Williams"
           title="Designing launch pages with reusable UI systems"
@@ -171,7 +171,7 @@ function Corner({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 12 12"
-      className={cn("absolute size-3 text-white", className)}
+      className={cn("absolute size-3 text-white dark:text-zinc-950", className)}
       aria-hidden="true"
     >
       <path d="M0 12H12C5.373 12 0 6.627 0 0Z" fill="currentColor" />

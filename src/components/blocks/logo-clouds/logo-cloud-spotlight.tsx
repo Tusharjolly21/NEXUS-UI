@@ -7,7 +7,7 @@
 import * as React from "react";
 import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LOGOS } from "./logos";
+import { LOGOS, LogoLockup } from "./logos";
 
 const SPOTLIGHT_RADIUS = 260;
 
@@ -15,22 +15,19 @@ type Props = { className?: string };
 
 function LogoGrid({ dim }: { dim: boolean }) {
   return (
-    <div className="grid grid-cols-3 gap-4 sm:gap-6 md:grid-cols-4 md:gap-8">
+    <div
+      aria-hidden={dim ? undefined : true}
+      className="grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-white/[0.06] sm:grid-cols-3 md:grid-cols-4"
+    >
       {LOGOS.map((logo) => (
         <div
           key={logo.name}
-          aria-label={logo.name}
           className={cn(
-            "flex flex-col items-center justify-center gap-2 rounded-xl p-3 sm:p-5",
-            dim && "opacity-[0.18] grayscale",
+            "flex h-20 items-center justify-center bg-neutral-900 px-3 sm:h-24",
+            dim ? "text-white/35" : "text-white",
           )}
         >
-          <logo.Icon
-            aria-hidden="true"
-            className="h-8 w-8 sm:h-10 sm:w-10"
-            style={{ color: logo.color }}
-          />
-          <span className="text-[10px] font-medium text-neutral-400 sm:text-xs">{logo.name}</span>
+          <LogoLockup logo={logo} className="text-[16px] sm:text-[18px]" />
         </div>
       ))}
     </div>
@@ -49,24 +46,38 @@ export default function LogoCloudSpotlight({ className }: Props) {
     mouseY.set(e.clientY - rect.top);
   }
 
+  const panel = React.useRef<HTMLDivElement>(null);
+
+  // rest the light in the middle of the grid, so touch screens and keyboard users see it lit too
+  const rest = React.useCallback(() => {
+    const el = panel.current;
+    if (!el) return;
+    mouseX.set(el.clientWidth / 2);
+    mouseY.set(el.clientHeight / 2);
+  }, [mouseX, mouseY]);
+
+  React.useEffect(() => {
+    // wait a frame: the masked layer subscribes to the motion values after this effect
+    const id = requestAnimationFrame(rest);
+    return () => cancelAnimationFrame(id);
+  }, [rest]);
+
   function handleMouseLeave() {
-    mouseX.set(-9999);
-    mouseY.set(-9999);
+    rest();
   }
 
   return (
     <section className={cn("w-full bg-neutral-950 py-12 px-4 sm:py-16", className)}>
-      <div className="mx-auto max-w-5xl text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-white md:text-4xl">
-          Trusted by the best in the industry
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-balance text-[26px] font-semibold leading-[1.15] tracking-[-0.025em] text-white md:text-[34px]">
+          Twelve partners, one integration standard
         </h2>
-        <p className="mt-3 text-sm text-neutral-400 sm:text-base">
-          Move your cursor across the grid to reveal our partners.
-        </p>
+        <p className="mt-3 text-[15px] text-neutral-400">Move across the grid to light up each partner.</p>
       </div>
 
       <div
-        className="relative mx-auto mt-10 max-w-4xl cursor-crosshair overflow-hidden rounded-2xl border border-white/[0.06] bg-neutral-900 p-5 sm:mt-14 sm:p-8 md:p-10"
+        className="relative mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-white/[0.08] bg-neutral-900 p-2 sm:mt-12"
+        ref={panel}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -75,7 +86,7 @@ export default function LogoCloudSpotlight({ className }: Props) {
 
         {/* Spotlight bright layer — masked to cursor position */}
         <motion.div
-          className="pointer-events-none absolute inset-0 p-5 sm:p-8 md:p-10"
+          className="pointer-events-none absolute inset-0 p-2"
           style={{ WebkitMaskImage: maskImage, maskImage }}
         >
           <LogoGrid dim={false} />

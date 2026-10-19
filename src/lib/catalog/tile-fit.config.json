@@ -1,0 +1,49 @@
+{
+  "$comment": "Canvas each preview is rendered on before it is framed into its tile. Re-run `node scripts/measure-tiles.mjs <slug>` after changing one.",
+  "settleMs": 2600,
+  "defaultCanvas": [960, 720],
+  "groupCanvas": {
+    "marketing": [1200, 800],
+    "layout": [1200, 820],
+    "blocks": [1280, 860]
+  },
+  "canvas": {
+    "mac-keyboard": [1100, 560],
+    "interactive-globe-explorer": [1200, 820],
+    "cinematic-card-deck": [1200, 800],
+    "card-carousel-3d": [1100, 720]
+  },
+  "overrides": {
+    "image-trail": {
+      "focus": [24, 150, 912, 420]
+    },
+    "block-interactive-dots": {
+      "focus": [352, 0, 576, 860]
+    },
+    "block-sidebar": {
+      "focus": [116, 0, 576, 860]
+    },
+    "block-why-choose-us": {
+      "focus": [50, 16, 1180, 837]
+    },
+    "block-faq-folder-card": {
+      "focus": [110, 19, 1060, 822]
+    },
+    "block-contact-page": {
+      "focus": [85, 0, 1109, 860]
+    },
+    "block-text-animations": {
+      "focus": [280, 103, 720, 655]
+    },
+    "block-blog-content-sections": {
+      "focus": [0, 154, 1280, 552]
+    },
+    "block-pricing-section": {
+      "focus": [60, 19, 1160, 823]
+    },
+    "block-logo-clouds": {
+      "focus": [96, 196, 1088, 469]
+    }
+  },
+  "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."
+}

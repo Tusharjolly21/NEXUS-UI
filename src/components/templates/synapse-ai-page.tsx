@@ -536,7 +536,7 @@ function LogoStrip() {
               <motion.span
                 key={i}
                 whileHover={{ color: "#111827", scale: 1.1, transition: { duration: 0.15 } }}
-                className="whitespace-nowrap cursor-default select-none text-sm font-semibold tracking-tight text-gray-300"
+                className="whitespace-nowrap cursor-default select-none text-base font-semibold tracking-tight text-gray-400"
               >
                 {logo}
               </motion.span>
@@ -554,7 +554,7 @@ function LogoStrip() {
               <motion.span
                 key={i}
                 whileHover={{ color: "#111827", scale: 1.1, transition: { duration: 0.15 } }}
-                className="whitespace-nowrap cursor-default select-none text-sm font-semibold tracking-tight text-gray-300"
+                className="whitespace-nowrap cursor-default select-none text-base font-semibold tracking-tight text-gray-400"
               >
                 {logo}
               </motion.span>
@@ -1650,17 +1650,22 @@ function ConnectStackSection() {
               animate={{ y: [0, logo.fy, 0], rotate: [0, logo.fr, 0] }}
               transition={{ duration: 4 + (i % 3) * 0.8, repeat: Infinity, ease: "easeInOut", delay: logo.delay }}
               whileHover={{ scale: 1.15, transition: { duration: 0.2 } }}
-              style={{
-                width: logo.sz,
-                height: logo.sz,
-                background: logo.bg,
-                color: logo.fg,
-                fontSize: logo.sz * 0.3,
-                border: logo.border ? "1.5px solid #e5e7eb" : undefined,
-              }}
-              className="grid cursor-default place-items-center rounded-2xl font-bold shadow-[0_8px_32px_rgba(0,0,0,0.10)]"
+              className="hidden cursor-default items-center gap-2.5 rounded-2xl border border-gray-100 bg-white py-2 pl-2 pr-4 text-sm font-semibold text-gray-700 shadow-[0_8px_32px_rgba(0,0,0,0.08)] md:flex"
             >
-              {logo.char}
+              <span
+                className="grid place-items-center rounded-xl font-bold"
+                style={{
+                  width: logo.sz * 0.62,
+                  height: logo.sz * 0.62,
+                  background: logo.bg,
+                  color: logo.fg,
+                  fontSize: logo.sz * 0.24,
+                  border: logo.border ? "1.5px solid #e5e7eb" : undefined,
+                }}
+              >
+                {logo.char}
+              </span>
+              {logo.label}
             </motion.div>
           </motion.div>
         );
@@ -1672,8 +1677,8 @@ function ConnectStackSection() {
           <motion.h2
             className="text-4xl font-bold leading-tight tracking-tight text-gray-900 sm:text-5xl md:text-[3.5rem]"
           >
-            Connect your Current Stack<br />
-            and Start Automating
+            Plug in the stack you already run.<br />
+            <span className="text-gray-400">Your first agent ships today.</span>
           </motion.h2>
 
           <motion.div
@@ -1842,14 +1847,15 @@ function Footer() {
 /* ─── MAIN EXPORT ────────────────────────────────────────────────────── */
 export function SynapseAIPage() {
   React.useEffect(() => {
-    let lenis: any = null;
+    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
+    let rafId = 0;
     (async () => {
       const LenisClass = (await import("@studio-freight/lenis")).default;
-      lenis = new LenisClass({ lerp: 0.1, smoothWheel: true });
-      const raf = (t: number) => { lenis.raf(t); requestAnimationFrame(raf); };
-      requestAnimationFrame(raf);
+      lenis = new LenisClass({ lerp: 0.1, smoothWheel: true } as ConstructorParameters<typeof LenisClass>[0]);
+      const raf = (t: number) => { lenis?.raf(t); rafId = requestAnimationFrame(raf); };
+      rafId = requestAnimationFrame(raf);
     })();
-    return () => { if (lenis) lenis.destroy(); };
+    return () => { cancelAnimationFrame(rafId); if (lenis) lenis.destroy(); };
   }, []);
 
   return (

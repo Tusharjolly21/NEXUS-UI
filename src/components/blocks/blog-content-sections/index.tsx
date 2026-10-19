@@ -122,9 +122,18 @@ export function BlogContentSectionsBlock({ className }: { className?: string }) 
 
 export function BlogContentSectionsBlockPreview() {
   return (
-    <div className="relative h-[320px] w-full overflow-hidden rounded-3xl bg-[#f7f7f7] dark:bg-zinc-950">
-      <div className="absolute left-1/2 top-0 w-[760px] -translate-x-1/2 scale-[0.52] origin-top">
-        <BlogContentCentered className="h-[620px] min-h-0 overflow-hidden rounded-3xl py-10" />
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white dark:bg-zinc-950">
+      <div data-tile-focus className="w-[1060px] shrink-0">
+        <div className="flex items-end justify-between gap-6 px-6">
+          <div>
+            <p className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400">From the journal</p>
+            <h2 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-zinc-950 dark:text-white">
+              Notes on building calmer products
+            </h2>
+          </div>
+          <span className="mb-1 shrink-0 text-[14px] font-medium text-zinc-600 dark:text-zinc-300">All 48 posts →</span>
+        </div>
+        <BlogHoverImageCardShowcase className="min-h-0 items-start p-6 pt-8 [&>div]:max-w-none [&>div]:!grid-cols-3" />
       </div>
     </div>
   );

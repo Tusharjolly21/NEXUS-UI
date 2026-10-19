@@ -6,7 +6,7 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LOGOS } from "./logos";
+import { LOGOS, LogoLockup } from "./logos";
 
 const SPRING = { type: "spring" as const, stiffness: 300, damping: 22 };
 
@@ -17,44 +17,28 @@ export default function LogoCloudBlur({ className }: Props) {
 
   return (
     <section className={cn("w-full bg-white py-16 px-4 dark:bg-neutral-950", className)}>
-      <div className="mx-auto max-w-5xl text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-neutral-900 md:text-4xl dark:text-white">
-          Trusted by the best in the industry
+      <div className="mx-auto max-w-2xl text-center">
+        <h2 className="text-balance text-[26px] font-semibold leading-[1.15] tracking-[-0.025em] text-neutral-950 md:text-[34px] dark:text-white">
+          The teams behind the products you open every morning
         </h2>
-        <p className="mt-3 text-base text-neutral-500 dark:text-neutral-400">
-          Hover any logo to bring it into focus.
-        </p>
+        <p className="mt-3 text-[15px] text-neutral-500 dark:text-neutral-400">Hover a name to bring it into focus.</p>
       </div>
 
-      <div className="mx-auto mt-14 grid grid-cols-3 place-items-center gap-x-8 gap-y-10 sm:grid-cols-4 sm:gap-x-12 md:flex md:flex-wrap md:justify-center md:gap-x-14 md:gap-y-10">
+      <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 place-items-center gap-x-6 gap-y-9 text-neutral-800 sm:grid-cols-3 sm:gap-x-10 md:grid-cols-4 md:gap-y-11 dark:text-neutral-200">
         {LOGOS.map((logo, i) => (
           <motion.div
             key={logo.name}
-            aria-label={logo.name}
             onHoverStart={() => setHovered(i)}
             onHoverEnd={() => setHovered(null)}
             animate={{
-              opacity: hovered === null ? 0.6 : hovered === i ? 1 : 0.2,
-              filter:
-                hovered === null
-                  ? "blur(1.5px)"
-                  : hovered === i
-                  ? "blur(0px)"
-                  : "blur(2.5px)",
-              scale: hovered === i ? 1.18 : 1,
-              y: hovered === i ? -4 : 0,
+              opacity: hovered === null ? 0.55 : hovered === i ? 1 : 0.18,
+              filter: hovered === null ? "blur(1px)" : hovered === i ? "blur(0px)" : "blur(2.5px)",
+              scale: hovered === i ? 1.08 : 1,
             }}
             transition={SPRING}
-            className="flex cursor-pointer flex-col items-center gap-1.5"
+            className="flex cursor-default items-center"
           >
-            <logo.Icon
-              aria-hidden="true"
-              className="h-9 w-9 sm:h-10 sm:w-10"
-              style={{ color: logo.color }}
-            />
-            <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-600 sm:text-[11px]">
-              {logo.name}
-            </span>
+            <LogoLockup logo={logo} tinted={hovered === i} className="text-[18px] sm:text-[20px]" />
           </motion.div>
         ))}
       </div>

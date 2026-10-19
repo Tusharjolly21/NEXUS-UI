@@ -14,8 +14,8 @@ import {
 import { getPlayground } from "@/lib/catalog/playgrounds";
 import { LivePropsPlayground } from "@/components/library/props-playground";
 import { CodeBlock } from "@/components/code-block/code-block";
-import { GalleryTile } from "@/components/gallery/gallery-tile";
-import { SHAPE_CLASSES, TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
+import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
+import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
@@ -858,13 +858,13 @@ export function ComponentDetailPageClient({
           {related.length ? (
             <section aria-labelledby="related-heading" className="mt-20">
               <SectionTitle id="related-heading">More {categoryLabel.toLowerCase()}</SectionTitle>
-              <ul className="mt-8 grid grid-flow-dense auto-rows-[190px] grid-cols-2 gap-4 lg:grid-cols-4">
+              <TileGrid className="mt-8">
                 {related.map((item) => (
-                  <li key={item.slug} className={SHAPE_CLASSES[item.shape === "large" ? "tall" : item.shape]}>
+                  <TileCell key={item.slug} item={item}>
                     <GalleryTile item={item} />
-                  </li>
+                  </TileCell>
                 ))}
-              </ul>
+              </TileGrid>
             </section>
           ) : null}
         </div>

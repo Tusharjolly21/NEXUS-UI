@@ -15,7 +15,7 @@
       "path": "next-ui/tracing-spotlight-panel.tsx",
       "type": "registry:component",
       "target": "components/tracing-spotlight-panel.tsx",
-      "content": "\"use client\";\n\nimport { motion, useMotionTemplate, useMotionValue } from \"framer-motion\";\n\nexport function TracingSpotlight() {\n  const x = useMotionValue(0);\n  const y = useMotionValue(0);\n  const bg = useMotionTemplate\\`radial-gradient(240px circle at \\${x}px \\${y}px, rgba(244,114,182,.35), transparent 60%)\\`;\n  return (\n    <div onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); x.set(e.clientX - r.left); y.set(e.clientY - r.top); }} className=\"relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-8\">\n      <motion.div className=\"absolute inset-0\" style={{ backgroundImage: bg }} />\n      <div className=\"relative text-white\">Spotlight content</div>\n    </div>\n  );\n}\n"
+      "content": "\"use client\";\n\nimport { motion, useMotionTemplate, useMotionValue } from \"framer-motion\";\n\nexport function TracingSpotlight() {\n  const x = useMotionValue(0);\n  const y = useMotionValue(0);\n  const bg = useMotionTemplate`radial-gradient(240px circle at ${x}px ${y}px, rgba(244,114,182,.35), transparent 60%)`;\n  return (\n    <div onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); x.set(e.clientX - r.left); y.set(e.clientY - r.top); }} className=\"relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-8\">\n      <motion.div className=\"absolute inset-0\" style={{ backgroundImage: bg }} />\n      <div className=\"relative text-white\">Spotlight content</div>\n    </div>\n  );\n}\n"
     }
   ]
 }

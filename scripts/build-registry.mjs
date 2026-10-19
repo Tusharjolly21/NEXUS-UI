@@ -81,7 +81,15 @@ function extractReactSource(block) {
   const openTick = head.indexOf("`", open);
   const closeTick = head.lastIndexOf("`");
   if (closeTick <= openTick) return null;
-  return head.slice(openTick + 1, closeTick);
+  // The catalog stores the snippet inside a template literal, so \` \${ \\ and \" are escaped
+  // there. Evaluate the literal (it has no interpolations) so the installed file is exactly the
+  // code the user sees on the site.
+  const raw = head.slice(openTick + 1, closeTick);
+  try {
+    return new Function(`return \`${raw}\`;`)();
+  } catch {
+    return raw.replace(/\\([`$\\])/g, "$1");
+  }
 }
 
 function extractName(block) {
@@ -359,8 +367,24 @@ function detectedPackageDependencies(item) {
     if (PROJECT_RUNTIME_DEPENDENCIES.has(packageName)) dependencies.add(packageName);
   }
 
-  return { ...item, dependencies: [...dependencies] };
+  const devDependencies = new Set(item.devDependencies ?? []);
+  for (const dependency of dependencies) {
+    const types = UNTYPED_PACKAGE_TYPES[dependency];
+    if (types) devDependencies.add(types);
+  }
+
+  return {
+    ...item,
+    dependencies: [...dependencies],
+    ...(devDependencies.size ? { devDependencies: [...devDependencies] } : {}),
+  };
 }
+
+/** Packages that ship without TypeScript types; installing a component that imports them also needs these. */
+const UNTYPED_PACKAGE_TYPES = {
+  "topojson-client": "@types/topojson-client",
+  three: "@types/three",
+};
 
 function buildTerminalItem() {
   const terminalPath = path.join(root, "src", "components", "terminal", "terminal.tsx");
@@ -651,6 +675,15 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/contact-page"],
   },
   {
+    name: "checkout-moments",
+    title: "Checkout Moments",
+    description:
+      "Pay-by-sliding order summary, one-time-code payment approval, and a tip-and-rate card.",
+    premium: true,
+    components: ["blocks/checkout-moments"],
+    dependencies: ["framer-motion", "lucide-react"],
+  },
+  {
     name: "blog-content-sections",
     title: "Blog Content Sections",
     description:
@@ -679,7 +712,7 @@ function buildBlockCollectionItem(blockPackage) {
     type: "registry:component",
     title: blockPackage.title,
     description: blockPackage.description,
-    dependencies: [],
+    dependencies: blockPackage.dependencies ?? [],
     registryDependencies: registryDepsForReactSource(contents),
     files: [...files.values()],
   };
@@ -735,7 +768,54 @@ for (const blockPackage of BLOCK_REGISTRY_PACKAGES) {
   items.push(buildBlockCollectionItem(blockPackage));
 }
 
-const completedItems = items.map(detectedPackageDependencies);
+/**
+ * Site utilities some components lean on (defined in src/app/globals.css). Ship them with the
+ * item as `css` so an installed component looks the same outside Nexus UI.
+ */
+const SITE_UTILITY_CSS = {
+  "lf-grid": {
+    "@utility lf-grid": {
+      "background-image":
+        "linear-gradient(oklch(0 0 0 / 5%) 1px, transparent 1px), linear-gradient(90deg, oklch(0 0 0 / 5%) 1px, transparent 1px)",
+      "background-size": "64px 64px",
+      "&:where(.dark, .dark *)": {
+        "background-image":
+          "linear-gradient(oklch(1 0 0 / 6%) 1px, transparent 1px), linear-gradient(90deg, oklch(1 0 0 / 6%) 1px, transparent 1px)",
+      },
+    },
+  },
+  "lf-aurora": {
+    "@utility lf-aurora": {
+      "background-image":
+        "radial-gradient(60% 80% at 10% 10%, oklch(0.28 0.015 260 / 0.5), transparent 60%), radial-gradient(50% 70% at 90% 20%, oklch(0.22 0.01 260 / 0.4), transparent 55%), radial-gradient(70% 60% at 50% 100%, oklch(0.18 0.01 260 / 0.3), transparent 60%)",
+      filter: "saturate(80%)",
+    },
+  },
+  "lf-glass": {
+    "@utility lf-glass": {
+      border: "1px solid var(--border)",
+      "background-color": "color-mix(in oklab, var(--card) 70%, transparent)",
+      "box-shadow": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "backdrop-filter": "blur(24px)",
+      "&:where(.dark, .dark *)": {
+        "border-color": "rgb(255 255 255 / 0.1)",
+        "background-color": "rgb(255 255 255 / 0.05)",
+        "box-shadow": "inset 0 0 0 1px rgba(255,255,255,0.04)",
+      },
+    },
+  },
+};
+
+function withSiteUtilityCss(item) {
+  const contents = (item.files ?? []).map((file) => file.content ?? "").join("\n");
+  const css = {};
+  for (const [name, rules] of Object.entries(SITE_UTILITY_CSS)) {
+    if (new RegExp(`\\b${name}\\b`).test(contents)) Object.assign(css, rules);
+  }
+  return Object.keys(css).length ? { ...item, css: { ...(item.css ?? {}), ...css } } : item;
+}
+
+const completedItems = items.map(detectedPackageDependencies).map(withSiteUtilityCss);
 
 function buildRegistryIndex(registryItems) {
   return {

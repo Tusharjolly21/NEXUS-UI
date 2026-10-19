@@ -7,9 +7,9 @@
 import * as React from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LOGOS } from "./logos";
+import { LOGOS, LogoLockup } from "./logos";
 
-const ROW_LOGOS = LOGOS.slice(0, 8);
+const ROW_LOGOS = LOGOS.slice(0, 6);
 const STAGGER = 0.06;
 
 type Props = { className?: string };
@@ -37,9 +37,7 @@ function LogoItem({
       viewport={{ once: true }}
       transition={{ delay: index * STAGGER, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.button
-        type="button"
-        aria-label={logo.name}
+      <motion.div
         onHoverStart={onHoverStart}
         onHoverEnd={onHoverEnd}
         animate={{
@@ -58,17 +56,10 @@ function LogoItem({
           scale: { type: "spring", stiffness: 380, damping: 28 },
           filter: { duration: 0.3, ease: "easeOut" },
         }}
-        className="flex flex-col items-center gap-1.5"
+        className="flex items-center text-neutral-700 dark:text-neutral-300"
       >
-        <logo.Icon
-          aria-hidden="true"
-          className="h-8 w-8 sm:h-9 sm:w-9"
-          style={{ color: logo.color }}
-        />
-        <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-600 sm:text-[11px]">
-          {logo.name}
-        </span>
-      </motion.button>
+        <LogoLockup logo={logo} className="text-[16px] sm:text-[18px]" />
+      </motion.div>
     </motion.div>
   );
 }
@@ -79,12 +70,12 @@ export default function LogoCloudSingleRow({ className }: Props) {
   return (
     <section className={cn("w-full bg-white py-12 px-4 dark:bg-neutral-950 sm:py-16", className)}>
       <div className="mx-auto max-w-5xl text-center">
-        <h2 className="text-lg font-semibold text-neutral-500 md:text-xl dark:text-neutral-400">
-          Backed by industry leaders
+        <h2 className="text-[14px] font-medium text-neutral-500 dark:text-neutral-400">
+          Product teams at these companies plan their week with us
         </h2>
       </div>
 
-      <div className="mx-auto mt-10 grid grid-cols-4 place-items-center gap-y-8 sm:flex sm:max-w-5xl sm:flex-wrap sm:justify-center sm:gap-10 md:gap-14">
+      <div className="mx-auto mt-8 grid max-w-5xl grid-cols-2 place-items-center gap-x-6 gap-y-7 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-11 sm:gap-y-8">
         {ROW_LOGOS.map((logo, i) => (
           <LogoItem
             key={logo.name}

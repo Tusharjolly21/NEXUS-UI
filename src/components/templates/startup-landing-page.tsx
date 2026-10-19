@@ -1666,10 +1666,10 @@ export function InvestorArc() {
   return (
     <footer
       id="contact"
-      className="relative overflow-visible bg-black pt-24 text-white"
+      className="relative overflow-x-clip bg-black pt-24 text-white"
     >
       <div className="mx-auto max-w-7xl px-5 text-center sm:px-8">
-        <div className="relative mx-auto h-[650px] max-w-7xl overflow-visible">
+        <div className="relative mx-auto h-[650px] max-w-7xl overflow-x-visible overflow-y-clip">
           {/* Outer rotating circle only */}
           <motion.div
             className="absolute left-1/2 top-[680px] h-295 w-295 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.025]"

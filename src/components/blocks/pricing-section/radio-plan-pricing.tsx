@@ -113,14 +113,14 @@ const THEME_PALETTES: Record<Exclude<PricingTheme, "custom">, Palette> = {
 };
 
 export const DEFAULT_PRICING_FEATURES = [
-  "AI advisor full time",
+  "A finance advisor on call",
   "Unlimited auto tracking",
-  "1 Day transaction clearing",
+  "Next-day transaction clearing",
   "Priority customer support",
-  "Enhanced Security",
-  "24/7 Technical Support",
-  "Unlimited User Accounts",
-  "Custom API Access",
+  "Two-person approval on payouts",
+  "24/7 technical support",
+  "Unlimited team accounts",
+  "Custom API access",
 ];
 
 export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
@@ -131,7 +131,7 @@ export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
     price: 10.59,
     period: "/mo",
     includedFeatureCount: 5,
-    ctaLabel: "Get Started",
+    ctaLabel: "Start monthly",
     ctaHref: "#",
   },
   {
@@ -140,19 +140,19 @@ export const DEFAULT_PRICING_PLANS: PricingPlan[] = [
     subtitle: "Best value",
     price: 8.59,
     period: "/mo",
-    badge: "Best Value",
+    badge: "Save 19%",
     includedFeatureCount: 7,
-    ctaLabel: "Choose Yearly",
+    ctaLabel: "Start yearly",
     ctaHref: "#",
   },
   {
     id: "lifetime",
     label: "Lifetime",
-    subtitle: "One time purchase",
+    subtitle: "Pay once, keep it",
     price: 90.59,
     period: "one-time",
     includedFeatureCount: 8,
-    ctaLabel: "Get Lifetime Access",
+    ctaLabel: "Get lifetime access",
     ctaHref: "#",
   },
 ];
@@ -249,10 +249,10 @@ function resolvePalette({
 export function RadioPlanPricing({
   plans = DEFAULT_PRICING_PLANS,
   features = DEFAULT_PRICING_FEATURES,
-  featuresTitle = "Features",
-  featuresSubtitle = "This pricing plan includes the following features",
-  plansTitle = "Pricing Plan",
-  plansSubtitle = "Choose the plan that best suits your needs",
+  featuresTitle = "What's included",
+  featuresSubtitle = "Pick a plan to see what it unlocks.",
+  plansTitle = "How you pay",
+  plansSubtitle = "Same product on every plan. Yearly saves you 19%.",
   currency = "$",
   defaultSelectedPlan = "monthly",
   layout = "responsive",
@@ -456,7 +456,7 @@ export function RadioPlanPricing({
                       </span>
                       {showPlanBadges && plan.badge && (
                         <span
-                          className="rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em]"
+                          className="rounded-full border px-2.5 py-0.5 text-[11.5px] font-semibold"
                           style={{
                             backgroundColor: `${palette.card}b8`,
                             borderColor: palette.border,
@@ -543,9 +543,10 @@ function PanelHeader({
 }
 
 export function RadioPlanPricingPreview() {
+  // drawn at its real size; the gallery frames the `data-tile-focus` box into each tile
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#111112]">
-      <div className="absolute left-1/2 top-1/2 h-[620px] w-[1140px] -translate-x-1/2 -translate-y-1/2 scale-[0.43] sm:scale-[0.48]">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-[#111112]">
+      <div data-tile-focus className="w-[1080px] shrink-0">
         <RadioPlanPricing layout="desktop" padding={32} outerRadius={30} optionRadius={17} />
       </div>
     </div>

@@ -24,10 +24,6 @@ const NexusAiLaunchTemplatePage = nextDynamic(
     })),
   { loading: TemplateFallback },
 );
-const LandingPage = nextDynamic(
-  () => import("@/components/marketing/landing-page").then((m) => ({ default: m.LandingPage })),
-  { loading: TemplateFallback },
-);
 const NovaLandingPage = nextDynamic(
   () => import("@/components/templates/nova-landing-page").then((m) => ({ default: m.NovaLandingPage })),
   { loading: TemplateFallback },
@@ -121,8 +117,6 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><NoirStudioTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "simplistic-saas-template") {
     return <ThemeReceiver><SimplisticSaaSPage /></ThemeReceiver>;
-  } else if (tmpl.slug === "saas-launch-aurora") {
-    return <ThemeReceiver><LandingPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nova-landing-page") {
     return <ThemeReceiver><NovaLandingPage /></ThemeReceiver>;
   } else if (tmpl.slug === "talent-hub-landing") {

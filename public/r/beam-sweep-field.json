@@ -3,19 +3,28 @@
   "name": "beam-sweep-field",
   "type": "registry:component",
   "title": "Beam Sweep Field",
-  "description": "Slow sweeping light column for cinematic section backgrounds.",
+  "description": "A cinematic dark backdrop where light columns sweep across a fine grid over a horizon glow, with a ready-made hero you can replace with any content.",
   "dependencies": [
-    "framer-motion"
+    "framer-motion",
+    "lucide-react",
+    "react"
   ],
   "registryDependencies": [
-    "http://127.0.0.1:3000/api/registry/nexus-font"
+    "http://127.0.0.1:3000/api/registry/nexus-font",
+    "utils"
   ],
   "files": [
     {
-      "path": "next-ui/beam-sweep-field.tsx",
+      "path": "next-ui/beam-sweep-field/beam-sweep-field.tsx",
       "type": "registry:component",
-      "target": "components/beam-sweep-field.tsx",
-      "content": "\"use client\";\n\nimport { motion } from \"framer-motion\";\n\nexport function BeamField() {\n  return (\n    <div className=\"relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950\">\n      <div className=\"lf-grid absolute inset-0 opacity-30\" />\n      <motion.div className=\"absolute inset-y-10 w-[2px] bg-gradient-to-b from-transparent via-cyan-300 to-transparent\" animate={{ left: [\"8%\", \"86%\", \"30%\", \"8%\"] }} transition={{ duration: 9, repeat: Infinity, ease: \"easeInOut\" }} />\n    </div>\n  );\n}\n"
+      "target": "components/beam-sweep-field/beam-sweep-field.tsx",
+      "content": "\"use client\";\n\nimport * as React from \"react\";\nimport { motion, useReducedMotion } from \"framer-motion\";\nimport { ArrowRight } from \"lucide-react\";\nimport { cn } from \"@/lib/utils\";\n\nexport type BeamFieldProps = {\n  /** Content placed over the field. Defaults to a short hero. */\n  children?: React.ReactNode;\n  /** Number of sweeping light columns. */\n  beams?: number;\n  /** Beam colour (any CSS colour). */\n  color?: string;\n  /** Seconds for one sweep. */\n  speed?: number;\n  className?: string;\n};\n\n/**\n * A cinematic dark backdrop: light columns sweep slowly across a fine grid, lighting the lines they\n * pass, over a soft horizon glow. Drop any content inside.\n */\nexport function BeamField({ children, beams = 3, color = \"#67e8f9\", speed = 11, className }: BeamFieldProps) {\n  const reduce = useReducedMotion();\n  return (\n    <section className={cn(\"relative isolate flex min-h-[420px] w-full items-center justify-center overflow-hidden rounded-[28px] bg-[#05070b] px-8 py-16\", className)}>\n      <div aria-hidden className=\"absolute inset-0 -z-10\">\n        <div className=\"absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_45%,black,transparent)]\" />\n        <div className=\"absolute inset-x-0 bottom-[-35%] h-[70%] rounded-[100%] blur-3xl\" style={{ background: `radial-gradient(closest-side, ${color}33, transparent)` }} />\n        {Array.from({ length: beams }).map((_, i) => (\n          <motion.div\n            key={i}\n            className=\"absolute inset-y-0 w-[180px] -translate-x-1/2\"\n            style={{ left: `${20 + i * (60 / Math.max(1, beams - 1))}%` }}\n            animate={reduce ? undefined : { left: [\"-10%\", \"110%\"] }}\n            transition={{ duration: speed + i * 3, repeat: Infinity, ease: \"easeInOut\", delay: i * (speed / beams), repeatType: \"mirror\" }}\n          >\n            <div className=\"absolute inset-y-0 left-1/2 w-px -translate-x-1/2\" style={{ background: `linear-gradient(to bottom, transparent, ${color}, transparent)` }} />\n            <div className=\"absolute inset-y-[10%] left-1/2 w-[120px] -translate-x-1/2 opacity-40 blur-2xl\" style={{ background: `linear-gradient(to bottom, transparent, ${color}, transparent)` }} />\n          </motion.div>\n        ))}\n        <div className=\"absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,#05070b_95%)]\" />\n      </div>\n\n      {children ?? (\n        <div className=\"relative max-w-xl text-center\">\n          <span className=\"inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[12px] font-medium text-white/70 backdrop-blur\">\n            <span className=\"size-1.5 rounded-full\" style={{ background: color, boxShadow: `0 0 10px ${color}` }} />\n            Now in public beta\n          </span>\n          <h2 className=\"mt-5 text-[40px] font-semibold leading-[1.05] tracking-[-0.04em] text-white [text-wrap:balance]\">Observability that sees every request</h2>\n          <p className=\"mx-auto mt-4 max-w-md text-[15px] leading-relaxed text-white/55\">Trace a slow page to the line of code behind it, without adding a single SDK.</p>\n          <div className=\"mt-7 flex items-center justify-center gap-3\">\n            <a href=\"#\" className=\"group inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-[14px] font-semibold text-zinc-950\">\n              Start tracing <ArrowRight className=\"size-4 transition-transform group-hover:translate-x-0.5\" />\n            </a>\n            <a href=\"#\" className=\"inline-flex h-11 items-center rounded-full border border-white/15 px-5 text-[14px] font-medium text-white/80 hover:bg-white/5\">\n              Read the docs\n            </a>\n          </div>\n        </div>\n      )}\n    </section>\n  );\n}\n"
+    },
+    {
+      "path": "next-ui/beam-sweep-field/index.ts",
+      "type": "registry:lib",
+      "target": "components/beam-sweep-field/index.ts",
+      "content": "export { BeamField } from \"./beam-sweep-field\";\nexport type { BeamFieldProps } from \"./beam-sweep-field\";\n"
     }
   ]
 }

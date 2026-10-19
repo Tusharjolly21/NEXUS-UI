@@ -1098,36 +1098,39 @@ export function PhoneInput({
   {
     slug: "hero-aurora-spotlight",
     name: "Aurora Hero Spotlight",
-    description: "Cursor-reactive spotlight layered over an aurora field for launch heroes.",
+    description:
+      "A launch hero on a slow aurora: a soft spotlight follows the pointer, the headline catches the light, and a glass product card rises underneath.",
     categorySlug: "hero-sections",
     tags: ["marketing", "gradient", "pointer"],
     premium: false,
     trendingScore: 98,
     createdAt: "2026-04-02",
     animationKinds: ["hover", "gradient"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewHeroAurora,
+    previewShell: "plain",
+    props: [
+      { name: "eyebrow", type: "string", description: "Pill text above the headline." },
+      { name: "title", type: "ReactNode", description: "Headline." },
+      { name: "subtitle", type: "string", description: "Supporting line." },
+      { name: "primary", type: "{ label: string; href: string }", description: "Primary call to action." },
+      { name: "secondary", type: "{ label: string; href: string }", description: "Secondary call to action." },
+      { name: "spotlight", type: "string", defaultValue: "\"rgba(56,189,248,0.22)\"", description: "Colour of the pointer spotlight." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { HeroAurora } from "@/components/hero-aurora-spotlight";
 
-export function HeroAurora() {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const spotlight = useMotionTemplate\`radial-gradient(420px at \${x}px \${y}px, rgba(56,189,248,.35), transparent 60%)\`;
-
+export function Hero() {
   return (
-    <section onMouseMove={(e) => {
-      const r = e.currentTarget.getBoundingClientRect();
-      x.set(e.clientX - r.left); y.set(e.clientY - r.top);
-    }} className="relative isolate overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950 p-10">
-      <div className="lf-aurora absolute inset-0 opacity-80" />
-      <motion.div className="absolute inset-0" style={{ backgroundImage: spotlight }} />
-      <div className="relative">
-        <p className="text-xs uppercase tracking-[0.2em] text-cyan-200/80">Ship faster</p>
-        <h1 className="mt-3 text-4xl font-semibold text-white">Motion-native interfaces</h1>
-      </div>
-    </section>
+    <HeroAurora
+      eyebrow="Now with realtime sync"
+      title="The workspace that keeps up with you"
+      subtitle="Docs, tasks and decisions in one fast, keyboard-first place."
+      primary={{ label: "Get started free", href: "/signup" }}
+      secondary={{ label: "See it in action", href: "/demo" }}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1135,29 +1138,43 @@ export function HeroAurora() {
   {
     slug: "bento-signal-grid",
     name: "Signal Bento Grid",
-    description: "Animated bento tiles with breathing gradients for product metrics.",
+    description:
+      "A monitoring bento: a live latency chart, 30 days of uptime bars, a request counter that counts up in view, and edge-region health.",
     categorySlug: "bento-grids",
     tags: ["dashboard", "metrics"],
     premium: false,
     trendingScore: 91,
     createdAt: "2026-03-18",
     animationKinds: ["scroll", "gradient"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewBentoMetrics,
+    previewShell: "plain",
+    props: [
+      { name: "latency", type: "number", defaultValue: "42", description: "Latency in ms the live chart hovers around." },
+      { name: "uptime", type: "string", defaultValue: "\"99.98%\"", description: "Uptime shown on the uptime tile." },
+      { name: "days", type: "(\"ok\" | \"degraded\" | \"down\")[]", description: "Daily status for the uptime bars, oldest first." },
+      { name: "requests", type: "number", description: "Requests served, counted up in view." },
+      { name: "regions", type: "{ name: string; ms: number; status?: \"ok\" | \"degraded\" }[]", description: "Edge regions and their latency." },
+      { name: "live", type: "boolean", defaultValue: "true", description: "Keep the latency chart ticking." },
+      { name: "className", type: "string", description: "Extra classes on the grid." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { BentoSignals } from "@/components/bento-signal-grid";
 
-export function BentoSignals() {
+export function StatusGrid() {
   return (
-    <div className="grid grid-cols-2 gap-3">
-      {["Latency", "Uptime"].map((label, i) => (
-        <motion.div key={label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-          <p className="text-xs text-zinc-400">{label}</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{i === 0 ? "42ms" : "99.99%"}</p>
-        </motion.div>
-      ))}
-    </div>
+    <BentoSignals
+      latency={38}
+      uptime="99.99%"
+      requests={8_204_119}
+      regions={[
+        { name: "Dublin", ms: 16 },
+        { name: "Oregon", ms: 29 },
+        { name: "Tokyo", ms: 54, status: "degraded" },
+        { name: "Sydney", ms: 47 },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1225,23 +1242,42 @@ export function FloatingNav() {
   {
     slug: "orbit-footer",
     name: "Orbit Footer",
-    description: "Compact footer with balanced columns and developer-first links.",
+    description:
+      "A complete site footer: brand and newsletter signup, link columns with badges, a live status pill and a giant ghost wordmark that rises into view.",
     categorySlug: "footers",
     tags: ["layout"],
     premium: false,
     trendingScore: 62,
     createdAt: "2026-01-22",
     animationKinds: ["hover"],
-    dependencies: [],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewFooterMini,
-    reactSource: `export function OrbitFooter() {
+    previewShell: "plain",
+    props: [
+      { name: "brand", type: "string", defaultValue: "\"Orbit\"", description: "Wordmark shown top-left and as the ghost word." },
+      { name: "tagline", type: "string", description: "Line under the brand." },
+      { name: "columns", type: "{ title: string; links: { label: string; href: string; badge?: string }[] }[]", description: "Link columns." },
+      { name: "status", type: "string | null", defaultValue: "\"All systems normal\"", description: "Status pill text; null hides it." },
+      { name: "statusHref", type: "string", defaultValue: "\"#\"", description: "Where the status pill links." },
+      { name: "onSubscribe", type: "(email: string) => Promise<void> | void", description: "Newsletter handler; a promise shows the pending state." },
+      { name: "showNewsletter", type: "boolean", defaultValue: "true", description: "Show the newsletter field." },
+      { name: "showWordmark", type: "boolean", defaultValue: "true", description: "Draw the giant ghost wordmark." },
+      { name: "className", type: "string", description: "Extra classes on the footer." },
+    ],
+    reactSource: `"use client";
+
+import { OrbitFooter } from "@/components/orbit-footer";
+
+export function SiteFooter() {
   return (
-    <footer className="rounded-3xl border border-white/10 bg-zinc-950 p-6 text-sm text-zinc-400">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-white">Nexus-UI</p>
-        <div className="flex gap-4"><a href="#">Docs</a><a href="#">Status</a></div>
-      </div>
-    </footer>
+    <OrbitFooter
+      brand="Orbit"
+      tagline="Interfaces that move, shipped as code you own."
+      status="All systems normal"
+      onSubscribe={async (email) => {
+        await fetch("/api/subscribe", { method: "POST", body: JSON.stringify({ email }) });
+      }}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1249,28 +1285,39 @@ export function FloatingNav() {
   {
     slug: "depth-testimonials",
     name: "Depth Testimonials",
-    description: "Stacked testimonial planes with staggered motion reveals.",
+    description:
+      "Testimonials stacked in depth: the front card reads clearly, the next wait behind it, and cycling sends the front card to the back. Auto-advances and pauses on hover.",
     categorySlug: "testimonials",
     tags: ["social-proof"],
     premium: false,
     trendingScore: 76,
     createdAt: "2026-04-12",
     animationKinds: ["scroll", "layout"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewTestimonialStack,
+    previewShell: "plain",
+    props: [
+      { name: "items", type: "{ quote: string; name: string; role?: string; tone?: [string, string] }[]", description: "Testimonials with bylines." },
+      { name: "quotes", type: "string[]", description: "Plain quotes (older API); used when items is not given." },
+      { name: "interval", type: "number", defaultValue: "4800", description: "Auto-advance interval in ms; 0 turns it off." },
+      { name: "heading", type: "string", defaultValue: "\"Loved by people who ship\"", description: "Section heading." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { DepthTestimonials } from "@/components/depth-testimonials";
 
-export function DepthTestimonials({ quotes }: { quotes: string[] }) {
+export function Testimonials() {
   return (
-    <div className="relative h-64">
-      {quotes.map((q, i) => (
-        <motion.figure key={q} className="absolute left-0 right-0 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl" style={{ top: 16 + i * 18 }} initial={{ y: 16, opacity: 0 }} whileInView={{ y: 0, opacity: 1 - i * 0.15 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-          <blockquote className="text-sm text-white">“{q}”</blockquote>
-        </motion.figure>
-      ))}
-    </div>
+    <DepthTestimonials
+      heading="Loved by people who ship"
+      interval={5000}
+      items={[
+        { quote: "We rebuilt our pricing page in an afternoon.", name: "Priya Raman", role: "Design lead, Fieldnote" },
+        { quote: "Accessibility review took ten minutes.", name: "Tomás Reyes", role: "Frontend engineer, Harbor" },
+        { quote: "It feels like Linear met a motion lab.", name: "Mei Tanaka", role: "Founder, Quietly" },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1308,25 +1355,33 @@ export function PricingToggle() {
   {
     slug: "beam-sweep-field",
     name: "Beam Sweep Field",
-    description: "Slow sweeping light column for cinematic section backgrounds.",
+    description:
+      "A cinematic dark backdrop where light columns sweep across a fine grid over a horizon glow, with a ready-made hero you can replace with any content.",
     categorySlug: "background-effects",
     tags: ["ambient"],
     premium: false,
     trendingScore: 84,
     createdAt: "2026-03-30",
     animationKinds: ["gradient", "layout"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewBeamSweep,
+    previewShell: "plain",
+    props: [
+      { name: "children", type: "ReactNode", description: "Content over the field; defaults to a short hero." },
+      { name: "beams", type: "number", defaultValue: "3", description: "Number of sweeping light columns." },
+      { name: "color", type: "string", defaultValue: "\"#67e8f9\"", description: "Beam colour." },
+      { name: "speed", type: "number", defaultValue: "11", description: "Seconds for one sweep." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { BeamField } from "@/components/beam-sweep-field";
 
-export function BeamField() {
+export function LaunchHero() {
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950">
-      <div className="lf-grid absolute inset-0 opacity-30" />
-      <motion.div className="absolute inset-y-10 w-[2px] bg-gradient-to-b from-transparent via-cyan-300 to-transparent" animate={{ left: ["8%", "86%", "30%", "8%"] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }} />
-    </div>
+    <BeamField beams={4} color="#a78bfa" speed={14}>
+      <h1 className="text-5xl font-semibold tracking-tight text-white">Your launch, lit properly.</h1>
+    </BeamField>
   );
 }`,
     tailwindSource: tw,
@@ -1386,26 +1441,40 @@ export function VectorTiltScene() {
   {
     slug: "glass-login-stack",
     name: "Glass Login Stack",
-    description: "Minimal glass authentication panel with crisp focus states.",
+    description:
+      "A frosted login card on a slow aurora with ghost cards stacked behind for depth: passkey first, then email and password, with a remember switch and a pending-to-welcome button.",
     categorySlug: "login-forms",
     tags: ["auth"],
     premium: false,
     trendingScore: 73,
     createdAt: "2026-02-02",
     animationKinds: ["spring"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewLoginGlass,
+    previewShell: "plain",
+    props: [
+      { name: "brand", type: "string", defaultValue: "\"Halo\"", description: "Brand initial and name." },
+      { name: "title", type: "string", defaultValue: "\"Welcome back\"", description: "Card heading." },
+      { name: "subtitle", type: "string", description: "Line under the heading." },
+      { name: "onSubmit", type: "(values: { email: string; password: string; remember: boolean }) => Promise<void> | void", description: "Called on sign in; throw to show the error state." },
+      { name: "onPasskey", type: "() => void", description: "Called by the passkey button." },
+      { name: "backdrop", type: "boolean", defaultValue: "true", description: "Draw the aurora backdrop behind the card." },
+      { name: "className", type: "string", description: "Extra classes on the root." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { GlassLogin } from "@/components/glass-login-stack";
 
-export function GlassLogin() {
+export function LoginPage() {
   return (
-    <motion.form initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm space-y-3 rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl">
-      <input className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white" placeholder="Email" />
-      <input className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white" type="password" placeholder="Password" />
-      <button className="w-full rounded-xl bg-cyan-300 py-2 text-sm font-semibold text-zinc-950">Continue</button>
-    </motion.form>
+    <GlassLogin
+      brand="Halo"
+      onPasskey={() => console.log("passkey")}
+      onSubmit={async ({ email, password }) => {
+        const res = await fetch("/api/login", { method: "POST", body: JSON.stringify({ email, password }) });
+        if (!res.ok) throw new Error("Invalid credentials");
+      }}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1413,29 +1482,41 @@ export function GlassLogin() {
   {
     slug: "split-signup-convert",
     name: "Split Signup Convert",
-    description: "Two-column signup with narrative panel and compact fields.",
+    description:
+      "A two-panel signup: the product's value on a lit aurora panel, and a short form with SSO, a live password-strength meter and a pending-to-done button.",
     categorySlug: "signup-forms",
     tags: ["auth", "conversion"],
     premium: false,
     trendingScore: 69,
     createdAt: "2026-03-08",
     animationKinds: ["hover"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewSignupSplit,
+    previewShell: "plain",
+    props: [
+      { name: "headline", type: "string", description: "Headline on the value panel." },
+      { name: "subhead", type: "string", description: "Line under the headline." },
+      { name: "benefits", type: "string[]", description: "Checked benefits on the value panel." },
+      { name: "submitLabel", type: "string", defaultValue: "\"Create workspace\"", description: "Submit button label." },
+      { name: "onSubmit", type: "(values: { email: string; password: string }) => Promise<void> | void", description: "Called on submit; a promise shows the pending state, a throw returns to idle." },
+      { name: "showSso", type: "boolean", defaultValue: "true", description: "Show Google and GitHub buttons." },
+      { name: "onSso", type: "(provider: \"google\" | \"github\") => void", description: "Called by the SSO buttons." },
+      { name: "className", type: "string", description: "Extra classes on the root." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { SplitSignup } from "@/components/split-signup-convert";
 
-export function SplitSignup() {
+export function SignupSection() {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-500/15 to-fuchsia-500/10 p-6">
-        <p className="text-sm font-semibold text-white">Ship interfaces faster</p>
-      </div>
-      <motion.div whileTap={{ scale: 0.99 }} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        {/* fields */}
-      </motion.div>
-    </div>
+    <SplitSignup
+      headline="Ship interfaces your team is proud of"
+      benefits={["Every component, live and editable", "One-line installs", "Light and dark"]}
+      onSubmit={async ({ email, password }) => {
+        await fetch("/api/signup", { method: "POST", body: JSON.stringify({ email, password }) });
+      }}
+      onSso={(provider) => console.log("sso", provider)}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1513,28 +1594,47 @@ export function AuthLoginCard() {
   {
     slug: "workbench-sidebar",
     name: "Workbench Sidebar",
-    description: "Dense sidebar navigation tuned for dashboards and tools.",
+    description:
+      "A product sidebar with a workspace switcher, search, a spring-sliding active highlight, projects, a usage meter and the signed-in user — collapses to an icon rail.",
     categorySlug: "sidebars",
     tags: ["app-shell"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-04-05",
     animationKinds: ["hover", "layout"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewSidebarShell,
+    previewShell: "plain",
+    props: [
+      { name: "workspace", type: "{ name: string; plan?: string }", description: "Workspace shown in the switcher." },
+      { name: "items", type: "{ id: string; label: string; icon: LucideIcon; count?: number }[]", description: "Main navigation." },
+      { name: "projects", type: "{ id: string; label: string; color: string }[]", description: "Projects list." },
+      { name: "user", type: "{ name: string; email: string }", description: "Signed-in user." },
+      { name: "usage", type: "number | null", defaultValue: "0.68", description: "Usage meter value 0–1; null hides the card." },
+      { name: "activeId", type: "string", description: "Controlled active item." },
+      { name: "defaultActiveId", type: "string", defaultValue: "\"overview\"", description: "Initial active item when uncontrolled." },
+      { name: "onNavigate", type: "(id: string) => void", description: "Called when an item is chosen." },
+      { name: "defaultCollapsed", type: "boolean", defaultValue: "false", description: "Start as an icon rail." },
+      { name: "className", type: "string", description: "Extra classes on the aside." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { usePathname, useRouter } from "next/navigation";
+import { WorkbenchSidebar } from "@/components/workbench-sidebar";
 
-const items = ["Overview", "Library", "Billing"];
-
-export function WorkbenchSidebar() {
+export function AppSidebar() {
+  const router = useRouter();
+  const active = usePathname().split("/")[1] || "overview";
   return (
-    <aside className="w-64 space-y-2 rounded-3xl border border-white/10 bg-white/5 p-3 backdrop-blur-xl">
-      {items.map((t) => (
-        <motion.button key={t} whileHover={{ x: 2 }} className="w-full rounded-xl px-3 py-2 text-left text-sm text-zinc-300 hover:bg-white/10 hover:text-white">{t}</motion.button>
-      ))}
-    </aside>
+    <div className="h-dvh p-2">
+      <WorkbenchSidebar
+        workspace={{ name: "Northwind", plan: "Pro plan" }}
+        user={{ name: "Ada Park", email: "ada@northwind.co" }}
+        usage={0.68}
+        activeId={active}
+        onNavigate={(id) => router.push(\`/\${id}\`)}
+      />
+    </div>
   );
 }`,
     tailwindSource: tw,
@@ -1542,29 +1642,38 @@ export function WorkbenchSidebar() {
   {
     slug: "pulse-dashboard-kpis",
     name: "Pulse Dashboard KPIs",
-    description: "KPI strip with micro-hover lifts and soft chart placeholders.",
+    description:
+      "A KPI strip with a 7d/30d/90d switcher: each metric gets a delta chip that knows when lower is better, and a sparkline that redraws as you change period.",
     categorySlug: "dashboards",
     tags: ["analytics"],
     premium: false,
     trendingScore: 101,
     createdAt: "2026-04-16",
     animationKinds: ["hover", "scroll"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewDashboardKpi,
+    previewShell: "plain",
+    props: [
+      { name: "kpis", type: "Kpi[]", description: "Metrics to show: label, value, delta, lowerIsBetter, trend." },
+      { name: "periods", type: "Record<string, Kpi[]>", description: "Named periods with their own metrics; adds a period switcher. Used by default when kpis is not passed." },
+      { name: "defaultPeriod", type: "string", description: "Period selected first." },
+      { name: "title", type: "string", defaultValue: "\"This week at a glance\"", description: "Heading above the strip." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { KpiStrip } from "@/components/pulse-dashboard-kpis";
 
-export function KpiStrip({ kpis }: { kpis: { label: string; value: string }[] }) {
+export function Overview() {
   return (
-    <div className="grid gap-3 md:grid-cols-3">
-      {kpis.map((k) => (
-        <motion.div key={k.label} whileHover={{ y: -2 }} className="rounded-3xl border border-white/10 bg-white/5 p-4">
-          <p className="text-xs text-zinc-400">{k.label}</p>
-          <p className="mt-2 text-3xl font-semibold text-white">{k.value}</p>
-        </motion.div>
-      ))}
-    </div>
+    <KpiStrip
+      title="Revenue at a glance"
+      kpis={[
+        { label: "MRR", value: "$48.2k", delta: "+8.1%", trend: [32, 35, 34, 38, 41, 44, 48] },
+        { label: "Churn", value: "1.9%", delta: "-0.4%", lowerIsBetter: true, trend: [3, 2.8, 2.6, 2.4, 2.1, 2, 1.9] },
+        { label: "Active seats", value: "3,214", delta: "+212", trend: [2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2] },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1572,7 +1681,8 @@ export function KpiStrip({ kpis }: { kpis: { label: string; value: string }[] })
   {
     slug: "orbital-loader",
     name: "Orbital Loader",
-    description: "Dual counter-rotating rings with breathing inner glow.",
+    description:
+      "A loader with presence: counter-rotating orbits, a glowing dot circling the ring, an arc that sweeps or fills to progress, and rotating status lines.",
     categorySlug: "loaders",
     tags: ["feedback"],
     premium: false,
@@ -1581,47 +1691,57 @@ export function KpiStrip({ kpis }: { kpis: { label: string; value: string }[] })
     animationKinds: ["layout", "gradient"],
     dependencies: ["framer-motion"],
     Preview: Previews.PreviewLoaderOrbit,
+    previewShell: "plain",
+    props: [
+      { name: "size", type: "number", defaultValue: "112", description: "Diameter in px." },
+      { name: "progress", type: "number", description: "0–1 for a determinate ring; omit for an indeterminate sweep." },
+      { name: "messages", type: "string[]", description: "Status lines cycled under the loader; [] hides them." },
+      { name: "color", type: "string", defaultValue: "\"#6366f1\"", description: "Accent colour of the arc and dot." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { OrbitalLoader } from "@/components/orbital-loader";
 
-export function OrbitalLoader() {
-  return (
-    <div className="relative size-28">
-      <motion.span className="absolute inset-0 rounded-full border border-white/10" animate={{ rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: "linear" }} />
-      <motion.span className="absolute inset-2 rounded-full border border-cyan-400/40" animate={{ rotate: -360 }} transition={{ duration: 4.5, repeat: Infinity, ease: "linear" }} />
-    </div>
-  );
+export function Uploading({ progress }: { progress: number }) {
+  return <OrbitalLoader progress={progress} messages={["Uploading your files"]} color="#10b981" />;
 }`,
     tailwindSource: tw,
   },
   {
     slug: "milestone-timeline",
     name: "Milestone Timeline",
-    description: "Vertical roadmap timeline with glowing nodes.",
+    description:
+      "A roadmap timeline: dates on the left, a rail that fills to the milestone in progress, and nodes that read done, current (pulsing) or upcoming at a glance.",
     categorySlug: "timelines",
     tags: ["roadmap"],
     premium: false,
     trendingScore: 71,
     createdAt: "2026-02-18",
     animationKinds: ["scroll"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewTimeline,
+    previewShell: "plain",
+    props: [
+      { name: "milestones", type: "{ title: string; date?: string; description?: string; status?: \"done\" | \"current\" | \"upcoming\"; tag?: string }[]", description: "Roadmap milestones." },
+      { name: "steps", type: "string[]", description: "Plain titles (older API); all but the last count as done." },
+      { name: "heading", type: "string", defaultValue: "\"Roadmap\"", description: "Heading." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { MilestoneTimeline } from "@/components/milestone-timeline";
 
-export function MilestoneTimeline({ steps }: { steps: string[] }) {
+export function Roadmap() {
   return (
-    <div className="relative pl-6">
-      <div className="absolute top-1 bottom-1 left-[7px] w-px bg-white/10" />
-      {steps.map((s, i) => (
-        <motion.div key={s} initial={{ opacity: 0, x: -6 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className="relative mb-6">
-          <span className="absolute -left-[9px] top-1 size-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.65)]" />
-          <p className="text-sm font-semibold text-white">{s}</p>
-        </motion.div>
-      ))}
-    </div>
+    <MilestoneTimeline
+      heading="Roadmap"
+      milestones={[
+        { title: "Research", date: "Jan 2026", description: "Twenty customer interviews.", status: "done" },
+        { title: "Private beta", date: "Jun 2026", description: "312 teams onboarded.", status: "current", tag: "In progress" },
+        { title: "Public launch", date: "Sep 2026", status: "upcoming" },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1629,29 +1749,38 @@ export function MilestoneTimeline({ steps }: { steps: string[] }) {
   {
     slug: "lattice-feature-grid",
     name: "Lattice Feature Grid",
-    description: "Four-up feature grid with scroll reveals and glass tiles.",
+    description:
+      "A four-up feature grid on a hairline lattice, where each tile carries a small live illustration of the feature it describes.",
     categorySlug: "feature-sections",
     tags: ["marketing"],
     premium: false,
     trendingScore: 90,
     createdAt: "2026-03-12",
     animationKinds: ["scroll"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewFeatureGrid,
+    previewShell: "plain",
+    props: [
+      { name: "items", type: "{ title: string; body: string; icon?: LucideIcon; visual?: ReactNode }[]", description: "Feature tiles; defaults include illustrated tiles." },
+      { name: "eyebrow", type: "string", defaultValue: "\"Why teams switch\"", description: "Small label above the heading." },
+      { name: "heading", type: "string", description: "Section heading; empty hides the header." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { Lock, Zap } from "lucide-react";
+import { LatticeFeatures } from "@/components/lattice-feature-grid";
 
-export function LatticeFeatures({ items }: { items: { title: string; body: string }[] }) {
+export function Features() {
   return (
-    <div className="grid gap-3 md:grid-cols-2">
-      {items.map((it, i) => (
-        <motion.div key={it.title} initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }} className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 to-transparent p-5">
-          <p className="text-sm font-semibold text-white">{it.title}</p>
-          <p className="mt-2 text-xs text-zinc-400">{it.body}</p>
-        </motion.div>
-      ))}
-    </div>
+    <LatticeFeatures
+      eyebrow="Platform"
+      heading="Built for teams that ship every day"
+      items={[
+        { title: "Instant previews", body: "Every branch gets a URL in seconds.", icon: Zap },
+        { title: "Secure by default", body: "SSO, audit logs and scoped tokens out of the box.", icon: Lock },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1659,34 +1788,40 @@ export function LatticeFeatures({ items }: { items: { title: string; body: strin
   {
     slug: "motion-faq-disclosure",
     name: "Motion FAQ Disclosure",
-    description: "Lightweight FAQ with directional affordance and animated answers.",
+    description:
+      "A two-column FAQ: heading and a support card on the left, a spring-animated accessible accordion on the right.",
     categorySlug: "faq-sections",
     tags: ["support"],
     premium: false,
     trendingScore: 66,
     createdAt: "2026-01-12",
     animationKinds: ["layout"],
-    dependencies: ["framer-motion", "react"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewFaq,
+    previewShell: "plain",
+    props: [
+      { name: "items", type: "{ q: string; a: string }[]", description: "Questions and answers." },
+      { name: "heading", type: "string", defaultValue: "\"Questions, answered\"", description: "Heading on the left." },
+      { name: "intro", type: "string", description: "Line under the heading." },
+      { name: "defaultOpen", type: "number", defaultValue: "0", description: "Index open on first render; -1 for none." },
+      { name: "multiple", type: "boolean", defaultValue: "false", description: "Allow several answers open at once." },
+      { name: "contact", type: "{ label: string; href: string } | null", description: "Support card; null hides it." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { MotionFaq } from "@/components/motion-faq-disclosure";
 
-export function MotionFaq({ items }: { items: { q: string; a: string }[] }) {
-  const [open, setOpen] = useState(0);
+export function Faq() {
   return (
-    <div className="space-y-2">
-      {items.map((it, i) => (
-        <button key={it.q} type="button" onClick={() => setOpen(i)} className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-left">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-medium text-white">{it.q}</p>
-            <motion.span animate={{ rotate: open === i ? 90 : 0 }} className="text-xs text-zinc-400">▸</motion.span>
-          </div>
-          {open === i ? <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mt-2 text-xs text-zinc-400">{it.a}</motion.p> : null}
-        </button>
-      ))}
-    </div>
+    <MotionFaq
+      heading="Questions, answered"
+      contact={{ label: "Talk to a human", href: "/contact" }}
+      items={[
+        { q: "Can I use this commercially?", a: "Yes — in personal and client work." },
+        { q: "Does it work with the App Router?", a: "Every component is a typed client component built for it." },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -2115,26 +2250,46 @@ export function CollaborativeReview() {
   {
     slug: "editorial-blog-rail",
     name: "Editorial Blog Rail",
-    description: "Featured article plus compact secondary headlines for content hubs.",
+    description:
+      "A magazine-style blog rail: one featured story with generated cover art beside a numbered list of recent posts.",
     categorySlug: "blog-components",
     tags: ["content"],
     premium: false,
     trendingScore: 58,
     createdAt: "2026-02-26",
     animationKinds: ["scroll"],
-    dependencies: [],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewBlogRail,
-    reactSource: `export function EditorialRail() {
+    previewShell: "plain",
+    props: [
+      { name: "heading", type: "string", defaultValue: "\"From the journal\"", description: "Section heading." },
+      { name: "allHref", type: "string", defaultValue: "\"#\"", description: "Link for View all." },
+      { name: "featured", type: "EditorialPost", description: "The featured story (title, category, date, readTime, excerpt, author, cover colours, href)." },
+      { name: "posts", type: "EditorialPost[]", description: "Stories in the numbered rail." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    reactSource: `"use client";
+
+import { EditorialRail } from "@/components/editorial-blog-rail";
+
+export function JournalSection() {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <article className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <p className="text-xs text-cyan-200/80">Featured</p>
-        <h2 className="mt-2 text-lg font-semibold text-white">Designing scroll choreography</h2>
-      </article>
-      <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="rounded-2xl border border-white/10 bg-black/30 p-4" />
-      ))}</div>
-    </div>
+    <EditorialRail
+      heading="From the journal"
+      featured={{
+        title: "Designing scroll choreography that people actually feel",
+        category: "Guide",
+        date: "Oct 14",
+        readTime: "12 min read",
+        author: { name: "Mara Okafor" },
+        cover: ["#6366f1", "#f472b6"],
+        href: "/blog/scroll-choreography",
+      }}
+      posts={[
+        { title: "Springs, not curves", category: "Craft", date: "Oct 09", readTime: "7 min", href: "/blog/springs" },
+        { title: "Shipping a design system in six weeks", category: "Case study", date: "Oct 02", readTime: "9 min" },
+      ]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -2142,29 +2297,44 @@ export function CollaborativeReview() {
   {
     slug: "split-contact-glass",
     name: "Split Contact Glass",
-    description: "Marketing narrative paired with a compact contact capture form.",
+    description:
+      "A contact section in two panes: a lit glass panel with how to reach the team and their live local time, and a form with topic chips, a counted message and a send button that confirms.",
     categorySlug: "contact-sections",
     tags: ["lead"],
     premium: false,
     trendingScore: 64,
     createdAt: "2026-03-02",
     animationKinds: ["hover"],
-    dependencies: ["framer-motion"],
+    dependencies: ["framer-motion", "lucide-react"],
     Preview: Previews.PreviewContactSplit,
+    previewShell: "plain",
+    props: [
+      { name: "heading", type: "string", description: "Heading on the glass panel." },
+      { name: "intro", type: "string", description: "Line under the heading." },
+      { name: "email", type: "string", defaultValue: "\"hello@studio.dev\"", description: "Contact email." },
+      { name: "location", type: "string", description: "Studio location." },
+      { name: "timeZone", type: "string", defaultValue: "\"Europe/Lisbon\"", description: "IANA zone for the live local time." },
+      { name: "replyTime", type: "string", description: "Response-time note." },
+      { name: "topics", type: "string[]", description: "Topic chips." },
+      { name: "onSubmit", type: "(values: { name: string; email: string; topic: string; message: string }) => Promise<void> | void", description: "Called on send; a promise shows the sending state." },
+      { name: "maxLength", type: "number", defaultValue: "500", description: "Message character limit." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { SplitContact } from "@/components/split-contact-glass";
 
-export function SplitContact() {
+export function ContactSection() {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <div className="rounded-3xl border border-white/10 bg-gradient-to-br from-cyan-500/15 to-fuchsia-500/10 p-6">
-        <p className="text-sm font-semibold text-white">Talk with us</p>
-      </div>
-      <motion.form whileTap={{ scale: 0.995 }} className="rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        {/* fields */}
-      </motion.form>
-    </div>
+    <SplitContact
+      email="hello@studio.dev"
+      location="Lisbon, Portugal"
+      timeZone="Europe/Lisbon"
+      topics={["Custom work", "Partnership", "Support"]}
+      onSubmit={async (values) => {
+        await fetch("/api/contact", { method: "POST", body: JSON.stringify(values) });
+      }}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -2185,10 +2355,21 @@ export function SplitContact() {
 
 import { motion } from "framer-motion";
 
+const NOISE =
+  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>";
+
 export function SvgNoise() {
   return (
-    <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950">
-      <motion.div aria-hidden className="absolute inset-0 opacity-40 mix-blend-screen" style={{ backgroundImage: "url(\\\"data:image/svg+xml,...feTurbulence...\\\")" }} animate={{ x: [0, -20, 0], y: [0, 10, 0] }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} />
+    <div className="relative h-80 overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950">
+      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.45),transparent_55%),radial-gradient(circle_at_80%_80%,rgba(236,72,153,0.35),transparent_50%)]" />
+      <motion.div
+        aria-hidden
+        className="absolute -inset-8 opacity-30 mix-blend-overlay"
+        style={{ backgroundImage: 'url("' + NOISE + '")' }}
+        animate={{ x: [0, -20, 0], y: [0, 10, 0] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+      />
+      <p className="absolute bottom-8 left-8 text-sm font-medium text-white/80">SVG turbulence noise field</p>
     </div>
   );
 }`,
@@ -4736,7 +4917,7 @@ const blobVariants = {
     transition: {
       duration: 14,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
@@ -4750,7 +4931,7 @@ const blob2Variants = {
     transition: {
       duration: 16,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
@@ -4763,7 +4944,7 @@ const blob3Variants = {
     transition: {
       duration: 20,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
@@ -4777,7 +4958,7 @@ const waveVariants = {
     transition: {
       duration: 22,
       repeat: Infinity,
-      ease: "easeInOut",
+      ease: "easeInOut" as const,
     },
   },
 };
@@ -5768,6 +5949,22 @@ export function Hero() {
 
 import { MotionLayerScroller } from "@/components/motion-layer-scroller";
 
+function BackgroundLayer() {
+  return <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#1e3a8a,transparent_60%)]" />;
+}
+
+function MidLayer() {
+  return <div className="absolute left-1/4 top-1/3 size-40 rounded-full bg-sky-400/30 blur-2xl" />;
+}
+
+function ForegroundLayer() {
+  return (
+    <div className="absolute inset-x-0 bottom-10 text-center text-2xl font-semibold text-white">
+      Depth on scroll
+    </div>
+  );
+}
+
 export function ParallaxScene() {
   return (
     <MotionLayerScroller
@@ -5822,11 +6019,25 @@ export function FeatureGrid() {
     Preview: Previews.PreviewBentoGridSkeleton,
     reactSource: `"use client";
 
-import { BentoGridSkeleton } from "@/components/bento-grid-skeleton";
+import { BentoGridSkeleton, type BentoSkeletonCard } from "@/components/bento-grid-skeleton";
 
-const cards = [
-  { id: "1", title: "Chat activity", tag: "Live", span: "2x1", skeletonType: "chat" },
-  { id: "2", title: "Dashboard", tag: "Stats", span: "1x1", skeletonType: "dashboard" },
+const cards: BentoSkeletonCard[] = [
+  {
+    id: "1",
+    title: "Chat activity",
+    description: "Live conversations streaming in while the data loads.",
+    tag: "Live",
+    span: "2x1",
+    skeletonType: "chat",
+  },
+  {
+    id: "2",
+    title: "Dashboard",
+    description: "Stats and charts sketched in before the numbers arrive.",
+    tag: "Stats",
+    span: "1x1",
+    skeletonType: "dashboard",
+  },
 ];
 
 export function SkeletonGrid() {
@@ -7189,6 +7400,602 @@ export function LinkPreview({
 }
 
 export default LinkPreview;`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "tick-slider",
+    name: "Tick Slider",
+    registryCliName: "tick-slider",
+    description:
+      "A value slider drawn as a row of fine tick marks that fill as you drag, swell into a soft wave under the pointer and read out a rolling number.",
+    categorySlug: "inputs-controls",
+    tags: ["slider", "range", "input", "ticks", "volume", "drag", "rolling number", "framer-motion"],
+    premium: false,
+    trendingScore: 168,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", description: "Controlled value." },
+      { name: "defaultValue", type: "number", defaultValue: "50", description: "Starting value when uncontrolled." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the snapped value while dragging and on key presses." },
+      { name: "onCommit", type: "(value: number) => void", description: "Called once when a drag or key press settles." },
+      { name: "min", type: "number", defaultValue: "0", description: "Lowest value." },
+      { name: "max", type: "number", defaultValue: "100", description: "Highest value." },
+      { name: "step", type: "number", defaultValue: "1", description: "Values snap to multiples of this." },
+      { name: "ticks", type: "number", defaultValue: "36", description: "How many tick marks the track is drawn with." },
+      { name: "label", type: "string", description: "Visible label above the track, also used as the accessible name." },
+      { name: "accent", type: "string", description: "Colour of the filled ticks and the number. Defaults to the text colour." },
+      { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Tick height and number size." },
+      { name: "showValue", type: "boolean", defaultValue: "true", description: "Show the rolling number beside the track." },
+      { name: "unit", type: "string", description: 'Suffix after the number, e.g. "%".' },
+      { name: "magnify", type: "number", defaultValue: "0.55", description: "How much ticks near the pointer grow. 0 turns the wave off." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables dragging and keys." },
+      { name: "className", type: "string", description: "Extra classes on the root." },
+    ],
+    Preview: Previews.PreviewTickSlider,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import * as React from "react";
+import { TickSlider } from "@/components/tick-slider";
+
+export function VolumeControl() {
+  const [volume, setVolume] = React.useState(64);
+
+  return (
+    <TickSlider
+      label="Volume"
+      value={volume}
+      onChange={setVolume}
+      unit="%"
+      ticks={40}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "time-scrubber",
+    name: "Time Scrubber",
+    registryCliName: "time-scrubber",
+    description:
+      "A time picker card where you drag, flick or scroll a ruler of minute ticks under a fixed needle, with momentum, snapping and a rolling clock readout.",
+    categorySlug: "inputs-controls",
+    tags: ["time picker", "scrubber", "ruler", "slider", "booking", "schedule", "drag", "momentum", "framer-motion"],
+    premium: false,
+    trendingScore: 163,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "number", description: "Controlled time in minutes since midnight (0–1439)." },
+      { name: "defaultValue", type: "number", defaultValue: "570", description: "Starting time when uncontrolled (570 = 9:30 AM)." },
+      { name: "onChange", type: "(minutes: number) => void", description: "Called with the snapped time whenever it changes." },
+      { name: "onCommit", type: "(minutes: number) => void", description: "Called once the ruler comes to rest." },
+      { name: "interval", type: "number", defaultValue: "15", description: "Minutes the ruler snaps to (5, 10, 15 or 30 read best)." },
+      { name: "format", type: '"12h" | "24h"', defaultValue: '"12h"', description: "Clock format for the readout and hour labels." },
+      { name: "accent", type: "string", defaultValue: '"#ef4444"', description: "Colour of the centre needle." },
+      { name: "density", type: "number", defaultValue: "1.6", description: "Pixels per minute on the ruler; larger spreads the hours out." },
+      { name: "label", type: "string", description: 'Caption above the time, e.g. "Pickup".' },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables dragging, wheel and keys." },
+      { name: "className", type: "string", description: "Extra classes on the card." },
+    ],
+    Preview: Previews.PreviewTimeScrubber,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import * as React from "react";
+import { TimeScrubber } from "@/components/time-scrubber";
+
+export function PickupTime() {
+  // minutes since midnight: 9:30 AM
+  const [time, setTime] = React.useState(9 * 60 + 30);
+
+  return (
+    <TimeScrubber
+      label="Pickup"
+      value={time}
+      onChange={setTime}
+      interval={15}
+      format="12h"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "slide-to-confirm",
+    name: "Slide to Confirm",
+    registryCliName: "slide-to-confirm",
+    description:
+      "A swipe-to-confirm pill: drag the knob across with rubber-band resistance, and it snaps home early or locks in, waits on your async action and morphs into a success state.",
+    categorySlug: "inputs-controls",
+    tags: ["slide to confirm", "swipe", "payment", "checkout", "confirm", "button", "drag", "async", "framer-motion"],
+    premium: false,
+    trendingScore: 172,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"Slide to confirm"', description: "Text inside the track before confirming; also the accessible name." },
+      { name: "successLabel", type: "string", defaultValue: '"Confirmed"', description: "Text shown once confirmed." },
+      { name: "pendingLabel", type: "string", defaultValue: '"Confirming"', description: "Text shown while onConfirm is pending." },
+      { name: "onConfirm", type: "() => void | Promise<unknown>", description: "Runs when the knob reaches the end. Return a promise to show a pending spinner; a rejected promise shakes the knob and slides it back." },
+      { name: "threshold", type: "number", defaultValue: "0.9", description: "How far (0–1) the knob must travel before letting go confirms." },
+      { name: "resetAfter", type: "number", defaultValue: "2200", description: "Return to the start this many ms after success. 0 keeps the success state." },
+      { name: "accent", type: "string", description: "Knob colour. Defaults to ink in light mode and white in dark mode." },
+      { name: "successColor", type: "string", defaultValue: '"#16a34a"', description: "Track colour once confirmed." },
+      { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Track height, knob size and text size." },
+      { name: "width", type: "number", description: "Track width in px. Defaults to 260 / 300 / 340 by size." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Locks the knob." },
+      { name: "className", type: "string", description: "Extra classes on the track." },
+    ],
+    Preview: Previews.PreviewSlideToConfirm,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SlideToConfirm } from "@/components/slide-to-confirm";
+
+async function payInvoice() {
+  const res = await fetch("/api/pay", { method: "POST" });
+  if (!res.ok) throw new Error("Payment failed");
+}
+
+export function PayButton() {
+  return (
+    <SlideToConfirm
+      label="Slide to pay $24"
+      pendingLabel="Paying"
+      successLabel="Paid"
+      onConfirm={payInvoice}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "emoji-reactions",
+    name: "Emoji Reactions",
+    registryCliName: "emoji-reactions",
+    description:
+      "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation.",
+    categorySlug: "inputs-controls",
+    tags: ["reactions", "emoji", "chat", "message", "picker", "counter", "social", "framer-motion"],
+    premium: false,
+    trendingScore: 166,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "message", type: "React.ReactNode", defaultValue: '"Shipped the new onboarding flow"', description: "Text in the message bubble. Pass null to show only the reactions." },
+      { name: "reactions", type: "{ emoji: string; count: number; reacted?: boolean }[]", defaultValue: "[🚀 3, 🔥 2]", description: "Starting reactions." },
+      { name: "emojis", type: "string[]", defaultValue: '["👍", "❤️", "😂", "🎉", "🔥", "🚀", "👀", "🙏"]', description: "Emojis offered in the picker." },
+      { name: "onChange", type: "(reactions: Reaction[]) => void", description: "Called whenever the reaction list changes." },
+      { name: "accent", type: "string", defaultValue: '"#5b8def"', description: "Ring and tint colour for reactions you've added." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewEmojiReactions,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { EmojiReactions, type Reaction } from "@/components/emoji-reactions";
+
+const initial: Reaction[] = [
+  { emoji: "🚀", count: 3 },
+  { emoji: "🔥", count: 2, reacted: true },
+];
+
+export function ReleaseNote() {
+  return (
+    <EmojiReactions
+      message="Shipped the new onboarding flow"
+      reactions={initial}
+      emojis={["👍", "❤️", "😂", "🎉", "🔥", "🚀", "👀", "🙏"]}
+      accent="#5b8def"
+      onChange={(reactions) => console.log(reactions)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "like-burst",
+    name: "Like Burst",
+    registryCliName: "like-burst",
+    description:
+      "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit.",
+    categorySlug: "inputs-controls",
+    tags: ["like", "heart", "button", "counter", "burst", "particles", "micro-interaction", "framer-motion"],
+    premium: false,
+    trendingScore: 168,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "count", type: "number", description: "Controlled like count." },
+      { name: "defaultCount", type: "number", defaultValue: "1299", description: "Starting count when uncontrolled." },
+      { name: "liked", type: "boolean", description: "Controlled liked state." },
+      { name: "defaultLiked", type: "boolean", defaultValue: "false", description: "Starting liked state when uncontrolled." },
+      { name: "onChange", type: "(liked: boolean, count: number) => void", description: "Called with the next liked state and count." },
+      { name: "color", type: "string", defaultValue: '"#ff3b5c"', description: "Heart, ring and particle colour." },
+      { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Button size." },
+      { name: "burst", type: "number", defaultValue: "10", description: "Particles in the burst; 0 turns it off." },
+      { name: "label", type: "string", defaultValue: '"Like"', description: "Accessible label; the count is appended." },
+      { name: "className", type: "string", description: "Extra classes on the button." },
+    ],
+    Preview: Previews.PreviewLikeBurst,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import * as React from "react";
+import { LikeBurst } from "@/components/like-burst";
+
+export function PostActions({ postId, likes, likedByMe }: { postId: string; likes: number; likedByMe: boolean }) {
+  return (
+    <LikeBurst
+      defaultCount={likes}
+      defaultLiked={likedByMe}
+      color="#ff3b5c"
+      onChange={(liked) => {
+        void fetch(\`/api/posts/\${postId}/like\`, { method: liked ? "POST" : "DELETE" });
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "toast-stack",
+    name: "Toast Stack",
+    registryCliName: "toast-stack",
+    description:
+      "Notifications that rest in a tidy stack, fan out into a list on hover or focus, and can be swiped away, with optional action buttons.",
+    categorySlug: "cards",
+    tags: ["toast", "notification", "snackbar", "stack", "swipe", "dismiss", "feedback", "framer-motion"],
+    premium: false,
+    trendingScore: 171,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "drag", "spring", "layout"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "toasts", type: "ToastItem[]", description: "Toasts in arrival order; the last sits at the front. Each has id, title, description?, type? (success | error | info) and action? ({ label })." },
+      { name: "onDismiss", type: "(id: string) => void", description: "Called when a toast is swiped away, closed, or dismissed with Escape." },
+      { name: "onAction", type: "(toast: ToastItem) => void", description: "Called when a toast's action button is pressed." },
+      { name: "position", type: '"top" | "bottom"', defaultValue: '"bottom"', description: "Which edge the stack grows from." },
+      { name: "expand", type: '"hover" | "always"', defaultValue: '"hover"', description: "Fan out on hover/focus, or stay fanned out." },
+      { name: "max", type: "number", defaultValue: "3", description: "How many toasts are drawn at once." },
+      { name: "width", type: "number", defaultValue: "340", description: "Toast width in px." },
+      { name: "className", type: "string", description: "Extra classes on the stack." },
+    ],
+    Preview: Previews.PreviewToastStack,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ToastStack, useToastStack } from "@/components/toast-stack";
+
+export function CheckoutNotifications() {
+  const { toasts, push, dismiss } = useToastStack();
+
+  async function pay() {
+    const ok = await fetch("/api/pay", { method: "POST" }).then((r) => r.ok);
+    push(
+      ok
+        ? { type: "success", title: "Payment received", description: "Receipt sent to your inbox." }
+        : { type: "error", title: "Payment declined", description: "Try another card.", action: { label: "Retry" } },
+    );
+  }
+
+  return (
+    <>
+      <button onClick={pay}>Pay now</button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <ToastStack
+          toasts={toasts}
+          onDismiss={dismiss}
+          onAction={(toast) => {
+            dismiss(toast.id);
+            void pay();
+          }}
+        />
+      </div>
+    </>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "one-time-code",
+    name: "One-Time Code",
+    registryCliName: "one-time-code",
+    description:
+      "A verification code input whose digits drop into their cells, shimmer while checking, shake on a wrong code and fill green on success.",
+    categorySlug: "login-forms",
+    tags: ["otp", "verification", "2fa", "pin", "code input", "auth", "paste", "framer-motion"],
+    premium: false,
+    trendingScore: 166,
+    createdAt: "2026-10-19",
+    animationKinds: ["type", "spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "length", type: "number", defaultValue: "6", description: "Number of cells." },
+      { name: "value", type: "string", description: "Controlled value. Omit to let the component keep its own state." },
+      { name: "defaultValue", type: "string", defaultValue: '""', description: "Initial value when uncontrolled." },
+      { name: "onChange", type: "(value: string) => void", description: "Called with the sanitised value on every change." },
+      { name: "onComplete", type: "(code: string) => void | boolean | Promise<boolean | void>", description: "Called once every cell is filled. Resolve true for the success wave, false to shake and clear." },
+      { name: "pattern", type: '"digits" | "alphanumeric"', defaultValue: '"digits"', description: "Which characters are accepted. Letters are upper-cased." },
+      { name: "groupAfter", type: "number", defaultValue: "3", description: "Show a separator after this many cells. 0 for none." },
+      { name: "accent", type: "string", description: "Colour of the caret and the focused cell ring. Defaults to ink (white in dark mode)." },
+      { name: "highlightActive", type: "boolean", defaultValue: "false", description: "Show the active cell even when the field is not focused, for demos." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables input." },
+      { name: "autoFocus", type: "boolean", defaultValue: "false", description: "Focus the field on mount." },
+      { name: "label", type: "string", defaultValue: '"Verification code"', description: "Accessible label for the field." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewOneTimeCode,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { OneTimeCode } from "@/components/one-time-code";
+
+async function verify(code: string) {
+  const res = await fetch("/api/verify", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+  return res.ok;
+}
+
+export function VerifyStep() {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="text-center">
+        <p className="font-semibold">Check your inbox</p>
+        <p className="text-sm text-neutral-500">We sent a 6-digit code to ana@studio.co</p>
+      </div>
+      <OneTimeCode length={6} groupAfter={3} onComplete={verify} autoFocus />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "upload-dropzone",
+    name: "Upload Dropzone",
+    registryCliName: "upload-dropzone",
+    description:
+      "A drag-and-drop upload card that lifts and marches its dashed edge while a file hovers, then lists each file with a type badge and a progress ring.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "dropzone", "drag and drop", "file input", "progress", "attachments", "framer-motion"],
+    premium: false,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "accept", type: "string", description: 'Same syntax as the file input accept attribute, e.g. "image/*,.pdf".' },
+      { name: "maxSize", type: "number", defaultValue: "5242880", description: "Largest file accepted, in bytes. Bigger files are listed as errors and the card shakes." },
+      { name: "multiple", type: "boolean", defaultValue: "true", description: "Accept several files at once." },
+      { name: "onFiles", type: "(files: File[]) => void", description: "Called with every batch of accepted files." },
+      { name: "onUpload", type: "(file: File, setProgress: (p: number) => void) => Promise<void>", description: "Upload one file and report progress from 0 to 1. Without it, uploads are simulated." },
+      { name: "initialFiles", type: "{ name: string; size: number; type?: string; progress?: number }[]", description: "Files shown on first render, such as ones already uploaded." },
+      { name: "title", type: "string", defaultValue: '"Drag a file here"', description: "Main line of the card." },
+      { name: "hint", type: "string", description: "Secondary line. Defaults to the size limit." },
+      { name: "accent", type: "string", defaultValue: '"#6d5cff"', description: "Tint and dashed edge colour while a file is dragged over." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Ignore drops and clicks." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewUploadDropzone,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { UploadDropzone } from "@/components/upload-dropzone";
+
+async function upload(file: File, setProgress: (p: number) => void) {
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload");
+    xhr.upload.onprogress = (e) => setProgress(e.loaded / e.total);
+    xhr.onload = () => (xhr.status < 300 ? resolve() : reject());
+    xhr.onerror = () => reject();
+    const body = new FormData();
+    body.append("file", file);
+    xhr.send(body);
+  });
+}
+
+export function Attachments() {
+  return (
+    <UploadDropzone
+      accept="image/*,video/*,.pdf"
+      maxSize={5 * 1024 * 1024}
+      onUpload={upload}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "hold-to-record",
+    name: "Hold to Record",
+    registryCliName: "hold-to-record",
+    description:
+      "A press-and-hold voice button that grows into a live waveform with a timer, cancels when you slide away, and settles into a playable voice note.",
+    categorySlug: "inputs-controls",
+    tags: ["voice note", "record", "audio", "microphone", "press and hold", "waveform", "chat", "framer-motion"],
+    premium: false,
+    trendingScore: 162,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "onRecorded", type: "(result: { durationMs: number; levels: number[] }) => void", description: "Called when a recording is kept. levels holds loudness samples from 0 to 1." },
+      { name: "onCancel", type: "() => void", description: "Called when a recording is cancelled by sliding left or pressing Escape." },
+      { name: "onDelete", type: "() => void", description: "Called when the kept voice note is deleted." },
+      { name: "maxDuration", type: "number", defaultValue: "60000", description: "Recording stops by itself after this many milliseconds." },
+      { name: "minDuration", type: "number", defaultValue: "400", description: "Holds shorter than this are ignored." },
+      { name: "useMicrophone", type: "boolean", defaultValue: "false", description: "Drive the waveform from the real microphone (asks for permission). Simulated otherwise." },
+      { name: "cancelDistance", type: "number", defaultValue: "90", description: "How far to slide left, in pixels, before releasing cancels." },
+      { name: "label", type: "string", defaultValue: '"Hold to record"', description: "Button label." },
+      { name: "accent", type: "string", defaultValue: '"#ef4444"', description: "Colour of the recording dot and the live waveform." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewHoldToRecord,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { HoldToRecord } from "@/components/hold-to-record";
+
+export function ChatComposer() {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <HoldToRecord
+        useMicrophone
+        maxDuration={120_000}
+        onRecorded={({ durationMs }) => {
+          console.log("Voice note", Math.round(durationMs / 1000), "s");
+        }}
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "cursor-buddy",
+    name: "Cursor Buddy",
+    registryCliName: "cursor-buddy",
+    description:
+      "A soft little character whose eyes follow the pointer across the page, sliding round its curved face, blinking now and then, flinching when you come close and dozing off when left alone.",
+    categorySlug: "motion-effects",
+    tags: ["eyes", "cursor", "follow", "mascot", "character", "playful", "empty state", "framer-motion"],
+    premium: false,
+    trendingScore: 172,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "shape", type: '"squircle" | "pill" | "circle"', defaultValue: '"squircle"', description: "Silhouette of the character." },
+      { name: "fill", type: '"light" | "dark" | string', defaultValue: '"light"', description: "Body colour: the light or dark preset, or any CSS colour." },
+      { name: "eyes", type: '"dots" | "slits" | "squares"', defaultValue: '"dots"', description: "Eye style." },
+      { name: "size", type: "number", defaultValue: "120", description: "Height of the body in px. The pill is wider than it is tall." },
+      { name: "follow", type: "number", defaultValue: "60", description: "How far the head turns towards the pointer, 0–100." },
+      { name: "sleepAfter", type: "number", defaultValue: "9000", description: "Fall asleep after this many ms without pointer movement. 0 keeps it awake." },
+      { name: "eyeColor", type: "string", description: "Eye colour. Defaults to ink on light bodies and white on dark ones." },
+      { name: "className", type: "string", description: "Classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewCursorBuddy,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CursorBuddy } from "@/components/cursor-buddy";
+
+export function EmptyInbox() {
+  return (
+    <div className="flex flex-col items-center gap-5 py-16 text-center">
+      <CursorBuddy shape="squircle" eyes="dots" size={96} follow={70} />
+      <div>
+        <p className="text-base font-medium text-neutral-900 dark:text-white">Nothing here yet</p>
+        <p className="text-sm text-neutral-500">New messages will land right here.</p>
+      </div>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "dot-sphere",
+    name: "Dot Sphere",
+    registryCliName: "dot-sphere",
+    description:
+      "A slowly turning sphere of dots drawn on canvas: move the pointer across it and the dots part and spring back, drag it to spin and let go to watch it coast.",
+    categorySlug: "motion-effects",
+    tags: ["canvas", "sphere", "dots", "globe", "particles", "repel", "drag", "interactive", "hero visual"],
+    premium: false,
+    trendingScore: 168,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "drag", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "dots", type: "number", defaultValue: "420", description: "Number of dots spread over the sphere." },
+      { name: "radius", type: "number", defaultValue: "130", description: "Sphere radius in px. The canvas adds room around it for dots pushed outwards." },
+      { name: "color", type: "string", description: "Dot colour. Defaults to the current text colour, so it follows your theme." },
+      { name: "repel", type: "number", defaultValue: "55", description: "How hard the pointer pushes dots away, 0–100." },
+      { name: "speed", type: "number", defaultValue: "30", description: "Idle spin speed, 0–100." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Let the pointer push dots and drag to spin the sphere." },
+      { name: "dotSize", type: "number", defaultValue: "3.4", description: "Base dot diameter in px; front dots draw larger, back dots smaller." },
+      { name: "className", type: "string", description: "Classes for the canvas element." },
+    ],
+    Preview: Previews.PreviewDotSphere,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { DotSphere } from "@/components/dot-sphere";
+
+export function GlobalHero() {
+  return (
+    <section className="grid items-center gap-10 py-20 md:grid-cols-2">
+      <div>
+        <h1 className="text-5xl font-semibold tracking-tight">Everywhere at once.</h1>
+        <p className="mt-4 max-w-md text-lg text-neutral-500">
+          Edge regions on every continent, one deploy away.
+        </p>
+      </div>
+      <div className="flex justify-center text-neutral-900 dark:text-white">
+        <DotSphere radius={160} dots={600} repel={60} speed={25} />
+      </div>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "dynamic-island",
+    name: "Dynamic Island",
+    registryCliName: "dynamic-island",
+    description:
+      "A black pill that morphs on a spring into whatever is happening, a running timer, the track that is playing or an incoming call, and opens into live controls when tapped.",
+    categorySlug: "cards",
+    tags: ["dynamic island", "pill", "morph", "timer", "music player", "notification", "call", "layout animation", "framer-motion"],
+    premium: false,
+    trendingScore: 170,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "state", type: '"idle" | "timer" | "music" | "call"', description: "Controlled activity shown in the island." },
+      { name: "defaultState", type: '"idle" | "timer" | "music" | "call"', defaultValue: '"timer"', description: "Starting activity when uncontrolled." },
+      { name: "onStateChange", type: "(state: IslandState) => void", description: "Called when the island changes activity (stop, decline, or a cycle step)." },
+      { name: "timerSeconds", type: "number", defaultValue: "300", description: "Length of the countdown in seconds. It really ticks." },
+      { name: "accent", type: "string", defaultValue: '"#ff9f0a"', description: "Accent colour for the timer and the music bars." },
+      { name: "cycle", type: "number", defaultValue: "0", description: "Uncontrolled only: step through `states` every this many ms. 0 stays put." },
+      { name: "states", type: "IslandState[]", defaultValue: '["timer", "music", "call"]', description: "Activities visited by `cycle`." },
+      { name: "track", type: "{ title: string; artist: string }", defaultValue: '{ title: "Midnight Drive", artist: "Neon Harbor" }', description: "Track shown in the music state." },
+      { name: "caller", type: "string", defaultValue: '"Ava Lin"', description: "Name shown in the call state." },
+      { name: "className", type: "string", description: "Classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewDynamicIsland,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import * as React from "react";
+import { DynamicIsland, type IslandState } from "@/components/dynamic-island";
+
+export function AppTopBar() {
+  const [activity, setActivity] = React.useState<IslandState>("timer");
+
+  return (
+    <header className="flex justify-center pt-3">
+      <DynamicIsland
+        state={activity}
+        onStateChange={setActivity}
+        timerSeconds={25 * 60}
+        accent="#ff9f0a"
+        track={{ title: "Midnight Drive", artist: "Neon Harbor" }}
+      />
+    </header>
+  );
+}`,
     tailwindSource: tw,
   },
 ];

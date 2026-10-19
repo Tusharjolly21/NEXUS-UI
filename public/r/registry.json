@@ -185,17 +185,24 @@
       "name": "hero-aurora-spotlight",
       "type": "registry:component",
       "title": "Aurora Hero Spotlight",
-      "description": "Cursor-reactive spotlight layered over an aurora field for launch heroes.",
+      "description": "A launch hero on a slow aurora: a soft spotlight follows the pointer, the headline catches the light, and a glass product card rises underneath.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/hero-aurora-spotlight.tsx",
+          "path": "next-ui/hero-aurora-spotlight/hero-aurora-spotlight.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/hero-aurora-spotlight/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -203,17 +210,24 @@
       "name": "bento-signal-grid",
       "type": "registry:component",
       "title": "Signal Bento Grid",
-      "description": "Animated bento tiles with breathing gradients for product metrics.",
+      "description": "A monitoring bento: a live latency chart, 30 days of uptime bars, a request counter that counts up in view, and edge-region health.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/bento-signal-grid.tsx",
+          "path": "next-ui/bento-signal-grid/bento-signal-grid.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/bento-signal-grid/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -257,14 +271,23 @@
       "name": "orbit-footer",
       "type": "registry:component",
       "title": "Orbit Footer",
-      "description": "Compact footer with balanced columns and developer-first links.",
-      "dependencies": [],
+      "description": "A complete site footer: brand and newsletter signup, link columns with badges, a live status pill and a giant ghost wordmark that rises into view.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/orbit-footer.tsx",
+          "path": "next-ui/orbit-footer/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/orbit-footer/orbit-footer.tsx",
           "type": "registry:component"
         }
       ]
@@ -273,17 +296,24 @@
       "name": "depth-testimonials",
       "type": "registry:component",
       "title": "Depth Testimonials",
-      "description": "Stacked testimonial planes with staggered motion reveals.",
+      "description": "Testimonials stacked in depth: the front card reads clearly, the next wait behind it, and cycling sends the front card to the back. Auto-advances and pauses on hover.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/depth-testimonials.tsx",
+          "path": "next-ui/depth-testimonials/depth-testimonials.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/depth-testimonials/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -310,17 +340,24 @@
       "name": "beam-sweep-field",
       "type": "registry:component",
       "title": "Beam Sweep Field",
-      "description": "Slow sweeping light column for cinematic section backgrounds.",
+      "description": "A cinematic dark backdrop where light columns sweep across a fine grid over a horizon glow, with a ready-made hero you can replace with any content.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/beam-sweep-field.tsx",
+          "path": "next-ui/beam-sweep-field/beam-sweep-field.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/beam-sweep-field/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -346,17 +383,24 @@
       "name": "glass-login-stack",
       "type": "registry:component",
       "title": "Glass Login Stack",
-      "description": "Minimal glass authentication panel with crisp focus states.",
+      "description": "A frosted login card on a slow aurora with ghost cards stacked behind for depth: passkey first, then email and password, with a remember switch and a pending-to-welcome button.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/glass-login-stack.tsx",
+          "path": "next-ui/glass-login-stack/glass-login-stack.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glass-login-stack/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -364,16 +408,23 @@
       "name": "split-signup-convert",
       "type": "registry:component",
       "title": "Split Signup Convert",
-      "description": "Two-column signup with narrative panel and compact fields.",
+      "description": "A two-panel signup: the product's value on a lit aurora panel, and a short form with SSO, a live password-strength meter and a pending-to-done button.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/split-signup-convert.tsx",
+          "path": "next-ui/split-signup-convert/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/split-signup-convert/split-signup-convert.tsx",
           "type": "registry:component"
         }
       ]
@@ -397,6 +448,10 @@
       ],
       "files": [
         {
+          "path": "next-ui/signup-form/brand-icons.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/signup-form/index.ts",
           "type": "registry:lib"
         },
@@ -418,16 +473,23 @@
       "name": "workbench-sidebar",
       "type": "registry:component",
       "title": "Workbench Sidebar",
-      "description": "Dense sidebar navigation tuned for dashboards and tools.",
+      "description": "A product sidebar with a workspace switcher, search, a spring-sliding active highlight, projects, a usage meter and the signed-in user — collapses to an icon rail.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/workbench-sidebar.tsx",
+          "path": "next-ui/workbench-sidebar/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/workbench-sidebar/workbench-sidebar.tsx",
           "type": "registry:component"
         }
       ]
@@ -436,16 +498,23 @@
       "name": "pulse-dashboard-kpis",
       "type": "registry:component",
       "title": "Pulse Dashboard KPIs",
-      "description": "KPI strip with micro-hover lifts and soft chart placeholders.",
+      "description": "A KPI strip with a 7d/30d/90d switcher: each metric gets a delta chip that knows when lower is better, and a sparkline that redraws as you change period.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/pulse-dashboard-kpis.tsx",
+          "path": "next-ui/pulse-dashboard-kpis/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/pulse-dashboard-kpis/pulse-dashboard-kpis.tsx",
           "type": "registry:component"
         }
       ]
@@ -454,16 +523,22 @@
       "name": "orbital-loader",
       "type": "registry:component",
       "title": "Orbital Loader",
-      "description": "Dual counter-rotating rings with breathing inner glow.",
+      "description": "A loader with presence: counter-rotating orbits, a glowing dot circling the ring, an arc that sweeps or fills to progress, and rotating status lines.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/orbital-loader.tsx",
+          "path": "next-ui/orbital-loader/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/orbital-loader/orbital-loader.tsx",
           "type": "registry:component"
         }
       ]
@@ -472,16 +547,23 @@
       "name": "milestone-timeline",
       "type": "registry:component",
       "title": "Milestone Timeline",
-      "description": "Vertical roadmap timeline with glowing nodes.",
+      "description": "A roadmap timeline: dates on the left, a rail that fills to the milestone in progress, and nodes that read done, current (pulsing) or upcoming at a glance.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/milestone-timeline.tsx",
+          "path": "next-ui/milestone-timeline/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/milestone-timeline/milestone-timeline.tsx",
           "type": "registry:component"
         }
       ]
@@ -490,16 +572,23 @@
       "name": "lattice-feature-grid",
       "type": "registry:component",
       "title": "Lattice Feature Grid",
-      "description": "Four-up feature grid with scroll reveals and glass tiles.",
+      "description": "A four-up feature grid on a hairline lattice, where each tile carries a small live illustration of the feature it describes.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/lattice-feature-grid.tsx",
+          "path": "next-ui/lattice-feature-grid/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/lattice-feature-grid/lattice-feature-grid.tsx",
           "type": "registry:component"
         }
       ]
@@ -508,17 +597,23 @@
       "name": "motion-faq-disclosure",
       "type": "registry:component",
       "title": "Motion FAQ Disclosure",
-      "description": "Lightweight FAQ with directional affordance and animated answers.",
+      "description": "A two-column FAQ: heading and a support card on the left, a spring-animated accessible accordion on the right.",
       "dependencies": [
         "framer-motion",
+        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/motion-faq-disclosure.tsx",
+          "path": "next-ui/motion-faq-disclosure/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/motion-faq-disclosure/motion-faq-disclosure.tsx",
           "type": "registry:component"
         }
       ]
@@ -724,15 +819,24 @@
       "name": "editorial-blog-rail",
       "type": "registry:component",
       "title": "Editorial Blog Rail",
-      "description": "Featured article plus compact secondary headlines for content hubs.",
-      "dependencies": [],
+      "description": "A magazine-style blog rail: one featured story with generated cover art beside a numbered list of recent posts.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/editorial-blog-rail.tsx",
+          "path": "next-ui/editorial-blog-rail/editorial-blog-rail.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/editorial-blog-rail/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -740,16 +844,23 @@
       "name": "split-contact-glass",
       "type": "registry:component",
       "title": "Split Contact Glass",
-      "description": "Marketing narrative paired with a compact contact capture form.",
+      "description": "A contact section in two panes: a lit glass panel with how to reach the team and their live local time, and a form with topic chips, a counted message and a send button that confirms.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "lucide-react",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/split-contact-glass.tsx",
+          "path": "next-ui/split-contact-glass/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/split-contact-glass/split-contact-glass.tsx",
           "type": "registry:component"
         }
       ]
@@ -1930,6 +2041,302 @@
       ]
     },
     {
+      "name": "tick-slider",
+      "type": "registry:component",
+      "title": "Tick Slider",
+      "description": "A value slider drawn as a row of fine tick marks that fill as you drag, swell into a soft wave under the pointer and read out a rolling number.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/tick-slider/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/tick-slider/tick-slider.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "time-scrubber",
+      "type": "registry:component",
+      "title": "Time Scrubber",
+      "description": "A time picker card where you drag, flick or scroll a ruler of minute ticks under a fixed needle, with momentum, snapping and a rolling clock readout.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/time-scrubber/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/time-scrubber/time-scrubber.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "slide-to-confirm",
+      "type": "registry:component",
+      "title": "Slide to Confirm",
+      "description": "A swipe-to-confirm pill: drag the knob across with rubber-band resistance, and it snaps home early or locks in, waits on your async action and morphs into a success state.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/slide-to-confirm/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/slide-to-confirm/slide-to-confirm.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "emoji-reactions",
+      "type": "registry:component",
+      "title": "Emoji Reactions",
+      "description": "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/emoji-reactions/emoji-reactions.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/emoji-reactions/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "like-burst",
+      "type": "registry:component",
+      "title": "Like Burst",
+      "description": "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/like-burst/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/like-burst/like-burst.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "toast-stack",
+      "type": "registry:component",
+      "title": "Toast Stack",
+      "description": "Notifications that rest in a tidy stack, fan out into a list on hover or focus, and can be swiped away, with optional action buttons.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/toast-stack/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/toast-stack/toast-stack.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "one-time-code",
+      "type": "registry:component",
+      "title": "One-Time Code",
+      "description": "A verification code input whose digits drop into their cells, shimmer while checking, shake on a wrong code and fill green on success.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/one-time-code/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/one-time-code/one-time-code.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "upload-dropzone",
+      "type": "registry:component",
+      "title": "Upload Dropzone",
+      "description": "A drag-and-drop upload card that lifts and marches its dashed edge while a file hovers, then lists each file with a type badge and a progress ring.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/upload-dropzone/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/upload-dropzone/upload-dropzone.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "hold-to-record",
+      "type": "registry:component",
+      "title": "Hold to Record",
+      "description": "A press-and-hold voice button that grows into a live waveform with a timer, cancels when you slide away, and settles into a playable voice note.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/hold-to-record/hold-to-record.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/hold-to-record/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "cursor-buddy",
+      "type": "registry:component",
+      "title": "Cursor Buddy",
+      "description": "A soft little character whose eyes follow the pointer across the page, sliding round its curved face, blinking now and then, flinching when you come close and dozing off when left alone.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cursor-buddy/cursor-buddy.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cursor-buddy/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "dot-sphere",
+      "type": "registry:component",
+      "title": "Dot Sphere",
+      "description": "A slowly turning sphere of dots drawn on canvas: move the pointer across it and the dots part and spring back, drag it to spin and let go to watch it coast.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/dot-sphere/dot-sphere.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dot-sphere/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "dynamic-island",
+      "type": "registry:component",
+      "title": "Dynamic Island",
+      "description": "A black pill that morphs on a spring into whatever is happening, a running timer, the track that is playing or an incoming call, and opens into live controls when tapped.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/dynamic-island/dynamic-island.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dynamic-island/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "pricing-section",
       "type": "registry:component",
       "title": "Pricing Section",
@@ -1966,8 +2373,7 @@
       "dependencies": [
         "react",
         "framer-motion",
-        "react-fast-marquee",
-        "react-icons"
+        "react-fast-marquee"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",

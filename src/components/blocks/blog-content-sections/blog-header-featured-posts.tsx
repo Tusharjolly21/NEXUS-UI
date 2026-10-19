@@ -191,7 +191,7 @@ const articles: Article[] = [
 
 export function BlogHeaderFeaturedPosts({
   className,
-  eyebrow = "Nexus journal",
+  eyebrow = "The Northfield journal",
   title = "Design notes for faster launches",
   description = "Practical writing on component systems, polished motion, frontend craft, and launch-ready product pages.",
 }: BlogHeaderFeaturedPostsProps) {

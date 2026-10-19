@@ -1,10 +1,9 @@
-/** How a component moves, grouped into the filters people look for. */
-export type Interaction = "hover" | "scroll" | "spring" | "glow" | "3d";
+import type { TileFit } from "@/lib/catalog/tile-fit";
+
+/** How you interact with a component — the verbs people filter by. */
+export type Interaction = "hover" | "press" | "drag" | "scroll" | "type" | "3d" | "loop";
 
 export type TileTint = "violet" | "sky" | "peach" | "mint" | "butter" | "pink";
-
-/** Bento footprint, sized to what the component needs. */
-export type TileShape = "small" | "wide" | "tall" | "large";
 
 /** Everything the gallery and the detail modal need about one component (plain, serialisable data). */
 export type GalleryItem = {
@@ -18,28 +17,29 @@ export type GalleryItem = {
   /** Export name in `@/registry/component-previews`, loaded lazily on the client. */
   exportName: string;
   tint: TileTint;
-  shape: TileShape;
-  /** Layout width the preview gets before it is scaled into the tile; smaller reads larger. */
-  canvas: number;
+  /** Where the component draws and how big its tile is at each breakpoint. */
+  fit: TileFit;
   /** shadcn registry name: `npx shadcn@latest add @nexus-labs/<install>`. */
   install: string;
+  /** Added in the last few weeks. */
+  isNew: boolean;
+  /**
+   * Ghost-cursor demo the tile plays on its own: `wander` glides over hover effects, `drag` pulls a
+   * handle across. Null when the preview already demonstrates itself or needs no pointer.
+   */
+  demo: "wander" | "drag" | null;
 };
 
 export const INTERACTION_FILTERS: { value: Interaction | "all"; label: string }[] = [
   { value: "all", label: "All" },
   { value: "hover", label: "Hover" },
+  { value: "press", label: "Press" },
+  { value: "drag", label: "Drag" },
   { value: "scroll", label: "Scroll" },
-  { value: "spring", label: "Spring" },
-  { value: "glow", label: "Glow" },
+  { value: "type", label: "Type" },
   { value: "3d", label: "3D" },
+  { value: "loop", label: "Ambient" },
 ];
-
-export const SHAPE_CLASSES: Record<TileShape, string> = {
-  small: "col-span-1 row-span-1",
-  wide: "col-span-2 row-span-1",
-  tall: "col-span-1 row-span-2",
-  large: "col-span-2 row-span-2",
-};
 
 export const TINT_CLASSES: Record<TileTint, string> = {
   violet: "bg-tint-violet",

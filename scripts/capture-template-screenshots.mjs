@@ -8,6 +8,13 @@
  * 
  * Usage:
  *   node scripts/capture-template-screenshots.mjs
+ *   SITE_URL=http://localhost:3000 SLUGS=orbit-ai-page,ai-startup-forge node scripts/capture-template-screenshots.mjs
+ *
+ * Env:
+ *   SITE_URL                   where the live previews are served (default: production)
+ *   SLUGS                      comma-separated subset of templates to capture
+ *   PUPPETEER_EXECUTABLE_PATH  use an installed Chromium instead of Puppeteer's download
+ *   SECTION_SUFFIX             file suffix for section shots (default "-v2", matching the catalog)
  * 
  * This will:
  *   1. Visit each template's live preview page
@@ -24,9 +31,12 @@ import path from "path";
 
 const BASE_URL = process.env.SITE_URL || "https://www.nexus-ui.com";
 const OUTPUT_DIR = path.join(process.cwd(), "public", "templates");
+const SECTION_SUFFIX = process.env.SECTION_SUFFIX ?? "-v2";
+const ONLY = (process.env.SLUGS || "").split(",").map((s) => s.trim()).filter(Boolean);
 
 // All template slugs from the catalog
 const TEMPLATE_SLUGS = [
+  "launchfolio-portfolio",
   "noir-studio",
   "nexus-ai-launch",
   "saas-launch-aurora",
@@ -47,8 +57,8 @@ const TEMPLATE_SLUGS = [
 ];
 
 // Section scroll positions (percentage of page height)
-// These capture different parts of the landing page
-const SECTION_POSITIONS = [0, 0.25, 0.5, 0.75];
+// These capture different parts of the landing page (the hero already has its own shot)
+const SECTION_POSITIONS = [0.16, 0.36, 0.56, 0.76];
 
 async function captureTemplate(browser, slug) {
   const dir = path.join(OUTPUT_DIR, slug);
@@ -61,9 +71,11 @@ async function captureTemplate(browser, slug) {
   await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
 
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 30000 });
-    // Wait for animations to settle
-    await new Promise((r) => setTimeout(r, 2000));
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 90000 });
+    // Hide the Next.js dev-tools badge when capturing from a dev server
+    await page.addStyleTag({ content: "nextjs-portal{display:none!important}" });
+    // Wait for entrance animations and hero demos to settle
+    await new Promise((r) => setTimeout(r, 3500));
 
     // Hero screenshot (top of page, used for listing)
     await page.screenshot({
@@ -75,21 +87,27 @@ async function captureTemplate(browser, slug) {
     console.log(`  ✓ hero.webp`);
 
     // Get total page height
-    const pageHeight = await page.evaluate(() => document.body.scrollHeight);
+    const pageHeight = await page.evaluate(() => document.documentElement.scrollHeight);
 
-    // Section screenshots
+    // Section screenshots. Walk down a viewport at a time so in-view animations fire the way they do
+    // for a visitor, instead of jumping straight to each position and catching them mid-reveal.
+    let y = 0;
     for (let i = 0; i < SECTION_POSITIONS.length; i++) {
-      const scrollY = Math.floor(pageHeight * SECTION_POSITIONS[i]);
-      await page.evaluate((y) => window.scrollTo(0, y), scrollY);
-      await new Promise((r) => setTimeout(r, 800)); // Wait for scroll animations
+      const target = Math.min(Math.floor(pageHeight * SECTION_POSITIONS[i]), pageHeight - 900);
+      while (y < target) {
+        y = Math.min(target, y + 700);
+        await page.evaluate((top) => window.scrollTo(0, top), y);
+        await new Promise((r) => setTimeout(r, 350));
+      }
+      await page.evaluate((top) => window.scrollTo(0, top), target);
+      await new Promise((r) => setTimeout(r, 2200));
 
       await page.screenshot({
-        path: path.join(dir, `section-${i + 1}.webp`),
+        path: path.join(dir, `section-${i + 1}${SECTION_SUFFIX}.webp`),
         type: "webp",
         quality: 85,
-        clip: { x: 0, y: 0, width: 1440, height: 900 },
       });
-      console.log(`  ✓ section-${i + 1}.webp`);
+      console.log(`  ✓ section-${i + 1}${SECTION_SUFFIX}.webp`);
     }
   } catch (err) {
     console.error(`  ✗ Failed: ${err.message}`);
@@ -104,10 +122,13 @@ async function main() {
 
   const browser = await puppeteer.launch({
     headless: true,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+    protocolTimeout: 240000,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
-  for (const slug of TEMPLATE_SLUGS) {
+  const slugs = ONLY.length ? TEMPLATE_SLUGS.filter((s) => ONLY.includes(s)) : TEMPLATE_SLUGS;
+  for (const slug of slugs) {
     await captureTemplate(browser, slug);
   }
 

@@ -4,14 +4,14 @@ const Footer = () => {
     return (
         <footer>
             <div className="info">
-                <p>More ways to shop: Find an Apple Store or other retailer near you. Or call 000800 040 1966.</p>
-                <img src="/logo.svg" alt ="Apple logo"/>
+                <p>More ways to shop: visit a Halcyon studio or an authorised retailer near you, or call 1-800-555-0142.</p>
+                <img src="/halcyon-logo.svg" alt="Halcyon" />
             </div>
 
             <hr />
 
             <div className="links">
-                <p>Copyright © 2024 Apple Inc. All rights reserved.</p>
+                <p>Copyright © 2026 Halcyon Computing. All rights reserved.</p>
 
                 <ul>
                     {footerLinks.map(({label, link }) => (

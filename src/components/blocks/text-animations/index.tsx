@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Code2, Layers3, Sparkles, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TextAnimationBlurFadeIn } from "./text-animation-blur-fade-in";
 import { TextAnimationFlippingWords } from "./text-animation-flipping-words";
@@ -21,107 +20,69 @@ export type { TextGenerateTypewriterProps } from "./text-generate-typewriter";
 export { TypewriterHeading } from "./typewriter-heading";
 export type { TypewriterHeadingProps } from "./typewriter-heading";
 
-const cardData = [
-  {
-    title: "Flipping Words",
-    description: "Words swap with letter-blur and a morphing pill/dot accent.",
-    icon: Sparkles,
-  },
-  {
-    title: "Typewriter Effect",
-    description: "Looping character-by-character copy for headings.",
-    icon: Code2,
-  },
-  {
-    title: "Blur Fade In",
-    description: "Staggered word, line, or character entrances.",
-    icon: Layers3,
-  },
-  {
-    title: "Generate Typewriter",
-    description: "AI-style typing with optional low-volume sound.",
-    icon: Zap,
-  },
+const SPECIMENS = [
+  { title: "Flipping words", use: "Rotating the noun in a hero line." },
+  { title: "Typewriter", use: "Cycling short claims under a headline." },
+  { title: "Blur fade in", use: "Revealing a paragraph as it scrolls in." },
+  { title: "Generate", use: "Streaming an assistant's answer, with optional key sounds." },
 ];
 
 export function TextAnimationsBlock({ className, muteSound = false }: { className?: string; muteSound?: boolean }) {
   return (
     <section
       className={cn(
-        "min-h-full w-full overflow-y-auto bg-zinc-950 p-4 text-white sm:p-6 lg:p-8",
+        "min-h-full w-full bg-[#f6f6f4] px-4 py-14 text-zinc-950 dark:bg-zinc-950 dark:text-white sm:px-6 sm:py-20 lg:px-8",
         className,
       )}
     >
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-6 rounded-[2rem] border border-white/10 bg-white/[0.03] p-4 shadow-2xl shadow-black/30 sm:p-6 lg:grid-cols-[0.88fr_1.12fr] lg:p-8">
-          <div className="flex min-h-[420px] flex-col justify-between rounded-[1.5rem] border border-zinc-200 bg-[#f7f7f8] p-6 text-zinc-950 shadow-2xl shadow-black/20 sm:p-8">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-blue-500/80">
-                Text Animations
-              </p>
-              <TextAnimationFlippingWords
-                prefix="Built with"
-                words={["React", "TypeScript", "Tailwind", "Vite"]}
-                dotColor="#18181b"
-                className="mt-8 text-4xl text-zinc-950 sm:text-5xl lg:text-6xl"
-              />
-              <p className="mt-6 max-w-xl text-base leading-7 text-white/58 sm:text-lg">
-                Create landing page copy that moves with intent: smooth reveal,
-                typewriter, and generation-style text patterns.
-              </p>
-            </div>
-            <div className="mt-10 flex flex-wrap items-center gap-3 text-sm text-zinc-500">
-              {["Hero pages", "SaaS sections", "Storytelling"].map((item) => (
-                <span key={item} className="rounded-full border border-zinc-200 bg-white px-3 py-1.5 shadow-sm">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <PreviewTile index={0}>
-              <TextAnimationFlippingWords
-                prefix="Built with"
-                words={["React", "TypeScript", "Tailwind", "Vite"]}
-                className="text-2xl text-white sm:text-3xl"
-              />
-            </PreviewTile>
-            <PreviewTile index={1}>
-              <TextAnimationTypewriterEffect
-                texts={["Ship components.", "Write less CSS.", "Launch faster."]}
-                delay={250}
-                className="text-2xl text-white sm:text-3xl"
-              />
-            </PreviewTile>
-            <PreviewTile index={2}>
-              <PhoneMockup />
-            </PreviewTile>
-            <PreviewTile index={3}>
-              <TextGenerateTypewriter
-                text="Nexus-ui is preparing a polished section with animated copy, clear hierarchy, and production-ready motion."
-                startOnView
-                typingSpeed={48}
-                muted={muteSound}
-                className="min-h-[260px] rounded-2xl p-4"
-              />
-            </PreviewTile>
-          </div>
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <TextAnimationFlippingWords
+            prefix="Copy that"
+            words={["lands.", "moves.", "sells.", "sticks."]}
+            dotColor="#ff5a36"
+            className="text-[44px] leading-[1.02] text-zinc-950 dark:text-white sm:text-6xl lg:text-7xl"
+          />
+          <p className="max-w-sm text-pretty text-[15px] leading-6 text-zinc-600 dark:text-zinc-400 lg:pb-2">
+            Four text treatments for headlines and paragraphs. Each one holds its layout while it animates and
+            settles to plain text when reduced motion is on.
+          </p>
         </div>
 
-        <div className="mt-6 grid gap-4 md:grid-cols-4">
-          {cardData.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4">
-                <div className="grid size-10 place-items-center rounded-xl bg-white text-zinc-950">
-                  <Icon className="size-4" />
-                </div>
-                <h3 className="mt-4 text-lg font-semibold">{item.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-white/54">{item.description}</p>
-              </div>
-            );
-          })}
+        <div className="mt-10 grid gap-3 sm:mt-14 md:grid-cols-2">
+          <Specimen index={0}>
+            <TextAnimationFlippingWords
+              prefix="Ship it on"
+              words={["Monday", "a Friday", "your terms"]}
+              dotColor="#ff5a36"
+              className="text-[28px] text-zinc-950 dark:text-white sm:text-4xl"
+            />
+          </Specimen>
+          <Specimen index={1}>
+            <TextAnimationTypewriterEffect
+              texts={["Preview every branch.", "Roll back in one click.", "Sleep through deploys."]}
+              delay={600}
+              className="text-[22px] text-zinc-950 dark:text-white sm:text-[28px]"
+            />
+          </Specimen>
+          <Specimen index={2}>
+            <TextAnimationBlurFadeIn
+              text="Good interfaces don't announce themselves. They answer the question you were about to ask, then get out of the way."
+              stagger={0.03}
+              once={false}
+              repeat
+              className="text-[19px] leading-[1.45] text-zinc-800 dark:text-zinc-200 sm:text-[22px]"
+            />
+          </Specimen>
+          <Specimen index={3} flush>
+            <TextGenerateTypewriter
+              text="Your Q3 churn rose 1.8 points, almost entirely from annual plans that renewed in August. Most of those accounts never invited a second teammate."
+              startOnView
+              typingSpeed={34}
+              muted={muteSound}
+              className="h-full w-full rounded-[18px] border-0 shadow-none"
+            />
+          </Specimen>
         </div>
       </div>
     </section>
@@ -130,81 +91,41 @@ export function TextAnimationsBlock({ className, muteSound = false }: { classNam
 
 export function TextAnimationsBlockPreview() {
   return (
-    <div className="relative flex h-[320px] w-full items-center overflow-hidden rounded-3xl bg-[#f7f7f8] px-8">
-      <div className="w-full origin-left scale-[0.72] sm:scale-[0.78]">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-[#f6f6f4]">
+      <div data-tile-focus className="w-[640px] shrink-0">
+        <p className="text-[15px] font-medium text-zinc-500">Changelog</p>
         <TypewriterHeading
-          text="Motion-native interfaces."
-          description="Typewriter headings for polished hero sections."
-          typingSpeed={54}
-          startDelay={120}
+          text="Release notes people read."
+          description="Type out the headline, hold it, then let the summary settle in underneath."
+          typingSpeed={70}
+          startDelay={200}
+          cursorColor="#ff5a36"
           loop
+          className="mt-3"
         />
       </div>
     </div>
   );
 }
 
-function PreviewTile({ children, index }: { children: React.ReactNode; index: number }) {
-  const meta = cardData[index];
-  const Icon = meta.icon;
+function Specimen({ children, index, flush = false }: { children: React.ReactNode; index: number; flush?: boolean }) {
+  const meta = SPECIMENS[index];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 18 }}
+      initial={{ opacity: 0, y: 14 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="flex min-h-[260px] flex-col justify-between overflow-hidden rounded-[1.5rem] border border-white/10 bg-white/[0.055] p-5 shadow-xl shadow-black/15"
+      transition={{ delay: index * 0.06, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="flex min-h-[260px] flex-col rounded-[22px] border border-zinc-200/80 bg-white p-2 dark:border-white/10 dark:bg-white/[0.03]"
     >
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold text-white">{meta.title}</p>
-          <p className="mt-1 text-xs text-white/42">{meta.description}</p>
-        </div>
-        <div className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-blue-200">
-          <Icon className="size-4" />
-        </div>
+      <div className="flex items-baseline gap-3 px-3 pb-1 pt-3">
+        <span className="font-mono text-[12px] text-zinc-400 dark:text-zinc-500">0{index + 1}</span>
+        <p className="text-[14px] font-semibold text-zinc-900 dark:text-white">{meta.title}</p>
+        <p className="hidden truncate text-[13px] text-zinc-500 sm:block dark:text-zinc-400">{meta.use}</p>
       </div>
-      <div className="flex flex-1 items-center">{children}</div>
+      <div className={cn("flex flex-1 items-center", flush ? "pt-2" : "px-4 pb-6 pt-4 sm:px-6")}>{children}</div>
     </motion.div>
-  );
-}
-
-function PhoneMockup() {
-  const items = [
-    ["🚀", "Getting Started", "Build your first animation in minutes"],
-    ["⚡", "Advanced Techniques", "Flip, blur, and generate with motion"],
-    ["⚙️", "Performance Tips", "Keep renders smooth and responsive"],
-  ];
-
-  return (
-    <div className="mx-auto w-full max-w-[190px] rounded-[2.2rem] border-[10px] border-black bg-white p-3 text-zinc-950 shadow-2xl">
-      <div className="mx-auto mb-4 h-4 w-16 rounded-full bg-black" />
-      <div className="space-y-3">
-        {items.map(([icon, title, text], index) => (
-          <motion.div
-            key={title}
-            initial={{ opacity: 0, y: 18, filter: "blur(8px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            transition={{ delay: 0.2 + index * 0.18, duration: 0.55 }}
-            className="rounded-2xl border border-zinc-200 bg-white p-3 shadow-lg shadow-zinc-950/10"
-          >
-            <div className="flex gap-2">
-              <span>{icon}</span>
-              <div>
-                <p className="text-sm font-semibold">{title}</p>
-                <p className="mt-1 text-xs leading-5 text-zinc-500">{text}</p>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      <div className="mt-5 flex justify-center gap-1.5">
-        <span className="h-1.5 w-6 rounded-full bg-blue-500" />
-        <span className="size-1.5 rounded-full bg-zinc-300" />
-        <span className="size-1.5 rounded-full bg-zinc-300" />
-      </div>
-    </div>
   );
 }
 

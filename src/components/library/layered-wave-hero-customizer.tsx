@@ -59,22 +59,19 @@ export function LayeredWaveHeroCustomizer() {
       >
         <div className="flex h-full items-center px-6 sm:px-10 lg:px-16">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-white/55">
-              Layered wave background
-            </p>
-            <h2 className="mt-5 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-7xl">
-              A calmer hero for launches that need atmosphere.
+            <p className="text-[14px] font-medium text-white/70">Halftone Conference · Lisbon · March 12–14</p>
+            <h2 className="mt-5 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-7xl">
+              Three days on the craft of calm software.
             </h2>
-            <p className="mt-6 max-w-2xl text-base leading-7 text-white/66 sm:text-lg">
-              Gradient wave layers drift at different speeds to create soft depth
-              behind landing pages, SaaS heroes, portfolio intros, and event banners.
+            <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-white/70 sm:text-lg">
+              Talks, workshops and long lunches with the people who build the tools you open every day. 400 seats.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <button className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-black/20">
-                Join waitlist
+              <button type="button" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-black/20">
+                Get a ticket
               </button>
-              <button className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-md">
-                View details
+              <button type="button" className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-md">
+                See the programme
               </button>
             </div>
           </div>
@@ -91,7 +88,7 @@ export function LayeredWaveHeroCustomizer() {
 
         <div className="mt-6 space-y-5">
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
               Palette
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -101,7 +98,7 @@ export function LayeredWaveHeroCustomizer() {
                   type="button"
                   onClick={() => setPalette(item)}
                   className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium transition",
+                    "rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     palette.name === item.name
                       ? "border-foreground/25 bg-foreground text-background"
                       : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
@@ -114,7 +111,7 @@ export function LayeredWaveHeroCustomizer() {
           </div>
 
           <div>
-            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
               Speed
             </p>
             <div className="grid grid-cols-3 gap-2">
@@ -124,7 +121,7 @@ export function LayeredWaveHeroCustomizer() {
                   type="button"
                   onClick={() => setSpeed(item)}
                   className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium capitalize transition",
+                    "rounded-xl border px-3 py-2 text-xs font-medium capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     speed === item
                       ? "border-foreground/25 bg-foreground text-background"
                       : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",

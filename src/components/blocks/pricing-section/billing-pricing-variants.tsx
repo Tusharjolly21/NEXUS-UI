@@ -22,7 +22,7 @@ const gridPlans: GridPlan[] = [
     label: "Starter",
     monthly: "$4/mo",
     yearly: "$38/yr",
-    copy: "Best for creators starting out",
+    copy: "For a first channel and a weekly upload rhythm.",
     features: [
       "Manage up to 2 channels",
       "Basic video upload support",
@@ -30,13 +30,13 @@ const gridPlans: GridPlan[] = [
       "Access to community forum",
       "Monthly performance reports",
     ],
-    action: "Browse Starter",
+    action: "Start free for 14 days",
   },
   {
-    label: "Medium",
+    label: "Growth",
     monthly: "$8/mo",
     yearly: "$76/yr",
-    copy: "Perfect for creators between 10k - 100k",
+    copy: "For creators between 10k and 100k subscribers.",
     features: [
       "Everything in Starter, plus",
       "Manage up to 5 channels",
@@ -45,15 +45,15 @@ const gridPlans: GridPlan[] = [
       "Access to exclusive webinars",
       "Advanced analytics reports",
     ],
-    action: "Buy Now",
+    action: "Choose Growth",
   },
   {
-    label: "Influencer",
+    label: "Studio",
     monthly: "$12/mo",
     yearly: "$114/yr",
-    copy: "Perfect for creators between 100k - 1m",
+    copy: "For established creators with a small team.",
     features: [
-      "Everything in Starter, plus",
+      "Everything in Growth, plus",
       "Manage up to 10 channels",
       "Priority video upload support",
       "Email support within 12 hours",
@@ -61,23 +61,23 @@ const gridPlans: GridPlan[] = [
       "Monthly strategy sessions",
       "Advanced analytics and insights",
     ],
-    action: "Buy Now",
+    action: "Choose Studio",
     featured: true,
   },
   {
-    label: "Celebrity",
-    monthly: "Contact Us",
-    yearly: "Contact Us",
-    copy: "Perfect for creators beyond 1m",
+    label: "Network",
+    monthly: "Let's talk",
+    yearly: "Let's talk",
+    copy: "For networks and agencies running many channels.",
     features: [
-      "Everything in Influencer, plus",
+      "Everything in Studio, plus",
       "Manage unlimited channels",
       "24/7 priority support",
       "Access to VIP creator community",
       "Weekly strategy sessions",
       "Custom branding and design services",
     ],
-    action: "Contact Us",
+    action: "Talk to sales",
   },
 ];
 
@@ -96,21 +96,21 @@ const comparisonPlans = [
     inherited: [],
   },
   {
-    label: "Starter",
+    label: "Team",
     monthly: "299",
     yearly: "2,870",
-    badge: "Featured",
+    badge: "Most teams",
     features: [
       "Advanced analytics dashboard",
       "Customizable reports and charts",
       "Real-time data tracking",
       "Integration with third-party tools",
     ],
-    inherited: ["Everything in Hobby Plan"],
+    inherited: ["Everything in Hobby"],
   },
   {
-    label: "Pro",
-    monthly: "1490",
+    label: "Scale",
+    monthly: "1,490",
     yearly: "14,300",
     features: [
       "Unlimited data storage",
@@ -119,7 +119,7 @@ const comparisonPlans = [
       "Real-time data processing",
       "AI-powered insights and recommendations",
     ],
-    inherited: ["Everything in Hobby Plan", "Everything in Starter Plan"],
+    inherited: ["Everything in Hobby and Team"],
   },
 ];
 
@@ -132,7 +132,7 @@ const spotlightPlans = [
     periodMonthly: "/ Month",
     periodYearly: "/ Year",
     action: "Start a free trial",
-    features: ["120 projects per month", "Unlimited workspaces", "2 AI Model Choices", "History & Export", "Basic email support", "1 member seat"],
+    features: ["120 projects per month", "Unlimited workspaces", "Two model choices", "History and export", "Email support", "1 member seat"],
   },
   {
     label: "Pro",
@@ -143,17 +143,17 @@ const spotlightPlans = [
     periodYearly: "/ Year",
     action: "Get started",
     featured: true,
-    features: ["Unlimited projects", "Unlimited workspaces", "All AI Models included", "History & Export", "Priority email support", "10 member seats"],
+    features: ["Unlimited projects", "Unlimited workspaces", "Every model included", "History and export", "Priority support", "10 member seats"],
   },
   {
     label: "Enterprise",
     copy: "For large organizations with custom needs.",
-    monthly: "$690",
-    yearly: "$6,620",
+    monthly: "Custom",
+    yearly: "Custom",
     periodMonthly: "/ Month",
     periodYearly: "/ Year",
     action: "Contact sales",
-    features: ["Everything in Pro", "Custom integrations", "Dedicated account manager", "SSO & SAML", "24/7 phone support", "Unlimited member seats"],
+    features: ["Everything in Pro", "Custom integrations", "A named account manager", "SSO and SAML", "24/7 phone support", "Unlimited member seats"],
   },
 ];
 
@@ -229,7 +229,7 @@ function SwitchingText({
 
 function FeatureItem({ children, pale = false }: { children: React.ReactNode; pale?: boolean }) {
   return (
-    <li className={cn("flex items-start gap-2.5 text-[12px] leading-5", pale ? "text-white/68" : "text-zinc-600")}>
+    <li className={cn("flex items-start gap-2.5 text-[12px] leading-5", pale ? "text-white/80" : "text-zinc-600")}>
       <span className={cn("mt-[3px] flex size-3.5 shrink-0 items-center justify-center rounded-full", pale ? "bg-white text-zinc-800" : "bg-zinc-600 text-white")}>
         <Check className="size-2.5 stroke-[3]" />
       </span>
@@ -245,9 +245,9 @@ export function PricingPlanGrid() {
     <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f7f7f7] px-4 py-8 text-zinc-950 sm:px-8">
       <div className="w-full max-w-[1040px]">
         <header className="mx-auto mb-8 max-w-lg text-center">
-          <h2 className="text-3xl font-semibold tracking-normal">Simple pricing for your ease</h2>
+          <h2 className="text-3xl font-semibold tracking-[-0.02em]">Plans that grow with your audience</h2>
           <p className="mt-3 text-sm leading-6 text-zinc-500">
-            Every AI offers a wide range of services. Choose the plan that suits your needs and get started instantly.
+            Start on the plan that fits the channels you run today. Switch tiers whenever you like and we prorate the difference.
           </p>
           <div className="mt-6">
             <BillingToggle cycle={cycle} onChange={setCycle} id="plan-grid" />
@@ -270,17 +270,11 @@ export function PricingPlanGrid() {
                 <SwitchingText cycle={cycle} monthly={plan.monthly} yearly={plan.yearly} />
               </div>
               <p className={cn("mt-4 min-h-10 text-[12px] leading-5", plan.featured ? "text-white/62" : "text-zinc-500")}>{plan.copy}</p>
-              <motion.ul
-                key={`${plan.label}-${cycle}`}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.035, duration: 0.3 }}
-                className="mt-6 space-y-2"
-              >
+              <ul className="mb-6 mt-6 space-y-2">
                 {plan.features.map((feature) => (
                   <FeatureItem key={feature} pale={plan.featured}>{feature}</FeatureItem>
                 ))}
-              </motion.ul>
+              </ul>
               <button
                 type="button"
                 className={cn(
@@ -305,9 +299,9 @@ export function AdvancedPricingColumns() {
     <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f8f8f8] px-4 py-7 text-zinc-900">
       <div className="w-full max-w-[940px]">
         <header className="mx-auto mb-7 flex max-w-xl flex-col items-center text-center">
-          <h2 className="text-[30px] font-semibold">Simple pricing for advanced people</h2>
+          <h2 className="text-[30px] font-semibold tracking-[-0.02em]">Pay for the questions you ask</h2>
           <p className="mt-2 max-w-md text-sm leading-6 text-zinc-500">
-            Flexible reporting and analytics plans built for teams that need more depth.
+            Every plan reads from the same warehouse. Upgrade when you need more seats, history or real-time data.
           </p>
           <div className="mt-5">
             <BillingToggle cycle={cycle} onChange={setCycle} id="advanced" />
@@ -338,26 +332,22 @@ export function AdvancedPricingColumns() {
                   />
                   <span className="text-xs text-zinc-500">/{cycle === "monthly" ? "month" : "year"}</span>
                 </div>
-                <button type="button" className="mt-7 w-full rounded-md bg-[#2394de] py-2.5 text-xs font-medium text-white shadow-[inset_0_1px_0_rgba(255,255,255,.28)]">
+                <button type="button" className={cn("mt-7 w-full rounded-md py-2.5 text-xs font-semibold transition-colors", plan.badge ? "bg-zinc-950 text-white hover:bg-zinc-800" : "border border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50")}>
                   Get {plan.label}
                 </button>
               </div>
-              <motion.ul
-                key={`${plan.label}-${cycle}`}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.035 }}
+              <ul
                 className="space-y-2 px-2 pt-7"
               >
                 {plan.features.map((feature) => <FeatureItem key={feature}>{feature}</FeatureItem>)}
-              </motion.ul>
+              </ul>
               {plan.inherited.length > 0 && (
                 <div className="mt-5 border-t border-zinc-200 px-2 pt-4">
                   <Plus className="mx-auto mb-4 size-3.5 text-zinc-700" />
                   <ul className="space-y-2">
                     {plan.inherited.map((feature) => (
                       <li key={feature} className="flex items-center gap-2 text-[12px] font-medium text-zinc-700">
-                        <span className="flex size-3.5 items-center justify-center rounded-full bg-sky-500 text-white"><Check className="size-2.5 stroke-[3]" /></span>
+                        <span className="flex size-3.5 items-center justify-center rounded-full bg-zinc-900 text-white"><Check className="size-2.5 stroke-[3]" /></span>
                         {feature}
                       </li>
                     ))}
@@ -379,8 +369,8 @@ export function SpotlightPricingCards() {
     <section className="flex h-full w-full items-center justify-center overflow-hidden bg-[#f7f7f7] px-4 py-7 text-zinc-950">
       <div className="w-full max-w-[900px]">
         <header className="mx-auto mb-8 max-w-sm text-center">
-          <h2 className="text-[40px] font-medium leading-[1.04] tracking-normal">Pick a pricing that<br />fits your needs</h2>
-          <p className="mt-5 text-sm leading-6 text-zinc-500">Every plan includes a free tier. Choose the one that fits your needs.</p>
+          <h2 className="text-balance text-[32px] font-medium leading-[1.04] tracking-[-0.03em] sm:text-[40px]">One assistant, three ways to run it</h2>
+          <p className="mt-5 text-sm leading-6 text-zinc-500">Start on Hobby for free for 14 days. Every plan keeps your history when you move up.</p>
           <div className="mt-5">
             <BillingToggle cycle={cycle} onChange={setCycle} id="spotlight" />
           </div>
@@ -403,9 +393,11 @@ export function SpotlightPricingCards() {
               </div>
               <div className="mt-7 flex items-baseline gap-2">
                 <SwitchingText cycle={cycle} monthly={plan.monthly} yearly={plan.yearly} className="text-[40px] font-medium leading-none" />
-                <span className={cn("text-xs", plan.featured ? "text-white/45" : "text-zinc-500")}>
-                  {cycle === "monthly" ? plan.periodMonthly : plan.periodYearly}
-                </span>
+                {plan.monthly !== "Custom" ? (
+                  <span className={cn("text-xs", plan.featured ? "text-white/45" : "text-zinc-500")}>
+                    {cycle === "monthly" ? plan.periodMonthly : plan.periodYearly}
+                  </span>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -417,18 +409,14 @@ export function SpotlightPricingCards() {
                 {plan.action}
               </button>
               <div className={cn("my-5 border-t border-dashed", plan.featured ? "border-white/15" : "border-zinc-200")} />
-              <p className={cn("mb-3 text-[10px] font-medium uppercase", plan.featured ? "text-white/45" : "text-zinc-400")}>
-                {plan.label} plan includes
+              <p className={cn("mb-3 text-[12px] font-medium", plan.featured ? "text-white/60" : "text-zinc-500")}>
+                Includes
               </p>
-              <motion.ul
-                key={`${plan.label}-${cycle}`}
-                initial={{ opacity: 0, y: 7 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.035 }}
+              <ul
                 className="space-y-2"
               >
                 {plan.features.map((feature) => <FeatureItem key={feature} pale={plan.featured}>{feature}</FeatureItem>)}
-              </motion.ul>
+              </ul>
             </motion.article>
           ))}
         </div>

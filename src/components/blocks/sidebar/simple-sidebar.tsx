@@ -82,33 +82,96 @@ function NavLink({ item }: { item: NavItem }) {
   );
 }
 
+const REVENUE = [38, 44, 41, 52, 49, 58, 63, 57, 66, 72, 69, 81];
+const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+
 function BentoPlaceholder() {
+  const max = Math.max(...REVENUE);
   return (
-    <div className="flex h-full flex-col gap-3 p-4">
-      <div className="flex gap-3">
-        <div className="flex h-24 flex-1 flex-col justify-between rounded-xl bg-neutral-100 p-3 dark:bg-white/[0.05]">
-          <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500">Total Revenue</span>
-          <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">$48,295</span>
+    <div className="flex h-full flex-col gap-3 overflow-hidden p-4 text-neutral-900 dark:text-neutral-100">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Overview</p>
+          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Good morning, Alex</h2>
         </div>
-        <div className="flex h-24 flex-1 flex-col justify-between rounded-xl bg-neutral-100 p-3 dark:bg-white/[0.05]">
-          <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500">Active Users</span>
-          <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">3,842</span>
+        <span className="rounded-full border border-neutral-200 px-2.5 py-1 text-[11px] text-neutral-500 dark:border-white/10 dark:text-neutral-400">
+          Last 12 months
+        </span>
+      </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          ["Revenue", "$48,295", "+12.4%"],
+          ["Active users", "3,842", "+4.1%"],
+          ["Conversion", "5.27%", "−0.3%"],
+        ].map(([label, value, delta]) => (
+          <div key={label} className="rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
+            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">{label}</p>
+            <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+              <span className="text-lg font-semibold tabular-nums">{value}</span>
+              <span className={delta.startsWith("+") ? "text-[11px] font-medium text-emerald-600 dark:text-emerald-400" : "text-[11px] font-medium text-rose-500"}>
+                {delta}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid min-h-0 flex-1 grid-cols-3 gap-3">
+        <div className="col-span-2 flex min-h-0 flex-col rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] font-medium">Monthly revenue</p>
+            <p className="hidden text-[11px] tabular-nums text-neutral-500 sm:block dark:text-neutral-400">$81k in December</p>
+          </div>
+          <div className="mt-3 flex min-h-[90px] flex-1 items-end gap-1.5">
+            {REVENUE.map((v, i) => (
+              <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+                <div
+                  className={i === REVENUE.length - 1 ? "w-full rounded-[4px] bg-neutral-900 dark:bg-white" : "w-full rounded-[4px] bg-neutral-200 dark:bg-white/15"}
+                  style={{ height: `${(v / max) * 100}%` }}
+                />
+                <span className="text-[9px] text-neutral-400">{MONTHS[i]}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="flex h-24 flex-1 flex-col justify-between rounded-xl bg-neutral-100 p-3 dark:bg-white/[0.05]">
-          <span className="text-[10px] font-medium text-neutral-400 dark:text-neutral-500">Conversion</span>
-          <span className="text-lg font-bold text-neutral-800 dark:text-neutral-200">5.27%</span>
+        <div className="flex min-h-0 flex-col rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
+          <p className="text-[12px] font-medium">Top pages</p>
+          <ul className="mt-2 space-y-2 text-[11.5px]">
+            {[
+              ["/pricing", "38%"],
+              ["/", "27%"],
+              ["/docs/install", "16%"],
+              ["/changelog", "9%"],
+            ].map(([page, share]) => (
+              <li key={page} className="flex items-center justify-between gap-2">
+                <span className="truncate text-neutral-600 dark:text-neutral-300">{page}</span>
+                <span className="tabular-nums text-neutral-500 dark:text-neutral-400">{share}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
-      <div className="flex flex-1 gap-3">
-        <div className="flex-[2] rounded-xl bg-neutral-100 dark:bg-white/[0.05]" />
-        <div className="flex flex-1 flex-col gap-3">
-          <div className="flex-1 rounded-xl bg-neutral-100 dark:bg-white/[0.05]" />
-          <div className="flex-1 rounded-xl bg-neutral-100 dark:bg-white/[0.05]" />
-        </div>
-      </div>
-      <div className="flex gap-3">
-        <div className="h-14 flex-1 rounded-xl bg-neutral-100 dark:bg-white/[0.05]" />
-        <div className="h-14 flex-1 rounded-xl bg-neutral-100 dark:bg-white/[0.05]" />
+
+      <div className="rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
+        <p className="text-[12px] font-medium">Recent sign-ups</p>
+        <ul className="mt-2 grid grid-cols-3 gap-2 text-[11.5px]">
+          {[
+            ["Maya Chen", "Team plan"],
+            ["Jonas Weber", "Pro trial"],
+            ["Ines Duarte", "Team plan"],
+          ].map(([name, plan]) => (
+            <li key={name} className="flex items-center gap-2">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-neutral-100 text-[10px] font-semibold text-neutral-600 dark:bg-white/10 dark:text-neutral-300">
+                {name.split(" ").map((p) => p[0]).join("")}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate font-medium">{name}</span>
+                <span className="block truncate text-[10.5px] text-neutral-500 dark:text-neutral-400">{plan}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
