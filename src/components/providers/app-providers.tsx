@@ -6,7 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { NexusProgressBar } from "@/components/brand/nexus-progress-bar";
-import { NexusSplash } from "@/components/brand/nexus-splash";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
@@ -33,7 +32,6 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     <NuqsAdapter>
     <ThemeProvider>
       <TooltipProvider>
-        <NexusSplash />
         <React.Suspense>
           <NexusProgressBar />
         </React.Suspense>

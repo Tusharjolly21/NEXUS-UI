@@ -3,7 +3,7 @@
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
 
-// Local Converge loader — same primitive as NexusSplash but smaller,
+// Local Converge loader (the nexus mark, animated),
 // used for route-transition state (no separate import avoids circular deps).
 function NavConverge({ size = 72 }: { size?: number }) {
   return (

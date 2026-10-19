@@ -1,9 +1,11 @@
 /** Must match `ThemeProvider` / `theme-provider.tsx`. */
-export const THEME_STORAGE_KEY = "nexus-ui-theme";
+// v2: the redesign made light the default. The old key held "dark" for every past
+// visitor (it was saved on load, not on choice), so it is left behind on purpose.
+export const THEME_STORAGE_KEY = "nexus-ui-theme-v2";
 
 export type AppTheme = "light" | "dark";
 
-const DEFAULT_THEME: AppTheme = "dark";
+export const DEFAULT_THEME: AppTheme = "light";
 
 export function coerceTheme(v: string | null | undefined): AppTheme {
   if (v === "light" || v === "dark") return v;
