@@ -828,7 +828,6 @@ const BLOCK_INSTALL_FILES: Record<string, string[]> = {
   ],
   "block-contact-page": [
     "components/blocks/contact-page.tsx",
-    "components/brand/nexus-mark.tsx",
   ],
   "block-blog-content-sections": [
     "components/blocks/blog-content-sections/blog-content-centered.tsx",
