@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { FileText, ImageIcon, ListTree, Newspaper, PanelsTopLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BlogContentCentered } from "./blog-content-centered";
@@ -21,97 +22,126 @@ export type { BlogContentWithTocProps } from "./blog-content-with-toc";
 
 const variants = [
   {
-    title: "Blog Content Centered",
-    description: "A narrow editorial article layout with large images and readable prose.",
+    title: "Centered article",
+    description: "A narrow editorial column with a wide hero image and readable prose.",
     icon: FileText,
   },
   {
-    title: "Blog Content With TOC",
-    description: "Sticky section navigation for long single-post pages.",
+    title: "Article with contents",
+    description: "A sticky table of contents that follows the reader through long posts.",
     icon: ListTree,
   },
   {
-    title: "Blog Content Editorial",
-    description: "A premium split story layout for essays and launch notes.",
+    title: "Editorial split",
+    description: "A pinned headline beside the story, for essays and launch notes.",
     icon: Newspaper,
   },
   {
-    title: "Blog Header Featured Posts",
-    description: "Featured hero story, category tabs, article grid, and pagination.",
+    title: "Journal index",
+    description: "Featured story, category filter, sortable article grid, and pagination.",
     icon: PanelsTopLeft,
   },
   {
-    title: "Blog Hover Image Card",
-    description: "A compact editorial card with a sliding author image and arrow hover state.",
+    title: "Hover image card",
+    description: "A compact card whose author portrait rises out of the image on hover.",
     icon: ImageIcon,
   },
 ];
 
+const frame =
+  "overflow-hidden rounded-[22px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:bg-black dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]";
+
 export function BlogContentSectionsBlock({ className }: { className?: string }) {
+  const reduce = useReducedMotion();
+  const rise: Variants = {
+    hidden: reduce ? { opacity: 0 } : { opacity: 0, y: 16, filter: "blur(6px)" },
+    show: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transition: { type: "spring", stiffness: 260, damping: 32 },
+    },
+  };
+
   return (
     <section
       className={cn(
-        "min-h-full w-full overflow-y-auto bg-zinc-950 p-4 text-white sm:p-6 lg:p-8",
+        "min-h-full w-full overflow-y-auto bg-[#f5f5f7] px-5 py-14 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7] sm:px-8 lg:py-20",
         className,
       )}
     >
       <div className="mx-auto max-w-7xl">
-        <div className="rounded-[2rem] border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/30 sm:p-6 lg:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ staggerChildren: 0.06 }}
+        >
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-200/70">
-                Blog Content Sections
-              </p>
-              <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Content sections for your single blog posts.
-              </h2>
+              <motion.p variants={rise} className="text-[17px] font-semibold text-[#6e6e73] dark:text-[#a1a1a6]">
+                Blog content sections
+              </motion.p>
+              <motion.h2
+                variants={rise}
+                className="mt-2 max-w-2xl text-balance text-[36px] font-semibold leading-[1.06] tracking-[-0.03em] sm:text-[48px]"
+              >
+                Sections for every kind of story.
+              </motion.h2>
             </div>
-            <p className="max-w-md text-sm leading-6 text-white/50">
-              Drop in centered articles, table-of-contents posts, or editorial
-              feature stories with polished spacing and responsive typography.
-            </p>
+            <motion.p
+              variants={rise}
+              className="max-w-md text-[17px] leading-[1.5] text-[#6e6e73] dark:text-[#a1a1a6]"
+            >
+              Centered articles, long reads with contents, editorial features, and
+              journal indexes, all with the same calm type and spacing.
+            </motion.p>
           </div>
 
-          <div className="mt-7 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <ul className="mt-10 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
             {variants.map((item) => {
               const Icon = item.icon;
               return (
-                <div key={item.title} className="rounded-2xl border border-white/10 bg-white/[0.055] p-4">
-                  <div className="grid size-10 place-items-center rounded-xl bg-white text-zinc-950">
-                    <Icon className="size-4" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold">{item.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-white/54">{item.description}</p>
-                </div>
+                <motion.li
+                  key={item.title}
+                  variants={rise}
+                  className="rounded-[20px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.04)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.06)]"
+                >
+                  <Icon aria-hidden strokeWidth={1.75} className="size-5 text-[#0071e3] dark:text-[#2997ff]" />
+                  <h3 className="mt-4 text-[17px] font-semibold tracking-[-0.01em]">{item.title}</h3>
+                  <p className="mt-1.5 text-[14px] leading-[1.45] text-[#6e6e73] dark:text-[#a1a1a6]">
+                    {item.description}
+                  </p>
+                </motion.li>
               );
             })}
-          </div>
+          </ul>
+        </motion.div>
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-2 xl:grid-cols-5">
-            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
-              <div className="h-[520px] overflow-hidden">
-                <BlogContentCentered className="h-full min-h-full" />
-              </div>
+        <div className="mt-6 grid gap-5 lg:grid-cols-2 xl:grid-cols-5">
+          <div className={frame}>
+            <div className="h-[520px] overflow-hidden">
+              <BlogContentCentered className="h-full min-h-full" />
             </div>
-            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
-              <div className="h-[520px] overflow-hidden">
-                <BlogContentWithToc className="h-full min-h-full" />
-              </div>
+          </div>
+          <div className={frame}>
+            <div className="h-[520px] overflow-hidden">
+              <BlogContentWithToc className="h-full min-h-full" />
             </div>
-            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-zinc-950">
-              <div className="h-[520px] overflow-hidden">
-                <BlogContentEditorial className="h-full min-h-full" />
-              </div>
+          </div>
+          <div className={frame}>
+            <div className="h-[520px] overflow-hidden">
+              <BlogContentEditorial className="h-full min-h-full" />
             </div>
-            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
-              <div className="h-[520px] overflow-hidden">
-                <BlogHeaderFeaturedPosts className="h-full min-h-full" />
-              </div>
+          </div>
+          <div className={frame}>
+            <div className="h-[520px] overflow-hidden">
+              <BlogHeaderFeaturedPosts className="h-full min-h-full" />
             </div>
-            <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-white">
-              <div className="h-[520px] overflow-hidden">
-                <BlogHoverImageCardShowcase className="h-full min-h-full" />
-              </div>
+          </div>
+          <div className={frame}>
+            <div className="h-[520px] overflow-hidden">
+              <BlogHoverImageCardShowcase className="h-full min-h-full" />
             </div>
           </div>
         </div>
@@ -122,16 +152,18 @@ export function BlogContentSectionsBlock({ className }: { className?: string }) 
 
 export function BlogContentSectionsBlockPreview() {
   return (
-    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-white dark:bg-zinc-950">
+    <div className="relative flex h-[320px] w-full items-center justify-center overflow-hidden bg-[#f5f5f7] dark:bg-black">
       <div data-tile-focus className="w-[1060px] shrink-0">
         <div className="flex items-end justify-between gap-6 px-6">
           <div>
-            <p className="text-[14px] font-medium text-zinc-500 dark:text-zinc-400">From the journal</p>
-            <h2 className="mt-2 text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-zinc-950 dark:text-white">
+            <p className="text-[15px] font-semibold text-[#6e6e73] dark:text-[#a1a1a6]">From the journal</p>
+            <h2 className="mt-1.5 text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7]">
               Notes on building calmer products
             </h2>
           </div>
-          <span className="mb-1 shrink-0 text-[14px] font-medium text-zinc-600 dark:text-zinc-300">All 48 posts →</span>
+          <span className="mb-1 shrink-0 text-[15px] font-medium text-[#0066cc] dark:text-[#2997ff]">
+            All 48 posts ›
+          </span>
         </div>
         <BlogHoverImageCardShowcase className="min-h-0 items-start p-6 pt-8 [&>div]:max-w-none [&>div]:!grid-cols-3" />
       </div>

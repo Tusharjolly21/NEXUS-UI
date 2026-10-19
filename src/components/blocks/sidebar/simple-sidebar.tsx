@@ -1,11 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  MotionConfig,
+  motion,
+  useReducedMotion,
+  type Transition,
+} from "framer-motion";
 import {
   BarChart2,
   BookOpen,
   Calendar,
+  ChevronsUpDown,
   CircleDollarSign,
   Code2,
   FileText,
@@ -16,158 +23,322 @@ import {
   Menu,
   Settings,
   Star,
+  TrendingDown,
+  TrendingUp,
   Users,
   X,
   Zap,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/* -------------------------------------------------------------------------- */
+/*  Data                                                                      */
+/* -------------------------------------------------------------------------- */
+
 type NavItem = {
+  id: string;
   label: string;
-  icon: React.ReactNode;
+  icon: LucideIcon;
   badge?: string;
   active?: boolean;
 };
 
-const PRIMARY_NAV: NavItem[] = [
-  { label: "Home", icon: <Home className="size-4" />, active: true },
-  { label: "Inbox", icon: <Inbox className="size-4" />, badge: "4" },
-  { label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
-  { label: "Analytics", icon: <BarChart2 className="size-4" /> },
-  { label: "Projects", icon: <Zap className="size-4" /> },
-  { label: "Team", icon: <Users className="size-4" /> },
-  { label: "Calendar", icon: <Calendar className="size-4" /> },
-  { label: "Starred", icon: <Star className="size-4" /> },
-  { label: "Settings", icon: <Settings className="size-4" /> },
+type NavSection = {
+  id: string;
+  title: string;
+  items: NavItem[];
+};
+
+const SECTIONS: NavSection[] = [
+  {
+    id: "workspace",
+    title: "Workspace",
+    items: [
+      { id: "home", label: "Home", icon: Home, active: true },
+      { id: "inbox", label: "Inbox", icon: Inbox, badge: "4" },
+      { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { id: "analytics", label: "Analytics", icon: BarChart2 },
+      { id: "projects", label: "Projects", icon: Zap },
+      { id: "team", label: "Team", icon: Users },
+      { id: "calendar", label: "Calendar", icon: Calendar },
+      { id: "starred", label: "Starred", icon: Star },
+      { id: "settings", label: "Settings", icon: Settings },
+    ],
+  },
+  {
+    id: "resources",
+    title: "Resources",
+    items: [
+      { id: "docs", label: "Documentation", icon: BookOpen },
+      { id: "api", label: "API reference", icon: Code2 },
+      { id: "changelog", label: "Changelog", icon: FileText },
+      { id: "support", label: "Support", icon: LifeBuoy },
+      { id: "sponsor", label: "Sponsor", icon: CircleDollarSign },
+    ],
+  },
 ];
 
-const SECONDARY_NAV: NavItem[] = [
-  { label: "Documentation", icon: <BookOpen className="size-4" /> },
-  { label: "API Reference", icon: <Code2 className="size-4" /> },
-  { label: "Changelog", icon: <FileText className="size-4" /> },
-  { label: "Support", icon: <LifeBuoy className="size-4" /> },
-  { label: "Sponsor", icon: <CircleDollarSign className="size-4" /> },
-];
+const ALL_ITEMS = SECTIONS.flatMap((section) => section.items);
+const INITIAL_ID = ALL_ITEMS.find((item) => item.active)?.id ?? ALL_ITEMS[0].id;
 
-function NavLink({ item }: { item: NavItem }) {
+/* -------------------------------------------------------------------------- */
+/*  Motion                                                                    */
+/* -------------------------------------------------------------------------- */
+
+const HIGHLIGHT: Transition = { type: "spring", stiffness: 500, damping: 32, mass: 0.9 };
+const SNAP: Transition = { type: "spring", stiffness: 420, damping: 34 };
+const PANEL: Transition = { type: "spring", stiffness: 260, damping: 32 };
+const INSTANT: Transition = { duration: 0 };
+
+const focusRing =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+
+/** Switches to the overlay layout when the block itself (not the window) is narrow. */
+function useCompact(ref: React.RefObject<HTMLElement | null>, breakpoint = 640) {
+  const [state, setState] = React.useState({ compact: false, ready: false });
+
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let frame = 0;
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width ?? el.clientWidth;
+      const compact = width < breakpoint;
+      setState((prev) => (prev.compact === compact ? prev : { ...prev, compact }));
+      // Let the first measurement land without animating, then enable springs.
+      if (!frame) {
+        frame = requestAnimationFrame(() =>
+          setState((prev) => (prev.ready ? prev : { ...prev, ready: true })),
+        );
+      }
+    });
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [ref, breakpoint]);
+
+  return state;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Sidebar row                                                               */
+/* -------------------------------------------------------------------------- */
+
+function SidebarRow({
+  item,
+  selected,
+  highlightId,
+  onSelect,
+}: {
+  item: NavItem;
+  selected: boolean;
+  highlightId: string;
+  onSelect: () => void;
+}) {
+  const Icon = item.icon;
   return (
     <motion.button
       type="button"
-      whileHover={{ x: 3 }}
-      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      onClick={onSelect}
+      whileTap={{ scale: 0.97 }}
+      transition={SNAP}
+      aria-current={selected ? "page" : undefined}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-        item.active
-          ? "bg-neutral-100 text-neutral-900 dark:bg-white/10 dark:text-white"
-          : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-white/[0.08] dark:hover:text-white",
+        "relative flex h-7 w-full items-center gap-2.5 rounded-[10px] px-2.5 text-left text-[13px] font-medium transition-colors duration-150",
+        focusRing,
+        selected
+          ? "text-white"
+          : "text-[#1d1d1f] hover:bg-black/[0.04] dark:text-[#f5f5f7] dark:hover:bg-white/[0.06]",
       )}
     >
-      <span
+      {selected && (
+        <motion.span
+          layoutId={highlightId}
+          transition={HIGHLIGHT}
+          className="absolute inset-0 rounded-[10px] bg-[#0071e3] shadow-[0_1px_2px_rgba(0,0,0,.12),inset_0_.5px_0_rgba(255,255,255,.2)]"
+        />
+      )}
+      <Icon
+        aria-hidden
+        strokeWidth={1.75}
         className={cn(
-          "shrink-0",
-          item.active
-            ? "text-neutral-900 dark:text-white"
-            : "text-neutral-400 dark:text-neutral-500",
+          "relative size-4 shrink-0 transition-colors duration-150",
+          selected ? "text-white" : "text-[#0071e3] dark:text-[#2997ff]",
         )}
-      >
-        {item.icon}
-      </span>
-      <span className="flex-1 truncate text-left">{item.label}</span>
+      />
+      <span className="relative min-w-0 flex-1 truncate">{item.label}</span>
       {item.badge && (
-        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-violet-500 px-1.5 text-[10px] font-semibold text-white">
+        <span
+          className={cn(
+            "relative text-[12px] tabular-nums transition-colors duration-150",
+            selected ? "text-white/80" : "text-[#86868b] dark:text-[#98989d]",
+          )}
+        >
           {item.badge}
+          <span className="sr-only"> unread</span>
         </span>
       )}
     </motion.button>
   );
 }
 
+/* -------------------------------------------------------------------------- */
+/*  Toolbar title                                                             */
+/* -------------------------------------------------------------------------- */
+
+function SwapTitle({ title }: { title: string }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="relative h-6 min-w-0 flex-1 overflow-hidden">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.h2
+          key={title}
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(6px)" }}
+          animate={{ opacity: 1, y: "0%", filter: "blur(0px)" }}
+          exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(6px)" }}
+          transition={SNAP}
+          className="truncate text-[15px] font-semibold leading-6 tracking-[-0.01em]"
+        >
+          {title}
+        </motion.h2>
+      </AnimatePresence>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Placeholder canvas                                                        */
+/* -------------------------------------------------------------------------- */
+
 const REVENUE = [38, 44, 41, 52, 49, 58, 63, 57, 66, 72, 69, 81];
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+const STATS = [
+  { label: "Revenue", value: "$48,295", delta: "+12.4%", up: true },
+  { label: "Active users", value: "3,842", delta: "+4.1%", up: true },
+  { label: "Conversion", value: "5.27%", delta: "−0.3%", up: false },
+];
+const PAGES = [
+  ["/pricing", "38%"],
+  ["/", "27%"],
+  ["/docs/install", "16%"],
+  ["/changelog", "9%"],
+];
+const SIGNUPS = [
+  ["Maya Chen", "Team plan"],
+  ["Jonas Weber", "Pro trial"],
+  ["Ines Duarte", "Team plan"],
+];
 
-function BentoPlaceholder() {
-  const max = Math.max(...REVENUE);
+const card =
+  "rounded-[18px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_1px_2px_rgba(0,0,0,.04)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]";
+
+function Monogram({ name, className }: { name: string; className?: string }) {
   return (
-    <div className="flex h-full flex-col gap-3 overflow-hidden p-4 text-neutral-900 dark:text-neutral-100">
+    <span
+      aria-hidden
+      className={cn(
+        "grid shrink-0 place-items-center rounded-full bg-[linear-gradient(180deg,#a1a1a6,#86868b)] font-semibold text-white dark:bg-[linear-gradient(180deg,#8e8e93,#636366)]",
+        className,
+      )}
+    >
+      {name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")}
+    </span>
+  );
+}
+
+function DashboardCanvas() {
+  const reduce = useReducedMotion();
+  const max = Math.max(...REVENUE);
+
+  return (
+    <div className="@container flex h-full flex-col gap-3 overflow-hidden px-4 pb-4">
       <div className="flex items-end justify-between gap-3">
-        <div>
-          <p className="text-[11px] text-neutral-500 dark:text-neutral-400">Overview</p>
-          <h2 className="text-[17px] font-semibold tracking-[-0.01em]">Good morning, Alex</h2>
+        <div className="min-w-0">
+          <p className="text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">Tuesday, 14 October</p>
+          <h3 className="truncate text-[22px] font-semibold leading-[1.1] tracking-[-0.025em]">
+            Good morning, Alex
+          </h3>
         </div>
-        <span className="rounded-full border border-neutral-200 px-2.5 py-1 text-[11px] text-neutral-500 dark:border-white/10 dark:text-neutral-400">
+        <span className="shrink-0 rounded-full bg-[#e8e8ed] px-3 py-1 text-[12px] font-medium dark:bg-[#2c2c2e]">
           Last 12 months
         </span>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          ["Revenue", "$48,295", "+12.4%"],
-          ["Active users", "3,842", "+4.1%"],
-          ["Conversion", "5.27%", "−0.3%"],
-        ].map(([label, value, delta]) => (
-          <div key={label} className="rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-400">{label}</p>
-            <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
-              <span className="text-lg font-semibold tabular-nums">{value}</span>
-              <span className={delta.startsWith("+") ? "text-[11px] font-medium text-emerald-600 dark:text-emerald-400" : "text-[11px] font-medium text-rose-500"}>
-                {delta}
-              </span>
+      <div className="grid grid-cols-3 gap-2.5 @md:gap-3">
+        {STATS.map((stat) => {
+          const Trend = stat.up ? TrendingUp : TrendingDown;
+          return (
+            <div key={stat.label} className={cn(card, "min-w-0 p-3")}>
+              <p className="truncate text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">{stat.label}</p>
+              <p className="mt-1 truncate text-[16px] font-semibold tracking-[-0.02em] tabular-nums @md:text-[20px]">
+                {stat.value}
+              </p>
+              <p className="mt-0.5 flex items-center gap-1 text-[12px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">
+                <Trend
+                  aria-hidden
+                  strokeWidth={2}
+                  className={cn("size-3.5", stat.up ? "text-[#34c759]" : "text-[#ff3b30]")}
+                />
+                {stat.delta}
+              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-3 gap-3">
-        <div className="col-span-2 flex min-h-0 flex-col rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
-          <div className="flex items-center justify-between">
-            <p className="text-[12px] font-medium">Monthly revenue</p>
-            <p className="hidden text-[11px] tabular-nums text-neutral-500 sm:block dark:text-neutral-400">$81k in December</p>
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 @md:grid-cols-3">
+        <div className={cn(card, "flex min-h-0 flex-col p-4 @md:col-span-2")}>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[13px] font-semibold">Monthly revenue</p>
+            <p className="text-[12px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">$81k in December</p>
           </div>
           <div className="mt-3 flex min-h-[90px] flex-1 items-end gap-1.5">
             {REVENUE.map((v, i) => (
-              <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-                <div
-                  className={i === REVENUE.length - 1 ? "w-full rounded-[4px] bg-neutral-900 dark:bg-white" : "w-full rounded-[4px] bg-neutral-200 dark:bg-white/15"}
+              <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1.5">
+                <motion.div
+                  initial={reduce ? { opacity: 0 } : { scaleY: 0, opacity: 0 }}
+                  whileInView={{ scaleY: 1, opacity: 1 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ type: "spring", stiffness: 260, damping: 30, delay: i * 0.03 }}
+                  className={cn(
+                    "w-full origin-bottom rounded-[5px]",
+                    i === REVENUE.length - 1 ? "bg-[#0071e3]" : "bg-[#e8e8ed] dark:bg-[#3a3a3c]",
+                  )}
                   style={{ height: `${(v / max) * 100}%` }}
                 />
-                <span className="text-[9px] text-neutral-400">{MONTHS[i]}</span>
+                <span className="text-[10px] text-[#86868b] dark:text-[#98989d]">{MONTHS[i]}</span>
               </div>
             ))}
           </div>
         </div>
-        <div className="flex min-h-0 flex-col rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
-          <p className="text-[12px] font-medium">Top pages</p>
-          <ul className="mt-2 space-y-2 text-[11.5px]">
-            {[
-              ["/pricing", "38%"],
-              ["/", "27%"],
-              ["/docs/install", "16%"],
-              ["/changelog", "9%"],
-            ].map(([page, share]) => (
+        <div className={cn(card, "hidden min-h-0 flex-col p-4 @md:flex")}>
+          <p className="text-[13px] font-semibold">Top pages</p>
+          <ul className="mt-3 space-y-2.5 text-[12px]">
+            {PAGES.map(([page, share]) => (
               <li key={page} className="flex items-center justify-between gap-2">
-                <span className="truncate text-neutral-600 dark:text-neutral-300">{page}</span>
-                <span className="tabular-nums text-neutral-500 dark:text-neutral-400">{share}</span>
+                <span className="truncate text-[#1d1d1f] dark:text-[#f5f5f7]">{page}</span>
+                <span className="tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">{share}</span>
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      <div className="rounded-xl border border-neutral-200/80 bg-white p-3 dark:border-white/[0.08] dark:bg-white/[0.03]">
-        <p className="text-[12px] font-medium">Recent sign-ups</p>
-        <ul className="mt-2 grid grid-cols-3 gap-2 text-[11.5px]">
-          {[
-            ["Maya Chen", "Team plan"],
-            ["Jonas Weber", "Pro trial"],
-            ["Ines Duarte", "Team plan"],
-          ].map(([name, plan]) => (
-            <li key={name} className="flex items-center gap-2">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-neutral-100 text-[10px] font-semibold text-neutral-600 dark:bg-white/10 dark:text-neutral-300">
-                {name.split(" ").map((p) => p[0]).join("")}
-              </span>
+      <div className={cn(card, "p-4")}>
+        <p className="text-[13px] font-semibold">Recent sign-ups</p>
+        <ul className="mt-3 grid grid-cols-2 gap-3 text-[12px] @md:grid-cols-3">
+          {SIGNUPS.map(([name, plan], i) => (
+            <li key={name} className={cn("flex min-w-0 items-center gap-2", i === 2 && "hidden @md:flex")}>
+              <Monogram name={name} className="size-7 text-[10px]" />
               <span className="min-w-0">
                 <span className="block truncate font-medium">{name}</span>
-                <span className="block truncate text-[10.5px] text-neutral-500 dark:text-neutral-400">{plan}</span>
+                <span className="block truncate text-[#6e6e73] dark:text-[#a1a1a6]">{plan}</span>
               </span>
             </li>
           ))}
@@ -177,116 +348,160 @@ function BentoPlaceholder() {
   );
 }
 
-export default function SimpleSidebar() {
-  const [isMobile, setIsMobile] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+/* -------------------------------------------------------------------------- */
+/*  Block                                                                     */
+/* -------------------------------------------------------------------------- */
 
-  React.useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
+export type SimpleSidebarProps = {
+  className?: string;
+};
 
-  const sidebarContent = (
-    <>
-      {/* Brand */}
-      <div className="mb-5 flex items-center justify-between px-3 pt-1">
-        <div className="flex items-center gap-3">
-          <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-neutral-900 text-xs font-bold text-white dark:bg-white dark:text-neutral-900">
-            N
-          </div>
-          <span className="text-sm font-semibold text-neutral-900 dark:text-white">Nexus Labs</span>
-        </div>
-        {isMobile && (
-          <button
-            type="button"
-            onClick={() => setMobileOpen(false)}
-            className="rounded-md p-1 text-neutral-400 hover:text-neutral-700 dark:hover:text-white"
-          >
-            <X className="size-4" />
-          </button>
-        )}
-      </div>
+export default function SimpleSidebar({ className }: SimpleSidebarProps = {}) {
+  const scope = React.useId();
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const { compact, ready } = useCompact(rootRef);
+  const [selected, setSelected] = React.useState(INITIAL_ID);
+  const [menuOpen, setMenuOpen] = React.useState(false);
 
-      {/* Primary nav */}
-      <nav className="flex flex-col gap-0.5 overflow-y-auto">
-        {PRIMARY_NAV.map((item) => (
-          <NavLink key={item.label} item={item} />
-        ))}
-      </nav>
-
-      {/* Divider */}
-      <div className="my-3 h-px bg-neutral-200 dark:bg-white/10" />
-
-      {/* Secondary nav */}
-      <nav className="flex flex-col gap-0.5">
-        {SECONDARY_NAV.map((item) => (
-          <NavLink key={item.label} item={item} />
-        ))}
-      </nav>
-
-      {/* User profile */}
-      <div className="mt-auto flex items-center gap-3 rounded-lg px-3 py-2.5">
-        <div className="grid size-7 shrink-0 place-items-center rounded-full bg-emerald-500 text-[10px] font-bold text-white">
-          AM
-        </div>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-neutral-800 dark:text-neutral-200">Alex Morgan</p>
-          <p className="truncate text-[11px] text-neutral-400 dark:text-neutral-500">alex@nexuslabs.io</p>
-        </div>
-      </div>
-    </>
-  );
+  const open = compact && menuOpen;
+  const current = ALL_ITEMS.find((item) => item.id === selected) ?? ALL_ITEMS[0];
 
   return (
-    <div className="relative flex h-[560px] w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm dark:border-white/10 dark:bg-neutral-950">
-      {/* Mobile overlay */}
-      <AnimatePresence>
-        {isMobile && mobileOpen && (
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="absolute inset-0 z-20 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Sidebar */}
-      <motion.aside
-        animate={{ x: isMobile ? (mobileOpen ? 0 : "-100%") : 0 }}
-        transition={{ type: "spring", stiffness: 340, damping: 32 }}
+    <MotionConfig reducedMotion="user">
+      <div
+        ref={rootRef}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setMenuOpen(false);
+        }}
         className={cn(
-          "flex w-[240px] shrink-0 flex-col border-r border-neutral-200 bg-white px-3 py-4 dark:border-white/10 dark:bg-neutral-950",
-          isMobile && "absolute inset-y-0 left-0 z-30",
+          "relative flex h-[560px] w-full overflow-hidden rounded-[22px] bg-[#f5f5f7] text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:bg-black dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]",
+          className,
         )}
       >
-        {sidebarContent}
-      </motion.aside>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              key="scrim"
+              aria-hidden
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setMenuOpen(false)}
+              className="absolute inset-0 z-20 bg-black/20 dark:bg-black/50"
+            />
+          )}
+        </AnimatePresence>
 
-      {/* Main content */}
-      <div className="flex min-w-0 flex-1 flex-col bg-neutral-50 dark:bg-neutral-900">
-        {/* Mobile header */}
-        {isMobile && (
-          <div className="flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-neutral-950">
-            <button
-              type="button"
-              onClick={() => setMobileOpen(true)}
-              className="rounded-md p-1 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-            >
-              <Menu className="size-5" />
-            </button>
-            <span className="text-sm font-semibold text-neutral-900 dark:text-white">Nexus Labs</span>
+        <motion.aside
+          aria-label="Sidebar"
+          inert={compact && !menuOpen}
+          initial={false}
+          animate={{ x: compact && !menuOpen ? "-110%" : "0%" }}
+          transition={ready ? PANEL : INSTANT}
+          className={cn(
+            "z-30 flex w-[244px] shrink-0 flex-col rounded-[18px] bg-white/70 backdrop-blur-2xl backdrop-saturate-150 dark:bg-[#1c1c1e]/75",
+            compact
+              ? "absolute inset-y-2 left-2 shadow-[0_0_0_.5px_rgba(0,0,0,.1),0_24px_48px_-20px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_.5px_rgba(255,255,255,.12),0_24px_48px_-20px_rgba(0,0,0,.8)]"
+              : "relative my-2 ml-2 shadow-[0_0_0_.5px_rgba(0,0,0,.08),0_8px_24px_-14px_rgba(0,0,0,.18)] dark:shadow-[0_0_0_.5px_rgba(255,255,255,.1)]",
+          )}
+        >
+          <div className="flex items-center gap-2.5 px-4 pb-2 pt-3.5">
+            <span className="grid size-7 shrink-0 place-items-center rounded-[8px] bg-[#1d1d1f] text-[12px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+              N
+            </span>
+            <span className="min-w-0 flex-1 truncate text-[14px] font-semibold tracking-[-0.01em]">
+              Nexus Labs
+            </span>
+            {compact && (
+              <motion.button
+                type="button"
+                aria-label="Close sidebar"
+                whileTap={{ scale: 0.92 }}
+                onClick={() => setMenuOpen(false)}
+                className={cn(
+                  "grid size-7 place-items-center rounded-full text-[#6e6e73] transition-colors hover:bg-black/[0.05] dark:text-[#a1a1a6] dark:hover:bg-white/[0.08]",
+                  focusRing,
+                )}
+              >
+                <X className="size-4" strokeWidth={2} />
+              </motion.button>
+            )}
           </div>
-        )}
-        <div className="flex-1 overflow-hidden">
-          <BentoPlaceholder />
+
+          <nav
+            aria-label="Main"
+            className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 [scrollbar-width:none]"
+          >
+            {SECTIONS.map((section, index) => (
+              <div key={section.id} className={index === 0 ? "mt-1" : "mt-4"}>
+                <p className="px-2.5 pb-1 text-[11px] font-semibold text-[#86868b] dark:text-[#98989d]">
+                  {section.title}
+                </p>
+                <ul className="flex flex-col gap-px">
+                  {section.items.map((item) => (
+                    <li key={item.id}>
+                      <SidebarRow
+                        item={item}
+                        selected={item.id === selected}
+                        highlightId={`${scope}-highlight`}
+                        onSelect={() => {
+                          setSelected(item.id);
+                          setMenuOpen(false);
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </nav>
+
+          <div className="border-t border-black/[0.06] p-2 dark:border-white/[0.08]">
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                "flex w-full items-center gap-2.5 rounded-[12px] p-2 text-left transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]",
+                focusRing,
+              )}
+            >
+              <Monogram name="Alex Morgan" className="size-8 text-[11px]" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-medium">Alex Morgan</span>
+                <span className="block truncate text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">
+                  alex@nexuslabs.io
+                </span>
+              </span>
+              <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-[#86868b]" strokeWidth={1.75} />
+            </motion.button>
+          </div>
+        </motion.aside>
+
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-12 shrink-0 items-center gap-2 px-4">
+            {compact && (
+              <motion.button
+                type="button"
+                aria-label="Show sidebar"
+                aria-expanded={menuOpen}
+                whileTap={{ scale: 0.92 }}
+                onClick={() => setMenuOpen(true)}
+                className={cn(
+                  "-ml-1.5 grid size-8 place-items-center rounded-full text-[#1d1d1f] transition-colors hover:bg-black/[0.05] dark:text-[#f5f5f7] dark:hover:bg-white/[0.08]",
+                  focusRing,
+                )}
+              >
+                <Menu className="size-[18px]" strokeWidth={1.75} />
+              </motion.button>
+            )}
+            <SwapTitle title={current.label} />
+          </header>
+          <div className="min-h-0 flex-1">
+            <DashboardCanvas />
+          </div>
         </div>
       </div>
-    </div>
+    </MotionConfig>
   );
 }
