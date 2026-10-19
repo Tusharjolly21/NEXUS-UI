@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ComponentGallery } from "@/components/gallery/component-gallery";
+import { Band, PillLink, RainbowWord } from "@/components/site";
+import { allGalleryItems, galleryCategories } from "@/lib/catalog/gallery-items";
 import { createMetadata } from "@/lib/seo";
-import { libraryComponents } from "@/lib/catalog/library-components";
-import { ComponentsCatalog } from "./_catalog";
 
 export const metadata: Metadata = createMetadata({
   title: "Free React UI Components — Tailwind CSS & Framer Motion",
@@ -12,18 +13,54 @@ export const metadata: Metadata = createMetadata({
 });
 
 export default function ComponentsPage() {
+  const items = allGalleryItems();
+
   return (
     <>
-      {/* Server-rendered index so search engines can discover all component pages.
-          Hidden visually but present in the HTML for crawlers. */}
-      <ul aria-hidden className="sr-only">
-        {libraryComponents.map((c) => (
-          <li key={c.slug}>
-            <Link href={`/components/${c.slug}`}>{c.name}</Link>
-          </li>
-        ))}
-      </ul>
-      <ComponentsCatalog />
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px]">
+          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Components</h1>
+          <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
+            {items.length} React components that <RainbowWord>move</RainbowWord>. Every one is free, with a live preview,
+            its source and a one-line install.
+          </p>
+        </div>
+      </section>
+
+      <section aria-label="Component gallery" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <ComponentGallery items={items} categories={galleryCategories(items)} searchable />
+        </div>
+      </section>
+
+      <Band tint="mint">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">Can&apos;t find the one you need?</h2>
+            <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
+              Tell us what you&apos;re building and we&apos;ll consider it for the next drop. Or start from a whole page.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+            <PillLink href="/contact">Ask for a component</PillLink>
+            <PillLink href="/templates" variant="white">
+              See templates
+            </PillLink>
+          </div>
+        </div>
+      </Band>
+
+      {/* every component as a plain link, for crawlers and screen-reader navigation */}
+      <nav aria-label="All components" className="sr-only">
+        <ul>
+          {items.map((i) => (
+            <li key={i.slug}>
+              <Link href={`/components/${i.slug}`}>{i.name}</Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </>
   );
 }

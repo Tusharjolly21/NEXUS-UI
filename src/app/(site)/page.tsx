@@ -3,12 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Play, Plus } from "lucide-react";
 import { HeroStickers } from "@/components/home/hero-stickers";
-import { InteractionGallery, type GalleryItem, type Interaction } from "@/components/home/interaction-gallery";
-import type { TileShape, TileTint } from "@/components/home/gallery-tile";
+import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { Band, InstallCard, PillLink, RainbowWord, StatRow } from "@/components/site";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
-import { libraryComponents } from "@/lib/catalog/library-components";
-import type { AnimationKind } from "@/lib/catalog/taxonomy";
+import { homeGalleryItems } from "@/lib/catalog/gallery-items";
 import { templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
@@ -16,54 +14,6 @@ export const metadata: Metadata = {
   ...createMetadata({ alternates: { canonical: "/" } }),
   title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}` },
 };
-
-/**
- * Homepage gallery picks, in order. Each tile's shape fits the component: inputs and text run
- * wide, small widgets stay small, rich scenes get the big tiles. `canvas` (px) is the layout width
- * the preview gets before scaling; smaller reads larger.
- */
-// Ordered so the first 13 pack the 4-column bento into a full 4×8 rectangle with no holes;
-// the last four only appear under a filter.
-const GALLERY: { slug: string; exportName: string; tint: TileTint; shape: TileShape; canvas?: number }[] = [
-  { slug: "cinematic-card-deck", exportName: "PreviewCinematicCardDeck", tint: "peach", shape: "large", canvas: 900 },
-  { slug: "gooey-search-input", exportName: "PreviewGooeySearch", tint: "mint", shape: "wide", canvas: 560 },
-  { slug: "stateful-button", exportName: "PreviewStatefulButton", tint: "mint", shape: "small", canvas: 340 },
-  { slug: "meteors", exportName: "PreviewMeteors", tint: "violet", shape: "tall", canvas: 460 },
-  { slug: "floating-dock", exportName: "PreviewFloatingDock", tint: "butter", shape: "wide", canvas: 620 },
-  { slug: "profile-orbit", exportName: "PreviewProfileOrbit", tint: "pink", shape: "tall", canvas: 520 },
-  { slug: "encrypted-text", exportName: "PreviewEncryptedText", tint: "sky", shape: "wide", canvas: 620 },
-  { slug: "wheel-selector", exportName: "PreviewWheelSelector", tint: "butter", shape: "tall", canvas: 560 },
-  { slug: "glowing-effect-cards", exportName: "PreviewGlowingEffectCards", tint: "violet", shape: "large", canvas: 900 },
-  { slug: "avatar-group", exportName: "PreviewAvatarGroup", tint: "sky", shape: "small", canvas: 360 },
-  { slug: "ask-nexus-input", exportName: "PreviewAskNexusInput", tint: "sky", shape: "wide", canvas: 700 },
-  { slug: "card-carousel-3d", exportName: "PreviewCardCarousel3D", tint: "peach", shape: "large", canvas: 900 },
-  { slug: "interactive-globe-explorer", exportName: "PreviewInteractiveGlobeExplorer", tint: "sky", shape: "large", canvas: 900 },
-  { slug: "typewriter-effect", exportName: "PreviewTypewriterEffect", tint: "pink", shape: "wide", canvas: 640 },
-  { slug: "warp-speed-card", exportName: "PreviewWarpSpeedCard", tint: "violet", shape: "tall", canvas: 520 },
-  { slug: "word-magnet", exportName: "PreviewWordMagnet", tint: "mint", shape: "wide", canvas: 620 },
-  { slug: "shader-flow", exportName: "PreviewShaderFlow", tint: "peach", shape: "tall", canvas: 520 },
-];
-
-/** The catalogue's animation kinds, grouped into the filters people actually look for. */
-const KIND_TO_INTERACTION: Partial<Record<AnimationKind, Interaction>> = {
-  hover: "hover",
-  magnetic: "hover",
-  scroll: "scroll",
-  parallax: "scroll",
-  spring: "spring",
-  gradient: "glow",
-  "3d": "3d",
-};
-
-function galleryItems(): GalleryItem[] {
-  const bySlug = new Map(libraryComponents.map((c) => [c.slug, c]));
-  return GALLERY.flatMap(({ slug, exportName, tint, shape, canvas }) => {
-    const c = bySlug.get(slug);
-    if (!c) return [];
-    const interactions = [...new Set(c.animationKinds.map((k) => KIND_TO_INTERACTION[k]).filter(Boolean))] as Interaction[];
-    return [{ slug, name: c.name, exportName, tint, shape, canvas, interactions }];
-  });
-}
 
 const WALL_SLUGS = ["noir-studio", "helix-ai-platform", "launchfolio-portfolio", "ocean-flow", "aether-portfolio", "nexus-ai-launch"];
 
@@ -93,7 +43,7 @@ const STEPS = [
 ];
 
 export default function Home() {
-  const items = galleryItems();
+  const items = homeGalleryItems();
   const wall = WALL_SLUGS.map((slug) => templates.find((t) => t.slug === slug)).filter(
     (t): t is (typeof templates)[number] => !!t?.previewImages?.hero,
   );
@@ -175,7 +125,23 @@ export default function Home() {
         </div>
       </section>
 
-      <InteractionGallery items={items} totalComponents={CATALOG_COUNTS.components} />
+      <section id="gallery" aria-label="Components by interaction" className="scroll-mt-20 px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <ComponentGallery
+            items={items}
+            limit={13}
+            mobileLimit={8}
+            aside={
+              <Link
+                href="/components"
+                className="shrink-0 text-[14px] font-medium text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
+              >
+                Browse all {CATALOG_COUNTS.components} components
+              </Link>
+            }
+          />
+        </div>
+      </section>
 
       <section className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
