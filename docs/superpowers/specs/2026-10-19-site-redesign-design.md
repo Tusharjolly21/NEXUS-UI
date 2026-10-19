@@ -144,3 +144,17 @@ Each step is a separate PR against `main`. Step 1 must land first; steps 3 to 7 
 - The Components dropdown replaces separate Blog and Contact items in the nav.
 - The Pro card carries a "Recommended" badge (not "Most picked", which would imply sales data).
 - Single templates "from $49" is kept from the current pricing page.
+
+## Inspiration from bencho.dev (added after step 1)
+
+The owner asked for bencho.dev's structure and UX, keeping Nexus UI's own Playground look. Adopted for the remaining steps:
+- **Gallery-first homepage.** A short hero, then straight into a live, filterable component gallery. Marketing sections shrink to what helps someone decide.
+- **Filter by interaction** (Hover, Click, Drag, Scroll, Type, Loop) using `AnimationKind` from the taxonomy, alongside the categories.
+- **Quiet tiles.** The live component is the thumbnail. The name, Free/Pro tag and actions (save, replay, customise) appear on hover and focus, and are always shown on touch. Pastel tints by category.
+- **Component detail as a deep-linked modal** over the gallery (`?c=slug`). The full `/components/[slug]` page stays for SEO and direct links.
+- **Playground controls** as switches (segmented) and levels (bar sliders) wired to real props.
+- **Search is always reachable.** The nav capsule slims to logo, search and one action on scroll (done in step 2).
+- **Honest paywall.** Pro tiles are blurred at the end of the free gallery under one "Unlock every component" panel.
+- **Native page scroll everywhere.** This is the one thing not to copy: bencho, like the current `/components` page, scrolls inside an inner container.
+
+Full notes: `side-session-notes/.../bencho-analysis.md` (session notes, not in the repo).

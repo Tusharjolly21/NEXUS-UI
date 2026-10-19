@@ -21,7 +21,21 @@ const catColor = (slug: string) =>
   CAT_COLORS[slug] ?? "bg-zinc-700/40 text-zinc-400 border-zinc-600/40";
 
 /* ── Search trigger button ─────────────────────────────────────────────────── */
-function SearchTrigger({ onClick }: { onClick: () => void }) {
+function SearchTrigger({ onClick, variant = "default" }: { onClick: () => void; variant?: "default" | "capsule" }) {
+  if (variant === "capsule") {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label="Search components"
+        className="group inline-flex h-9 items-center gap-2 rounded-full bg-white/[0.08] pl-3 pr-1.5 text-[13.5px] text-white/70 transition-colors hover:bg-white/[0.14] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+      >
+        <Search className="size-4 shrink-0" aria-hidden />
+        <span className="hidden sm:inline">Search</span>
+        <kbd className="ml-1 hidden rounded-full bg-white/10 px-2 py-0.5 font-sans text-[11px] text-white/60 sm:inline">⌘K</kbd>
+      </button>
+    );
+  }
   return (
     <button
       type="button"
@@ -49,7 +63,7 @@ function SearchTrigger({ onClick }: { onClick: () => void }) {
 }
 
 /* ── Two-panel command palette ─────────────────────────────────────────────── */
-export function SearchCommand() {
+export function SearchCommand({ variant = "default" }: { variant?: "default" | "capsule" } = {}) {
   const router = useRouter();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -137,7 +151,7 @@ export function SearchCommand() {
 
   return (
     <>
-      <SearchTrigger onClick={() => setOpen(true)} />
+      <SearchTrigger onClick={() => setOpen(true)} variant={variant} />
 
       <AnimatePresence>
         {open && (
