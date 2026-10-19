@@ -12,7 +12,11 @@ export const siteConfig = {
   description:
     "Free React components and Next.js templates built with Tailwind CSS and Framer Motion. Copy-paste animated UI blocks and ship faster.",
   url: site,
-  twitterHandle: "@nexus_ui",
+  // Official accounts only. Left empty until Nexus UI has its own profiles — a handle owned
+  // by someone else would tie the brand to their account in Google and AI answers.
+  twitterHandle: null as string | null, // e.g. "@nexusui"
+  /** Organization `sameAs` URLs (X, GitHub, 21st.dev, LinkedIn…), also listed in public/llms.txt. */
+  socialProfiles: [] as string[],
   // NOTE: Google explicitly does NOT use the <meta name="keywords"> tag.
   // Keywords are intentionally omitted — focus effort on titles, descriptions,
   // headings, and structured data instead (per Google SEO Starter Guide).
@@ -95,8 +99,9 @@ export function createMetadata(override: Metadata = {}): Metadata {
     },
     twitter: {
       card: "summary_large_image",
-      site: siteConfig.twitterHandle,
-      creator: siteConfig.twitterHandle,
+      ...(siteConfig.twitterHandle
+        ? { site: siteConfig.twitterHandle, creator: siteConfig.twitterHandle }
+        : {}),
       title: titleStr,
       description: descStr,
       images: [ogImageUrl],

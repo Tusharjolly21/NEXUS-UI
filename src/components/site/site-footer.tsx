@@ -40,7 +40,7 @@ const LEGAL = [
 
 /** Dark footer with the ghost "Nexus UI" wordmark bleeding off the bottom edge. */
 export function SiteFooter() {
-  const xHandle = siteConfig.twitterHandle.replace("@", "");
+  const xHandle = siteConfig.twitterHandle?.replace("@", "");
 
   return (
     <footer className="relative overflow-hidden bg-footer px-4 pt-20 text-white">
@@ -78,9 +78,11 @@ export function SiteFooter() {
                 {l.label}
               </Link>
             ))}
-            <a href={`https://x.com/${xHandle}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
-              X
-            </a>
+            {xHandle && (
+              <a href={`https://x.com/${xHandle}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
+                X
+              </a>
+            )}
           </div>
         </div>
       </div>

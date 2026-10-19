@@ -72,7 +72,7 @@ export default function Home() {
       name: siteConfig.name,
       url: siteConfig.url,
       logo: { "@type": "ImageObject", url: `${siteConfig.url}/nexus-ui-logo.png`, width: 192, height: 192 },
-      sameAs: [`https://x.com/${siteConfig.twitterHandle.replace("@", "")}`],
+      ...(siteConfig.socialProfiles.length > 0 ? { sameAs: siteConfig.socialProfiles } : {}),
       contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "contact@nexus-ui.com" },
     },
     {

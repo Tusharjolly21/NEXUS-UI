@@ -33,5 +33,4 @@ Nexus UI is a premium UI component library offering 100+ animated React componen
 ## Contact
 
 - Website: https://www.nexus-ui.com
-- Twitter/X: https://twitter.com/nexus_ui
 - Support: /contact
