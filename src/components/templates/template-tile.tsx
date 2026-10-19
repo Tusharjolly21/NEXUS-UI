@@ -125,7 +125,7 @@ export function TemplateTile({
           >
             <Link
               href={`/template-preview/${tmpl.slug}`}
-              className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 text-[13px] font-semibold text-[#17171c] shadow-[0_0_0_1px_rgba(23,23,28,0.08)] transition-colors hover:bg-white/80"
+              className="inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-full bg-white px-3.5 text-[13px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(23,23,28,0.08)] transition-colors hover:bg-white/80"
             >
               <Play className="size-3 fill-current" aria-hidden />
               Live
@@ -133,7 +133,7 @@ export function TemplateTile({
             </Link>
             <Link
               href={href}
-              className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full bg-[#17171c] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-black"
+              className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full bg-[#1d1d1f] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-black"
             >
               {owned ? "Open" : "Get it"}
               <ArrowUpRight className="size-3.5" aria-hidden />

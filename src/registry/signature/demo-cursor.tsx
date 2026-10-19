@@ -63,7 +63,7 @@ export function DemoCursor({
   loopDelay = 1400,
   startDelay = 700,
   resumeAfter = 2600,
-  color = "#6d5cff",
+  color = "#1d1d1f",
   className,
 }: Props) {
   const anchorRef = React.useRef<HTMLSpanElement | null>(null);

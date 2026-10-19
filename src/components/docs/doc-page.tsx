@@ -47,7 +47,7 @@ export function TechArticleJsonLd({
 }
 
 export const docPreClass =
-  "overflow-x-auto rounded-[20px] bg-[#17171c] p-5 font-mono text-[13.5px] leading-relaxed text-[#e6e6ea]";
+  "overflow-x-auto rounded-[20px] bg-[#1d1d1f] p-5 font-mono text-[13.5px] leading-relaxed text-[#e6e6ea]";
 
 export const docInlineCodeClass = "rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.88em] text-foreground";
 
@@ -82,7 +82,7 @@ export function DocPre({ children }: { children: string }) {
 
   return (
     <div className="group relative">
-      <pre className="doc-code-block overflow-x-auto rounded-[20px] bg-[#17171c] p-5 pr-14 text-[13.5px] leading-relaxed">
+      <pre className="doc-code-block overflow-x-auto rounded-[20px] bg-[#1d1d1f] p-5 pr-14 text-[13.5px] leading-relaxed">
         <code dangerouslySetInnerHTML={{ __html: highlighted }} />
       </pre>
       <button
@@ -143,7 +143,7 @@ export function DocPageShell({
   return (
     <div
       className={cn(
-        "max-w-[760px] space-y-12 [&_section_li]:text-[16px] [&_section_li]:leading-[1.65] [&_section_p]:text-[16.5px] [&_section_p]:leading-[1.7] [&_section_p]:text-body [&_section_a]:underline [&_section_a]:decoration-foreground/30 [&_section_a]:underline-offset-4",
+        "max-w-[760px] space-y-12 [&_section_li]:text-[16px] [&_section_li]:leading-[1.65] [&_section_p]:text-[16.5px] [&_section_p]:leading-[1.7] [&_section_p]:text-body [&_section_a]:text-link [&_section_a]:underline-offset-4 [&_section_a:hover]:underline",
         className,
       )}
     >

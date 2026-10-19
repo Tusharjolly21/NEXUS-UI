@@ -83,7 +83,7 @@ export function BlocksGallery({ items }: { items: BlockItem[] }) {
                 >
                   <FitPreview exportName={b.exportName} canvas={b.fit.canvas} focus={b.fit.focus} eager={i < 2} />
                   {b.isNew ? (
-                    <span className="absolute left-3 top-3 rounded-full bg-[#17171c] px-2.5 py-1 text-[11.5px] font-semibold text-white">New</span>
+                    <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11.5px] font-semibold text-[#bf4800] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md">New</span>
                   ) : null}
                 </div>
                 <div className="flex items-end justify-between gap-3 px-2.5 pb-1.5 pt-3">
@@ -113,7 +113,7 @@ export function BlocksGallery({ items }: { items: BlockItem[] }) {
                     <PlanTag pro={b.premium} />
                     <span
                       aria-hidden
-                      className="grid size-8 place-items-center rounded-full bg-[#17171c] text-white opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                      className="grid size-8 place-items-center rounded-full bg-action text-white opacity-0 transition-opacity group-hover:opacity-100 [@media(hover:none)]:opacity-100"
                     >
                       <ArrowUpRight className="size-4" />
                     </span>

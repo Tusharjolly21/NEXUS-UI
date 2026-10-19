@@ -358,10 +358,10 @@ function Inspector({ item }: { item: GalleryItem }) {
                 className={cn(
                   "grid h-8 w-9 place-items-center rounded-full transition-colors",
                   view === v
-                    ? "bg-white text-[#17171c] shadow-sm"
+                    ? "bg-white text-[#1d1d1f] shadow-sm"
                     : stageDark && view === "preview"
                       ? "text-white/70 hover:text-white"
-                      : "text-[#17171c]/55 hover:text-[#17171c]",
+                      : "text-[#1d1d1f]/55 hover:text-[#1d1d1f]",
                 )}
               >
                 <Icon className="size-4" aria-hidden />
@@ -376,7 +376,7 @@ function Inspector({ item }: { item: GalleryItem }) {
               title="Replay"
               className={cn(
                 "grid size-10 place-items-center rounded-full backdrop-blur-md transition-colors",
-                stageDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white/80 text-[#17171c] shadow-[0_0_0_1px_rgba(23,23,28,0.06)] hover:bg-white",
+                stageDark ? "bg-white/10 text-white hover:bg-white/20" : "bg-white/80 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(23,23,28,0.06)] hover:bg-white",
               )}
             >
               <RotateCcw className="size-4" aria-hidden />
@@ -385,7 +385,7 @@ function Inspector({ item }: { item: GalleryItem }) {
             <button
               type="button"
               onClick={() => prompt(promptText)}
-              className="inline-flex h-10 items-center gap-2 rounded-full bg-[#17171c] px-4 text-[13.5px] font-semibold text-white transition-[width] dark:bg-white dark:text-[#17171c]"
+              className="inline-flex h-10 items-center gap-2 rounded-full bg-[#1d1d1f] px-4 text-[13.5px] font-semibold text-white transition-[width] dark:bg-white dark:text-[#1d1d1f]"
             >
               {prompted ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
               <span aria-live="polite">{prompted ? "Copied — paste it into your agent" : "Copy prompt"}</span>
@@ -424,7 +424,7 @@ function Inspector({ item }: { item: GalleryItem }) {
             ))}
             <li className="rounded-full bg-tint-mint px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] dark:text-[#7be3a6]">Free</li>
             {item.isNew ? (
-              <li className="rounded-full bg-foreground px-2.5 py-1 text-[12px] font-semibold text-background">New</li>
+              <li className="rounded-full bg-card px-2.5 py-1 text-[12px] font-semibold text-[#bf4800] shadow-[0_0_0_0.5px_var(--border)] dark:text-[#ff9f0a]">New</li>
             ) : null}
           </ul>
 

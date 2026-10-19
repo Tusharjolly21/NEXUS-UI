@@ -10,7 +10,7 @@ const TINTS: Record<Tint, string> = {
   mint: "bg-tint-mint",
   butter: "bg-tint-butter",
   pink: "bg-tint-pink",
-  dark: "bg-[#17171c] text-white",
+  dark: "bg-[#1d1d1f] text-white",
 };
 
 /** Free / Pro tag shown on library tiles. */

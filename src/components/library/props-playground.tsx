@@ -95,7 +95,7 @@ export function Segmented<T extends string>({
   label: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-0.5 rounded-full bg-foreground/[0.05] p-0.5">
+    <div role="radiogroup" aria-label={label} className="flex flex-wrap items-center gap-0.5 rounded-[10px] bg-foreground/[0.07] p-[3px]">
       {options.map((option) => (
         <button
           key={option}
@@ -104,9 +104,9 @@ export function Segmented<T extends string>({
           aria-checked={value === option}
           onClick={() => onChange(option)}
           className={cn(
-            "h-7 rounded-full px-2.5 text-xs capitalize transition-colors",
+            "h-7 rounded-[8px] px-2.5 text-xs capitalize transition-colors",
             value === option
-              ? "bg-background font-medium text-foreground shadow-sm"
+              ? "bg-card font-medium text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)]"
               : "text-muted-foreground hover:text-foreground",
           )}
         >

@@ -70,13 +70,13 @@ export function GalleryTile({ item, onOpen }: { item: GalleryItem; onOpen?: (slu
 
   const chip = dark
     ? "bg-white/12 text-white ring-1 ring-inset ring-white/15 backdrop-blur-md hover:bg-white/20"
-    : "bg-white/90 text-[#17171c] shadow-[0_1px_2px_rgba(23,23,28,0.08),0_0_0_1px_rgba(23,23,28,0.06)] backdrop-blur-md hover:bg-white";
+    : "bg-white/90 text-[#1d1d1f] shadow-[0_1px_2px_rgba(23,23,28,0.08),0_0_0_1px_rgba(23,23,28,0.06)] backdrop-blur-md hover:bg-white";
 
   return (
     <div
       className={cn(
         "group relative h-full overflow-hidden rounded-[28px] transition-shadow duration-200",
-        "hover:shadow-[0_0_0_1px_rgba(23,23,28,0.08),0_12px_32px_-12px_rgba(23,23,28,0.25)]",
+        "hover:shadow-[0_0_0_0.5px_rgba(0,0,0,0.08),0_18px_40px_-18px_rgba(0,0,0,0.3)]",
         !fit.bg && TINT_CLASSES[item.tint],
       )}
       style={fit.bg ? { backgroundColor: fit.bg } : undefined}
@@ -98,7 +98,7 @@ export function GalleryTile({ item, onOpen }: { item: GalleryItem; onOpen?: (slu
         <span
           className={cn(
             "pointer-events-none absolute left-4 top-4 rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
-            dark ? "bg-white text-[#17171c]" : "bg-[#17171c] text-white",
+            dark ? "bg-white/12 text-[#ff9f0a] backdrop-blur-md" : "bg-white/90 text-[#bf4800] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md",
           )}
         >
           New
@@ -139,7 +139,7 @@ export function GalleryTile({ item, onOpen }: { item: GalleryItem; onOpen?: (slu
             title="Tweak and copy"
             className={cn(
               "grid size-8 place-items-center rounded-full transition-colors",
-              dark ? "bg-white text-[#17171c] hover:bg-white/90" : "bg-[#17171c] text-white hover:bg-black",
+              "bg-action text-white hover:bg-action-hover",
             )}
           >
             <SlidersHorizontal className="size-3.5" aria-hidden />

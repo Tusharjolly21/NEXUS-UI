@@ -15,11 +15,11 @@ type Sticker = {
 };
 
 const STICKERS: Sticker[] = [
-  { id: "motion", x: 14, y: 21, tilt: -8, className: "bg-card text-foreground", content: <><Zap className="size-3.5 text-rainbow-violet" aria-hidden />Framer Motion</> },
-  { id: "tailwind", x: 72, y: 17, tilt: 9, className: "bg-rainbow-blue text-white", content: <>Tailwind v4</> },
-  { id: "copy", x: 9, y: 46, tilt: -6, className: "bg-tint-mint text-[#126b3a]", content: <><Copy className="size-3.5" aria-hidden />Copy &amp; paste</> },
-  { id: "cli", x: 76, y: 42, tilt: 7, className: "pg-cta font-mono text-white", content: <>npx shadcn add</> },
-  { id: "free", x: 16, y: 66, tilt: 5, className: "bg-[#17171c] text-white", content: <><Check className="size-3.5 text-rainbow-green" aria-hidden />Free to start</> },
+  { id: "motion", x: 14, y: 21, tilt: -8, className: "bg-card text-foreground", content: <><Zap className="size-3.5 text-action" aria-hidden />Framer Motion</> },
+  { id: "tailwind", x: 72, y: 17, tilt: 9, className: "bg-action text-white", content: <>Tailwind v4</> },
+  { id: "copy", x: 9, y: 46, tilt: -6, className: "bg-card text-foreground", content: <><Copy className="size-3.5 text-[#34c759]" aria-hidden />Copy &amp; paste</> },
+  { id: "cli", x: 76, y: 42, tilt: 7, className: "bg-[#1d1d1f] font-mono text-white dark:bg-[#2c2c2e]", content: <>npx shadcn add</> },
+  { id: "free", x: 16, y: 66, tilt: 5, className: "bg-card text-foreground", content: <><span className="grid size-4 place-items-center rounded-full bg-action" aria-hidden><Check className="size-2.5 text-white" strokeWidth={3.5} /></span>Free to start</> },
   { id: "gooey", x: 69, y: 70, tilt: -9, className: "bg-card text-foreground", content: <><span className="size-2 rounded-full bg-rainbow-green" aria-hidden />Gooey Input</> },
 ];
 
@@ -35,7 +35,7 @@ export function HeroStickers() {
         <motion.div
           key={s.id}
           className={cn(
-            "pg-glass pointer-events-auto absolute flex cursor-grab touch-none select-none items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-semibold active:cursor-grabbing",
+            "pointer-events-auto absolute flex cursor-grab touch-none select-none items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-medium tracking-[-0.01em] shadow-[0_0_0_0.5px_var(--border),0_10px_24px_-12px_rgba(0,0,0,0.3)] active:cursor-grabbing",
             s.className,
           )}
           style={{ left: `${s.x}%`, top: `${s.y}%` }}

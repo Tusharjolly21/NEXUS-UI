@@ -14,7 +14,7 @@ export function PreviewLikeBurst({ compact = true }: { compact?: boolean } = {})
   return (
     <div className="relative flex h-full min-h-[320px] w-full items-center justify-center p-6">
       <LikeBurst defaultCount={1299} size={compact ? "md" : "lg"} />
-      <DemoCursor script={SCRIPT} color="#ff3b5c" />
+      <DemoCursor script={SCRIPT} />
     </div>
   );
 }

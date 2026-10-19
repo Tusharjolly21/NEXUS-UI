@@ -167,23 +167,23 @@ export default function PricingPage() {
             {PLANS.map((p) => (
               <article
                 key={p.name}
-                className={cn("pg-float relative flex flex-col rounded-tile p-7", p.featured ? "bg-tint-butter" : "bg-card")}
+                className={cn("pg-float relative flex flex-col rounded-tile p-7", p.featured ? "bg-card ring-2 ring-action" : "bg-card")}
               >
                 {p.featured ? (
-                  <span className="absolute right-6 top-6 rounded-full bg-foreground px-3 py-1 text-[12px] font-semibold text-background">
+                  <span className="absolute right-6 top-6 rounded-full bg-action/10 px-3 py-1 text-[12px] font-semibold text-link">
                     Recommended
                   </span>
                 ) : null}
                 <h2 className="text-[17px] font-semibold text-foreground">{p.name}</h2>
                 <p className="mt-3 flex items-baseline gap-2">
-                  <span className="text-[48px] font-bold leading-none tracking-[-0.04em] text-foreground">{p.price}</span>
+                  <span className="text-[48px] font-semibold leading-none tracking-[-0.035em] text-foreground">{p.price}</span>
                   <span className="text-[15px] text-muted-foreground">{p.term}</span>
                 </p>
                 <p className="mt-3 text-[15px] text-muted-foreground">{p.pitch}</p>
                 <ul className="mt-6 space-y-3">
                   {p.features.map((f) => (
                     <li key={f} className="flex gap-2.5 text-[15px] text-foreground">
-                      <Check className="mt-0.5 size-4 shrink-0 text-[#34c759]" aria-hidden />
+                      <Check className="mt-0.5 size-4 shrink-0 text-action" aria-hidden />
                       {f}
                     </li>
                   ))}
@@ -206,8 +206,8 @@ export default function PricingPage() {
           </div>
           <p className="mt-6 text-center text-[15px] text-muted-foreground">
             Need just one template? Single templates are ${TEMPLATE_PRICE}.{" "}
-            <Link href="/templates" className="font-semibold text-foreground underline underline-offset-4">
-              Browse templates
+            <Link href="/templates" className="text-link hover:underline hover:underline-offset-4">
+              Browse templates ›
             </Link>
           </p>
         </div>

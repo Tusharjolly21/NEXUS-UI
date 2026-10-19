@@ -143,7 +143,7 @@ npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
       <DocSection title="Nexus UI catalog workflow">
         <p className="text-sm text-muted-foreground">
           Every component in the{" "}
-          <Link href="/components" className="text-primary underline-offset-4 hover:underline">
+          <Link href="/components" className="text-link underline-offset-4 hover:underline">
             catalog
           </Link>{" "}
           has a matching registry entry. You can also open the{" "}

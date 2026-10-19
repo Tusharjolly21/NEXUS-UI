@@ -184,7 +184,7 @@ html.dark {
             Open{" "}
             <code className={docInlineCodeClass}>http://localhost:3000</code>. Tailwind utilities and
             your OKLCH tokens should be active. Next, add the{" "}
-            <Link href="/docs/add-utilities" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/docs/add-utilities" className="text-link underline-offset-4 hover:underline">
               cn() utility helper
             </Link>{" "}
             so components can merge class strings safely.

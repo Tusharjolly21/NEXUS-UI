@@ -66,7 +66,7 @@ npm install
 npm run dev`}</DocPre>
         <p className="text-sm text-muted-foreground">
           Visit <code className={docInlineCodeClass}>http://localhost:3000</code>. Next, wire{" "}
-          <Link href="/docs/install-tailwindcss" className="text-primary underline-offset-4 hover:underline">
+          <Link href="/docs/install-tailwindcss" className="text-link underline-offset-4 hover:underline">
             Tailwind CSS v4
           </Link>{" "}
           so utility classes and tokens match Nexus-UI patterns.

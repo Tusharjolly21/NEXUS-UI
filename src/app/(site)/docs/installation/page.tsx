@@ -90,7 +90,7 @@ html.dark {
             See the{" "}
             <Link
               href="/docs/install-tailwindcss"
-              className="text-primary underline-offset-4 hover:underline"
+              className="text-link underline-offset-4 hover:underline"
             >
               full Tailwind guide
             </Link>{" "}
@@ -141,7 +141,7 @@ export function cn(...inputs: ClassValue[]) {
                 — open any component on{" "}
                 <Link
                   href="/components"
-                  className="text-primary underline-offset-4 hover:underline"
+                  className="text-link underline-offset-4 hover:underline"
                 >
                   /components
                 </Link>
@@ -187,7 +187,7 @@ export function cn(...inputs: ClassValue[]) {
             <code className={docInlineCodeClass}>framer-motion</code>), pulls the{" "}
             <code className={docInlineCodeClass}>utils</code> helper if missing, and writes files
             under your components alias. See the{" "}
-            <Link href="/docs/cli" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/docs/cli" className="text-link underline-offset-4 hover:underline">
               CLI guide
             </Link>{" "}
             for full details.
@@ -205,7 +205,7 @@ export function cn(...inputs: ClassValue[]) {
             Open{" "}
             <code className={docInlineCodeClass}>http://localhost:3000</code> and your first Nexus
             UI component should be live. Browse{" "}
-            <Link href="/components" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/components" className="text-link underline-offset-4 hover:underline">
               /components
             </Link>{" "}
             for live previews and copy-ready snippets on every detail page.
