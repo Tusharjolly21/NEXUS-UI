@@ -6,7 +6,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CreditCard, Key, LayoutDashboard, LogOut, Menu, ShoppingBag, User, X } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { SearchCommand } from "@/components/search/search-command";
 import {
   DropdownMenu,
@@ -18,6 +17,7 @@ import {
 import { isSupabaseConfigured } from "@/lib/env";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { ThemeTrio } from "./theme-trio";
 
 const NAV_LINKS = [
   { href: "/components", label: "Components" },
@@ -140,10 +140,16 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
 
         <div className="ml-auto flex items-center gap-1.5">
           <SearchCommand variant="capsule" />
-          <div className={cn("hidden sm:block", compact && "sm:hidden")}>
-            <ThemeToggle variant="capsule" />
-          </div>
+          <ThemeTrio className={cn("hidden md:flex", compact && "md:hidden")} />
 
+          {primaryAction ? (
+            <Link
+              href={primaryAction.href}
+              className="pg-glass hidden h-[38px] items-center rounded-full bg-white px-4 text-[13.5px] font-semibold text-[#17171c] transition-colors hover:bg-white/90 sm:inline-flex"
+            >
+              {primaryAction.label}
+            </Link>
+          ) : null}
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -187,14 +193,6 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
             </Link>
           )}
 
-          {primaryAction ? (
-            <Link
-              href={primaryAction.href}
-              className="pg-glass hidden h-[38px] items-center rounded-full bg-white px-4 text-[13.5px] font-semibold text-[#17171c] transition-colors hover:bg-white/90 sm:inline-flex"
-            >
-              {primaryAction.label}
-            </Link>
-          ) : null}
 
           <button
             type="button"
@@ -237,7 +235,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
             })}
           </nav>
           <div className="mt-2 flex items-center gap-2 border-t border-white/10 px-1 pt-3">
-            <ThemeToggle variant="capsule" />
+            <ThemeTrio />
             {user ? (
               <>
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-white/[0.08] text-center text-[14px] font-medium text-white">
