@@ -1,5 +1,15 @@
 /** @type {import('next').NextConfig} */
 // Plain ESM config avoids the `next.config.ts` require-hook path that can break or stall on Node.js 24.15+.
+// Google AdSense: loader + ad-quality scripts, ad frames, and the beacons they send.
+// Ad creatives render inside doubleclick/googlesyndication iframes, so their own images
+// and scripts are governed by those frames, not by this policy.
+const adsenseScriptHosts =
+  "https://pagead2.googlesyndication.com https://*.googlesyndication.com https://partner.googleadservices.com https://www.googletagservices.com https://adservice.google.com https://*.adtrafficquality.google https://fundingchoicesmessages.google.com";
+const adsenseFrameHosts =
+  "https://googleads.g.doubleclick.net https://*.doubleclick.net https://*.googlesyndication.com https://www.google.com https://*.adtrafficquality.google";
+const adsenseBeaconHosts =
+  "https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://www.google.com https://csi.gstatic.com";
+
 const securityHeaders = [
   // Prevents MIME-type sniffing — blocks drive-by downloads and XSS via wrong content type
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -16,13 +26,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com",
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com ${adsenseScriptHosts}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://*.google-analytics.com https://*.googletagmanager.com",
+      `img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://cdn.simpleicons.org https://*.google-analytics.com https://*.googletagmanager.com ${adsenseBeaconHosts}`,
       "font-src 'self' https://fonts.gstatic.com",
-      "connect-src 'self' blob: https://*.supabase.co https://api.lemonsqueezy.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com",
+      `connect-src 'self' blob: https://*.supabase.co https://api.lemonsqueezy.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com ${adsenseBeaconHosts}`,
       "worker-src 'self' blob:",
-      "frame-src 'self' https://*.lemonsqueezy.com https://checkout.stripe.com",
+      `frame-src 'self' https://*.lemonsqueezy.com https://checkout.stripe.com ${adsenseFrameHosts}`,
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
