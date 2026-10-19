@@ -18,11 +18,14 @@ declare global {
  */
 export function CheckoutButton({
   plan,
+  returnPath,
   variant = "ink",
   className,
   children,
 }: {
   plan: "annual" | "lifetime";
+  /** Same-site path to come back to after signing in. Defaults to /pricing. */
+  returnPath?: string;
   variant?: PillVariant;
   className?: string;
   children: React.ReactNode;
@@ -38,7 +41,7 @@ export function CheckoutButton({
         body: JSON.stringify({ plan }),
       });
       if (res.status === 401) {
-        window.location.href = "/login?next=/pricing";
+        window.location.href = `/login?next=${encodeURIComponent(returnPath ?? "/pricing")}`;
         return;
       }
       const data = (await res.json()) as { url?: string; error?: string };

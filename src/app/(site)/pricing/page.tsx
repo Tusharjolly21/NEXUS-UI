@@ -7,17 +7,17 @@ import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+import { PRICES, formatPrice } from "@/lib/pricing";
 
 const { components, templates, blocks } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 
-const TEMPLATE_PRICE = 49;
-const PRO_PRICE = 99;
-const ALL_ACCESS_PRICE = 149;
+const PRO_PRICE = formatPrice(PRICES.pro);
+const ALL_ACCESS_PRICE = formatPrice(PRICES.allAccess);
 
 export const metadata: Metadata = {
   ...createMetadata({
-    description: `Every Nexus UI component is free. Pro ($${PRO_PRICE} for 12 months) and All-Access ($${ALL_ACCESS_PRICE} once) unlock the source of all ${templates} Next.js templates and the premium blocks.`,
+    description: `Every Nexus UI component is free. Pro (${PRO_PRICE} a year) and All-Access (${ALL_ACCESS_PRICE} once) unlock the source of all ${templates} Next.js templates and the premium blocks.`,
     alternates: { canonical: "/pricing" },
   }),
   title: { absolute: "Pricing — Nexus UI" },
@@ -48,29 +48,30 @@ const PLANS: Plan[] = [
   },
   {
     name: "Pro",
-    price: `$${PRO_PRICE}`,
-    term: "for 12 months",
-    pitch: "Every template and block for a year of building.",
+    price: PRO_PRICE,
+    term: "per year",
+    pitch: "Everything Nexus UI makes, renewed yearly.",
     featured: true,
     features: [
       "Everything in Starter",
       `Full source of all ${templates} templates`,
       `All ${blocks} section blocks`,
-      "Every update for 12 months",
-      "Email support",
+      "Every new template, block and component as it ships",
+      "Request components, blocks and templates",
+      "Priority support, 24 to 48 hours",
+      "Cancel anytime",
     ],
   },
   {
     name: "All-Access",
-    price: `$${ALL_ACCESS_PRICE}`,
+    price: ALL_ACCESS_PRICE,
     term: "one payment",
-    pitch: "Everything in Pro, and it never runs out.",
+    pitch: "Exactly what Pro unlocks, paid once and yours for good.",
     features: [
       "Everything in Pro",
-      "Lifetime access and updates",
-      "Every future template",
-      "Early access to new drops",
-      "Priority support, 24 to 48 hours",
+      "Every future release, for life",
+      "Requests and priority support, for life",
+      "One payment, never renews",
     ],
   },
 ];
@@ -81,9 +82,11 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Section blocks", `${freeBlocks} free`, `All ${blocks}`, `All ${blocks}`],
   ["Template source", "Preview only", true, true],
   ["Commercial and client use", true, true, true],
-  ["Updates", "Free items", "12 months", "Lifetime"],
-  ["Future templates", false, "During your 12 months", true],
-  ["Support", "Community", "Email", "Priority"],
+  ["New templates, blocks and components", "Free items", true, true],
+  ["Requests", false, true, true],
+  ["Support", "Community", "Priority", "Priority"],
+  ["Access", "Forever", "While subscribed", "Forever"],
+  ["Billing", "Free", "Yearly, cancel anytime", "Once"],
 ];
 
 const FAQ = [
@@ -93,19 +96,27 @@ const FAQ = [
   },
   {
     q: "What's the difference between Pro and All-Access?",
-    a: `Pro gives you everything for 12 months for $${PRO_PRICE}. All-Access is a single $${ALL_ACCESS_PRICE} payment that never ends and includes every template we release later.`,
+    a: `Only how you pay. Both unlock every template, every block, everything we release next, requests and priority support. Pro is ${PRO_PRICE} a year and renews until you cancel. All-Access is ${ALL_ACCESS_PRICE} once and never expires.`,
   },
   {
-    q: "What happens when Pro's 12 months end?",
-    a: "You keep using what you built or started during your term. You can't download premium items or get updates until you renew.",
+    q: "What happens if I cancel Pro?",
+    a: "You keep access until the end of the year you've paid for, and you keep using whatever you built. After that you can't download premium items or get updates unless you subscribe again.",
   },
   {
-    q: "What if I only need one template?",
-    a: `Buy it on its own for $${TEMPLATE_PRICE}, from that template's page.`,
+    q: "Can I buy a single template?",
+    a: `Templates come with a plan. Pro unlocks all ${templates} of them, plus everything we add later, for ${PRO_PRICE} a year.`,
+  },
+  {
+    q: "Can I request a component or template?",
+    a: "Yes. Pro and All-Access members can send requests from the contact page. The most-asked-for ones get built next, and both plans get them as they ship.",
+  },
+  {
+    q: "Can I upgrade from Pro to All-Access?",
+    a: "Yes, any time. Buy All-Access, then cancel Pro from Billing or email us and we'll stop the renewal for you.",
   },
   {
     q: "Can I get a refund?",
-    a: "All-Access: a full refund if you ask within 7 days. Pro and single templates: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
+    a: "All-Access: a full refund if you ask within 7 days. Pro: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
   },
   {
     q: "How do I get the code after paying?",
@@ -128,8 +139,8 @@ const jsonLd = [
     url: `${siteConfig.url}/pricing`,
     offers: [
       { "@type": "Offer", name: "Starter", price: "0", priceCurrency: "USD" },
-      { "@type": "Offer", name: "Pro", price: String(PRO_PRICE), priceCurrency: "USD" },
-      { "@type": "Offer", name: "All-Access", price: String(ALL_ACCESS_PRICE), priceCurrency: "USD" },
+      { "@type": "Offer", name: "Pro", price: String(PRICES.pro), priceCurrency: "USD" },
+      { "@type": "Offer", name: "All-Access", price: String(PRICES.allAccess), priceCurrency: "USD" },
     ],
   },
 ];
@@ -205,9 +216,9 @@ export default function PricingPage() {
             ))}
           </div>
           <p className="mt-6 text-center text-[15px] text-muted-foreground">
-            Need just one template? Single templates are ${TEMPLATE_PRICE}.{" "}
-            <Link href="/templates" className="text-link hover:underline hover:underline-offset-4">
-              Browse templates ›
+            Need something we don&apos;t have yet? Both plans include requests.{" "}
+            <Link href="/contact" className="text-link hover:underline hover:underline-offset-4">
+              Request a component ›
             </Link>
           </p>
         </div>

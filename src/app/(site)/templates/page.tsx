@@ -6,6 +6,7 @@ import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess, getOwnedTemplateSlugs } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createMetadata } from "@/lib/seo";
+import { PRICES, formatPrice } from "@/lib/pricing";
 import { templates } from "@/lib/catalog/templates";
 import TemplatesGallery from "./templates-client";
 
@@ -72,10 +73,10 @@ export default async function TemplatesPage() {
           ) : (
             <div>
               <h2 className="pg-display max-w-[620px] text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">
-                Want more than one?
+                Get every template
               </h2>
               <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-                A single template is $49. Pro unlocks all {templates.length} for 12 months at $99, and All-Access unlocks them for good at $149.
+                Pro unlocks all {templates.length}, every block and everything we release next for {formatPrice(PRICES.pro)} a year. All-Access unlocks the same, for good, at {formatPrice(PRICES.allAccess)} once.
               </p>
             </div>
           )}
