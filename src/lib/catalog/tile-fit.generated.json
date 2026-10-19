@@ -39,6 +39,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "animated-icons": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   306,
+   258,
+   348,
+   202
+  ],
+  "content": [
+   316,
+   268,
+   328,
+   170
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.06
+ },
  "animated-select-headline": {
   "canvas": [
    960,
@@ -619,6 +639,26 @@
   "bg": "#0c0c0c",
   "coverage": 0.12
  },
+ "copy-button": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   300,
+   298,
+   360,
+   124
+  ],
+  "content": [
+   318,
+   308,
+   332,
+   104
+  ],
+  "bg": null,
+  "coverage": 0.03
+ },
  "cursor-buddy": {
   "canvas": [
    960,
@@ -779,6 +819,26 @@
   "bg": "#ffffff",
   "coverage": 0.74
  },
+ "elastic-stepper": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   340,
+   304,
+   280,
+   108
+  ],
+  "content": [
+   392,
+   314,
+   176,
+   68
+  ],
+  "bg": null,
+  "coverage": 0.01
+ },
  "emoji-reactions": {
   "canvas": [
    960,
@@ -859,6 +919,26 @@
   "bg": "#0c0c0c",
   "coverage": 1
  },
+ "feedback-pill": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   300,
+   254,
+   360,
+   212
+  ],
+  "content": [
+   316,
+   270,
+   328,
+   180
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.11
+ },
  "float-glass-navbar": {
   "canvas": [
    960,
@@ -898,6 +978,26 @@
   ],
   "bg": "#f0f0f6",
   "coverage": 0.03
+ },
+ "folder-peek": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   340,
+   216,
+   282,
+   266
+  ],
+  "content": [
+   350,
+   226,
+   262,
+   224
+  ],
+  "bg": null,
+  "coverage": 0.08
  },
  "forge-ai-command-bar": {
   "canvas": [
@@ -1499,6 +1599,26 @@
   "bg": "#0c0c18",
   "coverage": 1
  },
+ "progress-button": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   404,
+   314,
+   154,
+   86
+  ],
+  "content": [
+   414,
+   334,
+   132,
+   32
+  ],
+  "bg": "#36c65a",
+  "coverage": 0.01
+ },
  "pulse-dashboard-kpis": {
   "canvas": [
    1200,
@@ -1578,6 +1698,26 @@
   ],
   "bg": null,
   "coverage": 0.02
+ },
+ "ruler-picker": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   336,
+   258,
+   288,
+   212
+  ],
+  "content": [
+   346,
+   268,
+   268,
+   192
+  ],
+  "bg": null,
+  "coverage": 0.04
  },
  "scroll-progress-bar": {
   "canvas": [
@@ -1839,6 +1979,26 @@
   "bg": null,
   "coverage": 0
  },
+ "stagger-menu": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   360,
+   228,
+   144,
+   40
+  ],
+  "content": [
+   360,
+   236,
+   240,
+   300
+  ],
+  "bg": null,
+  "coverage": 0.01
+ },
  "starfield-hero": {
   "canvas": [
    1200,
@@ -1898,6 +2058,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 1
+ },
+ "stretch-nav": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   290,
+   338,
+   382,
+   44
+  ],
+  "content": [
+   310,
+   348,
+   352,
+   24
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.02
  },
  "svg-noise-shader": {
   "canvas": [
@@ -2078,6 +2258,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.04
+ },
+ "todo-list": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   290,
+   240,
+   380,
+   232
+  ],
+  "content": [
+   300,
+   256,
+   360,
+   206
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.11
  },
  "toggle-pricing-pro": {
   "canvas": [
