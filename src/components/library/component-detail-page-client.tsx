@@ -3,23 +3,22 @@
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Monitor, RotateCcw } from "lucide-react";
+import { componentDescriptions } from "@/lib/catalog/component-descriptions";
+import { DynamicPreview } from "@/components/library/dynamic-preview";
 import {
-  ArrowUpRight,
-  Check,
-  ChevronRight,
-  Code2,
-  Copy,
-  Crown,
-  Expand,
-  File,
-  Folder,
-  Lock,
-  Monitor,
-  SlidersHorizontal,
-  Package,
-  RotateCcw,
-  Zap,
-} from "lucide-react";
+  getComponentCategoryHref,
+  getComponentCategoryLabel,
+  type ComponentCategorySlug,
+} from "@/lib/catalog/taxonomy";
+import { getPlayground } from "@/lib/catalog/playgrounds";
+import { LivePropsPlayground } from "@/components/library/props-playground";
+import { CodeBlock } from "@/components/code-block/code-block";
+import { GalleryTile } from "@/components/gallery/gallery-tile";
+import { SHAPE_CLASSES, TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
+import { InstallCard } from "@/components/site/install-card";
+import { RainbowWord } from "@/components/site/rainbow-word";
+import { cn } from "@/lib/utils";
 
 const DEMO_SLUGS = new Set([
   "background-boxes",
@@ -45,12 +44,19 @@ const DEMO_SLUGS = new Set([
 
 const PROP_CONTROL_LIMIT = 8;
 
+type PropDoc = {
+  name: string;
+  type: string;
+  description: string;
+  defaultValue?: string;
+};
+
 function getEditableProps(props: PropDoc[] = []) {
   return props
     .filter((prop) => {
       const type = prop.type.toLowerCase();
       if (/^on[A-Z]/.test(prop.name)) return false;
-      if (["className", "style", "children"].includes(prop.name)) return false;
+      if (["className", "style", "children"].includes(prop.name) || /ClassName$/.test(prop.name)) return false;
       if (type.includes("reactnode") || type.includes("=>")) return false;
       if (type.includes("[]") || type.includes("array") || type.includes("object") || type.includes("partial<")) {
         return false;
@@ -111,168 +117,484 @@ function toPascalCase(value: string) {
 }
 
 function getImportName(code: string, fallbackName: string) {
-  const namedImport = code.match(/import\s*\{\s*([A-Za-z0-9_]+)/);
-  if (namedImport?.[1]) return namedImport[1];
+  // the component's own import (from "@/components/..."), not an icon or helper imported first
+  const componentImport = code.match(/import\s*\{\s*([A-Za-z0-9_]+)[^}]*\}\s*from\s*["']@\/components\//);
+  if (componentImport?.[1]) return componentImport[1];
+  const defaultImport = code.match(/import\s+([A-Z][A-Za-z0-9_]*)\s+from\s*["']@\/components\//);
+  if (defaultImport?.[1]) return defaultImport[1];
   return toPascalCase(fallbackName);
-}
-import { componentDescriptions } from "@/lib/catalog/component-descriptions";
-import { DynamicPreview } from "@/components/library/dynamic-preview";
-import {
-  getComponentCategoryHref,
-  getComponentCategoryLabel,
-  type ComponentCategorySlug,
-} from "@/lib/catalog/taxonomy";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CodeBlock } from "@/components/code-block/code-block";
-import { cn } from "@/lib/utils";
-import { getPlayground } from "@/lib/catalog/playgrounds";
-import { LivePropsPlayground } from "@/components/library/props-playground";
-
-type PropDoc = {
-  name: string;
-  type: string;
-  description: string;
-  defaultValue?: string;
-};
-
-// ── tiny copy button ────────────────────────────────────────────────
-function CopyBtn({ text }: { text: string }) {
-  const [copied, setCopied] = React.useState(false);
-  function copy() {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    });
-  }
-  return (
-    <button
-      type="button"
-      onClick={copy}
-      className="inline-flex items-center gap-1 rounded-md border border-border bg-background/80 px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:text-foreground"
-    >
-      {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
-      {copied ? "Copied" : "Copy"}
-    </button>
-  );
 }
 
 const INCLUDED_PROJECT_PACKAGES = new Set(["next", "react", "react-dom"]);
 
 function getExtraLibraries(dependencies: string[]) {
-  return Array.from(
-    new Set(dependencies.filter((dependency) => !INCLUDED_PROJECT_PACKAGES.has(dependency))),
-  );
+  return Array.from(new Set(dependencies.filter((dependency) => !INCLUDED_PROJECT_PACKAGES.has(dependency))));
 }
 
 function formatFolderStructure(files: string[]) {
   const lines: string[] = [];
   let previousFolders: string[] = [];
-
   for (const file of [...files].sort()) {
     const parts = file.split("/").filter(Boolean);
     const folders = parts.slice(0, -1);
-
     folders.forEach((folder, index) => {
-      if (previousFolders[index] !== folder) {
-        lines.push(`${"  ".repeat(index)}${folder}/`);
-      }
+      if (previousFolders[index] !== folder) lines.push(`${"  ".repeat(index)}${folder}/`);
     });
-
     lines.push(`${"  ".repeat(folders.length)}${parts.at(-1)}`);
     previousFolders = folders;
   }
-
   return lines.join("\n");
 }
 
 function getFolderStructureRows(files: string[]) {
   const rows: Array<{ depth: number; label: string; type: "folder" | "file" }> = [];
   let previousFolders: string[] = [];
-
   for (const file of [...files].sort()) {
     const parts = file.split("/").filter(Boolean);
     const folders = parts.slice(0, -1);
-
     folders.forEach((folder, index) => {
-      if (previousFolders[index] !== folder) {
-        rows.push({ depth: index, label: folder, type: "folder" });
-      }
+      if (previousFolders[index] !== folder) rows.push({ depth: index, label: folder, type: "folder" });
     });
-
     const filename = parts.at(-1);
-    if (filename) {
-      rows.push({ depth: folders.length, label: filename, type: "file" });
-    }
+    if (filename) rows.push({ depth: folders.length, label: filename, type: "file" });
     previousFolders = folders;
   }
-
   return rows;
 }
 
-function getExampleImport(
-  source: string | undefined,
-  registryImport: string | undefined,
-  registryName: string,
-  name: string,
-) {
-  const componentImport = source?.match(
-    /^import\s+[^;\n]+\s+from\s+["']@\/components\/[^"']+["'];?/m,
-  )?.[0];
-
+function getExampleImport(source: string | undefined, registryImport: string | undefined, registryName: string, name: string) {
+  const componentImport = source?.match(/^import\s+[^;\n]+\s+from\s+["']@\/components\/[^"']+["'];?/m)?.[0];
   return componentImport ?? registryImport ?? `import { ${toPascalCase(name)} } from "@/components/${registryName}";`;
 }
 
-function CommandSnippet({ command }: { command: string }) {
+const INTERACTION_OF: Record<string, string> = {
+  hover: "Hover",
+  magnetic: "Hover",
+  scroll: "Scroll",
+  parallax: "Scroll",
+  spring: "Spring",
+  gradient: "Glow",
+  "3d": "3D",
+};
+
+// ── small pieces ─────────────────────────────────────────────────────
+
+function CopyBtn({ text, label = "Copy", dark = false }: { text: string; label?: string; dark?: boolean }) {
+  const [copied, setCopied] = React.useState(false);
+  function copy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    });
+  }
   return (
-    <div className="relative mt-3 rounded-xl border border-border bg-background/80 dark:bg-black/20">
-      <pre className="overflow-auto p-3 pr-20 font-mono text-xs leading-relaxed text-foreground">
-        {command}
-      </pre>
-      <div className="absolute right-2 top-2">
-        <CopyBtn text={command} />
+    <button
+      type="button"
+      onClick={copy}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] font-semibold transition-colors",
+        dark ? "bg-white/10 text-white hover:bg-white/15" : "pg-glass bg-foreground text-background",
+      )}
+    >
+      {copied ? <Check className="size-3.5" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
+      <span aria-live="polite">{copied ? "Copied" : label}</span>
+    </button>
+  );
+}
+
+function CodeSnippet({ code }: { code: string }) {
+  return (
+    <div className="relative mt-3 rounded-2xl bg-[#17171c]">
+      <pre className="overflow-auto p-4 pr-24 font-mono text-[12.5px] leading-relaxed text-[#e6e6ea]">{code}</pre>
+      <div className="absolute right-3 top-3">
+        <CopyBtn text={code} dark />
       </div>
     </div>
   );
 }
 
-function FolderStructureSnippet({ files }: { files: string[] }) {
-  const tree = formatFolderStructure(files);
+function FolderTree({ files }: { files: string[] }) {
   const rows = getFolderStructureRows(files);
-
   return (
-    <div className="relative mt-3 rounded-xl border border-border bg-background/80 p-3 pr-20 dark:bg-black/20">
-      <div className="space-y-1 font-mono text-xs leading-relaxed text-foreground">
+    <div className="relative mt-3 rounded-2xl bg-muted p-4 pr-24">
+      <div className="space-y-1 font-mono text-[12.5px] leading-relaxed text-foreground">
         {rows.map((row, index) => (
-          <div
-            key={`${row.type}-${row.depth}-${row.label}-${index}`}
-            className="flex items-center gap-2"
-            style={{ paddingLeft: `${row.depth * 16}px` }}
-          >
+          <div key={`${row.type}-${row.depth}-${row.label}-${index}`} className="flex items-center gap-2" style={{ paddingLeft: `${row.depth * 16}px` }}>
             {row.type === "folder" ? (
-              <Folder className="size-3.5 shrink-0 text-sky-500" />
+              <Folder className="size-3.5 shrink-0 text-rainbow-blue" aria-hidden />
             ) : (
-              <File className="size-3.5 shrink-0 text-muted-foreground" />
+              <File className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
             )}
-            <span>{row.label}{row.type === "folder" ? "/" : ""}</span>
+            <span>
+              {row.label}
+              {row.type === "folder" ? "/" : ""}
+            </span>
           </div>
         ))}
       </div>
-      <div className="absolute right-2 top-2">
-        <CopyBtn text={tree} />
+      <div className="absolute right-3 top-3">
+        <CopyBtn text={formatFolderStructure(files)} />
       </div>
     </div>
   );
 }
 
-function HowToUse({
+function SectionTitle({ id, children }: { id?: string; children: React.ReactNode }) {
+  return (
+    <h2 id={id} className="pg-display text-[clamp(32px,4.5vw,44px)] leading-[1.02] text-foreground">
+      {children}
+    </h2>
+  );
+}
+
+// ── stage: live preview / code, with replay and full screen ─────────
+
+function Stage({
+  title,
+  code,
+  exportName,
+  slug,
+  tint,
+}: {
+  title: string;
+  code: string;
+  exportName: string;
+  slug: string;
+  tint: TileTint;
+}) {
+  const [view, setView] = React.useState<"preview" | "code">("preview");
+  const [run, setRun] = React.useState(0);
+
+  return (
+    <div className={cn("rounded-tile p-3", TINT_CLASSES[tint])}>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1 pb-3">
+        <div role="tablist" aria-label={`${title} view`} className="flex gap-1 rounded-full bg-card/80 p-1">
+          {(["preview", "code"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              role="tab"
+              aria-selected={view === v}
+              onClick={() => setView(v)}
+              className={cn(
+                "inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium transition-colors",
+                view === v ? "bg-foreground text-background" : "text-foreground hover:bg-muted",
+              )}
+            >
+              {v === "preview" ? <Monitor className="size-3.5" aria-hidden /> : <Code2 className="size-3.5" aria-hidden />}
+              {v === "preview" ? "Preview" : "Code"}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-1.5">
+          {view === "preview" ? (
+            <button
+              type="button"
+              onClick={() => setRun((n) => n + 1)}
+              className="pg-glass inline-flex h-9 items-center gap-1.5 rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground"
+            >
+              <RotateCcw className="size-3.5" aria-hidden />
+              Replay
+            </button>
+          ) : null}
+          <Link
+            href={`/live-preview/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open full-screen preview in a new tab"
+            className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
+          >
+            <Expand className="size-4" aria-hidden />
+          </Link>
+        </div>
+      </div>
+
+      {view === "preview" ? (
+        <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card [&>*]:min-h-[460px] [&>*]:w-full">
+          <DynamicPreview key={run} exportName={exportName} compact={false} />
+        </div>
+      ) : (
+        <div className="h-[560px] overflow-hidden rounded-[20px]">
+          <CodeBlock
+            code={code}
+            language="tsx"
+            theme="dark"
+            header={{
+              enabled: true,
+              showDots: true,
+              title: `${title}.tsx`,
+              copy: { enabled: true, label: "Copy code", copiedLabel: "Copied", copiedDurationMs: 1400 },
+            }}
+            codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
+            border={{ radius: "20px" }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── install panel ───────────────────────────────────────────────────
+
+function InstallPanel({
+  slug,
+  registryCliName,
+  dependencies,
+  interactions,
+}: {
+  slug: string;
+  registryCliName?: string;
+  dependencies: string[];
+  interactions: string[];
+}) {
+  const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryCliName ?? slug}`;
+  const extra = getExtraLibraries(dependencies);
+
+  return (
+    <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
+      <h2 className="text-[19px] font-semibold tracking-[-0.4px] text-foreground">Install</h2>
+      <p className="mt-1 text-[14px] text-muted-foreground">One command adds the component and its dependencies.</p>
+      <InstallCard wrap command={command} className="mt-4" />
+
+      {extra.length ? (
+        <div className="mt-6">
+          <p className="text-[13px] font-medium text-foreground">Copying by hand? Install these first:</p>
+          <InstallCard wrap command={`npm install ${extra.join(" ")}`} className="mt-2 shadow-none ring-1 ring-border" />
+        </div>
+      ) : null}
+
+      {interactions.length ? (
+        <div className="mt-6">
+          <p className="text-[13px] font-medium text-foreground">How it moves</p>
+          <ul className="mt-2 flex flex-wrap gap-1.5">
+            {interactions.map((i) => (
+              <li key={i} className="rounded-full bg-muted px-2.5 py-1 text-[12px] font-medium text-foreground">
+                {i}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {DEMO_SLUGS.has(slug) ? (
+        <Link
+          href={`/demos/${slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium text-foreground underline decoration-foreground/25 underline-offset-4 hover:decoration-foreground"
+        >
+          Open the full-page demo
+          <ArrowUpRight className="size-3.5" aria-hidden />
+        </Link>
+      ) : null}
+    </aside>
+  );
+}
+
+// ── props playground: set the props, copy matching JSX ──────────────
+
+function PropsPlayground({ props, importName }: { props?: PropDoc[]; importName: string }) {
+  const editableProps = React.useMemo(() => getEditableProps(props), [props]);
+  const defaults = React.useMemo(
+    () => Object.fromEntries(editableProps.map((prop) => [prop.name, cleanDefaultValue(prop)])) as Record<string, unknown>,
+    [editableProps],
+  );
+  const [values, setValues] = React.useState<Record<string, unknown>>(() => defaults);
+
+  const usageCode = React.useMemo(() => {
+    if (!editableProps.length) return "";
+    const lines = editableProps.map((prop) => `  ${prop.name}=${propValueToCode(values[prop.name] ?? cleanDefaultValue(prop), prop)}`);
+    return `<${importName}\n${lines.join("\n")}\n/>`;
+  }, [editableProps, importName, values]);
+
+  if (!editableProps.length) return null;
+
+  return (
+    <section aria-labelledby="playground-heading" className="mt-20">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <SectionTitle id="playground-heading">Set it up, copy the code</SectionTitle>
+          <p className="mt-3 max-w-[560px] text-[17px] text-muted-foreground">
+            Choose values for the main props and the JSX on the right updates to match.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setValues(defaults)}
+          className="pg-glass inline-flex h-10 items-center gap-1.5 rounded-full bg-card px-4 text-[13.5px] font-medium text-foreground"
+        >
+          <RotateCcw className="size-3.5" aria-hidden />
+          Reset
+        </button>
+      </div>
+
+      <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+        <div className="grid gap-3 sm:grid-cols-2">
+          {editableProps.map((prop) => (
+            <PropControl
+              key={prop.name}
+              prop={prop}
+              value={values[prop.name] ?? cleanDefaultValue(prop)}
+              onChange={(value) => setValues((current) => ({ ...current, [prop.name]: value }))}
+            />
+          ))}
+        </div>
+        <div className="flex flex-col overflow-hidden rounded-tile bg-[#17171c] text-[#e6e6ea] lg:sticky lg:top-24 lg:self-start">
+          <div className="flex items-center justify-between border-b border-white/10 px-5 py-3.5">
+            <p className="text-[13px] font-medium text-white">Your JSX</p>
+            <CopyBtn text={usageCode} dark />
+          </div>
+          <pre className="max-h-[380px] overflow-auto p-5 font-mono text-[12.5px] leading-6">{usageCode}</pre>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PropControl({ prop, value, onChange }: { prop: PropDoc; value: unknown; onChange: (value: unknown) => void }) {
+  const id = React.useId();
+  const head = (
+    <div className="min-w-0">
+      <label htmlFor={id} className="block truncate font-mono text-[13px] font-semibold text-foreground">
+        {prop.name}
+      </label>
+      <p className="mt-0.5 line-clamp-2 text-[12.5px] leading-snug text-muted-foreground">{prop.description}</p>
+    </div>
+  );
+  const box = "rounded-[20px] bg-card p-4 ring-1 ring-border";
+
+  if (isBooleanProp(prop)) {
+    return (
+      <div className={cn(box, "flex items-start justify-between gap-3")}>
+        {head}
+        <button
+          id={id}
+          type="button"
+          role="switch"
+          aria-checked={Boolean(value)}
+          onClick={() => onChange(!value)}
+          className={cn("relative h-6 w-11 shrink-0 rounded-full transition-colors", value ? "bg-foreground" : "bg-muted")}
+        >
+          <span className={cn("absolute top-1/2 size-4 -translate-y-1/2 rounded-full bg-white shadow transition-[left]", value ? "left-6" : "left-1")} />
+        </button>
+      </div>
+    );
+  }
+
+  if (isUnionProp(prop)) {
+    return (
+      <div className={box}>
+        {head}
+        <div id={id} role="radiogroup" aria-label={prop.name} className="mt-3 flex flex-wrap gap-1.5">
+          {unionOptions(prop.type).map((option) => (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={value === option}
+              onClick={() => onChange(option)}
+              className={cn(
+                "rounded-full px-3 py-1 text-[12.5px] font-medium transition-colors",
+                value === option ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-accent",
+              )}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (isNumberProp(prop)) {
+    return (
+      <div className={box}>
+        <div className="flex items-start justify-between gap-3">
+          {head}
+          <input
+            id={id}
+            type="number"
+            value={Number(value)}
+            onChange={(event) => onChange(Number(event.target.value))}
+            className="h-9 w-20 shrink-0 rounded-lg bg-muted px-2 font-mono text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+        <input
+          type="range"
+          aria-label={`${prop.name} slider`}
+          min={0}
+          max={Math.max(Number(value) * 2 || 10, 10)}
+          step={Number(value) % 1 === 0 ? 1 : 0.1}
+          value={Number(value)}
+          onChange={(event) => onChange(Number(event.target.value))}
+          className="mt-3 w-full accent-[#17171c] dark:accent-white"
+        />
+      </div>
+    );
+  }
+
+  const isColor = prop.name.toLowerCase().includes("color") || String(value).startsWith("#");
+  return (
+    <div className={box}>
+      {head}
+      <div className="mt-3 flex gap-2">
+        {isColor && /^#[0-9a-fA-F]{6}$/.test(String(value)) ? (
+          <input
+            type="color"
+            aria-label={`${prop.name} colour`}
+            value={String(value)}
+            onChange={(event) => onChange(event.target.value)}
+            className="h-9 w-10 shrink-0 cursor-pointer rounded-lg bg-muted p-1"
+          />
+        ) : null}
+        <input
+          id={id}
+          type="text"
+          value={String(value)}
+          onChange={(event) => onChange(event.target.value)}
+          className="h-9 min-w-0 flex-1 rounded-lg bg-muted px-3 text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        />
+      </div>
+    </div>
+  );
+}
+
+// ── props table ─────────────────────────────────────────────────────
+
+function PropsTable({ props }: { props?: PropDoc[] }) {
+  if (!props?.length) return null;
+  return (
+    <section aria-labelledby="props-heading" className="mt-20">
+      <SectionTitle id="props-heading">Props</SectionTitle>
+      <div className="pg-float mt-8 overflow-x-auto rounded-tile bg-card">
+        <table className="w-full min-w-[640px] text-left text-[14px]">
+          <thead>
+            <tr className="border-b border-border text-[13px] text-muted-foreground">
+              <th className="px-6 py-3.5 font-medium">Prop</th>
+              <th className="px-6 py-3.5 font-medium">Type</th>
+              <th className="px-6 py-3.5 font-medium">Default</th>
+              <th className="px-6 py-3.5 font-medium">What it does</th>
+            </tr>
+          </thead>
+          <tbody>
+            {props.map((p) => (
+              <tr key={p.name} className="border-b border-border last:border-0">
+                <td className="px-6 py-3.5 font-mono text-[13px] font-semibold text-foreground">{p.name}</td>
+                <td className="px-6 py-3.5 font-mono text-[12.5px] text-rainbow-violet">{p.type}</td>
+                <td className="px-6 py-3.5 font-mono text-[12.5px] text-muted-foreground">{p.defaultValue ?? "—"}</td>
+                <td className="px-6 py-3.5 text-body">{p.description}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+// ── step-by-step setup ──────────────────────────────────────────────
+
+function Setup({
   name,
   slug,
   registryCliName,
@@ -292,439 +614,113 @@ function HowToUse({
   const registryName = registryCliName ?? slug;
   const registryCommand = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}`;
   const registryConfig = `{\n  "$schema": "https://ui.shadcn.com/schema.json",\n  "style": "default",\n  "rsc": true,\n  "tsx": true,\n  "tailwind": {\n    "css": "src/app/globals.css",\n    "baseColor": "neutral",\n    "cssVariables": true,\n    "prefix": ""\n  },\n  "aliases": {\n    "components": "@/components",\n    "utils": "@/lib/utils",\n    "ui": "@/components/ui",\n    "lib": "@/lib",\n    "hooks": "@/hooks"\n  },\n  "registries": {\n    "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"\n  }\n}`;
-  const extraLibraries = getExtraLibraries(dependencies);
+  const extra = getExtraLibraries(dependencies);
   const exampleImport = getExampleImport(usageSource, registryImport, registryName, name);
-  const manualDependencyStep = extraLibraries.length > 0 ? 4 : null;
-  const importStep = extraLibraries.length > 0 ? 5 : 4;
+  const example = `// app/page.tsx\n${exampleImport}\n\nexport default function Page() {\n  return (\n    <main>\n      <${getImportName(exampleImport, name)} />\n    </main>\n  );\n}`;
+
+  const steps: { title: string; body: React.ReactNode }[] = [
+    {
+      title: "Prepare your project",
+      body: (
+        <>
+          <p>
+            You need Tailwind CSS and the <code className="font-mono text-foreground">@/</code> import alias. If shadcn isn&apos;t set
+            up yet, initialise it once:
+          </p>
+          <CodeSnippet code="npx shadcn@latest init" />
+          <p className="mt-4">
+            Then add the Nexus registry to your <code className="font-mono text-foreground">components.json</code> (the{" "}
+            <code className="font-mono text-foreground">registries</code> key is the part that matters):
+          </p>
+          <CodeSnippet code={registryConfig} />
+        </>
+      ),
+    },
+    {
+      title: "Add the component",
+      body: (
+        <>
+          <p>Run this from your project root. It adds the component, the utilities it uses and its packages.</p>
+          <CodeSnippet code={registryCommand} />
+        </>
+      ),
+    },
+    {
+      title: "Check what was added",
+      body: (
+        <>
+          <p>With the standard aliases, these files land in your project:</p>
+          <FolderTree files={installedFiles} />
+        </>
+      ),
+    },
+    ...(extra.length
+      ? [
+          {
+            title: "Copying by hand? Install the packages",
+            body: (
+              <>
+                <p>Skip this if you used the command above.</p>
+                <CodeSnippet code={`npm install ${extra.join(" ")}`} />
+              </>
+            ),
+          },
+        ]
+      : []),
+    {
+      title: "Use it in a page",
+      body: (
+        <>
+          <p>
+            Import it and render it. The <span className="font-medium text-foreground">Code</span> tab above has the full example.
+          </p>
+          <CodeSnippet code={example} />
+        </>
+      ),
+    },
+  ];
 
   return (
-    <section aria-labelledby="how-to-use-heading">
-      <h2 id="how-to-use-heading" className="text-xl font-semibold text-foreground">
-        How to use
-      </h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-        Follow these steps to add {name} to a Next.js project. The shown file structure is
-        generated from this component&apos;s installation package.
-      </p>
-
-      <ol className="mt-5 divide-y divide-border/60 rounded-xl border border-border/60 bg-background/55">
-        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
-          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
-            1
-          </span>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Prepare your project</h3>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Use a project with Tailwind CSS and the <span className="font-mono text-foreground">@/</span>{" "}
-              import alias configured. If shadcn is not set up yet, initialize it once:
-            </p>
-            <CommandSnippet command="npx shadcn@latest init" />
-            <p className="mt-4 text-sm leading-6 text-muted-foreground">
-              Then replace your{" "}
-              <span className="font-mono text-foreground">components.json</span> with this (or add the{" "}
-              <span className="font-mono text-foreground">registries</span> key to your existing one):
-            </p>
-            <CommandSnippet command={registryConfig} />
-          </div>
-        </li>
-
-        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
-          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
-            2
-          </span>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Add the component files</h3>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Run the registry command from your project root. It installs the component,
-              required utilities, and package dependencies for you.
-            </p>
-            <CommandSnippet command={registryCommand} />
-          </div>
-        </li>
-
-        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
-          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
-            3
-          </span>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Installed folder structure</h3>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Files are written through the aliases in your <span className="font-mono text-foreground">components.json</span>.
-              With the standard <span className="font-mono text-foreground">@/components</span> alias, this component adds:
-            </p>
-            <FolderStructureSnippet files={installedFiles} />
-          </div>
-        </li>
-
-        {manualDependencyStep && (
-          <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
-            <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
-              {manualDependencyStep}
-            </span>
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">
-                Manual copy only: install libraries
-              </h3>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Skip this step when using the registry command above. Run it only if you
-                manually create and paste the component files.
-              </p>
-              <CommandSnippet command={`npm install ${extraLibraries.join(" ")}`} />
+    <section aria-labelledby="setup-heading" className="mt-20">
+      <SectionTitle id="setup-heading">Add it to your project</SectionTitle>
+      <ol className="mt-8 grid gap-4">
+        {steps.map((s, i) => (
+          <li key={s.title} className="pg-float grid gap-4 rounded-tile bg-card p-6 sm:grid-cols-[48px_minmax(0,1fr)]">
+            <span className="pg-display text-[32px] text-foreground">{i + 1}</span>
+            <div className="min-w-0 text-[15px] leading-relaxed text-muted-foreground">
+              <h3 className="mb-2 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h3>
+              {s.body}
             </div>
           </li>
-        )}
-
-        <li className="grid gap-3 p-4 sm:grid-cols-[2rem_minmax(0,1fr)]">
-          <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
-            {importStep}
-          </span>
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Copy the example into your page</h3>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              Switch to the <span className="font-medium text-foreground">Code</span> tab, copy the example, and paste it into{" "}
-              <span className="font-mono text-foreground">app/page.tsx</span>:
-            </p>
-            <CommandSnippet command={`// app/page.tsx\n${exampleImport}\n\nexport default function Page() {\n  return (\n    <main>\n      <${getImportName(exampleImport, name)} />\n    </main>\n  );\n}`} />
-          </div>
-        </li>
+        ))}
       </ol>
     </section>
   );
 }
 
-// ── install sidebar (matches the screenshot) ────────────────────────
-function InstallSidebar({
-  slug,
-  registryCliName,
-  dependencies,
-  animationKinds,
-}: {
-  slug: string;
-  registryCliName?: string;
-  dependencies: string[];
-  animationKinds: string[];
-}) {
-  const name = registryCliName ?? slug;
-  const shadcnAddCmd = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${name}`;
-  const extraLibraries = getExtraLibraries(dependencies);
-  const installCmd = `npm install ${extraLibraries.join(" ")}`;
-
+function About({ slug, name }: { slug: string; name: string }) {
+  const desc = componentDescriptions[slug];
+  if (!desc) return null;
   return (
-    <div className="space-y-5 rounded-2xl border border-border bg-card/80 p-5 shadow-sm dark:bg-white/[0.03]">
-      {/* shadcn CLI */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Zap className="size-3.5 text-muted-foreground" />
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Shadcn CLI
-          </p>
-        </div>
-        <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
-          <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
-            {shadcnAddCmd}
-          </pre>
-          <div className="absolute right-2 top-2">
-            <CopyBtn text={shadcnAddCmd} />
-          </div>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* npm packages */}
-      {extraLibraries.length > 0 && (
-        <>
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Package className="size-3.5 text-muted-foreground" />
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                npm packages
-              </p>
-            </div>
-            <div className="relative rounded-xl border border-border bg-muted/30 dark:bg-white/4">
-              <pre className="max-h-40 overflow-auto p-3 pr-16 font-mono text-[11px] leading-relaxed text-foreground">
-                {installCmd}
-              </pre>
-              <div className="absolute right-2 top-2">
-                <CopyBtn text={installCmd} />
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          {/* dependencies list */}
-          <div className="space-y-2">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Dependencies
-            </p>
-            <ul className="space-y-1.5">
-              {extraLibraries.map((d) => (
-                <li
-                  key={d}
-                  className="rounded-lg border border-border/70 bg-background/60 px-2.5 py-1.5 font-mono text-[11px] text-foreground dark:bg-black/20"
-                >
-                  {d}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {animationKinds.length > 0 && <Separator />}
-        </>
-      )}
-
-      {/* motion tags */}
-      {animationKinds.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Motion
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {animationKinds.map((a) => (
-              <Badge
-                key={a}
-                variant="outline"
-                className="rounded-full border-border text-[10px] capitalize text-muted-foreground"
-              >
-                {a}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PropsPlayground({
-  props,
-  importName,
-}: {
-  props?: PropDoc[];
-  importName: string;
-}) {
-  const editableProps = React.useMemo(() => getEditableProps(props), [props]);
-  const defaults = React.useMemo(
-    () =>
-      Object.fromEntries(
-        editableProps.map((prop) => [prop.name, cleanDefaultValue(prop)]),
-      ) as Record<string, unknown>,
-    [editableProps],
-  );
-  const [values, setValues] = React.useState<Record<string, unknown>>(
-    () => defaults,
-  );
-
-  const usageCode = React.useMemo(() => {
-    if (!editableProps.length) return "";
-
-    const lines = editableProps.map((prop) => {
-      const value = values[prop.name] ?? cleanDefaultValue(prop);
-      return `  ${prop.name}=${propValueToCode(value, prop)}`;
-    });
-
-    return `<${importName}\n${lines.join("\n")}\n/>`;
-  }, [editableProps, importName, values]);
-
-  if (!editableProps.length) return null;
-
-  return (
-    <section className="mt-7 overflow-hidden rounded-3xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950">
-      <div className="relative border-b border-border/70 bg-[radial-gradient(circle_at_12%_10%,rgba(124,58,237,0.14),transparent_30%),linear-gradient(135deg,rgba(250,250,250,0.95),rgba(244,244,245,0.72))] px-5 py-5 dark:bg-[radial-gradient(circle_at_12%_10%,rgba(168,85,247,0.18),transparent_30%),linear-gradient(135deg,rgba(24,24,27,0.96),rgba(9,9,11,0.78))] sm:px-6">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.09] dark:opacity-[0.16]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-        <div className="relative flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-300">
-              Playground
-            </p>
-            <h3 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
-              Shape the component before you copy it.
-            </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-              Adjust the important props for this component and grab JSX that matches your choices.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setValues(defaults)}
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background/85 px-3 py-2 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur transition hover:text-foreground dark:bg-zinc-950/70"
-          >
-            <RotateCcw className="size-3.5" />
-            Reset props
-          </button>
-        </div>
-      </div>
-
-      <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.62fr)]">
-        <div className="p-4 sm:p-5 lg:p-6">
-          <div className="grid gap-3 md:grid-cols-2">
-            {editableProps.map((prop) => (
-              <PropControl
-                key={prop.name}
-                prop={prop}
-                value={values[prop.name] ?? cleanDefaultValue(prop)}
-                onChange={(value) =>
-                  setValues((current) => ({ ...current, [prop.name]: value }))
-                }
-              />
-            ))}
-          </div>
-        </div>
-
-        <aside className="border-t border-border/70 bg-zinc-950 text-zinc-100 lg:border-l lg:border-t-0">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-widest text-zinc-400">
-                Generated JSX
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">
-                Copy this into your page.
-              </p>
-            </div>
-            <CopyBtn text={usageCode} />
-          </div>
-          <pre className="max-h-[360px] overflow-auto p-4 font-mono text-[12px] leading-6 text-zinc-100">
-            {usageCode}
-          </pre>
-        </aside>
+    <section aria-labelledby="about-heading" className="mt-20 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <SectionTitle id="about-heading">About {name}</SectionTitle>
+      <div>
+        <p className="text-[17px] leading-relaxed text-body">{desc.about}</p>
+        <h3 className="mt-8 text-[15px] font-semibold text-foreground">Good for</h3>
+        <ul className="mt-3 flex flex-wrap gap-2">
+          {desc.useCases.map((uc) => (
+            <li key={uc} className="rounded-full bg-card px-3.5 py-1.5 text-[14px] text-foreground ring-1 ring-border">
+              {uc}
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
 }
 
-function PropControl({
-  prop,
-  value,
-  onChange,
-}: {
-  prop: PropDoc;
-  value: unknown;
-  onChange: (value: unknown) => void;
-}) {
-  const label = (
-    <div className="min-w-0">
-      <p className="truncate font-mono text-xs font-semibold text-foreground">
-        {prop.name}
-      </p>
-      <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">
-        {prop.description}
-      </p>
-    </div>
-  );
+// ── page ────────────────────────────────────────────────────────────
 
-  if (isBooleanProp(prop)) {
-    return (
-      <label className="flex min-h-28 items-start justify-between gap-3 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
-        {label}
-        <button
-          type="button"
-          aria-pressed={Boolean(value)}
-          onClick={() => onChange(!value)}
-          className={cn(
-            "relative h-6 w-11 shrink-0 rounded-full border transition",
-            value
-              ? "border-primary/40 bg-primary"
-              : "border-border bg-muted",
-          )}
-        >
-          <span
-            className={cn(
-              "absolute top-1/2 size-4 -translate-y-1/2 rounded-full bg-white shadow transition",
-              value ? "left-6" : "left-1",
-            )}
-          />
-        </button>
-      </label>
-    );
-  }
-
-  if (isUnionProp(prop)) {
-    const options = unionOptions(prop.type);
-    return (
-      <div className="min-h-28 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
-        {label}
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {options.map((option) => (
-            <button
-              key={option}
-              type="button"
-              onClick={() => onChange(option)}
-              className={cn(
-                "rounded-lg border px-2.5 py-1 text-[11px] font-medium transition",
-                value === option
-                  ? "border-primary/40 bg-primary text-primary-foreground"
-                  : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (isNumberProp(prop)) {
-    return (
-      <label className="min-h-28 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
-        <div className="flex items-start justify-between gap-3">
-          {label}
-          <input
-            type="number"
-            value={Number(value)}
-            onChange={(event) => onChange(Number(event.target.value))}
-            className="h-9 w-24 shrink-0 rounded-lg border border-border bg-background px-2 font-mono text-xs text-foreground outline-none transition focus:border-primary"
-          />
-        </div>
-        <input
-          type="range"
-          min={0}
-          max={Math.max(Number(value) * 2 || 10, 10)}
-          step={Number(value) % 1 === 0 ? 1 : 0.1}
-          value={Number(value)}
-          onChange={(event) => onChange(Number(event.target.value))}
-          className="mt-3 w-full accent-primary"
-        />
-      </label>
-    );
-  }
-
-  const isColor =
-    prop.name.toLowerCase().includes("color") ||
-    String(value).startsWith("#");
-
-  return (
-    <label className="min-h-28 rounded-2xl border border-border/70 bg-muted/25 p-4 transition hover:border-border hover:bg-muted/40 dark:bg-white/[0.025] dark:hover:bg-white/[0.04]">
-      {label}
-      <div className="mt-3 flex gap-2">
-        {isColor && /^#[0-9a-fA-F]{6}$/.test(String(value)) && (
-          <input
-            type="color"
-            value={String(value)}
-            onChange={(event) => onChange(event.target.value)}
-            className="h-9 w-10 shrink-0 cursor-pointer rounded-lg border border-border bg-background p-1"
-          />
-        )}
-        <input
-          type="text"
-          value={String(value)}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-9 min-w-0 flex-1 rounded-lg border border-border bg-background px-3 text-xs text-foreground outline-none transition focus:border-primary"
-        />
-      </div>
-    </label>
-  );
-}
-
-// ── main client component ───────────────────────────────────────────
 type SerializedSection = {
   title?: string;
   reactSource: string;
@@ -748,17 +744,18 @@ type ComponentDetailProps = {
   props?: PropDoc[];
   previewExportName: string;
   serializedPreviewSections?: SerializedSection[];
+  /** Tile tint from the gallery, so the stage matches the tile people clicked. */
+  tint?: TileTint;
+  /** Other components from the same category, as gallery items. */
+  related?: GalleryItem[];
 };
 
 export function ComponentDetailPageClient({
   slug,
-  isPremium = false,
   name,
   description,
   categorySlug,
   animationKinds,
-  tags,
-  premium,
   registryCliName,
   dependencies,
   installedFiles,
@@ -767,359 +764,112 @@ export function ComponentDetailPageClient({
   props,
   previewExportName,
   serializedPreviewSections,
+  tint = "violet",
+  related = [],
 }: ComponentDetailProps) {
-  const codeIsLocked = premium && !isPremium;
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
-
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
+  const interactions = [...new Set(animationKinds.map((k) => INTERACTION_OF[k]).filter(Boolean))];
+  const [firstWord, ...rest] = name.split(" ");
+  const sections = serializedPreviewSections?.length
+    ? serializedPreviewSections.map((s, i) => ({
+        title: s.title ?? (serializedPreviewSections.length > 1 ? `${name}, variant ${i + 1}` : name),
+        code: s.reactSource,
+        exportName: s.previewExportName,
+      }))
+    : [{ title: name, code: reactSource ?? "", exportName: previewExportName }];
+  const importName = getImportName(sections[0].code, name);
+  // the curated live playgrounds (12 components) replace the generic prop picker
+  const livePlayground = getPlayground(slug);
 
   return (
-    <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
-      <nav className="mb-7 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link href="/components" className="transition hover:text-foreground">
-          Components
-        </Link>
-        <ChevronRight className="size-3.5" />
-        <Link
-          href={getComponentCategoryHref(categorySlug)}
-          className="transition hover:text-foreground"
-        >
-          {categoryLabel}
-        </Link>
-        <ChevronRight className="size-3.5" />
-        <span className="font-medium text-foreground">{name}</span>
-      </nav>
-
-      <header>
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-          {name}
-          <span className="sr-only"> — React Component</span>
-        </h1>
-        <p className="mt-4 max-w-3xl text-xl leading-8 text-muted-foreground">
-          {description}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-border/70 bg-muted/50 text-muted-foreground">
-            {categoryLabel}
-          </Badge>
-          {animationKinds.map((kind) => (
-            <Badge
-              key={kind}
-              variant="outline"
-              className="border-border/70 bg-muted/50 text-muted-foreground"
-            >
-              {kind}
-            </Badge>
-          ))}
-          {tags.map((tag) => (
-            <Badge
-              key={tag}
-              variant="outline"
-              className="border-border/70 bg-muted/50 text-muted-foreground"
-            >
-              {tag}
-            </Badge>
-          ))}
-        </div>
-      </header>
-
-      <Accordion defaultValue={[]} className="mt-10">
-        <AccordionItem value="installation" className="border-0">
-          <AccordionTrigger className="rounded-xl bg-muted/70 px-5 py-4 text-2xl font-semibold text-foreground no-underline hover:bg-muted hover:no-underline dark:bg-white/[0.06] dark:hover:bg-white/[0.08]">
-            Installation
-          </AccordionTrigger>
-          <AccordionContent className="rounded-b-xl border border-t-0 border-border/50 bg-muted/25 px-5 py-5 text-sm text-muted-foreground dark:bg-white/[0.03]">
-            <HowToUse
-              name={name}
-              slug={slug}
-              registryCliName={registryCliName}
-              dependencies={dependencies}
-              installedFiles={installedFiles}
-              registryImport={registryImport}
-              usageSource={usageSource}
-            />
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-
-      {serializedPreviewSections ? (
-        serializedPreviewSections.map((section, i) => (
-          <PreviewCodeSection
-            key={i}
-            title={
-              section.title ??
-              (serializedPreviewSections.length > 1
-                ? `${name} — Variant ${i + 1}`
-                : name)
-            }
-            description={description}
-            showLivePlayground={i === 0}
-            code={section.reactSource}
-            slug={slug}
-            props={props}
-            importName={getImportName(section.reactSource, name)}
-            dependencies={dependencies}
-            animationKinds={animationKinds}
-            registryCliName={registryCliName}
-            className={i > 0 ? "mt-16" : undefined}
-            locked={codeIsLocked}
-          >
-            <DynamicPreview exportName={section.previewExportName} compact={false} />
-          </PreviewCodeSection>
-        ))
-      ) : (
-        <PreviewCodeSection
-          title={name}
-          description={description}
-          code={reactSource ?? ""}
-          slug={slug}
-          props={props}
-          importName={getImportName(reactSource ?? "", name)}
-          dependencies={dependencies}
-          animationKinds={animationKinds}
-          locked={codeIsLocked}
-          registryCliName={registryCliName}
-        >
-          <DynamicPreview exportName={previewExportName} compact={false} />
-        </PreviewCodeSection>
-      )}
-
-      <section className="mt-10 grid gap-4 border-t border-border/50 pt-8 md:grid-cols-2">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Animation effects</h2>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {animationKinds.length > 0 ? (
-              animationKinds.map((kind) => (
-                <Badge key={kind} variant="outline" className="border-border/70 text-muted-foreground">
-                  {kind}
-                </Badge>
-              ))
-            ) : (
-              <Badge variant="outline" className="border-border/70 text-muted-foreground">
-                static
-              </Badge>
-            )}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border/60 bg-muted/30 p-4 dark:bg-white/4">
-          <p className="text-sm font-semibold text-foreground">Copy-paste ready</p>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Use the Code tab above to inspect and copy this component into your project.
-          </p>
-          {DEMO_SLUGS.has(slug) && (
-            <Link
-              href={`/demos/${slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary transition-colors hover:text-foreground"
-            >
-              Full-page demo
-              <ArrowUpRight className="size-3.5" />
+    <>
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[128px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px]">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
+            <Link href="/components" className="hover:text-foreground">
+              Components
             </Link>
-          )}
+            <ChevronRight className="size-3.5" aria-hidden />
+            <Link href={getComponentCategoryHref(categorySlug as ComponentCategorySlug)} className="hover:text-foreground">
+              {categoryLabel}
+            </Link>
+            <ChevronRight className="size-3.5" aria-hidden />
+            <span aria-current="page" className="font-medium text-foreground">
+              {name}
+            </span>
+          </nav>
+          <h1 className="pg-display mt-6 text-[clamp(44px,8vw,80px)] text-foreground">
+            {/^[A-Za-z]{3,}$/.test(firstWord) ? <RainbowWord>{firstWord}</RainbowWord> : firstWord}
+            {rest.length ? ` ${rest.join(" ")}` : ""}
+            <span className="sr-only">, animated React component</span>
+          </h1>
+          <p className="mt-5 max-w-[680px] text-[19px] leading-[1.55] text-muted-foreground">{description}</p>
+          <ul className="mt-6 flex flex-wrap gap-2" aria-label="About this component">
+            <li className="rounded-full bg-tint-mint px-3 py-1 text-[13px] font-semibold text-[#126b3a]">Free</li>
+            <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">{categoryLabel}</li>
+            {interactions.map((i) => (
+              <li key={i} className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">
+                {i}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      <ComponentAbout slug={slug} name={name} />
-    </main>
-  );
-}
-
-function ComponentAbout({ slug, name }: { slug: string; name: string }) {
-  const desc = componentDescriptions[slug];
-  if (!desc) return null;
-
-  return (
-    <section className="mt-16 border-t border-border/50 pt-10">
-      <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-        About {name}
-      </h2>
-      <p className="mt-4 max-w-4xl text-base leading-8 text-muted-foreground">
-        {desc.about}
-      </p>
-      <div className="mt-8">
-        <h3 className="text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          Common use cases
-        </h3>
-        <ul className="mt-4 flex flex-wrap gap-3">
-          {desc.useCases.map((uc) => (
-            <li
-              key={uc}
-              className="rounded-xl border border-border/70 bg-muted/40 px-4 py-2 text-sm text-muted-foreground dark:bg-white/[0.04]"
-            >
-              {uc}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-// ── preview + code tabs ─────────────────────────────────────────────
-function PreviewCodeSection({
-  title,
-  description,
-  showLivePlayground = true,
-  code,
-  slug,
-  props,
-  importName,
-  dependencies,
-  animationKinds,
-  registryCliName,
-  className,
-  locked = false,
-  children,
-}: {
-  title: string;
-  description: string;
-  showLivePlayground?: boolean;
-  code: string;
-  slug: string;
-  props?: PropDoc[];
-  importName: string;
-  dependencies: string[];
-  animationKinds: string[];
-  registryCliName?: string;
-  className?: string;
-  locked?: boolean;
-  children: React.ReactNode;
-}) {
-  // Components with a curated live playground open on it (Bencho-style: tweak, watch, copy)
-  const livePlayground = showLivePlayground ? getPlayground(slug) : undefined;
-
-  return (
-    <section className={className ?? "mt-14"}>
-      <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
-
-      <Tabs defaultValue={livePlayground ? "playground" : "preview"} className="mt-7 gap-0">
-        <div className="flex items-end justify-between gap-3">
-          <TabsList className="h-11 rounded-xl bg-muted p-1">
-            {livePlayground && (
-              <TabsTrigger value="playground" className="h-9 gap-2 rounded-lg px-4 text-base">
-                <SlidersHorizontal className="size-4" />
-                Playground
-              </TabsTrigger>
-            )}
-            <TabsTrigger value="preview" className="h-9 gap-2 rounded-lg px-4 text-base">
-              <Monitor className="size-4" />
-              Preview
-            </TabsTrigger>
-            <TabsTrigger value="code" className="h-9 gap-2 rounded-lg px-4 text-base" disabled={locked}>
-              {locked ? <Lock className="size-4" /> : <Code2 className="size-4" />}
-              Code
-            </TabsTrigger>
-          </TabsList>
-
-          <Link
-            href={`/live-preview/${slug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open full-screen preview in new tab"
-            className="grid size-10 place-items-center rounded-xl border border-border/70 bg-background text-muted-foreground shadow-sm transition hover:text-foreground dark:bg-white/4"
-          >
-            <Expand className="size-4" />
-          </Link>
-        </div>
-
-        {livePlayground && (
-          <TabsContent value="playground" className="mt-4">
-            <LivePropsPlayground
-              playground={livePlayground}
-              name={title}
-              description={description}
-            />
-          </TabsContent>
-        )}
-
-        <TabsContent value="preview" className="mt-4">
-          <div className="overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm dark:border-white/10 dark:bg-zinc-950">
-            {children}
+      <div className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+            <div className="grid min-w-0 gap-10">
+              {sections.map((s) => (
+                <div key={s.title}>
+                  {sections.length > 1 ? <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h2> : null}
+                  <Stage title={s.title} code={s.code} exportName={s.exportName} slug={slug} tint={tint} />
+                </div>
+              ))}
+            </div>
+            <InstallPanel slug={slug} registryCliName={registryCliName} dependencies={dependencies} interactions={interactions} />
           </div>
-        </TabsContent>
 
-        <TabsContent value="code" className="mt-4">
-          {locked ? (
-            <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-muted/20">
-              {/* Blurred code preview behind the paywall */}
-              <div className="pointer-events-none select-none blur-sm" aria-hidden>
-                <CodeBlock
-                  code={code}
-                  language="tsx"
-                  theme="dark"
-                  header={{ enabled: true, showDots: true, title: `${title}.tsx`, copy: { enabled: false, label: "", copiedLabel: "", copiedDurationMs: 0 } }}
-                  codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-                  border={{ radius: "16px" }}
-                />
-              </div>
-              {/* Paywall overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center gap-5 bg-background/60 backdrop-blur-[2px]">
-                <div className="flex size-14 items-center justify-center rounded-2xl border border-border bg-background shadow-lg">
-                  <Crown className="size-6 text-amber-500" />
-                </div>
-                <div className="text-center">
-                  <p className="text-base font-semibold text-foreground">Pro component</p>
-                  <p className="mt-1 text-sm text-muted-foreground">Upgrade to access the full source code</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/pricing"
-                    className="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition hover:opacity-90"
-                  >
-                    <Crown className="size-4" />
-                    Upgrade to Pro
-                  </Link>
-                  <Link
-                    href="/pricing"
-                    className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-                  >
-                    View plans
-                  </Link>
-                </div>
-              </div>
-            </div>
+          {livePlayground ? (
+            <section aria-labelledby="playground-heading" className="mt-20">
+              <SectionTitle id="playground-heading">Play with it</SectionTitle>
+              <p className="mb-6 mt-3 max-w-[560px] text-[17px] text-muted-foreground">
+                Move the controls and watch it change. Copy code gives you a snippet with only the props you changed.
+              </p>
+              <LivePropsPlayground playground={livePlayground} name={name} description={description} />
+            </section>
           ) : (
-            <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-              <InstallSidebar
-                slug={slug}
-                registryCliName={registryCliName}
-                dependencies={dependencies}
-                animationKinds={animationKinds}
-              />
-              <div className="h-150 xl:h-175">
-                <CodeBlock
-                  code={code}
-                  language="tsx"
-                  theme="dark"
-                  header={{
-                    enabled: true,
-                    showDots: true,
-                    title: `${title}.tsx`,
-                    copy: {
-                      enabled: true,
-                      label: "Copy code",
-                      copiedLabel: "Copied",
-                      copiedDurationMs: 1400,
-                    },
-                  }}
-                  codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
-                  border={{ radius: "16px" }}
-                />
-              </div>
-            </div>
+            <PropsPlayground key={`${slug}-${importName}`} props={props} importName={importName} />
           )}
-        </TabsContent>
-      </Tabs>
+          <PropsTable props={props} />
+          <Setup
+            name={name}
+            slug={slug}
+            registryCliName={registryCliName}
+            dependencies={dependencies}
+            installedFiles={installedFiles}
+            registryImport={registryImport}
+            usageSource={usageSource}
+          />
+          <About slug={slug} name={name} />
 
-      {!livePlayground && (
-        <PropsPlayground
-          key={`${slug}-${importName}`}
-          props={props}
-          importName={importName}
-        />
-      )}
-
-    </section>
+          {related.length ? (
+            <section aria-labelledby="related-heading" className="mt-20">
+              <SectionTitle id="related-heading">More {categoryLabel.toLowerCase()}</SectionTitle>
+              <ul className="mt-8 grid grid-flow-dense auto-rows-[190px] grid-cols-2 gap-4 lg:grid-cols-4">
+                {related.map((item) => (
+                  <li key={item.slug} className={SHAPE_CLASSES[item.shape === "large" ? "tall" : item.shape]}>
+                    <GalleryTile item={item} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+        </div>
+      </div>
+    </>
   );
 }
+

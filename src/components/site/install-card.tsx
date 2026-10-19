@@ -5,7 +5,7 @@ import { Terminal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** A white card holding a shell command and a Copy button that says "Copied". */
-export function InstallCard({ command, className }: { command: string; className?: string }) {
+export function InstallCard({ command, wrap = false, className }: { command: string; wrap?: boolean; className?: string }) {
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -26,7 +26,7 @@ export function InstallCard({ command, className }: { command: string; className
   return (
     <div className={cn("pg-float flex items-center gap-3 rounded-2xl bg-card px-4 py-3", className)}>
       <Terminal className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-      <code className="flex-1 truncate text-left font-mono text-[13px] text-body">$ {command}</code>
+      <code className={cn("flex-1 text-left font-mono text-[13px] text-body", wrap ? "break-all" : "truncate")}>$ {command}</code>
       <button
         type="button"
         onClick={copy}
