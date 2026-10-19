@@ -6,20 +6,13 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import {
   ArrowRight,
-  Box,
-  Brain,
   Clock,
-  Compass,
-  CreditCard,
-  FileText,
   Flame,
-  Layers,
   LayoutGrid,
   PanelLeft,
   Search,
-  Type,
+  SlidersHorizontal,
   X,
-  Zap,
 } from "lucide-react";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { blocks } from "@/lib/catalog/blocks";
@@ -49,24 +42,32 @@ import { cn } from "@/lib/utils";
 import { CatalogSkeleton } from "@/components/library/catalog-skeleton";
 
 type SortMode = "all" | "trending" | "newest";
-type TypeFilter = "all" | "text" | "background" | "3d" | "motion" | "cards" | "forms" | "navigation" | "ai";
+type InteractionFilter = "all" | "hover" | "cursor" | "press" | "drag" | "scroll" | "type" | "ambient" | "3d";
 
 const CATEGORY_ORDER = COMPONENT_CATEGORIES.map((c) => c.slug) as ComponentCategorySlug[];
 
 const FEATURED_BLOCK_SLUGS = ["block-interactive-dots", "block-why-choose-us", "block-faq-folder-card"];
 const featuredBlocks = blocks.filter((b) => FEATURED_BLOCK_SLUGS.includes(b.slug));
 
-type TypeFilterDef = { value: TypeFilter; label: string; icon: React.ReactNode; match: (comp: (typeof libraryComponents)[number]) => boolean };
-const TYPE_FILTERS: TypeFilterDef[] = [
-  { value: "all",        label: "All",        icon: <LayoutGrid className="size-3.5" />, match: () => true },
-  { value: "text",       label: "Text",       icon: <Type className="size-3.5" />,       match: (c) => c.tags.some((t) => ["text","typography","typewriter","headline","decode","reveal","typing","warp","underline","highlight","squiggly"].includes(t)) },
-  { value: "background", label: "Background", icon: <Layers className="size-3.5" />,     match: (c) => ["background-effects","shaders"].includes(c.categorySlug) || c.tags.some((t) => ["background","particles","beams","stars","starfield","blobs","bloom","aurora","gradient","meteors","shader"].includes(t)) },
-  { value: "3d",         label: "3D",         icon: <Box className="size-3.5" />,        match: (c) => c.categorySlug === "three-d-components" || c.tags.some((t) => ["3d","threejs","webgl","globe","orbit","orbital","canvas"].includes(t)) },
-  { value: "motion",     label: "Motion",     icon: <Zap className="size-3.5" />,        match: (c) => c.categorySlug === "motion-effects" || c.tags.some((t) => ["magnetic","spring","cursor","spotlight","trails","parallax","framer-motion","animation","animated"].includes(t)) },
-  { value: "cards",      label: "Cards",      icon: <CreditCard className="size-3.5" />, match: (c) => ["cards","bento-grids"].includes(c.categorySlug) || c.tags.some((t) => ["card","cards","bento","tilt","glass","stack"].includes(t)) },
-  { value: "forms",      label: "Forms",      icon: <FileText className="size-3.5" />,   match: (c) => ["login-forms","signup-forms","contact-sections"].includes(c.categorySlug) || c.tags.some((t) => ["form","forms","input","auth","validation","signup"].includes(t)) },
-  { value: "navigation", label: "Navigation", icon: <Compass className="size-3.5" />,   match: (c) => ["navbars","footers","sidebars","dashboards"].includes(c.categorySlug) || c.tags.some((t) => ["dock","navigation","navbar"].includes(t)) },
-  { value: "ai",         label: "AI",         icon: <Brain className="size-3.5" />,      match: (c) => c.categorySlug === "ai-components" || c.tags.some((t) => ["ai","copilot","chat"].includes(t)) },
+type CatalogComponent = (typeof libraryComponents)[number];
+
+const hasTag = (c: CatalogComponent, words: string[]) =>
+  c.tags.some((t) => words.includes(t.toLowerCase()));
+const hasKind = (c: CatalogComponent, kinds: string[]) =>
+  c.animationKinds.some((k) => kinds.includes(k));
+
+// Filter by what the visitor *does* with a component rather than what it is — the sidebar
+// already covers categories, so these pills answer "how does it respond?".
+const INTERACTION_FILTERS: { value: InteractionFilter; label: string; match: (c: CatalogComponent) => boolean }[] = [
+  { value: "all",     label: "All",     match: () => true },
+  { value: "hover",   label: "Hover",   match: (c) => hasKind(c, ["hover"]) || hasTag(c, ["hover", "spotlight", "tooltip", "tilt", "glow", "link"]) },
+  { value: "cursor",  label: "Cursor",  match: (c) => hasKind(c, ["magnetic"]) || hasTag(c, ["cursor", "pointer", "magnetic", "trail", "spotlight"]) },
+  { value: "press",   label: "Press",   match: (c) => hasTag(c, ["button", "modal", "expandable", "flip", "copy", "selection", "cta", "folder", "carousel", "dock", "snap", "disintegrate", "stack"]) },
+  { value: "drag",    label: "Drag",    match: (c) => hasTag(c, ["drag", "gesture", "slider", "compare", "before-after", "swipe", "wheel"]) },
+  { value: "scroll",  label: "Scroll",  match: (c) => hasKind(c, ["scroll", "parallax"]) || hasTag(c, ["scroll", "parallax", "infinite scroll", "progress"]) },
+  { value: "type",    label: "Type",    match: (c) => hasTag(c, ["input", "typing", "keyboard", "search", "form", "forms", "auth", "signup", "chat", "terminal", "command", "phone", "validation"]) },
+  { value: "ambient", label: "Ambient", match: (c) => hasTag(c, ["background", "particles", "shader", "ambient", "loop", "stars", "starfield", "meteors", "beams", "blobs", "aurora", "loading", "countdown", "typewriter", "marquee", "orbit"]) },
+  { value: "3d",      label: "3D",      match: (c) => c.categorySlug === "three-d-components" || hasKind(c, ["3d"]) || hasTag(c, ["3d", "threejs", "webgl", "globe", "isometric", "depth"]) },
 ];
 
 const SORT_OPTIONS: { value: SortMode; label: string; icon: React.ReactNode }[] = [
@@ -92,7 +93,7 @@ type GridItem =
 function ComponentsPageInner() {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortMode>("all");
-  const [typeFilter, setTypeFilter] = React.useState<TypeFilter>("all");
+  const [interaction, setInteraction] = React.useState<InteractionFilter>("all");
   const reduce = useReducedMotion() === true;
   const { category, query, commitParams } = useLibraryExplorerSidebar();
 
@@ -103,7 +104,7 @@ function ComponentsPageInner() {
 
   const normalizedQuery = query.trim().toLowerCase();
 
-  const typeFilterDef = TYPE_FILTERS.find((f) => f.value === typeFilter)!;
+  const interactionDef = INTERACTION_FILTERS.find((f) => f.value === interaction)!;
 
   const filteredComponents = React.useMemo(() => {
     return libraryComponents.filter((comp) => {
@@ -113,10 +114,10 @@ function ComponentsPageInner() {
         `${comp.name} ${comp.description} ${comp.categorySlug} ${comp.tags.join(" ")}`
           .toLowerCase()
           .includes(normalizedQuery);
-      const typeMatch = typeFilter === "all" || typeFilterDef.match(comp);
-      return categoryMatch && searchMatch && typeMatch;
+      const interactionMatch = interaction === "all" || interactionDef.match(comp);
+      return categoryMatch && searchMatch && interactionMatch;
     });
-  }, [category, normalizedQuery, typeFilter, typeFilterDef]);
+  }, [category, normalizedQuery, interaction, interactionDef]);
 
   const visibleComponents = React.useMemo(() => {
     if (sort === "trending") {
@@ -133,11 +134,11 @@ function ComponentsPageInner() {
   }, [filteredComponents, sort]);
 
   const hasActiveFilters =
-    (category && category !== "all") || normalizedQuery || typeFilter !== "all";
+    (category && category !== "all") || normalizedQuery || interaction !== "all";
 
   const clearAll = () => {
     setSort("all");
-    setTypeFilter("all");
+    setInteraction("all");
     commitParams({ cat: null, premium: null, q: null });
   };
 
@@ -147,17 +148,21 @@ function ComponentsPageInner() {
     if (!el) return;
     const ro = new ResizeObserver(([entry]) => {
       const w = entry?.contentRect.width ?? 0;
-      setCols(w >= 1024 ? 3 : w >= 640 ? 2 : 1);
+      setCols(w >= 1200 ? 3 : w >= 640 ? 2 : 1);
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
+  // Featured blocks only make sense in the unfiltered wall
+  const showFeaturedBlocks = !hasActiveFilters;
+
   // Group all grid items into rows
   const allItems = React.useMemo<GridItem[]>(() => [
     ...visibleComponents.map((comp, i) => ({ type: "component" as const, comp, index: i })),
-    ...featuredBlocks.map((block, i) => ({ type: "block" as const, block, index: visibleComponents.length + i })),
-  ], [visibleComponents]);
+    ...(showFeaturedBlocks ? featuredBlocks : []).map((block, i) => ({ type: "block" as const, block, index: visibleComponents.length + i })),
+  ], [visibleComponents, showFeaturedBlocks]);
+  const totalCount = allItems.length;
 
   const rows = React.useMemo(() => {
     const result: GridItem[][] = [];
@@ -177,13 +182,13 @@ function ComponentsPageInner() {
       scroll.getBoundingClientRect().top +
       scroll.scrollTop;
     setScrollMargin(margin);
-  }, [visibleComponents.length, category, normalizedQuery]);
+  }, [visibleComponents.length, category, normalizedQuery, interaction]);
 
   // eslint-disable-next-line react-hooks/incompatible-library -- virtualization intentionally supplies imperative measurement helpers
   const rowVirtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 440,
+    estimateSize: () => 360,
     overscan: 3,
     scrollMargin,
   });
@@ -225,55 +230,77 @@ function ComponentsPageInner() {
         </div>
 
         <main className="mx-auto w-full max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10 lg:py-16 xl:px-14">
-          {/* Heading */}
-          <section className="pb-10 lg:pb-14">
-            <h1 className="text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
+          {/* Heading — short and centered, Bencho-style; the long-form copy lives below the grid */}
+          <section className="flex flex-col items-center pb-10 text-center lg:pb-12">
+            <span className="inline-flex h-8 items-center rounded-full border border-border/70 px-3.5 text-[13px] text-muted-foreground">
+              <span className="font-medium tabular-nums text-foreground">{libraryComponents.length}</span>
+              &nbsp;components
+            </span>
+            <h1 className="mt-5 text-4xl font-medium tracking-[-0.025em] text-foreground sm:text-[44px] sm:leading-[1.1]">
               Next.js and React Components
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              Animated building blocks for modern user interfaces. Every component is built for the
-              Next.js App Router, supports server side rendering, ships with full TypeScript types,
-              and is compatible with shadcn/ui. Improve developer experience with copy-paste
-              react components, available free to use.
+            <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
+              Interactive, animated building blocks you can explore and take straight into your
+              projects.
             </p>
+            <Link
+              href="/docs/installation"
+              className="mt-6 inline-flex h-10 items-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition hover:bg-foreground/90"
+            >
+              Get started
+            </Link>
           </section>
 
-          {/* ── Filter bar ── */}
-          <div className="mb-8 flex flex-wrap items-center gap-2 rounded-2xl border border-border/50 bg-muted/30 p-2 dark:bg-white/[0.03] sm:gap-3 sm:p-2.5">
-            {/* Sort group */}
-            <div className="flex items-center gap-1">
-              {SORT_OPTIONS.map(({ value, label, icon }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setSort(value)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all duration-150",
-                    sort === value
-                      ? "bg-background text-foreground shadow-sm dark:bg-white/10"
-                      : "text-muted-foreground hover:bg-background/60 hover:text-foreground dark:hover:bg-white/5",
-                  )}
-                >
-                  {icon}
-                  {label}
-                </button>
-              ))}
+          {/* ── Filters: interaction pills + sort ── */}
+          <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-3">
+            <div className="-mx-1 flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto px-1 pb-0.5 scrollbar-none">
+              {INTERACTION_FILTERS.map(({ value, label }) => {
+                const active = interaction === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setInteraction(active && value !== "all" ? "all" : value)}
+                    className={cn(
+                      "inline-flex h-8 shrink-0 items-center rounded-full px-3.5 text-sm transition-colors duration-150",
+                      active
+                        ? "bg-foreground text-background"
+                        : "bg-foreground/[0.06] text-foreground/80 hover:bg-foreground/10 hover:text-foreground",
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Spacer + count + clear */}
-            <div className="ml-auto flex items-center gap-3">
-              <span className="hidden text-xs text-muted-foreground sm:inline">
-                <span className="font-semibold tabular-nums text-foreground">
-                  {visibleComponents.length + featuredBlocks.length}
-                </span>{" "}
-                component{visibleComponents.length + featuredBlocks.length !== 1 && "s"}
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center rounded-full bg-foreground/[0.06] p-0.5">
+                {SORT_OPTIONS.map(({ value, label, icon }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={sort === value}
+                    onClick={() => setSort(value)}
+                    className={cn(
+                      "inline-flex h-7 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition-colors duration-150",
+                      sort === value
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {icon}
+                    {label}
+                  </button>
+                ))}
+              </div>
 
               {hasActiveFilters && (
                 <button
                   type="button"
                   onClick={clearAll}
-                  className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-background px-2.5 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted dark:bg-white/5"
+                  className="inline-flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-muted-foreground transition hover:bg-foreground/[0.06] hover:text-foreground"
                 >
                   <X className="size-3" />
                   Clear
@@ -282,35 +309,12 @@ function ComponentsPageInner() {
             </div>
           </div>
 
-          {/* ── Type filter pills ── */}
-          <div className="mb-8 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 scrollbar-none">
-            {TYPE_FILTERS.map(({ value, label, icon }) => {
-              const active = typeFilter === value;
-              return (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setTypeFilter(value)}
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150",
-                    active
-                      ? "border-foreground bg-foreground text-background shadow-sm"
-                      : "border-border/60 bg-background/60 text-muted-foreground hover:border-foreground/30 hover:bg-muted hover:text-foreground dark:bg-white/[0.04] dark:hover:bg-white/[0.08]",
-                  )}
-                >
-                  {icon}
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Active sidebar-filter chips (category / query) */}
-          {(category && category !== "all" || normalizedQuery) && (
-            <div className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          {/* Result summary when anything narrows the wall */}
+          {hasActiveFilters && (
+            <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               Showing{" "}
-              <span className="font-medium text-foreground">{visibleComponents.length}</span>{" "}
-              result{visibleComponents.length !== 1 && "s"}
+              <span className="font-medium tabular-nums text-foreground">{totalCount}</span>{" "}
+              result{totalCount !== 1 && "s"}
               {category && category !== "all" && (
                 <Badge variant="outline" className="border-border/70 text-muted-foreground">
                   {getComponentCategoryLabel(category as ComponentCategorySlug)}
@@ -321,11 +325,11 @@ function ComponentsPageInner() {
 
           {/* Grid */}
           {visibleComponents.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border/70 bg-muted/15 px-6 py-16 text-center">
+            <div className="rounded-[28px] bg-foreground/[0.04] px-6 py-16 text-center">
               <Search className="mx-auto size-10 text-muted-foreground/30" />
               <p className="mt-4 text-base font-semibold text-foreground">No components found</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Try another category, search, or type filter.
+                Try another category, search, or interaction.
               </p>
             </div>
           ) : (
@@ -338,30 +342,48 @@ function ComponentsPageInner() {
                   key={virtualRow.key}
                   data-index={virtualRow.index}
                   ref={rowVirtualizer.measureElement}
-                  className="grid grid-cols-1 gap-4 pb-4 sm:grid-cols-2 sm:gap-5 sm:pb-5 lg:grid-cols-3"
+                  className="grid gap-3 pb-3"
                   style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     right: 0,
+                    gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
                     transform: `translateY(${virtualRow.start - scrollMargin}px)`,
                   }}
                 >
                   {rows[virtualRow.index]?.map((item) =>
                     item.type === "component" ? (
-                      <ComponentCard
+                      <BenchCard
                         key={item.comp.slug}
-                        comp={item.comp}
+                        id={item.comp.slug}
+                        href={`/components/${item.comp.slug}`}
+                        name={item.comp.name}
+                        Preview={item.comp.Preview}
                         index={item.index}
                         reduceMotion={reduce}
-                        isTrending={sort === "trending" && item.index < 5}
+                        badge={
+                          sort === "trending" && item.index < 5 ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/90 px-2.5 py-1 text-[11px] font-medium text-white">
+                              <Flame className="size-3 fill-current" />
+                              {item.index === 0 ? "Hot" : "Trending"}
+                            </span>
+                          ) : null
+                        }
                       />
                     ) : (
-                      <BlockCard
+                      <BenchCard
                         key={item.block.slug}
-                        block={item.block}
+                        href={`/blocks/${item.block.slug}`}
+                        name={item.block.name}
+                        Preview={item.block.Preview}
                         index={item.index}
                         reduceMotion={reduce}
+                        badge={
+                          <span className="inline-flex items-center rounded-full bg-background/75 px-2.5 py-1 text-[11px] font-medium text-foreground/80 backdrop-blur-md">
+                            Block
+                          </span>
+                        }
                       />
                     ),
                   )}
@@ -376,6 +398,12 @@ function ComponentsPageInner() {
               <h2 className="text-2xl font-bold tracking-tight text-foreground">
                 About Nexus UI — Next.js and React components
               </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+                Animated building blocks for modern user interfaces. Every component is built for the
+                Next.js App Router, supports server side rendering, ships with full TypeScript types,
+                and is compatible with shadcn/ui. Improve developer experience with copy-paste
+                react components, available free to use.
+              </p>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground">
                 Nexus UI is a component library built specifically for the Next.js App Router. Every
                 component is written as a TypeScript React component, styled with Tailwind CSS, and
@@ -481,132 +509,55 @@ function ComponentsPageInner() {
   );
 }
 
-function BlockCard({
-  block,
+function BenchCard({
+  id,
+  href,
+  name,
+  Preview,
   index,
   reduceMotion,
+  badge,
 }: {
-  block: (typeof featuredBlocks)[number];
+  id?: string;
+  href: string;
+  name: string;
+  Preview: React.ComponentProps<typeof ComponentCardPreview>["Preview"];
   index: number;
   reduceMotion: boolean;
+  badge?: React.ReactNode;
 }) {
   const animate = !reduceMotion && index < 9;
   return (
-    <motion.div
+    <motion.article
+      id={id}
       initial={animate ? { opacity: 0, y: 16 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={animate ? { delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
-      whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
-      className="group relative h-full"
+      className="group relative isolate overflow-hidden rounded-[28px] bg-foreground/[0.05]"
     >
-      <div className="flex h-full flex-col overflow-hidden rounded-[24px] border border-black/7 bg-white shadow-[0_2px_16px_-4px_rgba(15,23,42,0.10)] transition-all duration-300 hover:border-black/12 hover:shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-[#151517] dark:shadow-none dark:hover:border-white/14">
-        {/* Preview */}
-        <div className="relative p-3 pb-0">
-          <ComponentCardPreview Preview={block.Preview} />
-          <div className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-md border border-indigo-400/30 bg-black/75 px-2 py-0.5 text-[10px] font-semibold text-indigo-300 backdrop-blur-sm">
-            Blocks
-          </div>
-        </div>
+      <ComponentCardPreview Preview={Preview} frame="bleed" />
 
-        {/* Body */}
-        <div className="flex flex-1 flex-col px-5 pb-4 pt-5">
-          <div className="mb-2 flex items-start justify-between gap-2">
-            <h2 className="line-clamp-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-slate-800 dark:text-white">
-              {block.name}
-            </h2>
-            <span className="mt-0.5 shrink-0 text-[13px] font-medium text-slate-400 dark:text-white/40">
-              {block.category}
-            </span>
-          </div>
-          <p className="line-clamp-2 text-[13px] leading-[1.6] text-slate-400 dark:text-white/40">
-            {block.description}
-          </p>
-        </div>
+      {/* Hairline edge drawn above the preview so dark scenes still read as a tile */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-10 rounded-[28px] ring-1 ring-inset ring-foreground/[0.06] transition-[box-shadow] duration-300 group-hover:ring-foreground/15" />
 
-        {/* CTA */}
-        <div className="border-t border-black/5 px-5 py-4 dark:border-white/6">
-          <p className="w-full text-center text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 transition-colors duration-200 group-hover:text-slate-900 dark:text-white/60 dark:group-hover:text-white">
-            View Block
-          </p>
-        </div>
+      {badge ? <div className="pointer-events-none absolute left-3.5 top-3.5 z-10">{badge}</div> : null}
+
+      {/* Veil + labels */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-20 bg-gradient-to-t from-black/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-x-3.5 bottom-3.5 z-10 flex items-end justify-between gap-2">
+        <span className="inline-flex h-[38px] min-w-0 items-center truncate rounded-full bg-background/75 px-3.5 text-[12.5px] text-foreground/80 shadow-sm ring-1 ring-inset ring-foreground/5 backdrop-blur-md">
+          {name}
+        </span>
+        <span className="grid size-[38px] shrink-0 translate-y-1 place-items-center rounded-full bg-background/75 text-foreground/70 opacity-0 shadow-sm ring-1 ring-inset ring-foreground/5 backdrop-blur-md transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-has-[:focus-visible]:translate-y-0 group-has-[:focus-visible]:opacity-100">
+          <SlidersHorizontal className="size-4" />
+        </span>
       </div>
 
       <Link
-        href={`/blocks/${block.slug}`}
-        className="absolute inset-0 rounded-[24px]"
-        aria-label={`Open ${block.name}`}
-      >
-        <span className="sr-only">View {block.name}</span>
-      </Link>
-    </motion.div>
-  );
-}
-
-function ComponentCard({
-  comp,
-  index,
-  reduceMotion,
-  isTrending = false,
-}: {
-  comp: (typeof libraryComponents)[number];
-  index: number;
-  reduceMotion: boolean;
-  isTrending?: boolean;
-}) {
-  const animate = !reduceMotion && index < 9;
-  return (
-    <motion.div
-      initial={animate ? { opacity: 0, y: 16 } : false}
-      animate={{ opacity: 1, y: 0 }}
-      transition={animate ? { delay: Math.min(index * 0.025, 0.2), duration: 0.38, ease: [0.22, 1, 0.36, 1] } : { duration: 0 }}
-      whileHover={reduceMotion ? undefined : { y: -4, boxShadow: "0 24px 64px -20px rgba(15,23,42,0.18)" }}
-      className="group relative h-full"
-    >
-      <div
-        id={comp.slug}
-        className="flex h-full flex-col overflow-hidden rounded-[24px] border border-black/7 bg-white shadow-[0_2px_16px_-4px_rgba(15,23,42,0.10)] transition-all duration-300 hover:border-black/12 hover:shadow-[0_8px_32px_-8px_rgba(15,23,42,0.18)] dark:border-white/8 dark:bg-[#151517] dark:shadow-none dark:hover:border-white/14"
-      >
-        {/* Preview */}
-        <div className="relative p-3 pb-0">
-          <ComponentCardPreview Preview={comp.Preview} />
-          {isTrending && (
-            <div className="absolute left-5 top-5 inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold text-orange-400 backdrop-blur-sm">
-              <Flame className="size-3 fill-current" />
-              {index === 0 ? "Hot" : "Trending"}
-            </div>
-          )}
-        </div>
-
-        {/* Body */}
-        <div className="flex flex-1 flex-col px-5 pb-4 pt-5">
-          <div className="mb-2 flex items-start justify-between gap-2">
-            <h2 className="line-clamp-1 text-[17px] font-bold leading-snug tracking-[-0.02em] text-slate-800 dark:text-white">
-              {comp.name}
-            </h2>
-            <span className="mt-0.5 shrink-0 text-[13px] font-medium text-slate-400 dark:text-white/40">
-              {getComponentCategoryLabel(comp.categorySlug)}
-            </span>
-          </div>
-          <p className="line-clamp-2 text-[13px] leading-[1.6] text-slate-400 dark:text-white/40">
-            {comp.description}
-          </p>
-        </div>
-
-        {/* CTA */}
-        <div className="border-t border-black/5 px-5 py-4 dark:border-white/6">
-          <p className="w-full text-center text-[11px] font-bold uppercase tracking-[0.12em] text-slate-700 transition-colors duration-200 group-hover:text-slate-900 dark:text-white/60 dark:group-hover:text-white">
-            View Component
-          </p>
-        </div>
-      </div>
-
-      <Link
-        href={`/components/${comp.slug}`}
-        className="absolute inset-0 rounded-[24px]"
-        aria-label={`Open ${comp.name}`}
-      >
-        <span className="sr-only">View {comp.name}</span>
-      </Link>
-    </motion.div>
+        href={href}
+        className="absolute inset-0 z-20 rounded-[28px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        aria-label={`Open ${name}`}
+      />
+    </motion.article>
   );
 }
