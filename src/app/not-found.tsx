@@ -1,67 +1,51 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Home } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { PillLink } from "@/components/site/pill-link";
+import { RainbowWord } from "@/components/site/rainbow-word";
 
 export const metadata: Metadata = {
   title: "404 — Page not found",
   robots: { index: false, follow: false },
 };
 
+const ELSEWHERE = [
+  { href: "/templates", label: "Templates" },
+  { href: "/blocks", label: "Blocks" },
+  { href: "/docs/introduction", label: "Docs" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/blog", label: "Guides" },
+];
+
 export default function NotFound() {
   return (
-    <div className="flex min-h-[calc(100dvh-4rem)] flex-col items-center justify-center px-4 text-center">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-muted-foreground">
-        404
-      </p>
-      <h1 className="mt-4 text-balance text-4xl font-bold tracking-tight text-foreground md:text-5xl">
-        Page not found
-      </h1>
-      <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-muted-foreground">
-        The page you&apos;re looking for doesn&apos;t exist or may have moved.
-        Try searching for a component or heading back home.
-      </p>
-
-      <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-        <Link
-          href="/"
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "gap-2 rounded-full border-border/70",
-          )}
-        >
-          <Home className="size-4" />
-          Go home
-        </Link>
-        <Link
-          href="/components"
-          className={cn(
-            buttonVariants(),
-            "gap-2 rounded-full bg-foreground px-6 text-background hover:bg-foreground/90",
-          )}
-        >
-          Browse components
-          <ArrowRight className="size-4" />
-        </Link>
+    <main className="pg-dotgrid relative flex min-h-[100dvh] flex-col items-center justify-center overflow-hidden px-4 py-24 text-center">
+      <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+      <div className="relative">
+        <p className="pg-display text-[clamp(96px,18vw,180px)] leading-none">
+          <RainbowWord>404</RainbowWord>
+        </p>
+        <h1 className="pg-display mt-4 text-[clamp(32px,5vw,48px)] text-foreground">This page isn&apos;t here</h1>
+        <p className="mx-auto mt-4 max-w-[440px] text-[17px] leading-relaxed text-muted-foreground">
+          The link may be old, or the page moved. Everything we make is a click away from the component library.
+        </p>
+        <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <PillLink href="/components">Browse components</PillLink>
+          <PillLink href="/" variant="white">
+            Go home
+          </PillLink>
+        </div>
+        <nav aria-label="Elsewhere" className="mt-10">
+          <ul className="flex flex-wrap justify-center gap-2">
+            {ELSEWHERE.map((l) => (
+              <li key={l.href}>
+                <Link href={l.href} className="pg-glass inline-flex rounded-full bg-card px-4 py-2 text-[13.5px] font-medium text-foreground hover:bg-muted">
+                  {l.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
-
-      <div className="mt-14 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-muted-foreground">
-        {[
-          { href: "/templates", label: "Templates" },
-          { href: "/blocks", label: "Blocks" },
-          { href: "/pricing", label: "Pricing" },
-          { href: "/blog", label: "Blog" },
-        ].map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className="transition-colors hover:text-foreground"
-          >
-            {label}
-          </Link>
-        ))}
-      </div>
-    </div>
+    </main>
   );
 }
