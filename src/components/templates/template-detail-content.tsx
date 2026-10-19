@@ -3,205 +3,69 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Check,
-  ChevronRight,
-  Copy,
-  ExternalLink,
-  ShoppingCart,
-  Sparkles,
-  Tag,
-  Terminal,
-  X,
-} from "lucide-react";
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { Check, ChevronRight, Download, Maximize2, Play, X } from "lucide-react";
+import { Band } from "@/components/site/band";
+import { InstallCard } from "@/components/site/install-card";
+import { PillLink, pillClassName } from "@/components/site/pill-link";
+import { RainbowWord } from "@/components/site/rainbow-word";
+import { BrowserFrame, TemplateCard, templateName, templateTagline } from "@/components/templates/template-card";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
-import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
-import { cn } from "@/lib/utils";
 
-// ─── Inline tech-stack icons (simpleicons CDN — already used in codebase) ─────
-const TECH_ICONS: Record<string, { slug: string; invert?: boolean; color?: string }> = {
-  "Next.js":          { slug: "nextdotjs", invert: true },
-  "Tailwind":         { slug: "tailwindcss", color: "#06b6d4" },
-  "Tailwind CSS v4":  { slug: "tailwindcss", color: "#06b6d4" },
-  "Framer Motion":    { slug: "framer", invert: true },
-  "Motion":           { slug: "framer", invert: true },
-  "React":            { slug: "react", color: "#61dafb" },
-  "TypeScript":       { slug: "typescript", color: "#3178c6" },
-  "Supabase":         { slug: "supabase", color: "#3ecf8e" },
-  "Stripe":           { slug: "stripe", color: "#635bff" },
-  "MDX":              { slug: "mdx", invert: true },
-  "Lucide Icons":     { slug: "lucide", invert: true },
-  "Sanity-ready":     { slug: "sanity", color: "#f03e2f" },
-};
+const TEMPLATE_PRICE = 49;
+const PRO_PRICE = 99;
 
-function TechBadge({ tech }: { tech: string }) {
-  const icon = TECH_ICONS[tech];
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-muted/30 px-3 py-1.5 text-xs font-medium text-foreground dark:bg-white/[0.04] transition hover:border-border hover:bg-muted/50">
-      {icon ? (
-        <img
-          src={`https://cdn.simpleicons.org/${icon.slug}`}
-          alt={tech}
-          className={cn("size-3.5 shrink-0", icon.invert && "dark:invert")}
-          style={icon.color ? { filter: `none` } : undefined}
-        />
-      ) : (
-        <span className="size-3.5 shrink-0 rounded-sm bg-primary/20" />
-      )}
-      {tech}
-    </span>
-  );
-}
-
-// ─── Page card accent themes ──────────────────────────────────────────────────
-const PAGE_BG = [
-  { bg: "from-cyan-950/80 via-zinc-950 to-zinc-950", accent: "text-cyan-400" },
-  { bg: "from-violet-950/80 via-zinc-950 to-zinc-950", accent: "text-violet-400" },
-  { bg: "from-emerald-950/80 via-zinc-950 to-zinc-950", accent: "text-emerald-400" },
-  { bg: "from-amber-950/80 via-zinc-950 to-zinc-950", accent: "text-amber-400" },
-];
-
-function ScreenshotCard({
-  label,
-  index,
-  slug,
-  reduce,
-  imageSrc,
-}: {
-  label: string;
-  index: number;
-  slug: string;
-  reduce: boolean;
-  imageSrc?: string;
-}) {
-  const theme = PAGE_BG[index % PAGE_BG.length];
-
-  return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className={cn(
-        "overflow-hidden rounded-2xl border border-white/6",
-        `bg-linear-to-b ${theme.bg}`,
-        "shadow-xl shadow-black/30",
-      )}
-    >
-      {/* Thumbnail viewport */}
-      <div className="relative h-64 overflow-hidden" aria-hidden="true">
-        {imageSrc ? (
-          <Image
-            src={imageSrc}
-            alt={`${label} section preview`}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          />
-        ) : (
-          <div className="pointer-events-none origin-top-left scale-[0.42] w-[238%] will-change-transform">
-            <TemplateSceneLoader slug={slug} />
-          </div>
-        )}
-      </div>
-
-      {/* Label */}
-      <div className="flex items-center justify-between border-t border-white/6 bg-white/2 px-4 py-2.5">
-        <span className={cn("text-xs font-semibold", theme.accent)}>{label}</span>
-        <span className="font-mono text-[10px] text-white/20">
-          {index === 0 ? "/" : `/${label.toLowerCase()}`}
-        </span>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─── Feature descriptions ─────────────────────────────────────────────────────
+// What a feature name means, for the ones whose name alone doesn't say.
 const FEATURE_COPY: Record<string, string> = {
-  "AI agent hero with live motion effects": "A cinematic, full-viewport hero section with particle physics and spring-animated headline copy tuned for AI narratives.",
-  "Asymmetrical bento feature grid": "Five-cell bento layout with hover-reactive illustrations and per-cell accent gradients that adapt to light and dark mode.",
-  "Multi-device capability matrix": "Animated side-by-side device showcase — desktop, tablet, and phone — rendered with real responsive breakpoints.",
-  "Logo marquee trust strip": "Infinite-scroll marquee of client and partner logos with reduced-motion fallback.",
-  "Tiered pricing with toggle": "Monthly/annual billing toggle with animated card transitions and highlighted recommended tier.",
-  "FAQ accordion with spring physics": "Smooth-opening accordion built with Framer Motion spring stiffness and damping for a premium tactile feel.",
-  "Tailwind CSS v4 design tokens": "All colours, spacing, and radii defined as CSS custom properties using the oklch colour system.",
-  "Framer Motion microinteractions": "Button hover, card lift, scroll-reveal, and stagger entrance animations using Framer Motion v12.",
-  "TypeScript strict mode": "Full type coverage — props, catalog data, and utility functions are all strictly typed.",
-  "Fully responsive on all viewports": "Tested on 375 px iPhone SE through 4 K desktop. Layout adapts using Tailwind's responsive prefix system.",
-  "Animated hero with particle physics": "Physics-driven particle field synced to cursor movement with spring-based velocity alignment.",
-  "Social proof logo carousel": "Continuous marquee strip with configurable speed and pause-on-hover behaviour.",
-  "Bento metrics grid with motion": "Four-cell bento with counter animations and hover-lift interactions.",
-  "Pricing toggle (monthly / annual)": "Animated pill toggle that transitions price copy with a staggered fade.",
-  "Testimonial scroll rail": "Infinite horizontal rail of testimonial cards with drag-to-scroll support.",
-  "SEO-optimised metadata": "Next.js Metadata API configured with OpenGraph, Twitter card, and canonical tags.",
-  "Dark mode + light mode": "System-preference detection with manual override persisted to localStorage.",
-  "Fully responsive layout": "Mobile-first grid using Tailwind's responsive prefix system, tested from 375 px to 4 K.",
-  "3D Transforms": "CSS perspective and rotateX/Y/Z transforms power card flips, tilt effects, and depth-layered hero compositions.",
-  "A11y Optimized": "WCAG 2.1 AA compliant — proper ARIA roles, keyboard navigation, focus rings, reduced-motion support, and colour contrast.",
-  "Animations & Effects": "Scroll-triggered reveals, staggered entrances, blur-to-clear transitions, and hover microinteractions via Framer Motion v12.",
-  "Automated SEO": "Next.js Metadata API pre-configured with titles, descriptions, OpenGraph, Twitter cards, and canonical URLs per page.",
-  "Built-in Analytics": "Analytics event hooks wired to page views and CTA clicks — drop in your Plausible, Posthog, or GA4 token and go.",
-  "CMS": "Content structured as typed TypeScript config objects for easy copy updates without touching layout or component code.",
-  "Components": "40+ pre-built UI primitives — buttons, cards, badges, inputs, modals, tabs, and more — all dark-mode ready.",
-  "Forms": "Contact and waitlist forms with client-side validation, accessible error states, and a submit handler ready to wire to any API.",
-  "Layout Templates": "Named layout presets (hero, features, pricing, FAQ, CTA) that can be mixed and reordered with minimal prop changes.",
-  "Overlays & Modals": "AnimatePresence-powered dialogs, drawers, and full-screen overlays with keyboard-dismissal and scroll-lock built in.",
-  "Project Styles": "Global design tokens (colours, spacing, radii, shadows) defined as CSS custom properties for one-file brand theming.",
-  "Slideshows/Tickers": "Auto-scrolling logo marquees and testimonial rails with configurable speed, gap, and pause-on-hover behaviour.",
-  "Sticky Scrolling": "Sticky-left process section where the heading pins while step cards scroll past — built with CSS position:sticky.",
-  "Visual Breakpoints": "Tailwind responsive prefixes cover sm/md/lg/xl/2xl with tested layouts from 375 px iPhone SE to 4 K desktop.",
+  "AI agent hero with live motion effects": "A full-viewport hero with particle motion and a spring-animated headline.",
+  "Asymmetrical bento feature grid": "A five-cell bento with hover-reactive illustrations, in light and dark.",
+  "Multi-device capability matrix": "Desktop, tablet and phone side by side at real responsive breakpoints.",
+  "Logo marquee trust strip": "An endless logo strip that stops for reduced motion.",
+  "Tiered pricing with toggle": "Monthly and annual billing with animated cards and a highlighted tier.",
+  "FAQ accordion with spring physics": "An accordion that opens on a Framer Motion spring.",
+  "Tailwind CSS v4 design tokens": "Colours, spacing and radii as CSS custom properties.",
+  "Framer Motion microinteractions": "Hover, card lift, scroll reveals and staggered entrances.",
+  "TypeScript strict mode": "Props, content and utilities are strictly typed.",
+  "Fully responsive on all viewports": "Layouts adapt from a 375px phone up to a 4K desktop.",
+  "Animated hero with particle physics": "A particle field that follows the cursor on springs.",
+  "Social proof logo carousel": "A continuous logo strip with adjustable speed and pause on hover.",
+  "Bento metrics grid with motion": "Four cells with counting numbers and hover lift.",
+  "Pricing toggle (monthly / annual)": "A pill toggle that crossfades the prices.",
+  "Testimonial scroll rail": "A horizontal rail of quotes you can drag.",
+  "SEO-optimised metadata": "Titles, descriptions, Open Graph and canonical tags through the Metadata API.",
+  "Dark mode + light mode": "Follows the system setting, with a manual switch that's remembered.",
+  "Fully responsive layout": "A mobile-first grid, checked from 375px to 4K.",
+  "3D Transforms": "Perspective and rotation for card flips, tilt and layered hero depth.",
+  "A11y Optimized": "ARIA roles, keyboard navigation, focus rings and reduced-motion support.",
+  "Animations & Effects": "Scroll reveals, staggered entrances, blur-to-clear and hover details.",
+  "Automated SEO": "Titles, descriptions, Open Graph and canonical URLs set per page.",
+  "Built-in Analytics": "Page-view and button-click events ready for Plausible, PostHog or GA4.",
+  CMS: "Copy lives in typed config objects, so you edit words without touching layout.",
+  Forms: "Contact and waitlist forms with validation and accessible errors.",
+  "Layout Templates": "Hero, features, pricing, FAQ and CTA presets you can reorder.",
+  "Overlays & Modals": "Dialogs, drawers and full-screen overlays with Escape to close and scroll lock.",
+  "Project Styles": "One file of design tokens to rebrand the whole page.",
+  "Slideshows/Tickers": "Logo marquees and quote rails with adjustable speed and pause on hover.",
+  "Sticky Scrolling": "A process section whose heading pins while the steps scroll past.",
+  "Visual Breakpoints": "Tested layouts at every Tailwind breakpoint from phone to 4K.",
 };
-function featureDesc(f: string) {
-  return FEATURE_COPY[f] ?? "Production-ready and fully customisable out of the box.";
-}
 
-// ─── Copyable command chip ────────────────────────────────────────────────────
-function CopyableCommand({ cmd }: { cmd: string }) {
-  const [copied, setCopied] = React.useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(cmd).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button
-      onClick={copy}
-      className="flex w-full items-center justify-between gap-2 rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 font-mono text-[11px] text-zinc-300 transition hover:bg-zinc-900 hover:text-white"
-    >
-      <span className="truncate"><span className="text-zinc-600 mr-1.5">$</span>{cmd}</span>
-      {copied ? <Check className="size-3 shrink-0 text-emerald-400" /> : <Copy className="size-3 shrink-0 text-zinc-600" />}
-    </button>
-  );
-}
+// ─── Checkout ────────────────────────────────────────────────────────────────
 
-// ─── Add-to-Cart modal ────────────────────────────────────────────────────────
-function AddToCartModal({
+function CheckoutDialog({
   tmpl,
-  onClose,
+  open,
+  onOpenChange,
 }: {
   tmpl: MarketplaceTemplate;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const name = templateName(tmpl);
 
-  // Close on Escape
-  React.useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  // Lock body scroll
-  React.useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
-
-  const handleCheckout = async () => {
+  async function checkout() {
     setLoading(true);
     setError(null);
     try {
@@ -210,454 +74,476 @@ function AddToCartModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: "template", templateSlug: tmpl.slug }),
       });
-      const data = await res.json() as { url?: string; error?: string };
       if (res.status === 401) {
         window.location.href = `/login?next=/templates/${tmpl.slug}`;
         return;
       }
+      const data = (await res.json()) as { url?: string; error?: string };
       if (!res.ok || !data.url) {
-        setError(data.error ?? "Something went wrong. Please try again.");
+        setError(data.error ?? "Checkout didn't open. Try again in a moment.");
         setLoading(false);
         return;
       }
       window.location.href = data.url;
     } catch {
-      setError("Network error. Please try again.");
+      setError("Couldn't reach checkout. Check your connection and try again.");
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <AnimatePresence>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-        onClick={onClose}
-      >
-        {/* Card */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 8 }}
-          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900"
-        >
-          {/* Close button */}
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 rounded-full p-1 text-zinc-400 transition hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-[#17171c]/30 backdrop-blur-md transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
+        <DialogPrimitive.Popup className="pg-float fixed left-1/2 top-1/2 z-[61] w-[min(calc(100vw-32px),400px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-tile bg-card outline-none transition-[opacity,transform] duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-[calc(-50%+12px)] data-[starting-style]:translate-y-[calc(-50%+12px)] motion-reduce:transition-none">
+          {tmpl.previewImages ? (
+            <div className="relative aspect-[16/8] bg-muted">
+              <Image src={tmpl.previewImages.hero} alt="" fill sizes="400px" className="object-cover object-top" />
+            </div>
+          ) : null}
+          <DialogPrimitive.Close
+            aria-label="Close"
+            className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-card/90 text-foreground backdrop-blur transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            <X className="size-4" />
-          </button>
+            <X className="size-4" aria-hidden />
+          </DialogPrimitive.Close>
 
           <div className="p-6">
-            {/* Product row */}
-            <div className="flex items-start gap-3 pb-5 border-b border-zinc-100 dark:border-zinc-800">
-              {/* Tiny preview thumbnail */}
-              <div className="relative size-16 overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50 shrink-0 dark:border-zinc-700 dark:bg-zinc-800" aria-hidden="true">
-                <div className="origin-top-left scale-[0.12] w-[833%] will-change-transform pointer-events-none">
-                  <TemplateSceneLoader slug={tmpl.slug} />
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-zinc-900 dark:text-white text-sm leading-snug">{tmpl.title}</p>
-                <div className="mt-1.5 flex items-baseline gap-1.5">
-                  <span className="text-xl font-bold text-zinc-900 dark:text-white">$49</span>
-                  <span className="text-sm text-zinc-400 line-through">$79</span>
-                  <span className="ml-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                    Save 38%
-                  </span>
-                </div>
-              </div>
-            </div>
+            <DialogPrimitive.Title className="text-[22px] font-bold tracking-[-0.03em] text-foreground">
+              Buy {name}
+            </DialogPrimitive.Title>
+            <DialogPrimitive.Description className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+              ${TEMPLATE_PRICE}, paid once, for the full source of this template.
+            </DialogPrimitive.Description>
 
-            {/* Order summary */}
-            <div className="py-4 text-center space-y-1">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                One-time payment of <span className="font-bold text-zinc-900 dark:text-white">$49</span> — this template only
-              </p>
-              <p className="text-xs text-zinc-400">
-                Need all templates?{" "}
-                <Link href="/pricing" onClick={onClose} className="font-semibold text-zinc-600 underline dark:text-zinc-300">
-                  Get All-Access for $149
-                </Link>
-              </p>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <p className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-center text-xs text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
+            {error ? (
+              <p role="alert" className="mt-4 rounded-2xl bg-tint-pink px-4 py-3 text-[14px] text-foreground">
                 {error}
               </p>
-            )}
+            ) : null}
 
-            {/* Checkout button */}
             <button
               type="button"
-              onClick={handleCheckout}
+              onClick={checkout}
               disabled={loading}
-              className="w-full rounded-xl bg-zinc-900 py-2.5 text-sm font-semibold text-white transition hover:bg-zinc-700 disabled:opacity-60 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+              className={pillClassName("ink", "md", "mt-6 w-full disabled:opacity-60")}
             >
-              {loading ? "Redirecting to checkout…" : "Purchase — $49"}
+              {loading ? "Opening checkout…" : `Pay $${TEMPLATE_PRICE}`}
             </button>
-
-            <p className="mt-3 text-center text-[11px] text-zinc-400">
-              You&apos;ll be redirected to Lemon Squeezy to complete your purchase securely.
+            <p className="mt-3 text-center text-[13px] text-muted-foreground">
+              Payment is handled by Lemon Squeezy. Want every template?{" "}
+              <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
+                Compare plans
+              </Link>
             </p>
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 }
 
-// ─── Purchase-pending banner (polls until webhook fires) ──────────────────────
-function CheckoutPendingBanner({ slug }: { slug: string }) {
-  const [dots, setDots] = React.useState(".");
-
-  // Animated ellipsis
+/** Shown after Lemon Squeezy sends people back, until the webhook grants access; reloads every 3s. */
+function CheckoutPending() {
   React.useEffect(() => {
-    const id = setInterval(() => setDots((d) => (d.length >= 3 ? "." : d + ".")), 500);
+    const id = setInterval(() => window.location.reload(), 3000);
     return () => clearInterval(id);
   }, []);
 
-  // Poll: reload every 3 s until access is granted (server re-renders with hasAccess=true)
-  React.useEffect(() => {
-    const id = setInterval(() => {
-      window.location.reload();
-    }, 3000);
-    return () => clearInterval(id);
-  }, [slug]);
-
   return (
-    <div className="sticky top-0 z-40 flex items-center justify-center gap-3 border-b border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-600 dark:text-emerald-400">
-      <span className="inline-block size-2 animate-pulse rounded-full bg-emerald-500" />
-      Confirming your purchase{dots} Access will unlock automatically.
-    </div>
+    <p role="status" className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-tint-mint px-4 py-2 text-[14px] font-medium text-foreground">
+      <span aria-hidden className="size-2 animate-pulse rounded-full bg-[#34c759]" />
+      Payment received. Unlocking your template, this takes a few seconds.
+    </p>
   );
 }
 
-// ─── Main component ────────────────────────────────────────────────────────────
+// ─── Download (owners) ───────────────────────────────────────────────────────
+
+function useDownload(slug: string) {
+  const [state, setState] = React.useState<"idle" | "loading" | "failed">("idle");
+
+  async function download() {
+    setState("loading");
+    try {
+      const res = await fetch(`/api/download/template?slug=${slug}`);
+      if (!res.ok) throw new Error(String(res.status));
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${slug}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setState("idle");
+    } catch {
+      setState("failed");
+    }
+  }
+
+  return { state, download };
+}
+
+// ─── Panel ───────────────────────────────────────────────────────────────────
+
+function AccessPanel({
+  tmpl,
+  hasAccess,
+  onBuy,
+}: {
+  tmpl: MarketplaceTemplate;
+  hasAccess: boolean;
+  onBuy: () => void;
+}) {
+  const { state, download } = useDownload(tmpl.slug);
+  const previewHref = `/template-preview/${tmpl.slug}`;
+
+  return (
+    <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
+      {hasAccess ? (
+        <>
+          <p className="inline-flex items-center gap-1.5 rounded-full bg-tint-mint px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] dark:text-[#7ee2a8]">
+            <Check className="size-3.5" aria-hidden />
+            {tmpl.premium ? "Yours" : "Free"}
+          </p>
+          <h2 className="mt-3 text-[22px] font-bold tracking-[-0.03em] text-foreground">Take the source</h2>
+          <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+            A zip of the whole Next.js project, ready for <code className="font-mono text-[13px]">npm install</code>.
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={download}
+              disabled={state === "loading"}
+              className={pillClassName("ink", "md", "disabled:opacity-60")}
+            >
+              <Download className="size-4" aria-hidden />
+              {state === "loading" ? "Preparing the zip…" : "Download source"}
+            </button>
+            <PillLink href={previewHref} variant="white">
+              <Play className="size-4" aria-hidden />
+              Live preview
+            </PillLink>
+          </div>
+          {state === "failed" ? (
+            <p role="alert" className="mt-3 text-[13px] text-foreground">
+              The download didn&apos;t start. Try again, or download it from the live preview.
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <p className="flex items-baseline gap-2">
+            <span className="text-[40px] font-bold leading-none tracking-[-0.04em] text-foreground">${TEMPLATE_PRICE}</span>
+            <span className="text-[15px] text-muted-foreground">once</span>
+          </p>
+          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+            The full source of this template. Change anything, ship it as yours.
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <button type="button" onClick={onBuy} className={pillClassName("ink", "md")}>
+              Buy template
+            </button>
+            <PillLink href={previewHref} variant="white">
+              <Play className="size-4" aria-hidden />
+              Live preview
+            </PillLink>
+          </div>
+          <p className="mt-5 border-t border-border/60 pt-4 text-[14px] leading-relaxed text-muted-foreground">
+            Every template comes with Pro, ${PRO_PRICE} once.{" "}
+            <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
+              Compare plans
+            </Link>
+          </p>
+        </>
+      )}
+
+      <div className="mt-6">
+        <p className="text-[13px] font-medium text-foreground">Built with</p>
+        <ul className="mt-2 flex flex-wrap gap-1.5">
+          {tmpl.techStack.map((t) => (
+            <li key={t} className="rounded-full bg-muted px-2.5 py-1 text-[12px] font-medium text-foreground">
+              {t}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </aside>
+  );
+}
+
+// ─── Screenshots ─────────────────────────────────────────────────────────────
+
+function ScreenshotViewer({ shot, onClose }: { shot: { src: string; label: string } | null; onClose: () => void }) {
+  return (
+    <DialogPrimitive.Root open={!!shot} onOpenChange={(open) => !open && onClose()}>
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-[#17171c]/50 backdrop-blur-md transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
+        <DialogPrimitive.Popup className="fixed inset-x-3 top-1/2 z-[61] mx-auto max-w-[min(1280px,calc((100dvh_-_150px)*1.6))] -translate-y-1/2 outline-none transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none sm:inset-x-6">
+          {shot ? (
+            <>
+              <div className="mb-3 flex items-center justify-between gap-4">
+                <DialogPrimitive.Title className="rounded-full bg-card px-4 py-2 text-[14px] font-semibold text-foreground">
+                  {shot.label}
+                </DialogPrimitive.Title>
+                <DialogPrimitive.Close
+                  aria-label="Close"
+                  className="grid size-10 place-items-center rounded-full bg-card text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  <X className="size-4" aria-hidden />
+                </DialogPrimitive.Close>
+              </div>
+              <BrowserFrame src={shot.src} alt={shot.label} sizes="(max-width: 1320px) 100vw, 1280px" className="rounded-tile" />
+            </>
+          ) : null}
+        </DialogPrimitive.Popup>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
 export function TemplateDetailContent({
   tmpl,
+  related = [],
   isPremium = false,
   checkoutPending = false,
 }: {
   tmpl: MarketplaceTemplate;
+  related?: MarketplaceTemplate[];
+  /** The visitor can open this template (bought it, or has a plan that includes it). */
   isPremium?: boolean;
   checkoutPending?: boolean;
 }) {
-  const reduce = useReducedMotion() === true;
-  const [cartOpen, setCartOpen] = React.useState(false);
+  const [buyOpen, setBuyOpen] = React.useState(false);
+  const [shot, setShot] = React.useState<{ src: string; label: string } | null>(null);
+
   const hasAccess = isPremium || !tmpl.premium;
   const previewHref = `/template-preview/${tmpl.slug}`;
-  const pageLabels = tmpl.pageLabels?.length ? tmpl.pageLabels : tmpl.pages.slice(0, 4);
-  const previewCount = Math.min(tmpl.previewImages?.sections.length ?? pageLabels.length, 4);
-  const previewLabels = Array.from(
-    { length: previewCount },
-    (_, index) => pageLabels[index] ?? tmpl.sections[index] ?? `Preview ${index + 1}`,
-  );
-  const features = tmpl.features ?? [];
+  const name = templateName(tmpl);
+  const tagline = templateTagline(tmpl);
+  const [firstWord, ...restWords] = name.split(" ");
+  const pageLabels = tmpl.pageLabels?.length ? tmpl.pageLabels : tmpl.sections;
+  const shots = (tmpl.previewImages?.sections ?? []).slice(0, 4).map((src, i) => ({
+    src,
+    label: pageLabels[i] ?? `Screen ${i + 1}`,
+  }));
 
   return (
-    <div className="bg-background">
-      {checkoutPending && <CheckoutPendingBanner slug={tmpl.slug} />}
-      {cartOpen && <AddToCartModal tmpl={tmpl} onClose={() => setCartOpen(false)} />}
+    <>
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-12 pt-[136px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px]">
+          <nav aria-label="Breadcrumb">
+            <ol className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
+              <li>
+                <Link href="/templates" className="hover:text-foreground">
+                  Templates
+                </Link>
+              </li>
+              <li aria-hidden>
+                <ChevronRight className="size-3.5" />
+              </li>
+              <li aria-current="page" className="font-medium text-foreground">
+                {name}
+              </li>
+            </ol>
+          </nav>
 
-      {/* ════════ BREADCRUMB ════════ */}
-      <div className="border-b border-border/30 bg-background/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
-          <Link
-            href="/templates"
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" />
-            Templates
-          </Link>
-          <ChevronRight className="size-3 text-muted-foreground/40" />
-          <span className="text-xs font-medium text-foreground">{tmpl.title}</span>
-        </div>
-      </div>
-
-      {/* ════════ HERO ════════ */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-        <motion.div
-          initial={reduce ? false : { opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-3xl space-y-6"
-        >
-          {/* Badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            {tmpl.premium ? (
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold text-amber-400">
-                <Sparkles className="size-3" />
-                Premium
-              </span>
-            ) : (
-              <span className="rounded-full border border-border bg-muted/30 px-3 py-1 text-[11px] text-muted-foreground">Free</span>
-            )}
-            <span className="rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-[11px] text-muted-foreground">{tmpl.category}</span>
-            <span className="rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-[11px] text-muted-foreground">{tmpl.difficulty}</span>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            {tmpl.title}
-            <span className="sr-only"> — Next.js Template</span>
+          <h1 className="pg-display mt-5 max-w-[900px] text-[clamp(44px,7vw,76px)] text-foreground">
+            <RainbowWord>{firstWord}</RainbowWord>
+            {restWords.length ? ` ${restWords.join(" ")}` : null}
+            <span className="sr-only">, a Next.js template</span>
           </h1>
+          {tagline ? <p className="mt-3 text-[22px] font-semibold tracking-[-0.02em] text-foreground">{tagline}</p> : null}
+          <p className="mt-4 max-w-[680px] text-[18px] leading-[1.55] text-muted-foreground">{tmpl.description}</p>
 
-          {/* Description */}
-          <p className="text-base leading-relaxed text-muted-foreground max-w-2xl">{tmpl.description}</p>
+          <ul className="mt-6 flex flex-wrap gap-2" aria-label="About this template">
+            {[tmpl.category, tmpl.difficulty, `${tmpl.pages.length} ${tmpl.pages.length === 1 ? "page" : "pages"}`, `${tmpl.sections.length} sections`].map(
+              (c) => (
+                <li key={c} className="pg-glass rounded-full bg-card px-3.5 py-1.5 text-[13.5px] font-medium text-foreground">
+                  {c}
+                </li>
+              ),
+            )}
+          </ul>
 
-          {/* Tech stack icons */}
-          <div className="flex flex-wrap gap-2">
-            {tmpl.techStack.map((t) => <TechBadge key={t} tech={t} />)}
-          </div>
+          {checkoutPending ? <CheckoutPending /> : null}
+        </div>
+      </section>
 
-          {/* Price + CTAs */}
-          <div className="flex flex-wrap items-center gap-4 pt-1">
-            {/* Price display */}
-            {tmpl.premium && (
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold tracking-tight text-foreground">$49</span>
-                <span className="text-base text-muted-foreground line-through">$79</span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/25 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-500">
-                  <Tag className="size-2.5" />
-                  Save 38%
-                </span>
+      <section aria-label="Preview" className="px-4 pb-20">
+        <div className="mx-auto grid max-w-[1152px] gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="pg-float relative overflow-hidden rounded-tile bg-card">
+            {tmpl.previewImages ? (
+              <BrowserFrame
+                src={tmpl.previewImages.hero}
+                alt={`${name} home page`}
+                sizes="(max-width: 1023px) 100vw, 772px"
+                priority
+              />
+            ) : (
+              <div className="grid aspect-[16/10] place-items-center bg-muted text-[15px] text-muted-foreground">
+                Open the live preview to see this one.
               </div>
             )}
-
-            <div className="flex flex-wrap items-center gap-2.5">
-              <a
-                href={previewHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background px-5 py-2.5 text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted/40"
-              >
-                <ExternalLink className="size-4" />
-                Live Preview
-                <ArrowUpRight className="size-3.5" />
-              </a>
-              {hasAccess ? (
-                <Link
-                  href={`/template-preview/${tmpl.slug}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
-                >
-                  <Check className="size-4" />
-                  Access Template
-                </Link>
-              ) : tmpl.premium ? (
-                <button
-                  onClick={() => setCartOpen(true)}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
-                >
-                  <ShoppingCart className="size-4" />
-                  Add to Cart — $49
-                </button>
-              ) : (
-                <Link
-                  href="/pricing"
-                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
-                >
-                  Download Free
-                </Link>
-              )}
-            </div>
+            <Link href={previewHref} className={pillClassName("ink", "sm", "pg-float absolute bottom-4 right-4 h-[40px]")}>
+              <Play className="size-3.5" aria-hidden />
+              Open it live
+            </Link>
           </div>
-        </motion.div>
-      </section>
 
-      {/* ════════ 4 TEMPLATE PREVIEWS ════════ */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">
-          {previewLabels.length} previews included
-        </p>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {previewLabels.map((label, i) => (
-            <ScreenshotCard
-              key={label}
-              label={label}
-              index={i}
-              slug={tmpl.slug}
-              reduce={reduce}
-              imageSrc={tmpl.previewImages?.sections?.[i]}
-            />
-          ))}
+          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} onBuy={() => setBuyOpen(true)} />
         </div>
       </section>
 
-      {/* ════════ HOW TO RUN ════════ */}
-      <section className="border-t border-border/30">
-        <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45 }}
-          >
-            <div className="flex items-center gap-2 mb-6">
-              <Terminal className="size-4 text-primary" />
-              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">Get started</p>
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground mb-2">Run it on your machine</h2>
-            <p className="text-sm text-muted-foreground mb-8 max-w-xl">
-              Download the template, install dependencies, and have a fully working Next.js app running locally in under 2 minutes.
+      {shots.length ? (
+        <section aria-labelledby="inside" className="px-4 pb-24">
+          <div className="mx-auto max-w-[1152px]">
+            <h2 id="inside" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
+              Inside the page
+            </h2>
+            <p className="mt-3 max-w-[560px] text-[17px] text-muted-foreground">
+              Screens from the live template. Open one to see it full size.
             </p>
-
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { step: "01", title: "Download ZIP", desc: hasAccess ? 'Click "Access Template" → switch to Code tab → hit Download' : "Purchase the template to get the full source ZIP", icon: "↓" },
-                { step: "02", title: "Install deps", desc: "Open a terminal in the project folder and run the install command", cmd: "npm install" },
-                { step: "03", title: "Start dev server", desc: "Spin up the local development server with hot reload", cmd: "npm run dev" },
-                { step: "04", title: "Open browser", desc: "Visit the local URL and start customising the template", cmd: "localhost:3000" },
-              ].map(({ step, title, desc, cmd, icon }) => (
-                <div key={step} className="relative rounded-2xl border border-border/50 bg-muted/10 p-5 dark:bg-white/[0.02]">
-                  <span className="mb-3 inline-block font-mono text-[10px] font-bold text-primary/60 tracking-widest">{step}</span>
-                  <h3 className="font-semibold text-foreground mb-1.5">{title}</h3>
-                  <p className="text-xs text-muted-foreground leading-relaxed mb-3">{desc}</p>
-                  {cmd && (
-                    <CopyableCommand cmd={cmd} />
-                  )}
-                  {icon && !cmd && (
-                    <span className="text-2xl text-muted-foreground/30">{icon}</span>
-                  )}
-                </div>
+            <ul className="mt-8 grid gap-5 sm:grid-cols-2">
+              {shots.map((s) => (
+                <li key={s.src}>
+                  <button
+                    type="button"
+                    onClick={() => setShot(s)}
+                    className="pg-float group relative block w-full overflow-hidden rounded-tile bg-card text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <BrowserFrame src={s.src} alt="" sizes="(max-width: 639px) 100vw, 566px" />
+                    <span className="flex items-center justify-between px-5 py-4 text-[15px] font-semibold text-foreground">
+                      {s.label}
+                      <Maximize2 className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" aria-hidden />
+                      <span className="sr-only">, view full size</span>
+                    </span>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
+          </div>
+        </section>
+      ) : null}
 
-            <div className="mt-6 rounded-2xl border border-border/40 bg-zinc-950 dark:bg-zinc-900/60 overflow-hidden">
-              <div className="flex items-center gap-2 border-b border-zinc-800 bg-zinc-900 px-4 py-2.5">
-                <span className="size-2.5 rounded-full bg-red-400/80" />
-                <span className="size-2.5 rounded-full bg-yellow-400/80" />
-                <span className="size-2.5 rounded-full bg-green-400/80" />
-                <span className="ml-2 font-mono text-[11px] text-zinc-400">terminal</span>
-              </div>
-              <div className="p-5 font-mono text-[13px] space-y-1.5">
-                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">npx</span> <span className="text-zinc-200">create-next-app@latest my-app</span></p>
-                <p><span className="text-zinc-500">$</span> <span className="text-zinc-400"># copy template files into my-app/src/</span></p>
-                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">cd</span> <span className="text-zinc-200">my-app</span></p>
-                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">npm</span> <span className="text-zinc-200">install framer-motion lucide-react @studio-freight/lenis</span></p>
-                <p><span className="text-zinc-500">$</span> <span className="text-emerald-400">npm</span> <span className="text-zinc-200">run dev</span></p>
-                <p className="pt-1"><span className="text-zinc-500">→</span> <span className="text-cyan-400">Ready</span> <span className="text-zinc-400">on http://localhost:3000</span></p>
-              </div>
+      <section aria-labelledby="contents" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="contents" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
+            What&apos;s in it
+          </h2>
+          <div className="mt-8 grid gap-5 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+            <div className="rounded-tile bg-tint-violet p-7">
+              <h3 className="text-[17px] font-semibold text-foreground">Sections, top to bottom</h3>
+              <ol className="mt-4 space-y-2.5">
+                {tmpl.sections.map((s, i) => (
+                  <li key={s} className="flex gap-3 text-[15px] text-foreground">
+                    <span className="w-5 shrink-0 text-right tabular-nums text-muted-foreground">{i + 1}</span>
+                    {s}
+                  </li>
+                ))}
+              </ol>
             </div>
-
-            <p className="mt-4 text-xs text-muted-foreground">
-              Requires <span className="font-medium text-foreground">Node.js 18+</span> and <span className="font-medium text-foreground">npm 9+</span>.
-              Stack: {tmpl.techStack.join(", ")}.
-            </p>
-          </motion.div>
+            {tmpl.features.length ? (
+              <div className="rounded-tile bg-card p-7 pg-float">
+                <h3 className="text-[17px] font-semibold text-foreground">Built in</h3>
+                <ul className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+                  {tmpl.features.map((f) => (
+                    <li key={f} className="flex gap-2.5">
+                      <Check className="mt-0.5 size-4 shrink-0 text-[#34c759]" aria-hidden />
+                      <span>
+                        <span className="block text-[15px] font-medium text-foreground">{f}</span>
+                        {FEATURE_COPY[f] ? (
+                          <span className="mt-0.5 block text-[14px] leading-relaxed text-muted-foreground">{FEATURE_COPY[f]}</span>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         </div>
       </section>
 
-      {/* ════════ FEATURES GRID ════════ */}
-      {features.length > 0 && (
-        <section className="border-t border-border/30 bg-muted/20 dark:bg-white/1">
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-            <motion.div
-              initial={reduce ? false : { opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45 }}
-            >
-              <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-primary">What&apos;s included</p>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Everything you need to ship</h2>
-            </motion.div>
+      <section aria-labelledby="run" className="px-4 pb-24">
+        <div className="mx-auto max-w-[1152px]">
+          <h2 id="run" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
+            Run it on your machine
+          </h2>
+          <ol className="mt-8 grid gap-5 md:grid-cols-3">
+            <li className="rounded-tile bg-tint-sky p-6">
+              <h3 className="text-[17px] font-semibold text-foreground">Get the code</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
+                {hasAccess
+                  ? "Download the source zip and unpack it where you keep projects."
+                  : "Buy the template, then download the source zip from this page."}
+              </p>
+            </li>
+            <li className="rounded-tile bg-tint-mint p-6">
+              <h3 className="text-[17px] font-semibold text-foreground">Install</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">In the project folder:</p>
+              <InstallCard command="npm install" className="mt-3" />
+            </li>
+            <li className="rounded-tile bg-tint-peach p-6">
+              <h3 className="text-[17px] font-semibold text-foreground">Start it</h3>
+              <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">Then open localhost:3000.</p>
+              <InstallCard command="npm run dev" className="mt-3" />
+            </li>
+          </ol>
+        </div>
+      </section>
 
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {features.map((f, i) => (
-                <motion.div
-                  key={f}
-                  initial={reduce ? false : { opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.04, duration: 0.4 }}
-                  className="space-y-1.5 rounded-2xl border border-border/50 bg-background p-5 shadow-sm dark:bg-white/2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                      <Check className="size-3.5 text-primary" />
-                    </div>
-                    <h3 className="text-sm font-semibold text-foreground leading-snug">{f}</h3>
-                  </div>
-                  <p className="pl-8 text-xs leading-relaxed text-muted-foreground">{featureDesc(f)}</p>
-                </motion.div>
+      {related.length ? (
+        <section aria-labelledby="more" className="px-4 pb-24">
+          <div className="mx-auto max-w-[1152px]">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <h2 id="more" className="pg-display text-[clamp(32px,4.5vw,44px)] text-foreground">
+                More templates
+              </h2>
+              <PillLink href="/templates" variant="white" size="sm">
+                See all templates
+              </PillLink>
+            </div>
+            <div className="mt-8 grid gap-5 md:grid-cols-2">
+              {related.map((t) => (
+                <TemplateCard key={t.slug} tmpl={t} headingLevel="h3" />
               ))}
             </div>
           </div>
         </section>
-      )}
+      ) : null}
 
-      {/* ════════ SECTIONS ════════ */}
-      <section className="border-t border-border/30">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-          <p className="mb-4 text-[10px] font-semibold uppercase tracking-[0.25em] text-muted-foreground">Included sections</p>
-          <div className="flex flex-wrap gap-2">
-            {tmpl.sections.map((s) => (
-              <span key={s} className="rounded-full border border-border/50 bg-muted/20 px-3 py-1 text-xs text-muted-foreground dark:bg-white/2">{s}</span>
-            ))}
+      <Band tint="butter">
+        <div className="flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="pg-display max-w-[620px] text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">
+              {hasAccess ? `${name} is yours` : `Make ${name} yours`}
+            </h2>
+            <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
+              {hasAccess
+                ? "Swap in your words and colours, or drop in more sections from the component library."
+                : `$${TEMPLATE_PRICE} once for the full source. Swap in your words and colours and ship it.`}
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
+            {hasAccess ? (
+              <PillLink href="/components">Browse components</PillLink>
+            ) : (
+              <button type="button" onClick={() => setBuyOpen(true)} className={pillClassName("ink", "md")}>
+                Buy template
+              </button>
+            )}
+            <PillLink href={previewHref} variant="white">
+              Live preview
+            </PillLink>
           </div>
         </div>
-      </section>
+      </Band>
 
-      {/* ════════ BOTTOM CTA ════════ */}
-      <section className="border-t border-border/30 bg-linear-to-b from-primary/4 to-transparent dark:from-primary/6">
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45 }}
-            className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="max-w-md space-y-2">
-              <h2 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">Ready to ship with {tmpl.title}?</h2>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                One-time payment. Instant download. Everything you need to go from idea to production.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <a
-                href={previewHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-background px-5 py-2.5 text-sm font-medium text-foreground shadow-sm transition hover:bg-muted/40"
-              >
-                <ExternalLink className="size-3.5" />
-                Live Preview
-              </a>
-              {hasAccess ? (
-                <Link
-                  href={`/template-preview/${tmpl.slug}`}
-                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
-                >
-                  <Check className="size-4" />
-                  Access Template
-                </Link>
-              ) : tmpl.premium ? (
-                <button
-                  onClick={() => setCartOpen(true)}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90"
-                >
-                  <ShoppingCart className="size-4" />
-                  Add to Cart — $49
-                </button>
-              ) : (
-                <Link href="/pricing" className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-2.5 text-sm font-semibold text-background shadow transition hover:bg-foreground/90">
-                  <Sparkles className="size-4 text-amber-400" />
-                  Get All-Access
-                </Link>
-              )}
-            </div>
-          </motion.div>
-        </div>
-      </section>
-    </div>
+      <CheckoutDialog tmpl={tmpl} open={buyOpen} onOpenChange={setBuyOpen} />
+      <ScreenshotViewer shot={shot} onClose={() => setShot(null)} />
+    </>
   );
 }

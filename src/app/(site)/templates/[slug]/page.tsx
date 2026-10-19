@@ -50,6 +50,8 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
   const user = await getCachedUser();
   const hasAccess = user ? await canAccessTemplate(user.id, slug) : false;
   const checkoutPending = checkout === "success" && !hasAccess;
+  const others = templates.filter((t) => t.slug !== slug).sort((a, b) => b.trendingScore - a.trendingScore);
+  const related = [...others.filter((t) => t.category === tmpl.category), ...others.filter((t) => t.category !== tmpl.category)].slice(0, 2);
 
   const softwareJsonLd = {
     "@context": "https://schema.org",
@@ -80,7 +82,7 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <TemplateDetailContent tmpl={tmpl} isPremium={hasAccess} checkoutPending={checkoutPending} />
+      <TemplateDetailContent tmpl={tmpl} related={related} isPremium={hasAccess} checkoutPending={checkoutPending} />
     </>
   );
 }

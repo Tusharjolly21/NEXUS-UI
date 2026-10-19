@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { siteConfig } from "@/lib/seo";
 
 const COLUMNS = [
@@ -41,10 +40,6 @@ const LEGAL = [
 
 /** Dark footer with the ghost "Nexus UI" wordmark bleeding off the bottom edge. */
 export function SiteFooter() {
-  const pathname = usePathname() ?? "/";
-  // template previews render their own full-page chrome
-  if (pathname.startsWith("/templates/")) return null;
-
   const xHandle = siteConfig.twitterHandle.replace("@", "");
 
   return (
