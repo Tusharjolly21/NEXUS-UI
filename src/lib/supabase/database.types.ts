@@ -9,6 +9,33 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      api_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          token_hash: string;
+          token_hint: string;
+          created_at: string;
+          last_used_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          token_hash: string;
+          token_hint: string;
+          created_at?: string;
+          last_used_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          token_hash?: string;
+          token_hint?: string;
+          created_at?: string;
+          last_used_at?: string | null;
+        };
+        Relationships: [];
+      };
       contact_submissions: {
         Row: {
           id: string;

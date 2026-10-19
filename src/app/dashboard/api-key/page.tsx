@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
+import { getApiTokenInfo } from "@/lib/entitlements";
 import { ApiKeyClient } from "./api-key-client";
 import type { Metadata } from "next";
 
@@ -16,7 +17,8 @@ export default async function DashboardApiKeyPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login?next=/dashboard/api-key");
 
-  const apiKey = `nxs_${user.id.replace(/-/g, "")}`;
+  // Only display metadata is available — the token itself is shown once, when generated
+  const tokenInfo = await getApiTokenInfo(user.id);
 
   return (
     <div className="px-4 py-6 sm:px-8 sm:py-10">
@@ -26,7 +28,17 @@ export default async function DashboardApiKeyPage() {
           Generate your API key and configure your project to install Nexus UI components.
         </p>
       </div>
-      <ApiKeyClient apiKey={apiKey} />
+      <ApiKeyClient
+        existingToken={
+          tokenInfo
+            ? {
+                hint: tokenInfo.token_hint,
+                createdAt: tokenInfo.created_at,
+                lastUsedAt: tokenInfo.last_used_at,
+              }
+            : null
+        }
+      />
     </div>
   );
 }

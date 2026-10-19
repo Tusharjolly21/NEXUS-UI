@@ -14,7 +14,9 @@
  * Security properties:
  *  - Token is never logged
  *  - No user data is returned in error responses
+ *  - Tokens are looked up by SHA-256 hash; plaintext is never stored
  *  - Free components bypass auth entirely (no unnecessary latency)
+ *  - Premium responses are private, no-store so no shared cache keeps them
  *  - Rate limited to prevent abuse
  */
 
@@ -23,7 +25,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
-import { parseApiToken, adminCanAccessComponent } from "@/lib/entitlements";
+import { resolveApiToken, adminCanAccessComponent } from "@/lib/entitlements";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 type Params = { params: Promise<{ name: string }> };
@@ -59,7 +61,7 @@ export async function GET(_req: Request, { params }: Params) {
 
   // ── 2. Free components — no auth required ────────────────────────
   if (isPublicRegistryAsset || !(component?.premium ?? block?.premium ?? true)) {
-    return serveRegistryFile(name);
+    return serveRegistryFile(name, "public");
   }
 
   // ── 3. Premium — require and validate token ──────────────────────
@@ -74,19 +76,31 @@ export async function GET(_req: Request, { params }: Params) {
         error: "Unauthorized",
         message: "Add your API token to components.json. Get it at nexus-ui.com/dashboard/api-key",
       }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
+      { status: 401, headers: PRIVATE_JSON_HEADERS },
     );
   }
 
-  // Resolve token to user ID
-  const userId = parseApiToken(token);
+  // Resolve token to user ID via its hash
+  const resolved = await resolveApiToken(token);
 
-  if (!userId) {
+  if (resolved.status === "legacy") {
     return new NextResponse(
-      JSON.stringify({ error: "Invalid token format" }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
+      JSON.stringify({
+        error: "Unauthorized",
+        message: "This API token format has been retired. Generate a new token at nexus-ui.com/dashboard/api-key",
+      }),
+      { status: 401, headers: PRIVATE_JSON_HEADERS },
     );
   }
+
+  if (resolved.status !== "valid") {
+    return new NextResponse(
+      JSON.stringify({ error: "Invalid token" }),
+      { status: 401, headers: PRIVATE_JSON_HEADERS },
+    );
+  }
+
+  const { userId } = resolved;
 
   // ── 4. Entitlement check (service-role, bypasses RLS) ───────────
   const allowed = await adminCanAccessComponent(userId, component?.slug ?? block!.slug);
@@ -97,15 +111,30 @@ export async function GET(_req: Request, { params }: Params) {
         error: "Forbidden",
         message: `'${name}' is a premium component. Upgrade at nexus-ui.com/pricing`,
       }),
-      { status: 403, headers: { "Content-Type": "application/json" } },
+      { status: 403, headers: PRIVATE_JSON_HEADERS },
     );
   }
 
   // ── 5. Serve ─────────────────────────────────────────────────────
-  return serveRegistryFile(name);
+  return serveRegistryFile(name, "private");
 }
 
-async function serveRegistryFile(name: string): Promise<NextResponse> {
+const PRIVATE_JSON_HEADERS = {
+  "Content-Type": "application/json",
+  "Cache-Control": "private, no-store",
+};
+
+const CACHE_CONTROL = {
+  // Free items: let the shadcn CLI, browsers and CDNs cache for 60 s
+  public: "public, max-age=60, stale-while-revalidate=300",
+  // Token-gated items: never store, so no shared cache can serve them unauthenticated
+  private: "private, no-store",
+} as const;
+
+async function serveRegistryFile(
+  name: string,
+  visibility: keyof typeof CACHE_CONTROL,
+): Promise<NextResponse> {
   try {
     const filePath = path.join(process.cwd(), ".generated", "registry", `${name}.json`);
     const contents = await readFile(filePath, "utf-8");
@@ -114,8 +143,7 @@ async function serveRegistryFile(name: string): Promise<NextResponse> {
       status: 200,
       headers: {
         "Content-Type": "application/json",
-        // Allow shadcn CLI (and browsers) to cache for 60 s
-        "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+        "Cache-Control": CACHE_CONTROL[visibility],
       },
     });
   } catch {
