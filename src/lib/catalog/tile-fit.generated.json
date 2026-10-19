@@ -211,10 +211,10 @@
    860
   ],
   "content": [
-   10,
-   10,
-   1250,
-   840
+   14,
+   12,
+   1256,
+   792
   ],
   "bg": null,
   "coverage": 1
@@ -233,11 +233,11 @@
   "content": [
    10,
    10,
-   1250,
+   1260,
    840
   ],
   "bg": null,
-  "coverage": 0.98
+  "coverage": 1
  },
  "backgrounds-particle-noise": {
   "canvas": [
@@ -256,7 +256,7 @@
    1260,
    840
   ],
-  "bg": "#000000",
+  "bg": "#f6f6f6",
   "coverage": 0.99
  },
  "beam-sweep-field": {
@@ -391,12 +391,12 @@
    860
   ],
   "content": [
-   288,
-   144,
-   704,
-   572
+   128,
+   86,
+   1026,
+   736
   ],
-  "bg": "#0c0c0c",
+  "bg": "#f6f6f6",
   "coverage": 1
  },
  "block-blog-content-sections": {
@@ -1699,6 +1699,26 @@
   "bg": "#f6f6f6",
   "coverage": 0.98
  },
+ "island-morph": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   338,
+   230,
+   284,
+   260
+  ],
+  "content": [
+   348,
+   240,
+   264,
+   240
+  ],
+  "bg": null,
+  "coverage": 0.03
+ },
  "lattice-feature-grid": {
   "canvas": [
    1200,
@@ -1899,6 +1919,26 @@
   "bg": null,
   "coverage": 0.31
  },
+ "magnify-dock": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   284,
+   370,
+   392,
+   52
+  ],
+  "content": [
+   294,
+   380,
+   372,
+   32
+  ],
+  "bg": null,
+  "coverage": 0.02
+ },
  "meteors": {
   "canvas": [
    960,
@@ -2018,6 +2058,26 @@
   ],
   "bg": "#0c0c0c",
   "coverage": 1
+ },
+ "notification-stack": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   316,
+   400,
+   332,
+   110
+  ],
+  "content": [
+   326,
+   410,
+   294,
+   88
+  ],
+  "bg": null,
+  "coverage": 0.01
  },
  "orbit-footer": {
   "canvas": [
@@ -3118,6 +3178,26 @@
   ],
   "bg": null,
   "coverage": 0.06
+ },
+ "upload-chips": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   280,
+   214,
+   400,
+   228
+  ],
+  "content": [
+   290,
+   224,
+   380,
+   208
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.12
  },
  "upload-dropzone": {
   "canvas": [

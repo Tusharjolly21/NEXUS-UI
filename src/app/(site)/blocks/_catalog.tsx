@@ -1,6 +1,9 @@
 "use client";
 
-import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import { FitPreview } from "@/components/gallery/fit-preview";
+import { TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import type { GalleryItem } from "@/components/gallery/types";
 import * as React from "react";
 import { useUrlParam } from "@/components/gallery/use-url-param";
@@ -15,6 +18,8 @@ export type BlockTileItem = GalleryItem & {
   premium: boolean;
   /** Block page URL with the section's anchor. */
   href: string;
+  /** Name of the block, shown under the section name. */
+  blockName: string;
 };
 
 /** Sections per page: block tiles are large, so a page is a dozen. */
@@ -22,20 +27,58 @@ const PAGE_SIZE = 12;
 
 export type BlockFilter = { slug: string; name: string; count: number };
 
-function PlanBadge({ pro, dark }: { pro: boolean; dark: boolean }) {
+/**
+ * A section tile: the live section, scaled down so all of it shows, above a caption that is always
+ * visible (section name, its block, Free or Pro). The whole card is one link to the section.
+ */
+function BlockTile({ item, eager }: { item: BlockTileItem; eager: boolean }) {
+  const { fit } = item;
   return (
-    <span
-      className={cn(
-        "grid h-8 place-items-center rounded-full px-3 text-[12px] font-semibold",
-        pro
-          ? "bg-[#1d1d1f] text-white"
-          : dark
-            ? "bg-white/12 text-white ring-1 ring-inset ring-white/15 backdrop-blur-md"
-            : "bg-white/90 text-[#1d1d1f] shadow-[0_1px_2px_rgba(23,23,28,0.08),0_0_0_1px_rgba(23,23,28,0.06)] backdrop-blur-md",
-      )}
-    >
-      {pro ? "Pro" : "Free"}
-    </span>
+    <article className="group relative isolate flex h-full flex-col overflow-hidden rounded-[28px] bg-card p-2 shadow-[0_0_0_0.5px_var(--border)] transition-shadow duration-200 hover:shadow-[0_0_0_0.5px_var(--border),0_18px_40px_-18px_rgba(0,0,0,0.3)]">
+      <div
+        aria-hidden
+        className="pointer-events-none relative min-h-0 flex-1 overflow-hidden rounded-[22px] bg-background"
+        style={fit.bg ? { backgroundColor: fit.bg } : undefined}
+      >
+        <FitPreview exportName={item.exportName} canvas={fit.canvas} focus={fit.focus} eager={eager} />
+        {item.isNew ? (
+          <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[11.5px] font-semibold text-[#bf4800] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md">
+            New
+          </span>
+        ) : null}
+      </div>
+      <div className="flex shrink-0 items-center justify-between gap-3 px-3 pb-1.5 pt-3">
+        <div className="min-w-0">
+          <h3 className="truncate text-[15px] font-semibold tracking-[-0.01em] text-foreground">
+            <Link
+              href={item.href}
+              className="after:absolute after:inset-0 after:z-10 after:content-[''] focus-visible:outline-none [&:focus-visible]:after:rounded-[28px] [&:focus-visible]:after:outline-2 [&:focus-visible]:after:outline-offset-2 [&:focus-visible]:after:outline-ring"
+            >
+              {item.name}
+            </Link>
+          </h3>
+          <p className="truncate text-[13px] text-muted-foreground">{item.blockName}</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span
+            className={cn(
+              "rounded-full px-2.5 py-0.5 text-[12px] font-semibold",
+              item.premium
+                ? "bg-[#1d1d1f] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]"
+                : "bg-[#34c759]/12 text-[#248a3d] dark:text-[#30d158]",
+            )}
+          >
+            {item.premium ? "Pro" : "Free"}
+          </span>
+          <span
+            aria-hidden
+            className="grid size-8 place-items-center rounded-full bg-action text-white transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+          >
+            <ArrowUpRight className="size-4" />
+          </span>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -80,9 +123,9 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
       </p>
 
       <TileGrid className="mt-5">
-        {shown.map((item) => (
+        {shown.map((item, i) => (
           <TileCell key={item.slug} item={item}>
-            <GalleryTile item={item} href={item.href} badge={<PlanBadge pro={item.premium} dark={item.fit.dark} />} />
+            <BlockTile item={item} eager={i < 4} />
           </TileCell>
         ))}
       </TileGrid>

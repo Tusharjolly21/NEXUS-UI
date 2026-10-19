@@ -77,6 +77,7 @@ export default function BlocksPage() {
       demo: null,
       block: v.block,
       premium: block.premium,
+      blockName: block.name,
       href: `/blocks/${v.block}#${variantAnchor(v.title)}`,
     };
   });
