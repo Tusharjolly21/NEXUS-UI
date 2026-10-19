@@ -4,6 +4,8 @@ import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
 import { getAllPosts } from "@/lib/blog";
+import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
+import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 
 // Demo pages that have dedicated full-page routes.
 const DEMO_SLUGS = [
@@ -73,6 +75,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: c.createdAt,
   }));
 
+  // Category landing pages — lastmod is the newest component in the category.
+  const categoryRoutes: MetadataRoute.Sitemap = getPopulatedCategories()
+    .filter((c) => isIndexableCategory(c.slug))
+    .map((c) => ({
+      url: `${base}${getComponentCategoryHref(c.slug)}`,
+      lastModified: getCategoryComponents(c.slug).reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt,
+    }));
+
   const templateRoutes: MetadataRoute.Sitemap = templates.map((t) => ({
     url: `${base}/templates/${t.slug}`,
     lastModified: t.createdAt,
@@ -93,5 +103,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: DEMO_DATES[slug] ?? "2026-01-15",
   }));
 
-  return [...staticRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes, ...demoRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes, ...demoRoutes];
 }

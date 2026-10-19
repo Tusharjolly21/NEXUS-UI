@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import type { LibraryComponent } from "@/lib/catalog/library-components";
 import { libraryComponents } from "@/lib/catalog/library-components";
-import { COMPONENT_CATEGORIES } from "@/lib/catalog/taxonomy";
+import { COMPONENT_CATEGORIES, getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
 import { useDiscovery } from "@/hooks/use-discovery";
 import { Badge } from "@/components/ui/badge";
@@ -488,7 +488,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
           </Link>
           <ChevronRight className="size-3.5 opacity-40" />
           <Link
-            href={`/components?view=components&cat=${encodeURIComponent(item.categorySlug)}`}
+            href={getComponentCategoryHref(item.categorySlug)}
             className="transition-colors hover:text-foreground"
           >
             {categoryLabel}
@@ -816,7 +816,7 @@ export function ComponentDetailView({ item }: { item: LibraryComponent }) {
                 </h2>
               </div>
               <Link
-                href={`/components?view=components&cat=${encodeURIComponent(item.categorySlug)}`}
+                href={getComponentCategoryHref(item.categorySlug)}
                 className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "text-primary")}
               >
                 Browse {categoryLabel}

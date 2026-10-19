@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { ArrowUpRight, Crown, Search } from "lucide-react";
 import { blocks, type BlockCategory } from "@/lib/catalog/blocks";
@@ -10,6 +10,7 @@ import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import {
   COMPONENT_SIDEBAR_SECTIONS,
+  getComponentCategoryHref,
   getComponentCategoryLabel,
   type AnimationKind,
   type CatalogSort,
@@ -110,6 +111,11 @@ export type LibraryExplorerSidebarContextValue = {
 const LibraryExplorerSidebarContext =
   React.createContext<LibraryExplorerSidebarContextValue | null>(null);
 
+/** `/components/category/<slug>` → `<slug>`; categories live in the path there, not `?cat=`. */
+function getPathCategory(pathname: string) {
+  return /^\/components\/category\/([^/]+)\/?$/.exec(pathname)?.[1] ?? null;
+}
+
 function getCatalogBasePath(pathname: string) {
   if (pathname === "/blocks") return "/blocks";
   if (pathname === "/templates") return "/templates";
@@ -141,6 +147,8 @@ export function LibraryExplorerSidebarProvider({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const pathCategory = getPathCategory(pathname);
   const [params, setParams] = useQueryStates(CATALOG_PARSERS, {
     scroll: false,
     history: "push",
@@ -152,12 +160,12 @@ export function LibraryExplorerSidebarProvider({
       ? viewParam
       : pathname === "/blocks"
         ? "blocks"
-        : pathname === "/components"
+        : pathname === "/components" || pathCategory
           ? "components"
           : "all";
 
   const [query, setQuery] = React.useState(params.q);
-  const category = params.cat;
+  const category = pathCategory ?? params.cat;
   const bcat = params.bcat;
   const sort = (params.sort as CatalogSort) || "trending";
   const [animFilter, setAnimFilter] = React.useState<AnimationKind[]>([]);
@@ -176,6 +184,12 @@ export function LibraryExplorerSidebarProvider({
 
   const commitParams = React.useCallback(
     (next: Record<string, string | null | undefined>, replace = false) => {
+      // On a category page the category is the path itself — changing it means navigating.
+      if (pathCategory && "cat" in next && next.cat !== pathCategory) {
+        const cat = next.cat;
+        router.push(cat && cat !== "all" ? getComponentCategoryHref(cat) : "/components");
+        return;
+      }
       const updates: Partial<Record<keyof typeof CATALOG_PARSERS, string | null>> = {};
       for (const [k, v] of Object.entries(next)) {
         updates[k as keyof typeof CATALOG_PARSERS] =
@@ -183,11 +197,14 @@ export function LibraryExplorerSidebarProvider({
       }
       setParams(updates, { history: replace ? "replace" : "push" });
     },
-    [setParams],
+    [pathCategory, router, setParams],
   );
 
   const buildHref = React.useCallback(
     (updates: Record<string, string | null | undefined>) => {
+      // Component categories link to their crawlable landing pages instead of `?cat=` filters.
+      const nextCat = updates.cat;
+      if (nextCat && nextCat !== "all") return getComponentCategoryHref(nextCat);
       const p = new URLSearchParams();
       if (params.view) p.set("view", params.view);
       if (params.cat && params.cat !== "all") p.set("cat", params.cat);
@@ -199,8 +216,9 @@ export function LibraryExplorerSidebarProvider({
         if (v === null || v === undefined || v === "" || v === "all") p.delete(k);
         else p.set(k, v);
       }
-      const qs = p.toString();
       const basePath = getCatalogBasePath(pathname);
+      if (basePath === "/components" && p.get("view") === "components") p.delete("view");
+      const qs = p.toString();
       return qs ? `${basePath}?${qs}` : basePath;
     },
     [pathname, params],

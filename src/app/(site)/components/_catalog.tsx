@@ -76,11 +76,26 @@ const SORT_OPTIONS: { value: SortMode; label: string; icon: React.ReactNode }[] 
   { value: "newest",   label: "Newest",   icon: <Clock className="size-3" /> },
 ];
 
-export function ComponentsCatalog() {
+/** Heading copy for a category landing page; the full catalog uses the default heading. */
+export type CatalogCategoryIntro = {
+  label: string;
+  heading: string;
+  intro: string;
+  count: number;
+};
+
+export function ComponentsCatalog({
+  categoryIntro,
+  children,
+}: {
+  categoryIntro?: CatalogCategoryIntro;
+  /** Server-rendered content placed after the grid (category pages pass their crawlable index here). */
+  children?: React.ReactNode;
+}) {
   return (
     <React.Suspense fallback={<CatalogSkeleton />}>
       <LibraryExplorerSidebarProvider>
-        <ComponentsPageInner />
+        <ComponentsPageInner categoryIntro={categoryIntro}>{children}</ComponentsPageInner>
       </LibraryExplorerSidebarProvider>
     </React.Suspense>
   );
@@ -90,7 +105,13 @@ type GridItem =
   | { type: "component"; comp: (typeof libraryComponents)[number]; index: number }
   | { type: "block"; block: (typeof featuredBlocks)[number]; index: number };
 
-function ComponentsPageInner() {
+function ComponentsPageInner({
+  categoryIntro,
+  children,
+}: {
+  categoryIntro?: CatalogCategoryIntro;
+  children?: React.ReactNode;
+}) {
   const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
   const [sort, setSort] = React.useState<SortMode>("all");
   const [interaction, setInteraction] = React.useState<InteractionFilter>("all");
@@ -232,16 +253,31 @@ function ComponentsPageInner() {
         <main className="mx-auto w-full max-w-[1480px] px-4 py-10 sm:px-6 lg:px-10 lg:py-16 xl:px-14">
           {/* Heading — short and centered, Bencho-style; the long-form copy lives below the grid */}
           <section className="flex flex-col items-center pb-10 text-center lg:pb-12">
-            <span className="inline-flex h-8 items-center rounded-full border border-border/70 px-3.5 text-[13px] text-muted-foreground">
-              <span className="font-medium tabular-nums text-foreground">{libraryComponents.length}</span>
-              &nbsp;components
-            </span>
+            {categoryIntro ? (
+              <nav
+                aria-label="Breadcrumb"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border/70 px-3.5 text-[13px] text-muted-foreground"
+              >
+                <Link href="/components" className="transition hover:text-foreground">
+                  Components
+                </Link>
+                <span aria-hidden className="opacity-40">/</span>
+                <span className="text-foreground">{categoryIntro.label}</span>
+                <span aria-hidden className="opacity-40">·</span>
+                <span className="font-medium tabular-nums text-foreground">{categoryIntro.count}</span>
+              </nav>
+            ) : (
+              <span className="inline-flex h-8 items-center rounded-full border border-border/70 px-3.5 text-[13px] text-muted-foreground">
+                <span className="font-medium tabular-nums text-foreground">{libraryComponents.length}</span>
+                &nbsp;components
+              </span>
+            )}
             <h1 className="mt-5 text-4xl font-medium tracking-[-0.025em] text-foreground sm:text-[44px] sm:leading-[1.1]">
-              Next.js and React Components
+              {categoryIntro?.heading ?? "Next.js and React Components"}
             </h1>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-muted-foreground">
-              Interactive, animated building blocks you can explore and take straight into your
-              projects.
+              {categoryIntro?.intro ??
+                "Interactive, animated building blocks you can explore and take straight into your projects."}
             </p>
             <Link
               href="/docs/installation"
@@ -392,7 +428,10 @@ function ComponentsPageInner() {
             </div>
           )}
 
-          {/* ── About the library ── */}
+          {children}
+
+          {/* ── About the library ── (full catalog only; category pages bring their own copy) */}
+          {!categoryIntro && (
           <section className="mt-20 border-t border-border/50 pt-16">
             <div className="mx-auto max-w-3xl">
               <h2 className="text-2xl font-bold tracking-tight text-foreground">
@@ -503,6 +542,7 @@ function ComponentsPageInner() {
               </div>
             </div>
           </section>
+          )}
         </main>
       </div>
     </div>

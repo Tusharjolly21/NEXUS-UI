@@ -94,6 +94,11 @@ export function getComponentCategoryLabel(slug: ComponentCategorySlug): string {
   return row?.label ?? slug;
 }
 
+/** Crawlable landing page for a component category (replaces `/components?cat=`). */
+export function getComponentCategoryHref(slug: string): string {
+  return `/components/category/${slug}`;
+}
+
 export type AnimationKind =
   | "parallax"
   | "hover"

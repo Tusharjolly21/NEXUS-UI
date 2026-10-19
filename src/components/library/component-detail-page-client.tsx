@@ -117,7 +117,11 @@ function getImportName(code: string, fallbackName: string) {
 }
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
-import { getComponentCategoryLabel, type ComponentCategorySlug } from "@/lib/catalog/taxonomy";
+import {
+  getComponentCategoryHref,
+  getComponentCategoryLabel,
+  type ComponentCategorySlug,
+} from "@/lib/catalog/taxonomy";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -777,7 +781,7 @@ export function ComponentDetailPageClient({
         </Link>
         <ChevronRight className="size-3.5" />
         <Link
-          href={`/components?cat=${categorySlug}`}
+          href={getComponentCategoryHref(categorySlug)}
           className="transition hover:text-foreground"
         >
           {categoryLabel}

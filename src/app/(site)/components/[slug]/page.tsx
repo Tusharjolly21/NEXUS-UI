@@ -8,6 +8,7 @@ import {
   libraryComponents,
 } from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { getCachedUser } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
@@ -140,8 +141,14 @@ export default async function ComponentDetailPage({ params }: Props) {
       {
         "@type": "ListItem",
         position: 3,
+        name: getComponentCategoryLabel(item.categorySlug),
+        item: `${siteConfig.url}${getComponentCategoryHref(item.categorySlug)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
         name: item.name,
-        item: `${siteConfig.url}/components/${slug}`,
+        item: `${siteConfig.url}/components/${item.slug}`,
       },
     ],
   };

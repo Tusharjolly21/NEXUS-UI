@@ -67,6 +67,13 @@ const nextConfig = {
       { source: "/docs", destination: "/docs/introduction", permanent: true },
       { source: "/demos", destination: "/components", permanent: true },
       { source: "/Nexus", destination: "/", permanent: true },
+      // Old `?cat=` filter links → crawlable category pages (unknown slugs 404 there).
+      {
+        source: "/components",
+        has: [{ type: "query", key: "cat", value: "(?<cat>(?!all$)[a-z0-9-]+)" }],
+        destination: "/components/category/:cat",
+        permanent: true,
+      },
     ];
   },
   async headers() {
