@@ -2864,6 +2864,604 @@
       ]
     },
     {
+      "name": "lanyard-badge",
+      "type": "registry:component",
+      "title": "Lanyard Badge",
+      "description": "A conference badge hanging from a strap. Grab it and throw it around; it swings back as a damped pendulum and twists with its sideways speed.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/lanyard-badge/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/lanyard-badge/lanyard-badge.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "glass-lens",
+      "type": "registry:component",
+      "title": "Glass Lens",
+      "description": "A glass puck you drag over content. It magnifies the centre and splits colour toward the rim, built from three offset copies of the content instead of a shader.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/glass-lens/glass-lens.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glass-lens/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "ascii-wake",
+      "type": "registry:component",
+      "title": "ASCII Wake",
+      "description": "Your pointer leaves a trail of characters that thickens where you linger and thins as it ages. Switch the glyph set, or let the glyphs follow the direction you moved.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/ascii-wake/ascii-wake.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/ascii-wake/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "liquid-dial",
+      "type": "registry:component",
+      "title": "Liquid Dial",
+      "description": "A floating action button whose actions bud out of it like liquid. The highlight is two blobs on different springs, so it pulls into a thread before wrapping the next action.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/liquid-dial/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/liquid-dial/liquid-dial.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "voice-orb",
+      "type": "registry:component",
+      "title": "Voice Orb",
+      "description": "One shape for an assistant's four states. Hold it to talk: a dotted ring becomes a glow, a dark thinking sphere, then a churning voice.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/voice-orb/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/voice-orb/voice-orb.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "sagging-field",
+      "type": "registry:component",
+      "title": "Sagging Field",
+      "description": "A text field that bends under the weight of what you type. Letters ride the curve on springs, anything that runs past the end falls off, and Let it go drops the whole lot.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/sagging-field/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/sagging-field/sagging-field.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tear-off-ticket",
+      "type": "registry:component",
+      "title": "Tear-off Ticket",
+      "description": "An event ticket whose stub you pull away along the perforation. Let go early and it snaps back; pull through and it hangs on the last tooth, swings, then drops.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/tear-off-ticket/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/tear-off-ticket/tear-off-ticket.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "throw-wheel",
+      "type": "registry:component",
+      "title": "Throw Wheel",
+      "description": "Cards on a 3D drum you can fling. While it spins every card turns edge-on and blurs with speed, then they straighten one by one as the wheel snaps a card to the front.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/throw-wheel/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/throw-wheel/throw-wheel.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "pixel-select",
+      "type": "registry:component",
+      "title": "Pixel Select",
+      "description": "A dropdown that builds itself out of a grid of pixels tinted with the chosen colour, then dissolves into a falling shower of them when you pick an option.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/pixel-select/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/pixel-select/pixel-select.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "scrub-inputs",
+      "type": "registry:component",
+      "title": "Scrub Inputs",
+      "description": "Design-tool number fields: drag a label sideways to change the value, with Shift for big steps and Alt for fine ones. A badge shows how far you have moved, then reports the change when you let go.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/scrub-inputs/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/scrub-inputs/scrub-inputs.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "lit-keyboard",
+      "type": "registry:component",
+      "title": "Lit Keyboard",
+      "description": "A tilted keyboard that lights up under your typing and fades with a slow afterglow. Record a run and replay it with the original timing.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/lit-keyboard/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/lit-keyboard/lit-keyboard.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "ripple-field",
+      "type": "registry:component",
+      "title": "Ripple Field",
+      "description": "A quiet grid of dots: click anywhere and a ring travels outward. Every dot it crosses bursts into colour, gets kicked away from the centre and springs back home.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/ripple-field/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/ripple-field/ripple-field.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "dot-globe",
+      "type": "registry:component",
+      "title": "Dot Globe",
+      "description": "A dotted globe with flight arcs drawing themselves along great circles. Drag to spin it and it coasts to a stop; pick a city and it springs round to face you.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/dot-globe/dot-globe.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dot-globe/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "component-layers",
+      "type": "registry:component",
+      "title": "Component Layers",
+      "description": "A finished music player card tips into an isometric view and peels apart into its surface, spacing, layout and content layers, each with a leader-line label.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/component-layers/component-layers.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/component-layers/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "standing-calendar",
+      "type": "registry:component",
+      "title": "Standing Calendar",
+      "description": "A contribution grid that stands up into a 3D field of columns. Each day becomes a box as tall as its count, rising in a wave across the weeks; hover a day to read its value.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/standing-calendar/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/standing-calendar/standing-calendar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "money-goo",
+      "type": "registry:component",
+      "title": "Money Goo",
+      "description": "A peer-to-peer payment you drag out of your avatar: a liquid neck stretches, thins and snaps, and dropping the amount on a friend pours it in while both balances roll.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/money-goo/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/money-goo/money-goo.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "weather-puck",
+      "type": "registry:component",
+      "title": "Weather Puck",
+      "description": "Drag a glowing puck across a field of dots to set the time of day. Nearby dots lift and warm, and the landscape above relights from dawn to night with the hour name and clock rolling along.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/weather-puck/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/weather-puck/weather-puck.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "metal-orbs",
+      "type": "registry:component",
+      "title": "Metal Orbs",
+      "description": "Two liquid-metal metaballs shaded per pixel with a fake chrome reflection on a 2D canvas. They bulge toward each other and pool when they meet; switch between joined, apart and orbit, or drag the cool orb around.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/metal-orbs/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/metal-orbs/metal-orbs.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "bending-rail",
+      "type": "registry:component",
+      "title": "Bending Rail",
+      "description": "A slider whose rail follows the knob. Pull the knob off the groove and the rail bends toward it while a ghost knob keeps the value; let go and it twangs straight on a spring.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/bending-rail/bending-rail.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/bending-rail/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "layout-switch",
+      "type": "registry:component",
+      "title": "Layout Switch",
+      "description": "A photo set that glides between grid, row, feature and pile arrangements on springs, with nothing fading or cutting. Click a photo and it grows to fill the frame; click again or press Escape to put it back.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/layout-switch/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/layout-switch/layout-switch.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "fan-deck",
+      "type": "registry:component",
+      "title": "Fan Deck",
+      "description": "A paint-chip deck that tips onto its side and fans out into a colour-graded half circle around its rivet. Hover lifts a chip and clicking one copies its hex code.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/fan-deck/fan-deck.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/fan-deck/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "receipt-unfold",
+      "type": "registry:component",
+      "title": "Receipt Unfold",
+      "description": "Press Get invoice and a folded paper slip rises out of the row, unfolds panel by panel on 3D hinges, and the total gets circled by hand.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/receipt-unfold/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/receipt-unfold/receipt-unfold.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "page-curl",
+      "type": "registry:component",
+      "title": "Page Curl",
+      "description": "Grab the corner of a page and peel it back. The fold is computed live from your pointer, the flap shows the paper's back, and whatever you put underneath is revealed.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/page-curl/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/page-curl/page-curl.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "sign-and-seal",
+      "type": "registry:component",
+      "title": "Sign & Seal",
+      "description": "A membership card you sign with your pointer on a canvas. Pause for a moment and a clear plastic sleeve slides down over it with a glint running across.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/sign-and-seal/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/sign-and-seal/sign-and-seal.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "streak-counter",
+      "type": "registry:component",
+      "title": "Streak Counter",
+      "description": "Log a day and the number rolls up, the week strip slides along to make room for today, and the flame bursts into embers that fall back in, burning hotter with each day.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/streak-counter/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/streak-counter/streak-counter.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "capsule-toggles",
+      "type": "registry:component",
+      "title": "Capsule Toggles",
+      "description": "Switches built as a ball sealed in a glass capsule. Flip one and the ball stretches into a pill mid-flight, then takes on the row's colour and glows as it lands.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/capsule-toggles/capsule-toggles.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/capsule-toggles/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "pricing-section",
       "type": "registry:component",
       "title": "Pricing Section",

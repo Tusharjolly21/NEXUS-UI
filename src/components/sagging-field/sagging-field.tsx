@@ -1,0 +1,204 @@
+"use client";
+import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValueEvent, useSpring } from "framer-motion";
+
+export interface SaggingFieldProps {
+  label?: string;
+  width?: number;
+  maxChars?: number;
+  accent?: string;
+  /** Types a heavy sentence by itself until the user clicks in. */
+  autoplay?: boolean;
+}
+
+interface FallenLetter {
+  key: number;
+  ch: string;
+  x: number;
+  y: number;
+  r: number;
+  dx: number;
+}
+
+const FONT = "500 17px -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif";
+const H = 56;
+const PAD = 18;
+
+let measureCtx: CanvasRenderingContext2D | null = null;
+const measure = (s: string) => {
+  if (typeof document === "undefined") return s.length * 9;
+  measureCtx ??= document.createElement("canvas").getContext("2d");
+  if (!measureCtx) return s.length * 9;
+  measureCtx.font = FONT;
+  return measureCtx.measureText(s).width;
+};
+
+/** Deflection of a beam held at the left end with weight toward the right. */
+const curve = (t: number, sag: number) => sag * t * t * (3 - t) * 0.5;
+const slope = (t: number, sag: number, w: number) => (sag * (6 * t - 3 * t * t) * 0.5) / w;
+
+export function SaggingField({ label = "What's weighing on you?", width = 400, maxChars = 34, accent = "#0071e3", autoplay = false }: SaggingFieldProps) {
+  const id = useId();
+  const [value, setValue] = useState("");
+  const [fallen, setFallen] = useState<FallenLetter[]>([]);
+  const [focused, setFocused] = useState(false);
+  const sagMV = useSpring(0, { stiffness: 90, damping: 9, mass: 1.2 });
+  const [sag, setSag] = useState(0);
+  const touched = useRef(false);
+  const keyRef = useRef(1);
+  useMotionValueEvent(sagMV, "change", setSag);
+
+  const inner = width - PAD * 2;
+  const letters = useMemo(() => {
+    const out: { ch: string; i: number; x: number; w: number }[] = [];
+    let acc = 0;
+    for (let i = 0; i < value.length; i++) {
+      const w = measure(value[i]);
+      out.push({ ch: value[i], i, x: acc, w });
+      acc += w;
+    }
+    return out;
+  }, [value]);
+
+  useEffect(() => {
+    const weight = Math.min(1, value.length / maxChars);
+    sagMV.set(Math.pow(weight, 1.3) * 64);
+  }, [value, maxChars, sagMV]);
+
+  const push = (next: string) => {
+    // Anything past the right edge slides off and falls.
+    let acc = 0;
+    let keep = next.length;
+    for (let i = 0; i < next.length; i++) {
+      acc += measure(next[i]);
+      if (acc > inner) { keep = i; break; }
+    }
+    if (keep < next.length) {
+      const drops = next.slice(keep).split("").map((ch, k) => ({ key: keyRef.current++, ch, x: inner - 6 + k * 4, y: curve(1, sag), r: (Math.random() - 0.5) * 140, dx: 30 + Math.random() * 40 }));
+      setFallen((f) => [...f, ...drops]);
+      setTimeout(() => setFallen((f) => f.filter((d) => !drops.some((x) => x.key === d.key))), 1300);
+    }
+    setValue(next.slice(0, keep));
+  };
+
+  const letGo = () => {
+    const drops = letters.map((l) => ({ key: keyRef.current++, ch: l.ch, x: l.x, y: curve(l.x / inner, sag), r: (Math.random() - 0.5) * 160, dx: (Math.random() - 0.3) * 50 }));
+    setFallen((f) => [...f, ...drops]);
+    setTimeout(() => setFallen((f) => f.filter((d) => !drops.some((x) => x.key === d.key))), 1500);
+    setValue("");
+  };
+
+  // Effect events always see the latest letters and sag.
+  const autoPush = useEffectEvent((next: string) => push(next));
+  const autoLetGo = useEffectEvent(() => letGo());
+
+  useEffect(() => {
+    if (!autoplay) return;
+    const sample = "deadlines, the move, that unanswered email, taxes, the dentist";
+    let i = 0;
+    let t: number;
+    const step = () => {
+      if (touched.current) return;
+      i++;
+      if (i <= sample.length) {
+        autoPush(sample.slice(0, i));
+        t = window.setTimeout(step, 70 + Math.random() * 60);
+      } else {
+        t = window.setTimeout(() => { if (!touched.current) { autoLetGo(); i = 0; t = window.setTimeout(step, 1400); } }, 1600);
+      }
+    };
+    t = window.setTimeout(step, 800);
+    return () => clearTimeout(t);
+  }, [autoplay]);
+
+  // Field outline follows the same curve as the letters.
+  const N = 24;
+  const top = Array.from({ length: N + 1 }, (_, k) => {
+    const t = k / N;
+    return [t * width, 8 + curve(t, sag)] as const;
+  });
+  const d =
+    `M ${top.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(" L ")} ` +
+    `L ${[...top].reverse().map(([x, y]) => `${x.toFixed(1)} ${(y + H).toFixed(1)}`).join(" L ")} Z`;
+
+  const caretT = Math.min(1, (letters.length ? letters[letters.length - 1].x + letters[letters.length - 1].w : 0) / inner);
+  const caretX = PAD + caretT * inner;
+  const caretY = 8 + curve(caretX / width, sag);
+
+  return (
+    <div
+      className="flex w-full flex-col items-center gap-4 [--sf-edge:#d2d2d7] [--sf-fill:#ffffff] [--sf-pin:#aeaeb2] [--sf-shadow:rgba(0,0,0,.08)] dark:[--sf-edge:#3a3a3c] dark:[--sf-fill:#1c1c1e] dark:[--sf-pin:#636366] dark:[--sf-shadow:rgba(0,0,0,.5)]"
+      onPointerDown={() => { touched.current = true; }}
+    >
+      <label htmlFor={id} className="text-[22px] font-semibold tracking-[-0.025em] text-[#1d1d1f] dark:text-[#f5f5f7]">
+        {label}
+      </label>
+      <div className="relative" style={{ width, height: H + 90 }}>
+        <svg className="pointer-events-none absolute inset-0 overflow-visible" width={width} height={H + 90} aria-hidden="true">
+          <path d={d} strokeWidth={focused ? 2 : 1} strokeLinejoin="round" style={{ fill: "var(--sf-fill)", stroke: focused ? accent : "var(--sf-edge)", filter: "drop-shadow(0 12px 18px var(--sf-shadow))" }} />
+          <circle cx="0" cy={8 + H / 2} r="5" style={{ fill: "var(--sf-pin)" }} />
+        </svg>
+        <div className="pointer-events-none absolute inset-0" style={{ font: FONT }} aria-hidden="true">
+          {letters.map((l) => {
+            const cx = PAD + l.x + l.w / 2;
+            const t = cx / width;
+            return (
+              <motion.span
+                key={l.i}
+                className="absolute text-[#1d1d1f] dark:text-[#f5f5f7]"
+                initial={{ y: 8 + curve(t, sag) + H / 2 - 22, opacity: 0, scale: 0.6 }}
+                animate={{ y: 8 + curve(t, sag) + H / 2 - 11, opacity: 1, scale: 1, rotate: (Math.atan(slope(t, sag, width)) * 180) / Math.PI }}
+                transition={{ y: { type: "spring", stiffness: 500, damping: 30 }, rotate: { type: "spring", stiffness: 300, damping: 20 }, default: { duration: 0.15 } }}
+                style={{ left: PAD + l.x, whiteSpace: "pre", lineHeight: "22px" }}
+              >
+                {l.ch}
+              </motion.span>
+            );
+          })}
+          {value.length === 0 && !focused && (
+            <span className="absolute text-[#a1a1a6] dark:text-[#8e8e93]" style={{ left: PAD, top: 8 + H / 2 - 11, lineHeight: "22px" }}>
+              Type it out…
+            </span>
+          )}
+          {focused && (
+            <motion.span className="absolute w-[2px] rounded-full" style={{ left: caretX + 1, top: caretY + H / 2 - 11, height: 22, background: accent }} animate={{ opacity: [1, 1, 0, 0] }} transition={{ duration: 1, repeat: Infinity, times: [0, 0.5, 0.5, 1] }} />
+          )}
+          <AnimatePresence>
+            {fallen.map((f) => (
+              <motion.span
+                key={f.key}
+                className="absolute text-[#1d1d1f] dark:text-[#f5f5f7]"
+                style={{ left: PAD + f.x, top: 8 + f.y + H / 2 - 11, lineHeight: "22px", whiteSpace: "pre" }}
+                initial={{ y: 0, x: 0, opacity: 1, rotate: 0 }}
+                animate={{ y: 260, x: f.dx, opacity: 0, rotate: f.r }}
+                transition={{ y: { duration: 1.1, ease: [0.55, 0, 1, 0.45] }, x: { duration: 1.1, ease: "easeOut" }, opacity: { duration: 1.1, ease: [0.8, 0, 1, 1] }, rotate: { duration: 1.1 } }}
+              >
+                {f.ch}
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </div>
+        <input
+          id={id}
+          value={value}
+          onChange={(e) => { touched.current = true; push(e.target.value); }}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          autoComplete="off"
+          className="absolute left-0 top-2 w-full cursor-text bg-transparent text-transparent caret-transparent outline-none"
+          style={{ height: H + 50, font: FONT }}
+        />
+      </div>
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.95 }}
+        onClick={() => { touched.current = true; letGo(); }}
+        disabled={!value}
+        className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 dark:bg-[#f5f5f7] dark:text-[#1d1d1f]"
+        style={{ outlineColor: accent }}
+      >
+        Let it go
+      </motion.button>
+    </div>
+  );
+}

@@ -203,6 +203,63 @@
         1088,
         469
       ]
+    },
+    "lanyard-badge": {
+      "focus": [
+        150,
+        0,
+        660,
+        480
+      ],
+      "object": true
+    },
+    "liquid-dial": {
+      "focus": [
+        300,
+        190,
+        360,
+        330
+      ]
+    },
+    "fan-deck": {
+      "focus": [
+        250,
+        150,
+        460,
+        400
+      ],
+      "span": 2
+    },
+    "receipt-unfold": {
+      "focus": [
+        300,
+        130,
+        360,
+        440
+      ]
+    },
+    "bending-rail": {
+      "focus": [
+        300,
+        230,
+        360,
+        250
+      ]
+    },
+    "throw-wheel": {
+      "focus": [
+        220,
+        200,
+        520,
+        340
+      ],
+      "span": 2
+    },
+    "sagging-field": {
+      "span": 2
+    },
+    "metal-orbs": {
+      "span": 2
     }
   },
   "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."

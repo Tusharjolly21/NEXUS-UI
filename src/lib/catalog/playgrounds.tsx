@@ -48,6 +48,32 @@ import { MagnifyDock } from "@/components/magnify-dock";
 import { UploadChips } from "@/components/upload-chips";
 import { NotificationStack } from "@/components/notification-stack";
 import { IslandMorph } from "@/components/island-morph";
+import { LanyardBadge } from "@/components/lanyard-badge";
+import { GlassLens } from "@/components/glass-lens";
+import { AsciiWake } from "@/components/ascii-wake";
+import { LiquidDial } from "@/components/liquid-dial";
+import { VoiceOrb } from "@/components/voice-orb";
+import { SaggingField } from "@/components/sagging-field";
+import { TearOffTicket } from "@/components/tear-off-ticket";
+import { ThrowWheel } from "@/components/throw-wheel";
+import { PixelSelect } from "@/components/pixel-select";
+import { ScrubInputs } from "@/components/scrub-inputs";
+import { LitKeyboard } from "@/components/lit-keyboard";
+import { RippleField } from "@/components/ripple-field";
+import { DotGlobe } from "@/components/dot-globe";
+import { ComponentLayers } from "@/components/component-layers";
+import { StandingCalendar } from "@/components/standing-calendar";
+import { MoneyGoo } from "@/components/money-goo";
+import { WeatherPuck } from "@/components/weather-puck";
+import { MetalOrbs } from "@/components/metal-orbs";
+import { BendingRail } from "@/components/bending-rail";
+import { LayoutSwitch } from "@/components/layout-switch";
+import { FanDeck } from "@/components/fan-deck";
+import { ReceiptUnfold } from "@/components/receipt-unfold";
+import { PageCurl } from "@/components/page-curl";
+import { SignAndSeal } from "@/components/sign-and-seal";
+import { StreakCounter } from "@/components/streak-counter";
+import { CapsuleToggles } from "@/components/capsule-toggles";
 
 /**
  * Live props playgrounds for component detail pages (Bencho-style "tweak and copy").
@@ -910,6 +936,276 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false }],
     render: (v) => <IslandMorph key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "lanyard-badge": {
+    componentName: "LanyardBadge",
+    importPath: "@/components/lanyard-badge",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "strap", label: "Strap", options: ["#0071e3", "#ff375f", "#30d158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "tag", label: "Tag", options: ["Speaker", "Attendee", "Staff", "Press"], defaultValue: "Speaker" },
+      { kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false },
+    ],
+    render: (v) => <LanyardBadge key={String(v.autoplay)} strap={v.strap as string} tag={v.tag as string} autoplay={v.autoplay as boolean} />,
+  },
+  "glass-lens": {
+    componentName: "GlassLens",
+    importPath: "@/components/glass-lens",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "zoom", label: "Zoom", min: 1.1, max: 2.2, step: 0.05, unit: "×", defaultValue: 1.45 },
+      { kind: "range", prop: "size", label: "Lens", min: 100, max: 200, step: 2, unit: "px", defaultValue: 150 },
+      { kind: "toggle", prop: "autoplay", label: "Drift by itself", defaultValue: false },
+    ],
+    render: (v) => <GlassLens key={String(v.autoplay)} zoom={v.zoom as number} size={v.size as number} autoplay={v.autoplay as boolean} />,
+  },
+  "ascii-wake": {
+    componentName: "AsciiWake",
+    importPath: "@/components/ascii-wake",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff375f", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "height", label: "Height", min: 200, max: 400, step: 10, unit: "px", defaultValue: 300 },
+      { kind: "toggle", prop: "autoplay", label: "Draw by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[560px]">
+        <AsciiWake accent={v.accent as string} height={v.height as number} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "liquid-dial": {
+    componentName: "LiquidDial",
+    importPath: "@/components/liquid-dial",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30d158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "color", prop: "color", label: "Blob", options: ["#1d1d1f", "#3a3a3c", "#5e5ce6", "#0071e3"], defaultValue: "#1d1d1f" },
+      { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false },
+    ],
+    // Defaults are passed as undefined so the component's own light/dark colours apply.
+    render: (v) => (
+      <LiquidDial
+        key={String(v.autoplay)}
+        accent={v.accent === "#0071e3" ? undefined : (v.accent as string)}
+        color={v.color === "#1d1d1f" ? undefined : (v.color as string)}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "voice-orb": {
+    componentName: "VoiceOrb",
+    importPath: "@/components/voice-orb",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#bf5af2", "#ff375f", "#30d158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false },
+    ],
+    render: (v) => <VoiceOrb key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "sagging-field": {
+    componentName: "SaggingField",
+    importPath: "@/components/sagging-field",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "maxChars", label: "Full sag at", min: 12, max: 60, step: 1, unit: " chars", defaultValue: 34 },
+    ],
+    render: (v) => <SaggingField accent={v.accent as string} maxChars={v.maxChars as number} />,
+  },
+  "tear-off-ticket": {
+    componentName: "TearOffTicket",
+    importPath: "@/components/tear-off-ticket",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Event", options: ["Light & Matter", "Night Market", "Modern Forms"], defaultValue: "Light & Matter" },
+      { kind: "toggle", prop: "autoplay", label: "Tear by itself", defaultValue: false },
+    ],
+    render: (v) => <TearOffTicket key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
+  },
+  "throw-wheel": {
+    componentName: "ThrowWheel",
+    importPath: "@/components/throw-wheel",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Throw by itself", defaultValue: false }],
+    render: (v) => <ThrowWheel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "pixel-select": {
+    componentName: "PixelSelect",
+    importPath: "@/components/pixel-select",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
+    render: (v) => <PixelSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "scrub-inputs": {
+    componentName: "ScrubInputs",
+    importPath: "@/components/scrub-inputs",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Scrub by itself", defaultValue: false },
+    ],
+    render: (v) => <ScrubInputs key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "lit-keyboard": {
+    componentName: "LitKeyboard",
+    importPath: "@/components/lit-keyboard",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "glow", label: "Glow", options: ["#ff9f0a", "#0a84ff", "#30d158", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false },
+    ],
+    render: (v) => <LitKeyboard key={String(v.autoplay)} glow={v.glow as string} autoplay={v.autoplay as boolean} />,
+  },
+  "ripple-field": {
+    componentName: "RippleField",
+    importPath: "@/components/ripple-field",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "gap", label: "Dot gap", min: 12, max: 28, step: 2, unit: "px", defaultValue: 18 },
+      { kind: "range", prop: "height", label: "Height", min: 200, max: 400, step: 10, unit: "px", defaultValue: 300 },
+      { kind: "toggle", prop: "autoplay", label: "Drop rings by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[560px]">
+        <RippleField gap={v.gap as number} height={v.height as number} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "dot-globe": {
+    componentName: "DotGlobe",
+    importPath: "@/components/dot-globe",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff9f0a", "#ff375f", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "size", label: "Size", min: 260, max: 420, step: 10, unit: "px", defaultValue: 340 },
+      { kind: "toggle", prop: "autoplay", label: "Tour cities", defaultValue: false },
+    ],
+    render: (v) => <DotGlobe key={String(v.autoplay)} accent={v.accent as string} size={v.size as number} autoplay={v.autoplay as boolean} />,
+  },
+  "component-layers": {
+    componentName: "ComponentLayers",
+    importPath: "@/components/component-layers",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#bf5af2", "#30d158", "#ff375f", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Explode by itself", defaultValue: false },
+    ],
+    render: (v) => <ComponentLayers key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "standing-calendar": {
+    componentName: "StandingCalendar",
+    importPath: "@/components/standing-calendar",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "weeks", label: "Weeks", min: 12, max: 36, step: 1, defaultValue: 30 },
+      { kind: "toggle", prop: "autoplay", label: "Stand up by itself", defaultValue: false },
+    ],
+    render: (v) => <StandingCalendar key={String(v.autoplay)} weeks={v.weeks as number} autoplay={v.autoplay as boolean} />,
+  },
+  "money-goo": {
+    componentName: "MoneyGoo",
+    importPath: "@/components/money-goo",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Goo", options: ["#0071e3", "#34c759", "#ff375f", "#af52de", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "amount", label: "Amount", min: 5, max: 100, step: 5, defaultValue: 40 },
+      { kind: "toggle", prop: "autoplay", label: "Send by itself", defaultValue: false },
+    ],
+    render: (v) => <MoneyGoo key={String(v.autoplay)} accent={v.accent as string} amount={v.amount as number} autoplay={v.autoplay as boolean} />,
+  },
+  "weather-puck": {
+    componentName: "WeatherPuck",
+    importPath: "@/components/weather-puck",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false }],
+    render: (v) => <WeatherPuck key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "metal-orbs": {
+    componentName: "MetalOrbs",
+    importPath: "@/components/metal-orbs",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "height", label: "Height", min: 200, max: 340, step: 10, unit: "px", defaultValue: 280 },
+      { kind: "toggle", prop: "autoplay", label: "Cycle modes", defaultValue: false },
+    ],
+    render: (v) => <MetalOrbs key={String(v.autoplay)} height={v.height as number} autoplay={v.autoplay as boolean} />,
+  },
+  "bending-rail": {
+    componentName: "BendingRail",
+    importPath: "@/components/bending-rail",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#34c759", "#ff9f0a", "#ff375f", "#af52de"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "label", label: "Label", options: ["Volume", "Brightness", "Opacity"], defaultValue: "Volume" },
+      { kind: "toggle", prop: "autoplay", label: "Tug by itself", defaultValue: false },
+    ],
+    render: (v) => <BendingRail key={String(v.autoplay)} accent={v.accent as string} label={v.label as string} autoplay={v.autoplay as boolean} />,
+  },
+  "layout-switch": {
+    componentName: "LayoutSwitch",
+    importPath: "@/components/layout-switch",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle layouts", defaultValue: false }],
+    render: (v) => <LayoutSwitch key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "fan-deck": {
+    componentName: "FanDeck",
+    importPath: "@/components/fan-deck",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Fan by itself", defaultValue: false }],
+    render: (v) => <FanDeck key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "receipt-unfold": {
+    componentName: "ReceiptUnfold",
+    importPath: "@/components/receipt-unfold",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "total", label: "Total", options: ["$49.68", "$120.96", "$8.99"], defaultValue: "$49.68" },
+      { kind: "toggle", prop: "autoplay", label: "Unfold by itself", defaultValue: false },
+    ],
+    render: (v) => <ReceiptUnfold key={String(v.autoplay)} total={v.total as string} autoplay={v.autoplay as boolean} />,
+  },
+  "page-curl": {
+    componentName: "PageCurl",
+    importPath: "@/components/page-curl",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "width", label: "Width", min: 320, max: 440, step: 10, unit: "px", defaultValue: 400 },
+      { kind: "toggle", prop: "autoplay", label: "Peek by itself", defaultValue: false },
+    ],
+    render: (v) => <PageCurl key={`${v.width}-${v.autoplay}`} width={v.width as number} autoplay={v.autoplay as boolean} />,
+  },
+  "sign-and-seal": {
+    componentName: "SignAndSeal",
+    importPath: "@/components/sign-and-seal",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "ink", label: "Ink", options: ["#1d1d1f", "#0071e3", "#5e5ce6", "#ff375f", "#30b158"], defaultValue: "#1d1d1f" },
+      { kind: "select", prop: "name", label: "Name", options: ["Alex Rivera", "Jordan Lee", "Sam Okafor"], defaultValue: "Alex Rivera" },
+      { kind: "toggle", prop: "autoplay", label: "Sign by itself", defaultValue: false },
+    ],
+    render: (v) => <SignAndSeal key={String(v.autoplay)} ink={v.ink as string} name={v.name as string} autoplay={v.autoplay as boolean} />,
+  },
+  "streak-counter": {
+    componentName: "StreakCounter",
+    importPath: "@/components/streak-counter",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "start", label: "Start at", min: 0, max: 60, step: 1, defaultValue: 11 },
+      { kind: "toggle", prop: "autoplay", label: "Log by itself", defaultValue: false },
+    ],
+    render: (v) => <StreakCounter key={`${v.start}-${v.autoplay}`} start={v.start as number} autoplay={v.autoplay as boolean} />,
+  },
+  "capsule-toggles": {
+    componentName: "CapsuleToggles",
+    importPath: "@/components/capsule-toggles",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Title", options: ["Controls", "Quick settings", "Privacy"], defaultValue: "Controls" },
+      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false },
+    ],
+    render: (v) => <CapsuleToggles key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
 };
 

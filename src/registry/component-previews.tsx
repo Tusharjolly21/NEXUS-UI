@@ -4211,3 +4211,8 @@ export * from "./signature/dynamic-island";
 export * from "./signature/checkout-moments";
 export * from "./signature/motion-kit";
 export * from "./blocks/block-variants";
+export * from "./signature/motion-kit-a";
+export * from "./signature/motion-kit-b";
+export * from "./signature/motion-kit-c";
+export * from "./signature/motion-kit-d";
+export * from "./signature/motion-kit-e";
