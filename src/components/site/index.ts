@@ -7,3 +7,4 @@ export { RAINBOW_HUES, RainbowWord } from "./rainbow-word";
 export { StatRow } from "./stat-row";
 export { SiteFooter } from "./site-footer";
 export { SiteNav } from "./site-nav";
+export { ThemeTrio } from "./theme-trio";
