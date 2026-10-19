@@ -166,11 +166,55 @@ const TINT_OF: Record<string, TileTint> = {
   "ask-nexus-input": "sky",
 };
 
+/**
+ * The Motion Kit components, newest batch first. They lead the components wall in this order, so
+ * the latest additions are always on its first page.
+ */
+export const MOTION_KIT_ORDER: string[] = [
+  // third batch
+  "magnify-dock",
+  "island-morph",
+  "notification-stack",
+  "upload-chips",
+  // second batch
+  "stretch-nav",
+  "animated-icons",
+  "folder-peek",
+  "ruler-picker",
+  "stagger-menu",
+  "copy-button",
+  "elastic-stepper",
+  "feedback-pill",
+  "progress-button",
+  "todo-list",
+  // first batch
+  "otp-input",
+  "hold-to-confirm",
+  "price-odometer",
+  "tilt-pass",
+  "animated-tabs",
+  "radio-cards",
+  "before-after",
+  "password-strength",
+  "shared-element-cards",
+  "rotating-headline",
+];
+
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
-  "animated-icons",
-  "ruler-picker",
   "stretch-nav",
+  "magnify-dock",
+  "animated-icons",
+  "island-morph",
+  "ruler-picker",
+  "folder-peek",
+  "notification-stack",
+  "stagger-menu",
+  "copy-button",
+  "elastic-stepper",
+  "upload-chips",
+  "feedback-pill",
+  "progress-button",
   "hold-to-confirm",
   "price-odometer",
   "slide-to-confirm",
@@ -241,10 +285,15 @@ function toItem(c: LibraryComponent): GalleryItem | null {
   };
 }
 
-/** Every component as a gallery item: newest additions first, then most popular. */
+const KIT_RANK = new Map(MOTION_KIT_ORDER.map((slug, i) => [slug, i] as const));
+
+/** Every component as a gallery item: the Motion Kit first (newest batch first), then other new additions, then most popular. */
 export function allGalleryItems(): GalleryItem[] {
   return [...libraryComponents]
     .sort((a, b) => {
+      const ka = KIT_RANK.get(a.slug) ?? Infinity;
+      const kb = KIT_RANK.get(b.slug) ?? Infinity;
+      if (ka !== kb) return ka - kb;
       const na = NEWEST - (Date.parse(a.createdAt) || 0) < NEW_WINDOW_MS ? 1 : 0;
       const nb = NEWEST - (Date.parse(b.createdAt) || 0) < NEW_WINDOW_MS ? 1 : 0;
       return nb - na || b.trendingScore - a.trendingScore;
