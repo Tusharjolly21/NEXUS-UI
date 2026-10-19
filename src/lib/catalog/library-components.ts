@@ -7726,7 +7726,7 @@ export function CheckoutNotifications() {
       { name: "initialFiles", type: "{ name: string; size: number; type?: string; progress?: number }[]", description: "Files shown on first render, such as ones already uploaded." },
       { name: "title", type: "string", defaultValue: '"Drag a file here"', description: "Main line of the card." },
       { name: "hint", type: "string", description: "Secondary line. Defaults to the size limit." },
-      { name: "accent", type: "string", defaultValue: '"#6d5cff"', description: "Tint and dashed edge colour while a file is dragged over." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Tint and dashed edge colour while a file is dragged over." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Ignore drops and clicks." },
       { name: "className", type: "string", description: "Extra classes on the wrapper." },
     ],
@@ -8336,6 +8336,383 @@ export function Hero() {
     <section className="py-24">
       <RotatingHeadline lead="Made for" words={["founders.", "designers.", "teams."]} sub="One kit, every launch." accent="#ff375f" />
     </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stretch-nav",
+    name: "Stretch Nav",
+    registryCliName: "stretch-nav",
+    description:
+      "A pill navigation whose active capsule moves its leading edge first and lets the trailing edge catch up, so it stretches towards the next item and snaps back to size, with a soft hover pill that follows the pointer.",
+    categorySlug: "navbars",
+    tags: ["navigation", "nav", "tabs", "pill", "stretch", "segmented", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 153,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "string[]", defaultValue: '["Home", "Work", "Writing", "About", "Contact"]', description: "Item labels, left to right." },
+      { name: "defaultIndex", type: "number", defaultValue: "0", description: "Item active at first." },
+      { name: "onChange", type: "(index: number) => void", description: "Called when an item is picked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves between items by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewStretchNav,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { usePathname, useRouter } from "next/navigation";
+import { StretchNav } from "@/components/stretch-nav";
+
+const LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Work", href: "/work" },
+  { label: "Writing", href: "/writing" },
+  { label: "About", href: "/about" },
+];
+
+export function SiteNav() {
+  const router = useRouter();
+  const path = usePathname();
+  const current = Math.max(0, LINKS.findIndex((l) => l.href === path));
+  return <StretchNav items={LINKS.map((l) => l.label)} defaultIndex={current} onChange={(i) => router.push(LINKS[i].href)} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "feedback-pill",
+    name: "Feedback Pill",
+    registryCliName: "feedback-pill",
+    description:
+      "A small Feedback pill that morphs into a note form, shows a spinner in the Send button while it posts, then shrinks into a thank-you before folding back into the pill.",
+    categorySlug: "inputs-controls",
+    tags: ["feedback", "form", "morph", "popover", "textarea", "widget", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 152,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "type", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onSend", type: "(message: string) => void | Promise<void>", description: "Called with the message. The spinner shows until it resolves." },
+      { name: "label", type: "string", defaultValue: '"Feedback"', description: "Pill label and form title." },
+      { name: "placeholder", type: "string", defaultValue: '"What would make this better?"', description: "Textarea placeholder." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Send button and focus colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens, types and sends a sample message until someone interacts." },
+    ],
+    Preview: Previews.PreviewFeedbackPill,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FeedbackPill } from "@/components/feedback-pill";
+
+export function FeedbackCorner() {
+  return (
+    <div className="fixed bottom-6 right-6">
+      <FeedbackPill
+        onSend={(message) =>
+          fetch("/api/feedback", { method: "POST", body: JSON.stringify({ message, page: location.pathname }) }).then(() => undefined)
+        }
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stagger-menu",
+    name: "Stagger Menu",
+    registryCliName: "stagger-menu",
+    description:
+      "A share menu that unfolds from its button with the items arriving one after another, a highlight that glides between rows, arrow-key navigation, and a button label that rolls to confirm what you picked.",
+    categorySlug: "inputs-controls",
+    tags: ["menu", "dropdown", "share", "context menu", "stagger", "keyboard", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "hover", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "MenuItem[]", description: "Each item has id, label, icon, and optional danger (red, after a divider) and done (the confirmation shown in the button)." },
+      { name: "onSelect", type: "(id: string) => void", description: "Called with the id of the picked item." },
+      { name: "label", type: "string", defaultValue: '"Share"', description: "Button label." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and browses the menu by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewStaggerMenu,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StaggerMenu } from "@/components/stagger-menu";
+
+export function ShareButton({ url }: { url: string }) {
+  return (
+    <StaggerMenu
+      onSelect={(id) => {
+        if (id === "link") navigator.clipboard.writeText(url);
+        if (id === "email") window.location.href = \`mailto:?body=\${encodeURIComponent(url)}\`;
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ruler-picker",
+    name: "Ruler Picker",
+    registryCliName: "ruler-picker",
+    description:
+      "A duration picker you fling like a ruler: it glides with momentum and snaps to whole units, the big number rolls in the direction you moved, and presets spring the ruler into place.",
+    categorySlug: "inputs-controls",
+    tags: ["ruler", "picker", "slider", "duration", "timer", "momentum", "drag", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 155,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "min", type: "number", defaultValue: "0", description: "Smallest value." },
+      { name: "max", type: "number", defaultValue: "90", description: "Largest value." },
+      { name: "defaultValue", type: "number", defaultValue: "25", description: "Starting value." },
+      { name: "unit", type: "string", defaultValue: '"min"', description: "Unit shown after the number. Values of 60 and up show as hours." },
+      { name: "presets", type: "number[]", defaultValue: "[5, 15, 30, 60]", description: "Quick-pick buttons under the ruler." },
+      { name: "accent", type: "string", defaultValue: '"#ff9f0a"', description: "Needle and selected preset colour." },
+      { name: "onChange", type: "(value: number) => void", description: "Called as the value changes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Glides between presets until someone interacts." },
+    ],
+    Preview: Previews.PreviewRulerPicker,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { RulerPicker } from "@/components/ruler-picker";
+
+export function FocusTimer() {
+  const [minutes, setMinutes] = useState(25);
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <RulerPicker defaultValue={minutes} onChange={setMinutes} />
+      <button className="h-11 rounded-full bg-[#0071e3] px-6 text-white">Start {minutes} min focus</button>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "elastic-stepper",
+    name: "Elastic Stepper",
+    registryCliName: "elastic-stepper",
+    description:
+      "A plus / minus stepper whose number rolls up or down, with a dot track that stretches to the current value and a rubber-band bounce when you push past either limit.",
+    categorySlug: "inputs-controls",
+    tags: ["stepper", "counter", "quantity", "number input", "guests", "rubber band", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 150,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"Guests"', description: "What is being counted; also used for the button labels." },
+      { name: "min", type: "number", defaultValue: "1", description: "Lowest value." },
+      { name: "max", type: "number", defaultValue: "8", description: "Highest value." },
+      { name: "defaultValue", type: "number", defaultValue: "2", description: "Starting value." },
+      { name: "onChange", type: "(value: number) => void", description: "Called when the value changes." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Dot track colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Counts up and down by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewElasticStepper,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ElasticStepper } from "@/components/elastic-stepper";
+
+export function TableBooking() {
+  return <ElasticStepper label="Guests" min={1} max={12} defaultValue={2} onChange={(n) => console.log(n)} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "todo-list",
+    name: "Todo List",
+    registryCliName: "todo-list",
+    description:
+      "A task list where ticking a task draws a check, strikes the text through and drops it out of the list into a Completed drawer with a counter that pops, plus quick add and undo.",
+    categorySlug: "cards",
+    tags: ["todo", "tasks", "checklist", "checkbox", "list", "productivity", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 149,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "type", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "initial", type: "string[]", description: "Tasks shown at first." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Check and counter colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks tasks off by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewTodoList,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TodoList } from "@/components/todo-list";
+
+export function LaunchChecklist() {
+  return <TodoList initial={["Write release notes", "Record the demo", "Update pricing page", "Email beta users"]} accent="#34c759" />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "progress-button",
+    name: "Progress Button",
+    registryCliName: "progress-button",
+    description:
+      "A button that becomes its own progress bar: it stretches, fills as the work runs with a live percentage, then turns green with a drawn check and a new label.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "progress", "download", "loading", "upload", "state", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 154,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "task", type: "(onProgress: (p: number) => void) => Promise<void>", description: "Run the work and report progress from 0 to 1. Simulated if left out." },
+      { name: "label", type: "string", defaultValue: '"Download"', description: "Resting label." },
+      { name: "doneLabel", type: "string", defaultValue: '"Open file"', description: "Label once finished." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Button and fill colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs itself on a loop until someone interacts." },
+    ],
+    Preview: Previews.PreviewProgressButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ProgressButton } from "@/components/progress-button";
+
+export function ExportButton() {
+  return (
+    <ProgressButton
+      label="Export video"
+      doneLabel="Show in folder"
+      task={async (onProgress) => {
+        const job = await fetch("/api/export", { method: "POST" }).then((r) => r.json());
+        for (let p = 0; p < 1; ) {
+          p = await fetch(\`/api/export/\${job.id}\`).then((r) => r.json()).then((j) => j.progress);
+          onProgress(p);
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "copy-button",
+    name: "Copy Button",
+    registryCliName: "copy-button",
+    description:
+      "Two copy controls: an ID chip whose icon morphs into a check under a ripple and a Copied tooltip, and a command line whose button rolls from Copy to Copied.",
+    categorySlug: "inputs-controls",
+    tags: ["copy", "clipboard", "copy to clipboard", "api key", "command", "chip", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "string", description: "CopyChip: the text written to the clipboard." },
+      { name: "display", type: "string", description: "CopyChip: what the chip shows, such as a shortened ID. Defaults to value." },
+      { name: "label", type: "string", defaultValue: '"Copy"', description: "CopyChip: start of the accessible label." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "CopyChip: ripple and check colour." },
+      { name: "command", type: "string", description: "CopyCommand: the shell command shown and copied." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Both: copy by themselves every few seconds until someone interacts." },
+    ],
+    Preview: Previews.PreviewCopyButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CopyChip, CopyCommand } from "@/components/copy-button";
+
+export function ApiKeyRow({ keyId }: { keyId: string }) {
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <CopyChip value={keyId} display={\`\${keyId.slice(0, 7)}…\${keyId.slice(-4)}\`} />
+      <CopyCommand command="npx shadcn@latest add @nexus-labs/copy-button" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "animated-icons",
+    name: "Animated Icons",
+    registryCliName: "animated-icons",
+    description:
+      "Eight toggle icons with their own small stories: menu to close, play morphing into pause, a heart that bursts, a bell that rings, sun turning to moon, a bookmark that fills, sound muting and a lock that springs open.",
+    categorySlug: "motion-effects",
+    tags: ["icons", "animated icons", "toggle", "svg", "morph", "micro-interactions", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "on", type: "boolean", description: "Each icon (MenuIcon, PlayIcon, HeartIcon, BellIcon, ThemeIcon, BookmarkIcon, VolumeIcon, LockIcon) takes its state as on." },
+      { name: "burst", type: "number", description: "HeartIcon only: increase it to play a new burst." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "AnimatedIcons grid only: toggles the icons in turn until someone interacts." },
+    ],
+    Preview: Previews.PreviewAnimatedIcons,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { MenuIcon, ThemeIcon } from "@/components/animated-icons";
+
+export function HeaderControls() {
+  const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(false);
+  return (
+    <div className="flex gap-2">
+      <button aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <MenuIcon on={open} />
+      </button>
+      <button aria-label="Toggle dark mode" aria-pressed={dark} onClick={() => setDark((d) => !d)}>
+        <ThemeIcon on={dark} />
+      </button>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "folder-peek",
+    name: "Folder Peek",
+    registryCliName: "folder-peek",
+    description:
+      "A folder that tips its front panel back on hover or focus while a document, a photo and a chart fan out of it, then tuck back in when you leave.",
+    categorySlug: "cards",
+    tags: ["folder", "files", "hover", "3d", "fan out", "documents", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 152,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Brand assets"', description: "Folder name." },
+      { name: "meta", type: "string", defaultValue: '"24 files · Updated today"', description: "Line under the name." },
+      { name: "color", type: "string", defaultValue: '"#0071e3"', description: "Folder colour; the back panel is drawn a shade darker." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes by itself until someone hovers it." },
+    ],
+    Preview: Previews.PreviewFolderPeek,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FolderPeek } from "@/components/folder-peek";
+
+export function ProjectFolders() {
+  return (
+    <div className="grid grid-cols-2 gap-10 pt-16">
+      <FolderPeek title="Launch kit" meta="12 files · Edited 2h ago" color="#34c759" />
+      <FolderPeek title="Brand assets" meta="24 files · Updated today" />
+    </div>
   );
 }`,
     tailwindSource: tw,
