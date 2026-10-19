@@ -83,14 +83,14 @@ export function PriceOdometer({ monthlyRate = 15, yearlyRate = 12, maxSeats = 10
   const touch = () => (touched.current = true);
 
   return (
-    <div className="flex w-full max-w-[460px] flex-col gap-6 rounded-[28px] bg-white p-7 shadow-[0_0_0_1px_rgba(0,0,0,.04),0_24px_50px_-28px_rgba(0,0,0,.28)]" onPointerDown={touch}>
+    <div className="flex w-full max-w-[460px] flex-col gap-6 rounded-[28px] bg-white p-7 shadow-[0_0_0_1px_rgba(0,0,0,.04),0_24px_50px_-28px_rgba(0,0,0,.28)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-28px_rgba(0,0,0,.6)]" onPointerDown={touch}>
       <div className="flex items-center justify-between">
-        <div role="group" aria-label="Billing period" className="relative grid w-[220px] grid-cols-2 rounded-xl bg-[#f0f0f3] p-[3px]">
+        <div role="group" aria-label="Billing period" className="relative grid w-[220px] grid-cols-2 rounded-xl bg-[#f0f0f3] p-[3px] dark:bg-[#3a3a3c]">
           {["Monthly", "Yearly"].map((l, i) => {
             const on = (i === 1) === yearly;
             return (
-              <button key={l} type="button" aria-pressed={on} onClick={() => setYearly(i === 1)} className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] focus-visible:outline focus-visible:outline-2" style={{ outlineColor: accent }}>
-                {on && <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
+              <button key={l} type="button" aria-pressed={on} onClick={() => setYearly(i === 1)} className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2" style={{ outlineColor: accent }}>
+                {on && <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white dark:bg-[#636366] shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
                 {l}
               </button>
             );
@@ -113,23 +113,23 @@ export function PriceOdometer({ monthlyRate = 15, yearlyRate = 12, maxSeats = 10
       </div>
 
       <div className="flex flex-col gap-1">
-        <motion.div layout className="flex items-start text-[84px] font-semibold leading-none tracking-[-0.045em] text-[#1d1d1f] tabular-nums" role="status">
+        <motion.div layout className="flex items-start text-[84px] font-semibold leading-none tracking-[-0.045em] text-[#1d1d1f] tabular-nums dark:text-[#f5f5f7]" role="status">
           <motion.span layout className="mr-1 mt-2 text-[40px] tracking-[-0.02em]">$</motion.span>
           <RollingNumber value={total} />
-          <motion.span layout className="mb-3 ml-2.5 self-end text-[17px] font-medium tracking-[-0.01em] text-[#86868b]">/mo</motion.span>
+          <motion.span layout className="mb-3 ml-2.5 self-end text-[17px] font-medium tracking-[-0.01em] text-[#86868b] dark:text-[#98989d]">/mo</motion.span>
         </motion.div>
-        <span className="text-[14px] text-[#86868b]">
+        <span className="text-[14px] text-[#86868b] dark:text-[#98989d]">
           ${rate} per seat, billed {yearly ? "yearly" : "monthly"}
         </span>
       </div>
 
       <div className="flex flex-col gap-2.5">
         <div className="flex items-baseline justify-between">
-          <label htmlFor={`${uid}-seats`} className="text-[15px] font-medium text-[#1d1d1f]">Seats</label>
-          <span className="text-[15px] font-semibold tabular-nums text-[#1d1d1f]">{seats}</span>
+          <label htmlFor={`${uid}-seats`} className="text-[15px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Seats</label>
+          <span className="text-[15px] font-semibold tabular-nums text-[#1d1d1f] dark:text-[#f5f5f7]">{seats}</span>
         </div>
         <div className="relative flex h-[26px] items-center">
-          <div className="absolute inset-x-0 h-1 rounded-full bg-[#e8e8ed]" />
+          <div className="absolute inset-x-0 h-1 rounded-full bg-[#e8e8ed] dark:bg-[#48484a]" />
           <motion.div className="absolute left-0 h-1 rounded-full" style={{ background: accent }} animate={{ width: `${((seats - 1) / (maxSeats - 1)) * 100}%` }} transition={{ type: "spring", stiffness: 400, damping: 40 }} />
           <input
             id={`${uid}-seats`}

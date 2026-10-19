@@ -662,7 +662,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "OtpInput",
     importPath: "@/components/otp-input",
     defaultFill: "light",
-    lightOnly: true,
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "length", label: "Digits", min: 4, max: 8, step: 2, defaultValue: 6 },
@@ -675,7 +674,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "RadioCards",
     importPath: "@/components/radio-cards",
     defaultFill: "light",
-    lightOnly: true,
     controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
     render: (v) => <RadioCards accent={v.accent as string} />,
   },
@@ -683,7 +681,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "HoldToConfirm",
     importPath: "@/components/hold-to-confirm",
     defaultFill: "light",
-    lightOnly: true,
     controls: [
       { kind: "color", prop: "color", label: "Color", options: ["#ff3b30", "#1d1d1f", "#0071e3", "#ff375f", "#30b158"], defaultValue: "#ff3b30" },
       { kind: "range", prop: "holdMs", label: "Hold for", min: 600, max: 4000, step: 100, unit: "ms", defaultValue: 1500 },
@@ -696,7 +693,6 @@ export const playgrounds: Record<string, Playground> = {
     importPath: "@/components/before-after",
     snippetBaseProps: ['before={<img src="/before.jpg" alt="" className="h-full w-full object-cover" />}', 'after={<img src="/after.jpg" alt="" className="h-full w-full object-cover" />}'],
     defaultFill: "light",
-    lightOnly: true,
     controls: [
       { kind: "select", prop: "beforeLabel", label: "Before label", options: ["Before", "Original", "Raw"], defaultValue: "Before" },
       { kind: "select", prop: "afterLabel", label: "After label", options: ["After", "Edited", "Graded"], defaultValue: "After" },
@@ -716,7 +712,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "PriceOdometer",
     importPath: "@/components/price-odometer",
     defaultFill: "light",
-    lightOnly: true,
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "monthlyRate", label: "Monthly / seat", min: 5, max: 60, step: 1, defaultValue: 15 },
@@ -736,7 +731,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "PasswordStrength",
     importPath: "@/components/password-strength",
     defaultFill: "light",
-    lightOnly: true,
     controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
     render: (v) => <PasswordStrength accent={v.accent as string} />,
   },
@@ -744,7 +738,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "TiltPass",
     importPath: "@/components/tilt-pass",
     defaultFill: "light",
-    lightOnly: true,
     controls: [
       { kind: "select", prop: "title", label: "Title", options: ["Founders Pass", "Backstage", "Season Ticket"], defaultValue: "Founders Pass" },
       { kind: "select", prop: "name", label: "Holder", options: ["Alex Rivera", "Sam Okafor", "Mina Park"], defaultValue: "Alex Rivera" },
@@ -756,7 +749,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AnimatedTabs",
     importPath: "@/components/animated-tabs",
     defaultFill: "light",
-    lightOnly: true,
     controls: [{ kind: "color", prop: "accent", label: "Switch", options: ["#34c759", "#0071e3", "#ff375f", "#ff9f0a", "#1d1d1f"], defaultValue: "#34c759" }],
     render: (v) => <AnimatedTabs accent={v.accent as string} />,
   },
@@ -764,7 +756,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "SharedElementCards",
     importPath: "@/components/shared-element-cards",
     defaultFill: "light",
-    lightOnly: true,
     controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false }],
     render: (v) => <SharedElementCards key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
@@ -772,7 +763,6 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "RotatingHeadline",
     importPath: "@/components/rotating-headline",
     defaultFill: "light",
-    lightOnly: true,
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "select", prop: "lead", label: "Lead", options: ["Built to", "Made to", "Designed to"], defaultValue: "Built to" },

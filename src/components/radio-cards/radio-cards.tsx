@@ -69,7 +69,7 @@ export function RadioCards({
                 layout
                 transition={spring}
                 key={o.id}
-                className="relative block cursor-pointer rounded-[20px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_1px_3px_rgba(0,0,0,.04)] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4"
+                className="relative block cursor-pointer rounded-[20px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_1px_3px_rgba(0,0,0,.04)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-4"
                 style={{ outlineColor: accent }}
                 whileTap={{ scale: 0.985 }}
               >
@@ -84,20 +84,19 @@ export function RadioCards({
                 )}
                 <motion.span layout="position" className="flex h-[62px] items-center gap-3.5 px-[18px]">
                   <motion.span
-                    className="flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full"
-                    animate={{ backgroundColor: on ? accent : "rgba(0,0,0,0)", boxShadow: on ? `inset 0 0 0 0px ${accent}` : "inset 0 0 0 1.5px #c7c7cc" }}
-                    transition={{ duration: 0.2 }}
+                    className={`flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full transition-[background-color,box-shadow] duration-200 ${on ? "" : "shadow-[inset_0_0_0_1.5px_#c7c7cc] dark:shadow-[inset_0_0_0_1.5px_#636366]"}`}
+                    style={{ backgroundColor: on ? accent : "transparent" }}
                   >
                     <motion.span className="h-2 w-2 rounded-full bg-white" initial={false} animate={{ scale: on ? 1 : 0 }} transition={{ type: "spring", stiffness: 700, damping: 18 }} />
                   </motion.span>
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="text-[16px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{o.title}</span>
-                    <span className="text-[13px] text-[#86868b]">{o.description}</span>
+                    <span className="text-[16px] font-semibold tracking-[-0.01em] text-[#1d1d1f] dark:text-[#f5f5f7]">{o.title}</span>
+                    <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">{o.description}</span>
                   </span>
                   {o.meta && (
-                    <motion.span animate={{ color: on ? "#1d1d1f" : "#86868b" }} className="text-[15px] font-medium tabular-nums">
+                    <span className={`text-[15px] font-medium tabular-nums transition-colors ${on ? "text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#86868b] dark:text-[#98989d]"}`}>
                       {o.meta}
-                    </motion.span>
+                    </span>
                   )}
                 </motion.span>
                 <AnimatePresence initial={false}>
@@ -117,7 +116,7 @@ export function RadioCards({
                             initial={{ opacity: 0, y: 8, scale: 0.9 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             transition={{ ...spring, delay: 0.06 + i * 0.05 }}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-[#f5f5f7] py-[5px] pl-[7px] pr-2.5 text-[12.5px] font-medium text-[#1d1d1f]"
+                            className="inline-flex items-center gap-1.5 rounded-full bg-[#f5f5f7] py-[5px] pl-[7px] pr-2.5 text-[12.5px] font-medium text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#f5f5f7]"
                           >
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                               <path d="M5 12.5l4.5 4.5L19 7.5" />

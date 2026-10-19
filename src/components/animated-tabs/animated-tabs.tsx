@@ -22,10 +22,8 @@ export function Switch({ checked, onChange, label, accent = "#34c759" }: SwitchP
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
-      animate={{ backgroundColor: checked ? accent : "#e9e9eb" }}
-      transition={{ duration: 0.2 }}
-      className="relative flex h-[31px] w-[51px] flex-none items-center rounded-full p-[2px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
-      style={{ justifyContent: checked ? "flex-end" : "flex-start" }}
+      className="relative flex h-[31px] w-[51px] flex-none items-center rounded-full p-[2px] transition-colors duration-200 [--sw-off:#e9e9eb] dark:[--sw-off:#39393d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
+      style={{ justifyContent: checked ? "flex-end" : "flex-start", backgroundColor: checked ? accent : "var(--sw-off)" }}
     >
       <motion.span
         layout
@@ -95,7 +93,7 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false }: AnimatedT
 
   return (
     <div className="flex w-full max-w-[420px] flex-col gap-4" onPointerDown={() => (touched.current = true)}>
-      <div role="tablist" aria-label="Settings" className="relative grid grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px]">
+      <div role="tablist" aria-label="Settings" className="relative grid grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
         {TABS.map((t, i) => (
           <button
             key={t.id}
@@ -105,14 +103,14 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false }: AnimatedT
             aria-controls={`${group}-panel`}
             type="button"
             onClick={() => go(i)}
-            className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]"
+            className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]"
           >
-            {i === index && <motion.span layoutId={`${group}-pill`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
+            {i === index && <motion.span layoutId={`${group}-pill`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]" />}
             {t.label}
           </button>
         ))}
       </div>
-      <motion.div layout transition={{ type: "spring", stiffness: 300, damping: 30 }} className="relative overflow-hidden rounded-[20px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_10px_30px_-18px_rgba(0,0,0,.25)]" id={`${group}-panel`} role="tabpanel">
+      <motion.div layout transition={{ type: "spring", stiffness: 300, damping: 30 }} className="relative overflow-hidden rounded-[20px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_10px_30px_-18px_rgba(0,0,0,.25)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]" id={`${group}-panel`} role="tabpanel">
         <AnimatePresence mode="popLayout" initial={false} custom={dir}>
           <motion.ul
             key={tab.id}
@@ -126,13 +124,13 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false }: AnimatedT
             animate="center"
             exit="exit"
             transition={{ type: "spring", stiffness: 320, damping: 32 }}
-            className="divide-y divide-[#e8e8ed]"
+            className="divide-y divide-[#e8e8ed] dark:divide-[#3a3a3c]"
           >
             {tab.rows.map((r, ri) => (
               <motion.li key={r.label} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + ri * 0.04 }} className="flex items-center gap-4 px-[18px] py-3">
                 <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="text-[15px] font-medium tracking-[-0.01em] text-[#1d1d1f]">{r.label}</span>
-                  <span className="text-[13px] text-[#86868b]">{r.hint}</span>
+                  <span className="text-[15px] font-medium tracking-[-0.01em] text-[#1d1d1f] dark:text-[#f5f5f7]">{r.label}</span>
+                  <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">{r.hint}</span>
                 </span>
                 <Switch
                   label={r.label}
