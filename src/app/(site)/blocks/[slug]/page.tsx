@@ -668,33 +668,33 @@ function FlippingWordsDemo() {
     ["Sep 22", "Keyboard-first search", "Press / anywhere to jump to a project, page, or teammate."],
   ];
   return (
-    <section className="grid h-full min-h-full w-full overflow-hidden bg-[#f6f6f4] px-5 py-10 text-zinc-950 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:p-14">
+    <section className="grid h-full min-h-full w-full overflow-hidden bg-[#f5f5f7] px-5 py-10 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7] sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:p-14">
       <div className="flex flex-col justify-center">
-        <p className="text-[13px] font-medium text-zinc-500">Changelog</p>
+        <p className="text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Changelog</p>
         <TypewriterHeading
           text="Release notes people read."
           description="Ship a headline that types itself out, then let the summary settle in underneath. The layout is reserved up front, so nothing below it jumps."
           typingSpeed={78}
           startDelay={300}
-          cursorColor="#ff5a36"
+          cursorColor="#0071e3"
           className="mt-3"
         />
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <span className="inline-flex h-11 items-center rounded-full bg-zinc-950 px-5 text-sm font-semibold text-white">
+          <span className="inline-flex h-11 items-center rounded-full bg-[#0071e3] px-5 text-[15px] font-medium text-white">
             Read the latest
           </span>
-          <span className="inline-flex h-11 items-center rounded-full border border-zinc-300 px-5 text-sm font-semibold text-zinc-800">
+          <span className="inline-flex h-11 items-center rounded-full bg-[#e8e8ed] px-5 text-[15px] font-medium text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#f5f5f7]">
             Subscribe by email
           </span>
         </div>
       </div>
       <ol className="mt-10 hidden flex-col justify-center gap-2 lg:mt-0 lg:flex">
         {notes.map(([date, title, copy]) => (
-          <li key={title} className="grid grid-cols-[64px_1fr] gap-4 rounded-2xl border border-zinc-200/80 bg-white p-4">
-            <span className="pt-0.5 font-mono text-[12px] text-zinc-400">{date}</span>
+          <li key={title} className="grid grid-cols-[64px_1fr] gap-4 rounded-[20px] bg-white p-4 shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+            <span className="pt-0.5 text-[12.5px] tabular-nums text-[#86868b] dark:text-[#98989d]">{date}</span>
             <span>
               <span className="block text-[15px] font-semibold tracking-[-0.01em]">{title}</span>
-              <span className="mt-1 block text-[13.5px] leading-5 text-zinc-500">{copy}</span>
+              <span className="mt-1 block text-[13.5px] leading-5 text-[#6e6e73] dark:text-[#a1a1a6]">{copy}</span>
             </span>
           </li>
         ))}
@@ -705,20 +705,20 @@ function FlippingWordsDemo() {
 
 function TypewriterEffectDemo() {
   return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#0d0d10] px-5 py-12 text-white sm:px-8">
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-black px-5 py-12 text-[#f5f5f7] sm:px-8">
       <div className="w-full max-w-3xl">
-        <p className="text-[13px] font-medium text-white/50">Hosting for small teams</p>
+        <p className="text-[13px] font-medium text-[#a1a1a6]">Hosting for small teams</p>
         <h3 className="mt-3 text-[34px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-5xl">
           Push to main.
         </h3>
         <div className="mt-2 min-h-[2.6em] text-[34px] leading-[1.05] sm:text-5xl">
           <TextAnimationTypewriterEffect
             texts={["Preview every branch.", "Roll back in one click.", "Sleep through deploys."]}
-            className="text-[34px] text-white/55 sm:text-5xl"
+            className="text-[34px] text-[#86868b] sm:text-5xl"
             delay={500}
           />
         </div>
-        <p className="mt-8 max-w-xl text-pretty text-[16px] leading-7 text-white/55">
+        <p className="mt-8 max-w-xl text-pretty text-[16px] leading-7 text-[#a1a1a6]">
           Cycles through short claims, typing and deleting each one. The line keeps its height, so the copy below
           never shifts.
         </p>
@@ -729,18 +729,18 @@ function TypewriterEffectDemo() {
 
 function BlurFadeInDemo() {
   return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-white px-5 py-12 text-zinc-950 dark:bg-zinc-950 dark:text-white sm:px-8">
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-white px-5 py-12 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7] sm:px-8">
       <div className="w-full max-w-3xl">
-        <p className="text-[13px] font-medium text-zinc-500 dark:text-zinc-400">From the founders</p>
+        <p className="text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">From the founders</p>
         <TextAnimationBlurFadeIn
           text={"We built the tool we kept wishing for.\nIt does fewer things than the others.\nEach of them, properly."}
           by="word"
           stagger={0.045}
           once={false}
           repeat
-          className="mt-5 text-[30px] font-semibold leading-[1.15] tracking-[-0.03em] text-zinc-900 dark:text-white sm:text-5xl"
+          className="mt-5 text-[30px] font-semibold leading-[1.15] tracking-[-0.03em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-5xl"
         />
-        <p className="mt-8 text-[14px] text-zinc-500 dark:text-zinc-400">Ana Ruiz and Tom Becker, co-founders</p>
+        <p className="mt-8 text-[14px] text-[#6e6e73] dark:text-[#a1a1a6]">Ana Ruiz and Tom Becker, co-founders</p>
       </div>
     </section>
   );
@@ -748,9 +748,9 @@ function BlurFadeInDemo() {
 
 function TextGenerateTypewriterDemo() {
   return (
-    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#f6f6f4] px-5 py-12 dark:bg-zinc-950 sm:px-8">
+    <section className="flex h-full min-h-full w-full items-center justify-center overflow-hidden bg-[#f5f5f7] px-5 py-12 dark:bg-black sm:px-8">
       <div className="w-full max-w-2xl">
-        <div className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-zinc-950 px-4 py-3 text-[15px] text-white dark:bg-white dark:text-zinc-950">
+        <div className="ml-auto w-fit max-w-[85%] rounded-[20px] rounded-br-md bg-[#0071e3] px-4 py-3 text-[15px] text-white">
           Why did churn go up last quarter?
         </div>
         <TextGenerateTypewriter
@@ -1133,8 +1133,8 @@ function PreviewCodeSection({
 
         <TabsContent value="preview" className="mt-4">
           <div className="min-w-0 overflow-hidden rounded-2xl bg-muted/80 p-4 shadow-[0_0_0_1px_rgba(0,0,0,0.04)] dark:bg-white/[0.06] dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
-            <div className="relative isolate h-[620px] min-w-0 overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm [contain:paint] dark:border-white/10 dark:bg-zinc-950 md:h-[720px] xl:h-[860px]">
-              <div className="absolute inset-4 min-w-0 overflow-hidden rounded-lg bg-background [contain:paint] dark:bg-zinc-950 sm:inset-6">
+            <div className="relative isolate h-[620px] min-w-0 overflow-hidden rounded-xl border border-border/70 bg-background shadow-sm [contain:paint] dark:border-white/10 dark:bg-black md:h-[720px] xl:h-[860px]">
+              <div className="absolute inset-4 min-w-0 overflow-hidden rounded-lg bg-background [contain:paint] dark:bg-black sm:inset-6">
                 <div className="h-full min-h-0 w-full min-w-0 overflow-hidden [&>*]:!h-full [&>*]:!min-h-0 [&>*]:!w-full [&>*]:!max-w-none [&>*]:!overflow-hidden [&>*]:!rounded-lg">
                   {children}
                 </div>

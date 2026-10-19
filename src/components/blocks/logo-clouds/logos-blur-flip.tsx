@@ -1,11 +1,10 @@
 "use client";
-// Periodic Blur-Flip: logos sit in a stationary row. Every `interval` ms,
-// all logos play a blur-flip-in-place sequence simultaneously — they drift
-// up, blur out, rotateX-flip, then snap back sharp — while holding their
-// positions. No scroll, no marquee. GPU-only transforms for zero layout shift.
+// Periodic Blur-Flip: monochrome marks hold their places in a quiet grid. Every `interval` ms each
+// mark rolls over in place, one after another: the face tips back and blurs away while a fresh copy
+// springs up from below. Transforms and opacity only, so nothing around it shifts.
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LOGOS, LogoLockup } from "./logos";
 
@@ -27,77 +26,65 @@ export type LogosBlurFlipProps = {
 
 // ─── Animation config ─────────────────────────────────────────────────────────
 
-const FLIP_DURATION = 0.72;
-const FLIP_TIMES = [0, 0.38, 1];
 const STAGGER = 0.05;
+const FLIP = { type: "spring" as const, stiffness: 300, damping: 26 };
+const SOFT = { type: "spring" as const, stiffness: 240, damping: 30 };
 
 // ─── Default logos ────────────────────────────────────────────────────────────
 
 const DEFAULT_LOGOS: LogoEntry[] = LOGOS.map((l) => ({
-  icon: <LogoLockup logo={l} className="text-[18px] sm:text-[20px]" />,
+  icon: <LogoLockup logo={l} className="text-[17px] sm:text-[19px]" />,
   id: l.name,
 }));
 
 // ─── Logo Item ────────────────────────────────────────────────────────────────
 
+function LogoFace({ logo }: { logo: LogoEntry }) {
+  return (
+    <>
+      <span className="flex h-9 min-w-9 items-center justify-center sm:h-10 sm:min-w-10">{logo.icon}</span>
+      {logo.name ? (
+        <span className="select-none whitespace-nowrap text-[12px] font-medium">{logo.name}</span>
+      ) : null}
+    </>
+  );
+}
+
 function LogoItem({
   logo,
   index,
-  isFlipping,
-  onFlipDone,
+  cycle,
+  reduced,
+  rise,
 }: {
   logo: LogoEntry;
   index: number;
-  isFlipping: boolean;
-  onFlipDone: () => void;
+  cycle: number;
+  reduced: boolean;
+  rise: Variants;
 }) {
+  const delay = index * STAGGER;
   return (
-    <motion.div
-      role={logo.name ? "img" : undefined}
-      aria-label={logo.name}
-      style={{ transformPerspective: 700 }}
-      animate={
-        isFlipping
-          ? {
-              opacity: [1, 0, 1],
-              filter: ["blur(0px)", "blur(10px)", "blur(0px)"],
-              y: [0, -10, 0],
-              rotateX: [0, -50, 0],
-              scale: [1, 0.88, 1],
+    // the list item takes the entrance; the inner wrapper owns the resting opacity and hover
+    <motion.li variants={rise} role={logo.name ? "img" : undefined} aria-label={logo.name} className="w-full">
+      <div className="relative flex h-16 items-center justify-center text-[#1d1d1f] opacity-55 transition-opacity duration-300 ease-out [perspective:700px] hover:opacity-100 dark:text-[#f5f5f7]">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span
+            key={cycle}
+            className="flex origin-center flex-col items-center gap-1.5"
+            initial={reduced ? { opacity: 0 } : { opacity: 0, rotateX: 80, y: "45%", filter: "blur(8px)" }}
+            animate={{ opacity: 1, rotateX: 0, y: 0, filter: "blur(0px)", transition: { ...FLIP, delay } }}
+            exit={
+              reduced
+                ? { opacity: 0, transition: { duration: 0.2, delay } }
+                : { opacity: 0, rotateX: -80, y: "-45%", filter: "blur(8px)", transition: { ...FLIP, delay } }
             }
-          : {
-              opacity: 1,
-              filter: "blur(0px)",
-              y: 0,
-              rotateX: 0,
-              scale: 1,
-            }
-      }
-      transition={
-        isFlipping
-          ? {
-              duration: FLIP_DURATION,
-              times: FLIP_TIMES,
-              ease: "easeInOut",
-              delay: index * STAGGER,
-            }
-          : { duration: 0.28, ease: "easeOut" }
-      }
-      onAnimationComplete={() => {
-        if (isFlipping && index === 0) onFlipDone();
-      }}
-      whileHover={{ scale: 1.05, y: -3 }}
-      className="flex shrink-0 cursor-default flex-col items-center gap-2 text-neutral-700 dark:text-neutral-300"
-    >
-      <span className="flex h-9 min-w-9 items-center justify-center sm:h-10 sm:min-w-10">
-        {logo.icon}
-      </span>
-      {logo.name && (
-        <span className="select-none whitespace-nowrap text-[10px] font-medium tracking-wide text-neutral-400 dark:text-neutral-600 sm:text-[11px]">
-          {logo.name}
-        </span>
-      )}
-    </motion.div>
+          >
+            <LogoFace logo={logo} />
+          </motion.span>
+        </AnimatePresence>
+      </div>
+    </motion.li>
   );
 }
 
@@ -110,55 +97,55 @@ export default function LogosBlurFlip({
   interval = 2600,
   className,
 }: LogosBlurFlipProps) {
-  const [flipping, setFlipping] = React.useState(false);
+  const ref = React.useRef<HTMLUListElement>(null);
+  const inView = useInView(ref, { margin: "-80px" });
+  const reduced = !!useReducedMotion();
+  const [cycle, setCycle] = React.useState(0);
 
   React.useEffect(() => {
-    const id = setInterval(() => setFlipping(true), interval);
-    return () => clearInterval(id);
-  }, [interval]);
+    if (!inView || reduced) return;
+    const id = window.setInterval(() => setCycle((c) => c + 1), interval);
+    return () => window.clearInterval(id);
+  }, [inView, interval, reduced]);
 
-  function handleFlipDone() {
-    setFlipping(false);
-  }
+  const rise: Variants = reduced
+    ? { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.4 } } }
+    : {
+        hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+        visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: SOFT },
+      };
 
   return (
-    <section className={cn("w-full bg-white px-4 py-12 dark:bg-neutral-950 sm:py-16", className)}>
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-balance text-[26px] font-semibold leading-[1.15] tracking-[-0.025em] text-neutral-950 md:text-[34px] dark:text-white">
-          {title}
-        </h2>
-        {subtitle && (
-          <p className="mt-3 text-[15px] text-neutral-500 dark:text-neutral-400">{subtitle}</p>
-        )}
-      </div>
-
-      <div className="mx-auto mt-10 max-w-5xl sm:mt-12">
-        {/* Desktop: single flex row */}
-        <div className="hidden items-center justify-center sm:flex sm:flex-wrap sm:gap-x-10 sm:gap-y-8 lg:gap-x-12">
-          {logos.map((logo, i) => (
-            <LogoItem
-              key={logo.id ?? i}
-              logo={logo}
-              index={i}
-              isFlipping={flipping}
-              onFlipDone={handleFlipDone}
-            />
-          ))}
+    <section className={cn("w-full bg-white px-4 py-16 dark:bg-black sm:py-24", className)}>
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-80px" }}
+        variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04 } } }}
+      >
+        <div className="mx-auto max-w-2xl text-center">
+          <motion.h2
+            variants={rise}
+            className="text-balance text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-[40px]"
+          >
+            {title}
+          </motion.h2>
+          {subtitle ? (
+            <motion.p variants={rise} className="mt-3 text-[17px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6]">
+              {subtitle}
+            </motion.p>
+          ) : null}
         </div>
 
-        {/* Mobile: 3-col grid */}
-        <div className="grid grid-cols-2 place-items-center gap-x-4 gap-y-7 sm:hidden">
+        <ul
+          ref={ref}
+          className="mx-auto mt-12 grid max-w-5xl grid-cols-2 place-items-center gap-x-4 gap-y-4 sm:mt-14 sm:grid-cols-3 sm:gap-x-10 lg:grid-cols-6"
+        >
           {logos.map((logo, i) => (
-            <LogoItem
-              key={logo.id ?? i}
-              logo={logo}
-              index={i}
-              isFlipping={flipping}
-              onFlipDone={handleFlipDone}
-            />
+            <LogoItem key={logo.id ?? i} logo={logo} index={i} cycle={cycle} reduced={reduced} rise={rise} />
           ))}
-        </div>
-      </div>
+        </ul>
+      </motion.div>
     </section>
   );
 }
