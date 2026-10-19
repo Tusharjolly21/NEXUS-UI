@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Github, Loader2 } from "lucide-react";
+import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { isSupabaseConfigured } from "@/lib/env";
+import { safeNextPath } from "@/lib/safe-redirect";
 import { createClient } from "@/lib/supabase/client";
 import { NexusMark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -16,10 +18,22 @@ import { Separator } from "@/components/ui/separator";
 
 export function LoginForm() {
   const searchParams = useSearchParams();
-  const next = searchParams.get("next") || "/dashboard/orders";
+  const next = safeNextPath(searchParams.get("next"));
+  const authError = searchParams.get("error");
   const [email, setEmail] = React.useState("");
   const [pending, setPending] = React.useState(false);
   const [cooldown, setCooldown] = React.useState(0);
+
+  /* /auth/callback redirects back here with ?error= when the OAuth exchange fails.
+     Never echo the raw param — anyone can craft a /login?error=... link. */
+  React.useEffect(() => {
+    if (!authError) return;
+    toast.error(
+      authError === "missing_code"
+        ? "Sign-in was cancelled or expired. Please try again."
+        : "Sign-in failed. Please try again.",
+    );
+  }, [authError]);
 
   React.useEffect(() => {
     if (cooldown <= 0) return;
@@ -169,6 +183,17 @@ export function LoginForm() {
               or
             </span>
           </div>
+
+          <Button
+            type="button"
+            disabled={pending}
+            variant="outline"
+            className="h-14 w-full rounded-xl border-border bg-background/80 text-base font-semibold text-foreground shadow-sm hover:bg-muted/70 dark:bg-white/[0.02]"
+            onClick={() => oauth("google")}
+          >
+            <FcGoogle className="size-5" />
+            Login with Google
+          </Button>
 
           <Button
             type="button"
