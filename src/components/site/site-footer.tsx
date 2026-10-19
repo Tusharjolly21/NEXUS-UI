@@ -1,0 +1,100 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { siteConfig } from "@/lib/seo";
+
+const COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { href: "/components", label: "Components" },
+      { href: "/templates", label: "Templates" },
+      { href: "/blocks", label: "Blocks" },
+      { href: "/pricing", label: "Pricing" },
+    ],
+  },
+  {
+    title: "Developers",
+    links: [
+      { href: "/docs/introduction", label: "Docs" },
+      { href: "/docs/installation", label: "Installation" },
+      { href: "/docs/cli", label: "shadcn CLI" },
+      { href: "/blog", label: "Blog" },
+    ],
+  },
+  {
+    title: "Account",
+    links: [
+      { href: "/login", label: "Sign in" },
+      { href: "/dashboard", label: "Dashboard" },
+      { href: "/contact", label: "Contact" },
+    ],
+  },
+] as const;
+
+const LEGAL = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+] as const;
+
+/** Dark footer with the ghost "Nexus UI" wordmark bleeding off the bottom edge. */
+export function SiteFooter() {
+  const pathname = usePathname() ?? "/";
+  // template previews render their own full-page chrome
+  if (pathname.startsWith("/templates/")) return null;
+
+  const xHandle = siteConfig.twitterHandle.replace("@", "");
+
+  return (
+    <footer className="relative overflow-hidden bg-footer px-4 pt-20 text-white">
+      <div className="relative z-10 mx-auto max-w-[1152px]">
+        <div className="grid gap-12 pb-16 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/70">
+              <Image src="/nexus-ui-logo.png" alt="" width={36} height={36} className="size-9 rounded-lg" />
+              <span className="text-[16px] font-semibold">Nexus UI</span>
+            </Link>
+            <p className="mt-4 max-w-[260px] text-[14px] leading-relaxed text-white/55">
+              Animated React components and Next.js templates you copy into your project and own.
+            </p>
+          </div>
+          {COLUMNS.map((col) => (
+            <nav key={col.title} aria-label={col.title}>
+              <p className="mb-4 text-[13px] font-semibold text-white">{col.title}</p>
+              <ul className="space-y-2.5 text-[14px] text-white/55">
+                {col.links.map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="transition-colors hover:text-white">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+        <div className="flex flex-col gap-3 border-t border-white/10 py-6 text-[13px] text-white/45 sm:flex-row sm:items-center sm:justify-between">
+          <p>© {new Date().getFullYear()} Nexus UI</p>
+          <div className="flex items-center gap-5">
+            {LEGAL.map((l) => (
+              <Link key={l.href} href={l.href} className="transition-colors hover:text-white">
+                {l.label}
+              </Link>
+            ))}
+            <a href={`https://x.com/${xHandle}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-white">
+              X
+            </a>
+          </div>
+        </div>
+      </div>
+      <p
+        aria-hidden
+        className="pg-display pointer-events-none -mb-[4vw] select-none whitespace-nowrap text-center text-[20vw] leading-[0.75] text-white/[0.04]"
+      >
+        Nexus UI
+      </p>
+    </footer>
+  );
+}

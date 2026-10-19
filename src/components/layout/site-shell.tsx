@@ -1,5 +1,5 @@
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteNav } from "@/components/site/site-nav";
 import { createClient } from "@/lib/supabase/server";
 import { hasPremiumAccess } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -12,13 +12,13 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) isPremium = await hasPremiumAccess(user.id);
     } catch {
-      // non-fatal — header degrades gracefully
+      // non-fatal: the nav falls back to the signed-out state
     }
   }
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <SiteHeader isPremium={isPremium} />
+      <SiteNav isPremium={isPremium} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
     </div>
