@@ -1,0 +1,28 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "rotating-headline",
+  "type": "registry:component",
+  "title": "Rotating Headline",
+  "description": "A hero headline whose words arrive one by one out of a blur, ending on a word that keeps rolling to the next, with a subline that follows word by word and a replay button.",
+  "dependencies": [
+    "framer-motion",
+    "react"
+  ],
+  "registryDependencies": [
+    "http://127.0.0.1:3000/api/registry/nexus-font"
+  ],
+  "files": [
+    {
+      "path": "next-ui/rotating-headline/index.ts",
+      "type": "registry:lib",
+      "target": "components/rotating-headline/index.ts",
+      "content": "export { RotatingHeadline } from \"./rotating-headline\";\nexport type { RotatingHeadlineProps } from \"./rotating-headline\";\n"
+    },
+    {
+      "path": "next-ui/rotating-headline/rotating-headline.tsx",
+      "type": "registry:component",
+      "target": "components/rotating-headline/rotating-headline.tsx",
+      "content": "\"use client\";\nimport { useEffect, useState } from \"react\";\nimport { AnimatePresence, motion } from \"framer-motion\";\n\nexport interface RotatingHeadlineProps {\n  lead?: string;\n  words?: string[];\n  sub?: string;\n  accent?: string;\n  interval?: number;\n}\n\nconst ease = [0.16, 1, 0.3, 1] as const;\n\nexport function RotatingHeadline({\n  lead = \"Built to\",\n  words = [\"move.\", \"delight.\", \"last.\", \"ship.\"],\n  sub = \"Every word arrives on its own beat. The last one keeps changing.\",\n  accent = \"#0071e3\",\n  interval = 2000,\n}: RotatingHeadlineProps) {\n  const [run, setRun] = useState(0);\n  const [i, setI] = useState(0);\n\n  useEffect(() => {\n    const t = setInterval(() => setI((n) => (n + 1) % words.length), interval);\n    return () => clearInterval(t);\n  }, [words.length, interval]);\n\n  const leadWords = lead.split(\" \");\n  const subWords = sub.split(\" \");\n\n  return (\n    <div className=\"flex w-full flex-col items-center gap-6 text-center\">\n      <h2 key={`h${run}`} className=\"m-0 flex flex-wrap items-baseline justify-center gap-x-[0.25em] text-[56px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#1d1d1f]\">\n        {leadWords.map((w, k) => (\n          <motion.span\n            key={w + k}\n            initial={{ opacity: 0, y: 24, filter: \"blur(12px)\" }}\n            animate={{ opacity: 1, y: 0, filter: \"blur(0px)\" }}\n            transition={{ duration: 0.9, ease, delay: 0.1 + k * 0.12 }}\n            className=\"inline-block\"\n          >\n            {w}\n          </motion.span>\n        ))}\n        <motion.span\n          layout\n          transition={{ type: \"spring\", stiffness: 300, damping: 30 }}\n          className=\"relative inline-flex overflow-hidden pb-[0.08em]\"\n          style={{ color: accent }}\n        >\n          <AnimatePresence mode=\"popLayout\" initial={false}>\n            <motion.span\n              key={words[i]}\n              initial={{ y: \"100%\", opacity: 0, filter: \"blur(8px)\" }}\n              animate={{ y: \"0%\", opacity: 1, filter: \"blur(0px)\" }}\n              exit={{ y: \"-100%\", opacity: 0, filter: \"blur(8px)\" }}\n              transition={{ type: \"spring\", stiffness: 260, damping: 26 }}\n              className=\"inline-block\"\n            >\n              {words[i]}\n            </motion.span>\n          </AnimatePresence>\n        </motion.span>\n      </h2>\n\n      <p key={`p${run}`} className=\"m-0 max-w-[360px] text-[17px] leading-[1.45] tracking-[-0.01em] text-[#6e6e73]\">\n        {subWords.map((w, k) => (\n          <motion.span\n            key={w + k}\n            initial={{ opacity: 0, filter: \"blur(6px)\" }}\n            animate={{ opacity: 1, filter: \"blur(0px)\" }}\n            transition={{ duration: 0.6, ease, delay: 0.6 + k * 0.035 }}\n            className=\"inline-block whitespace-pre\"\n          >\n            {w}{k < subWords.length - 1 ? \" \" : \"\"}\n          </motion.span>\n        ))}\n      </p>\n\n      <motion.button\n        type=\"button\"\n        onClick={() => setRun((r) => r + 1)}\n        whileHover={{ scale: 1.03 }}\n        whileTap={{ scale: 0.95 }}\n        className=\"relative overflow-hidden rounded-full bg-[#1d1d1f] px-5 py-2.5 text-[14px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]\"\n      >\n        <motion.span\n          aria-hidden=\"true\"\n          className=\"absolute inset-y-0 -left-1/2 w-1/2 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)]\"\n          animate={{ x: [\"0%\", \"400%\"] }}\n          transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1.4, ease: \"easeInOut\" }}\n        />\n        <span className=\"relative\">Replay reveal</span>\n      </motion.button>\n    </div>\n  );\n}\n"
+    }
+  ]
+}

@@ -7705,61 +7705,6 @@ export function CheckoutNotifications() {
     tailwindSource: tw,
   },
   {
-    slug: "one-time-code",
-    name: "One-Time Code",
-    registryCliName: "one-time-code",
-    description:
-      "A verification code input whose digits drop into their cells, shimmer while checking, shake on a wrong code and fill green on success.",
-    categorySlug: "login-forms",
-    tags: ["otp", "verification", "2fa", "pin", "code input", "auth", "paste", "framer-motion"],
-    premium: false,
-    trendingScore: 166,
-    createdAt: "2026-10-19",
-    animationKinds: ["type", "spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    props: [
-      { name: "length", type: "number", defaultValue: "6", description: "Number of cells." },
-      { name: "value", type: "string", description: "Controlled value. Omit to let the component keep its own state." },
-      { name: "defaultValue", type: "string", defaultValue: '""', description: "Initial value when uncontrolled." },
-      { name: "onChange", type: "(value: string) => void", description: "Called with the sanitised value on every change." },
-      { name: "onComplete", type: "(code: string) => void | boolean | Promise<boolean | void>", description: "Called once every cell is filled. Resolve true for the success wave, false to shake and clear." },
-      { name: "pattern", type: '"digits" | "alphanumeric"', defaultValue: '"digits"', description: "Which characters are accepted. Letters are upper-cased." },
-      { name: "groupAfter", type: "number", defaultValue: "3", description: "Show a separator after this many cells. 0 for none." },
-      { name: "accent", type: "string", description: "Colour of the caret and the focused cell ring. Defaults to ink (white in dark mode)." },
-      { name: "highlightActive", type: "boolean", defaultValue: "false", description: "Show the active cell even when the field is not focused, for demos." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables input." },
-      { name: "autoFocus", type: "boolean", defaultValue: "false", description: "Focus the field on mount." },
-      { name: "label", type: "string", defaultValue: '"Verification code"', description: "Accessible label for the field." },
-      { name: "className", type: "string", description: "Extra classes on the wrapper." },
-    ],
-    Preview: Previews.PreviewOneTimeCode,
-    previewShell: "plain",
-    reactSource: `"use client";
-
-import { OneTimeCode } from "@/components/one-time-code";
-
-async function verify(code: string) {
-  const res = await fetch("/api/verify", {
-    method: "POST",
-    body: JSON.stringify({ code }),
-  });
-  return res.ok;
-}
-
-export function VerifyStep() {
-  return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="text-center">
-        <p className="font-semibold">Check your inbox</p>
-        <p className="text-sm text-neutral-500">We sent a 6-digit code to ana@studio.co</p>
-      </div>
-      <OneTimeCode length={6} groupAfter={3} onComplete={verify} autoFocus />
-    </div>
-  );
-}`,
-    tailwindSource: tw,
-  },
-  {
     slug: "upload-dropzone",
     name: "Upload Dropzone",
     registryCliName: "upload-dropzone",
@@ -7994,6 +7939,403 @@ export function AppTopBar() {
         track={{ title: "Midnight Drive", artist: "Neon Harbor" }}
       />
     </header>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "otp-input",
+    name: "OTP Input",
+    registryCliName: "otp-input",
+    description:
+      "A six-box one-time-code field: digits spring in as you type, the boxes ripple while the code is checked, shake on a wrong code, and fold into a Verified pill on success.",
+    categorySlug: "inputs-controls",
+    tags: ["otp", "one-time code", "verification", "2fa", "pin", "input", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 168,
+    createdAt: "2026-10-19",
+    animationKinds: ["type", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "length", type: "number", defaultValue: "6", description: "Number of digits. The boxes split into two groups at the middle." },
+      { name: "verify", type: "(code: string) => boolean | Promise<boolean>", description: "Return true when the code is valid. Runs once every box is filled." },
+      { name: "onVerified", type: "(code: string) => void", description: "Called after a code verifies." },
+      { name: "onResend", type: "() => void", description: "Called when “Resend code” is pressed." },
+      { name: "autoplay", type: "string", description: "Types this code by itself, on a loop, until someone clicks in." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Focus ring, caret and success colour." },
+    ],
+    Preview: Previews.PreviewOtpInput,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { OtpInput } from "@/components/otp-input";
+
+export function VerifyPhone() {
+  return (
+    <OtpInput
+      verify={async (code) => {
+        const res = await fetch("/api/verify", { method: "POST", body: JSON.stringify({ code }) });
+        return res.ok;
+      }}
+      onVerified={() => (window.location.href = "/welcome")}
+      onResend={() => fetch("/api/verify/resend", { method: "POST" })}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "radio-cards",
+    name: "Radio Cards",
+    registryCliName: "radio-cards",
+    description:
+      "A plan picker built on real radio inputs: the selection ring glides between cards, the chosen card opens to show its features, and the button label rolls to the new plan.",
+    categorySlug: "inputs-controls",
+    tags: ["radio", "radio group", "plan picker", "pricing", "select", "cards", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "options", type: "RadioOption[]", description: "Each option has id, title, description, and optional meta (shown on the right) and features (chips shown when selected)." },
+      { name: "defaultValue", type: "string", description: "Id of the option selected at first. Defaults to the second option." },
+      { name: "onChange", type: "(id: string) => void", description: "Called when the selection changes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the options until someone interacts." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Ring, dot and button colour." },
+    ],
+    Preview: Previews.PreviewRadioCards,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { RadioCards } from "@/components/radio-cards";
+
+export function ChoosePlan() {
+  return (
+    <RadioCards
+      defaultValue="pro"
+      onChange={(id) => console.log("plan", id)}
+      options={[
+        { id: "starter", title: "Starter", description: "For side projects", meta: "Free", features: ["3 sites", "Community support"] },
+        { id: "pro", title: "Pro", description: "For growing products", meta: "$20/mo", features: ["Unlimited sites", "Analytics", "Custom domains"] },
+        { id: "scale", title: "Scale", description: "For whole teams", meta: "$60/mo", features: ["Everything in Pro", "SSO", "Audit log"] },
+      ]}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "hold-to-confirm",
+    name: "Hold to Confirm",
+    registryCliName: "hold-to-confirm",
+    description:
+      "A destructive button you have to press and hold: the fill sweeps across, letting go early springs it back, and finishing bursts into a tick with an undo toast that counts down.",
+    categorySlug: "inputs-controls",
+    tags: ["hold", "press and hold", "delete", "destructive", "confirm", "undo", "button", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 166,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onConfirm", type: "() => void", description: "Called once the hold completes." },
+      { name: "onUndo", type: "() => void", description: "Called when Undo is pressed before the countdown runs out." },
+      { name: "holdMs", type: "number", defaultValue: "1500", description: "How long the button must be held, in ms." },
+      { name: "label", type: "string", defaultValue: '"Hold to Delete"', description: "Resting label." },
+      { name: "holdingLabel", type: "string", defaultValue: '"Keep holding…"', description: "Label revealed by the fill." },
+      { name: "doneLabel", type: "string", defaultValue: '"Project deleted"', description: "Toast text after confirming." },
+      { name: "color", type: "string", defaultValue: '"#ff3b30"', description: "Fill and text colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Shows a short hold-and-release tease until someone interacts." },
+    ],
+    Preview: Previews.PreviewHoldToConfirm,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { HoldToConfirm } from "@/components/hold-to-confirm";
+
+export function DangerZone({ projectId }: { projectId: string }) {
+  return (
+    <HoldToConfirm
+      holdMs={1800}
+      onConfirm={() => fetch(\`/api/projects/\${projectId}\`, { method: "DELETE" })}
+      onUndo={() => fetch(\`/api/projects/\${projectId}/restore\`, { method: "POST" })}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "before-after",
+    name: "Before / After",
+    registryCliName: "before-after",
+    description:
+      "An image comparison slider with a springy handle, fading corner labels, arrow-key control and a segmented Before / Split / After jump.",
+    categorySlug: "motion-effects",
+    tags: ["before after", "compare", "image comparison", "slider", "photo", "drag", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 160,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "before", type: "ReactNode", description: "What shows on the left of the handle, usually an <img>." },
+      { name: "after", type: "ReactNode", description: "What shows on the right of the handle." },
+      { name: "beforeLabel", type: "string", defaultValue: '"Before"', description: "Top-left label." },
+      { name: "afterLabel", type: "string", defaultValue: '"After"', description: "Top-right label." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the handle every few seconds until touched." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewBeforeAfter,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BeforeAfter } from "@/components/before-after";
+
+export function GradeComparison() {
+  return (
+    <div className="mx-auto max-w-2xl">
+      <BeforeAfter
+        before={<img src="/shots/raw.jpg" alt="Unedited photo" className="h-full w-full object-cover" />}
+        after={<img src="/shots/graded.jpg" alt="Colour-graded photo" className="h-full w-full object-cover" />}
+        beforeLabel="Raw"
+        afterLabel="Graded"
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "price-odometer",
+    name: "Price Odometer",
+    registryCliName: "price-odometer",
+    description:
+      "A seat-based pricing card whose total rolls like an odometer: each digit spins on its own spring, columns slide in as the number grows, and a Save badge pops in for yearly billing.",
+    categorySlug: "pricing-sections",
+    tags: ["pricing", "odometer", "rolling number", "counter", "seats", "billing toggle", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 164,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "monthlyRate", type: "number", defaultValue: "15", description: "Price per seat when billed monthly." },
+      { name: "yearlyRate", type: "number", defaultValue: "12", description: "Price per seat when billed yearly. The Save badge is worked out from the two rates." },
+      { name: "maxSeats", type: "number", defaultValue: "100", description: "Top of the seats slider." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Slider fill and badge colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Changes seats and billing by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewPriceOdometer,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PriceOdometer, RollingNumber } from "@/components/price-odometer";
+
+export function TeamPricing() {
+  return <PriceOdometer monthlyRate={20} yearlyRate={16} maxSeats={250} />;
+}
+
+// RollingNumber works on its own too:
+export function LiveCount({ value }: { value: number }) {
+  return (
+    <span className="text-5xl font-semibold tabular-nums">
+      <RollingNumber value={value} />
+    </span>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "password-strength",
+    name: "Password Strength",
+    registryCliName: "password-strength",
+    description:
+      "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash.",
+    categorySlug: "signup-forms",
+    tags: ["password", "strength meter", "validation", "signup", "form", "input", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 157,
+    createdAt: "2026-10-19",
+    animationKinds: ["type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onChange", type: "(value: string, score: number) => void", description: "Called on every keystroke with the password and its score from 0 to 4." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the ticked rules and the focus ring." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample password until someone clicks in." },
+    ],
+    Preview: Previews.PreviewPasswordStrength,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { PasswordStrength } from "@/components/password-strength";
+
+export function CreatePassword() {
+  const [ok, setOk] = useState(false);
+  return (
+    <form className="flex flex-col gap-6">
+      <PasswordStrength onChange={(_, score) => setOk(score >= 3)} />
+      <button disabled={!ok} className="h-12 rounded-full bg-black text-white disabled:opacity-40">
+        Create account
+      </button>
+    </form>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "tilt-pass",
+    name: "Tilt Pass",
+    registryCliName: "tilt-pass",
+    description:
+      "A membership pass that tilts towards the pointer with a moving glare and holographic sheen, casts a shadow that shifts with it, and flips over to a scannable back on click.",
+    categorySlug: "three-d-components",
+    tags: ["tilt", "3d card", "pass", "ticket", "membership", "holographic", "flip", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 163,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Founders Pass"', description: "Pass name on the front." },
+      { name: "name", type: "string", defaultValue: '"Alex Rivera"', description: "Holder's name, front and back." },
+      { name: "number", type: "string", defaultValue: '"No. 0042"', description: "Membership number." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Floats gently on its own while the pointer is away." },
+    ],
+    Preview: Previews.PreviewTiltPass,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TiltPass } from "@/components/tilt-pass";
+
+export function MemberWelcome() {
+  return (
+    <div className="flex flex-col items-center gap-6 py-16">
+      <TiltPass title="Backstage" name="Sam Okafor" number="No. 0318" autoplay />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "animated-tabs",
+    name: "Animated Tabs",
+    registryCliName: "animated-tabs",
+    description:
+      "A settings panel with a sliding segmented control: rows slide in from the side you moved towards, the panel resizes to fit, and each row has an iOS-style switch whose knob stretches while pressed.",
+    categorySlug: "inputs-controls",
+    tags: ["tabs", "segmented control", "switch", "toggle", "settings", "ios", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#34c759"', description: "Colour of a switch that is on." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips switches and changes tabs until someone interacts." },
+    ],
+    Preview: Previews.PreviewAnimatedTabs,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { AnimatedTabs, Switch } from "@/components/animated-tabs";
+
+export function SettingsPage() {
+  return <AnimatedTabs />;
+}
+
+// The switch is exported on its own as well:
+export function WifiRow() {
+  const [on, setOn] = useState(true);
+  return (
+    <div className="flex items-center justify-between">
+      <span>Wi-Fi</span>
+      <Switch label="Wi-Fi" checked={on} onChange={setOn} />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "shared-element-cards",
+    name: "Shared Element Cards",
+    registryCliName: "shared-element-cards",
+    description:
+      "Story cards that open into a sheet with a shared-element transition: the artwork, eyebrow and title travel from the card into place, then the body fades in. Closes with Escape or a click outside.",
+    categorySlug: "cards",
+    tags: ["shared element", "layoutId", "expand", "modal", "sheet", "cards", "app store", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 155,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "cards", type: "StoryCard[]", description: "Each card has id, eyebrow, title, art (any CSS background) and body paragraphs." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes the cards by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewSharedElementCards,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SharedElementCards } from "@/components/shared-element-cards";
+
+export function Stories() {
+  return (
+    <SharedElementCards
+      cards={[
+        {
+          id: "launch",
+          eyebrow: "New",
+          title: "Launch week",
+          art: "linear-gradient(135deg,#ffd1e0,#c7d7ff)",
+          body: ["Five days, five releases.", "Follow along as each one ships."],
+        },
+        {
+          id: "night",
+          eyebrow: "Tonight",
+          title: "Quiet hours",
+          art: "linear-gradient(135deg,#1c1c3a,#5e5ce6)",
+          body: ["Notifications pause from 10pm to 7am."],
+        },
+      ]}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "rotating-headline",
+    name: "Rotating Headline",
+    registryCliName: "rotating-headline",
+    description:
+      "A hero headline whose words arrive one by one out of a blur, ending on a word that keeps rolling to the next, with a subline that follows word by word and a replay button.",
+    categorySlug: "motion-effects",
+    tags: ["headline", "text rotate", "word swap", "hero", "blur in", "typography", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 154,
+    createdAt: "2026-10-19",
+    animationKinds: ["layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "lead", type: "string", defaultValue: '"Built to"', description: "The words that stay put." },
+      { name: "words", type: "string[]", defaultValue: '["move.", "delight.", "last.", "ship."]', description: "Words that take turns at the end." },
+      { name: "sub", type: "string", description: "Subline under the headline." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the rotating word." },
+      { name: "interval", type: "number", defaultValue: "2000", description: "Milliseconds between word changes." },
+    ],
+    Preview: Previews.PreviewRotatingHeadline,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { RotatingHeadline } from "@/components/rotating-headline";
+
+export function Hero() {
+  return (
+    <section className="py-24">
+      <RotatingHeadline lead="Made for" words={["founders.", "designers.", "teams."]} sub="One kit, every launch." accent="#ff375f" />
+    </section>
   );
 }`,
     tailwindSource: tw,

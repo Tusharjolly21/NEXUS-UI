@@ -14,6 +14,10 @@
     "card-carousel-3d": [1100, 720]
   },
   "overrides": {
+    "otp-input": { "focus": [236, 214, 488, 292] },
+    "hold-to-confirm": { "span": 2 },
+    "tilt-pass": { "span": 2 },
+    "animated-tabs": { "focus": [250, 184, 460, 352] },
     "image-trail": {
       "focus": [24, 150, 912, 420]
     },

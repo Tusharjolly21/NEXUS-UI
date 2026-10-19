@@ -19,12 +19,21 @@ import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { EmojiReactions } from "@/components/emoji-reactions";
 import { LikeBurst } from "@/components/like-burst";
 import { ToastStack } from "@/components/toast-stack";
-import { OneTimeCode } from "@/components/one-time-code";
 import { UploadDropzone } from "@/components/upload-dropzone";
 import { HoldToRecord } from "@/components/hold-to-record";
 import { CursorBuddy } from "@/components/cursor-buddy";
 import { DotSphere } from "@/components/dot-sphere";
 import { DynamicIsland } from "@/components/dynamic-island";
+import { OtpInput } from "@/components/otp-input";
+import { RadioCards } from "@/components/radio-cards";
+import { HoldToConfirm } from "@/components/hold-to-confirm";
+import { BeforeAfter } from "@/components/before-after";
+import { PriceOdometer } from "@/components/price-odometer";
+import { PasswordStrength } from "@/components/password-strength";
+import { TiltPass } from "@/components/tilt-pass";
+import { AnimatedTabs } from "@/components/animated-tabs";
+import { SharedElementCards } from "@/components/shared-element-cards";
+import { RotatingHeadline } from "@/components/rotating-headline";
 
 /**
  * Live props playgrounds for component detail pages (Bencho-style "tweak and copy").
@@ -58,6 +67,8 @@ export type Playground = {
   snippetBaseProps?: string[];
   /** Which surface the stage starts on. */
   defaultFill?: "light" | "dark";
+  /** Designed for light surfaces only: the stage stays light in dark mode and the Fill switch is hidden. */
+  lightOnly?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
 };
 
@@ -538,30 +549,6 @@ export const playgrounds: Record<string, Playground> = {
       />
     ),
   },
-  "one-time-code": {
-    componentName: "OneTimeCode",
-    importPath: "@/components/one-time-code",
-    snippetBaseProps: ["onComplete={verify}"],
-    defaultFill: "light",
-    controls: [
-      { kind: "range", prop: "length", label: "Cells", min: 4, max: 8, step: 1, defaultValue: 6 },
-      { kind: "range", prop: "groupAfter", label: "Group after", min: 0, max: 4, step: 1, defaultValue: 3 },
-      { kind: "select", prop: "pattern", label: "Accepts", options: ["digits", "alphanumeric"], defaultValue: "digits" },
-      { kind: "toggle", prop: "highlightActive", label: "Show caret", defaultValue: false },
-      { kind: "toggle", prop: "disabled", label: "Disabled", defaultValue: false },
-    ],
-    render: (v) => (
-      <OneTimeCode
-        key={`${v.length}-${v.pattern}`}
-        length={v.length as number}
-        groupAfter={v.groupAfter as number}
-        pattern={v.pattern as "digits"}
-        highlightActive={v.highlightActive as boolean}
-        disabled={v.disabled as boolean}
-        onComplete={(code) => new Promise<boolean>((r) => setTimeout(() => r(code.startsWith("4")), 800))}
-      />
-    ),
-  },
   "upload-dropzone": {
     componentName: "UploadDropzone",
     importPath: "@/components/upload-dropzone",
@@ -670,6 +657,128 @@ export const playgrounds: Record<string, Playground> = {
         cycle={v.cycle as number}
       />
     ),
+  },
+  "otp-input": {
+    componentName: "OtpInput",
+    importPath: "@/components/otp-input",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "length", label: "Digits", min: 4, max: 8, step: 2, defaultValue: 6 },
+    ],
+    render: (v) => (
+      <OtpInput key={v.length as number} accent={v.accent as string} length={v.length as number} verify={(c) => c.startsWith("4829")} />
+    ),
+  },
+  "radio-cards": {
+    componentName: "RadioCards",
+    importPath: "@/components/radio-cards",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <RadioCards accent={v.accent as string} />,
+  },
+  "hold-to-confirm": {
+    componentName: "HoldToConfirm",
+    importPath: "@/components/hold-to-confirm",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "color", label: "Color", options: ["#ff3b30", "#1d1d1f", "#0071e3", "#ff375f", "#30b158"], defaultValue: "#ff3b30" },
+      { kind: "range", prop: "holdMs", label: "Hold for", min: 600, max: 4000, step: 100, unit: "ms", defaultValue: 1500 },
+      { kind: "select", prop: "label", label: "Label", options: ["Hold to Delete", "Hold to Archive", "Hold to Leave"], defaultValue: "Hold to Delete" },
+    ],
+    render: (v) => <HoldToConfirm color={v.color as string} holdMs={v.holdMs as number} label={v.label as string} />,
+  },
+  "before-after": {
+    componentName: "BeforeAfter",
+    importPath: "@/components/before-after",
+    snippetBaseProps: ['before={<img src="/before.jpg" alt="" className="h-full w-full object-cover" />}', 'after={<img src="/after.jpg" alt="" className="h-full w-full object-cover" />}'],
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "select", prop: "beforeLabel", label: "Before label", options: ["Before", "Original", "Raw"], defaultValue: "Before" },
+      { kind: "select", prop: "afterLabel", label: "After label", options: ["After", "Edited", "Graded"], defaultValue: "After" },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[520px]">
+        <BeforeAfter
+          beforeLabel={v.beforeLabel as string}
+          afterLabel={v.afterLabel as string}
+          before={<div className="h-full w-full bg-[linear-gradient(180deg,#9a9a9a,#d6d6d6_60%,#5c5c5c)]" />}
+          after={<div className="h-full w-full bg-[linear-gradient(180deg,#7fb3e8,#f6d9b8_60%,#3e5f7e)]" />}
+        />
+      </div>
+    ),
+  },
+  "price-odometer": {
+    componentName: "PriceOdometer",
+    importPath: "@/components/price-odometer",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "monthlyRate", label: "Monthly / seat", min: 5, max: 60, step: 1, defaultValue: 15 },
+      { kind: "range", prop: "yearlyRate", label: "Yearly / seat", min: 4, max: 50, step: 1, defaultValue: 12 },
+      { kind: "range", prop: "maxSeats", label: "Max seats", min: 10, max: 500, step: 10, defaultValue: 100 },
+    ],
+    render: (v) => (
+      <PriceOdometer
+        accent={v.accent as string}
+        monthlyRate={v.monthlyRate as number}
+        yearlyRate={v.yearlyRate as number}
+        maxSeats={v.maxSeats as number}
+      />
+    ),
+  },
+  "password-strength": {
+    componentName: "PasswordStrength",
+    importPath: "@/components/password-strength",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
+    render: (v) => <PasswordStrength accent={v.accent as string} />,
+  },
+  "tilt-pass": {
+    componentName: "TiltPass",
+    importPath: "@/components/tilt-pass",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "select", prop: "title", label: "Title", options: ["Founders Pass", "Backstage", "Season Ticket"], defaultValue: "Founders Pass" },
+      { kind: "select", prop: "name", label: "Holder", options: ["Alex Rivera", "Sam Okafor", "Mina Park"], defaultValue: "Alex Rivera" },
+      { kind: "toggle", prop: "autoplay", label: "Float on its own", defaultValue: false },
+    ],
+    render: (v) => <TiltPass title={v.title as string} name={v.name as string} autoplay={v.autoplay as boolean} />,
+  },
+  "animated-tabs": {
+    componentName: "AnimatedTabs",
+    importPath: "@/components/animated-tabs",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "color", prop: "accent", label: "Switch", options: ["#34c759", "#0071e3", "#ff375f", "#ff9f0a", "#1d1d1f"], defaultValue: "#34c759" }],
+    render: (v) => <AnimatedTabs accent={v.accent as string} />,
+  },
+  "shared-element-cards": {
+    componentName: "SharedElementCards",
+    importPath: "@/components/shared-element-cards",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false }],
+    render: (v) => <SharedElementCards key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "rotating-headline": {
+    componentName: "RotatingHeadline",
+    importPath: "@/components/rotating-headline",
+    defaultFill: "light",
+    lightOnly: true,
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "lead", label: "Lead", options: ["Built to", "Made to", "Designed to"], defaultValue: "Built to" },
+      { kind: "range", prop: "interval", label: "Swap every", min: 800, max: 4000, step: 100, unit: "ms", defaultValue: 2000 },
+    ],
+    render: (v) => <RotatingHeadline accent={v.accent as string} lead={v.lead as string} interval={v.interval as number} />,
   },
 };
 

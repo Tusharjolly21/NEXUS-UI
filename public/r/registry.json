@@ -2189,31 +2189,6 @@
       ]
     },
     {
-      "name": "one-time-code",
-      "type": "registry:component",
-      "title": "One-Time Code",
-      "description": "A verification code input whose digits drop into their cells, shimmer while checking, shake on a wrong code and fill green on success.",
-      "dependencies": [
-        "framer-motion",
-        "lucide-react",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
-      ],
-      "files": [
-        {
-          "path": "next-ui/one-time-code/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/one-time-code/one-time-code.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "upload-dropzone",
       "type": "registry:component",
       "title": "Upload Dropzone",
@@ -2333,6 +2308,236 @@
         {
           "path": "next-ui/dynamic-island/index.ts",
           "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "otp-input",
+      "type": "registry:component",
+      "title": "OTP Input",
+      "description": "A six-box one-time-code field: digits spring in as you type, the boxes ripple while the code is checked, shake on a wrong code, and fold into a Verified pill on success.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/otp-input/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/otp-input/otp-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "radio-cards",
+      "type": "registry:component",
+      "title": "Radio Cards",
+      "description": "A plan picker built on real radio inputs: the selection ring glides between cards, the chosen card opens to show its features, and the button label rolls to the new plan.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/radio-cards/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/radio-cards/radio-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "hold-to-confirm",
+      "type": "registry:component",
+      "title": "Hold to Confirm",
+      "description": "A destructive button you have to press and hold: the fill sweeps across, letting go early springs it back, and finishing bursts into a tick with an undo toast that counts down.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/hold-to-confirm/hold-to-confirm.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/hold-to-confirm/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "before-after",
+      "type": "registry:component",
+      "title": "Before / After",
+      "description": "An image comparison slider with a springy handle, fading corner labels, arrow-key control and a segmented Before / Split / After jump.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/before-after/before-after.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/before-after/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "price-odometer",
+      "type": "registry:component",
+      "title": "Price Odometer",
+      "description": "A seat-based pricing card whose total rolls like an odometer: each digit spins on its own spring, columns slide in as the number grows, and a Save badge pops in for yearly billing.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/price-odometer/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/price-odometer/price-odometer.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "password-strength",
+      "type": "registry:component",
+      "title": "Password Strength",
+      "description": "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/password-strength/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/password-strength/password-strength.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tilt-pass",
+      "type": "registry:component",
+      "title": "Tilt Pass",
+      "description": "A membership pass that tilts towards the pointer with a moving glare and holographic sheen, casts a shadow that shifts with it, and flips over to a scannable back on click.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/tilt-pass/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/tilt-pass/tilt-pass.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-tabs",
+      "type": "registry:component",
+      "title": "Animated Tabs",
+      "description": "A settings panel with a sliding segmented control: rows slide in from the side you moved towards, the panel resizes to fit, and each row has an iOS-style switch whose knob stretches while pressed.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/animated-tabs/animated-tabs.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-tabs/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "shared-element-cards",
+      "type": "registry:component",
+      "title": "Shared Element Cards",
+      "description": "Story cards that open into a sheet with a shared-element transition: the artwork, eyebrow and title travel from the card into place, then the body fades in. Closes with Escape or a click outside.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/shared-element-cards/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/shared-element-cards/shared-element-cards.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "rotating-headline",
+      "type": "registry:component",
+      "title": "Rotating Headline",
+      "description": "A hero headline whose words arrive one by one out of a blur, ending on a word that keeps rolling to the next, with a subline that follows word by word and a replay button.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/rotating-headline/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/rotating-headline/rotating-headline.tsx",
+          "type": "registry:component"
         }
       ]
     },

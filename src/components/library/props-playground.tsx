@@ -288,10 +288,12 @@ export function LivePropsPlayground({
           </p>
         </div>
 
-        <div className="mt-5 flex items-center justify-between">
-          <span className="text-[13px] text-foreground/75">Fill</span>
-          <Segmented label="Fill" options={["light", "dark"] as const} value={fill} onChange={setFill} />
-        </div>
+        {playground.lightOnly ? null : (
+          <div className="mt-5 flex items-center justify-between">
+            <span className="text-[13px] text-foreground/75">Fill</span>
+            <Segmented label="Fill" options={["light", "dark"] as const} value={fill} onChange={setFill} />
+          </div>
+        )}
 
         <div className="mt-3 space-y-2">
           {playground.controls.map((control) => (

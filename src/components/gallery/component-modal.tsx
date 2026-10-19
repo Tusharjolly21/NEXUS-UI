@@ -250,13 +250,13 @@ function Inspector({ item }: { item: GalleryItem }) {
         className={cn(
           "relative min-h-[280px] flex-1 overflow-hidden rounded-[28px] lg:min-h-0",
           !playground && !item.fit.bg && TINT_CLASSES[item.tint],
-          playground && (fill === "dark" ? "dark bg-[#0b0b10]" : TINT_CLASSES[item.tint]),
+          playground && (playground.lightOnly ? "bg-[#f5f5f7]" : fill === "dark" ? "dark bg-[#0b0b10]" : TINT_CLASSES[item.tint]),
         )}
         style={!playground && item.fit.bg ? { backgroundColor: item.fit.bg } : undefined}
       >
         {view === "preview" ? (
           playground ? (
-            <div key={run} className="absolute inset-0 flex items-center justify-center p-6 text-foreground">
+            <div key={run} className={cn("absolute inset-0 flex items-center justify-center p-6", playground.lightOnly ? "text-[#1d1d1f]" : "text-foreground")}>
               {playground.render(values, fill)}
             </div>
           ) : (
@@ -430,10 +430,12 @@ function Inspector({ item }: { item: GalleryItem }) {
 
           {playground ? (
             <div className="mt-5 space-y-2">
-              <div className="flex min-h-9 items-center justify-between gap-2">
-                <span className="text-[13px] text-foreground/75">Fill</span>
-                <Segmented label="Fill" options={["light", "dark"] as const} value={fill} onChange={setFill} />
-              </div>
+              {playground.lightOnly ? null : (
+                <div className="flex min-h-9 items-center justify-between gap-2">
+                  <span className="text-[13px] text-foreground/75">Fill</span>
+                  <Segmented label="Fill" options={["light", "dark"] as const} value={fill} onChange={setFill} />
+                </div>
+              )}
               {playground.controls.map((control) => (
                 <ControlRow
                   key={control.prop}
