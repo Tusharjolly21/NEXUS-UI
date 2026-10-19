@@ -1,0 +1,13 @@
+// DRAFT: the privacy policy and terms are a starting point, not legal advice.
+// Have them reviewed, fill in every REVIEW item below, and bump `lastUpdated`
+// whenever the text of either page changes.
+export const legalConfig = {
+  // REVIEW: the legal name of the person or company that runs Nexus UI
+  // (e.g. "Example Labs Pvt. Ltd." or a sole proprietor's name).
+  operator: "Nexus UI",
+  // REVIEW: the country/state whose law governs the terms and whose courts
+  // hear disputes. Rendered as-is in the "Governing law" section.
+  jurisdiction: "[jurisdiction to be confirmed]",
+  contactEmail: "contact@nexus-ui.com",
+  lastUpdated: "October 19, 2026",
+} as const;

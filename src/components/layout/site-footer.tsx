@@ -25,6 +25,11 @@ const FOOTER_LINKS = {
   ],
 } as const;
 
+const LEGAL_LINKS = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Service" },
+] as const;
+
 export function SiteFooter() {
   const pathname = usePathname();
 
@@ -100,8 +105,17 @@ export function SiteFooter() {
         </div>
       </div>
 
-      <div className="border-t border-border/40 py-5 text-center text-xs text-muted-foreground dark:border-white/[0.05]">
-        © {new Date().getFullYear()} Nexus-UI. Built for developers who ship.
+      <div className="border-t border-border/40 py-5 text-xs text-muted-foreground dark:border-white/[0.05]">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-3 px-4 sm:flex-row sm:justify-between">
+          <p>© {new Date().getFullYear()} Nexus-UI. Built for developers who ship.</p>
+          <nav aria-label="Legal" className="flex gap-5">
+            {LEGAL_LINKS.map((link) => (
+              <Link key={link.href} href={link.href} className="transition-colors hover:text-foreground">
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </div>
     </footer>
   );
