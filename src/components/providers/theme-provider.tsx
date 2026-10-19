@@ -6,6 +6,7 @@ import {
   type AppTheme,
   applyThemeToDom,
   coerceTheme,
+  DEFAULT_THEME,
 } from "@/lib/theme";
 
 export type ThemeContextValue = {
@@ -20,29 +21,29 @@ const ThemeContext = React.createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = React.useState<AppTheme>(() => {
-    if (typeof window === "undefined") return "dark";
+    if (typeof window === "undefined") return DEFAULT_THEME;
     try {
       return coerceTheme(localStorage.getItem(THEME_STORAGE_KEY));
     } catch {
-      return "dark";
+      return DEFAULT_THEME;
     }
   });
 
   React.useEffect(() => {
     applyThemeToDom(theme);
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch {
-      // private mode, etc.
-    }
   }, [theme]);
 
+  // Only an explicit choice is remembered, so the default can change later.
   const setTheme = React.useCallback((next: AppTheme | string | ((prev: string) => string)) => {
     setThemeState((prev) => {
       const raw = typeof next === "function" ? (next as (p: string) => string)(prev) : next;
-      if (raw === "system") return prev;
-      if (raw === "light" || raw === "dark") return raw;
-      return prev;
+      if (raw !== "light" && raw !== "dark") return prev;
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, raw);
+      } catch {
+        // private mode, etc.
+      }
+      return raw;
     });
   }, []);
 
