@@ -2,7 +2,7 @@
  * entitlements.ts — SERVER ONLY
  *
  * Two responsibilities:
- *  1. Parse the nxs_xxx API token back into a Supabase user UUID
+ *  1. Issue and resolve nxs_xxx API tokens (only a hash is stored)
  *  2. Check whether a user is allowed to access a given resource
  *
  * Access hierarchy (first match wins):
@@ -11,6 +11,7 @@
  *  - Per-item order  → can access that specific component or template
  */
 
+import { createHash, randomBytes } from "node:crypto";
 import { createClient } from "@/lib/supabase/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import type { Database } from "@/lib/supabase/database.types";
@@ -18,39 +19,91 @@ import type { Database } from "@/lib/supabase/database.types";
 type Order = Database["public"]["Tables"]["orders"]["Row"];
 type Subscription = Database["public"]["Tables"]["subscriptions"]["Row"];
 
-// ── Token parsing ─────────────────────────────────────────────────────────────
+// ── API tokens ────────────────────────────────────────────────────────────────
+
+const TOKEN_PREFIX = "nxs_";
+
+/** New tokens: nxs_ + 32 random bytes as base64url (43 chars). */
+const TOKEN_PATTERN = /^nxs_[A-Za-z0-9_-]{43}$/;
+
+/** Retired tokens derived from the user UUID: nxs_ + 32 hex chars. */
+const LEGACY_TOKEN_PATTERN = /^nxs_[0-9a-f]{32}$/;
 
 /**
- * Converts a Supabase UUID into an nxs_xxx API token.
- * Must stay in sync with the derivation in /dashboard/api-key/page.tsx.
+ * SHA-256 is enough here: tokens carry 256 bits of randomness, so there is
+ * nothing to brute-force and no need for a slow password hash.
  */
-export function buildApiToken(userId: string): string {
-  return `nxs_${userId.replace(/-/g, "")}`;
+export function hashApiToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 /**
- * Parses an nxs_xxx token back into a Supabase UUID.
- * Returns null if the token is malformed.
- *
- * UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
- * Token format: nxs_<32 hex chars>
+ * Creates a new random API token, stores only its hash, and returns the
+ * plaintext. Replaces any existing token for the user, which revokes it.
+ * The caller must have verified that `userId` is the signed-in user.
  */
-export function parseApiToken(token: string): string | null {
-  if (!token || !token.startsWith("nxs_")) return null;
+export async function issueApiToken(userId: string): Promise<string> {
+  const token = `${TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
 
-  const hex = token.slice(4); // strip "nxs_"
+  const admin = getAdminClient();
+  const { error } = await admin.from("api_tokens").upsert(
+    {
+      user_id: userId,
+      token_hash: hashApiToken(token),
+      token_hint: token.slice(-4),
+      created_at: new Date().toISOString(),
+      last_used_at: null,
+    },
+    { onConflict: "user_id" },
+  );
 
-  // Must be exactly 32 lowercase hex chars (UUID without dashes)
-  if (!/^[0-9a-f]{32}$/.test(hex)) return null;
+  if (error) throw new Error("Failed to store API token");
+  return token;
+}
 
-  // Reconstruct UUID: 8-4-4-4-12
-  return [
-    hex.slice(0, 8),
-    hex.slice(8, 12),
-    hex.slice(12, 16),
-    hex.slice(16, 20),
-    hex.slice(20),
-  ].join("-");
+/**
+ * Display metadata for the user's current token. Never includes the token.
+ */
+export async function getApiTokenInfo(userId: string) {
+  const admin = getAdminClient();
+  const { data } = await admin
+    .from("api_tokens")
+    .select("token_hint, created_at, last_used_at")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return data;
+}
+
+export type ApiTokenResolution =
+  | { status: "valid"; userId: string }
+  | { status: "legacy" }
+  | { status: "invalid" };
+
+/**
+ * Resolves a Bearer token to its owner by hash lookup.
+ * Uses the service role — the caller has no Supabase session.
+ */
+export async function resolveApiToken(token: string): Promise<ApiTokenResolution> {
+  if (LEGACY_TOKEN_PATTERN.test(token)) return { status: "legacy" };
+  if (!TOKEN_PATTERN.test(token)) return { status: "invalid" };
+
+  const admin = getAdminClient();
+  const tokenHash = hashApiToken(token);
+  const { data } = await admin
+    .from("api_tokens")
+    .select("user_id")
+    .eq("token_hash", tokenHash)
+    .maybeSingle();
+
+  if (!data) return { status: "invalid" };
+
+  // Best effort — a failed timestamp update must not block the install
+  await admin
+    .from("api_tokens")
+    .update({ last_used_at: new Date().toISOString() })
+    .eq("token_hash", tokenHash);
+
+  return { status: "valid", userId: data.user_id };
 }
 
 // ── Entitlement checks ────────────────────────────────────────────────────────
