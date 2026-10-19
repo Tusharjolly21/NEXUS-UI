@@ -3,41 +3,83 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Heart, Search } from "lucide-react";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { useDiscovery } from "@/hooks/use-discovery";
-import { Button } from "@/components/ui/button";
+import { Chip, ChipRail } from "@/components/site/chip-rail";
+import { PlanTag } from "@/components/site/pastel-tile";
+import { cn } from "@/lib/utils";
 
-function hrefForFavorite(kind: "component" | "template" | "block", slug: string) {
+type ItemKind = "component" | "template" | "block";
+type Kind = "all" | ItemKind;
+
+const KIND_LABEL: Record<ItemKind, string> = { component: "Component", template: "Template", block: "Block" };
+const KIND_TINT: Record<ItemKind, string> = { component: "bg-tint-violet", template: "bg-tint-butter", block: "bg-tint-sky" };
+
+function hrefFor(kind: ItemKind, slug: string) {
   if (kind === "component") return `/components/${slug}`;
   if (kind === "template") return `/templates/${slug}`;
   return `/blocks/${slug}`;
 }
 
-type Kind = "all" | "component" | "template" | "block";
+type Result = { kind: ItemKind; slug: string; title: string; meta: string; score: number; premium: boolean; haystack: string };
+
+const ALL: Result[] = [
+  ...libraryComponents.map((c) => ({
+    kind: "component" as const,
+    slug: c.slug,
+    title: c.name,
+    meta: getComponentCategoryLabel(c.categorySlug),
+    score: c.trendingScore,
+    premium: c.premium,
+    haystack: `${c.name} ${c.description} ${c.tags.join(" ")}`.toLowerCase(),
+  })),
+  ...templates.map((t) => ({
+    kind: "template" as const,
+    slug: t.slug,
+    title: t.title.split(" — ")[0],
+    meta: t.category,
+    score: t.trendingScore,
+    premium: t.premium,
+    haystack: `${t.title} ${t.description} ${t.category} ${t.tags.join(" ")}`.toLowerCase(),
+  })),
+  ...blocks.map((b) => ({
+    kind: "block" as const,
+    slug: b.slug,
+    title: b.name,
+    meta: b.category,
+    score: b.premium ? 70 : 50,
+    premium: b.premium,
+    haystack: `${b.name} ${b.description} ${b.category} ${b.tags.join(" ")}`.toLowerCase(),
+  })),
+].sort((a, b) => b.score - a.score);
+
+const TITLES = new Map(ALL.map((r) => [`${r.kind}:${r.slug}`, r.title]));
+const KINDS: { value: Kind; label: string }[] = [
+  { value: "all", label: "Everything" },
+  { value: "component", label: "Components" },
+  { value: "template", label: "Templates" },
+  { value: "block", label: "Blocks" },
+];
 
 export function SearchExplorer() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [q, setQ] = React.useState(searchParams.get("q") ?? "");
-  const kind = (searchParams.get("kind") as Kind) || "all";
-  const sort = searchParams.get("sort") ?? "trending";
-  const { favorites, bookmarks, recent, toggleFavorite } = useDiscovery();
+  const kindParam = searchParams.get("kind");
+  const kind: Kind = KINDS.some((k) => k.value === kindParam) ? (kindParam as Kind) : "all";
+  const { favorites, recent, toggleFavorite } = useDiscovery();
 
-  React.useEffect(() => {
-    setQ(searchParams.get("q") ?? "");
-  }, [searchParams]);
+  // keep the field in step with the URL (Back/Forward, links into /search?q=)
+  const urlQ = searchParams.get("q") ?? "";
+  const [syncedQ, setSyncedQ] = React.useState(urlQ);
+  if (urlQ !== syncedQ) {
+    setSyncedQ(urlQ);
+    setQ(urlQ);
+  }
 
   function pushParams(next: Record<string, string | null>) {
     const p = new URLSearchParams(searchParams.toString());
@@ -45,203 +87,162 @@ export function SearchExplorer() {
       if (!v || v === "all") p.delete(k);
       else p.set(k, v);
     });
-    router.push(`/search?${p.toString()}`);
+    p.delete("sort");
+    const qs = p.toString();
+    router.push(qs ? `/search?${qs}` : "/search");
   }
 
-  const results = React.useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    const comps = libraryComponents
-      .filter((c) => kind === "all" || kind === "component")
-      .filter(
-        (c) =>
-          !needle ||
-          c.name.toLowerCase().includes(needle) ||
-          c.tags.some((t) => t.toLowerCase().includes(needle)),
-      )
-      .map((c) => ({
-        kind: "component" as const,
-        title: c.name,
-        href: `/components/${c.slug}`,
-        meta: c.categorySlug,
-        score: c.trendingScore,
-        premium: c.premium,
-      }));
-    const tmpls = templates
-      .filter((t) => kind === "all" || kind === "template")
-      .filter(
-        (t) =>
-          !needle ||
-          t.title.toLowerCase().includes(needle) ||
-          t.tags.some((x) => x.toLowerCase().includes(needle)),
-      )
-      .map((t) => ({
-        kind: "template" as const,
-        title: t.title,
-        href: `/templates/${t.slug}`,
-        meta: t.category,
-        score: t.trendingScore,
-        premium: t.premium,
-      }));
-    const blks = blocks
-      .filter((b) => kind === "all" || kind === "block")
-      .filter(
-        (b) =>
-          !needle ||
-          b.name.toLowerCase().includes(needle) ||
-          b.tags.some((x) => x.toLowerCase().includes(needle)),
-      )
-      .map((b) => ({
-        kind: "block" as const,
-        title: b.name,
-        href: `/blocks/${b.slug}`,
-        meta: b.category,
-        score: b.premium ? 70 : 50,
-        premium: b.premium,
-      }));
-    let merged = [...comps, ...tmpls, ...blks];
-    if (sort === "trending") merged.sort((a, b) => b.score - a.score);
-    if (sort === "newest") merged.reverse();
-    return merged;
-  }, [q, kind, sort]);
+  const needle = q.trim().toLowerCase();
+  const matching = needle ? ALL.filter((r) => r.haystack.includes(needle)) : ALL;
+  const counts = {
+    all: matching.length,
+    component: matching.filter((r) => r.kind === "component").length,
+    template: matching.filter((r) => r.kind === "template").length,
+    block: matching.filter((r) => r.kind === "block").length,
+  };
+  const results = kind === "all" ? matching : matching.filter((r) => r.kind === kind);
+  const favSet = new Set(favorites.map((f) => `${f.kind}:${f.slug}`));
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-10">
-      <div>
-        <h1 className="text-3xl font-semibold text-foreground md:text-4xl">Search & discovery</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Live search across components, templates, and blocks. Favorites and bookmarks stay on
-          this device until you connect Supabase sync.
-        </p>
-      </div>
-
-      <Card className="border-border bg-muted/50 dark:bg-white/5 p-4">
-        <div className="grid gap-3 md:grid-cols-[1fr_160px_160px]">
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && pushParams({ q })}
-            placeholder="Try “pricing”, “hero”, “dashboard”…"
-            className="border-border bg-muted dark:bg-black/40 text-foreground"
-          />
-          <Select value={kind} onValueChange={(v) => pushParams({ kind: v })}>
-            <SelectTrigger className="border-border bg-muted dark:bg-black/40 text-foreground">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Everything</SelectItem>
-              <SelectItem value="component">Components</SelectItem>
-              <SelectItem value="template">Templates</SelectItem>
-              <SelectItem value="block">Blocks</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={sort} onValueChange={(v) => pushParams({ sort: v })}>
-            <SelectTrigger className="border-border bg-muted dark:bg-black/40 text-foreground">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="trending">Trending</SelectItem>
-              <SelectItem value="newest">Newest</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-3">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">Results ({results.length})</p>
-          <div className="space-y-2">
-            {results.map((r) => (
-              <Link
-                key={`${r.kind}-${r.href}`}
-                href={r.href}
-                className="flex items-center justify-between rounded-2xl border border-border bg-muted dark:bg-zinc-950/60 px-4 py-3 transition hover:border-cyan-400/40"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{r.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {r.kind} · {r.meta}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {r.premium ? (
-                    <Badge className="border border-fuchsia-400/30 bg-fuchsia-500/10 text-fuchsia-100">
-                      Premium
-                    </Badge>
-                  ) : null}
-                  <Button
-                    type="button"
-                    size="icon"
-                    variant="ghost"
-                    className="text-muted-foreground hover:text-foreground"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      toggleFavorite(r.kind, r.href.split("/").pop()!);
-                    }}
-                  >
-                    <span className="sr-only">Favorite</span>♥
-                  </Button>
-                </div>
-              </Link>
+    <>
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[136px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px]">
+          <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Search</h1>
+          <form
+            role="search"
+            className="mt-8 max-w-[720px]"
+            onSubmit={(e) => {
+              e.preventDefault();
+              pushParams({ q: q.trim() || null });
+            }}
+          >
+            <label htmlFor="search-q" className="sr-only">
+              Search components, templates and blocks
+            </label>
+            <div className="pg-float flex h-[60px] items-center gap-3 rounded-full bg-card px-6">
+              <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+              <input
+                id="search-q"
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Pricing, hero, globe, dock…"
+                autoFocus
+                className="h-full min-w-0 flex-1 bg-transparent text-[17px] text-foreground outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+          </form>
+          <ChipRail className="mt-5">
+            {KINDS.map((k) => (
+              <Chip key={k.value} active={kind === k.value} onClick={() => pushParams({ kind: k.value })}>
+                {k.label}
+                <span className="text-[12px] opacity-60">{counts[k.value]}</span>
+              </Chip>
             ))}
-            {!results.length ? (
-              <p className="text-sm text-muted-foreground">No matches — broaden your query or reset filters.</p>
-            ) : null}
+          </ChipRail>
+        </div>
+      </section>
+
+      <section className="px-4 pb-24">
+        <div className="mx-auto grid max-w-[1152px] grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+          <div>
+            <p className="text-[14px] text-muted-foreground" aria-live="polite">
+              {results.length} {results.length === 1 ? "result" : "results"}
+              {needle ? ` for “${q.trim()}”` : ""}
+            </p>
+            {results.length ? (
+              <ul className="pg-float mt-3 divide-y divide-border/60 overflow-hidden rounded-tile bg-card">
+                {results.map((r) => {
+                  const key = `${r.kind}:${r.slug}`;
+                  const saved = favSet.has(key);
+                  return (
+                    <li key={key} className="flex items-center gap-3 px-4 py-3 sm:px-5">
+                      <Link
+                        href={hrefFor(r.kind, r.slug)}
+                        className="flex min-w-0 flex-1 items-center gap-4 rounded-xl py-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                      >
+                        <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-[12px] font-semibold text-foreground", KIND_TINT[r.kind])}>
+                          {KIND_LABEL[r.kind]}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-[16px] font-semibold text-foreground">{r.title}</span>
+                          <span className="block truncate text-[13.5px] text-muted-foreground">{r.meta}</span>
+                        </span>
+                      </Link>
+                      <PlanTag pro={r.premium} />
+                      <button
+                        type="button"
+                        aria-pressed={saved}
+                        aria-label={saved ? `Remove ${r.title} from favourites` : `Save ${r.title} to favourites`}
+                        onClick={() => toggleFavorite(r.kind, r.slug)}
+                        className={cn(
+                          "grid size-9 shrink-0 place-items-center rounded-full transition-colors hover:bg-muted",
+                          saved ? "text-[#ff3b8d]" : "text-muted-foreground",
+                        )}
+                      >
+                        <Heart className={cn("size-4", saved && "fill-current")} aria-hidden />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <div className="pg-float mt-3 rounded-tile bg-card px-6 py-14 text-center">
+                <p className="text-[17px] font-semibold text-foreground">Nothing matches “{q.trim()}”</p>
+                <p className="mt-1 text-[15px] text-muted-foreground">Try a shorter word, or look through everything instead.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQ("");
+                    pushParams({ q: null, kind: null });
+                  }}
+                  className="pg-glass mt-5 rounded-full bg-card px-4 py-2 text-[13.5px] font-semibold text-foreground"
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-        <div className="space-y-4">
-          <Card className="border-border bg-muted/50 dark:bg-white/5">
-            <CardHeader>
-              <CardTitle className="text-base text-foreground">Favorites</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-muted-foreground">
+
+          <aside className="grid content-start gap-5">
+            <div className="rounded-tile bg-tint-pink p-6">
+              <h2 className="text-[17px] font-semibold text-foreground">Favourites</h2>
               {favorites.length ? (
-                favorites.slice(0, 8).map((f) => (
-                  <div key={`${f.kind}-${f.slug}`} className="flex justify-between gap-2">
-                    <span>
-                      {f.kind} · {f.slug}
-                    </span>
-                    <Link className="text-primary hover:text-foreground" href={hrefForFavorite(f.kind, f.slug)}>
-                      Open
-                    </Link>
-                  </div>
-                ))
+                <ul className="mt-3 space-y-1.5">
+                  {favorites.slice(0, 8).map((f) => (
+                    <li key={`${f.kind}-${f.slug}`}>
+                      <Link href={hrefFor(f.kind, f.slug)} className="text-[15px] text-foreground underline-offset-4 hover:underline">
+                        {TITLES.get(`${f.kind}:${f.slug}`) ?? f.slug}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               ) : (
-                <p>Save items with the heart icon.</p>
+                <p className="mt-2 text-[14.5px] leading-relaxed text-body">
+                  Tap the heart on a result to keep it here. Favourites stay in this browser.
+                </p>
               )}
-            </CardContent>
-          </Card>
-          <Card className="border-border bg-muted/50 dark:bg-white/5">
-            <CardHeader>
-              <CardTitle className="text-base text-foreground">Bookmarks</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-muted-foreground">
-              {bookmarks.length ? (
-                bookmarks.slice(0, 8).map((b) => (
-                  <div key={`${b.kind}-${b.slug}`}>{b.kind} · {b.slug}</div>
-                ))
-              ) : (
-                <p>Use bookmarks from detail pages.</p>
-              )}
-            </CardContent>
-          </Card>
-          <Card className="border-border bg-muted/50 dark:bg-white/5">
-            <CardHeader>
-              <CardTitle className="text-base text-foreground">Recently viewed</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-xs text-muted-foreground">
+            </div>
+            <div className="rounded-tile bg-tint-mint p-6">
+              <h2 className="text-[17px] font-semibold text-foreground">Recently viewed</h2>
               {recent.length ? (
-                recent.map((slug) => (
-                  <Link key={slug} className="block text-primary hover:text-foreground" href={`/components/${slug}`}>
-                    {slug}
-                  </Link>
-                ))
+                <ul className="mt-3 space-y-1.5">
+                  {recent.slice(0, 8).map((slug) => (
+                    <li key={slug}>
+                      <Link href={`/components/${slug}`} className="text-[15px] text-foreground underline-offset-4 hover:underline">
+                        {TITLES.get(`component:${slug}`) ?? slug}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               ) : (
-                <p>Open a component to populate history.</p>
+                <p className="mt-2 text-[14.5px] leading-relaxed text-body">Components you open show up here.</p>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </aside>
         </div>
-      </div>
-    </div>
+      </section>
+    </>
   );
 }

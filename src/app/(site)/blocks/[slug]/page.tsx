@@ -204,45 +204,42 @@ export default async function BlockDetailPage({ params }: Props) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <main className="mx-auto w-full max-w-[1420px] px-4 py-8 sm:px-6 lg:px-10 lg:py-10 xl:px-14">
-      <nav className="mb-7 flex items-center gap-1 text-sm text-muted-foreground">
-        <Link href="/blocks" className="transition hover:text-foreground">
-          Blocks
-        </Link>
-        <ChevronRight className="size-3.5" />
-        <span className="font-medium text-foreground">{block.name}</span>
-      </nav>
-
-      <header>
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-          {block.name}
-          <span className="sr-only"> — UI Block</span>
-        </h1>
-        <p className="mt-4 max-w-3xl text-xl leading-8 text-muted-foreground">
-          {block.description}
-        </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Badge variant="outline" className="border-border/70 bg-muted/50 text-muted-foreground">
-            {block.category}
-          </Badge>
-          {block.tags.map((tag) => (
-            <Badge
-              key={tag}
-              variant="outline"
-              className="border-border/70 bg-muted/50 text-muted-foreground"
-            >
-              {tag}
-            </Badge>
-          ))}
+      <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-10 pt-[128px]">
+        <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <div className="relative mx-auto max-w-[1152px]">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-[14px] text-muted-foreground">
+            <Link href="/blocks" className="hover:text-foreground">
+              Blocks
+            </Link>
+            <ChevronRight className="size-3.5" aria-hidden />
+            <span aria-current="page" className="font-medium text-foreground">
+              {block.name}
+            </span>
+          </nav>
+          <h1 className="pg-display mt-6 text-[clamp(44px,8vw,76px)] text-foreground">
+            {block.name}
+            <span className="sr-only"> — UI Block</span>
+          </h1>
+          <p className="mt-5 max-w-[680px] text-[19px] leading-[1.55] text-muted-foreground">{block.description}</p>
+          <ul className="mt-6 flex flex-wrap gap-2" aria-label="About this block">
+            <li className={block.premium ? "rounded-full bg-foreground px-3 py-1 text-[13px] font-semibold text-background" : "rounded-full bg-tint-mint px-3 py-1 text-[13px] font-semibold text-[#126b3a]"}>
+              {block.premium ? "Pro" : "Free"}
+            </li>
+            <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">{block.category}</li>
+            <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">
+              {block.variants.length} {block.variants.length === 1 ? "variant" : "variants"}
+            </li>
+          </ul>
         </div>
-      </header>
+      </section>
 
-      <Accordion defaultValue={[]} className="mt-10">
+      <main className="mx-auto w-full max-w-[1184px] px-4 pb-24">
+      <Accordion defaultValue={[]}>
         <AccordionItem value="installation" className="border-0">
-          <AccordionTrigger className="rounded-xl bg-muted/70 px-5 py-4 text-2xl font-semibold text-foreground no-underline hover:bg-muted hover:no-underline dark:bg-white/[0.06] dark:hover:bg-white/[0.08]">
+          <AccordionTrigger className="pg-float rounded-tile bg-card px-6 py-5 text-[20px] font-semibold text-foreground no-underline hover:no-underline">
             Installation
           </AccordionTrigger>
-          <AccordionContent className="rounded-b-xl border border-t-0 border-border/50 bg-muted/25 px-5 py-4 text-sm text-muted-foreground dark:bg-white/[0.03]">
+          <AccordionContent className="mt-2 rounded-tile bg-card px-6 py-5 text-[15px] text-muted-foreground">
             <BlockInstallation block={block} details={installDetails} />
           </AccordionContent>
         </AccordionItem>

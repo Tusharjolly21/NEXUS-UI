@@ -47,17 +47,15 @@ export function TechArticleJsonLd({
 }
 
 export const docPreClass =
-  "overflow-x-auto rounded-xl border border-border bg-muted p-4 text-[13px] leading-relaxed text-foreground/90 dark:bg-zinc-950 dark:text-muted-foreground";
+  "overflow-x-auto rounded-[20px] bg-[#17171c] p-5 font-mono text-[13.5px] leading-relaxed text-[#e6e6ea]";
 
-export const docInlineCodeClass =
-  "rounded border border-border bg-muted px-1.5 py-0.5 text-[13px] text-foreground";
+export const docInlineCodeClass = "rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.88em] text-foreground";
 
 export function DocPageHeader({ title, description }: { title: string; description: string }) {
   return (
     <header>
-      <p className="text-xs font-medium uppercase tracking-[0.2em] text-primary/80">Docs</p>
-      <h1 className="mt-2 text-balance text-3xl font-semibold tracking-tight text-foreground md:text-4xl">{title}</h1>
-      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{description}</p>
+      <h1 className="pg-display text-[clamp(40px,6vw,60px)] leading-[1.04] text-foreground">{title}</h1>
+      <p className="mt-4 text-[19px] leading-[1.55] text-muted-foreground">{description}</p>
     </header>
   );
 }
@@ -65,7 +63,7 @@ export function DocPageHeader({ title, description }: { title: string; descripti
 export function DocSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-4">
-      <h2 className="text-lg font-semibold tracking-tight text-foreground">{title}</h2>
+      <h2 className="pg-display pt-2 text-[28px] leading-[1.1] text-foreground">{title}</h2>
       {children}
     </section>
   );
@@ -84,19 +82,16 @@ export function DocPre({ children }: { children: string }) {
 
   return (
     <div className="group relative">
-      <pre className="doc-code-block overflow-x-auto rounded-xl border border-[#3e3e3e] bg-[#1e1e1e] p-4 text-[13px] leading-relaxed">
+      <pre className="doc-code-block overflow-x-auto rounded-[20px] bg-[#17171c] p-5 pr-14 text-[13.5px] leading-relaxed">
         <code dangerouslySetInnerHTML={{ __html: highlighted }} />
       </pre>
       <button
         onClick={copy}
         aria-label={copied ? "Copied" : "Copy code"}
         className={cn(
-          "absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-md border transition-all duration-200",
-          "border-[#3e3e3e] bg-[#2d2d2d] text-[#858585]",
-          "opacity-0 group-hover:opacity-100",
-          copied
-            ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-400"
-            : "hover:border-[#555] hover:bg-[#3a3a3a] hover:text-[#d4d4d4]",
+          "absolute right-3 top-3 flex size-8 items-center justify-center rounded-full transition-colors duration-150",
+          "bg-white/10 text-white/70 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100",
+          copied ? "text-[#34c759]" : "hover:bg-white/20 hover:text-white",
         )}
       >
         {copied ? (
@@ -118,20 +113,19 @@ export function DocFooterNav({
 }) {
   if (!prev && !next) return null;
   return (
-    <nav
-      className="flex flex-col gap-3 border-t border-border pt-10 text-sm sm:flex-row sm:items-center sm:justify-between"
-      aria-label="Documentation pagination"
-    >
+    <nav className="grid gap-3 pt-6 sm:grid-cols-2" aria-label="Previous and next page">
       {prev ? (
-        <Link href={prev.href} className="text-muted-foreground transition hover:text-foreground">
-          ← {prev.label}
+        <Link href={prev.href} className="pg-float rounded-tile bg-card px-6 py-5 transition-transform hover:-translate-y-0.5 motion-reduce:transition-none">
+          <span className="block text-[13px] text-muted-foreground">Previous</span>
+          <span className="mt-1 block text-[17px] font-semibold text-foreground">{prev.label}</span>
         </Link>
       ) : (
-        <span />
+        <span aria-hidden />
       )}
       {next ? (
-        <Link href={next.href} className="text-primary transition hover:underline">
-          {next.label} →
+        <Link href={next.href} className="pg-float rounded-tile bg-card px-6 py-5 text-right transition-transform hover:-translate-y-0.5 motion-reduce:transition-none">
+          <span className="block text-[13px] text-muted-foreground">Next</span>
+          <span className="mt-1 block text-[17px] font-semibold text-foreground">{next.label}</span>
         </Link>
       ) : null}
     </nav>
@@ -145,5 +139,15 @@ export function DocPageShell({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("mx-auto max-w-3xl space-y-10 px-4 py-14", className)}>{children}</div>;
+  // Page bodies were written with 14px muted text; lift paragraphs and lists to a reading size here.
+  return (
+    <div
+      className={cn(
+        "max-w-[760px] space-y-12 [&_section_li]:text-[16px] [&_section_li]:leading-[1.65] [&_section_p]:text-[16.5px] [&_section_p]:leading-[1.7] [&_section_p]:text-body [&_section_a]:underline [&_section_a]:decoration-foreground/30 [&_section_a]:underline-offset-4",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }

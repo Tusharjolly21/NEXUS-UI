@@ -107,7 +107,7 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
   return (
     <div className="flex flex-col gap-6">
       {/* Step 1 — Generate your API key */}
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="pg-float rounded-tile border-0 bg-card p-6">
         <div className="mb-1 flex items-center gap-3">
           <div className={STEP_BADGE}>1</div>
           <h2 className="font-semibold text-foreground">Generate your API key</h2>
@@ -186,7 +186,7 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
       </div>
 
       {/* Step 2 — Add to components.json */}
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="pg-float rounded-tile border-0 bg-card p-6">
         <div className="mb-1 flex items-center gap-3">
           <div className={STEP_BADGE}>2</div>
           <h2 className="font-semibold text-foreground">Add to components.json</h2>
@@ -245,7 +245,7 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
       </div>
 
       {/* Step 3 — Install components */}
-      <div className="rounded-2xl border border-border bg-card p-6">
+      <div className="pg-float rounded-tile border-0 bg-card p-6">
         <div className="mb-1 flex items-center gap-3">
           <div className={STEP_BADGE}>3</div>
           <h2 className="font-semibold text-foreground">Install components</h2>

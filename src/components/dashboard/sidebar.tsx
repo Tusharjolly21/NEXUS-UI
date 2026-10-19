@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NexusMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { createClient } from "@/lib/supabase/client";
 
@@ -40,10 +41,6 @@ export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
-  // Close sidebar on route change
-  React.useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   async function signOut() {
     const supabase = createClient();
@@ -55,16 +52,18 @@ export function Sidebar({ user }: SidebarProps) {
     <>
       {/* Top: Logo + ThemeToggle */}
       <div className="flex items-center justify-between">
-        <span className="font-semibold text-foreground">Nexus-UI</span>
+        <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold text-foreground">
+          <span className="grid size-8 place-items-center rounded-lg bg-foreground text-background">
+            <NexusMark size={18} />
+          </span>
+          Nexus UI
+        </Link>
         <ThemeToggle />
       </div>
 
       {/* Navigation */}
-      <div className="mt-6">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          Navigation
-        </p>
-        <nav className="flex flex-col gap-1">
+      <div className="mt-8">
+        <nav aria-label="Account" className="flex flex-col gap-1">
           {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const active =
               href === "/dashboard"
@@ -74,11 +73,11 @@ export function Sidebar({ user }: SidebarProps) {
               <Link
                 key={href}
                 href={href}
+                aria-current={active ? "page" : undefined}
+                onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  active
-                    ? "bg-accent text-foreground"
-                    : "text-muted-foreground hover:text-foreground",
+                  "flex items-center gap-3 rounded-full px-3.5 py-2.5 text-[14.5px] font-medium transition-colors",
+                  active ? "bg-foreground text-background" : "text-body hover:bg-muted hover:text-foreground",
                 )}
               >
                 <Icon className="size-4 shrink-0" />
@@ -129,8 +128,13 @@ export function Sidebar({ user }: SidebarProps) {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-background px-4 lg:hidden">
-        <span className="font-semibold text-foreground">Nexus-UI</span>
+      <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-border bg-card px-4 lg:hidden">
+        <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold text-foreground">
+          <span className="grid size-7 place-items-center rounded-lg bg-foreground text-background">
+            <NexusMark size={16} />
+          </span>
+          Nexus UI
+        </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button
@@ -147,7 +151,8 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Mobile overlay backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          aria-hidden
+          className="fixed inset-0 z-30 bg-[#17171c]/30 backdrop-blur-sm lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -155,7 +160,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Desktop sidebar (always visible) + Mobile slide-in */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-40 flex h-full w-60 flex-col border-r border-border bg-background px-4 pt-18 pb-5 transition-transform duration-300 lg:pt-5",
+          "fixed left-0 top-0 z-40 flex h-full w-60 flex-col border-r border-border/60 bg-card px-4 pt-18 pb-5 transition-transform duration-300 motion-reduce:transition-none lg:pt-5",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >

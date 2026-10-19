@@ -34,7 +34,7 @@ export default async function DashboardBillingPage() {
   return (
     <div className="px-4 py-6 sm:px-8 sm:py-10">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Billing</h1>
+        <h1 className="pg-display text-[clamp(36px,5vw,52px)] text-foreground">Billing</h1>
         <p className="mt-1 text-muted-foreground">Manage your subscription and view invoices</p>
       </div>
 
@@ -87,7 +87,7 @@ export default async function DashboardBillingPage() {
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center rounded-2xl border border-border bg-card p-8 text-center">
+          <div className="flex flex-col items-center pg-float rounded-tile border-0 bg-card p-8 text-center">
             <Crown className="size-10 text-muted-foreground" />
             <h2 className="mt-4 text-lg font-semibold text-foreground">No Active Plan</h2>
             <p className="mt-2 max-w-sm text-sm text-muted-foreground">
@@ -103,7 +103,7 @@ export default async function DashboardBillingPage() {
         )}
 
         {/* Order history */}
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="pg-float rounded-tile border-0 bg-card p-6">
           <div className="mb-4 flex items-center gap-2">
             <Receipt className="size-4 text-muted-foreground" />
             <h2 className="font-semibold text-foreground">Order History</h2>
@@ -143,7 +143,7 @@ export default async function DashboardBillingPage() {
         </div>
 
         {/* Support */}
-        <div className="rounded-2xl border border-border bg-card p-6">
+        <div className="pg-float rounded-tile border-0 bg-card p-6">
           <h2 className="font-semibold text-foreground">Need help with billing?</h2>
           <p className="mt-1.5 text-sm text-muted-foreground">
             Contact support for questions about your subscription or invoices.

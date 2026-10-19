@@ -14,7 +14,7 @@ export function ArticleChrome({ children }: { children: React.ReactNode }) {
   return (
     <div>
       <motion.div
-        className="fixed top-0 left-0 z-40 h-0.5 w-full origin-left bg-gradient-to-r from-cyan-400 to-fuchsia-500"
+        className="fixed top-0 left-0 z-40 h-0.5 w-full origin-left bg-[linear-gradient(to_right,#0a7aff,#34c759,#ff7a1a,#ffc800,#ff3b8d,#8b5cf6)]"
         style={{ scaleX }}
       />
       <div ref={ref} className="relative">

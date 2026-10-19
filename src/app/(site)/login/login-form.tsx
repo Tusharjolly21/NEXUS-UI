@@ -87,39 +87,33 @@ export function LoginForm() {
   const canSendEmail = !pending && cooldown === 0;
 
   return (
-    <div className="relative isolate flex min-h-[calc(100dvh-4rem)] items-center justify-center overflow-hidden bg-background px-4 py-16">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(14,165,233,0.10),transparent_34%),radial-gradient(circle_at_85%_78%,rgba(139,92,246,0.10),transparent_30%)]" />
-      <div className="lf-grid pointer-events-none absolute inset-0 opacity-[0.10] dark:opacity-[0.16]" />
+    <div className="pg-dotgrid relative isolate -mt-[64px] flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 pb-16 pt-[120px]">
+      <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 18, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="relative w-full max-w-[420px]"
-      >
-        <div className="mx-auto flex flex-col items-center text-center">
+      <div className="relative w-full max-w-[440px]">
+        <div className="flex flex-col items-center text-center">
           <Link
             href="/"
             aria-label="Go to Nexus UI home"
-            className="grid size-12 place-items-center rounded-2xl bg-foreground text-background shadow-xl shadow-foreground/10 ring-1 ring-border/60 transition hover:scale-105"
+            className="grid size-12 place-items-center rounded-2xl bg-foreground text-background transition-transform hover:scale-105 motion-reduce:transition-none"
           >
             <NexusMark size={28} />
           </Link>
-          <h1 className="mt-5 text-4xl font-bold tracking-tight text-foreground">Login</h1>
-          <p className="mt-3 text-base text-muted-foreground">
-            Login to your Nexus UI Pro account
+          <h1 className="pg-display mt-6 text-[clamp(44px,8vw,60px)] text-foreground">Sign in</h1>
+          <p className="mt-3 max-w-[340px] text-[17px] leading-relaxed text-muted-foreground">
+            New here? The same steps create your account. No password needed.
           </p>
         </div>
 
         <form
-          className="mt-10 space-y-6"
+          className="pg-float mt-8 space-y-4 rounded-tile bg-card p-6 sm:p-7"
           onSubmit={(event) => {
             event.preventDefault();
             void magicLink();
           }}
         >
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-base font-medium text-foreground">
+            <Label htmlFor="email" className="text-[14px] font-medium text-foreground">
               Email
             </Label>
             <Input
@@ -129,27 +123,26 @@ export function LoginForm() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-14 rounded-xl border-border bg-background/90 px-4 text-lg shadow-sm transition focus-visible:ring-2 focus-visible:ring-primary/30 dark:bg-white/[0.03]"
-              placeholder="name@example.com"
+              className="h-[51px] rounded-full border-border bg-background px-5 text-[16px]"
+              placeholder="you@example.com"
             />
           </div>
 
           {!isSupabaseConfigured() && (
-            <p className="rounded-xl border border-border bg-muted/40 px-4 py-3 text-left text-xs leading-relaxed text-muted-foreground">
-              Supabase keys are not configured yet. The buttons are ready, but auth will activate
-              after adding your environment keys.
+            <p className="rounded-2xl bg-tint-butter px-4 py-3 text-left text-[13px] leading-relaxed text-foreground">
+              Supabase keys aren&apos;t configured, so sign-in is switched off in this environment.
             </p>
           )}
 
           <Button
             type="submit"
             disabled={!canSendEmail}
-            className="relative h-14 w-full overflow-hidden rounded-xl bg-foreground text-base font-semibold text-background shadow-lg shadow-foreground/10 hover:bg-foreground/90"
+            className="relative h-[51px] w-full overflow-hidden rounded-full bg-foreground text-[15px] font-semibold text-background hover:bg-foreground/90"
           >
             {cooldown > 0 && (
               <motion.span
                 aria-hidden
-                className="absolute inset-y-0 left-0 bg-primary/25"
+                className="absolute inset-y-0 left-0 bg-background/20"
                 initial={{ width: "100%" }}
                 animate={{ width: "0%" }}
                 transition={{ duration: cooldown, ease: "linear" }}
@@ -158,55 +151,63 @@ export function LoginForm() {
             )}
             <span className="relative z-10 inline-flex items-center gap-2">
               {pending ? (
-                <Loader2 className="size-5 animate-spin" />
+                <Loader2 className="size-5 animate-spin" aria-label="Sending" />
               ) : cooldown > 0 ? (
-                `Send another email in ${cooldown}s`
+                `Send another link in ${cooldown}s`
               ) : (
-                "Sign In with Email"
+                "Email me a sign-in link"
               )}
             </span>
           </Button>
 
           {cooldown > 0 && (
-            <motion.p
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center text-xs text-muted-foreground"
-            >
-              You can send another magic link after the timer ends.
-            </motion.p>
+            <p role="status" className="text-center text-[13px] text-muted-foreground">
+              Link sent to {email}. Open it on this device to finish signing in.
+            </p>
           )}
 
-          <div className="relative flex items-center">
-            <Separator className="bg-border" />
-            <span className="absolute left-1/2 -translate-x-1/2 rounded-full border border-border bg-background px-2 py-1 text-xs text-muted-foreground shadow-sm">
-              or
-            </span>
+          <div className="flex items-center gap-3 py-1 text-[13px] text-muted-foreground">
+            <Separator className="flex-1 bg-border" />
+            or
+            <Separator className="flex-1 bg-border" />
           </div>
 
-          <Button
-            type="button"
-            disabled={pending}
-            variant="outline"
-            className="h-14 w-full rounded-xl border-border bg-background/80 text-base font-semibold text-foreground shadow-sm hover:bg-muted/70 dark:bg-white/[0.02]"
-            onClick={() => oauth("google")}
-          >
-            <FcGoogle className="size-5" />
-            Login with Google
-          </Button>
-
-          <Button
-            type="button"
-            disabled={pending}
-            variant="outline"
-            className="h-14 w-full rounded-xl border-border bg-background/80 text-base font-semibold text-foreground shadow-sm hover:bg-muted/70 dark:bg-white/[0.02]"
-            onClick={() => oauth("github")}
-          >
-            <Github className="size-5" />
-            Login with GitHub
-          </Button>
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              disabled={pending}
+              variant="outline"
+              className="pg-glass h-[51px] rounded-full border-0 bg-card text-[15px] font-semibold text-foreground hover:bg-muted"
+              onClick={() => oauth("google")}
+            >
+              <FcGoogle className="size-5" aria-hidden />
+              Continue with Google
+            </Button>
+            <Button
+              type="button"
+              disabled={pending}
+              variant="outline"
+              className="pg-glass h-[51px] rounded-full border-0 bg-card text-[15px] font-semibold text-foreground hover:bg-muted"
+              onClick={() => oauth("github")}
+            >
+              <Github className="size-5" aria-hidden />
+              Continue with GitHub
+            </Button>
+          </div>
         </form>
-      </motion.div>
+
+        <p className="mt-6 text-center text-[13px] leading-relaxed text-muted-foreground">
+          By signing in you agree to the{" "}
+          <Link href="/terms" className="text-foreground underline underline-offset-2">
+            terms
+          </Link>{" "}
+          and{" "}
+          <Link href="/privacy" className="text-foreground underline underline-offset-2">
+            privacy policy
+          </Link>
+          .
+        </p>
+      </div>
     </div>
   );
 }
