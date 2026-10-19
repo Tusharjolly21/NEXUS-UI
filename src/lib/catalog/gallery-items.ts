@@ -1,5 +1,5 @@
 import type { GalleryItem, Interaction, TileShape, TileTint } from "@/components/gallery/types";
-import { libraryComponents, type LibraryComponent } from "@/lib/catalog/library-components";
+import { getPreviewExportName, libraryComponents, type LibraryComponent } from "@/lib/catalog/library-components";
 import {
   COMPONENT_SIDEBAR_SECTIONS,
   getComponentCategoryLabel,
@@ -77,17 +77,6 @@ const GROUP_OF = new Map<string, string>(
   COMPONENT_SIDEBAR_SECTIONS.flatMap((s) => s.slugs.map((slug) => [slug, s.id] as const)),
 );
 
-/**
- * The registry is a "use client" module, so on the server each `Preview` is a client reference
- * whose id ends in "#<ExportName>". That name is all the client needs to load it lazily.
- */
-function exportNameOf(Preview: LibraryComponent["Preview"]): string | undefined {
-  const id = (Preview as unknown as { $$id?: unknown }).$$id;
-  if (typeof id === "string" && id.includes("#")) return id.slice(id.lastIndexOf("#") + 1);
-  const name = (Preview as { name?: string }).name;
-  return name || undefined;
-}
-
 function hashIndex(s: string, n: number) {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
@@ -95,7 +84,7 @@ function hashIndex(s: string, n: number) {
 }
 
 function toItem(c: LibraryComponent): GalleryItem | null {
-  const exportName = exportNameOf(c.Preview);
+  const exportName = getPreviewExportName(c.Preview);
   if (!exportName) return null;
   const pick = PICKS.get(c.slug);
   const textLike = c.categorySlug === "motion-effects" && c.tags.some((t) => /text|type|headline/.test(t));
