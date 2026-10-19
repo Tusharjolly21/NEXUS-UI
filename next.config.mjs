@@ -61,6 +61,14 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
+  // Section roots without their own page — Search Console reported these as 404s.
+  async redirects() {
+    return [
+      { source: "/docs", destination: "/docs/introduction", permanent: true },
+      { source: "/demos", destination: "/components", permanent: true },
+      { source: "/Nexus", destination: "/", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

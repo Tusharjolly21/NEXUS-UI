@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -99,7 +99,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${item.name} — Animated React Component`,
     description: item.description,
     openGraph: { title: `${item.name} · ${siteConfig.name}` },
-    alternates: { canonical: `/components/${slug}` },
+    alternates: { canonical: `/components/${item.slug}` },
   });
 }
 
@@ -107,6 +107,8 @@ export default async function ComponentDetailPage({ params }: Props) {
   const { slug } = await params;
   const item = getLibraryComponent(slug);
   if (!item) notFound();
+  // Registry CLI aliases (e.g. gooey-input) resolve here too — send them to the one canonical URL.
+  if (item.slug !== slug) permanentRedirect(`/components/${item.slug}`);
 
   const user = await getCachedUser();
   const isPremium = user ? await hasPremiumAccess(user.id) : false;
