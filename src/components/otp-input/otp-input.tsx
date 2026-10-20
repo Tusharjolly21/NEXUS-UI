@@ -120,10 +120,13 @@ export function OtpInput({
   const locked = status === "verifying" || status === "success" || status === "done";
   const activeIndex = Math.min(code.length, length - 1);
   const center = (length - 1) / 2;
+  // The row keeps the width of its boxes even after they leave, so the Verified pill stays centred.
+  const gapAfter = (i: number) => (i === length - 1 ? 0 : i === length / 2 - 1 ? 22 : 10);
+  const rowWidth = Array.from({ length }, (_, i) => 54 + gapAfter(i)).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <motion.div animate={shake} className="relative flex h-[66px] items-center">
+    <div className="flex flex-col items-center gap-6 [--otp-box:#ffffff] [--otp-ink:#1d1d1f] [--otp-line:#d2d2d7] [--otp-line-on:#aeaeb2] dark:[--otp-box:#2c2c2e] dark:[--otp-ink:#f5f5f7] dark:[--otp-line:#48484a] dark:[--otp-line-on:#7c7c80]">
+      <motion.div animate={shake} className="relative flex h-[66px] items-center" style={{ width: rowWidth }}>
         <AnimatePresence initial={false}>
           {status !== "done" &&
             Array.from({ length }).map((_, i) => {
@@ -139,17 +142,19 @@ export function OtpInput({
                   animate={
                     status === "verifying"
                       ? { opacity: 1, scale: 1, y: [0, -8, 0], transition: { y: { duration: 0.8, repeat: Infinity, delay: i * 0.07, ease: "easeInOut" } } }
-                      : { opacity: 1, scale: 1, y: 0, x: 0, backgroundColor: isSuccess ? accent : "#ffffff", transition: { ...spring, delay: isSuccess ? i * 0.05 : 0 } }
+                      : { opacity: 1, scale: 1, y: 0, x: 0, transition: spring }
                   }
                   exit={{ x: (center - i) * 64, scale: 0.3, opacity: 0, transition: { type: "spring", stiffness: 260, damping: 26, delay: Math.abs(center - i) * 0.03 } }}
-                  className="relative flex h-[66px] w-[54px] items-center justify-center rounded-2xl"
+                  className="relative flex h-[66px] w-[54px] items-center justify-center rounded-2xl transition-colors duration-300"
                   style={{
-                    marginRight: i === length - 1 ? 0 : i === length / 2 - 1 ? 22 : 10,
+                    backgroundColor: isSuccess ? accent : "var(--otp-box)",
+                    transitionDelay: isSuccess ? `${i * 50}ms` : "0ms",
+                    marginRight: gapAfter(i),
                     boxShadow: isError
                       ? "inset 0 0 0 2px #ff3b30, 0 0 0 5px rgba(255,59,48,.10)"
                       : filled
-                        ? "inset 0 0 0 1px #aeaeb2, 0 1px 2px rgba(0,0,0,.04)"
-                        : "inset 0 0 0 1px #d2d2d7, 0 1px 2px rgba(0,0,0,.04)",
+                        ? "inset 0 0 0 1px var(--otp-line-on), 0 1px 2px rgba(0,0,0,.04)"
+                        : "inset 0 0 0 1px var(--otp-line), 0 1px 2px rgba(0,0,0,.04)",
                   }}
                 >
                   {isActive && (
@@ -169,7 +174,7 @@ export function OtpInput({
                         exit={{ y: -14, opacity: 0, scale: 0.6, filter: "blur(4px)" }}
                         transition={{ type: "spring", stiffness: 520, damping: 24 }}
                         className="text-[30px] font-semibold tracking-tight"
-                        style={{ color: isSuccess ? "#fff" : "#1d1d1f" }}
+                        style={{ color: isSuccess ? "#fff" : "var(--otp-ink)" }}
                       >
                         {code[i]}
                       </motion.span>
@@ -200,7 +205,7 @@ export function OtpInput({
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.6, opacity: 0 }}
               transition={{ type: "spring", stiffness: 380, damping: 20, delay: 0.15 }}
-              className="absolute inset-0 m-auto flex h-[58px] w-max items-center gap-3 rounded-full bg-[#1d1d1f] pl-2.5 pr-6 text-[17px] font-semibold text-white shadow-[0_20px_40px_-16px_rgba(0,0,0,.35)]"
+              className="absolute inset-0 m-auto flex h-[58px] w-max items-center gap-3 rounded-full bg-[#1d1d1f] pl-2.5 pr-6 text-[17px] font-semibold text-white shadow-[0_20px_40px_-16px_rgba(0,0,0,.35)] dark:bg-[#f5f5f7] dark:text-[#1d1d1f]"
             >
               <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full" style={{ background: accent }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -246,7 +251,7 @@ export function OtpInput({
         />
       </motion.div>
 
-      <div className="flex h-11 items-center justify-center text-[15px] text-[#6e6e73]">
+      <div className="flex h-11 items-center justify-center text-[15px] text-[#6e6e73] dark:text-[#a1a1a6]">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={status === "done" ? "done" : status === "verifying" || status === "success" ? "checking" : showError ? "error" : "idle"}
@@ -263,7 +268,7 @@ export function OtpInput({
             ) : status === "verifying" || status === "success" ? (
               <>
                 <motion.span
-                  className="h-4 w-4 rounded-full border-2 border-[#d2d2d7]"
+                  className="h-4 w-4 rounded-full border-2 border-[var(--otp-line)]"
                   style={{ borderTopColor: accent }}
                   animate={{ rotate: 360 }}
                   transition={{ duration: 0.7, repeat: Infinity, ease: "linear" }}
@@ -271,7 +276,7 @@ export function OtpInput({
                 Checking…
               </>
             ) : showError ? (
-              <span className="text-[#d70015]">That code didn’t match. Try again.</span>
+              <span className="text-[#d70015] dark:text-[#ff6961]">That code didn’t match. Try again.</span>
             ) : (
               <span>Didn’t get it? <button type="button" onClick={onResend} className="font-medium" style={{ color: accent }}>Resend code</button></span>
             )}

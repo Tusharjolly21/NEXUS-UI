@@ -9,6 +9,8 @@ import { templates } from "@/lib/catalog/templates";
  */
 export const CATALOG_COUNTS = {
   components: libraryComponents.length,
+  freeComponents: libraryComponents.filter((c) => !c.premium).length,
+  proComponents: libraryComponents.filter((c) => c.premium).length,
   templates: templates.length,
   blocks: blocksManifest.length,
 } as const;

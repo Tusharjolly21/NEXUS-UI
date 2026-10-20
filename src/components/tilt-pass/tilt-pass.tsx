@@ -89,7 +89,7 @@ export function TiltPass({ name = "Alex Rivera", title = "Founders Pass", number
 
           {/* Back */}
           <div
-            className="absolute inset-0 flex items-center gap-5 overflow-hidden rounded-[22px] bg-[#1d1d1f] p-6 text-white shadow-[0_30px_60px_-24px_rgba(0,0,0,.45)]"
+            className="absolute inset-0 flex items-center gap-5 overflow-hidden rounded-[22px] bg-[#1d1d1f] p-6 text-white shadow-[0_30px_60px_-24px_rgba(0,0,0,.45)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_60px_-24px_rgba(0,0,0,.7)]"
             style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
           >
             <div className="grid h-[120px] w-[120px] flex-none grid-cols-8 gap-[3px] rounded-xl bg-white p-2.5">
@@ -105,7 +105,7 @@ export function TiltPass({ name = "Alex Rivera", title = "Founders Pass", number
           </div>
         </motion.div>
       </motion.div>
-      <span className="text-[13px] text-[#86868b]">Move your pointer over it. Click to flip.</span>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Move your pointer over it. Click to flip.</span>
     </div>
   );
 }

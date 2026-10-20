@@ -1,206 +1,135 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, type Variants } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type TextAnimationFlippingWordsProps = {
   prefix?: string;
   words?: string[];
   suffix?: string;
+  /** Colour of the dot that rides at the end of the word. Defaults to the accent blue. */
   dotColor?: string;
+  /** How the rotating word is coloured: action blue, the spectrum gradient, or plain ink. */
+  accent?: "blue" | "spectrum" | "none";
+  /** Milliseconds each word holds before the next one rolls in. */
+  holdMs?: number;
   className?: string;
 };
 
-// ─── Timing constants ────────────────────────────────────────────────
-const HOLD_MS    = 1200;   // how long to sit on each word
-const STAGGER    = 0.028;  // seconds between adjacent letter animations
-const EXIT_DUR   = 0.13;   // seconds per letter blur-out
-const ENTER_DUR  = 0.17;   // seconds per letter blur-in
+const SPECTRUM = "linear-gradient(90deg, #0090f7, #ba62fc, #f2416b, #f55600)";
+const LETTER_STAGGER = 0.022;
+const SPRING = { type: "spring" as const, stiffness: 420, damping: 32 };
+const DOT_SPRING = { type: "spring" as const, stiffness: 380, damping: 30 };
 
-function exitDuration(word: string)  { return word.length * STAGGER * 1000 + EXIT_DUR  * 1000 + 60; }
-function enterDuration(word: string) { return word.length * STAGGER * 1000 + ENTER_DUR * 1000 + 60; }
+const WORD: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: LETTER_STAGGER } },
+  exit: { transition: { staggerChildren: LETTER_STAGGER * 0.6 } },
+};
+
+const LETTER: Variants = {
+  hidden: { opacity: 0, y: "0.45em", filter: "blur(8px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: SPRING },
+  exit: { opacity: 0, y: "-0.45em", filter: "blur(8px)", transition: { duration: 0.18, ease: [0.4, 0, 1, 1] } },
+};
+
+const LETTER_REDUCED: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.25 } },
+  exit: { opacity: 0, transition: { duration: 0.15 } },
+};
 
 export function TextAnimationFlippingWords({
   prefix = "Built with",
   words = ["React", "TypeScript", "Tailwind", "Vite"],
   suffix,
   dotColor,
+  accent = "blue",
+  holdMs = 2200,
   className,
 }: TextAnimationFlippingWordsProps) {
   const ws = React.useMemo(() => words.filter(Boolean), [words]);
   const longest = ws.reduce((a, b) => (b.length > a.length ? b : a), "");
-
   const reduceMotion = useReducedMotion();
-
-  // ── State ──────────────────────────────────────────────────────────
   const [idx, setIdx] = React.useState(0);
-  const [phase, setPhase] = React.useState<"showing" | "exiting" | "entering">("showing");
-  // pill geometry relative to the word-container
-  const [pillLeft,  setPillLeft]  = React.useState(0);
-  const [pillWidth, setPillWidth] = React.useState(13);
 
-  // ── Refs ───────────────────────────────────────────────────────────
-  const containerRef = React.useRef<HTMLSpanElement>(null); // relative wrapper
-  const textRef      = React.useRef<HTMLSpanElement>(null); // inline-flex letter wrapper (real width!)
-
-  const wsRef    = React.useRef(ws);
-  const idxRef   = React.useRef(idx);
-  const phaseRef = React.useRef(phase);
-  // keep the latest values for the timers; synced before the phase effects below run
-  React.useLayoutEffect(() => {
-    wsRef.current = ws;
-    idxRef.current = idx;
-    phaseRef.current = phase;
-  });
-
-  // ── Measure the rendered text (textRef is inline, gives real width) ─
-  function snap() {
-    const t = textRef.current; const c = containerRef.current;
-    if (!t || !c) return;
-    const tR = t.getBoundingClientRect();
-    const cR = c.getBoundingClientRect();
-    const left  = tR.left - cR.left;
-    const width = tR.width;
-    setPillLeft(left + width + 2);   // dot just after last letter
-    setPillWidth(13);
-  }
-
-  // ── Phase loop via three effects ───────────────────────────────────
-
-  // showing → exiting after HOLD
   React.useEffect(() => {
-    if (phase !== "showing") return;
-    snap(); // dot may need repositioning after word settled
     if (ws.length <= 1 || reduceMotion) return;
-    const t = setTimeout(() => setPhase("exiting"), HOLD_MS);
-    return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, idx]);
+    const t = window.setInterval(() => setIdx((i) => (i + 1) % ws.length), holdMs);
+    return () => window.clearInterval(t);
+  }, [holdMs, reduceMotion, ws.length]);
 
-  // exiting: expand pill, then switch word → entering
-  React.useEffect(() => {
-    if (phase !== "exiting") return;
-    const word = wsRef.current[idxRef.current] ?? "";
+  const index = idx % Math.max(ws.length, 1);
+  const currentWord = ws[index] ?? "";
+  const chars = Array.from(currentWord);
+  const letter = reduceMotion ? LETTER_REDUCED : LETTER;
 
-    // expand pill leftward to wipe the word
-    const t = textRef.current; const c = containerRef.current;
-    if (t && c) {
-      const tR = t.getBoundingClientRect();
-      const cR = c.getBoundingClientRect();
-      const left  = tR.left - cR.left;
-      const width = tR.width;
-      // right edge stays fixed, left sweeps left to cover word
-      setPillLeft(left - 5);
-      setPillWidth(width + 20);
-    }
-
-    const done = setTimeout(() => {
-      setIdx((i) => (i + 1) % wsRef.current.length);
-      setPhase("entering");
-    }, exitDuration(word));
-
-    return () => clearTimeout(done);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-
-  // entering: contract pill to dot, then → showing
-  React.useEffect(() => {
-    if (phase !== "entering") return;
-    const word = wsRef.current[idxRef.current] ?? "";
-
-    // Contract pill to dot at end of new word (after one frame so DOM has updated)
-    const snapTimer = setTimeout(snap, 20);
-
-    const done = setTimeout(() => setPhase("showing"), enterDuration(word));
-    return () => { clearTimeout(snapTimer); clearTimeout(done); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, idx]);
-
-  // ── Boot: initial dot position ─────────────────────────────────────
-  React.useEffect(() => {
-    const t = setTimeout(snap, 200);
-    return () => clearTimeout(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Derived ────────────────────────────────────────────────────────
-  const currentWord = ws[idx] ?? "";
-  const isExiting   = phase === "exiting";
-  const isEntering  = phase === "entering";
-  const pillActive  = isExiting;   // pill is red + wide during exit only
+  const letterStyle = (i: number): React.CSSProperties | undefined => {
+    if (accent !== "spectrum") return undefined;
+    // one gradient across the whole word, sliced per letter so each glyph shows its own stretch
+    const span = Math.max(chars.length - 1, 1);
+    return {
+      backgroundImage: SPECTRUM,
+      backgroundSize: `${chars.length * 100}% 100%`,
+      backgroundPosition: `${(i / span) * 100}% 0`,
+      WebkitBackgroundClip: "text",
+      backgroundClip: "text",
+      color: "transparent",
+    };
+  };
 
   return (
     <h2
       className={cn(
-        "flex flex-wrap items-baseline gap-x-[0.26em] font-semibold tracking-[-0.04em]",
+        "flex flex-wrap items-baseline gap-x-[0.26em] font-semibold leading-[1.05] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7]",
         className,
       )}
     >
-      {prefix && <span>{prefix}</span>}
+      {prefix ? <span>{prefix}</span> : null}
 
-      {/* ── Word container fixed to longest word width ── */}
-      <span ref={containerRef} className="relative inline-block">
-
-        {/* Ghost sizer — keeps layout stable */}
-        <span aria-hidden className="invisible select-none whitespace-nowrap">
+      {/* Word slot: sized by the longest word so the line never reflows */}
+      <span className="relative inline-block">
+        <span aria-hidden className="invisible select-none whitespace-nowrap pr-[0.3em]">
           {longest}
         </span>
+        <span className="sr-only">{currentWord}</span>
 
-        {/* Animated letters — absolute, left-aligned */}
-        <span
-          className="absolute left-0 top-0 bottom-0 flex items-baseline"
-          aria-label={currentWord}
-        >
-          {/* textRef on the inline-flex so getBoundingClientRect gives real text width */}
-          <span ref={textRef} className="inline-flex">
-            {currentWord.split("").map((char, i) => (
-              <motion.span
-                key={`${idx}-${i}`}           // remount when word changes
-                aria-hidden
-                initial={
-                  isEntering
-                    ? { opacity: 0, y: 8, filter: "blur(12px)" }
-                    : { opacity: 1, y: 0, filter: "blur(0px)" }
-                }
-                animate={
-                  isExiting
-                    ? { opacity: 0, y: -6, filter: "blur(10px)" }
-                    : { opacity: 1, y: 0,  filter: "blur(0px)" }
-                }
-                transition={{
-                  delay: i * STAGGER,
-                  duration: isExiting ? EXIT_DUR : ENTER_DUR,
-                  ease: "easeOut",
-                }}
-                className="inline-block"
-                style={{ whiteSpace: char === " " ? "pre" : undefined }}
-              >
-                {char}
-              </motion.span>
-            ))}
-          </span>
+        <span aria-hidden className="absolute inset-y-0 left-0 flex items-baseline">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={`${index}-${currentWord}`}
+              variants={WORD}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className={cn(
+                "inline-flex whitespace-pre",
+                accent === "blue" && "text-[#0071e3] dark:text-[#2997ff]",
+              )}
+            >
+              {chars.map((char, i) => (
+                <motion.span key={i} variants={letter} className="inline-block" style={letterStyle(i)}>
+                  {char === " " ? " " : char}
+                </motion.span>
+              ))}
+            </motion.span>
+          </AnimatePresence>
+
+          {/* The dot rides the end of the word and springs to its new place on every swap */}
+          <motion.span
+            layout={!reduceMotion}
+            transition={DOT_SPRING}
+            className={cn(
+              "ml-[0.06em] inline-block size-[0.16em] shrink-0 self-baseline rounded-full",
+              !dotColor && (accent === "spectrum" ? "bg-[#f55600]" : "bg-[#0071e3] dark:bg-[#2997ff]"),
+            )}
+            style={dotColor ? { backgroundColor: dotColor } : undefined}
+          />
         </span>
-
-        {/* ── Pill / dot ── single element that morphs ── */}
-        <motion.span
-          aria-hidden
-          className="pointer-events-none absolute bottom-[0.06em] z-10 rounded-full"
-          animate={{
-            left:            pillLeft,
-            width:           pillWidth,
-            backgroundColor: pillActive ? "#27272a" : (dotColor ?? "#3B82F6"),
-            height:          13,
-          }}
-          transition={{
-            left:            { duration: pillActive ? 0.46 : 0.3,  ease: [0.4, 0, 0.2, 1] },
-            width:           { duration: 0.42, ease: [0.22, 1, 0.36, 1] },
-            backgroundColor: { duration: 0.2 },
-          }}
-        />
       </span>
 
-      {suffix && <span>{suffix}</span>}
+      {suffix ? <span>{suffix}</span> : null}
     </h2>
   );
 }

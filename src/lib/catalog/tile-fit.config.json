@@ -1,52 +1,265 @@
 {
   "$comment": "Canvas each preview is rendered on before it is framed into its tile. Re-run `node scripts/measure-tiles.mjs <slug>` after changing one.",
   "settleMs": 2600,
-  "defaultCanvas": [960, 720],
+  "defaultCanvas": [
+    960,
+    720
+  ],
   "groupCanvas": {
-    "marketing": [1200, 800],
-    "layout": [1200, 820],
-    "blocks": [1280, 860]
+    "marketing": [
+      1200,
+      800
+    ],
+    "layout": [
+      1200,
+      820
+    ],
+    "blocks": [
+      1280,
+      860
+    ]
   },
   "canvas": {
-    "mac-keyboard": [1100, 560],
-    "interactive-globe-explorer": [1200, 820],
-    "cinematic-card-deck": [1200, 800],
-    "card-carousel-3d": [1100, 720]
+    "mac-keyboard": [
+      1100,
+      560
+    ],
+    "interactive-globe-explorer": [
+      1200,
+      820
+    ],
+    "cinematic-card-deck": [
+      1200,
+      800
+    ],
+    "card-carousel-3d": [
+      1100,
+      720
+    ],
+    "pricing-four-tier": [
+      1280,
+      1200
+    ],
+    "pricing-spotlight-cards": [
+      1280,
+      1200
+    ],
+    "bento-mentorship": [
+      1280,
+      1200
+    ],
+    "bento-ats": [
+      1280,
+      1200
+    ],
+    "faq-searchable": [
+      1280,
+      1200
+    ],
+    "contact-image-story": [
+      1280,
+      1200
+    ],
+    "blog-centered": [
+      1280,
+      1100
+    ],
+    "blog-toc": [
+      1280,
+      1100
+    ],
+    "blog-editorial": [
+      1280,
+      1600
+    ],
+    "blog-featured-posts": [
+      1280,
+      1600
+    ],
+    "contact-centered": [
+      1280,
+      1200
+    ],
+    "bento-spotlight": [
+      1280,
+      1200
+    ],
+    "pricing-advanced-columns": [
+      1280,
+      1200
+    ]
   },
   "overrides": {
-    "otp-input": { "focus": [236, 214, 488, 292] },
-    "hold-to-confirm": { "span": 2 },
-    "tilt-pass": { "span": 2 },
-    "animated-tabs": { "focus": [250, 184, 460, 352] },
+    "otp-input": {
+      "focus": [
+        236,
+        214,
+        488,
+        292
+      ]
+    },
+    "ruler-picker": {
+      "span": 2
+    },
+    "stagger-menu": {
+      "focus": [
+        330,
+        210,
+        300,
+        330
+      ],
+      "object": true
+    },
+    "hold-to-confirm": {
+      "span": 2
+    },
+    "tilt-pass": {
+      "span": 2
+    },
+    "animated-tabs": {
+      "focus": [
+        250,
+        184,
+        460,
+        352
+      ]
+    },
     "image-trail": {
-      "focus": [24, 150, 912, 420]
+      "focus": [
+        24,
+        150,
+        912,
+        420
+      ]
     },
     "block-interactive-dots": {
-      "focus": [352, 0, 576, 860]
+      "focus": [
+        352,
+        0,
+        576,
+        860
+      ]
     },
     "block-sidebar": {
-      "focus": [116, 0, 576, 860]
+      "focus": [
+        116,
+        0,
+        576,
+        860
+      ]
     },
     "block-why-choose-us": {
-      "focus": [50, 16, 1180, 837]
+      "focus": [
+        50,
+        16,
+        1180,
+        837
+      ]
     },
     "block-faq-folder-card": {
-      "focus": [110, 19, 1060, 822]
+      "focus": [
+        110,
+        19,
+        1060,
+        822
+      ]
     },
     "block-contact-page": {
-      "focus": [85, 0, 1109, 860]
+      "focus": [
+        85,
+        0,
+        1109,
+        860
+      ]
     },
     "block-text-animations": {
-      "focus": [280, 103, 720, 655]
+      "focus": [
+        280,
+        103,
+        720,
+        655
+      ]
     },
     "block-blog-content-sections": {
-      "focus": [0, 154, 1280, 552]
+      "focus": [
+        0,
+        154,
+        1280,
+        552
+      ]
     },
     "block-pricing-section": {
-      "focus": [60, 19, 1160, 823]
+      "focus": [
+        60,
+        19,
+        1160,
+        823
+      ]
     },
     "block-logo-clouds": {
-      "focus": [96, 196, 1088, 469]
+      "focus": [
+        96,
+        196,
+        1088,
+        469
+      ]
+    },
+    "lanyard-badge": {
+      "focus": [
+        150,
+        0,
+        660,
+        480
+      ],
+      "object": true
+    },
+    "liquid-dial": {
+      "focus": [
+        300,
+        190,
+        360,
+        330
+      ]
+    },
+    "fan-deck": {
+      "focus": [
+        250,
+        150,
+        460,
+        400
+      ],
+      "span": 2
+    },
+    "receipt-unfold": {
+      "focus": [
+        300,
+        130,
+        360,
+        440
+      ]
+    },
+    "bending-rail": {
+      "focus": [
+        300,
+        230,
+        360,
+        250
+      ]
+    },
+    "throw-wheel": {
+      "focus": [
+        220,
+        200,
+        520,
+        340
+      ],
+      "span": 2
+    },
+    "sagging-field": {
+      "span": 2
+    },
+    "metal-orbs": {
+      "span": 2
     }
   },
   "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."

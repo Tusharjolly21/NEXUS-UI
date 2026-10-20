@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Monitor, RotateCcw } from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, RotateCcw } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import {
@@ -17,6 +17,7 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
+import { ProBadge, ProLock, useProAccess } from "@/components/pro/pro-access";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
 
@@ -255,14 +256,19 @@ function Stage({
   exportName,
   slug,
   tint,
+  locked,
+  name,
 }: {
   title: string;
   code: string;
   exportName: string;
   slug: string;
   tint: TileTint;
+  locked: boolean;
+  name: string;
 }) {
   const [view, setView] = React.useState<"preview" | "code">("preview");
+  const { requestUpgrade } = useProAccess();
   const [run, setRun] = React.useState(0);
 
   return (
@@ -275,13 +281,19 @@ function Stage({
               type="button"
               role="tab"
               aria-selected={view === v}
-              onClick={() => setView(v)}
+              onClick={() => (v === "code" && locked ? requestUpgrade(name) : setView(v))}
               className={cn(
                 "inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium transition-colors",
                 view === v ? "bg-foreground text-background" : "text-foreground hover:bg-muted",
               )}
             >
-              {v === "preview" ? <Monitor className="size-3.5" aria-hidden /> : <Code2 className="size-3.5" aria-hidden />}
+              {v === "preview" ? (
+                <Monitor className="size-3.5" aria-hidden />
+              ) : locked ? (
+                <Lock className="size-3.5" aria-hidden />
+              ) : (
+                <Code2 className="size-3.5" aria-hidden />
+              )}
               {v === "preview" ? "Preview" : "Code"}
             </button>
           ))}
@@ -341,14 +353,57 @@ function InstallPanel({
   registryCliName,
   dependencies,
   interactions,
+  locked,
+  name,
 }: {
   slug: string;
   registryCliName?: string;
   dependencies: string[];
   interactions: string[];
+  locked: boolean;
+  name: string;
 }) {
   const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryCliName ?? slug}`;
   const extra = getExtraLibraries(dependencies);
+  const { requestUpgrade } = useProAccess();
+
+  if (locked) {
+    return (
+      <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
+        <ProBadge />
+        <h2 className="mt-4 text-[19px] font-semibold tracking-[-0.4px] text-foreground">Unlock {name}</h2>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-muted-foreground">
+          Preview it as much as you like. The source, the one-line install and the playground come with Pro.
+        </p>
+        <button
+          type="button"
+          onClick={() => requestUpgrade(name)}
+          className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-action text-[15px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          <Lock className="size-4" aria-hidden />
+          Upgrade to Pro
+        </button>
+        <Link
+          href="/pricing"
+          className="mt-2 inline-flex h-9 w-full items-center justify-center text-[14px] font-medium text-link hover:underline hover:underline-offset-4"
+        >
+          See what Pro includes
+        </Link>
+        {interactions.length ? (
+          <div className="mt-6">
+            <p className="text-[13px] font-medium text-foreground">How it moves</p>
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {interactions.map((i) => (
+                <li key={i} className="rounded-full bg-muted px-2.5 py-1 text-[12px] font-medium text-foreground">
+                  {i}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </aside>
+    );
+  }
 
   return (
     <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
@@ -748,6 +803,8 @@ type ComponentDetailProps = {
   tint?: TileTint;
   /** Other components from the same category, as gallery items. */
   related?: GalleryItem[];
+  /** Pro component and this visitor has no access: the server sent no code, the UI offers Pro. */
+  locked?: boolean;
 };
 
 export function ComponentDetailPageClient({
@@ -766,6 +823,8 @@ export function ComponentDetailPageClient({
   serializedPreviewSections,
   tint = "violet",
   related = [],
+  premium,
+  locked = false,
 }: ComponentDetailProps) {
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
@@ -807,7 +866,13 @@ export function ComponentDetailPageClient({
           </h1>
           <p className="mt-5 max-w-[680px] text-[19px] leading-[1.55] text-muted-foreground">{description}</p>
           <ul className="mt-6 flex flex-wrap gap-2" aria-label="About this component">
-            <li className="rounded-full bg-tint-mint px-3 py-1 text-[13px] font-semibold text-[#126b3a]">Free</li>
+            {premium ? (
+              <li>
+                <ProBadge className="px-3 text-[13px]" />
+              </li>
+            ) : (
+              <li className="rounded-full bg-tint-mint px-3 py-1 text-[13px] font-semibold text-[#126b3a] dark:text-[#7be3a6]">Free</li>
+            )}
             <li className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">{categoryLabel}</li>
             {interactions.map((i) => (
               <li key={i} className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground">
@@ -825,11 +890,18 @@ export function ComponentDetailPageClient({
               {sections.map((s) => (
                 <div key={s.title}>
                   {sections.length > 1 ? <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h2> : null}
-                  <Stage title={s.title} code={s.code} exportName={s.exportName} slug={slug} tint={tint} />
+                  <Stage title={s.title} code={s.code} exportName={s.exportName} slug={slug} tint={tint} locked={locked} name={name} />
                 </div>
               ))}
             </div>
-            <InstallPanel slug={slug} registryCliName={registryCliName} dependencies={dependencies} interactions={interactions} />
+            <InstallPanel
+              slug={slug}
+              registryCliName={registryCliName}
+              dependencies={dependencies}
+              interactions={interactions}
+              locked={locked}
+              name={name}
+            />
           </div>
 
           {livePlayground ? (
@@ -838,12 +910,15 @@ export function ComponentDetailPageClient({
               <p className="mb-6 mt-3 max-w-[560px] text-[17px] text-muted-foreground">
                 Move the controls and watch it change. Copy code gives you a snippet with only the props you changed.
               </p>
-              <LivePropsPlayground playground={livePlayground} name={name} description={description} />
+              <LivePropsPlayground playground={livePlayground} name={name} description={description} locked={locked} />
             </section>
           ) : (
-            <PropsPlayground key={`${slug}-${importName}`} props={props} importName={importName} />
+            <ProLock locked={locked} name={name} label="Edit it with Pro">
+              <PropsPlayground key={`${slug}-${importName}`} props={props} importName={importName} />
+            </ProLock>
           )}
           <PropsTable props={props} />
+          <ProLock locked={locked} name={name} label="Install it with Pro" className="rounded-tile">
           <Setup
             name={name}
             slug={slug}
@@ -853,6 +928,7 @@ export function ComponentDetailPageClient({
             registryImport={registryImport}
             usageSource={usageSource}
           />
+          </ProLock>
           <About slug={slug} name={name} />
 
           {related.length ? (

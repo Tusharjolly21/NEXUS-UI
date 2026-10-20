@@ -19,8 +19,8 @@ const WALL_SLUGS = ["noir-studio", "helix-ai-platform", "launchfolio-portfolio",
 
 const FAQ = [
   {
-    q: "Are the components really free?",
-    a: `Yes. All ${CATALOG_COUNTS.components} components are free, with their full source. Pro adds the full source of every template and a licence for client work.`,
+    q: "Are the components free?",
+    a: `${CATALOG_COUNTS.freeComponents} of the ${CATALOG_COUNTS.components} are free, with their full source. Pro unlocks the other ${CATALOG_COUNTS.proComponents}, the full source of every template and the premium blocks.`,
   },
   {
     q: "Do they work with the Next.js App Router?",
@@ -147,7 +147,7 @@ export default function Home() {
         <div className="mx-auto max-w-[1152px]">
           <StatRow
             items={[
-              { value: CATALOG_COUNTS.components, label: "components, all free" },
+              { value: CATALOG_COUNTS.components, label: `components, ${CATALOG_COUNTS.freeComponents} free` },
               { value: CATALOG_COUNTS.templates, label: "full-page templates" },
               { value: CATALOG_COUNTS.blocks, label: "section blocks" },
               { value: "1", label: "command to install" },

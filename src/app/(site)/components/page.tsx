@@ -6,6 +6,7 @@ import { getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/categ
 import { allGalleryItems, galleryCategories } from "@/lib/catalog/gallery-items";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { createMetadata } from "@/lib/seo";
+import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 
 export const metadata: Metadata = createMetadata({
   title: "Free React UI Components — Tailwind CSS & Framer Motion",
@@ -24,8 +25,8 @@ export default function ComponentsPage() {
         <div className="relative mx-auto max-w-[1152px]">
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Components</h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            {items.length} React components that <RainbowWord>move</RainbowWord>. Every one is free, with a live preview,
-            its source and a one-line install.
+            {items.length} React components that <RainbowWord>move</RainbowWord>. {CATALOG_COUNTS.freeComponents} are free, with a live
+            preview, their source and a one-line install. Pro unlocks the other {CATALOG_COUNTS.proComponents}.
           </p>
         </div>
       </section>

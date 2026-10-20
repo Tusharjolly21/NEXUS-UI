@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { RotateCcw, ShieldCheck } from "lucide-react";
 import { OneTimeCode } from "@/components/one-time-code";
 import { cn } from "@/lib/utils";
-import { formatMoney, GhostButton, hairline, MomentCard, muted, StepSwap, SuccessMark } from "./moment-card";
+import { ACCENT, formatMoney, GhostButton, hairline, MomentCard, muted, StepSwap, SuccessMark } from "./moment-card";
 
 export type VerifyPaymentProps = {
   /** Where the code was sent, already masked: "•••• 42" or "m•••@studio.co". */
@@ -104,9 +104,9 @@ export function VerifyPayment({
             <p className={cn("mt-1 text-[14px]", muted)}>
               {formatMoney(amount, currency)} to {merchant}. You can close this window.
             </p>
-            <div className="mt-6 h-1 w-40 overflow-hidden rounded-full bg-[#17171c]/[0.08] dark:bg-white/10" aria-hidden>
+            <div className="mt-6 h-1 w-40 overflow-hidden rounded-full bg-[#e8e8ed] dark:bg-[#3a3a3c]" aria-hidden>
               <motion.div
-                className="h-full rounded-full bg-[#16a34a]"
+                className="h-full rounded-full bg-[#34c759]"
                 initial={{ width: "0%" }}
                 animate={{ width: "100%" }}
                 transition={{ duration: reduce ? 0 : 2.4, ease: "linear" }}
@@ -121,10 +121,21 @@ export function VerifyPayment({
         ) : (
           <>
             <div className="flex items-start justify-between gap-4">
-              <span className="grid size-11 place-items-center rounded-2xl bg-[#17171c]/[0.05] dark:bg-white/[0.07]" aria-hidden>
-                <ShieldCheck className="size-5" />
-              </span>
-              <span className="rounded-full bg-[#17171c]/[0.05] px-3 py-1 text-[12.5px] font-medium tabular-nums dark:bg-white/[0.07]">
+              <motion.span
+                className={cn(
+                  "grid size-11 place-items-center rounded-[14px] transition-colors duration-300",
+                  state === "locked"
+                    ? "bg-[#ff3b30]/10 text-[#ff3b30]"
+                    : "bg-[#0071e3]/10 text-[#0071e3] dark:bg-[#2997ff]/15 dark:text-[#2997ff]",
+                )}
+                animate={reduce || attempts === 0 ? { x: 0 } : { x: [0, -6, 6, -4, 4, 0] }}
+                transition={{ duration: 0.4 }}
+                key={`shield-${attempts}`}
+                aria-hidden
+              >
+                <ShieldCheck className="size-5" strokeWidth={1.75} />
+              </motion.span>
+              <span className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[12.5px] font-medium tabular-nums dark:bg-[#2c2c2e]">
                 {formatMoney(amount, currency)} · {merchant}
               </span>
             </div>
@@ -145,6 +156,7 @@ export function VerifyPayment({
                 onComplete={check}
                 disabled={state === "locked"}
                 label={`Verification code sent to ${destination}`}
+                accent={ACCENT}
               />
             </div>
 
@@ -153,10 +165,11 @@ export function VerifyPayment({
                 {attempts > 0 && state === "entry" ? (
                   <motion.p
                     key={`a${attempts}`}
-                    className="text-[#dc2626] dark:text-[#f87171]"
-                    initial={{ opacity: 0, y: 4 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    className="text-[#ff3b30]"
+                    initial={reduce ? { opacity: 0 } : { opacity: 0, y: 6, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                     exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
                   >
                     That code didn’t match. {remaining} {remaining === 1 ? "try" : "tries"} left.
                   </motion.p>
@@ -179,7 +192,10 @@ export function VerifyPayment({
               ) : (
                 <GhostButton
                   onClick={resend}
-                  className={cn("-mr-3", state === "locked" && "bg-[#17171c] text-white hover:bg-black hover:text-white dark:bg-white dark:text-[#17171c]")}
+                  className={cn(
+                    "-mr-3",
+                    state === "locked" && "mr-0 bg-[#0071e3] px-4 text-white hover:bg-[#0077ed] dark:bg-[#0071e3] dark:text-white dark:hover:bg-[#0077ed]",
+                  )}
                 >
                   Resend code
                 </GhostButton>

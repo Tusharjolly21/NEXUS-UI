@@ -6,44 +6,73 @@ import {
   type LayeredWaveDirection,
   type LayeredWaveSpeed,
 } from "@/components/layered-wave-background";
+import {
+  HeroControlPanel,
+  HeroCopy,
+  PanelSegmented,
+  PanelSlider,
+  PanelSwitch,
+  useIsDarkTheme,
+} from "@/components/library/interactive-dots-hero-customizer";
 import { cn } from "@/lib/utils";
+
+type WaveSwatch = { colors: readonly string[]; background: string };
 
 const PALETTES = [
   {
-    name: "Aurora",
-    colors: ["#7c3aed", "#06b6d4", "#ec4899"],
-    background: "#020617",
+    name: "Graphite",
+    light: { colors: ["#d2d2d7", "#e8e8ed", "#b8b8bd"], background: "#f5f5f7" },
+    dark: { colors: ["#3a3a3c", "#636366", "#2c2c2e"], background: "#000000" },
   },
   {
-    name: "Sunset",
-    colors: ["#f97316", "#ec4899", "#8b5cf6"],
-    background: "#120713",
+    name: "Blue",
+    light: { colors: ["#a8d1ff", "#d6e9ff", "#6cb4ff"], background: "#f5f5f7" },
+    dark: { colors: ["#0071e3", "#2997ff", "#00346b"], background: "#000000" },
   },
   {
-    name: "Ocean",
-    colors: ["#0ea5e9", "#22c55e", "#67e8f9"],
-    background: "#031018",
+    name: "Sand",
+    light: { colors: ["#eadbc8", "#f5ede2", "#d6c0a3"], background: "#f5f5f7" },
+    dark: { colors: ["#5c4a36", "#8a6f50", "#2e251b"], background: "#000000" },
   },
-] as const;
+] as const satisfies ReadonlyArray<{ name: string; light: WaveSwatch; dark: WaveSwatch }>;
 
-type Palette = (typeof PALETTES)[number];
+type PaletteName = (typeof PALETTES)[number]["name"];
+
+const PALETTE_OPTIONS = PALETTES.map((palette) => ({ value: palette.name, label: palette.name }));
+const SPEED_OPTIONS = [
+  { value: "slow", label: "Slow" },
+  { value: "medium", label: "Medium" },
+  { value: "fast", label: "Fast" },
+] as const satisfies ReadonlyArray<{ value: LayeredWaveSpeed; label: string }>;
+const DIRECTION_OPTIONS = [
+  { value: "left", label: "Left" },
+  { value: "right", label: "Right" },
+] as const satisfies ReadonlyArray<{ value: LayeredWaveDirection; label: string }>;
 
 export function LayeredWaveHeroCustomizer() {
-  const [palette, setPalette] = React.useState<Palette>(PALETTES[0]);
-  const [speed, setSpeed] = React.useState<LayeredWaveSpeed>("medium");
+  const isDark = useIsDarkTheme();
+  const [paletteName, setPaletteName] = React.useState<PaletteName>("Blue");
+  const [speed, setSpeed] = React.useState<LayeredWaveSpeed>("slow");
   const [direction, setDirection] = React.useState<LayeredWaveDirection>("left");
-  const [waveLayers, setWaveLayers] = React.useState(5);
+  const [waveLayers, setWaveLayers] = React.useState(4);
   const [waveWidth, setWaveWidth] = React.useState(1.25);
-  const [waveHeight, setWaveHeight] = React.useState(1.08);
-  const [blurIntensity, setBlurIntensity] = React.useState(24);
-  const [opacity, setOpacity] = React.useState(0.72);
+  const [waveHeight, setWaveHeight] = React.useState(0.9);
+  const [blurIntensity, setBlurIntensity] = React.useState(28);
+  const [opacity, setOpacity] = React.useState(0.7);
   const [transparentBackground, setTransparentBackground] = React.useState(false);
+  const palette = PALETTES.find((item) => item.name === paletteName) ?? PALETTES[0];
+  const swatch = isDark ? palette.dark : palette.light;
 
   return (
-    <div className="grid h-full min-h-full w-full overflow-hidden rounded-lg bg-background lg:grid-cols-[1fr_320px]">
+    <div
+      className={cn(
+        "relative h-full min-h-[560px] w-full overflow-hidden",
+        transparentBackground ? "bg-white dark:bg-[#1c1c1e]" : "bg-[#f5f5f7] dark:bg-black",
+      )}
+    >
       <LayeredWaveBackground
-        gradientColors={[...palette.colors]}
-        backgroundColor={palette.background}
+        gradientColors={[...swatch.colors]}
+        backgroundColor={swatch.background}
         transparentBackground={transparentBackground}
         waveLayers={waveLayers}
         waveWidth={waveWidth}
@@ -52,146 +81,35 @@ export function LayeredWaveHeroCustomizer() {
         opacity={opacity}
         speed={speed}
         direction={direction}
-        className={cn(
-          "h-full min-h-[560px] rounded-none lg:min-h-full",
-          transparentBackground && "bg-[linear-gradient(135deg,#020617,#111827)]",
-        )}
+        className="absolute inset-0 h-full min-h-0 rounded-none"
       >
-        <div className="flex h-full items-center px-6 sm:px-10 lg:px-16">
-          <div className="max-w-3xl">
-            <p className="text-[14px] font-medium text-white/70">Halftone Conference · Lisbon · March 12–14</p>
-            <h2 className="mt-5 text-balance text-4xl font-semibold leading-[1.02] tracking-[-0.04em] text-white sm:text-5xl lg:text-7xl">
-              Three days on the craft of calm software.
-            </h2>
-            <p className="mt-6 max-w-xl text-pretty text-base leading-7 text-white/70 sm:text-lg">
-              Talks, workshops and long lunches with the people who build the tools you open every day. 400 seats.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <button type="button" className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-zinc-950 shadow-lg shadow-black/20">
-                Get a ticket
-              </button>
-              <button type="button" className="rounded-full border border-white/15 bg-white/8 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-md">
-                See the programme
-              </button>
-            </div>
-          </div>
-        </div>
+        {/* Lifts the component's built-in bottom shade so light mode stays clean. */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent from-40% to-white/30 dark:hidden"
+        />
       </LayeredWaveBackground>
 
-      <aside className="border-t border-border bg-background p-5 dark:border-white/10 dark:bg-zinc-950 lg:border-l lg:border-t-0">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground">Customize</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Tune the wave system for your hero.
-          </p>
-        </div>
-
-        <div className="mt-6 space-y-5">
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
-              Palette
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {PALETTES.map((item) => (
-                <button
-                  key={item.name}
-                  type="button"
-                  onClick={() => setPalette(item)}
-                  className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    palette.name === item.name
-                      ? "border-foreground/25 bg-foreground text-background"
-                      : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {item.name}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-[12px] font-medium text-muted-foreground">
-              Speed
-            </p>
-            <div className="grid grid-cols-3 gap-2">
-              {(["slow", "medium", "fast"] as LayeredWaveSpeed[]).map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => setSpeed(item)}
-                  className={cn(
-                    "rounded-xl border px-3 py-2 text-xs font-medium capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                    speed === item
-                      ? "border-foreground/25 bg-foreground text-background"
-                      : "border-border bg-muted/40 text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setDirection((value) => (value === "left" ? "right" : "left"))}
-            className="w-full rounded-xl border border-border bg-muted/40 px-3 py-2 text-xs font-semibold text-foreground transition hover:bg-muted"
-          >
-            Direction: {direction}
-          </button>
-
-          <label className="flex items-center justify-between gap-3 rounded-xl border border-border bg-muted/30 px-3 py-2">
-            <span className="text-xs font-medium text-foreground">Transparent background</span>
-            <input
-              type="checkbox"
-              checked={transparentBackground}
-              onChange={(event) => setTransparentBackground(event.target.checked)}
-              className="accent-foreground"
-            />
-          </label>
-
-          <Control label="Wave layers" value={waveLayers} min={1} max={8} step={1} onChange={setWaveLayers} />
-          <Control label="Wave width" value={waveWidth} min={0.8} max={2.2} step={0.05} onChange={setWaveWidth} />
-          <Control label="Wave height" value={waveHeight} min={0.5} max={1.6} step={0.05} onChange={setWaveHeight} />
-          <Control label="Blur" value={blurIntensity} min={0} max={44} step={2} onChange={setBlurIntensity} />
-          <Control label="Opacity" value={opacity} min={0.2} max={1} step={0.02} onChange={setOpacity} />
-        </div>
-      </aside>
-    </div>
-  );
-}
-
-function Control({
-  label,
-  value,
-  min,
-  max,
-  step,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  step: number;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <label className="block space-y-2">
-      <span className="flex items-center justify-between gap-4 text-xs">
-        <span className="font-medium text-foreground">{label}</span>
-        <span className="font-mono text-muted-foreground">{Number(value.toFixed(2))}</span>
-      </span>
-      <input
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground"
+      <HeroCopy
+        align="center"
+        eyebrow="Halftone Conference · Lisbon · March 12–14"
+        title="Three days on the craft of calm software."
+        body="Talks, workshops and long lunches with the people who build the tools you open every day. 400 seats."
+        primary="Get a ticket"
+        secondary="See the programme"
       />
-    </label>
+
+      <HeroControlPanel subtitle="Tune the wave system.">
+        <PanelSegmented label="Color" options={PALETTE_OPTIONS} value={paletteName} onChange={setPaletteName} />
+        <PanelSegmented label="Speed" options={SPEED_OPTIONS} value={speed} onChange={setSpeed} />
+        <PanelSegmented label="Direction" options={DIRECTION_OPTIONS} value={direction} onChange={setDirection} />
+        <PanelSwitch label="Transparent background" checked={transparentBackground} onChange={setTransparentBackground} />
+        <PanelSlider label="Wave layers" value={waveLayers} min={1} max={8} step={1} onChange={setWaveLayers} />
+        <PanelSlider label="Wave width" value={waveWidth} min={0.8} max={2.2} step={0.05} onChange={setWaveWidth} />
+        <PanelSlider label="Wave height" value={waveHeight} min={0.5} max={1.6} step={0.05} onChange={setWaveHeight} />
+        <PanelSlider label="Blur" value={blurIntensity} min={0} max={44} step={2} onChange={setBlurIntensity} />
+        <PanelSlider label="Opacity" value={opacity} min={0.2} max={1} step={0.02} onChange={setOpacity} />
+      </HeroControlPanel>
+    </div>
   );
 }

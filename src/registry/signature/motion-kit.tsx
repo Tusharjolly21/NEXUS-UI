@@ -17,10 +17,24 @@ import { TiltPass } from "@/components/tilt-pass";
 import { AnimatedTabs } from "@/components/animated-tabs";
 import { SharedElementCards } from "@/components/shared-element-cards";
 import { RotatingHeadline } from "@/components/rotating-headline";
+import { StretchNav } from "@/components/stretch-nav";
+import { FeedbackPill } from "@/components/feedback-pill";
+import { StaggerMenu } from "@/components/stagger-menu";
+import { RulerPicker } from "@/components/ruler-picker";
+import { ElasticStepper } from "@/components/elastic-stepper";
+import { TodoList } from "@/components/todo-list";
+import { ProgressButton } from "@/components/progress-button";
+import { CopyDemo } from "@/components/copy-button";
+import { AnimatedIcons } from "@/components/animated-icons";
+import { FolderPeek } from "@/components/folder-peek";
+import { MagnifyDock } from "@/components/magnify-dock";
+import { UploadChips } from "@/components/upload-chips";
+import { NotificationStack } from "@/components/notification-stack";
+import { IslandMorph } from "@/components/island-morph";
 
 function Stage({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
-    <div className={`relative flex h-full min-h-[360px] w-full items-center justify-center p-8 dark:bg-[#f5f5f7] text-[#1d1d1f] ${className}`}>
+    <div className={`relative flex h-full min-h-[360px] w-full items-center justify-center p-8 text-[#1d1d1f] dark:text-[#f5f5f7] ${className}`}>
       {children}
     </div>
   );
@@ -33,7 +47,7 @@ export function PreviewOtpInput({ compact = false }: { compact?: boolean } = {})
       <div className="flex flex-col items-center gap-7">
         <div className="flex flex-col items-center gap-2 text-center">
           <p className="m-0 text-[28px] font-semibold tracking-[-0.025em]">Enter the code</p>
-          <p className="m-0 text-[15px] text-[#6e6e73]">We sent six digits to your phone.</p>
+          <p className="m-0 text-[15px] text-[#6e6e73] dark:text-[#a1a1a6]">We sent six digits to your phone.</p>
         </div>
         <OtpInput autoplay="482913" />
       </div>
@@ -55,14 +69,14 @@ export function PreviewHoldToConfirm({ compact = false }: { compact?: boolean } 
   return (
     <Stage>
       <div className="flex flex-col items-center gap-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-white text-[#ff3b30] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_10px_24px_-12px_rgba(0,0,0,.2)]">
+        <div className="flex h-16 w-16 items-center justify-center rounded-[20px] bg-white text-[#ff3b30] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_10px_24px_-12px_rgba(0,0,0,.2)] dark:bg-[#2c2c2e] dark:text-[#ff453a] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" />
           </svg>
         </div>
         <div className="flex flex-col items-center gap-2">
           <p className="m-0 text-[26px] font-semibold tracking-[-0.025em]">Delete this project?</p>
-          <p className="m-0 max-w-[340px] text-[15px] leading-[1.45] text-[#6e6e73]">Deployments and domains go with it. Hold the button so it can’t happen by accident.</p>
+          <p className="m-0 max-w-[340px] text-[15px] leading-[1.45] text-[#6e6e73] dark:text-[#a1a1a6]">Deployments and domains go with it. Hold the button so it can’t happen by accident.</p>
         </div>
         <HoldToConfirm autoplay />
       </div>
@@ -151,6 +165,132 @@ export function PreviewRotatingHeadline({ compact = false }: { compact?: boolean
   return (
     <Stage>
       <RotatingHeadline />
+    </Stage>
+  );
+}
+
+export function PreviewStretchNav({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <StretchNav autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewFeedbackPill({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <FeedbackPill autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewStaggerMenu({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <div className="flex justify-center pt-6"><StaggerMenu autoplay /></div>
+    </Stage>
+  );
+}
+
+export function PreviewRulerPicker({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <RulerPicker autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewElasticStepper({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <ElasticStepper autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewTodoList({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <TodoList autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewProgressButton({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <ProgressButton autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewCopyButton({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <CopyDemo autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewAnimatedIcons({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <AnimatedIcons autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewFolderPeek({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <FolderPeek autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewMagnifyDock({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <MagnifyDock autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewUploadChips({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <UploadChips autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewNotificationStack({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <NotificationStack autoplay />
+    </Stage>
+  );
+}
+
+export function PreviewIslandMorph({ compact = false }: { compact?: boolean } = {}) {
+  void compact;
+  return (
+    <Stage>
+      <IslandMorph autoplay />
     </Stage>
   );
 }

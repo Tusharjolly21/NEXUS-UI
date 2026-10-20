@@ -7726,7 +7726,7 @@ export function CheckoutNotifications() {
       { name: "initialFiles", type: "{ name: string; size: number; type?: string; progress?: number }[]", description: "Files shown on first render, such as ones already uploaded." },
       { name: "title", type: "string", defaultValue: '"Drag a file here"', description: "Main line of the card." },
       { name: "hint", type: "string", description: "Secondary line. Defaults to the size limit." },
-      { name: "accent", type: "string", defaultValue: '"#6d5cff"', description: "Tint and dashed edge colour while a file is dragged over." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Tint and dashed edge colour while a file is dragged over." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Ignore drops and clicks." },
       { name: "className", type: "string", description: "Extra classes on the wrapper." },
     ],
@@ -8336,6 +8336,1467 @@ export function Hero() {
     <section className="py-24">
       <RotatingHeadline lead="Made for" words={["founders.", "designers.", "teams."]} sub="One kit, every launch." accent="#ff375f" />
     </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stretch-nav",
+    name: "Stretch Nav",
+    registryCliName: "stretch-nav",
+    description:
+      "A pill navigation whose active capsule moves its leading edge first and lets the trailing edge catch up, so it stretches towards the next item and snaps back to size, with a soft hover pill that follows the pointer.",
+    categorySlug: "navbars",
+    tags: ["navigation", "nav", "tabs", "pill", "stretch", "segmented", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "string[]", defaultValue: '["Home", "Work", "Writing", "About", "Contact"]', description: "Item labels, left to right." },
+      { name: "defaultIndex", type: "number", defaultValue: "0", description: "Item active at first." },
+      { name: "onChange", type: "(index: number) => void", description: "Called when an item is picked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves between items by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewStretchNav,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { usePathname, useRouter } from "next/navigation";
+import { StretchNav } from "@/components/stretch-nav";
+
+const LINKS = [
+  { label: "Home", href: "/" },
+  { label: "Work", href: "/work" },
+  { label: "Writing", href: "/writing" },
+  { label: "About", href: "/about" },
+];
+
+export function SiteNav() {
+  const router = useRouter();
+  const path = usePathname();
+  const current = Math.max(0, LINKS.findIndex((l) => l.href === path));
+  return <StretchNav items={LINKS.map((l) => l.label)} defaultIndex={current} onChange={(i) => router.push(LINKS[i].href)} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "feedback-pill",
+    name: "Feedback Pill",
+    registryCliName: "feedback-pill",
+    description:
+      "A small Feedback pill that morphs into a note form, shows a spinner in the Send button while it posts, then shrinks into a thank-you before folding back into the pill.",
+    categorySlug: "inputs-controls",
+    tags: ["feedback", "form", "morph", "popover", "textarea", "widget", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "type", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onSend", type: "(message: string) => void | Promise<void>", description: "Called with the message. The spinner shows until it resolves." },
+      { name: "label", type: "string", defaultValue: '"Feedback"', description: "Pill label and form title." },
+      { name: "placeholder", type: "string", defaultValue: '"What would make this better?"', description: "Textarea placeholder." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Send button and focus colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens, types and sends a sample message until someone interacts." },
+    ],
+    Preview: Previews.PreviewFeedbackPill,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FeedbackPill } from "@/components/feedback-pill";
+
+export function FeedbackCorner() {
+  return (
+    <div className="fixed bottom-6 right-6">
+      <FeedbackPill
+        onSend={(message) =>
+          fetch("/api/feedback", { method: "POST", body: JSON.stringify({ message, page: location.pathname }) }).then(() => undefined)
+        }
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stagger-menu",
+    name: "Stagger Menu",
+    registryCliName: "stagger-menu",
+    description:
+      "A share menu that unfolds from its button with the items arriving one after another, a highlight that glides between rows, arrow-key navigation, and a button label that rolls to confirm what you picked.",
+    categorySlug: "inputs-controls",
+    tags: ["menu", "dropdown", "share", "context menu", "stagger", "keyboard", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "hover", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "MenuItem[]", description: "Each item has id, label, icon, and optional danger (red, after a divider) and done (the confirmation shown in the button)." },
+      { name: "onSelect", type: "(id: string) => void", description: "Called with the id of the picked item." },
+      { name: "label", type: "string", defaultValue: '"Share"', description: "Button label." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and browses the menu by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewStaggerMenu,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StaggerMenu } from "@/components/stagger-menu";
+
+export function ShareButton({ url }: { url: string }) {
+  return (
+    <StaggerMenu
+      onSelect={(id) => {
+        if (id === "link") navigator.clipboard.writeText(url);
+        if (id === "email") window.location.href = \`mailto:?body=\${encodeURIComponent(url)}\`;
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ruler-picker",
+    name: "Ruler Picker",
+    registryCliName: "ruler-picker",
+    description:
+      "A duration picker you fling like a ruler: it glides with momentum and snaps to whole units, the big number rolls in the direction you moved, and presets spring the ruler into place.",
+    categorySlug: "inputs-controls",
+    tags: ["ruler", "picker", "slider", "duration", "timer", "momentum", "drag", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 155,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "min", type: "number", defaultValue: "0", description: "Smallest value." },
+      { name: "max", type: "number", defaultValue: "90", description: "Largest value." },
+      { name: "defaultValue", type: "number", defaultValue: "25", description: "Starting value." },
+      { name: "unit", type: "string", defaultValue: '"min"', description: "Unit shown after the number. Values of 60 and up show as hours." },
+      { name: "presets", type: "number[]", defaultValue: "[5, 15, 30, 60]", description: "Quick-pick buttons under the ruler." },
+      { name: "accent", type: "string", defaultValue: '"#ff9f0a"', description: "Needle and selected preset colour." },
+      { name: "onChange", type: "(value: number) => void", description: "Called as the value changes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Glides between presets until someone interacts." },
+    ],
+    Preview: Previews.PreviewRulerPicker,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { RulerPicker } from "@/components/ruler-picker";
+
+export function FocusTimer() {
+  const [minutes, setMinutes] = useState(25);
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <RulerPicker defaultValue={minutes} onChange={setMinutes} />
+      <button className="h-11 rounded-full bg-[#0071e3] px-6 text-white">Start {minutes} min focus</button>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "elastic-stepper",
+    name: "Elastic Stepper",
+    registryCliName: "elastic-stepper",
+    description:
+      "A plus / minus stepper whose number rolls up or down, with a dot track that stretches to the current value and a rubber-band bounce when you push past either limit.",
+    categorySlug: "inputs-controls",
+    tags: ["stepper", "counter", "quantity", "number input", "guests", "rubber band", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 150,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"Guests"', description: "What is being counted; also used for the button labels." },
+      { name: "min", type: "number", defaultValue: "1", description: "Lowest value." },
+      { name: "max", type: "number", defaultValue: "8", description: "Highest value." },
+      { name: "defaultValue", type: "number", defaultValue: "2", description: "Starting value." },
+      { name: "onChange", type: "(value: number) => void", description: "Called when the value changes." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Dot track colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Counts up and down by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewElasticStepper,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ElasticStepper } from "@/components/elastic-stepper";
+
+export function TableBooking() {
+  return <ElasticStepper label="Guests" min={1} max={12} defaultValue={2} onChange={(n) => console.log(n)} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "todo-list",
+    name: "Todo List",
+    registryCliName: "todo-list",
+    description:
+      "A task list where ticking a task draws a check, strikes the text through and drops it out of the list into a Completed drawer with a counter that pops, plus quick add and undo.",
+    categorySlug: "cards",
+    tags: ["todo", "tasks", "checklist", "checkbox", "list", "productivity", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "type", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "initial", type: "string[]", description: "Tasks shown at first." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Check and counter colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks tasks off by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewTodoList,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TodoList } from "@/components/todo-list";
+
+export function LaunchChecklist() {
+  return <TodoList initial={["Write release notes", "Record the demo", "Update pricing page", "Email beta users"]} accent="#34c759" />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "progress-button",
+    name: "Progress Button",
+    registryCliName: "progress-button",
+    description:
+      "A button that becomes its own progress bar: it stretches, fills as the work runs with a live percentage, then turns green with a drawn check and a new label.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "progress", "download", "loading", "upload", "state", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "task", type: "(onProgress: (p: number) => void) => Promise<void>", description: "Run the work and report progress from 0 to 1. Simulated if left out." },
+      { name: "label", type: "string", defaultValue: '"Download"', description: "Resting label." },
+      { name: "doneLabel", type: "string", defaultValue: '"Open file"', description: "Label once finished." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Button and fill colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs itself on a loop until someone interacts." },
+    ],
+    Preview: Previews.PreviewProgressButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ProgressButton } from "@/components/progress-button";
+
+export function ExportButton() {
+  return (
+    <ProgressButton
+      label="Export video"
+      doneLabel="Show in folder"
+      task={async (onProgress) => {
+        const job = await fetch("/api/export", { method: "POST" }).then((r) => r.json());
+        for (let p = 0; p < 1; ) {
+          p = await fetch(\`/api/export/\${job.id}\`).then((r) => r.json()).then((j) => j.progress);
+          onProgress(p);
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "copy-button",
+    name: "Copy Button",
+    registryCliName: "copy-button",
+    description:
+      "Two copy controls: an ID chip whose icon morphs into a check under a ripple and a Copied tooltip, and a command line whose button rolls from Copy to Copied.",
+    categorySlug: "inputs-controls",
+    tags: ["copy", "clipboard", "copy to clipboard", "api key", "command", "chip", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "value", type: "string", description: "CopyChip: the text written to the clipboard." },
+      { name: "display", type: "string", description: "CopyChip: what the chip shows, such as a shortened ID. Defaults to value." },
+      { name: "label", type: "string", defaultValue: '"Copy"', description: "CopyChip: start of the accessible label." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "CopyChip: ripple and check colour." },
+      { name: "command", type: "string", description: "CopyCommand: the shell command shown and copied." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Both: copy by themselves every few seconds until someone interacts." },
+    ],
+    Preview: Previews.PreviewCopyButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CopyChip, CopyCommand } from "@/components/copy-button";
+
+export function ApiKeyRow({ keyId }: { keyId: string }) {
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <CopyChip value={keyId} display={\`\${keyId.slice(0, 7)}…\${keyId.slice(-4)}\`} />
+      <CopyCommand command="npx shadcn@latest add @nexus-labs/copy-button" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "animated-icons",
+    name: "Animated Icons",
+    registryCliName: "animated-icons",
+    description:
+      "Eight toggle icons with their own small stories: menu to close, play morphing into pause, a heart that bursts, a bell that rings, sun turning to moon, a bookmark that fills, sound muting and a lock that springs open.",
+    categorySlug: "motion-effects",
+    tags: ["icons", "animated icons", "toggle", "svg", "morph", "micro-interactions", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "on", type: "boolean", description: "Each icon (MenuIcon, PlayIcon, HeartIcon, BellIcon, ThemeIcon, BookmarkIcon, VolumeIcon, LockIcon) takes its state as on." },
+      { name: "burst", type: "number", description: "HeartIcon only: increase it to play a new burst." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "AnimatedIcons grid only: toggles the icons in turn until someone interacts." },
+    ],
+    Preview: Previews.PreviewAnimatedIcons,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { MenuIcon, ThemeIcon } from "@/components/animated-icons";
+
+export function HeaderControls() {
+  const [open, setOpen] = useState(false);
+  const [dark, setDark] = useState(false);
+  return (
+    <div className="flex gap-2">
+      <button aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        <MenuIcon on={open} />
+      </button>
+      <button aria-label="Toggle dark mode" aria-pressed={dark} onClick={() => setDark((d) => !d)}>
+        <ThemeIcon on={dark} />
+      </button>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "folder-peek",
+    name: "Folder Peek",
+    registryCliName: "folder-peek",
+    description:
+      "A folder that tips its front panel back on hover or focus while a document, a photo and a chart fan out of it, then tuck back in when you leave.",
+    categorySlug: "cards",
+    tags: ["folder", "files", "hover", "3d", "fan out", "documents", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Brand assets"', description: "Folder name." },
+      { name: "meta", type: "string", defaultValue: '"24 files · Updated today"', description: "Line under the name." },
+      { name: "color", type: "string", defaultValue: '"#0071e3"', description: "Folder colour; the back panel is drawn a shade darker." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes by itself until someone hovers it." },
+    ],
+    Preview: Previews.PreviewFolderPeek,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FolderPeek } from "@/components/folder-peek";
+
+export function ProjectFolders() {
+  return (
+    <div className="grid grid-cols-2 gap-10 pt-16">
+      <FolderPeek title="Launch kit" meta="12 files · Edited 2h ago" color="#34c759" />
+      <FolderPeek title="Brand assets" meta="24 files · Updated today" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "magnify-dock",
+    name: "Magnify Dock",
+    registryCliName: "magnify-dock",
+    description:
+      "A macOS-style app dock: icons swell as the pointer passes over them, show a label above, bounce when launched and keep a running dot underneath.",
+    categorySlug: "navbars",
+    tags: ["dock", "macos", "magnify", "app icons", "launcher", "toolbar", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 157,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "press", "spring", "magnetic"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "apps", type: "DockApp[]", description: "Each app has id, label, bg (any CSS background) and glyph (an icon)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps an invisible pointer across the dock until someone hovers it." },
+    ],
+    Preview: Previews.PreviewMagnifyDock,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MagnifyDock } from "@/components/magnify-dock";
+
+export function AppDock() {
+  return (
+    <div className="fixed inset-x-0 bottom-4 flex justify-center">
+      <MagnifyDock />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "upload-chips",
+    name: "Upload Chips",
+    registryCliName: "upload-chips",
+    description:
+      "A drop zone that lifts and tints while you drag over it, then turns every file into a chip with a filling progress bar, a progress ring and a check when it lands.",
+    categorySlug: "inputs-controls",
+    tags: ["upload", "file upload", "dropzone", "progress", "drag and drop", "attachments", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "upload", type: "(file: File | { name: string; size: number }, onProgress: (p: number) => void) => Promise<void>", description: "Upload one file and report progress from 0 to 1. Simulated if left out." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Drag highlight, progress and check colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drops sample files in by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewUploadChips,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { UploadChips } from "@/components/upload-chips";
+
+export function Attachments() {
+  return (
+    <UploadChips
+      upload={(file, onProgress) =>
+        new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.upload.onprogress = (e) => onProgress(e.loaded / e.total);
+          xhr.onload = () => resolve();
+          xhr.onerror = reject;
+          xhr.open("POST", "/api/upload");
+          xhr.send(file as File);
+        })
+      }
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "notification-stack",
+    name: "Notification Stack",
+    registryCliName: "notification-stack",
+    description:
+      "Toasts that pile into a neat stack, spread out while hovered (pausing their timers), swipe away sideways, and turn a loading toast into a success when the work finishes.",
+    categorySlug: "cards",
+    tags: ["toast", "notifications", "stack", "swipe", "promise", "sonner", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 150,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pushes sample toasts by itself until someone presses a trigger." },
+    ],
+    Preview: Previews.PreviewNotificationStack,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { NotificationStack } from "@/components/notification-stack";
+
+export function NotificationsDemo() {
+  return (
+    <div className="mx-auto max-w-md py-10">
+      <NotificationStack />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "island-morph",
+    name: "Island Morph",
+    registryCliName: "island-morph",
+    description:
+      "A black pill that morphs between a timer, an incoming call and a full music player, with each state's content blurring in once the shape lands.",
+    categorySlug: "motion-effects",
+    tags: ["dynamic island", "morph", "live activity", "music player", "call", "timer", "ios", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through idle, timer, call and music until a control is pressed." },
+    ],
+    Preview: Previews.PreviewIslandMorph,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { IslandMorph } from "@/components/island-morph";
+
+export function PhoneMockupTop() {
+  return (
+    <div className="flex justify-center pt-4">
+      <IslandMorph autoplay />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "lanyard-badge",
+    name: "Lanyard Badge",
+    registryCliName: "lanyard-badge",
+    description:
+      "A conference badge hanging from a strap. Grab it and throw it around; it swings back as a damped pendulum and twists with its sideways speed.",
+    categorySlug: "cards",
+    tags: ["badge", "lanyard", "pendulum", "physics", "drag", "conference", "id card", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "name", type: "string", defaultValue: '"Alex Rivera"', description: "Attendee name; the avatar shows its initials." },
+      { name: "role", type: "string", defaultValue: '"Design Engineer"', description: "Line under the name." },
+      { name: "event", type: "string", defaultValue: '"Motion Summit"', description: "Event name printed at the top (followed by 2026)." },
+      { name: "tag", type: "string", defaultValue: '"Speaker"', description: "Label on the coloured band at the bottom of the badge." },
+      { name: "strap", type: "string", defaultValue: '"#0071e3"', description: "Strap, band and avatar colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Gives the badge a nudge every few seconds until someone grabs it." },
+    ],
+    Preview: Previews.PreviewLanyardBadge,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { LanyardBadge } from "@/components/lanyard-badge";
+
+export function SpeakerBadge() {
+  return (
+    <div className="flex justify-center">
+      <LanyardBadge name="Priya Sharma" role="Staff Engineer" event="Motion Summit" tag="Speaker" strap="#ff375f" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "glass-lens",
+    name: "Glass Lens",
+    registryCliName: "glass-lens",
+    description:
+      "A glass puck you drag over content. It magnifies the centre and splits colour toward the rim, built from three offset copies of the content instead of a shader.",
+    categorySlug: "motion-effects",
+    tags: ["magnifier", "lens", "glass", "chromatic aberration", "zoom", "drag", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "size", type: "number", defaultValue: "150", description: "Lens diameter in px." },
+      { name: "zoom", type: "number", defaultValue: "1.45", description: "Magnification at the centre of the lens." },
+      { name: "width", type: "number", defaultValue: "520", description: "Width of the content surface in px." },
+      { name: "height", type: "number", defaultValue: "300", description: "Height of the content surface in px." },
+      { name: "children", type: "ReactNode", defaultValue: "Field notes text", description: "Content under the glass. It is rendered four times (page plus three lens layers), so keep it static." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drifts across the content by itself until the user drags it." },
+    ],
+    Preview: Previews.PreviewGlassLens,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { GlassLens } from "@/components/glass-lens";
+
+export function FinePrint() {
+  return (
+    <GlassLens size={140} zoom={1.6} width={480} height={280}>
+      <div className="flex h-full flex-col justify-center gap-2 px-8">
+        <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#86868b]">Terms</p>
+        <p className="m-0 text-[14px] leading-[1.5] text-[#1d1d1f] dark:text-[#f5f5f7]">
+          Cancel any time before the trial ends and you will not be charged. Plans renew monthly.
+        </p>
+      </div>
+    </GlassLens>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ascii-wake",
+    name: "ASCII Wake",
+    registryCliName: "ascii-wake",
+    description:
+      "Your pointer leaves a trail of characters that thickens where you linger and thins as it ages. Switch the glyph set, or let the glyphs follow the direction you moved.",
+    categorySlug: "background-effects",
+    tags: ["ascii", "canvas", "pointer trail", "glyphs", "cursor", "generative", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-19",
+    animationKinds: ["hover", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number", defaultValue: "300", description: "Height of the field in px; it fills the available width." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the glyphs right under the pointer." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Draws a looping path by itself while the pointer is away." },
+    ],
+    Preview: Previews.PreviewAsciiWake,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { AsciiWake } from "@/components/ascii-wake";
+
+export function TerminalHero() {
+  return (
+    <section className="mx-auto w-full max-w-[640px]">
+      <AsciiWake height={260} accent="#30d158" autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "liquid-dial",
+    name: "Liquid Dial",
+    registryCliName: "liquid-dial",
+    description:
+      "A floating action button whose actions bud out of it like liquid. The highlight is two blobs on different springs, so it pulls into a thread before wrapping the next action.",
+    categorySlug: "inputs-controls",
+    tags: ["fab", "action menu", "speed dial", "gooey", "svg filter", "radial menu", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 157,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "actions", type: "LiquidDialAction[]", defaultValue: "Photo, Note, Voice memo, Link", description: "Up to four actions ({ id, label, d }) laid out on an arc; d is SVG path data in a 24×24 box." },
+      { name: "color", type: "string", defaultValue: '"#1d1d1f"', description: "Blob colour. Left unset it is near-black, or #3a3a3c in dark mode." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Highlight blob and focus ring colour. Left unset it is #0071e3, or #0a84ff in dark mode." },
+      { name: "onSelect", type: "(id: string) => void", defaultValue: "undefined", description: "Called with the action id when an action is picked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and browses by itself until the user interacts." },
+    ],
+    Preview: Previews.PreviewLiquidDial,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { LiquidDial } from "@/components/liquid-dial";
+
+export function ComposeButton() {
+  return (
+    <LiquidDial
+      accent="#ff375f"
+      onSelect={(id) => console.log("create", id)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "voice-orb",
+    name: "Voice Orb",
+    registryCliName: "voice-orb",
+    description:
+      "One shape for an assistant's four states. Hold it to talk: a dotted ring becomes a glow, a dark thinking sphere, then a churning voice.",
+    categorySlug: "ai-components",
+    tags: ["voice", "assistant", "orb", "ai", "push to talk", "blob", "states", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 159,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the glow and the middle of the listening/speaking gradient." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Walks through listening, thinking and speaking by itself until pressed." },
+    ],
+    Preview: Previews.PreviewVoiceOrb,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { VoiceOrb } from "@/components/voice-orb";
+
+export function AssistantPanel() {
+  return (
+    <div className="flex flex-col items-center gap-4 py-10">
+      <p className="m-0 text-[15px] text-[#6e6e73]">How can I help?</p>
+      <VoiceOrb accent="#bf5af2" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "sagging-field",
+    name: "Sagging Field",
+    registryCliName: "sagging-field",
+    description:
+      "A text field that bends under the weight of what you type. Letters ride the curve on springs, anything that runs past the end falls off, and Let it go drops the whole lot.",
+    categorySlug: "inputs-controls",
+    tags: ["input", "text field", "playful", "physics", "letters", "typing", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-19",
+    animationKinds: ["type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"What\'s weighing on you?"', description: "Heading shown above the field and used as its label." },
+      { name: "width", type: "number", defaultValue: "400", description: "Field width in pixels." },
+      { name: "maxChars", type: "number", defaultValue: "34", description: "How many characters it takes to reach the full sag." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Focus outline and caret colour." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a heavy sentence and lets it go by itself until someone clicks in." },
+    ],
+    Preview: Previews.PreviewSaggingField,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SaggingField } from "@/components/sagging-field";
+
+export function WorryJournal() {
+  return (
+    <section className="flex flex-col items-center py-16">
+      <SaggingField label="What's on your mind today?" maxChars={40} accent="#ff375f" />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "tear-off-ticket",
+    name: "Tear-off Ticket",
+    registryCliName: "tear-off-ticket",
+    description:
+      "An event ticket whose stub you pull away along the perforation. Let go early and it snaps back; pull through and it hangs on the last tooth, swings, then drops.",
+    categorySlug: "cards",
+    tags: ["ticket", "event", "stub", "drag", "tear", "pass", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Light & Matter"', description: "Event name." },
+      { name: "venue", type: "string", defaultValue: '"Hall 3 · North Gallery"', description: "First detail line." },
+      { name: "date", type: "string", defaultValue: '"Sat 14 Nov · 11:00"', description: "Second detail line." },
+      { name: "seat", type: "string", defaultValue: '"Row C · Seat 12"', description: "Seat shown on the stub." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tugs, tears and resets on a loop until someone grabs the stub." },
+    ],
+    Preview: Previews.PreviewTearOffTicket,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TearOffTicket } from "@/components/tear-off-ticket";
+
+export function CheckInTicket() {
+  return (
+    <div className="flex justify-center py-16">
+      <TearOffTicket title="Night Market" venue="Pier 9 · Lower Deck" date="Fri 20 Nov · 19:30" seat="General admission" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "throw-wheel",
+    name: "Throw Wheel",
+    registryCliName: "throw-wheel",
+    description:
+      "Cards on a 3D drum you can fling. While it spins every card turns edge-on and blurs with speed, then they straighten one by one as the wheel snaps a card to the front.",
+    categorySlug: "three-d-components",
+    tags: ["carousel", "3d", "wheel", "cards", "inertia", "drag", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "cards", type: "WheelCard[]", description: "Each card has title, sub and art (any CSS background). Ten travel destinations by default." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws the wheel every few seconds until someone grabs it." },
+    ],
+    Preview: Previews.PreviewThrowWheel,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ThrowWheel, type WheelCard } from "@/components/throw-wheel";
+
+const collections: WheelCard[] = [
+  { title: "Ceramics", sub: "42 pieces", art: "linear-gradient(160deg,#ffd6e7,#c49bff 60%,#5e5ce6)" },
+  { title: "Textiles", sub: "18 pieces", art: "linear-gradient(160deg,#ffe58a,#ffcc00 50%,#ff9f0a)" },
+  { title: "Glass", sub: "27 pieces", art: "linear-gradient(160deg,#c6f1ff,#64d2ff 50%,#0a84ff)" },
+  { title: "Prints", sub: "65 pieces", art: "linear-gradient(160deg,#b7f7c5,#30d158 55%,#0b8f6a)" },
+  { title: "Lighting", sub: "11 pieces", art: "linear-gradient(160deg,#ffc9a3,#ff9f0a 50%,#d1495b)" },
+  { title: "Furniture", sub: "33 pieces", art: "linear-gradient(160deg,#dbe9ff,#8fb5ff 50%,#30486e)" },
+  { title: "Jewellery", sub: "54 pieces", art: "linear-gradient(160deg,#ffb3c7,#ff6482 60%,#bf5af2)" },
+  { title: "Books", sub: "90 pieces", art: "linear-gradient(160deg,#ffe2b8,#ffb36b 50%,#5ac8fa)" },
+];
+
+export function CollectionPicker() {
+  return <ThrowWheel cards={collections} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "pixel-select",
+    name: "Pixel Select",
+    registryCliName: "pixel-select",
+    description:
+      "A dropdown that builds itself out of a grid of pixels tinted with the chosen colour, then dissolves into a falling shower of them when you pick an option.",
+    categorySlug: "inputs-controls",
+    tags: ["select", "dropdown", "listbox", "pixels", "mood", "menu", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "options", type: "Mood[]", description: "Each option has id, label and color; the pixels take the selected option's colour. Six moods by default." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the option id when the user picks one." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and picks options by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewPixelSelect,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PixelSelect, type Mood } from "@/components/pixel-select";
+
+const themes: Mood[] = [
+  { id: "ocean", label: "Ocean", color: "#0a84ff" },
+  { id: "forest", label: "Forest", color: "#30d158" },
+  { id: "sunset", label: "Sunset", color: "#ff9f0a" },
+  { id: "berry", label: "Berry", color: "#ff375f" },
+];
+
+export function ThemePicker({ onTheme }: { onTheme: (id: string) => void }) {
+  return <PixelSelect options={themes} onChange={onTheme} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "scrub-inputs",
+    name: "Scrub Inputs",
+    registryCliName: "scrub-inputs",
+    description:
+      "Design-tool number fields: drag a label sideways to change the value, with Shift for big steps and Alt for fine ones. A badge shows how far you have moved, then reports the change when you let go.",
+    categorySlug: "inputs-controls",
+    tags: ["number input", "scrub", "drag", "inspector", "design tool", "slider", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 150,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", description: "ScrubInput: field name; dragging it changes the value." },
+      { name: "value", type: "number", description: "ScrubInput: the current value (controlled)." },
+      { name: "onChange", type: "(v: number) => void", description: "ScrubInput: called with each new value while dragging, typing or using the arrow keys." },
+      { name: "min", type: "number", description: "ScrubInput: lowest allowed value." },
+      { name: "max", type: "number", description: "ScrubInput: highest allowed value." },
+      { name: "step", type: "number", defaultValue: "1", description: "ScrubInput: change per two pixels of drag and per arrow key press." },
+      { name: "unit", type: "string", defaultValue: '""', description: "ScrubInput: suffix shown after the number and in the change badge." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Both: badge colour while dragging; ScrubInputs also starts its sample shape's gradient with it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "ScrubInputs: changes the three sample fields by itself until someone touches them." },
+    ],
+    Preview: Previews.PreviewScrubInputs,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { ScrubInput } from "@/components/scrub-inputs";
+
+export function LayerInspector() {
+  const [opacity, setOpacity] = useState(100);
+  const [blur, setBlur] = useState(0);
+
+  return (
+    <div className="flex w-[240px] flex-col gap-2.5">
+      <ScrubInput label="Opacity" value={opacity} onChange={setOpacity} min={0} max={100} unit="%" />
+      <ScrubInput label="Blur" value={blur} onChange={setBlur} min={0} max={40} step={0.5} unit="px" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "lit-keyboard",
+    name: "Lit Keyboard",
+    registryCliName: "lit-keyboard",
+    description:
+      "A tilted keyboard that lights up under your typing and fades with a slow afterglow. Record a run and replay it with the original timing.",
+    categorySlug: "motion-effects",
+    tags: ["keyboard", "typing", "keys", "glow", "record", "replay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-19",
+    animationKinds: ["type", "press", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "glow", type: "string", defaultValue: '"#ff9f0a"', description: "Colour a key flashes to when pressed. Use a hex colour; the glow adds alpha to it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample phrase by itself every few seconds until someone types." },
+    ],
+    Preview: Previews.PreviewLitKeyboard,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { LitKeyboard } from "@/components/lit-keyboard";
+
+export function TypingHero() {
+  return (
+    <section className="mx-auto flex w-full max-w-[560px] flex-col items-center gap-8 py-16">
+      <h2 className="text-3xl font-semibold tracking-tight">Shortcuts for everything</h2>
+      <LitKeyboard glow="#0a84ff" autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ripple-field",
+    name: "Ripple Field",
+    registryCliName: "ripple-field",
+    description:
+      "A quiet grid of dots: click anywhere and a ring travels outward. Every dot it crosses bursts into colour, gets kicked away from the centre and springs back home.",
+    categorySlug: "background-effects",
+    tags: ["dots", "ripple", "canvas", "grid", "click effect", "springs", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 150,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "height", type: "number", defaultValue: "300", description: "Height of the field in px; it fills the available width." },
+      { name: "gap", type: "number", defaultValue: "18", description: "Distance between dots in px." },
+      { name: "colors", type: "string[]", defaultValue: "RIPPLE_FIELD_PALETTE", description: "Colours a dot can burst into; one is picked at random each time a ring hits it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drops rings at random spots until someone clicks." },
+    ],
+    Preview: Previews.PreviewRippleField,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { RippleField } from "@/components/ripple-field";
+
+export function LaunchBanner() {
+  return (
+    <section className="mx-auto w-full max-w-[720px]">
+      <RippleField height={260} gap={16} colors={["#0a84ff", "#64d2ff", "#bf5af2"]} autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "dot-globe",
+    name: "Dot Globe",
+    registryCliName: "dot-globe",
+    description:
+      "A dotted globe with flight arcs drawing themselves along great circles. Drag to spin it and it coasts to a stop; pick a city and it springs round to face you.",
+    categorySlug: "three-d-components",
+    tags: ["globe", "map", "canvas", "flights", "arcs", "world", "inertia", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "size", type: "number", defaultValue: "340", description: "Width and height of the globe canvas in px." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the arcs, pins and the selected city chip." },
+      { name: "cities", type: "DotGlobeCity[]", defaultValue: "DOT_GLOBE_CITIES", description: "Cities to pin and list as chips. Each has id, name, lat and lon." },
+      { name: "routes", type: "[string, string][]", defaultValue: "DOT_GLOBE_ROUTES", description: "Flight arcs as pairs of city ids; pairs with an unknown id are skipped." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Turns slowly and tours the cities until someone drags or picks one." },
+    ],
+    Preview: Previews.PreviewDotGlobe,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { DotGlobe, type DotGlobeCity } from "@/components/dot-globe";
+
+const offices: DotGlobeCity[] = [
+  { id: "ber", name: "Berlin", lat: 52.52, lon: 13.4 },
+  { id: "nyc", name: "New York", lat: 40.71, lon: -74.01 },
+  { id: "sgp", name: "Singapore", lat: 1.35, lon: 103.82 },
+];
+
+export function OfficesMap() {
+  return (
+    <DotGlobe
+      size={360}
+      accent="#30d158"
+      cities={offices}
+      routes={[["ber", "nyc"], ["ber", "sgp"]]}
+      autoplay
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "component-layers",
+    name: "Component Layers",
+    registryCliName: "component-layers",
+    description:
+      "A finished music player card tips into an isometric view and peels apart into its surface, spacing, layout and content layers, each with a leader-line label.",
+    categorySlug: "three-d-components",
+    tags: ["exploded view", "isometric", "layers", "design system", "anatomy", "3d", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-19",
+    animationKinds: ["3d", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Used in the cover art and for the hovered layer's outline and leader line." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Explodes and assembles on a loop until someone uses the toggle." },
+    ],
+    Preview: Previews.PreviewComponentLayers,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ComponentLayers } from "@/components/component-layers";
+
+export function AnatomySection() {
+  return (
+    <section className="flex flex-col items-center gap-6 py-20">
+      <h2 className="text-3xl font-semibold tracking-tight">Built from four layers</h2>
+      <ComponentLayers accent="#bf5af2" autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "standing-calendar",
+    name: "Standing Calendar",
+    registryCliName: "standing-calendar",
+    description:
+      "A contribution grid that stands up into a 3D field of columns. Each day becomes a box as tall as its count, rising in a wave across the weeks; hover a day to read its value.",
+    categorySlug: "dashboards",
+    tags: ["contribution graph", "heatmap", "calendar", "activity", "3d", "isometric", "chart", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["3d", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "weeks", type: "number", defaultValue: "30", description: "How many weeks of sample data to draw. Ignored when data is passed." },
+      { name: "data", type: "number[][]", description: "Your own counts: one array of 7 numbers (Mon to Sun) per week. Sample data is generated if left out." },
+      { name: "levels", type: "string[]", defaultValue: "STANDING_CALENDAR_LEVELS", description: "Five colours from no activity to busiest. The default empty colour follows light and dark mode." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Stands up and lies down on a loop until someone interacts." },
+    ],
+    Preview: Previews.PreviewStandingCalendar,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StandingCalendar } from "@/components/standing-calendar";
+
+export function ActivityCard({ weeks }: { weeks: number[][] }) {
+  return (
+    <div className="mx-auto w-full max-w-[680px] rounded-3xl p-6">
+      <StandingCalendar
+        data={weeks}
+        levels={["#ebedf0", "#c7f0d2", "#7ee2a1", "#30d158", "#1a8f3c"]}
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "money-goo",
+    name: "Money Goo",
+    registryCliName: "money-goo",
+    description:
+      "A peer-to-peer payment you drag out of your avatar: a liquid neck stretches, thins and snaps, and dropping the amount on a friend pours it in while both balances roll.",
+    categorySlug: "motion-effects",
+    tags: ["payment", "send money", "drag and drop", "gooey", "metaball", "fintech", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "amount", type: "number", defaultValue: "40", description: "Amount carried by the draggable blob on each send." },
+      { name: "from", type: "MoneyGooPerson", defaultValue: '{ name: "You", initials: "ME", balance: 248 }', description: "Sender: name, initials and starting balance." },
+      { name: "to", type: "MoneyGooPerson", defaultValue: '{ name: "Maya", initials: "MK", balance: 112 }', description: "Recipient: name, initials shown in the avatar, and starting balance." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the goo, the blob and the drop-target ring." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sends money by itself on a loop until someone drags." },
+    ],
+    Preview: Previews.PreviewMoneyGoo,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MoneyGoo } from "@/components/money-goo";
+
+export function SplitBill() {
+  return (
+    <MoneyGoo
+      amount={25}
+      from={{ name: "You", initials: "ME", balance: 180 }}
+      to={{ name: "Leo", initials: "LO", balance: 64 }}
+      accent="#34c759"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "weather-puck",
+    name: "Weather Puck",
+    registryCliName: "weather-puck",
+    description:
+      "Drag a glowing puck across a field of dots to set the time of day. Nearby dots lift and warm, and the landscape above relights from dawn to night with the hour name and clock rolling along.",
+    categorySlug: "inputs-controls",
+    tags: ["time of day", "slider", "weather", "sky", "canvas", "dot grid", "colour interpolation", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the light across the day until someone drags it." },
+    ],
+    Preview: Previews.PreviewWeatherPuck,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { WeatherPuck } from "@/components/weather-puck";
+
+export function TimeOfDayCard() {
+  return (
+    <section className="flex flex-col items-center gap-4">
+      <h2 className="text-lg font-semibold">Pick your golden hour</h2>
+      <WeatherPuck />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "metal-orbs",
+    name: "Metal Orbs",
+    registryCliName: "metal-orbs",
+    description:
+      "Two liquid-metal metaballs shaded per pixel with a fake chrome reflection on a 2D canvas. They bulge toward each other and pool when they meet; switch between joined, apart and orbit, or drag the cool orb around.",
+    categorySlug: "shaders",
+    tags: ["metaballs", "liquid metal", "chrome", "canvas", "blob", "no webgl", "segmented control", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "width", type: "number", defaultValue: "440", description: "Canvas width in px." },
+      { name: "height", type: "number", defaultValue: "280", description: "Canvas height in px." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles joined, orbit and apart by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewMetalOrbs,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MetalOrbs } from "@/components/metal-orbs";
+
+export function HeroOrbs() {
+  return (
+    <div className="flex justify-center py-16">
+      <MetalOrbs width={520} height={300} autoplay />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bending-rail",
+    name: "Bending Rail",
+    registryCliName: "bending-rail",
+    description:
+      "A slider whose rail follows the knob. Pull the knob off the groove and the rail bends toward it while a ghost knob keeps the value; let go and it twangs straight on a spring.",
+    categorySlug: "inputs-controls",
+    tags: ["slider", "range", "elastic", "rubber band", "spring", "svg", "volume", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"Volume"', description: "Label shown above the rail and used as the slider's accessible name." },
+      { name: "min", type: "number", defaultValue: "0", description: "Lowest value." },
+      { name: "max", type: "number", defaultValue: "100", description: "Highest value." },
+      { name: "defaultValue", type: "number", defaultValue: "40", description: "Starting value." },
+      { name: "unit", type: "string", defaultValue: '"%"', description: "Suffix shown after the value." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the filled run, the tether and the ghost knob." },
+      { name: "onChange", type: "(v: number) => void", description: "Called whenever the rounded value changes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tugs the knob around by itself until someone grabs it." },
+    ],
+    Preview: Previews.PreviewBendingRail,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { BendingRail } from "@/components/bending-rail";
+
+export function BrightnessControl() {
+  const [brightness, setBrightness] = useState(70);
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <BendingRail label="Brightness" defaultValue={brightness} accent="#ff9f0a" onChange={setBrightness} />
+      <p className="text-sm text-neutral-500">Screen at {brightness}%</p>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "layout-switch",
+    name: "Layout Switch",
+    registryCliName: "layout-switch",
+    description:
+      "A photo set that glides between grid, row, feature and pile arrangements on springs, with nothing fading or cutting. Click a photo and it grows to fill the frame; click again or press Escape to put it back.",
+    categorySlug: "motion-effects",
+    tags: ["gallery", "photos", "layout", "grid", "pile", "segmented control", "lightbox", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 155,
+    createdAt: "2026-10-19",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Changes layouts by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewLayoutSwitch,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { LayoutSwitch } from "@/components/layout-switch";
+
+export function TripGallery() {
+  return (
+    <section className="mx-auto flex max-w-[680px] flex-col gap-6 px-4 py-12">
+      <h2 className="text-2xl font-semibold tracking-tight">Last summer</h2>
+      <LayoutSwitch />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "fan-deck",
+    name: "Fan Deck",
+    registryCliName: "fan-deck",
+    description:
+      "A paint-chip deck that tips onto its side and fans out into a colour-graded half circle around its rivet. Hover lifts a chip and clicking one copies its hex code.",
+    categorySlug: "motion-effects",
+    tags: ["color palette", "paint chips", "fan out", "swatches", "copy hex", "spring", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-19",
+    animationKinds: ["spring", "hover", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "chips", type: "FanDeckChip[]", defaultValue: "12 chips, Ember to Rosewood", description: "The swatches as { name, hex }, in the order they fan out from left to right." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fans out and closes by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewFanDeck,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FanDeck } from "@/components/fan-deck";
+
+const brand = [
+  { name: "Night", hex: "#1D1D1F" },
+  { name: "Slate", hex: "#5B6475" },
+  { name: "Sky", hex: "#3DB9CF" },
+  { name: "Cobalt", hex: "#0071E3" },
+  { name: "Iris", hex: "#5B5BD6" },
+  { name: "Sun", hex: "#F5A524" },
+  { name: "Coral", hex: "#F76B4B" },
+];
+
+export function BrandPalette() {
+  return <FanDeck chips={brand} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "receipt-unfold",
+    name: "Receipt Unfold",
+    registryCliName: "receipt-unfold",
+    description:
+      "Press Get invoice and a folded paper slip rises out of the row, unfolds panel by panel on 3D hinges, and the total gets circled by hand.",
+    categorySlug: "cards",
+    tags: ["invoice", "receipt", "unfold", "3d", "paper", "billing", "path drawing", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-19",
+    animationKinds: ["3d", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "lines", type: "ReceiptLine[]", defaultValue: "4 sample line items", description: "Line items as { label, amount } shown on the middle panel." },
+      { name: "total", type: "string", defaultValue: '"$49.68"', description: "Total on the bottom panel; it gets circled once the slip is fully open." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and folds by itself until someone presses the row." },
+    ],
+    Preview: Previews.PreviewReceiptUnfold,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ReceiptUnfold } from "@/components/receipt-unfold";
+
+export function BillingRow() {
+  return (
+    <ReceiptUnfold
+      lines={[
+        { label: "Team plan · November", amount: "$96.00" },
+        { label: "Extra seats × 2", amount: "$16.00" },
+        { label: "Tax", amount: "$8.96" },
+      ]}
+      total="$120.96"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "page-curl",
+    name: "Page Curl",
+    registryCliName: "page-curl",
+    description:
+      "Grab the corner of a page and peel it back. The fold is computed live from your pointer, the flap shows the paper's back, and whatever you put underneath is revealed.",
+    categorySlug: "cards",
+    tags: ["page curl", "peel", "fold", "reveal", "paper", "drag", "clip-path", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "width", type: "number", defaultValue: "400", description: "Page width in px." },
+      { name: "height", type: "number", defaultValue: "260", description: "Page height in px." },
+      { name: "front", type: "ReactNode", defaultValue: "sample letter", description: "Content of the page you peel." },
+      { name: "back", type: "ReactNode", defaultValue: "hidden discount card", description: "What is revealed underneath the page." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Peeks the corner by itself until someone grabs it." },
+    ],
+    Preview: Previews.PreviewPageCurl,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PageCurl } from "@/components/page-curl";
+
+export function SecretOffer() {
+  return (
+    <PageCurl
+      width={360}
+      height={220}
+      front={
+        <div className="flex h-full flex-col justify-center gap-2 p-7">
+          <p className="text-[24px] font-semibold tracking-tight">There is more here.</p>
+          <p className="text-[14px] text-neutral-500">Drag the bottom-right corner.</p>
+        </div>
+      }
+      back={
+        <div className="flex h-full items-center justify-center bg-gradient-to-br from-amber-200 to-rose-300 text-[22px] font-semibold">
+          Free shipping: SHIPFREE
+        </div>
+      }
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "sign-and-seal",
+    name: "Sign & Seal",
+    registryCliName: "sign-and-seal",
+    description:
+      "A membership card you sign with your pointer on a canvas. Pause for a moment and a clear plastic sleeve slides down over it with a glint running across.",
+    categorySlug: "inputs-controls",
+    tags: ["signature", "signature pad", "canvas", "draw", "card", "sleeve", "idle detection", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-19",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "name", type: "string", defaultValue: '"Alex Rivera"', description: "Name printed on the card." },
+      { name: "title", type: "string", defaultValue: '"Founding member"', description: "Small label above the name." },
+      { name: "ink", type: "string", defaultValue: "theme ink", description: "Ink colour. Defaults to near-black, or near-white in dark mode." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Signs itself on a loop until someone draws." },
+    ],
+    Preview: Previews.PreviewSignAndSeal,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SignAndSeal } from "@/components/sign-and-seal";
+
+export function MemberCard() {
+  return <SignAndSeal name="Jordan Lee" title="Early supporter" ink="#0071e3" />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "streak-counter",
+    name: "Streak Counter",
+    registryCliName: "streak-counter",
+    description:
+      "Log a day and the number rolls up, the week strip slides along to make room for today, and the flame bursts into embers that fall back in, burning hotter with each day.",
+    categorySlug: "cards",
+    tags: ["streak", "habit", "counter", "flame", "particles", "gamification", "week strip", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "start", type: "number", defaultValue: "11", description: "Streak length to start from; the flame heats up over the next eight logged days." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Logs a day by itself every couple of seconds until someone presses." },
+    ],
+    Preview: Previews.PreviewStreakCounter,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StreakCounter } from "@/components/streak-counter";
+
+export function HabitCard() {
+  return <StreakCounter start={27} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "capsule-toggles",
+    name: "Capsule Toggles",
+    registryCliName: "capsule-toggles",
+    description:
+      "Switches built as a ball sealed in a glass capsule. Flip one and the ball stretches into a pill mid-flight, then takes on the row's colour and glows as it lands.",
+    categorySlug: "inputs-controls",
+    tags: ["toggle", "switch", "settings", "glass", "spring", "control center", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-19",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "rows", type: "CapsuleToggleRow[]", defaultValue: "Wi-Fi, Bluetooth, Focus, Low Power", description: "CapsuleToggles: rows as { id, label, hint, color, on }." },
+      { name: "title", type: "string", defaultValue: '"Controls"', description: "CapsuleToggles: small heading above the list." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "CapsuleToggles: flips the rows one after another until someone touches the panel." },
+      { name: "checked", type: "boolean", defaultValue: "required", description: "CapsuleToggle: whether the switch is on." },
+      { name: "onChange", type: "(v: boolean) => void", defaultValue: "required", description: "CapsuleToggle: called with the new value when pressed." },
+      { name: "label", type: "string", defaultValue: "required", description: "CapsuleToggle: accessible name of the switch." },
+      { name: "onColor", type: "string", defaultValue: '"#34c759"', description: "CapsuleToggle: ball colour and glow when on." },
+      { name: "offColor", type: "string", defaultValue: "theme grey", description: "CapsuleToggle: ball colour when off; defaults to a grey that adapts to dark mode." },
+    ],
+    Preview: Previews.PreviewCapsuleToggles,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { CapsuleToggle } from "@/components/capsule-toggles";
+
+export function NotificationsSetting() {
+  const [on, setOn] = useState(true);
+  return (
+    <label className="flex items-center justify-between gap-6">
+      <span className="text-[15px] font-medium">Notifications</span>
+      <CapsuleToggle label="Notifications" checked={on} onChange={setOn} onColor="#0a84ff" />
+    </label>
   );
 }`,
     tailwindSource: tw,

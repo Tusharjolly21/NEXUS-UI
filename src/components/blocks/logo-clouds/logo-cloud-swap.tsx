@@ -1,10 +1,10 @@
 "use client";
-// Per-Icon Left-to-Right Reveal: each icon blurs out, then the sharp version
-// sweeps back in from its left edge to its right edge using clipPath.
-// This per-icon wipe cascades sequentially across the row left → right.
+// Swap Animation: a fixed set of slots shows one page of marks at a time. Every `interval` ms the
+// next page rolls in, slot by slot from left to right: the outgoing mark lifts away and blurs out
+// while the incoming one rises into place on a spring. Pauses while off screen.
 
 import * as React from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { LOGOS, LogoLockup } from "./logos";
 
@@ -20,98 +20,52 @@ export type LogoCloudSwapProps = {
   subtitle?: string;
   interval?: number;
   stagger?: number;
+  /** How many marks are on screen at once. Defaults to 6. */
+  slots?: number;
   className?: string;
 };
 
-const WIPE_DURATION = 0.92;
-const WIPE_TIMES = [0, 0.4, 1];
+const SPRING = { type: "spring" as const, stiffness: 400, damping: 32 };
+const SOFT = { type: "spring" as const, stiffness: 240, damping: 30 };
 
 const DEFAULT_LOGOS: LogoEntry[] = LOGOS.map((l) => ({
-  icon: <LogoLockup logo={l} className="text-[18px] sm:text-[20px]" />,
+  icon: <LogoLockup logo={l} className="text-[17px] sm:text-[19px]" />,
   id: l.name,
 }));
 
-function LogoItem({
+function Slot({
   logo,
-  index,
-  isWaving,
-  stagger,
-  totalCount,
-  onDone,
+  page,
+  delay,
+  reduced,
 }: {
   logo: LogoEntry;
-  index: number;
-  isWaving: boolean;
-  stagger: number;
-  totalCount: number;
-  onDone: () => void;
+  page: number;
+  delay: number;
+  reduced: boolean;
 }) {
+  const motionIn = reduced ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(6px)" };
+  const motionOut = reduced ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(6px)" };
+
   return (
-    <motion.div
-      role={logo.name ? "img" : undefined}
-      aria-label={logo.name}
-      animate={
-        isWaving
-          ? {
-              clipPath: [
-                "inset(0 0% 0 0)",
-                "inset(0 100% 0 0)",
-                "inset(0 0% 0 0)",
-              ],
-              filter: ["blur(0px)", "blur(8px)", "blur(0px)"],
-              opacity: [1, 0.2, 1],
-            }
-          : {
-              clipPath: "inset(0 0% 0 0)",
-              filter: "blur(0px)",
-              opacity: 1,
-            }
-      }
-      transition={
-        isWaving
-          ? {
-              clipPath: {
-                duration: WIPE_DURATION,
-                times: WIPE_TIMES,
-                ease: ["easeIn", [0.16, 1, 0.3, 1]],
-                delay: index * stagger,
-              },
-              filter: {
-                duration: WIPE_DURATION * 0.9,
-                times: WIPE_TIMES,
-                ease: "easeInOut" as const,
-                delay: index * stagger,
-              },
-              opacity: {
-                duration: WIPE_DURATION * 0.85,
-                times: WIPE_TIMES,
-                ease: "easeInOut" as const,
-                delay: index * stagger,
-              },
-            }
-          : {
-              duration: 0.3,
-              ease: "easeOut",
-            }
-      }
-      onAnimationComplete={() => {
-        if (isWaving && index === totalCount - 1) onDone();
-      }}
-      whileHover={{
-        scale: 1.07,
-        opacity: 1,
-        filter: "blur(0px)",
-        transition: { type: "spring", stiffness: 340, damping: 24 },
-      }}
-      className="flex shrink-0 cursor-default flex-col items-center gap-2 text-neutral-700 dark:text-neutral-300"
-    >
-      <span className="flex h-9 min-w-9 items-center justify-center sm:h-10 sm:min-w-10">{logo.icon}</span>
-      {logo.name && (
-        <span className="select-none whitespace-nowrap text-[10px] font-medium tracking-wide text-neutral-400 dark:text-neutral-600 sm:text-[11px]">
-          {logo.name}
-        </span>
-      )}
-    </motion.div>
+    <div className="relative flex h-16 w-full items-center justify-center overflow-hidden opacity-55 transition-opacity duration-300 ease-out hover:opacity-100">
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.div
+          key={`${page}-${logo.id ?? logo.name ?? ""}`}
+          role={logo.name ? "img" : undefined}
+          aria-label={logo.name}
+          initial={motionIn}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { ...SPRING, delay } }}
+          exit={{ ...motionOut, transition: { ...SPRING, delay } }}
+          className="flex cursor-default flex-col items-center gap-1.5 text-[#1d1d1f] dark:text-[#f5f5f7]"
+        >
+          <span className="flex h-8 min-w-8 items-center justify-center">{logo.icon}</span>
+          {logo.name ? (
+            <span className="select-none whitespace-nowrap text-[12px] font-medium">{logo.name}</span>
+          ) : null}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   );
 }
 
@@ -120,57 +74,54 @@ export default function LogoCloudSwap({
   title = "Chosen by teams who sweat the details",
   subtitle = "Each of these replaced three tools with one.",
   interval = 3200,
-  stagger = 0.11,
+  stagger = 0.08,
+  slots = 6,
   className,
 }: LogoCloudSwapProps) {
-  const [waving, setWaving] = React.useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "-80px" });
+  const reduced = !!useReducedMotion();
+  const [page, setPage] = React.useState(0);
+
+  const slotCount = Math.max(1, Math.min(slots, logos.length));
+  const pages = Math.max(1, Math.ceil(logos.length / slotCount));
 
   React.useEffect(() => {
-    const id = setInterval(() => setWaving(true), interval);
-    return () => clearInterval(id);
-  }, [interval]);
+    if (!inView || pages < 2) return;
+    const id = window.setInterval(() => setPage((p) => p + 1), interval);
+    return () => window.clearInterval(id);
+  }, [inView, interval, pages]);
+
+  const pageIndex = page % pages;
 
   return (
-    <section className={cn("w-full bg-white px-4 py-12 dark:bg-neutral-950 sm:py-16", className)}>
-      <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-balance text-[26px] font-semibold leading-[1.15] tracking-[-0.025em] text-neutral-950 md:text-[34px] dark:text-white">
+    <section className={cn("w-full bg-white px-4 py-16 dark:bg-black sm:py-24", className)}>
+      <motion.div
+        className="mx-auto max-w-2xl text-center"
+        initial={reduced ? { opacity: 0 } : { opacity: 0, y: 16, filter: "blur(6px)" }}
+        whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={SOFT}
+      >
+        <h2 className="text-balance text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-[40px]">
           {title}
         </h2>
-        {subtitle && (
-          <p className="mt-3 text-[15px] text-neutral-500 dark:text-neutral-400">{subtitle}</p>
+        {subtitle ? (
+          <p className="mt-3 text-[17px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6]">{subtitle}</p>
+        ) : null}
+      </motion.div>
+
+      <div
+        ref={ref}
+        className={cn(
+          "mx-auto mt-12 grid max-w-5xl grid-cols-2 gap-x-4 gap-y-4 sm:mt-14 sm:grid-cols-3 sm:gap-x-8",
+          slotCount >= 6 && "lg:grid-cols-6",
         )}
-      </div>
-
-      <div className="mx-auto mt-10 max-w-5xl sm:mt-12">
-        {/* Desktop: single flex row */}
-        <div className="hidden items-center justify-center sm:flex sm:flex-wrap sm:gap-x-10 sm:gap-y-8 lg:gap-x-12">
-          {logos.map((logo, i) => (
-            <LogoItem
-              key={logo.id ?? i}
-              logo={logo}
-              index={i}
-              isWaving={waving}
-              stagger={stagger}
-              totalCount={logos.length}
-              onDone={() => setWaving(false)}
-            />
-          ))}
-        </div>
-
-        {/* Mobile: 3-col grid */}
-        <div className="grid grid-cols-2 place-items-center gap-x-4 gap-y-7 sm:hidden">
-          {logos.map((logo, i) => (
-            <LogoItem
-              key={logo.id ?? i}
-              logo={logo}
-              index={i}
-              isWaving={waving}
-              stagger={stagger}
-              totalCount={logos.length}
-              onDone={() => setWaving(false)}
-            />
-          ))}
-        </div>
+      >
+        {Array.from({ length: slotCount }, (_, i) => {
+          const logo = logos[(pageIndex * slotCount + i) % logos.length];
+          return <Slot key={i} logo={logo} page={page} delay={i * stagger} reduced={reduced} />;
+        })}
       </div>
     </section>
   );

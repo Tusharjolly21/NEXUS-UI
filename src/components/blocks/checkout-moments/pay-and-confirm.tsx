@@ -1,11 +1,25 @@
 "use client";
 
 import * as React from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CreditCard, Lock, Minus, Plus, RotateCcw } from "lucide-react";
 import { SlideToConfirm } from "@/components/slide-to-confirm";
 import { ToastStack, useToastStack } from "@/components/toast-stack";
 import { cn } from "@/lib/utils";
-import { formatMoney, GhostButton, hairline, MomentCard, Money, muted, StepSwap, SuccessMark, useElementWidth } from "./moment-card";
+import {
+  ACCENT,
+  focusRing,
+  formatMoney,
+  GhostButton,
+  hairline,
+  MomentCard,
+  Money,
+  muted,
+  StepSwap,
+  SUCCESS,
+  SuccessMark,
+  useElementWidth,
+} from "./moment-card";
 
 export type CheckoutProduct = {
   name: string;
@@ -64,6 +78,8 @@ export function PayAndConfirm({
   receiptEmail = "you@studio.co",
   className,
 }: PayAndConfirmProps) {
+  const uid = React.useId();
+  const reduce = useReducedMotion();
   const [qty, setQty] = React.useState(1);
   const [shipId, setShipId] = React.useState(shipping[0]?.id ?? "");
   const [paid, setPaid] = React.useState<string | null>(null);
@@ -103,7 +119,7 @@ export function PayAndConfirm({
               <p className={cn("mt-1 text-[14px]", muted)}>
                 {formatMoney(total, currency)} to {merchant} · Receipt {paid}
               </p>
-              <div className={cn("mt-6 w-full space-y-2 rounded-2xl border p-4 text-left", hairline)}>
+              <div className={cn("mt-6 w-full space-y-2 rounded-2xl border bg-[#f5f5f7] p-4 text-left dark:bg-[#2c2c2e]", hairline)}>
                 <div className={row}>
                   <span className={muted}>{product.name}</span>
                   <span className="tabular-nums">×{qty}</span>
@@ -122,7 +138,7 @@ export function PayAndConfirm({
             <>
               <header className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="grid size-8 place-items-center rounded-full bg-[#17171c] text-[13px] font-semibold text-white dark:bg-white dark:text-[#17171c]">
+                  <span className="grid size-8 place-items-center rounded-full bg-[#1d1d1f] text-[13px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
                     {merchant.slice(0, 1)}
                   </span>
                   <div className="leading-tight">
@@ -131,7 +147,7 @@ export function PayAndConfirm({
                   </div>
                 </div>
                 <span className={cn("inline-flex items-center gap-1 text-[12.5px]", muted)}>
-                  <Lock className="size-3.5" aria-hidden />
+                  <Lock className="size-3.5" strokeWidth={2} aria-hidden />
                   Secure
                 </span>
               </header>
@@ -139,7 +155,7 @@ export function PayAndConfirm({
               <div className="mt-6 flex items-center gap-3.5">
                 <span
                   aria-hidden
-                  className="size-14 shrink-0 rounded-2xl bg-cover bg-center shadow-[inset_0_0_0_1px_rgba(23,23,28,0.06)]"
+                  className="size-14 shrink-0 rounded-[14px] bg-cover bg-center shadow-[inset_0_0_0_1px_rgba(0,0,0,0.06)]"
                   style={{ background: product.image ? `center / cover url(${product.image})` : product.swatch }}
                 />
                 <div className="min-w-0 flex-1">
@@ -149,26 +165,37 @@ export function PayAndConfirm({
                 <div
                   role="group"
                   aria-label="Quantity"
-                  className="flex items-center rounded-full bg-[#17171c]/[0.05] p-0.5 dark:bg-white/[0.07]"
+                  className="flex items-center rounded-full bg-[#f5f5f7] p-0.5 dark:bg-[#2c2c2e]"
                 >
                   <button
                     type="button"
                     aria-label="Remove one"
                     disabled={qty <= 1}
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="grid size-7 place-items-center rounded-full transition-colors hover:bg-white disabled:opacity-30 dark:hover:bg-white/10"
+                    className={cn("grid size-7 place-items-center rounded-full transition-[background-color,transform] hover:bg-white active:scale-90 disabled:opacity-30 dark:hover:bg-[#3a3a3c]", focusRing)}
                   >
                     <Minus className="size-3.5" aria-hidden />
                   </button>
-                  <span aria-live="polite" className="w-6 text-center text-[14px] font-semibold tabular-nums">
-                    {qty}
+                  <span aria-live="polite" className="relative grid w-6 overflow-hidden text-center text-[14px] font-semibold tabular-nums">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      <motion.span
+                        key={qty}
+                        className="block"
+                        initial={reduce ? { opacity: 0 } : { opacity: 0, y: "100%", filter: "blur(4px)" }}
+                        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                        exit={reduce ? { opacity: 0 } : { opacity: 0, y: "-100%", filter: "blur(4px)" }}
+                        transition={reduce ? { duration: 0.12 } : { type: "spring", stiffness: 500, damping: 34 }}
+                      >
+                        {qty}
+                      </motion.span>
+                    </AnimatePresence>
                   </span>
                   <button
                     type="button"
                     aria-label="Add one"
                     disabled={qty >= 9}
                     onClick={() => setQty((q) => Math.min(9, q + 1))}
-                    className="grid size-7 place-items-center rounded-full transition-colors hover:bg-white disabled:opacity-30 dark:hover:bg-white/10"
+                    className={cn("grid size-7 place-items-center rounded-full transition-[background-color,transform] hover:bg-white active:scale-90 disabled:opacity-30 dark:hover:bg-[#3a3a3c]", focusRing)}
                   >
                     <Plus className="size-3.5" aria-hidden />
                   </button>
@@ -184,22 +211,30 @@ export function PayAndConfirm({
                       <label
                         key={s.id}
                         className={cn(
-                          "relative cursor-pointer rounded-2xl border p-3 transition-[border-color,box-shadow] has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#17171c] dark:has-[:focus-visible]:outline-white",
+                          "relative cursor-pointer rounded-2xl border p-3 transition-[border-color,background-color] duration-200 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-[#0071e3]",
                           active
-                            ? "border-[#17171c] shadow-[0_0_0_1px_#17171c] dark:border-white dark:shadow-[0_0_0_1px_#fff]"
-                            : cn(hairline, "hover:border-[#17171c]/25 dark:hover:border-white/25"),
+                            ? "border-transparent bg-[#0071e3]/[0.04] dark:bg-[#2997ff]/[0.08]"
+                            : cn(hairline, "hover:border-black/20 dark:hover:border-white/25"),
                         )}
                       >
+                        {active ? (
+                          <motion.span
+                            layoutId={`${uid}-ship`}
+                            aria-hidden
+                            className="pointer-events-none absolute -inset-px rounded-2xl shadow-[inset_0_0_0_2px_#0071e3]"
+                            transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 34 }}
+                          />
+                        ) : null}
                         <input
                           type="radio"
-                          name="pay-and-confirm-shipping"
+                          name={`${uid}-shipping`}
                           value={s.id}
                           checked={active}
                           onChange={() => setShipId(s.id)}
                           className="sr-only"
                         />
-                        <span className="block truncate text-[13.5px] font-semibold">{s.label}</span>
-                        <span className={cn("block truncate text-[12.5px]", muted)}>
+                        <span className="relative block truncate text-[13.5px] font-semibold">{s.label}</span>
+                        <span className={cn("relative block truncate text-[12.5px]", muted)}>
                           {s.eta} · {s.price ? formatMoney(s.price, currency) : "Free"}
                         </span>
                       </label>
@@ -229,7 +264,7 @@ export function PayAndConfirm({
                 </div>
               </dl>
 
-              <div className={cn("mt-4 flex items-center justify-between rounded-2xl bg-[#17171c]/[0.04] px-3.5 py-2.5 dark:bg-white/[0.05]")}>
+              <div className="mt-4 flex items-center justify-between rounded-2xl bg-[#f5f5f7] px-3.5 py-2.5 dark:bg-[#2c2c2e]">
                 <span className="inline-flex items-center gap-2 whitespace-nowrap text-[13.5px]">
                   <CreditCard className={cn("size-4", muted)} aria-hidden />
                   Card •••• {cardLast4}
@@ -238,14 +273,16 @@ export function PayAndConfirm({
               </div>
 
               <div ref={slotRef} className="mt-4">
-              <SlideToConfirm
-                width={slotWidth}
-                label={`Slide to pay ${formatMoney(total, currency)}`}
-                pendingLabel="Processing…"
-                successLabel="Paid"
-                onConfirm={pay}
-                resetAfter={0}
-              />
+                <SlideToConfirm
+                  width={slotWidth}
+                  label={`Slide to pay ${formatMoney(total, currency)}`}
+                  pendingLabel="Processing…"
+                  successLabel="Paid"
+                  onConfirm={pay}
+                  resetAfter={0}
+                  accent={ACCENT}
+                  successColor={SUCCESS}
+                />
               </div>
             </>
           )}

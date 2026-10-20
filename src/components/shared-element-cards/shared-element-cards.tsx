@@ -94,7 +94,7 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
           <>
             <motion.div
               key="scrim"
-              className="absolute -inset-3 z-10 rounded-[28px] bg-white/60 backdrop-blur-md"
+              className="absolute -inset-3 z-10 rounded-[28px] bg-white/60 backdrop-blur-md dark:bg-black/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -107,7 +107,7 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
               role="dialog"
               aria-modal="true"
               aria-label={active.title}
-              className="absolute inset-0 z-20 flex flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,.45)]"
+              className="absolute inset-0 z-20 flex flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,.45)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_70px_-20px_rgba(0,0,0,.8)]"
             >
               <div className="relative h-[150px] flex-none" style={{ background: active.art }}>
                 <motion.div layoutId={lid(active.id, "text")} transition={spring} className="absolute bottom-0 left-0 flex flex-col gap-1 p-5">
@@ -128,7 +128,7 @@ export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedEl
                 </motion.button>
               </div>
               <motion.div
-                className="flex flex-col gap-3 overflow-y-auto px-5 py-4 text-[15px] leading-[1.5] text-[#424245]"
+                className="flex flex-col gap-3 overflow-y-auto px-5 py-4 text-[15px] leading-[1.5] text-[#424245] dark:text-[#d2d2d7]"
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.18, duration: 0.35 } }}
                 exit={{ opacity: 0, transition: { duration: 0.08 } }}

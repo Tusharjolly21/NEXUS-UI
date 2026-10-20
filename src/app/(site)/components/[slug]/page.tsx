@@ -12,8 +12,7 @@ import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { allGalleryItems } from "@/lib/catalog/gallery-items";
-import { getCachedUser } from "@/lib/supabase/server";
-import { hasPremiumAccess } from "@/lib/entitlements";
+import { sessionCanAccessComponent, sessionHasPro } from "@/lib/component-access";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -114,8 +113,9 @@ export default async function ComponentDetailPage({ params }: Props) {
   // Registry CLI aliases (e.g. gooey-input) resolve here too — send them to the one canonical URL.
   if (item.slug !== slug) permanentRedirect(`/components/${item.slug}`);
 
-  const user = await getCachedUser();
-  const isPremium = user ? await hasPremiumAccess(user.id) : false;
+  const isPremium = await sessionHasPro();
+  // Pro code never reaches a browser without access: a locked page gets no source or usage code.
+  const locked = !(await sessionCanAccessComponent(item.slug, item.premium));
   const registryName = item.registryCliName ?? item.slug;
   const installInfo = await getRegistryInstallInfo(registryName, item.name, item.dependencies);
 
@@ -162,7 +162,7 @@ export default async function ComponentDetailPage({ params }: Props) {
 
   const serializedPreviewSections = item.previewSections?.map((s) => ({
     title: s.title,
-    reactSource: s.reactSource,
+    reactSource: locked ? "" : s.reactSource,
     previewExportName: getPreviewExportName(s.Preview),
   }));
 
@@ -189,7 +189,8 @@ export default async function ComponentDetailPage({ params }: Props) {
         dependencies={installInfo.dependencies}
         installedFiles={installInfo.files}
         registryImport={installInfo.registryImport}
-        reactSource={item.reactSource}
+        reactSource={locked ? undefined : item.reactSource}
+        locked={locked}
         props={item.props}
         previewExportName={getPreviewExportName(item.Preview)}
         serializedPreviewSections={serializedPreviewSections}

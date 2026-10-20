@@ -2663,10 +2663,6 @@
         {
           "path": "next-ui/blocks/contact-page.tsx",
           "type": "registry:component"
-        },
-        {
-          "path": "next-ui/brand/nexus-mark.tsx",
-          "type": "registry:component"
         }
       ]
     },
@@ -2676,8 +2672,8 @@
       "title": "Blog Content Sections",
       "description": "Centered article, table-of-contents, editorial, featured post, and hover-card blog sections.",
       "dependencies": [
-        "framer-motion",
         "react",
+        "framer-motion",
         "lucide-react"
       ],
       "registryDependencies": [
