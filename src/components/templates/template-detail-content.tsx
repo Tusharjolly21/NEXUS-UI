@@ -153,7 +153,8 @@ function BuildPromptButton({ slug, name, hasAccess }: { slug: string; name: stri
         {hasAccess ? null : <ProBadge className="ml-0.5" />}
       </button>
       <p id={`${slug}-prompt-hint`} className="px-1 text-[13px] leading-relaxed text-muted-foreground">
-        The brief to rebuild {name} with Claude, Cursor or v0. It&apos;s also in the zip as PROMPT.md.
+        The brief to rebuild {name} with Claude, Cursor or v0.{" "}
+        {hasAccess ? "It's also in the zip as PROMPT.md." : "Comes with Pro, along with the source."}
       </p>
     </>
   );

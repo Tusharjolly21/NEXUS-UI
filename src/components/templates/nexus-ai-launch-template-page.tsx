@@ -31,16 +31,11 @@ const spring = { type: "spring", stiffness: 260, damping: 24 } as const;
 function Logo() {
   return (
     <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
-      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
-        <rect x="3" y="3" width="26" height="26" rx="8" fill={A} />
-        <motion.path
-          d="M16 8.5l1.9 5.6 5.6 1.9-5.6 1.9L16 23.5l-1.9-5.6-5.6-1.9 5.6-1.9z"
-          fill="#fff"
-          animate={{ rotate: [0, 90] }}
-          transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2.6, type: "spring", stiffness: 120, damping: 14 }}
-          style={{ originX: "16px", originY: "16px" }}
-        />
-      </svg>
+      <span className="relative flex h-[26px] w-[26px] items-center justify-center rounded-[8px]" style={{ background: A }} aria-hidden="true">
+        <motion.svg width="16" height="16" viewBox="0 0 24 24" animate={{ rotate: [0, 90] }} transition={{ duration: 2.4, repeat: Infinity, repeatDelay: 2.6, type: "spring", stiffness: 120, damping: 14 }}>
+          <path d="M12 2.5l2.4 7.1 7.1 2.4-7.1 2.4L12 21.5l-2.4-7.1L2.5 12l7.1-2.4z" fill="#fff" />
+        </motion.svg>
+      </span>
       Asteria
     </span>
   );
@@ -599,14 +594,14 @@ function HowItWorks() {
 function NotesBefore() {
   return (
     <div className="absolute inset-0 flex flex-col gap-[1.4cqw] bg-[#fdfbf3] p-[4cqw] text-left text-[#3f3a2e]" style={{ fontFamily: MONO, containerType: "inline-size" }}>
-      <span className="text-[2.2cqw] text-[#857a5b]">notes.txt · last edited 01:12</span>
-      <span className="text-[2.6cqw]">dog walking but at NIGHT??</span>
-      <span className="text-[2.6cqw]">- nurses, warehouse ppl, bakers</span>
-      <span className="text-[2.6cqw] line-through decoration-[#b45309]">- uber for dogs</span>
-      <span className="text-[2.6cqw]">- walkers who are up anyway (students? night owls)</span>
-      <span className="text-[2.6cqw]">- send a photo when dog is home!!</span>
-      <span className="text-[2.6cqw]">price ~18/walk?? ask the dog park group</span>
-      <span className="text-[2.6cqw]">name: nightpaws / moonwalk / owl&amp;dog</span>
+      <span className="text-[1.8cqw] text-[#857a5b]">notes.txt · last edited 01:12</span>
+      <span className="text-[2.1cqw]">dog walking but at NIGHT??</span>
+      <span className="text-[2.1cqw]">- nurses, warehouse ppl, bakers</span>
+      <span className="text-[2.1cqw] line-through decoration-[#b45309]">- just an app for dogs??</span>
+      <span className="text-[2.1cqw]">- walkers who are up anyway (students? night owls)</span>
+      <span className="text-[2.1cqw]">- send a photo when dog is home!!</span>
+      <span className="text-[2.1cqw]">price ~18/walk?? ask the dog park group</span>
+      <span className="text-[2.1cqw]">name: nightpaws / moonwalk / owl&amp;dog</span>
       <span className="absolute bottom-[5cqw] right-[5cqw] rotate-[4deg] rounded-[1cqw] bg-[#fde68a] px-[2cqw] py-[1.4cqw] text-[2.3cqw] shadow-[0_8px_16px_-8px_rgba(0,0,0,.3)]">launch before xmas</span>
     </div>
   );
@@ -742,7 +737,7 @@ function Pricing() {
                 <p className="m-0 mt-1 text-[15px] text-[#6e6e73]">{p.blurb}</p>
               </div>
               <div className="flex items-baseline gap-1.5">
-                <span className="flex text-[48px] font-semibold tabular-nums tracking-[-0.045em] text-[#1d1d1f]">$<RollingNumber value={yearly ? p.y : p.m} /></span>
+                <span className="flex text-[48px] font-semibold leading-none tabular-nums tracking-[-0.045em] text-[#1d1d1f]">$<RollingNumber value={yearly ? p.y : p.m} /></span>
                 <span className="text-[14px] text-[#6e6e73]">{p.m === 0 ? "forever" : "per month"}</span>
               </div>
               <ul className="m-0 flex list-none flex-col gap-3 p-0">

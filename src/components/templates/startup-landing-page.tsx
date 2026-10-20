@@ -27,7 +27,7 @@ function Logo() {
     <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
       <svg width="30" height="22" viewBox="0 0 40 28" aria-hidden="true">
         {[8, 20, 32].map((cx, i) => (
-          <motion.circle key={cx} cx={cx} cy="14" r="7.5" fill="none" stroke={i === 1 ? A : "#1d1d1f"} strokeWidth="2.6" animate={{ cy: [14, i === 1 ? 11 : 15, 14] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.25 }} />
+          <motion.circle key={cx} cx={cx} cy="14" r="7.5" fill="none" stroke={i === 1 ? A : "#1d1d1f"} strokeWidth="2.6" animate={{ y: [0, i === 1 ? -3 : 1, 0] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.25 }} />
         ))}
       </svg>
       Aureon

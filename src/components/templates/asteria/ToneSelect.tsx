@@ -31,7 +31,7 @@ export interface PixelSelectProps {
  * A dropdown that assembles itself out of pixels tinted with the current mood,
  * then dissolves back into a shower of them when it closes.
  */
-export default function ToneSelect({ options = MOODS, onChange, autoplay = false, defaultValue, label = "Mood", accent = "#0071e3" }: PixelSelectProps & { defaultValue?: string; label?: string; accent?: string }) {
+export default function ToneSelect({ options = MOODS, onChange, autoplay = false, defaultValue, label = "Mood", accent = "#7c3aed" }: PixelSelectProps & { defaultValue?: string; label?: string; accent?: string }) {
   const uid = useId();
   const [value, setValue] = useState(defaultValue ?? options[1].id);
   const [phase, setPhase] = useState<Phase>("closed");

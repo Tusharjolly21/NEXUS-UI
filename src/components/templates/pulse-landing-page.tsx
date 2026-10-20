@@ -293,7 +293,7 @@ function Hero() {
             </h1>
             <Reveal delay={0.35} y={14}>
               <p className="m-0 text-[clamp(17px,2vw,19px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
-                Pulse keeps the issue tracker, the on-call incident and the quarter's roadmap on one timeline. Drag through the week and watch the work move.
+                Pulse keeps the issue tracker, the on-call incident and the quarter&apos;s roadmap on one timeline. Drag through the week and watch the work move.
               </p>
             </Reveal>
             <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">

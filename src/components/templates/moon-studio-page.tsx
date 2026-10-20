@@ -15,7 +15,8 @@ import ComponentLayers from "@/components/templates/kit/components/ComponentLaye
 import GlassLens from "@/components/templates/kit/components/GlassLens";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
 import SignBadge from "@/components/templates/kit/components/SignBadge";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, StickyStory, card, scrollToId } from "@/components/templates/kit/parts";
+import { StickyStory } from "@/components/templates/nova-studio/StickyStory";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
 const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const SERIF = 'ui-serif, "New York", "Iowan Old Style", Georgia, serif';
@@ -272,7 +273,7 @@ function Hero() {
                   <span className="hidden text-[13px] tabular-nums text-[#6e6e73] md:block">{d.count} projects</span>
                 </span>
                 <motion.span
-                  className="block text-[clamp(64px,12.6vw,188px)] font-semibold leading-[0.9] tracking-[-0.068em]"
+                  className="block text-[clamp(60px,11.6vw,172px)] font-semibold leading-[0.9] tracking-[-0.068em]"
                   animate={{ x: on ? 14 : 0, color: on ? A : INK }}
                   transition={{ type: "spring", stiffness: 300, damping: 24 }}
                 >

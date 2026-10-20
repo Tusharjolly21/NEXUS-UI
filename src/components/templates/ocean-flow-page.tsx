@@ -9,7 +9,7 @@
  */
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue } from "framer-motion";
-import RadioCards from "@/components/templates/kit/components/RadioCards";
+import RadioCards from "@/components/templates/ocean-flow/RadioCards";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
@@ -104,7 +104,9 @@ function ComputerArt({ strap = "#1d1d1f", w = 170, depth = 18, ndl = "56" }: { s
       <circle cx="85" cy="110" r="58" fill="#0b1720" stroke="#3a3a3c" strokeWidth="3" />
       {Array.from({ length: 24 }, (_, i) => {
         const a = (i / 24) * Math.PI * 2;
-        return <line key={i} x1={85 + Math.cos(a) * 62} y1={110 + Math.sin(a) * 62} x2={85 + Math.cos(a) * 65} y2={110 + Math.sin(a) * 65} stroke="#8e8e93" strokeWidth="2" />;
+        // Rounded so the server and client print the same attribute strings.
+        const p = (r: number, c: number, f: (x: number) => number) => (c + f(a) * r).toFixed(2);
+        return <line key={i} x1={p(62, 85, Math.cos)} y1={p(62, 110, Math.sin)} x2={p(65, 85, Math.cos)} y2={p(65, 110, Math.sin)} stroke="#8e8e93" strokeWidth="2" />;
       })}
       <text x="85" y="104" textAnchor="middle" fontSize="30" fontWeight="700" fill="#e0f2fe" style={{ fontFamily: SYSTEM_FONT }}>{depth.toFixed(0)}<tspan fontSize="14" fill="#7dd3fc"> m</tspan></text>
       <text x="85" y="128" textAnchor="middle" fontSize="11" fontWeight="600" fill="#7dd3fc" letterSpacing="1" style={{ fontFamily: SYSTEM_FONT }}>NO-STOP {ndl}</text>
@@ -502,7 +504,7 @@ function Hero({ shared }: { shared: MotionValue<number> }) {
           <div className="absolute left-3 top-3 sm:left-5 sm:top-5">
             <Readout d={d} ds={ds} />
           </div>
-          <div className="absolute bottom-3 left-3 right-[92px] sm:bottom-5 sm:left-5 sm:right-auto">
+          <div className="absolute bottom-3 left-3 right-[92px] sm:bottom-5 sm:left-auto sm:right-[100px]">
             <Packed d={d} />
           </div>
           <Gauge depth={depth} onTouch={() => (touched.current = true)} />
@@ -624,7 +626,7 @@ function Gear() {
   const ndl = ndlAt(depth);
   return (
     <section id="gear" className="mx-auto max-w-[1180px] px-5 py-24">
-      <SectionHead eyebrow="Featured gear" title="Four things every diver ends up buying." sub="We stock fewer models and test every one in the pool before it ships. Pick a colour, add it, keep scrolling." accent={AD} />
+      <SectionHead eyebrow="Featured gear" title="Five things every diver ends up buying." sub="We stock fewer models and test every one in the pool before it ships. Pick a colour, add it, keep scrolling." accent={AD} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Reveal y={20} className="lg:col-span-2">
           <div className={`${card} grid h-full grid-cols-1 items-center gap-8 overflow-hidden p-7 sm:grid-cols-[1fr_1.1fr] sm:p-9`}>
@@ -758,8 +760,19 @@ function Sizing() {
               <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Wetsuits, by the water.</h3>
               <p className="m-0 mt-1.5 text-[15px] text-[#6e6e73]">Pick the thickness from where you dive, not the time of year. Then a size.</p>
               <div className="mt-6 flex flex-1 flex-col items-center gap-5">
-                <RadioCards options={SUITS} defaultValue="s5" onChange={setSuit} accent={AD} />
-                <div className="flex w-full max-w-[440px] flex-wrap items-center justify-between gap-4">
+                <RadioCards
+                  options={SUITS}
+                  defaultValue="s5"
+                  onChange={setSuit}
+                  accent={AD}
+                  ctaPrefix={`Add size ${size}`}
+                  onConfirm={(id) => {
+                    const sx = SUITS.find((x) => x.id === id)!;
+                    add([{ key: `${id}-${size}`, name: sx.title, variant: `Size ${size}`, price: sx.price, tint: A }]);
+                  }}
+                  footer={
+                <div className="flex w-full flex-wrap items-center justify-between gap-3">
+                  <span className="text-[13px] font-medium text-[#424245]">Size, from the chart on the tag</span>
                   <div className="relative flex rounded-full bg-[#f0f0f3] p-1" role="radiogroup" aria-label="Wetsuit size">
                     {["XS", "S", "M", "L", "XL"].map((z) => (
                       <button key={z} type="button" role="radio" aria-checked={size === z} onClick={() => setSize(z)} className="relative h-9 w-10 rounded-full text-[13px] font-semibold outline-none focus-visible:ring-2" style={{ color: size === z ? INK : "#6e6e73" }}>
@@ -768,8 +781,10 @@ function Sizing() {
                       </button>
                     ))}
                   </div>
-                  <AddButton label={`Add · ${chosen.meta}`} onAdd={() => add([{ key: `${suit}-${size}`, name: chosen.title, variant: `Size ${size}`, price: chosen.price, tint: A }])} />
                 </div>
+                  }
+                />
+                <span className="text-[13px] text-[#6e6e73]">Chosen: {chosen.title}, size {size}. Swap free if it flushes.</span>
               </div>
             </div>
           </Reveal>
@@ -799,9 +814,9 @@ function KitBuilder() {
   const total = sum - discount;
   return (
     <section id="kit" className="mx-auto max-w-[1180px] px-5 py-24">
-      <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.1fr_1fr]">
-        <Reveal y={20}>
-          <div className="relative h-[360px] overflow-hidden rounded-[28px] sm:h-[460px]" style={{ background: "radial-gradient(70% 60% at 30% 20%, #fff7e6, rgba(255,247,230,0) 60%), linear-gradient(160deg, #f3e7cf, #e6d3ad)" }} aria-label={`Kit flat lay: ${picked.map((p) => p.name).join(", ") || "empty"}`} role="img">
+      <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <Reveal y={20} className="h-full">
+          <div className="relative h-[360px] overflow-hidden rounded-[28px] sm:h-[460px] lg:h-full lg:min-h-[560px]" style={{ background: "radial-gradient(70% 60% at 30% 20%, #fff7e6, rgba(255,247,230,0) 60%), linear-gradient(160deg, #f3e7cf, #e6d3ad)" }} aria-label={`Kit flat lay: ${picked.map((p) => p.name).join(", ") || "empty"}`} role="img">
             {KIT.map((k, i) => (
               <motion.div
                 key={k.id}
@@ -835,7 +850,7 @@ function KitBuilder() {
               ))}
               <div className="mx-2 mt-2 flex flex-wrap items-center justify-between gap-4 rounded-[20px] bg-[#f5f5f7] px-5 py-4">
                 <span className="flex flex-col">
-                  <span className="flex items-baseline gap-1 text-[34px] font-semibold tracking-[-0.04em] text-[#1d1d1f] tabular-nums">$<RollingNumber value={total} /></span>
+                  <span className="flex items-baseline gap-0.5 text-[34px] font-semibold leading-none tracking-[-0.04em] text-[#1d1d1f] tabular-nums">$<RollingNumber value={total} /></span>
                   <AnimatePresence mode="popLayout" initial={false}>
                     <motion.span key={discount ? "d" : "n"} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="text-[13px]" style={{ color: discount ? "#15803d" : "#6e6e73" }}>
                       {discount ? `You save ${money(discount)} on ${picked.length} pieces` : `${Math.max(0, 4 - picked.length)} more for 10% off`}

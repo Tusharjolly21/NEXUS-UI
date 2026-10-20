@@ -1,1223 +1,572 @@
 "use client";
+/**
+ * Simplistic: landing page template for AI agents that run routine workflows
+ * overnight and leave a short report for the morning. Deliberately calm.
+ * Motion Kit style: light page, one cyan accent.
+ * Built from Motion Kit components: Stagger Menu, Dock, Capsule Toggles,
+ * Todo List, Liquid Dial (as agent actions), Elastic Stepper and the rolling
+ * number from Price Odometer.
+ */
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import StaggerMenu from "@/components/templates/kit/components/StaggerMenu";
+import Dock, { type DockApp } from "@/components/templates/kit/components/Dock";
+import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
+import TodoList from "@/components/templates/kit/components/TodoList";
+import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
+import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
+import AgentDial from "@/components/templates/simplistic/AgentDial";
+import StickyStory from "@/components/templates/simplistic/StickyStory";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import Link from "next/link";
-import { motion, useReducedMotion, useScroll, useTransform, type Variants } from "framer-motion";
-import { MacKeyboard } from "@/components/keyboard";
-import { InfiniteMovingCards } from "@/components/infinite-moving-cards/InfiniteMovingCards";
-import {
-  ArrowRight,
-  ChevronDown,
-  Sparkles,
-  Check,
-  Zap,
-  BarChart,
-  Puzzle,
-  Globe,
-  Shield,
-  Smartphone,
-  Laptop,
-  Layers,
-  Lock,
-  MessageSquare,
-  ChevronRight,
-  Menu,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+const C = "#0891b2"; // cyan for fills and graphics
+const CT = "#0e7490"; // cyan for text and buttons (5.4:1 on white)
+const INK = "#1d1d1f";
+const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+const spring = { type: "spring", stiffness: 260, damping: 26 } as const;
 
-// Custom Animated Laptop Component for the Platforms Section
-function AnimatedLaptopMockup({ variants }: { variants: Variants }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["0 1", "0.6 1"] // Starts opening when enters viewport, fully open when 60% in view
+function Logo() {
+  return (
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="13" fill="none" stroke={C} strokeWidth="3" />
+        <motion.circle cx="16" cy="16" r="5" fill={CT} animate={{ scale: [1, 0.82, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} style={{ originX: "16px", originY: "16px" }} />
+      </svg>
+      Simplistic
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Hero: scrub through the night and watch the agents' work land.      */
+/* ------------------------------------------------------------------ */
+
+const NIGHT_HOURS = 9; // 22:00 to 07:00
+const LOG = [
+  { at: 0.5, agent: "Inbox triage", body: "Sorted 146 emails. Drafted 38 replies and held them for you.", waits: true },
+  { at: 1.7, agent: "Invoice chaser", body: "Sent 9 polite reminders. Two over $5,000 wait for your OK.", waits: true },
+  { at: 3.25, agent: "Inventory sync", body: "Merged 3 supplier sheets. 4 items are below reorder level.", waits: false },
+  { at: 5.1, agent: "CRM tidy-up", body: "Merged 61 duplicate contacts. Nothing was deleted.", waits: false },
+  { at: 7.3, agent: "Weekly numbers", body: "Pulled revenue, refunds and churn into Monday's report.", waits: false },
+  { at: 8.75, agent: "Morning brief", body: "6 jobs done, 3 things need you. Coffee first.", waits: false },
+];
+
+const clock = (t: number) => {
+  const mins = Math.round((t * NIGHT_HOURS * 60) / 5) * 5;
+  const h = (22 + Math.floor(mins / 60)) % 24;
+  return `${String(h).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+};
+
+function NightPanel() {
+  const target = useMotionValue(0.02);
+  const t = useSpring(target, { stiffness: 90, damping: 22 });
+  const [shown, setShown] = useState(0);
+  const clockRef = useRef<HTMLSpanElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const touched = useRef(false);
+  const dragging = useRef(false);
+
+  // Sky colours and the moon's arc are driven straight from the motion value.
+  const top = useTransform(t, [0, 0.2, 0.7, 0.9, 1], ["#33415c", "#0b1430", "#0b1430", "#3b4f80", "#7cc4dd"]);
+  const bottom = useTransform(t, [0, 0.2, 0.7, 0.9, 1], ["#b4546b", "#14244a", "#14244a", "#e9a17c", "#fde3b5"]);
+  const sky = useMotionTemplate`linear-gradient(180deg, ${top}, ${bottom})`;
+  const stars = useTransform(t, [0, 0.18, 0.78, 0.92], [0.2, 1, 1, 0]);
+  const orbX = useTransform(t, (v) => `${8 + v * 84}%`);
+  const orbY = useTransform(t, (v) => 118 - Math.sin(v * Math.PI) * 86);
+  const moon = useTransform(t, [0.78, 0.92], [1, 0]);
+  const sun = useTransform(t, [0.8, 0.95], [0, 1]);
+  const fill = useTransform(t, (v) => `${v * 100}%`);
+
+  useMotionValueEvent(t, "change", (v) => {
+    if (clockRef.current) clockRef.current.textContent = clock(v);
+    const n = LOG.filter((l) => v * NIGHT_HOURS >= l.at).length;
+    setShown((s) => (s === n ? s : n));
   });
-  
-  // Animate lid from closed (flat, folded down towards the user) to open (standing up)
-  // rotateX: 90deg makes the top fold towards the user over the keyboard.
-  const rotateX = useTransform(scrollYProgress, [0, 1], [90, 0]);
+
+  // Until the visitor grabs the timeline, the night plays by itself.
+  useEffect(() => {
+    let ctl: { stop: () => void } | null = null;
+    const ts: number[] = [];
+    const play = () => {
+      if (touched.current) return;
+      target.jump(0.02);
+      t.jump(0.02);
+      ctl = animate(target, 1, { duration: 13, ease: "linear" });
+    };
+    ts.push(window.setTimeout(play, 900));
+    const loop = window.setInterval(play, 17500);
+    return () => { ctl?.stop(); ts.forEach(clearTimeout); clearInterval(loop); };
+  }, [target, t]);
+
+  const fromPointer = (e: RPointerEvent) => {
+    const r = track.current!.getBoundingClientRect();
+    target.stop();
+    target.set(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)));
+  };
+  const onKey = (e: KeyboardEvent) => {
+    const step = e.shiftKey ? 1 / 9 : 1 / 36;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") { e.preventDefault(); touched.current = true; target.stop(); target.set(Math.min(1, target.get() + step)); }
+    if (e.key === "ArrowLeft" || e.key === "ArrowDown") { e.preventDefault(); touched.current = true; target.stop(); target.set(Math.max(0, target.get() - step)); }
+    if (e.key === "Home") { touched.current = true; target.stop(); target.set(0); }
+    if (e.key === "End") { touched.current = true; target.stop(); target.set(1); }
+  };
+
+  const visible = LOG.slice(0, shown);
+  const waiting = visible.filter((l) => l.waits).length;
+  const morning = shown === LOG.length;
 
   return (
-    <motion.div variants={variants} ref={ref} className="flex flex-col items-center group cursor-pointer [perspective:1500px]">
-      <div className="relative mt-8 md:mt-0 transition-transform group-hover:-translate-y-2 duration-500 flex flex-col items-center [transform-style:preserve-3d]">
-        
-        {/* Lid (Screen) */}
-        <motion.div 
-          style={{ rotateX, transformOrigin: "bottom" }}
-          className="w-56 h-36 rounded-t-xl border-[6px] border-zinc-200 bg-black dark:border-zinc-800 flex flex-col relative shadow-2xl z-20 overflow-hidden"
-        >
-          <div className="flex-1 bg-white dark:bg-zinc-950 flex flex-col items-center justify-center relative border-t border-zinc-300 dark:border-zinc-700">
-            <div className="absolute top-1 left-1/2 -translate-x-1/2 size-1 bg-zinc-800 rounded-full" />
-            <div className="absolute inset-x-2 bottom-0 top-5 bg-white dark:bg-zinc-900 border border-zinc-100 border-b-0 dark:border-zinc-800 flex items-center justify-center overflow-hidden rounded-t-sm shadow-inner">
-              <div className="w-full h-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:12px_12px]" />
-            </div>
-          </div>
-          {/* Display bezel base */}
-          <div className="h-3 w-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center shrink-0">
-             <span className="text-[4px] font-bold text-zinc-500">Laptop Pro</span>
-          </div>
+    <div className={`${card} w-full overflow-hidden`}>
+      <motion.div className="relative h-[200px] overflow-hidden sm:h-[220px]" style={{ background: sky }} aria-hidden="true">
+        <motion.div className="absolute inset-0" style={{ opacity: stars }}>
+          {[[8, 20], [18, 46], [27, 14], [36, 34], [48, 18], [57, 50], [66, 12], [74, 36], [83, 22], [91, 44], [12, 66], [62, 70], [42, 60]].map(([x, y], i) => (
+            <motion.span key={i} className="absolute h-[3px] w-[3px] rounded-full bg-white" style={{ left: `${x}%`, top: `${y}%` }} animate={{ opacity: [0.35, 1, 0.35] }} transition={{ duration: 2.4 + (i % 4) * 0.7, repeat: Infinity, ease: "easeInOut" }} />
+          ))}
         </motion.div>
-        
-        {/* Base (Keyboard deck front edge) */}
-        <div className="w-64 h-3 bg-zinc-300 dark:bg-zinc-700 rounded-b-xl relative shadow-xl border-t border-zinc-400 dark:border-zinc-600 flex justify-center items-start z-10 -mt-[1px]">
-          {/* Trackpad notch */}
-          <div className="w-12 h-[2px] bg-zinc-400 dark:bg-zinc-800 rounded-b-md mt-[1px]"></div>
+        <motion.span className="absolute -ml-6 -mt-6 h-12 w-12 rounded-full" style={{ left: orbX, top: orbY, opacity: moon, background: "#f1f5f9", boxShadow: "0 0 40px 6px rgba(241,245,249,.35), inset -10px -4px 0 #cbd5e1" }} />
+        <motion.span className="absolute -ml-7 -mt-7 h-14 w-14 rounded-full" style={{ left: orbX, top: orbY, opacity: sun, background: "#fbbf24", boxShadow: "0 0 60px 14px rgba(251,191,36,.45)" }} />
+        <svg className="absolute bottom-0 left-0 h-[70px] w-full" viewBox="0 0 520 70" preserveAspectRatio="none">
+          <path d="M0 52 C 60 30, 110 40, 170 46 S 280 20, 340 38 S 450 50, 520 30 V70 H0 Z" fill="rgba(15,23,42,.55)" />
+          <path d="M0 62 C 80 50, 150 58, 230 56 S 390 44, 520 56 V70 H0 Z" fill="#0f172a" />
+          {[[60, 54], [72, 54], [300, 50], [312, 50], [324, 50]].map(([x, y], i) => <motion.rect key={i} x={x} y={y} width="5" height="5" rx="1" fill="#fde68a" animate={{ opacity: [1, 0.55, 1] }} transition={{ duration: 3 + i, repeat: Infinity }} />)}
+        </svg>
+      </motion.div>
+
+      <div className="flex flex-col gap-4 p-5 sm:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <span className="flex items-baseline gap-2">
+            <span ref={clockRef} className="text-[30px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f]">22:00</span>
+            <span className="text-[13px] text-[#6e6e73]">tonight</span>
+          </span>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={morning ? "m" : "n"} initial={{ opacity: 0, y: 8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }} transition={spring} className="rounded-full px-3 py-1.5 text-[13px] font-semibold" style={morning ? { background: "#fef3c7", color: "#92400e" } : { background: "#ecfeff", color: CT }} aria-live="polite">
+              {morning ? `Good morning. ${waiting} things need you.` : `${shown} of ${LOG.length} jobs done`}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+
+        <div
+          ref={track}
+          role="slider"
+          tabIndex={0}
+          aria-label="Time of night"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round((shown / LOG.length) * 100)}
+          aria-valuetext={`${shown} of ${LOG.length} jobs done`}
+          onKeyDown={onKey}
+          onPointerDown={(e) => { touched.current = true; dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); fromPointer(e); }}
+          onPointerMove={(e) => dragging.current && fromPointer(e)}
+          onPointerUp={() => (dragging.current = false)}
+          onPointerCancel={() => (dragging.current = false)}
+          className="group relative h-10 cursor-ew-resize touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0e7490] focus-visible:ring-offset-2"
+        >
+          <span className="absolute inset-x-0 top-1/2 h-[6px] -translate-y-1/2 rounded-full bg-[#e8e8ed]" />
+          <motion.span className="absolute left-0 top-1/2 h-[6px] -translate-y-1/2 rounded-full" style={{ width: fill, background: C }} />
+          {LOG.map((l) => (
+            <span key={l.agent} className="absolute top-1/2 h-2.5 w-[2px] -translate-y-1/2 rounded-full bg-white/90" style={{ left: `${(l.at / NIGHT_HOURS) * 100}%` }} />
+          ))}
+          <motion.span className="absolute top-1/2 -ml-[13px] -mt-[13px] h-[26px] w-[26px] rounded-full bg-white shadow-[0_2px_10px_rgba(0,0,0,.25),0_0_0_.5px_rgba(0,0,0,.1)] transition-transform group-active:scale-110" style={{ left: fill }} />
+        </div>
+        <div className="-mt-2 flex justify-between text-[12px] tabular-nums text-[#6e6e73]" aria-hidden="true">
+          <span>22:00</span><span>01:00</span><span>04:00</span><span>07:00</span>
+        </div>
+
+        <ol className="m-0 flex h-[244px] list-none flex-col justify-end gap-2 overflow-hidden p-0" aria-live="polite" aria-label="Overnight log">
+          <AnimatePresence initial={false}>
+            {visible.length === 0 && (
+              <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-full items-center justify-center rounded-2xl bg-[#f5f5f7] text-[14px] text-[#6e6e73]">
+                Drag the timeline. Agents start at 22:30.
+              </motion.li>
+            )}
+            {visible.slice(-3).map((l) => (
+              <motion.li key={l.agent} layout initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.97, transition: { duration: 0.2 } }} transition={spring} className="flex items-start gap-3 rounded-2xl bg-[#f5f5f7] px-4 py-3">
+                <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: l.waits ? "#fef3c7" : "#cffafe" }}>
+                  {l.waits ? (
+                    <span className="h-2 w-2 rounded-full bg-[#d97706]" />
+                  ) : (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={CT} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                  )}
+                </span>
+                <span className="flex min-w-0 flex-col">
+                  <span className="text-[14px] font-semibold text-[#1d1d1f]">{l.agent} <span className="font-normal tabular-nums text-[#6e6e73]">· {clock(l.at / NIGHT_HOURS)}</span></span>
+                  <span className="text-[13px] leading-[1.4] text-[#424245]">{l.body}</span>
+                </span>
+              </motion.li>
+            ))}
+          </AnimatePresence>
+        </ol>
+      </div>
+    </div>
+  );
+}
+
+function Hero() {
+  return (
+    <section id="top" className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(45% 55% at 78% 40%, rgba(8,145,178,.14), transparent 70%), radial-gradient(30% 35% at 8% 12%, rgba(30,41,59,.06), transparent 70%)" }} />
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-16 pt-14 lg:grid-cols-[1fr_520px] lg:gap-16 lg:pt-20">
+        <div className="flex flex-col items-start gap-7">
+          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">
+            <span className="h-2 w-2 rounded-full" style={{ background: C }} />
+            AI agents for the work nobody wants at 6pm
+          </motion.span>
+          <h1 className="m-0 text-[clamp(46px,7.2vw,88px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+            <Words text="Go to bed. The work gets done." accentWords={["done."]} accent={CT} />
+          </h1>
+          <Reveal delay={0.35} y={14}>
+            <p className="m-0 max-w-[500px] text-[clamp(18px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+              Simplistic runs your routine workflows overnight: inbox triage, invoice reminders, stock sheets, the weekly numbers. Anything risky waits for you, with a short note in the morning.
+            </p>
+          </Reveal>
+          <Reveal delay={0.5} y={14} className="flex flex-wrap gap-3">
+            <Magnetic className="text-white" style={{ background: CT }} onClick={() => scrollToId("pricing")}>Start with one agent</Magnetic>
+            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("how")}>How it works</Magnetic>
+          </Reveal>
+          <Reveal delay={0.6} y={10}>
+            <span className="text-[13px] text-[#6e6e73]">Your first agent is free. Drag the timeline to scrub through a real night.</span>
+          </Reveal>
+        </div>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="w-full">
+          <NightPanel />
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+const TEAMS = [
+  { n: "Halden Freight", c: "font-semibold" },
+  { n: "copperleaf", c: "font-serif italic" },
+  { n: "BIRCH & VALE", c: "tracking-[0.24em] font-medium" },
+  { n: "Ostrander", c: "font-black tracking-tight" },
+  { n: "pinewood supply", c: "font-bold lowercase" },
+  { n: "Marlow Studio", c: "font-serif" },
+  { n: "QUAYSIDE", c: "tracking-[0.3em]" },
+  { n: "Tern Analytics", c: "font-medium italic" },
+];
+
+function Teams() {
+  return (
+    <section className="border-y border-black/[.05] bg-white py-9" aria-label="Customers">
+      <p className="m-0 mb-5 text-center text-[13px] font-medium text-[#6e6e73]">Working the night shift for 2,300 small teams, including</p>
+      <Marquee speed={28}>
+        {TEAMS.map((b) => <span key={b.n} className={`mx-10 text-[22px] text-[#6e6e73] ${b.c}`}>{b.n}</span>)}
+      </Marquee>
+    </section>
+  );
+}
+
+function Principles() {
+  const items = [
+    { t: "It asks first.", d: "Emails, payments and deletions wait in a morning queue until you say yes. You choose what counts as risky.", icon: "M12 3l8 4v5c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V7z" },
+    { t: "It writes everything down.", d: "Every step an agent takes is logged in plain English, with the data it read. Undo any run for 24 hours.", icon: "M6 4h9l4 4v12H6zM14 4v5h5M9 13h7M9 17h5" },
+    { t: "It stays small.", d: "No workflow canvas, no node graph. Pick a trigger, connect tools, set rules. Most agents take four minutes.", icon: "M5 12h14M12 5v14" },
+  ];
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
+      <SectionHead eyebrow="Calm by design" title="Fewer features. Fewer surprises." sub="Simplistic does one thing: routine work, done overnight, checked by you in the morning." accent={CT} />
+      <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
+        {items.map((it) => (
+          <div key={it.t} className={`${card} flex h-full flex-col gap-4 p-7`}>
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ background: "#ecfeff", color: CT }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={it.icon} /></svg>
+            </span>
+            <h3 className="m-0 text-[21px] font-semibold tracking-[-0.025em] text-[#1d1d1f]">{it.t}</h3>
+            <p className="m-0 text-[16px] leading-[1.5] text-[#6e6e73]">{it.d}</p>
+          </div>
+        ))}
+      </Stagger>
+    </section>
+  );
+}
+
+/* --------------------------- How it works --------------------------- */
+
+const I = (d: string) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+
+const TRIGGERS = [
+  { id: "night", label: "Every night at 02:00", icon: I("M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"), done: "Runs nightly at 02:00" },
+  { id: "file", label: "When a file lands", icon: I("M3 7h6l2 2h10v10H3z"), done: "Watching the folder" },
+  { id: "mail", label: "When an email arrives", icon: I("M4 6h16v12H4zM4 7l8 6 8-6"), done: "Watching the inbox" },
+  { id: "ship", label: "After the last order ships", icon: I("M3 7l9-4 9 4v10l-9 4-9-4zM3 7l9 4 9-4M12 11v10"), done: "Runs after shipping" },
+  { id: "manual", label: "Only when I ask", icon: I("M8 13V5a2 2 0 0 1 4 0v6M12 11V4a2 2 0 0 1 4 0v8M16 9a2 2 0 0 1 4 0v5a7 7 0 0 1-14 0v-2a2 2 0 0 1 4 0"), done: "Manual runs only" },
+];
+
+const G = (d: string) => (
+  <svg width="56%" height="56%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+const TOOLS: DockApp[] = [
+  { id: "mail", label: "Email", bg: "linear-gradient(180deg,#22d3ee,#0e7490)", glyph: G("M4 6h16v12H4zM4 7l8 6 8-6") },
+  { id: "cal", label: "Calendar", bg: "linear-gradient(180deg,#fb7185,#e11d48)", glyph: G("M4 6h16v14H4zM4 10h16M9 3v4M15 3v4") },
+  { id: "sheet", label: "Spreadsheets", bg: "linear-gradient(180deg,#4ade80,#15803d)", glyph: G("M4 4h16v16H4zM4 10h16M4 15h16M10 4v16") },
+  { id: "drive", label: "Shared drive", bg: "linear-gradient(180deg,#fcd34d,#d97706)", glyph: G("M3 7h6l2 2h10v10H3z") },
+  { id: "chat", label: "Team chat", bg: "linear-gradient(180deg,#a78bfa,#6d28d9)", glyph: G("M4 5h16v11H9l-5 4z") },
+  { id: "books", label: "Accounting", bg: "linear-gradient(180deg,#60a5fa,#1d4ed8)", glyph: G("M6 3h12v18H6zM9 7h6M9 11h6M9 15h3") },
+  { id: "crm", label: "CRM", bg: "linear-gradient(180deg,#94a3b8,#334155)", glyph: G("M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0") },
+];
+
+function TriggerVisual() {
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-5 p-7`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Invoice chaser · Trigger</span>
+        <span className="rounded-full bg-[#ecfeff] px-2.5 py-1 text-[12px] font-semibold" style={{ color: CT }}>Step 1 of 4</span>
+      </div>
+      <div className="flex justify-center"><StaggerMenu label="Choose a trigger" items={TRIGGERS} autoplay /></div>
+    </div>
+  );
+}
+
+function ToolsVisual() {
+  return (
+    <div className={`${card} flex w-[520px] flex-col gap-2 p-7`}>
+      <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Connected tools</span>
+      <p className="m-0 text-[15px] leading-[1.5] text-[#424245]">The agent can only see what is in this dock. Click a tool to connect it.</p>
+      <Dock apps={TOOLS} autoplay />
+    </div>
+  );
+}
+
+const RULES = [
+  { id: "email", label: "Ask before sending any email", hint: "Drafts wait in your morning queue", on: true },
+  { id: "pay", label: "Ask before payments over $1,000", hint: "Smaller reminders go out on their own", on: true },
+  { id: "delete", label: "Never delete records", hint: "Merge and archive only", on: true },
+  { id: "cost", label: "Stop if a run costs over $5", hint: "Model usage, checked every step", on: false },
+];
+
+function RulesVisual() {
+  const [state, setState] = useState(() => Object.fromEntries(RULES.map((r) => [r.id, r.on])) as Record<string, boolean>);
+  const touched = useRef(false);
+  useEffect(() => {
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      const r = RULES[k++ % 2 ? 1 : 3];
+      setState((s) => ({ ...s, [r.id]: !s[r.id] }));
+    }, 1600);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className={`${card} w-[460px] overflow-hidden`} onPointerDown={() => (touched.current = true)}>
+      <div className="flex items-center justify-between px-6 pb-2 pt-5">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Rules</span>
+        <span className="text-[12px] tabular-nums text-[#6e6e73]">{Object.values(state).filter(Boolean).length} of {RULES.length} on</span>
+      </div>
+      <ul className="m-0 list-none divide-y divide-[#f0f0f3] p-0">
+        {RULES.map((r) => (
+          <li key={r.id} className="flex items-center gap-4 px-6 py-4">
+            <span className="flex flex-1 flex-col">
+              <span className="text-[15px] font-medium text-[#1d1d1f]">{r.label}</span>
+              <span className="text-[13px] text-[#6e6e73]">{state[r.id] ? r.hint : "Off"}</span>
+            </span>
+            <CapsuleToggle label={r.label} checked={state[r.id]} onColor={C} onChange={(v) => { touched.current = true; setState((s) => ({ ...s, [r.id]: v })); }} />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ReviewVisual() {
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-4 p-6`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Waiting for you · 07:00</span>
+        <span className="text-[12px] text-[#6e6e73]">About 4 minutes</span>
+      </div>
+      <TodoList accent={CT} initial={["Approve 38 drafted replies", "OK two invoices over $5,000", "Reorder 4 low-stock items", "Skim the Monday numbers"]} autoplay />
+    </div>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <section id="how" className="bg-[#f5f5f7] py-20 sm:py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="How it works" title="Four steps. No diagrams." sub="Every agent is the same four questions. When does it run, what can it touch, what must it ask about, and what do you see in the morning." accent={CT} />
+        <div className="mt-6">
+          <StickyStory
+            accent={CT}
+            steps={[
+              { kicker: "01 · When", title: "Pick a trigger.", body: "A time of night, a new file, an incoming email or the end of the shipping day. One trigger per agent keeps it predictable.", visual: <TriggerVisual /> },
+              { kicker: "02 · What", title: "Connect only what it needs.", body: "Agents get read or write access tool by tool. An invoice chaser never sees your calendar.", visual: <ToolsVisual /> },
+              { kicker: "03 · Limits", title: "Set the rules once.", body: "Plain switches, not prompt engineering. Rules are checked before every step, and a broken rule stops the run.", visual: <RulesVisual /> },
+              { kicker: "04 · Morning", title: "Review over coffee.", body: "Everything that needed a yes is in one short list. Tick it off, or open any item to see exactly what the agent did and why.", visual: <ReviewVisual /> },
+            ]}
+          />
         </div>
       </div>
-      <h4 className="mt-8 font-bold text-zinc-950 text-sm dark:text-white">Full control at your desk</h4>
-      <p className="mt-2 text-xs text-zinc-500 text-center max-w-[200px]">Build, debug, and deploy agents with powerful desktop tools.</p>
-    </motion.div>
+    </section>
+  );
+}
+
+/* ------------------------------ Control ------------------------------ */
+
+const ACTIONS = [
+  { id: "run", label: "Run now", d: "M8 5l11 7-11 7z", done: "Running now" },
+  { id: "skip", label: "Skip tonight", d: "M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5zM4 4l16 16", done: "Skipping tonight" },
+  { id: "pause", label: "Pause", d: "M8 5h3v14H8zM13 5h3v14h-3z", done: "Agent paused" },
+  { id: "rules", label: "Edit rules", d: "M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6", done: "Opening rules" },
+];
+
+function Control() {
+  const [status, setStatus] = useState("Scheduled for 02:00");
+  const pick = (id: string) => setStatus({ run: "Running now · 1 of 6 steps", skip: "Skipping tonight, back tomorrow", pause: "Paused until you resume it", rules: "Editing rules" }[id] ?? "Scheduled for 02:00");
+  return (
+    <section id="agents" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
+        <div className="flex flex-col gap-10">
+          <SectionHead eyebrow="In control" title="Change tonight's plan in one tap." sub="Run an agent now, skip a night or pause it while you are on holiday. No settings pages." accent={CT} />
+          <Stagger className="grid grid-cols-2 gap-x-6 gap-y-8">
+            {[
+              { to: 11.4, f: (n: number) => `${n.toFixed(1)}h`, l: "saved per person each week, median" },
+              { to: 92, f: (n: number) => `${Math.round(n)}%`, l: "of overnight runs need no edits" },
+              { to: 4, f: (n: number) => `${Math.round(n)} min`, l: "to set up a typical agent" },
+              { to: 24, f: (n: number) => `${Math.round(n)}h`, l: "undo window on every run" },
+            ].map((s) => (
+              <div key={s.l} className="flex flex-col gap-1.5 border-t border-black/[.08] pt-5">
+                <Counter to={s.to} format={s.f} className="text-[clamp(32px,4vw,44px)] font-semibold tracking-[-0.04em] text-[#1d1d1f]" />
+                <span className="text-[14px] text-[#6e6e73]">{s.l}</span>
+              </div>
+            ))}
+          </Stagger>
+        </div>
+        <Reveal y={16}>
+          <div className={`${card} flex flex-col items-center gap-2 px-6 pb-8 pt-7`}>
+            <div className="flex w-full items-center gap-4 rounded-[20px] bg-[#f5f5f7] p-4">
+              <span className="flex h-11 w-11 flex-none items-center justify-center rounded-2xl text-white" style={{ background: CT }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h3" /></svg>
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-[16px] font-semibold text-[#1d1d1f]">Invoice chaser</span>
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span key={status} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={spring} className="text-[13px] text-[#6e6e73]" aria-live="polite">{status}</motion.span>
+                </AnimatePresence>
+              </span>
+              <span className="text-[12px] tabular-nums text-[#6e6e73]">Last run 02:00</span>
+            </div>
+            <Fit><AgentDial actions={ACTIONS} color={INK} accent={C} onSelect={pick} label="Agent actions" autoplay /></Fit>
+            <span className="text-[13px] text-[#6e6e73]">Press the button and pick an action.</span>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------ Pricing ------------------------------ */
+
+function Pricing() {
+  const [agents, setAgents] = useState(3);
+  const [yearly, setYearly] = useState(false);
+  const rate = yearly ? 10 : 12;
+  const total = Math.max(0, agents - 1) * rate;
+  return (
+    <section id="pricing" className="bg-[#f5f5f7] py-20 sm:py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Pricing" title="One plan. Pay per agent." sub="Your first agent is free for good. Every agent after that is $12 a month, with model usage included up to a fair limit." accent={CT} center />
+        <Reveal y={16} className="mx-auto mt-12 max-w-[880px]">
+          <div className={`${card} grid grid-cols-1 overflow-hidden md:grid-cols-[1.1fr_1fr]`}>
+            <div className="flex flex-col items-center gap-7 px-6 py-10 sm:px-10">
+              <span className="text-[14px] font-semibold text-[#1d1d1f]">How many agents?</span>
+              <ElasticStepper label="Agents" min={1} max={12} defaultValue={3} onChange={setAgents} accent={CT} />
+              <label className="flex items-center gap-3 text-[15px] font-medium text-[#1d1d1f]">
+                <CapsuleToggle label="Billed yearly" checked={yearly} onChange={setYearly} onColor={C} />
+                Billed yearly <span className="rounded-full bg-[#ecfeff] px-2 py-0.5 text-[12px] font-semibold" style={{ color: CT }}>2 months free</span>
+              </label>
+            </div>
+            <div className="flex flex-col gap-6 bg-[#1d1d1f] px-6 py-10 text-white sm:px-10">
+              <div className="flex flex-col gap-1">
+                <span className="text-[13px] text-[#a1a1a6]">Your monthly total</span>
+                <span className="flex items-baseline gap-2">
+                  <span className="flex text-[56px] font-semibold tabular-nums leading-none tracking-[-0.05em]">$<RollingNumber value={total} /></span>
+                  <span className="text-[14px] text-[#a1a1a6]">/ month</span>
+                </span>
+                <span className="text-[13px] tabular-nums text-[#a1a1a6]">{agents === 1 ? "One agent, on the house." : `1 free + ${agents - 1} × $${rate}`}</span>
+              </div>
+              <ul className="m-0 flex list-none flex-col gap-3 p-0 text-[15px] text-[#d2d2d7]">
+                {["Unlimited runs and team members", "Morning queue and 24-hour undo", "Every integration, no add-ons", "Logs kept for 90 days"].map((f) => (
+                  <li key={f} className="flex items-center gap-3">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#67e8f9" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <motion.button type="button" whileTap={{ scale: 0.96 }} className="mt-auto h-12 rounded-full bg-white text-[15px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#67e8f9] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1d1d1f]">
+                Start free
+              </motion.button>
+            </div>
+          </div>
+        </Reveal>
+        <p className="m-0 mt-6 text-center text-[13px] text-[#6e6e73]">Prices in US dollars, before tax. Cancel from settings in two clicks.</p>
+      </div>
+    </section>
+  );
+}
+
+const QUOTES = [
+  { q: "I used to spend Sunday night chasing invoices. Now I read a list of four things on Monday and I'm done before the kettle boils.", n: "Dana Whitlock", c: "Owner, Copperleaf Dental" },
+  { q: "The rules are switches, which is why I trust it. It cannot email a customer without me.", n: "Marcus Oyelaran", c: "Ops lead, Halden Freight" },
+  { q: "We tried a workflow builder with forty node types. Simplistic has four questions, and our team actually uses it.", n: "Sofia Lind", c: "COO, Birch & Vale" },
+  { q: "The morning brief replaced our stand-up for the stock numbers. Ten minutes back, every day.", n: "Ravi Menon", c: "Founder, Pinewood Supply" },
+];
+
+function Quotes() {
+  return (
+    <section className="py-20" aria-label="What customers say">
+      <Marquee speed={24}>
+        {QUOTES.map((q) => (
+          <figure key={q.n} className={`${card} m-0 mx-2.5 flex w-[340px] flex-none flex-col gap-5 p-7 sm:w-[380px]`}>
+            <blockquote className="m-0 text-[18px] leading-[1.45] tracking-[-0.01em] text-[#1d1d1f]">“{q.q}”</blockquote>
+            <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span> · {q.c}</figcaption>
+          </figure>
+        ))}
+      </Marquee>
+    </section>
   );
 }
 
 export function SimplisticSaaSPage() {
-  const reduce = useReducedMotion() === true;
-  const [activeFaq, setActiveFaq] = React.useState<number | null>(0);
-  const [kanbanTab, setKanbanTab] = React.useState<"issues" | "projects" | "views">("issues");
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-
-  const clients = [
-    { name: "OpenAI", text: true, className: "font-sans font-semibold tracking-tight text-zinc-900 dark:text-white" },
-    { name: "hello patient", text: true, className: "font-serif lowercase tracking-tight" },
-    { name: "granola", text: true, className: "font-sans font-bold tracking-tighter" },
-    { name: "character.ai", text: true, className: "font-bold tracking-tighter lowercase" },
-    { name: "ORACLE", text: true, className: "font-sans font-black tracking-widest text-red-600 dark:text-red-500" },
-    { name: "Portola", text: true, className: "font-serif tracking-widest uppercase" },
-    { name: "Accel", text: true, className: "font-black tracking-tight" },
-    { name: "Bloomberg", text: true, className: "font-sans font-black tracking-tighter text-zinc-900 dark:text-white" },
-    { name: "Forbes", text: true, className: "font-serif font-bold tracking-tighter uppercase text-zinc-900 dark:text-white" },
-    { name: "SoftBank", text: true, className: "font-sans font-bold tracking-tight text-zinc-900 dark:text-white" },
-    { name: "The Guardian", slug: "theguardian", invertDark: true },
-    { name: "WIRED", text: true, className: "font-sans font-black tracking-tighter text-zinc-900 dark:text-white" },
-    { name: "hulu", text: true, className: "font-sans font-bold tracking-tighter text-[#1ce783] lowercase" },
-    { name: "YouTube", slug: "youtube" },
-    { name: "NETFLIX", slug: "netflix" },
-    { name: "Spotify", slug: "spotify" },
-    { name: "twitch", slug: "twitch" },
-    { name: "Raycast", slug: "raycast" },
-    { name: "Vercel", slug: "vercel", invertDark: true },
-    { name: "Stripe", slug: "stripe" },
-    { name: "Linear", slug: "linear", invertDark: true },
-    { name: "GitHub", slug: "github", invertDark: true },
-    { name: "Notion", slug: "notion", invertDark: true },
-  ];
-
-  const renderClient = (client: typeof clients[0]) => {
-    if (client.text) {
-      return (
-        <span className={cn("text-xl font-bold text-zinc-900 dark:text-white", client.className)}>
-          {client.name}
-        </span>
-      );
-    }
-    return (
-      <img
-        src={`https://cdn.simpleicons.org/${client.slug}`}
-        alt={client.name}
-        className={cn("h-6 w-auto", client.invertDark && "dark:invert")}
-        loading="lazy"
-      />
-    );
-  };
-
-  const testimonials = [
-    {
-      quote: "Best investment for our startup",
-      body: "We deployed AI agents that automated our entire workflow overnight. The autonomous execution is exactly what we needed.",
-      author: "Nina Kowalski",
-      role: "VP Operations",
-    },
-    {
-      quote: "Exceeded all expectations",
-      body: "The AI agents handle complex decisions while we sleep. Our team's productivity has increased tenfold since we started using it.",
-      author: "David Park",
-      role: "Lead Architect",
-    },
-    {
-      quote: "Game changer for our team",
-      body: "Orchestrating intelligent workflows used to take weeks of manual work. Now our AI agents handle everything autonomously.",
-      author: "Lisa Thompson",
-      role: "Product Director",
-    },
-    {
-      quote: "Worth every penny",
-      body: "Building and deploying AI agents is incredibly simple. Our automation runs 24/7 without any human intervention.",
-      author: "Marcus Vance",
-      role: "Founding Engineer",
-    },
-    {
-      quote: "Our secret weapon",
-      body: "The autonomous AI workflows give us a competitive edge. Tasks that took hours are now executed automatically in minutes.",
-      author: "Elena Rostova",
-      role: "Growth Head",
-    },
-    {
-      quote: "Incredible developer experience",
-      body: "Deploy, orchestrate, automate. The platform makes building intelligent AI agents straightforward and powerful.",
-      author: "Devon Lane",
-      role: "Staff Developer",
-    },
-  ];
-
-  const faqs = [
-    {
-      q: "What are autonomous AI workflows?",
-      a: "Autonomous AI workflows allow intelligent agents to chain tool calls, monitor system state triggers, and execute conditional automation sequences independently without constant prompt intervention.",
-    },
-    {
-      q: "How secure is the authentication setup?",
-      a: "Our integrated auth flow leverages state-of-the-art secure SDK handlers, complete session encryption bounds, and dynamic API token protection suitable for enterprise deployments.",
-    },
-    {
-      q: "Can I self-host the orchestration layer?",
-      a: "Yes, our native platform SDKs support full edge proxy deployments and private VPC routing to fulfill strict SOC2 and HIPAA regulatory compliance requirements.",
-    },
-    {
-      q: "What platforms do the SDKs support natively?",
-      a: "We ship optimized drop-in SDK bundles for React, Next.js App Router, Vue, React Native, iOS (SwiftUI), and Android (Kotlin) out of the box.",
-    },
-  ];
-
-  const easeOutExpo = [0.16, 1, 0.3, 1] as const;
-
-  const staggerVariants: Variants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.1 } }
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20, filter: "blur(8px)" },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      filter: "blur(0px)", 
-      transition: { duration: 1.0, ease: easeOutExpo } 
-    }
-  };
-
   return (
-    <div className="relative min-h-screen bg-white text-zinc-900 selection:bg-blue-500 selection:text-white antialiased font-sans dark:bg-zinc-950 dark:text-zinc-50">
-      
-      {/* ── Navigation Bar ── */}
-      <header className="sticky top-0 z-40 w-full border-b border-zinc-100 bg-white/80 backdrop-blur-md dark:border-zinc-900 dark:bg-zinc-950/80">
-        <div className="mx-auto flex h-14 sm:h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2.5">
-            <div className="flex size-7 sm:size-8 items-center justify-center rounded-xl bg-zinc-950 text-white font-bold text-xs sm:text-sm shadow-md dark:bg-white dark:text-zinc-950">
-              𝝠
-            </div>
-            <span className="text-base sm:text-lg font-bold tracking-tight">Simplistic</span>
-          </div>
-
-          <nav className="hidden items-center gap-8 text-sm font-medium text-zinc-600 md:flex dark:text-zinc-300">
-            <a href="#product" className="transition hover:text-blue-600 dark:hover:text-blue-400">
-              Product
-            </a>
-            <a href="#pricing" className="transition hover:text-blue-600 dark:hover:text-blue-400">
-              Pricing
-            </a>
-            <div className="group relative flex items-center gap-1 cursor-pointer py-2">
-              <span className="transition group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Resources
-              </span>
-              <ChevronDown className="size-3.5 text-zinc-400 transition group-hover:rotate-180" />
-              <div className="absolute top-full left-0 hidden w-48 rounded-xl border border-zinc-100 bg-white p-2 shadow-xl group-hover:block dark:border-zinc-800 dark:bg-zinc-900">
-                <a href="#docs" className="block rounded-lg px-3 py-2 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                  Documentation
-                </a>
-                <a href="#blog" className="block rounded-lg px-3 py-2 text-xs hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                  Blog & Updates
-                </a>
-              </div>
-            </div>
-            <a href="#contact" className="transition hover:text-blue-600 dark:hover:text-blue-400">
-              Contact
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <a href="#login" className="hidden text-sm font-medium text-zinc-600 transition hover:text-zinc-900 sm:inline-block dark:text-zinc-300 dark:hover:text-white">
-              Login
-            </a>
-            <a
-              href="#pricing"
-              className="hidden sm:inline-flex items-center justify-center rounded-full bg-blue-500 px-4 py-2 text-xs sm:text-sm font-medium text-white shadow-sm transition hover:bg-blue-600"
-            >
-              Try for free
-            </a>
-            {/* Mobile hamburger */}
-            <button
-              type="button"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              onClick={() => setMobileMenuOpen((v) => !v)}
-              className="flex md:hidden size-9 items-center justify-center rounded-lg text-zinc-600 transition hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-            >
-              {mobileMenuOpen ? <span className="text-lg">✕</span> : <Menu className="size-5" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile slide-down menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden border-t border-zinc-100 bg-white/95 backdrop-blur-lg px-4 pb-4 pt-3 dark:border-zinc-800 dark:bg-zinc-950/95">
-            <nav className="flex flex-col gap-1">
-              <a href="#product" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900">Product</a>
-              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900">Pricing</a>
-              <a href="#docs" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900">Documentation</a>
-              <a href="#blog" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900">Blog</a>
-              <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-900">Contact</a>
-            </nav>
-            <div className="mt-3 flex gap-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
-              <a href="#login" onClick={() => setMobileMenuOpen(false)} className="flex-1 rounded-lg border border-zinc-200 py-2.5 text-center text-sm font-medium text-zinc-700 dark:border-zinc-700 dark:text-zinc-300">Login</a>
-              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="flex-1 rounded-lg bg-blue-500 py-2.5 text-center text-sm font-semibold text-white">Try for free</a>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden pt-16 pb-20 md:pt-24 lg:pt-32">
-        {/* Absolute diagonal blue beams overlays mimic screenshots perfectly */}
-        <div className="pointer-events-none absolute right-0 top-1/3 -z-10 h-[600px] w-[500px] origin-top-left -rotate-12 bg-gradient-to-tr from-blue-600/10 via-blue-400/5 to-transparent blur-3xl rounded-full" />
-        <div className="pointer-events-none absolute left-0 bottom-0 -z-10 h-[400px] w-[400px] bg-blue-500/[0.03] blur-3xl rounded-full" />
-
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          
-          {/* Label banner */}
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="inline-flex items-center gap-1.5 rounded-full bg-zinc-50 border border-zinc-200/60 px-4 py-1.5 text-xs font-medium text-zinc-600 mb-6 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300"
-          >
-            <span>Introducing autonomous AI workflows</span>
-            <ArrowRight className="size-3 text-zinc-400" />
-          </motion.div>
-
-          {/* Headline */}
-          <motion.h1
-            initial={reduce ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mx-auto max-w-4xl text-balance text-4xl font-extrabold tracking-tight text-zinc-950 sm:text-5xl md:text-6xl lg:text-7xl dark:text-white"
-          >
-            Deploy AI agents that <br className="hidden sm:inline" />
-            work while you sleep.
-          </motion.h1>
-
-          {/* Description */}
-          <motion.p
-            initial={reduce ? false : { opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mx-auto mt-6 max-w-2xl text-pretty text-base sm:text-lg leading-relaxed text-zinc-600 dark:text-zinc-400"
-          >
-            Build, deploy, and orchestrate intelligent AI agents that automate complex workflows, make decisions, and execute tasks autonomously.
-          </motion.p>
-
-          {/* Buttons Row */}
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-4"
-          >
-            <a
-              href="#pricing"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:opacity-95"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="size-4" />
-            </a>
-            <a
-              href="#features"
-              className="inline-flex items-center justify-center rounded-full border border-zinc-200 bg-white px-8 py-3.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800/80"
-            >
-              Learn More
-            </a>
-          </motion.div>
-
-          {/* ── Immersive Browser App Dashboard Mockup ── */}
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-12 sm:mt-16 md:mt-20 relative mx-auto max-w-5xl"
-          >
-            <div className="rounded-xl sm:rounded-2xl border border-zinc-200/80 bg-zinc-50 shadow-xl sm:shadow-2xl overflow-hidden dark:border-zinc-800 dark:bg-zinc-900 text-left">
-              {/* Chrome Top Bar */}
-              <div className="flex h-11 items-center justify-between border-b border-zinc-200/60 bg-white px-4 dark:border-zinc-800 dark:bg-zinc-950">
-                <div className="flex items-center gap-1.5">
-                  <span className="size-3 rounded-full bg-red-400" />
-                  <span className="size-3 rounded-full bg-amber-400" />
-                  <span className="size-3 rounded-full bg-emerald-400" />
-                </div>
-                <div className="text-[11px] font-medium text-zinc-400 tracking-wide font-mono">
-                  app.simplistic.ai
-                </div>
-                <div className="w-12" />
-              </div>
-
-              {/* Dashboard Internal Window Body */}
-              <div className="grid grid-cols-1 md:grid-cols-12 min-h-[300px] md:min-h-[450px] bg-white dark:bg-zinc-950">
-                {/* Internal Shell Sidebar — hidden on small mobile, shown as top bar on sm */}
-                <div className="hidden sm:block border-r border-zinc-100 bg-zinc-50/50 p-3 sm:p-4 md:col-span-3 dark:border-zinc-900 dark:bg-zinc-900/40">
-                  <div className="flex items-center gap-2 px-2 py-1.5">
-                    <div className="size-5 rounded bg-blue-500 text-[10px] font-bold text-white flex items-center justify-center">
-                      𝝠
-                    </div>
-                    <span className="text-xs font-semibold">Simplistic Core</span>
-                  </div>
-
-                  <div className="mt-6 space-y-1">
-                    <p className="px-2 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                      Workspace
-                    </p>
-                    {(["Issues", "Projects", "Views"] as const).map((label) => {
-                      const lower = label.toLowerCase() as Lowercase<typeof label>;
-                      return (
-                        <button
-                          key={label}
-                          onClick={() => setKanbanTab(lower)}
-                          className={cn(
-                            "w-full flex items-center justify-between rounded-lg px-2.5 py-1.5 text-xs font-medium transition",
-                            kanbanTab === lower
-                              ? "bg-white text-blue-600 shadow-sm dark:bg-zinc-800 dark:text-blue-400"
-                              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/50",
-                          )}
-                        >
-                          <span>{label}</span>
-                          {label === "Issues" && (
-                            <span className="rounded-full bg-blue-50 px-1.5 py-0.5 text-[9px] font-semibold text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                              30
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div className="mt-8 space-y-1">
-                    <p className="px-2 text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">
-                      Your Teams
-                    </p>
-                    <div className="rounded-lg px-2 py-1 text-xs text-zinc-500">
-                      ⚡ Platform Infra
-                    </div>
-                    <div className="rounded-lg px-2 py-1 text-xs text-zinc-500">
-                      🎨 Design Systems
-                    </div>
-                  </div>
-                </div>
-
-                {/* Internal Shell Content Panel */}
-                <div className="p-3 sm:p-4 md:col-span-9 col-span-1 bg-white dark:bg-zinc-950 overflow-x-auto">
-                  {/* Top utility row */}
-                  <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-zinc-100 dark:border-zinc-900">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] sm:text-xs font-semibold text-zinc-500">Filter</span>
-                      <span className="rounded-md bg-zinc-100 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-medium text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
-                        Active
-                      </span>
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-blue-600 font-medium">Live Workflow Rails</div>
-                  </div>
-
-                  {/* Kanban Columns Grid replicating target UI */}
-                  <div className="mt-3 sm:mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
-                    
-                    {/* Column 1: Backlog */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between px-1">
-                        <span className="text-xs font-medium text-zinc-500">Backlog</span>
-                        <span className="text-[10px] text-zinc-400">33</span>
-                      </div>
-                      <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-3 shadow-xs dark:border-zinc-900 dark:bg-zinc-900/50">
-                        <span className="text-[10px] font-mono text-zinc-400">SMP-179</span>
-                        <p className="mt-1 text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-snug">
-                          Simplistic Builder v2 automated static parsing engine setup
-                        </p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="rounded bg-orange-50 px-1.5 py-0.5 text-[9px] font-medium text-orange-600 dark:bg-orange-950/60 dark:text-orange-400">
-                            Document
-                          </span>
-                          <span className="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 text-[8px] font-bold flex items-center justify-center">
-                            AI
-                          </span>
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-3 shadow-xs dark:border-zinc-900 dark:bg-zinc-900/50">
-                        <span className="text-[10px] font-mono text-zinc-400">SMP-148</span>
-                        <p className="mt-1 text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-snug">
-                          Autonomous lead synchronization handler hooks
-                        </p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="rounded bg-purple-50 px-1.5 py-0.5 text-[9px] font-medium text-purple-600 dark:bg-purple-950/60 dark:text-purple-400">
-                            Wisdom
-                          </span>
-                          <span className="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 text-[8px] font-bold flex items-center justify-center">
-                            NK
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Column 2: Todo */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between px-1">
-                        <span className="text-xs font-medium text-zinc-500">Todo</span>
-                        <span className="text-[10px] text-zinc-400">4</span>
-                      </div>
-                      <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-3 shadow-xs dark:border-zinc-900 dark:bg-zinc-900/50">
-                        <span className="text-[10px] font-mono text-zinc-400">SMP-228</span>
-                        <p className="mt-1 text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-snug">
-                          Optimize autonomous tool chains for ChatGPT
-                        </p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-600 dark:bg-blue-950/60 dark:text-blue-400">
-                            Improvement
-                          </span>
-                          <span className="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 text-[8px] font-bold flex items-center justify-center">
-                            AI
-                          </span>
-                        </div>
-                      </div>
-                      <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-3 shadow-xs dark:border-zinc-900 dark:bg-zinc-900/50">
-                        <span className="text-[10px] font-mono text-zinc-400">SMP-199</span>
-                        <p className="mt-1 text-xs font-medium text-zinc-800 dark:text-zinc-200 leading-snug">
-                          Schedule daily analytics database backup trigger
-                        </p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[9px] font-medium text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400">
-                            Task
-                          </span>
-                          <span className="size-4 rounded-full bg-zinc-200 dark:bg-zinc-700 text-[8px] font-bold flex items-center justify-center">
-                            DP
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Column 3: In Progress */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between px-1">
-                        <span className="text-xs font-medium text-zinc-500">In Progress</span>
-                        <span className="text-[10px] text-zinc-400">5</span>
-                      </div>
-                      <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-3 shadow-xs dark:border-blue-950 dark:bg-blue-950/20">
-                        <span className="text-[10px] font-mono text-blue-500 font-semibold">SMP-243</span>
-                        <p className="mt-1 text-xs font-medium text-zinc-900 dark:text-white leading-snug">
-                          List of premium autonomous block templates deployment
-                        </p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-                            Active Sync
-                          </span>
-                          <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ── Logo Cloud Strip ── */}
-      <section id="product" className="border-y border-zinc-100 py-12 md:py-16 bg-zinc-50/50 dark:border-zinc-900 dark:bg-zinc-950">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">
-            Trusted by teams building the future of AI.
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">
-            From prototype to production, autonomously.
-          </p>
-
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={{
-              visible: { transition: { staggerChildren: 0.05 } },
-              hidden: {}
-            }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6 transition-all"
-          >
-            {clients.map((brand, i) => (
-              <motion.div 
-                key={brand.name} 
-                variants={{
-                  hidden: { opacity: 0, y: 20, filter: "blur(12px)" },
-                  visible: { 
-                    opacity: 1, 
-                    y: 0, 
-                    filter: "blur(0px)", 
-                    transition: { duration: 0.7, ease: easeOutExpo } 
-                  }
-                }}
-                className="flex min-w-[100px] sm:min-w-[120px] items-center justify-center px-2"
-              >
-                {renderClient(brand)}
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ── Autonomous AI workflow features (Bento Grid) ── */}
-      <section id="features" className="py-20 md:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center md:text-left">
-            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
-              Autonomous AI workflow features
-            </h2>
-            <p className="mt-2 text-base text-zinc-500 dark:text-zinc-400">
-              From prototype to production, autonomously
-            </p>
-          </div>
-
-          {/* Asymmetrical Bento layout grid */}
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerVariants}
-            className="mt-8 sm:mt-12 grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3"
-          >
-            
-            {/* Box 1: Easy auth setup */}
-            <motion.div variants={itemVariants} className="flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-6 lg:col-span-1 dark:border-zinc-800 dark:bg-zinc-950 shadow-sm relative group">
-              <div className="absolute inset-0 bg-gradient-to-br from-zinc-100/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity dark:from-white/5" />
-              <div className="relative z-10">
-                <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Easy auth setup</h3>
-                <p className="mt-2 text-xs text-zinc-600 leading-relaxed dark:text-zinc-400">
-                  Get started in minutes with our simple authentication flow.
-                </p>
-              </div>
-
-              {/* Visual simulated auth profile form */}
-              <div className="relative z-10 mt-8 rounded-2xl border border-zinc-200/60 bg-white/50 p-5 shadow-xs backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-900/50 transition-transform group-hover:scale-[1.02] duration-500">
-                <div className="flex items-center gap-2 pb-4 border-b border-zinc-100/80 dark:border-zinc-800/80 justify-center">
-                  <div className="size-5 rounded-md bg-zinc-950 text-[10px] font-bold text-white flex items-center justify-center dark:bg-white dark:text-zinc-950">
-                    N
-                  </div>
-                  <span className="text-sm font-bold text-zinc-900 dark:text-white tracking-tight">Nexus</span>
-                </div>
-                <div className="mt-4 space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">Email</label>
-                    <div className="h-8 w-full rounded-lg border border-zinc-200 bg-white px-3 text-[11px] flex items-center text-zinc-400 shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
-                      you@example.com
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400">Password</label>
-                    <div className="h-8 w-full rounded-lg border border-zinc-200 bg-white px-3 text-[11px] flex items-center text-zinc-400 shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
-                      ••••••••
-                    </div>
-                  </div>
-                  <div className="pt-2">
-                    <div className="h-9 w-full rounded-lg bg-zinc-950 flex items-center justify-center text-xs font-semibold text-white shadow-md dark:bg-white dark:text-zinc-950 transition-transform hover:scale-[1.02] cursor-pointer">
-                      Sign in
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 pt-2">
-                    <div className="h-px w-full bg-zinc-100 dark:bg-zinc-800"></div>
-                    <span className="text-[9px] text-zinc-400 uppercase tracking-widest whitespace-nowrap">Or continue with</span>
-                    <div className="h-px w-full bg-zinc-100 dark:bg-zinc-800"></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 pt-1">
-                    <div className="h-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-[10px] font-semibold shadow-sm dark:border-zinc-800 dark:bg-zinc-950">Google</div>
-                    <div className="h-8 rounded-lg border border-zinc-200 bg-white flex items-center justify-center text-[10px] font-semibold shadow-sm dark:border-zinc-800 dark:bg-zinc-950">GitHub</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative z-10 mt-6 rounded-2xl bg-zinc-50 p-4 border border-zinc-100 dark:bg-zinc-900 dark:border-zinc-800">
-                <p className="text-[11px] text-zinc-500 leading-relaxed dark:text-zinc-400">
-                  &ldquo;Setting up auth took us 10 minutes instead of 2 weeks. The SDK just works out of the box with zero configuration. Our team shipped the entire login flow before lunch.&rdquo;
-                </p>
-                <div className="mt-3 flex items-center gap-2">
-                  <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" className="size-6 rounded-full" alt="User" />
-                  <div>
-                    <p className="text-[10px] font-bold text-zinc-900 dark:text-white">Sarah Chen</p>
-                    <p className="text-[9px] text-zinc-500">CTO at TechFlow</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Middle stacked boxes */}
-            <motion.div variants={itemVariants} className="flex flex-col gap-6 lg:col-span-1">
-              
-              {/* Box 2: You're secure everywhere */}
-              <div className="flex-1 overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-6 flex flex-col relative dark:border-zinc-800 dark:bg-zinc-950 shadow-sm group">
-                <div className="relative z-10">
-                  <h3 className="text-lg font-bold text-zinc-950 dark:text-white">You&apos;re secure, everywhere</h3>
-                  <p className="mt-2 text-xs text-zinc-600 leading-relaxed dark:text-zinc-400">
-                    Enterprise-grade security that follows your users across the globe. Built-in encryption, compliance, and monitoring.
-                  </p>
-                </div>
-                {/* Dotted Map Simulation */}
-                <div className="mt-8 relative h-40 w-full overflow-hidden flex items-center justify-center rounded-xl bg-zinc-50/50 dark:bg-zinc-900/20">
-                  {/* Subtle dotted background pattern */}
-                  <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:8px_8px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-70"></div>
-                  
-                  {/* Avatar Pins */}
-                  <motion.div 
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 0 }}
-                    className="absolute top-1/3 left-1/4 flex flex-col items-center"
-                  >
-                    <div className="relative">
-                      <div className="size-8 rounded-full border-2 border-white shadow-md overflow-hidden bg-blue-100 dark:border-zinc-800 relative z-10">
-                         <img src="https://i.pravatar.cc/150?u=a04258a2462d826712d" alt="User" />
-                      </div>
-                      <div className="absolute -inset-2 bg-blue-500/20 rounded-full blur-md -z-10 animate-pulse"></div>
-                    </div>
-                    <div className="w-1 h-3 bg-gradient-to-b from-blue-500 to-transparent opacity-50 mt-1 rounded-full"></div>
-                  </motion.div>
-
-                  <motion.div 
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                    className="absolute top-1/4 right-1/3 flex flex-col items-center"
-                  >
-                    <div className="relative">
-                      <div className="size-10 rounded-full border-2 border-white shadow-md overflow-hidden bg-indigo-100 dark:border-zinc-800 relative z-10">
-                         <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User" />
-                      </div>
-                      <div className="absolute -inset-2 bg-indigo-500/20 rounded-full blur-md -z-10 animate-pulse"></div>
-                    </div>
-                    <div className="w-1 h-4 bg-gradient-to-b from-indigo-500 to-transparent opacity-50 mt-1 rounded-full"></div>
-                  </motion.div>
-
-                  <motion.div 
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                    className="absolute bottom-1/4 right-1/4 flex flex-col items-center"
-                  >
-                    <div className="relative">
-                      <div className="size-7 rounded-full border-2 border-white shadow-md overflow-hidden bg-emerald-100 dark:border-zinc-800 relative z-10">
-                         <img src="https://i.pravatar.cc/150?u=a048581f4e29026701d" alt="User" />
-                      </div>
-                      <div className="absolute -inset-2 bg-emerald-500/20 rounded-full blur-md -z-10 animate-pulse"></div>
-                    </div>
-                    <div className="w-1 h-2 bg-gradient-to-b from-emerald-500 to-transparent opacity-50 mt-1 rounded-full"></div>
-                  </motion.div>
-                </div>
-              </div>
-
-              {/* Box 3: SDK available for everything */}
-              <div className="overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-6 relative dark:border-zinc-800 dark:bg-zinc-950 shadow-sm group">
-                <div className="relative z-10">
-                  <h3 className="text-lg font-bold text-zinc-950 dark:text-white">SDK available for everything</h3>
-                  <p className="mt-2 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[200px]">
-                    Native SDKs for every platform. React, Vue, iOS, Android, and more.
-                  </p>
-                </div>
-                
-                {/* Mac Keyboard Graphic */}
-                <div className="mt-8 relative -mx-2 sm:-mx-0 group-hover:-translate-y-2 transition-transform duration-500 [perspective:1000px]">
-                  <div className="[transform:rotateX(5deg)] [transform-origin:bottom]">
-                    <MacKeyboard
-                      className="border border-zinc-200/50 dark:border-zinc-800/50"
-                      enableSound={true}
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Box 4: Real-time collaboration */}
-            <motion.div variants={itemVariants} className="flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-200/80 bg-white p-6 lg:col-span-1 dark:border-zinc-800 dark:bg-zinc-950 shadow-sm relative group">
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-50 pointer-events-none" />
-              
-              <div className="relative z-10">
-                <h3 className="text-lg font-bold text-zinc-950 dark:text-white">Real-time collaboration</h3>
-                <p className="mt-2 text-xs text-zinc-600 leading-relaxed dark:text-zinc-400">
-                  Connect with your team instantly. AI-powered insights help you work smarter together.
-                </p>
-              </div>
-
-              {/* Chat bubbles with avatars replicating the actual template */}
-              <div className="relative z-10 mt-8 space-y-4 font-sans flex-1 flex flex-col justify-center">
-                
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                  className="flex items-end gap-3"
-                >
-                  <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" className="size-8 rounded-full shadow-sm border border-zinc-100 dark:border-zinc-800" alt="Avatar" />
-                  <div className="rounded-2xl rounded-bl-sm bg-white p-3 shadow-sm border border-zinc-100 max-w-[220px] dark:border-zinc-800 dark:bg-zinc-900 group-hover:-translate-y-1 transition-transform duration-500">
-                    <p className="text-xs text-zinc-700 dark:text-zinc-300">
-                      Workflow completed. 847 tasks processed.
-                    </p>
-                  </div>
-                </motion.div>
-
-                <motion.div 
-                  initial={{ opacity: 0, x: 10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4, duration: 0.5 }}
-                  className="flex items-end justify-end gap-3"
-                >
-                  <div className="rounded-2xl rounded-br-sm bg-blue-500 p-3 shadow-md max-w-[200px] group-hover:-translate-y-1 transition-transform duration-500">
-                    <p className="text-xs text-white">
-                      Deploy to production 🚀
-                    </p>
-                  </div>
-                  <img src="https://i.pravatar.cc/150?u=a04258114e29026702d" className="size-8 rounded-full shadow-sm border border-zinc-100 dark:border-zinc-800" alt="Avatar" />
-                </motion.div>
-
-                <motion.div 
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.6, duration: 0.5 }}
-                  className="flex items-end gap-3"
-                >
-                  <img src="https://i.pravatar.cc/150?u=a048581f4e29026701d" className="size-8 rounded-full shadow-sm border border-zinc-100 dark:border-zinc-800" alt="Avatar" />
-                  <div className="rounded-2xl rounded-bl-sm bg-white p-3 shadow-sm border border-zinc-100 max-w-[220px] dark:border-zinc-800 dark:bg-zinc-900 group-hover:-translate-y-1 transition-transform duration-500">
-                    <p className="text-xs text-zinc-700 dark:text-zinc-300">
-                      Deployed. All systems operational in us-east-1.
-                    </p>
-                  </div>
-                </motion.div>
-
-                {/* Simulated vertical glowing line behind avatars */}
-                <div className="absolute left-[15px] top-4 bottom-4 w-px bg-gradient-to-b from-transparent via-blue-500/20 to-transparent -z-10" />
-
-              </div>
-              
-              <div className="relative mt-8 mx-auto w-40 h-40 rounded-2xl overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-xl group-hover:scale-105 transition-transform duration-700">
-                 <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400&h=400" className="w-full h-full object-cover" alt="Focus mode" />
-                 <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 to-transparent" />
-                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
-                   <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                   <span className="text-[10px] font-bold text-white uppercase tracking-wider">Focus Mode</span>
-                 </div>
-              </div>
-            </motion.div>
-
-          </motion.div>
-
-          {/* ── 3-Column Minor Feature Icons Row ── */}
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerVariants}
-            className="mt-10 sm:mt-16 grid gap-6 sm:gap-8 border-t border-zinc-100 pt-8 sm:pt-12 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 dark:border-zinc-900"
-          >
-            <motion.div variants={itemVariants}>
-              <Zap className="size-5 text-blue-500" />
-              <h4 className="mt-3 font-bold text-zinc-950 text-sm dark:text-white">Lightning-fast deployments</h4>
-              <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Push to production in seconds. Our CI/CD pipeline handles builds, tests, and rollbacks automatically.
-              </p>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <BarChart className="size-5 text-blue-500" />
-              <h4 className="mt-3 font-bold text-zinc-950 text-sm dark:text-white">Built-in analytics</h4>
-              <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Track user behavior, monitor performance, and gain actionable insights without third-party tools.
-              </p>
-            </motion.div>
-            <motion.div variants={itemVariants}>
-              <Puzzle className="size-5 text-blue-500" />
-              <h4 className="mt-3 font-bold text-zinc-950 text-sm dark:text-white">Seamless integrations</h4>
-              <p className="mt-1.5 text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
-                Connect with your existing stack. Slack, GitHub, Jira, and 100+ integrations out of the box.
-              </p>
-            </motion.div>
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ── Loved by thousands of happy customers (Testimonials) ── */}
-      <section className="border-t border-zinc-100 py-20 md:py-28 bg-zinc-50/30 dark:border-zinc-900 dark:bg-zinc-950/40">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
-              Loved by thousands of happy customers
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              Hear from our community of builders, designers, and creators who trust us to power their projects.
-            </p>
-          </div>
-
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={itemVariants}
-            className="mt-8 sm:mt-16 w-full relative"
-          >
-            <div className="w-full pb-6">
-              <InfiniteMovingCards
-                items={testimonials.map((t, i) => ({
-                  id: `top-${i}`,
-                  title: t.quote,
-                  description: t.body,
-                  name: t.author,
-                  role: t.role,
-                  rating: 5,
-                }))}
-                direction="left"
-                speed="normal"
-                pauseOnHover={true}
-                cardClassName="bg-white dark:bg-zinc-900 border-zinc-200/60 dark:border-zinc-800/60 w-[320px] max-w-full"
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
+        <Nav brand={<Logo />} accent={CT} cta="Start free" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Agents", id: "agents" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <main>
+          <Hero />
+          <Teams />
+          <Principles />
+          <HowItWorks />
+          <Control />
+          <Pricing />
+          <Quotes />
+          <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-20 sm:py-24 lg:grid-cols-[1fr_1.4fr]">
+            <SectionHead eyebrow="FAQ" title="Good questions." accent={CT} />
+            <Reveal y={16}>
+              <Faq
+                accent={CT}
+                items={[
+                  { q: "What if an agent gets something wrong?", a: "Every run is logged step by step and can be undone for 24 hours. Anything you marked as risky never happens without your yes, so the worst case is usually a draft you delete." },
+                  { q: "Which models do the agents use?", a: "A mix of hosted language models, chosen per step for cost and accuracy. Your data is not used to train them, and you can see which model handled each step in the log." },
+                  { q: "Do I need to write prompts?", a: "No. You describe the job in a sentence, pick a trigger, connect tools and set rules with switches. You can edit the instructions if you want to, but most people never do." },
+                  { q: "Can it run during the day too?", a: "Yes. Night is the default because nobody is waiting on the results, but any agent can run on a file, an email or a button press." },
+                  { q: "Where is my data stored?", a: "In the EU or US region you choose at sign-up, encrypted at rest. Connected tools use scoped access you can revoke at any time." },
+                ]}
               />
-            </div>
-            <div className="w-full">
-              <InfiniteMovingCards
-                items={[...testimonials].reverse().map((t, i) => ({
-                  id: `bottom-${i}`,
-                  title: t.quote,
-                  description: t.body,
-                  name: t.author,
-                  role: t.role,
-                  rating: 5,
-                }))}
-                direction="right"
-                speed="slow"
-                pauseOnHover={true}
-                cardClassName="bg-white dark:bg-zinc-900 border-zinc-200/60 dark:border-zinc-800/60 w-[320px] max-w-full"
-              />
-            </div>
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ── Secondary Platform / Device Array Matrix ── */}
-      <section className="py-20 md:py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          
-          <div className="max-w-3xl">
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-950 dark:text-white">
-              Your AI agents work seamlessly on mobile, desktop, and tablet. Monitor and orchestrate from anywhere.
-            </h2>
+            </Reveal>
+          </section>
+          <div className="mx-auto max-w-[1180px] px-5 pb-20">
+            <CtaBand title="Hand over one boring job tonight." sub="Set up your first agent in about four minutes. It is free, and it asks before it does anything risky." cta="Start with one agent" secondary="Book a 15-minute call" accent={CT} glow="rgba(8,145,178,.22)" dark={false} />
           </div>
-
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerVariants}
-            className="mt-16 w-full flex flex-col items-center"
-          >
-            {/* Animated SVG Path connecting devices */}
-            <div className="relative w-full h-24 hidden md:block max-w-4xl opacity-50 dark:opacity-30">
-              <svg viewBox="0 0 1000 100" className="w-full h-full overflow-visible" fill="none" preserveAspectRatio="none">
-                <path d="M100,80 Q250,20 500,50 T900,80" stroke="currentColor" strokeWidth="1" className="text-zinc-400 dark:text-zinc-600" strokeDasharray="4 4" />
-                <motion.path 
-                  d="M100,80 Q250,20 500,50 T900,80" 
-                  stroke="url(#gradient)" 
-                  strokeWidth="3" 
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                />
-                <circle cx="100" cy="80" r="4" fill="#3b82f6" />
-                <circle cx="500" cy="50" r="4" fill="#3b82f6" />
-                <circle cx="900" cy="80" r="4" fill="#3b82f6" />
-                <defs>
-                  <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="transparent" />
-                    <stop offset="50%" stopColor="#3b82f6" />
-                    <stop offset="100%" stopColor="transparent" />
-                  </linearGradient>
-                </defs>
-              </svg>
-            </div>
-
-            {/* Device Mockups Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 w-full max-w-5xl gap-12 mt-8 md:-mt-4">
-              
-              {/* Mobile Mockup */}
-              <motion.div variants={itemVariants} className="flex flex-col items-center group cursor-pointer">
-                <div className="w-28 h-56 rounded-[2rem] border-[6px] border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 relative shadow-sm flex items-start justify-center transition-transform group-hover:-translate-y-2 duration-500">
-                  <div className="w-10 h-3 bg-zinc-200 dark:bg-zinc-800 rounded-b-xl absolute top-0"></div>
-                  <div className="absolute inset-2 rounded-[1.5rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center overflow-hidden">
-                    <div className="w-full h-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:8px_8px]" />
-                  </div>
-                </div>
-                <h4 className="mt-8 font-bold text-zinc-950 text-sm dark:text-white">Agents in your pocket</h4>
-                <p className="mt-2 text-xs text-zinc-500 text-center max-w-[200px]">Monitor workflows and receive real-time alerts on the go.</p>
-              </motion.div>
-
-              {/* Laptop mockup (animated 3D) */}
-              <AnimatedLaptopMockup variants={itemVariants} />
-
-              {/* Tablet Mockup */}
-              <motion.div variants={itemVariants} className="flex flex-col items-center group cursor-pointer">
-                <div className="w-52 h-36 rounded-[1.5rem] border-[6px] border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950 relative shadow-sm flex items-center justify-center mt-8 md:mt-2 transition-transform group-hover:-translate-y-2 duration-500">
-                  <div className="w-1.5 h-1.5 bg-zinc-300 dark:bg-zinc-700 rounded-full absolute right-2"></div>
-                  <div className="absolute inset-2 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 flex items-center justify-center overflow-hidden">
-                    <div className="size-14 rounded-full overflow-hidden border-2 border-white shadow-md z-10 relative">
-                      <img src="https://i.pravatar.cc/150?u=a042581f4e29026704d" alt="User" />
-                    </div>
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:12px_12px]" />
-                  </div>
-                </div>
-                <h4 className="mt-8 font-bold text-zinc-950 text-sm dark:text-white">Orchestrate from anywhere</h4>
-                <p className="mt-2 text-xs text-zinc-500 text-center max-w-[200px]">Manage complex workflows with touch-friendly dashboards.</p>
-              </motion.div>
-
-            </div>
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ── Simple, Transparent Pricing ── */}
-      <section id="pricing" className="border-t border-zinc-100 py-20 md:py-28 bg-zinc-50/40 dark:border-zinc-900 dark:bg-zinc-950/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center max-w-xl mx-auto">
-            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
-              Simple, Transparent Pricing
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-              Choose a plan that works best for you and your team. No hidden fees.
-            </p>
-          </div>
-
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerVariants}
-            className="mt-8 sm:mt-12 grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-3"
-          >
-            
-            {/* Starter Plan */}
-            <motion.div variants={itemVariants} className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm flex flex-col justify-between dark:border-zinc-800 dark:bg-zinc-900">
-              <div>
-                <h3 className="text-base font-bold text-zinc-950 dark:text-white">Starter</h3>
-                <p className="mt-1 text-xs text-zinc-500">Perfect for exploring AI agent capabilities</p>
-                <p className="mt-6 text-4xl font-extrabold text-zinc-950 dark:text-white">$0</p>
-                
-                <ul className="mt-8 space-y-3 text-xs text-zinc-600 dark:text-zinc-400">
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>5 active agents</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Standard tool library</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Community Discord support</span>
-                  </li>
-                </ul>
-              </div>
-              <button
-                onClick={() => alert("Starter plan selected. Ready for immediate deployment.")}
-                className="mt-8 w-full rounded-full border border-zinc-200 bg-zinc-50 py-2.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              >
-                Get Started
-              </button>
-            </motion.div>
-
-            {/* Pro Plan */}
-            <motion.div variants={itemVariants} className="rounded-3xl border-2 border-blue-500 bg-white p-8 shadow-xl relative flex flex-col justify-between dark:bg-zinc-900">
-              <div className="absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-500 px-3 py-0.5 text-[10px] font-bold uppercase text-white tracking-wider">
-                Popular
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-zinc-950 dark:text-white">Pro</h3>
-                <p className="mt-1 text-xs text-zinc-500">For teams automating complex workflows</p>
-                <p className="mt-6 text-4xl font-extrabold text-zinc-950 dark:text-white">$49<span className="text-xs font-normal text-zinc-400">/mo</span></p>
-                
-                <ul className="mt-8 space-y-3 text-xs text-zinc-600 dark:text-zinc-400">
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span className="font-semibold text-zinc-950 dark:text-white">Unlimited agents</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Advanced real-time sync</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Priority event loops</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Private webhook integrations</span>
-                  </li>
-                </ul>
-              </div>
-              <button
-                onClick={() => alert("Navigating to secure Pro Checkout profile.")}
-                className="mt-8 w-full rounded-full bg-blue-500 py-2.5 text-xs font-semibold text-white shadow-md transition hover:bg-blue-600"
-              >
-                Start Pro Access
-              </button>
-            </motion.div>
-
-            {/* Enterprise Plan */}
-            <motion.div variants={itemVariants} className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm flex flex-col justify-between dark:border-zinc-800 dark:bg-zinc-900">
-              <div>
-                <h3 className="text-base font-bold text-zinc-950 dark:text-white">Enterprise</h3>
-                <p className="mt-1 text-xs text-zinc-500">For organizations that need full autonomy</p>
-                <p className="mt-6 text-4xl font-extrabold text-zinc-950 dark:text-white">Custom</p>
-                
-                <ul className="mt-8 space-y-3 text-xs text-zinc-600 dark:text-zinc-400">
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Dedicated edge clusters</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>SOC2 audit assistance</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="size-3.5 text-blue-500" /> <span>Custom platform SLAs</span>
-                  </li>
-                </ul>
-              </div>
-              <button
-                onClick={() => alert("Initiating enterprise consulting schedule mapping.")}
-                className="mt-8 w-full rounded-full border border-zinc-200 bg-zinc-50 py-2.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-800"
-              >
-                Contact Sales
-              </button>
-            </motion.div>
-
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ── Frequently Asked Questions ── */}
-      <section className="py-20 md:py-28">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
-              Frequently Asked Questions
-            </h2>
-            <p className="mt-2 text-sm text-zinc-500">
-              Everything you need to know about deploying AI agents and automating your workflows.
-            </p>
-          </div>
-
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            variants={staggerVariants}
-            className="mt-12 space-y-4"
-          >
-            {faqs.map((faq, i) => {
-              const isOpen = activeFaq === i;
-              return (
-                <motion.div
-                  variants={itemVariants}
-                  key={i}
-                  className="rounded-2xl border border-zinc-200/80 bg-zinc-50/30 overflow-hidden transition dark:border-zinc-800 dark:bg-zinc-900/30"
-                >
-                  <button
-                    onClick={() => setActiveFaq(isOpen ? null : i)}
-                    className="w-full flex items-center justify-between p-5 text-left text-sm font-bold text-zinc-950 transition hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
-                  >
-                    <span>{faq.q}</span>
-                    <ChevronDown className={cn("size-4 text-zinc-400 transition-transform", isOpen && "rotate-180")} />
-                  </button>
-                  {isOpen && (
-                    <div className="px-5 pb-5 text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed border-t border-zinc-100 pt-3 dark:border-zinc-800/50">
-                      {faq.a}
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })}
-          </motion.div>
-
-        </div>
-      </section>
-
-      {/* ── Start building autonomous workflows today (CTA Footer Strip) ── */}
-      <section className="border-t border-zinc-100 py-20 bg-gradient-to-b from-zinc-50/50 to-white text-center dark:border-zinc-900 dark:from-zinc-950 dark:to-zinc-900/40">
-        <motion.div 
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={itemVariants}
-          className="mx-auto max-w-4xl px-4"
-        >
-          <h2 className="text-3xl font-extrabold tracking-tight text-zinc-950 sm:text-4xl dark:text-white">
-            Start building autonomous workflows today.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-xs sm:text-sm text-zinc-500 leading-relaxed">
-            Build, deploy, and orchestrate intelligent AI agents that automate complex workflows, make decisions, and execute tasks autonomously.
-          </p>
-          <div className="mt-8 flex justify-center">
-            <a
-              href="#pricing"
-              className="inline-flex items-center gap-2 rounded-full bg-blue-500 px-8 py-3.5 text-sm font-semibold text-white shadow-md transition hover:bg-blue-600"
-            >
-              <span>Get Started Now</span>
-              <ArrowRight className="size-4" />
-            </a>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ── Footer Columns ── */}
-      <footer className="border-t border-zinc-100 bg-white py-12 dark:border-zinc-900 dark:bg-zinc-950 text-xs text-zinc-500">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 gap-6 sm:gap-8 md:grid-cols-5">
-            
-            {/* Branding Column */}
-            <div className="col-span-2 space-y-3">
-              <div className="flex items-center gap-2">
-                <div className="flex size-6 items-center justify-center rounded-lg bg-zinc-950 text-white font-bold text-xs dark:bg-white dark:text-zinc-950">
-                  𝝠
-                </div>
-                <span className="font-bold text-zinc-950 dark:text-white">Simplistic</span>
-              </div>
-              <p className="max-w-xs text-[11px] text-zinc-400">
-                Next-generation state mechanics tooling powering scalable autonomous operations out of the box.
-              </p>
-              <p className="text-[10px] text-zinc-400 pt-4">
-                © {new Date().getFullYear()} Simplistic UI Systems Inc. All rights reserved.
-              </p>
-            </div>
-
-            {/* Pages Column */}
-            <div className="space-y-2">
-              <p className="font-bold text-zinc-950 dark:text-white">Pages</p>
-              <a href="#product" className="block hover:underline">Products</a>
-              <a href="#features" className="block hover:underline">Features</a>
-              <a href="#pricing" className="block hover:underline">Integrations</a>
-              <a href="#pricing" className="block hover:underline">Pricing</a>
-              <a href="#blog" className="block hover:underline">Blog</a>
-            </div>
-
-            {/* Socials Column */}
-            <div className="space-y-2">
-              <p className="font-bold text-zinc-950 dark:text-white">Socials</p>
-              <a href="#twitter" className="block hover:underline">Twitter</a>
-              <a href="#linkedin" className="block hover:underline">LinkedIn</a>
-              <a href="#github" className="block hover:underline">GitHub</a>
-              <a href="#discord" className="block hover:underline">Discord</a>
-            </div>
-
-            {/* Legal Column */}
-            <div className="space-y-2">
-              <p className="font-bold text-zinc-950 dark:text-white">Legal</p>
-              <a href="#privacy" className="block hover:underline">Privacy Policy</a>
-              <a href="#terms" className="block hover:underline">Terms of Service</a>
-              <a href="#cookie" className="block hover:underline">Cookie Policy</a>
-            </div>
-
-          </div>
-        </div>
-      </footer>
-
-    </div>
+        </main>
+        <Footer brand={<Logo />} note="Quiet AI agents for small teams. They work at night and ask before anything risky." columns={[{ title: "Product", links: ["How it works", "Agents", "Pricing", "Changelog"] }, { title: "Trust", links: ["Security", "Data regions", "Status", "Logs and undo"] }, { title: "Company", links: ["About", "Careers", "Privacy", "Contact"] }]} />
+      </div>
+    </MotionConfig>
   );
 }
+
+export default SimplisticSaaSPage;

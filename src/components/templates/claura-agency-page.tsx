@@ -17,7 +17,8 @@ import { RollingNumber } from "@/components/templates/kit/components/PriceOdomet
 import UploadChips from "@/components/templates/lumis/UploadChips";
 import ReviewStack from "@/components/templates/lumis/ReviewStack";
 import StandingCalendar from "@/components/templates/lumis/StandingCalendar";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Spotlight, Stagger, StickyStory, card, scrollToId } from "@/components/templates/kit/parts";
+import { StickyStory } from "@/components/templates/lumis/StickyStory";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Spotlight, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
 const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const A = "#a21caf"; // fuchsia, 6.3:1 on white

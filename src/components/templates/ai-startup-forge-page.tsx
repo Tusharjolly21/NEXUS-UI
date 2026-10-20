@@ -96,7 +96,7 @@ const PADX = 20;
 const PADY = 18;
 const GUT = 34; // gutter width
 const PANEL_W = 556;
-const R = 116; // lens radius
+const R = 124; // lens radius
 
 function XrayEditor() {
   const panel = useRef<HTMLDivElement>(null);
@@ -210,7 +210,7 @@ function XrayEditor() {
           {/* What Forge sees: only inside the lens */}
           <motion.div className="pointer-events-none absolute inset-0" style={{ clipPath: clip, WebkitClipPath: clip, background: "#fffaf0" }} aria-hidden="true">
             <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(180,83,9,.16) 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
-            <CodeLayer xray cw={cw} />
+            <CodeLayer xray cw={cw} active={active} />
           </motion.div>
           {/* Lens ring, draggable on touch */}
           <motion.div
@@ -249,7 +249,7 @@ function XrayEditor() {
   );
 }
 
-function CodeLayer({ xray = false, cw = 7.8 }: { xray?: boolean; cw?: number }) {
+function CodeLayer({ xray = false, cw = 7.8, active = -1 }: { xray?: boolean; cw?: number; active?: number }) {
   return (
     <div className="absolute inset-0" style={{ padding: `${PADY}px ${PADX}px` }}>
       {CODE.map((l, i) => (
@@ -263,7 +263,7 @@ function CodeLayer({ xray = false, cw = 7.8 }: { xray?: boolean; cw?: number }) 
           <code className="whitespace-pre">{hl(l, xray)}{l === "" ? " " : null}</code>
         </div>
       ))}
-      {xray && NOTES.map((n) => {
+      {xray && NOTES.map((n, k) => {
         const left = PADX + GUT + n.col * cw;
         const top = PADY + n.line * LH;
         const boxW = 232;
@@ -271,10 +271,14 @@ function CodeLayer({ xray = false, cw = 7.8 }: { xray?: boolean; cw?: number }) 
         return (
           <div key={n.key}>
             <span className="absolute rounded-[5px]" style={{ left: left - 2, top: top + 3, width: n.len * cw + 4, height: LH - 6, background: `${n.tone}22`, boxShadow: `inset 0 -2px 0 ${n.tone}` }} />
-            <div className="absolute rounded-[12px] bg-white px-3 py-2 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_24px_-12px_rgba(0,0,0,.35)]" style={{ left: boxLeft, top: top + LH + 2, width: boxW, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif" }}>
-              <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[#1d1d1f]"><span className="h-1.5 w-1.5 rounded-full" style={{ background: n.tone }} />{n.title}</span>
-              <span className="mt-0.5 block text-[11.5px] leading-[1.35] text-[#515154]">{n.body}</span>
-            </div>
+            <AnimatePresence>
+              {active === k && (
+                <motion.div key="c" className="absolute rounded-[12px] bg-white px-3 py-2 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_24px_-12px_rgba(0,0,0,.35)]" style={{ left: boxLeft, top: top + LH + 2, width: boxW, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif" }} initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}>
+                  <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[#1d1d1f]"><span className="h-1.5 w-1.5 rounded-full" style={{ background: n.tone }} />{n.title}</span>
+                  <span className="mt-0.5 block text-[11.5px] leading-[1.35] text-[#515154]">{n.body}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         );
       })}
@@ -412,14 +416,14 @@ const GHOST = [`  const rule = await findActiveRule(code);`, `  if (!rule) retur
 
 function SuggestCard() {
   return (
-    <div className={`${card} flex w-[460px] flex-col gap-5 p-6`}>
+    <div className={`${card} flex w-[480px] flex-col gap-5 p-6`}>
       <div className="flex items-center justify-between">
         <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Suggestion</span>
         <span className="flex items-center gap-1.5 text-[12px] text-[#6e6e73]">
           <kbd className="rounded-md bg-[#f5f5f7] px-1.5 py-0.5 text-[11px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]">Tab</kbd> to accept
         </span>
       </div>
-      <div className="rounded-2xl bg-[#f5f5f7] p-4 text-[12.5px] leading-[1.9]" style={{ fontFamily: MONO }}>
+      <div className="rounded-2xl bg-[#f5f5f7] p-4 text-[12px] leading-[1.9]" style={{ fontFamily: MONO }}>
         <div className="whitespace-pre text-[#1d1d1f]">{"export async function applyDiscount(cart, code) {"}</div>
         {GHOST.map((g, i) => (
           <motion.div key={i} className="whitespace-pre" style={{ color: "#a16207" }} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 0.85, x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 24, delay: 0.3 + i * 0.25 }}>
@@ -518,7 +522,8 @@ const AFTER = [
 
 function CodePane({ lines, tone, bg, mark }: { lines: string[]; tone: string; bg: string; mark: number[] }) {
   return (
-    <div className="flex h-full w-full flex-col justify-center px-4 py-5 text-[9.5px] leading-[1.75] sm:px-10 sm:text-[14px]" style={{ background: bg, fontFamily: MONO }}>
+    <div className="flex h-full w-full items-center justify-center px-3 py-5 text-[9.5px] leading-[1.75] sm:text-[14px] lg:text-[17px]" style={{ background: bg, fontFamily: MONO }}>
+      <div className="flex w-[34em] max-w-full flex-col">
       {lines.map((l, i) => (
         <div key={i} className="relative flex gap-3 sm:gap-5">
           <span className="w-3 flex-none select-none text-right tabular-nums text-[#86868b] sm:w-5">{i + 1}</span>
@@ -526,6 +531,7 @@ function CodePane({ lines, tone, bg, mark }: { lines: string[]; tone: string; bg
           <code className="whitespace-pre">{hl(l)}{l === "" ? " " : null}</code>
         </div>
       ))}
+      </div>
     </div>
   );
 }
@@ -692,13 +698,13 @@ function Pricing() {
         ))}
       </Stagger>
       <Reveal className="mt-5" y={16}>
-        <div className={`${card} flex flex-col items-center justify-between gap-6 p-7 sm:flex-row`}>
-          <div className="flex flex-col gap-1 text-center sm:text-left">
+        <div className={`${card} grid grid-cols-1 items-center gap-6 p-7 lg:grid-cols-[1fr_auto_1fr]`}>
+          <div className="flex flex-col gap-1 text-center lg:text-left">
             <span className="text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Team, for your whole team</span>
             <span className="text-[14px] text-[#6e6e73]">Add or remove seats any time. We prorate to the day.</span>
           </div>
-          <ElasticStepper label="Seats" min={1} max={60} defaultValue={8} accent={AD} onChange={setSeats} />
-          <div className="flex items-baseline gap-1.5 text-[#1d1d1f]">
+          <div className="flex justify-center"><Fit><ElasticStepper label="Seats" min={1} max={30} defaultValue={8} accent={AD} onChange={setSeats} /></Fit></div>
+          <div className="flex items-baseline justify-center gap-1.5 whitespace-nowrap text-[#1d1d1f] lg:justify-end">
             <span className="flex text-[40px] font-semibold tracking-[-0.045em] tabular-nums">$<RollingNumber value={seats * 19} /></span>
             <span className="text-[14px] text-[#6e6e73]">/ month</span>
           </div>
