@@ -23,7 +23,35 @@ import {
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 import { cn } from "@/lib/utils";
 
+/** Motion Kit templates: slug → [exported component, file, page title, page description]. */
+const MOTION_KIT_PAGES: Record<string, [string, string, string, string]> = {
+  relay: ["RelayPage", "relay-page", "Relay — One API. Every model. Half the bill.", "The AI gateway that routes each request to the cheapest model that can do the job."],
+  tally: ["TallyPage", "tally-page", "Tally — Money that moves like you do.", "Split a dinner with a flick, sort a week of spending in a minute, and save without thinking about it."],
+  wayfare: ["WayfarePage", "wayfare-page", "Wayfare — The whole trip, in one calm place.", "Flights, stays and plans together. Wayfare keeps the tickets, checks the weather and tells you when to leave."],
+  "side-b": ["SideBPage", "side-b-page", "Side B — Music for whatever today is.", "Spin a feeling, hum a tune, or make someone a mixtape."],
+};
+
 function getTemplateCode(tmpl: MarketplaceTemplate): string {
+  const kit = MOTION_KIT_PAGES[tmpl.slug];
+  if (kit) {
+    const [name, file, title, description] = kit;
+    return `// ${tmpl.title} — Production Template
+// Stack: ${tmpl.techStack.join(", ")}
+// Pages: ${tmpl.pages.join(", ")}
+
+import type { Metadata } from "next";
+import { ${name} } from "@/components/templates/${file}";
+
+export const metadata: Metadata = {
+  title: "${title}",
+  description: "${description}",
+};
+
+export default function HomePage() {
+  return <${name} />;
+}`;
+  }
+
   if (tmpl.slug === "nexus-ai-launch") {
     return `// ${tmpl.title} — Production Template
 // Stack: ${tmpl.techStack.join(", ")}

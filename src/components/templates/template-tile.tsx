@@ -18,6 +18,9 @@ const CATEGORY_TINT: Partial<Record<TemplateCategory, string>> = {
   Dashboard: "bg-tint-sky",
   Productivity: "bg-tint-mint",
   "Creator Websites": "bg-tint-butter",
+  Fintech: "bg-tint-mint",
+  Travel: "bg-tint-peach",
+  Music: "bg-tint-violet",
 };
 
 /**

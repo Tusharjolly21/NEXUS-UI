@@ -89,6 +89,23 @@ const LaunchfolioPortfolioPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const RelayPage = nextDynamic(
+  () => import("@/components/templates/relay-page").then((m) => ({ default: m.RelayPage })),
+  { loading: TemplateFallback },
+);
+const TallyPage = nextDynamic(
+  () => import("@/components/templates/tally-page").then((m) => ({ default: m.TallyPage })),
+  { loading: TemplateFallback },
+);
+const WayfarePage = nextDynamic(
+  () => import("@/components/templates/wayfare-page").then((m) => ({ default: m.WayfarePage })),
+  { loading: TemplateFallback },
+);
+const SideBPage = nextDynamic(
+  () => import("@/components/templates/side-b-page").then((m) => ({ default: m.SideBPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export function generateStaticParams() {
@@ -111,7 +128,15 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  if (tmpl.slug === "nexus-ai-launch") {
+  if (tmpl.slug === "relay") {
+    return <ThemeReceiver><RelayPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "tally") {
+    return <ThemeReceiver><TallyPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "wayfare") {
+    return <ThemeReceiver><WayfarePage /></ThemeReceiver>;
+  } else if (tmpl.slug === "side-b") {
+    return <ThemeReceiver><SideBPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {
     return <ThemeReceiver><NoirStudioTemplatePage /></ThemeReceiver>;
