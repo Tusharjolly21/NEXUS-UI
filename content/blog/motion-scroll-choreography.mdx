@@ -85,6 +85,8 @@ return (
 
 The `offset` parameter defines when the scroll progress starts and ends relative to the target element and the viewport. `"start end"` means "when the top of the element reaches the bottom of the viewport" — i.e., when it first becomes visible. `"end start"` means "when the bottom of the element leaves the top of the viewport."
 
+A scroll-linked progress line is the backbone of an animated timeline; the [React timeline guide](/blog/react-timeline-component) builds one end to end.
+
 ### Keep parallax subtle
 
 A `y` range of -15% to -25% of the element height is the practical maximum for parallax effects without causing layout disorientation. Deeper parallax values look impressive in isolation but cause motion sickness when combined with other scrolling content on the same page.

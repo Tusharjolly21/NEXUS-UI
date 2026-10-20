@@ -1462,7 +1462,7 @@
       "name": "compare",
       "type": "registry:component",
       "title": "Before / After Compare",
-      "description": "Drag a vertical handle to compare two images side-by-side. Supports mouse and touch, optional labels, custom start position, and any aspect ratio.",
+      "description": "Compare two images side by side: the divider follows the mouse on desktop and drags on touch screens. Optional labels, custom start position, and any aspect ratio.",
       "dependencies": [
         "lucide-react",
         "react"
@@ -1609,7 +1609,7 @@
       "name": "shader-flow",
       "type": "registry:component",
       "title": "Shader Flow",
-      "description": "A soft animated shader-style background with flowing gradient motion.",
+      "description": "A soft, shader-style background: blurred gradient blobs drifting with Framer Motion, no WebGL needed.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1678,6 +1678,45 @@
         },
         {
           "path": "next-ui/interactive-globe-explorer/interactive-globe-explorer.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "code-block",
+      "type": "registry:component",
+      "title": "Code Block",
+      "description": "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/code-block/code-block.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "card-stack-rotator",
+      "type": "registry:component",
+      "title": "Card Stack Rotator",
+      "description": "A polished stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/card-stack-rotator/card-stack-rotator.tsx",
           "type": "registry:component"
         }
       ]
@@ -1923,7 +1962,7 @@
       "name": "command-palette",
       "type": "registry:component",
       "title": "Command Palette",
-      "description": "Animated command palette with ⌘K shortcut, grouped navigation/actions/theme commands, backdrop blur overlay, and Framer Motion enter/exit transitions.",
+      "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions.",
       "dependencies": [
         "framer-motion",
         "lucide-react",

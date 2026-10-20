@@ -1,0 +1,216 @@
+---
+title: "React Marquee Logo Cloud: Infinite Scroll with Tailwind"
+description: "Build an infinite logo marquee in React: a CSS-only Tailwind loop, a Framer Motion version, pause on hover, edge fade masks, and accessible duplicate logos."
+date: "2026-10-20"
+---
+
+A logo cloud is the row of customer or partner logos that sits under most SaaS hero sections. When there are more logos than fit in one row, the usual answer is an infinite marquee: a strip that drifts sideways forever. It looks simple, but a good one has to loop without a visible jump, pause when the user wants it to, fade at the edges on any background, and avoid reading every logo twice to screen reader users. This guide builds one with React and Tailwind CSS, then shows when a Framer Motion version is worth the JavaScript. For ready-made variants, see the [logo clouds block](/blocks/block-logo-clouds).
+
+## Should a logo cloud scroll at all?
+
+Not always. If every logo fits on one row at desktop width, a static row or grid is easier to scan and has no accessibility cost. A marquee earns its place when you have more logos than space, or when the movement itself is part of the page's tone. If you want motion without a loop, a one-time entrance animation works well: the [cinematic logo cloud](/components/cinematic-logo-cloud) staggers a blur-fade across a static layout instead.
+
+## How does an infinite marquee work?
+
+Every seamless marquee uses the same trick. Render the list twice, side by side, and move both copies left by exactly the width of one copy. At the end of the animation the second copy sits precisely where the first one started, so restarting the animation is invisible.
+
+Two conditions make or break the loop:
+
+1. **The distance must be exactly one copy's width, including the spacing after its last item.** If you use `gap` between the two copies, the jump is off by one gap. Put trailing padding inside each copy instead.
+2. **One copy must be at least as wide as the container.** Otherwise empty space appears on the right before the loop resets. With few logos, repeat the list inside each copy.
+
+## CSS-only infinite marquee in React and Tailwind
+
+A CSS animation that only touches `transform` can run on the browser's compositor, needs no JavaScript, and renders on the server. Start by registering a keyframe in your Tailwind v4 theme:
+
+```css
+/* globals.css */
+@theme {
+  --animate-marquee: marquee 40s linear infinite;
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-100%); }
+  }
+}
+```
+
+Then the component. Each copy is its own `ul` that animates by `-100%` of its own width, so the gap problem disappears:
+
+```tsx
+import { cn } from "@/lib/utils";
+
+type Logo = { name: string; src: string; width: number; height: number };
+
+const fade =
+  "motion-safe:[mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] " +
+  "motion-safe:[-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]";
+
+export function LogoMarquee({
+  logos,
+  duration = 40,
+  paused = false,
+  className,
+}: {
+  logos: Logo[];
+  duration?: number;
+  paused?: boolean;
+  className?: string;
+}) {
+  return (
+    <div className={cn("group flex overflow-hidden", fade, className)}>
+      {[0, 1].map((copy) => (
+        <ul
+          key={copy}
+          aria-label={copy === 0 ? "Companies using our product" : undefined}
+          aria-hidden={copy === 1 ? true : undefined}
+          inert={copy === 1}
+          style={{ animationDuration: `${duration}s`, animationPlayState: paused ? "paused" : undefined }}
+          className={cn(
+            "flex shrink-0 items-center gap-12 pr-12 animate-marquee",
+            "group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]",
+            "motion-reduce:animate-none",
+            copy === 0
+              ? "motion-reduce:w-full motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-6 motion-reduce:pr-0"
+              : "motion-reduce:hidden",
+          )}
+        >
+          {logos.map((logo) => (
+            <li key={logo.name} className="shrink-0">
+              <img
+                src={logo.src}
+                alt={logo.name}
+                width={logo.width}
+                height={logo.height}
+                className="h-7 w-auto opacity-60 grayscale transition-opacity hover:opacity-100 dark:invert"
+              />
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  );
+}
+```
+
+A few details worth calling out:
+
+- **Duration and pause state are set inline.** `animationDuration` overrides the 40s from the theme without a separate utility per speed, and an inline `animationPlayState` beats any class, so the `paused` prop always wins.
+- **`pr-12` matches `gap-12`,** so the spacing between the last logo of one copy and the first logo of the next equals the spacing everywhere else.
+- **Under reduced motion** the animation stops, the duplicate is removed, and the first copy wraps into a centred static grid. Users who opt out of motion still see every logo.
+
+In a Next.js app, swap `img` for `next/image` with the same width and height.
+
+## How do you pause a marquee on hover?
+
+`animation-play-state: paused` freezes a CSS animation in place, and resuming continues from the same frame. The `group-hover:` variant applies it to both copies when the pointer is anywhere over the strip. `group-focus-within:` does the same when a keyboard user tabs onto a linked logo, which matters if your logos link to case studies.
+
+Hover pausing is not enough on its own for accessibility. WCAG 2.2.2 (Pause, Stop, Hide) requires a way to pause content that moves automatically for more than five seconds alongside other content, and touch and keyboard users cannot hover. Add a real control:
+
+```tsx
+"use client";
+
+import { useState } from "react";
+
+export function PausableMarquee({ logos }: { logos: Logo[] }) {
+  const [paused, setPaused] = useState(false);
+  return (
+    <div>
+      <LogoMarquee logos={logos} paused={paused} />
+      <button
+        type="button"
+        aria-pressed={paused}
+        onClick={() => setPaused((p) => !p)}
+        className="mt-4 text-sm text-zinc-500 underline-offset-4 hover:underline"
+      >
+        Pause logo animation
+      </button>
+    </div>
+  );
+}
+```
+
+The label stays the same in both states and `aria-pressed` tells screen readers whether the toggle is on. Only this wrapper needs `"use client"`; the marquee itself can stay a Server Component.
+
+## Fading the edges: mask-image vs gradient overlay
+
+The common shortcut is to place two absolutely positioned gradients over the ends, from the page background colour to transparent. That only works on a flat background of a known colour, and it breaks in dark mode unless you maintain two sets.
+
+A `mask-image` fades the strip itself to transparency, so it works on any background, including images and gradients. The `motion-safe:` prefix in the component above removes the mask under reduced motion, where the logos are static and should not fade out at the edges.
+
+## When is a Framer Motion marquee worth it?
+
+CSS covers a constant-speed loop. Reach for JavaScript when you want behaviour CSS animations cannot express: easing to a stop instead of freezing, changing speed in response to scroll velocity, or letting users drag the strip. With Framer Motion, `useAnimationFrame` advances a motion value each frame without re-rendering React:
+
+```tsx
+"use client";
+
+import { useEffect, useRef } from "react";
+import { motion, useAnimationFrame, useMotionValue, useReducedMotion } from "framer-motion";
+
+export function MotionMarquee({ children, speed = 40 }: { children: React.ReactNode; speed?: number }) {
+  const copyRef = useRef<HTMLDivElement>(null);
+  const width = useRef(0);
+  const hovered = useRef(false);
+  const factor = useRef(1);
+  const x = useMotionValue(0);
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    const el = copyRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      width.current = el.offsetWidth;
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useAnimationFrame((_, delta) => {
+    if (reduce || !width.current) return;
+    // Ease the speed toward 0 on hover rather than stopping dead.
+    const target = hovered.current ? 0 : 1;
+    factor.current += (target - factor.current) * Math.min(1, delta / 250);
+    let next = x.get() - speed * factor.current * (delta / 1000);
+    if (next <= -width.current) next += width.current;
+    x.set(next);
+  });
+
+  return (
+    <div
+      className="flex overflow-hidden"
+      onPointerEnter={() => {
+        hovered.current = true;
+      }}
+      onPointerLeave={() => {
+        hovered.current = false;
+      }}
+    >
+      <motion.div style={{ x }} className="flex shrink-0">
+        <div ref={copyRef} className="flex shrink-0 items-center gap-12 pr-12">
+          {children}
+        </div>
+        <div aria-hidden inert className="flex shrink-0 items-center gap-12 pr-12">
+          {children}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+```
+
+Here `speed` is in pixels per second, so the marquee moves at the same pace whatever the number of logos. Multiplying by `delta` keeps it frame-rate independent on 60Hz and 120Hz screens. The [infinite moving cards](/components/infinite-moving-cards) component uses this same `useAnimationFrame` approach with direction and speed presets, and works for logos as well as testimonial cards. A third option is a small library: the Infinite Marquee variant in the [logo clouds block](/blocks/block-logo-clouds) uses `react-fast-marquee` for the loop and a `mask-image` for the edges.
+
+## Accessibility of duplicated logos
+
+The duplicate copy exists only for the visual loop, so hide it from assistive technology properly:
+
+- **`aria-hidden`** stops screen readers from reading every logo twice.
+- **`inert`** also removes it from the tab order. `aria-hidden` alone does not, so if your logos are links, keyboard users would otherwise tab through invisible duplicates. React 19 supports `inert` as a boolean prop.
+- **Give the visible list a label** and give each logo `alt` text with the company name. A logo with empty alt text tells a screen reader user nothing about who your customers are.
+
+## Logo assets that look even
+
+Most logo clouds look messy because the marks have different visual weight, not because of the animation. Size by height (`h-7 w-auto`) rather than width, trim padding from the source SVGs, and tone everything to one colour with `grayscale` and reduced opacity, or use single-colour SVGs that inherit `currentColor`. Wide wordmarks often need a slightly smaller height than square marks to look the same size.
+
+For vertical scrolling social proof, the same duplicated-track technique runs top to bottom in the [scrolling testimonials](/components/scrolling-testimonials) component, which uses pure CSS keyframes. For where the logo row belongs on a landing page, see [how we structure landing pages](/blog/landing-page-structure).

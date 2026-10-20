@@ -7,38 +7,11 @@ import { getAllPosts } from "@/lib/blog";
 import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 
-// Demo pages that have dedicated full-page routes.
-const DEMO_SLUGS = [
-  "background-boxes", "background-gradient", "cursor-text-reveal", "encrypted-text",
-  "floating-dock", "glowing-effect-cards", "gooey-input",
-  "image-trail", "infinite-moving-cards", "keyboard",
-  "meteors", "signup-form", "sparkles", "squiggly-text",
-  "stateful-button", "terminal", "text-generate-effect",
-  "text-reveal-card", "typewriter-effect",
-];
-
-// Slug → lastmod for demo pages (matches the corresponding component's createdAt).
-const DEMO_DATES: Record<string, string> = {
-  "background-boxes":      "2026-01-15",
-  "background-gradient":   "2026-01-15",
-  "cursor-text-reveal":    "2026-05-22",
-  "encrypted-text":        "2026-02-01",
-  "floating-dock":         "2026-01-20",
-  "glowing-effect-cards":  "2026-02-10",
-  "gooey-input":           "2026-02-15",
-  "image-trail":           "2026-03-01",
-  "infinite-moving-cards": "2026-01-20",
-  "keyboard":              "2026-03-10",
-  "meteors":               "2026-01-15",
-  "signup-form":           "2026-02-01",
-  "sparkles":              "2026-01-15",
-  "squiggly-text":         "2026-03-15",
-  "stateful-button":       "2026-02-20",
-  "terminal":              "2026-03-05",
-  "text-generate-effect":  "2026-01-25",
-  "text-reveal-card":      "2026-02-05",
-  "typewriter-effect":     "2026-02-25",
-};
+// Every page's markup changed with the site redesign on this date, so no lastmod is older than it.
+// (/demos/* pages are full-screen versions of component pages and canonicalise to them, so they
+// are left out of the sitemap.)
+const REDESIGN = "2026-10-19";
+const since = (date: string | undefined) => (date && date > REDESIGN ? date : REDESIGN);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = siteConfig.url;
@@ -53,26 +26,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const latestTemplate  = templates.reduce((a, b) => a.createdAt > b.createdAt ? a : b);
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: base,                              lastModified: latestComponent.createdAt },
-    { url: `${base}/components`,              lastModified: latestComponent.createdAt },
-    { url: `${base}/blocks`,                  lastModified: latestTemplate.createdAt },
-    { url: `${base}/templates`,               lastModified: latestTemplate.createdAt },
-    { url: `${base}/pricing`,                 lastModified: "2026-04-01" },
-    { url: `${base}/contact`,                 lastModified: "2026-01-01" },
-    { url: `${base}/privacy`,                 lastModified: "2026-10-19" },
-    { url: `${base}/terms`,                   lastModified: "2026-10-19" },
-    { url: `${base}/blog`,                    lastModified: allPosts[0]?.date ?? "2026-01-01" },
-    { url: `${base}/docs/introduction`,        lastModified: "2026-03-01" },
-    { url: `${base}/docs/installation`,       lastModified: "2026-03-01" },
-    { url: `${base}/docs/install-nextjs`,     lastModified: "2026-03-01" },
-    { url: `${base}/docs/install-tailwindcss`,lastModified: "2026-03-01" },
-    { url: `${base}/docs/add-utilities`,      lastModified: "2026-03-01" },
-    { url: `${base}/docs/cli`,                lastModified: "2026-03-01" },
+    { url: base,                              lastModified: since(latestComponent.createdAt) },
+    { url: `${base}/components`,              lastModified: since(latestComponent.createdAt) },
+    { url: `${base}/blocks`,                  lastModified: since("2026-10-20") },
+    { url: `${base}/templates`,               lastModified: since(latestTemplate.createdAt) },
+    { url: `${base}/pricing`,                 lastModified: since("2026-04-01") },
+    { url: `${base}/contact`,                 lastModified: since("2026-01-01") },
+    { url: `${base}/privacy`,                 lastModified: since("2026-10-19") },
+    { url: `${base}/terms`,                   lastModified: since("2026-10-19") },
+    { url: `${base}/blog`,                    lastModified: since(allPosts[0]?.date ?? "2026-01-01") },
+    { url: `${base}/docs/introduction`,        lastModified: since("2026-03-01") },
+    { url: `${base}/docs/installation`,       lastModified: since("2026-03-01") },
+    { url: `${base}/docs/install-nextjs`,     lastModified: since("2026-03-01") },
+    { url: `${base}/docs/install-tailwindcss`,lastModified: since("2026-03-01") },
+    { url: `${base}/docs/add-utilities`,      lastModified: since("2026-10-20") },
+    { url: `${base}/docs/cli`,                lastModified: since("2026-03-01") },
   ];
 
   const componentRoutes: MetadataRoute.Sitemap = libraryComponents.map((c) => ({
     url: `${base}/components/${c.slug}`,
-    lastModified: c.createdAt,
+    lastModified: since(c.createdAt),
   }));
 
   // Category landing pages — lastmod is the newest component in the category.
@@ -80,28 +53,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((c) => isIndexableCategory(c.slug))
     .map((c) => ({
       url: `${base}${getComponentCategoryHref(c.slug)}`,
-      lastModified: getCategoryComponents(c.slug).reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt,
+      lastModified: since(getCategoryComponents(c.slug).reduce((a, b) => (a.createdAt > b.createdAt ? a : b)).createdAt),
     }));
 
   const templateRoutes: MetadataRoute.Sitemap = templates.map((t) => ({
     url: `${base}/templates/${t.slug}`,
-    lastModified: t.createdAt,
+    lastModified: since(t.createdAt),
   }));
 
   const blockRoutes: MetadataRoute.Sitemap = blocks.map((b) => ({
     url: `${base}/blocks/${b.slug}`,
-    lastModified: "2026-04-01",
+    lastModified: since("2026-10-20"),
   }));
 
   const blogRoutes: MetadataRoute.Sitemap = allPosts.map((post) => ({
     url: `${base}/blog/${post.slug}`,
-    lastModified: post.date ?? "2026-01-01",
+    lastModified: since(post.date ?? "2026-01-01"),
   }));
 
-  const demoRoutes: MetadataRoute.Sitemap = DEMO_SLUGS.map((slug) => ({
-    url: `${base}/demos/${slug}`,
-    lastModified: DEMO_DATES[slug] ?? "2026-01-15",
-  }));
-
-  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes, ...demoRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes];
 }

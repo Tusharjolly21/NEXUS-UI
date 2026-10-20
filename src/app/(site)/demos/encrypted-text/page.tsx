@@ -6,7 +6,7 @@ export const metadata: Metadata = createMetadata({
   title: "Encrypted Text",
   description:
     "Animated text that decodes gibberish characters to reveal the final string. Futuristic scramble effect for React headings, labels, and any text node.",
-  alternates: { canonical: "/demos/encrypted-text" },
+  alternates: { canonical: "/components/encrypted-text" },
 });
 
 export default function EncryptedTextDemoPage() {

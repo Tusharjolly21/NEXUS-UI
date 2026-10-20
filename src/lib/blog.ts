@@ -50,3 +50,31 @@ export async function getPost(slug: string) {
   });
   return { frontmatter, content: mdx, slug };
 }
+
+/**
+ * Posts that link to a component page, newest first — shown on that component's page so guides
+ * and components point at each other. Read once per server process.
+ */
+let guideIndex: Map<string, { slug: string; title: string }[]> | null = null;
+
+export function getGuidesForComponent(componentSlug: string) {
+  if (!guideIndex) {
+    guideIndex = new Map();
+    const posts = getPostSlugs()
+      .map((slug) => {
+        const raw = fs.readFileSync(path.join(dir, `${slug}.mdx`), "utf8");
+        const { content, data } = matter(raw);
+        return { slug, title: String((data as BlogFrontmatter).title ?? slug), date: String((data as BlogFrontmatter).date ?? ""), content };
+      })
+      .sort((a, b) => (a.date < b.date ? 1 : -1));
+    for (const post of posts) {
+      const linked = new Set([...post.content.matchAll(/\]\(\/components\/([a-z0-9-]+)\)/g)].map((m) => m[1]));
+      for (const c of linked) {
+        const list = guideIndex.get(c) ?? [];
+        list.push({ slug: post.slug, title: post.title });
+        guideIndex.set(c, list);
+      }
+    }
+  }
+  return (guideIndex.get(componentSlug) ?? []).slice(0, 3);
+}

@@ -5,7 +5,7 @@ import { InfiniteMovingCardsDemo } from "@/components/infinite-moving-cards";
 export const metadata: Metadata = createMetadata({
   title: "Infinite moving cards demo",
   description: "Seamless infinite card marquee with configurable direction, speed, and hover-pause. Perfect for testimonials, logo strips, and feature lists in React.",
-  alternates: { canonical: "/demos/infinite-moving-cards" },
+  alternates: { canonical: "/components/infinite-moving-cards" },
 });
 
 export default function InfiniteMovingCardsDemoPage() {

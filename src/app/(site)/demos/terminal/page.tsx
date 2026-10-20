@@ -5,7 +5,7 @@ import { TerminalDemo } from "@/components/terminal";
 export const metadata: Metadata = createMetadata({
   title: "Terminal demo",
   description: "Premium interactive terminal animation with typing sequences, blinking cursor, command chaining, and optional synthesised mechanical key sounds.",
-  alternates: { canonical: "/demos/terminal" },
+  alternates: { canonical: "/components/terminal" },
 });
 
 export default function TerminalDemoPage() {

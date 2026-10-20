@@ -5,7 +5,7 @@ import { CursorTextRevealDemo } from "@/components/cursor-text-reveal";
 export const metadata: Metadata = createMetadata({
   title: "Cursor Text Reveal Demo",
   description: "Interactive cursor-following text reveal for React. A mask effect that exposes hidden content as the user moves their pointer across the text.",
-  alternates: { canonical: "/demos/cursor-text-reveal" },
+  alternates: { canonical: "/components/cursor-text-reveal" },
 });
 
 export default function CursorTextRevealDemoPage() {
