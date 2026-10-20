@@ -5836,15 +5836,66 @@ export function LineRevealDemo() {
   {
     slug: "animated-countdown",
     name: "Animated Countdown",
-    description: "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion.",
+    description: "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant.",
     categorySlug: "motion-effects",
-    tags: ["countdown", "timer", "flip", "launch", "framer-motion"],
+    tags: ["motion kit", "countdown", "timer", "flip", "launch", "framer-motion"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-04-10",
     animationKinds: ["spring", "layout"],
     dependencies: ["framer-motion"],
     Preview: Previews.PreviewAnimatedCountdown,
+    props: [
+      { name: "SplitFlapBoard.to", type: "Date | number", defaultValue: "mount + 2d 14:37:09", description: "Moment to count down to, as a Date or epoch milliseconds." },
+      { name: "SplitFlapBoard.label", type: "string", defaultValue: "\"Launch \u00b7 MK 4.0\"", description: "Heading in the top-left corner." },
+      { name: "SplitFlapBoard.liveLabel", type: "string", defaultValue: "\"Live\"", description: "Text next to the pulsing dot in the top-right corner." },
+      { name: "SplitFlapBoard.statusLabel", type: "string", defaultValue: "\"Status\"", description: "Caption above the status row." },
+      { name: "SplitFlapBoard.statuses", type: "string[]", defaultValue: "[\"BOARDING\", \"ON TIME\", \"GATE B12\", \"FINAL CALL\"]", description: "Status lines; the first is shown and autoplay rotates through them. Up to 10 characters fit." },
+      { name: "SplitFlapBoard.status", type: "string", description: "Shows this status instead of the statuses list (controlled)." },
+      { name: "SplitFlapBoard.onComplete", type: "() => void", description: "Called once when the countdown reaches zero." },
+      { name: "SplitFlapBoard.autoplay", type: "boolean", defaultValue: "false", description: "Rotates the status line every 4.2s until someone presses the board. The countdown always runs." },
+      { name: "SplitFlapBoard.className", type: "string", description: "Extra classes for the board." },
+    ],
+    previewSections: [
+      {
+        title: "Animated Countdown",
+        Preview: Previews.PreviewAnimatedCountdown,
+        reactSource: `"use client";
+
+import { AnimatedCountdown } from "@/components/animated-countdown";
+
+export function LaunchCountdown() {
+  return (
+    <AnimatedCountdown
+      targetDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
+      variant="modern"
+      size="md"
+    />
+  );
+}`,
+      },
+      {
+        title: "Split-Flap Board",
+        Preview: Previews.PreviewSplitFlapBoard,
+        reactSource: `"use client";
+
+import { SplitFlapBoard } from "@/components/animated-countdown";
+
+const LAUNCH = new Date("2026-12-01T17:00:00Z");
+
+export function LaunchBoard() {
+  return (
+    <SplitFlapBoard
+      to={LAUNCH}
+      label="Launch · v2.0"
+      statuses={["ON TIME", "GATE OPEN", "FINAL CALL"]}
+      autoplay
+      onComplete={() => console.log("we have lift-off")}
+    />
+  );
+}`,
+      },
+    ],
     detailPreviews: [
       Previews.PreviewAnimatedCountdownModern,
       Previews.PreviewAnimatedCountdownDigital,
@@ -6559,15 +6610,60 @@ export function ProfileOrbitDemo() {
   {
     slug: "command-palette",
     name: "Command Palette",
-    description: "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions.",
+    description: "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions. Also includes the Motion Kit Command Morph variant.",
     categorySlug: "motion-effects",
-    tags: ["command", "search", "keyboard", "modal", "framer-motion", "shadcn"],
+    tags: ["motion kit", "command", "search", "keyboard", "modal", "framer-motion", "shadcn"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-05-18",
     animationKinds: ["spring", "hover"],
     dependencies: ["framer-motion", "lucide-react", "cmdk", "@radix-ui/react-dialog"],
     Preview: Previews.PreviewCommandPalette,
+    previewSections: [
+      {
+        title: "Command Palette",
+        Preview: Previews.PreviewCommandPalette,
+        reactSource: `"use client";
+
+import { CommandPalette } from "@/components/command-palette";
+
+export function CommandPaletteDemo() {
+  return <CommandPalette />;
+}`,
+      },
+      {
+        title: "Command Morph",
+        Preview: Previews.PreviewCommandMorph,
+        reactSource: `"use client";
+
+import { CommandMorph, type CommandItem } from "@/components/command-palette";
+
+const commands: CommandItem[] = [
+  { id: "search", label: "Search docs", hint: "/", icon: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4" },
+  {
+    id: "goto",
+    label: "Go to page",
+    crumb: "pages",
+    icon: "M3 7h6l2 2h10v10H3z",
+    children: [
+      { id: "home", label: "Home", icon: "M3 11l9-8 9 8v10H3z" },
+      { id: "billing", label: "Billing", icon: "M2 6h20v12H2zM2 10h20" },
+    ],
+  },
+  { id: "logout", label: "Log out", icon: "M9 21H5V3h4M16 17l5-5-5-5M21 12H9" },
+];
+
+export function AppCommands() {
+  return (
+    <CommandMorph
+      commands={commands}
+      hotkey
+      onSelect={(cmd, path) => console.log([...path.map((p) => p.id), cmd.id].join("/"))}
+    />
+  );
+}`,
+      },
+    ],
     tailwindSource: `"use client";
 
 import { CommandPalette } from "@/components/command-palette";
@@ -6584,6 +6680,12 @@ export function CommandPaletteDemo() {
 }`,
     props: [
       { name: "className", type: "string", description: "Optional className for the root wrapper." },
+      { name: "CommandMorph.commands", type: "CommandItem[]", defaultValue: "DEFAULT_COMMANDS", description: "Commands on the first page, each { id, label, icon, hint?, crumb?, children? }. Items with children open a nested page." },
+      { name: "CommandMorph.placeholder", type: "string", defaultValue: "\"Type a command\u2026\"", description: "Search field placeholder on the first page. Nested pages show \"Search\u2026\"." },
+      { name: "CommandMorph.onSelect", type: "(command: CommandItem, path: CommandItem[]) => void", description: "Called when the user runs a command without children, with the groups that led to it." },
+      { name: "CommandMorph.hotkey", type: "boolean", defaultValue: "false", description: "Opt-in: Cmd/Ctrl+K anywhere on the page focuses the search field. Off by default." },
+      { name: "CommandMorph.autoplay", type: "boolean", defaultValue: "false", description: "Walks through the palette by itself until someone touches it." },
+      { name: "CommandMorph.className", type: "string", description: "Extra classes for the outer box." },
     ],
   },
   {
@@ -7556,9 +7658,9 @@ export function PayButton() {
     name: "Emoji Reactions",
     registryCliName: "emoji-reactions",
     description:
-      "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation.",
+      "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation. Also includes the Motion Kit Spark Reactions variant.",
     categorySlug: "inputs-controls",
-    tags: ["reactions", "emoji", "chat", "message", "picker", "counter", "social", "framer-motion"],
+    tags: ["motion kit", "reactions", "emoji", "chat", "message", "picker", "counter", "social", "framer-motion"],
     premium: false,
     trendingScore: 166,
     createdAt: "2026-10-19",
@@ -7571,8 +7673,60 @@ export function PayButton() {
       { name: "onChange", type: "(reactions: Reaction[]) => void", description: "Called whenever the reaction list changes." },
       { name: "accent", type: "string", defaultValue: '"#5b8def"', description: "Ring and tint colour for reactions you've added." },
       { name: "className", type: "string", description: "Extra classes on the wrapper." },
+      { name: "SparkReactions.message", type: "string", defaultValue: "\"Shipped the new onboarding flow\"", description: "The message the reactions belong to." },
+      { name: "SparkReactions.reactions", type: "SparkReaction[]", defaultValue: "DEFAULT_SPARK_REACTIONS", description: "Starting row, each { id, count, mine } (rocket 3 and fire 2 by default)." },
+      { name: "SparkReactions.options", type: "SparkReactionOption[]", defaultValue: "DEFAULT_SPARK_OPTIONS", description: "Reactions in the picker, each { id, label, d, color, darkColor? }; also the icons for reactions." },
+      { name: "SparkReactions.onChange", type: "(reactions: SparkReaction[]) => void", description: "Called with the new row after the user adds or removes a reaction." },
+      { name: "SparkReactions.autoplay", type: "boolean", defaultValue: "false", description: "Reacts, opens the picker and un-reacts on a loop until someone touches it." },
+      { name: "SparkReactions.className", type: "string", description: "Extra classes for the root." },
     ],
     Preview: Previews.PreviewEmojiReactions,
+    previewSections: [
+      {
+        title: "Emoji Reactions",
+        Preview: Previews.PreviewEmojiReactions,
+        reactSource: `"use client";
+
+import { EmojiReactions, type Reaction } from "@/components/emoji-reactions";
+
+const initial: Reaction[] = [
+  { emoji: "🚀", count: 3 },
+  { emoji: "🔥", count: 2, reacted: true },
+];
+
+export function ReleaseNote() {
+  return (
+    <EmojiReactions
+      message="Shipped the new onboarding flow"
+      reactions={initial}
+      emojis={["👍", "❤️", "😂", "🎉", "🔥", "🚀", "👀", "🙏"]}
+      accent="#5b8def"
+      onChange={(reactions) => console.log(reactions)}
+    />
+  );
+}`,
+      },
+      {
+        title: "Spark Reactions",
+        Preview: Previews.PreviewSparkReactions,
+        reactSource: `"use client";
+
+import { SparkReactions } from "@/components/emoji-reactions";
+
+export function ReleaseNoteReactions() {
+  return (
+    <SparkReactions
+      message="v2.4 is live for everyone"
+      reactions={[
+        { id: "party", count: 8, mine: true },
+        { id: "rocket", count: 5, mine: false },
+      ]}
+      onChange={(row) => console.log("reactions", row)}
+    />
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -7601,9 +7755,9 @@ export function ReleaseNote() {
     name: "Like Burst",
     registryCliName: "like-burst",
     description:
-      "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit.",
+      "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit. Also includes the Motion Kit Confetti Like variant.",
     categorySlug: "inputs-controls",
-    tags: ["like", "heart", "button", "counter", "burst", "particles", "micro-interaction", "framer-motion"],
+    tags: ["motion kit", "like", "heart", "button", "counter", "burst", "particles", "micro-interaction", "framer-motion"],
     premium: false,
     trendingScore: 168,
     createdAt: "2026-10-19",
@@ -7620,8 +7774,55 @@ export function ReleaseNote() {
       { name: "burst", type: "number", defaultValue: "10", description: "Particles in the burst; 0 turns it off." },
       { name: "label", type: "string", defaultValue: '"Like"', description: "Accessible label; the count is appended." },
       { name: "className", type: "string", description: "Extra classes on the button." },
+      { name: "ConfettiLike.count", type: "number", defaultValue: "1300", description: "Like count without yours; liking adds one." },
+      { name: "ConfettiLike.defaultLiked", type: "boolean", defaultValue: "false", description: "Whether it starts liked." },
+      { name: "ConfettiLike.accent", type: "string", defaultValue: "\"#ff375f\"", description: "Heart and ring colour, as a hex value." },
+      { name: "ConfettiLike.colors", type: "string[]", defaultValue: "DEFAULT_CONFETTI_COLORS", description: "Confetti colours, used in turn around the burst." },
+      { name: "ConfettiLike.onChange", type: "(liked: boolean, count: number) => void", description: "Called with the new state and displayed count when the user toggles it." },
+      { name: "ConfettiLike.autoplay", type: "boolean", defaultValue: "false", description: "Likes and unlikes itself every 1.5s until someone presses it." },
+      { name: "ConfettiLike.className", type: "string", description: "Extra classes for the button." },
     ],
     Preview: Previews.PreviewLikeBurst,
+    previewSections: [
+      {
+        title: "Like Burst",
+        Preview: Previews.PreviewLikeBurst,
+        reactSource: `"use client";
+
+import * as React from "react";
+import { LikeBurst } from "@/components/like-burst";
+
+export function PostActions({ postId, likes, likedByMe }: { postId: string; likes: number; likedByMe: boolean }) {
+  return (
+    <LikeBurst
+      defaultCount={likes}
+      defaultLiked={likedByMe}
+      color="#ff3b5c"
+      onChange={(liked) => {
+        void fetch(\`/api/posts/\${postId}/like\`, { method: liked ? "POST" : "DELETE" });
+      }}
+    />
+  );
+}`,
+      },
+      {
+        title: "Confetti Like",
+        Preview: Previews.PreviewConfettiLike,
+        reactSource: `"use client";
+
+import { ConfettiLike } from "@/components/like-burst";
+
+export function PostLike() {
+  return (
+    <ConfettiLike
+      count={2481}
+      accent="#ff375f"
+      onChange={(liked, count) => console.log(liked ? "liked" : "unliked", count)}
+    />
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -9981,7 +10182,7 @@ export function AudioPanel() {
     name: "Crumple to Trash",
     registryCliName: "crumple-to-trash",
     description:
-      "A literal Move to trash: the page scrunches into a paper ball, arcs into a bin whose lid flips open and snaps shut, and Undo throws it back out and smooths it flat.",
+      "A literal Move to trash: the page scrunches into a paper ball, arcs into a bin whose lid flips open and snaps shut, and Undo throws it back out and smooths it flat. Also includes the Motion Kit Shatter Delete variant.",
     categorySlug: "motion-effects",
     tags: ["delete", "trash", "undo", "crumple", "paper", "svg filter", "bin", "motion kit", "framer-motion"],
     premium: true,
@@ -9994,8 +10195,48 @@ export function AudioPanel() {
       { name: "onTrash", type: "() => void", description: "Called once the ball has landed in the bin." },
       { name: "onRestore", type: "() => void", description: "Called once Undo has smoothed the page flat again." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws the page away and brings it back every 3s until someone clicks the button." },
+      { name: "ShatterDelete.fileName", type: "string", defaultValue: "\"Q3-board-report.pdf\"", description: "File name on the card." },
+      { name: "ShatterDelete.meta", type: "string", defaultValue: "\"2.4 MB \u00b7 edited 2 days ago\"", description: "Secondary line under the name." },
+      { name: "ShatterDelete.badge", type: "string", defaultValue: "\"PDF\"", description: "Text on the file-type badge." },
+      { name: "ShatterDelete.badgeColor", type: "string", defaultValue: "\"#ff3b30\"", description: "Colour of the file-type badge." },
+      { name: "ShatterDelete.onDelete", type: "() => void", description: "Called when the user presses Delete; the component only plays the effect." },
+      { name: "ShatterDelete.onUndo", type: "() => void", description: "Called when the user presses Undo and the shards fly back together." },
+      { name: "ShatterDelete.autoplay", type: "boolean", defaultValue: "false", description: "Shatters and mends the card every 2.3s until someone touches it." },
     ],
     Preview: Previews.PreviewCrumpleToTrash,
+    previewSections: [
+      {
+        title: "Crumple to Trash",
+        Preview: Previews.PreviewCrumpleToTrash,
+        reactSource: `"use client";
+
+import { CrumpleToTrash } from "@/components/crumple-to-trash";
+
+export function DeleteDraft({ onDelete, onRestore }: { onDelete: () => void; onRestore: () => void }) {
+  return <CrumpleToTrash title="Launch checklist" onTrash={onDelete} onRestore={onRestore} />;
+}`,
+      },
+      {
+        title: "Shatter Delete",
+        Preview: Previews.PreviewShatterDelete,
+        reactSource: `"use client";
+
+import { ShatterDelete } from "@/components/crumple-to-trash";
+
+export function DeleteFile() {
+  return (
+    <ShatterDelete
+      fileName="brand-guidelines.fig"
+      meta="18 MB · edited today"
+      badge="FIG"
+      badgeColor="#a259ff"
+      onDelete={() => console.log("deleted")}
+      onUndo={() => console.log("restored")}
+    />
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -10268,7 +10509,7 @@ export function DailyCheckIn() {
     name: "Swipe Stack",
     registryCliName: "swipe-stack",
     description:
-      "Payments to review as a deck of cards. Drag the top card right to approve or left to flag: it tilts as you pull, a stamp fades in, and once thrown the next card rises from the deck.",
+      "Payments to review as a deck of cards. Drag the top card right to approve or left to flag: it tilts as you pull, a stamp fades in, and once thrown the next card rises from the deck. Also includes the Motion Kit Swipe Rows variant.",
     categorySlug: "cards",
     tags: ["swipe", "tinder", "deck", "cards", "approve", "review", "payments", "drag", "motion kit", "framer-motion"],
     premium: true,
@@ -10280,8 +10521,65 @@ export function DailyCheckIn() {
       { name: "payments", type: "SwipePayment[]", defaultValue: "DEFAULT_PAYMENTS", description: "Cards to review, top first: { amount, from, to, note, when, hue }. \"Load more\" deals the same list again." },
       { name: "onDecide", type: "(payment: SwipePayment, approved: boolean) => void", defaultValue: "undefined", description: "Called after a card is thrown; approved is true for right / approve and false for left / flag." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws a card every 1.7 s (mostly approvals) and reloads when empty, until someone touches it." },
+      { name: "SwipeRows.items", type: "SwipeRowItem[]", defaultValue: "DEFAULT_SWIPE_MAIL", description: "Rows to show, each { id, from, subject, time, color }." },
+      { name: "SwipeRows.title", type: "string", defaultValue: "\"Inbox\"", description: "Heading at the top of the list." },
+      { name: "SwipeRows.onArchive", type: "(item: SwipeRowItem) => void", description: "Called when the user archives a row (swipe right or the right arrow key)." },
+      { name: "SwipeRows.onDelete", type: "(item: SwipeRowItem) => void", description: "Called when the user deletes a row (long swipe left, the Delete button, or Delete/Backspace)." },
+      { name: "SwipeRows.onFlag", type: "(item: SwipeRowItem) => void", description: "Called when the user taps Flag on a half-open row." },
+      { name: "SwipeRows.onUndo", type: "(item: SwipeRowItem, action: \"archive\" | \"delete\") => void", description: "Called when the user undoes the last archive or delete." },
+      { name: "SwipeRows.autoplay", type: "boolean", defaultValue: "false", description: "Archives and deletes rows by itself, refilling the list, until someone touches it." },
     ],
     Preview: Previews.PreviewSwipeStack,
+    previewSections: [
+      {
+        title: "Swipe Stack",
+        Preview: Previews.PreviewSwipeStack,
+        reactSource: `"use client";
+
+import { SwipeStack, type SwipePayment } from "@/components/swipe-stack";
+
+const queue: SwipePayment[] = [
+  { amount: "$1,240", from: "Acme Inc", to: "you", note: "March retainer", when: "2h", hue: 200 },
+  { amount: "$86.10", from: "you", to: "Lena", note: "dinner split", when: "6h", hue: 20 },
+  { amount: "$540", from: "Orbit Labs", to: "you", note: "invoice #204", when: "1d", hue: 140 },
+];
+
+export function ReviewQueue() {
+  return (
+    <SwipeStack
+      payments={queue}
+      onDecide={(payment, approved) => console.log(approved ? "approved" : "flagged", payment.amount)}
+    />
+  );
+}`,
+      },
+      {
+        title: "Swipe Rows",
+        Preview: Previews.PreviewSwipeRows,
+        reactSource: `"use client";
+
+import { SwipeRows, type SwipeRowItem } from "@/components/swipe-stack";
+
+const mail: SwipeRowItem[] = [
+  { id: "a1", from: "Priya Shah", subject: "Contract signed", time: "10:12", color: "#0a84ff" },
+  { id: "a2", from: "GitHub", subject: "3 new pull request reviews", time: "9:30", color: "#5e5ce6" },
+  { id: "a3", from: "Noah Kim", subject: "Lunch on Thursday?", time: "Yesterday", color: "#30d158" },
+];
+
+export function Inbox() {
+  return (
+    <SwipeRows
+      title="Inbox"
+      items={mail}
+      onArchive={(m) => console.log("archive", m.id)}
+      onDelete={(m) => console.log("delete", m.id)}
+      onFlag={(m) => console.log("flag", m.id)}
+      onUndo={(m, action) => console.log("undo", action, m.id)}
+    />
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -11052,6 +11350,411 @@ export function TaskAssignees() {
       <p className="text-[13px] text-neutral-500">{ids.length} assigned</p>
     </div>
   );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bend-text",
+    name: "Bend Text",
+    registryCliName: "bend-text",
+    description:
+      "A line of type running along a string that you can grab and pull, with the words flowing round the bend. Let go and an underdamped spring twangs it back, overshooting a few times before it lies flat.",
+    categorySlug: "motion-effects",
+    tags: ["text", "textPath", "svg", "string", "pluck", "typography", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: '"PLUCK THE LINE · MAKE IT SING · "', description: "One repeat of the text on the string; it is repeated four times so the line stays full." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the grab point and the focus ring." },
+      { name: "hint", type: "string", defaultValue: '"Grab the line, pull, and let go."', description: "Caption under the stage. An empty string hides it." },
+      { name: "onPluck", type: "(pull: number) => void", description: "Called on release with how far the string was pulled from rest, in stage units." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plucks the string every 2.6s until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root element." },
+    ],
+    Preview: Previews.PreviewBendText,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BendText } from "@/components/bend-text";
+
+export function PluckHeadline() {
+  return (
+    <BendText
+      text="NEW SEASON · NEW SOUNDS · "
+      accent="#ff375f"
+      hint="Pull the string."
+      onPluck={(pull) => {
+        if (pull > 80) console.log("big pluck");
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "pressure-text",
+    name: "Pressure Text",
+    registryCliName: "pressure-text",
+    description:
+      "A headline that bulges where you hover: letters near the pointer swell taller and heavier on a variable font's weight axis and take the accent colour. Each letter has its own spring, so the swell falls away smoothly on either side.",
+    categorySlug: "motion-effects",
+    tags: ["text", "typography", "variable font", "font weight", "hover", "headline", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: '"Feel every word"', description: "The headline. Each character gets its own spring." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour the letters take near the pointer." },
+      { name: "hint", type: "string", defaultValue: '"Move along the word."', description: "Caption under the headline. An empty string hides it." },
+      { name: "spread", type: "number", defaultValue: "0.18", description: "Share of the word's width a letter can be from the pointer and still swell." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a bulge back and forth along the word until someone hovers it." },
+      { name: "className", type: "string", description: "Extra classes for the root element." },
+    ],
+    Preview: Previews.PreviewPressureText,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PressureText } from "@/components/pressure-text";
+
+export function HeroHeadline() {
+  return <PressureText text="Made to be touched" accent="#5e5ce6" spread={0.25} hint="" />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "morph-cursor",
+    name: "Morph Cursor",
+    registryCliName: "morph-cursor",
+    description:
+      "An iPad-style pointer for a panel: a soft dot that melts into the shape of whatever you can press, sits behind it as a highlight while the element leans toward you, and turns into a caret over text. The system cursor is hidden only inside the panel.",
+    categorySlug: "motion-effects",
+    tags: ["cursor", "pointer", "ipad", "hover", "highlight", "magnetic", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "magnetic", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "icons", type: "MorphCursorIcon[]", defaultValue: "DEFAULT_MORPH_ICONS", description: "Icon buttons in the top row, each { id, label, path } with a 24×24 path." },
+      { name: "buttonLabel", type: "string", defaultValue: '"Start a project"', description: "Label of the pill button." },
+      { name: "inputLabel", type: "string", defaultValue: '"Project name"', description: "Accessible name of the text field." },
+      { name: "defaultInputValue", type: "string", defaultValue: '"Spring launch, website and email"', description: "Starting text in the field." },
+      { name: "cards", type: "MorphCursorCard[]", defaultValue: "DEFAULT_MORPH_CARDS", description: "Tiles under the field, each { id, label, gradient }." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the caret over the field and of the focus rings." },
+      { name: "onAction", type: "(id: string) => void", description: "Called with an icon id, \"button\" for the pill, or a card id when one is pressed." },
+      { name: "hint", type: "string", defaultValue: '"Move the pointer around."', description: "Caption at the bottom of the panel. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tours the pointer over every target until someone moves over the panel." },
+      { name: "className", type: "string", description: "Extra classes for the panel." },
+    ],
+    Preview: Previews.PreviewMorphCursor,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MorphCursor } from "@/components/morph-cursor";
+
+export function ToolbarPanel() {
+  return (
+    <MorphCursor
+      buttonLabel="New board"
+      inputLabel="Board name"
+      defaultInputValue="Q4 roadmap"
+      cards={[
+        { id: "notes", label: "Notes", gradient: "linear-gradient(135deg,#ffd60a,#ff9f0a)" },
+        { id: "tasks", label: "Tasks", gradient: "linear-gradient(135deg,#30d158,#0a7d3b)" },
+      ]}
+      onAction={(id) => console.log("pressed", id)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ink-theme-switch",
+    name: "Ink Theme Switch",
+    registryCliName: "ink-theme-switch",
+    description:
+      "A dark-mode toggle where the dark version of a settings panel pours out of the switch as a growing ink circle and drains back in when you switch off. The sun pulls in its rays and turns into a crescent moon, and only the component's own panel is themed.",
+    categorySlug: "inputs-controls",
+    tags: ["theme toggle", "dark mode", "switch", "clip-path", "settings", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "defaultDark", type: "boolean", defaultValue: "false", description: "Start with the panel dark. Only the component's own panel is themed; the page theme is never touched." },
+      { name: "onChange", type: "(dark: boolean) => void", description: "Called with the new value when the user flips the switch." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips between light and dark every 2.2s until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the panel." },
+    ],
+    Preview: Previews.PreviewInkThemeSwitch,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { InkThemeSwitch } from "@/components/ink-theme-switch";
+
+export function AppearanceSetting() {
+  const [dark, setDark] = useState(false);
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <InkThemeSwitch defaultDark={dark} onChange={setDark} />
+      <p className="text-sm text-neutral-500">Preview is {dark ? "dark" : "light"}</p>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "liquid-gauge",
+    name: "Liquid Gauge",
+    registryCliName: "liquid-gauge",
+    description:
+      "A storage meter drawn as liquid in a glass orb, with two rolling wave layers, rising bubbles and a surface that leans toward the pointer. The percentage is drawn twice so the part under the liquid turns white, and changing the level sloshes it.",
+    categorySlug: "dashboards",
+    tags: ["gauge", "storage", "meter", "progress", "liquid", "wave", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "total", type: "number", defaultValue: "200", description: "Capacity of the store, in units." },
+      { name: "defaultUsed", type: "number", defaultValue: "136", description: "Amount used on first render, clamped to 0..total." },
+      { name: "accent", type: "string", defaultValue: '"#0a84ff"', description: "Liquid colour while usage is below warnAt." },
+      { name: "warnAt", type: "number", defaultValue: "85", description: "Percentage at which the liquid turns orange and the caption warns." },
+      { name: "unit", type: "string", defaultValue: '"GB"', description: "Unit shown in the caption." },
+      { name: "onChange", type: "(used: number) => void", description: "Called with the new amount after Clean up (-40) or Add files (+30)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sloshes through a few fill levels until someone presses a button." },
+    ],
+    Preview: Previews.PreviewLiquidGauge,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { LiquidGauge } from "@/components/liquid-gauge";
+
+export function StorageCard() {
+  return (
+    <LiquidGauge
+      total={512}
+      defaultUsed={301}
+      accent="#30d158"
+      warnAt={90}
+      onChange={(used) => console.log("now using", used, "GB")}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "thermo-dial",
+    name: "Thermo Dial",
+    registryCliName: "thermo-dial",
+    description:
+      "A thermostat ring you drag round or step with the arrow keys. Ticks light up to the set point, the glow shifts from cool blue to warm orange, the number rolls and the label says whether it is heating or cooling toward the room temperature.",
+    categorySlug: "inputs-controls",
+    tags: ["thermostat", "dial", "knob", "slider", "temperature", "smart home", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "room", type: "number", defaultValue: "19.5", description: "Current room temperature; marks a tick and decides Heating, Cooling or Holding." },
+      { name: "defaultValue", type: "number", defaultValue: "21", description: "Target temperature the dial starts at." },
+      { name: "min", type: "number", defaultValue: "10", description: "Lowest settable temperature (start of the arc)." },
+      { name: "max", type: "number", defaultValue: "30", description: "Highest settable temperature (end of the arc)." },
+      { name: "step", type: "number", defaultValue: "0.5", description: "Increment for dragging and the arrow keys." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the new target when the user drags or uses the keyboard." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Turns the dial to a few set points until someone touches it." },
+    ],
+    Preview: Previews.PreviewThermoDial,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ThermoDial } from "@/components/thermo-dial";
+
+export function LivingRoomThermostat() {
+  return (
+    <ThermoDial
+      room={68}
+      defaultValue={70}
+      min={50}
+      max={86}
+      step={1}
+      onChange={(target) => console.log("set to", target, "°F")}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "pull-cord",
+    name: "Pull Cord",
+    registryCliName: "pull-cord",
+    description:
+      "A light switch on a cord: a small verlet rope you grab by its bead, pull past its slack and let go to toggle the light. The panel lights up or goes dark and the cord swings and settles; Enter or Space tugs it from the keyboard.",
+    categorySlug: "inputs-controls",
+    tags: ["switch", "toggle", "light", "rope", "physics", "verlet", "dark mode", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "defaultOn", type: "boolean", defaultValue: "false", description: "Whether the light starts on." },
+      { name: "onChange", type: "(on: boolean) => void", description: "Called with the new state when the user pulls the cord or presses Enter/Space on it." },
+      { name: "onText", type: "string", defaultValue: '"Lights on."', description: "Headline while the light is on." },
+      { name: "offText", type: "string", defaultValue: '"Lights off."', description: "Headline while the light is off." },
+      { name: "hint", type: "string", defaultValue: '"Pull the cord."', description: "Small line under the headline." },
+      { name: "className", type: "string", description: "Extra classes for the 320px-wide outer wrapper." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tugs the cord every 2.6s until someone grabs it." },
+    ],
+    Preview: Previews.PreviewPullCord,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { PullCord } from "@/components/pull-cord";
+
+export function FocusLamp() {
+  const [focus, setFocus] = useState(false);
+  return (
+    <PullCord
+      defaultOn={focus}
+      onText="Focus mode on."
+      offText="Focus mode off."
+      hint="Pull to toggle notifications."
+      onChange={setFocus}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "scratch-reveal",
+    name: "Scratch Reveal",
+    registryCliName: "scratch-reveal",
+    description:
+      "A reward scratch card: rub the silver foil and it wears through where you scratch, shedding dust that falls out of the card. Once enough is gone the rest lifts away with a burst of confetti and the code can be copied to the clipboard.",
+    categorySlug: "cards",
+    tags: ["scratch card", "reward", "coupon", "promo code", "canvas", "reveal", "copy", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "code", type: "string", defaultValue: '"MOTION20"', description: "The code under the foil; the Copy button writes it to the clipboard." },
+      { name: "headline", type: "string", defaultValue: '"20% off Pro"', description: "Prize line above the code." },
+      { name: "eyebrow", type: "string", defaultValue: '"You won"', description: "Small uppercase line above the headline." },
+      { name: "accent", type: "string", defaultValue: '"#bf5af2"', description: "Colour of the eyebrow." },
+      { name: "threshold", type: "number", defaultValue: "0.55", description: "Share of the foil (0 to 1) that must be scratched before the rest lifts away." },
+      { name: "onReveal", type: "() => void", description: "Called each time the foil comes off." },
+      { name: "onCopy", type: "(code: string) => void", description: "Called with the code after it has been copied." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scratches the card, reveals it and starts over until someone touches it." },
+    ],
+    Preview: Previews.PreviewScratchReveal,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ScratchReveal } from "@/components/scratch-reveal";
+
+export function WelcomeGift() {
+  return (
+    <ScratchReveal
+      eyebrow="Welcome gift"
+      headline="Free month"
+      code="HELLO-30"
+      accent="#ff375f"
+      onReveal={() => console.log("revealed")}
+      onCopy={(code) => console.log("copied", code)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "polaroid-develop",
+    name: "Polaroid Develop",
+    registryCliName: "polaroid-develop",
+    description:
+      "An instant photo you develop by dragging and shaking it: the faster it moves, the quicker the grey haze clears and the colour comes through. It swings with the drag velocity, develops slowly on its own, and writes a handwritten caption once it is done.",
+    categorySlug: "cards",
+    tags: ["polaroid", "photo", "instant camera", "drag", "velocity", "shake", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "src", type: "string", description: "Photo to develop. Without it the drawn scenes are shown." },
+      { name: "alt", type: "string", defaultValue: '""', description: "Alt text for src." },
+      { name: "caption", type: "string", description: "Handwritten caption for src once developed. Drawn scenes carry their own." },
+      { name: "scenes", type: "PolaroidScene[]", defaultValue: "DEFAULT_POLAROID_SCENES", description: "Drawn scenes cycled by New photo, each { sky, sea, sun, land, caption }." },
+      { name: "onDeveloped", type: "(caption: string) => void", description: "Called when the photo finishes developing, with its caption (or alt)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Shakes the photo by itself and swaps to a new one until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewPolaroidDevelop,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PolaroidDevelop } from "@/components/polaroid-develop";
+
+export function TripSnapshot() {
+  return (
+    <PolaroidDevelop
+      src="/images/porto.jpg"
+      alt="Rooftops in Porto"
+      caption="Porto, last light"
+      onDeveloped={(caption) => console.log("developed", caption)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "wallet-stack",
+    name: "Wallet Stack",
+    registryCliName: "wallet-stack",
+    description:
+      "Payment cards tucked into a leather wallet, each peeking out a little higher than the one in front. Picking a card slides it out while the others sink, then turns it over in 3D to show the back; picking it again puts it away.",
+    categorySlug: "cards",
+    tags: ["wallet", "credit card", "payment", "card stack", "flip", "3d", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "cards", type: "WalletCard[]", defaultValue: "DEFAULT_WALLET_CARDS", description: "Cards from back to front, each { id, name, last, bg, ink, brand, expires? }. Four fit best." },
+      { name: "label", type: "string", defaultValue: '"Wallet"', description: "Word stamped on the wallet; also the group's accessible name." },
+      { name: "hint", type: "string", defaultValue: '"Pick a card."', description: "Hint under the wallet. An empty string hides it." },
+      { name: "onSelect", type: "(id: string | null) => void", description: "Called with the card id when one slides out, and null when it is put back." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Takes each card out, flips it and puts it back in turn until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewWalletStack,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { WalletStack } from "@/components/wallet-stack";
+
+const cards = [
+  { id: "main", name: "Main", last: "5521", bg: "linear-gradient(135deg,#2c2c2e,#0b0b0c)", ink: "#f5f5f7", brand: "Acme Bank" },
+  { id: "trip", name: "Travel", last: "0937", bg: "linear-gradient(135deg,#5ac8fa,#0a4fd6)", ink: "#ffffff", brand: "Wayfare", expires: "11/29" },
+  { id: "team", name: "Team", last: "7340", bg: "linear-gradient(135deg,#ffb38a,#ff375f)", ink: "#ffffff", brand: "Acme Bank" },
+];
+
+export function PaymentMethods() {
+  return <WalletStack cards={cards} label="Cards" onSelect={(id) => console.log("selected", id)} />;
 }`,
     tailwindSource: tw,
   },

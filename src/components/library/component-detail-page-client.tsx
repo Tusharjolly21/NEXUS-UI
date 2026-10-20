@@ -6,6 +6,7 @@ import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
 import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
+import { FitPreview } from "@/components/library/fit-preview";
 import {
   getComponentCategoryHref,
   getComponentCategoryLabel,
@@ -258,8 +259,10 @@ function Stage({
       </div>
 
       {view === "preview" ? (
-        <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card [&>*]:min-h-[460px] [&>*]:w-full">
-          <DynamicPreview key={run} exportName={exportName} compact={false} />
+        <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card">
+          <FitPreview key={run}>
+            <DynamicPreview exportName={exportName} compact={false} />
+          </FitPreview>
         </div>
       ) : (
         <div className="h-[560px] overflow-hidden rounded-[20px]">

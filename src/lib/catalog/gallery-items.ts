@@ -148,6 +148,16 @@ const SELF_DEMO = new Set([
   "seek-search",
   "fold-note",
   "assign-picker",
+  "bend-text",
+  "pressure-text",
+  "morph-cursor",
+  "ink-theme-switch",
+  "liquid-gauge",
+  "thermo-dial",
+  "pull-cord",
+  "scratch-reveal",
+  "polaroid-develop",
+  "wallet-stack",
 ]);
 
 /** Hover effects that look like nothing until a pointer passes over them. */
@@ -280,6 +290,16 @@ const TINT_OF: Record<string, TileTint> = {
   "seek-search": "sky",
   "fold-note": "mint",
   "assign-picker": "violet",
+  "bend-text": "sky",
+  "pressure-text": "violet",
+  "morph-cursor": "mint",
+  "ink-theme-switch": "butter",
+  "liquid-gauge": "sky",
+  "thermo-dial": "peach",
+  "pull-cord": "butter",
+  "scratch-reveal": "pink",
+  "polaroid-develop": "peach",
+  "wallet-stack": "butter",
   "avatar-group": "sky",
   "stateful-button": "mint",
   "gooey-search-input": "mint",
@@ -291,6 +311,21 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // seventh batch
+  "bend-text",
+  "pressure-text",
+  "morph-cursor",
+  "ink-theme-switch",
+  "liquid-gauge",
+  "thermo-dial",
+  "pull-cord",
+  "scratch-reveal",
+  "polaroid-develop",
+  "wallet-stack",
+  "animated-countdown",
+  "command-palette",
+  "like-burst",
+  "emoji-reactions",
   // sixth batch
   "todo-tower",
   "peek-login",

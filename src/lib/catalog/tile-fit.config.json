@@ -320,6 +320,35 @@
     "goo-reorder": {
       "object": true,
       "bg": null
+    },
+    "thermo-dial": {
+      "focus": [
+        330,
+        190,
+        300,
+        330
+      ],
+      "object": true,
+      "bg": null
+    },
+    "wallet-stack": {
+      "focus": [
+        320,
+        190,
+        320,
+        340
+      ],
+      "object": true,
+      "bg": null
+    },
+    "pressure-text": {
+      "focus": [
+        250,
+        290,
+        460,
+        140
+      ],
+      "object": true
     }
   },
   "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."
