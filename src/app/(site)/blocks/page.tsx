@@ -17,15 +17,18 @@ export const metadata: Metadata = createMetadata({
 /** Wall order: the liveliest blocks first. */
 const ORDER = [
   "block-hero",
+  "block-gallery",
   "block-pricing-section",
   "block-features",
   "block-checkout-moments",
   "block-why-choose-us",
   "block-social-proof",
+  "block-changelog",
   "block-logo-clouds",
   "block-navigation",
   "block-faq-folder-card",
   "block-newsletter",
+  "block-404",
   "block-sidebar",
   "block-contact-page",
   "block-interactive-dots",
@@ -50,6 +53,9 @@ const CHIP_NAME: Record<string, string> = {
   "block-interactive-dots": "Backgrounds",
   "block-text-animations": "Text animations",
   "block-blog-content-sections": "Blog",
+  "block-gallery": "Gallery",
+  "block-changelog": "Changelog",
+  "block-404": "404 pages",
 };
 
 const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];

@@ -112,6 +112,7 @@ export const blockVariants: BlockVariant[] = [
 
   mk("spotlight-hero", "block-hero", "Spotlight Hero", "SpotlightHero"),
   mk("parallax-stack-hero", "block-hero", "Parallax Stack Hero", "ParallaxStackHero"),
+  mk("kinetic-hero", "block-hero", "Kinetic Hero", "KineticHero"),
 
   mk("auto-advancing-tabs", "block-features", "Auto-advancing Tabs", "AutoAdvancingTabs"),
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),
@@ -121,6 +122,10 @@ export const blockVariants: BlockVariant[] = [
   mk("wall-of-love", "block-social-proof", "Wall of Love", "WallOfLove"),
 
   mk("typo-catching-signup", "block-newsletter", "Typo-catching Signup", "TypoCatchingSignup"),
+
+  mk("drift-gallery", "block-gallery", "Drift Gallery", "DriftGallery"),
+  mk("changelog-pile", "block-changelog", "Changelog Pile", "ChangelogPile"),
+  mk("gravity-404", "block-404", "Gravity 404", "Gravity404"),
 ];
 
 /** Motion Kit sections, in page order, for one block. */

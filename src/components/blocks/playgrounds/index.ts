@@ -22,4 +22,7 @@ export const PLAYGROUND_LOADERS: Record<string, () => Promise<{ default: BlockPl
   "block-features": () => import("./features"),
   "block-social-proof": () => import("./social-proof"),
   "block-newsletter": () => import("./newsletter"),
+  "block-gallery": () => import("./gallery"),
+  "block-changelog": () => import("./changelog"),
+  "block-404": () => import("./not-found"),
 };

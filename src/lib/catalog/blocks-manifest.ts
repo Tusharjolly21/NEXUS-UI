@@ -16,7 +16,10 @@ export type BlockCategory =
   | "Interactive backgrounds"
   | "FAQ sections"
   | "Blog sections"
-  | "Navigation";
+  | "Navigation"
+  | "Gallery sections"
+  | "Changelog sections"
+  | "Error pages";
 
 export type BlockManifestEntry = {
   slug: string;
@@ -311,11 +314,11 @@ export default function Header() {
     registryCliName: "hero-blocks",
     name: "Hero Sections",
     description:
-      "Landing page heroes with real motion: a pointer-lit dot grid with a rotating last word, and copy beside product cards that part as you scroll.",
+      "Landing page heroes with real motion: a pointer-lit dot grid with a rotating last word, copy beside product cards that part as you scroll, and a headline you scroll through as its letters tumble in and the last word turns like a drum.",
     category: "Hero blocks",
     tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Spotlight Hero", "Parallax Stack Hero"],
+    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero"],
     reactSource: `import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
 
 export default function Home() {
@@ -368,6 +371,54 @@ export default function Testimonials() {
 
 export default function Newsletter() {
   return <TypoCatchingSignup onSubmit={async (email) => { /* add to your list */ }} />;
+}`,
+  },
+  {
+    slug: "block-gallery",
+    registryCliName: "gallery-blocks",
+    name: "Gallery",
+    description:
+      "An endless wall of work in 3D that wraps in every direction: drag it and the sheets flex with your speed, click a piece to open it, and leave it alone to drift.",
+    category: "Gallery sections",
+    tags: ["gallery", "portfolio", "exhibition", "three.js", "react-three-fiber", "webgl", "motion kit"],
+    premium: true,
+    variants: ["Drift Gallery"],
+    reactSource: `import { DriftGallery } from "@/components/blocks/motion-kit/drift-gallery";
+
+export default function Work() {
+  return <DriftGallery />;
+}`,
+  },
+  {
+    slug: "block-changelog",
+    registryCliName: "changelog-blocks",
+    name: "Changelog",
+    description:
+      "Release notes that land as a pile of real cards you can throw, filter by New, Improved or Fixed, or switch to a readable list.",
+    category: "Changelog sections",
+    tags: ["changelog", "release notes", "product updates", "whats new", "physics", "matter-js", "motion kit"],
+    premium: true,
+    variants: ["Changelog Pile"],
+    reactSource: `import { ChangelogPile } from "@/components/blocks/motion-kit/changelog-pile";
+
+export default function Changelog() {
+  return <ChangelogPile />;
+}`,
+  },
+  {
+    slug: "block-404",
+    registryCliName: "not-found-blocks",
+    name: "404 Page",
+    description:
+      "A not-found page that falls apart: every digit, word, button and link drops under gravity, you bat them about, then put it all back.",
+    category: "Error pages",
+    tags: ["404", "not found", "error page", "physics", "matter-js", "motion kit"],
+    premium: true,
+    variants: ["Gravity 404"],
+    reactSource: `import { Gravity404 } from "@/components/blocks/motion-kit/gravity-404";
+
+export default function NotFound() {
+  return <Gravity404 />;
 }`,
   },
 ];
