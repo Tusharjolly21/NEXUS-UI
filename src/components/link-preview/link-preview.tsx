@@ -107,14 +107,17 @@ export function LinkPreview({
       const el = anchor.current;
       if (el) {
         const r = el.getBoundingClientRect();
-        ax.set(r.left + r.width / 2);
+        // Centre on the link, but keep the whole card on screen (links near a phone's edge).
+        const half = width / 2 + 8;
+        const centre = r.left + r.width / 2;
+        ax.set(window.innerWidth > half * 2 ? Math.min(window.innerWidth - half, Math.max(half, centre)) : window.innerWidth / 2);
         ay.set(below ? r.bottom + 12 : r.top - 12);
       }
       raf = requestAnimationFrame(tick);
     };
     tick();
     return () => cancelAnimationFrame(raf);
-  }, [shown, below, ax, ay]);
+  }, [shown, below, ax, ay, width]);
 
   // Autoplay: lift the card, sweep the lean across, drop it, repeat.
   React.useEffect(() => {
