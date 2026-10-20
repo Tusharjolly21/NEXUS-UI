@@ -83,11 +83,22 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
     () => Object.fromEntries(editable.map((p) => [p.name, cleanDefaultValue(p)])) as Record<string, unknown>,
     [editable],
   );
-  const [values, setValues] = React.useState<Record<string, unknown>>(defaults);
+  // Where the controls start: the documented defaults, except that a section with autoplay starts
+  // playing so the preview shows what it does.
+  const initial = React.useMemo(
+    () => (editable.some((p) => p.name === "autoplay") ? { ...defaults, autoplay: true } : defaults),
+    [defaults, editable],
+  );
+  const [values, setValues] = React.useState<Record<string, unknown>>(initial);
   // Remount the live section when a value changes the way it starts (and after Reset).
   const [run, setRun] = React.useState(0);
 
+  // Only values that differ from the component's defaults are passed (and written into the JSX), so
+  // an untouched accent keeps the component's own light/dark pair.
   const changed = editable.filter((p) => !Object.is(values[p.name], defaults[p.name]));
+  const live: Record<string, unknown> = { ...baseProps };
+  for (const p of changed) live[p.name] = values[p.name];
+  if ("autoplay" in values) live.autoplay = values.autoplay;
   // Props that only set where a section starts (defaultX, initialX, autoplay) need a fresh mount to show.
   const startKey = editable
     .filter((p) => /^(default|initial)[A-Z]/.test(p.name) || p.name === "autoplay")
@@ -107,8 +118,8 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
         )}
       >
         <div className={cn("relative overflow-hidden rounded-[22px] bg-background [contain:paint] [&>*]:min-h-[420px] [&>*]:w-full", frameClassName)}>
-          <PreviewBoundary key={`${run}:${startKey}`} onReset={() => { setValues(defaults); setRun((r) => r + 1); }}>
-            <Component {...baseProps} {...values} />
+          <PreviewBoundary key={`${run}:${startKey}`} onReset={() => { setValues(initial); setRun((r) => r + 1); }}>
+            <Component {...live} />
           </PreviewBoundary>
         </div>
       </div>
@@ -123,7 +134,7 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
               <button
                 type="button"
                 onClick={() => {
-                  setValues(defaults);
+                  setValues(initial);
                   setRun((r) => r + 1);
                 }}
                 className="inline-flex h-10 items-center gap-1.5 rounded-full bg-foreground/[0.07] px-4 text-[13px] font-medium text-foreground transition-colors hover:bg-foreground/[0.11] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
