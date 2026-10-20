@@ -28,7 +28,7 @@ function Logo() {
       <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
         <circle cx="16" cy="16" r="6.5" fill={R} />
         <ellipse cx="16" cy="16" rx="14" ry="6" fill="none" stroke="#1d1d1f" strokeWidth="1.6" transform="rotate(-24 16 16)" />
-        <motion.circle r="2.4" fill="#1d1d1f" animate={{ cx: [29, 3, 29], cy: [10, 22, 10] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.circle r="2.4" fill="#1d1d1f" initial={{ cx: 29, cy: 10 }} animate={{ cx: [29, 3, 29], cy: [10, 22, 10] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
       </svg>
       Aether
     </span>
@@ -190,9 +190,9 @@ function ContactSheet({ w, h }: { w: number; h: number }) {
 
 function Hero() {
   const { ref, w } = useWidth<HTMLDivElement>();
-  const h = w >= 900 ? 430 : w >= 520 ? 640 : 560;
+  const h = w >= 900 ? 390 : w >= 520 ? 640 : 560;
   return (
-    <section className="relative overflow-hidden pb-14 pt-10 sm:pt-14">
+    <section className="relative overflow-hidden pb-14 pt-8 sm:pt-10">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: `radial-gradient(40% 40% at 85% 10%, ${RT}, transparent 70%)` }} />
       <div className="relative mx-auto max-w-[1180px] px-5">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="flex flex-wrap items-center justify-between gap-3 border-b border-black/[.08] pb-4 text-[13px] text-[#6e6e73]">
@@ -206,10 +206,10 @@ function Hero() {
             Booking from January
           </span>
         </motion.div>
-        <h1 className="m-0 mt-8 max-w-[1100px] text-[clamp(50px,9.6vw,136px)] font-semibold leading-[0.94] tracking-[-0.06em] text-[#1d1d1f] [text-wrap:balance]">
+        <h1 className="m-0 mt-7 max-w-[1100px] text-[clamp(48px,8vw,112px)] font-semibold leading-[0.95] tracking-[-0.06em] text-[#1d1d1f] [text-wrap:balance]">
           <Words text="I design and build quiet software." accentWords={["quiet"]} accent={R} />
         </h1>
-        <div className="mt-8 grid grid-cols-1 items-end gap-6 md:grid-cols-[1.2fr_1fr]">
+        <div className="mt-6 grid grid-cols-1 items-end gap-6 md:grid-cols-[1.2fr_1fr]">
           <Reveal delay={0.3} y={14}>
             <p className="m-0 max-w-[560px] text-[clamp(17px,2vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
               Aether is a studio of one. I take a product from a rough idea to shipped code: the research, the screens, the design system and the front end. Six projects below, all still in use.
@@ -221,8 +221,8 @@ function Hero() {
           </Reveal>
         </div>
       </div>
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.35 }} className="relative mx-auto mt-12 max-w-[1320px] px-3 sm:px-5">
-        <div ref={ref} className="relative w-full" style={{ height: w ? h : 430 }}>
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.35 }} className="relative mx-auto mt-10 max-w-[1320px] px-3 sm:px-5">
+        <div ref={ref} className="relative w-full" style={{ height: w ? h : 390 }}>
           {w > 0 && (
             <div className="absolute inset-0 [&>div]:!rounded-[28px]">
               <GlassLens width={w} height={h} size={w >= 900 ? 190 : 140} zoom={1.7} autoplay>
@@ -263,12 +263,12 @@ function Work() {
     <section id="work" className="mx-auto max-w-[1180px] px-5 py-24">
       <SectionHead eyebrow="Selected work" title="Six projects, all still shipping." sub="Pick a layout to browse, or open one from the index. Each line says what changed, not just what I made." accent={R} />
       <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.25fr_1fr]">
-        <Reveal y={20}>
+        <Reveal y={20} className="min-w-0">
           <div className={`${card} flex h-full items-center justify-center px-4 py-8`}>
             <Fit><WorkLayout items={WORK} accent={R} autoplay openId={open} onOpenChange={setOpen} /></Fit>
           </div>
         </Reveal>
-        <Reveal y={20} delay={0.08}>
+        <Reveal y={20} delay={0.08} className="min-w-0">
           <ol className={`${card} m-0 flex h-full list-none flex-col p-2`}>
             {WORK.map((p, i) => {
               const on = open === p.id;

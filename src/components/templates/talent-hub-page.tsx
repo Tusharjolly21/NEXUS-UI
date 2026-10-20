@@ -148,7 +148,7 @@ function Planner() {
           <span className="hidden sm:block" />
           <div className="relative h-4 text-[11px] tabular-nums text-[#6e6e73]" aria-hidden="true">
             {labels.map((h, i) => (
-              <span key={h} className={`absolute top-0 -translate-x-1/2 ${i % 2 ? "hidden sm:block" : ""} ${i === 0 ? "translate-x-0" : ""} ${i === labels.length - 1 ? "!-translate-x-full" : ""}`} style={{ left: `${(h / 24) * 100}%` }}>{fmt(h)}</span>
+              <span key={h} className={`absolute top-0 ${i % 2 ? "hidden sm:block" : ""}`} style={{ left: `${(h / 24) * 100}%`, transform: i === 0 ? "none" : i === labels.length - 1 ? "translateX(-100%)" : "translateX(-50%)" }}>{fmt(h)}</span>
             ))}
           </div>
           <span className="hidden sm:block" />
@@ -431,7 +431,7 @@ const VOICES = [
 
 function Voices() {
   return (
-    <section className="bg-[#f5f5f7] py-20 sm:py-24" aria-label="What founders say">
+    <section id="voices" className="bg-[#f5f5f7] py-20 sm:py-24" aria-label="What founders say">
       <div className="mx-auto max-w-[1180px] px-5">
         <SectionHead eyebrow="From founders" title="Small teams, long placements." accent={A} />
         <Stagger className="mt-12 grid grid-cols-1 gap-4 md:grid-cols-3">

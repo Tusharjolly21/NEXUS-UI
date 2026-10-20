@@ -15,7 +15,7 @@ import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleTogg
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import TodoList from "@/components/templates/kit/components/TodoList";
 import FlightTracker from "@/components/templates/kit/components/FlightTracker";
-import ReceiptUnfold from "@/components/templates/kit/components/ReceiptUnfold";
+import ReceiptUnfold from "@/components/templates/ocean-flow/ReceiptUnfold";
 import RulerPicker from "@/components/templates/ocean-flow/RulerPicker";
 import { Story } from "@/components/templates/ocean-flow/Story";
 import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
@@ -449,14 +449,14 @@ function Hero({ shared }: { shared: MotionValue<number> }) {
   const surfaceY = useTransform(ds, [0, 8], [0, -170]);
   const dark = useTransform(ds, [20, 40], [0, 0.35]);
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-12 sm:pt-20">
+    <section id="top" className="relative overflow-hidden pb-16 pt-10 sm:pt-12">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px]" aria-hidden="true" style={{ background: "radial-gradient(55% 60% at 50% 0%, rgba(56,189,248,.20), transparent 70%)" }} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-6 px-5 text-center">
+      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
         <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
           <span className="h-2 w-2 rounded-full" style={{ background: A }} />
-          Dive gear, fitted and pressure-tested before it ships
+          Fitted and pressure-tested before it ships
         </motion.span>
-        <h1 className="m-0 max-w-[900px] text-[clamp(44px,7.6vw,96px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+        <h1 className="m-0 max-w-[900px] text-[clamp(42px,6.4vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
           <Words text="Gear for the depth you actually dive." className="justify-center" accentWords={["depth"]} accent={AD} />
         </h1>
         <Reveal delay={0.3} y={14}>
@@ -473,7 +473,7 @@ function Hero({ shared }: { shared: MotionValue<number> }) {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.25 }}
-        className="relative mx-auto mt-10 max-w-[1240px] px-3 sm:px-5"
+        className="relative mx-auto mt-8 max-w-[1240px] px-3 sm:px-5"
       >
         <div className="relative h-[700px] overflow-hidden rounded-[32px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_40px_80px_-40px_rgba(3,105,161,.55)] sm:h-[620px]" onPointerDown={() => (touched.current = true)}>
           <motion.div className="absolute inset-0" style={{ background: bg }} aria-hidden="true" />
@@ -1007,9 +1007,11 @@ function CartDrawer({ open, onClose, lines, setLines }: { open: boolean; onClose
     if (!placed) return null;
     const sub = placed.reduce((s, l) => s + l.price * l.qty, 0);
     const shipping = sub >= FREE ? 0 : 9;
-    const top = placed.slice(0, 3).map((l) => ({ label: `${l.name} × ${l.qty}`, amount: money(l.price * l.qty) }));
-    const rest = placed.slice(3).reduce((s, l) => s + l.price * l.qty, 0);
-    return { lines: [...top, ...(rest ? [{ label: `${placed.length - 3} more items`, amount: money(rest) }] : []), { label: "Shipping", amount: shipping ? money(shipping) : "Free" }], total: money(sub + shipping) };
+    // The slip has room for four rows: up to three items (or two plus a "more" row) and shipping.
+    const keep = placed.length > 3 ? 2 : 3;
+    const top = placed.slice(0, keep).map((l) => ({ label: `${l.name} × ${l.qty}`, amount: money(l.price * l.qty) }));
+    const rest = placed.slice(keep).reduce((s, l) => s + l.price * l.qty, 0);
+    return { lines: [...top, ...(rest ? [{ label: `${placed.length - keep} more items`, amount: money(rest) }] : []), { label: "Shipping", amount: shipping ? money(shipping) : "Free" }], total: money(sub + shipping) };
   }, [placed]);
   return (
     <AnimatePresence>
@@ -1041,7 +1043,7 @@ function CartDrawer({ open, onClose, lines, setLines }: { open: boolean; onClose
                   <span className="text-[17px] font-semibold">Order OF-20419 is in.</span>
                   <span className="text-[14px] text-[#6e6e73]">This is a demo store, so nothing was charged.</span>
                 </div>
-                <Fit><ReceiptUnfold lines={receipt.lines} total={receipt.total} /></Fit>
+                <Fit><ReceiptUnfold lines={receipt.lines} total={receipt.total} number="Order OF-20419" from="Ocean Flow" billedTo="Shipped to your saved address" paidWith="Demo order · no card charged" /></Fit>
                 <button type="button" onClick={() => { setPlaced(null); onClose(); }} className="mt-auto h-11 rounded-full bg-black/5 px-6 text-[14px] font-semibold outline-none focus-visible:ring-2">Keep shopping</button>
               </div>
             ) : (

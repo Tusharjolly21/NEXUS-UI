@@ -371,7 +371,7 @@ function Hero() {
         </Reveal>
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.25 }} className="relative mx-auto mt-9 max-w-[780px] px-5" onPointerDown={touch} onFocus={touch}>
+      <motion.div initial={{ y: 14 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.25 }} className="relative mx-auto mt-9 max-w-[780px] px-5" onPointerDown={touch} onFocus={touch}>
         <form onSubmit={submit} className={`${card} flex flex-col gap-2 p-2.5 sm:flex-row sm:items-center`}>
           <label htmlFor="asteria-idea" className="sr-only">Describe your product idea</label>
           <span className="hidden h-10 w-10 flex-none items-center justify-center rounded-full sm:flex" style={{ background: "#f5f3ff", color: A }} aria-hidden="true">
@@ -410,14 +410,14 @@ function Hero() {
       </motion.div>
 
       <div className="relative mx-auto mt-10 grid max-w-[1180px] grid-cols-1 gap-5 px-5 lg:grid-cols-[250px_1fr]">
-        <motion.aside initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.4 }} className={`${card} hidden flex-col gap-3 self-start p-3 lg:flex`} aria-label="Build progress">
+        <motion.aside initial={{ x: -12 }} animate={{ x: 0 }} transition={{ type: "spring", stiffness: 160, damping: 22, delay: 0.4 }} className={`${card} hidden flex-col gap-3 self-start p-3 lg:flex`} aria-label="Build progress">
           <span className="px-3 pt-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Assembling</span>
           <StepRail stage={stage} running={running} />
           <div className="mx-1 mb-1 mt-1 rounded-2xl bg-[#f5f5f7] p-3 text-[13px] leading-[1.45] text-[#6e6e73]" aria-live="polite">
             {stage === 6 ? "Draft ready. Every word, colour and section is editable." : running ? "Writing from your sentence. Nothing is published yet." : "Type an idea or pick one above."}
           </div>
         </motion.aside>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }} className={`${card} min-w-0 overflow-hidden`}>
+        <motion.div initial={{ y: 18 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }} className={`${card} min-w-0 overflow-hidden`}>
           <div className="flex items-center gap-2 border-b border-black/[.06] px-4 py-3 sm:px-5">
             {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-3 w-3 flex-none rounded-full" style={{ background: c }} />)}
             <span className="ml-2 min-w-0 truncate rounded-full bg-[#f5f5f7] px-3 py-1 text-[12px] font-medium text-[#6e6e73] tabular-nums">{host}</span>

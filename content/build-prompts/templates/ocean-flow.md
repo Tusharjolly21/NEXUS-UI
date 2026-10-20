@@ -12,7 +12,7 @@ Build a single-page e-commerce landing site for **Ocean Flow**, a dive shop that
 ## Page structure and copy
 
 1. **Sticky glass nav.** Logo: a blue disc with a swaying white wave, plus "Ocean Flow". Links Gear, Sizing, Kits, Delivery, Reviews. The right button is the bag ("Bag", then "Bag · 3") and opens the cart drawer.
-2. **Hero: centred copy above a wide water window.** Pill "Dive gear, fitted and pressure-tested before it ships". Headline "Gear for the **depth** you actually dive." Sub: "Drag the gauge down the reef. Watch the reds go, the water cool and the no-stop time shrink, and we'll pack the kit that suits that dive." Buttons "Shop the gear", "Find my size". Then a 1240px rounded window (620px tall, 700px on phones) with:
+2. **Hero: centred copy above a wide water window.** Pill "Fitted and pressure-tested before it ships". Headline "Gear for the **depth** you actually dive." Sub: "Drag the gauge down the reef. Watch the reds go, the water cool and the no-stop time shrink, and we'll pack the kit that suits that dive." Buttons "Shop the gear", "Find my size". Then a 1240px rounded window (620px tall, 700px on phones) with:
    - a vertical depth gauge on the right (0–40 m, white glass pill, a blue knob reading "18m");
    - a readout card top-left: "Punta Vela reef", the range (Open Water to 18 m, Advanced to 30 m, Deep specialty beyond), depth as a rolling number, pressure (1 + d/10 bar), water temperature (27 °C − 0.22 °C per metre), no-stop time from a recreational air table (10 m 219 min, 12 m 147, 14 m 98, 16 m 72, 18 m 56, 20 m 45, 22 m 37, 25 m 29, 30 m 20, 35 m 14, 40 m 9), five "colour left" dots where red, orange and yellow fade, and "Planning figures for air, first dive of the day. Not a dive table.";
    - a "Packed for 18 m" card bottom-right: Tern mask, the wetsuit for the temperature (3 mm at 24 °C+, 5 mm from 20 °C, 7 mm below), the Fathom computer from 10 m and the Lumen torch from 15 m, each with a reason and price, and "Add this kit · $906".
@@ -32,7 +32,7 @@ Build a single-page e-commerce landing site for **Ocean Flow**, a dive shop that
 - Page white, sections `#f5f5f7`, cards white. Ink `#1d1d1f`, secondary `#6e6e73`, `#424245` for small text on glass.
 - Blue `#0284c7` for graphics, `#0369a1` for text and buttons (5.9:1 on white). Green `#15803d` only for "Added" and free shipping.
 - Water gradient by depth at 0 / 10 / 25 / 40 m: top `#bdeafe, #38bdf8, #0369a1, #062437`; bottom `#38bdf8, #0284c7, #074b70, #03131f`.
-- System font stack. Hero headline `clamp(44px, 7.6vw, 96px)`, weight 600, line-height 0.98, tracking -0.055em. Captions 12–13px. `tabular-nums` on prices and readings.
+- System font stack. Hero headline `clamp(42px, 6.4vw, 84px)`, weight 600, line-height 0.98, tracking -0.055em. Captions 12–13px. `tabular-nums` on prices and readings.
 - Cards radius 28px, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 48px -32px rgba(0,0,0,.35)`; pill buttons 44px.
 
 ## Motion
@@ -47,7 +47,7 @@ Build a single-page e-commerce landing site for **Ocean Flow**, a dive shop that
 - Radio Cards (local copy with a confirm callback and footer slot): wetsuit thickness.
 - Ruler Picker (local copy with an accessible label): foot length.
 - Elastic Stepper: computer quantity. Capsule Toggles: kit pieces. Price Odometer rolling number: kit total.
-- Todo List: pre-ship checks. Flight Tracker: island delivery. Receipt Unfold: the order receipt.
+- Todo List: pre-ship checks. Flight Tracker: island delivery. Receipt Unfold (local copy with header and payment props): the order receipt.
 - A local pinned scroll story with a hydration-safe media query that keeps every visual mounted.
 
 ## Responsive and accessibility

@@ -22,7 +22,8 @@ export const ease = [0.16, 1, 0.3, 1] as const;
 
 /** True while a media query matches. */
 export function useMedia(q: string) {
-  const [m, setM] = useState(() => typeof window !== "undefined" && window.matchMedia(q).matches);
+  // Start false on server and client alike so hydration matches; the effect reads the real value.
+  const [m, setM] = useState(false);
   useEffect(() => {
     const mq = window.matchMedia(q);
     const on = () => setM(mq.matches);
@@ -49,7 +50,7 @@ export function Reveal({ children, delay = 0, y = 28, className = "", amount = 0
       initial={{ opacity: 0, y, filter: "blur(10px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
       viewport={{ once: true, amount }}
-      transition={{ duration: 0.9, ease, delay }}
+      transition={{ duration: 0.6, ease, delay }}
     >
       {children}
     </motion.div>
@@ -82,7 +83,7 @@ export function Words({ text, className = "", delay = 0, accentWords = [], accen
             initial={{ y: "105%", opacity: 0, filter: "blur(8px)" }}
             whileInView={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            transition={{ duration: 0.9, ease, delay: delay + i * 0.07 }}
+            transition={{ duration: 0.6, ease, delay: delay + i * 0.06 }}
           >
             {w}
           </motion.span>

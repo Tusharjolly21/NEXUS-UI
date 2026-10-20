@@ -518,6 +518,7 @@ const AFTER = [
   `return withTotal(cart, atLeast0(cart.total - off));`,
   ``,
   `// + total.test.ts: 3 new cases`,
+  ``,
 ];
 
 function CodePane({ lines, tone, bg, mark }: { lines: string[]; tone: string; bg: string; mark: number[] }) {

@@ -7,7 +7,7 @@
  * controls), Hold to Confirm (rollback), Standing Calendar (deploy history),
  * Copy Buttons and Radio Cards.
  */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent } from "framer-motion";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
@@ -104,6 +104,15 @@ function useRollout() {
   return { origin, run, stage, lit, litIds, ring, ringOpacity, clockRef, push, order };
 }
 
+/** The static land dots, memoised so rollout state changes never re-render them. */
+const DotLayer = memo(function DotLayer() {
+  return (
+    <g fill="#d4d7dd">
+      {DOTS.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r="2.3" />)}
+    </g>
+  );
+});
+
 function LogLine({ done, running, children }: { done: boolean; running: boolean; children: ReactNode }) {
   return (
     <motion.div layout initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={spring} className="flex items-center gap-2.5">
@@ -166,12 +175,10 @@ function Hero() {
       </div>
 
       <div className="relative mx-auto mt-10 max-w-[1260px] px-3 sm:px-5 lg:pb-[200px]">
-        <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="relative">
+        <motion.div initial={{ scale: 0.985 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="relative">
           <div className="relative w-full" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
             <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
-              <g fill="#d4d7dd">
-                {DOTS.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r="2.3" />)}
-              </g>
+              <DotLayer />
               <motion.circle cx={o.x} cy={o.y} r={ring} fill="none" stroke={A} strokeWidth="1.5" style={{ opacity: ringOpacity }} />
               <g fill="none" stroke={A} strokeWidth="1.4" strokeLinecap="round">
                 {REGIONS.filter((r) => r.id !== origin && litIds.has(r.id)).map((r) => (
@@ -421,10 +428,10 @@ function History() {
   return (
     <section className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
       <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.5fr]">
-        <SectionHead eyebrow="Deploy history" title="Deploy often. Sleep fine." sub="Teams on Aurora ship 23 times a week at the median. Every deploy is kept, so you can open, compare or promote any of them." accent={AT} />
+        <SectionHead eyebrow="Deploy history" title="Deploy often. Sleep fine." sub="The median team on Aurora ships 13 times a week. Every deploy is kept, so you can open, compare or promote any of them." accent={AT} />
         <Reveal y={16}>
           <div className={`${card} overflow-hidden px-4 py-7 sm:px-7`}>
-            <Fit><DeployCalendar weeks={30} noun="deploys in 30 weeks" autoplay /></Fit>
+            <Fit><DeployCalendar weeks={30} noun="deploys from one team in 30 weeks" autoplay /></Fit>
           </div>
         </Reveal>
       </div>
@@ -508,7 +515,7 @@ function Pricing() {
               <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Choose a plan</h3>
               <p className="m-0 mt-1 text-[15px] text-[#6e6e73]">Change plans any time. Billing is prorated by the day.</p>
             </div>
-            <Fit>
+            <div className="flex justify-center">
               <RadioCards
                 accent={AT}
                 defaultValue="pro"
@@ -519,7 +526,7 @@ function Pricing() {
                   { id: "scale", title: "Scale", description: "For high-traffic products", meta: "Custom", features: ["Private regions", "SSO and audit logs", "99.99% SLA"] },
                 ]}
               />
-            </Fit>
+            </div>
           </div>
         </Reveal>
         <Reveal y={16} delay={0.08}>

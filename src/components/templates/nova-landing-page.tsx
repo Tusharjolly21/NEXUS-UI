@@ -27,7 +27,7 @@ function Logo() {
     <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
       <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
         <circle cx="16" cy="16" r="14" fill="#1d1d1f" />
-        <motion.circle cx="16" cy="16" r="6" fill={GLOW} animate={{ r: [5.5, 7, 5.5] }} transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.circle cx="16" cy="16" r="6" fill={GLOW} style={{ originX: "16px", originY: "16px" }} animate={{ scale: [0.92, 1.15, 0.92] }} transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }} />
       </svg>
       Nova
     </span>
@@ -147,7 +147,7 @@ function AmbientStage() {
   const nits = useTransform(nitsN, (n) => `${Math.round(n / 10) * 10} nits`);
   const lux = useTransform(vs, [0.06, 0.94], [900, 40]);
   const luxText = useTransform(lux, (l) => `${Math.round(l / 10) * 10} lux`);
-  const roomText = useTransform(us, (x) => (x < 0.35 ? "Warm lamp" : x > 0.65 ? "Daylight" : "Mixed light"));
+  const roomText = useTransform(us, (x): string => (x < 0.35 ? "Warm lamp" : x > 0.65 ? "Daylight" : "Mixed light"));
 
   const lx = useTransform(us, (x) => x * 100);
   const ly = useTransform(vs, (y) => y * 100);

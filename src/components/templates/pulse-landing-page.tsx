@@ -10,7 +10,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as R
 import { AnimatePresence, LayoutGroup, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 import HoldToConfirm from "@/components/templates/kit/components/HoldToConfirm";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
-import TodoList from "@/components/templates/kit/components/TodoList";
+import TodoList from "@/components/templates/pulse-landing/runbook-list";
 import { CopyChip } from "@/components/templates/kit/components/CopyButton";
 import StretchNav from "@/components/templates/kit/components/StretchNav";
 import RadioCards from "@/components/templates/kit/components/RadioCards";
@@ -133,7 +133,7 @@ function WeekBoard({ step }: { step: number }) {
       <LayoutGroup id="pulse-week">
         <div className="grid grid-cols-4 gap-1.5 p-2 sm:gap-2.5 sm:p-3">
           {COLS.map((name, c) => (
-            <div key={name} className="flex min-h-[300px] min-w-0 flex-col gap-1.5 rounded-[16px] bg-[#f5f5f7] p-1.5 sm:min-h-[372px] sm:gap-2 sm:p-2">
+            <div key={name} className="flex min-h-[230px] min-w-0 flex-col gap-1.5 rounded-[16px] bg-[#f5f5f7] p-1.5 sm:min-h-[372px] sm:gap-2 sm:p-2">
               <div className="flex items-center justify-between px-1 pt-0.5 text-[11px] font-semibold text-[#515154] sm:text-[12px]">
                 <span className="truncate">{name}</span>
                 <RollDigit n={cols[c].length} />
@@ -143,7 +143,7 @@ function WeekBoard({ step }: { step: number }) {
                   key={it.key}
                   layoutId={`pulse-${it.key}`}
                   layout
-                  initial={{ opacity: 0, scale: 0.85 }}
+                  initial={it.hist[0][0] === step ? { opacity: 0, scale: 0.85 } : false}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ type: "spring", stiffness: 340, damping: 28 }}
                   className="relative flex flex-col gap-1 rounded-[10px] bg-white p-1.5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_4px_10px_-6px_rgba(0,0,0,.25)] sm:gap-1.5 sm:rounded-[12px] sm:p-2.5"
@@ -560,7 +560,7 @@ function Roadmap() {
                         </span>
                         <span className="w-10 text-right text-[13px] font-semibold tabular-nums text-[#1d1d1f]">{r.p}%</span>
                       </span>
-                      <span className="row-start-1 justify-self-end rounded-full px-2.5 py-1 text-[12px] font-semibold sm:row-auto" style={{ color: ST[r.s].c, background: ST[r.s].bg }}>{ST[r.s].l}</span>
+                      <span className="row-start-1 justify-self-end rounded-full px-2.5 py-1 text-center text-[12px] font-semibold sm:row-auto sm:w-[84px]" style={{ color: ST[r.s].c, background: ST[r.s].bg }}>{ST[r.s].l}</span>
                       <span className="hidden w-14 text-right text-[13px] tabular-nums text-[#515154] sm:block">{r.due}</span>
                     </div>
                   ))}
@@ -609,7 +609,7 @@ function Pricing() {
                 />
               </div>
             </Fit>
-            <Magnetic className="w-full text-white" style={{ background: A }}>Start a 14-day trial</Magnetic>
+            <span className="text-[13px] text-[#6e6e73]">14-day trial of Team or Business. No card needed.</span>
           </div>
         </Reveal>
       </div>

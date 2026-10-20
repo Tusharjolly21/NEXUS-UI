@@ -187,7 +187,7 @@ function RiskBand() {
             {SEGS.map((s) => (
               <span key={s.k} className="flex items-center gap-2 text-[#6e6e73]">
                 <span className="h-2.5 w-2.5 flex-none rounded-[3px]" style={{ background: s.c, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.08)" }} />
-                <span className="truncate">{s.label}</span>
+                <span className="min-w-0">{s.label}</span>
                 <LegendPct s={s} pos={pos} mode={mode} />
               </span>
             ))}
@@ -396,7 +396,7 @@ function SendBoard() {
         <span className="text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">3 orders to your brokerage</span>
       </div>
       <ul className="m-0 flex list-none flex-col gap-2 p-0 text-[14px]">
-        {[["Sell employer stock", "−$86,700"], ["Buy international fund", "+$49,500"], ["Buy Treasury fund", "+$18,400"]].map(([l, v]) => (
+        {[["Sell employer stock", "−$86,700"], ["Buy international fund", "+$47,600"], ["Buy Treasury fund", "+$18,400"]].map(([l, v]) => (
           <li key={l} className="flex justify-between border-b border-black/[.06] pb-2 text-[#1d1d1f]"><span>{l}</span><span className="font-semibold tabular-nums">{v}</span></li>
         ))}
       </ul>

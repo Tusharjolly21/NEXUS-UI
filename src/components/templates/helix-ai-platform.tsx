@@ -281,7 +281,7 @@ function ApprovalQueue() {
     <div className={`${C} w-full overflow-hidden`} role="region" aria-label="Approval queue demo" onKeyDown={onKey}>
       <div className="flex items-center justify-between gap-3 border-b border-black/[.06] px-5 py-4">
         <span className="flex items-center gap-2.5">
-          <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">Needs your call</span>
+          <span className="whitespace-nowrap text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">Needs your call</span>
           <span className="relative flex h-6 min-w-6 items-center justify-center overflow-hidden rounded-full px-2 text-[12px] font-semibold tabular-nums text-white" style={{ background: pending.length ? A : "#6e6e73" }} aria-live="polite">
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.span key={pending.length} initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}>{pending.length}</motion.span>
@@ -289,8 +289,8 @@ function ApprovalQueue() {
           </span>
         </span>
         <span className="flex items-center gap-3 text-[13px] tabular-nums text-[#6e6e73]">
-          <span className="flex items-center gap-1"><Check size={12} color={A} /> {okCount} approved</span>
-          <span className="flex items-center gap-1"><BackArrow size={12} /> {backCount} sent back</span>
+          <span className="flex items-center gap-1"><Check size={12} color={A} /> {okCount}<span className="hidden sm:inline"> approved</span></span>
+          <span className="flex items-center gap-1"><BackArrow size={12} /> {backCount}<span className="hidden sm:inline"> sent back</span></span>
         </span>
       </div>
 

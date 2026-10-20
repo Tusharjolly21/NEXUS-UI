@@ -137,7 +137,7 @@ export default function HoldingsCluster({ accent = "#4d7c0f", autoplay = false }
           </button>
         ))}
       </div>
-      <span className="relative h-5 w-full max-w-[400px] overflow-hidden text-center text-[13px] font-medium text-[#424245]" aria-live="polite">
+      <span className="relative h-10 w-[400px] max-w-full overflow-hidden text-center text-[13px] font-medium leading-[1.45] text-[#424245]" aria-live="polite">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.span key={group} className="block" initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -16, opacity: 0 }} transition={{ type: "spring", stiffness: 420, damping: 32 }}>
             {NOTES[group]}

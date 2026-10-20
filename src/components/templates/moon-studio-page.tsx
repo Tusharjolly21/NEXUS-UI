@@ -181,6 +181,7 @@ function Hero() {
   const wide = useMq("(min-width: 768px)");
   const [active, setActive] = useState(0);
   const [hovering, setHovering] = useState(false);
+  const [paused, setPaused] = useState(false);
   const parked = useRef(false);
   const shown = useMotionValue(0);
   const box = useRef<HTMLDivElement>(null);
@@ -217,10 +218,10 @@ function Hero() {
 
   // Idle: cycle through the disciplines so the hero is never still.
   useEffect(() => {
-    if (hovering) return;
+    if (hovering || paused) return;
     const t = setInterval(() => setActive((a) => (a + 1) % DISCIPLINES.length), 3600);
     return () => clearInterval(t);
-  }, [hovering]);
+  }, [hovering, paused]);
 
   const follow = (e: React.PointerEvent) => {
     if (!fine || !box.current) return;
@@ -261,7 +262,7 @@ function Hero() {
                 aria-label={`${d.word}: ${d.count} projects. See the work`}
                 onPointerEnter={() => setActive(i)}
                 onFocus={() => setActive(i)}
-                onClick={() => (fine || on ? scrollToId("work") : setActive(i))}
+                onClick={() => { if (fine || on) scrollToId("work"); else { setActive(i); setPaused(true); } }}
                 initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ type: "spring", stiffness: 200, damping: 26, delay: 0.12 + i * 0.08 }}
@@ -645,7 +646,7 @@ export default function MoonStudioPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
-        <Nav brand={<Logo />} accent={A} cta="Start a project" onCta={() => scrollToId("contact")} links={[{ label: "Work", id: "work" }, { label: "Case study", id: "case" }, { label: "Services", id: "services" }, { label: "Studio", id: "studio" }, { label: "Contact", id: "contact" }]} />
+        <Nav brand={<Logo />} accent={A} cta="Contact us" onCta={() => scrollToId("contact")} links={[{ label: "Work", id: "work" }, { label: "Case study", id: "case" }, { label: "Services", id: "services" }, { label: "Studio", id: "studio" }, { label: "Contact", id: "contact" }]} />
         <Hero />
         <Work />
         <CaseStudy />

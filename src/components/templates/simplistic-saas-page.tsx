@@ -172,7 +172,7 @@ function NightPanel() {
           <span>22:00</span><span>01:00</span><span>04:00</span><span>07:00</span>
         </div>
 
-        <ol className="m-0 flex h-[244px] list-none flex-col justify-end gap-2 overflow-hidden p-0" aria-live="polite" aria-label="Overnight log">
+        <ol className="m-0 flex h-[300px] list-none sm:h-[244px] flex-col justify-end gap-2 overflow-hidden p-0" aria-live="polite" aria-label="Overnight log">
           <AnimatePresence initial={false}>
             {visible.length === 0 && (
               <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-full items-center justify-center rounded-2xl bg-[#f5f5f7] text-[14px] text-[#6e6e73]">
@@ -227,7 +227,7 @@ function Hero() {
             <span className="text-[13px] text-[#6e6e73]">Your first agent is free. Drag the timeline to scrub through a real night.</span>
           </Reveal>
         </div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="w-full">
+        <motion.div initial={{ y: 18 }} animate={{ y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="w-full">
           <NightPanel />
         </motion.div>
       </div>
@@ -266,7 +266,7 @@ function Principles() {
     { t: "It stays small.", d: "No workflow canvas, no node graph. Pick a trigger, connect tools, set rules. Most agents take four minutes.", icon: "M5 12h14M12 5v14" },
   ];
   return (
-    <section className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
+    <section id="principles" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
       <SectionHead eyebrow="Calm by design" title="Fewer features. Fewer surprises." sub="Simplistic does one thing: routine work, done overnight, checked by you in the morning." accent={CT} />
       <Stagger className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
         {items.map((it) => (
@@ -343,10 +343,9 @@ function RulesVisual() {
   const [state, setState] = useState(() => Object.fromEntries(RULES.map((r) => [r.id, r.on])) as Record<string, boolean>);
   const touched = useRef(false);
   useEffect(() => {
-    let k = 0;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
-      const r = RULES[k++ % 2 ? 1 : 3];
+      const r = RULES[3];
       setState((s) => ({ ...s, [r.id]: !s[r.id] }));
     }, 1600);
     return () => clearInterval(t);
@@ -448,7 +447,7 @@ function Control() {
                   <motion.span key={status} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={spring} className="text-[13px] text-[#6e6e73]" aria-live="polite">{status}</motion.span>
                 </AnimatePresence>
               </span>
-              <span className="text-[12px] tabular-nums text-[#6e6e73]">Last run 02:00</span>
+              <span className="hidden text-[12px] tabular-nums text-[#6e6e73] sm:inline">Last run 02:00</span>
             </div>
             <Fit><AgentDial actions={ACTIONS} color={INK} accent={C} onSelect={pick} label="Agent actions" autoplay /></Fit>
             <span className="text-[13px] text-[#6e6e73]">Press the button and pick an action.</span>

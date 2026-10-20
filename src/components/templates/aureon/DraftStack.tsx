@@ -10,7 +10,7 @@ interface Draft { id: number; side: "Sell" | "Buy"; amount: string; what: string
 
 const DATA: Omit<Draft, "id">[] = [
   { side: "Sell", amount: "$86,700", what: "Employer stock", why: "Takes it from 31% to 10% of what you own.", tax: "Split over two tax years · est. tax $7,940" },
-  { side: "Buy", amount: "$49,500", what: "Total international fund", why: "You're 9% international. Your plan says 21%.", tax: "In your brokerage · no tax" },
+  { side: "Buy", amount: "$47,600", what: "Total international fund", why: "You're 9% international. Your plan says 21%.", tax: "In your brokerage · no tax" },
   { side: "Sell", amount: "$11,250", what: "Tech sector fund", why: "61% overlap with your S&P fund, at 4× the fee.", tax: "Harvests a $1,380 loss" },
   { side: "Buy", amount: "$18,400", what: "Short-term Treasury fund", why: "Moves 4 months of spending out of the market.", tax: "In your 401(k) · no tax" },
 ];

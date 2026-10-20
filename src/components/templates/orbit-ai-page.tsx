@@ -10,7 +10,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPoi
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from "framer-motion";
 import ProgressButton from "@/components/templates/kit/components/ProgressButton";
 import HoldToConfirm from "@/components/templates/kit/components/HoldToConfirm";
-import RulerPicker from "@/components/templates/kit/components/RulerPicker";
+import RulerPicker from "@/components/templates/orbit-ai/budget-ruler";
 import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
 import GooeyDial from "@/components/templates/kit/components/GooeyDial";
 import StandingCalendar from "@/components/templates/kit/components/StandingCalendar";

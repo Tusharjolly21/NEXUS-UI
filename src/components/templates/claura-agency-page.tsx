@@ -132,6 +132,10 @@ function Wire({ id, a, b, nw, nh, vertical, drawn, live }: { id: string; a: Node
   );
 }
 
+const NH = 96; // node height
+const VGAP = 36; // vertical gap between nodes in the narrow layout
+const VH = 5 * NH + 4 * VGAP;
+
 function WorkflowCanvas() {
   const fine = useMq("(hover: hover) and (pointer: fine)");
   const reduce = useReducedMotion();
@@ -139,11 +143,12 @@ function WorkflowCanvas() {
   const [geo, setGeo] = useState({ w: 0, nw: 196, vertical: false });
   const [nodes] = useState<NodeMV[]>(() => Array.from({ length: 5 }, () => ({ px: motionValue(0), py: motionValue(0), dx: motionValue(0), dy: motionValue(0) })));
   const [task, setTask] = useState(0);
-  const [s, setS] = useState(0); // how many nodes are visible
-  const [approved, setApproved] = useState(false);
-  const [saved, setSaved] = useState(312);
+  // Start on a finished run so the first thing people see is a complete workflow.
+  const [s, setS] = useState(5); // how many nodes are visible
+  const [approved, setApproved] = useState(true);
+  const [saved, setSaved] = useState(338);
   const touched = useRef(false);
-  const NH = 96;
+  const firstRun = useRef(true); // the finished run shown on load stays up a little longer
 
   // Lay the five nodes out in a zigzag row, or a zigzag column when narrow.
   useLayoutEffect(() => {
@@ -152,11 +157,11 @@ function WorkflowCanvas() {
     const place = () => {
       const w = el.clientWidth;
       const vertical = w < 880;
-      const nw = vertical ? Math.min(220, w * 0.62) : Math.min(196, (w - 4 * 30) / 5);
-      const h = vertical ? 540 : 300;
+      const nw = vertical ? Math.min(280, w * 0.8) : Math.min(196, (w - 4 * 30) / 5);
+      const h = vertical ? VH : 300;
       const ys = [0.52, 0.12, 0.7, 0.18, 0.56];
       nodes.forEach((n, i) => {
-        if (vertical) { n.px.set(i % 2 ? w - nw : 0); n.py.set(i * ((h - NH) / 4)); }
+        if (vertical) { n.px.set(i % 2 ? w - nw : 0); n.py.set(i * (NH + VGAP)); }
         else { n.px.set(i * ((w - nw) / 4)); n.py.set(ys[i] * (h - NH)); }
       });
       setGeo({ w, nw, vertical });
@@ -180,7 +185,7 @@ function WorkflowCanvas() {
     if (s < 4) t = setTimeout(() => setS(s + 1), s === 0 ? 450 : 700);
     else if (s === 4 && !approved) { if (!touched.current) t = setTimeout(() => setApproved(true), 2300); }
     else if (s === 4 && approved) t = setTimeout(() => { setS(5); setSaved((v) => v + TASKS[task].hours); }, 450);
-    else if (s === 5 && !touched.current) t = setTimeout(() => { setTask((k) => (k + 1) % TASKS.length); setS(0); setApproved(false); nodes.forEach((n) => { animate(n.dx, 0, spring); animate(n.dy, 0, spring); }); }, 3600);
+    else if (s === 5 && !touched.current) t = setTimeout(() => { firstRun.current = false; setTask((k) => (k + 1) % TASKS.length); setS(0); setApproved(false); nodes.forEach((n) => { animate(n.dx, 0, spring); animate(n.dy, 0, spring); }); }, firstRun.current ? 9000 : 4600);
     return () => clearTimeout(t);
   }, [s, approved, task, nodes]);
 
@@ -194,7 +199,7 @@ function WorkflowCanvas() {
         role="group"
         aria-label={`Workflow preview: ${T.label}`}
         className="relative w-full"
-        style={{ height: geo.vertical ? 540 : 300 }}
+        style={{ height: geo.vertical ? VH : 300 }}
       >
         {geo.w > 0 && (
           <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden="true">
@@ -223,7 +228,7 @@ function WorkflowCanvas() {
               <motion.div
                 className="relative flex h-full flex-col justify-between rounded-[20px] bg-white p-3 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_18px_30px_-20px_rgba(0,0,0,.4)]"
                 initial={false}
-                animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 0.85, y: shown ? 0 : 8 }}
+                animate={{ opacity: shown ? 1 : 0.5, scale: shown ? 1 : 0.95, y: shown ? 0 : 4, filter: shown ? "saturate(1)" : "saturate(0)" }}
                 transition={{ type: "spring", stiffness: 420, damping: 26 }}
                 style={human && waiting ? { boxShadow: `0 0 0 2px ${A}, 0 18px 30px -20px rgba(0,0,0,.4)` } : undefined}
               >
@@ -306,7 +311,7 @@ function Hero() {
             <div className="flex flex-col items-start gap-5">
               <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.1 }} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]">
                 <motion.span className="h-2 w-2 rounded-full" style={{ background: A }} animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
-                AI automation agency · 61 agents in production
+                AI automation agency<span className="hidden sm:inline"> · 61 agents in production</span>
               </motion.span>
               <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: 0.15 }} className="m-0 text-[clamp(40px,6.4vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
                 AI agents for the <span style={{ color: A }}>boring half</span> of your business.
@@ -494,11 +499,11 @@ function Roi() {
             <div className="grid grid-cols-2 gap-6 border-t border-white/10 pt-6">
               <div className="flex flex-col gap-1">
                 <span className="text-[13px] text-[#a1a1a6]">Worth, at €32 an hour</span>
-                <span className="text-[30px] font-semibold tracking-[-0.03em] tabular-nums">€<RollingNumber value={value} /></span>
+                <span className="flex items-baseline text-[30px] font-semibold leading-none tracking-[-0.03em] tabular-nums">€<RollingNumber value={value} /></span>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[13px] text-[#a1a1a6]">A €18k build pays back in</span>
-                <span className="text-[30px] font-semibold tracking-[-0.03em] tabular-nums"><RollingNumber value={payback} /> wks</span>
+                <span className="flex items-baseline text-[30px] font-semibold leading-none tracking-[-0.03em] tabular-nums"><RollingNumber value={payback} /><span className="ml-2">wks</span></span>
               </div>
             </div>
             <span className="text-[13px] leading-[1.45] text-[#a1a1a6]">An estimate, not a promise. The audit gives you a real number for your team before you spend more.</span>

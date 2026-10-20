@@ -42,6 +42,8 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  // No dev badge: template preview images are captured from the dev server.
+  devIndicators: false,
   poweredByHeader: false,
   compress: true,
   outputFileTracingIncludes: {

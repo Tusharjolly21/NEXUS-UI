@@ -35,7 +35,7 @@ function layoutFor(w: number): Layout {
   if (w < 720) {
     const cx = (w - NW) / 2;
     const off = Math.min(46, (w - NW) / 2 - 4);
-    return { pts: NODES.map((_, i) => ({ x: cx + (i % 2 ? off : -off), y: 18 + i * 118 })), h: 18 + 4 * 118 + NH + 96, vertical: true };
+    return { pts: NODES.map((_, i) => ({ x: cx + (i % 2 ? off : -off), y: 18 + i * 118 })), h: 18 + 4 * 118 + NH + 44, vertical: true };
   }
   const span = w - NW;
   const ys = [20, 190, 20, 190, 105];

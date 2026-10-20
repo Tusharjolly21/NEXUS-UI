@@ -145,7 +145,7 @@ function StageText({ p, range, children, className = "" }: { p: MotionValue<numb
   const y = useTransform(p, [range[0], range[1], range[2], range[3]], [20, 0, 0, -20]);
   const events = useTransform(opacity, (o) => (o > 0.5 ? "auto" : "none"));
   return (
-    <motion.div className={`absolute inset-x-0 top-[9vh] flex flex-col items-center gap-4 px-5 text-center ${className}`} style={{ opacity, y, pointerEvents: events }}>
+    <motion.div className={`absolute inset-x-0 top-[8vh] flex flex-col items-center gap-4 px-5 text-center ${className}`} style={{ opacity, y, pointerEvents: events }}>
       {children}
     </motion.div>
   );
@@ -160,7 +160,7 @@ function Hero() {
   const lid = useTransform(lidScroll, (v) => (reduce ? 14 : v));
   const screenOn = useTransform(p, (v) => (reduce ? 1 : Math.max(0, Math.min(1, (v - 0.3) / 0.18))));
   const tilt = useTransform(p, [0, 0.5, 1], [-32, -14, -11]);
-  const scale = useTransform(p, [0, 0.5, 1], [0.84, 1, 1.05]);
+  const scale = useTransform(p, [0, 0.5, 1], [0.84, 0.94, 0.98]);
   const turnScroll = useTransform(p, [0, 0.5, 1], [-26, -6, 8]);
   const spin = useMotionValue(0);
   const spinS = useSpring(spin, { stiffness: 80, damping: 14 });
@@ -186,11 +186,11 @@ function Hero() {
         </StageText>
         <StageText p={p} range={[0.26, 0.36, 0.5, 0.6]}>
           <span className="text-[15px] font-semibold" style={{ color: A }}>Studio display</span>
-          <h2 className="m-0 max-w-[820px] text-[clamp(36px,6vw,76px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">1,600 nits, the moment it opens.</h2>
+          <h2 className="m-0 max-w-[820px] text-[clamp(32px,4.8vw,64px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">1,600 nits, the moment it opens.</h2>
         </StageText>
         <StageText p={p} range={[0.62, 0.72, 1.5, 2]}>
           <span className="text-[15px] font-semibold" style={{ color: A }}>HX2 Max</span>
-          <h2 className="m-0 max-w-[860px] text-[clamp(36px,6vw,76px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">Full-speed 8K, unplugged.</h2>
+          <h2 className="m-0 max-w-[860px] text-[clamp(32px,4.8vw,64px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">Full-speed 8K, unplugged.</h2>
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <Magnetic className="text-white focus-visible:ring-[#475569]" style={{ background: A }} onClick={() => scrollToId("buy")}>Order from $2,099</Magnetic>
             <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:ring-[#475569]" onClick={() => scrollToId("performance")}>See performance</Magnetic>
@@ -198,7 +198,7 @@ function Hero() {
         </StageText>
 
         <motion.div
-          className="absolute inset-x-0 bottom-[2vh] top-[34vh] flex cursor-grab items-center justify-center active:cursor-grabbing"
+          className="absolute inset-x-0 bottom-0 top-[40vh] flex cursor-grab items-center justify-center active:cursor-grabbing"
           style={{ touchAction: "pan-y" }}
           onPan={onPan}
           onPanEnd={onPanEnd}
@@ -207,7 +207,7 @@ function Hero() {
         >
           <div className="origin-center scale-[0.5] sm:scale-[0.8] lg:scale-100" style={{ perspective: 1900 }}>
             <div className="relative h-[520px] w-[760px]">
-              <motion.div className="absolute left-1/2 top-[66%] h-0 w-0" style={{ transformStyle: "preserve-3d", rotateX: tilt, rotateY: rotY, scale }}>
+              <motion.div className="absolute left-1/2 top-[72%] h-0 w-0" style={{ transformStyle: "preserve-3d", rotateX: tilt, rotateY: rotY, scale }}>
                 <Machine lid={lid} screenOn={screenOn} finish={FINISHES[0]} />
               </motion.div>
             </div>
