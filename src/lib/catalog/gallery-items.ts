@@ -304,6 +304,10 @@ const TINT_OF: Record<string, TileTint> = {
   "scratch-reveal": "pink",
   "polaroid-develop": "peach",
   "wallet-stack": "butter",
+  "tag-pit": "sky",
+  "usage-stack": "sky",
+  "marble-progress": "mint",
+  "cloth-banner": "violet",
   "traffic-bars": "sky",
   "stock-line": "mint",
   "pulse-monitor": "pink",
@@ -319,6 +323,11 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // ninth batch (Depth)
+  "tag-pit",
+  "usage-stack",
+  "marble-progress",
+  "cloth-banner",
   // eighth batch
   "traffic-bars",
   "stock-line",

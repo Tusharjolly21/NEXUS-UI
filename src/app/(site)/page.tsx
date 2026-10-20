@@ -91,6 +91,8 @@ export default function Home() {
         { slug: "block-pricing-section", label: "Pricing" },
         { slug: "block-faq-folder-card", label: "FAQ" },
         { slug: "block-newsletter", label: "Newsletter" },
+        { slug: "block-changelog", label: "Changelog" },
+        { slug: "block-404", label: "404 page" },
       ],
     },
     templates: {

@@ -400,6 +400,7 @@ function detectedPackageDependencies(item) {
 const UNTYPED_PACKAGE_TYPES = {
   "topojson-client": "@types/topojson-client",
   three: "@types/three",
+  "matter-js": "@types/matter-js",
 };
 
 function buildTerminalItem() {
@@ -856,6 +857,34 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/motion-kit/typo-catching-signup"],
   },
   {
+    name: "kinetic-hero",
+    title: "Kinetic Hero",
+    description: "Kinetic Hero, a Motion Kit block section.",
+    premium: true,
+    components: ["blocks/motion-kit/kinetic-hero"],
+  },
+  {
+    name: "drift-gallery",
+    title: "Drift Gallery",
+    description: "Drift Gallery, a Motion Kit block section.",
+    premium: true,
+    components: ["blocks/motion-kit/drift-gallery"],
+  },
+  {
+    name: "changelog-pile",
+    title: "Changelog Pile",
+    description: "Changelog Pile, a Motion Kit block section.",
+    premium: true,
+    components: ["blocks/motion-kit/changelog-pile"],
+  },
+  {
+    name: "gravity-404",
+    title: "Gravity 404",
+    description: "Gravity 404, a Motion Kit block section.",
+    premium: true,
+    components: ["blocks/motion-kit/gravity-404"],
+  },
+  {
     name: "navigation-blocks",
     title: "Navigation Blocks",
     description: "A navigation bar that morphs into a compact pill as the page scrolls.",
@@ -865,9 +894,10 @@ const BLOCK_REGISTRY_PACKAGES = [
   {
     name: "hero-blocks",
     title: "Hero Blocks",
-    description: "A cursor spotlight hero and a parallax stack hero.",
+    description: "A cursor spotlight hero, a parallax stack hero and a scroll-driven kinetic headline hero.",
     premium: true,
-    components: ["blocks/motion-kit/spotlight-hero", "blocks/motion-kit/parallax-stack-hero"],
+    dependencies: ["framer-motion", "gsap"],
+    components: ["blocks/motion-kit/spotlight-hero", "blocks/motion-kit/parallax-stack-hero", "blocks/motion-kit/kinetic-hero"],
   },
   {
     name: "feature-blocks",
@@ -889,6 +919,30 @@ const BLOCK_REGISTRY_PACKAGES = [
     description: "A newsletter signup that catches email typos before submitting.",
     premium: true,
     components: ["blocks/motion-kit/typo-catching-signup"],
+  },
+  {
+    name: "gallery-blocks",
+    title: "Gallery Blocks",
+    description: "An endless 3D wall of work you can drag, fling and open.",
+    premium: true,
+    dependencies: ["framer-motion", "three", "@react-three/fiber"],
+    components: ["blocks/motion-kit/drift-gallery"],
+  },
+  {
+    name: "changelog-blocks",
+    title: "Changelog Blocks",
+    description: "Release notes as a pile of physical cards, with filters and a list view.",
+    premium: true,
+    dependencies: ["framer-motion", "matter-js"],
+    components: ["blocks/motion-kit/changelog-pile"],
+  },
+  {
+    name: "not-found-blocks",
+    title: "404 Page Blocks",
+    description: "A not-found page whose pieces fall under gravity and can be put back.",
+    premium: true,
+    dependencies: ["framer-motion", "matter-js"],
+    components: ["blocks/motion-kit/gravity-404"],
   },
 ];
 

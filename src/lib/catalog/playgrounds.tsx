@@ -48,6 +48,7 @@ import { MagnifyDock } from "@/components/magnify-dock";
 import { UploadChips } from "@/components/upload-chips";
 import { NotificationStack } from "@/components/notification-stack";
 import { IslandMorph } from "@/components/island-morph";
+import { ClothBanner } from "@/components/cloth-banner";
 import { TrafficBars } from "@/components/traffic-bars";
 import { StockLine } from "@/components/stock-line";
 import { PulseMonitor } from "@/components/pulse-monitor";
@@ -122,6 +123,11 @@ import { PageCurl } from "@/components/page-curl";
 import { SignAndSeal } from "@/components/sign-and-seal";
 import { StreakCounter } from "@/components/streak-counter";
 import { CapsuleToggles } from "@/components/capsule-toggles";
+
+// matter-js stays out of the shared playground bundle: these load lazily.
+const TagPit = React.lazy(() => import("@/components/tag-pit").then((m) => ({ default: m.TagPit })));
+const UsageStack = React.lazy(() => import("@/components/usage-stack").then((m) => ({ default: m.UsageStack })));
+const MarbleProgress = React.lazy(() => import("@/components/marble-progress").then((m) => ({ default: m.MarbleProgress })));
 
 /**
  * Live props playgrounds for component detail pages (Bencho-style "tweak and copy").
@@ -1774,6 +1780,57 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false },
     ],
     render: (v) => <SpendDonut key={String(v.autoplay)} thickness={v.thickness as number} gap={v.gap as number} autoplay={v.autoplay as boolean} />,
+  },
+  "tag-pit": {
+    componentName: "TagPit",
+    importPath: "@/components/tag-pit",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "min", label: "Picks needed", min: 1, max: 6, step: 1, defaultValue: 3 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <React.Suspense fallback={null}>
+        <TagPit key={String(v.autoplay)} accent={v.accent as string} min={v.min as number} autoplay={v.autoplay as boolean} />
+      </React.Suspense>
+    ),
+  },
+  "usage-stack": {
+    componentName: "UsageStack",
+    importPath: "@/components/usage-stack",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultValue", label: "Start at", options: ["50000", "120000", "300000", "600000"], defaultValue: "120000" },
+      { kind: "toggle", prop: "autoplay", label: "Step by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <React.Suspense fallback={null}>
+        <UsageStack key={`${v.defaultValue}-${v.autoplay}`} defaultValue={Number(v.defaultValue)} autoplay={v.autoplay as boolean} />
+      </React.Suspense>
+    ),
+  },
+  "marble-progress": {
+    componentName: "MarbleProgress",
+    importPath: "@/components/marble-progress",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Tick by itself", defaultValue: false }],
+    render: (v) => (
+      <React.Suspense fallback={null}>
+        <MarbleProgress key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </React.Suspense>
+    ),
+  },
+  "cloth-banner": {
+    componentName: "ClothBanner",
+    importPath: "@/components/cloth-banner",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "from", label: "Cloth", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#1d1d1f"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "title", label: "Title", options: ["Launch Week", "Now in beta", "50% off"], defaultValue: "Launch Week" },
+      { kind: "toggle", prop: "autoplay", label: "Gusts", defaultValue: false },
+    ],
+    render: (v) => <ClothBanner key={String(v.autoplay)} from={v.from as string} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
 };
 
