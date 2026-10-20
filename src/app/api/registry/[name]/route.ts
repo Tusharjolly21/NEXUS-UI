@@ -35,7 +35,8 @@ type Params = { params: Promise<{ name: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
   const { name } = await params;
-  const isPublicRegistryAsset = name === "nexus-font";
+  // Free, non-catalog registry items (a font setup, the UI sounds library).
+  const isPublicRegistryAsset = name === "nexus-font" || name === "ui-sounds";
 
   // Rate limit: 60 requests per IP per minute (generous for CLI batch installs)
   const ip = getClientIp(_req);

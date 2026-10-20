@@ -12,6 +12,20 @@
       "files": []
     },
     {
+      "name": "ui-sounds",
+      "type": "registry:lib",
+      "title": "UI Sounds",
+      "description": "24 interface sound effects synthesised with the Web Audio API. One file, no audio assets.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "next-ui/lib/ui-sounds.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "scroll-progress-bar",
       "type": "registry:component",
       "title": "Scroll Progress Bar",

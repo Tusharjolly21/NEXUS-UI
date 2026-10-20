@@ -65,6 +65,8 @@ const nextConfig = {
     "/api/prompt/template/[slug]": ["./content/build-prompts/templates/*.md"],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
     "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
+    // The sounds page shows the library's own source.
+    "/sounds": ["./src/lib/ui-sounds.ts"],
     // Component pages list the guides that link to them.
     "/components/[slug]": ["./content/blog/*.mdx"],
     // Block pages read section source at request time (only for sessions allowed to see it).
