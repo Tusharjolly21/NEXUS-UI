@@ -10,6 +10,7 @@ import {
 } from "@/components/docs/doc-page";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { createMetadata } from "@/lib/seo";
+import { CliSimulator } from "@/components/docs/interactive/cli-simulator";
 
 export const metadata: Metadata = createMetadata({
   title: "Introduction",
@@ -263,6 +264,7 @@ export default function IntroductionPage() {
             </Link>{" "}
             for full registry setup instructions.
           </p>
+          <div data-doc-widget><CliSimulator autoplay={false} /></div>
         </DocSection>
 
         <DocSection title="Get started">

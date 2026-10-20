@@ -12,7 +12,11 @@ import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { Band, PillLink } from "@/components/site";
-import { CatalogShelf } from "@/components/site/catalog-shelf";
+import { LibraryIndex, type LibraryIndexData } from "@/components/site/library-index";
+import { blockVariants } from "@/lib/catalog/block-variants";
+import { getCategoryComponents, getPopulatedCategories } from "@/lib/catalog/category-seo";
+import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
+import { SOUNDS } from "@/lib/ui-sounds";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { homeGalleryItems } from "@/lib/catalog/gallery-items";
 import { templates } from "@/lib/catalog/templates";
@@ -64,6 +68,40 @@ export default function Home() {
   const wall = WALL_SLUGS.map((slug) => templates.find((t) => t.slug === slug)).filter(
     (t): t is (typeof templates)[number] => !!t?.previewImages?.hero,
   );
+
+  // The library index: real counts, the busiest categories, a page's worth of block types, and
+  // templates that aren't already on the wall further down.
+  const libraryIndex: LibraryIndexData = {
+    components: {
+      total: CATALOG_COUNTS.components,
+      free: CATALOG_COUNTS.freeComponents,
+      categories: getPopulatedCategories()
+        .map((c) => ({ slug: c.slug, label: c.label, count: getCategoryComponents(c.slug).length, href: getComponentCategoryHref(c.slug) }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 16),
+    },
+    blocks: {
+      total: CATALOG_COUNTS.blocks,
+      sections: blockVariants.length,
+      items: [
+        { slug: "block-navigation", label: "Navigation" },
+        { slug: "block-hero", label: "Hero" },
+        { slug: "block-features", label: "Features" },
+        { slug: "block-social-proof", label: "Social proof" },
+        { slug: "block-pricing-section", label: "Pricing" },
+        { slug: "block-faq-folder-card", label: "FAQ" },
+        { slug: "block-newsletter", label: "Newsletter" },
+      ],
+    },
+    templates: {
+      total: CATALOG_COUNTS.templates,
+      items: templates
+        .filter((t) => t.previewImages?.hero && !WALL_SLUGS.includes(t.slug))
+        .slice(0, 3)
+        .map((t) => ({ slug: t.slug, title: t.title.split(" — ")[0], image: t.previewImages!.hero })),
+    },
+    sounds: { total: Object.keys(SOUNDS).length },
+  };
 
   const jsonLd = [
     {
@@ -168,13 +206,7 @@ export default function Home() {
 
       <section className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
-          <CatalogShelf
-            components={CATALOG_COUNTS.components}
-            freeComponents={CATALOG_COUNTS.freeComponents}
-            templates={CATALOG_COUNTS.templates}
-            blocks={CATALOG_COUNTS.blocks}
-            command="npx shadcn@latest add @nexus-labs/otp-input"
-          />
+          <LibraryIndex data={libraryIndex} />
           <StackStrip />
         </div>
       </section>

@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { motion, useReducedMotion } from "framer-motion";
+import { OnThisPage } from "@/components/docs/on-this-page";
 import { cn } from "@/lib/utils";
 
 export const DOCS_PAGES = [
@@ -22,6 +24,8 @@ const BROWSE = [
 /** Docs navigation: a sticky list on desktop, a scrolling row of pills on small screens. */
 export function DocsNav() {
   const pathname = usePathname() ?? "";
+  const reduce = useReducedMotion();
+  const spring = reduce ? { duration: 0 } : ({ type: "spring", stiffness: 480, damping: 36 } as const);
 
   return (
     <>
@@ -35,11 +39,14 @@ export function DocsNav() {
                   href={p.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "pg-glass inline-flex rounded-full px-4 py-2 text-[13.5px] font-medium",
-                    active ? "bg-foreground text-background" : "bg-card text-foreground",
+                    "pg-glass relative inline-flex min-h-10 items-center rounded-full bg-card px-4 py-2 text-[13.5px] font-medium",
+                    active ? "text-background" : "text-foreground",
                   )}
                 >
-                  {p.label}
+                  {active ? (
+                    <motion.span layoutId="docs-nav-pill" aria-hidden className="absolute inset-0 rounded-full bg-foreground" transition={spring} />
+                  ) : null}
+                  <span className="relative">{p.label}</span>
                 </Link>
               </li>
             );
@@ -58,16 +65,20 @@ export function DocsNav() {
                   href={p.href}
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "block rounded-[10px] px-3 py-2 text-[14.5px] transition-colors",
-                    active ? "bg-foreground/[0.07] font-medium text-foreground" : "text-body hover:bg-foreground/[0.04] hover:text-foreground",
+                    "relative block rounded-[10px] px-3 py-2 text-[14.5px] transition-colors",
+                    active ? "font-medium text-foreground" : "text-body hover:bg-foreground/[0.04] hover:text-foreground",
                   )}
                 >
-                  {p.label}
+                  {active ? (
+                    <motion.span layoutId="docs-nav-row" aria-hidden className="absolute inset-0 rounded-[10px] bg-foreground/[0.07]" transition={spring} />
+                  ) : null}
+                  <span className="relative">{p.label}</span>
                 </Link>
               </li>
             );
           })}
         </ul>
+        <OnThisPage />
         <p className="mt-8 px-3 text-[13px] font-medium text-muted-foreground">Browse</p>
         <ul className="mt-2 space-y-0.5">
           {BROWSE.map((p) => (
