@@ -20,6 +20,7 @@ import { InstallCard } from "@/components/site/install-card";
 import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
+import { PropControl, cleanDefaultValue, getEditableProps, propValueToCode, type PropDoc } from "@/components/library/prop-controls";
 
 const DEMO_SLUGS = new Set([
   "background-boxes",
@@ -42,71 +43,6 @@ const DEMO_SLUGS = new Set([
   "text-reveal-card",
   "typewriter-effect",
 ]);
-
-const PROP_CONTROL_LIMIT = 8;
-
-type PropDoc = {
-  name: string;
-  type: string;
-  description: string;
-  defaultValue?: string;
-};
-
-function getEditableProps(props: PropDoc[] = []) {
-  return props
-    .filter((prop) => {
-      const type = prop.type.toLowerCase();
-      if (/^on[A-Z]/.test(prop.name)) return false;
-      if (["className", "style", "children"].includes(prop.name) || /ClassName$/.test(prop.name)) return false;
-      if (type.includes("reactnode") || type.includes("=>")) return false;
-      if (type.includes("[]") || type.includes("array") || type.includes("object") || type.includes("partial<")) {
-        return false;
-      }
-      return isBooleanProp(prop) || isNumberProp(prop) || isUnionProp(prop) || isStringProp(prop);
-    })
-    .slice(0, PROP_CONTROL_LIMIT);
-}
-
-function isBooleanProp(prop: PropDoc) {
-  return prop.type === "boolean";
-}
-
-function isNumberProp(prop: PropDoc) {
-  return prop.type === "number";
-}
-
-function isStringProp(prop: PropDoc) {
-  return prop.type === "string" || prop.type === "string | undefined";
-}
-
-function isUnionProp(prop: PropDoc) {
-  return /"[^"]+"/.test(prop.type) && prop.type.includes("|");
-}
-
-function unionOptions(type: string) {
-  return [...type.matchAll(/"([^"]+)"/g)].map((match) => match[1]).slice(0, 6);
-}
-
-function cleanDefaultValue(prop: PropDoc) {
-  if (!prop.defaultValue) {
-    if (isBooleanProp(prop)) return false;
-    if (isNumberProp(prop)) return 0;
-    const option = unionOptions(prop.type)[0];
-    return option ?? "";
-  }
-
-  const value = prop.defaultValue.trim();
-  if (isBooleanProp(prop)) return value === "true";
-  if (isNumberProp(prop)) return Number.parseFloat(value) || 0;
-  const quoted = value.match(/^"([\s\S]*)"$/);
-  return quoted?.[1] ?? value;
-}
-
-function propValueToCode(value: unknown, prop: PropDoc) {
-  if (isBooleanProp(prop)) return value ? `{true}` : `{false}`;
-  if (isNumberProp(prop)) return `{${Number(value)}}`;
-  return JSON.stringify(String(value));
-}
 
 function toPascalCase(value: string) {
   return value
@@ -545,114 +481,6 @@ function PropsPlayground({ props, importName }: { props?: PropDoc[]; importName:
         </div>
       </div>
     </section>
-  );
-}
-
-function PropControl({ prop, value, onChange }: { prop: PropDoc; value: unknown; onChange: (value: unknown) => void }) {
-  const id = React.useId();
-  const head = (
-    <div className="min-w-0">
-      <label htmlFor={id} className="block truncate font-mono text-[13px] font-semibold text-foreground">
-        {prop.name}
-      </label>
-      <p className="mt-0.5 line-clamp-2 text-[12.5px] leading-snug text-muted-foreground">{prop.description}</p>
-    </div>
-  );
-  const box = "rounded-[20px] bg-card p-4 ring-1 ring-border";
-
-  if (isBooleanProp(prop)) {
-    return (
-      <div className={cn(box, "flex items-start justify-between gap-3")}>
-        {head}
-        <button
-          id={id}
-          type="button"
-          role="switch"
-          aria-checked={Boolean(value)}
-          onClick={() => onChange(!value)}
-          className={cn("relative h-6 w-11 shrink-0 rounded-full transition-colors", value ? "bg-foreground" : "bg-muted")}
-        >
-          <span className={cn("absolute top-1/2 size-4 -translate-y-1/2 rounded-full bg-white shadow transition-[left]", value ? "left-6" : "left-1")} />
-        </button>
-      </div>
-    );
-  }
-
-  if (isUnionProp(prop)) {
-    return (
-      <div className={box}>
-        {head}
-        <div id={id} role="radiogroup" aria-label={prop.name} className="mt-3 flex flex-wrap gap-1.5">
-          {unionOptions(prop.type).map((option) => (
-            <button
-              key={option}
-              type="button"
-              role="radio"
-              aria-checked={value === option}
-              onClick={() => onChange(option)}
-              className={cn(
-                "rounded-full px-3 py-1 text-[12.5px] font-medium transition-colors",
-                value === option ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-accent",
-              )}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (isNumberProp(prop)) {
-    return (
-      <div className={box}>
-        <div className="flex items-start justify-between gap-3">
-          {head}
-          <input
-            id={id}
-            type="number"
-            value={Number(value)}
-            onChange={(event) => onChange(Number(event.target.value))}
-            className="h-9 w-20 shrink-0 rounded-lg bg-muted px-2 font-mono text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </div>
-        <input
-          type="range"
-          aria-label={`${prop.name} slider`}
-          min={0}
-          max={Math.max(Number(value) * 2 || 10, 10)}
-          step={Number(value) % 1 === 0 ? 1 : 0.1}
-          value={Number(value)}
-          onChange={(event) => onChange(Number(event.target.value))}
-          className="mt-3 w-full accent-[#1d1d1f] dark:accent-white"
-        />
-      </div>
-    );
-  }
-
-  const isColor = prop.name.toLowerCase().includes("color") || String(value).startsWith("#");
-  return (
-    <div className={box}>
-      {head}
-      <div className="mt-3 flex gap-2">
-        {isColor && /^#[0-9a-fA-F]{6}$/.test(String(value)) ? (
-          <input
-            type="color"
-            aria-label={`${prop.name} colour`}
-            value={String(value)}
-            onChange={(event) => onChange(event.target.value)}
-            className="h-9 w-10 shrink-0 cursor-pointer rounded-lg bg-muted p-1"
-          />
-        ) : null}
-        <input
-          id={id}
-          type="text"
-          value={String(value)}
-          onChange={(event) => onChange(event.target.value)}
-          className="h-9 min-w-0 flex-1 rounded-lg bg-muted px-3 text-[13px] text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        />
-      </div>
-    </div>
   );
 }
 

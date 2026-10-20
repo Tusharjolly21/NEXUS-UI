@@ -57,7 +57,12 @@ type CopyState = "idle" | "loading" | "copied" | "error";
  * dialog. The clipboard write starts inside the click (a ClipboardItem holding the pending
  * fetch), so Safari keeps the user activation it needs.
  */
-export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () => void] {
+export function useCopyBuildPrompt(
+  slug: string,
+  name: string,
+  /** Where the prompt comes from; block sections use /api/prompt/blocks/<id>. */
+  endpoint = `/api/prompt/${encodeURIComponent(slug)}`,
+): [CopyState, () => void] {
   const { isPro, requestUpgrade } = useProAccess();
   const [state, setState] = React.useState<CopyState>("idle");
 
@@ -71,7 +76,7 @@ export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () =
     if (!isPro) return requestUpgrade(name, "build prompt");
     setState("loading");
     let denied = false;
-    const text = fetch(`/api/prompt/${encodeURIComponent(slug)}`, { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
+    const text = fetch(endpoint, { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
       if (r.status === 401 || r.status === 403) {
         denied = true;
         throw new Error("denied");
@@ -93,7 +98,7 @@ export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () =
           requestUpgrade(name, "build prompt");
         } else setState("error");
       });
-  }, [isPro, requestUpgrade, name, slug]);
+  }, [isPro, requestUpgrade, name, endpoint]);
 
   return [state, copy];
 }
