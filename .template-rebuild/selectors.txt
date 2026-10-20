@@ -14,3 +14,6 @@ macbook-pro-showcase #performance #display #grade #buy
 helix-ai-platform #how #cases #guardrails #pricing
 orion-ai-ops #runbooks #governance #audit #pricing
 synapse-ai-platform #build #test #deploy #pricing
+aether-portfolio #work "#process h3" #writing #services
+launchfolio-portfolio #work #fernway #tidepool #process
+ocean-flow #gear #fit #kit #reviews

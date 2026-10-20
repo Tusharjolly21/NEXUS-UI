@@ -1,0 +1,64 @@
+{
+ "slug": "launchfolio-portfolio",
+ "title": "Launchfolio — product designer case study portfolio",
+ "description": "A case-study driven portfolio for a product designer. The hero is a real redesign: drag the divider across a checkout and the completion rate, time to pay and field count beside it move from the old numbers to the new ones. Three case studies follow, each built around the shipped interaction: chaptered checkout research, a live upload component, and a design system bento with component layers, token scrubbers and settings tabs, then a seven-week process timeline, team quotes and a project brief form.",
+ "category": "Portfolio",
+ "tags": [
+  "portfolio",
+  "product designer",
+  "case studies",
+  "ux",
+  "before and after",
+  "design system",
+  "motion kit"
+ ],
+ "techStack": [
+  "Next.js",
+  "TypeScript",
+  "Tailwind CSS",
+  "Framer Motion"
+ ],
+ "pages": [
+  "/"
+ ],
+ "sections": [
+  "Nav",
+  "Before/after hero with live metrics",
+  "Proof stats",
+  "Case study folders",
+  "Case 01 Fernway chapters",
+  "Case 02 Ledgerly uploads",
+  "Case 03 Tidepool design system",
+  "Process timeline",
+  "Team quotes",
+  "Contact brief",
+  "FAQ",
+  "CTA band",
+  "Footer"
+ ],
+ "features": [
+  "Before/after checkout hero whose divider drives three result metrics",
+  "Case-study folders that peek open and link to each case",
+  "Chapter switcher (Problem, Research, Design, Outcome) on a stretch nav",
+  "Shipped components shown live: upload chips, component layers, scrub inputs, settings tabs",
+  "Scroll-linked seven-week process timeline",
+  "Project brief form with a stagger menu and demo send state"
+ ],
+ "pageLabels": [
+  "Case studies",
+  "Fernway case",
+  "Tidepool system",
+  "Process"
+ ],
+ "accent": "#ea580c",
+ "kitComponents": [
+  "BeforeAfter",
+  "FolderPeek",
+  "StretchNav",
+  "UploadChips",
+  "ComponentLayers",
+  "ScrubInput",
+  "AnimatedTabs",
+  "StaggerMenu"
+ ]
+}

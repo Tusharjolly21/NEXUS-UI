@@ -44,10 +44,10 @@
   "Reduced-motion aware, hydration-safe, responsive to 390px"
  ],
  "pageLabels": [
-  "Hero",
   "Triage",
   "Incidents",
-  "Roadmap"
+  "Roadmap",
+  "Pricing"
  ],
  "accent": "#dc2626",
  "kitComponents": [
