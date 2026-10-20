@@ -27,6 +27,12 @@ def find_object(src: str, slug: str):
                 continue
             if c == q:
                 in_str = False
+        elif c == "/" and src[i + 1:i + 2] == "/":
+            i = src.index("\n", i)
+            continue
+        elif c == "/" and src[i + 1:i + 2] == "*":
+            i = src.index("*/", i) + 2
+            continue
         elif c in "\"'`":
             in_str, q = True, c
         elif c == "{":

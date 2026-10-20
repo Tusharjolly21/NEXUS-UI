@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { TemplateDetailContent } from "@/components/templates/template-detail-content";
 import { createMetadata, siteConfig } from "@/lib/seo";
-import { getCachedUser } from "@/lib/supabase/server";
-import { canAccessTemplate } from "@/lib/entitlements";
+import { sessionCanAccessTemplate } from "@/lib/template-access";
 
 export const dynamic = "force-dynamic";
 
@@ -47,8 +46,8 @@ export default async function TemplateDetailPage({ params, searchParams }: Props
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  const user = await getCachedUser();
-  const hasAccess = user ? await canAccessTemplate(user.id, slug) : false;
+  // Fails closed: an auth or database outage renders the page as locked instead of erroring.
+  const hasAccess = await sessionCanAccessTemplate(slug);
   const checkoutPending = checkout === "success" && !hasAccess;
   const others = templates.filter((t) => t.slug !== slug).sort((a, b) => b.trendingScore - a.trendingScore);
   const related = [...others.filter((t) => t.category === tmpl.category), ...others.filter((t) => t.category !== tmpl.category)].slice(0, 2);

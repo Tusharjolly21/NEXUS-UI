@@ -35,12 +35,12 @@ export default function MoneyGoo({ amount = 40, from = { name: "You", initials: 
 
   const dist = useTransform(() => Math.hypot(x.get() - A.x, y.get() - A.y));
   // Neck beads between the avatar and the blob, thinning with distance until they snap.
-  const bead = (t: number) => ({
+  const useBead = (t: number) => ({
     bx: useTransform(() => A.x + (x.get() - A.x) * t),
     by: useTransform(() => A.y + (y.get() - A.y) * t),
     s: useTransform(dist, [0, 60, 150, 175], [1, 0.75, 0.32, 0]),
   });
-  const b1 = bead(0.25), b2 = bead(0.5), b3 = bead(0.75);
+  const b1 = useBead(0.25), b2 = useBead(0.5), b3 = useBead(0.75);
   const blobScale = useTransform(dist, [0, 30, 200], [0.6, 1, 0.92]);
 
   const send = () => {

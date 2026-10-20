@@ -21,16 +21,28 @@ export default function TodoList({ initial = ["Reply to design review", "Ship th
   const [showDone, setShowDone] = useState(false);
   const counter = useAnimationControls();
   const touched = useRef(false);
+  // Pending timers, cleared on unmount so nothing animates a component that's gone.
+  const timers = useRef<number[]>([]);
+  const alive = useRef(true);
+  useEffect(() => {
+    alive.current = true;
+    const pending = timers.current;
+    return () => {
+      alive.current = false;
+      pending.forEach((t) => window.clearTimeout(t));
+    };
+  }, []);
 
   const open = tasks.filter((t) => !t.done || t.leaving);
   const done = tasks.filter((t) => t.done && !t.leaving);
 
   const complete = (id: number) => {
     setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, done: true, leaving: true } : t)));
-    setTimeout(() => {
+    timers.current.push(window.setTimeout(() => {
+      if (!alive.current) return;
       setTasks((ts) => ts.map((t) => (t.id === id ? { ...t, leaving: false } : t)));
       counter.start({ scale: [1, 1.25, 1], transition: { duration: 0.35 } });
-    }, 750);
+    }, 750));
   };
 
   const restore = (id: number) => setTasks((ts) => [...ts.filter((t) => t.id !== id), { ...ts.find((t) => t.id === id)!, done: false, leaving: false }]);
@@ -49,7 +61,7 @@ export default function TodoList({ initial = ["Reply to design review", "Ship th
       setTasks((ts) => {
         const next = ts.find((x) => !x.done);
         if (next) {
-          setTimeout(() => complete(next.id), 0);
+          timers.current.push(window.setTimeout(() => alive.current && complete(next.id), 0));
           return ts;
         }
         return ts.map((x) => ({ ...x, done: false, leaving: false }));

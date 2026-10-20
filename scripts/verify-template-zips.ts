@@ -198,7 +198,8 @@ const SITE_TOKENS =
 function run(command: string, commandArgs: string[], cwd: string, logFile: string): Promise<{ code: number; tail: string }> {
   return new Promise((resolve) => {
     const env: NodeJS.ProcessEnv = { ...process.env, NEXT_TELEMETRY_DISABLED: "1" };
-    delete env.NODE_ENV;
+    // Drop NODE_ENV so each zip's `next build` picks its own (it's typed read-only, hence Reflect).
+    Reflect.deleteProperty(env, "NODE_ENV");
     const child = spawn(command, commandArgs, {
       cwd,
       env,

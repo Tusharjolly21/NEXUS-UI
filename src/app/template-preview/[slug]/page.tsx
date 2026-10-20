@@ -3,8 +3,7 @@ import type { Metadata } from "next";
 import { getTemplate, templates } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { FullPreviewShell } from "@/components/templates/full-preview-shell";
-import { getCachedUser } from "@/lib/supabase/server";
-import { canAccessTemplate } from "@/lib/entitlements";
+import { sessionCanAccessTemplate } from "@/lib/template-access";
 
 export const dynamic = "force-dynamic";
 
@@ -30,8 +29,8 @@ export default async function TemplatePreviewPage({ params }: Props) {
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
 
-  const user = await getCachedUser();
-  const isPremium = user ? await canAccessTemplate(user.id, slug) : false;
+  // Fails closed: an auth or database outage shows the locked preview instead of erroring.
+  const isPremium = await sessionCanAccessTemplate(slug);
 
   return <FullPreviewShell tmpl={tmpl} isPremium={isPremium} />;
 }

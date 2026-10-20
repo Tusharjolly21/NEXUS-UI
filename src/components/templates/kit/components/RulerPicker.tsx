@@ -28,13 +28,22 @@ export default function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit
   useMotionValueEvent(x, "change", (v) => {
     const next = Math.max(min, Math.min(max, Math.round(-v / STEP) + min));
     setValue((prev) => {
-      if (prev !== next) {
-        setDir(next > prev ? 1 : -1);
-        onChange?.(next);
-      }
+      if (prev !== next) setDir(next > prev ? 1 : -1);
       return next;
     });
   });
+
+  // Report changes after render, never from inside a state updater (React warns when a parent stores it).
+  const reported = useRef(defaultValue);
+  const onChangeRef = useRef(onChange);
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+  useEffect(() => {
+    if (reported.current === value) return;
+    reported.current = value;
+    onChangeRef.current?.(value);
+  }, [value]);
 
   const goTo = (v: number) => animate(x, -(v - min) * STEP, { type: "spring", stiffness: 140, damping: 22 });
 
