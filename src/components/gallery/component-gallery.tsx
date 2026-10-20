@@ -181,8 +181,8 @@ export function ComponentGallery({
             ))}
           </ChipRail>
           <div className="flex shrink-0 items-center gap-4">
-            {filtering ? (
-              <p className="text-[13px] tabular-nums text-muted-foreground" aria-live="polite">
+            {interaction !== "all" || category !== "all" || needle ? (
+              <p className="shrink-0 text-[13px] tabular-nums text-muted-foreground" aria-live="polite">
                 {matches.length} of {items.length}
               </p>
             ) : null}
