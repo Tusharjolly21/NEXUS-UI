@@ -47,6 +47,8 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   outputFileTracingIncludes: {
+    // Pro template screenshots are served only through the gated route, never from public/.
+    "/api/template-shot/[slug]/[n]": ["./private/template-shots/**/*"],
     // The template zip (src/lib/template-zip.ts) reads the page, its imports, the public files it
     // references, the versions to pin, and the template's build prompt (PROMPT.md).
     "/api/download/template": [

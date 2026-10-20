@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Band, PillLink, RainbowWord } from "@/components/site";
 import { templateName } from "@/components/templates/template-card";
 import { getCachedUser } from "@/lib/supabase/server";
-import { hasPremiumAccess, getOwnedTemplateSlugs } from "@/lib/entitlements";
+import { hasPremiumAccess } from "@/lib/entitlements";
 import { isSupabaseConfigured } from "@/lib/env";
 import { createMetadata } from "@/lib/seo";
 import { PRICES, formatPrice } from "@/lib/pricing";
@@ -20,18 +20,12 @@ export const metadata: Metadata = createMetadata({
 
 export default async function TemplatesPage() {
   let isPremium = false;
-  let ownedSlugs: string[] = [];
 
   if (isSupabaseConfigured()) {
     try {
       const user = await getCachedUser();
       if (user) {
         isPremium = await hasPremiumAccess(user.id);
-        if (!isPremium) {
-          const owned = await getOwnedTemplateSlugs(user.id);
-          // null means lifetime/subscription — isPremium handles that
-          ownedSlugs = owned ? Array.from(owned) : [];
-        }
       }
     } catch {
       // non-fatal: the page still works logged out
@@ -55,7 +49,7 @@ export default async function TemplatesPage() {
 
       <section aria-label="Templates" className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
-          <TemplatesGallery isPremium={isPremium} ownedSlugs={ownedSlugs} />
+          <TemplatesGallery isPremium={isPremium} />
         </div>
       </section>
 

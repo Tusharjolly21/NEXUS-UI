@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { PreviewShield } from "@/components/pro/preview-shield";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
@@ -1107,7 +1108,9 @@ function PreviewCodeSection({
       sectionId={variant?.id}
       installCommand={locked ? undefined : `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}`}
     >
-      {children}
+      <PreviewShield active={locked} className="w-full">
+        {children}
+      </PreviewShield>
     </BlockSection>
   );
 }

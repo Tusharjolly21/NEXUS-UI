@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Check, Play } from "lucide-react";
+import { ArrowUpRight, Check, Lock, Play } from "lucide-react";
 import type { MarketplaceTemplate, TemplateCategory } from "@/lib/catalog/templates";
+import { templatePageShots } from "@/lib/template-shots";
 import { cn } from "@/lib/utils";
 import { templateName, templateTagline } from "./template-card";
 
@@ -31,17 +32,23 @@ const CATEGORY_TINT: Partial<Record<TemplateCategory, string>> = {
  */
 export function TemplateTile({
   tmpl,
-  owned = false,
+  isPro = false,
   priority = false,
 }: {
   tmpl: MarketplaceTemplate;
-  owned?: boolean;
+  /** The visitor has Pro or All-Access. */
+  isPro?: boolean;
   priority?: boolean;
 }) {
   const name = templateName(tmpl);
   const tagline = templateTagline(tmpl);
   const href = `/templates/${tmpl.slug}`;
-  const pages = tmpl.previewImages ? [tmpl.previewImages.hero, ...tmpl.previewImages.sections] : [];
+  const unlocked = isPro || !tmpl.premium;
+  const allPages = templatePageShots(tmpl, unlocked);
+  const firstLocked = allPages.findIndex((p) => p.locked);
+  // Without Pro the tour stops on the first blurred page, where the lock fades in.
+  const pages = firstLocked === -1 ? allPages : allPages.slice(0, firstLocked + 1);
+  const tourMs = Math.max(1, pages.length - 1) * 1700;
   const tint = CATEGORY_TINT[tmpl.category] ?? "bg-tint-sky";
 
   return (
@@ -67,14 +74,15 @@ export function TemplateTile({
             style={
               {
                 "--pages": Math.max(1, pages.length),
-                transitionDuration: `${Math.max(1, pages.length - 1) * 1700}ms`,
+                transitionDuration: `${tourMs}ms`,
               } as React.CSSProperties
             }
           >
-            {pages.map((src, i) => (
+            {pages.map(({ src, unoptimized }, i) => (
               <div key={src} className="relative aspect-[16/10] w-full shrink-0">
                 <Image
                   src={src}
+                  unoptimized={unoptimized}
                   alt=""
                   fill
                   priority={priority && i === 0}
@@ -85,6 +93,17 @@ export function TemplateTile({
               </div>
             ))}
           </div>
+          {firstLocked !== -1 ? (
+            <div
+              className="pointer-events-none absolute inset-0 grid place-items-center opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:[transition-delay:var(--lock-at)] motion-reduce:transition-none"
+              style={{ "--lock-at": `${Math.round(tourMs * 0.7)}ms` } as React.CSSProperties}
+            >
+              <span className="inline-flex translate-y-2 scale-95 items-center gap-1.5 rounded-full bg-white/90 px-3.5 py-2 text-[13px] font-semibold text-[#1d1d1f] shadow-[0_8px_24px_-8px_rgba(0,0,0,0.45)] backdrop-blur-md transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:translate-y-0 group-hover:scale-100 group-hover:[transition-delay:var(--lock-at)]">
+                <Lock className="size-3.5" aria-hidden />
+                The rest comes with Pro
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -107,10 +126,14 @@ export function TemplateTile({
         </div>
 
         <div className="relative z-20 flex shrink-0 items-center gap-1.5">
-          {owned ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] dark:bg-black/30 dark:text-[#7ee2a8]">
+          {!tmpl.premium ? (
+            <span className="rounded-full bg-white/80 px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] transition-opacity md:group-hover:opacity-0 md:group-focus-within:opacity-0 dark:bg-black/30 dark:text-[#7ee2a8] [@media(hover:none)]:hidden">
+              Free
+            </span>
+          ) : unlocked ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[12px] font-semibold text-[#126b3a] transition-opacity md:group-hover:opacity-0 md:group-focus-within:opacity-0 dark:bg-black/30 dark:text-[#7ee2a8] [@media(hover:none)]:hidden">
               <Check className="size-3" aria-hidden />
-              Yours
+              Unlocked
             </span>
           ) : (
             <span className="rounded-full bg-foreground px-2.5 py-1 text-[12px] font-semibold text-background transition-opacity md:group-hover:opacity-0 md:group-focus-within:opacity-0 [@media(hover:none)]:hidden">
@@ -138,7 +161,7 @@ export function TemplateTile({
               href={href}
               className="inline-flex h-9 items-center gap-1 whitespace-nowrap rounded-full bg-[#1d1d1f] px-3.5 text-[13px] font-semibold text-white transition-colors hover:bg-black"
             >
-              {owned ? "Open" : "Get it"}
+              {unlocked ? "Open" : "Details"}
               <ArrowUpRight className="size-3.5" aria-hidden />
               <span className="sr-only">{name}</span>
             </Link>

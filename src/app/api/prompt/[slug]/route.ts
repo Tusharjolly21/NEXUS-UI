@@ -1,4 +1,6 @@
 import { readFile } from "node:fs/promises";
+import { withLicense } from "@/lib/license-stamp";
+import { getSessionUser } from "@/lib/component-access";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
@@ -41,7 +43,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
 
   try {
     const file = path.join(process.cwd(), "content", "build-prompts", `${component.slug}.md`);
-    const prompt = await readFile(file, "utf8");
+    const prompt = withLicense(await readFile(file, "utf8"), (await getSessionUser())?.id, component.slug);
     return NextResponse.json({ name: component.name, prompt }, { headers: PRIVATE });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });

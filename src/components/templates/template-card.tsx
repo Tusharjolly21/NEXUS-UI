@@ -22,6 +22,7 @@ export function BrowserFrame({
   aspect = "aspect-[16/10]",
   sizes,
   priority,
+  unoptimized,
   className,
 }: {
   src: string;
@@ -29,6 +30,8 @@ export function BrowserFrame({
   aspect?: string;
   sizes: string;
   priority?: boolean;
+  /** For gated screenshots, which the image optimizer can't fetch. */
+  unoptimized?: boolean;
   className?: string;
 }) {
   return (
@@ -39,7 +42,7 @@ export function BrowserFrame({
         <span className="size-2.5 rounded-full bg-[#00ca4e]" />
       </div>
       <div className={cn("relative overflow-hidden bg-muted", aspect)}>
-        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} className="object-cover object-top" />
+        <Image src={src} alt={alt} fill sizes={sizes} priority={priority} unoptimized={unoptimized} className="object-cover object-top" />
       </div>
     </div>
   );

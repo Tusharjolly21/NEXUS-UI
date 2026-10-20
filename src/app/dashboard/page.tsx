@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
-import { getOwnedTemplateSlugs, hasPremiumAccess } from "@/lib/entitlements";
+import { hasPremiumAccess } from "@/lib/entitlements";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { PillLink } from "@/components/site/pill-link";
@@ -29,8 +29,8 @@ export default async function DashboardPage() {
   }
 
   const isPremium = await hasPremiumAccess(user.id);
-  const owned = isPremium ? null : await getOwnedTemplateSlugs(user.id);
-  const templatesYours = isPremium ? CATALOG_COUNTS.templates : (owned?.size ?? 0);
+  const componentsYours = isPremium ? CATALOG_COUNTS.components : CATALOG_COUNTS.freeComponents;
+  const templatesYours = isPremium ? CATALOG_COUNTS.templates : CATALOG_COUNTS.freeTemplates;
   const blocksYours = isPremium ? CATALOG_COUNTS.blocks : blocksManifest.filter((b) => !b.premium).length;
 
   const displayName =
@@ -38,9 +38,9 @@ export default async function DashboardPage() {
   const firstName = String(displayName).split(" ")[0];
 
   const stats = [
-    { value: CATALOG_COUNTS.components, of: CATALOG_COUNTS.components, label: "Components you can use", tint: "bg-tint-violet" },
+    { value: componentsYours, of: CATALOG_COUNTS.components, label: "Components you can use", tint: "bg-tint-violet" },
     { value: blocksYours, of: CATALOG_COUNTS.blocks, label: "Blocks you can use", tint: "bg-tint-sky" },
-    { value: templatesYours, of: CATALOG_COUNTS.templates, label: "Templates you own", tint: "bg-tint-butter" },
+    { value: templatesYours, of: CATALOG_COUNTS.templates, label: "Templates you can use", tint: "bg-tint-butter" },
   ];
 
   return (

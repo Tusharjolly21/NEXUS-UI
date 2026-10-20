@@ -13,6 +13,8 @@ import { RainbowWord } from "@/components/site/rainbow-word";
 import { BrowserFrame, TemplateCard, templateName, templateTagline } from "@/components/templates/template-card";
 import { ProBadge, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
+import { templateSectionShots } from "@/lib/template-shots";
+import { ProLockVeil } from "@/components/templates/pro-lock-veil";
 
 const PRO_PRICE = formatPrice(PRICES.pro);
 const ALL_ACCESS_PRICE = formatPrice(PRICES.allAccess);
@@ -213,17 +215,15 @@ function AccessPanel({
         </>
       ) : (
         <>
-          <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Included in Pro</p>
-          <p className="mt-2 flex items-baseline gap-2">
-            <span className="text-[40px] font-bold leading-none tracking-[-0.04em] text-foreground">{PRO_PRICE}</span>
-            <span className="text-[15px] text-muted-foreground">a year</span>
-          </p>
-          <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-            This template and every other one, every block, and everything we release next.
+          <ProBadge className="px-3 text-[12.5px]" />
+          <h2 className="mt-3 text-[22px] font-bold tracking-[-0.03em] text-foreground">Unlock it with Pro</h2>
+          <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
+            Templates aren&apos;t sold one by one. Pro opens this one, every other template, every component and block,
+            and everything we release next.
           </p>
           <div className="mt-6 flex flex-col gap-2">
             <CheckoutButton plan="annual" returnPath={`/templates/${tmpl.slug}`}>
-              Get Pro
+              Get Pro, {PRO_PRICE} a year
             </CheckoutButton>
             <CheckoutButton plan="lifetime" variant="white" returnPath={`/templates/${tmpl.slug}`}>
               Lifetime, {ALL_ACCESS_PRICE} once
@@ -259,7 +259,7 @@ function AccessPanel({
 
 // ─── Screenshots ─────────────────────────────────────────────────────────────
 
-function ScreenshotViewer({ shot, onClose }: { shot: { src: string; label: string } | null; onClose: () => void }) {
+function ScreenshotViewer({ shot, onClose }: { shot: { src: string; label: string; unoptimized?: boolean } | null; onClose: () => void }) {
   return (
     <DialogPrimitive.Root open={!!shot} onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
@@ -278,7 +278,7 @@ function ScreenshotViewer({ shot, onClose }: { shot: { src: string; label: strin
                   <X className="size-4" aria-hidden />
                 </DialogPrimitive.Close>
               </div>
-              <BrowserFrame src={shot.src} alt={shot.label} sizes="(max-width: 1320px) 100vw, 1280px" className="rounded-tile" />
+              <BrowserFrame src={shot.src} alt={shot.label} sizes="(max-width: 1320px) 100vw, 1280px" unoptimized={shot.unoptimized} className="rounded-tile" />
             </>
           ) : null}
         </DialogPrimitive.Popup>
@@ -301,7 +301,7 @@ export function TemplateDetailContent({
   isPremium?: boolean;
   checkoutPending?: boolean;
 }) {
-  const [shot, setShot] = React.useState<{ src: string; label: string } | null>(null);
+  const [shot, setShot] = React.useState<{ src: string; label: string; unoptimized?: boolean } | null>(null);
 
   const hasAccess = isPremium || !tmpl.premium;
   const previewHref = `/template-preview/${tmpl.slug}`;
@@ -309,10 +309,11 @@ export function TemplateDetailContent({
   const tagline = templateTagline(tmpl);
   const [firstWord, ...restWords] = name.split(" ");
   const pageLabels = tmpl.pageLabels?.length ? tmpl.pageLabels : tmpl.sections;
-  const shots = (tmpl.previewImages?.sections ?? []).slice(0, 4).map((src, i) => ({
-    src,
-    label: pageLabels[i] ?? `Screen ${i + 1}`,
-  }));
+  const shots = templateSectionShots(tmpl, hasAccess)
+    .slice(0, 4)
+    .map((s, i) => ({ ...s, label: pageLabels[i] ?? `Screen ${i + 1}` }));
+  const lockedCount = shots.filter((s) => s.locked).length;
+  const { requestUpgrade } = useProAccess();
 
   return (
     <>
@@ -389,21 +390,30 @@ export function TemplateDetailContent({
               Inside the page
             </h2>
             <p className="mt-3 max-w-[560px] text-[17px] text-muted-foreground">
-              Screens from the live template. Open one to see it full size.
+              {lockedCount
+                ? `Screens from the live template. The first one is open to everyone; Pro unlocks the other ${lockedCount}.`
+                : "Screens from the live template. Open one to see it full size."}
             </p>
             <ul className="mt-8 grid gap-5 sm:grid-cols-2">
               {shots.map((s) => (
                 <li key={s.src}>
                   <button
                     type="button"
-                    onClick={() => setShot(s)}
+                    onClick={() => (s.locked ? requestUpgrade(name) : setShot(s))}
                     className="pg-float group relative block w-full overflow-hidden rounded-tile bg-card text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
                   >
-                    <BrowserFrame src={s.src} alt="" sizes="(max-width: 639px) 100vw, 566px" />
+                    <div className="relative">
+                      <BrowserFrame src={s.src} alt="" sizes="(max-width: 639px) 100vw, 566px" unoptimized={s.unoptimized} />
+                      {s.locked ? <ProLockVeil label="Unlock with Pro" size="sm" className="top-[35px]" /> : null}
+                    </div>
                     <span className="flex items-center justify-between px-5 py-4 text-[15px] font-semibold text-foreground">
                       {s.label}
-                      <Maximize2 className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" aria-hidden />
-                      <span className="sr-only">, view full size</span>
+                      {s.locked ? (
+                        <Lock className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" aria-hidden />
+                      ) : (
+                        <Maximize2 className="size-4 text-muted-foreground transition-colors group-hover:text-foreground" aria-hidden />
+                      )}
+                      <span className="sr-only">{s.locked ? ", comes with Pro" : ", view full size"}</span>
                     </span>
                   </button>
                 </li>

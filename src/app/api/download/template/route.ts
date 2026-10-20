@@ -18,6 +18,7 @@ import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { getSessionUser, userCanAccessTemplate } from "@/lib/template-access";
 import { getTemplateSource } from "@/lib/template-sources";
 import { TemplateZipError, createTemplateZip } from "@/lib/template-zip";
+import { licenseComment } from "@/lib/license-stamp";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
 
   let zip: Awaited<ReturnType<typeof createTemplateZip>>["zip"];
   try {
-    ({ zip } = await createTemplateZip(tmpl.slug));
+    ({ zip } = await createTemplateZip(tmpl.slug, process.cwd(), tmpl.premium ? licenseComment(user.id, tmpl.slug) : undefined));
   } catch (error) {
     // Server log only: project-relative paths, no user data.
     console.error(`[download/template] ${tmpl.slug}:`, error instanceof TemplateZipError ? error.message : "unexpected error");
