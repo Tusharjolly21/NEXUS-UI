@@ -667,6 +667,28 @@ function Faq({ name, items }: { name: string; items: { q: string; a: string }[] 
   );
 }
 
+function Guides({ items }: { items: { slug: string; title: string }[] }) {
+  if (!items.length) return null;
+  return (
+    <section aria-labelledby="guides-heading" className="mt-20 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <SectionTitle id="guides-heading">Guides</SectionTitle>
+      <ul className="border-t border-border">
+        {items.map((g) => (
+          <li key={g.slug} className="border-b border-border">
+            <Link
+              href={`/blog/${g.slug}`}
+              className="group flex min-h-12 items-center justify-between gap-6 py-4 text-[17px] font-semibold tracking-[-0.3px] text-foreground hover:text-link focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              {g.title}
+              <ArrowUpRight className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none" aria-hidden />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 // ── page ────────────────────────────────────────────────────────────
 
 type SerializedSection = {
@@ -702,6 +724,8 @@ type ComponentDetailProps = {
   hasPrompt?: boolean;
   /** Questions and answers about this component (also sent as FAQPage structured data). */
   faq?: { q: string; a: string }[];
+  /** Blog guides that use this component. */
+  guides?: { slug: string; title: string }[];
 };
 
 export function ComponentDetailPageClient({
@@ -724,6 +748,7 @@ export function ComponentDetailPageClient({
   locked = false,
   hasPrompt = false,
   faq = [],
+  guides = [],
 }: ComponentDetailProps) {
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
@@ -831,6 +856,7 @@ export function ComponentDetailPageClient({
           </ProLock>
           <About slug={slug} name={name} />
           <Faq name={name} items={faq} />
+          <Guides items={guides} />
 
           {related.length ? (
             <section aria-labelledby="related-heading" className="mt-20">

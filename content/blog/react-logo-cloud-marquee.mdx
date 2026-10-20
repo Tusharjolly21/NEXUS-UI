@@ -1,6 +1,6 @@
 ---
 title: "React Marquee Logo Cloud: Infinite Scroll with Tailwind"
-description: "Build an infinite logo marquee in React: a CSS-only loop with Tailwind, a Framer Motion version, pause on hover, edge fade masks, and accessible duplicated logos."
+description: "Build an infinite logo marquee in React: a CSS-only Tailwind loop, a Framer Motion version, pause on hover, edge fade masks, and accessible duplicate logos."
 date: "2026-10-20"
 ---
 
@@ -199,7 +199,7 @@ export function MotionMarquee({ children, speed = 40 }: { children: React.ReactN
 }
 ```
 
-Here `speed` is in pixels per second, so the marquee moves at the same pace whatever the number of logos. Multiplying by `delta` keeps it frame-rate independent on 60Hz and 120Hz screens. The [infinite moving cards](/components/infinite-moving-cards) component uses this same `useAnimationFrame` approach with direction and speed presets, and works for logos as well as testimonial cards.
+Here `speed` is in pixels per second, so the marquee moves at the same pace whatever the number of logos. Multiplying by `delta` keeps it frame-rate independent on 60Hz and 120Hz screens. The [infinite moving cards](/components/infinite-moving-cards) component uses this same `useAnimationFrame` approach with direction and speed presets, and works for logos as well as testimonial cards. A third option is a small library: the Infinite Marquee variant in the [logo clouds block](/blocks/block-logo-clouds) uses `react-fast-marquee` for the loop and a `mask-image` for the edges.
 
 ## Accessibility of duplicated logos
 

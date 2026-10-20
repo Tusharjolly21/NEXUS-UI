@@ -10,6 +10,7 @@ import {
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
+import { getGuidesForComponent } from "@/lib/blog";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { allGalleryItems, hasBuildPrompt } from "@/lib/catalog/gallery-items";
@@ -216,6 +217,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         tint={self?.tint}
         related={related}
         faq={faq}
+        guides={getGuidesForComponent(item.slug)}
       />
     </>
   );

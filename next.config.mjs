@@ -58,6 +58,8 @@ const nextConfig = {
     ],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
     "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
+    // Component pages list the guides that link to them.
+    "/components/[slug]": ["./content/blog/*.mdx"],
     // Block pages read section source at request time (only for sessions allowed to see it).
     "/blocks/[slug]": [
       "./src/components/blocks/**/*.{ts,tsx}",
