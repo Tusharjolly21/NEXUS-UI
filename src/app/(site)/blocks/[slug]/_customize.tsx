@@ -88,6 +88,11 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
   const [run, setRun] = React.useState(0);
 
   const changed = editable.filter((p) => !Object.is(values[p.name], defaults[p.name]));
+  // Props that only set where a section starts (defaultX, initialX, autoplay) need a fresh mount to show.
+  const startKey = editable
+    .filter((p) => /^(default|initial)[A-Z]/.test(p.name) || p.name === "autoplay")
+    .map((p) => String(values[p.name]))
+    .join("|");
   const snippet = React.useMemo(() => {
     const attrs = [...snippetProps, ...changed.map((p) => `${p.name}=${propValueToCode(values[p.name], p)}`)];
     const tag = attrs.length ? `<${jsxName}\n${attrs.map((a) => `  ${a}`).join("\n")}\n/>` : `<${jsxName} />`;
@@ -102,7 +107,7 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
         )}
       >
         <div className={cn("relative overflow-hidden rounded-[22px] bg-background [contain:paint] [&>*]:min-h-[420px] [&>*]:w-full", frameClassName)}>
-          <PreviewBoundary key={run} onReset={() => { setValues(defaults); setRun((r) => r + 1); }}>
+          <PreviewBoundary key={`${run}:${startKey}`} onReset={() => { setValues(defaults); setRun((r) => r + 1); }}>
             <Component {...baseProps} {...values} />
           </PreviewBoundary>
         </div>
