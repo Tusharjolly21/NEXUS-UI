@@ -9,7 +9,7 @@ function hexToRgb(hex: string) {
 }
 
 /** The colour at position t (0–1) along the spectrum. */
-function sample(t: number) {
+export function rainbowColor(t: number) {
   const span = RAINBOW_HUES.length - 1;
   const x = Math.min(span, Math.max(0, t * span));
   const i = Math.min(span - 1, Math.floor(x));
@@ -48,7 +48,7 @@ export function RainbowWord({
             <span
               key={i}
               className="pg-rainbow-letter"
-              style={{ color: sample(i / last), animationDelay: `${delay + i * 0.06}s` }}
+              style={{ color: rainbowColor(i / last), animationDelay: `${delay + i * 0.06}s` }}
             >
               {char}
             </span>

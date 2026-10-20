@@ -2,13 +2,21 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Play, Plus } from "lucide-react";
+import { CodeDemo } from "@/components/home/code-demo";
+import { HeroInstall } from "@/components/home/hero-install";
+import { HeroSpotlight } from "@/components/home/hero-spotlight";
 import { HeroStickers } from "@/components/home/hero-stickers";
+import { HeroWord } from "@/components/home/hero-word";
+import { PricingTeaser } from "@/components/home/pricing-teaser";
+import { ShippingLog } from "@/components/home/shipping-log";
+import { StackStrip } from "@/components/home/stack-strip";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
-import { Band, InstallCard, PillLink, RainbowWord } from "@/components/site";
+import { Band, PillLink } from "@/components/site";
 import { CatalogShelf } from "@/components/site/catalog-shelf";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { homeGalleryItems } from "@/lib/catalog/gallery-items";
 import { templates } from "@/lib/catalog/templates";
+import { PRICES, formatPrice } from "@/lib/pricing";
 import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -22,6 +30,14 @@ const FAQ = [
   {
     q: "Are the components free?",
     a: `${CATALOG_COUNTS.freeComponents} of the ${CATALOG_COUNTS.components} are free, with their full source. Pro unlocks the other ${CATALOG_COUNTS.proComponents}, the full source of every template and the premium blocks.`,
+  },
+  {
+    q: "What does Pro cost?",
+    a: `${formatPrice(PRICES.pro)} a year, or ${formatPrice(PRICES.allAccess)} once for lifetime access. Both unlock the same things: every Pro component, the source of every template, the premium blocks and everything we release next.`,
+  },
+  {
+    q: "Can I ask for a component?",
+    a: "Yes. Pro and All-Access members can request components, blocks and templates from the contact page. The most-asked-for ones get built next.",
   },
   {
     q: "Do they work with the Next.js App Router?",
@@ -95,18 +111,22 @@ export default function Home() {
       {/* Hero: tucked under the floating nav so the dot grid runs behind it */}
       <section className="pg-dotgrid relative -mt-[64px] overflow-hidden px-4 pb-20 pt-[148px]">
         <div aria-hidden className="pg-bloom pointer-events-none absolute inset-0" />
+        <HeroSpotlight />
         <HeroStickers />
         <p className="absolute right-6 top-[84px] z-20 hidden text-[13px] font-medium text-muted-foreground lg:block">
           Psst. Try throwing a sticker.
         </p>
         <div className="relative z-20 mx-auto max-w-[980px] text-center">
           <p className="pg-glass inline-flex items-center gap-2 rounded-full bg-card px-3.5 py-1.5 text-[13px] font-medium text-foreground">
-            <span className="size-2 rounded-full bg-rainbow-green" aria-hidden />
+            <span className="relative flex size-2" aria-hidden>
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-rainbow-green opacity-60 motion-reduce:animate-none" />
+              <span className="relative inline-flex size-2 rounded-full bg-rainbow-green" />
+            </span>
             {CATALOG_COUNTS.components} animated components, free to start
           </p>
           <h1 className="pg-display mt-7 text-[clamp(52px,11vw,124px)] text-foreground">
             <span className="block">Make your</span>
-            <RainbowWord className="block">landing page</RainbowWord>
+            <HeroWord className="block" />
             <span className="block">move.</span>
           </h1>
           <p className="mx-auto mt-8 max-w-[560px] text-[18px] leading-[1.55] text-muted-foreground">
@@ -122,7 +142,7 @@ export default function Home() {
               See it move
             </PillLink>
           </div>
-          <InstallCard command="npx shadcn@latest add @nexus-labs/gooey-input" className="mx-auto mt-6 max-w-[520px]" />
+          <HeroInstall className="mx-auto mt-6 max-w-[520px]" />
         </div>
       </section>
 
@@ -153,6 +173,7 @@ export default function Home() {
             blocks={CATALOG_COUNTS.blocks}
             command="npx shadcn@latest add @nexus-labs/otp-input"
           />
+          <StackStrip />
         </div>
       </section>
 
@@ -201,11 +222,20 @@ export default function Home() {
         </ul>
       </Band>
 
-      {/* Steps: a real sequence, so they're numbered */}
+      {/* Your code: a live component beside its source, then the three steps */}
       <section className="px-4 py-24 sm:py-28">
         <div className="mx-auto max-w-[1152px]">
-          <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">From the gallery to your repo</h2>
-          <ol className="mt-12 grid gap-8 md:grid-cols-3">
+          <div className="max-w-[640px]">
+            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">From the gallery to your repo</h2>
+            <p className="mt-4 text-[18px] text-muted-foreground">
+              No package to keep up to date. One command copies the source into your project, and from then on
+              it&apos;s your code.
+            </p>
+          </div>
+          <div className="mt-12">
+            <CodeDemo />
+          </div>
+          <ol className="mt-14 grid gap-8 md:grid-cols-3">
             {STEPS.map((s, i) => (
               <li key={s.title} className="border-t-2 border-foreground pt-5">
                 <p className="pg-display text-[40px] text-foreground">{i + 1}</p>
@@ -214,6 +244,18 @@ export default function Home() {
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      {/* Release history and requests */}
+      <Band tint="mint" id="new">
+        <ShippingLog />
+      </Band>
+
+      {/* Plans */}
+      <section className="px-4 py-24 sm:py-28">
+        <div className="mx-auto max-w-[1152px]">
+          <PricingTeaser />
         </div>
       </section>
 
@@ -250,9 +292,19 @@ export default function Home() {
           <h2 className="pg-display mx-auto max-w-[720px] text-[clamp(40px,7vw,64px)] leading-[1.02] text-[#f5f5f7]">
             Start with the component you need today.
           </h2>
-          <div className="mt-9">
+          <p className="mx-auto mt-5 max-w-[460px] text-[17px] text-white/60">
+            {CATALOG_COUNTS.freeComponents} are free. Pro unlocks the rest, from {formatPrice(PRICES.pro)} a year.
+          </p>
+          <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PillLink href="/components" variant="cta" className="h-14 px-8 text-[16px]">
               Browse components
+            </PillLink>
+            <PillLink
+              href="/pricing"
+              variant="white"
+              className="h-14 bg-white/10 px-8 text-[16px] text-white shadow-none hover:bg-white/15"
+            >
+              See plans
             </PillLink>
           </div>
         </div>
