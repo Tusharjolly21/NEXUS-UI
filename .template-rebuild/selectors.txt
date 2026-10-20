@@ -11,3 +11,6 @@ side-b #moods #mixtapes #studio #plans
 startup-landing-page #xray #how #planner #pricing
 nova-landing-page #display #keyboard #design #buy
 macbook-pro-showcase #performance #display #grade #buy
+helix-ai-platform #how #cases #guardrails #pricing
+orion-ai-ops #runbooks #governance #audit #pricing
+synapse-ai-platform #build #test #deploy #pricing

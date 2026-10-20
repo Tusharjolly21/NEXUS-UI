@@ -520,7 +520,7 @@ function DiffPanel() {
                 <code className="whitespace-pre text-[#e6edf3]">{d.t}</code>
               </div>
               {d.note && (
-                <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ type: "spring", stiffness: 260, damping: 24 }} className="my-1.5 ml-[68px] mr-5 flex max-w-[520px] items-start gap-2.5 rounded-xl bg-[#22262e] px-3 py-2.5" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+                <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ type: "spring", stiffness: 260, damping: 24 }} className="sticky left-[68px] my-1.5 ml-[68px] mr-5 flex w-[min(520px,calc(100vw-120px))] items-start gap-2.5 rounded-xl bg-[#22262e] px-3 py-2.5" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
                   <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full text-white" style={{ background: A }}><Icon d={AGENTS[d.note.agent].d} size={13} /></span>
                   <span className="flex flex-col whitespace-normal">
                     <span className="text-[12px] font-semibold text-[#f5f5f7]">Orbit · {AGENTS[d.note.agent].name}</span>
