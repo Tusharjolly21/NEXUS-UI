@@ -10,6 +10,8 @@ import {
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
+import { SetupChecklist } from "@/components/docs/setup-checklist";
+import { docSectionId } from "@/lib/doc-anchor";
 
 export const metadata: Metadata = createMetadata({
   title: "Quick Start",
@@ -17,6 +19,15 @@ export const metadata: Metadata = createMetadata({
     "Get your own app running with Nexus UI components in minutes — Next.js, Tailwind CSS v4, shadcn/ui, and your first component.",
   alternates: { canonical: "/docs/installation" },
 });
+
+const STEPS = [
+  { id: docSectionId("1. Create a Next.js project"), title: "Create a Next.js project" },
+  { id: docSectionId("2. Confirm Tailwind CSS v4"), title: "Confirm Tailwind CSS v4" },
+  { id: docSectionId("3. Add the cn() utility"), title: "Add the cn() utility" },
+  { id: docSectionId("4. Initialize shadcn/ui"), title: "Initialize shadcn/ui" },
+  { id: docSectionId("5. Add your first component"), title: "Add your first component" },
+  { id: docSectionId("6. Start the dev server"), title: "Start the dev server" },
+];
 
 export default function InstallationPage() {
   return (
@@ -31,6 +42,8 @@ export default function InstallationPage() {
           title="Quick Start"
           description="From zero to your first Nexus UI component in six steps. Create a Next.js app with Tailwind and an import alias, initialize shadcn/ui, connect the registry, and install a component."
         />
+
+        <SetupChecklist steps={STEPS} />
 
         <DocSection title="1. Create a Next.js project">
           <p className="text-sm text-muted-foreground">
