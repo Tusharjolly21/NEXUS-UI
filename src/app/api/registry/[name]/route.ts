@@ -25,6 +25,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
+import { getVariantByRegistryName } from "@/lib/catalog/block-variants";
 import { resolveApiToken, adminCanAccessComponent } from "@/lib/entitlements";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { sessionCanAccessComponent } from "@/lib/component-access";
@@ -54,14 +55,21 @@ export async function GET(_req: Request, { params }: Params) {
   // ── 1. Resolve component metadata ───────────────────────────────
   const component = getLibraryComponent(name);
   const block = blocksManifest.find((item) => item.registryCliName === name);
+  // A single Motion Kit block section (installable on its own). Always Pro, even inside a free block.
+  const section = component || block ? null : getVariantByRegistryName(name);
 
   // Unknown package → 404
-  if (!component && !block && !isPublicRegistryAsset) {
+  if (!component && !block && !section && !isPublicRegistryAsset) {
     return new NextResponse("Component not found", { status: 404 });
   }
 
+  // What the entitlement check is about. Sections use their own id: no one buys a section on its
+  // own, so in practice that means a Pro plan or All-Access.
+  const entitlementSlug = component?.slug ?? block?.slug ?? section?.id ?? "";
+  const premium = component?.premium ?? block?.premium ?? (section ? section.premium !== false : true);
+
   // ── 2. Free components — no auth required ────────────────────────
-  if (isPublicRegistryAsset || !(component?.premium ?? block?.premium ?? true)) {
+  if (isPublicRegistryAsset || !premium) {
     return serveRegistryFile(name, "public");
   }
 
@@ -74,8 +82,7 @@ export async function GET(_req: Request, { params }: Params) {
   if (!token) {
     // The site's own inspector asks with the browser session instead of a CLI token. Same
     // entitlement check, same private no-store response; cross-origin pages can't read it (no CORS).
-    const slug = component?.slug ?? block?.slug;
-    if (slug && (await sessionCanAccessComponent(slug, true))) {
+    if (entitlementSlug && (await sessionCanAccessComponent(entitlementSlug, true))) {
       return serveRegistryFile(name, "private");
     }
     return new NextResponse(
@@ -110,7 +117,7 @@ export async function GET(_req: Request, { params }: Params) {
   const { userId } = resolved;
 
   // ── 4. Entitlement check (service-role, bypasses RLS) ───────────
-  const allowed = await adminCanAccessComponent(userId, component?.slug ?? block!.slug);
+  const allowed = entitlementSlug ? await adminCanAccessComponent(userId, entitlementSlug) : false;
 
   if (!allowed) {
     return new NextResponse(

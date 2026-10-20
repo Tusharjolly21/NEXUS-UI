@@ -10,17 +10,22 @@ import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog"
 
 export const metadata: Metadata = createMetadata({
   title: "UI Blocks for Next.js — Tailwind CSS & Framer Motion",
-  description: `${blocks.length} full-section UI blocks for Next.js: pricing, FAQ, contact, logo clouds, text animations and more. Built with Tailwind CSS and Framer Motion.`,
+  description: `${blocks.length} full-section UI blocks for Next.js: heroes, navigation, pricing, testimonials, FAQ, contact and more. Built with Tailwind CSS and Framer Motion.`,
   alternates: { canonical: "/blocks" },
 });
 
 /** Wall order: the liveliest blocks first. */
 const ORDER = [
+  "block-hero",
   "block-pricing-section",
+  "block-features",
   "block-checkout-moments",
   "block-why-choose-us",
+  "block-social-proof",
   "block-logo-clouds",
+  "block-navigation",
   "block-faq-folder-card",
+  "block-newsletter",
   "block-sidebar",
   "block-contact-page",
   "block-interactive-dots",
@@ -30,6 +35,11 @@ const ORDER = [
 
 /** Shorter chip labels than the block names. */
 const CHIP_NAME: Record<string, string> = {
+  "block-hero": "Heroes",
+  "block-navigation": "Navigation",
+  "block-features": "Features",
+  "block-social-proof": "Social proof",
+  "block-newsletter": "Newsletter",
   "block-pricing-section": "Pricing",
   "block-checkout-moments": "Checkout",
   "block-why-choose-us": "Feature bentos",
@@ -73,10 +83,10 @@ export default function BlocksPage() {
       tint: TINTS[i % TINTS.length],
       fit: getTileFit(v.id),
       install: block.registryCliName ?? block.slug,
-      isNew: v.block === "block-checkout-moments",
+      isNew: Boolean(v.registryCliName) || v.block === "block-checkout-moments",
       demo: null,
       block: v.block,
-      premium: block.premium,
+      premium: v.premium ?? block.premium,
       blockName: block.name,
       href: `/blocks/${v.block}#${variantAnchor(v.title)}`,
     };
@@ -96,8 +106,8 @@ export default function BlocksPage() {
         <div className="relative mx-auto max-w-[1152px]">
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Blocks</h1>
           <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
-            Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: pricing, FAQ, contact, logo
-            clouds and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
+            Whole sections that <RainbowWord>drop</RainbowWord> straight into a page: heroes, navigation, pricing,
+            testimonials, FAQ and more. {items.length} sections across {blocks.length} blocks, {free} of them free.
           </p>
         </div>
       </section>

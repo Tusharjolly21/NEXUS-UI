@@ -57,6 +57,12 @@ const nextConfig = {
       "./public/*.{png,jpg,jpeg,webp,svg}",
     ],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
+    // Block pages read section source at request time (only for sessions allowed to see it).
+    "/blocks/[slug]": [
+      "./src/components/blocks/**/*.{ts,tsx}",
+      "./src/components/{interactive-dots,layered-wave-background,particle-noise,wavy-lines}/**/*.{ts,tsx}",
+      "./src/app/globals.css",
+    ],
     "/components/[slug]": ["./.generated/registry/**/*.json"],
     // Pro build prompts live outside public/ and are only read by this gated route.
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],

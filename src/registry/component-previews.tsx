@@ -4220,3 +4220,7 @@ export * from "./signature/motion-kit-f";
 export * from "./signature/motion-kit-g";
 export * from "./signature/motion-kit-h";
 export * from "./signature/motion-kit-i";
+export * from "./blocks/motion-kit-blocks-a";
+export * from "./blocks/motion-kit-blocks-b";
+export * from "./blocks/motion-kit-blocks-c";
+export * from "./blocks/motion-kit-blocks-d";
