@@ -235,6 +235,25 @@ html.dark {
   }
 }
 
+/* Hero: a dot grid revealed in a soft circle around the pointer (see HeroSpotlight) */
+.pg-spotlight {
+  background-image:
+    radial-gradient(circle, color-mix(in oklab, var(--action) 55%, transparent) 0 1.1px, transparent 1.7px),
+    radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), color-mix(in oklab, var(--action) 9%, transparent), transparent 70%);
+  background-size: 22px 22px, 100% 100%;
+  -webkit-mask-image: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), #000 0%, transparent 72%);
+  mask-image: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), #000 0%, transparent 72%);
+}
+
+/* Typing caret in the hero install command */
+.pg-caret {
+  animation: pg-blink 1.05s steps(1) infinite;
+}
+
+@keyframes pg-blink {
+  50% { opacity: 0; }
+}
+
 @keyframes pg-drop {
   0% { transform: translateY(-0.35em) scale(0.9); }
   60% { transform: translateY(0.05em) scale(1.02); }
@@ -242,8 +261,12 @@ html.dark {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pg-rainbow-letter {
+  .pg-rainbow-letter,
+  .pg-caret {
     animation: none;
+  }
+  .pg-spotlight {
+    display: none;
   }
 }
 

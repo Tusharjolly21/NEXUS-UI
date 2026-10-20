@@ -24,8 +24,8 @@ const STICKERS: Sticker[] = [
 ];
 
 /**
- * Decorative stickers around the hero headline. They drop in once, can be grabbed and thrown,
- * and spring back to where they were. Hidden from screen readers and on small screens.
+ * Decorative stickers around the hero headline. They drop in once, then float gently; they can be
+ * grabbed and thrown, and spring back to where they were. Hidden from screen readers and on small screens.
  */
 export function HeroStickers() {
   const reduce = useReducedMotion();
@@ -34,10 +34,7 @@ export function HeroStickers() {
       {STICKERS.map((s, i) => (
         <motion.div
           key={s.id}
-          className={cn(
-            "pointer-events-auto absolute flex cursor-grab touch-none select-none items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-medium tracking-[-0.01em] shadow-[0_0_0_0.5px_var(--border),0_10px_24px_-12px_rgba(0,0,0,0.3)] active:cursor-grabbing",
-            s.className,
-          )}
+          className="pointer-events-auto absolute cursor-grab touch-none select-none active:cursor-grabbing"
           style={{ left: `${s.x}%`, top: `${s.y}%` }}
           initial={reduce ? { rotate: s.tilt } : { y: -320, rotate: s.tilt * 3, opacity: 0 }}
           animate={{ y: 0, rotate: s.tilt, opacity: 1 }}
@@ -48,7 +45,21 @@ export function HeroStickers() {
           dragTransition={{ bounceStiffness: 260, bounceDamping: 12 }}
           whileDrag={{ scale: 1.08, rotate: 0 }}
         >
-          {s.content}
+          {/* Idle float, on its own layer so it never fights the drag */}
+          <motion.div
+            className={cn(
+              "flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 text-[13px] font-medium tracking-[-0.01em] shadow-[0_0_0_0.5px_var(--border),0_10px_24px_-12px_rgba(0,0,0,0.3)]",
+              s.className,
+            )}
+            animate={reduce ? undefined : { y: [0, -7, 0], rotate: [0, i % 2 ? 1.6 : -1.6, 0] }}
+            transition={
+              reduce
+                ? undefined
+                : { duration: 4.2 + (i % 3) * 0.9, repeat: Infinity, ease: "easeInOut", delay: 1.6 + i * 0.27 }
+            }
+          >
+            {s.content}
+          </motion.div>
         </motion.div>
       ))}
     </div>
