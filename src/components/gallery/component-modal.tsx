@@ -9,7 +9,7 @@ import { buildSnippet, ControlRow, initialValues, Segmented } from "@/components
 import type { Playground, PlaygroundValues } from "@/lib/catalog/playgrounds";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { cn } from "@/lib/utils";
-import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
+import { ProBadge, useCopyBuildPrompt, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { FitPreview } from "./fit-preview";
 import { INTERACTION_FILTERS, TINT_CLASSES, type GalleryItem } from "./types";
 
@@ -171,10 +171,28 @@ function Inspector({ item }: { item: GalleryItem }) {
   const [openSection, setOpenSection] = React.useState<"install" | "usage" | "source">("usage");
   const [shared, share] = useCopied();
   const [prompted, copyPrompt] = useCopied(2200);
-  const { requestUpgrade } = useProAccess();
+  const { isPro, requestUpgrade } = useProAccess();
   // The UI lock follows the visitor's plan; the server's answer (usage.locked) wins when it says no.
   const locked = useLocked(item.premium) || !!usage?.locked;
-  const prompt = (text: string) => (locked ? requestUpgrade(item.name) : copyPrompt(text));
+  // Components with a build prompt copy that (Pro); the rest copy the install brief for an agent.
+  const [buildState, copyBuild] = useCopyBuildPrompt(item.slug, item.name);
+  const prompt = (text: string) => (item.hasPrompt ? copyBuild() : locked ? requestUpgrade(item.name) : copyPrompt(text));
+  const promptDone = item.hasPrompt ? buildState === "copied" : prompted;
+  const promptLabel = item.hasPrompt
+    ? buildState === "loading"
+      ? "Copying…"
+      : buildState === "copied"
+        ? "Copied — paste it into your agent"
+        : buildState === "error"
+          ? "Couldn't copy, try again"
+          : isPro
+            ? "Copy build prompt"
+            : "Copy build prompt with Pro"
+    : prompted
+      ? "Copied — paste into your agent"
+      : locked
+        ? "Copy prompt with Pro"
+        : "Copy prompt";
   const pickView = (v: "preview" | "code") => (v === "code" && locked ? requestUpgrade(item.name) : setView(v));
 
   // Load the live controls (heavy: imports every playground component) only when inspecting.
@@ -400,8 +418,8 @@ function Inspector({ item }: { item: GalleryItem }) {
               onClick={() => prompt(promptText)}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-[#1d1d1f] px-4 text-[13.5px] font-semibold text-white transition-[width] dark:bg-white dark:text-[#1d1d1f]"
             >
-              {prompted ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
-              <span aria-live="polite">{prompted ? "Copied — paste it into your agent" : "Copy prompt"}</span>
+              {promptDone ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
+              <span aria-live="polite">{promptLabel}</span>
             </button>
           )}
         </div>
@@ -515,8 +533,8 @@ function Inspector({ item }: { item: GalleryItem }) {
             onClick={() => prompt(promptText)}
             className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-foreground text-[14px] font-semibold text-background transition-opacity hover:opacity-90"
           >
-            {prompted ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
-            <span aria-live="polite">{prompted ? "Copied — paste into your agent" : locked ? "Copy prompt with Pro" : "Copy prompt"}</span>
+            {promptDone ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
+            <span aria-live="polite">{promptLabel}</span>
           </button>
           <Link
             href={`/components/${item.slug}`}

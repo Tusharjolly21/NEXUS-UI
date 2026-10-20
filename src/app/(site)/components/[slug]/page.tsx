@@ -11,7 +11,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
-import { allGalleryItems } from "@/lib/catalog/gallery-items";
+import { allGalleryItems, hasBuildPrompt } from "@/lib/catalog/gallery-items";
 import { sessionCanAccessComponent, sessionHasPro } from "@/lib/component-access";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -191,6 +191,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         registryImport={installInfo.registryImport}
         reactSource={locked ? undefined : item.reactSource}
         locked={locked}
+        hasPrompt={hasBuildPrompt(item.slug)}
         props={item.props}
         previewExportName={getPreviewExportName(item.Preview)}
         serializedPreviewSections={serializedPreviewSections}

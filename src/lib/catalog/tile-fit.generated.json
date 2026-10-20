@@ -739,6 +739,66 @@
   "bg": "#ffffff",
   "coverage": 1
  },
+ "bolting-sliders": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   302,
+   166,
+   356,
+   390
+  ],
+  "content": [
+   330,
+   194,
+   310,
+   336
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.2
+ },
+ "box-spill": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   260,
+   182,
+   440,
+   356
+  ],
+  "content": [
+   270,
+   290,
+   420,
+   238
+  ],
+  "bg": null,
+  "coverage": 0.19
+ },
+ "bubble-cluster": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   306,
+   200,
+   350,
+   328
+  ],
+  "content": [
+   346,
+   210,
+   300,
+   308
+  ],
+  "bg": null,
+  "coverage": 0.08
+ },
  "capsule-toggles": {
   "canvas": [
    960,
@@ -1099,6 +1159,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "context-meter": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   280,
+   160,
+   400,
+   400
+  ],
+  "content": [
+   300,
+   184,
+   360,
+   356
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.23
+ },
  "copy-button": {
   "canvas": [
    960,
@@ -1118,6 +1198,26 @@
   ],
   "bg": null,
   "coverage": 0.03
+ },
+ "crumple-to-trash": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   414,
+   208,
+   244,
+   306
+  ],
+  "content": [
+   424,
+   218,
+   224,
+   282
+  ],
+  "bg": null,
+  "coverage": 0.02
  },
  "cursor-buddy": {
   "canvas": [
@@ -1158,6 +1258,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 1
+ },
+ "curved-reel": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   158,
+   222,
+   632,
+   298
+  ],
+  "content": [
+   168,
+   232,
+   612,
+   238
+  ],
+  "bg": null,
+  "coverage": 0.14
  },
  "depth-testimonials": {
   "canvas": [
@@ -1499,6 +1619,26 @@
   "bg": "#ffffff",
   "coverage": 0.11
  },
+ "flight-tracker": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   310,
+   256,
+   340,
+   210
+  ],
+  "content": [
+   330,
+   280,
+   300,
+   166
+  ],
+  "bg": "#1e1e1e",
+  "coverage": 0.1
+ },
  "float-glass-navbar": {
   "canvas": [
    960,
@@ -1578,6 +1718,26 @@
   ],
   "bg": "#0c0c0c",
   "coverage": 1
+ },
+ "glass-bubbles": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   260,
+   194,
+   440,
+   326
+  ],
+  "content": [
+   276,
+   204,
+   388,
+   228
+  ],
+  "bg": null,
+  "coverage": 0.18
  },
  "glass-lens": {
   "canvas": [
@@ -2159,6 +2319,26 @@
   "bg": null,
   "coverage": 0.02
  },
+ "matrix-loaders": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   284,
+   232,
+   392,
+   256
+  ],
+  "content": [
+   294,
+   242,
+   372,
+   236
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.12
+ },
  "metal-orbs": {
   "canvas": [
    960,
@@ -2238,6 +2418,26 @@
   ],
   "bg": null,
   "coverage": 0.01
+ },
+ "mood-wheel": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   270,
+   200,
+   420,
+   314
+  ],
+  "content": [
+   280,
+   210,
+   398,
+   294
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.17
  },
  "motion-faq-disclosure": {
   "canvas": [
@@ -2398,6 +2598,26 @@
   ],
   "bg": null,
   "coverage": 0.03
+ },
+ "packet-router": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   250,
+   270,
+   460,
+   182
+  ],
+  "content": [
+   260,
+   280,
+   440,
+   162
+  ],
+  "bg": null,
+  "coverage": 0.02
  },
  "page-curl": {
   "canvas": [
@@ -3119,6 +3339,26 @@
   "bg": "#ffffff",
   "coverage": 0.64
  },
+ "squeeze-progress": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   260,
+   230,
+   440,
+   260
+  ],
+  "content": [
+   270,
+   240,
+   420,
+   240
+  ],
+  "bg": "#c0420c",
+  "coverage": 0.16
+ },
  "squiggly-text": {
   "canvas": [
    960,
@@ -3158,6 +3398,26 @@
   ],
   "bg": null,
   "coverage": 0.01
+ },
+ "stamp-swirl": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   274,
+   252,
+   396,
+   140
+  ],
+  "content": [
+   286,
+   262,
+   374,
+   120
+  ],
+  "bg": null,
+  "coverage": 0.04
  },
  "standing-calendar": {
   "canvas": [
@@ -3239,6 +3499,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "sticker-toss": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   260,
+   198,
+   440,
+   320
+  ],
+  "content": [
+   270,
+   208,
+   420,
+   280
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.18
+ },
  "streak-counter": {
   "canvas": [
    960,
@@ -3298,6 +3578,46 @@
   ],
   "bg": null,
   "coverage": 1
+ },
+ "swipe-stack": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   320,
+   220,
+   320,
+   288
+  ],
+  "content": [
+   342,
+   234,
+   278,
+   258
+  ],
+  "bg": null,
+  "coverage": 0.09
+ },
+ "tape-shelf": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   362,
+   214,
+   176,
+   296
+  ],
+  "content": [
+   372,
+   226,
+   156,
+   262
+  ],
+  "bg": null,
+  "coverage": 0.04
  },
  "tear-off-ticket": {
   "canvas": [

@@ -23,6 +23,8 @@ type Override = {
   focus?: Rect;
   /** Treat as a full-bleed scene (frame the whole surface). */
   scene?: boolean;
+  /** Tile background: a colour, or null for the tile's tint (when the measured backdrop is only a passing state). */
+  bg?: string | null;
   /** Treat as an object even if it measured as a scene: frame the content. */
   object?: boolean;
   /** Force the desktop column span. */
@@ -91,7 +93,7 @@ export function getTileFit(slug: string): TileFit {
   const o = OVERRIDES[slug] ?? {};
   const canvas: [number, number] = m?.canvas ?? DEFAULT_CANVAS;
 
-  const bg = m?.bg ?? null;
+  const bg = o.bg !== undefined ? o.bg : (m?.bg ?? null);
   const darkBg = bg !== null && luminance(bg) < 0.2;
   const surface = m?.surface ?? [0, 0, canvas[0], canvas[1]];
   const content = m?.content ?? [canvas[0] * 0.2, canvas[1] * 0.2, canvas[0] * 0.6, canvas[1] * 0.6];

@@ -260,6 +260,35 @@
     },
     "metal-orbs": {
       "span": 2
+    },
+    "squeeze-progress": {
+      "focus": [
+        240,
+        210,
+        480,
+        300
+      ],
+      "object": true,
+      "span": 2,
+      "bg": null
+    },
+    "flight-tracker": {
+      "focus": [
+        300,
+        250,
+        360,
+        226
+      ],
+      "object": true
+    },
+    "crumple-to-trash": {
+      "focus": [
+        230,
+        180,
+        500,
+        340
+      ],
+      "span": 2
     }
   },
   "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."
