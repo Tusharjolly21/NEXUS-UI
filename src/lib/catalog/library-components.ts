@@ -48,300 +48,248 @@ export const libraryComponents: LibraryComponent[] = [
     slug: "scroll-progress-bar",
     name: "Scroll Progress Bar",
     registryCliName: "scroll-progress-bar",
-    description:
-      "A minimal vertical progress rail that fills smoothly as a target section moves through the viewport or a scrollable container.",
+    description: "A progress rail for long reads: the fill springs after your scroll, a bead rides its tip and stretches with your speed, and each milestone dot pops in as you pass it. It tracks the page, a section or a scrollable panel, runs vertical or horizontal, and optional chapter labels jump to their part of the page.",
     categorySlug: "motion-effects",
-    tags: ["scroll", "progress", "indicator", "section", "framer-motion", "navigation"],
+    tags: ["scroll", "progress", "reading progress", "indicator", "table of contents", "navigation", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 154,
     createdAt: "2026-05-27",
     animationKinds: ["scroll", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewScrollProgressBar,
+    props: [
+      { name: "targetRef", type: "RefObject<HTMLElement | null>", description: "Section whose trip through the viewport drives the fill. Omit it to track the page or containerRef." },
+      { name: "containerRef", type: "RefObject<HTMLElement | null>", description: "Scrollable parent, when the bar tracks a panel rather than the document." },
+      { name: "progress", type: "MotionValue<number>", description: "Your own 0..1 progress. Overrides scroll tracking." },
+      { name: "orientation", type: "\"vertical\" | \"horizontal\"", defaultValue: "\"vertical\"", description: "Rail direction." },
+      { name: "height", type: "number | string", defaultValue: "206 (vertical) / 4 (horizontal)", description: "Vertical: rail length. Horizontal: rail thickness." },
+      { name: "width", type: "number | string", defaultValue: "4 (vertical) / \"100%\" (horizontal)", description: "Vertical: rail thickness. Horizontal: rail length." },
+      { name: "fillColor", type: "string", defaultValue: "#0071e3 (#0a84ff dark)", description: "Fill, bead and marker colour." },
+      { name: "backgroundColor", type: "string", defaultValue: "#e8e8ed (#3a3a3c dark)", description: "Track colour." },
+      { name: "markerCount", type: "number", defaultValue: "4", description: "Milestone dots spread evenly along the rail, ends included." },
+      { name: "markerSize", type: "number", defaultValue: "10", description: "Milestone dot diameter in px." },
+      { name: "showMarkers", type: "boolean", defaultValue: "true", description: "Show the milestone dots." },
+      { name: "labels", type: "string[]", description: "One label per milestone. Labels become buttons that scroll to their chapter." },
+      { name: "showHead", type: "boolean", defaultValue: "true", description: "Draw the bead that rides the tip of the fill." },
+      { name: "stiffness", type: "number", defaultValue: "150", description: "Spring stiffness for the fill." },
+      { name: "damping", type: "number", defaultValue: "26", description: "Spring damping for the fill." },
+      { name: "onSeek", type: "(progress: number) => void", description: "Called with the target progress when a label is clicked, before it scrolls there." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Gently scrolls containerRef (or plays the fill by itself) until someone scrolls, clicks or presses a key." },
+      { name: "ariaLabel", type: "string", defaultValue: "\"Section scroll progress\"", description: "Accessible name of the progressbar." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewScrollProgressBarRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
+import { useRef } from "react";
 import { ScrollProgressBar } from "@/components/scroll-progress-bar";
 
+const chapters = ["Why", "How it works", "Pricing", "FAQ"];
+
 export function StorySection() {
-  const sectionRef = React.useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   return (
     <section ref={sectionRef} className="relative flex gap-10 py-24">
       <aside className="sticky top-24 h-fit">
-        <ScrollProgressBar
-          targetRef={sectionRef}
-          fillColor="#770bf4"
-          backgroundColor="#dddddd"
-          height={206}
-          markerCount={4}
-        />
+        <ScrollProgressBar targetRef={sectionRef} height={240} labels={chapters} />
       </aside>
       <div className="max-w-xl space-y-24">
-        <h2 className="text-5xl font-semibold">A guided product story.</h2>
-        <p className="text-lg text-neutral-500">
-          Add long-form feature content here. The progress bar fills while
-          this section travels through the viewport.
-        </p>
-        <p className="text-lg text-neutral-500">
-          Keep scrolling to connect each chapter with a quiet visual cue.
-        </p>
+        {chapters.map((title) => (
+          <article key={title}>
+            <h2 className="text-4xl font-semibold tracking-tight">{title}</h2>
+            <p className="mt-4 text-lg text-neutral-500">Long-form content for this chapter.</p>
+          </article>
+        ))}
       </div>
     </section>
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "targetRef", type: "React.RefObject<HTMLElement | null>", description: "Section whose viewport progress drives the fill. Omit it to track the page or supplied container." },
-      { name: "containerRef", type: "React.RefObject<HTMLElement | null>", description: "Optional scrollable parent when the bar lives inside a panel rather than the document." },
-      { name: "progress", type: "MotionValue<number>", description: "Optional custom normalized progress value that overrides scroll tracking." },
-      { name: "fillColor", type: "string", defaultValue: '"#770bf4"', description: "Active filler color." },
-      { name: "backgroundColor", type: "string", defaultValue: '"#dddddd"', description: "Inactive rail color." },
-      { name: "height", type: "number | string", defaultValue: "206", description: "Height of the progress rail." },
-      { name: "width", type: "number | string", defaultValue: "2", description: "Width of the progress rail." },
-      { name: "markerCount", type: "number", defaultValue: "4", description: "Number of milestone circles rendered along the rail." },
-      { name: "markerSize", type: "number", defaultValue: "10", description: "Circle diameter in pixels." },
-      { name: "showMarkers", type: "boolean", defaultValue: "true", description: "Show or hide milestone circles on the rail." },
-      { name: "stiffness", type: "number", defaultValue: "150", description: "Spring stiffness used to smooth scroll progress." },
-      { name: "damping", type: "number", defaultValue: "26", description: "Spring damping used to settle the filler movement." },
-      { name: "className", type: "string", description: "Additional classes on the rail wrapper." },
-    ],
   },
   {
     slug: "wheel-selector",
     name: "Wheel Selector",
     registryCliName: "wheel-selector",
-    description:
-      "An interactive radial navigation dial for services, features, or portfolio items with drag, wheel, and click input plus a responsive mobile arch.",
+    description: "A radial selector: a ring of icon nodes you drag round, fling, scroll or step with the arrow keys. It coasts, snaps to the nearest stop with a little overshoot, and the node at the top swells and fills with its colour while the hub counter rolls and the side panel swaps to that item.",
     categorySlug: "feature-sections",
-    tags: ["wheel", "radial", "navigation", "services", "portfolio", "drag", "responsive", "framer-motion"],
+    tags: ["wheel", "dial", "radial", "selector", "carousel", "services", "drag", "fling", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 152,
     createdAt: "2026-05-26",
-    animationKinds: ["hover", "spring", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewWheelSelector,
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "WheelItem[]", description: "Entries: id, label, title, optional subtitle, description, accentColor, icon (16 built-in names) or iconImageUrl, image, ctaHref and ctaLabel." },
+      { name: "activeIndex", type: "number", description: "Controlled selection; the dial turns the short way to it." },
+      { name: "onActiveChange", type: "(index: number) => void", description: "Called when the dial settles on a new item." },
+      { name: "variant", type: "\"responsive\" | \"desktop\" | \"mobile\"", defaultValue: "\"responsive\"", description: "Panel beside the dial when there is room, always beside it, or always stacked." },
+      { name: "contentMode", type: "\"minimal\" | \"detailed\" | \"hidden\"", defaultValue: "\"detailed\"", description: "Title only, title with description and image, or no panel." },
+      { name: "ringRadius", type: "number", defaultValue: "112", description: "Radius of the ring of nodes in px, 80 to 220." },
+      { name: "tickCount", type: "number", defaultValue: "60", description: "Ticks round the rim, 12 to 120." },
+      { name: "showTicks", type: "boolean", defaultValue: "true", description: "Show the rotating rim ticks." },
+      { name: "showCounter", type: "boolean", defaultValue: "true", description: "Show the rolling 02 / 06 counter in the hub." },
+      { name: "showCTA", type: "boolean", defaultValue: "false", description: "Show each item's CTA link in the panel." },
+      { name: "animationSpeed", type: "\"slow\" | \"medium\" | \"fast\"", defaultValue: "\"medium\"", description: "How snappy the snap spring is." },
+      { name: "accentColor", type: "string", defaultValue: "\"#0071e3\"", description: "Accent for items without their own accentColor." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Turns the wheel one stop at a time until someone touches it." },
+      { name: "autoRotate", type: "boolean", defaultValue: "false", description: "Older name for autoplay." },
+      { name: "autoRotateInterval", type: "number", defaultValue: "3000", description: "Milliseconds between autoplay turns (1200 to 15000)." },
+      { name: "className", type: "string", description: "Extra classes for the section." },
+    ],
+    Preview: Previews.PreviewWheelSelectorRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
+import { useState } from "react";
 import { WheelSelector, type WheelItem } from "@/components/wheel-selector";
 
 const services: WheelItem[] = [
-  {
-    id: "strategy",
-    label: "Strategy",
-    subtitle: "Direction",
-    title: "Product Strategy",
-    description: "Position products with a clear story and roadmap.",
-    icon: "compass",
-    accentColor: "#38bdf8",
-    ctaHref: "#strategy",
-  },
-  {
-    id: "design",
-    label: "Design",
-    subtitle: "Craft",
-    title: "Experience Design",
-    description: "Create interfaces people understand immediately.",
-    icon: "pen",
-    accentColor: "#f97316",
-    ctaHref: "#design",
-  },
-  {
-    id: "research",
-    label: "Insights",
-    subtitle: "Learn",
-    title: "User Research",
-    description: "Turn user signals into confident product decisions.",
-    icon: "analytics",
-    accentColor: "#8b5cf6",
-    ctaHref: "#research",
-  },
+  { id: "strategy", label: "Strategy", subtitle: "Direction", title: "Product strategy", description: "Position products with a clear story and roadmap.", icon: "compass", accentColor: "#0071e3", ctaHref: "#strategy" },
+  { id: "design", label: "Design", subtitle: "Craft", title: "Experience design", description: "Interfaces people understand immediately.", icon: "pen", accentColor: "#ff9f0a", ctaHref: "#design" },
+  { id: "build", label: "Build", subtitle: "Engineering", title: "Digital platforms", description: "Fast, reliable front ends on scalable systems.", icon: "code", accentColor: "#30d158", ctaHref: "#build" },
+  { id: "research", label: "Insights", subtitle: "Learn", title: "User research", description: "Turn user signals into confident decisions.", icon: "analytics", accentColor: "#bf5af2", ctaHref: "#research" },
 ];
 
 export function ServicesWheel() {
+  const [index, setIndex] = useState(0);
   return (
     <WheelSelector
       items={services}
-      theme="obsidian"
+      activeIndex={index}
+      onActiveChange={setIndex}
       contentMode="detailed"
-      showTicks
-      showCounter
-      autoRotate
-      autoRotateInterval={4500}
+      showCTA
+      ringRadius={120}
     />
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "items", type: "WheelItem[]", description: "Content entries with title, subtitle, description, accent, icon or uploaded icon URL, image, and CTA values." },
-      { name: "theme", type: "\"obsidian\" | \"midnight\" | \"arctic\" | \"ember\" | \"custom\"", defaultValue: "\"obsidian\"", description: "Curated color treatment or fully overridden custom colors." },
-      { name: "variant", type: "\"responsive\" | \"desktop\" | \"mobile\"", defaultValue: "\"responsive\"", description: "Responsive ring-to-arch behavior or a forced presentation variant." },
-      { name: "contentMode", type: "\"minimal\" | \"detailed\" | \"hidden\"", defaultValue: "\"detailed\"", description: "Amount of supporting content shown beside the dial." },
-      { name: "ringRadius", type: "number", defaultValue: "186", description: "Desktop ring radius in pixels, clamped between 100 and 400." },
-      { name: "tickCount", type: "number", defaultValue: "48", description: "Number of dial perimeter tick marks, clamped from 10 to 80." },
-      { name: "showTicks", type: "boolean", defaultValue: "true", description: "Display the animated perimeter tick marks." },
-      { name: "showCounter", type: "boolean", defaultValue: "true", description: "Display the animated selection counter in the hub or arch." },
-      { name: "showCTA", type: "boolean", defaultValue: "false", description: "Enable per-item call-to-action links globally." },
-      { name: "autoRotate", type: "boolean", defaultValue: "false", description: "Advance selection automatically until a user interacts." },
-      { name: "autoRotateInterval", type: "number", defaultValue: "4500", description: "Automatic advancement interval in milliseconds, from 1000 to 15000." },
-      { name: "animationSpeed", type: "\"slow\" | \"medium\" | \"fast\"", defaultValue: "\"medium\"", description: "Transition pace for wheel positions and content changes." },
-      { name: "backgroundColor", type: "string", description: "Override the component background color." },
-      { name: "accentColor", type: "string", description: "Default accent when an item does not provide its own accentColor." },
-      { name: "textColor", type: "string", description: "Override title and primary text color." },
-      { name: "mutedTextColor", type: "string", description: "Override secondary copy color." },
-      { name: "cardColor", type: "string", description: "Override dial node and center hub color." },
-      { name: "ringStrokeColor", type: "string", description: "Override ring, border, and inactive tick color." },
-      { name: "ctaBackgroundColor", type: "string", description: "Custom CTA background color." },
-      { name: "ctaTextColor", type: "string", description: "Custom CTA text color." },
-      { name: "ctaBorderColor", type: "string", description: "Custom CTA border color." },
-      { name: "titleFontFamily", type: "string", description: "Independent typeface for selected item titles." },
-      { name: "bodyFontFamily", type: "string", description: "Independent typeface for description copy." },
-      { name: "labelFontFamily", type: "string", description: "Independent typeface for labels, CTA, and counters." },
-      { name: "fontFamily", type: "string", description: "Base typeface fallback for the entire component." },
-      { name: "activeIndex", type: "number", description: "Optional controlled selected index." },
-      { name: "onActiveChange", type: "(index: number) => void", description: "Called whenever wheel, drag, or click navigation changes selection." },
-      { name: "className", type: "string", description: "Extra classes on the component shell." },
-    ],
   },
   {
     slug: "cinematic-card-deck",
     name: "Cinematic Card Deck",
     registryCliName: "cinematic-card-deck",
-    description:
-      "A scroll-linked 3D card stack with depth, ambient glow, progress dots, cursor parallax, and optional image-backed cards.",
+    description: "A deck of poster cards in 3D: the front card peels away on its bottom edge while the cards behind rise to take its place, leaning back as the deck moves and springing upright when it stops. Swipe or fling it, scroll the wheel over it, use the arrow keys or the progress pills, or set scrollLinked to deal it from page scroll.",
     categorySlug: "cards",
-    tags: ["cards", "scroll", "3d", "stack", "framer-motion", "parallax"],
+    tags: ["cards", "deck", "stack", "3d", "scroll", "swipe", "carousel", "parallax", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 148,
     createdAt: "2026-05-22",
-    animationKinds: ["scroll", "3d", "parallax", "spring"],
+    animationKinds: ["drag", "scroll", "3d", "spring", "parallax"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCinematicCardDeck,
+    props: [
+      { name: "cards", type: "CinematicDeckCard[]", defaultValue: "4 sample cards", description: "Cards from front to back, each { title, description, tag?, cardColor?, accentColor?, imageUrl? }." },
+      { name: "intensity", type: "\"subtle\" | \"standard\" | \"cinematic\"", defaultValue: "\"standard\"", description: "How far the back cards recede and how hard the front card peels away." },
+      { name: "exitDirection", type: "\"up\" | \"down\"", defaultValue: "\"up\"", description: "Which way a finished card peels off (and which way to swipe)." },
+      { name: "cardWidth", type: "number", defaultValue: "340", description: "Card width in px; the deck shrinks to fit narrower parents." },
+      { name: "cardHeight", type: "number", defaultValue: "220", description: "Card height in px, kept as an aspect ratio when the deck shrinks." },
+      { name: "borderRadius", type: "string", defaultValue: "\"24px\"", description: "Card corner radius." },
+      { name: "smoothing", type: "number", defaultValue: "0.6", description: "0 is snappy, 1 is floaty: sets the spring that follows the target card." },
+      { name: "showProgress", type: "boolean", defaultValue: "true", description: "Progress pills that show and pick the front card." },
+      { name: "progressPosition", type: "\"bottom\" | \"left\" | \"right\"", defaultValue: "\"bottom\"", description: "Where the pills sit." },
+      { name: "showAccent", type: "boolean", defaultValue: "true", description: "Accent bar on the front card." },
+      { name: "showAmbientGlow", type: "boolean", defaultValue: "true", description: "Soft light in the front card's accent colour behind the deck." },
+      { name: "glowIntensity", type: "number", defaultValue: "0.35", description: "Opacity of the ambient light, 0 to 1." },
+      { name: "scrollLinked", type: "boolean", defaultValue: "false", description: "Drive the deck from page scroll: the root becomes sectionHeight vh tall with a sticky stage." },
+      { name: "sectionHeight", type: "number", defaultValue: "300", description: "Scroll distance in viewport heights when scrollLinked." },
+      { name: "scrollContainerRef", type: "RefObject<HTMLElement | null>", description: "Scrolling element to track when scrollLinked (defaults to the window)." },
+      { name: "onChange", type: "(index: number) => void", description: "Called with the new front card index." },
+      { name: "hint", type: "string", defaultValue: "\"Swipe, scroll or use the arrow keys.\"", description: "Caption under the deck. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Deals through the deck every 2.4s until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewCinematicCardDeckRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { CinematicCardDeck } from "@/components/cinematic-card-deck";
 
 const cards = [
-  {
-    title: "Launch Systems",
-    description:
-      "Ship cohesive landing pages with reusable sections, shared spacing rules, and motion that feels designed from the first scroll.",
-    tag: "Foundation",
-    cardColor: "#0A0A0A",
-    accentColor: "#FF6B4A",
-    imageUrl: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "Motion Stories",
-    description:
-      "Layer cards, depth, and scroll-linked perspective to turn feature explanations into a cinematic product narrative.",
-    tag: "Animation",
-    cardColor: "#1A1235",
-    accentColor: "#A78BFF",
-    imageUrl: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    title: "Fast Interfaces",
-    description:
-      "GPU-friendly transforms keep the deck smooth while content stays readable, responsive, and ready for production pages.",
-    tag: "Engineering",
-    cardColor: "#0C2340",
-    accentColor: "#4ADBFF",
-    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=80",
-  },
+  { title: "Plan", description: "Map the launch in one shared board.", tag: "Week 1", cardColor: "#16161a", accentColor: "#ff9f0a" },
+  { title: "Build", description: "Ship sections from a shared system.", tag: "Week 2", cardColor: "#0c2340", accentColor: "#64d2ff" },
+  { title: "Launch", description: "Go live with motion that feels made, not added.", tag: "Week 3", cardColor: "#1d1438", accentColor: "#bf5af2" },
 ];
 
-export function CinematicCardDeckDemo() {
+export function LaunchDeck() {
   return (
     <CinematicCardDeck
       cards={cards}
       intensity="cinematic"
-      sectionHeight={360}
-      cardWidth={520}
-      cardHeight={360}
+      onChange={(i) => console.log("front card", i)}
     />
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "cards", type: "CinematicDeckCard[]", description: "Cards to render in the scroll-linked deck." },
-      { name: "intensity", type: '"subtle" | "standard" | "cinematic"', defaultValue: '"standard"', description: "Controls depth, rotation, blur, and exit drama." },
-      { name: "exitDirection", type: '"up" | "down"', defaultValue: '"up"', description: "Direction cards fly away while scrolling." },
-      { name: "cardWidth", type: "number", defaultValue: "520", description: "Card width in pixels." },
-      { name: "cardHeight", type: "number", defaultValue: "360", description: "Card height in pixels." },
-      { name: "sectionHeight", type: "number", defaultValue: "400", description: "Scroll distance in viewport heights." },
-      { name: "smoothing", type: "number", defaultValue: "0.7", description: "Spring smoothing for scroll progress." },
-      { name: "showProgress", type: "boolean", defaultValue: "true", description: "Show side progress dots." },
-      { name: "showAmbientGlow", type: "boolean", defaultValue: "true", description: "Show accent-colored glow behind the active card." },
-    ],
   },
   {
     slug: "cursor-text-reveal",
     name: "Cursor Text Reveal",
     registryCliName: "cursor-text-reveal",
-    resourceLinks: [{ label: "Live demo", href: "/demos/cursor-text-reveal" }],
-    description:
-      "An immersive cursor-following spotlight that reveals alternate text, gradients, or imagery beneath perfectly aligned headline layers.",
+    description: "An ink lens follows the pointer across a card and shows a second sentence through it, dragging a tail of droplets on looser and looser springs so fast moves stretch into a drip. Press and hold (or Space) to flood the whole card with the reveal; it lets go with an overshoot.",
     categorySlug: "motion-effects",
-    tags: ["cursor", "text", "reveal", "spotlight", "mask", "hero", "framer-motion"],
+    tags: ["cursor", "text", "reveal", "lens", "mask", "hero", "spring", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 142,
     createdAt: "2026-05-22",
-    animationKinds: ["hover", "spring", "magnetic"],
+    animationKinds: ["hover", "press", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCursorTextReveal,
+    props: [
+      { name: "baseText", type: "string", description: "Text everyone sees." },
+      { name: "revealText", type: "string", description: "Text shown inside the lens. Defaults to baseText." },
+      { name: "mode", type: "\"text\" | \"image\"", defaultValue: "\"text\"", description: "Lens backdrop: solid ink, or an image / built-in gradient." },
+      { name: "revealImage", type: "string", description: "Image URL inside the lens in image mode. Nothing is fetched unless you pass one." },
+      { name: "revealImagePosition", type: "string", defaultValue: "\"center\"", description: "CSS background-position for revealImage." },
+      { name: "backgroundImage", type: "string", description: "Optional image URL behind the base text." },
+      { name: "backgroundPosition", type: "string", defaultValue: "\"center\"", description: "CSS background-position for backgroundImage." },
+      { name: "maskSize", type: "number", defaultValue: "120", description: "Lens radius in px while the pointer is over the card." },
+      { name: "initialMaskSize", type: "number", defaultValue: "0", description: "Lens radius at rest; 0 hides it." },
+      { name: "smoothness", type: "number", defaultValue: "0.18", description: "0.04 to 0.6. Lower is snappier, higher drifts behind the pointer." },
+      { name: "fontSize", type: "string", defaultValue: "\"clamp(2rem, 5.2vw, 3.6rem)\"", description: "Font size for both text layers." },
+      { name: "align", type: "\"left\" | \"center\" | \"right\"", defaultValue: "\"center\"", description: "Text alignment." },
+      { name: "enableGlow", type: "boolean", defaultValue: "true", description: "Thin ring around the lens edge." },
+      { name: "revealBackgroundClassName", type: "string", description: "Classes for the lens backdrop; replaces the default ink fill." },
+      { name: "baseTextClassName", type: "string", description: "Classes for the base text." },
+      { name: "revealTextClassName", type: "string", description: "Classes for the revealed text." },
+      { name: "containerClassName", type: "string", description: "Classes for the card." },
+      { name: "className", type: "string", description: "Classes for both text wrappers." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves the lens along a slow figure-eight until a real pointer arrives." },
+    ],
+    Preview: Previews.PreviewCursorTextRevealRedesign,
+    previewShell: "plain",
     previewSections: [
       {
-        title: "Text Reveal",
-        Preview: Previews.PreviewCursorTextReveal,
+        title: "Ink lens",
+        Preview: Previews.PreviewCursorTextRevealRedesign,
         reactSource: `"use client";
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
 
-export function TextRevealExample() {
+export function Manifesto() {
   return (
     <CursorTextReveal
       baseText="The first rule of motion is clarity."
       revealText="The second rule is feeling."
-      maskSize={310}
-      smoothness={0.16}
-      enableGlow={false}
-      showAmbient={false}
-      showGrid={false}
-      revealBackgroundClassName="bg-black"
-      baseTextClassName="text-zinc-950"
-      revealTextClassName="text-white"
-      containerClassName="border-zinc-200 bg-white text-zinc-950 shadow-sm"
+      maskSize={110}
     />
   );
 }`,
       },
       {
-        title: "Image Reveal",
-        Preview: Previews.PreviewCursorTextRevealImage,
+        title: "Image lens",
+        Preview: Previews.PreviewCursorTextRevealImageRedesign,
         reactSource: `"use client";
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
 
-export function ImageRevealExample() {
+export function PhotoReveal() {
   return (
     <CursorTextReveal
-      baseText="We chase moments in time to feel alive."
-      revealText="We keep the moments we usually ignore."
-      backgroundImage="https://images.unsplash.com/photo-1730874829217-f7f666e94822?auto=format&fit=crop&w=1800&q=85"
-      backgroundPosition="42% center"
       mode="image"
-      revealImage="https://images.unsplash.com/photo-1649787652660-df5ac7c91532?auto=format&fit=crop&w=1800&q=85"
-      revealImagePosition="center"
-      maskSize={340}
-      smoothness={0.2}
-      enableGlow={false}
-      showAmbient={false}
-      showGrid={false}
-      baseTextClassName="text-white/45"
-      revealTextClassName="text-white drop-shadow-[0_12px_34px_rgba(0,0,0,0.45)]"
+      revealImage="/images/harbour.jpg"
+      baseText="We chase moments to feel alive."
+      revealText="We keep the ones we usually miss."
+      maskSize={130}
     />
   );
 }`,
@@ -351,52 +299,15 @@ export function ImageRevealExample() {
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
 
-export function CursorTextRevealExample() {
+export function Manifesto() {
   return (
     <CursorTextReveal
       baseText="The first rule of motion is clarity."
       revealText="The second rule is feeling."
-      maskSize={310}
-      smoothness={0.16}
-      enableGlow={false}
-      showAmbient={false}
-      showGrid={false}
-      revealBackgroundClassName="bg-black"
-      baseTextClassName="text-zinc-950"
-      revealTextClassName="text-white"
-      containerClassName="border-zinc-200 bg-white text-zinc-950 shadow-sm"
+      maskSize={110}
     />
   );
 }`,
-    reactExamples: [
-      {
-        title: "Image reveal",
-        code: `"use client";
-
-import { CursorTextReveal } from "@/components/cursor-text-reveal";
-
-export function ImageRevealExample() {
-  return (
-    <CursorTextReveal
-      baseText="We chase moments in time to feel alive."
-      revealText="We keep the moments we usually ignore."
-      backgroundImage="https://images.unsplash.com/photo-1730874829217-f7f666e94822?auto=format&fit=crop&w=1800&q=85"
-      backgroundPosition="42% center"
-      mode="image"
-      revealImage="https://images.unsplash.com/photo-1649787652660-df5ac7c91532?auto=format&fit=crop&w=1800&q=85"
-      revealImagePosition="center"
-      maskSize={340}
-      smoothness={0.2}
-      enableGlow={false}
-      showAmbient={false}
-      showGrid={false}
-      baseTextClassName="text-white/45"
-      revealTextClassName="text-white drop-shadow-[0_12px_34px_rgba(0,0,0,0.45)]"
-    />
-  );
-}`,
-      },
-    ],
     tailwindSource: `"use client";
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
@@ -418,718 +329,239 @@ export function CursorTextRevealExample() {
     />
   );
 }`,
-    props: [
-      { name: "baseText", type: "string", description: "Primary text layer visible by default." },
-      { name: "revealText", type: "string", description: "Secondary text revealed inside the circular cursor mask." },
-      { name: "backgroundImage", type: "string", description: "Optional full-card background image for cinematic image reveals." },
-      { name: "backgroundPosition", type: "string", defaultValue: '"center"', description: "CSS background-position for the full-card background image." },
-      { name: "revealImage", type: "string", description: "Image URL used in image reveal mode." },
-      { name: "revealImagePosition", type: "string", defaultValue: '"center"', description: "CSS background-position for the image revealed inside the cursor mask." },
-      { name: "mode", type: '"text" | "image"', defaultValue: '"text"', description: "Reveal text or an image/texture layer beneath the base text." },
-      { name: "maskSize", type: "number", defaultValue: "240", description: "Expanded circular spotlight radius in pixels." },
-      { name: "initialMaskSize", type: "number", defaultValue: "0", description: "Resting mask size before hover or after leave." },
-      { name: "smoothness", type: "number", defaultValue: "0.18", description: "Spring response for cursor tracking. Lower values feel snappier." },
-      { name: "fontSize", type: "string", defaultValue: '"clamp(2.75rem, 8vw, 8rem)"', description: "CSS font-size applied to both aligned text layers." },
-      { name: "align", type: '"left" | "center" | "right"', defaultValue: '"center"', description: "Text alignment and horizontal placement." },
-      { name: "enableGlow", type: "boolean", defaultValue: "true", description: "Show a soft circular glow around the spotlight edge." },
-      { name: "showAmbient", type: "boolean", defaultValue: "true", description: "Render the built-in radial color wash behind the text." },
-      { name: "showGrid", type: "boolean", defaultValue: "true", description: "Render the built-in subtle grid overlay." },
-      { name: "revealBackgroundClassName", type: "string", description: "ClassName for a masked reveal backdrop, useful for solid black spotlight circles." },
-      { name: "baseTextClassName", type: "string", description: "ClassName applied to the default text layer." },
-      { name: "revealTextClassName", type: "string", description: "ClassName applied to the revealed text layer." },
-      { name: "containerClassName", type: "string", description: "ClassName for the outer section." },
-      { name: "className", type: "string", description: "ClassName for the inner content wrapper." },
-    ],
+    resourceLinks: [{ label: "Live demo", href: "/demos/cursor-text-reveal" }],
   },
   {
     slug: "cinematic-logo-cloud",
     name: "Cinematic Logo Cloud",
-    description: "A staggered blur-fade entrance animation for brand logos. Uses framer-motion and fully semantic responsive layouts.",
+    registryCliName: "cinematic-logo-cloud",
+    description: "Social proof with a cinematic entrance: each logo blurs into view in turn, then a soft spotlight follows the pointer and the logos it passes resolve from grey into crisp ink and lift. The marquee variants drift on their own, ease off under the pointer, and can be dragged and flung.",
     categorySlug: "logo-clouds",
-    tags: ["logos", "brand", "marquee", "social proof", "framer-motion", "blur"],
+    tags: ["logos", "logo cloud", "brand", "social proof", "marquee", "spotlight", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 92,
     createdAt: "2024-05-15T00:00:00.000Z",
-    animationKinds: ["spring"],
+    animationKinds: ["hover", "spring", "drag", "scroll"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCinematicLogoCloud,
+    props: [
+      { name: "clients", type: "LogoCloudClient[]", defaultValue: "DEFAULT_LOGO_CLIENTS", description: "Brands: { name, logo?, src?, text?, className?, nameClassName?, invertDark? }. logo is any ReactNode, src an image URL you host; with neither, a drawn monogram is used. slug is still accepted but no longer fetched from a CDN." },
+      { name: "variant", type: "\"grid\" | \"marquee\" | \"marquee-named\"", defaultValue: "\"grid\"", description: "grid: blur-in and spotlight. marquee: drifting pills of marks. marquee-named: marks with names." },
+      { name: "eyebrow", type: "string", defaultValue: "\"Trusted by teams building the future of AI.\"", description: "Small caps label above the logos; empty string hides it." },
+      { name: "description", type: "string", description: "Optional line under the eyebrow." },
+      { name: "speed", type: "number", defaultValue: "40", description: "Marquee drift in px per second." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Grid only: sweeps the spotlight across the logos until someone points at them." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    Preview: Previews.PreviewCinematicLogoCloudRedesign,
+    previewShell: "plain",
     previewSections: [
       {
-        Preview: Previews.PreviewCinematicLogoCloudGrid,
+        title: "Spotlight grid",
+        Preview: Previews.PreviewCinematicLogoCloudRedesign,
         reactSource: `"use client";
+
 import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
+import { AcmeLogo, GlobexLogo, InitechLogo } from "@/components/brand-logos";
 
 const clients = [
-  { name: "OpenAI",       text: true, className: "font-sans font-semibold tracking-tight" },
-  { name: "Bloomberg",    text: true, className: "font-sans font-black tracking-tighter" },
-  { name: "NETFLIX",      slug: "netflix" },
-  { name: "Spotify",      slug: "spotify" },
-  { name: "Raycast",      slug: "raycast" },
-  { name: "Vercel",       slug: "vercel",  invertDark: true },
-  { name: "Stripe",       slug: "stripe" },
-  { name: "Linear",       slug: "linear",  invertDark: true },
-  { name: "GitHub",       slug: "github",  invertDark: true },
-  { name: "Notion",       slug: "notion",  invertDark: true },
+  { name: "Acme", logo: <AcmeLogo /> },
+  { name: "Globex", logo: <GlobexLogo /> },
+  { name: "Initech", logo: <InitechLogo /> },
+  { name: "Umbrella", src: "/logos/umbrella.svg", invertDark: true },
+  { name: "Hooli", text: true, className: "font-black tracking-tight" },
 ];
 
-export function GridLogoCloud() {
+export function CustomerLogos() {
   return (
     <CinematicLogoCloud
       clients={clients}
-      eyebrow="Trusted by teams building the future of AI."
-      description="From prototype to production, autonomously."
+      eyebrow="Trusted by teams building what's next"
+      description="From first prototype to production."
     />
   );
 }`,
       },
       {
-        Preview: Previews.PreviewCinematicLogoCloudMarquee,
+        title: "Named marquee",
+        Preview: Previews.PreviewCinematicLogoCloudMarqueeRedesign,
         reactSource: `"use client";
+
 import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
 
 const clients = [
-  { name: "Stripe",    slug: "stripe" },
-  { name: "Figma",     slug: "figma",     invertDark: true },
-  { name: "Framer",    slug: "framer" },
-  { name: "Linear",    slug: "linear",    invertDark: true },
-  { name: "Vercel",    slug: "vercel",    invertDark: true },
-  { name: "GitHub",    slug: "github",    invertDark: true },
-  { name: "Notion",    slug: "notion",    invertDark: true },
-  { name: "Raycast",   slug: "raycast" },
-  { name: "Loom",      slug: "loom" },
-  { name: "Intercom",  slug: "intercom" },
-  { name: "Twitch",    slug: "twitch" },
+  { name: "Acme", src: "/logos/acme.svg" },
+  { name: "Globex", src: "/logos/globex.svg", invertDark: true },
+  { name: "Initech", src: "/logos/initech.svg" },
+  { name: "Hooli", src: "/logos/hooli.svg" },
 ];
 
-export function MarqueeLogoCloud() {
-  return (
-    <CinematicLogoCloud
-      clients={clients}
-      variant="marquee"
-      eyebrow="Integrates with your entire stack."
-    />
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewCinematicLogoCloudNamed,
-        reactSource: `"use client";
-import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
-
-const clients = [
-  { name: "Stripe",   slug: "stripe",   nameClassName: "font-sans font-semibold tracking-tight" },
-  { name: "Figma",    slug: "figma",    invertDark: true, nameClassName: "font-sans font-semibold tracking-tight" },
-  { name: "Framer",   slug: "framer",   nameClassName: "font-sans font-medium" },
-  { name: "Linear",   slug: "linear",   invertDark: true, nameClassName: "font-sans font-medium tracking-tight" },
-  { name: "Vercel",   slug: "vercel",   invertDark: true, nameClassName: "font-sans font-bold tracking-tight" },
-  { name: "GitHub",   slug: "github",   invertDark: true, nameClassName: "font-sans font-semibold" },
-  { name: "Notion",   slug: "notion",   invertDark: true, nameClassName: "font-sans font-medium" },
-  { name: "Raycast",  slug: "raycast",  nameClassName: "font-sans font-semibold tracking-tight" },
-  { name: "Loom",     slug: "loom",     nameClassName: "font-sans font-bold tracking-tight" },
-  { name: "Intercom", slug: "intercom", nameClassName: "font-sans font-bold" },
-  { name: "Twitch",   slug: "twitch",   nameClassName: "font-sans font-black tracking-tight" },
-  { name: "Spotify",  slug: "spotify",  nameClassName: "font-sans font-black tracking-tight" },
-];
-
-export function NamedMarqueeLogoCloud() {
-  return (
-    <CinematicLogoCloud
-      clients={clients}
-      variant="marquee-named"
-      eyebrow="Used by teams at the world's best companies."
-    />
-  );
+export function IntegrationsMarquee() {
+  return <CinematicLogoCloud clients={clients} variant="marquee-named" eyebrow="Works with your whole stack" speed={36} />;
 }`,
       },
     ],
     reactSource: `"use client";
-import * as React from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
-import { Marquee } from "@/components/ui/marquee";
 
-export type LogoCloudClient = {
-  name: string;
-  slug?: string;
-  text?: boolean;
-  className?: string;
-  invertDark?: boolean;
-};
+import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
+import { AcmeLogo, GlobexLogo, InitechLogo } from "@/components/brand-logos";
 
-export interface CinematicLogoCloudProps {
-  clients: LogoCloudClient[];
-  variant?: "grid" | "marquee";
-  className?: string;
-  eyebrow?: string;
-  description?: string;
-}
+const clients = [
+  { name: "Acme", logo: <AcmeLogo /> },
+  { name: "Globex", logo: <GlobexLogo /> },
+  { name: "Initech", logo: <InitechLogo /> },
+  { name: "Umbrella", src: "/logos/umbrella.svg", invertDark: true },
+  { name: "Hooli", text: true, className: "font-black tracking-tight" },
+];
 
-export function CinematicLogoCloud({
-  clients,
-  variant = "grid",
-  className,
-  eyebrow = "Trusted by teams building the future of AI.",
-  description,
-}: CinematicLogoCloudProps) {
-  const renderClient = (client: LogoCloudClient, size: "lg" | "sm" = "lg") => {
-    if (client.text) {
-      return (
-        <span className={cn(size === "lg" ? "text-xl font-bold text-zinc-900 dark:text-white" : "text-sm font-semibold text-zinc-700 dark:text-zinc-300", client.className)}>
-          {client.name}
-        </span>
-      );
-    }
-    return (
-      <img
-        src={\`https://cdn.simpleicons.org/\${client.slug}\`}
-        alt={client.name}
-        className={cn(size === "lg" ? "h-6 w-auto" : "h-5 w-auto", client.invertDark && "dark:invert")}
-        loading="lazy"
-      />
-    );
-  };
-
-  if (variant === "marquee") {
-    return (
-      <div className={cn("w-full bg-zinc-50/50 py-12 md:py-16 dark:bg-zinc-950", className)}>
-        <p className="mb-8 text-center text-xs font-semibold uppercase tracking-widest text-zinc-400">{eyebrow}</p>
-        <Marquee speed={35}>
-          {clients.map((brand) => (
-            <div key={brand.name} className="flex shrink-0 items-center justify-center rounded-xl border border-zinc-200/80 bg-white px-5 py-3 shadow-sm dark:border-white/8 dark:bg-zinc-900">
-              {renderClient(brand, "sm")}
-            </div>
-          ))}
-        </Marquee>
-      </div>
-    );
-  }
-
+export function CustomerLogos() {
   return (
-    <div className={cn("w-full bg-zinc-50/50 py-12 md:py-16 dark:bg-zinc-950", className)}>
-      <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">{eyebrow}</p>
-        {description && <p className="mt-1 text-xs text-zinc-500">{description}</p>}
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-          variants={{ visible: { transition: { staggerChildren: 0.1 } }, hidden: {} }}
-          className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-6"
-        >
-          {clients.map((brand) => (
-            <motion.div
-              key={brand.name}
-              variants={{
-                hidden: { opacity: 0, y: 20, filter: "blur(12px)" },
-                visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 1.2, ease: [0.16, 1, 0.3, 1] } },
-              }}
-              className="flex min-w-25 items-center justify-center px-2 sm:min-w-30"
-            >
-              {renderClient(brand)}
-            </motion.div>
-          ))}
-        </motion.div>
-      </div>
-    </div>
+    <CinematicLogoCloud
+      clients={clients}
+      eyebrow="Trusted by teams building what's next"
+      description="From first prototype to production."
+    />
   );
 }`,
     tailwindSource: "",
-    registryCliName: "cinematic-logo-cloud",
-    props: [
-      { name: "clients",     type: "LogoCloudClient[]",       description: "Array of brand objects — each needs name plus either slug (simpleicons) or text: true with optional className." },
-      { name: "variant",     type: '"grid" | "marquee"',       description: "grid renders a staggered blur-fade entrance; marquee renders a continuously scrolling pill row.", defaultValue: '"grid"' },
-      { name: "eyebrow",     type: "string",                   description: "Small uppercase label above the logos.", defaultValue: '"Trusted by teams building the future of AI."' },
-      { name: "description", type: "string",                   description: "Optional supporting line shown below the eyebrow in grid variant." },
-      { name: "className",   type: "string",                   description: "Extra classes on the section wrapper." },
-    ]
   },
   {
     slug: "step-flow",
     name: "Step Flow",
     registryCliName: "step-flow",
-    description:
-      "A responsive four-step process section with a sliding highlight, animated image swaps, and hover or click step selection.",
+    description: "A process section with numbered steps beside a deck of cards. Picking a step by hover, click or arrow keys slides the highlight to it on a spring and deals its card to the front while the old card tucks under the back of the deck; with autoplay a progress bar fills under the active step.",
     categorySlug: "feature-sections",
-    tags: ["steps", "process", "feature", "hover", "motion", "framer-motion"],
+    tags: ["steps", "process", "feature section", "tabs", "cards", "deck", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 96,
     createdAt: "2026-05-23",
-    animationKinds: ["hover", "spring", "layout"],
+    animationKinds: ["hover", "spring", "layout", "3d"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewStepFlow,
+    props: [
+      { name: "steps", type: "StepFlowItem[]", description: "Steps: title, optional serial, description, image (+ imageAlt) and accent. Without an image the card is drawn in the accent." },
+      { name: "defaultStep", type: "number", defaultValue: "0", description: "Step selected on first render." },
+      { name: "onStepChange", type: "(index: number) => void", description: "Called with the index when the selected step changes." },
+      { name: "highlightColor", type: "string", description: "Background of the sliding highlight; defaults to the system grey." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Advances through the steps with a progress bar until someone touches the component." },
+      { name: "autoPlay", type: "boolean", defaultValue: "false", description: "Older name for autoplay." },
+      { name: "autoPlayInterval", type: "number", defaultValue: "3200", description: "Milliseconds per step while autoplaying (min 1200)." },
+      { name: "className", type: "string", description: "Extra classes for the section." },
+      { name: "textClassName", type: "string", description: "Extra classes for the step list column." },
+      { name: "imageClassName", type: "string", description: "Extra classes for the card deck column." },
+    ],
+    Preview: Previews.PreviewStepFlowRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { StepFlow } from "@/components/step-flow";
+import { StepFlow, type StepFlowItem } from "@/components/step-flow";
 
-const steps = [
-  {
-    serial: "01",
-    title: "Audit the idea",
-    description: "Collect the messy notes, user goals, and brand cues before a single section is built.",
-    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=85",
-  },
-  {
-    serial: "02",
-    title: "Sketch the system",
-    description: "Turn the direction into reusable layout rules, component states, and rhythm.",
-    image: "https://images.unsplash.com/photo-1559028012-481c04fa702d?auto=format&fit=crop&w=1200&q=85",
-  },
-  {
-    serial: "03",
-    title: "Layer the motion",
-    description: "Add transitions that guide attention without making the page feel busy.",
-    image: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=85",
-  },
-  {
-    serial: "04",
-    title: "Ship the page",
-    description: "Package a polished, responsive experience your users can copy into production.",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1200&q=85",
-  },
+const steps: StepFlowItem[] = [
+  { serial: "01", title: "Audit the idea", description: "Collect the messy notes, user goals and brand cues before a single section is built." },
+  { serial: "02", title: "Sketch the system", description: "Turn the direction into reusable layout rules, component states and rhythm." },
+  { serial: "03", title: "Layer the motion", description: "Add transitions that guide attention without making the page feel busy.", accent: "#ff375f" },
+  // Pass an image to show a photo on the card instead of the drawn art.
+  { serial: "04", title: "Ship the page", description: "Package a polished, responsive page your users can copy into production.", image: "/images/ship.jpg", imageAlt: "The finished landing page" },
 ];
 
-export function StepFlowDemo() {
+export function ProcessSection() {
   return (
     <StepFlow
       steps={steps}
-      highlightColor="rgb(229 229 229)"
-      className="mx-auto max-w-6xl"
+      onStepChange={(i) => console.log("step", i + 1)}
+      className="mx-auto max-w-5xl"
     />
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "steps", type: "StepFlowItem[]", description: "Process steps with serial number, title, optional description, and image URL." },
-      { name: "defaultStep", type: "number", defaultValue: "0", description: "Initial active step index." },
-      { name: "highlightColor", type: "string", defaultValue: '"rgb(229 229 229)"', description: "Color used by the moving active step panel." },
-      { name: "autoPlay", type: "boolean", defaultValue: "false", description: "Automatically advance through steps." },
-      { name: "autoPlayInterval", type: "number", defaultValue: "3500", description: "Delay between auto-play step changes in milliseconds." },
-      { name: "className", type: "string", description: "ClassName for the outer section." },
-      { name: "textClassName", type: "string", description: "ClassName for the step list column." },
-      { name: "imageClassName", type: "string", description: "ClassName for the image preview column." },
-    ],
   },
   {
     slug: "phone-input",
     name: "Phone Input",
-    description: "A modern animated phone number input with country selector and validation.",
+    registryCliName: "phone-input",
+    description: "A phone number field with a searchable country picker that formats the number in each country's own pattern. Digits drop into place with a small overshoot, a hairline fills toward a complete number, a check draws itself when it's valid and the country chip flips over when you change country.",
     categorySlug: "cards",
-    tags: ["form", "phone", "country", "input", "validation", "framer-motion"],
+    tags: ["phone", "input", "form", "country picker", "validation", "mask", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-05-16",
-    animationKinds: ["hover", "spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewPhoneInput,
+    animationKinds: ["type", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "defaultCountry", type: "string", defaultValue: "\"US\"", description: "ISO 3166-1 alpha-2 code of the country selected at first." },
+      { name: "label", type: "string", description: "Visible label above the field; also its accessible name." },
+      { name: "placeholder", type: "string", description: "Placeholder for the number. Defaults to an example in the country's format." },
+      { name: "minDigits", type: "number", description: "Digits needed before the number counts as valid. Defaults to the country's full length." },
+      { name: "countries", type: "Country[]", defaultValue: "COUNTRIES", description: "The countries to offer: iso, name, code, max digits and an optional # mask." },
+      { name: "onChange", type: "(value: PhoneInputValue) => void", description: "Called with { iso, code, number, isValid } when the user types or picks a country." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a few example numbers, switching country between them, until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the 340px-wide wrapper." },
+    ],
+    Preview: Previews.PreviewPhoneInputRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronDown, Search, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { PhoneInput, type PhoneInputValue } from "@/components/phone-input";
 
-export interface Country {
-  iso: string;
-  name: string;
-  code: string;
-  max: number;
-}
-
-export const COUNTRIES: Country[] = [
-  { iso: "US", name: "United States", code: "+1", max: 10 },
-  { iso: "CA", name: "Canada", code: "+1", max: 10 },
-  { iso: "MX", name: "Mexico", code: "+52", max: 10 },
-  { iso: "GB", name: "United Kingdom", code: "+44", max: 10 },
-  { iso: "FR", name: "France", code: "+33", max: 9 },
-  { iso: "DE", name: "Germany", code: "+49", max: 11 },
-  { iso: "IT", name: "Italy", code: "+39", max: 10 },
-  { iso: "ES", name: "Spain", code: "+34", max: 9 },
-  { iso: "NL", name: "Netherlands", code: "+31", max: 9 },
-  { iso: "SE", name: "Sweden", code: "+46", max: 9 },
-  { iso: "IE", name: "Ireland", code: "+353", max: 9 },
-  { iso: "PT", name: "Portugal", code: "+351", max: 9 },
-  { iso: "IN", name: "India", code: "+91", max: 10 },
-  { iso: "CN", name: "China", code: "+86", max: 11 },
-  { iso: "JP", name: "Japan", code: "+81", max: 10 },
-  { iso: "KR", name: "South Korea", code: "+82", max: 10 },
-  { iso: "SG", name: "Singapore", code: "+65", max: 8 },
-  { iso: "HK", name: "Hong Kong", code: "+852", max: 8 },
-  { iso: "AU", name: "Australia", code: "+61", max: 9 },
-  { iso: "NZ", name: "New Zealand", code: "+64", max: 9 },
-  { iso: "BR", name: "Brazil", code: "+55", max: 11 },
-  { iso: "AR", name: "Argentina", code: "+54", max: 10 },
-  { iso: "AE", name: "United Arab Emirates", code: "+971", max: 9 },
-  { iso: "SA", name: "Saudi Arabia", code: "+966", max: 9 },
-  { iso: "IL", name: "Israel", code: "+972", max: 9 },
-  { iso: "EG", name: "Egypt", code: "+20", max: 10 },
-  { iso: "ZA", name: "South Africa", code: "+27", max: 9 },
-  { iso: "TR", name: "Turkey", code: "+90", max: 10 },
-  { iso: "RU", name: "Russia", code: "+7", max: 10 },
-];
-
-function flagFromIso(iso: string): string {
-  return iso
-    .toUpperCase()
-    .split("")
-    .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
-    .join("");
-}
-
-function formatDigits(digits: string): string {
-  if (!digits) return "";
-  const groups: string[] = [];
-  for (let i = 0; i < digits.length; i += 3) {
-    groups.push(digits.slice(i, i + 3));
-  }
-  return groups.join(" ");
-}
-
-export interface PhoneInputValue {
-  iso: string;
-  code: string;
-  number: string;
-  isValid: boolean;
-}
-
-export interface PhoneInputProps {
-  defaultCountry?: string;
-  placeholder?: string;
-  label?: string;
-  minDigits?: number;
-  onChange?: (value: PhoneInputValue) => void;
-  className?: string;
-}
-
-export function PhoneInput({
-  defaultCountry = "US",
-  placeholder = "Phone number",
-  label,
-  minDigits = 7,
-  onChange,
-  className,
-}: PhoneInputProps) {
-  const [selectedIso, setSelectedIso] = useState(defaultCountry);
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [digits, setDigits] = useState("");
-  const [touched, setTouched] = useState(false);
-  const [focused, setFocused] = useState(false);
-
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const phoneInputRef = useRef<HTMLInputElement | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
-
-  const selected = useMemo(
-    () => COUNTRIES.find((c) => c.iso === selectedIso) ?? COUNTRIES[0],
-    [selectedIso],
-  );
-
-  const isValid = digits.length >= minDigits;
-  const hasError = touched && !focused && digits.length > 0 && !isValid;
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return COUNTRIES;
-    return COUNTRIES.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.code.includes(q) ||
-        c.iso.toLowerCase().includes(q),
-    );
-  }, [search]);
-
-  useEffect(() => {
-    onChange?.({
-      iso: selected.iso,
-      code: selected.code,
-      number: digits,
-      isValid,
-    });
-  }, [selected.iso, selected.code, digits, isValid, onChange]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setSearch("");
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: globalThis.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        setSearch("");
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [open]);
-
-  useEffect(() => {
-    if (open) {
-      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
-      return () => cancelAnimationFrame(id);
-    }
-  }, [open]);
-
-  const handleDigitsChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value.replace(/\\D/g, "");
-      setDigits(raw.slice(0, selected.max));
-    },
-    [selected.max],
-  );
-
-  const handleSelect = useCallback((iso: string) => {
-    setSelectedIso(iso);
-    setOpen(false);
-    setSearch("");
-    requestAnimationFrame(() => phoneInputRef.current?.focus());
-  }, []);
-
-  const handleTriggerKey = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      setOpen(true);
-    }
-  };
-
-  const ringColor = focused
-    ? "rgb(99,102,241)"
-    : hasError
-      ? "rgb(239,68,68)"
-      : "rgb(229,231,235)";
-  const ringShadow = focused
-    ? "0 0 0 4px rgba(99,102,241,0.14), 0 1px 2px rgba(0,0,0,0.03)"
-    : hasError
-      ? "0 0 0 4px rgba(239,68,68,0.10)"
-      : "0 1px 2px rgba(0,0,0,0.03)";
-  const surfaceBg = focused ? "rgb(255,255,255)" : "rgb(250,250,250)";
+export function CheckoutPhone() {
+  const [phone, setPhone] = useState<PhoneInputValue | null>(null);
 
   return (
-    <div ref={containerRef} className={cn("relative w-full max-w-md", className)}>
-      {label && (
-        <label className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>
-      )}
-
-      <motion.div
-        animate={{
-          borderColor: ringColor,
-          boxShadow: ringShadow,
-          backgroundColor: surfaceBg,
-        }}
-        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-stretch overflow-hidden rounded-xl border"
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (phone?.isValid) console.log("send code to", phone.code + phone.number);
+      }}
+      className="flex w-full max-w-[340px] flex-col gap-4"
+    >
+      <PhoneInput label="Mobile number" defaultCountry="GB" onChange={setPhone} />
+      <button
+        type="submit"
+        disabled={!phone?.isValid}
+        className="h-11 rounded-full bg-[#0071e3] text-[15px] font-semibold text-white disabled:opacity-40"
       >
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          onKeyDown={handleTriggerKey}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          aria-label={\`Country: \${selected.name}\`}
-          className="flex shrink-0 items-center gap-2 border-r border-gray-200 px-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none"
-        >
-          <span className="text-lg leading-none" aria-hidden>
-            {flagFromIso(selected.iso)}
-          </span>
-          <span className="text-sm font-medium text-gray-900">{selected.code}</span>
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="text-gray-400"
-          >
-            <ChevronDown className="size-4" />
-          </motion.span>
-        </button>
-
-        <div className="relative flex-1">
-          <input
-            ref={phoneInputRef}
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            value={formatDigits(digits)}
-            onChange={handleDigitsChange}
-            onFocus={() => setFocused(true)}
-            onBlur={() => {
-              setFocused(false);
-              setTouched(true);
-            }}
-            placeholder={placeholder}
-            aria-label={label ?? "Phone number"}
-            aria-invalid={hasError || undefined}
-            aria-describedby={hasError ? "phone-input-error" : undefined}
-            className="h-12 w-full bg-transparent px-3 pr-10 text-sm text-gray-900 outline-none placeholder:text-gray-400"
-          />
-
-          <AnimatePresence>
-            {isValid && !focused && (
-              <motion.span
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.6 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500"
-                aria-hidden
-              >
-                <Check className="size-4" strokeWidth={2.5} />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
-
-      <AnimatePresence>
-        {hasError && (
-          <motion.p
-            id="phone-input-error"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="mt-1.5 flex items-center gap-1.5 text-xs text-red-500"
-          >
-            <AlertCircle className="size-3.5" />
-            That number looks too short — please add the remaining digits.
-          </motion.p>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            style={{ transformOrigin: "top center" }}
-            className="absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_12px_32px_-12px_rgba(15,23,42,0.18),0_4px_8px_-2px_rgba(15,23,42,0.06)]"
-            role="listbox"
-            aria-label="Country list"
-          >
-            <div className="border-b border-gray-100 p-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  ref={searchInputRef}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search country or code"
-                  aria-label="Search countries"
-                  className="h-9 w-full rounded-md bg-gray-50 pl-8 pr-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:bg-gray-100"
-                />
-              </div>
-            </div>
-
-            <div className="max-h-56 overflow-y-auto py-1">
-              {filtered.length === 0 ? (
-                <div className="px-3 py-6 text-center text-xs text-gray-400">
-                  No countries match &ldquo;{search}&rdquo;
-                </div>
-              ) : (
-                filtered.map((c) => {
-                  const isSelected = c.iso === selected.iso;
-                  return (
-                    <button
-                      key={c.iso}
-                      type="button"
-                      role="option"
-                      aria-selected={isSelected}
-                      onClick={() => handleSelect(c.iso)}
-                      className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors",
-                        isSelected
-                          ? "bg-indigo-50 text-indigo-900"
-                          : "text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none",
-                      )}
-                    >
-                      <span className="text-base leading-none" aria-hidden>
-                        {flagFromIso(c.iso)}
-                      </span>
-                      <span className="flex-1 truncate">{c.name}</span>
-                      <span
-                        className={cn(
-                          "text-xs tabular-nums",
-                          isSelected ? "text-indigo-500" : "text-gray-400",
-                        )}
-                      >
-                        {c.code}
-                      </span>
-                      {isSelected && (
-                        <Check className="size-4 text-indigo-500" strokeWidth={2.5} />
-                      )}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        Send code
+      </button>
+    </form>
   );
 }`,
     tailwindSource: tw,
-    registryCliName: "phone-input",
-    props: [
-      { name: "defaultCountry", type: "string", description: "ISO 3166-1 alpha-2 code for the initially selected country.", defaultValue: "US" },
-      { name: "placeholder", type: "string", description: "Placeholder text shown in the phone number input.", defaultValue: "Phone number" },
-      { name: "label", type: "string", description: "Optional label text displayed above the input." },
-      { name: "minDigits", type: "number", description: "Minimum digits required for validation.", defaultValue: "7" },
-      { name: "onChange", type: "(value: PhoneInputValue) => void", description: "Callback fired when the phone number or country changes." },
-      { name: "className", type: "string", description: "Optional CSS classes to override wrapper styling." }
-    ]
   },
   {
     slug: "hero-aurora-spotlight",
     name: "Aurora Hero Spotlight",
-    description:
-      "A launch hero on a slow aurora: a soft spotlight follows the pointer, the headline catches the light, and a glass product card rises underneath.",
+    description: "A launch hero on a slow aurora with a spotlight that trails the pointer and ribbons of light drifting against it. The glass product card underneath rises in with an overshoot, counts up its numbers and tilts toward the pointer while a glare slides across it.",
     categorySlug: "hero-sections",
-    tags: ["marketing", "gradient", "pointer"],
+    tags: ["hero", "aurora", "spotlight", "landing", "glass", "3d tilt", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 98,
     createdAt: "2026-04-02",
-    animationKinds: ["hover", "gradient"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewHeroAurora,
-    previewShell: "plain",
+    animationKinds: ["hover", "spring", "3d", "parallax"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "eyebrow", type: "string", description: "Pill text above the headline." },
+      { name: "eyebrow", type: "string", defaultValue: "\"Introducing Aurora 2.0\"", description: "Pill text above the headline." },
       { name: "title", type: "ReactNode", description: "Headline." },
       { name: "subtitle", type: "string", description: "Supporting line." },
       { name: "primary", type: "{ label: string; href: string }", description: "Primary call to action." },
       { name: "secondary", type: "{ label: string; href: string }", description: "Secondary call to action." },
-      { name: "spotlight", type: "string", defaultValue: "\"rgba(56,189,248,0.22)\"", description: "Colour of the pointer spotlight." },
+      { name: "spotlight", type: "string", defaultValue: "\"rgba(100,210,255,0.22)\"", description: "Colour of the light that follows the pointer." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves a pretend pointer across the hero until someone moves over it." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewHeroAuroraSpotlightRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { HeroAurora } from "@/components/hero-aurora-spotlight";
 
-export function Hero() {
+export function LandingHero() {
   return (
     <HeroAurora
-      eyebrow="Now with realtime sync"
-      title="The workspace that keeps up with you"
-      subtitle="Docs, tasks and decisions in one fast, keyboard-first place."
-      primary={{ label: "Get started free", href: "/signup" }}
-      secondary={{ label: "See it in action", href: "/demo" }}
+      eyebrow="Now with live analytics"
+      title="See every launch land."
+      subtitle="Realtime dashboards for teams that ship weekly. Set up in five minutes."
+      primary={{ label: "Start free", href: "/signup" }}
+      secondary={{ label: "Watch the demo", href: "/demo" }}
+      spotlight="rgba(191,90,242,0.22)"
     />
   );
 }`,
@@ -1138,26 +570,26 @@ export function Hero() {
   {
     slug: "bento-signal-grid",
     name: "Signal Bento Grid",
-    description:
-      "A monitoring bento: a live latency chart, 30 days of uptime bars, a request counter that counts up in view, and edge-region health.",
+    description: "A service health bento: a latency line that scrolls live, 30 days of uptime bars, a request counter and edge-region health. Point at the chart and a sprung cursor rides the line reading the value under it; the uptime bars spring up in view and explain any day on hover or with the arrow keys.",
     categorySlug: "bento-grids",
-    tags: ["dashboard", "metrics"],
+    tags: ["bento", "dashboard", "monitoring", "status", "metrics", "uptime", "chart", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 91,
     createdAt: "2026-03-18",
-    animationKinds: ["scroll", "gradient"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewBentoMetrics,
-    previewShell: "plain",
+    animationKinds: ["hover", "spring", "scroll"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "latency", type: "number", defaultValue: "42", description: "Latency in ms the live chart hovers around." },
       { name: "uptime", type: "string", defaultValue: "\"99.98%\"", description: "Uptime shown on the uptime tile." },
       { name: "days", type: "(\"ok\" | \"degraded\" | \"down\")[]", description: "Daily status for the uptime bars, oldest first." },
-      { name: "requests", type: "number", description: "Requests served, counted up in view." },
+      { name: "requests", type: "number", defaultValue: "12480331", description: "Requests served; rolls up in view, then ticks while live." },
       { name: "regions", type: "{ name: string; ms: number; status?: \"ok\" | \"degraded\" }[]", description: "Edge regions and their latency." },
-      { name: "live", type: "boolean", defaultValue: "true", description: "Keep the latency chart ticking." },
+      { name: "live", type: "boolean", defaultValue: "true", description: "Keep the chart scrolling and the counters ticking." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the chart cursor back and forth until someone points at the grid." },
       { name: "className", type: "string", description: "Extra classes on the grid." },
     ],
+    Preview: Previews.PreviewBentoSignalGridRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { BentoSignals } from "@/components/bento-signal-grid";
@@ -1182,33 +614,49 @@ export function StatusGrid() {
   {
     slug: "nebula-glass-card",
     name: "Nebula Glass Card",
-    description: "3D tilt card with spring physics and luminous edge lighting.",
+    description: "A frosted glass card floating over a slowly drifting nebula. It tilts toward the pointer on springs with its layers at different depths, a rim light runs round the edge on the pointer's side, and a press dips the card in and flashes the rim before it springs back.",
     categorySlug: "cards",
-    tags: ["product", "depth"],
+    tags: ["card", "glass", "glassmorphism", "tilt", "3d", "pricing", "product", "hover", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 104,
     createdAt: "2026-04-28",
-    animationKinds: ["3d", "spring", "hover"],
+    animationKinds: ["hover", "press", "3d", "spring", "parallax"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCardTilt,
+    props: [
+      { name: "eyebrow", type: "string", defaultValue: "\"Nebula Pro\"", description: "Small label above the title." },
+      { name: "title", type: "string", defaultValue: "\"Render anywhere\"", description: "Card heading." },
+      { name: "description", type: "string", description: "One or two lines under the heading." },
+      { name: "stats", type: "{ label: string; value: string }[]", defaultValue: "3 sample stats", description: "Up to three figures along the bottom. An empty array hides the row." },
+      { name: "cta", type: "string", defaultValue: "\"Upgrade\"", description: "Button label. An empty string hides the button." },
+      { name: "onAction", type: "() => void", description: "Called when the button is pressed." },
+      { name: "hues", type: "[string, string, string]", defaultValue: "[\"#bf5af2\", \"#0a84ff\", \"#ff6482\"]", description: "Colours for the nebula behind the glass and the rim light." },
+      { name: "tiltStrength", type: "number", defaultValue: "12", description: "Maximum tilt in degrees." },
+      { name: "children", type: "ReactNode", description: "Replaces the default body (eyebrow, title, description, stats)." },
+      { name: "hint", type: "string", defaultValue: "\"Move over the glass, then press it.\"", description: "Caption under the card. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a virtual pointer across the card, pressing now and then, until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewNebulaGlassCardRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { NebulaGlassCard } from "@/components/nebula-glass-card";
 
-export function NebulaCard() {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rx = useSpring(useTransform(y, [-40, 40], [8, -8]), { stiffness: 260, damping: 20 });
-  const ry = useSpring(useTransform(x, [-40, 40], [-8, 8]), { stiffness: 260, damping: 20 });
-
+export function PlanCard() {
   return (
-    <motion.div style={{ rotateX: rx, rotateY: ry, transformPerspective: 900 }} onMouseMove={(e) => {
-      const r = e.currentTarget.getBoundingClientRect();
-      x.set(e.clientX - r.left - r.width / 2);
-      y.set(e.clientY - r.top - r.height / 2);
-    }} onMouseLeave={() => { x.set(0); y.set(0); }} className="rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6">
-      <p className="text-white">Tilt depth</p>
-    </motion.div>
+    <NebulaGlassCard
+      eyebrow="Team plan"
+      title="Ship previews faster"
+      description="Unlimited preview builds, shared environments and priority support."
+      stats={[
+        { label: "Seats", value: "25" },
+        { label: "Builds", value: "Unlimited" },
+        { label: "Support", value: "24/7" },
+      ]}
+      cta="Start free trial"
+      hues={["#30d158", "#0a84ff", "#bf5af2"]}
+      onAction={() => console.log("trial")}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1216,25 +664,54 @@ export function NebulaCard() {
   {
     slug: "float-glass-navbar",
     name: "Float Glass Navbar",
-    description: "Glass navigation rail with spring entrance and CTA emphasis.",
+    description: "A floating glass navigation bar: a soft lens slides under the link you point at, thinning as it travels and stretching as it lands, then glides back to the active link. Once the page scrolls it tucks itself into a compact pill, and when the links no longer fit they fold into a springy menu.",
     categorySlug: "navbars",
-    tags: ["layout", "glass"],
+    tags: ["navbar", "navigation", "header", "glass", "sticky", "responsive", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 87,
     createdAt: "2026-02-10",
-    animationKinds: ["spring", "hover"],
+    animationKinds: ["hover", "spring", "scroll", "layout"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewNavbarFloating,
+    props: [
+      { name: "brand", type: "string", defaultValue: "\"Nexus\"", description: "Wordmark next to the logo. It folds away when the bar condenses." },
+      { name: "logo", type: "ReactNode", description: "Your logo. Defaults to a drawn mark." },
+      { name: "links", type: "{ label: string; href: string }[]", defaultValue: "DEFAULT_NAV_LINKS", description: "Navigation links." },
+      { name: "activeHref", type: "string", description: "Controlled active link." },
+      { name: "defaultActiveHref", type: "string", description: "Active link when uncontrolled. Defaults to the first link." },
+      { name: "cta", type: "{ label: string; href?: string; onClick?: () => void } | null", defaultValue: "{ label: \"Get started\" }", description: "Call-to-action pill on the right. null hides it." },
+      { name: "onNavigate", type: "(href: string) => void", description: "Called when a link is clicked. When set, the browser's own navigation is prevented so you can route yourself." },
+      { name: "condensed", type: "boolean", description: "Force the compact pill. Leave undefined to condense after scrolling past condenseAt." },
+      { name: "scrollContainerRef", type: "RefObject<HTMLElement | null>", description: "Scroll container to watch instead of the window." },
+      { name: "condenseAt", type: "number", defaultValue: "24", description: "Scroll distance in px after which the bar condenses." },
+      { name: "position", type: "\"sticky\" | \"fixed\" | \"static\"", defaultValue: "\"sticky\"", description: "How the bar is pinned." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tours the links and breathes between wide and compact until someone points at it." },
+      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+    ],
+    Preview: Previews.PreviewFloatGlassNavbarRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { usePathname, useRouter } from "next/navigation";
+import { FloatGlassNavbar } from "@/components/float-glass-navbar";
 
-export function FloatingNav() {
+const links = [
+  { label: "Product", href: "/product" },
+  { label: "Pricing", href: "/pricing" },
+  { label: "Docs", href: "/docs" },
+  { label: "Changelog", href: "/changelog" },
+];
+
+export function SiteHeader() {
+  const router = useRouter();
+  const pathname = usePathname();
   return (
-    <motion.header initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur-xl">
-      <span className="text-sm font-semibold text-white">Brand</span>
-      <motion.button whileHover={{ scale: 1.03 }} className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-900">Start</motion.button>
-    </motion.header>
+    <FloatGlassNavbar
+      brand="Acme"
+      links={links}
+      activeHref={pathname}
+      onNavigate={(href) => router.push(href)}
+      cta={{ label: "Sign up", onClick: () => router.push("/signup") }}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1242,31 +719,39 @@ export function FloatingNav() {
   {
     slug: "orbit-footer",
     name: "Orbit Footer",
-    description:
-      "A complete site footer: brand and newsletter signup, link columns with badges, a live status pill and a giant ghost wordmark that rises into view.",
+    description: "A complete site footer with brand, a newsletter signup, link columns with badges, a live status pill and social links. Under it a giant ghost wordmark rises from behind the legal bar, and its letters lift and ink in like a wave following the pointer.",
     categorySlug: "footers",
-    tags: ["layout"],
+    tags: ["footer", "site footer", "newsletter", "links", "status", "wordmark", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 62,
     createdAt: "2026-01-22",
-    animationKinds: ["hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewFooterMini,
-    previewShell: "plain",
+    animationKinds: ["hover", "spring", "press"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "brand", type: "string", defaultValue: "\"Orbit\"", description: "Wordmark shown top-left and as the ghost word." },
+      { name: "brand", type: "string", defaultValue: "\"Orbit\"", description: "Wordmark shown top-left and as the giant ghost word." },
       { name: "tagline", type: "string", description: "Line under the brand." },
       { name: "columns", type: "{ title: string; links: { label: string; href: string; badge?: string }[] }[]", description: "Link columns." },
       { name: "status", type: "string | null", defaultValue: "\"All systems normal\"", description: "Status pill text; null hides it." },
       { name: "statusHref", type: "string", defaultValue: "\"#\"", description: "Where the status pill links." },
-      { name: "onSubscribe", type: "(email: string) => Promise<void> | void", description: "Newsletter handler; a promise shows the pending state." },
-      { name: "showNewsletter", type: "boolean", defaultValue: "true", description: "Show the newsletter field." },
+      { name: "onSubscribe", type: "(email: string) => Promise<void> | void", description: "Called with a validated email. A promise shows the pending state, a throw shows the error state. Without it the form simulates success locally." },
+      { name: "showNewsletter", type: "boolean", defaultValue: "true", description: "Show the newsletter form." },
       { name: "showWordmark", type: "boolean", defaultValue: "true", description: "Draw the giant ghost wordmark." },
+      { name: "socials", type: "{ label: string; href: string; icon: ReactNode }[]", defaultValue: "X and GitHub", description: "Icon links next to the status pill." },
+      { name: "year", type: "number", description: "Year in the copyright line; omitted when not given." },
+      { name: "legal", type: "string", description: "Text after the copyright sign. Defaults to the brand." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a wave through the wordmark until someone points at the footer." },
       { name: "className", type: "string", description: "Extra classes on the footer." },
     ],
+    Preview: Previews.PreviewOrbitFooterRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { OrbitFooter } from "@/components/orbit-footer";
+
+async function addToNewsletter(email: string) {
+  // Call your email provider here.
+  console.log("subscribe", email);
+}
 
 export function SiteFooter() {
   return (
@@ -1274,9 +759,10 @@ export function SiteFooter() {
       brand="Orbit"
       tagline="Interfaces that move, shipped as code you own."
       status="All systems normal"
-      onSubscribe={async (email) => {
-        await fetch("/api/subscribe", { method: "POST", body: JSON.stringify({ email }) });
-      }}
+      statusHref="/status"
+      year={2026}
+      legal="Orbit Labs"
+      onSubscribe={addToNewsletter}
     />
   );
 }`,
@@ -1285,39 +771,44 @@ export function SiteFooter() {
   {
     slug: "depth-testimonials",
     name: "Depth Testimonials",
-    description:
-      "Testimonials stacked in depth: the front card reads clearly, the next wait behind it, and cycling sends the front card to the back. Auto-advances and pauses on hover.",
+    description: "Testimonials stacked down a corridor: the front card reads clearly and the rest wait behind it, softer and further away. Next flies the front card past you while the deck surges forward and overshoots, and you can drag the deck to pull it through by hand.",
     categorySlug: "testimonials",
-    tags: ["social-proof"],
+    tags: ["testimonials", "social proof", "carousel", "3d", "depth", "drag", "quotes", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 76,
     createdAt: "2026-04-12",
-    animationKinds: ["scroll", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewTestimonialStack,
-    previewShell: "plain",
+    animationKinds: ["drag", "spring", "3d"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "items", type: "{ quote: string; name: string; role?: string; tone?: [string, string] }[]", description: "Testimonials with bylines." },
-      { name: "quotes", type: "string[]", description: "Plain quotes (older API); used when items is not given." },
-      { name: "interval", type: "number", defaultValue: "4800", description: "Auto-advance interval in ms; 0 turns it off." },
-      { name: "heading", type: "string", defaultValue: "\"Loved by people who ship\"", description: "Section heading." },
-      { name: "className", type: "string", description: "Extra classes on the section." },
+      { name: "items", type: "DepthTestimonial[]", defaultValue: "DEFAULT_DEPTH_TESTIMONIALS", description: "Testimonials, front first: { quote, name, role?, tone?: [string, string] }. tone is the avatar gradient." },
+      { name: "quotes", type: "string[]", description: "Plain quotes without bylines (older API); used when items is not given." },
+      { name: "heading", type: "string", defaultValue: "\"Loved by people who ship\"", description: "Heading above the deck. An empty string hides the header." },
+      { name: "eyebrow", type: "string", defaultValue: "\"Testimonials\"", description: "Small caption above the heading." },
+      { name: "hint", type: "string", defaultValue: "\"Drag the deck, or use the arrows.\"", description: "Hint under the controls. An empty string hides it." },
+      { name: "interval", type: "number", defaultValue: "0", description: "Auto-advance every this many ms, paused on hover and focus. 0 turns it off." },
+      { name: "onChange", type: "(index: number) => void", description: "Called with the index of the testimonial that comes to the front." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pulls the deck and flies cards past every 2.8s until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the section." },
     ],
+    Preview: Previews.PreviewDepthTestimonialsRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { DepthTestimonials } from "@/components/depth-testimonials";
 
 export function Testimonials() {
   return (
-    <DepthTestimonials
-      heading="Loved by people who ship"
-      interval={5000}
-      items={[
-        { quote: "We rebuilt our pricing page in an afternoon.", name: "Priya Raman", role: "Design lead, Fieldnote" },
-        { quote: "Accessibility review took ten minutes.", name: "Tomás Reyes", role: "Frontend engineer, Harbor" },
-        { quote: "It feels like Linear met a motion lab.", name: "Mei Tanaka", role: "Founder, Quietly" },
-      ]}
-    />
+    <section className="flex justify-center py-24">
+      <DepthTestimonials
+        heading="Teams ship faster with it"
+        items={[
+          { quote: "We rebuilt our pricing page in an afternoon.", name: "Priya Raman", role: "Design lead, Fieldnote" },
+          { quote: "Accessibility review took ten minutes, not a week.", name: "Tomas Reyes", role: "Frontend engineer, Harborline" },
+          { quote: "Launch week sign-ups were up a third.", name: "Mei Tanaka", role: "Founder, Quietly", tone: ["#7ee0a1", "#1fa463"] },
+        ]}
+        onChange={(i) => console.log("showing", i)}
+      />
+    </section>
   );
 }`,
     tailwindSource: tw,
@@ -1325,29 +816,45 @@ export function Testimonials() {
   {
     slug: "toggle-pricing-pro",
     name: "Toggle Pricing",
-    description: "Annual/monthly toggle with spring knob and contextual savings callout.",
+    description: "Pricing cards with a monthly and yearly switch. The knob squashes and stretches with its own speed as it slides, the saving badge pops in, and every price rolls digit by digit to its new figure with a small overshoot.",
     categorySlug: "pricing-sections",
-    tags: ["billing", "motion"],
+    tags: ["pricing", "toggle", "billing", "plans", "switch", "odometer", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 112,
     createdAt: "2026-05-01",
-    animationKinds: ["spring", "layout"],
-    dependencies: ["framer-motion", "react"],
-    Preview: Previews.PreviewPricingToggle,
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "plans", type: "PricingPlan[]", description: "Plans: id, name, monthly and annual per-month prices, optional description, features (up to 4), cta and featured. Defaults to three sample plans." },
+      { name: "defaultBilling", type: "\"monthly\" | \"annual\"", defaultValue: "\"annual\"", description: "Billing period shown first." },
+      { name: "onBillingChange", type: "(billing: \"monthly\" | \"annual\") => void", description: "Called when the user flips the switch." },
+      { name: "onSelect", type: "(planId: string, billing: \"monthly\" | \"annual\") => void", description: "Called when a plan's button is pressed." },
+      { name: "currency", type: "string", defaultValue: "\"$\"", description: "Currency symbol before the price." },
+      { name: "savingsLabel", type: "string", description: "Badge next to Yearly; defaults to the best saving across plans, e.g. \"Save 25%\"." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips the billing period every 2.6s until someone touches the component." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewTogglePricingProRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { PricingToggle, type PricingPlan } from "@/components/toggle-pricing-pro";
 
-export function PricingToggle() {
-  const [annual, setAnnual] = useState(true);
+const plans: PricingPlan[] = [
+  { id: "hobby", name: "Hobby", monthly: 0, annual: 0, description: "Free forever.", features: ["1 project", "Community support"] },
+  { id: "team", name: "Team", monthly: 24, annual: 19, description: "For small teams.", features: ["Unlimited projects", "Shared workspaces", "Priority support"], featured: true, cta: "Start free trial" },
+  { id: "business", name: "Business", monthly: 79, annual: 64, description: "For whole companies.", features: ["SSO and SCIM", "Audit logs", "99.99% SLA"] },
+];
+
+export function Pricing() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-zinc-950 p-6">
-      <button type="button" onClick={() => setAnnual((v) => !v)} className="relative h-8 w-16 rounded-full border border-white/10 bg-white/5">
-        <motion.span className="absolute top-1 left-1 h-6 w-6 rounded-full bg-cyan-300" animate={{ x: annual ? 0 : 32 }} transition={{ type: "spring", stiffness: 500, damping: 35 }} />
-      </button>
-      <p className="mt-4 text-4xl font-semibold text-white">\${annual ? 29 : 39}</p>
-    </div>
+    <PricingToggle
+      plans={plans}
+      defaultBilling="annual"
+      currency="$"
+      onBillingChange={(b) => console.log("billing", b)}
+      onSelect={(plan, billing) => console.log("checkout", plan, billing)}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1355,32 +862,39 @@ export function PricingToggle() {
   {
     slug: "beam-sweep-field",
     name: "Beam Sweep Field",
-    description:
-      "A cinematic dark backdrop where light columns sweep across a fine grid over a horizon glow, with a ready-made hero you can replace with any content.",
+    description: "A dark hero backdrop where columns of light sweep across a fine grid and light up the lines they pass. Move over it and the nearest beam swings onto the pointer, leans into the move and overshoots before drifting back into its sweep.",
     categorySlug: "background-effects",
-    tags: ["ambient"],
+    tags: ["background", "hero", "beams", "grid", "light", "dark", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 84,
     createdAt: "2026-03-30",
-    animationKinds: ["gradient", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewBeamSweep,
-    previewShell: "plain",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "children", type: "ReactNode", description: "Content over the field; defaults to a short hero." },
-      { name: "beams", type: "number", defaultValue: "3", description: "Number of sweeping light columns." },
-      { name: "color", type: "string", defaultValue: "\"#67e8f9\"", description: "Beam colour." },
-      { name: "speed", type: "number", defaultValue: "11", description: "Seconds for one sweep." },
+      { name: "children", type: "ReactNode", description: "Content over the field. Defaults to a short launch hero." },
+      { name: "beams", type: "number", defaultValue: "3", description: "Number of sweeping light columns, 1 to 5." },
+      { name: "color", type: "string", defaultValue: "\"#67e8f9\"", description: "Beam and lit-grid colour. Any CSS colour." },
+      { name: "speed", type: "number", defaultValue: "11", description: "Seconds for one sweep across the field." },
+      { name: "hint", type: "string", defaultValue: "\"Move across the field. The nearest beam follows.\"", description: "Caption at the bottom edge. Pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Swings a beam onto a few points until someone moves over the field." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewBeamSweepFieldRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { BeamField } from "@/components/beam-sweep-field";
 
-export function LaunchHero() {
+export function TracingHero() {
   return (
-    <BeamField beams={4} color="#a78bfa" speed={14}>
-      <h1 className="text-5xl font-semibold tracking-tight text-white">Your launch, lit properly.</h1>
+    <BeamField beams={3} color="#67e8f9" speed={11} hint="" className="min-h-[520px]">
+      <div className="relative max-w-xl text-center">
+        <h1 className="text-5xl font-semibold tracking-[-0.045em] text-white">Every request, traced.</h1>
+        <p className="mt-4 text-[15px] text-white/65">Find the slow line of code behind any page in seconds.</p>
+        <a href="/signup" className="mt-8 inline-flex h-11 items-center rounded-full bg-white px-5 text-sm font-semibold text-[#1d1d1f]">
+          Start tracing
+        </a>
+      </div>
     </BeamField>
   );
 }`,
@@ -1389,51 +903,43 @@ export function LaunchHero() {
   {
     slug: "vector-tilt-scene",
     name: "Vector Tilt Scene",
-    description: "High depth glass panel for hero cards and feature highlights.",
+    description: "A card that is really a little diorama: point at it and it tilts toward you while its paper-cut layers spring apart in depth, overshoot and settle. The layers then drift against the pointer for real parallax, and a sheen follows the pointer across the glass label.",
     categorySlug: "three-d-components",
-    tags: ["depth", "product"],
+    tags: ["3d", "tilt", "parallax", "depth", "card", "hero card", "layers", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 96,
     createdAt: "2026-04-20",
-    animationKinds: ["3d", "spring"],
+    animationKinds: ["hover", "3d", "parallax", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCardTilt,
+    props: [
+      { name: "eyebrow", type: "string", defaultValue: "\"Scene depth\"", description: "Small caption on the glass label." },
+      { name: "title", type: "string", defaultValue: "\"Vector Tilt Scene\"", description: "Title on the glass label, also used in the accessible name." },
+      { name: "description", type: "string", defaultValue: "\"Layers that open up as you look closer.\"", description: "One line under the title." },
+      { name: "children", type: "ReactNode", description: "Replaces the glass label with your own content, floating on the top layer." },
+      { name: "maxTilt", type: "number", defaultValue: "14", description: "Largest tilt in degrees." },
+      { name: "depth", type: "number", defaultValue: "26", description: "Gap between layers when the scene pops open, in px." },
+      { name: "glare", type: "boolean", defaultValue: "true", description: "Sheen that follows the pointer." },
+      { name: "hint", type: "string", defaultValue: "\"Point at the card.\"", description: "Hint under the card. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pops the scene open and tilts it in a slow figure of eight until someone touches it." },
+      { name: "className", type: "string", description: "Classes for the root." },
+    ],
+    Preview: Previews.PreviewVectorTiltSceneRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { VectorTiltScene } from "@/components/vector-tilt-scene";
 
-export function VectorTiltScene() {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const rotateX = useSpring(useTransform(y, [-60, 60], [12, -12]), {
-    stiffness: 240,
-    damping: 22,
-  });
-  const rotateY = useSpring(useTransform(x, [-60, 60], [-12, 12]), {
-    stiffness: 240,
-    damping: 22,
-  });
-
+export function FeatureHighlight() {
   return (
-    <motion.div
-      style={{ rotateX, rotateY, transformPerspective: 1100 }}
-      onMouseMove={(event) => {
-        const bounds = event.currentTarget.getBoundingClientRect();
-        x.set(event.clientX - bounds.left - bounds.width / 2);
-        y.set(event.clientY - bounds.top - bounds.height / 2);
-      }}
-      onMouseLeave={() => {
-        x.set(0);
-        y.set(0);
-      }}
-      className="rounded-3xl border border-white/10 bg-gradient-to-br from-zinc-900 to-zinc-950 p-8 shadow-2xl"
-    >
-      <p className="text-xs uppercase tracking-[0.18em] text-cyan-300">Scene depth</p>
-      <h3 className="mt-4 text-2xl font-semibold text-white">Vector Tilt Scene</h3>
-      <p className="mt-2 text-sm text-zinc-400">
-        A spring-driven glass panel for dimensional product highlights.
-      </p>
-    </motion.div>
+    <div className="flex justify-center py-16">
+      <VectorTiltScene
+        eyebrow="New in 4.0"
+        title="Spaces"
+        description="Every project gets its own room."
+        maxTilt={12}
+        depth={30}
+      />
+    </div>
   );
 }`,
     tailwindSource: tw,
@@ -1441,39 +947,50 @@ export function VectorTiltScene() {
   {
     slug: "glass-login-stack",
     name: "Glass Login Stack",
-    description:
-      "A frosted login card on a slow aurora with ghost cards stacked behind for depth: passkey first, then email and password, with a remember switch and a pending-to-welcome button.",
+    description: "A frosted login card stacked on two ghost cards over a slow aurora: the stack tilts toward the pointer and the ghosts follow a beat late, so the layers peel apart in depth. Passkey first, then email and password with a remember switch; bad input shakes the card, and success swaps it for a drawn-check welcome.",
     categorySlug: "login-forms",
-    tags: ["auth"],
+    tags: ["login", "sign in", "auth", "form", "passkey", "glass", "3d", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 73,
     createdAt: "2026-02-02",
-    animationKinds: ["spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewLoginGlass,
-    previewShell: "plain",
+    animationKinds: ["hover", "press", "spring", "3d", "parallax", "type"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "brand", type: "string", defaultValue: "\"Halo\"", description: "Brand initial and name." },
       { name: "title", type: "string", defaultValue: "\"Welcome back\"", description: "Card heading." },
-      { name: "subtitle", type: "string", description: "Line under the heading." },
-      { name: "onSubmit", type: "(values: { email: string; password: string; remember: boolean }) => Promise<void> | void", description: "Called on sign in; throw to show the error state." },
-      { name: "onPasskey", type: "() => void", description: "Called by the passkey button." },
-      { name: "backdrop", type: "boolean", defaultValue: "true", description: "Draw the aurora backdrop behind the card." },
+      { name: "subtitle", type: "string", defaultValue: "\"Sign in to pick up where you left off.\"", description: "Line under the heading." },
+      { name: "onSubmit", type: "(values: { email: string; password: string; remember: boolean }) => Promise<void> | void", description: "Called after local validation. A promise shows the pending state; throw an Error to show its message. Without it the form simulates success." },
+      { name: "onPasskey", type: "() => Promise<void> | void", description: "Called by the passkey button; the scan animation runs until the promise settles." },
+      { name: "onForgotPassword", type: "() => void", description: "Called by Forgot password?." },
+      { name: "onSignUp", type: "() => void", description: "Shows a Create an account link under the button when set." },
+      { name: "backdrop", type: "boolean", defaultValue: "true", description: "Draw the aurora backdrop. Turn off to place the card on your own background." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a demo sign-in and plays it through on a loop until someone touches the form." },
       { name: "className", type: "string", description: "Extra classes on the root." },
     ],
+    Preview: Previews.PreviewGlassLoginStackRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
+import { useRouter } from "next/navigation";
 import { GlassLogin } from "@/components/glass-login-stack";
 
+async function signIn(email: string, password: string) {
+  // Call your auth provider here and throw on failure.
+  if (password.length < 8) throw new Error("Those details didn't match. Try again.");
+}
+
 export function LoginPage() {
+  const router = useRouter();
   return (
     <GlassLogin
       brand="Halo"
-      onPasskey={() => console.log("passkey")}
       onSubmit={async ({ email, password }) => {
-        const res = await fetch("/api/login", { method: "POST", body: JSON.stringify({ email, password }) });
-        if (!res.ok) throw new Error("Invalid credentials");
+        await signIn(email, password);
+        router.push("/app");
       }}
+      onPasskey={() => console.log("start passkey flow")}
+      onForgotPassword={() => router.push("/reset")}
+      onSignUp={() => router.push("/signup")}
     />
   );
 }`,
@@ -1482,40 +999,49 @@ export function LoginPage() {
   {
     slug: "split-signup-convert",
     name: "Split Signup Convert",
-    description:
-      "A two-panel signup: the product's value on a lit aurora panel, and a short form with SSO, a live password-strength meter and a pending-to-done button.",
+    description: "A two-panel signup: a lit value panel with the pitch and benefits, and a short form with Google and GitHub buttons, an email that confirms itself, and a password whose four-segment strength meter pops each segment in. As the form fills, the benefits on the left tick themselves off and a progress line grows under them.",
     categorySlug: "signup-forms",
-    tags: ["auth", "conversion"],
+    tags: ["signup", "sign up", "auth", "form", "password strength", "conversion", "split", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 69,
     createdAt: "2026-03-08",
-    animationKinds: ["hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewSignupSplit,
-    previewShell: "plain",
+    animationKinds: ["spring", "type", "press", "layout"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "headline", type: "string", description: "Headline on the value panel." },
-      { name: "subhead", type: "string", description: "Line under the headline." },
-      { name: "benefits", type: "string[]", description: "Checked benefits on the value panel." },
+      { name: "subhead", type: "string", description: "Line under the headline (hidden on narrow two-column layouts)." },
+      { name: "benefits", type: "string[]", description: "Benefits that tick off as the form fills. Three fit best." },
+      { name: "badge", type: "string", defaultValue: "\"Free forever plan\"", description: "Pill above the headline; empty string hides it." },
+      { name: "proof", type: "string", defaultValue: "\"Joined by 12,000 teams this year\"", description: "Social proof line with avatars; empty string hides it." },
       { name: "submitLabel", type: "string", defaultValue: "\"Create workspace\"", description: "Submit button label." },
-      { name: "onSubmit", type: "(values: { email: string; password: string }) => Promise<void> | void", description: "Called on submit; a promise shows the pending state, a throw returns to idle." },
-      { name: "showSso", type: "boolean", defaultValue: "true", description: "Show Google and GitHub buttons." },
+      { name: "onSubmit", type: "(values: { email: string; password: string }) => Promise<void> | void", description: "Called after local validation. A promise shows the pending state; throw an Error to show its message. Without it the form simulates success." },
+      { name: "showSso", type: "boolean", defaultValue: "true", description: "Show the Google and GitHub buttons." },
       { name: "onSso", type: "(provider: \"google\" | \"github\") => void", description: "Called by the SSO buttons." },
+      { name: "onSignIn", type: "() => void", description: "Shows an Already have an account? link when set." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a demo signup on a loop until someone touches the form." },
       { name: "className", type: "string", description: "Extra classes on the root." },
     ],
+    Preview: Previews.PreviewSplitSignupConvertRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
+import { useRouter } from "next/navigation";
 import { SplitSignup } from "@/components/split-signup-convert";
 
+async function createAccount(email: string, password: string) {
+  // Call your auth provider here and throw on failure.
+  console.log("create", email, password.length);
+}
+
 export function SignupSection() {
+  const router = useRouter();
   return (
     <SplitSignup
       headline="Ship interfaces your team is proud of"
       benefits={["Every component, live and editable", "One-line installs", "Light and dark"]}
-      onSubmit={async ({ email, password }) => {
-        await fetch("/api/signup", { method: "POST", body: JSON.stringify({ email, password }) });
-      }}
+      onSubmit={({ email, password }) => createAccount(email, password)}
       onSso={(provider) => console.log("sso", provider)}
+      onSignIn={() => router.push("/login")}
     />
   );
 }`,
@@ -1525,98 +1051,140 @@ export function SignupSection() {
     slug: "signup-form",
     name: "Signup Form",
     registryCliName: "signup-form",
-    resourceLinks: [{ label: "Live demo", href: "/demos/signup-form" }],
-    description:
-      "Customizable signup form built on shadcn input + label with subtle framer-motion transitions and async submit states.",
+    description: "A signup card with floating labels that spring up as you type, password rules that tick green as they are met, and inline errors that shake the field that needs fixing. Submitting squeezes the button into a spinner and swells it back out in green; a matching LoginForm ships alongside it.",
     categorySlug: "signup-forms",
-    tags: ["auth", "forms", "signup", "shadcn"],
+    tags: ["signup", "sign up", "login", "auth", "form", "floating label", "validation", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 107,
     createdAt: "2026-05-14",
-    animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    previewShell: "plain",
+    animationKinds: ["spring", "press", "layout", "type"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "title", type: "string", defaultValue: "\"Create your account\"", description: "Main heading displayed at the top." },
-      { name: "subtitle", type: "string", defaultValue: "\"Start building polished interfaces with motion-first components.\"", description: "Supporting text below the title." },
-      { name: "submitLabel", type: "string", defaultValue: "\"Create account\"", description: "Button label in idle state." },
-      { name: "loadingLabel", type: "string", defaultValue: "\"Creating account...\"", description: "Button label while submit is pending." },
-      { name: "successLabel", type: "string", defaultValue: "\"Account created\"", description: "Button label after successful submit." },
-      { name: "className", type: "string", description: "Optional class names for wrapper styling." },
-      { name: "showNameField", type: "boolean", defaultValue: "true", description: "Shows or hides the full-name input." },
-      { name: "showConfirmPasswordField", type: "boolean", defaultValue: "true", description: "Shows or hides the confirm-password input." },
-      { name: "minPasswordLength", type: "number", defaultValue: "8", description: "Minimum password length enforced by validation." },
-      { name: "defaultValues", type: "Partial<SignupFormValues>", description: "Initial values for prefilled form state." },
-      { name: "onSubmit", type: "(values: SignupFormValues) => Promise<void> | void", description: "Submit handler called after validation passes." },
-      { name: "showSocialLogins", type: "boolean", defaultValue: "true", description: "Shows GitHub/Apple/Google buttons under submit." },
-      { name: "onSocialLogin", type: "(provider: \"github\" | \"apple\" | \"google\") => void", description: "Called when a social provider button is clicked." },
+      { name: "title", type: "string", defaultValue: "\"Create your account\"", description: "Heading." },
+      { name: "subtitle", type: "string", defaultValue: "\"Start building polished interfaces with motion-first components.\"", description: "Line under the heading; empty string hides it." },
+      { name: "submitLabel", type: "string", defaultValue: "\"Create account\"", description: "Button label when idle." },
+      { name: "loadingLabel", type: "string", defaultValue: "\"Creating account...\"", description: "Accessible label while the button is a spinner." },
+      { name: "successLabel", type: "string", defaultValue: "\"Account created\"", description: "Button label after success." },
+      { name: "showNameField", type: "boolean", defaultValue: "true", description: "Show first and last name." },
+      { name: "showConfirmPasswordField", type: "boolean", defaultValue: "true", description: "Show the confirm-password field." },
+      { name: "minPasswordLength", type: "number", defaultValue: "8", description: "Minimum password length (at least 6)." },
+      { name: "defaultValues", type: "Partial<SignupFormValues>", description: "Initial values." },
+      { name: "onSubmit", type: "(values: SignupFormValues) => Promise<void> | void", description: "Called after validation. A promise shows the spinner; throw an Error to show its message. Without it the form simulates success." },
+      { name: "showSocialLogins", type: "boolean", defaultValue: "true", description: "Show the GitHub, Apple and Google buttons." },
+      { name: "onSocialLogin", type: "(provider: \"github\" | \"apple\" | \"google\") => void", description: "Called by a social button." },
+      { name: "onSignIn", type: "() => void", description: "Shows an Already have an account? link when set." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a demo signup on a loop until someone touches the form." },
+      { name: "className", type: "string", description: "Extra classes on the card." },
     ],
-    Preview: Previews.PreviewSignupForm,
+    Preview: Previews.PreviewSignupFormRedesign,
+    previewShell: "plain",
     previewSections: [
       {
         title: "Signup Form",
-        Preview: Previews.PreviewSignupForm,
+        Preview: Previews.PreviewSignupFormRedesign,
         reactSource: `"use client";
 
+import { useRouter } from "next/navigation";
 import { SignupForm, type SignupFormValues } from "@/components/signup-form";
 
-export function AuthSignupCard() {
-  async function createAccount(values: SignupFormValues) {
-    await new Promise<void>((resolve) => setTimeout(resolve, 1200));
-  }
+async function createAccount(values: SignupFormValues) {
+  // Call your auth provider here. Throw an Error to show its message on the form.
+  console.log("create account for", values.email);
+}
 
-  return <SignupForm onSubmit={createAccount} />;
+export function AuthSignupCard() {
+  const router = useRouter();
+  return (
+    <SignupForm
+      showConfirmPasswordField={false}
+      onSubmit={createAccount}
+      onSocialLogin={(provider) => console.log("social", provider)}
+      onSignIn={() => router.push("/login")}
+    />
+  );
 }`,
       },
       {
         title: "Login Form",
-        Preview: Previews.PreviewLoginForm,
+        Preview: Previews.PreviewSignupFormLoginRedesign,
         reactSource: `"use client";
 
-import { LoginForm, type LoginFormValues } from "@/components/signup-form/login-form";
+import { useRouter } from "next/navigation";
+import { LoginForm, type LoginFormValues } from "@/components/signup-form";
+
+async function signIn(values: LoginFormValues) {
+  // Call your auth provider here. Throw an Error to show its message on the form.
+  if (values.password !== "correct horse") throw new Error("Wrong email or password.");
+}
 
 export function AuthLoginCard() {
-  async function signIn(values: LoginFormValues) {
-    await new Promise<void>((resolve) => setTimeout(resolve, 1200));
-  }
-
+  const router = useRouter();
   return (
     <LoginForm
       onSubmit={signIn}
-      onForgotPassword={() => console.log("forgot password")}
+      onForgotPassword={() => router.push("/reset")}
+      onSignUp={() => router.push("/signup")}
     />
   );
 }`,
       },
     ],
+    reactSource: `"use client";
+
+import { useRouter } from "next/navigation";
+import { SignupForm, type SignupFormValues } from "@/components/signup-form";
+
+async function createAccount(values: SignupFormValues) {
+  // Call your auth provider here. Throw an Error to show its message on the form.
+  console.log("create account for", values.email);
+}
+
+export function AuthSignupCard() {
+  const router = useRouter();
+  return (
+    <SignupForm
+      showConfirmPasswordField={false}
+      onSubmit={createAccount}
+      onSocialLogin={(provider) => console.log("social", provider)}
+      onSignIn={() => router.push("/login")}
+    />
+  );
+}`,
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/signup-form" }],
   },
   {
     slug: "workbench-sidebar",
     name: "Workbench Sidebar",
-    description:
-      "A product sidebar with a workspace switcher, search, a spring-sliding active highlight, projects, a usage meter and the signed-in user — collapses to an icon rail.",
+    description: "A product sidebar with a workspace switcher, a search that filters the list as you type, a highlight that springs between rows, projects, a usage meter and the signed-in user. Collapsing springs it down to an icon rail while the labels trail after the width one row at a time.",
     categorySlug: "sidebars",
-    tags: ["app-shell"],
+    tags: ["sidebar", "navigation", "app shell", "dashboard", "search", "collapsible", "workspace switcher", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-04-05",
-    animationKinds: ["hover", "layout"],
+    animationKinds: ["hover", "press", "spring", "layout", "type"],
     dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewSidebarShell,
-    previewShell: "plain",
     props: [
-      { name: "workspace", type: "{ name: string; plan?: string }", description: "Workspace shown in the switcher." },
-      { name: "items", type: "{ id: string; label: string; icon: LucideIcon; count?: number }[]", description: "Main navigation." },
+      { name: "workspace", type: "{ name: string; plan?: string; color?: string }", description: "Workspace shown in the switcher. color is any CSS background for its badge." },
+      { name: "workspaces", type: "{ name: string; plan?: string; color?: string }[]", description: "Workspaces listed in the switcher menu." },
+      { name: "onWorkspaceChange", type: "(workspace) => void", description: "Called with the workspace picked from the switcher." },
+      { name: "items", type: "{ id: string; label: string; icon: LucideIcon; count?: number }[]", description: "Main navigation. count shows a badge (a dot on the rail)." },
       { name: "projects", type: "{ id: string; label: string; color: string }[]", description: "Projects list." },
+      { name: "onNewProject", type: "() => void", description: "Called by the + next to Projects." },
       { name: "user", type: "{ name: string; email: string }", description: "Signed-in user." },
-      { name: "usage", type: "number | null", defaultValue: "0.68", description: "Usage meter value 0–1; null hides the card." },
-      { name: "activeId", type: "string", description: "Controlled active item." },
+      { name: "usage", type: "number | null", defaultValue: "0.68", description: "Usage meter value 0-1; null hides the card. Turns orange from 0.9." },
+      { name: "usageLabel", type: "string", defaultValue: "\"Builds this month\"", description: "Meter caption." },
+      { name: "usageNote", type: "string", defaultValue: "\"Resets in 9 days\"", description: "Line under the meter." },
+      { name: "activeId", type: "string", description: "Controlled active item or project." },
       { name: "defaultActiveId", type: "string", defaultValue: "\"overview\"", description: "Initial active item when uncontrolled." },
-      { name: "onNavigate", type: "(id: string) => void", description: "Called when an item is chosen." },
+      { name: "onNavigate", type: "(id: string) => void", description: "Called when an item or project is chosen." },
       { name: "defaultCollapsed", type: "boolean", defaultValue: "false", description: "Start as an icon rail." },
+      { name: "onCollapsedChange", type: "(collapsed: boolean) => void", description: "Called when the sidebar folds or unfolds." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Walks through rows, a search and a collapse until someone touches it." },
       { name: "className", type: "string", description: "Extra classes on the aside." },
     ],
+    Preview: Previews.PreviewWorkbenchSidebarRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { usePathname, useRouter } from "next/navigation";
@@ -1633,6 +1201,7 @@ export function AppSidebar() {
         usage={0.68}
         activeId={active}
         onNavigate={(id) => router.push(\`/\${id}\`)}
+        onNewProject={() => router.push("/projects/new")}
       />
     </div>
   );
@@ -1642,37 +1211,49 @@ export function AppSidebar() {
   {
     slug: "pulse-dashboard-kpis",
     name: "Pulse Dashboard KPIs",
-    description:
-      "A KPI strip with a 7d/30d/90d switcher: each metric gets a delta chip that knows when lower is better, and a sparkline that redraws as you change period.",
+    description: "A row of KPI cards with a period switcher. Switching period morphs every sparkline into its new shape on a spring, rolls each figure to its new value and flips the delta chips, which know when a drop is good news.",
     categorySlug: "dashboards",
-    tags: ["analytics"],
+    tags: ["dashboard", "kpi", "metrics", "analytics", "sparkline", "stats", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 101,
     createdAt: "2026-04-16",
-    animationKinds: ["hover", "scroll"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewDashboardKpi,
-    previewShell: "plain",
+    animationKinds: ["spring", "layout", "hover"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "kpis", type: "Kpi[]", description: "Metrics to show: label, value, delta, lowerIsBetter, trend." },
       { name: "periods", type: "Record<string, Kpi[]>", description: "Named periods with their own metrics; adds a period switcher. Used by default when kpis is not passed." },
       { name: "defaultPeriod", type: "string", description: "Period selected first." },
+      { name: "onPeriodChange", type: "(period: string) => void", description: "Called when the user switches period." },
       { name: "title", type: "string", defaultValue: "\"This week at a glance\"", description: "Heading above the strip." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the periods every 2.8s until someone touches the strip." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewPulseDashboardKpisRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { KpiStrip } from "@/components/pulse-dashboard-kpis";
+import { KpiStrip, type Kpi } from "@/components/pulse-dashboard-kpis";
+
+const periods: Record<string, Kpi[]> = {
+  Week: [
+    { label: "MRR", value: "$48.2k", delta: "+8.1%", trend: [32, 35, 34, 38, 41, 44, 48] },
+    { label: "Churn", value: "1.9%", delta: "-0.4%", lowerIsBetter: true, trend: [3, 2.8, 2.6, 2.4, 2.1, 2, 1.9] },
+    { label: "Active seats", value: "3,214", delta: "+212", trend: [2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2] },
+  ],
+  Month: [
+    { label: "MRR", value: "$186.4k", delta: "+14.0%", trend: [140, 150, 148, 160, 171, 178, 186] },
+    { label: "Churn", value: "2.3%", delta: "+0.2%", lowerIsBetter: true, trend: [2.1, 2.2, 2.0, 2.4, 2.3, 2.2, 2.3] },
+    { label: "Active seats", value: "3,180", delta: "+540", trend: [2.4, 2.5, 2.7, 2.8, 3, 3.1, 3.18] },
+  ],
+};
 
 export function Overview() {
   return (
     <KpiStrip
       title="Revenue at a glance"
-      kpis={[
-        { label: "MRR", value: "$48.2k", delta: "+8.1%", trend: [32, 35, 34, 38, 41, 44, 48] },
-        { label: "Churn", value: "1.9%", delta: "-0.4%", lowerIsBetter: true, trend: [3, 2.8, 2.6, 2.4, 2.1, 2, 1.9] },
-        { label: "Active seats", value: "3,214", delta: "+212", trend: [2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2] },
-      ]}
+      periods={periods}
+      defaultPeriod="Week"
+      onPeriodChange={(p) => console.log("period", p)}
     />
   );
 }`,
@@ -1681,53 +1262,87 @@ export function Overview() {
   {
     slug: "orbital-loader",
     name: "Orbital Loader",
-    description:
-      "A loader with presence: counter-rotating orbits, a glowing dot circling the ring, an arc that sweeps or fills to progress, and rotating status lines.",
+    description: "A loader with a comet that laps the ring, speeding up and easing off each lap, its tail stretching with the speed and shrinking as it slows. Give it progress and the arc fills behind the comet; at 100% the ring pops, turns green and draws a tick.",
     categorySlug: "loaders",
-    tags: ["feedback"],
+    tags: ["loader", "spinner", "progress", "ring", "upload", "status", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 80,
     createdAt: "2026-01-30",
-    animationKinds: ["layout", "gradient"],
+    animationKinds: ["spring", "layout"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewLoaderOrbit,
-    previewShell: "plain",
     props: [
+      { name: "progress", type: "number", description: "0–1 for a ring that fills to progress; leave out for an endless orbit. At 1 it ticks." },
       { name: "size", type: "number", defaultValue: "112", description: "Diameter in px." },
-      { name: "progress", type: "number", description: "0–1 for a determinate ring; omit for an indeterminate sweep." },
-      { name: "messages", type: "string[]", description: "Status lines cycled under the loader; [] hides them." },
-      { name: "color", type: "string", defaultValue: "\"#6366f1\"", description: "Accent colour of the arc and dot." },
-      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+      { name: "messages", type: "string[]", defaultValue: "[\"Warming up the build\", ...]", description: "Status lines cycled under the loader. One line stays fixed; [] hides them." },
+      { name: "doneMessage", type: "string", defaultValue: "\"Done\"", description: "Line shown once progress reaches 1." },
+      { name: "color", type: "string", description: "Accent colour of the arc and comet. Defaults to system blue." },
+      { name: "onComplete", type: "() => void", description: "Called once when progress reaches 1." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs a pretend upload from 0 to 100%, ticks, and starts again, until someone clicks the loader." },
+      { name: "className", type: "string", description: "Classes for the root." },
+    ],
+    Preview: Previews.PreviewOrbitalLoaderRedesign,
+    previewShell: "plain",
+    previewSections: [
+      {
+        title: "Progress",
+        Preview: Previews.PreviewOrbitalLoaderRedesign,
+        reactSource: `"use client";
+
+import { OrbitalLoader } from "@/components/orbital-loader";
+
+export function UploadStatus({ progress }: { progress: number }) {
+  return <OrbitalLoader progress={progress} messages={["Uploading your files"]} doneMessage="All files uploaded" />;
+}`,
+      },
+      {
+        title: "Endless",
+        Preview: Previews.PreviewOrbitalLoaderEndless,
+        reactSource: `"use client";
+
+import { OrbitalLoader } from "@/components/orbital-loader";
+
+export function Booting() {
+  return <OrbitalLoader size={120} />;
+}`,
+      },
     ],
     reactSource: `"use client";
 
 import { OrbitalLoader } from "@/components/orbital-loader";
 
-export function Uploading({ progress }: { progress: number }) {
-  return <OrbitalLoader progress={progress} messages={["Uploading your files"]} color="#10b981" />;
+export function UploadStatus({ progress }: { progress: number }) {
+  return (
+    <OrbitalLoader
+      progress={progress}
+      messages={["Uploading your files", "Making thumbnails"]}
+      doneMessage="All files uploaded"
+      onComplete={() => console.log("done")}
+    />
+  );
 }`,
     tailwindSource: tw,
   },
   {
     slug: "milestone-timeline",
     name: "Milestone Timeline",
-    description:
-      "A roadmap timeline: dates on the left, a rail that fills to the milestone in progress, and nodes that read done, current (pulsing) or upcoming at a glance.",
+    description: "A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes.",
     categorySlug: "timelines",
-    tags: ["roadmap"],
+    tags: ["timeline", "roadmap", "milestones", "progress", "changelog", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 71,
     createdAt: "2026-02-18",
-    animationKinds: ["scroll"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewTimeline,
-    previewShell: "plain",
+    animationKinds: ["scroll", "spring", "layout"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "milestones", type: "{ title: string; date?: string; description?: string; status?: \"done\" | \"current\" | \"upcoming\"; tag?: string }[]", description: "Roadmap milestones." },
       { name: "steps", type: "string[]", description: "Plain titles (older API); all but the last count as done." },
       { name: "heading", type: "string", defaultValue: "\"Roadmap\"", description: "Heading." },
+      { name: "defaultOpen", type: "number", description: "Milestone opened first; defaults to the current one." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens each milestone in turn until someone touches the timeline." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewMilestoneTimelineRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { MilestoneTimeline } from "@/components/milestone-timeline";
@@ -1738,8 +1353,9 @@ export function Roadmap() {
       heading="Roadmap"
       milestones={[
         { title: "Research", date: "Jan 2026", description: "Twenty customer interviews.", status: "done" },
+        { title: "Design system v1", date: "Mar 2026", description: "Tokens, type and 40 components.", status: "done" },
         { title: "Private beta", date: "Jun 2026", description: "312 teams onboarded.", status: "current", tag: "In progress" },
-        { title: "Public launch", date: "Sep 2026", status: "upcoming" },
+        { title: "Public launch", date: "Sep 2026", description: "Pricing, docs and the launch film.", status: "upcoming" },
       ]}
     />
   );
@@ -1749,27 +1365,44 @@ export function Roadmap() {
   {
     slug: "lattice-feature-grid",
     name: "Lattice Feature Grid",
-    description:
-      "A four-up feature grid on a hairline lattice, where each tile carries a small live illustration of the feature it describes.",
+    description: "A feature grid drawn on a hairline lattice. The hairlines catch a soft blue light that follows the pointer, and the tile under it plays its small illustration: colour swatches fan out, a spring ball lands and settles, a focus ring hops between buttons and a search result climbs to first place.",
     categorySlug: "feature-sections",
-    tags: ["marketing"],
+    tags: ["features", "grid", "marketing", "lattice", "spotlight", "illustration", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 90,
     createdAt: "2026-03-12",
-    animationKinds: ["scroll"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewFeatureGrid,
-    previewShell: "plain",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "items", type: "{ title: string; body: string; icon?: LucideIcon; visual?: ReactNode }[]", description: "Feature tiles; defaults include illustrated tiles." },
+      { name: "items", type: "{ title: string; body: string; icon?: ComponentType<{ className?: string }>; visual?: ReactNode | ComponentType<{ active: boolean }> }[]", description: "Feature tiles. A visual given as a component receives { active } while its tile is lit. Defaults to four illustrated tiles." },
       { name: "eyebrow", type: "string", defaultValue: "\"Why teams switch\"", description: "Small label above the heading." },
-      { name: "heading", type: "string", description: "Section heading; empty hides the header." },
+      { name: "heading", type: "string", defaultValue: "\"Everything a design system should have done for you\"", description: "Section heading; an empty string hides the header." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Wanders the light over the lattice and plays each tile in turn until someone points at it." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewLatticeFeatureGridRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { Lock, Zap } from "lucide-react";
-import { LatticeFeatures } from "@/components/lattice-feature-grid";
+import { LatticeFeatures, type LatticeVisualProps } from "@/components/lattice-feature-grid";
+import { motion } from "framer-motion";
+
+// A visual can be a component: it receives { active } while its tile is lit.
+function PreviewBars({ active }: LatticeVisualProps) {
+  return (
+    <div className="flex h-12 items-end gap-1">
+      {[30, 55, 40, 80].map((h, i) => (
+        <motion.span
+          key={i}
+          className="w-5 rounded-md bg-[#0071e3]/30"
+          animate={{ height: active ? \`\${h}%\` : "20%" }}
+          transition={{ type: "spring", stiffness: 300, damping: 16, delay: i * 0.05 }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function Features() {
   return (
@@ -1777,7 +1410,7 @@ export function Features() {
       eyebrow="Platform"
       heading="Built for teams that ship every day"
       items={[
-        { title: "Instant previews", body: "Every branch gets a URL in seconds.", icon: Zap },
+        { title: "Instant previews", body: "Every branch gets a URL in seconds.", icon: Zap, visual: PreviewBars },
         { title: "Secure by default", body: "SSO, audit logs and scoped tokens out of the box.", icon: Lock },
       ]}
     />
@@ -1788,17 +1421,14 @@ export function Features() {
   {
     slug: "motion-faq-disclosure",
     name: "Motion FAQ Disclosure",
-    description:
-      "A two-column FAQ: heading and a support card on the left, a spring-animated accessible accordion on the right.",
+    description: "A two-column FAQ with a heading and support card on one side and an accessible accordion on the other. Opening a question lifts it out of the list into a raised card with a slight overshoot, spins its plus into a minus and unfolds the answer a sentence at a time.",
     categorySlug: "faq-sections",
-    tags: ["support"],
+    tags: ["faq", "accordion", "disclosure", "support", "questions", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 66,
     createdAt: "2026-01-12",
-    animationKinds: ["layout"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewFaq,
-    previewShell: "plain",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "items", type: "{ q: string; a: string }[]", description: "Questions and answers." },
       { name: "heading", type: "string", defaultValue: "\"Questions, answered\"", description: "Heading on the left." },
@@ -1806,8 +1436,12 @@ export function Features() {
       { name: "defaultOpen", type: "number", defaultValue: "0", description: "Index open on first render; -1 for none." },
       { name: "multiple", type: "boolean", defaultValue: "false", description: "Allow several answers open at once." },
       { name: "contact", type: "{ label: string; href: string } | null", description: "Support card; null hides it." },
+      { name: "onToggle", type: "(index: number, open: boolean) => void", description: "Called when a question opens or closes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens each question in turn until someone touches the list." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewMotionFaqDisclosureRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { MotionFaq } from "@/components/motion-faq-disclosure";
@@ -1816,10 +1450,13 @@ export function Faq() {
   return (
     <MotionFaq
       heading="Questions, answered"
+      intro="Everything people ask before they sign up."
       contact={{ label: "Talk to a human", href: "/contact" }}
+      onToggle={(i, open) => console.log("question", i, open ? "opened" : "closed")}
       items={[
-        { q: "Can I use this commercially?", a: "Yes — in personal and client work." },
-        { q: "Does it work with the App Router?", a: "Every component is a typed client component built for it." },
+        { q: "Can I use this commercially?", a: "Yes. Personal and client work are both fine." },
+        { q: "Does it work with the App Router?", a: "Every component is a typed client component built for it. Drop it into a server page and it hydrates on its own." },
+        { q: "How do updates arrive?", a: "Run the install command again. You review the change like any other diff." },
       ]}
     />
   );
@@ -1829,25 +1466,43 @@ export function Faq() {
   {
     slug: "nebula-cta-glow",
     name: "Nebula CTA Glow",
-    description: "Pulsing dual nebula glow behind a high-contrast CTA.",
+    description: "A call-to-action on a twinkling night sky. Two nebulae drift after the pointer on lazy springs, gather around the button and brighten as you near it while the button leans toward you, and pressing it blooms a ring of light outward.",
     categorySlug: "cta-sections",
-    tags: ["conversion"],
+    tags: ["cta", "call to action", "starfield", "nebula", "glow", "dark", "magnetic", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 93,
     createdAt: "2026-04-08",
-    animationKinds: ["gradient", "hover"],
+    animationKinds: ["hover", "press", "spring", "magnetic", "gradient", "parallax"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCtaGlow,
+    props: [
+      { name: "eyebrow", type: "string", defaultValue: "\"Ready when you are\"", description: "Small caps line above the title; empty string hides it." },
+      { name: "title", type: "string", defaultValue: "\"Start building faster\"", description: "Headline." },
+      { name: "description", type: "string", description: "Line under the headline; empty string hides it." },
+      { name: "primaryAction", type: "{ label: string; href?: string; onClick?: () => void } | null", defaultValue: "{ label: \"Start building\" }", description: "The bright button. Without href the click is handled by onClick only. null hides it." },
+      { name: "secondaryAction", type: "{ label: string; href?: string; onClick?: () => void } | null", defaultValue: "{ label: \"Browse components\" }", description: "Quiet text link beside it. null hides it." },
+      { name: "colors", type: "[string, string]", defaultValue: "[\"#0a84ff\", \"#bf5af2\"]", description: "The two nebula colours (hex, so the halo can add alpha)." },
+      { name: "stars", type: "number", defaultValue: "140", description: "Stars in the seeded canvas starfield (max 600)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drifts an invisible pointer around the button and presses it now and then until someone points at the card." },
+      { name: "className", type: "string", description: "Extra classes on the card." },
+    ],
+    Preview: Previews.PreviewNebulaCtaGlowRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { NebulaCtaGlow } from "@/components/nebula-cta-glow";
 
-export function NebulaCta() {
+export function PricingCta() {
+  const router = useRouter();
   return (
-    <div className="relative flex items-center justify-center overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950 px-10 py-16">
-      <motion.div className="absolute size-40 rounded-full bg-cyan-400/25 blur-3xl" animate={{ scale: [1, 1.2, 1], opacity: [0.35, 0.65, 0.35] }} transition={{ duration: 4, repeat: Infinity }} />
-      <motion.button whileHover={{ scale: 1.03 }} className="relative rounded-full bg-white px-6 py-2 text-sm font-semibold text-zinc-950">Start building</motion.button>
-    </div>
+    <NebulaCtaGlow
+      eyebrow="Launch week"
+      title="Ship your next idea tonight"
+      description="Free while in beta. No card required."
+      primaryAction={{ label: "Create a project", onClick: () => router.push("/new") }}
+      secondaryAction={{ label: "Read the docs", href: "/docs" }}
+      colors={["#0a84ff", "#ff375f"]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -1855,419 +1510,352 @@ export function NebulaCta() {
   {
     slug: "glow-button",
     name: "Glow Button",
-    description:
-      "Framer-style glowing CTA button with expanding shadow, radial border sweep, glass edge, and animated arrow.",
+    registryCliName: "glow-button",
+    description: "A call-to-action link with a coloured light that lives on its rim. The brightest arc turns to face the pointer and the glow behind the button leans the same way, the button drifts a few pixels toward the cursor and the arrow springs ahead on hover.",
     categorySlug: "cta-sections",
-    tags: ["button", "cta", "glow", "framer-motion", "hover"],
+    tags: ["button", "cta", "glow", "gradient", "magnetic", "link", "hero", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 96,
     createdAt: "2026-05-18",
-    animationKinds: ["hover", "spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewGlowButton,
+    animationKinds: ["hover", "magnetic", "gradient", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "children", type: "React.ReactNode", defaultValue: "\"Get Started Now\"", description: "Label." },
+      { name: "href", type: "string", defaultValue: "\"#\"", description: "Link target." },
+      { name: "colors", type: "string[]", defaultValue: "[\"#0a84ff\", \"#bf5af2\", \"#ff9f0a\", \"#30d158\"]", description: "Colours of the light on the rim and the glow behind." },
+      { name: "background", type: "string", description: "Inner pill fill. Defaults to ink in light mode and near-white in dark mode." },
+      { name: "textColor", type: "string", description: "Label colour. Defaults to ink or white, whichever reads better on the fill." },
+      { name: "arrowColor", type: "string", description: "Arrow colour. Defaults to the label colour." },
+      { name: "radius", type: "number", defaultValue: "28", description: "Corner radius in px." },
+      { name: "borderColor", type: "string", description: "Colour of the resting rim." },
+      { name: "glow", type: "string", description: "Extra box-shadow under the button." },
+      { name: "openInNewTab", type: "boolean", defaultValue: "false", description: "Open the link in a new tab." },
+      { name: "innerClassName", type: "string", description: "Extra classes for the inner pill (padding, font size)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Orbits the light round the rim until someone points at the button." },
+    ],
+    Preview: Previews.PreviewGlowButtonRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
-import { ArrowRight } from "lucide-react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { GlowButton } from "@/components/glow-button";
 
-type GlowButtonProps = {
-  children?: React.ReactNode;
-  href?: string;
-  className?: string;
-  innerClassName?: string;
-  background?: string;
-  textColor?: string;
-  arrowColor?: string;
-  radius?: number;
-  glow?: string;
-  borderColor?: string;
-  openInNewTab?: boolean;
-} & Omit<React.ComponentPropsWithoutRef<typeof motion.a>, "children" | "href" | "color">;
-
-export function GlowButton({
-  children = "Get Started Now",
-  href = "#",
-  className,
-  innerClassName,
-  background = "rgb(0, 0, 0)",
-  textColor = "rgb(255, 255, 255)",
-  arrowColor = "rgb(255, 255, 255)",
-  radius = 8,
-  glow = "0px 20px 50px 4px rgba(255, 255, 255, 0.25)",
-  borderColor = "rgba(255, 255, 255, 0.25)",
-  openInNewTab = false,
-  ...props
-}: GlowButtonProps) {
-  const rounded = \`\${radius}px\`;
-  const target = openInNewTab ? "_blank" : undefined;
-  const rel = openInNewTab ? "noreferrer noopener" : undefined;
-
+export function HeroCta() {
   return (
-    <motion.a
-      href={href}
-      target={target}
-      rel={rel}
-      initial="rest"
-      animate="rest"
-      whileHover="hover"
-      className={cn("relative inline-flex cursor-pointer items-center justify-center overflow-visible no-underline", className)}
-      {...props}
-    >
-      <motion.span
-        aria-hidden
-        variants={{
-          rest: { scale: 0.4, boxShadow: glow },
-          hover: { scale: 1, boxShadow: "0px 7px 20px 0px rgba(255, 255, 255, 0.25)" },
-        }}
-        transition={{ type: "spring", duration: 1, bounce: 0 }}
-        className="absolute inset-0 z-0 origin-bottom"
-        style={{ borderRadius: rounded, backgroundColor: "transparent" }}
-      />
-
-      <span className="relative z-10 inline-flex items-center justify-center overflow-hidden p-px" style={{ borderRadius: rounded, backgroundColor: "rgba(255, 255, 255, 0.05)" }}>
-        <motion.span
-          aria-hidden
-          variants={{
-            rest: { left: "30%", width: "40%" },
-            hover: { left: "0%", width: "100%" },
-          }}
-          transition={{ type: "spring", duration: 1, bounce: 0 }}
-          className="absolute bottom-0 z-10 h-1/2"
-          style={{
-            borderRadius: rounded,
-            background: "radial-gradient(50% 200% at 50% 50%, rgba(255,255,255,0.1) 0%, rgb(255,255,255) 52%, rgba(255,255,255,0.1) 100%)",
-          }}
-        />
-        <span
-          aria-hidden
-          className="absolute inset-0 z-0 backdrop-blur-[10px]"
-          style={{
-            borderRadius: rounded,
-            background: "radial-gradient(50% 50% at 50% 50%, rgba(255,255,255,0.47) 0%, rgba(171,171,171,0.4) 100%)",
-          }}
-        />
-        <span aria-hidden className="pointer-events-none absolute inset-0 z-10" style={{ borderRadius: rounded, border: \`1px solid \${borderColor}\` }} />
-        <span className={cn("relative z-20 inline-flex items-center justify-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm leading-none", innerClassName)} style={{ borderRadius: rounded, background, color: textColor }}>
-          <span>{children}</span>
-          <span className="grid size-5 place-items-center overflow-hidden">
-            <motion.span variants={{ rest: { x: 0 }, hover: { x: [0, 4, 0] } }} transition={{ duration: 0.8, ease: "easeInOut" }}>
-              <ArrowRight className="size-5" style={{ color: arrowColor, strokeWidth: 1.5 }} />
-            </motion.span>
-          </span>
-        </span>
-      </span>
-    </motion.a>
+    <div className="flex items-center gap-4">
+      <GlowButton href="/signup">Start free trial</GlowButton>
+      <GlowButton href="/pricing" colors={["#30d158", "#64d2ff"]} radius={14}>
+        See pricing
+      </GlowButton>
+    </div>
   );
 }`,
     tailwindSource: tw,
-    registryCliName: "glow-button",
-    props: [
-      { name: "children", type: "React.ReactNode", defaultValue: "\"Get Started Now\"", description: "Button label or inline content." },
-      { name: "href", type: "string", defaultValue: "\"#\"", description: "Destination link for the CTA." },
-      { name: "background", type: "string", defaultValue: "\"rgb(0, 0, 0)\"", description: "Inner button background color." },
-      { name: "textColor", type: "string", defaultValue: "\"rgb(255, 255, 255)\"", description: "Button text color." },
-      { name: "arrowColor", type: "string", defaultValue: "\"rgb(255, 255, 255)\"", description: "Arrow icon color." },
-      { name: "radius", type: "number", defaultValue: "8", description: "Corner radius in pixels." },
-      { name: "glow", type: "string", description: "CSS box-shadow used for the resting outer glow." },
-      { name: "borderColor", type: "string", description: "Subtle glass border color." },
-      { name: "openInNewTab", type: "boolean", defaultValue: "false", description: "Opens the link in a new browser tab." },
-    ],
   },
   {
     slug: "word-magnet",
     name: "Word Magnet",
-    description:
-      "Cursor-reactive text where whole words gently repel from the pointer and spring back without splitting letters.",
+    registryCliName: "word-magnet",
+    description: "A headline whose words behave like fridge magnets: the pointer pushes nearby words away, each one tilts in the direction it was shoved, holds for a beat, then springs home with a wobble. Whole words move, letters never split, and it works with touch as well as a mouse.",
     categorySlug: "motion-effects",
-    tags: ["text", "cursor", "magnetic", "hover", "spring", "framer-motion"],
+    tags: ["text", "cursor", "magnetic", "repel", "physics", "headline", "spring", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 91,
     createdAt: "2026-05-18",
-    animationKinds: ["hover", "spring"],
+    animationKinds: ["hover", "magnetic", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewWordMagnet,
+    props: [
+      { name: "text", type: "string", defaultValue: "\"Magnetic words react to your cursor and snap back into place\"", description: "Text split into magnetic words." },
+      { name: "radius", type: "number", defaultValue: "130", description: "Pointer influence radius in px." },
+      { name: "force", type: "number", defaultValue: "0.45", description: "Push strength, 0 to 1." },
+      { name: "damping", type: "number", defaultValue: "28", description: "Return-spring damping. Lower wobbles longer, higher settles flat." },
+      { name: "returnDelay", type: "number", defaultValue: "360", description: "Milliseconds a pushed word holds before springing back." },
+      { name: "disableOnMobile", type: "boolean", defaultValue: "false", description: "Turns the effect off on touch screens and viewports under 768px." },
+      { name: "overflow", type: "CSSProperties['overflow']", defaultValue: "\"visible\"", description: "Whether pushed words may spill out of the text box." },
+      { name: "className", type: "string", description: "Classes for the text container." },
+      { name: "wordClassName", type: "string", description: "Classes for every word." },
+      { name: "style", type: "CSSProperties", description: "Inline styles for the container." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost pointer drifts through the words until a real pointer arrives." },
+    ],
+    Preview: Previews.PreviewWordMagnetRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { WordMagnet } from "@/components/word-magnet";
 
 export function MagneticHeadline() {
   return (
-    <div className="flex min-h-[420px] items-center justify-center rounded-3xl bg-zinc-50 px-6 dark:bg-zinc-950">
+    <section className="flex min-h-[420px] items-center justify-center px-6">
       <WordMagnet
-        text="Move your cursor through this magnetic headline and watch every word gently drift aside before snapping back into a clean readable rhythm"
-        radius={130}
-        force={0.45}
-        damping={28}
-        returnDelay={360}
-        className="max-w-5xl text-5xl font-semibold tracking-[-0.03em] text-zinc-950 dark:text-white"
+        text="Push these words around and watch them wobble back into place"
+        radius={140}
+        force={0.5}
+        damping={22}
+        className="max-w-3xl text-5xl"
       />
-    </div>
+    </section>
   );
 }`,
     tailwindSource: tw,
-    registryCliName: "word-magnet",
-    props: [
-      { name: "text", type: "string", defaultValue: "\"Magnetic words react to your cursor and snap back into place\"", description: "Text split into magnetic word tokens." },
-      { name: "radius", type: "number", defaultValue: "130", description: "Pointer influence radius in pixels." },
-      { name: "force", type: "number", defaultValue: "0.45", description: "Repulsion strength applied to nearby words." },
-      { name: "damping", type: "number", defaultValue: "28", description: "Spring damping for the return motion." },
-      { name: "returnDelay", type: "number", defaultValue: "360", description: "Delay before a word springs back after being pushed." },
-      { name: "disableOnMobile", type: "boolean", defaultValue: "true", description: "Disables pointer motion on touch and small screens." },
-      { name: "overflow", type: "CSSProperties['overflow']", defaultValue: "\"visible\"", description: "Controls whether moving words can leave the text box." },
-      { name: "className", type: "string", description: "Classes for the wrapping text container." },
-      { name: "wordClassName", type: "string", description: "Classes applied to each individual word." },
-    ],
   },
   {
     slug: "three-d-folder",
     name: "3D Folder Card",
-    description:
-      "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
+    registryCliName: "three-d-folder",
+    description: "A folder card that swings open when you hover, focus or tap it: the front flap falls forward on a spring and up to three papers fan up out of it, each settling with a wobble. Picking a paper grows its cover into a preview dialog you can page through with the arrow keys and close with Escape.",
     categorySlug: "cards",
-    tags: ["folder", "portfolio", "gallery", "hover", "3d", "framer-motion"],
+    tags: ["folder", "portfolio", "gallery", "lightbox", "cards", "3d", "hover", "shared layout", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 90,
     createdAt: "2026-05-18",
-    animationKinds: ["hover", "spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewThreeDFolder,
+    animationKinds: ["hover", "press", "spring", "3d", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Design Archive\"", description: "Label under the folder, also printed on the flap." },
+      { name: "projects", type: "FolderProject[]", defaultValue: "3 sample projects", description: "Each { id, title, image?, bg?, meta?, href? }. The first three show as papers; the preview pages through all of them. Without image, the drawn cover in bg is used." },
+      { name: "folderBackColor", type: "string", defaultValue: "\"#3d9cf0\"", description: "Back panel colour." },
+      { name: "folderFrontColor", type: "string", defaultValue: "\"#6cb8f6\"", description: "Front flap colour." },
+      { name: "folderTabColor", type: "string", description: "Tab colour. Defaults to the back colour." },
+      { name: "size", type: "\"sm\" | \"md\"", defaultValue: "\"md\"", description: "\"sm\" draws the folder at about 60% for dense grids." },
+      { name: "onOpenProject", type: "(id: string | null) => void", description: "Called with the project id when a preview opens, and null when it closes." },
+      { name: "hint", type: "string", defaultValue: "\"Hover or tap the folder.\"", description: "Caption under the count (md only). An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes the folder by itself until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewThreeDFolderRedesign,
+    previewShell: "plain",
     previewSections: [
       {
-        Preview: Previews.PreviewThreeDFolder,
+        title: "Single folder",
+        Preview: Previews.PreviewThreeDFolderRedesign,
         reactSource: `"use client";
 
 import { ThreeDFolder } from "@/components/three-d-folder";
 
-export function FolderShowcase() {
-  return (
-    <div className="grid min-h-[520px] items-center gap-8 rounded-3xl bg-zinc-50 p-8 md:grid-cols-2 dark:bg-zinc-950">
-      <ThreeDFolder
-        title="Launch Assets"
-        folderBackColor="#fb7185"
-        folderFrontColor="#facc15"
-        folderTabColor="#f97316"
-      />
+const projects = [
+  { id: "atlas", title: "Atlas", meta: "Brand system, 2026", bg: "linear-gradient(160deg,#64d2ff,#0a84ff 55%,#0040dd)", href: "/work/atlas" },
+  { id: "prism", title: "Prism", meta: "Launch film, 2026", image: "/work/prism-cover.jpg", href: "/work/prism" },
+  { id: "signal", title: "Signal", meta: "Campaign, 2025", bg: "linear-gradient(160deg,#ffd60a,#ff9f0a 50%,#ff453a)" },
+];
 
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.24em] text-rose-500">Portfolio folder</p>
-        <h2 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">
-          Hover the folder to reveal stacked project previews.
-        </h2>
-        <p className="mt-4 text-zinc-600 dark:text-zinc-400">
-          Use it for case studies, campaign assets, product shots, or any compact visual archive.
-        </p>
-      </div>
-    </div>
+export function WorkFolder() {
+  return (
+    <ThreeDFolder
+      title="Selected work"
+      projects={projects}
+      folderBackColor="#3d9cf0"
+      folderFrontColor="#6cb8f6"
+      onOpenProject={(id) => console.log("preview", id)}
+    />
   );
 }`,
       },
       {
-        Preview: Previews.PreviewThreeDFolderMini,
+        title: "Compact grid",
+        Preview: Previews.PreviewThreeDFolderGridRedesign,
         reactSource: `"use client";
 
 import { ThreeDFolder } from "@/components/three-d-folder";
 
-export function FolderShowcaseMini() {
-  return (
-    <div className="grid min-h-[520px] items-center gap-8 rounded-3xl bg-zinc-50 p-8 md:grid-cols-2 dark:bg-zinc-950">
-      <ThreeDFolder
-        title="Launch Assets"
-        size="sm"
-        folderBackColor="#fb7185"
-        folderFrontColor="#facc15"
-        folderTabColor="#f97316"
-      />
+const folders = [
+  { title: "Brand", back: "#3d9cf0", front: "#6cb8f6" },
+  { title: "Photos", back: "#ff9f0a", front: "#ffbf4d" },
+  { title: "Product", back: "#30b65a", front: "#5fd47f" },
+];
 
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.24em] text-rose-500">Portfolio folder</p>
-        <h2 className="mt-4 text-4xl font-semibold tracking-tight text-zinc-950 dark:text-white">
-          Hover the folder to reveal stacked project previews.
-        </h2>
-        <p className="mt-4 text-zinc-600 dark:text-zinc-400">
-          Use size="sm" for a compact folder — great for sidebars, dashboards, or anywhere space is tight.
-        </p>
-      </div>
+export function FolderGrid() {
+  return (
+    <div className="flex flex-wrap justify-center gap-4">
+      {folders.map((f) => (
+        <ThreeDFolder key={f.title} size="sm" title={f.title} folderBackColor={f.back} folderFrontColor={f.front} />
+      ))}
     </div>
   );
 }`,
       },
     ],
+    reactSource: `"use client";
+
+import { ThreeDFolder } from "@/components/three-d-folder";
+
+const projects = [
+  { id: "atlas", title: "Atlas", meta: "Brand system, 2026", bg: "linear-gradient(160deg,#64d2ff,#0a84ff 55%,#0040dd)", href: "/work/atlas" },
+  { id: "prism", title: "Prism", meta: "Launch film, 2026", image: "/work/prism-cover.jpg", href: "/work/prism" },
+  { id: "signal", title: "Signal", meta: "Campaign, 2025", bg: "linear-gradient(160deg,#ffd60a,#ff9f0a 50%,#ff453a)" },
+];
+
+export function WorkFolder() {
+  return (
+    <ThreeDFolder
+      title="Selected work"
+      projects={projects}
+      folderBackColor="#3d9cf0"
+      folderFrontColor="#6cb8f6"
+      onOpenProject={(id) => console.log("preview", id)}
+    />
+  );
+}`,
     tailwindSource: tw,
-    registryCliName: "three-d-folder",
-    props: [
-      { name: "title", type: "string", defaultValue: "\"Design Archive\"", description: "Folder label displayed below the 3D folder." },
-      { name: "projects", type: "FolderProject[]", description: "Gallery items with id, title, image URL, and optional href." },
-      { name: "folderBackColor", type: "string", defaultValue: "\"#fb7185\"", description: "Back panel color." },
-      { name: "folderFrontColor", type: "string", defaultValue: "\"#fbbf24\"", description: "Front panel color." },
-      { name: "folderTabColor", type: "string", defaultValue: "\"#f97316\"", description: "Folder tab color." },
-      { name: "size", type: "\"sm\" | \"md\"", defaultValue: "\"md\"", description: "Folder scale — sm renders at 60% for dense grid layouts." },
-      { name: "className", type: "string", description: "Optional classes for the card wrapper." },
-    ],
   },
   {
     slug: "draggable-card-stack",
     name: "Draggable Card Stack",
-    description:
-      "Shuffled deck of portrait cards on a dark surface. Drag or fling the top card to send it to the back; press ← to pull the bottom card to the front. Supports images and videos, hover overlay, auto-play, and fully configurable stack geometry.",
+    registryCliName: "draggable-card-stack",
+    description: "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work.",
     categorySlug: "cards",
-    tags: ["drag", "cards", "stack", "framer-motion", "interactive", "gesture", "spring", "3d"],
+    tags: ["cards", "stack", "deck", "drag", "swipe", "fling", "gallery", "gesture", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 115,
     createdAt: "2026-05-19",
-    animationKinds: ["spring", "hover", "gesture" as AnimationKind],
+    animationKinds: ["drag", "hover", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewDraggableCardStack,
+    props: [
+      { name: "cards", type: "StackCard[]", defaultValue: "5 drawn scenes", description: "Cards from top to bottom, each { id, title?, subtitle?, media?, type?: \"image\" | \"video\", bg? }. Without media a drawn scene (or bg) is shown." },
+      { name: "cardWidth", type: "number", defaultValue: "220", description: "Card width in px." },
+      { name: "cardHeight", type: "number", defaultValue: "296", description: "Card height in px." },
+      { name: "borderRadius", type: "number", defaultValue: "22", description: "Corner radius in px." },
+      { name: "shadowStrength", type: "number", defaultValue: "1", description: "Drop-shadow strength from 0 to 1." },
+      { name: "stackOffset", type: "number", defaultValue: "0", description: "Extra downward offset per card in the pile, in px." },
+      { name: "maxRotation", type: "number", defaultValue: "9", description: "Largest resting tilt of the cards underneath, in degrees." },
+      { name: "depthScale", type: "number", defaultValue: "0.045", description: "How much smaller each card underneath is (0.045 = 4.5%)." },
+      { name: "showOverlay", type: "boolean", defaultValue: "true", description: "Title and subtitle over the top card." },
+      { name: "hoverScale", type: "number", defaultValue: "1.03", description: "Scale of the top card under the pointer." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the id of the new top card." },
+      { name: "hint", type: "string", defaultValue: "\"Fling the top card. Arrow keys work too.\"", description: "Caption under the stack. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flings the top card left and right in turn until someone touches the stack." },
+      { name: "autoInterval", type: "number", defaultValue: "2400", description: "Time between autoplay flings, in ms." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewDraggableCardStackRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { DraggableCardStack } from "@/components/draggable-card-stack";
 
-export function CardStackDemo() {
-  return <DraggableCardStack />;
+const cards = [
+  { id: "sur", title: "Big Sur", subtitle: "Coast road at dusk", media: "/photos/big-sur.jpg" },
+  { id: "lofoten", title: "Lofoten", subtitle: "Blue hour over the bay", media: "/photos/lofoten.jpg" },
+  { id: "kyoto", title: "Kyoto", subtitle: "Lanterns after rain", media: "/clips/kyoto.mp4", type: "video" as const },
+  { id: "rum", title: "Wadi Rum", subtitle: "Sand at first light", bg: "linear-gradient(180deg,#fddb92,#f6a04d)" },
+];
+
+export function TripStack() {
+  return <DraggableCardStack cards={cards} cardWidth={240} cardHeight={320} onChange={(id) => console.log("top card", id)} />;
 }`,
     tailwindSource: tw,
-    registryCliName: "draggable-card-stack",
-    props: [
-      { name: "cards",              type: "StackCard[]", description: "Array of cards. Each card has id, optional title/subtitle, a media URL, and an optional type (\"image\" | \"video\")." },
-      { name: "cardWidth",          type: "number",  defaultValue: "300",   description: "Card width in px." },
-      { name: "cardHeight",         type: "number",  defaultValue: "420",   description: "Card height in px." },
-      { name: "borderRadius",       type: "number",  defaultValue: "24",    description: "Card corner radius in px." },
-      { name: "shadowStrength",     type: "number",  defaultValue: "1",     description: "Drop-shadow intensity from 0 (none) to 1 (full)." },
-      { name: "stackOffset",        type: "number",  defaultValue: "0",     description: "Vertical Y offset in px per depth level — fans out the stack." },
-      { name: "maxRotation",        type: "number",  defaultValue: "14",    description: "Maximum resting rotation in degrees for stack cards." },
-      { name: "depthScale",         type: "number",  defaultValue: "0.04",  description: "Scale reduction per depth level (e.g. 0.04 = 4% smaller per card behind)." },
-      { name: "showOverlay",        type: "boolean", defaultValue: "true",  description: "Show a gradient overlay with title and subtitle on hover over the top card." },
-      { name: "hoverScale",         type: "number",  defaultValue: "1.03",  description: "Scale applied to the top card on hover." },
-      { name: "transitionDuration", type: "number",  defaultValue: "0.25",  description: "Duration in seconds for the overlay fade and hover scale transitions." },
-      { name: "autoPlay",           type: "boolean", defaultValue: "false", description: "Automatically cycle cards at the given interval." },
-      { name: "autoInterval",       type: "number",  defaultValue: "3000",  description: "Auto-play interval in milliseconds." },
-      { name: "className",          type: "string",  description: "Optional classes for the outer wrapper." },
-    ],
   },
   {
     slug: "card-carousel-3d",
     name: "3D Card Carousel",
-    description:
-      "Cylindrical 3D card carousel — cards arranged in a circle on the Z axis, rotating continuously or on scroll. Radius, perspective, item size, speed, and direction are all configurable.",
+    registryCliName: "card-carousel-3d",
+    description: "Product cards standing round a 3D cylinder. Drag or fling it and it coasts, then clicks into place with the nearest card facing you; spin it fast and the cards swing outward and settle back in as it slows, with wheel, arrow keys, dots and a tap on any card also working.",
     categorySlug: "cards",
-    tags: ["3d", "carousel", "scroll", "framer-motion", "interactive", "cards", "animation"],
+    tags: ["3d", "carousel", "cylinder", "products", "drag", "inertia", "cards", "shop", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 112,
     createdAt: "2026-05-19",
-    animationKinds: ["scroll", "spring"],
+    animationKinds: ["drag", "scroll", "3d", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCardCarousel3D,
+    props: [
+      { name: "cards", type: "CarouselCard[]", defaultValue: "DEFAULT_CARDS", description: "Each { id, name, price, image?, color? }. Without image a phone is drawn in color." },
+      { name: "radius", type: "number", description: "Cylinder radius in px. Defaults to one that fits the cards edge to edge." },
+      { name: "itemWidth", type: "number", defaultValue: "168", description: "Card width in px." },
+      { name: "itemHeight", type: "number", defaultValue: "220", description: "Card height in px." },
+      { name: "perspective", type: "number", defaultValue: "1100", description: "CSS perspective in px." },
+      { name: "autoRotate", type: "boolean", defaultValue: "false", description: "Drift continuously; pauses under the pointer and for a moment after any interaction." },
+      { name: "autoSpeed", type: "number", defaultValue: "1", description: "Drift speed multiplier." },
+      { name: "scrollSpeed", type: "number", defaultValue: "1", description: "Drag and wheel speed multiplier." },
+      { name: "direction", type: "\"cw\" | \"ccw\"", defaultValue: "\"cw\"", description: "Direction for drift and autoplay." },
+      { name: "onChange", type: "(index: number) => void", description: "Called with the index of the card that settles in front." },
+      { name: "hint", type: "string", defaultValue: "\"Drag, scroll or use the arrow keys.\"", description: "Caption under the dots. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps to the next card every 2.4s until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewCardCarousel3DRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { CardCarousel3D } from "@/components/card-carousel-3d";
 
-export function CarouselDemo() {
+const cards = [
+  { id: "studio", name: "Studio Headphones", price: "$349", image: "/products/studio.png" },
+  { id: "buds", name: "Buds Pro", price: "$249", image: "/products/buds.png" },
+  { id: "speaker", name: "Home Speaker", price: "$299", image: "/products/speaker.png" },
+  { id: "mini", name: "Mini Speaker", price: "$99", color: "#f2a7c3" },
+  { id: "pro", name: "Lumen Pro", price: "From $999", color: "#3a3a3c" },
+];
+
+export function ProductRing() {
   return (
     <CardCarousel3D
-      radius={500}
-      itemWidth={280}
-      itemHeight={380}
-      perspective={1000}
-      autoRotate
-      autoSpeed={1}
-      scrollSpeed={1}
-      direction="cw"
+      cards={cards}
+      itemWidth={180}
+      itemHeight={236}
+      onChange={(i) => console.log("in front", cards[i].name)}
     />
   );
 }`,
     tailwindSource: tw,
-    registryCliName: "card-carousel-3d",
-    props: [
-      { name: "cards", type: "CarouselCard[]", description: "Array of cards with id, name, price, and image URL." },
-      { name: "radius", type: "number", defaultValue: "380", description: "Carousel cylinder radius in px (200–1000)." },
-      { name: "itemWidth", type: "number", defaultValue: "280", description: "Card width in px (200–800)." },
-      { name: "itemHeight", type: "number", defaultValue: "380", description: "Card height in px (200–800)." },
-      { name: "perspective", type: "number", defaultValue: "1000", description: "CSS perspective depth in px (500–3000)." },
-      { name: "autoRotate", type: "boolean", defaultValue: "true", description: "Enable continuous auto-rotation." },
-      { name: "autoSpeed", type: "number", defaultValue: "1", description: "Auto-rotation speed multiplier (0.1–5)." },
-      { name: "scrollSpeed", type: "number", defaultValue: "1", description: "Wheel/drag speed multiplier (0.1–5)." },
-      { name: "direction", type: "\"cw\" | \"ccw\"", defaultValue: "\"cw\"", description: "Rotation direction — clockwise or counterclockwise." },
-      { name: "className", type: "string", description: "Optional classes for the outer wrapper." },
-    ],
   },
   {
     slug: "real-time-cursors",
     name: "Real-Time Cursors",
-    description:
-      "Collaborative workspace preview with animated teammate cursors, code review cards, and simulated live presence trails.",
+    registryCliName: "real-time-cursors",
+    description: "A shared design board with teammates' cursors moving over it live: arrows glide between spots and lean with their speed, name tags trail behind and swing when they stop, stops land as clicks and now and then someone drops a comment. Your own pointer gets a You tag when it comes over the board.",
     categorySlug: "motion-effects",
-    tags: ["cursor", "collaboration", "code", "presence", "framer-motion", "workspace"],
+    tags: ["cursor", "multiplayer", "collaboration", "presence", "live", "figma", "board", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 92,
     createdAt: "2026-05-18",
     animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewRealTimeCursors,
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "cursors", type: "LiveCursor[]", defaultValue: "3 teammates", description: "Teammates: { name, color, textColor?, path: {x, y}[] in % of the board, duration?, delay?, note? }." },
+      { name: "title", type: "string", defaultValue: "\"Launch board\"", description: "Board name in the header." },
+      { name: "showYou", type: "boolean", defaultValue: "true", description: "Shows a You tag that follows the visitor's pointer over the board." },
+      { name: "youColor", type: "string", defaultValue: "\"#30d158\"", description: "Colour of the visitor's tag." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves a demo You cursor round the board until the visitor's pointer comes over it." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewRealTimeCursorsRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { RealTimeCursors } from "@/components/real-time-cursors";
 
-export function CollaborativeReview() {
+export function TeamBoard() {
   return (
     <RealTimeCursors
+      title="Q3 roadmap"
       cursors={[
-        {
-          name: "Ava",
-          color: "#2563eb",
-          note: "checking props",
-          path: [
-            { x: 16, y: 26 },
-            { x: 72, y: 21 },
-            { x: 64, y: 58 },
-            { x: 20, y: 68 },
-          ],
-        },
-        {
-          name: "Noah",
-          color: "#7c3aed",
-          note: "left a comment",
-          path: [
-            { x: 78, y: 74 },
-            { x: 36, y: 54 },
-            { x: 52, y: 30 },
-            { x: 84, y: 42 },
-          ],
-        },
+        { name: "Ava", color: "#0071e3", note: "Move this up?", path: [{ x: 18, y: 30 }, { x: 44, y: 24 }, { x: 30, y: 60 }] },
+        { name: "Noah", color: "#bf5af2", path: [{ x: 80, y: 70 }, { x: 60, y: 40 }, { x: 86, y: 28 }], delay: 0.6 },
       ]}
-      className="min-h-[520px]"
     />
   );
 }`,
     tailwindSource: tw,
-    registryCliName: "real-time-cursors",
-    props: [
-      { name: "cursors", type: "LiveCursor[]", description: "Presence cursor definitions with name, color, note, and percentage-based path points." },
-      { name: "showCodePanel", type: "boolean", defaultValue: "true", description: "Shows or hides the built-in code review surface behind the cursors." },
-      { name: "className", type: "string", description: "Optional classes for the outer workspace container." },
-    ],
   },
   {
     slug: "editorial-blog-rail",
     name: "Editorial Blog Rail",
-    description:
-      "A magazine-style blog rail: one featured story with generated cover art beside a numbered list of recent posts.",
+    description: "A magazine-style blog rail: a featured story with generated cover art beside a numbered list of recent posts. Pointing at or focusing a post turns the featured slot into its preview: the cover blooms into that post's colours, the title and excerpt slide in, and the lines on the cover drift with the pointer.",
     categorySlug: "blog-components",
-    tags: ["content"],
+    tags: ["blog", "articles", "journal", "editorial", "content", "list", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 58,
     createdAt: "2026-02-26",
-    animationKinds: ["scroll"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewBlogRail,
-    previewShell: "plain",
+    animationKinds: ["hover", "spring", "layout", "parallax"],
+    dependencies: ["framer-motion"],
     props: [
       { name: "heading", type: "string", defaultValue: "\"From the journal\"", description: "Section heading." },
       { name: "allHref", type: "string", defaultValue: "\"#\"", description: "Link for View all." },
       { name: "featured", type: "EditorialPost", description: "The featured story (title, category, date, readTime, excerpt, author, cover colours, href)." },
-      { name: "posts", type: "EditorialPost[]", description: "Stories in the numbered rail." },
+      { name: "posts", type: "EditorialPost[]", description: "Stories in the numbered rail; each can carry its own excerpt, author and cover colours for its preview." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Previews each story in the featured slot in turn until someone points at the rail." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewEditorialBlogRailRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { EditorialRail } from "@/components/editorial-blog-rail";
@@ -2276,18 +1864,21 @@ export function JournalSection() {
   return (
     <EditorialRail
       heading="From the journal"
+      allHref="/blog"
       featured={{
         title: "Designing scroll choreography that people actually feel",
         category: "Guide",
         date: "Oct 14",
         readTime: "12 min read",
+        excerpt: "How we stage scroll-linked motion so it explains the product.",
         author: { name: "Mara Okafor" },
-        cover: ["#6366f1", "#f472b6"],
+        cover: ["#0071e3", "#bf5af2"],
         href: "/blog/scroll-choreography",
       }}
       posts={[
-        { title: "Springs, not curves", category: "Craft", date: "Oct 09", readTime: "7 min", href: "/blog/springs" },
-        { title: "Shipping a design system in six weeks", category: "Case study", date: "Oct 02", readTime: "9 min" },
+        { title: "Springs, not curves", category: "Craft", date: "Oct 09", readTime: "7 min", href: "/blog/springs", cover: ["#ff9f0a", "#ff375f"] },
+        { title: "Shipping a design system in six weeks", category: "Case study", date: "Oct 02", readTime: "9 min", href: "/blog/six-weeks" },
+        { title: "The quiet power of a 1px hairline", category: "Details", date: "Sep 26", readTime: "4 min", href: "/blog/hairlines" },
       ]}
     />
   );
@@ -2297,32 +1888,37 @@ export function JournalSection() {
   {
     slug: "split-contact-glass",
     name: "Split Contact Glass",
-    description:
-      "A contact section in two panes: a lit glass panel with how to reach the team and their live local time, and a form with topic chips, a counted message and a send button that confirms.",
+    description: "A contact section in two panes: a glass panel with the team's local time on a springy analog clock, a one-tap copyable email and the reply time, and a form with name, email, topic chips and a message whose count ring fills as you type. Sending launches the paper plane off the button and swaps the form for a thank-you.",
     categorySlug: "contact-sections",
-    tags: ["lead"],
+    tags: ["contact", "contact form", "lead", "form", "clock", "glass", "split", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 64,
     createdAt: "2026-03-02",
-    animationKinds: ["hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewContactSplit,
-    previewShell: "plain",
+    animationKinds: ["spring", "press", "layout", "type"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "heading", type: "string", description: "Heading on the glass panel." },
-      { name: "intro", type: "string", description: "Line under the heading." },
-      { name: "email", type: "string", defaultValue: "\"hello@studio.dev\"", description: "Contact email." },
-      { name: "location", type: "string", description: "Studio location." },
-      { name: "timeZone", type: "string", defaultValue: "\"Europe/Lisbon\"", description: "IANA zone for the live local time." },
-      { name: "replyTime", type: "string", description: "Response-time note." },
-      { name: "topics", type: "string[]", description: "Topic chips." },
-      { name: "onSubmit", type: "(values: { name: string; email: string; topic: string; message: string }) => Promise<void> | void", description: "Called on send; a promise shows the sending state." },
-      { name: "maxLength", type: "number", defaultValue: "500", description: "Message character limit." },
+      { name: "heading", type: "string", defaultValue: "\"Let's build something good\"", description: "Heading on the glass panel." },
+      { name: "intro", type: "string", description: "Line under the heading; empty string hides it." },
+      { name: "email", type: "string", defaultValue: "\"hello@studio.dev\"", description: "Contact email; the card copies it to the clipboard." },
+      { name: "location", type: "string", defaultValue: "\"Lisbon, Portugal\"", description: "Shown above the local time." },
+      { name: "timeZone", type: "string", defaultValue: "\"Europe/Lisbon\"", description: "IANA zone for the live clock (read on the client only)." },
+      { name: "replyTime", type: "string", defaultValue: "\"Replies within a day\"", description: "Response-time note." },
+      { name: "topics", type: "string[]", description: "Topic chips; the first is selected by default." },
+      { name: "onSubmit", type: "(values: { name: string; email: string; topic: string; message: string }) => Promise<void> | void", description: "Called after local validation. A promise shows the sending state; throw an Error to show its message. Without it the form simulates a send." },
+      { name: "maxLength", type: "number", defaultValue: "500", description: "Message character limit; the ring turns orange past 90%." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fills in and sends a demo message on a loop until someone touches the form." },
       { name: "className", type: "string", description: "Extra classes on the section." },
     ],
+    Preview: Previews.PreviewSplitContactGlassRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { SplitContact } from "@/components/split-contact-glass";
+import { SplitContact, type SplitContactValues } from "@/components/split-contact-glass";
+
+async function sendToInbox(values: SplitContactValues) {
+  // Forward the message to your CRM or email service here. Throw an Error to show its message.
+  console.log("new message", values);
+}
 
 export function ContactSection() {
   return (
@@ -2331,9 +1927,7 @@ export function ContactSection() {
       location="Lisbon, Portugal"
       timeZone="Europe/Lisbon"
       topics={["Custom work", "Partnership", "Support"]}
-      onSubmit={async (values) => {
-        await fetch("/api/contact", { method: "POST", body: JSON.stringify(values) });
-      }}
+      onSubmit={sendToInbox}
     />
   );
 }`,
@@ -2342,35 +1936,38 @@ export function ContactSection() {
   {
     slug: "svg-noise-shader",
     name: "SVG Noise Shader",
-    description: "FeTurbulence-driven noise field for textured sci-fi surfaces.",
+    description: "A grainy gradient surface built from SVG feTurbulence: film grain that flickers over soft pools of colour leaning toward the pointer. Press and hold (or hold Space) and the surface melts through a displacement map; let go and it snaps back like jelly, overshooting before it settles.",
     categorySlug: "shaders",
-    tags: ["texture"],
+    tags: ["texture", "noise", "grain", "svg filter", "feTurbulence", "gradient", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 77,
     createdAt: "2026-04-22",
-    animationKinds: ["gradient", "layout"],
+    animationKinds: ["press", "hover", "spring", "gradient"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewShaderNoise,
+    props: [
+      { name: "colors", type: "string[]", defaultValue: "[\"#5e5ce6\", \"#ff375f\", \"#0a84ff\", \"#ff9f0a\"]", description: "Up to four colours for the glowing pools under the grain." },
+      { name: "grain", type: "number", defaultValue: "0.35", description: "Strength of the film grain, 0 to 1." },
+      { name: "distortion", type: "number", defaultValue: "90", description: "How far the surface melts while held, in px of displacement." },
+      { name: "speed", type: "number", defaultValue: "1", description: "Speed multiplier for the flowing turbulence." },
+      { name: "children", type: "ReactNode", description: "Content over the surface. Defaults to a title." },
+      { name: "hint", type: "string", defaultValue: "\"Press and hold to melt it.\"", description: "Caption under the default title. Pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Holds and releases the surface every few seconds until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes (the surface is 340px tall and up to 520px wide by default)." },
+    ],
+    Preview: Previews.PreviewSvgNoiseShaderRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
+import { SvgNoise } from "@/components/svg-noise-shader";
 
-const NOISE =
-  "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>";
-
-export function SvgNoise() {
+export function GrainPoster() {
   return (
-    <div className="relative h-80 overflow-hidden rounded-[2.5rem] border border-white/10 bg-zinc-950">
-      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.45),transparent_55%),radial-gradient(circle_at_80%_80%,rgba(236,72,153,0.35),transparent_50%)]" />
-      <motion.div
-        aria-hidden
-        className="absolute -inset-8 opacity-30 mix-blend-overlay"
-        style={{ backgroundImage: 'url("' + NOISE + '")' }}
-        animate={{ x: [0, -20, 0], y: [0, 10, 0] }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-      />
-      <p className="absolute bottom-8 left-8 text-sm font-medium text-white/80">SVG turbulence noise field</p>
-    </div>
+    <SvgNoise colors={["#ff375f", "#ff9f0a", "#bf5af2", "#0a84ff"]} grain={0.45} className="h-[380px] max-w-[560px]">
+      <div className="pointer-events-none text-center text-white">
+        <p className="text-[12px] font-medium uppercase tracking-[0.18em] text-white/75">Summer drop</p>
+        <h2 className="mt-2 text-6xl font-semibold tracking-[-0.05em]">Heatwave.</h2>
+      </div>
+    </SvgNoise>
   );
 }`,
     tailwindSource: tw,
@@ -2378,28 +1975,37 @@ export function SvgNoise() {
   {
     slug: "tracing-spotlight-panel",
     name: "Tracing Spotlight Panel",
-    description: "Cursor-traced highlight for feature callouts and pricing tiers.",
+    description: "A panel with a light in it: point inside and a soft spotlight trails the pointer on a spring while the border glows wherever the light is closest. Leave and the light slides out to the edge and keeps running laps around the border, tracing the outline until you come back.",
     categorySlug: "motion-effects",
-    tags: ["pointer"],
+    tags: ["spotlight", "pointer", "glow", "border", "pricing", "card", "hover", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 107,
     createdAt: "2026-05-06",
-    animationKinds: ["hover", "gradient"],
+    animationKinds: ["hover", "spring", "gradient"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewSpotlightPanel,
+    props: [
+      { name: "children", type: "ReactNode", description: "Panel content. Leave out for the built-in pricing tier." },
+      { name: "color", type: "string", description: "Colour of the light. Defaults to system blue." },
+      { name: "size", type: "number", defaultValue: "260", description: "Radius of the spotlight inside the panel, in px." },
+      { name: "trace", type: "boolean", defaultValue: "true", description: "While nobody is pointing at it, the light runs laps around the border." },
+      { name: "lap", type: "number", defaultValue: "5", description: "Seconds for one lap of the border." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the spotlight through the panel now and then until someone points at it." },
+      { name: "className", type: "string", description: "Classes for the root (it is 340px wide at most)." },
+    ],
+    Preview: Previews.PreviewTracingSpotlightPanelRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { TracingSpotlightPanel } from "@/components/tracing-spotlight-panel";
 
-export function TracingSpotlight() {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const bg = useMotionTemplate\`radial-gradient(240px circle at \${x}px \${y}px, rgba(244,114,182,.35), transparent 60%)\`;
+export function TeamPlan() {
   return (
-    <div onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); x.set(e.clientX - r.left); y.set(e.clientY - r.top); }} className="relative overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 p-8">
-      <motion.div className="absolute inset-0" style={{ backgroundImage: bg }} />
-      <div className="relative text-white">Spotlight content</div>
-    </div>
+    <TracingSpotlightPanel color="#bf5af2" lap={6}>
+      <p className="text-sm font-semibold">Team</p>
+      <p className="mt-2 text-4xl font-semibold tracking-tight">$49</p>
+      <p className="mt-1 text-sm text-neutral-500">per seat, billed yearly</p>
+      <button className="mt-6 h-10 w-full rounded-full bg-neutral-900 text-sm font-medium text-white">Choose Team</button>
+    </TracingSpotlightPanel>
   );
 }`,
     tailwindSource: tw,
@@ -2407,26 +2013,38 @@ export function TracingSpotlight() {
   {
     slug: "forge-ai-command-bar",
     name: "Forge AI Command Bar",
-    description: "Command surface for AI copilots with motion layout container.",
+    description: "A command bar for an AI copilot: pick Ask, Edit or Build, type a prompt or tap a suggestion and send it. The bar grows a panel where the prompt lands as a heading and each step ticks off while a light runs round the edge; Cmd/Ctrl+K focuses it and Esc stops a run.",
     categorySlug: "ai-components",
-    tags: ["copilot"],
+    tags: ["ai", "copilot", "command bar", "prompt", "input", "chat", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 118,
     createdAt: "2026-05-09",
-    animationKinds: ["layout", "spring"],
-    dependencies: ["framer-motion", "react"],
-    Preview: Previews.PreviewAiBar,
+    animationKinds: ["type", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "placeholder", type: "string", defaultValue: "\"Describe what you need...\"", description: "Placeholder while the field is empty." },
+      { name: "suggestions", type: "string[]", defaultValue: "3 prompts", description: "One-tap prompts shown under the field while it is empty (up to three)." },
+      { name: "defaultMode", type: "\"ask\" | \"edit\" | \"build\"", defaultValue: "\"build\"", description: "Mode the switcher starts on." },
+      { name: "onSubmit", type: "(prompt: string, mode: AiCommandMode) => void", description: "Called with the prompt and mode when the user sends it." },
+      { name: "steps", type: "(prompt: string, mode: AiCommandMode) => string[]", description: "Builds the progress steps shown while the copilot works. Defaults to four generic steps." },
+      { name: "hotkey", type: "string", defaultValue: "\"k\"", description: "Key that focuses the bar with Cmd or Ctrl. Empty string turns the shortcut off." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types and runs the suggestions in turn until someone touches the bar." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewForgeAiCommandBarRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { AiCommandBar } from "@/components/forge-ai-command-bar";
 
-export function AiCommandBar() {
-  const [value, setValue] = useState("");
+export function CopilotBar() {
   return (
-    <motion.div layout className="rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-      <input value={value} onChange={(e) => setValue(e.target.value)} className="w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm text-white" placeholder="Describe the UI you need…" />
-    </motion.div>
+    <AiCommandBar
+      placeholder="Ask the copilot..."
+      suggestions={["Add a pricing table", "Make the hero animate in", "Write the FAQ"]}
+      onSubmit={(prompt, mode) => console.log(mode, prompt)}
+      steps={(prompt) => ["Reading the project", \`Planning: \${prompt}\`, "Writing 2 files", "Done"]}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -2435,3231 +2053,1633 @@ export function AiCommandBar() {
     slug: "gooey-search-input",
     name: "Gooey Search Input",
     registryCliName: "gooey-input",
-    resourceLinks: [
-      { label: "Live demo", href: "/demos/gooey-input" },
-    ],
-    description:
-      "Expandable pill search with a detached icon bubble merged through an SVG goo filter and spring layout.",
+    description: "A search pill whose icon pinches off into its own bubble through an SVG goo filter when you open it, while the field grows with a springy overshoot. Pass suggestions and the matches drip out of the underside of the field through the same goo, with arrow-key navigation.",
     categorySlug: "motion-effects",
-    tags: ["search", "svg", "spring", "forms"],
+    tags: ["search", "input", "gooey", "svg filter", "autocomplete", "spring", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 112,
     createdAt: "2026-05-13",
-    animationKinds: ["spring", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
+    animationKinds: ["spring", "type", "layout"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "placeholder", type: "string", defaultValue: "\"Type to search...\"", description: "Input placeholder text." },
-      { name: "collapsedWidth", type: "number", defaultValue: "115", description: "Width (px) when collapsed." },
-      { name: "expandedWidth", type: "number", defaultValue: "200", description: "Width (px) when expanded." },
-      { name: "expandedOffset", type: "number", defaultValue: "56", description: "Left offset (px) applied when expanded." },
-      { name: "gooeyBlur", type: "number", defaultValue: "5", description: "SVG blur strength for gooey merge effect." },
+      { name: "placeholder", type: "string", defaultValue: "\"Type to search...\"", description: "Placeholder of the open field." },
+      { name: "collapsedLabel", type: "string", defaultValue: "\"Search\"", description: "Label on the collapsed pill." },
+      { name: "collapsedWidth", type: "number", defaultValue: "115", description: "Width of the pill while collapsed, in px." },
+      { name: "expandedWidth", type: "number", defaultValue: "200", description: "Width of the open field, in px." },
+      { name: "expandedOffset", type: "number", defaultValue: "56", description: "Room left of the open field for the icon bubble, in px." },
+      { name: "gooeyBlur", type: "number", defaultValue: "5", description: "Blur of the goo filter; higher melts the shapes together more." },
+      { name: "suggestions", type: "string[]", description: "Words to suggest; up to four matches drip out below while typing." },
+      { name: "onSelect", type: "(value: string) => void", description: "Called when a suggestion is picked with a click or Enter." },
       { name: "value", type: "string", description: "Controlled value." },
-      { name: "defaultValue", type: "string", defaultValue: "\"\"", description: "Initial value for uncontrolled mode." },
-      { name: "onValueChange", type: "(value: string) => void", description: "Called when value changes." },
-      { name: "onOpenChange", type: "(open: boolean) => void", description: "Called when expanded/collapsed state changes." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables interactions and input." },
+      { name: "defaultValue", type: "string", defaultValue: "\"\"", description: "Initial value when uncontrolled." },
+      { name: "onValueChange", type: "(value: string) => void", description: "Called when the text changes (and with \"\" when the field closes)." },
+      { name: "onOpenChange", type: "(open: boolean) => void", description: "Called when the field opens or closes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens, types a query and closes on a loop until someone touches it." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the pill and ignores input." },
     ],
-    Preview: Previews.PreviewGooeySearch,
+    Preview: Previews.PreviewGooeySearchInputRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
+import { useRouter } from "next/navigation";
 import { GooeyInput } from "@/components/gooey-input";
 
-export function CatalogSearch() {
+const PAGES = ["Pricing", "Changelog", "Components", "Templates", "Docs", "Blog"];
+
+export function SiteSearch() {
+  const router = useRouter();
+
   return (
     <GooeyInput
-      placeholder="Search…"
-      collapsedWidth={115}
-      expandedWidth={200}
-      expandedOffset={56}
+      placeholder="Search the site"
+      collapsedWidth={120}
+      expandedWidth={240}
+      suggestions={PAGES}
+      onSelect={(page) => router.push(\`/\${page.toLowerCase()}\`)}
     />
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [
+      { label: "Live demo", href: "/demos/gooey-input" },
+    ],
   },
   {
     slug: "terminal",
     name: "Interactive Terminal",
     registryCliName: "terminal",
+    description: "A macOS-style terminal window that types a script of commands with human timing, shows a spinner while each runs and prints its output. Then the prompt is yours: click in and type help, ls, echo or any scripted command, with history, Tab completion and Ctrl+C.",
+    categorySlug: "motion-effects",
+    tags: ["terminal", "cli", "shell", "typewriter", "command line", "interactive", "sound", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 110,
+    createdAt: "2026-05-13",
+    animationKinds: ["type", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "commands", type: "TerminalCommand[]", defaultValue: "3-command demo", description: "Script typed and run in order: { input, output?, runDelayMs? }. Visitors can run these again by typing them." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Loops the script until someone clicks or types in the terminal, then hands them the prompt." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Lets visitors type real commands after the script or their first click." },
+      { name: "onCommand", type: "(input: string) => TerminalOutput | void", description: "Answers a typed command. Return lines to print, or nothing to fall back to the built-ins." },
+      { name: "theme", type: "\"carbon\" | \"midnight\" | \"paper\"", defaultValue: "\"carbon\"", description: "Window style. Paper is light on light pages and turns dark with the site." },
+      { name: "username", type: "string", defaultValue: "\"you\"", description: "Username in the title bar and for whoami." },
+      { name: "hostname", type: "string", defaultValue: "\"nexus\"", description: "Hostname in the prompt and title bar." },
+      { name: "promptSymbol", type: "string", defaultValue: "\"➜\"", description: "Prompt symbol before each command." },
+      { name: "typingSpeed", type: "number", defaultValue: "34", description: "Base typing speed in ms per character." },
+      { name: "typingJitter", type: "number", defaultValue: "30", description: "Random extra ms per character." },
+      { name: "startupDelay", type: "number", defaultValue: "450", description: "Pause before the script starts, in ms." },
+      { name: "delayBetweenCommands", type: "number", defaultValue: "750", description: "Pause after each command, in ms." },
+      { name: "autoStart", type: "boolean", defaultValue: "true", description: "Runs the script once when it scrolls into view." },
+      { name: "loop", type: "boolean", defaultValue: "false", description: "Repeats the script forever." },
+      { name: "loopDelay", type: "number", defaultValue: "1600", description: "Pause between loops, in ms." },
+      { name: "showCursor", type: "boolean", defaultValue: "true", description: "Shows the caret." },
+      { name: "enableSound", type: "boolean", defaultValue: "false", description: "Plays a key click while typing. Synthesised unless a sprite is passed." },
+      { name: "soundSpriteUrl", type: "string", description: "OGG sprite for real key sounds. Nothing is fetched unless set." },
+      { name: "soundSpriteConfigUrl", type: "string", description: "JSON timing map for the sprite." },
+      { name: "simpleSoundUrl", type: "string", description: "One audio file played on every key instead of a sprite." },
+      { name: "showSoundToggle", type: "boolean", defaultValue: "true", description: "Shows the sound button in the title bar." },
+      { name: "showControls", type: "boolean", defaultValue: "true", description: "Shows pause, resume and replay in the title bar." },
+      { name: "fillHeight", type: "boolean", defaultValue: "false", description: "Fills a parent with a fixed height instead of the default 300px body." },
+      { name: "hint", type: "string", defaultValue: "\"Click in and type help.\"", description: "Line under the window. Empty string hides it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewTerminalRedesign,
+    previewShell: "plain",
+    previewSections: [
+      {
+        title: "Carbon",
+        Preview: Previews.PreviewTerminalRedesign,
+        reactSource: `"use client";
+
+import { Terminal } from "@/components/terminal";
+
+export function CarbonTerminal() {
+  return (
+    <Terminal
+      autoplay
+      commands={[
+        { input: "npx shadcn@latest add @nexus-labs/terminal", runDelayMs: 800, output: [{ text: "wrote components/terminal/terminal.tsx", tone: "success" }] },
+        { input: "npm run dev", runDelayMs: 600, output: [{ text: "Local: http://localhost:3000", tone: "info" }] },
+      ]}
+    />
+  );
+}`,
+      },
+      {
+        title: "Paper",
+        Preview: Previews.PreviewTerminalPaperRedesign,
+        reactSource: `"use client";
+
+import { Terminal } from "@/components/terminal";
+
+export function PaperTerminal() {
+  return (
+    <Terminal
+      theme="paper"
+      hint=""
+      commands={[{ input: "git push origin main", runDelayMs: 700, output: [{ text: "main -> main", tone: "success" }] }]}
+    />
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
+
+import { Terminal } from "@/components/terminal";
+
+export function InstallTerminal() {
+  return (
+    <div className="flex h-[420px] flex-col">
+      <Terminal
+        fillHeight
+        className="min-h-0 flex-1"
+        username="tushar"
+        hostname="nexus"
+        commands={[
+          { input: "npm install", runDelayMs: 900, output: ["added 182 packages in 3s", { text: "found 0 vulnerabilities", tone: "success" }] },
+          { input: "npm run dev", runDelayMs: 600, output: [{ text: "ready on http://localhost:3000", tone: "info" }] },
+        ]}
+        onCommand={(input) => (input === "deploy" ? [{ text: "live on nexus-ui.com", tone: "success" }] : undefined)}
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
     resourceLinks: [
       { label: "Live demo", href: "/demos/terminal" },
       { label: "Download sound sprite (sound.ogg)", href: "/sounds/sound.ogg" },
       { label: "Sprite timing map (config.json)", href: "/sounds/config.json" },
     ],
-    description:
-      "macOS-style terminal window with typewriter commands, cursor blink, output sequencing, and optional sound.",
-    categorySlug: "motion-effects",
-    tags: ["terminal", "cli", "typewriter", "sound", "shell"],
-    premium: false,
-    trendingScore: 110,
-    createdAt: "2026-05-13",
-    animationKinds: ["spring", "layout"],
-    dependencies: ["framer-motion"],
-    props: [
-      { name: "commands", type: "TerminalCommand[]", description: "Command script typed and executed in sequence." },
-      { name: "promptSymbol", type: "string", defaultValue: "\"➜\"", description: "Prompt symbol shown before each command." },
-      { name: "username", type: "string", defaultValue: "\"user\"", description: "Username displayed in prompt/header." },
-      { name: "hostname", type: "string", defaultValue: "\"nexus\"", description: "Hostname displayed in prompt/header." },
-      { name: "typingSpeed", type: "number", defaultValue: "28", description: "Base typing speed in ms/character." },
-      { name: "typingJitter", type: "number", defaultValue: "28", description: "Random typing cadence variation (ms)." },
-      { name: "startupDelay", type: "number", defaultValue: "450", description: "Delay before script starts (ms)." },
-      { name: "delayBetweenCommands", type: "number", defaultValue: "850", description: "Pause between commands (ms)." },
-      { name: "autoStart", type: "boolean", defaultValue: "true", description: "Auto-run when component enters viewport." },
-      { name: "loop", type: "boolean", defaultValue: "false", description: "Repeats the full script forever." },
-      { name: "loopDelay", type: "number", defaultValue: "1400", description: "Pause between loops (ms)." },
-      { name: "showCursor", type: "boolean", defaultValue: "true", description: "Displays blinking cursor during typing." },
-      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Enables keyboard and enter sounds." },
-      { name: "showSoundToggle", type: "boolean", defaultValue: "true", description: "Renders sound toggle control in header." },
-      { name: "showControls", type: "boolean", defaultValue: "true", description: "Renders pause/resume/replay controls." },
-      { name: "theme", type: "\"carbon\" | \"midnight\" | \"paper\"", defaultValue: "\"carbon\"", description: "Terminal visual theme." },
-      { name: "fillHeight", type: "boolean", defaultValue: "false", description: "Makes body scroll inside fixed parent height." },
-      { name: "className", type: "string", description: "Optional class names for layout/styling." },
-    ],
-    Preview: Previews.PreviewTerminal,
-    reactSource: `"use client";
-
-import { Terminal } from "@/components/terminal";
-
-export function TerminalExample() {
-  return (
-    <Terminal
-      fillHeight
-      className="h-[420px]"
-      username="tushar"
-      hostname="Nexus-Macbook"
-      theme="carbon"
-      commands={[
-        { input: "npm install", runDelayMs: 900, output: ["added packages", { text: "done", tone: "success" }] },
-        { input: "pnpm dev", runDelayMs: 650, output: [{ text: "ready - http://localhost:3000", tone: "success" }] },
-        { input: "git push origin main", runDelayMs: 700, output: [{ text: "main -> main", tone: "success" }] },
-        { input: "deploy --prod", runDelayMs: 800, output: [{ text: "live on nexus-ui.com", tone: "success" }] },
-        { input: "npx shadcn@latest add @nexus-labs/gooey-input", runDelayMs: 600, output: [{ text: "✔ component added", tone: "success" }] },
-      ]}
-    />
-  );
-}`,
-    tailwindSource: tw,
   },
   {
     slug: "squiggly-text",
     name: "RippleLine squiggly text",
     registryCliName: "squiggly-text",
+    description: "Text that boils like a stop-motion pencil drawing: an SVG turbulence filter re-rolls its noise every few frames, and an optional hand-drawn underline draws itself in. Sweeping the pointer across it stirs the ink, which jumps with pointer speed and settles back on a spring.",
+    categorySlug: "motion-effects",
+    tags: ["typography", "svg", "filter", "hand-drawn", "hero", "underline", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 108,
+    createdAt: "2026-05-13",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "children", type: "React.ReactNode", description: "Content to boil. Takes priority over text." },
+      { name: "text", type: "string", description: "Convenience text when no children are given." },
+      { name: "steps", type: "number", defaultValue: "5", description: "How many noise frames the boil cycles through." },
+      { name: "stepDuration", type: "number", defaultValue: "80", description: "Milliseconds each frame is held." },
+      { name: "scale", type: "number | readonly [number, number]", defaultValue: "[6, 8]", description: "Resting displacement in px; a pair alternates frame by frame." },
+      { name: "baseFrequency", type: "number", defaultValue: "0.02", description: "Noise frequency. Higher gives tighter wiggles." },
+      { name: "numOctaves", type: "number", defaultValue: "3", description: "Noise detail, 1 to 5." },
+      { name: "stir", type: "number", defaultValue: "0.06", description: "How hard pointer speed stirs the ink. 0 turns it off." },
+      { name: "underline", type: "boolean", defaultValue: "false", description: "Adds a hand-drawn squiggle underline that redraws when the pointer enters." },
+      { name: "underlineColor", type: "string", description: "Underline colour. Defaults to the accent blue." },
+      { name: "as", type: "\"span\" | \"div\"", defaultValue: "\"span\"", description: "Root element of SquigglyText." },
+      { name: "className", type: "string", description: "Classes for the root element." },
+      { name: "textClassName", type: "string", description: "Classes for the boiling text node." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Stirs the ink and redraws the underline every 2.8s until someone points at it." },
+    ],
+    Preview: Previews.PreviewSquigglyTextRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SquigglyText, SquigglyWord } from "@/components/squiggly-text";
+
+export function HandDrawnHero() {
+  return (
+    <h1 className="text-center text-5xl font-semibold tracking-tight">
+      Interfaces with{" "}
+      <SquigglyWord underline scale={[3, 4.5]} className="text-[#0071e3]">
+        a little life
+      </SquigglyWord>{" "}
+      in every line.
+    </h1>
+  );
+}
+
+export function SketchedLabel() {
+  return (
+    <SquigglyText
+      text="Sketched, not printed."
+      steps={4}
+      stepDuration={140}
+      scale={[2, 3]}
+      textClassName="text-2xl font-semibold"
+    />
+  );
+}`,
+    tailwindSource: tw,
     resourceLinks: [
       { label: "Live demo", href: "/demos/squiggly-text" },
       { label: "SVG filters (MDN)", href: "https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feTurbulence" },
     ],
-    description:
-      "A hero headline that wobbles like hand-drawn ink: an SVG turbulence and displacement filter steps through frames, with a still fallback when reduced motion is on.",
-    categorySlug: "motion-effects",
-    tags: ["typography", "svg", "motion", "hero", "underline", "filters"],
-    premium: false,
-    trendingScore: 108,
-    createdAt: "2026-05-13",
-    animationKinds: ["spring", "layout"],
-    dependencies: ["framer-motion"],
-    props: [
-      { name: "children", type: "React.ReactNode", description: "Custom content for the squiggly text wrapper." },
-      { name: "text", type: "string", description: "Convenience text content (when children not provided)." },
-      { name: "steps", type: "number", defaultValue: "5", description: "Number of turbulence/displacement frames." },
-      { name: "stepDuration", type: "number", defaultValue: "80", description: "Duration per frame in ms." },
-      { name: "scale", type: "number | readonly [number, number]", defaultValue: "[6, 8]", description: "Displacement intensity per frame." },
-      { name: "baseFrequency", type: "number", defaultValue: "0.02", description: "Turbulence base frequency." },
-      { name: "numOctaves", type: "number", defaultValue: "3", description: "Number of turbulence octaves." },
-      { name: "as", type: "\"span\" | \"div\"", defaultValue: "\"span\"", description: "Root tag for SquigglyText." },
-      { name: "className", type: "string", description: "Root wrapper class names." },
-      { name: "textClassName", type: "string", description: "Class names applied to animated text node." },
-    ],
-    Preview: Previews.PreviewSquigglyText,
-    reactSource: `"use client";
-
-import { SquigglyDrinksHeadline, SquigglyText } from "@/components/squiggly-text";
-
-export function HeroLine() {
-  return (
-    <SquigglyText as="div" steps={5} stepDuration={80} scale={[6, 8]} baseFrequency={0.02} numOctaves={3}>
-      <span className="block">How many drinks</span>
-      <span className="block">are too many drinks?</span>
-    </SquigglyText>
-  );
-}
-
-export function DrinksDemo() {
-  return <SquigglyDrinksHeadline />;
-}`,
-    tailwindSource: tw,
   },
   {
     slug: "floating-dock",
     name: "Nexus floating dock",
     registryCliName: "floating-dock",
+    description: "A macOS-style dock: tiles swell under the pointer and push their neighbours aside on springs, a tooltip names each one, and a click bounces the tile like a launching app before a running dot slides under it. Below md it turns into one glass button that springs the tiles up as a stack.",
+    categorySlug: "navbars",
+    tags: ["dock", "navigation", "macos", "magnify", "glass", "tooltip", "navbar", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 105,
+    createdAt: "2026-05-13",
+    animationKinds: ["hover", "press", "spring", "magnetic", "layout"],
+    dependencies: ["framer-motion", "lucide-react"],
+    props: [
+      { name: "items", type: "FloatingDockItem[]", description: "Tiles: { title, icon, href, tint?, badge? }. tint is any CSS colour or gradient; with it the icon turns white." },
+      { name: "position", type: "\"fixed\" | \"inline\"", defaultValue: "\"fixed\"", description: "fixed pins the dock to the bottom of the viewport; inline renders it where you place it. Both switch to the compact menu below md." },
+      { name: "activeHref", type: "string", description: "Href of the item that gets the running dot. Defaults to matching the current pathname." },
+      { name: "onSelect", type: "(item: FloatingDockItem) => void", description: "Called with the item when a tile is clicked." },
+      { name: "disableLinks", type: "boolean", defaultValue: "false", description: "Render tiles as buttons instead of links, for in-app actions." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps an invisible pointer across the dock and bounces a tile until someone points at it." },
+      { name: "desktopClassName", type: "string", description: "Extra classes on the desktop dock wrapper." },
+      { name: "mobileClassName", type: "string", description: "Extra classes on the mobile menu wrapper." },
+    ],
+    Preview: Previews.PreviewFloatingDockRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BookOpen, Home, LayoutGrid, Search, Settings } from "lucide-react";
+import { FloatingDock } from "@/components/floating-dock";
+
+const items = [
+  { title: "Home", icon: <Home />, href: "/", tint: "linear-gradient(160deg,#5ac8fa,#0071e3)" },
+  { title: "Components", icon: <LayoutGrid />, href: "/components", tint: "linear-gradient(160deg,#bf5af2,#5e5ce6)", badge: 2 },
+  { title: "Docs", icon: <BookOpen />, href: "/docs", tint: "linear-gradient(160deg,#ffd60a,#ff9f0a)" },
+  { title: "Search", icon: <Search />, href: "/search" },
+  { title: "Settings", icon: <Settings />, href: "/settings" },
+];
+
+export function AppDock() {
+  return <FloatingDock items={items} />;
+}`,
+    tailwindSource: tw,
     resourceLinks: [
       { label: "Live demo", href: "/demos/floating-dock" },
       { label: "Magnified dock pattern (Build UI)", href: "https://buildui.com/recipes/magnified-dock" },
     ],
-    description:
-      "Bottom-centered macOS-style dock with pointer-driven magnification, neighbor scaling, glass pill chrome, tooltips, and a touch-friendly expandable mobile menu.",
-    categorySlug: "navbars",
-    tags: ["navigation", "motion", "dock", "glass", "tooltip"],
-    premium: false,
-    trendingScore: 105,
-    createdAt: "2026-05-13",
-    animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    props: [
-      { name: "items", type: "FloatingDockItem[]", description: "Dock entries: title, icon, and href." },
-      { name: "desktopClassName", type: "string", description: "Extra class names for desktop dock wrapper." },
-      { name: "mobileClassName", type: "string", description: "Extra class names for mobile dock wrapper." },
-    ],
-    Preview: Previews.PreviewFloatingDock,
-    reactSource: `"use client";
-
-import { FloatingDock } from "@/components/floating-dock";
-import { Home, LayoutGrid } from "lucide-react";
-
-const items = [
-  { title: "Home", icon: <Home />, href: "/" },
-  { title: "Components", icon: <LayoutGrid />, href: "/components" },
-];
-
-export function NavbarDock() {
-  return <FloatingDock items={items} />;
-}`,
-    tailwindSource: tw,
   },
   {
     slug: "stateful-button",
     name: "Stateful message button",
     registryCliName: "stateful-button",
-    resourceLinks: [
-      { label: "Live demo", href: "/demos/stateful-button" },
-      { label: "Live demo", href: "/demos/stateful-button" },
-    ],
-    description:
-      "Animated async button with idle → loading → success transitions, built-in click guarding, and smooth icon/text motion.",
+    description: "A button that shows its own async work: idle, loading, success and error. Pressed it squashes, a light sweeps across while the promise runs and the label rolls with the width springing to fit; success turns it green with a small overshoot pop and a drawn check, failure turns it red and shakes.",
     categorySlug: "motion-effects",
-    tags: ["button", "forms", "async", "loading", "success"],
+    tags: ["button", "async", "loading", "success", "error", "submit", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 104,
     createdAt: "2026-05-13",
-    animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "children", type: "React.ReactNode", description: "Idle button label/content." },
-      { name: "loadingText", type: "string", defaultValue: "\"Loading...\"", description: "Label shown in loading phase." },
-      { name: "successText", type: "string", defaultValue: "\"Success\"", description: "Label shown in success phase." },
-      { name: "errorText", type: "string", defaultValue: "\"Something went wrong\"", description: "Label shown in error phase." },
-      { name: "onClick", type: "() => Promise<void> | void", description: "Async/sync action invoked on click." },
-      { name: "resetDelay", type: "number", defaultValue: "1800", description: "Auto-reset delay after success/error (ms)." },
-      { name: "showSuccess", type: "boolean", defaultValue: "true", description: "If false, returns to idle after action completes." },
-      { name: "variant", type: "\"default\" | \"outline\" | \"ghost\" | \"destructive\"", defaultValue: "\"default\"", description: "Visual style variant." },
-      { name: "size", type: "\"sm\" | \"md\" | \"lg\"", defaultValue: "\"md\"", description: "Button size preset." },
-      { name: "icon", type: "React.ReactNode", description: "Optional icon shown in idle state." },
-      { name: "successIcon", type: "React.ReactNode", description: "Optional icon shown in success state." },
-      { name: "errorIcon", type: "React.ReactNode", description: "Optional icon shown in error state." },
-      { name: "disabled", type: "boolean", description: "Disables interaction (in addition to loading lock)." },
-      { name: "className", type: "string", description: "Optional class names for custom styling." },
+      { name: "children", type: "React.ReactNode", description: "Idle label." },
+      { name: "onClick", type: "() => Promise<void> | void", description: "Runs on click. Return a promise to show the loading state until it settles; throw to show the error state." },
+      { name: "loadingText", type: "string", defaultValue: "\"Loading\"", description: "Label while onClick is pending." },
+      { name: "successText", type: "string", defaultValue: "\"Done\"", description: "Label after onClick resolves." },
+      { name: "errorText", type: "string", defaultValue: "\"Something went wrong\"", description: "Label after onClick rejects." },
+      { name: "resetDelay", type: "number", defaultValue: "1800", description: "How long success or error stays before the button resets, in ms." },
+      { name: "showSuccess", type: "boolean", defaultValue: "true", description: "Show the success state; otherwise go straight back to idle." },
+      { name: "variant", type: "\"default\" | \"outline\" | \"ghost\" | \"destructive\"", defaultValue: "\"default\"", description: "Visual style of the idle and loading states." },
+      { name: "size", type: "\"sm\" | \"md\" | \"lg\"", defaultValue: "\"md\"", description: "Height, padding and text size." },
+      { name: "icon", type: "React.ReactNode", description: "Icon before the idle label." },
+      { name: "successIcon", type: "React.ReactNode", description: "Replaces the drawn check." },
+      { name: "errorIcon", type: "React.ReactNode", description: "Replaces the drawn alert." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Loops through loading and success (without calling onClick) until someone presses it." },
     ],
-    Preview: Previews.PreviewStatefulButton,
+    Preview: Previews.PreviewStatefulButtonRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { CheckCircle2 } from "lucide-react";
 import { StatefulButton } from "@/components/stateful-button";
 
-async function sendMessage() {
-  await new Promise<void>((resolve) => setTimeout(resolve, 1300));
+async function publish() {
+  const res = await fetch("/api/posts/42/publish", { method: "POST" });
+  if (!res.ok) throw new Error("Publish failed");
 }
 
-export function MessageButton() {
+export function PublishButton() {
   return (
-    <StatefulButton
-      onClick={sendMessage}
-      loadingText="Send message"
-      successText="Send message"
-      successIcon={<CheckCircle2 className="size-4" />}
-      className="flex min-w-[120px] cursor-pointer items-center justify-center gap-2 rounded-full bg-green-500 px-4 py-2 font-medium text-white ring-offset-2 transition duration-200 hover:ring-2 hover:ring-green-500 dark:ring-offset-black"
-    >
-      Send message
+    <StatefulButton onClick={publish} loadingText="Publishing" successText="Published" errorText="Try again">
+      Publish post
     </StatefulButton>
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [
+      { label: "Live demo", href: "/demos/stateful-button" },
+      { label: "Live demo", href: "/demos/stateful-button" },
+    ],
   },
   {
     slug: "sparkles",
     name: "Sparkles field",
     registryCliName: "sparkles",
-    resourceLinks: [
-      { label: "Live demo", href: "/demos/sparkles" },
-      { label: "Live demo", href: "/demos/sparkles" },
-    ],
-    description:
-      "Configurable animated particle field for hero highlights, card backgrounds, and decorative UI layers with optional pointer interaction.",
+    description: "A canvas layer of sparkles that pop in with a small overshoot, turn as they shine, drift and fade, then reappear elsewhere. With interactive on, the pointer leaves a sparkling trail and a click throws a burst that arcs down under gravity.",
     categorySlug: "motion-effects",
-    tags: ["particles", "sparkles", "background", "hero", "decorative"],
+    tags: ["sparkles", "particles", "canvas", "stars", "glitter", "background", "motion kit"],
     premium: false,
     trendingScore: 103,
     createdAt: "2026-05-14",
-    animationKinds: ["gradient", "hover"],
+    animationKinds: ["hover", "press"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "count", type: "number", defaultValue: "36", description: "Base number of particles before density scaling." },
-      { name: "color", type: "string", defaultValue: "\"#e5f4ff\"", description: "Particle and glow color." },
-      { name: "minSize", type: "number", defaultValue: "0.9", description: "Minimum particle size in pixels." },
-      { name: "maxSize", type: "number", defaultValue: "2.8", description: "Maximum particle size in pixels." },
-      { name: "speed", type: "number", defaultValue: "1", description: "Overall animation speed multiplier." },
-      { name: "opacity", type: "number", defaultValue: "0.9", description: "Global opacity multiplier for particles." },
-      { name: "className", type: "string", description: "Optional class names for layout/positioning." },
-      { name: "background", type: "boolean", defaultValue: "false", description: "If true, mounts as a full-layer absolute background." },
-      { name: "density", type: "\"low\" | \"medium\" | \"high\"", defaultValue: "\"medium\"", description: "Density preset that scales particle count." },
-      { name: "direction", type: "\"up\" | \"down\" | \"random\"", defaultValue: "\"random\"", description: "Primary movement direction for particle drift." },
-      { name: "enableGlow", type: "boolean", defaultValue: "true", description: "Adds soft bloom/glow to each particle." },
-      { name: "interactive", type: "boolean", defaultValue: "false", description: "Enables pointer glow, hover sparkles, and click bursts." },
+      { name: "count", type: "number", defaultValue: "36", description: "Base number of sparkles, before density scales it." },
+      { name: "color", type: "string", description: "Sparkle colour. Defaults to blue on light, ice white on dark." },
+      { name: "minSize", type: "number", defaultValue: "0.9", description: "Smallest sparkle radius in px." },
+      { name: "maxSize", type: "number", defaultValue: "2.8", description: "Largest sparkle radius in px. The biggest fifth are drawn as four-point stars." },
+      { name: "speed", type: "number", defaultValue: "1", description: "Speed multiplier for twinkling and drift." },
+      { name: "opacity", type: "number", defaultValue: "0.9", description: "Overall opacity, 0.1 to 1." },
+      { name: "className", type: "string", description: "Classes for layout and masking." },
+      { name: "background", type: "boolean", defaultValue: "false", description: "Mount as an absolute layer filling the parent." },
+      { name: "density", type: "\"low\" | \"medium\" | \"high\"", defaultValue: "\"medium\"", description: "Density preset that scales count." },
+      { name: "direction", type: "\"up\" | \"down\" | \"random\"", defaultValue: "\"random\"", description: "Which way sparkles drift while they shine." },
+      { name: "enableGlow", type: "boolean", defaultValue: "true", description: "Soft bloom round each sparkle." },
+      { name: "interactive", type: "boolean", defaultValue: "false", description: "Pointer trail and click bursts." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws a few bursts until someone touches the layer." },
     ],
-    Preview: Previews.PreviewSparkles,
-    detailPreviews: [Previews.PreviewSparklesLine, Previews.PreviewSparklesStarfield],
-    reactExamples: [
-      {
-        title: "Code 1 — First Component",
-        code: `"use client";
-
-import { Sparkles } from "@/components/sparkles";
-
-export function SparklesLineHero() {
-  return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-black p-8">
-      <div className="relative z-[2] mx-auto max-w-2xl space-y-4 text-center">
-        <h2 className="text-5xl font-semibold tracking-tight text-white">NEXUS-UI</h2>
-        <div className="relative mx-auto w-fit">
-          <div className="h-px w-72 bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
-          <div className="pointer-events-none absolute left-1/2 top-full h-16 w-[19rem] -translate-x-1/2 -mt-px overflow-hidden">
-            <Sparkles
-              className="h-full w-full"
-              count={240}
-              density="high"
-              color="#a8d7ff"
-              minSize={0.55}
-              maxSize={1.45}
-              speed={1.15}
-              opacity={0.95}
-              direction="down"
-              enableGlow
-            />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}`,
-      },
-      {
-        title: "Code 2 — Second Component",
-        code: `"use client";
-
-import { Sparkles } from "@/components/sparkles";
-
-export function SparklesStarfieldCard() {
-  return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-black p-8">
-      <Sparkles
-        background
-        count={130}
-        density="high"
-        color="#e6f3ff"
-        minSize={0.8}
-        maxSize={2.4}
-        speed={0.95}
-        opacity={1}
-        direction="random"
-        enableGlow
-      />
-      <div className="relative text-center">
-        <h2 className="text-4xl font-semibold tracking-tight text-white">Build great products</h2>
-      </div>
-    </section>
-  );
-}`,
-      },
-    ],
+    Preview: Previews.PreviewSparklesRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { Sparkles } from "@/components/sparkles";
 
-export function SparklesLineHero() {
+export function SparkleHeadline() {
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-black p-8">
-      <div className="relative z-[2] mx-auto max-w-2xl space-y-4 text-center">
-        <h2 className="text-5xl font-semibold tracking-tight text-white">NEXUS-UI</h2>
-        <div className="relative mx-auto w-fit">
-          <div className="h-px w-72 bg-gradient-to-r from-transparent via-cyan-300 to-transparent" />
-          <div className="pointer-events-none absolute left-1/2 top-full h-16 w-[19rem] -translate-x-1/2 -mt-px overflow-hidden">
-            <Sparkles
-              className="h-full w-full"
-              count={240}
-              density="high"
-              color="#a8d7ff"
-              minSize={0.55}
-              maxSize={1.45}
-              speed={1.15}
-              opacity={0.95}
-              direction="down"
-              enableGlow
-            />
-          </div>
-        </div>
+    <div className="relative overflow-hidden rounded-3xl bg-white px-6 py-16 text-center dark:bg-[#1c1c1e]">
+      <h2 className="text-6xl font-semibold tracking-[-0.05em] text-[#1d1d1f] dark:text-[#f5f5f7]">Nexus</h2>
+      <div className="relative mx-auto mt-4 h-28 max-w-sm">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#0a84ff] to-transparent" />
+        <Sparkles
+          background
+          count={120}
+          density="high"
+          maxSize={1.8}
+          direction="down"
+          className="[mask-image:radial-gradient(60%_90%_at_50%_0%,#000,transparent)]"
+        />
       </div>
-    </section>
-  );
-}
-
-export function SparklesStarfieldCard() {
-  return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-black p-8">
-      <Sparkles
-        background
-        count={130}
-        density="high"
-        color="#e6f3ff"
-        minSize={0.8}
-        maxSize={2.4}
-        speed={0.95}
-        opacity={1}
-        direction="random"
-        enableGlow
-      />
-      <div className="relative text-center">
-        <h2 className="text-4xl font-semibold tracking-tight text-white">Build great products</h2>
-      </div>
-    </section>
+    </div>
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [
+      { label: "Live demo", href: "/demos/sparkles" },
+      { label: "Live demo", href: "/demos/sparkles" },
+    ],
   },
   {
     slug: "text-generate-effect",
     name: "Text Generate Effect",
     registryCliName: "text-generate-effect",
-    resourceLinks: [
-      { label: "Live demo", href: "/demos/text-generate-effect" },
-      { label: "Live demo", href: "/demos/text-generate-effect" },
-    ],
-    description:
-      "Animated text reveal that fades words, characters, or lines into view with optional blur and upward motion.",
+    description: "Text that streams in like a model writing it: each word, character or line springs up out of a blur on its own beat and overshoots a hair before settling. A glowing caret rides on the newest token while it generates.",
     categorySlug: "motion-effects",
-    tags: ["typography", "hero", "stagger", "reveal", "motion"],
+    tags: ["text", "reveal", "ai", "streaming", "blur", "stagger", "typography", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 102,
     createdAt: "2026-05-14",
-    animationKinds: ["spring", "layout"],
+    animationKinds: ["spring", "scroll"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "text", type: "string", description: "Text content to animate." },
-      { name: "mode", type: "\"word\" | \"character\" | \"line\"", defaultValue: "\"word\"", description: "Animation segmentation mode." },
-      { name: "delay", type: "number", defaultValue: "0", description: "Initial delay before first segment appears." },
-      { name: "duration", type: "number", defaultValue: "0.48", description: "Per-segment animation duration in seconds." },
-      { name: "stagger", type: "number", defaultValue: "0.06", description: "Delay between segment animations in seconds." },
-      { name: "blur", type: "boolean", defaultValue: "true", description: "Applies blur-to-clear transition." },
-      { name: "once", type: "boolean", defaultValue: "true", description: "With viewport trigger, animate only once." },
-      { name: "className", type: "string", description: "Optional class names for text wrapper." },
-      { name: "as", type: "\"p\" | \"h1\" | \"h2\" | \"span\" | \"div\"", defaultValue: "\"p\"", description: "Semantic element used as root." },
-      { name: "lift", type: "boolean", defaultValue: "true", description: "Adds subtle upward motion while revealing." },
-      { name: "trigger", type: "\"mount\" | \"viewport\"", defaultValue: "\"mount\"", description: "Animation trigger strategy." },
-      { name: "replayKey", type: "string | number", description: "Changing this value replays the reveal sequence." },
+      { name: "text", type: "string", description: "The text to stream in. Use \\n for line breaks (and as the separator in line mode)." },
+      { name: "mode", type: "\"word\" | \"character\" | \"line\"", defaultValue: "\"word\"", description: "What arrives on each beat. Character mode never breaks inside a word." },
+      { name: "delay", type: "number", defaultValue: "0", description: "Seconds before the first token arrives." },
+      { name: "duration", type: "number", defaultValue: "0.48", description: "Seconds each token takes to settle; sets the spring's speed." },
+      { name: "stagger", type: "number", defaultValue: "0.06", description: "Seconds between tokens." },
+      { name: "blur", type: "boolean", defaultValue: "true", description: "Tokens arrive out of a blur." },
+      { name: "lift", type: "boolean", defaultValue: "true", description: "Tokens rise into place with a small overshoot." },
+      { name: "showCaret", type: "boolean", defaultValue: "true", description: "Glowing caret that rides on the newest token while text streams in." },
+      { name: "trigger", type: "\"mount\" | \"viewport\"", defaultValue: "\"mount\"", description: "Start on mount, or when the text scrolls into view." },
+      { name: "once", type: "boolean", defaultValue: "true", description: "With the viewport trigger, play once or every time it enters view." },
+      { name: "replayKey", type: "string | number", description: "Change it to replay the effect." },
+      { name: "as", type: "\"p\" | \"h1\" | \"h2\" | \"span\" | \"div\"", defaultValue: "\"p\"", description: "Root element." },
+      { name: "className", type: "string", description: "Classes for the root element." },
+      { name: "onComplete", type: "() => void", description: "Called when the last token has arrived." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Dissolves and regenerates every few seconds until someone clicks or taps the text." },
     ],
-    Preview: Previews.PreviewTextGenerateEffect,
+    Preview: Previews.PreviewTextGenerateEffectRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { TextGenerateEffect } from "@/components/text-generate-effect";
 
-export function HeroTextReveal() {
+export function AnswerCard({ answer }: { answer: string }) {
+  return (
+    <div className="rounded-3xl bg-white p-6 shadow-sm">
+      <TextGenerateEffect
+        key={answer}
+        text={answer}
+        stagger={0.05}
+        className="text-xl font-semibold leading-snug tracking-tight"
+      />
+    </div>
+  );
+}
+
+export function HeroLine() {
   return (
     <TextGenerateEffect
-      as="h2"
-      text="Ship product stories with motion-first typography that reveals ideas with clarity, rhythm, and cinematic polish."
-      mode="word"
-      className="text-4xl font-semibold tracking-tight sm:text-5xl"
-      duration={0.4}
-      stagger={0.07}
-      blur
+      as="h1"
+      mode="character"
+      stagger={0.02}
+      trigger="viewport"
+      text="Build interfaces that feel alive."
+      className="text-5xl font-semibold tracking-tight"
     />
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [
+      { label: "Live demo", href: "/demos/text-generate-effect" },
+      { label: "Live demo", href: "/demos/text-generate-effect" },
+    ],
   },
   {
     slug: "background-gradient",
     name: "Background Gradient",
     registryCliName: "background-gradient",
-    resourceLinks: [{ label: "Live demo", href: "/demos/background-gradient" }],
-    description:
-      "Animated gradient wrapper with soft glow and blur for cards, buttons, and hero sections.",
+    description: "Wraps a card or button in a slowly turning conic-gradient ring with a soft glow underneath. Hover and the ring spins up while its centre leans toward the pointer; press and the card squashes, springs back past its size and the glow flashes.",
     categorySlug: "background-effects",
-    tags: ["gradient", "glow", "wrapper", "interactive", "background"],
+    tags: ["gradient", "border", "glow", "card", "button", "conic", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 101,
     createdAt: "2026-05-14",
-    animationKinds: ["gradient", "hover"],
+    animationKinds: ["hover", "press", "spring", "gradient"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "children", type: "React.ReactNode", description: "Content rendered above the animated gradient layers." },
-      { name: "className", type: "string", description: "Class names for the outer animated wrapper." },
-      { name: "containerClassName", type: "string", description: "Class names for the inner content container." },
-      { name: "surfaceClassName", type: "string", description: "Optional class names for the inner surface layer (inside gradient shell)." },
-      { name: "colors", type: "string[]", defaultValue: "[\"#22d3ee\", \"#818cf8\", \"#a855f7\", \"#ec4899\"]", description: "Gradient palette used for animated layers." },
-      { name: "animationSpeed", type: "number", defaultValue: "1", description: "Speed multiplier for looping gradient motion." },
-      { name: "blur", type: "number", defaultValue: "24", description: "Blur intensity in pixels for glow softness." },
-      { name: "borderRadius", type: "string", defaultValue: "\"1rem\"", description: "Wrapper border radius (e.g. \"1rem\", \"24px\")." },
-      { name: "as", type: "\"div\" | \"button\" | \"section\"", defaultValue: "\"div\"", description: "Semantic root element variant." },
-      { name: "interactive", type: "boolean", defaultValue: "true", description: "Enables hover boost and cursor-follow glow." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables press interaction when used as button." },
+      { name: "children", type: "ReactNode", description: "Content inside the ring." },
+      { name: "className", type: "string", description: "Classes for the outer wrapper (width, layout)." },
+      { name: "containerClassName", type: "string", description: "Classes for the content wrapper; put padding here." },
+      { name: "surfaceClassName", type: "string", description: "Classes for the inner surface. White, or #1c1c1e in dark mode, by default." },
+      { name: "colors", type: "string[]", defaultValue: "[\"#0a84ff\", \"#5e5ce6\", \"#bf5af2\", \"#ff375f\", \"#ff9f0a\"]", description: "Ring colours in order round the edge. Two or more." },
+      { name: "animationSpeed", type: "number", defaultValue: "1", description: "Spin speed multiplier, 0.2 to 3." },
+      { name: "blur", type: "number", defaultValue: "24", description: "Blur of the glow under the card, in px." },
+      { name: "borderRadius", type: "string", defaultValue: "\"24px\"", description: "Corner radius of the wrapper." },
+      { name: "ringWidth", type: "number", defaultValue: "1.5", description: "Thickness of the gradient ring, in px." },
+      { name: "as", type: "\"div\" | \"button\" | \"section\"", defaultValue: "\"div\"", description: "Root element. \"button\" adds keyboard focus and press feedback." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Spin up and lean toward the pointer on hover, squash on press." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables the button variant." },
+      { name: "onClick", type: "() => void", description: "Click handler for the button variant." },
+      { name: "aria-label", type: "string", description: "Accessible name for the button variant when its content is not plain text." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Circles a pretend pointer round the card until someone hovers it." },
     ],
-    Preview: Previews.PreviewBackgroundGradient,
+    Preview: Previews.PreviewBackgroundGradientRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { BackgroundGradient } from "@/components/background-gradient";
 
-export function GradientCard() {
+export function ProPlanCard() {
   return (
-    <BackgroundGradient
-      as="section"
-      className="w-full max-w-xl"
-      containerClassName="rounded-[inherit] p-6"
-      colors={["#22d3ee", "#818cf8", "#a855f7", "#ec4899"]}
-      animationSpeed={1}
-      blur={24}
-      interactive
-    >
-      <h3 className="text-2xl font-semibold tracking-tight">Animated gradient card</h3>
-      <p className="mt-2 text-sm text-muted-foreground">Use this wrapper behind any content.</p>
-    </BackgroundGradient>
+    <div className="flex flex-col items-center gap-6">
+      <BackgroundGradient className="w-full max-w-[320px]" containerClassName="p-6">
+        <p className="text-xs font-medium uppercase tracking-[0.14em] text-[#6e6e73] dark:text-[#a1a1a6]">Pro</p>
+        <p className="mt-2 text-4xl font-semibold tracking-[-0.045em] tabular-nums">$18 / month</p>
+        <p className="mt-3 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Unlimited projects, team seats and priority builds.</p>
+      </BackgroundGradient>
+      <BackgroundGradient as="button" borderRadius="999px" containerClassName="px-6 py-3 text-[15px] font-semibold" onClick={() => console.log("upgrade")}>
+        Upgrade now
+      </BackgroundGradient>
+    </div>
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/background-gradient" }],
   },
   {
     slug: "typewriter-effect",
     name: "Typewriter Effect",
     registryCliName: "typewriter-effect",
-    resourceLinks: [
-      { label: "Live demo", href: "/demos/typewriter-effect" },
-      { label: "Live demo", href: "/demos/typewriter-effect" },
-    ],
-    description:
-      "Character-by-character typewriter text animation with blinking cursor, optional deleting, looping, and semantic heading support.",
+    description: "A typewriter with a physical caret: each new character drops in and settles on a spring, the caret stretches on every keystroke and squashes on every delete, and it only blinks while it waits. Type one phrase, rotate through a list, or loop forever.",
     categorySlug: "motion-effects",
-    tags: ["typing", "cursor", "hero", "loop", "text"],
+    tags: ["typing", "typewriter", "cursor", "caret", "hero", "loop", "text", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 104,
     createdAt: "2026-05-14",
-    animationKinds: ["layout", "spring"],
+    animationKinds: ["type", "spring"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "text", type: "string | string[]", description: "Single text or rotating text list to type." },
-      { name: "typingSpeed", type: "number", defaultValue: "65", description: "Delay in ms between typed characters." },
-      { name: "deletingSpeed", type: "number", defaultValue: "42", description: "Delay in ms between deleted characters." },
-      { name: "delay", type: "number", defaultValue: "0", description: "Initial delay in ms before typing starts." },
-      { name: "pauseDuration", type: "number", defaultValue: "1200", description: "Pause in ms after a full phrase is typed." },
-      { name: "loop", type: "boolean", defaultValue: "false", description: "Loops phrases continuously after completion." },
-      { name: "showCursor", type: "boolean", defaultValue: "true", description: "Shows blinking typewriter cursor." },
-      { name: "cursorClassName", type: "string", description: "Optional class names for cursor styling." },
-      { name: "className", type: "string", description: "Optional class names for text wrapper." },
-      { name: "as", type: "\"h1\" | \"h2\" | \"p\" | \"span\" | \"div\"", defaultValue: "\"span\"", description: "Semantic element used as root." },
-      { name: "onComplete", type: "() => void", description: "Callback fired when one full phrase set completes." },
+      { name: "text", type: "string | string[]", description: "One phrase, or a list typed one after another." },
+      { name: "typingSpeed", type: "number", defaultValue: "65", description: "Milliseconds per typed character, with a little human jitter." },
+      { name: "deletingSpeed", type: "number", defaultValue: "42", description: "Milliseconds per deleted character. 0 swaps straight to the next phrase." },
+      { name: "delay", type: "number", defaultValue: "0", description: "Milliseconds before the first character." },
+      { name: "pauseDuration", type: "number", defaultValue: "1200", description: "Milliseconds a finished phrase is held." },
+      { name: "loop", type: "boolean", defaultValue: "false", description: "Starts again from the first phrase after the last one." },
+      { name: "showCursor", type: "boolean", defaultValue: "true", description: "Shows the caret." },
+      { name: "cursorClassName", type: "string", description: "Classes for the caret; it uses the text colour by default." },
+      { name: "as", type: "\"h1\" | \"h2\" | \"p\" | \"span\" | \"div\"", defaultValue: "\"span\"", description: "Root element." },
+      { name: "className", type: "string", description: "Classes for the root element." },
+      { name: "onComplete", type: "() => void", description: "Called each time the last phrase finishes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Loops until someone clicks or taps the text, then stops after the current phrase." },
     ],
-    Preview: Previews.PreviewTypewriterEffect,
+    Preview: Previews.PreviewTypewriterEffectRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { TypewriterEffect } from "@/components/typewriter-effect";
 
-export function HeroTypewriterHeading() {
+export function Hero() {
   return (
-    <TypewriterEffect
-      as="h1"
-      text="Build polished SaaS surfaces with cinematic motion."
-      typingSpeed={45}
-      pauseDuration={1500}
-      className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl"
-    />
+    <h1 className="text-5xl font-semibold tracking-tight">
+      Made for{" "}
+      <TypewriterEffect
+        text={["designers.", "engineers.", "founders.", "everyone."]}
+        loop
+        pauseDuration={1300}
+        className="text-[#0071e3]"
+      />
+    </h1>
+  );
+}
+
+export function SearchPlaceholder() {
+  return (
+    <label className="flex h-12 items-center gap-2 rounded-full bg-white px-4 shadow-sm">
+      <span className="text-zinc-500">
+        Search <TypewriterEffect text={["quarterly report", "flights to Lisbon"]} loop deletingSpeed={26} />
+      </span>
+    </label>
   );
 }`,
-    reactExamples: [
-      {
-        title: "Hero heading example",
-        code: `"use client";
-
-import { TypewriterEffect } from "@/components/typewriter-effect";
-
-export function HeroTypewriterHeading() {
-  return (
-    <TypewriterEffect
-      as="h1"
-      text="Build polished SaaS surfaces with cinematic motion."
-      typingSpeed={45}
-      pauseDuration={1500}
-      className="text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl"
-    />
-  );
-}`,
-      },
-      {
-        title: "Multiple rotating words example",
-        code: `"use client";
-
-import { TypewriterEffect } from "@/components/typewriter-effect";
-
-export function RotatingTypewriterWords() {
-  return (
-    <TypewriterEffect
-      as="h2"
-      text={["Ship faster.", "Polish every interaction.", "Convert visitors into customers."]}
-      typingSpeed={52}
-      deletingSpeed={36}
-      pauseDuration={1200}
-      loop
-      className="text-2xl font-medium tracking-tight text-muted-foreground sm:text-3xl"
-      cursorClassName="bg-primary"
-    />
-  );
-}`,
-      },
-    ],
     tailwindSource: tw,
+    resourceLinks: [
+      { label: "Live demo", href: "/demos/typewriter-effect" },
+      { label: "Live demo", href: "/demos/typewriter-effect" },
+    ],
   },
   {
     slug: "text-reveal-card",
     name: "Text Reveal Card",
     registryCliName: "text-reveal-card",
+    description: "A card where you scrub a divider across one sentence to swap it for another. The divider follows the pointer on a spring, leans into the direction you move and swings upright when you stop, sheds sparks from the seam, and bounces home when you leave.",
+    categorySlug: "cards",
+    tags: ["card", "reveal", "scrub", "hover", "text", "sparkles", "portfolio", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 105,
+    createdAt: "2026-05-14",
+    animationKinds: ["hover", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: "\"Most teams ship on a hunch.\"", description: "The sentence you see before scrubbing." },
+      { name: "revealContent", type: "React.ReactNode", defaultValue: "\"Yours will ship on proof.\"", description: "What the scrub reveals. A string gets the blue-to-purple gradient." },
+      { name: "title", type: "string", description: "Small heading above the reveal area." },
+      { name: "description", type: "string", defaultValue: "\"Drag across the line, or use the arrow keys.\"", description: "One-line hint under the reveal area." },
+      { name: "icon", type: "React.ReactNode", description: "Icon next to the title." },
+      { name: "image", type: "string", description: "Optional image URL above the card body. Nothing is fetched unless you pass one." },
+      { name: "children", type: "React.ReactNode", description: "Extra content at the bottom of the card." },
+      { name: "intensity", type: "number", defaultValue: "1", description: "Spark amount, 0.5 to 2.2." },
+      { name: "className", type: "string", description: "Classes for the card." },
+      { name: "revealClassName", type: "string", description: "Classes for the reveal area." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Shows the revealed sentence and turns the interaction off." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the divider across and back every few seconds until someone touches the card." },
+    ],
+    Preview: Previews.PreviewTextRevealCardRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TextRevealCard } from "@/components/text-reveal-card";
+
+export function PitchCard() {
+  return (
+    <TextRevealCard
+      title="Launch review"
+      text="Most teams ship on a hunch."
+      revealContent="Yours will ship on proof."
+      intensity={1.3}
+    />
+  );
+}`,
+    tailwindSource: tw,
     resourceLinks: [
       { label: "Live demo", href: "/demos/text-reveal-card" },
       { label: "Live demo", href: "/demos/text-reveal-card" },
     ],
-    description:
-      "Interactive spotlight card with mouse-follow glow and bottom reveal content for features, case studies, and portfolio sections.",
-    categorySlug: "cards",
-    tags: ["card", "reveal", "hover", "spotlight", "portfolio"],
-    premium: false,
-    trendingScore: 105,
-    createdAt: "2026-05-14",
-    animationKinds: ["hover", "gradient", "layout"],
-    dependencies: ["framer-motion"],
-    props: [
-      { name: "title", type: "string", description: "Main card heading displayed in the content area." },
-      { name: "description", type: "string", description: "Default bottom content shown when revealContent is not provided." },
-      { name: "icon", type: "React.ReactNode", description: "Optional icon shown next to the title." },
-      { name: "image", type: "string", description: "Optional top image URL rendered as card media." },
-      { name: "children", type: "React.ReactNode", description: "Optional custom overlay/content rendered inside the media area." },
-      { name: "revealContent", type: "React.ReactNode", description: "Custom content rendered in the reveal section at the bottom." },
-      { name: "className", type: "string", description: "Optional class names for card wrapper styling." },
-      { name: "revealClassName", type: "string", description: "Optional class names for the reveal content container." },
-      { name: "intensity", type: "number", defaultValue: "1", description: "Controls spotlight/reveal intensity. Clamped between 0.5 and 2.2." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables interactive reveal and hover elevation." },
-    ],
-    Preview: Previews.PreviewTextRevealCard,
-    reactSource: `"use client";
-
-import { Sparkles } from "lucide-react";
-import { TextRevealCard } from "@/components/text-reveal-card";
-
-export function FeatureRevealCard() {
-  return (
-    <TextRevealCard
-      title="Feature Signal Card"
-      description="Reveal launch-ready messaging as users scrub across the card."
-      icon={<Sparkles className="size-4 text-primary" />}
-      image="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
-      intensity={1.1}
-      className="max-w-md"
-    />
-  );
-}`,
-    reactExamples: [
-      {
-        title: "Feature card example",
-        code: `"use client";
-
-import { Rocket } from "lucide-react";
-import { TextRevealCard } from "@/components/text-reveal-card";
-
-export function FeatureRevealCard() {
-  return (
-    <TextRevealCard
-      title="Feature Signal Card"
-      description="Progressively reveal polished copy while preserving baseline readability."
-      icon={<Rocket className="size-4 text-primary" />}
-      image="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80"
-      intensity={1.05}
-      className="max-w-md"
-    />
-  );
-}`,
-      },
-      {
-        title: "Portfolio card example",
-        code: `"use client";
-
-import { BriefcaseBusiness } from "lucide-react";
-import { TextRevealCard } from "@/components/text-reveal-card";
-
-export function PortfolioRevealCard() {
-  return (
-    <TextRevealCard
-      title="Portfolio Proof Card"
-      description="Show outcomes progressively without overloading the initial view."
-      icon={<BriefcaseBusiness className="size-4 text-primary" />}
-      image="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80"
-      revealContent={
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">Workspace analytics relaunch</p>
-          <p className="text-sm text-muted-foreground">+31% activation after simplifying onboarding copy and interaction cues.</p>
-        </div>
-      }
-      className="max-w-md"
-    />
-  );
-}`,
-      },
-    ],
-    tailwindSource: tw,
   },
   {
     slug: "glowing-effect-cards",
     name: "Glowing Effect Cards",
     registryCliName: "glowing-effect-cards",
-    resourceLinks: [{ label: "Live demo", href: "/demos/glowing-effect-cards" }],
-    description:
-      "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for refined SaaS sections and dashboards.",
+    description: "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width).",
     categorySlug: "cards",
-    tags: ["glow", "cards", "cursor", "interactive", "layout"],
+    tags: ["glow", "cards", "cursor", "border", "bento", "feature grid", "hover", "container queries", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 111,
     createdAt: "2026-05-14",
-    animationKinds: ["hover", "gradient", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
+    animationKinds: ["hover", "press", "spring", "gradient"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "children", type: "React.ReactNode", description: "Content rendered inside `GlowingEffect`." },
-      { name: "className", type: "string", description: "Class names for `GlowingEffect` or `GlowingCard` wrapper." },
-      { name: "borderRadius", type: "string", defaultValue: "\"1rem\"", description: "Border radius applied to the glowing container." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables pointer-reactive glow behavior." },
-      { name: "intensity", type: "number", defaultValue: "1", description: "Glow spread/intensity multiplier." },
-      { name: "blur", type: "number", defaultValue: "18", description: "Ambient glow blur amount in pixels." },
-      { name: "title", type: "string", description: "`GlowingCard` heading text." },
-      { name: "description", type: "string", description: "`GlowingCard` supporting copy." },
-      { name: "icon", type: "React.ReactNode", description: "Optional icon for `GlowingCard`." },
-      { name: "tall", type: "boolean", defaultValue: "false", description: "Makes `GlowingCard` span a tall middle-column presentation." },
+      { name: "cards", type: "GlowingCardProps[]", defaultValue: "DEFAULT_GLOW_CARDS", description: "GlowingCardsLayout: five cards, two left, one tall centre, two right." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "GlowingCardsLayout: sweeps a light across the cards until someone moves over them." },
+      { name: "hint", type: "string", defaultValue: "\"Move across the cards.\"", description: "GlowingCardsLayout: caption above the grid. An empty string hides it." },
+      { name: "title / description", type: "string", description: "GlowingCard: heading and one line of copy." },
+      { name: "icon", type: "ReactNode", description: "GlowingCard: icon in the tinted tile." },
+      { name: "accent", type: "string", defaultValue: "\"#0071e3\"", description: "GlowingCard: tint for the icon tile and call to action." },
+      { name: "cta / href", type: "string", description: "GlowingCard: call-to-action label, and a link that makes the whole card clickable." },
+      { name: "tall", type: "boolean", defaultValue: "false", description: "GlowingCard: spreads the content for a tall card." },
+      { name: "colors", type: "string[]", defaultValue: "[\"#5ac8fa\", \"#0a84ff\", \"#bf5af2\", \"#ff375f\", \"#ff9f0a\"]", description: "GlowingEffect: colours along the lit arc, tail to head (glowColor sets just the first)." },
+      { name: "spread", type: "number", defaultValue: "90", description: "GlowingEffect: width of the lit arc in degrees." },
+      { name: "proximity", type: "number", defaultValue: "72", description: "GlowingEffect: how far outside the card the pointer still lights it, in px." },
+      { name: "intensity", type: "number", defaultValue: "1", description: "GlowingEffect: rim thickness and brightness (0.5 to 2)." },
+      { name: "blur", type: "number", defaultValue: "18", description: "GlowingEffect: blur of the bloom outside the rim, in px." },
+      { name: "borderRadius", type: "string", defaultValue: "\"22px\"", description: "GlowingEffect: corner radius." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "GlowingEffect: turns the light off." },
     ],
-    Preview: Previews.PreviewGlowingEffectCards,
-    reactSource: `"use client";
+    Preview: Previews.PreviewGlowingEffectCardsRedesign,
+    previewShell: "plain",
+    previewSections: [
+      {
+        title: "2-1-2 layout",
+        Preview: Previews.PreviewGlowingEffectCardsRedesign,
+        reactSource: `"use client";
 
 import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
 
-export function CursorGlowCardsSection() {
-  return <GlowingCardsLayout className="max-w-6xl" />;
-}`,
-    reactExamples: [
-      {
-        title: "2-1-2 layout example",
-        code: `"use client";
-
-import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
-
-export function CursorGlowCardsSection() {
-  return <GlowingCardsLayout className="max-w-6xl" />;
-}`,
-      },
-      {
-        title: "Single glowing card example",
-        code: `"use client";
-
-import { Sparkles } from "lucide-react";
-import { GlowingCard } from "@/components/glowing-effect-cards";
-
-export function FeatureGlowCard() {
+export function FeatureGrid() {
   return (
-    <GlowingCard
-      title="Cursor-reactive border"
-      description="Glow follows mouse movement and fades smoothly on leave."
-      icon={<Sparkles className="size-4" />}
-      cta="Open details"
-      className="max-w-md"
+    <GlowingCardsLayout
+      cards={[
+        { title: "Instant deploys", description: "Push and it is live.", accent: "#0071e3", cta: "Docs", href: "/docs" },
+        { title: "Analytics", description: "Every visit, no cookies.", accent: "#bf5af2", cta: "Explore" },
+        { title: "Edge network", description: "Served from 28 regions, close to every visitor.", accent: "#ff9f0a", cta: "See regions" },
+        { title: "Access control", description: "Roles and SSO built in.", accent: "#30b65a", cta: "Security" },
+        { title: "Integrations", description: "Connect the tools you use.", accent: "#ff375f", cta: "Browse" },
+      ]}
     />
   );
 }`,
       },
       {
-        title: "Custom effect wrapper",
-        code: `"use client";
+        title: "Single card and custom wrapper",
+        Preview: Previews.PreviewGlowingCardSingleRedesign,
+        reactSource: `"use client";
 
-import { GlowingEffect } from "@/components/glowing-effect-cards";
+import { GlowingCard, GlowingEffect } from "@/components/glowing-effect-cards";
 
-export function CustomGlowContainer() {
+export function GlowExamples() {
   return (
-    <GlowingEffect glowColor="#7dd3fc" intensity={1.2} blur={22} className="rounded-2xl">
-      <div className="p-6">
-        <h3 className="text-lg font-semibold">Custom glow theme</h3>
-        <p className="mt-2 text-sm text-muted-foreground">Use on any container, not just cards.</p>
-      </div>
-    </GlowingEffect>
+    <div className="grid gap-4 sm:grid-cols-2">
+      <GlowingCard
+        title="Cursor-reactive rim"
+        description="The light follows your pointer round the edge and flares when you press."
+        accent="#bf5af2"
+        cta="Open details"
+        glow={{ colors: ["#64d2ff", "#bf5af2", "#ff375f"], spread: 120, intensity: 1.4 }}
+      />
+      <GlowingEffect colors={["#30d158", "#64d2ff"]} borderRadius="16px">
+        <div className="p-6">
+          <h3 className="text-[16px] font-semibold">Any content</h3>
+          <p className="mt-1 text-[13px] text-[#6e6e73]">Wrap your own markup in GlowingEffect.</p>
+        </div>
+      </GlowingEffect>
+    </div>
   );
 }`,
       },
     ],
+    reactSource: `"use client";
+
+import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
+
+export function FeatureGrid() {
+  return (
+    <GlowingCardsLayout
+      cards={[
+        { title: "Instant deploys", description: "Push and it is live.", accent: "#0071e3", cta: "Docs", href: "/docs" },
+        { title: "Analytics", description: "Every visit, no cookies.", accent: "#bf5af2", cta: "Explore" },
+        { title: "Edge network", description: "Served from 28 regions, close to every visitor.", accent: "#ff9f0a", cta: "See regions" },
+        { title: "Access control", description: "Roles and SSO built in.", accent: "#30b65a", cta: "Security" },
+        { title: "Integrations", description: "Connect the tools you use.", accent: "#ff375f", cta: "Browse" },
+      ]}
+    />
+  );
+}`,
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/glowing-effect-cards" }],
   },
   {
     slug: "infinite-moving-cards",
     name: "Infinite Moving Cards",
     registryCliName: "infinite-moving-cards",
-    resourceLinks: [{ label: "Live demo", href: "/demos/infinite-moving-cards" }],
-    description:
-      "Customizable infinite marquee of cards with seamless looping, direction controls, hover pause, and optional custom rendering.",
+    description: "A belt of cards that cruises sideways forever and fades out at the edges. Hover and it eases to a stop; grab it and fling, and it coasts on your throw, leaning into the speed, before it settles back to cruising.",
     categorySlug: "motion-effects",
-    tags: ["carousel", "marquee", "testimonials", "logos", "cards"],
+    tags: ["marquee", "carousel", "testimonials", "logos", "cards", "drag", "fling", "infinite", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 109,
     createdAt: "2026-05-14",
-    animationKinds: ["layout", "hover", "spring"],
+    animationKinds: ["drag", "hover", "spring"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "items", type: "InfiniteMovingCardItem[]", description: "Card data array used to render the moving list." },
-      { name: "direction", type: "\"left\" | \"right\"", defaultValue: "\"left\"", description: "Scroll direction of the marquee track." },
-      { name: "speed", type: "\"slow\" | \"normal\" | \"fast\"", defaultValue: "\"normal\"", description: "Velocity preset for card movement." },
-      { name: "pauseOnHover", type: "boolean", defaultValue: "true", description: "Pauses track animation while hovered." },
-      { name: "className", type: "string", description: "Class names for the root wrapper." },
-      { name: "cardClassName", type: "string", description: "Class names applied to each card container." },
-      { name: "gap", type: "number", defaultValue: "16", description: "Spacing in pixels between cards." },
-      { name: "loop", type: "boolean", defaultValue: "true", description: "Enables seamless infinite looping via duplicated items." },
-      { name: "showGradientMask", type: "boolean", defaultValue: "true", description: "Shows edge fade masks for polished marquee framing." },
-      { name: "renderItem", type: "(item, index) => React.ReactNode", description: "Custom renderer for complete card UI control." },
+      { name: "items", type: "InfiniteMovingCardItem[]", description: "Cards: { id?, title?, description?, image?, avatar?, name?, role?, rating?, tags? }." },
+      { name: "direction", type: "\"left\" | \"right\"", defaultValue: "\"left\"", description: "Which way the belt cruises." },
+      { name: "speed", type: "\"slow\" | \"normal\" | \"fast\"", defaultValue: "\"normal\"", description: "Cruise speed preset." },
+      { name: "pauseOnHover", type: "boolean", defaultValue: "true", description: "Ease to a stop while hovered or focused." },
+      { name: "draggable", type: "boolean", defaultValue: "true", description: "Let people grab the belt and fling it." },
+      { name: "gap", type: "number", defaultValue: "16", description: "Space between cards in px." },
+      { name: "loop", type: "boolean", defaultValue: "true", description: "Repeat the items so the belt never runs out." },
+      { name: "showGradientMask", type: "boolean", defaultValue: "true", description: "Fade the cards out at the left and right edges (a mask, so it works on any background)." },
+      { name: "renderItem", type: "(item, index) => ReactNode", description: "Draw your own card." },
+      { name: "cardClassName", type: "string", description: "Classes for each card's wrapper, e.g. a width." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flings the belt back and forth every few seconds until someone touches it." },
+      { name: "className", type: "string", description: "Classes for the root." },
     ],
-    Preview: Previews.PreviewInfiniteMovingCards,
+    Preview: Previews.PreviewInfiniteMovingCardsRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { InfiniteMovingCards } from "@/components/infinite-moving-cards";
 
-const testimonials = [
-  {
-    title: "Launch velocity increased",
-    description: "We shipped our redesign in half the usual time.",
-    name: "Ariana Shaw",
-    role: "Product Lead",
-    rating: 5,
-    tags: ["SaaS"],
-  },
-  {
-    title: "No visual jump",
-    description: "The loop feels smooth and polished on every screen size.",
-    name: "Marcus Lee",
-    role: "Frontend Engineer",
-    rating: 5,
-    tags: ["Motion"],
-  },
+const reviews = [
+  { id: 1, title: "Launch week, sorted", description: "We rebuilt the landing page in two days.", name: "Ariana Shaw", role: "Product lead, Orbitstack", rating: 5 },
+  { id: 2, title: "Smooth on every screen", description: "The loop never jumps, even on huge monitors.", name: "Marcus Lee", role: "Frontend, Sprintops", rating: 5 },
+  { id: 3, title: "People play with it", description: "Visitors fling the reviews. Time on page went up.", name: "Lena Okafor", role: "Design manager, Cloudframe", rating: 5 },
 ];
 
-export function TestimonialsRail() {
-  return <InfiniteMovingCards items={testimonials} direction="left" speed="normal" pauseOnHover />;
-}`,
-    reactExamples: [
-      {
-        title: "Testimonials example",
-        code: `"use client";
-
-import { InfiniteMovingCards } from "@/components/infinite-moving-cards";
-
-const testimonials = [
-  { title: "Launch velocity increased", description: "Shipped in half the time.", name: "Ariana", role: "Product Lead", rating: 5, tags: ["SaaS"] },
-  { title: "Production-ready defaults", description: "Smooth, readable, responsive.", name: "Marcus", role: "Frontend Engineer", rating: 5, tags: ["React"] },
-  { title: "No visual jump", description: "Seamless loop even on large screens.", name: "Lena", role: "Design Manager", rating: 4, tags: ["UX"] },
-];
-
-export function TestimonialsRail() {
-  return <InfiniteMovingCards items={testimonials} direction="left" speed="normal" pauseOnHover />;
-}`,
-      },
-      {
-        title: "Logo/cards example",
-        code: `"use client";
-
-import { InfiniteMovingCards } from "@/components/infinite-moving-cards";
-
-const tools = [
-  { id: "1", title: "Nexus", tags: ["UI"] },
-  { id: "2", title: "Orbit", tags: ["Analytics"] },
-  { id: "3", title: "Flux", tags: ["Ops"] },
-  { id: "4", title: "Pulse", tags: ["Growth"] },
-];
-
-export function ToolsRail() {
+export function ReviewsRail() {
   return (
-    <InfiniteMovingCards
-      items={tools}
-      direction="right"
-      speed="fast"
-      cardClassName="min-w-[180px] max-w-[180px]"
-      renderItem={(item) => (
-        <div className="flex h-[110px] w-[180px] flex-col items-center justify-center rounded-2xl border border-border/70 bg-card">
-          <p className="text-sm font-medium">{item.title}</p>
-          <p className="text-[11px] text-muted-foreground">{item.tags?.[0]}</p>
-        </div>
-      )}
-    />
+    <div className="space-y-4 py-16">
+      <InfiniteMovingCards items={reviews} speed="slow" />
+      <InfiniteMovingCards items={reviews} direction="right" cardClassName="w-72" />
+    </div>
   );
 }`,
-      },
-    ],
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/infinite-moving-cards" }],
   },
   {
     slug: "meteors",
     name: "Meteor Effect",
     registryCliName: "meteors",
-    resourceLinks: [{ label: "Live demo", href: "/demos/meteors" }],
-    description:
-      "Animated diagonal meteor beams with glow heads and trailing streaks, designed as a reusable background layer for cards and hero sections.",
+    description: "A canvas layer of meteors that burn in, pick up speed and leave tapering trails across whatever sits behind it. The pointer bends passing meteors toward it, and a click calls one down to strike that spot in a ring of sparks.",
     categorySlug: "background-effects",
-    tags: ["meteors", "background", "hero", "glow", "motion"],
+    tags: ["background", "meteors", "night sky", "canvas", "particles", "shooting stars", "motion kit"],
     premium: false,
     trendingScore: 106,
     createdAt: "2026-05-14",
-    animationKinds: ["gradient", "hover", "layout"],
+    animationKinds: ["hover", "press"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "number", type: "number", defaultValue: "18", description: "Base number of meteor beams before intensity scaling." },
-      { name: "className", type: "string", description: "Class names for the root wrapper." },
-      { name: "meteorClassName", type: "string", description: "Class names applied to each meteor beam element." },
-      { name: "minDelay", type: "number", defaultValue: "0.12", description: "Minimum start delay between meteor loops (seconds)." },
-      { name: "maxDelay", type: "number", defaultValue: "2.4", description: "Maximum start delay between meteor loops (seconds)." },
-      { name: "minDuration", type: "number", defaultValue: "3.2", description: "Minimum meteor travel duration (seconds)." },
-      { name: "maxDuration", type: "number", defaultValue: "7.2", description: "Maximum meteor travel duration (seconds)." },
-      { name: "angle", type: "number", defaultValue: "215", description: "Travel direction angle in degrees." },
-      { name: "glow", type: "boolean", defaultValue: "true", description: "Adds glow bloom around meteor heads." },
-      { name: "color", type: "string", defaultValue: "\"hsl(var(--primary) / 0.95)\"", description: "Beam/head color value." },
-      { name: "intensity", type: "\"low\" | \"medium\" | \"high\"", defaultValue: "\"medium\"", description: "Meteor density multiplier preset." },
-      { name: "hoverOnly", type: "boolean", defaultValue: "false", description: "Runs animation only while hovering the container." },
-      { name: "children", type: "React.ReactNode", description: "Foreground content rendered above the meteor layer." },
+      { name: "number", type: "number", defaultValue: "18", description: "Base number of meteors in the air, before intensity scales it." },
+      { name: "className", type: "string", description: "Classes for the root. Use \"absolute inset-0\" to lay it behind content." },
+      { name: "meteorClassName", type: "string", description: "Classes for the canvas the meteors are drawn on." },
+      { name: "minDelay", type: "number", defaultValue: "0.12", description: "Shortest wait before a meteor reappears, in seconds." },
+      { name: "maxDelay", type: "number", defaultValue: "2.4", description: "Longest wait before a meteor reappears, in seconds." },
+      { name: "minDuration", type: "number", defaultValue: "3.2", description: "Fastest crossing, in seconds." },
+      { name: "maxDuration", type: "number", defaultValue: "7.2", description: "Slowest crossing, in seconds." },
+      { name: "angle", type: "number", defaultValue: "215", description: "Direction of travel in degrees, counter-clockwise from pointing right. 215 heads down and to the left." },
+      { name: "glow", type: "boolean", defaultValue: "true", description: "Bloom round the heads and the impact flash." },
+      { name: "color", type: "string", defaultValue: "\"#cfe6ff\"", description: "Meteor colour. Any CSS colour, including CSS variables." },
+      { name: "intensity", type: "\"low\" | \"medium\" | \"high\"", defaultValue: "\"medium\"", description: "Density preset that scales number." },
+      { name: "hoverOnly", type: "boolean", defaultValue: "false", description: "Only spawn meteors while the pointer is over the container." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Pointer gravity bends passing meteors; a click calls one down." },
+      { name: "stars", type: "number", defaultValue: "0", description: "Faint twinkling background stars drawn behind the meteors." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Calls meteors down on a few spots until someone clicks." },
+      { name: "children", type: "ReactNode", description: "Content drawn above the sky." },
     ],
-    Preview: Previews.PreviewMeteors,
+    Preview: Previews.PreviewMeteorsRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { Meteors } from "@/components/meteors";
 
-export function HeroMeteors() {
+export function WishCard() {
   return (
     <Meteors
-      number={26}
-      minDuration={2.8}
-      maxDuration={5.8}
-      minDelay={0.06}
-      maxDelay={1.8}
-      angle={212}
-      className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#050911] px-8 py-16 text-white"
-      intensity="high"
-      glow
+      number={22}
+      stars={70}
+      className="flex h-[360px] items-center justify-center rounded-3xl bg-[radial-gradient(120%_90%_at_50%_0%,#13204a,#060a18_55%,#03050c)]"
     >
-      <div className="relative z-10 mx-auto max-w-2xl text-center">
-        <h2 className="text-4xl font-semibold tracking-tight sm:text-5xl">Launch cinematic product surfaces</h2>
+      <div className="pointer-events-none text-center text-white">
+        <h2 className="text-4xl font-semibold tracking-[-0.045em]">Make a wish.</h2>
+        <p className="mt-3 text-[13px] text-white/65">Click the sky to call one down.</p>
       </div>
     </Meteors>
   );
 }`,
-    reactExamples: [
-      {
-        title: "Card background example",
-        code: `"use client";
-
-import { Meteors } from "@/components/meteors";
-
-export function PricingMeteorCard() {
-  return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#050911] p-6 text-white">
-      <Meteors number={18} minDuration={3} maxDuration={6} angle={218} className="absolute inset-0" />
-      <div className="relative z-10">
-        <p className="text-xs uppercase tracking-[0.2em] text-sky-200/80">Team plan</p>
-        <h3 className="mt-2 text-2xl font-semibold">$49/mo</h3>
-      </div>
-    </div>
-  );
-}`,
-      },
-      {
-        title: "Hero background example",
-        code: `"use client";
-
-import { Meteors } from "@/components/meteors";
-
-export function HeroMeteors() {
-  return (
-    <Meteors
-      number={30}
-      minDelay={0.05}
-      maxDelay={1.8}
-      minDuration={2.8}
-      maxDuration={5.8}
-      angle={212}
-      intensity="high"
-      glow
-      className="relative overflow-hidden rounded-3xl border border-white/10 bg-[#030712] px-8 py-16 text-white"
-    >
-      <div className="relative z-10 mx-auto max-w-2xl text-center">
-        <h2 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-          Build launch pages with subtle motion depth
-        </h2>
-      </div>
-    </Meteors>
-  );
-}`,
-      },
-    ],
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/meteors" }],
   },
   {
     slug: "background-boxes",
     name: "Background Boxes",
     registryCliName: "background-boxes",
-    resourceLinks: [{ label: "Live demo", href: "/demos/background-boxes" }],
-    description:
-      "Animated isometric grid background with hover color effects and cross markers. Fully configurable skew, scale, box dimensions, and colors.",
+    description: "An isometric grid drawn on canvas, set at any skew, scale and rotation. The cell under the pointer pops up like a key in one of the hover colours, overshoots and settles, while a ripple nudges the cells around it.",
     categorySlug: "background-effects",
-    tags: ["grid", "hover", "background", "isometric", "animated", "interactive"],
+    tags: ["background", "grid", "isometric", "boxes", "canvas", "3d", "hover", "motion kit"],
     premium: false,
     trendingScore: 103,
     createdAt: "2026-05-14",
-    animationKinds: ["hover"],
+    animationKinds: ["hover", "spring", "3d"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "rows", type: "number", defaultValue: "150", description: "Number of columns in the grid layout." },
-      { name: "cols", type: "number", defaultValue: "100", description: "Number of rows in each column." },
-      { name: "boxWidth", type: "number", defaultValue: "64", description: "Width of each box in px." },
-      { name: "boxHeight", type: "number", defaultValue: "32", description: "Height of each box in px." },
-      { name: "borderColor", type: "string", defaultValue: "\"#374151\"", description: "Border color for each box." },
-      { name: "borderWidth", type: "number", defaultValue: "1", description: "Border width in px." },
-      { name: "showCrosses", type: "boolean", defaultValue: "true", description: "Show SVG cross markers at even row/column intersections." },
-      { name: "crossColor", type: "string", defaultValue: "\"#374151\"", description: "Color of the cross markers." },
-      { name: "hoverColors", type: "string[]", defaultValue: "9 pastel colors", description: "Array of colors randomly applied on cell hover." },
-      { name: "skewX", type: "number", defaultValue: "-48", description: "SkewX transform in degrees for the isometric effect." },
-      { name: "skewY", type: "number", defaultValue: "14", description: "SkewY transform in degrees for the isometric effect." },
-      { name: "scale", type: "number", defaultValue: "0.675", description: "Scale transform applied to the grid." },
-      { name: "rotation", type: "number", defaultValue: "0", description: "Rotation in degrees." },
-      { name: "translateX", type: "number", defaultValue: "-40", description: "Horizontal offset in percent." },
-      { name: "translateY", type: "number", defaultValue: "-60", description: "Vertical offset in percent." },
-      { name: "className", type: "string", description: "Class names for the root wrapper." },
+      { name: "rows", type: "number", defaultValue: "60", description: "Number of rows in the grid." },
+      { name: "cols", type: "number", defaultValue: "60", description: "Number of columns in the grid." },
+      { name: "boxWidth", type: "number", defaultValue: "64", description: "Width of one cell before the transform, in px." },
+      { name: "boxHeight", type: "number", defaultValue: "32", description: "Height of one cell before the transform, in px." },
+      { name: "borderColor", type: "string", description: "Grid line colour. Defaults to a hairline that suits the theme." },
+      { name: "borderWidth", type: "number", defaultValue: "1", description: "Grid line width in px." },
+      { name: "showCrosses", type: "boolean", defaultValue: "true", description: "Small plus marks at every other intersection." },
+      { name: "crossColor", type: "string", description: "Colour of the plus marks. Defaults to a theme-aware grey." },
+      { name: "hoverColors", type: "string[]", defaultValue: "7 system colours", description: "Colours a cell can light up in when it pops." },
+      { name: "skewX", type: "number", defaultValue: "-48", description: "CSS-style skewX of the grid, in degrees." },
+      { name: "skewY", type: "number", defaultValue: "14", description: "CSS-style skewY of the grid, in degrees." },
+      { name: "scale", type: "number", defaultValue: "0.675", description: "Scale of the grid." },
+      { name: "rotation", type: "number", defaultValue: "0", description: "Rotation of the grid, in degrees." },
+      { name: "translateX", type: "number", defaultValue: "0", description: "Pans the grid sideways by a percentage of the container width." },
+      { name: "translateY", type: "number", defaultValue: "0", description: "Pans the grid vertically by a percentage of the container height." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs a pretend pointer across the grid until someone moves over it." },
+      { name: "children", type: "ReactNode", description: "Content drawn above the grid." },
+      { name: "className", type: "string", description: "Classes for the root (size, background, radius)." },
     ],
-    Preview: Previews.PreviewBackgroundBoxes,
+    Preview: Previews.PreviewBackgroundBoxesRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { BackgroundBoxes } from "@/components/background-boxes";
 
-export function HeroBackgroundBoxes() {
+export function GridHero() {
   return (
-    <div className="h-[400px] w-full overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950">
-      <BackgroundBoxes
-        rows={40}
-        cols={30}
-        boxWidth={64}
-        boxHeight={32}
-        borderColor="#374151"
-        showCrosses
-        crossColor="#374151"
-      />
-    </div>
+    <BackgroundBoxes className="h-[520px] w-full rounded-3xl bg-white dark:bg-[#0b0b0d]">
+      <div className="pointer-events-none flex h-full flex-col items-center justify-center text-center">
+        <h1 className="text-5xl font-semibold tracking-[-0.045em] text-[#1d1d1f] dark:text-[#f5f5f7]">Every cell is a key.</h1>
+        <p className="mt-3 text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">Run the pointer across the grid.</p>
+      </div>
+    </BackgroundBoxes>
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/background-boxes" }],
   },
   {
     slug: "encrypted-text",
     name: "Encrypted Text",
     registryCliName: "encrypted-text",
-    resourceLinks: [{ label: "Live demo", href: "/demos/encrypted-text" }],
-    description:
-      "Characters shuffle through gibberish before locking into the final string — a futuristic cyber decoding reveal for hero headings, buttons, badges, and nav links.",
+    description: "Text that decodes itself: every character shuffles through a charset in a fixed-width cell so the line never jitters, then a lock wave runs left to right and each character drops into place with a spring pop. Start it on load, on hover, on click or when it scrolls into view, and loop it if you like.",
     categorySlug: "motion-effects",
-    tags: ["animation", "text", "cyber", "reveal", "typewriter", "hacker", "decode"],
+    tags: ["text", "decode", "scramble", "reveal", "cyber", "hacker", "hover", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 91,
     createdAt: "2026-05-14",
-    animationKinds: ["hover", "scroll"],
+    animationKinds: ["hover", "press", "scroll", "spring"],
     dependencies: ["framer-motion"],
-    previewShell: "plain",
     props: [
-      { name: "text", type: "string", description: "The final string that gets revealed." },
-      { name: "trigger", type: '"load" | "hover" | "viewport" | "click"', defaultValue: '"load"', description: "What event starts the animation." },
-      { name: "speed", type: "number", defaultValue: "50", description: "Milliseconds between each character locking in." },
-      { name: "shuffleSpeed", type: "number", defaultValue: "35", description: "Milliseconds between gibberish shuffle ticks." },
-      { name: "iterations", type: "number", defaultValue: "8", description: "Shuffle cycles that run before the first character locks." },
-      { name: "revealDelay", type: "number", defaultValue: "0", description: "Milliseconds before the animation begins." },
-      { name: "characters", type: "string", description: "Character set used for the gibberish phase." },
-      { name: "loop", type: "boolean", defaultValue: "false", description: "Replay the animation after completion." },
-      { name: "loopDelay", type: "number", defaultValue: "2000", description: "Milliseconds between loop cycles." },
-      { name: "as", type: '"span" | "p" | "h1" | "h2" | "h3" | "div"', defaultValue: '"span"', description: "Rendered HTML element." },
-      { name: "onComplete", type: "() => void", description: "Callback fired when every character has locked in." },
-      { name: "className", type: "string", description: "Additional Tailwind classes merged onto the root element." },
+      { name: "text", type: "string", description: "The string that ends up on screen." },
+      { name: "trigger", type: "\"load\" | \"hover\" | \"viewport\" | \"click\"", defaultValue: "\"load\"", description: "What starts the decode. Load and viewport start scrambled." },
+      { name: "speed", type: "number", defaultValue: "50", description: "Milliseconds between one character locking and the next." },
+      { name: "shuffleSpeed", type: "number", defaultValue: "35", description: "Milliseconds between scramble ticks." },
+      { name: "iterations", type: "number", defaultValue: "8", description: "Scramble ticks before the first character locks." },
+      { name: "revealDelay", type: "number", defaultValue: "0", description: "Milliseconds before the decode starts." },
+      { name: "characters", type: "string", description: "Characters used while scrambling." },
+      { name: "loop", type: "boolean", defaultValue: "false", description: "Scrambles and decodes again after loopDelay." },
+      { name: "loopDelay", type: "number", defaultValue: "2000", description: "Milliseconds between loops." },
+      { name: "scrambleClassName", type: "string", description: "Classes for the scrambling glyphs. Defaults to the accent blue." },
+      { name: "as", type: "\"span\" | \"p\" | \"h1\" | \"h2\" | \"h3\" | \"div\"", defaultValue: "\"span\"", description: "Root element." },
+      { name: "onComplete", type: "() => void", description: "Called each time every character has locked in." },
+      { name: "className", type: "string", description: "Classes for the root element. It is monospaced by default; pass font-sans to change that." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Replays the decode every loopDelay ms until someone hovers, focuses or clicks it." },
     ],
-    Preview: Previews.PreviewEncryptedText,
+    Preview: Previews.PreviewEncryptedTextRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { EncryptedText } from "@/components/encrypted-text";
 
-/* Load trigger — plays once on mount */
-export function HeroHeading() {
+export function VaultTitle() {
   return (
     <EncryptedText
-      text="INITIALIZING SYSTEM"
-      trigger="load"
+      as="h2"
+      text="ACCESS GRANTED"
+      trigger="viewport"
       speed={55}
-      shuffleSpeed={30}
-      iterations={10}
-      className="text-5xl font-bold tracking-[0.12em] text-foreground"
+      iterations={9}
+      className="text-4xl font-semibold tracking-wide"
     />
   );
 }
 
-/* Hover trigger — replays on each mouse-enter */
-export function HoverButton() {
+export function DecodeButton() {
   return (
-    <button className="rounded-full border border-primary/40 bg-primary/10 px-5 py-2.5 text-sm font-semibold text-primary">
-      <EncryptedText text="Get started" trigger="hover" speed={35} shuffleSpeed={20} iterations={4} />
+    <button className="rounded-full bg-[#1d1d1f] px-5 py-2.5 text-sm font-medium text-white">
+      <EncryptedText text="Get started" trigger="hover" speed={35} iterations={4} className="font-sans" scrambleClassName="text-white/60" />
     </button>
-  );
-}
-
-/* Looping badge */
-export function LiveBadge() {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-300">
-      <span className="size-1.5 rounded-full bg-emerald-500" />
-      <EncryptedText text="ONLINE" trigger="load" loop loopDelay={3000} speed={80} iterations={3} />
-    </span>
   );
 }`,
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/encrypted-text" }],
   },
   {
     slug: "mac-keyboard",
     name: "Mac Keyboard",
     registryCliName: "mac-keyboard",
-    resourceLinks: [{ label: "Live demo", href: "/demos/keyboard" }],
-    description:
-      "Fully interactive Mac-style keyboard with Web Audio synthesised click sounds, Framer Motion keycap animations, and real-time physical keyboard highlighting.",
+    description: "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, click with synthesised sound and show what you type in a strip above.",
     categorySlug: "motion-effects",
-    tags: ["keyboard", "interactive", "sound", "animation", "mac", "input", "audio"],
+    tags: ["keyboard", "mac", "keys", "typing", "sound", "web audio", "interactive", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 95,
     createdAt: "2026-05-14",
-    animationKinds: ["hover", "spring"],
+    animationKinds: ["press", "spring", "type"],
     dependencies: ["framer-motion"],
-    previewShell: "plain",
     props: [
-      { name: "layout",          type: '"mac" | "compact"',               defaultValue: '"mac"',         description: "Full layout or compact (no Fn row)." },
-      { name: "theme",           type: '"dark" | "light" | "auto"',       defaultValue: '"auto"',        description: "Visual theme; auto tracks the document dark class." },
-      { name: "enableSound",     type: "boolean",                         defaultValue: "true",          description: "Toggle synthesised click sounds." },
-      { name: "soundType",       type: '"mechanical" | "soft" | "clicky"', defaultValue: '"mechanical"', description: "Timbre of the synthesised key sound." },
-      { name: "volume",          type: "number",                          defaultValue: "0.6",           description: "Master volume (0 – 1)." },
-      { name: "showFunctionRow", type: "boolean",                         defaultValue: "true",          description: "Show or hide the Esc + F-key row." },
-      { name: "activeKeys",      type: "string[]",                        defaultValue: "[]",            description: "KeyboardEvent.code values to highlight as pressed." },
-      { name: "onKeyPress",      type: "(key: KeyDef) => void",           description: "Fires when a virtual key is clicked." },
-      { name: "className",       type: "string",                          description: "Extra classes on the keyboard body." },
-      { name: "keyClassName",    type: "string",                          description: "Extra classes on every keycap." },
+      { name: "layout", type: "\"mac\" | \"compact\"", defaultValue: "\"mac\"", description: "Full layout with the Esc and F-key row, or compact without it." },
+      { name: "theme", type: "\"dark\" | \"light\" | \"auto\"", defaultValue: "\"auto\"", description: "Space grey, silver, or follow the page's dark class." },
+      { name: "listen", type: "boolean", defaultValue: "false", description: "Reacts to the real keyboard: keys sink, ripple, click and type." },
+      { name: "showOutput", type: "boolean", defaultValue: "true", description: "Shows a strip above the keys with what has been typed. Return clears it." },
+      { name: "placeholder", type: "string", defaultValue: "\"Start typing...\"", description: "Text in the strip before anything is typed." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types autoplayText on the keys again and again until someone presses a key." },
+      { name: "autoplayText", type: "string", defaultValue: "\"hello, nexus\"", description: "What the demo types." },
+      { name: "accent", type: "string", defaultValue: "\"#0a84ff\"", description: "Colour of the backlight ripple." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays a synthesised click on each press (not during autoplay)." },
+      { name: "soundType", type: "\"mechanical\" | \"soft\" | \"clicky\"", defaultValue: "\"mechanical\"", description: "Timbre of the click." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Click volume, 0 to 1." },
+      { name: "showFunctionRow", type: "boolean", defaultValue: "true", description: "Shows the Esc and F-key row (mac layout)." },
+      { name: "activeKeys", type: "string[]", defaultValue: "[]", description: "KeyboardEvent.code values to show as held, e.g. from usePhysicalKeyboard()." },
+      { name: "onKeyPress", type: "(key: KeyDef) => void", description: "Fires when a key on screen is pressed." },
+      { name: "className", type: "string", description: "Extra classes on the keyboard body." },
+      { name: "keyClassName", type: "string", description: "Extra classes on every keycap." },
     ],
-    Preview: Previews.PreviewKeyboard,
+    Preview: Previews.PreviewMacKeyboardRedesign,
+    previewShell: "plain",
     previewSections: [
       {
-        Preview: Previews.PreviewKeyboardWithSoundDetail,
+        title: "Silver, typing on its own",
+        Preview: Previews.PreviewMacKeyboardRedesign,
         reactSource: `"use client";
-import { MacKeyboard, usePhysicalKeyboard } from "@/components/keyboard";
 
-export function KeyboardWithSound() {
-  const active = usePhysicalKeyboard();
+import { MacKeyboard } from "@/components/keyboard";
 
-  return (
-    <MacKeyboard
-      layout="mac"
-      theme="auto"
-      enableSound={true}
-      soundType="mechanical"
-      volume={0.65}
-      activeKeys={active}
-      showFunctionRow={true}
-    />
-  );
+export function DemoKeyboard() {
+  return <MacKeyboard autoplay autoplayText="hello, nexus" enableSound={false} />;
 }`,
       },
       {
-        Preview: Previews.PreviewKeyboardSilentDetail,
+        title: "Space grey, listening to your keyboard",
+        Preview: Previews.PreviewMacKeyboardListenRedesign,
         reactSource: `"use client";
-import { MacKeyboard, usePhysicalKeyboard } from "@/components/keyboard";
 
-export function KeyboardSilent() {
-  const active = usePhysicalKeyboard();
+import { MacKeyboard } from "@/components/keyboard";
 
-  return (
-    <MacKeyboard
-      layout="mac"
-      theme="auto"
-      enableSound={false}
-      activeKeys={active}
-      showFunctionRow={true}
-    />
-  );
+export function LiveKeyboard() {
+  return <MacKeyboard listen theme="dark" accent="#bf5af2" placeholder="Type on your keyboard..." />;
 }`,
       },
     ],
+    reactSource: `"use client";
+
+import { MacKeyboard } from "@/components/keyboard";
+
+export function TypingPlayground() {
+  return (
+    <MacKeyboard
+      listen
+      theme="auto"
+      soundType="clicky"
+      volume={0.5}
+      onKeyPress={(key) => console.log(key.code)}
+    />
+  );
+}`,
     tailwindSource: tw,
+    resourceLinks: [{ label: "Live demo", href: "/demos/keyboard" }],
   },
   {
     slug: "images-badge",
     name: "Images Badge",
     registryCliName: "images-badge",
-    description:
-      "Stacked avatar/image pill that fans open on hover — ideal for team badges, social proof, avatar groups, and template galleries.",
+    description: "A pill of overlapping avatars that fans open along a gentle arc on hover or focus, each face springing into place a beat after the last while the +N count rolls down. A name tag glides from face to face under the pointer or the arrow keys, and faces without a picture show initials.",
     categorySlug: "motion-effects",
-    tags: ["avatar", "badge", "social-proof", "hover", "stack", "team", "animation"],
+    tags: ["avatar", "avatar group", "badge", "social proof", "team", "stack", "presence", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 91,
     createdAt: "2026-05-14",
-    animationKinds: ["hover", "spring"],
+    animationKinds: ["hover", "spring", "layout"],
     dependencies: ["framer-motion"],
-    previewShell: "plain",
     props: [
-      { name: "images",         type: "BadgeImage[]",         description: "Array of { src, alt } objects to display." },
-      { name: "maxVisible",     type: "number",               defaultValue: "3",       description: "Images shown in the collapsed state." },
-      { name: "revealCount",    type: "number",               defaultValue: "2",       description: "Extra images revealed on hover." },
-      { name: "label",          type: "string",               description: "Optional text label after the stack." },
-      { name: "size",           type: '"sm" | "md" | "lg"',                  defaultValue: '"md"',       description: "Controls image diameter and pill height." },
-      { name: "shape",          type: '"circle" | "rounded" | "square"',   defaultValue: '"rounded"',  description: "Clipping shape applied to each image." },
-      { name: "className",      type: "string",               description: "Extra classes on the pill container." },
-      { name: "imageClassName", type: "string",               description: "Extra classes on every image wrapper." },
-      { name: "onClick",        type: "() => void",           description: "Makes the badge interactive (button role + keyboard)." },
+      { name: "images", type: "BadgeImage[]", defaultValue: "7 people", description: "People in the stack, front first: { src?, alt, color? }. Without src the face shows initials." },
+      { name: "maxVisible", type: "number", defaultValue: "3", description: "How many show while the stack is closed." },
+      { name: "revealCount", type: "number", defaultValue: "2", description: "How many more fan out when it opens. The rest are counted in the +N chip." },
+      { name: "label", type: "string", description: "Text after the stack." },
+      { name: "size", type: "\"sm\" | \"md\" | \"lg\"", defaultValue: "\"md\"", description: "Face size and pill height." },
+      { name: "shape", type: "\"circle\" | \"rounded\" | \"square\"", defaultValue: "\"circle\"", description: "Shape of each face." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens the stack and walks the name tag along it until someone hovers or focuses it." },
+      { name: "onClick", type: "() => void", description: "Makes the whole badge a button." },
+      { name: "className", type: "string", description: "Extra classes on the pill." },
+      { name: "imageClassName", type: "string", description: "Extra classes on every face." },
     ],
-    Preview: Previews.PreviewImagesBadge,
-    previewSections: [
-      {
-        Preview: Previews.PreviewImagesBadgeDefault,
-        reactSource: `"use client";
+    Preview: Previews.PreviewImagesBadgeRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
 import { ImagesBadge } from "@/components/images-badge";
 
 const TEAM = [
-  { src: "https://api.dicebear.com/9.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4", alt: "Felix" },
-  { src: "https://api.dicebear.com/9.x/avataaars/svg?seed=Aneka&backgroundColor=c0aede", alt: "Aneka" },
-  { src: "https://api.dicebear.com/9.x/avataaars/svg?seed=Milo&backgroundColor=d1d4f9",  alt: "Milo"  },
-  { src: "https://api.dicebear.com/9.x/avataaars/svg?seed=Zoe&backgroundColor=ffd5dc",   alt: "Zoe"   },
-  { src: "https://api.dicebear.com/9.x/avataaars/svg?seed=Kai&backgroundColor=ffdfbf",   alt: "Kai"   },
+  { src: "/avatars/ava.jpg", alt: "Ava Chen" },
+  { src: "/avatars/noah.jpg", alt: "Noah Park" },
+  { alt: "Mira Shah", color: "#bf5af2" },
+  { alt: "Leo Grant" },
+  { alt: "Zoe Ito" },
+  { alt: "Kai Moss" },
 ];
 
-export function DefaultBadge() {
+export function TeamBadge() {
   return (
     <ImagesBadge
       images={TEAM}
       maxVisible={3}
       revealCount={2}
-      label="Trusted by our team"
+      label="Editing now"
       size="md"
-      direction="right"
+      onClick={() => console.log("open team")}
     />
   );
 }`,
-      },
-      {
-        Preview: Previews.PreviewImagesBadgeLarge,
-        reactSource: `"use client";
-import { ImagesBadge } from "@/components/images-badge";
-
-export function LargeBadge() {
-  return (
-    <ImagesBadge
-      images={TEAM}           // 7 images
-      maxVisible={4}
-      revealCount={3}
-      label="12,000+ developers"
-      size="lg"
-      direction="right"
-      onClick={() => window.location.href = "/community"}
-    />
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewImagesBadgeCompact,
-        reactSource: `"use client";
-import { ImagesBadge } from "@/components/images-badge";
-
-export function CompactBadge() {
-  return (
-    <div className="flex items-center gap-3">
-      <ImagesBadge
-        images={TEAM}
-        maxVisible={2}
-        revealCount={2}
-        size="sm"
-      />
-      <span className="text-sm text-muted-foreground">
-        Felix, Aneka + 3 others liked this
-      </span>
-    </div>
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewImagesBadgeWide,
-        reactSource: `"use client";
-import { ImagesBadge } from "@/components/images-badge";
-
-const TEMPLATES = [
-  { src: "https://api.dicebear.com/9.x/shapes/svg?seed=alpha&backgroundColor=1e293b",   alt: "Dashboard"  },
-  { src: "https://api.dicebear.com/9.x/shapes/svg?seed=beta&backgroundColor=0f172a",    alt: "Landing"    },
-  { src: "https://api.dicebear.com/9.x/shapes/svg?seed=gamma&backgroundColor=172554",   alt: "Portfolio"  },
-  { src: "https://api.dicebear.com/9.x/shapes/svg?seed=delta&backgroundColor=1c1917",   alt: "SaaS"       },
-  { src: "https://api.dicebear.com/9.x/shapes/svg?seed=epsilon&backgroundColor=14532d", alt: "Store"      },
-  { src: "https://api.dicebear.com/9.x/shapes/svg?seed=zeta&backgroundColor=450a0a",    alt: "Blog"       },
-];
-
-export function WideSpreadBadge() {
-  return (
-    <ImagesBadge
-      images={TEMPLATES}
-      maxVisible={2}
-      revealCount={4}
-      label="6 templates included"
-      size="md"
-      direction="left"
-    />
-  );
-}`,
-      },
-    ],
     tailwindSource: tw,
   },
   {
     slug: "dot-grid-hero",
     name: "Interactive Dot Grid Hero",
     registryCliName: "dot-grid-hero",
-    description:
-      "Cinematic hero section with a Canvas-rendered dot grid that reacts to cursor proximity — dots scale, brighten, and return to rest with a smooth radial glow spotlight.",
+    description: "A hero over a field of coloured dashes that behave like iron filings round a magnet: near the pointer they swing to point at it, grow and get pushed aside, then wobble back to their own heading. Click anywhere and a ripple rolls out, kicking and spinning the dashes it passes.",
     categorySlug: "hero-sections",
-    tags: ["hero", "canvas", "interactive", "particles", "cursor", "spotlight", "animation", "background"],
+    tags: ["hero", "particles", "canvas", "interactive", "dashes", "magnetic", "dark mode", "motion kit"],
     premium: false,
     trendingScore: 97,
     createdAt: "2026-05-14",
-    animationKinds: ["hover", "gradient"],
-    dependencies: ["framer-motion", "lucide-react"],
-    previewShell: "plain",
+    animationKinds: ["hover", "press", "magnetic", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "title",             type: "string",   defaultValue: '"Build interfaces\\nthat ship."', description: "Hero heading. Use \\n for line breaks." },
-      { name: "subtitle",          type: "string",   description: "Supporting paragraph below the title." },
-      { name: "primaryCTA",        type: "CTAButton", description: "{ label, href?, onClick? } — main action button." },
-      { name: "secondaryCTA",      type: "CTAButton", description: "{ label, href?, onClick? } — ghost action button." },
-      { name: "dotSize",           type: "number",   defaultValue: "1.2",       description: "Base dot radius in px." },
-      { name: "dotGap",            type: "number",   defaultValue: "22",        description: "Gap between dot centres in px." },
-      { name: "glowColor",         type: "string",   defaultValue: '"#6366f1"', description: "Cursor spotlight colour (hex)." },
-      { name: "interactionRadius", type: "number",   defaultValue: "130",       description: "Radius in px where dots react to the cursor." },
-      { name: "dotColor",          type: "string",   defaultValue: '"#334155"', description: "Resting dot colour (hex)." },
-      { name: "activeDotColor",    type: "string",   defaultValue: '"#e2e8f0"', description: "Fully-activated dot colour (hex)." },
-      { name: "className",         type: "string",   description: "Extra classes on the section element." },
+      { name: "title", type: "string", defaultValue: "\"Build interfaces\\nthat ship.\"", description: "Hero heading. Use \\n for line breaks." },
+      { name: "subtitle", type: "string", description: "Supporting paragraph under the heading." },
+      { name: "primaryCTA", type: "CTAButton", description: "{ label, href?, onClick? }: the filled pill." },
+      { name: "secondaryCTA", type: "CTAButton", description: "{ label, href?, onClick? }: the text link with a chevron." },
+      { name: "dotGap", type: "number", defaultValue: "44", description: "Average spacing between dashes in px." },
+      { name: "interactionRadius", type: "number", defaultValue: "140", description: "Radius in px where dashes turn and get pushed." },
+      { name: "repulsionStrength", type: "number", defaultValue: "5", description: "How hard the pointer pushes dashes away." },
+      { name: "springK", type: "number", defaultValue: "0.06", description: "Spring pulling dashes back to their spot, per frame." },
+      { name: "damping", type: "number", defaultValue: "0.82", description: "Velocity kept per frame, 0 to 1. Lower settles faster." },
+      { name: "colors", type: "string[]", defaultValue: "6 system colours", description: "Dash colours." },
+      { name: "background", type: "string", description: "Hero background. Defaults to white, or black in dark mode." },
+      { name: "textColor", type: "string", description: "Heading colour. Defaults to the theme's text colour." },
+      { name: "hint", type: "string", defaultValue: "\"Move to steer the field. Click to send a ripple.\"", description: "Caption at the bottom edge. Pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a pretend pointer through the field and sends a ripple every few seconds until someone moves over it." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
     ],
-    Preview: Previews.PreviewDotGridHero,
-    previewSections: [
-      {
-        Preview: Previews.PreviewDotGridHeroDefault,
-        reactSource: `"use client";
+    Preview: Previews.PreviewDotGridHeroRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
 import { DotGridHero } from "@/components/dot-grid-hero";
 
-export function DefaultHero() {
+export function HomeHero() {
   return (
     <DotGridHero
-      title={"Build interfaces\\nthat ship."}
-      subtitle="A motion-native component library for React.
-Animated, accessible, and production-ready."
-      primaryCTA={{ label: "Get started",         href: "/components" }}
+      title={"Design systems\\nthat move."}
+      subtitle="Components, blocks and templates with motion built in."
+      primaryCTA={{ label: "Get started", href: "/docs" }}
       secondaryCTA={{ label: "Browse components", href: "/components" }}
+      colors={["#0a84ff", "#5e5ce6", "#64d2ff"]}
+      dotGap={40}
+      className="min-h-[620px]"
     />
   );
 }`,
-      },
-      {
-        Preview: Previews.PreviewDotGridHeroDense,
-        reactSource: `"use client";
-import { DotGridHero } from "@/components/dot-grid-hero";
-
-export function DenseHero() {
-  return (
-    <DotGridHero
-      title={"Design systems\\nmade simple."}
-      subtitle="Everything you need to build fast,
-beautiful products at scale."
-      primaryCTA={{ label: "Start for free", href: "#" }}
-      secondaryCTA={{ label: "View docs",    href: "#" }}
-      dotGap={14}
-      dotSize={1.0}
-      glowColor="#06b6d4"
-      activeDotColor="#cffafe"
-      interactionRadius={150}
-    />
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewDotGridHeroAmber,
-        reactSource: `"use client";
-import { DotGridHero } from "@/components/dot-grid-hero";
-
-export function AmberHero() {
-  return (
-    <DotGridHero
-      title={"Ship 10× faster\\nwith AI."}
-      subtitle="AI-powered tooling that writes, tests,
-and deploys your code automatically."
-      primaryCTA={{ label: "Try it free",  href: "#" }}
-      secondaryCTA={{ label: "Watch demo", href: "#" }}
-      dotGap={26}
-      dotSize={1.4}
-      glowColor="#f59e0b"
-      activeDotColor="#fef3c7"
-      dotColor="#292524"
-      interactionRadius={200}
-    />
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewDotGridHeroRose,
-        reactSource: `"use client";
-import { DotGridHero } from "@/components/dot-grid-hero";
-
-export function RoseHero() {
-  return (
-    <DotGridHero
-      title={"Beautiful UX\\nstarts here."}
-      subtitle="Craft interfaces your users will love.
-Polished components, zero compromise."
-      primaryCTA={{ label: "Explore now",  href: "#" }}
-      secondaryCTA={{ label: "See pricing", href: "#" }}
-      dotGap={30}
-      dotSize={2.0}
-      glowColor="#f43f5e"
-      activeDotColor="#ffe4e6"
-      dotColor="#3f1f27"
-      interactionRadius={160}
-    />
-  );
-}`,
-      },
-    ],
     tailwindSource: tw,
   },
   {
     slug: "starfield-hero",
     name: "Interactive Starfield Hero",
     registryCliName: "starfield-hero",
-    description:
-      "Dark hero section with a cursor-reactive starfield. Hundreds of glowing particles stretch, brighten, and rotate toward the cursor — built on Canvas + requestAnimationFrame at 60 fps.",
+    description: "A hero set in a deep 3D starfield drawn on canvas: stars drift toward you, the vanishing point leans toward the pointer and stars near it brighten. Press and hold anywhere, or the Warp button, to jump to warp; on release the field brakes past a standstill, recoils a touch and settles.",
     categorySlug: "hero-sections",
-    tags: ["hero", "canvas", "interactive", "particles", "cursor", "starfield", "animation", "dark", "background"],
+    tags: ["hero", "starfield", "space", "warp", "canvas", "particles", "3d", "motion kit"],
     premium: false,
     trendingScore: 98,
     createdAt: "2026-05-14",
-    animationKinds: ["hover", "spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    previewShell: "plain",
+    animationKinds: ["hover", "press", "spring", "3d", "parallax"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "title",             type: "string",    defaultValue: '"Ship faster.\\nBuild better."', description: "Hero heading — use \\n for line breaks." },
-      { name: "subtitle",          type: "string",    description: "Supporting paragraph below the title." },
-      { name: "primaryCTA",        type: "CTAConfig", description: "{ label, href?, onClick? } — main action button." },
-      { name: "secondaryCTA",      type: "CTAConfig", description: "{ label, href?, onClick? } — ghost action button." },
-      { name: "particleCount",     type: "number",    defaultValue: "300",       description: "Total number of particles." },
-      { name: "interactionRadius", type: "number",    defaultValue: "140",       description: "Cursor influence radius in px." },
-      { name: "particleColor",     type: "string",    defaultValue: '"#60a5fa"', description: "Base particle colour (hex)." },
-      { name: "activeColor",       type: "string",    defaultValue: '"#ffffff"', description: "Particle colour at full activation (hex)." },
-      { name: "speed",             type: "number",    defaultValue: "0.5",       description: "Return speed: 0.1 (dreamlike) → 1.0 (snappy)." },
-      { name: "children",          type: "ReactNode", description: "Override default hero content entirely." },
-      { name: "className",         type: "string",    description: "Extra classes on the section element." },
+      { name: "title", type: "string", defaultValue: "\"Ship faster.\\nBuild better.\"", description: "Heading. Use \\n for a line break; the second line is dimmed." },
+      { name: "subtitle", type: "string", description: "Supporting paragraph under the heading." },
+      { name: "primaryCTA", type: "CTAConfig", description: "{ label, href?, onClick? }: the white pill." },
+      { name: "secondaryCTA", type: "CTAConfig", description: "{ label, href?, onClick? }: the glass pill." },
+      { name: "particleCount", type: "number", defaultValue: "300", description: "Number of stars." },
+      { name: "interactionRadius", type: "number", defaultValue: "140", description: "Stars within this many px of the pointer brighten toward activeColor." },
+      { name: "particleColor", type: "string", defaultValue: "\"#9fc6ff\"", description: "Resting star colour. Any CSS colour." },
+      { name: "activeColor", type: "string", defaultValue: "\"#ffffff\"", description: "Star colour near the pointer and at full warp." },
+      { name: "speed", type: "number", defaultValue: "0.5", description: "How snappy the warp and steering feel: 0.1 (dreamlike) to 1 (snappy)." },
+      { name: "warpLabel", type: "string", defaultValue: "\"Hold to warp\"", description: "Label of the hold-to-warp button. Pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Jumps to warp every few seconds until someone touches the hero." },
+      { name: "children", type: "ReactNode", description: "Replaces the default hero content." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
     ],
-    Preview: Previews.PreviewStarfieldHero,
-    previewSections: [
-      {
-        Preview: Previews.PreviewStarfieldHeroDefault,
-        reactSource: `"use client";
+    Preview: Previews.PreviewStarfieldHeroRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
 import { InteractiveStarfieldHero } from "@/components/starfield-hero";
 
-export function DefaultHero() {
+export function SpaceHero() {
   return (
     <InteractiveStarfieldHero
-      title={"Ship faster.\\nBuild better."}
-      subtitle="A motion-native component library for React — animated, accessible, and production-ready."
-      primaryCTA={{ label: "Get started",      href: "/components" }}
-      secondaryCTA={{ label: "View components", href: "/components" }}
+      title={"Launch day.\\nEvery day."}
+      subtitle="Release notes, changelogs and status pages that look as good as your product."
+      primaryCTA={{ label: "Start free", href: "/signup" }}
+      secondaryCTA={{ label: "See examples", href: "/examples" }}
+      particleColor="#a5b4fc"
+      particleCount={420}
+      speed={0.6}
+      className="min-h-[640px]"
     />
   );
 }`,
-      },
-      {
-        Preview: Previews.PreviewStarfieldHeroDeepSpace,
-        reactSource: `"use client";
-import { InteractiveStarfieldHero } from "@/components/starfield-hero";
-
-export function DeepSpaceHero() {
-  return (
-    <InteractiveStarfieldHero
-      title={"Design systems\\nmade simple."}
-      subtitle="Everything you need to build beautiful products at scale."
-      primaryCTA={{ label: "Start for free", href: "#" }}
-      secondaryCTA={{ label: "View docs",    href: "#" }}
-      particleCount={400}
-      particleColor="#a78bfa"
-      activeColor="#f0abfc"
-      interactionRadius={180}
-      speed={0.4}
-    />
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewStarfieldHeroOcean,
-        reactSource: `"use client";
-import { InteractiveStarfieldHero } from "@/components/starfield-hero";
-
-export function OceanNightHero() {
-  return (
-    <InteractiveStarfieldHero
-      title={"Ship 10× faster\\nwith AI."}
-      subtitle="AI-powered tooling that writes, tests, and deploys your code automatically."
-      primaryCTA={{ label: "Try it free",  href: "#" }}
-      secondaryCTA={{ label: "Watch demo", href: "#" }}
-      particleColor="#22d3ee"
-      activeColor="#ecfeff"
-      interactionRadius={120}
-      speed={0.8}
-    />
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewStarfieldHeroEmber,
-        reactSource: `"use client";
-import { InteractiveStarfieldHero } from "@/components/starfield-hero";
-
-export function EmberStormHero() {
-  return (
-    <InteractiveStarfieldHero
-      title={"Beautiful UX\\nstarts here."}
-      subtitle="Craft interfaces your users will love. Polished components, zero compromise."
-      primaryCTA={{ label: "Explore now",  href: "#" }}
-      secondaryCTA={{ label: "See pricing", href: "#" }}
-      particleCount={180}
-      particleColor="#f59e0b"
-      activeColor="#fef9c3"
-      interactionRadius={160}
-      speed={0.15}
-    />
-  );
-}`,
-      },
-    ],
     tailwindSource: tw,
   },
   {
     slug: "compare",
     name: "Before / After Compare",
     registryCliName: "compare",
-    description:
-      "Compare two images side by side: the divider follows the mouse on desktop and drags on touch screens. Optional labels, custom start position, and any aspect ratio.",
+    description: "A before and after comparison for images or any two pieces of content. Press or drag anywhere and the divider springs to your finger with a little follow-through, the handle stretches in the direction it travels and each label fades as the divider reaches it; arrow keys move it too.",
     categorySlug: "motion-effects",
-    tags: ["compare", "slider", "before-after", "image", "interactive", "drag", "cursor"],
+    tags: ["compare", "before after", "slider", "image", "photo", "diff", "drag", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 92,
     createdAt: "2026-05-14",
-    animationKinds: ["hover"],
-    dependencies: ["lucide-react"],
-    previewShell: "plain",
+    animationKinds: ["drag", "hover", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "beforeImage",     type: "string", description: "src URL for the before (left) image." },
-      { name: "afterImage",      type: "string", description: "src URL for the after (right) image." },
-      { name: "beforeLabel",     type: "string", description: "Optional text label on the left side." },
-      { name: "afterLabel",      type: "string", description: "Optional text label on the right side." },
-      { name: "initialPosition", type: "number", defaultValue: "50",  description: "Starting slider position as 0–100%." },
-      { name: "className",       type: "string", description: "Extra Tailwind classes — set aspect ratio here." },
+      { name: "beforeImage", type: "string", description: "Image for the left (before) side." },
+      { name: "afterImage", type: "string", description: "Image for the right (after) side." },
+      { name: "beforeAlt", type: "string", defaultValue: "\"Before\"", description: "Alt text for beforeImage." },
+      { name: "afterAlt", type: "string", defaultValue: "\"After\"", description: "Alt text for afterImage." },
+      { name: "beforeContent", type: "React.ReactNode", description: "Any content for the before side; overrides beforeImage." },
+      { name: "afterContent", type: "React.ReactNode", description: "Any content for the after side; overrides afterImage." },
+      { name: "beforeLabel", type: "string", description: "Label chip on the left." },
+      { name: "afterLabel", type: "string", description: "Label chip on the right." },
+      { name: "initialPosition", type: "number", defaultValue: "50", description: "Starting divider position, 0-100." },
+      { name: "mode", type: "\"drag\" | \"hover\"", defaultValue: "\"drag\"", description: "Drag: press or drag anywhere. Hover: the divider follows the pointer and returns on leave." },
+      { name: "onChange", type: "(position: number) => void", description: "Called with the divider position when the user moves it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the divider back and forth until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes; set the aspect ratio and max width here (defaults to 4:3, 480px)." },
     ],
-    Preview: Previews.PreviewCompare,
+    Preview: Previews.PreviewCompareRedesign,
+    previewShell: "plain",
     previewSections: [
       {
-        Preview: Previews.PreviewCompareDefault,
+        title: "Photo",
+        Preview: Previews.PreviewCompareRedesign,
         reactSource: `"use client";
+
 import { Compare } from "@/components/compare";
 
-export function CompareDemo() {
+export function GradeCompare() {
   return (
     <Compare
-      beforeImage="/images/before.jpg"
-      afterImage="/images/after.jpg"
+      beforeImage="/images/lake-flat.jpg"
+      afterImage="/images/lake-graded.jpg"
+      beforeLabel="Original"
+      afterLabel="Graded"
+    />
+  );
+}`,
+      },
+      {
+        title: "Any content",
+        Preview: Previews.PreviewCompareCodeRedesign,
+        reactSource: `"use client";
+
+import { Compare } from "@/components/compare";
+
+export function RefactorCompare() {
+  return (
+    <Compare
       beforeLabel="Before"
       afterLabel="After"
-      className="aspect-video w-full"
+      className="aspect-[16/10] max-w-[440px]"
+      beforeContent={<pre className="absolute inset-0 bg-white p-5 font-mono text-sm">{"for (let i = 0; i < items.length; i++) {...}"}</pre>}
+      afterContent={<pre className="absolute inset-0 bg-[#1d1d1f] p-5 font-mono text-sm text-white">{"items.reduce((sum, i) => sum + i.price, 0)"}</pre>}
     />
   );
 }`,
       },
     ],
+    reactSource: `"use client";
+
+import { Compare } from "@/components/compare";
+
+export function RetouchCompare() {
+  return (
+    <Compare
+      beforeImage="/images/portrait-raw.jpg"
+      afterImage="/images/portrait-retouched.jpg"
+      beforeAlt="Unedited portrait"
+      afterAlt="Retouched portrait"
+      beforeLabel="Raw"
+      afterLabel="Retouched"
+      initialPosition={40}
+      className="aspect-[3/4] max-w-sm"
+    />
+  );
+}`,
     tailwindSource: tw,
   },
   {
     slug: "expandable-cards",
     name: "Expandable Cards",
     registryCliName: "expandable-cards",
-    description:
-      "Responsive card grid where clicking a card smoothly expands it into a full-detail overlay with image, description, and a CTA button.",
+    description: "A grid of story cards where picking one grows it, in one continuous spring, into a full card with the long description and a call to action while the rest of the grid sinks back; closing shrinks it home into its slot. It can open over the grid itself or in a centred dialog over the page, and the columns follow the container's width.",
     categorySlug: "cards",
-    tags: ["cards", "grid", "expandable", "modal", "interactive", "framer-motion", "animation"],
+    tags: ["cards", "grid", "expandable", "shared layout", "app store", "modal", "dialog", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 94,
     createdAt: "2026-05-14",
-    animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    previewShell: "plain",
+    animationKinds: ["press", "hover", "layout", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "cards",     type: "CardItem[]", description: "Array of card data objects." },
-      { name: "className", type: "string",     description: "Extra classes on the grid container." },
+      { name: "cards", type: "CardItem[]", defaultValue: "6 sample cards", description: "Each { id, title, description, fullDescription, category, image?, bg?, ctaText?, ctaLink? }. Without image the drawn cover in bg is used." },
+      { name: "expandInto", type: "\"grid\" | \"viewport\"", defaultValue: "\"grid\"", description: "\"grid\" opens a card over the grid itself; \"viewport\" opens it in a centred dialog over the page and locks scroll." },
+      { name: "onOpenChange", type: "(id: string | null) => void", description: "Called with the card id when one opens, and null when it closes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes each card in turn until someone touches the grid." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
     ],
-    Preview: Previews.PreviewExpandableCards,
-    previewSections: [
-      {
-        Preview: Previews.PreviewExpandableCards,
-        reactSource: `"use client";
-import { ExpandableCards } from "@/components/expandable-cards";
-import type { CardItem } from "@/components/expandable-cards";
+    Preview: Previews.PreviewExpandableCardsRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ExpandableCards, type CardItem } from "@/components/expandable-cards";
 
 const cards: CardItem[] = [
   {
-    id: "1",
-    title: "Motion Design System",
-    description: "Animation primitives built for React and Tailwind CSS.",
-    fullDescription: "Full description shown when expanded...",
-    image: "/images/card-1.jpg",
+    id: "motion",
     category: "Design",
-    ctaText: "Explore",
+    title: "Motion system",
+    description: "Spring presets for every surface.",
+    fullDescription: "One set of springs for buttons, sheets and lists, tuned to feel the same at every size.",
+    image: "/covers/motion.jpg",
+    ctaText: "Explore system",
     ctaLink: "/components",
+  },
+  {
+    id: "type",
+    category: "Typography",
+    title: "Fluid type",
+    description: "A scale that breathes with the screen.",
+    fullDescription: "A type scale built on clamp(), with tight tracking on display sizes.",
+    bg: "linear-gradient(150deg,#ffd60a,#ff9f0a)",
+    ctaText: "See examples",
+    ctaLink: "/type",
   },
 ];
 
-export default function Page() {
-  return <ExpandableCards cards={cards} />;
+export function StoryGrid() {
+  return <ExpandableCards cards={cards} expandInto="viewport" onOpenChange={(id) => console.log("open", id)} />;
 }`,
-      },
-    ],
     tailwindSource: tw,
   },
   {
     slug: "animated-select-headline",
     name: "Animated Select Headline",
-    description: "A cycling word headline where each active word is highlighted with a Figma-style selection rectangle — thin border with corner handles — using blur-fade transitions.",
+    description: "A headline where one word sits inside a design-tool selection box, and every few seconds a different collaborator selects the next word. The box springs to the new width with an elastic overshoot, the size badge counts the pixels live, and the collaborator's cursor trails the corner on a softer spring.",
     categorySlug: "motion-effects",
-    tags: ["headline", "text", "animation", "cycling", "selection", "framer-motion", "hero", "blur"],
+    tags: ["headline", "text", "cycling", "selection", "figma", "multiplayer", "cursor", "hero", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 188,
     createdAt: "2026-05-16T00:00:00.000Z",
-    animationKinds: ["spring"],
+    animationKinds: ["spring", "layout", "press"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewAnimatedSelectHeadline,
+    props: [
+      { name: "words", type: "string[]", defaultValue: "[\"warp speed\", \"record time\", \"pure flow\", \"light speed\"]", description: "Words or short phrases to cycle through." },
+      { name: "prefix", type: "string", defaultValue: "\"Build amazing websites at\"", description: "Text before the selected word." },
+      { name: "suffix", type: "string", description: "Text after the selected word." },
+      { name: "interval", type: "number", defaultValue: "2500", description: "Milliseconds between words. 0 stops the cycling; click and arrow keys still step. Pauses while hovered or focused." },
+      { name: "collaborators", type: "{ name: string; color: string }[]", defaultValue: "Maya, Leo, Ari, Sam", description: "People whose cursors take turns selecting each word." },
+      { name: "showCursor", type: "boolean", defaultValue: "true", description: "Shows the collaborator's cursor and name tag." },
+      { name: "showSize", type: "boolean", defaultValue: "true", description: "Shows the live width × height badge under the selection." },
+      { name: "onChange", type: "(index: number) => void", description: "Called with the index of the newly selected word." },
+      { name: "className", type: "string", description: "Classes for the wrapper." },
+      { name: "headingClassName", type: "string", description: "Classes for the h2." },
+    ],
+    Preview: Previews.PreviewAnimatedSelectHeadlineRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { AnimatedSelectHeadline } from "@/components/animated-select-headline";
 
-export interface AnimatedSelectHeadlineProps {
-  words?: string[];
-  prefix?: string;
-  suffix?: string;
-  interval?: number;
-  className?: string;
-  headingClassName?: string;
-}
-
-const ACCENT_GRADIENTS = [
-  "bg-gradient-to-r from-cyan-400 to-emerald-500 bg-clip-text text-transparent",
-  "bg-gradient-to-r from-amber-400 to-pink-500 bg-clip-text text-transparent",
-];
-
-export function AnimatedSelectHeadline({
-  words = ["warp speed", "record time", "pure flow", "light speed"],
-  prefix = "Build amazing websites at",
-  suffix,
-  interval = 2500,
-  className,
-  headingClassName,
-}: AnimatedSelectHeadlineProps) {
-  const [index, setIndex] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setIndex((i) => (i + 1) % words.length), interval);
-    return () => clearInterval(id);
-  }, [words.length, interval]);
-
-  const accentStart = Math.max(words.length - 2, 0);
-  const isAccent = index >= accentStart;
-  const accentClass = isAccent ? ACCENT_GRADIENTS[index - accentStart] : undefined;
-
+export function Hero() {
   return (
-    <div className={cn("text-center", className)}>
-      <h2
-        className={cn(
-          "text-4xl font-bold leading-tight tracking-tight text-gray-950 sm:text-5xl",
-          headingClassName,
-        )}
-      >
-        {prefix && <>{prefix} </>}
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={index}
-            initial={{ opacity: 0, filter: "blur(8px)", y: 8 }}
-            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-            exit={{ opacity: 0, filter: "blur(8px)", y: -8 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className={cn("relative inline-block font-bold", accentClass)}
-          >
-            {words[index]}
-          </motion.span>
-        </AnimatePresence>
-        {suffix && <> {suffix}</>}
-      </h2>
-    </div>
+    <AnimatedSelectHeadline
+      prefix="Build websites at"
+      words={["warp speed", "record time", "pure flow", "light speed"]}
+      collaborators={[
+        { name: "Maya", color: "#0071e3" },
+        { name: "Leo", color: "#bf5af2" },
+        { name: "Ari", color: "#ff9f0a" },
+      ]}
+      interval={2400}
+    />
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "words", type: "string[]", description: "Array of words or phrases to cycle through", defaultValue: '["warp speed", "record time", "pure flow", "light speed"]' },
-      { name: "prefix", type: "string", description: "Static text displayed before the animated word", defaultValue: '"Build amazing websites at"' },
-      { name: "suffix", type: "string | undefined", description: "Optional static text displayed after the animated word" },
-      { name: "interval", type: "number", description: "Milliseconds between each word transition", defaultValue: "2500" },
-      { name: "className", type: "string | undefined", description: "Additional classes applied to the wrapper div" },
-      { name: "headingClassName", type: "string | undefined", description: "Additional classes applied to the h2 heading element" },
-    ],
   },
   {
     slug: "warp-speed-card",
     name: "Warp Speed Card",
-    description: "A focused warp-speed effect — hover a single phrase to reveal a dark space scene with streaking beams confined to the text's bounding box. The text itself stays static; the effect lives entirely behind it.",
+    description: "Wrap a phrase in a headline to give it a hyperdrive: hover, focus or tap it and a starfield inside its box spools up on a spring, stretching stars into streaks as speed builds. The phrase squashes and stretches on the kick and drops out of warp with a jolt when you let go.",
     categorySlug: "motion-effects",
-    tags: ["hover", "reveal", "beams", "space", "warp", "framer-motion", "card", "background", "text"],
+    tags: ["hover", "warp", "starfield", "space", "headline", "text", "canvas", "card", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 210,
     createdAt: "2026-05-16T00:00:00.000Z",
-    animationKinds: ["hover", "spring"],
+    animationKinds: ["hover", "press", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewWarpSpeedCard,
+    props: [
+      { name: "WarpTextTrigger.children", type: "React.ReactNode", description: "The phrase that jumps to warp." },
+      { name: "WarpTextTrigger.beamColor", type: "string", defaultValue: "\"255,255,255\"", description: "Star colour as an \"r,g,b\" triplet." },
+      { name: "WarpTextTrigger.onWarpChange", type: "(warping: boolean) => void", description: "Called when the jump starts and when it drops out." },
+      { name: "WarpTextTrigger.autoplay", type: "boolean", defaultValue: "false", description: "Makes a jump every few seconds until someone hovers, focuses or taps the phrase." },
+      { name: "WarpTextTrigger.className", type: "string", description: "Classes for the phrase box." },
+      { name: "WarpSpeedCard.children", type: "React.ReactNode", description: "Card content, usually a heading containing a WarpTextTrigger." },
+      { name: "WarpSpeedCard.className", type: "string", description: "Classes for the card." },
+      { name: "WarpSpeedCard.contentClassName", type: "string", description: "Classes for the inner content wrapper." },
+    ],
+    Preview: Previews.PreviewWarpSpeedCardRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { WarpSpeedCard, WarpTextTrigger } from "@/components/warp-speed-card";
 
-const BEAMS = [
-  { y: "8%",  length: 60,  thickness: 1, opacity: 0.9,  delay: 0,    duration: 0.46 },
-  { y: "20%", length: 95,  thickness: 1, opacity: 0.55, delay: 0.1,  duration: 0.7  },
-  { y: "30%", length: 45,  thickness: 1, opacity: 1.0,  delay: 0.04, duration: 0.4  },
-  { y: "42%", length: 115, thickness: 2, opacity: 0.42, delay: 0.18, duration: 0.86 },
-  { y: "55%", length: 65,  thickness: 1, opacity: 0.85, delay: 0.08, duration: 0.48 },
-  { y: "66%", length: 100, thickness: 1, opacity: 0.5,  delay: 0.22, duration: 0.78 },
-  { y: "78%", length: 50,  thickness: 1, opacity: 0.92, delay: 0.12, duration: 0.44 },
-  { y: "90%", length: 85,  thickness: 2, opacity: 0.6,  delay: 0.06, duration: 0.66 },
-] as const;
-
-const STARS = [
-  { x: 14, y: 22, r: 1,   delay: 0.1 },
-  { x: 36, y: 62, r: 1,   delay: 0.4 },
-  { x: 58, y: 16, r: 1.5, delay: 0.7 },
-  { x: 76, y: 76, r: 1,   delay: 0.2 },
-  { x: 50, y: 45, r: 1,   delay: 0.55 },
-  { x: 88, y: 38, r: 1,   delay: 0.35 },
-] as const;
-
-export interface WarpSpeedCardProps {
-  children: React.ReactNode;
-  className?: string;
-  contentClassName?: string;
-}
-
-export function WarpSpeedCard({ children, className, contentClassName }: WarpSpeedCardProps) {
+export function WarpHero() {
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl bg-white", className)}>
-      <div className={cn("relative", contentClassName)}>{children}</div>
-    </div>
-  );
-}
-
-export interface WarpTextTriggerProps {
-  children: React.ReactNode;
-  className?: string;
-  beamColor?: string;
-}
-
-export function WarpTextTrigger({
-  children,
-  className,
-  beamColor = "255,255,255",
-}: WarpTextTriggerProps) {
-  const [hovered, setHovered] = useState(false);
-  const handleBorder = hovered ? "rgba(148,163,184,0.8)" : "rgb(59,130,246)";
-  const handleFill = hovered ? "rgb(24,24,27)" : "white";
-  const boxBorder = hovered ? "rgba(148,163,184,0.5)" : "rgba(59,130,246,0.5)";
-
-  return (
-    <span
-      className={cn("relative inline-block cursor-default select-none align-baseline", className)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Confined warp scene — clipped to the text box */}
-      <span className="pointer-events-none absolute -inset-1 overflow-hidden" aria-hidden>
-        <motion.span
-          className="absolute inset-0 block bg-zinc-950"
-          animate={{ opacity: hovered ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        />
-        {STARS.map((s, i) => (
-          <motion.span
-            key={\`s-\${i}\`}
-            className="absolute block rounded-full bg-white"
-            style={{ left: \`\${s.x}%\`, top: \`\${s.y}%\`, width: s.r, height: s.r }}
-            animate={hovered ? { opacity: [0, 1, 0.3, 1, 0] } : { opacity: 0 }}
-            transition={hovered ? { duration: 2.6, delay: s.delay, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
-          />
-        ))}
-        {BEAMS.map((beam, i) => (
-          <motion.span
-            key={\`b-\${i}\`}
-            className="absolute block"
-            style={{
-              left: 0,
-              top: beam.y,
-              height: beam.thickness,
-              width: beam.length,
-              background: \`linear-gradient(90deg, transparent 0%, rgba(\${beamColor},0.75) 38%, rgba(\${beamColor},1) 50%, rgba(\${beamColor},0.75) 62%, transparent 100%)\`,
-            }}
-            initial={{ x: -160, opacity: 0 }}
-            animate={hovered ? { x: [-160, 700], opacity: [0, beam.opacity, beam.opacity, 0] } : { x: -160, opacity: 0 }}
-            transition={hovered ? {
-              duration: beam.duration, delay: beam.delay, repeat: Infinity,
-              ease: [0.18, 0.52, 0.82, 1], times: [0, 0.08, 0.92, 1],
-            } : { duration: 0.2 }}
-          />
-        ))}
-      </span>
-
-      {/* Static text — color flips on hover so it stays legible on dark bg */}
-      <motion.span
-        className="relative inline-block px-0.5"
-        animate={{ color: hovered ? "rgb(255,255,255)" : "rgb(17,24,39)" }}
-        transition={{ duration: 0.3 }}
-      >
-        {children}
-      </motion.span>
-
-      {/* Figma-style selection handles */}
-      <span className="pointer-events-none absolute -inset-1" aria-hidden>
-        <span className="absolute inset-0 border" style={{ borderColor: boxBorder }} />
-        <span className="absolute -top-0.75 -left-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
-        <span className="absolute -top-0.75 -right-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
-        <span className="absolute -bottom-0.75 -left-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
-        <span className="absolute -bottom-0.75 -right-0.75 size-1.5 border" style={{ borderColor: handleBorder, backgroundColor: handleFill }} />
-      </span>
-    </span>
-  );
-}
-
-// Usage example
-export default function Demo() {
-  return (
-    <WarpSpeedCard className="border border-gray-200 shadow-sm">
-      <div className="px-10 py-14 text-center">
-        <h2 className="text-5xl font-bold leading-tight tracking-tight text-gray-950">
+    <WarpSpeedCard className="mx-auto max-w-xl">
+      <div className="px-8 py-14 text-center">
+        <h2 className="text-5xl font-semibold tracking-tight">
           Build amazing websites
           <br />
-          at <WarpTextTrigger>warp speed</WarpTextTrigger>
+          at <WarpTextTrigger onWarpChange={(on) => console.log("warp", on)}>warp speed</WarpTextTrigger>
         </h2>
       </div>
     </WarpSpeedCard>
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "children", type: "ReactNode", description: "Card content. Place a <WarpTextTrigger>phrase</WarpTextTrigger> inside to enable the inline warp effect on hover." },
-      { name: "className", type: "string | undefined", description: "Additional classes applied to the card root element" },
-      { name: "contentClassName", type: "string | undefined", description: "Additional classes applied to the inner content wrapper" },
-    ],
   },
   {
     slug: "circular-carousel",
     name: "Circular Carousel",
-    description: "An animated orbital carousel with smooth active-card transitions.",
+    description: "Cards hung round the rim of a wheel, with the active card at the top and its neighbours tipping away down each side. Drag or fling the wheel and it coasts to the nearest card while the cards swing on their pins and settle, and the counter in the middle rolls to the new number; arrows, dots and keys work too.",
     categorySlug: "cards",
-    tags: ["carousel", "circular", "orbital", "cards", "framer-motion", "animation"],
+    tags: ["carousel", "circular", "wheel", "orbital", "cards", "drag", "inertia", "counter", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 85,
     createdAt: "2026-05-16T00:00:00.000Z",
-    animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewCircularCarousel,
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "CarouselItem[]", defaultValue: "6 sample steps", description: "Each { id, title, description, tag?, accent? }." },
+      { name: "activeIndex", type: "number", description: "Controlled active card; the wheel turns the short way round to it." },
+      { name: "onActiveChange", type: "(index: number) => void", description: "Called with the new active index." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps to the next card every autoPlayInterval ms until someone touches it." },
+      { name: "autoPlayInterval", type: "number", defaultValue: "2600", description: "Time between autoplay steps, in ms." },
+      { name: "hint", type: "string", defaultValue: "\"Drag the wheel, or use the arrow keys.\"", description: "Caption under the controls. An empty string hides it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewCircularCarouselRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { CircularCarousel } from "@/components/circular-carousel";
 
-export interface CarouselItem {
-  id: string;
-  title: string;
-  description: string;
-  tag?: string;
-}
+const steps = [
+  { id: "plan", tag: "Plan", title: "Shape the brief", description: "Goals, audience and the one thing to get right." },
+  { id: "build", tag: "Build", title: "Make it real", description: "Components, data and motion wired together." },
+  { id: "test", tag: "Test", title: "Watch people use it", description: "Five sessions find most of the rough edges.", accent: "#30b65a" },
+  { id: "ship", tag: "Ship", title: "Put it out", description: "Release, measure and write down what you learned." },
+  { id: "learn", tag: "Learn", title: "Loop back", description: "Feed what you saw into the next brief." },
+];
 
-export interface CircularCarouselProps {
-  items: CarouselItem[];
-  activeIndex?: number;
-  onActiveChange?: (index: number) => void;
-  autoPlay?: boolean;
-  autoPlayInterval?: number;
-  className?: string;
-}
-
-const VISIBLE_COUNT = 5;
-const RADIUS_X = 220;
-const RADIUS_Y = 100;
-
-function getItemPosition(index: number, activeIndex: number, total: number) {
-  const offset = index - activeIndex;
-  const half = Math.floor(VISIBLE_COUNT / 2);
-  let adjustedOffset = offset;
-
-  if (offset > half) adjustedOffset = offset - total;
-  if (offset < -half) adjustedOffset = offset + total;
-
-  if (Math.abs(adjustedOffset) > half * 2) return null;
-
-  const angle = (adjustedOffset / VISIBLE_COUNT) * Math.PI;
-  const x = Math.sin(angle) * RADIUS_X;
-  const y = -Math.cos(angle) * RADIUS_Y;
-
-  const distance = Math.abs(adjustedOffset);
-  const maxDistance = half + 1;
-  const scale = Math.max(0, 1 - (distance / maxDistance) * 0.3);
-  const opacity = Math.max(0.3, 1 - (distance / maxDistance) * 0.7);
-  const zIndex = VISIBLE_COUNT - distance;
-
-  return { x, y, scale, opacity, zIndex, adjustedOffset };
-}
-
-export function CircularCarousel({
-  items,
-  activeIndex: controlledIndex,
-  onActiveChange,
-  autoPlay = true,
-  autoPlayInterval = 4000,
-  className,
-}: CircularCarouselProps) {
-  const [internalIndex, setInternalIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const activeIndex = controlledIndex ?? internalIndex;
-  const total = items.length;
-
-  const goTo = useCallback(
-    (index: number) => {
-      const newIndex = ((index % total) + total) % total;
-      if (controlledIndex === undefined) {
-        setInternalIndex(newIndex);
-      }
-      onActiveChange?.(newIndex);
-    },
-    [total, controlledIndex, onActiveChange],
-  );
-
-  const next = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
-  const prev = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
-
-  useEffect(() => {
-    if (!autoPlay || isHovered || isFocused) return;
-    intervalRef.current = setInterval(next, autoPlayInterval);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [autoPlay, autoPlayInterval, isHovered, isFocused, next]);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
-    };
-    const el = containerRef.current;
-    el?.addEventListener("keydown", handler);
-    return () => el?.removeEventListener("keydown", handler);
-  }, [next, prev]);
-
-  const activeItem = items[activeIndex];
-
-  return (
-    <div
-      ref={containerRef}
-      tabIndex={0}
-      role="region"
-      aria-label="Circular carousel"
-      aria-roledescription="carousel"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsFocused(true)}
-      onBlur={() => setIsFocused(false)}
-      className={cn(
-        "relative flex flex-col items-center justify-center gap-8 outline-none",
-        className,
-      )}
-    >
-      {/* Circular track */}
-      <div className="relative h-[280px] w-full max-w-lg">
-        <AnimatePresence mode="popLayout">
-          {items.map((item, i) => {
-            const pos = getItemPosition(i, activeIndex, total);
-            if (!pos) return null;
-
-            const isActive = i === activeIndex;
-
-            return (
-              <motion.button
-                key={item.id}
-                layout
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{
-                  x: pos.x,
-                  y: pos.y,
-                  scale: pos.scale,
-                  opacity: pos.opacity,
-                  zIndex: pos.zIndex,
-                }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                transition={{
-                  duration: 0.65,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                onClick={() => goTo(i)}
-                aria-label={item.title}
-                aria-selected={isActive}
-                role="option"
-                className={cn(
-                  "absolute left-1/2 top-1/2 flex h-32 w-48 -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col items-start justify-between rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-800/90 to-zinc-900/90 p-4 backdrop-blur-sm transition-shadow duration-300",
-                  isActive
-                    ? "shadow-[0_20px_60px_-12px_rgba(0,0,0,0.5)]"
-                    : "shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_12px_32px_-4px_rgba(0,0,0,0.4)]",
-                )}
-                style={{ transformOrigin: "center center" }}
-              >
-                {item.tag && (
-                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/70">
-                    {item.tag}
-                  </span>
-                )}
-                <div className="w-full">
-                  <h3 className={cn(
-                    "font-semibold leading-tight transition-colors duration-300",
-                    isActive ? "text-white text-base" : "text-white/80 text-sm"
-                  )}>
-                    {item.title}
-                  </h3>
-                  <p className={cn(
-                    "mt-1 line-clamp-2 text-xs leading-relaxed transition-colors duration-300",
-                    isActive ? "text-white/60" : "text-white/40"
-                  )}>
-                    {item.description}
-                  </p>
-                </div>
-              </motion.button>
-            );
-          })}
-        </AnimatePresence>
-      </div>
-
-      {/* Center content */}
-      <motion.div
-        key={activeItem.id}
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
-        className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none"
-      >
-        <span className="text-5xl font-bold tracking-tight text-white/90">
-          {String(activeIndex + 1).padStart(2, "0")}
-        </span>
-        <span className="mt-1 text-xs text-white/40">
-          of {String(total).padStart(2, "0")}
-        </span>
-      </motion.div>
-
-      {/* Controls */}
-      <div className="flex items-center gap-4">
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={prev}
-          aria-label="Previous item"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/30"
-        >
-          <ChevronLeft className="size-5" />
-        </motion.button>
-
-        {/* Dot indicators */}
-        <div className="flex items-center gap-1.5" role="tablist">
-          {items.map((_, i) => (
-            <button
-              key={i}
-              role="tab"
-              aria-selected={i === activeIndex}
-              onClick={() => goTo(i)}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                i === activeIndex
-                  ? "w-6 bg-white/80"
-                  : "w-1.5 bg-white/20 hover:bg-white/40",
-              )}
-              aria-label={\`Go to item \${i + 1}\`}
-            />
-          ))}
-        </div>
-
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={next}
-          aria-label="Next item"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 backdrop-blur-sm transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/30"
-        >
-          <ChevronRight className="size-5" />
-        </motion.button>
-      </div>
-    </div>
-  );
+export function ProcessWheel() {
+  const [step, setStep] = useState(0);
+  return <CircularCarousel items={steps} activeIndex={step} onActiveChange={setStep} />;
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "items", type: "CarouselItem[]", description: "Array of carousel items with id, title, description, and optional tag." },
-      { name: "activeIndex", type: "number | undefined", description: "Controlled active item index." },
-      { name: "onActiveChange", type: "(index: number) => void", description: "Callback fired when the active item changes." },
-      { name: "autoPlay", type: "boolean", description: "Enable automatic rotation.", defaultValue: "true" },
-      { name: "autoPlayInterval", type: "number", description: "Milliseconds between auto-rotation.", defaultValue: "4000" },
-      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper." },
-    ],
   },
   {
     slug: "chat-messages",
     name: "Chat Messages",
-    description: "Animated chat message bubbles with typing indicators and sequential reveal.",
+    description: "A chat thread styled like a messaging app, with blue user bubbles, grey replies and a composer. With autoplay the conversation plays itself: user lines type into the composer and pop out, and the assistant's typing dots grow into each reply; visitors can then send their own messages.",
     categorySlug: "ai-components",
-    tags: ["chat", "messages", "ai", "conversation", "typing", "animation", "framer-motion"],
+    tags: ["chat", "messages", "ai", "assistant", "bubbles", "typing indicator", "conversation", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 92,
     createdAt: "2026-05-16T00:00:00.000Z",
-    animationKinds: ["spring", "hover"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewChatMessages,
+    animationKinds: ["layout", "spring", "type"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "messages", type: "ChatMessage[]", defaultValue: "5-message demo", description: "The conversation: { id, sender: \"user\" | \"assistant\", content, timestamp? }." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays the conversation and loops it until someone touches the chat. `autoPlay` still works." },
+      { name: "autoPlayDelay", type: "number", defaultValue: "900", description: "Pause after each message during autoplay, in ms." },
+      { name: "typingDuration", type: "number", defaultValue: "1300", description: "How long the typing dots show before a reply, in ms." },
+      { name: "showReplay", type: "boolean", defaultValue: "true", description: "Shows a replay button in the header." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Lets visitors type and send their own messages." },
+      { name: "reply", type: "(text: string) => string | Promise<string>", description: "Produces the assistant's answer to a sent message. Defaults to canned replies." },
+      { name: "onSend", type: "(text: string) => void", description: "Called with the text whenever the visitor sends a message." },
+      { name: "title", type: "string", defaultValue: "\"Nexus AI\"", description: "Name in the header." },
+      { name: "className", type: "string", description: "Extra classes for the root. Give it a height to change the default 440px." },
+    ],
+    Preview: Previews.PreviewChatMessagesRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Send, RotateCcw, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ChatMessages } from "@/components/chat-messages";
 
-export interface ChatMessage {
-  id: string;
-  sender: "user" | "assistant";
-  content: string;
-  timestamp?: string;
-}
-
-export interface ChatMessagesProps {
-  messages?: ChatMessage[];
-  autoPlay?: boolean;
-  autoPlayDelay?: number;
-  typingDuration?: number;
-  showReplay?: boolean;
-  interactive?: boolean;
-  className?: string;
-}
-
-const DEFAULT_MESSAGES: ChatMessage[] = [
-  { id: "1", sender: "assistant", content: "Hello! I'm your Nexus AI assistant. How can I help you build something amazing today?" },
-  { id: "2", sender: "user", content: "I want to create a beautiful landing page for my SaaS product." },
-  { id: "3", sender: "assistant", content: "Great choice! Nexus UI has everything you need — animated components, polished styling, and easy integration. What feature would you like to showcase first?" },
-  { id: "4", sender: "user", content: "I need something that will impress investors during pitch meetings." },
-  { id: "5", sender: "assistant", content: "Perfect. I'd recommend our Hero Aurora Spotlight combined with the Cinematic Logo Cloud. They create a stunning first impression that showcases both innovation and credibility." },
-  { id: "6", sender: "user", content: "Can I see how they look together?" },
-  { id: "7", sender: "assistant", content: "Absolutely. Click any component in the sidebar to preview it live, then copy the code directly into your project. No complex setup required." },
-];
-
-function TypingIndicator({ className }: { className?: string }) {
+export function SupportChat() {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-2xl rounded-tl-md border border-white/10 bg-zinc-800/90 px-4 py-3 backdrop-blur-sm",
-        className,
-      )}
-    >
-      {[0, 1, 2].map((i) => (
-        <motion.span
-          key={i}
-          className="h-2 w-2 rounded-full bg-white/60"
-          animate={{ opacity: [0.4, 1, 0.4], y: [0, -4, 0] }}
-          transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            delay: i * 0.15,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </motion.div>
-  );
-}
-
-function MessageBubble({
-  message,
-  isLast,
-}: {
-  message: ChatMessage;
-  isLast?: boolean;
-}) {
-  const isUser = message.sender === "user";
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 12, scale: 0.96, x: isUser ? 20 : -20 }}
-      animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn(
-        "flex w-full",
-        isUser ? "justify-end" : "justify-start",
-      )}
-    >
-      <div className={cn("flex items-end gap-2", isUser && "flex-row-reverse")}>
-        {!isUser && (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600">
-            <Sparkles className="size-4 text-white" />
-          </div>
-        )}
-        <motion.div
-          layout
-          className={cn(
-            "max-w-[75%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-            isUser
-              ? "rounded-tr-md bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-[0_8px_24px_-4px_rgba(99,102,241,0.4)]"
-              : "rounded-tl-md border border-white/10 bg-zinc-800/90 text-zinc-100 backdrop-blur-sm shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)]",
-          )}
-          whileHover={{ scale: 1.01, y: -1 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
-        >
-          {message.content}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
-export function ChatMessages({
-  messages = DEFAULT_MESSAGES,
-  autoPlay = true,
-  autoPlayDelay = 1800,
-  typingDuration = 1400,
-  showReplay = true,
-  interactive = false,
-  className,
-}: ChatMessagesProps) {
-  const [visibleCount, setVisibleCount] = useState(autoPlay ? 0 : messages.length);
-  const [isTyping, setIsTyping] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(messages);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const isAutoPlaying = useRef(false);
-
-  const scrollToBottom = useCallback(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  }, []);
-
-  const revealNext = useCallback(
-    async (index: number) => {
-      if (index >= chatMessages.length) {
-        isAutoPlaying.current = false;
-        return;
-      }
-
-      const message = chatMessages[index];
-
-      if (message.sender === "assistant") {
-        setIsTyping(true);
-        await new Promise((r) => setTimeout(r, typingDuration));
-        setIsTyping(false);
-      }
-
-      setVisibleCount(index + 1);
-      await new Promise((r) => setTimeout(r, 100));
-      scrollToBottom();
-
-      await new Promise((r) => setTimeout(r, autoPlayDelay - (message.sender === "assistant" ? typingDuration : 0) - 100));
-
-      if (isAutoPlaying.current) {
-        revealNext(index + 1);
-      }
-    },
-    [chatMessages, autoPlayDelay, typingDuration, scrollToBottom],
-  );
-
-  const replay = useCallback(() => {
-    setVisibleCount(0);
-    setChatMessages(messages);
-    isAutoPlaying.current = true;
-    setTimeout(() => revealNext(0), 100);
-  }, [messages, revealNext]);
-
-  useEffect(() => {
-    setChatMessages(messages);
-    if (autoPlay) {
-      setVisibleCount(0);
-      isAutoPlaying.current = true;
-      const timer = setTimeout(() => revealNext(0), 500);
-      return () => {
-        clearTimeout(timer);
-        isAutoPlaying.current = false;
-      };
-    } else {
-      setVisibleCount(messages.length);
-    }
-  }, [messages, autoPlay, revealNext]);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [visibleCount, isTyping, scrollToBottom]);
-
-  const handleSend = useCallback(() => {
-    if (!inputValue.trim() || !interactive) return;
-
-    const newMessage: ChatMessage = {
-      id: \`user-\${Date.now()}\`,
-      sender: "user",
-      content: inputValue.trim(),
-    };
-
-    setChatMessages((prev) => [...prev, newMessage]);
-    setInputValue("");
-    setVisibleCount((prev) => prev + 1);
-
-    setTimeout(() => {
-      const assistantReply: ChatMessage = {
-        id: \`assistant-\${Date.now()}\`,
-        sender: "assistant",
-        content: "That's a great question! Let me help you explore the best options for your use case.",
-      };
-      setChatMessages((prev) => [...prev, assistantReply]);
-      setVisibleCount((prev) => prev + 1);
-    }, typingDuration + 500);
-  }, [inputValue, interactive, typingDuration]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  return (
-    <div
-      className={cn(
-        "relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-b from-zinc-900 to-zinc-950 shadow-[0_24px_64px_-16px_rgba(0,0,0,0.5)]",
-        className,
-      )}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600">
-            <Sparkles className="size-4 text-white" />
-          </div>
-          <div>
-            <h3 className="text-sm font-medium text-white">Nexus AI</h3>
-            <p className="text-xs text-white/40">Always here to help</p>
-          </div>
-        </div>
-        {showReplay && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={replay}
-            aria-label="Replay conversation"
-            className="flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs text-white/60 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <RotateCcw className="size-3.5" />
-            Replay
-          </motion.button>
-        )}
-      </div>
-
-      {/* Messages */}
-      <div
-        ref={scrollRef}
-        role="log"
-        aria-label="Chat messages"
-        aria-live="polite"
-        className="flex-1 space-y-3 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
-      >
-        {chatMessages.slice(0, visibleCount).map((message, i) => (
-          <MessageBubble
-            key={message.id}
-            message={message}
-            isLast={i === visibleCount - 1}
-          />
-        ))}
-
-        <AnimatePresence>
-          {isTyping && <TypingIndicator />}
-        </AnimatePresence>
-      </div>
-
-      {/* Input */}
-      <div className="border-t border-white/5 p-3">
-        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2 backdrop-blur-sm focus-within:border-white/20 focus-within:bg-zinc-800/70">
-          <input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={!interactive}
-            placeholder={interactive ? "Ask Nexus AI..." : "Demo mode - replay to watch again"}
-            aria-label={interactive ? "Type your message" : "Chat input (demo mode)"}
-            className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/30 disabled:cursor-not-allowed"
-          />
-          <motion.button
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.92 }}
-            onClick={handleSend}
-            disabled={!interactive || !inputValue.trim()}
-            aria-label="Send message"
-            className={cn(
-              "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
-              interactive && inputValue.trim()
-                ? "bg-indigo-600 text-white hover:bg-indigo-500"
-                : "bg-white/5 text-white/30",
-            )}
-          >
-            <Send className="size-4" />
-          </motion.button>
-        </div>
-      </div>
-    </div>
+    <ChatMessages
+      title="Support"
+      className="h-[480px]"
+      messages={[
+        { id: "1", sender: "assistant", content: "Hi! How can I help?" },
+        { id: "2", sender: "user", content: "Where is my order?" },
+        { id: "3", sender: "assistant", content: "It left the warehouse this morning.", timestamp: "9:41" },
+      ]}
+      reply={async (text) => {
+        const res = await fetch("/api/chat", { method: "POST", body: JSON.stringify({ text }) });
+        return (await res.json()).answer;
+      }}
+    />
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "messages", type: "ChatMessage[]", description: "Array of chat messages with id, sender, content, and optional timestamp.", defaultValue: "7 built-in messages" },
-      { name: "autoPlay", type: "boolean", description: "Automatically play the conversation on mount.", defaultValue: "true" },
-      { name: "autoPlayDelay", type: "number", description: "Delay between messages in milliseconds.", defaultValue: "1800" },
-      { name: "typingDuration", type: "number", description: "How long the typing indicator shows before assistant replies.", defaultValue: "1400" },
-      { name: "showReplay", type: "boolean", description: "Show the replay button to restart the animation.", defaultValue: "true" },
-      { name: "interactive", type: "boolean", description: "Allow user to type and send messages.", defaultValue: "false" },
-      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper." },
-    ],
   },
   {
     slug: "shader-flow",
     name: "Shader Flow",
-    description: "A soft, shader-style background: blurred gradient blobs drifting with Framer Motion, no WebGL needed.",
+    description: "A real WebGL fragment shader of domain-warped noise that drifts like ink in water, with a static gradient fallback where WebGL is missing. Move the pointer and the flow swirls behind it on a lagging spring; stop and the swirl swings into a small counter-twist before it calms.",
     categorySlug: "background-effects",
-    tags: ["background", "shader", "gradient", "animation", "flowing", "blobs", "framer-motion"],
+    tags: ["background", "shader", "webgl", "gradient", "noise", "fluid", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-05-16T00:00:00.000Z",
-    animationKinds: ["gradient", "hover"],
+    animationKinds: ["hover", "spring", "gradient"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewShaderFlow,
+    props: [
+      { name: "children", type: "ReactNode", description: "Content over the flow. Replaces the default title card." },
+      { name: "className", type: "string", description: "Extra classes on the panel (size, radius)." },
+      { name: "showContent", type: "boolean", defaultValue: "true", description: "Show the default title card when no children are passed." },
+      { name: "cursorReactive", type: "boolean", defaultValue: "true", description: "Let the pointer stir the flow." },
+      { name: "intensity", type: "\"low\" | \"medium\" | \"high\"", defaultValue: "\"medium\"", description: "Strength of the colour and warping." },
+      { name: "colors", type: "[string, string, string, string]", defaultValue: "[\"#05060d\", \"#1d39d6\", \"#bf5af2\", \"#ff9f6a\"]", description: "Four hex colours: base, body, accent, highlight." },
+      { name: "speed", type: "number", defaultValue: "1", description: "Speed multiplier for the drift." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Stirs the flow with a pretend pointer until someone moves over it." },
+    ],
+    Preview: Previews.PreviewShaderFlowRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { useRef, useState, type ReactNode } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { ShaderFlow } from "@/components/shader-flow";
 
-export interface ShaderFlowProps {
-  children?: ReactNode;
-  className?: string;
-  showContent?: boolean;
-  cursorReactive?: boolean;
-  intensity?: "low" | "medium" | "high";
-}
-
-const blobVariants = {
-  animate: {
-    x: ["-10%", "10%", "-10%"],
-    y: ["0%", "8%", "0%"],
-    scale: [1, 1.15, 1],
-    opacity: [0.45, 0.7, 0.45],
-    transition: {
-      duration: 14,
-      repeat: Infinity,
-      ease: "easeInOut" as const,
-    },
-  },
-};
-
-const blob2Variants = {
-  animate: {
-    x: ["12%", "-8%", "12%"],
-    y: ["10%", "-6%", "10%"],
-    scale: [1.1, 0.95, 1.1],
-    opacity: [0.35, 0.6, 0.35],
-    transition: {
-      duration: 16,
-      repeat: Infinity,
-      ease: "easeInOut" as const,
-    },
-  },
-};
-
-const blob3Variants = {
-  animate: {
-    rotate: [0, 8, 0],
-    scale: [1, 1.08, 1],
-    opacity: [0.3, 0.5, 0.3],
-    transition: {
-      duration: 20,
-      repeat: Infinity,
-      ease: "easeInOut" as const,
-    },
-  },
-};
-
-const waveVariants = {
-  animate: {
-    x: ["-5%", "5%", "-5%"],
-    y: ["-3%", "3%", "-3%"],
-    scale: [1, 1.05, 1],
-    opacity: [0.25, 0.4, 0.25],
-    transition: {
-      duration: 22,
-      repeat: Infinity,
-      ease: "easeInOut" as const,
-    },
-  },
-};
-
-function NoiseOverlay({ className }: { className?: string }) {
+export function FlowHero() {
   return (
-    <div
-      className={cn(
-        "absolute inset-0 opacity-[0.015] pointer-events-none",
-        "bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIj48ZmlsdGVyIGlkPSJhIiB4PSIwIiB5PSIwIj48ZmVUdXJidWxlbmNlIGJhc2VGcmVxdWVuY3k9Ii43NSIgc3RpdGNoVGlsZXM9InN0aXRjaCIgdHlwZT0iZnJhY3RhbE5vaXNlIi8+PGZlQ29sb3JNYXRyaXggdHlwZT0ic2F0dXJhdGUiIHZhbHVlcz0iMCIvPjwvZmlsdGVyPjxwYXRoIGQ9Ik0wIDBoMzAwdjMwMEgweiIgZmlsdGVyPSJ1cmwoI2EpIiBvcGFjaXR5PSIuMDUiLz48L3N2Zz4=')]",
-        className,
-      )}
-      aria-hidden
-    />
-  );
-}
-
-function BlobLayer({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <motion.div
-      variants={blobVariants}
-      animate="animate"
-      className={cn(
-        "absolute rounded-full bg-gradient-to-br from-indigo-500/30 via-violet-500/20 to-fuchsia-500/30 blur-[100px]",
-        className,
-      )}
-      style={style}
-      aria-hidden
-    />
-  );
-}
-
-function Blob2Layer({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <motion.div
-      variants={blob2Variants}
-      animate="animate"
-      className={cn(
-        "absolute rounded-full bg-gradient-to-tr from-cyan-500/25 via-blue-500/20 to-indigo-500/25 blur-[80px]",
-        className,
-      )}
-      style={style}
-      aria-hidden
-    />
-  );
-}
-
-function Blob3Layer({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <motion.div
-      variants={blob3Variants}
-      animate="animate"
-      className={cn(
-        "absolute rounded-full bg-gradient-to-bl from-amber-500/20 via-orange-500/15 to-pink-500/20 blur-[90px]",
-        className,
-      )}
-      style={style}
-      aria-hidden
-    />
-  );
-}
-
-function WaveLayer({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  return (
-    <motion.div
-      variants={waveVariants}
-      animate="animate"
-      className={cn(
-        "absolute rounded-full bg-gradient-to-r from-violet-500/10 via-fuchsia-500/10 to-cyan-500/10 blur-[120px]",
-        className,
-      )}
-      style={style}
-      aria-hidden
-    />
-  );
-}
-
-function ShaderBackground({
-  cursorReactive,
-  intensity = "medium",
-}: {
-  cursorReactive?: boolean;
-  intensity?: "low" | "medium" | "high";
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const reduceMotion = useReducedMotion();
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!cursorReactive || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    setMousePosition({ x, y });
-  };
-
-  const intensityScale = intensity === "low" ? 0.6 : intensity === "high" ? 1.2 : 1;
-
-  return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      className="absolute inset-0 overflow-hidden"
-      aria-hidden
-    >
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950" />
-
-      {!reduceMotion && (
-        <>
-          <BlobLayer
-            className="h-[600px] w-[600px] -top-48 -left-48"
-            style={{
-              transform: cursorReactive
-                ? \`translate(\${mousePosition.x * 30 * intensityScale}px, \${mousePosition.y * 20 * intensityScale}px)\`
-                : undefined,
-            }}
-          />
-          <Blob2Layer
-            className="h-[500px] w-[500px] -top-24 -right-24"
-            style={{
-              transform: cursorReactive
-                ? \`translate(\${mousePosition.x * -25 * intensityScale}px, \${mousePosition.y * 15 * intensityScale}px)\`
-                : undefined,
-            }}
-          />
-          <Blob3Layer
-            className="h-[450px] w-[450px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-            style={{
-              transform: cursorReactive
-                ? \`translate(\${mousePosition.x * 20 * intensityScale}px, \${mousePosition.y * -20 * intensityScale}px)\`
-                : undefined,
-            }}
-          />
-          <WaveLayer
-            className="h-[700px] w-[700px] -bottom-64 -left-32"
-            style={{
-              transform: cursorReactive
-                ? \`translate(\${mousePosition.x * -15 * intensityScale}px, \${mousePosition.y * 25 * intensityScale}px)\`
-                : undefined,
-            }}
-          />
-          <WaveLayer
-            className="h-[550px] w-[550px] top-0 right-0"
-            style={{
-              transform: cursorReactive
-                ? \`translate(\${mousePosition.x * 20 * intensityScale}px, \${mousePosition.y * -15 * intensityScale}px)\`
-                : undefined,
-            }}
-          />
-        </>
-      )}
-
-      {reduceMotion && (
-        <>
-          <div className="absolute h-[600px] w-[600px] -top-48 -left-48 rounded-full bg-gradient-to-br from-indigo-500/20 via-violet-500/15 to-fuchsia-500/20 blur-[100px]" />
-          <div className="absolute h-[500px] w-[500px] -top-24 -right-24 rounded-full bg-gradient-to-tr from-cyan-500/15 via-blue-500/15 to-indigo-500/15 blur-[80px]" />
-          <div className="absolute h-[450px] w-[450px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-bl from-amber-500/15 via-orange-500/10 to-pink-500/15 blur-[90px]" />
-        </>
-      )}
-
-      <NoiseOverlay />
-    </div>
-  );
-}
-
-function ForegroundContent() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="relative z-10 flex flex-col items-center justify-center text-center"
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/70 backdrop-blur-sm">
-          <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-          New component available
-        </span>
-      </motion.div>
-
-      <motion.h2
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-6 max-w-2xl text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl"
-      >
-        Build stunning interfaces with{" "}
-        <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-          Nexus UI
-        </span>
-      </motion.h2>
-
-      <motion.p
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-6 max-w-lg text-base text-white/60 sm:text-lg"
-      >
-        Polished animated components built with Framer Motion and Tailwind CSS.
-        Copy, paste, and ship beautiful interfaces in minutes.
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6, delay: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        className="mt-10 flex flex-wrap items-center justify-center gap-4"
-      >
-        <motion.button
-          whileHover={{ scale: 1.03, y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-6 py-3 text-sm font-medium text-white shadow-[0_8px_32px_-8px_rgba(99,102,241,0.5)] transition-shadow hover:shadow-[0_12px_40px_-8px_rgba(99,102,241,0.6)]"
-        >
-          Browse components
-        </motion.button>
-        <motion.button
-          whileHover={{ scale: 1.03, y: -1 }}
-          whileTap={{ scale: 0.97 }}
-          className="rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm transition-colors hover:bg-white/10"
-        >
-          View documentation
-        </motion.button>
-      </motion.div>
-    </motion.div>
-  );
-}
-
-export function ShaderFlow({
-  children,
-  className,
-  showContent = true,
-  cursorReactive = true,
-  intensity = "medium",
-}: ShaderFlowProps) {
-  return (
-    <div
-      className={cn(
-        "relative flex min-h-[500px] items-center justify-center overflow-hidden rounded-2xl border border-white/10",
-        className,
-      )}
-    >
-      <ShaderBackground cursorReactive={cursorReactive} intensity={intensity} />
-
-      {showContent ? (
-        children ?? <ForegroundContent />
-      ) : (
-        children
-      )}
-    </div>
+    <ShaderFlow className="min-h-[520px]" intensity="high" colors={["#05060d", "#0a5bd6", "#5e5ce6", "#64d2ff"]}>
+      <div className="relative px-6 text-center text-white">
+        <h1 className="text-5xl font-semibold tracking-[-0.045em]">Design in motion.</h1>
+        <p className="mt-4 text-[15px] text-white/70">Move to stir the colour.</p>
+      </div>
+    </ShaderFlow>
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "children", type: "ReactNode", description: "Custom foreground content to display over the shader background.", defaultValue: "Built-in demo content" },
-      { name: "showContent", type: "boolean", description: "Show the default built-in foreground content.", defaultValue: "true" },
-      { name: "cursorReactive", type: "boolean", description: "Enable subtle cursor-reactive movement of background blobs.", defaultValue: "true" },
-      { name: "intensity", type: "\"low\" | \"medium\" | \"high\"", description: "Control the intensity of cursor-reactive movement.", defaultValue: "\"medium\"" },
-      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper." },
-    ],
   },
   {
     slug: "ask-nexus-input",
     name: "Ask Nexus Input",
-    description: "A bold \"Ask anything\" headline paired with a pill-shaped search input. Placeholders rotate while idle, and on submit the text disintegrates right-to-left into drifting particles — a Thanos-snap dust effect rendered on canvas, finished off with framer-motion polish.",
+    description: "A headline over a pill-shaped question field whose placeholder questions roll past while it is empty. Send a question and the words break into dust that blows off to the right, letter by letter from the end, before the field resets.",
     categorySlug: "ai-components",
-    tags: ["ai", "input", "search", "disintegrate", "particles", "thanos", "snap", "canvas", "framer-motion", "placeholder"],
+    tags: ["ai", "input", "search", "ask", "disintegrate", "particles", "canvas", "placeholder", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 260,
     createdAt: "2026-05-16T00:00:00.000Z",
-    animationKinds: ["spring"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewAskNexusInput,
+    animationKinds: ["type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: "\"Ask Nexus UI anything\"", description: "Headline above the field." },
+      { name: "placeholders", type: "string[]", defaultValue: "5 questions", description: "Questions that roll through the placeholder. Sending an empty field asks the one showing." },
+      { name: "placeholderInterval", type: "number", defaultValue: "2800", description: "Time each placeholder stays up, in ms." },
+      { name: "defaultValue", type: "string", defaultValue: "\"\"", description: "Text the field starts with." },
+      { name: "onSubmit", type: "(value: string) => void", description: "Called with the trimmed question the moment it is sent." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types and sends the placeholders in turn until someone touches the field." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewAskNexusInputRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AskNexusInput } from "@/components/ask-nexus-input";
 
-export interface AskNexusInputProps {
-  title?: string;
-  placeholders?: string[];
-  placeholderInterval?: number;
-  defaultValue?: string;
-  onSubmit?: (value: string) => void;
-  className?: string;
-}
-
-type Phase = "idle" | "disintegrating";
-
-const INPUT_FONT_PX = 14;
-const PARTICLE_RGB = "17,24,39";
-
-const DEFAULT_PLACEHOLDERS = [
-  "Who is Tyler Durden?",
-  "Explain quantum entanglement like I'm five",
-  "Write a haiku about the ocean at midnight",
-  "What's the best stack for a 2026 startup?",
-  "How do I become a 10x designer?",
-];
-
-export function AskNexusInput({
-  title = "Ask Nexus UI Anything",
-  placeholders = DEFAULT_PLACEHOLDERS,
-  placeholderInterval = 2800,
-  defaultValue = "",
-  onSubmit,
-  className,
-}: AskNexusInputProps) {
-  const [value, setValue] = useState(defaultValue);
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [snapshot, setSnapshot] = useState("");
-  const [phIndex, setPhIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const activePlaceholder = placeholders[phIndex] ?? "";
-
-  useEffect(() => {
-    if (phase !== "idle" || value || placeholders.length <= 1) return;
-    const id = setInterval(
-      () => setPhIndex((i) => (i + 1) % placeholders.length),
-      placeholderInterval,
-    );
-    return () => clearInterval(id);
-  }, [phase, value, placeholders.length, placeholderInterval]);
-
-  const handleSubmit = (e?: FormEvent) => {
-    e?.preventDefault();
-    if (phase !== "idle") return;
-    const submitted = value.trim() || activePlaceholder.trim();
-    if (!submitted) return;
-    onSubmit?.(submitted);
-    setSnapshot(submitted);
-    setPhase("disintegrating");
-  };
-
-  const handleComplete = useCallback(() => {
-    setSnapshot("");
-    setValue("");
-    setPhase("idle");
-    requestAnimationFrame(() => inputRef.current?.focus());
-  }, []);
-
-  const showPlaceholder = phase === "idle" && !value;
-
+export function HelpSearch() {
   return (
-    <div className={cn("flex w-full flex-col items-center gap-10 py-12", className)}>
-      <motion.h1
-        initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl md:text-5xl"
-      >
-        {title}
-      </motion.h1>
-
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-        className="w-full max-w-xl"
-      >
-        <motion.div
-          animate={phase === "disintegrating" ? { scale: [1, 0.985, 1] } : { scale: 1 }}
-          transition={{ duration: 0.45, ease: "easeOut" }}
-          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] focus-within:border-gray-300"
-        >
-          <div className="relative h-6 flex-1">
-            <div className="absolute inset-0 overflow-hidden">
-              <input
-                ref={inputRef}
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                disabled={phase !== "idle"}
-                spellCheck={false}
-                className={cn(
-                  "absolute inset-0 w-full bg-transparent text-sm text-gray-900 outline-none transition-opacity duration-300",
-                  phase === "disintegrating" && "opacity-0",
-                )}
-              />
-              <AnimatePresence mode="wait">
-                {showPlaceholder && (
-                  <motion.span
-                    key={phIndex}
-                    initial={{ y: 10, opacity: 0, filter: "blur(4px)" }}
-                    animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                    exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 truncate text-sm text-gray-400"
-                  >
-                    {activePlaceholder}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-            {phase === "disintegrating" && (
-              <DisintegratingText text={snapshot} onComplete={handleComplete} />
-            )}
-          </div>
-
-          <motion.button
-            type="submit"
-            aria-label="Ask"
-            disabled={phase !== "idle"}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 420, damping: 18 }}
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 disabled:opacity-60"
-          >
-            <ArrowRight className="size-4" strokeWidth={2.25} />
-          </motion.button>
-        </motion.div>
-      </motion.form>
-    </div>
-  );
-}
-
-type Particle = {
-  ox: number; oy: number;
-  vx: number; vy: number;
-  delay: number; life: number; size: number;
-};
-
-const RIGHT_OVERHANG_PX = 90;
-const CHAR_STEP_MS = 50;
-const CHAR_JITTER_MS = 22;
-
-function DisintegratingText({ text, onComplete }: { text: string; onComplete: () => void }) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const parent = canvas?.parentElement;
-    if (!canvas || !parent) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const baseW = Math.max(parent.clientWidth, 1);
-    const H = Math.max(parent.clientHeight, 1);
-    const W = baseW + RIGHT_OVERHANG_PX;
-
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = \`\${W}px\`;
-    canvas.style.height = \`\${H}px\`;
-    ctx.scale(dpr, dpr);
-
-    ctx.font = \`\${INPUT_FONT_PX}px ui-sans-serif, system-ui, -apple-system, sans-serif\`;
-    ctx.fillStyle = \`rgb(\${PARTICLE_RGB})\`;
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "left";
-    ctx.fillText(text, 0, H / 2);
-
-    // Map x-ranges to character indexes so the wave can snap one character at a time.
-    const chars = Array.from(text);
-    const charBounds: { start: number; end: number }[] = [];
-    let cursor = 0;
-    for (const ch of chars) {
-      const w = ctx.measureText(ch).width;
-      charBounds.push({ start: cursor, end: cursor + w });
-      cursor += w;
-    }
-    const totalChars = chars.length;
-    const charDelay = (charIdx: number) => {
-      const fromRight = totalChars - 1 - charIdx;
-      return fromRight * CHAR_STEP_MS + Math.random() * CHAR_JITTER_MS;
-    };
-    const findCharIdx = (lx: number) => {
-      let lo = 0, hi = charBounds.length - 1;
-      while (lo <= hi) {
-        const mid = (lo + hi) >> 1;
-        const b = charBounds[mid];
-        if (lx < b.start) hi = mid - 1;
-        else if (lx >= b.end) lo = mid + 1;
-        else return mid;
-      }
-      return Math.min(Math.max(lo, 0), charBounds.length - 1);
-    };
-
-    const sampleW = baseW * dpr;
-    const img = ctx.getImageData(0, 0, sampleW, H * dpr);
-    const particles: Particle[] = [];
-    const stride = dpr;
-
-    for (let y = 0; y < H * dpr; y += stride) {
-      for (let x = 0; x < sampleW; x += stride) {
-        const i = (y * sampleW + x) * 4;
-        if (img.data[i + 3] > 110) {
-          const lx = x / dpr;
-          const ly = y / dpr;
-          const charIdx = findCharIdx(lx);
-
-          const angle = (Math.random() - 0.5) * Math.PI * 0.6;
-          const speed = 0.18 + Math.random() * 0.55;
-          const vx = Math.cos(angle) * speed + 0.12;
-          const vy = Math.sin(angle) * speed * 0.55;
-
-          const sizeRoll = Math.random();
-          const size = sizeRoll < 0.65 ? 1 : sizeRoll < 0.92 ? 1.4 : 1.8;
-
-          particles.push({
-            ox: lx, oy: ly,
-            vx, vy,
-            delay: charDelay(charIdx),
-            life: 480 + Math.random() * 320,
-            size,
-          });
-        }
-      }
-    }
-    ctx.clearRect(0, 0, W, H);
-
-    let rafId = 0;
-    let start = 0;
-    let cancelled = false;
-
-    const frame = (now: number) => {
-      if (cancelled) return;
-      if (!start) start = now;
-      const elapsed = now - start;
-      ctx.clearRect(0, 0, W, H);
-      let aliveCount = 0;
-
-      for (const p of particles) {
-        if (elapsed < p.delay) {
-          const ttd = p.delay - elapsed;
-          if (ttd < 80) {
-            const tension = 1 - ttd / 80;
-            const jx = (Math.random() - 0.5) * 0.5 * tension;
-            const jy = (Math.random() - 0.5) * 0.5 * tension;
-            ctx.fillStyle = \`rgb(\${PARTICLE_RGB})\`;
-            ctx.fillRect(p.ox + jx, p.oy + jy, p.size, p.size);
-          } else {
-            ctx.fillStyle = \`rgb(\${PARTICLE_RGB})\`;
-            ctx.fillRect(p.ox, p.oy, p.size, p.size);
-          }
-          aliveCount++;
-          continue;
-        }
-        const t = elapsed - p.delay;
-        if (t > p.life) continue;
-        aliveCount++;
-
-        const norm = t / p.life;
-        const motionT = t / 16;
-        const wobble = Math.sin((p.ox + motionT) * 0.22) * 0.4;
-        const x = p.ox + p.vx * motionT + wobble * norm;
-        const y = p.oy + p.vy * motionT;
-        const opacity = Math.cos((norm * Math.PI) / 2);
-        ctx.fillStyle = \`rgba(\${PARTICLE_RGB},\${opacity.toFixed(3)})\`;
-        ctx.fillRect(x, y, p.size, p.size);
-      }
-
-      if (aliveCount === 0) {
-        onCompleteRef.current();
-        return;
-      }
-      rafId = requestAnimationFrame(frame);
-    };
-
-    rafId = requestAnimationFrame(frame);
-    return () => { cancelled = true; cancelAnimationFrame(rafId); };
-  }, [text]);
-
-  return <canvas ref={canvasRef} className="pointer-events-none absolute left-0 top-0" aria-hidden />;
-}
-
-// Usage
-export default function Demo() {
-  return (
-    <div className="flex min-h-[480px] w-full items-center justify-center bg-white px-8">
-      <AskNexusInput />
-    </div>
+    <AskNexusInput
+      title="How can we help?"
+      placeholders={["How do I reset my password?", "Can I change my plan?", "Where are my invoices?"]}
+      onSubmit={(question) => console.log("asked", question)}
+    />
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "title", type: "string", description: "Main headline shown above the input", defaultValue: '"Ask Nexus UI Anything"' },
-      { name: "placeholders", type: "string[]", description: "Rotating placeholder suggestions shown while the input is empty and idle", defaultValue: "5 built-in prompts" },
-      { name: "placeholderInterval", type: "number", description: "Milliseconds between placeholder rotations", defaultValue: "2800" },
-      { name: "defaultValue", type: "string", description: "Initial value of the input", defaultValue: '""' },
-      { name: "onSubmit", type: "(value: string) => void", description: "Fired with the trimmed query (or the current placeholder if the input is empty) the instant the user submits — runs before the disintegration animation starts" },
-      { name: "className", type: "string | undefined", description: "Additional classes applied to the outer wrapper" },
-    ],
   },
   {
     slug: "interactive-globe-explorer",
     name: "Interactive Globe Explorer",
-    description:
-      "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+    registryCliName: "interactive-globe-explorer",
+    description: "An office finder: a dotted globe drawn on canvas beside a list of cities, with the address and email of the selected one ready to copy. Pick a city or its pin and the globe swings round on a spring, overshoots a touch and settles with the city in the middle, where its pin drops in with a bounce and sends out a ripple.",
     categorySlug: "three-d-components",
-    tags: [
-      "globe",
-      "map",
-      "3d",
-      "location",
-      "scroll",
-      "interactive",
-      "copy",
-      "tooltip",
-      "webgl",
-    ],
+    tags: ["globe", "map", "locations", "offices", "canvas", "3d", "drag", "copy", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 225,
     createdAt: "2026-05-20T00:00:00.000Z",
-    animationKinds: ["3d", "scroll", "hover"],
-    dependencies: ["react-globe.gl", "three", "lucide-react"],
-    Preview: Previews.PreviewInteractiveGlobeExplorer,
+    animationKinds: ["drag", "spring", "3d", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "locations", type: "GlobeLocation[]", defaultValue: "20 cities", description: "Places to pin: { id, name, lat, lng, address, email }." },
+      { name: "initialLocationId", type: "string", defaultValue: "\"4\" (London)", description: "Id of the location selected first." },
+      { name: "onSelect", type: "(location: GlobeLocation) => void", description: "Called whenever a location is selected." },
+      { name: "title", type: "string", defaultValue: "\"Our offices\"", description: "Heading above the list." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flies from city to city every few seconds until someone touches the explorer." },
+      { name: "className", type: "string", description: "Classes for the card. Give it a height for the side-by-side layout; below 500px wide it stacks." },
+    ],
+    Preview: Previews.PreviewInteractiveGlobeExplorerRedesign,
     previewShell: "plain",
-    registryCliName: "interactive-globe-explorer",
     reactSource: `"use client";
 
-import { InteractiveGlobeExplorer } from "@/components/interactive-globe-explorer";
+import { InteractiveGlobeExplorer, type GlobeLocation } from "@/components/interactive-globe-explorer";
 
-export function InteractiveGlobeExplorerDemo() {
-  return (
-    <InteractiveGlobeExplorer className="h-[680px]" />
-  );
+const offices: GlobeLocation[] = [
+  { id: "lis", name: "Lisbon", lat: 38.72, lng: -9.14, address: "Rua Augusta 24, 1100-053 Lisbon, PT", email: "lisbon@yourco.com" },
+  { id: "nyc", name: "New York", lat: 40.71, lng: -74.0, address: "89 Greene St, New York NY 10012, US", email: "nyc@yourco.com" },
+  { id: "tyo", name: "Tokyo", lat: 35.68, lng: 139.65, address: "2-1 Marunouchi, Tokyo 100-0005, JP", email: "tokyo@yourco.com" },
+  { id: "syd", name: "Sydney", lat: -33.87, lng: 151.21, address: "40 Bridge St, Sydney NSW 2000, AU", email: "sydney@yourco.com" },
+];
+
+export function Offices() {
+  return <InteractiveGlobeExplorer locations={offices} initialLocationId="lis" className="h-[480px]" />;
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "locations", type: "GlobeLocation[]", description: "Locations with id, name, lat, lng, address, and email. Defaults to 20 global office locations." },
-      { name: "initialLocationId", type: "string", description: "Optional id of the city focused when the globe initializes.", defaultValue: "\"4\" (London)" },
-      { name: "globeTextureUrl", type: "string", description: "Path to the globe texture image used by react-globe.gl.", defaultValue: "\"/images/earth-blue-marble.jpg\"" },
-      { name: "className", type: "string", description: "Extra classes on the rounded component shell." },
-    ],
   },
   {
     slug: "code-block",
     name: "Code Block",
-    description: "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",
+    description: "A syntax-highlighted code block with a title bar, language badge, line numbers and a copy button. A soft bar glides between lines as the pointer moves, highlightLines marks lines with an accent bar, and copying turns the icon into a tick that draws itself.",
     categorySlug: "feature-sections",
-    tags: ["code", "syntax", "highlight", "copy", "snippet", "dark", "light"],
+    tags: ["code", "syntax", "highlight", "copy", "snippet", "docs", "line numbers", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 0,
     createdAt: "2026-05-17T00:00:00.000Z",
-    animationKinds: ["hover"] as const,
+    animationKinds: ["hover", "spring", "press"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCodeBlock,
-    tailwindSource: tw,
+    props: [
+      { name: "code", type: "string", description: "The source to show." },
+      { name: "language", type: "\"plain\" | \"js\" | \"ts\" | \"jsx\" | \"tsx\" | \"css\" | \"json\" | \"html\"", defaultValue: "\"tsx\"", description: "Highlighting rules and the badge in the title bar." },
+      { name: "theme", type: "\"dark\" | \"light\" | \"auto\" | \"custom\"", defaultValue: "\"dark\"", description: "Built-in palettes; auto follows the page's dark class; custom reads colours from header, codeArea and border." },
+      { name: "header", type: "HeaderProps", defaultValue: "{ enabled, showDots, title, copy }", description: "Title bar: enabled, showDots, title, font, and copy { enabled, label, copiedLabel, copiedDurationMs }." },
+      { name: "codeArea", type: "CodeAreaProps", defaultValue: "{ showLineNumbers: true, wrap: false, padding: 18 }", description: "Line numbers, wrapping, padding, font and custom colours." },
+      { name: "border", type: "BorderProps", defaultValue: "{ width: 0, radius: \"22px\" }", description: "Border colour, width and radius." },
+      { name: "highlightLines", type: "number[]", description: "1-based lines to mark with an accent bar." },
+      { name: "hoverHighlight", type: "boolean", defaultValue: "true", description: "A soft bar glides to the line under the pointer." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Walks the glide bar through highlightLines (or every line) until the pointer comes over the code." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+      { name: "style", type: "React.CSSProperties", description: "Inline styles for the root." },
+    ],
+    Preview: Previews.PreviewCodeBlockRedesign,
+    previewShell: "plain",
     previewSections: [
       {
-        Preview: Previews.PreviewCodeBlockDefault,
+        title: "Dark with marked lines",
+        Preview: Previews.PreviewCodeBlockRedesign,
         reactSource: `"use client";
 
-import { CodeBlock } from "@/components/code-block/code-block";
+import { CodeBlock } from "@/components/code-block";
 
-const code = \`import React, { useState } from 'react';
-
-export default function PricingCard() {
-  const [isYearly, setIsYearly] = useState(false);
-  return <div>...</div>;
+const code = \`export function Badge({ count }: { count: number }) {
+  return <span>{count > 99 ? "99+" : count}</span>;
 }\`;
 
-export function CodeBlockDefault() {
+export function MarkedSnippet() {
   return (
-    <div style={{ height: 420 }}>
-      <CodeBlock code={code} language="jsx" theme="dark" className="w-full h-full" />
+    <div className="h-[200px]">
+      <CodeBlock code={code} language="tsx" theme="dark" highlightLines={[2]} header={{ enabled: true, showDots: true, title: "badge.tsx", copy: { enabled: true } }} />
     </div>
   );
 }`,
       },
       {
-        Preview: Previews.PreviewCodeBlockLight,
+        title: "Follows the page theme",
+        Preview: Previews.PreviewCodeBlockAutoRedesign,
         reactSource: `"use client";
 
-import { CodeBlock } from "@/components/code-block/code-block";
+import { CodeBlock } from "@/components/code-block";
 
-const code = \`const x = 42;\`;
-
-export function CodeBlockLight() {
+export function ThemedSnippet({ code }: { code: string }) {
   return (
-    <div style={{ height: 420 }}>
-      <CodeBlock code={code} language="ts" theme="light" className="w-full h-full" />
-    </div>
-  );
-}`,
-      },
-      {
-        Preview: Previews.PreviewCodeBlockJson,
-        reactSource: `"use client";
-
-import { CodeBlock } from "@/components/code-block/code-block";
-
-const json = \`{ "name": "nexus-labs", "version": "1.0.0" }\`;
-
-export function CodeBlockJson() {
-  return (
-    <div style={{ height: 420 }}>
-      <CodeBlock code={json} language="json" theme="dark" className="w-full h-full" />
+    <div className="h-[320px]">
+      <CodeBlock code={code} language="tsx" theme="auto" header={{ enabled: true, title: "badge.tsx", copy: { enabled: true } }} />
     </div>
   );
 }`,
@@ -5667,49 +3687,70 @@ export function CodeBlockJson() {
     ],
     reactSource: `"use client";
 
-import { CodeBlock } from "@/components/code-block/code-block";
+import { CodeBlock } from "@/components/code-block";
 
-const code = \`import React from 'react';
-
-export default function App() {
-  return <h1>Hello, world!</h1>;
+const code = \`export function Greeting({ name }: { name: string }) {
+  return <p>Hello, {name}</p>;
 }\`;
 
-export function CodeBlockExample() {
+export function Snippet() {
   return (
-    <div style={{ height: 420 }}>
+    <div className="h-[220px]">
       <CodeBlock
         code={code}
-        language="jsx"
-        theme="dark"
-        className="w-full h-full"
+        language="tsx"
+        theme="auto"
+        highlightLines={[2]}
+        header={{ enabled: true, showDots: true, title: "greeting.tsx", copy: { enabled: true } }}
       />
     </div>
   );
 }`,
-    props: [
-      { name: "code", type: "string", description: "The code string to display.", defaultValue: "DEFAULT_CODE (PricingCard example)" },
-      { name: "language", type: "CodeLanguage", description: "Syntax language for tokenization.", defaultValue: "\"jsx\"" },
-      { name: "theme", type: "\"dark\" | \"light\" | \"custom\"", description: "Color theme preset.", defaultValue: "\"dark\"" },
-      { name: "header", type: "HeaderProps", description: "Header bar configuration: show/hide, window dots, title, copy button.", defaultValue: "{ enabled: true, showDots: true, title: \"Example\", ... }" },
-      { name: "codeArea", type: "CodeAreaProps", description: "Code area: line numbers, wrap, padding, background, text color.", defaultValue: "{ showLineNumbers: true, wrap: true, padding: 16, ... }" },
-      { name: "border", type: "BorderProps", description: "Border: color, width, border-radius.", defaultValue: "{ color: \"#1A1A1A\", width: 1, radius: \"12px\" }" },
-      { name: "className", type: "string | undefined", description: "CSS classes on the container." },
-      { name: "style", type: "React.CSSProperties | undefined", description: "Inline styles on the container." },
-    ],
+    tailwindSource: tw,
   },
   {
     slug: "card-stack-rotator",
     name: "Card Stack Rotator",
-    description: "A polished stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
+    description: "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke.",
     categorySlug: "testimonials",
-    tags: ["testimonials", "carousel", "cards", "motion", "stack"],
+    tags: ["testimonials", "card stack", "swipe", "carousel", "highlight", "quotes", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 0,
     createdAt: "2026-05-17",
-    animationKinds: ["spring", "layout"] as const,
+    animationKinds: ["drag", "spring", "layout"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewCardStackRotator,
+    props: [
+      { name: "cards", type: "CardData[]", description: "Cards, front first: { id, content, name, designation, company?, initials?, avatarUrl? }. Wrap words in **double asterisks** to highlight them." },
+      { name: "rotationInterval", type: "number", defaultValue: "0", description: "Throw the front card to the back every this many ms, paused on hover. 0 turns it off." },
+      { name: "maxVisible", type: "number", defaultValue: "3", description: "How many cards are drawn in the stack." },
+      { name: "stackOffset", type: "number", defaultValue: "14", description: "How far each card behind peeks out below, in px." },
+      { name: "scaleStep", type: "number", defaultValue: "0.05", description: "How much smaller each card behind is." },
+      { name: "cardWidth", type: "string", defaultValue: "\"420px\"", description: "CSS width of the stack; it never grows past its container." },
+      { name: "cardHeight", type: "string", defaultValue: "\"auto\"", description: "CSS height of each card. auto sizes to the tallest card." },
+      { name: "direction", type: "\"forward\" | \"backward\"", defaultValue: "\"forward\"", description: "Which way cards are thrown: forward flicks left, backward flicks right." },
+      { name: "hint", type: "string", defaultValue: "\"Flick the top card away.\"", description: "Hint under the stack. An empty string hides it." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the id of the card that comes to the front." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flicks the top card away every 2.6s until someone touches the stack." },
+      { name: "cardBackground / textColor / mutedColor", type: "string", description: "Optional colour overrides; by default the cards follow light and dark mode." },
+      { name: "highlightBackground / highlightTextColor", type: "string", description: "Optional colours for the highlighter stroke and highlighted words." },
+      { name: "pauseOnHover", type: "boolean", defaultValue: "true", description: "Pause rotationInterval while the pointer is over the stack." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewCardStackRotatorRedesign,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CardStackRotator } from "@/components/card-stack-rotator";
+
+const cards = [
+  { id: "1", content: "We shipped onboarding in **three days**.", name: "Sana Whitfield", designation: "Head of Design", company: "Pebblework" },
+  { id: "2", content: "The motion is **tuned, not decorated**.", name: "Diego Marchetti", designation: "Staff Engineer", company: "Northwake" },
+  { id: "3", content: "Swapped our carousel and **time on page doubled**.", name: "Hana Ito", designation: "Growth Lead", company: "Tidepool" },
+];
+
+export function CustomerQuotes() {
+  return <CardStackRotator cards={cards} cardWidth="400px" rotationInterval={6000} />;
+}`,
     tailwindSource: `"use client";
 
 import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rotator";
@@ -5725,113 +3766,68 @@ export function CardStackRotatorDemo() {
       <CardStackRotator cards={cards} rotationInterval={3000} maxVisible={3} stackOffset={14} scaleStep={0.04} cardWidth="420px" cardHeight="260px" cardBackground="#111113" cardBorderColor="rgba(255,255,255,0.07)" textColor="#fafafa" mutedColor="rgba(250,250,250,0.45)" highlightBackground="rgba(129,140,248,0.15)" highlightTextColor="#a5b4fc" borderRadius="16px" shadowIntensity={0.55} pauseOnHover />
     </div>
   );
-}`
-    ,
-    props: [
-      { name: "cards", type: "CardData[]", description: "Array of card objects to display." },
-      { name: "rotationInterval", type: "number", description: "Time between rotations in ms.", defaultValue: "3000" },
-      { name: "maxVisible", type: "number", description: "Maximum number of visible cards in the stack.", defaultValue: "4" },
-      { name: "stackOffset", type: "number", description: "Vertical offset per card in px.", defaultValue: "16" },
-      { name: "scaleStep", type: "number", description: "Scale reduction per card.", defaultValue: "0.04" },
-      { name: "cardWidth", type: "string", description: "CSS width of each card.", defaultValue: "\"420px\"" },
-      { name: "cardHeight", type: "string", description: "CSS height of each card.", defaultValue: "\"auto\"" },
-      { name: "cardBackground", type: "string", description: "Card background color.", defaultValue: "\"#0f0f0f\"" },
-      { name: "cardBorderColor", type: "string", description: "Card border color.", defaultValue: "\"rgba(255,255,255,0.08)\"" },
-      { name: "textColor", type: "string", description: "Primary text color.", defaultValue: "\"#fafafa\"" },
-      { name: "mutedColor", type: "string", description: "Muted/secondary text color.", defaultValue: "\"rgba(250,250,250,0.5)\"" },
-      { name: "highlightTextColor", type: "string", description: "Text color for **bold** highlights.", defaultValue: "\"#a5b4fc\"" },
-      { name: "contentFontSize", type: "string", description: "Font size of card content.", defaultValue: "\"15px\"" },
-      { name: "nameFontSize", type: "string", description: "Font size of card author name.", defaultValue: "\"15px\"" },
-      { name: "designationFontSize", type: "string", description: "Font size of author role.", defaultValue: "\"12px\"" },
-      { name: "borderRadius", type: "string", description: "Card border radius.", defaultValue: "\"16px\"" },
-      { name: "shadowIntensity", type: "number", description: "Shadow intensity 0–1.", defaultValue: "0.5" },
-      { name: "pauseOnHover", type: "boolean", description: "Pause rotation on mouse hover.", defaultValue: "true" },
-      { name: "direction", type: "\"forward\" | \"backward\"", description: "Rotation direction.", defaultValue: "\"forward\"" },
-    ],
+}`,
   },
   {
     slug: "scroll-reveal-text",
     name: "Scroll Reveal Text",
-    description:
-      "Scroll-linked text reveal where words, characters, or lines emerge from muted gray to bright white with optional blur dissolve and staggered cascade.",
+    description: "A paragraph that reads itself as you scroll: each word, character or line rises out of a blur and passes through the accent colour on its way from grey to ink, so a bright reading wave travels through the text. Scroll progress is smoothed by a spring, and it can track the page or any scrollable container.",
     categorySlug: "motion-effects",
-    tags: ["scroll", "text", "reveal", "animation", "typography", "blur", "framer-motion", "storytelling"],
+    tags: ["scroll", "text", "reveal", "reading", "typography", "blur", "storytelling", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-05-18",
-    animationKinds: ["scroll"],
+    animationKinds: ["scroll", "spring"],
     dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", description: "The text to reveal. In line mode, \\n separates lines." },
+      { name: "mode", type: "\"word\" | \"character\" | \"line\"", defaultValue: "\"word\"", description: "Granularity of each reveal step." },
+      { name: "as", type: "\"p\" | \"h2\" | \"h3\" | \"div\"", defaultValue: "\"p\"", description: "Root element." },
+      { name: "mutedColor", type: "string", description: "Colour of unread text. Defaults to #d2d2d7 (#3a3a3c in dark mode)." },
+      { name: "accentColor", type: "string", description: "Colour text passes through while revealing. Defaults to #0071e3 (#0a84ff in dark mode)." },
+      { name: "activeColor", type: "string", description: "Colour of revealed text. Defaults to #1d1d1f (#f5f5f7 in dark mode)." },
+      { name: "startOffset", type: "number", defaultValue: "0.05", description: "Scroll progress (0 entering, 1 leaving) where the reveal begins." },
+      { name: "endOffset", type: "number", defaultValue: "0.75", description: "Scroll progress where the reveal is complete." },
+      { name: "blurAmount", type: "number", defaultValue: "6", description: "Starting blur in px. 0 turns it off." },
+      { name: "stagger", type: "number", defaultValue: "0.65", description: "0 reveals everything together, 1 strictly one unit after another." },
+      { name: "fontSize", type: "string", defaultValue: "\"clamp(1.75rem, 4.5vw, 3.75rem)\"", description: "CSS font-size." },
+      { name: "align", type: "\"left\" | \"center\" | \"right\"", defaultValue: "\"left\"", description: "Text alignment." },
+      { name: "container", type: "RefObject<HTMLElement | null>", description: "Scrollable ancestor to track instead of the page. Give it position: relative." },
+      { name: "className", type: "string", description: "Classes for the root element." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays the reveal on a loop until someone scrolls. With a container it scrolls the container itself, so handing over is seamless." },
+    ],
+    Preview: Previews.PreviewScrollRevealTextRedesign,
     previewShell: "plain",
-    Preview: Previews.PreviewScrollRevealText,
     reactSource: `"use client";
 
-import ScrollRevealText from "@/components/blocks/scroll-reveal-text";
+import { ScrollRevealText } from "@/components/scroll-reveal-text";
 
-/* Word reveal — hero heading */
-export function WordRevealDemo() {
+export function Manifesto() {
   return (
-    <section className="min-h-[60vh] flex items-center px-8 py-24 bg-zinc-950">
+    <section className="mx-auto max-w-4xl px-6 py-[40vh]">
       <ScrollRevealText
-        text="We design tools that engineers actually want to use every single day."
-        mode="word"
+        text="We design tools that people actually want to open every single morning."
         stagger={0.7}
         blurAmount={8}
-        fontSize="clamp(2rem, 5vw, 4.5rem)"
-        align="left"
       />
     </section>
   );
 }
 
-/* Character reveal — punchy short line */
-export function CharRevealDemo() {
+export function LineByLine() {
   return (
-    <section className="min-h-[60vh] flex items-center justify-center px-8 py-24 bg-zinc-950">
+    <section className="mx-auto max-w-4xl px-6 py-[40vh]">
       <ScrollRevealText
-        text="Ship faster."
-        mode="character"
-        stagger={0.85}
-        blurAmount={10}
-        mutedColor="#27272a"
-        activeColor="#ffffff"
-        fontSize="clamp(3.5rem, 9vw, 8rem)"
-        align="center"
-      />
-    </section>
-  );
-}
-
-/* Line reveal — multi-line manifesto */
-export function LineRevealDemo() {
-  return (
-    <section className="min-h-[80vh] flex items-center px-8 py-24 bg-zinc-950">
-      <ScrollRevealText
-        text={"Built for speed.\\nDesigned to last.\\nShips on Friday."}
         mode="line"
-        stagger={1}
-        blurAmount={4}
+        text={"Built for speed.\\nDesigned to last.\\nShips on Friday."}
         startOffset={0.1}
-        endOffset={0.8}
-        fontSize="clamp(2.5rem, 6vw, 5.5rem)"
-        align="left"
+        endOffset={0.6}
+        fontSize="clamp(2.5rem, 6vw, 5rem)"
       />
     </section>
   );
 }`,
     tailwindSource: tw,
-    props: [
-      { name: "text", type: "string", description: "The text to reveal. Use \\n as line separators in line mode." },
-      { name: "mode", type: '"word" | "character" | "line"', defaultValue: '"word"', description: "Granularity of the reveal unit." },
-      { name: "mutedColor", type: "string", defaultValue: '"#52525b"', description: "Color of unrevealed units (start state)." },
-      { name: "activeColor", type: "string", defaultValue: '"#fafafa"', description: "Color of fully revealed units (end state)." },
-      { name: "startOffset", type: "number", defaultValue: "0.05", description: "Scroll progress (0–1) when the reveal begins." },
-      { name: "endOffset", type: "number", defaultValue: "0.75", description: "Scroll progress (0–1) when the reveal finishes." },
-      { name: "blurAmount", type: "number", defaultValue: "6", description: "Starting blur in px. Set 0 to disable blur dissolve." },
-      { name: "stagger", type: "number", defaultValue: "0.65", description: "0 = all units reveal simultaneously · 1 = fully sequential cascade." },
-      { name: "fontSize", type: "string", defaultValue: '"clamp(1.75rem, 4.5vw, 3.75rem)"', description: "CSS font-size (supports clamp)." },
-      { name: "align", type: '"left" | "center" | "right"', defaultValue: '"left"', description: "Text alignment." },
-      { name: "className", type: "string", description: "Additional classes merged onto the root element." },
-    ],
   },
   {
     slug: "animated-countdown",
@@ -5919,30 +3915,42 @@ export function LaunchCountdown() {
   {
     slug: "shooting-stars-grid",
     name: "Shooting Stars Grid",
-    description: "Animated dot grid with diagonal shooting star streaks and glowing nodes. A dramatic yet subtle background for hero sections and feature blocks.",
+    description: "A hero grid where shooting stars run along the lines, sometimes turning a corner at a node and lighting each node they cross. Move over it and a spotlight follows the pointer while the stars turn toward you at every node; it adapts to light and dark mode.",
     categorySlug: "background-effects",
-    tags: ["grid", "stars", "background", "hero", "ambient", "framer-motion"],
+    tags: ["background", "grid", "shooting stars", "hero", "canvas", "dark mode", "motion kit"],
     premium: false,
     trendingScore: 85,
     createdAt: "2026-04-05",
-    animationKinds: ["gradient", "scroll"],
-    dependencies: ["framer-motion", "lucide-react"],
-    Preview: Previews.PreviewShootingStarsGrid,
-    detailPreviews: [Previews.PreviewShootingStarsGridHero],
+    animationKinds: ["hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "children", type: "ReactNode", description: "Content over the grid. Defaults to a short hero." },
+      { name: "starCount", type: "number", defaultValue: "48", description: "Twinkling background stars." },
+      { name: "shootingStarCount", type: "number", defaultValue: "6", description: "Shooting stars running at once." },
+      { name: "gridSize", type: "number", defaultValue: "44", description: "Grid cell size in px." },
+      { name: "speed", type: "\"slow\" | \"normal\" | \"fast\" | number", defaultValue: "\"normal\"", description: "Preset, or a duration multiplier where higher is slower." },
+      { name: "glow", type: "boolean", defaultValue: "true", description: "Glow round the heads, the lit nodes and the pointer spotlight." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+      { name: "contentClassName", type: "string", description: "Classes for the content wrapper." },
+      { name: "showGrid", type: "boolean", defaultValue: "true", description: "Draw the grid lines." },
+      { name: "showStaticStars", type: "boolean", defaultValue: "true", description: "Draw the twinkling stars." },
+      { name: "reducedMotionFallback", type: "boolean", defaultValue: "true", description: "With reduced motion, draw one still frame instead of animating." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Spotlight under the pointer; stars steer toward it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steers the stars round a pretend pointer until someone moves over the grid." },
+    ],
+    Preview: Previews.PreviewShootingStarsGridRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { ShootingStarsGrid } from "@/components/shooting-stars-grid";
 
-export function HeroSection() {
+export function LaunchHero() {
   return (
-    <ShootingStarsGrid
-      starCount={54}
-      shootingStarCount={7}
-      className="min-h-[560px] rounded-3xl"
-    >
-      <h1 className="text-4xl font-semibold tracking-tight">
-        Build interfaces that feel alive
-      </h1>
+    <ShootingStarsGrid shootingStarCount={7} gridSize={48} className="min-h-[560px]">
+      <div className="mx-auto max-w-2xl text-center">
+        <h1 className="text-5xl font-semibold tracking-[-0.045em]">Ship the launch page tonight.</h1>
+        <p className="mt-4 text-[15px] text-[#6e6e73] dark:text-[#a1a1a6]">Templates, blocks and components that already move.</p>
+      </div>
     </ShootingStarsGrid>
   );
 }`,
@@ -5951,32 +3959,56 @@ export function HeroSection() {
   {
     slug: "hover-highlight-text",
     name: "Hover Highlight Text",
-    description: "Cursor-tracked SVG spotlight that reveals outlined text beneath a base layer. Smooth spring physics follow the mouse for a cinematic hover effect.",
+    description: "A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail.",
     categorySlug: "motion-effects",
-    tags: ["hover", "text", "spotlight", "cursor", "svg", "spring", "framer-motion"],
+    tags: ["hover", "text", "highlight", "marker", "cursor", "headline", "spring", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 90,
     createdAt: "2026-04-18",
     animationKinds: ["hover", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewHoverHighlightText,
-    detailPreviews: [Previews.PreviewHoverHighlightTextHero, Previews.PreviewHoverHighlightTextBanner],
+    props: [
+      { name: "text", type: "string", description: "The sentence to highlight." },
+      { name: "as", type: "\"h1\" | \"h2\" | \"p\" | \"span\"", defaultValue: "\"h2\"", description: "Element used for the text." },
+      { name: "reach", type: "number", defaultValue: "40", description: "How far from the pointer, in px, a word still gets highlighted." },
+      { name: "linger", type: "number", defaultValue: "0.9", description: "Seconds a stroke takes to retract after the pointer moves on." },
+      { name: "markerColor", type: "string", description: "Marker colour. Defaults to a highlighter yellow, softer in dark mode." },
+      { name: "baseColor", type: "string", description: "Colour of words that are not highlighted. Defaults to #86868b (#6e6e73 in dark mode)." },
+      { name: "highlightColor", type: "string", description: "Colour of highlighted words. Defaults to the ink colour." },
+      { name: "springConfig", type: "SpringOptions", defaultValue: "{ stiffness: 320, damping: 17, mass: 0.7 }", description: "Spring for the marker stroke; the default overshoots a little." },
+      { name: "baseClassName", type: "string", description: "Classes for the text element (size, weight, width)." },
+      { name: "highlightClassName", type: "string", description: "Classes for every marker stroke. A bg-* class replaces markerColor." },
+      { name: "containerClassName", type: "string", description: "Classes for the wrapper that listens to the pointer." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Shows plain text with no effect." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a highlighter across the words, line by line, until a real pointer arrives." },
+    ],
+    Preview: Previews.PreviewHoverHighlightTextRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { HoverHighlightText } from "@/components/hover-highlight-text";
 
 export function Hero() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-black px-6">
+    <section className="flex min-h-[60vh] items-center justify-center px-6">
       <HoverHighlightText
-        text="Build beautiful interfaces that users remember."
         as="h1"
-        spotlightRadius={130}
-        baseClassName="max-w-5xl text-6xl font-semibold leading-tight text-white/15"
-        highlightClassName="max-w-5xl text-6xl font-semibold leading-tight text-transparent"
-        strokeColor="rgba(255,255,255,0.72)"
+        text="Build interfaces people remember long after they close the tab."
+        reach={44}
+        linger={1.1}
+        baseClassName="max-w-[15ch] text-6xl"
       />
-    </div>
+    </section>
+  );
+}
+
+export function BlueMarker() {
+  return (
+    <HoverHighlightText
+      text="Highlight what matters."
+      markerColor="rgba(0,113,227,0.18)"
+      baseClassName="text-4xl"
+    />
   );
 }`,
     tailwindSource: tw,
@@ -5984,45 +4016,44 @@ export function Hero() {
   {
     slug: "motion-layer-scroller",
     name: "Motion Layer Scroller",
-    description: "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
+    description: "A landscape built from paper-cut layers inside its own scroll frame: scroll through it and each ridge rises at its own speed while the sun sinks behind them. When you stop, the layers settle on a soft spring with a small overshoot; pass your own layers to build any parallax scene.",
     categorySlug: "motion-effects",
-    tags: ["parallax", "scroll", "depth", "layers", "framer-motion"],
+    tags: ["parallax", "scroll", "depth", "layers", "landscape", "hero", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 83,
     createdAt: "2026-03-28",
-    animationKinds: ["scroll", "parallax"],
+    animationKinds: ["scroll", "parallax", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewMotionLayerScroller,
+    props: [
+      { name: "layers", type: "LayerConfig[]", description: "Your own layers: { id, content, xRange?, yRange?, scaleRange?, rotateRange?, opacityRange?, blurRange?, className? }, mapped from the start to the end of the scroll. Leave out for the landscape; [] shows just the heading." },
+      { name: "direction", type: "\"vertical\" | \"horizontal\"", defaultValue: "\"vertical\"", description: "Which way the scene scrolls." },
+      { name: "scrollHeight", type: "number", defaultValue: "420", description: "Height of the scene in px." },
+      { name: "distance", type: "number", defaultValue: "1.6", description: "How far there is to scroll, in scene heights." },
+      { name: "heading", type: "string", defaultValue: "\"Motion that moves people\"", description: "Heading that drifts up and fades as you scroll." },
+      { name: "description", type: "string", defaultValue: "\"Every layer travels at its own speed.\"", description: "Line under the heading." },
+      { name: "hint", type: "string", defaultValue: "\"Scroll inside the scene.\"", description: "Hint shown until the scene is scrolled. An empty string hides it." },
+      { name: "backgroundColor", type: "string", description: "Overrides the sky colour." },
+      { name: "showGrid", type: "boolean", defaultValue: "false", description: "Draw a faint grid over the sky." },
+      { name: "showGlow", type: "boolean", defaultValue: "true", description: "Draw the sun (the moon in dark mode) and its glow." },
+      { name: "perspective", type: "number", defaultValue: "1200", description: "Perspective for custom layers, in px." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scrolls the scene down and back up every few seconds until someone touches it." },
+      { name: "className", type: "string", description: "Classes for the frame." },
+    ],
+    Preview: Previews.PreviewMotionLayerScrollerRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
 import { MotionLayerScroller } from "@/components/motion-layer-scroller";
 
-function BackgroundLayer() {
-  return <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,#1e3a8a,transparent_60%)]" />;
-}
-
-function MidLayer() {
-  return <div className="absolute left-1/4 top-1/3 size-40 rounded-full bg-sky-400/30 blur-2xl" />;
-}
-
-function ForegroundLayer() {
+export function DepthHero() {
   return (
-    <div className="absolute inset-x-0 bottom-10 text-center text-2xl font-semibold text-white">
-      Depth on scroll
-    </div>
-  );
-}
-
-export function ParallaxScene() {
-  return (
-    <MotionLayerScroller
-      scrollHeight={600}
-      layers={[
-        { id: "bg", yRange: [0, -60], content: <BackgroundLayer /> },
-        { id: "mid", yRange: [0, -30], content: <MidLayer /> },
-        { id: "fg", yRange: [0, 20], content: <ForegroundLayer /> },
-      ]}
-    />
+    <section className="mx-auto max-w-4xl px-6 py-16">
+      <MotionLayerScroller
+        scrollHeight={520}
+        heading="Built in layers"
+        description="Scroll the scene to pull it apart."
+      />
+    </section>
   );
 }`,
     tailwindSource: tw,
@@ -6030,236 +4061,160 @@ export function ParallaxScene() {
   {
     slug: "animated-bento-grid",
     name: "Animated Bento Grid",
-    description: "Feature showcase bento grid with entrance animations and configurable column spans. Each tile supports custom content, tags, and motion entrance delays.",
+    description: "A grid of stat tiles whose digits roll in like odometers when the grid scrolls into view. Hovering or focusing a tile lifts it and spins its digits a full turn before they land with a small overshoot; tiles come plain, frosted glass, with a border that lights under the pointer, or with a spotlight.",
     categorySlug: "bento-grids",
-    tags: ["bento", "grid", "features", "showcase", "framer-motion", "layout"],
+    tags: ["bento", "grid", "stats", "metrics", "odometer", "counter", "dashboard", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 94,
     createdAt: "2026-04-20",
-    animationKinds: ["scroll", "spring"],
+    animationKinds: ["scroll", "hover", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewAnimatedBentoGrid,
-    reactSource: `"use client";
+    props: [
+      { name: "items", type: "BentoItem[]", description: "Tiles: id, label, value (digits roll), optional icon, accent, span (\"1x1\" | \"2x1\" | \"1x2\" | \"2x2\") and trend { value, label }. Defaults to five sample stats." },
+      { name: "variant", type: "\"default\" | \"glass\" | \"gradient-border\" | \"spotlight\"", defaultValue: "\"default\"", description: "Surface treatment for every tile." },
+      { name: "columns", type: "2 | 3 | 4", defaultValue: "3", description: "Columns at full width; narrow containers drop to two." },
+      { name: "animated", type: "boolean", defaultValue: "true", description: "Roll the numbers in on scroll and spin them on hover." },
+      { name: "staggerDelay", type: "number", defaultValue: "0", description: "Extra delay before the first tile, in seconds." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Lifts and spins each tile in turn until someone touches the grid." },
+      { name: "className", type: "string", description: "Extra classes for the grid." },
+      { name: "itemClassName", type: "string", description: "Extra classes for every tile wrapper." },
+    ],
+    Preview: Previews.PreviewAnimatedBentoGridRedesign,
+    previewShell: "plain",
+    previewSections: [
+      {
+        title: "Frosted glass",
+        Preview: Previews.PreviewAnimatedBentoGridGlassRedesign,
+        reactSource: `"use client";
 
 import { AnimatedBentoGrid } from "@/components/animated-bento-grid";
 
-const items = [
-  { id: "1", title: "Ship faster", description: "Production components, zero setup.", tag: "DX", span: "2x1" },
-  { id: "2", title: "Motion-native", description: "Framer Motion built in.", tag: "Anim", span: "1x1" },
+export function GlassStats() {
+  // Without items it shows the default five tiles.
+  return <AnimatedBentoGrid variant="glass" columns={3} />;
+}`,
+      },
+      {
+        title: "Border light",
+        Preview: Previews.PreviewAnimatedBentoGridBorderRedesign,
+        reactSource: `"use client";
+
+import { AnimatedBentoGrid } from "@/components/animated-bento-grid";
+
+export function SocialProof() {
+  return (
+    <AnimatedBentoGrid
+      variant="gradient-border"
+      columns={4}
+      items={[
+        { id: "teams", label: "Companies", value: "2,400+", accent: "#0071e3" },
+        { id: "deploys", label: "Deployments", value: "18M+", accent: "#bf5af2", trend: { value: 34, label: "this year" } },
+        { id: "rating", label: "Avg rating", value: "4.9", accent: "#ff9f0a" },
+        { id: "support", label: "First reply", value: "< 2hr", accent: "#30d158" },
+      ]}
+    />
+  );
+}`,
+      },
+    ],
+    reactSource: `"use client";
+
+import { AnimatedBentoGrid, type BentoItem } from "@/components/animated-bento-grid";
+
+const items: BentoItem[] = [
+  { id: "mrr", label: "Monthly revenue", value: "$84,210", span: "2x1", trend: { value: 12.4, label: "vs last month" } },
+  { id: "churn", label: "Churn", value: "1.8%", accent: "#ff3b30", trend: { value: -0.3, label: "MoM" } },
+  { id: "seats", label: "Active seats", value: "3,214", accent: "#bf5af2" },
+  { id: "nps", label: "NPS", value: "72", span: "2x1", accent: "#30d158", trend: { value: 4, label: "this quarter" } },
 ];
 
-export function FeatureGrid() {
-  return <AnimatedBentoGrid items={items} columns={3} />;
+export function RevenueBento() {
+  return <AnimatedBentoGrid items={items} columns={3} variant="spotlight" />;
 }`,
     tailwindSource: tw,
   },
   {
     slug: "bento-grid-skeleton",
     name: "Bento Grid Skeleton",
-    description: "Bento grid with animated skeleton placeholder tiles — chat, dashboard, avatar, workflow, calendar, and code variants. Perfect for loading states.",
+    description: "A bento of loading cards, each with a small placeholder scene: a chat thread, a bar chart, a team, a workflow, a calendar or code. One band of light sweeps the whole grid at once instead of each card separately, and pointing at a card plays its scene: bubbles pop in, bars regrow, faces fan out, steps connect, the free slot hops and lines type out.",
     categorySlug: "bento-grids",
-    tags: ["bento", "skeleton", "loading", "placeholder", "framer-motion"],
+    tags: ["bento", "skeleton", "loading", "placeholder", "shimmer", "empty state", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 80,
     createdAt: "2026-03-15",
-    animationKinds: ["layout"],
+    animationKinds: ["hover", "spring", "layout"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewBentoGridSkeleton,
+    props: [
+      { name: "cards", type: "BentoSkeletonCard[]", description: "Cards: id, title, description, optional tag, span (\"1x1\" | \"2x1\" | \"1x2\" | \"2x2\") and skeletonType (\"chat\" | \"dashboard\" | \"avatar\" | \"workflow\" | \"calendar\" | \"code\"). Defaults to one of each." },
+      { name: "animated", type: "boolean", defaultValue: "true", description: "Run the shimmer and the scene loops." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays each card's scene in turn until someone points at the grid." },
+      { name: "className", type: "string", description: "Extra classes for the grid wrapper." },
+    ],
+    Preview: Previews.PreviewBentoGridSkeletonRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
+import type { ReactNode } from "react";
 import { BentoGridSkeleton, type BentoSkeletonCard } from "@/components/bento-grid-skeleton";
 
 const cards: BentoSkeletonCard[] = [
-  {
-    id: "1",
-    title: "Chat activity",
-    description: "Live conversations streaming in while the data loads.",
-    tag: "Live",
-    span: "2x1",
-    skeletonType: "chat",
-  },
-  {
-    id: "2",
-    title: "Dashboard",
-    description: "Stats and charts sketched in before the numbers arrive.",
-    tag: "Stats",
-    span: "1x1",
-    skeletonType: "dashboard",
-  },
+  { id: "inbox", title: "Inbox", description: "Conversations stream in while the thread loads.", tag: "Live", span: "2x1", skeletonType: "chat" },
+  { id: "stats", title: "This week", description: "Charts settle before the numbers arrive.", tag: "Stats", skeletonType: "dashboard" },
+  { id: "deploys", title: "Deploy pipeline", description: "Each step lights up as it connects.", tag: "CI", skeletonType: "workflow" },
+  { id: "diff", title: "Latest diff", description: "Lines type themselves out.", tag: "Code", span: "2x1", skeletonType: "code" },
 ];
 
-export function SkeletonGrid() {
-  return <BentoGridSkeleton cards={cards} />;
+export function LoadingWorkspace({ ready, children }: { ready: boolean; children: ReactNode }) {
+  return ready ? <>{children}</> : <BentoGridSkeleton cards={cards} />;
 }`,
     tailwindSource: tw,
   },
   {
     slug: "scrolling-testimonials",
     name: "Scrolling Testimonials",
-    description: "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
+    description: "A wall of testimonials scrolling in columns at different speeds, faded at the top and bottom. Hover and the wall glides to a stop while the card under the pointer stays lit; wheel or drag over it and the columns take the push, lean with the speed and coast back to cruising.",
     categorySlug: "testimonials",
-    tags: ["testimonials", "social proof", "marquee", "infinite scroll", "vertical", "cards", "reviews"],
+    tags: ["testimonials", "social proof", "marquee", "infinite scroll", "wall of love", "reviews", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 96,
     createdAt: "2026-05-18",
-    animationKinds: ["scroll"],
-    dependencies: [],
-    Preview: Previews.PreviewScrollingTestimonials,
+    animationKinds: ["scroll", "drag", "hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "testimonials", type: "Testimonial[]", defaultValue: "DEFAULT_SCROLLING_TESTIMONIALS", description: "Cards: { id, quote, name, role, company?, avatar?, rating? }." },
+      { name: "columns", type: "1 | 2 | 3", defaultValue: "3", description: "Number of columns. Narrow containers drop to fewer." },
+      { name: "speed", type: "number", defaultValue: "32000", description: "Time in ms for the first column to scroll through once. Lower is faster." },
+      { name: "columnSpeeds", type: "number[]", description: "Per-column loop times in ms; overrides speed for each index given." },
+      { name: "reverseColumns", type: "boolean[]", defaultValue: "[false, true, false]", description: "Per-column direction; true scrolls that column downward." },
+      { name: "pauseOnHover", type: "boolean", defaultValue: "true", description: "Ease the wall to a stop while the pointer is over it." },
+      { name: "height", type: "number", defaultValue: "420", description: "Height of the moving wall in px." },
+      { name: "showHeader", type: "boolean", defaultValue: "true", description: "Show the badge, title and subtitle above the wall." },
+      { name: "badge / title / subtitle", type: "string", description: "Header text." },
+      { name: "showStars", type: "boolean", defaultValue: "true", description: "Draw each card's rating as stars." },
+      { name: "fadeMask", type: "boolean", defaultValue: "true", description: "Fade the wall out at its top and bottom edges." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flings the wall up and down every few seconds until someone touches it." },
+      { name: "cardBackground / borderColor / textColor / mutedTextColor / backgroundColor", type: "string", description: "Optional colour overrides; by default it follows light and dark mode." },
+    ],
+    Preview: Previews.PreviewScrollingTestimonialsRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
-import { cn } from "@/lib/utils";
+import { ScrollingTestimonials } from "@/components/scrolling-testimonials";
 
-export type Testimonial = {
-  id: string;
-  quote: string;
-  name: string;
-  role: string;
-  company?: string;
-  avatar?: string;
-  rating?: number;
-};
+const reviews = [
+  { id: "1", quote: "Shipped the marketing site in a weekend.", name: "Lena Moritz", role: "Design lead", company: "Halcyon", rating: 5 },
+  { id: "2", quote: "Our designers stopped writing animation specs.", name: "Kwame Asante", role: "Staff engineer", company: "Ferrous", rating: 5 },
+  { id: "3", quote: "Pricing page conversion went up 18%.", name: "Ines Duarte", role: "Growth", company: "Ledgerly", rating: 5 },
+  { id: "4", quote: "Two sprints saved on dark mode alone.", name: "Marcus Bell", role: "Founder", company: "Papertrail Co", rating: 5 },
+  { id: "5", quote: "The first UI kit I actually kept.", name: "Theo Laurent", role: "Frontend lead", company: "Quarry", rating: 5 },
+  { id: "6", quote: "Clients keep asking how we built it.", name: "Nadia Petrova", role: "Studio owner", company: "Fieldhouse", rating: 4 },
+];
 
-export interface ScrollingTestimonialsProps {
-  testimonials: Testimonial[];
-  columns?: 1 | 2 | 3;
-  speed?: number;
-  columnSpeeds?: number[];
-  reverseColumns?: boolean[];
-  pauseOnHover?: boolean;
-  showHeader?: boolean;
-  badge?: string;
-  title?: string;
-  subtitle?: string;
-  backgroundColor?: string;
-  cardBackground?: string;
-  borderColor?: string;
-  textColor?: string;
-  mutedTextColor?: string;
-  avatarSize?: number;
-  showStars?: boolean;
-  fadeMask?: boolean;
-  className?: string;
-}
-
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-  return reduced;
-}
-
-function nameInitials(name: string): string {
-  return name.split(" ").slice(0, 2).map((n) => n[0] ?? "").join("").toUpperCase();
-}
-
-function nameHue(name: string): number {
-  return name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
-}
-
-function StarRating({ rating }: { rating: number }) {
+export function WallOfLove() {
   return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} className="size-3.5" viewBox="0 0 16 16" aria-hidden>
-          <path
-            d="M8 1.5 9.8 5.2l4.1.6-2.96 2.88.7 4.07L8 10.68l-3.64 1.07.7-4.07L2.1 5.8l4.1-.6z"
-            fill={i < rating ? "#f59e0b" : "none"}
-            stroke={i < rating ? "#f59e0b" : "rgba(148,163,184,0.35)"}
-            strokeWidth="1.25"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
-function AvatarEl({ src, name, size }: { src?: string; name: string; size: number }) {
-  if (src) {
-    return <img src={src} alt={name} style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />;
-  }
-  const hue = nameHue(name);
-  return (
-    <div aria-hidden style={{ width: size, height: size, borderRadius: "50%", background: \`oklch(0.46 0.13 \${hue})\`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: Math.round(size * 0.36), fontWeight: 600, color: "#fff", flexShrink: 0, letterSpacing: "-0.02em", userSelect: "none" }}>
-      {nameInitials(name)}
-    </div>
-  );
-}
-
-function TestimonialCard({ item, cardBackground, borderColor, textColor, mutedTextColor, avatarSize, showStars }: { item: Testimonial; cardBackground?: string; borderColor?: string; textColor?: string; mutedTextColor?: string; avatarSize: number; showStars: boolean }) {
-  return (
-    <div className="flex flex-col gap-3 rounded-2xl p-4 sm:p-5" style={{ background: cardBackground ?? "var(--card, rgba(255,255,255,0.04))", border: \`1px solid \${borderColor ?? "rgba(255,255,255,0.08)"}\`, boxShadow: "0 1px 10px rgba(0,0,0,0.22), 0 0 0 1px rgba(255,255,255,0.03) inset" }}>
-      {showStars && typeof item.rating === "number" && <StarRating rating={item.rating} />}
-      <p className="text-sm leading-relaxed sm:text-[15px]" style={{ color: textColor ?? "var(--foreground)" }}>
-        &ldquo;{item.quote}&rdquo;
-      </p>
-      <div className="flex items-center gap-3 pt-0.5">
-        <AvatarEl src={item.avatar} name={item.name} size={avatarSize} />
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold leading-snug" style={{ color: textColor ?? "var(--foreground)" }}>{item.name}</p>
-          <p className="truncate text-xs leading-snug" style={{ color: mutedTextColor ?? "var(--muted-foreground, rgba(255,255,255,0.45))" }}>{item.role}{item.company ? \` · \${item.company}\` : ""}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ScrollColumn({ items, duration, reverse, pauseOnHover, cardBackground, borderColor, textColor, mutedTextColor, avatarSize, showStars }: { items: Testimonial[]; duration: number; reverse: boolean; pauseOnHover: boolean; cardBackground?: string; borderColor?: string; textColor?: string; mutedTextColor?: string; avatarSize: number; showStars: boolean }) {
-  const [hovered, setHovered] = React.useState(false);
-  const reduced = usePrefersReducedMotion();
-  const doubled = React.useMemo(() => [...items, ...items], [items]);
-  return (
-    <div className="h-full overflow-hidden" onMouseEnter={() => pauseOnHover && setHovered(true)} onMouseLeave={() => pauseOnHover && setHovered(false)}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 14, animation: reduced ? "none" : \`\${reverse ? "nexus-st-rev" : "nexus-st-fwd"} \${duration}ms linear infinite\`, animationPlayState: hovered ? "paused" : "running", willChange: "transform" }}>
-        {doubled.map((item, i) => (
-          <TestimonialCard key={\`\${item.id}-\${i}\`} item={item} cardBackground={cardBackground} borderColor={borderColor} textColor={textColor} mutedTextColor={mutedTextColor} avatarSize={avatarSize} showStars={showStars} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function ScrollingTestimonials({ testimonials, columns = 3, speed = 35000, columnSpeeds, reverseColumns = [], pauseOnHover = true, showHeader = true, badge = "Testimonials", title = "Loved by teams worldwide", subtitle = "Join thousands of teams shipping beautiful products faster.", backgroundColor, cardBackground, borderColor, textColor, mutedTextColor, avatarSize = 40, showStars = true, fadeMask = true, className }: ScrollingTestimonialsProps) {
-  const cols = React.useMemo<Testimonial[][]>(() => {
-    const buckets: Testimonial[][] = Array.from({ length: columns }, () => []);
-    testimonials.forEach((t, i) => buckets[i % columns].push(t));
-    return buckets;
-  }, [testimonials, columns]);
-  const bg = backgroundColor ?? "var(--background)";
-  return (
-    <>
-      <style>{\`@keyframes nexus-st-fwd { from { transform: translateY(0); } to { transform: translateY(-50%); } } @keyframes nexus-st-rev { from { transform: translateY(-50%); } to { transform: translateY(0); } }\`}</style>
-      <section className={cn("relative w-full overflow-hidden py-20", className)} style={{ background: bg }}>
-        {showHeader && (
-          <div className="relative z-10 mx-auto mb-14 max-w-2xl px-4 text-center">
-            {badge && <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-primary/25 bg-primary/8 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-primary">{badge}</span>}
-            {title && <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl" style={{ color: textColor }}>{title}</h2>}
-            {subtitle && <p className="mt-4 text-balance text-base leading-relaxed" style={{ color: mutedTextColor ?? "var(--muted-foreground)" }}>{subtitle}</p>}
-          </div>
-        )}
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {fadeMask && (
-            <>
-              <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 z-10 h-28" style={{ background: \`linear-gradient(to bottom, \${bg} 0%, transparent 100%)\` }} />
-              <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-28" style={{ background: \`linear-gradient(to top, \${bg} 0%, transparent 100%)\` }} />
-            </>
-          )}
-          <div className={cn("grid gap-4 overflow-hidden", columns === 1 && "grid-cols-1", columns === 2 && "grid-cols-1 md:grid-cols-2", columns === 3 && "grid-cols-1 md:grid-cols-2 lg:grid-cols-3")} style={{ height: 680 }}>
-            {cols.map((items, i) => (
-              <div key={i} className={cn("h-full", i === 1 && "hidden md:block", i === 2 && "hidden lg:block")}>
-                <ScrollColumn items={items} duration={columnSpeeds?.[i] ?? speed * (1 + i * 0.22)} reverse={reverseColumns[i] ?? false} pauseOnHover={pauseOnHover} cardBackground={cardBackground} borderColor={borderColor} textColor={textColor} mutedTextColor={mutedTextColor} avatarSize={avatarSize} showStars={showStars} />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </>
+    <section className="mx-auto max-w-5xl px-6 py-24">
+      <ScrollingTestimonials testimonials={reviews} title="Loved by product teams" height={520} speed={28000} />
+    </section>
   );
 }`,
     tailwindSource: `"use client";
@@ -6294,128 +4249,63 @@ export function ScrollingTestimonialsDemo() {
     />
   );
 }`,
-    props: [
-      { name: "testimonials", type: "Testimonial[]", description: "Array of testimonial objects to display." },
-      { name: "columns", type: "1 | 2 | 3", description: "Number of columns (responsive — clamped by breakpoint).", defaultValue: "3" },
-      { name: "speed", type: "number", description: "Base animation duration in ms for column 0.", defaultValue: "35000" },
-      { name: "columnSpeeds", type: "number[]", description: "Per-column override durations. Overrides `speed` when provided." },
-      { name: "reverseColumns", type: "boolean[]", description: "Per-column reverse direction flags.", defaultValue: "[]" },
-      { name: "pauseOnHover", type: "boolean", description: "Pause a column's animation on hover.", defaultValue: "true" },
-      { name: "showHeader", type: "boolean", description: "Render the badge / title / subtitle header.", defaultValue: "true" },
-      { name: "badge", type: "string", description: "Small pill badge text above the heading.", defaultValue: "\"Testimonials\"" },
-      { name: "title", type: "string", description: "Section heading.", defaultValue: "\"Loved by teams worldwide\"" },
-      { name: "subtitle", type: "string", description: "Section subheading.", defaultValue: "\"Join thousands of teams...\"" },
-      { name: "backgroundColor", type: "string", description: "Section background. Defaults to `var(--background)`." },
-      { name: "cardBackground", type: "string", description: "Card background color." },
-      { name: "borderColor", type: "string", description: "Card border color." },
-      { name: "textColor", type: "string", description: "Primary text color." },
-      { name: "mutedTextColor", type: "string", description: "Muted / secondary text color." },
-      { name: "avatarSize", type: "number", description: "Avatar diameter in px.", defaultValue: "40" },
-      { name: "showStars", type: "boolean", description: "Render star ratings when `rating` is set.", defaultValue: "true" },
-      { name: "fadeMask", type: "boolean", description: "Show gradient top/bottom fade masks.", defaultValue: "true" },
-      { name: "className", type: "string", description: "Extra className on the section wrapper." },
-    ],
   },
   {
     slug: "spectra-frame",
     name: "Spectra Frame",
-    description: "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
+    description: "A photo grid that rests in black and white. Pointing at a photo blooms colour out from where the pointer came in while the photo widens, its row grows and the rest dim; moving off drains the colour back to where the pointer left.",
     categorySlug: "cards",
-    tags: ["gallery", "grid", "images", "grayscale", "hover", "color", "photo", "portfolio", "css-animation", "responsive"],
+    tags: ["gallery", "grid", "photos", "grayscale", "color reveal", "hover", "portfolio", "clip-path", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 102,
     createdAt: "2026-05-18",
-    animationKinds: ["hover"],
-    dependencies: [],
-    Preview: Previews.PreviewSpectraFrame,
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "images", type: "SpectraImage[]", defaultValue: "8 drawn scenes", description: "Photos in reading order, each { src?, alt }. Without src a drawn scene is used. alt is the caption and accessible name." },
+      { name: "imageCount", type: "number", defaultValue: "8", description: "How many images to show (slices images)." },
+      { name: "columns", type: "number", defaultValue: "4", description: "Photos per row." },
+      { name: "gap", type: "number", defaultValue: "8", description: "Gap between photos, in px." },
+      { name: "borderRadius", type: "number", defaultValue: "16", description: "Corner radius of each photo, in px." },
+      { name: "padding", type: "number", defaultValue: "0", description: "Padding round the grid, in px." },
+      { name: "backgroundColor", type: "string", defaultValue: "\"transparent\"", description: "Background behind the grid." },
+      { name: "grayscaleIntensity", type: "number", defaultValue: "100", description: "How grey the resting photos are, 0 to 100." },
+      { name: "scaleAmount", type: "number", defaultValue: "1.06", description: "Zoom of the open photo." },
+      { name: "cellMinHeight", type: "number", defaultValue: "128", description: "Resting row height, in px." },
+      { name: "hoveredMinHeight", type: "number", defaultValue: "176", description: "Height of the row holding the open photo, in px (the grid keeps its total height)." },
+      { name: "expandedFlex", type: "number", defaultValue: "2.2", description: "How much wider the open photo grows than its neighbours." },
+      { name: "onSelect", type: "(index: number) => void", description: "Called with the index when a photo is clicked or activated with the keyboard." },
+      { name: "hint", type: "string", defaultValue: "\"Point at a photo.\"", description: "Caption under the grid. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens each photo in turn until someone touches the grid." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewSpectraFrameRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
+import { SpectraFrame } from "@/components/spectra-frame";
 
-export interface SpectraImage {
-  src: string;
-  alt: string;
-}
+const photos = [
+  { src: "/gallery/01.jpg", alt: "Harbour at dawn" },
+  { src: "/gallery/02.jpg", alt: "Market street" },
+  { src: "/gallery/03.jpg", alt: "Glasshouse" },
+  { src: "/gallery/04.jpg", alt: "Salt flats" },
+  { src: "/gallery/05.jpg", alt: "Night ferry" },
+  { src: "/gallery/06.jpg", alt: "Old library" },
+];
 
-export interface SpectraFrameProps {
-  images?: SpectraImage[];
-  imageCount?: number;
-  gap?: number;
-  columns?: number;
-  aspectRatio?: string;
-  transitionSpeed?: number;
-  scaleAmount?: number;
-  colorRevealTiming?: string;
-  backgroundColor?: string;
-  grayscaleIntensity?: number;
-  borderRadius?: number;
-  className?: string;
-}
-
-const PLACEHOLDERS: SpectraImage[] = Array.from({ length: 12 }, (_, i) => ({
-  src: \`https://picsum.photos/seed/sf\${i + 1}/800/600\`,
-  alt: \`Photo \${i + 1}\`,
-}));
-
-export function SpectraFrame({
-  images             = PLACEHOLDERS,
-  imageCount         = 12,
-  gap                = 10,
-  columns            = 4,
-  aspectRatio        = "4/3",
-  transitionSpeed    = 480,
-  scaleAmount        = 1.08,
-  colorRevealTiming  = "cubic-bezier(0.4, 0, 0.2, 1)",
-  backgroundColor    = "#09090b",
-  grayscaleIntensity = 100,
-  borderRadius       = 14,
-  className,
-}: SpectraFrameProps) {
-  const [hoveredIndex, setHoveredIndex] = React.useState<number | null>(null);
-  const rawId = React.useId();
-  const uid   = "sf" + rawId.replace(/[^a-zA-Z0-9]/g, "");
-
-  const items        = images.slice(0, imageCount);
-  const isAnyHovered = hoveredIndex !== null;
-  const imgTransition = [
-    \`filter    \${transitionSpeed}ms \${colorRevealTiming}\`,
-    \`transform \${transitionSpeed}ms \${colorRevealTiming}\`,
-    \`opacity   \${Math.round(transitionSpeed * 0.7)}ms \${colorRevealTiming}\`,
-  ].join(", ");
-
+export function Portfolio() {
   return (
-    <>
-      <style>{\`
-        #\${uid} { --sf-cols: \${columns}; box-sizing: border-box; width: 100%; background: \${backgroundColor}; padding: \${gap}px; }
-        @media (max-width: 900px) { #\${uid} { --sf-cols: 3; } }
-        @media (max-width: 600px) { #\${uid} { --sf-cols: 2; } }
-        #\${uid} .sf-grid { display: grid; grid-template-columns: repeat(var(--sf-cols), 1fr); gap: \${gap}px; }
-        #\${uid} .sf-cell { border-radius: \${borderRadius}px; overflow: hidden; aspect-ratio: \${aspectRatio}; cursor: pointer; position: relative; transform: translateZ(0); isolation: isolate; }
-        #\${uid} .sf-cell img { width: 100%; height: 100%; display: block; object-fit: cover; transform-origin: center center; will-change: filter, transform, opacity; backface-visibility: hidden; }
-      \`}</style>
-      <div id={uid} className={className}>
-        <div className="sf-grid">
-          {items.map((img, index) => {
-            const isActive = hoveredIndex === index;
-            const isDimmed = isAnyHovered && !isActive;
-            const grayPct    = isActive ? 0              : grayscaleIntensity;
-            const brightness = isActive ? 1.06            : isDimmed ? 0.62 : 1;
-            const scale      = isActive ? scaleAmount      : isDimmed ? 0.96 : 1;
-            const opacity    = isActive ? 1                : isDimmed ? 0.72 : 1;
-            return (
-              <div key={index} className="sf-cell" onMouseEnter={() => setHoveredIndex(index)} onMouseLeave={() => setHoveredIndex(null)}>
-                <img src={img.src} alt={img.alt} style={{ filter: \`grayscale(\${grayPct}%) brightness(\${brightness})\`, transform: \`scale(\${scale}) translateZ(0)\`, opacity, transition: imgTransition }} />
-                <div aria-hidden style={{ position: "absolute", inset: 0, borderRadius, boxShadow: "0 0 0 2px rgba(255,255,255,0.20) inset", opacity: isActive ? 1 : 0, transition: \`opacity \${Math.round(transitionSpeed * 0.5)}ms \${colorRevealTiming}\`, pointerEvents: "none" }} />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </>
+    <SpectraFrame
+      images={photos}
+      imageCount={6}
+      columns={3}
+      cellMinHeight={150}
+      hoveredMinHeight={210}
+      onSelect={(i) => console.log("open", photos[i].alt)}
+    />
   );
-}
-
-export default SpectraFrame;`,
+}`,
     tailwindSource: `import { SpectraFrame } from "@/components/spectra-frame/spectra-frame";
 
 export function SpectraFrameDemo() {
@@ -6433,163 +4323,49 @@ export function SpectraFrameDemo() {
     />
   );
 }`,
-    props: [
-      { name: "images", type: "SpectraImage[]", description: "Array of { src, alt } objects. Defaults to 12 picsum placeholders." },
-      { name: "imageCount", type: "number", description: "Number of images to render (slices the array).", defaultValue: "12" },
-      { name: "gap", type: "number", description: "Grid gap in px.", defaultValue: "10" },
-      { name: "columns", type: "number", description: "Column count on desktop (≥901px). Auto-reduces to 3 on tablet, 2 on mobile.", defaultValue: "4" },
-      { name: "aspectRatio", type: "string", description: "CSS aspect-ratio per cell.", defaultValue: "\"4/3\"" },
-      { name: "transitionSpeed", type: "number", description: "Transition duration in ms.", defaultValue: "480" },
-      { name: "scaleAmount", type: "number", description: "Scale multiplier on the hovered image.", defaultValue: "1.08" },
-      { name: "colorRevealTiming", type: "string", description: "CSS easing for all transitions.", defaultValue: "\"cubic-bezier(0.4,0,0.2,1)\"" },
-      { name: "backgroundColor", type: "string", description: "Grid background color.", defaultValue: "\"#09090b\"" },
-      { name: "grayscaleIntensity", type: "number", description: "Grayscale % on idle images (0–100).", defaultValue: "100" },
-      { name: "borderRadius", type: "number", description: "Cell corner radius in px.", defaultValue: "14" },
-      { name: "className", type: "string", description: "Extra className on the root element." },
-    ],
   },
   {
     slug: "profile-orbit",
     name: "Profile Orbit",
-    description: "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
+    description: "A profile card with the whole team orbiting it on a tilted ring. Dragging the ring, using the arrows or tapping a face spins that person round to the front, the card slides over to them and their avatar drops in with a bounce, while people at the back of the ring pass under the card.",
     categorySlug: "cards",
-    tags: ["profile", "carousel", "avatar", "orbit", "social", "team", "hover", "animation", "navigation"],
+    tags: ["profile", "team", "avatar", "orbit", "carousel", "contact", "social", "drag", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 108,
     createdAt: "2026-05-18",
-    animationKinds: ["hover", "spring"],
-    dependencies: [],
-    Preview: Previews.PreviewProfileOrbit,
+    animationKinds: ["drag", "press", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "people", type: "ProfilePerson[]", defaultValue: "6 sample people", description: "Each { seed, name, role, email, avatar? }. Without avatar a coloured monogram is drawn; seed is the key and picks the colour." },
+      { name: "onConnect", type: "(person: ProfilePerson, connected: boolean) => void", description: "Called when the Connect button is toggled." },
+      { name: "onChange", type: "(index: number) => void", description: "Called with the index of the person now in the card." },
+      { name: "autoRotateInterval", type: "number", defaultValue: "2800", description: "Time between autoplay steps, in ms." },
+      { name: "hint", type: "string", defaultValue: "\"Drag the ring or tap a face.\"", description: "Caption under the orbit. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Turns the ring to the next person until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the root." },
+    ],
+    Preview: Previews.PreviewProfileOrbitRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
+import { ProfileOrbit } from "@/components/profile-orbit";
 
-export type ProfilePerson = { seed: number; name: string; role: string; email: string; };
-
-export interface ProfileOrbitProps {
-  people?: ProfilePerson[];
-  autoRotateInterval?: number;
-  className?: string;
-}
-
-const DEFAULT_PEOPLE: ProfilePerson[] = [
-  { seed: 10, name: "Jordan Lee",   role: "Head of Product",  email: "jordan@example.com"  },
-  { seed: 20, name: "Alex Chen",    role: "Lead Designer",    email: "alex@example.com"    },
-  { seed: 30, name: "Maya Patel",   role: "Engineering Lead", email: "maya@example.com"    },
-  { seed: 40, name: "Sam Rivera",   role: "Marketing Dir.",   email: "sam@example.com"     },
-  { seed: 50, name: "Chris Morgan", role: "Head of Sales",    email: "chris@example.com"   },
+const team = [
+  { seed: 1, name: "Priya Shah", role: "Founder", email: "priya@acme.dev", avatar: "/team/priya.jpg" },
+  { seed: 2, name: "Leo Martin", role: "Design", email: "leo@acme.dev" },
+  { seed: 3, name: "Ana Costa", role: "Engineering", email: "ana@acme.dev" },
+  { seed: 4, name: "Kenji Ito", role: "Growth", email: "kenji@acme.dev" },
+  { seed: 5, name: "Sara Holm", role: "Support", email: "sara@acme.dev" },
 ];
 
-const ORBIT: { top: string; left: string }[] = [
-  { top: "17%", left: "50%" },
-  { top: "40%", left: "71%" },
-  { top: "77%", left: "68%" },
-  { top: "77%", left: "32%" },
-  { top: "40%", left: "29%" },
-];
-
-const SPRING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-
-function ArrowButton({ onClick, direction, ariaLabel }: { onClick: () => void; direction: "left" | "right"; ariaLabel: string }) {
-  const [hovered, setHovered] = React.useState(false);
+export function Team() {
   return (
-    <button aria-label={ariaLabel} onClick={onClick} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ width: 36, height: 36, borderRadius: "50%", background: hovered ? "#e0e0e0" : "#f0f0f0", border: "none", cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "#111", transition: "background 0.2s ease", userSelect: "none" }}>
-      {direction === "left" ? "←" : "→"}
-    </button>
+    <ProfileOrbit
+      people={team}
+      onConnect={(p, on) => console.log(on ? "connect" : "disconnect", p.email)}
+    />
   );
-}
-
-function ConnectButton() {
-  const [hovered, setHovered] = React.useState(false);
-  return (
-    <button onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ flex: 1, margin: "0 10px", background: hovered ? "#333" : "#111", color: "white", borderRadius: 100, padding: "10px 0", fontSize: 14, fontWeight: 600, border: "none", cursor: "pointer", transition: "background 0.2s ease" }}>
-      Connect
-    </button>
-  );
-}
-
-export function ProfileOrbit({ people = DEFAULT_PEOPLE, autoRotateInterval = 3000, className }: ProfileOrbitProps) {
-  const [activeIndex, setActiveIndex]   = React.useState(0);
-  const [displayIndex, setDisplayIndex] = React.useState(0);
-  const cardInnerRef = React.useRef<HTMLDivElement>(null);
-  const timerRef     = React.useRef<ReturnType<typeof setInterval> | null>(null);
-  const pausedRef    = React.useRef(false);
-  const count = people.length;
-
-  React.useEffect(() => {
-    const el = cardInnerRef.current;
-    if (!el) return;
-    el.style.opacity = "0"; el.style.transform = "translateY(6px)";
-    const t = setTimeout(() => { setDisplayIndex(activeIndex); el.style.opacity = "1"; el.style.transform = "translateY(0)"; }, 200);
-    return () => clearTimeout(t);
-  }, [activeIndex]);
-
-  React.useEffect(() => {
-    timerRef.current = setInterval(() => { if (!pausedRef.current) setActiveIndex((i) => (i + 1) % count); }, autoRotateInterval);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [autoRotateInterval, count]);
-
-  React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft")  setActiveIndex((i) => (i - 1 + count) % count);
-      if (e.key === "ArrowRight") setActiveIndex((i) => (i + 1) % count);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [count]);
-
-  const pause  = () => { pausedRef.current = true;  };
-  const resume = () => { pausedRef.current = false; };
-  const prev   = () => setActiveIndex((i) => (i - 1 + count) % count);
-  const next   = () => setActiveIndex((i) => (i + 1) % count);
-  const person = people[displayIndex];
-
-  return (
-    <div className={className} style={{ width: "100%", height: "100%", position: "relative", overflow: "hidden", background: "#0a0e1a", backgroundImage: ["radial-gradient(ellipse 60% 50% at 70% 40%, rgba(100,40,180,0.5) 0%, transparent 70%)", "radial-gradient(ellipse 50% 60% at 20% 60%, rgba(20,80,160,0.4) 0%, transparent 70%)"].join(", ") }}>
-      <div aria-hidden style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)", backgroundSize: "28px 28px", pointerEvents: "none" }} />
-
-      {people.map((p, i) => {
-        const isActive  = i === activeIndex;
-        const slotIndex = (i - activeIndex + count) % count;
-        const slot      = ORBIT[slotIndex];
-        return (
-          <button key={p.seed} aria-label={\`View \${p.name}\`} onClick={() => setActiveIndex(i)} onMouseEnter={pause} onMouseLeave={resume}
-            style={{ position: "absolute", top: slot.top, left: slot.left, transform: "translate(-50%, -50%)", width: isActive ? 72 : 64, height: isActive ? 72 : 64, borderRadius: "50%", border: \`3px solid \${isActive ? "white" : "rgba(255,255,255,0.3)"}\`, boxShadow: isActive ? "0 0 0 4px rgba(255,255,255,0.15)" : "none", padding: 0, background: "none", cursor: "pointer", overflow: "hidden", zIndex: isActive ? 3 : 2, transition: \`top 0.55s \${SPRING}, left 0.55s \${SPRING}, width 0.4s ease, height 0.4s ease, box-shadow 0.4s ease, border 0.4s ease\` }}>
-            <img src={\`https://picsum.photos/seed/\${p.seed}/300/300\`} alt={p.name} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%", display: "block", pointerEvents: "none" }} />
-          </button>
-        );
-      })}
-
-      <div onMouseEnter={pause} onMouseLeave={resume} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 48, zIndex: 4 }}>
-        <div style={{ width: 280, background: "white", borderRadius: 20, padding: "0 24px 24px", boxShadow: "0 20px 60px rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <div ref={cardInnerRef} style={{ transition: "opacity 0.25s ease, transform 0.25s ease" }}>
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              <img src={\`https://picsum.photos/seed/\${person.seed}/300/300\`} alt={person.name} style={{ width: 96, height: 96, borderRadius: "50%", objectFit: "cover", border: "3px solid white", boxShadow: "0 4px 20px rgba(0,0,0,0.3)", marginTop: -48, display: "block" }} />
-            </div>
-            <p style={{ fontSize: 20, fontWeight: 700, color: "#111", marginTop: 12, textAlign: "center", lineHeight: 1.3, margin: "12px 0 0" }}>{person.name}</p>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 6, fontSize: 13, color: "#666" }}><span aria-hidden>💼</span><span>{person.role}</span></div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4, marginTop: 4, fontSize: 13, color: "#666" }}><span aria-hidden>✉️</span><span>{person.email}</span></div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-              <ArrowButton onClick={prev} direction="left"  ariaLabel="Previous profile" />
-              <ConnectButton />
-              <ArrowButton onClick={next} direction="right" ariaLabel="Next profile" />
-            </div>
-          </div>
-        </div>
-        <div style={{ marginTop: 24, display: "flex", gap: 8, alignItems: "center" }}>
-          {people.map((_, i) => {
-            const isActive = i === activeIndex;
-            return <button key={i} aria-label={\`Go to profile \${i + 1}\`} onClick={() => setActiveIndex(i)} style={{ width: isActive ? 24 : 8, height: 8, borderRadius: isActive ? 4 : "50%", background: isActive ? "white" : "rgba(255,255,255,0.3)", border: "none", cursor: "pointer", padding: 0, transition: "all 0.3s ease" }} />;
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default ProfileOrbit;`,
+}`,
     tailwindSource: `"use client";
 
 import { ProfileOrbit } from "@/components/profile-orbit/profile-orbit";
@@ -6601,11 +4377,6 @@ export function ProfileOrbitDemo() {
     </div>
   );
 }`,
-    props: [
-      { name: "people", type: "ProfilePerson[]", description: "Array of 5 people. Each needs: seed (picsum image seed), name, role, email." },
-      { name: "autoRotateInterval", type: "number", description: "Auto-rotation interval in ms.", defaultValue: "3000" },
-      { name: "className", type: "string", description: "Extra className on the root element." },
-    ],
   },
   {
     slug: "command-palette",
@@ -6692,93 +4463,84 @@ export function CommandPaletteDemo() {
     slug: "image-trail",
     name: "Image Trail",
     registryCliName: "image-trail",
-    resourceLinks: [{ label: "Live demo", href: "/demos/image-trail" }],
-    description:
-      "A cursor trail that cycles through a configurable image array as you move, with fade-blur transitions and an optional magnetic repulsion effect.",
+    description: "Move across the area and it deals out photos along your path: each lands with a small overshoot, tilted the way you were heading, carries a bit of your speed, then drops away under gravity, blurring as it fades. Turn on the magnetic effect and the pointer shoves the photos that are still lying there.",
     categorySlug: "motion-effects",
-    tags: ["cursor", "trail", "images", "magnetic", "motion", "interactive"],
+    tags: ["cursor", "trail", "images", "photos", "pointer", "magnetic", "hero", "motion kit"],
     premium: false,
     trendingScore: 118,
     createdAt: "2026-05-21",
-    animationKinds: ["hover", "magnetic", "layout"],
+    animationKinds: ["hover", "magnetic", "spring"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "images", type: "ImageTrailImage[]", description: "Array of { src, alt? } objects cycled through as the trail." },
-      { name: "spacing", type: "number", defaultValue: "40", description: "Minimum cursor travel (px) before spawning the next image." },
-      { name: "duration", type: "number", defaultValue: "1000", description: "How long (ms) each image stays visible before fading out." },
-      { name: "imageSize", type: "number", defaultValue: "120", description: "Width and height of each trail image (px)." },
-      { name: "cornerRadius", type: "number", defaultValue: "8", description: "Border radius of each trail image (px)." },
-      { name: "fadeInDuration", type: "number", defaultValue: "0.3", description: "Fade-in animation duration (seconds)." },
-      { name: "fadeOutDuration", type: "number", defaultValue: "0.5", description: "Fade-out animation duration (seconds)." },
-      { name: "fadeInBlur", type: "number", defaultValue: "0", description: "Blur applied to each image on entry (px)." },
-      { name: "fadeOutBlur", type: "number", defaultValue: "6", description: "Blur applied to each image on exit (px)." },
-      { name: "smoothness", type: "number", defaultValue: "0.7", description: "Lerp factor (0–1) — lower values produce silkier entry animation." },
-      { name: "magneticEffect", type: "boolean", defaultValue: "false", description: "Enable magnetic repulsion — trail images push toward the cursor." },
-      { name: "magneticRadius", type: "number", defaultValue: "100", description: "Max distance (px) at which the magnetic force acts." },
-      { name: "magneticStrength", type: "number", defaultValue: "0.3", description: "Strength multiplier of the magnetic force (0–1)." },
-      { name: "className", type: "string", description: "className for the root container (set width, height, background here)." },
-      { name: "children", type: "React.ReactNode", description: "Optional foreground content rendered above the trail layer." },
+      { name: "images", type: "ImageTrailImage[]", defaultValue: "DEFAULT_TRAIL_IMAGES", description: "Images dealt out in turn: { src, alt? }. Defaults to six drawn postcards, so nothing is fetched." },
+      { name: "spacing", type: "number", defaultValue: "48", description: "Pointer travel in px between one image and the next." },
+      { name: "duration", type: "number", defaultValue: "1000", description: "How long each image stays, in ms, before it falls away." },
+      { name: "imageSize", type: "number", defaultValue: "112", description: "Width and height of each image in px." },
+      { name: "cornerRadius", type: "number", defaultValue: "14", description: "Corner radius of each image in px." },
+      { name: "smoothness", type: "number", defaultValue: "0.7", description: "0–1. Higher lets each image glide in from the last one." },
+      { name: "fadeInDuration / fadeOutDuration", type: "number", defaultValue: "0.25 / 0.5", description: "Fade times in seconds." },
+      { name: "fadeInBlur / fadeOutBlur", type: "number", defaultValue: "0 / 6", description: "Blur in px on the way in and out." },
+      { name: "magneticEffect", type: "boolean", defaultValue: "false", description: "Let the pointer shove images that are already down." },
+      { name: "magneticRadius / magneticStrength", type: "number", defaultValue: "110 / 0.3", description: "Reach in px and strength (0–1) of the shove." },
+      { name: "maxTrailImages", type: "number", defaultValue: "16", description: "Most images on screen at once." },
+      { name: "staticPreview", type: "boolean", defaultValue: "false", description: "Lay out a fixed fan of images and ignore the pointer." },
+      { name: "hint", type: "string", defaultValue: "\"Move across the canvas.\"", description: "Hint shown when there are no children. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost pointer draws loops across the area until someone moves over it." },
+      { name: "children", type: "ReactNode", description: "Content drawn above the trail, e.g. a headline." },
+      { name: "className", type: "string", description: "Classes for the root; set its size here (defaults to h-80 w-full)." },
     ],
-    Preview: Previews.PreviewImageTrail,
-    reactSource: `"use client";
+    Preview: Previews.PreviewImageTrailRedesign,
+    previewShell: "plain",
+    previewSections: [
+      {
+        title: "Trail",
+        Preview: Previews.PreviewImageTrailRedesign,
+        reactSource: `"use client";
 
 import { ImageTrail } from "@/components/image-trail";
 
-const IMAGES = [
-  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
-  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
-  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
-  { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300&q=80", alt: "Autumn" },
-];
+export function Postcards() {
+  return <ImageTrail className="h-96 w-full" />;
+}`,
+      },
+      {
+        title: "Magnetic, with a headline",
+        Preview: Previews.PreviewImageTrailMagnetic,
+        reactSource: `"use client";
 
-export function ImageTrailExample() {
+import { ImageTrail } from "@/components/image-trail";
+
+export function SummerHero() {
   return (
-    <ImageTrail
-      images={IMAGES}
-      spacing={36}
-      duration={900}
-      imageSize={120}
-      cornerRadius={10}
-      fadeOutBlur={6}
-      className="h-96 w-full rounded-2xl border border-border bg-muted/20"
-    >
+    <ImageTrail magneticEffect magneticStrength={0.5} spacing={36} duration={1600} cornerRadius={48} className="h-96 w-full">
       <div className="pointer-events-none flex h-full items-center justify-center">
-        <p className="select-none text-sm text-muted-foreground/50">Move cursor here</p>
+        <h2 className="text-3xl font-semibold tracking-tight">Summer, collected.</h2>
       </div>
     </ImageTrail>
   );
 }`,
-    reactExamples: [
-      {
-        title: "With magnetic effect",
-        code: `"use client";
+      },
+    ],
+    reactSource: `"use client";
 
 import { ImageTrail } from "@/components/image-trail";
 
-const IMAGES = [
-  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
-  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
-  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
+const photos = [
+  { src: "/photos/coast.jpg", alt: "Coast" },
+  { src: "/photos/market.jpg", alt: "Market" },
+  { src: "/photos/peaks.jpg", alt: "Peaks" },
+  { src: "/photos/harbour.jpg", alt: "Harbour" },
 ];
 
-export function MagneticTrailExample() {
+export function TravelHero() {
   return (
-    <ImageTrail
-      images={IMAGES}
-      spacing={28}
-      duration={1100}
-      imageSize={100}
-      cornerRadius={50}
-      fadeOutBlur={8}
-      magneticEffect
-      magneticStrength={0.35}
-      magneticRadius={120}
-      className="h-96 w-full rounded-2xl border border-border bg-muted/20"
-    />
+    <ImageTrail images={photos} imageSize={140} spacing={56} className="h-[520px] w-full">
+      <div className="pointer-events-none flex h-full items-center justify-center">
+        <h1 className="text-6xl font-semibold tracking-tight">Go somewhere.</h1>
+      </div>
+    </ImageTrail>
   );
 }`,
-      },
-    ],
     tailwindSource: `"use client";
 
 import { ImageTrail } from "@/components/image-trail";
@@ -6807,442 +4569,100 @@ export function ImageTrailExample() {
     </ImageTrail>
   );
 }`,
+    resourceLinks: [{ label: "Live demo", href: "/demos/image-trail" }],
   },
   {
     slug: "avatar-group",
     name: "Avatar Group",
-    description: "Overlapping avatar stack with per-avatar entrance animations (flip, slide, scale, bounce), four hover styles, name tooltips, and automatic color-coded fallback initials when no image is supplied.",
+    description: "An overlapping stack of avatars that behaves like a dock: the face under the pointer swells and rises, its neighbours lean out of the way and a single name pill glides from face to face. Past a maximum a +N chip opens the rest, and every avatar is focusable from the keyboard.",
     categorySlug: "motion-effects",
-    tags: ["avatar", "group", "users", "social proof", "tooltip", "framer-motion", "spring", "overlap"],
+    tags: ["avatar", "avatar stack", "team", "people", "tooltip", "dock", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 115,
     createdAt: "2026-05-21T00:00:00.000Z",
-    animationKinds: ["spring", "hover"],
+    animationKinds: ["hover", "spring", "magnetic"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewAvatarGroup,
     props: [
-      { name: "size", type: "number", description: "Avatar diameter in px.", defaultValue: "40" },
-      { name: "overlap", type: "number", description: "Pixel overlap between adjacent avatars.", defaultValue: "10" },
-      { name: "showTooltips", type: "boolean", description: "Show name tooltip on hover.", defaultValue: "true" },
-      { name: "hoverAnimation", type: '"scale" | "lift" | "rotate" | "up" | "none"', description: "Animation applied to the avatar under the cursor.", defaultValue: '"lift"' },
-      { name: "hoverScale", type: "number", description: "Scale multiplier applied on hover.", defaultValue: "1.1" },
-      { name: "entranceAnimation", type: '"none" | "fade" | "flip" | "slide" | "scale" | "bounce"', description: "Entrance animation for each avatar on mount.", defaultValue: '"scale"' },
-      { name: "entranceStagger", type: "number", description: "Delay in seconds between each avatar's entrance.", defaultValue: "0.05" },
+      { name: "avatars", type: "AvatarData[]", description: "People to show: { src?, alt?, fallback, tooltip?, bgColor? }. Defaults to an example team." },
+      { name: "size", type: "number", defaultValue: "40", description: "Avatar diameter in px." },
+      { name: "overlap", type: "number", defaultValue: "10", description: "Pixel overlap between neighbours." },
+      { name: "max", type: "number", description: "Show at most this many, then a +N chip that expands the rest." },
+      { name: "hoverAnimation", type: "\"lift\" | \"scale\" | \"rotate\" | \"up\" | \"none\"", defaultValue: "\"lift\"", description: "How faces near the pointer react: lift swells, rises and spreads; scale only swells; rotate fans; up only rises." },
+      { name: "hoverScale", type: "number", defaultValue: "1.3", description: "Largest scale a face reaches right under the pointer." },
+      { name: "showTooltips", type: "boolean", defaultValue: "true", description: "Show the gliding name pill." },
+      { name: "borderWidth", type: "number", defaultValue: "2", description: "Width of the ring around each face, in px." },
+      { name: "borderColor", type: "string", description: "Ring colour. Defaults to white, or the dark surface colour in dark mode." },
+      { name: "entranceAnimation", type: "\"none\" | \"fade\" | \"flip\" | \"slide\" | \"scale\" | \"bounce\"", defaultValue: "\"scale\"", description: "How faces appear on mount." },
+      { name: "entranceStagger", type: "number", defaultValue: "0.05", description: "Seconds between each face's entrance." },
+      { name: "onSelect", type: "(avatar: AvatarData, index: number) => void", description: "Called when a face is clicked or activated with the keyboard." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a virtual pointer across the stack until someone points at it." },
     ],
+    Preview: Previews.PreviewAvatarGroupRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { AvatarGroup, type AvatarData } from "@/components/avatar-group";
 
-export interface AvatarData {
-  src?: string;
-  alt?: string;
-  fallback: string;
-  tooltip?: string;
-  bgColor?: string;
-}
-
-export interface AvatarGroupProps {
-  avatars: AvatarData[];
-  size?: number;
-  overlap?: number;
-  borderWidth?: number;
-  borderColor?: string;
-  showTooltips?: boolean;
-  hoverAnimation?: "scale" | "lift" | "rotate" | "up" | "none";
-  hoverScale?: number;
-  entranceAnimation?: "none" | "fade" | "flip" | "slide" | "scale" | "bounce";
-  entranceStagger?: number;
-  className?: string;
-}
-
-const SPRING = { type: "spring" as const, stiffness: 400, damping: 18, mass: 0.8 };
-
-const DEFAULT_COLOURS = [
-  "#06b6d4", "#8b5cf6", "#10b981", "#f59e0b",
-  "#d946ef", "#0ea5e9", "#f43f5e", "#14b8a6",
+const team: AvatarData[] = [
+  { src: "/avatars/aiko.jpg", fallback: "AK", tooltip: "Aiko Kimura" },
+  { src: "/avatars/mateo.jpg", fallback: "MR", tooltip: "Mateo Ruiz" },
+  { fallback: "SN", tooltip: "Sofia Novak" },
+  { fallback: "JO", tooltip: "James Okafor" },
+  { fallback: "LP", tooltip: "Lena Park" },
+  { fallback: "DV", tooltip: "Dev Varma" },
+  { fallback: "EB", tooltip: "Elsa Berg" },
 ];
 
-function entranceInitial(type: AvatarGroupProps["entranceAnimation"]) {
-  switch (type) {
-    case "flip":   return { rotateY: -90, scale: 0.8, opacity: 0 };
-    case "slide":  return { x: 16, opacity: 0 };
-    case "scale":  return { scale: 0.8, opacity: 0 };
-    case "bounce": return { scale: 0.8, y: 16, opacity: 0 };
-    case "fade":   return { opacity: 0 };
-    default:       return false as const;
-  }
-}
-
-function entranceFinal(type: AvatarGroupProps["entranceAnimation"]) {
-  switch (type) {
-    case "flip":   return { rotateY: 0, scale: 1, opacity: 1 };
-    case "slide":  return { x: 0, opacity: 1 };
-    case "scale":  return { scale: 1, opacity: 1 };
-    case "bounce": return { scale: 1, y: 0, opacity: 1 };
-    case "fade":   return { opacity: 1 };
-    default:       return {};
-  }
-}
-
-function hoverTarget(type: AvatarGroupProps["hoverAnimation"], scale: number) {
-  switch (type) {
-    case "scale":  return { scale };
-    case "lift":   return { y: -4, scale };
-    case "rotate": return { rotate: 5, scale };
-    case "up":     return { y: -8 };
-    default:       return undefined;
-  }
-}
-
-export function AvatarGroup({
-  avatars,
-  size = 40,
-  overlap = 10,
-  borderWidth = 2,
-  borderColor,
-  showTooltips = true,
-  hoverAnimation = "lift",
-  hoverScale = 1.1,
-  entranceAnimation = "scale",
-  entranceStagger = 0.05,
-  className,
-}: AvatarGroupProps) {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const reduce = useReducedMotion();
-
-  const step = size - overlap;
-  const totalWidth = avatars.length > 0
-    ? avatars.length * size - (avatars.length - 1) * overlap
-    : 0;
-
-  const initial = reduce ? false : entranceInitial(entranceAnimation);
-  const finalState = entranceFinal(entranceAnimation);
-  const hoverAnim = reduce ? undefined : hoverTarget(hoverAnimation, hoverScale);
-
-  return (
-    <div
-      className={cn("relative", className)}
-      style={{ width: totalWidth, height: size }}
-    >
-      {avatars.map((avatar, index) => {
-        const bgColor = avatar.bgColor ?? DEFAULT_COLOURS[index % DEFAULT_COLOURS.length];
-        return (
-          <motion.div
-            key={index}
-            className="absolute top-0 select-none"
-            style={{
-              left: index * step,
-              width: size,
-              height: size,
-              zIndex: hoveredIndex === index ? avatars.length + 10 : avatars.length - index,
-            }}
-            initial={initial}
-            animate={finalState}
-            transition={{ ...SPRING, delay: reduce ? 0 : entranceStagger * index }}
-            whileHover={hoverAnim}
-            onHoverStart={() => setHoveredIndex(index)}
-            onHoverEnd={() => setHoveredIndex(null)}
-          >
-            <div
-              className={cn(
-                "flex items-center justify-center rounded-full overflow-hidden cursor-pointer",
-                !borderColor && "ring-2 ring-background dark:ring-zinc-900",
-              )}
-              style={{
-                width: size,
-                height: size,
-                backgroundColor: bgColor,
-                ...(borderColor ? { boxShadow: \`0 0 0 \${borderWidth}px \${borderColor}\` } : {}),
-              }}
-            >
-              {avatar.src ? (
-                <img src={avatar.src} alt={avatar.alt ?? avatar.tooltip ?? avatar.fallback}
-                  width={size} height={size} className="h-full w-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.style.display = "none";
-                    const sib = e.currentTarget.nextElementSibling as HTMLElement | null;
-                    if (sib) sib.style.display = "flex";
-                  }}
-                />
-              ) : null}
-              <span className="flex items-center justify-center w-full h-full font-semibold text-white"
-                style={{ fontSize: size * 0.35, display: avatar.src ? "none" : "flex" }}>
-                {avatar.fallback}
-              </span>
-            </div>
-
-            {showTooltips && avatar.tooltip && (
-              <AnimatePresence>
-                {hoveredIndex === index && (
-                  <motion.div key="tip"
-                    initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 4 }} transition={{ duration: 0.15 }}
-                    className="pointer-events-none absolute z-50"
-                    style={{ bottom: size + 6, left: "50%", transform: "translateX(-50%)" }}
-                  >
-                    <div className="rounded bg-zinc-900 px-2 py-1 text-[11px] font-medium text-white whitespace-nowrap dark:bg-zinc-700">
-                      {avatar.tooltip}
-                    </div>
-                    <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-700" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            )}
-          </motion.div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Usage example ─────────────────────────────────────────────────────────────
-export function SocialProofAvatars() {
-  return (
-    <AvatarGroup
-      avatars={[
-        { fallback: "PS", tooltip: "Priya Sharma",   bgColor: "#06b6d4" },
-        { fallback: "JK", tooltip: "James Kowalski", bgColor: "#8b5cf6" },
-        { fallback: "SC", tooltip: "Sofia Chen",     bgColor: "#10b981" },
-        { fallback: "MR", tooltip: "Marcus Reid",    bgColor: "#f59e0b" },
-        { fallback: "AN", tooltip: "Aisha Nkosi",    bgColor: "#d946ef" },
-      ]}
-      size={40}
-      overlap={10}
-      hoverAnimation="lift"
-      entranceAnimation="scale"
-    />
-  );
+export function ProjectMembers() {
+  return <AvatarGroup avatars={team} size={44} overlap={12} max={5} onSelect={(person) => console.log(person.tooltip)} />;
 }`,
     tailwindSource: tw,
   },
   {
     slug: "feature-tools-card",
     name: "Feature Tools Card",
-    description: "A dark glass card with five magnetic icon slots, a rotating conic-gradient orbit ring, and 3-D tilt physics. Swap the default integration icons for any SVG or image.",
+    description: "An integrations card: five tool icons ride a slow ring round your app's hub, each wired to it by a line that carries small packets inward. Bring the pointer near and the tools lean toward it like magnets, their line lights up and they snap back with a wobble when it moves away, while the whole card tilts toward the pointer.",
     categorySlug: "cards",
-    tags: ["card", "icons", "integrations", "tilt", "3d", "magnetic", "orbit", "glassmorphism"],
+    tags: ["card", "integrations", "icons", "magnetic", "orbit", "tilt", "3d", "feature", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 130,
     createdAt: "2026-05-21T00:00:00.000Z",
-    animationKinds: ["3d", "hover", "spring"],
-    dependencies: [],
-    Preview: Previews.PreviewFeatureToolsCard,
+    animationKinds: ["hover", "magnetic", "3d", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "title", type: "string", description: "Card heading text.", defaultValue: '"Feature Block Animated Card"' },
-      { name: "description", type: "string", description: "Supporting description below the heading.", defaultValue: '"A card that showcases a set of tools your platform connects with."' },
-      { name: "cardBg", type: "string", description: "CSS background value for the card surface.", defaultValue: '"rgba(40,40,40,0.70)"' },
-      { name: "enableTilt", type: "boolean", description: "Enable 3-D perspective tilt on mouse move.", defaultValue: "true" },
-      { name: "tiltStrength", type: "number", description: "Max tilt rotation in degrees.", defaultValue: "8" },
-      { name: "enableMagnetic", type: "boolean", description: "Enable magnetic icon attraction toward cursor.", defaultValue: "true" },
-      { name: "magneticStrength", type: "number", description: "Magnetic pull multiplier (0–1).", defaultValue: "0.4" },
-      { name: "magneticRadius", type: "number", description: "Cursor distance in px at which magnetic pull begins.", defaultValue: "120" },
-      { name: "enableOrbit", type: "boolean", description: "Show the conic-gradient orbit ring.", defaultValue: "true" },
-      { name: "orbitSpeed", type: "number", description: "Orbit ring full-rotation duration in seconds.", defaultValue: "18" },
-      { name: "orbitColor", type: "string", description: "CSS color for the orbit sweep segments.", defaultValue: '"rgba(255,255,255,0.18)"' },
+      { name: "title", type: "string", defaultValue: "\"Connects with your stack\"", description: "Card heading." },
+      { name: "description", type: "string", description: "Line under the heading." },
+      { name: "icon1 ... icon5", type: "ReactNode", description: "Replace the drawn mail, chat, calendar, docs and cloud glyphs (shown on a white tile)." },
+      { name: "hubIcon", type: "ReactNode", description: "Logo in the hub the tools connect to." },
+      { name: "cardBg", type: "string", description: "CSS background for the card. Defaults to white, dark grey in dark mode." },
+      { name: "enableTilt", type: "boolean", defaultValue: "true", description: "3D tilt toward the pointer." },
+      { name: "tiltStrength", type: "number", defaultValue: "8", description: "Maximum tilt in degrees." },
+      { name: "enableMagnetic", type: "boolean", defaultValue: "true", description: "Icons lean toward the pointer." },
+      { name: "magneticStrength", type: "number", defaultValue: "0.4", description: "Share of the distance an icon travels toward the pointer, 0 to 1." },
+      { name: "magneticRadius", type: "number", defaultValue: "120", description: "Distance at which an icon starts to feel the pointer, in px." },
+      { name: "enableOrbit", type: "boolean", defaultValue: "true", description: "Icons ride slowly round the ring." },
+      { name: "orbitSpeed", type: "number", defaultValue: "36", description: "Seconds per full turn of the ring." },
+      { name: "orbitColor", type: "string", description: "Colour of the dashed ring." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a virtual pointer round the ring until someone touches the card." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
     ],
+    Preview: Previews.PreviewFeatureToolsCardRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { FeatureToolsCard } from "@/components/feature-tools-card";
 
-const ORBIT_KEYFRAMES = \`@keyframes ftc-orbit-spin { to { transform: rotate(360deg); } }\`;
-
-// ── default icons ──────────────────────────────────────────────────────────────
-function GithubIcon() {
+export function IntegrationsCard() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="w-full h-full">
-      <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-    </svg>
-  );
-}
-
-function NotionIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="w-full h-full">
-      <path fillRule="evenodd" clipRule="evenodd" d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466l1.823 1.447zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933l3.222-.187z" />
-    </svg>
-  );
-}
-
-function GmailIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full">
-      <path d="M3.5 5.5h17A1.5 1.5 0 0 1 22 7v10a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 17V7a1.5 1.5 0 0 1 1.5-1.5z" fill="#FFFFFF" />
-      <path d="M22 7v10a1.5 1.5 0 0 1-1.5 1.5h-2V10.66L22 7z" fill="#4285F4" />
-      <path d="M2 7v10a1.5 1.5 0 0 0 1.5 1.5h2V10.66L2 7z" fill="#34A853" />
-      <path d="M5.5 18.5V10.66L12 14.5l6.5-3.84v7.84h-13z" fill="#EA4335" />
-      <path d="M22 7L12 13.5 2 7l1-1.5h18L22 7z" fill="#FBBC04" />
-    </svg>
-  );
-}
-
-function SlackIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full">
-      <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z" fill="#E01E5A" />
-      <path d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z" fill="#36C5F0" />
-      <path d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z" fill="#2EB67D" />
-      <path d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z" fill="#ECB22E" />
-    </svg>
-  );
-}
-
-function DriveIcon() {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-full h-full">
-      <path d="M7.71 3.5L1.15 15l3.42 6 6.55-11.5z" fill="#0066DA" />
-      <path d="M16.29 3.5H7.71l6.55 11.5h8.59z" fill="#FFC107" />
-      <path d="M22.85 15h-8.59l-3.16 5.5h8.31z" fill="#1B872B" />
-      <path d="M14.26 15l-3.14-5.5L7.71 3.5l3.42 6h.01l3.12 5.5z" fill="#EA4335" />
-      <path d="M22.85 15l-3.14-5.5h-5.45l3.14 5.5z" fill="#188038" />
-    </svg>
-  );
-}
-
-export interface FeatureToolsCardProps {
-  title?: string;
-  description?: string;
-  cardBg?: string;
-  icon1?: React.ReactNode;
-  icon2?: React.ReactNode;
-  icon3?: React.ReactNode;
-  icon4?: React.ReactNode;
-  icon5?: React.ReactNode;
-  enableTilt?: boolean;
-  tiltStrength?: number;
-  enableMagnetic?: boolean;
-  magneticStrength?: number;
-  magneticRadius?: number;
-  enableOrbit?: boolean;
-  orbitSpeed?: number;
-  orbitColor?: string;
-  className?: string;
-}
-
-export function FeatureToolsCard({
-  title = "Feature Block Animated Card",
-  description = "A card that showcases a set of tools your platform connects with.",
-  cardBg = "rgba(40,40,40,0.70)",
-  icon1, icon2, icon3, icon4, icon5,
-  enableTilt = true,
-  tiltStrength = 8,
-  enableMagnetic = true,
-  magneticStrength = 0.4,
-  magneticRadius = 120,
-  enableOrbit = true,
-  orbitSpeed = 18,
-  orbitColor = "rgba(255,255,255,0.18)",
-  className,
-}: FeatureToolsCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const magnetRefs = useRef<(HTMLDivElement | null)[]>([]);
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-    function onMove(e: MouseEvent) {
-      const rect = card!.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-      if (enableTilt) {
-        const rx = ((my - rect.height / 2) / (rect.height / 2)) * -tiltStrength;
-        const ry = ((mx - rect.width / 2) / (rect.width / 2)) * tiltStrength;
-        card!.style.transform = \`perspective(900px) rotateX(\${rx}deg) rotateY(\${ry}deg)\`;
-      }
-      if (enableMagnetic) {
-        magnetRefs.current.forEach((m) => {
-          if (!m) return;
-          const r = m.getBoundingClientRect();
-          const cx = r.left + r.width / 2 - rect.left;
-          const cy = r.top + r.height / 2 - rect.top;
-          const dx = mx - cx;
-          const dy = my - cy;
-          const dist = Math.hypot(dx, dy);
-          if (dist < magneticRadius) {
-            const pull = (1 - dist / magneticRadius) * magneticStrength;
-            m.style.transform = \`translate(\${dx * pull}px, \${dy * pull}px)\`;
-          } else {
-            m.style.transform = "translate(0,0)";
-          }
-        });
-      }
-    }
-    function onLeave() {
-      if (enableTilt) card!.style.transform = "perspective(900px) rotateX(0) rotateY(0)";
-      if (enableMagnetic) magnetRefs.current.forEach((m) => { if (m) m.style.transform = "translate(0,0)"; });
-    }
-    card.addEventListener("mousemove", onMove);
-    card.addEventListener("mouseleave", onLeave);
-    return () => { card.removeEventListener("mousemove", onMove); card.removeEventListener("mouseleave", onLeave); };
-  }, [enableTilt, tiltStrength, enableMagnetic, magneticStrength, magneticRadius]);
-
-  const icons = [
-    { node: icon1 ?? <GithubIcon />, size: "w-8 h-8",  iconSize: "w-4 h-4" },
-    { node: icon2 ?? <NotionIcon />, size: "w-12 h-12", iconSize: "w-6 h-6" },
-    { node: icon3 ?? <GmailIcon />,  size: "w-16 h-16", iconSize: "w-8 h-8" },
-    { node: icon4 ?? <SlackIcon />,  size: "w-12 h-12", iconSize: "w-6 h-6" },
-    { node: icon5 ?? <DriveIcon />,  size: "w-8 h-8",  iconSize: "w-4 h-4" },
-  ];
-
-  return (
-    <div
-      ref={cardRef}
-      className={cn("w-full max-w-sm rounded-xl p-8", className)}
-      style={{
-        background: cardBg,
-        border: "1px solid rgba(255,255,255,0.10)",
-        boxShadow: "inset 2px 4px 16px 0px rgba(248,248,248,0.06)",
-        transformStyle: "preserve-3d",
-        transition: "transform 0.2s ease-out",
-        willChange: "transform",
-      }}
-    >
-      <style>{ORBIT_KEYFRAMES}</style>
-      <div
-        className="relative h-80 rounded-xl overflow-hidden"
-        style={{
-          background: cardBg,
-          WebkitMaskImage: "radial-gradient(50% 50% at 50% 50%, white 0%, transparent 100%)",
-          maskImage: "radial-gradient(50% 50% at 50% 50%, white 0%, transparent 100%)",
-        }}
-      >
-        {enableOrbit && (
-          <div
-            className="pointer-events-none absolute top-1/2 left-1/2 rounded-full"
-            style={{
-              width: 280, height: 280, marginTop: -140, marginLeft: -140,
-              background: \`conic-gradient(from 0deg, transparent 0%, \${orbitColor} 25%, transparent 50%, \${orbitColor} 75%, transparent 100%)\`,
-              WebkitMask: "radial-gradient(circle, transparent 56%, black 58%, black 80%, transparent 82%)",
-              mask: "radial-gradient(circle, transparent 56%, black 58%, black 80%, transparent 82%)",
-              animation: \`ftc-orbit-spin \${orbitSpeed}s linear infinite\`,
-              zIndex: 1,
-            }}
-          />
-        )}
-        <div className="relative z-10 flex h-full items-center justify-center">
-          <div className="flex flex-row items-center justify-center gap-2">
-            {icons.map(({ node, size, iconSize }, i) => (
-              <div
-                key={i}
-                ref={(el) => { magnetRefs.current[i] = el; }}
-                className="inline-flex"
-                style={{ transition: "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)", willChange: "transform" }}
-              >
-                <div className={cn("rounded-full flex items-center justify-center overflow-hidden cursor-pointer transition-all duration-350 hover:scale-110", size)}
-                  style={{ background: "rgba(248,248,248,0.01)", boxShadow: "inset 0px 0px 8px 0px rgba(248,248,248,0.25), 0px 32px 24px -16px rgba(0,0,0,0.40)" }}
-                >
-                  <span className={cn("pointer-events-none", iconSize)}>{node}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <h3 className="mt-2 pt-2 text-lg font-semibold tracking-tight text-white">{title}</h3>
-      <p className="mt-1 text-sm leading-relaxed text-white/50">{description}</p>
-    </div>
+    <FeatureToolsCard
+      title="Works with your tools"
+      description="Connect mail, chat and storage in a couple of clicks."
+      icon1={<img src="/logos/mail.svg" alt="" />}
+      icon2={<img src="/logos/chat.svg" alt="" />}
+      hubIcon={<img src="/logo.svg" alt="" className="size-7" />}
+      magneticStrength={0.5}
+      orbitSpeed={30}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -7250,269 +4670,63 @@ export function FeatureToolsCard({
   {
     slug: "link-preview",
     name: "Link Preview",
-    description:
-      "Hover-triggered image tooltip that transforms inline text links into cinematic visual previews. Spring-animated entrance with blur, scale, mouse-tracking tilt, and a soft floating glide — perfect for blogs, portfolios, and product pages.",
+    description: "An inline link that lifts a preview card out of the text on hover or keyboard focus. The card rises with a stretch and settles, leans and slides as the pointer moves along the link, and draws its own cover from the title and site when no image is given.",
     categorySlug: "motion-effects",
-    tags: ["tooltip", "hover", "link", "preview", "framer-motion", "blog", "animation"],
+    tags: ["link", "tooltip", "hover card", "preview", "blog", "inline", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-05-21T00:00:00.000Z",
     animationKinds: ["hover", "spring"],
     dependencies: ["framer-motion"],
-    Preview: Previews.PreviewLinkPreview,
-    previewShell: "plain",
     props: [
-      { name: "href", type: "string", description: "Destination URL — internal path or external https:// link." },
-      { name: "image", type: "string", description: "Image URL to display inside the preview card." },
-      { name: "title", type: "string", description: "Optional label shown beneath the card alongside the hostname.", defaultValue: "undefined" },
-      { name: "children", type: "React.ReactNode", description: "The visible link text rendered inline." },
-      { name: "width", type: "number", description: "Preview card width in px.", defaultValue: "320" },
-      { name: "height", type: "number", description: "Preview card height in px.", defaultValue: "200" },
-      { name: "delay", type: "number", description: "Entrance animation delay in seconds.", defaultValue: "0.08" },
-      { name: "className", type: "string", description: "Extra className applied to the anchor element.", defaultValue: "undefined" },
-      { name: "previewClassName", type: "string", description: "Extra className applied to the tooltip wrapper.", defaultValue: "undefined" },
-      { name: "openInNewTab", type: "boolean", description: "Opens the link in a new tab when true.", defaultValue: "true" },
+      { name: "href", type: "string", description: "Destination: an internal path or a full URL." },
+      { name: "children", type: "React.ReactNode", description: "The link text." },
+      { name: "image", type: "string", description: "Picture for the card. Without one the card draws a cover from the title and site name." },
+      { name: "title", type: "string", description: "Card heading." },
+      { name: "description", type: "string", description: "One or two lines under the heading." },
+      { name: "width", type: "number", defaultValue: "300", description: "Card width in px." },
+      { name: "height", type: "number", defaultValue: "168", description: "Height of the picture area in px." },
+      { name: "delay", type: "number", defaultValue: "0.08", description: "Wait before the card rises, in seconds." },
+      { name: "open", type: "boolean", description: "Controls the card from outside. Leave unset to open on hover and focus." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and closes the card on its own until someone hovers or focuses the link." },
+      { name: "openInNewTab", type: "boolean", defaultValue: "true", description: "Opens the link in a new tab." },
+      { name: "className", type: "string", description: "Extra classes for the link." },
+      { name: "previewClassName", type: "string", description: "Extra classes for the floating card." },
     ],
+    Preview: Previews.PreviewLinkPreviewRedesign,
+    previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
-import { createPortal } from "react-dom";
-import Link from "next/link";
-import {
-  motion,
-  AnimatePresence,
-  useSpring,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
-import { cn } from "@/lib/utils";
+import { LinkPreview } from "@/components/link-preview";
 
-export type LinkPreviewProps = {
-  href: string;
-  image: string;
-  title?: string;
-  children: React.ReactNode;
-  width?: number;
-  height?: number;
-  delay?: number;
-  className?: string;
-  previewClassName?: string;
-  openInNewTab?: boolean;
-};
-
-function getHostname(href: string): string {
-  try {
-    return new URL(href).hostname.replace(/^www\\./, "");
-  } catch {
-    return "";
-  }
-}
-
-export function LinkPreview({
-  href,
-  image,
-  title,
-  children,
-  width = 320,
-  height = 200,
-  delay = 0.08,
-  className,
-  previewClassName,
-  openInNewTab = true,
-}: LinkPreviewProps) {
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-  const [imageError, setImageError] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
-  const [anchorPos, setAnchorPos] = React.useState({ top: 0, left: 0 });
-
-  const anchorRef = React.useRef<HTMLAnchorElement>(null);
-
-  const mouseXRaw = useMotionValue(0);
-  const springX = useSpring(mouseXRaw, { stiffness: 90, damping: 16, mass: 0.6 });
-  const rotateZ = useTransform(springX, [-1, 1], [-5, 5]);
-  const shiftX = useTransform(springX, [-1, 1], [-12, 12]);
-
-  React.useEffect(() => {
-    setMounted(true);
-    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
-  }, []);
-
-  React.useEffect(() => {
-    setImageLoaded(false);
-    setImageError(false);
-  }, [image]);
-
-  function captureAnchorPos() {
-    const el = anchorRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setAnchorPos({ top: rect.top, left: rect.left + rect.width / 2 });
-  }
-
-  function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
-    const el = anchorRef.current;
-    if (!el) return;
-    const { left, width: w } = el.getBoundingClientRect();
-    mouseXRaw.set(((e.clientX - left) / w) * 2 - 1);
-  }
-
-  function handleMouseEnter() { captureAnchorPos(); setIsVisible(true); }
-  function handleMouseLeave() { setIsVisible(false); mouseXRaw.set(0); }
-  function handleTouchStart(e: React.TouchEvent) {
-    e.preventDefault();
-    captureAnchorPos();
-    setIsVisible((v) => !v);
-  }
-
-  const hostname = getHostname(href);
-  const tooltipTop = anchorPos.top - height - 56;
-
-  const tooltip = (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          key={\`link-preview-\${href}\`}
-          initial={{ opacity: 0, y: 14, scale: 0.92, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: 10, scale: 0.94, filter: "blur(6px)", transition: { duration: 0.15, ease: "easeIn" } }}
-          transition={{
-            type: "spring",
-            stiffness: 250,
-            damping: 22,
-            mass: 0.65,
-            delay,
-            filter: { type: "tween", duration: 0.2, ease: "easeOut", delay },
-            opacity: { type: "tween", duration: 0.18, ease: "easeOut", delay },
-          }}
-          style={{
-            position: "fixed",
-            top: tooltipTop,
-            left: anchorPos.left,
-            marginLeft: -(width / 2),
-            x: shiftX,
-            rotateZ,
-            width,
-            transformOrigin: "bottom center",
-            zIndex: 9999,
-          }}
-          className={cn("pointer-events-none", previewClassName)}
-        >
-          <motion.div
-            animate={{ y: [0, -4, 0] }}
-            transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
-          >
-            <div
-              className={cn(
-                "relative overflow-hidden rounded-2xl border bg-white",
-                "border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]",
-                "dark:border-white/[0.10] dark:bg-neutral-900",
-                "dark:shadow-[0_8px_30px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)]",
-              )}
-              style={{ width, height }}
-            >
-              {!imageError ? (
-                <>
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 animate-pulse bg-neutral-100 dark:bg-neutral-800" />
-                  )}
-                  <img
-                    src={image}
-                    alt={title ?? "Link preview"}
-                    width={width}
-                    height={height}
-                    draggable={false}
-                    className={cn(
-                      "h-full w-full object-cover transition-opacity duration-300",
-                      imageLoaded ? "opacity-100" : "opacity-0",
-                    )}
-                    onLoad={() => setImageLoaded(true)}
-                    onError={() => setImageError(true)}
-                  />
-                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/[0.07] dark:ring-white/[0.07]" />
-                </>
-              ) : (
-                <div className="flex h-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-100 px-6 dark:from-violet-950/40 dark:via-indigo-950/30 dark:to-purple-950/40">
-                  <div className="size-12 rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 shadow-lg shadow-violet-400/30" />
-                  <div className="space-y-2.5 text-center">
-                    <div className="mx-auto h-3 w-32 rounded-full bg-violet-200/80 dark:bg-violet-700/50" />
-                    <div className="mx-auto h-2 w-24 rounded-full bg-indigo-200/60 dark:bg-indigo-800/40" />
-                    <div className="mx-auto h-2 w-16 rounded-full bg-purple-100/80 dark:bg-purple-800/30" />
-                  </div>
-                  {hostname && (
-                    <span className="font-mono text-[11px] text-violet-400/80 dark:text-violet-500/70">
-                      {hostname}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {(title || hostname) && (
-              <div className="mt-2.5 flex items-center gap-2 px-0.5">
-                {title && (
-                  <span className="flex-1 truncate text-[11px] font-semibold leading-none text-neutral-700 dark:text-neutral-300">
-                    {title}
-                  </span>
-                )}
-                {hostname && (
-                  <span className="shrink-0 font-mono text-[10px] text-neutral-400 dark:text-neutral-600">
-                    {hostname}
-                  </span>
-                )}
-              </div>
-            )}
-
-            <div className="absolute -bottom-[7px] left-1/2 size-3.5 -translate-x-1/2 rotate-45 rounded-sm border-b border-r border-neutral-200/80 bg-white dark:border-white/[0.10] dark:bg-neutral-900" />
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
+export function ArticleIntro() {
   return (
-    <>
-      <Link
-        ref={anchorRef}
-        href={href}
-        {...(openInNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-        onMouseEnter={isTouchDevice ? undefined : handleMouseEnter}
-        onMouseLeave={isTouchDevice ? undefined : handleMouseLeave}
-        onMouseMove={isTouchDevice ? undefined : handleMouseMove}
-        onTouchStart={isTouchDevice ? handleTouchStart : undefined}
-        className={cn(
-          "relative inline font-semibold",
-          "text-neutral-800 dark:text-neutral-100",
-          "underline decoration-violet-400/60 decoration-[1.5px] underline-offset-[3px]",
-          "transition-colors duration-150",
-          "hover:text-violet-600 hover:decoration-violet-500",
-          "dark:hover:text-violet-400 dark:hover:decoration-violet-400",
-          className,
-        )}
-      >
-        {children}
-      </Link>
-      {mounted && createPortal(tooltip, document.body)}
-    </>
+    <p className="max-w-prose text-lg leading-relaxed">
+      We rebuilt the editor on top of{" "}
+      <LinkPreview href="https://react.dev" title="React" description="The library for web and native user interfaces." image="/og/react.png">
+        React
+      </LinkPreview>{" "}
+      and wrote up{" "}
+      <LinkPreview href="/blog/migration" title="How we migrated" description="Six weeks, zero downtime." openInNewTab={false}>
+        how the migration went
+      </LinkPreview>
+      .
+    </p>
   );
-}
-
-export default LinkPreview;`,
+}`,
     tailwindSource: tw,
   },
   {
     slug: "tick-slider",
     name: "Tick Slider",
     registryCliName: "tick-slider",
-    description:
-      "A value slider drawn as a row of fine tick marks that fill as you drag, swell into a soft wave under the pointer and read out a rolling number.",
+    description: "A slider drawn as a row of ticks that fill with colour up to the value. Ticks swell in a wave around the pointer and the needle, the needle leans into the direction it moves and swings upright when it stops, and the number above rolls digit by digit.",
     categorySlug: "inputs-controls",
-    tags: ["slider", "range", "input", "ticks", "volume", "drag", "rolling number", "framer-motion"],
+    tags: ["slider", "range", "ticks", "input", "volume", "rolling number", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 168,
     createdAt: "2026-10-19",
-    animationKinds: ["drag", "spring", "hover"],
+    animationKinds: ["drag", "spring"],
     dependencies: ["framer-motion"],
     props: [
       { name: "value", type: "number", description: "Controlled value." },
@@ -7523,32 +4737,36 @@ export default LinkPreview;`,
       { name: "max", type: "number", defaultValue: "100", description: "Highest value." },
       { name: "step", type: "number", defaultValue: "1", description: "Values snap to multiples of this." },
       { name: "ticks", type: "number", defaultValue: "36", description: "How many tick marks the track is drawn with." },
-      { name: "label", type: "string", description: "Visible label above the track, also used as the accessible name." },
-      { name: "accent", type: "string", description: "Colour of the filled ticks and the number. Defaults to the text colour." },
-      { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Tick height and number size." },
-      { name: "showValue", type: "boolean", defaultValue: "true", description: "Show the rolling number beside the track." },
-      { name: "unit", type: "string", description: 'Suffix after the number, e.g. "%".' },
-      { name: "magnify", type: "number", defaultValue: "0.55", description: "How much ticks near the pointer grow. 0 turns the wave off." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables dragging and keys." },
-      { name: "className", type: "string", description: "Extra classes on the root." },
+      { name: "label", type: "string", description: "Visible label above the track; also the accessible name." },
+      { name: "unit", type: "string", description: "Suffix after the number, e.g. \"%\"." },
+      { name: "accent", type: "string", description: "Colour of the filled ticks and the needle. Defaults to system blue." },
+      { name: "size", type: "\"sm\" | \"md\" | \"lg\"", defaultValue: "\"md\"", description: "Tick height and number size." },
+      { name: "showValue", type: "boolean", defaultValue: "true", description: "Show the rolling number above the track." },
+      { name: "magnify", type: "number", defaultValue: "0.55", description: "How much ticks near the pointer and needle grow; 0 turns the wave off." },
+      { name: "hint", type: "string", defaultValue: "\"Drag across the ticks, or use the arrow keys.\"", description: "One-line caption under the track; an empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps the needle to a few values until someone touches it." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the slider and ignores input." },
     ],
-    Preview: Previews.PreviewTickSlider,
+    Preview: Previews.PreviewTickSliderRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { TickSlider } from "@/components/tick-slider";
 
-export function VolumeControl() {
-  const [volume, setVolume] = React.useState(64);
+export function BrushSize() {
+  const [size, setSize] = useState(24);
 
   return (
     <TickSlider
-      label="Volume"
-      value={volume}
-      onChange={setVolume}
-      unit="%"
-      ticks={40}
+      label="Brush size"
+      value={size}
+      onChange={setSize}
+      min={1}
+      max={64}
+      unit="px"
+      ticks={32}
+      onCommit={(v) => console.log("saved", v)}
     />
   );
 }`,
@@ -7558,46 +4776,45 @@ export function VolumeControl() {
     slug: "time-scrubber",
     name: "Time Scrubber",
     registryCliName: "time-scrubber",
-    description:
-      "A time picker card where you drag, flick or scroll a ruler of minute ticks under a fixed needle, with momentum, snapping and a rolling clock readout.",
+    description: "A time picker drawn as a ruler you drag or fling under a fixed needle. The ruler coasts and lands exactly on a snap point, the needle ticks at every interval it crosses and bounces when the ruler lands, the digits roll and a small sky chip shifts from night to dawn to day.",
     categorySlug: "inputs-controls",
-    tags: ["time picker", "scrubber", "ruler", "slider", "booking", "schedule", "drag", "momentum", "framer-motion"],
+    tags: ["time picker", "ruler", "scrubber", "input", "inertia", "rolling number", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 163,
     createdAt: "2026-10-19",
     animationKinds: ["drag", "spring"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "value", type: "number", description: "Controlled time in minutes since midnight (0–1439)." },
-      { name: "defaultValue", type: "number", defaultValue: "570", description: "Starting time when uncontrolled (570 = 9:30 AM)." },
-      { name: "onChange", type: "(minutes: number) => void", description: "Called with the snapped time whenever it changes." },
-      { name: "onCommit", type: "(minutes: number) => void", description: "Called once the ruler comes to rest." },
-      { name: "interval", type: "number", defaultValue: "15", description: "Minutes the ruler snaps to (5, 10, 15 or 30 read best)." },
-      { name: "format", type: '"12h" | "24h"', defaultValue: '"12h"', description: "Clock format for the readout and hour labels." },
-      { name: "accent", type: "string", defaultValue: '"#ef4444"', description: "Colour of the centre needle." },
+      { name: "value", type: "number", description: "Controlled value in minutes since midnight (0-1439)." },
+      { name: "defaultValue", type: "number", defaultValue: "570", description: "Starting value when uncontrolled (9:30)." },
+      { name: "onChange", type: "(minutes: number) => void", description: "Called with the snapped time whenever the user changes it." },
+      { name: "onCommit", type: "(minutes: number) => void", description: "Called once the ruler comes to rest after a user change." },
+      { name: "interval", type: "number", defaultValue: "15", description: "Minutes the ruler snaps to." },
+      { name: "format", type: "\"12h\" | \"24h\"", defaultValue: "\"12h\"", description: "Clock format for the readout and hour labels." },
       { name: "density", type: "number", defaultValue: "1.6", description: "Pixels per minute on the ruler; larger spreads the hours out." },
-      { name: "label", type: "string", description: 'Caption above the time, e.g. "Pickup".' },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables dragging, wheel and keys." },
-      { name: "className", type: "string", description: "Extra classes on the card." },
+      { name: "accent", type: "string", description: "Needle colour. Defaults to system blue." },
+      { name: "label", type: "string", description: "Caption above the time, e.g. \"Pickup\"." },
+      { name: "hint", type: "string", defaultValue: "\"Drag the ruler, or fling it.\"", description: "One-line hint under the ruler; an empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flings the ruler to a few times of day until someone touches it." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the picker and ignores input." },
     ],
-    Preview: Previews.PreviewTimeScrubber,
+    Preview: Previews.PreviewTimeScrubberRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
-import * as React from "react";
+import { useState } from "react";
 import { TimeScrubber } from "@/components/time-scrubber";
 
 export function PickupTime() {
-  // minutes since midnight: 9:30 AM
-  const [time, setTime] = React.useState(9 * 60 + 30);
+  const [minutes, setMinutes] = useState(18 * 60);
 
   return (
     <TimeScrubber
       label="Pickup"
-      value={time}
-      onChange={setTime}
-      interval={15}
-      format="12h"
+      value={minutes}
+      onChange={setMinutes}
+      interval={10}
+      onCommit={(m) => console.log("pickup at", Math.floor(m / 60), m % 60)}
     />
   );
 }`,
@@ -7607,36 +4824,35 @@ export function PickupTime() {
     slug: "slide-to-confirm",
     name: "Slide to Confirm",
     registryCliName: "slide-to-confirm",
-    description:
-      "A swipe-to-confirm pill: drag the knob across with rubber-band resistance, and it snaps home early or locks in, waits on your async action and morphs into a success state.",
+    description: "A slide-to-confirm track for payments and other deliberate actions. The knob stretches along the track in proportion to how fast you drag it and squashes back when it stops, the label shimmers and fades as you pull, and past the threshold the track floods with the success colour while a check draws itself.",
     categorySlug: "inputs-controls",
-    tags: ["slide to confirm", "swipe", "payment", "checkout", "confirm", "button", "drag", "async", "framer-motion"],
+    tags: ["slider", "confirm", "swipe", "payment", "button", "squash and stretch", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 172,
     createdAt: "2026-10-19",
     animationKinds: ["drag", "spring", "press"],
-    dependencies: ["framer-motion", "lucide-react"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "label", type: "string", defaultValue: '"Slide to confirm"', description: "Text inside the track before confirming; also the accessible name." },
-      { name: "successLabel", type: "string", defaultValue: '"Confirmed"', description: "Text shown once confirmed." },
-      { name: "pendingLabel", type: "string", defaultValue: '"Confirming"', description: "Text shown while onConfirm is pending." },
-      { name: "onConfirm", type: "() => void | Promise<unknown>", description: "Runs when the knob reaches the end. Return a promise to show a pending spinner; a rejected promise shakes the knob and slides it back." },
-      { name: "threshold", type: "number", defaultValue: "0.9", description: "How far (0–1) the knob must travel before letting go confirms." },
-      { name: "resetAfter", type: "number", defaultValue: "2200", description: "Return to the start this many ms after success. 0 keeps the success state." },
-      { name: "accent", type: "string", description: "Knob colour. Defaults to ink in light mode and white in dark mode." },
-      { name: "successColor", type: "string", defaultValue: '"#16a34a"', description: "Track colour once confirmed." },
-      { name: "size", type: '"sm" | "md" | "lg"', defaultValue: '"md"', description: "Track height, knob size and text size." },
-      { name: "width", type: "number", description: "Track width in px. Defaults to 260 / 300 / 340 by size." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Locks the knob." },
-      { name: "className", type: "string", description: "Extra classes on the track." },
+      { name: "label", type: "string", defaultValue: "\"Slide to confirm\"", description: "Text inside the track before confirming." },
+      { name: "successLabel", type: "string", defaultValue: "\"Confirmed\"", description: "Text shown once confirmed." },
+      { name: "pendingLabel", type: "string", defaultValue: "\"Confirming\"", description: "Text shown while onConfirm is pending." },
+      { name: "onConfirm", type: "() => void | Promise<unknown>", description: "Runs when the knob reaches the end. Return a promise to show a pending state; reject to bounce back." },
+      { name: "threshold", type: "number", defaultValue: "0.9", description: "How far (0-1) the knob must travel before letting go confirms." },
+      { name: "resetAfter", type: "number", defaultValue: "2200", description: "Return to the start this many ms after success; 0 keeps the success state." },
+      { name: "accent", type: "string", description: "Colour of the trail and the arrow. Defaults to system blue." },
+      { name: "successColor", type: "string", defaultValue: "\"#248a3d\"", description: "Track colour once confirmed." },
+      { name: "size", type: "\"sm\" | \"md\" | \"lg\"", defaultValue: "\"md\"", description: "Track height and default width." },
+      { name: "width", type: "number", description: "Track width in px. Defaults per size (260, 300, 340)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Slides itself across and confirms (without calling onConfirm) until someone touches it." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the track and ignores input." },
     ],
-    Preview: Previews.PreviewSlideToConfirm,
+    Preview: Previews.PreviewSlideToConfirmRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
 import { SlideToConfirm } from "@/components/slide-to-confirm";
 
-async function payInvoice() {
+async function pay() {
   const res = await fetch("/api/pay", { method: "POST" });
   if (!res.ok) throw new Error("Payment failed");
 }
@@ -7644,10 +4860,11 @@ async function payInvoice() {
 export function PayButton() {
   return (
     <SlideToConfirm
-      label="Slide to pay $24"
+      label="Slide to pay $24.00"
       pendingLabel="Paying"
       successLabel="Paid"
-      onConfirm={payInvoice}
+      onConfirm={pay}
+      resetAfter={0}
     />
   );
 }`,
@@ -7847,26 +5064,27 @@ export function PostActions({ postId, likes, likedByMe }: { postId: string; like
     slug: "toast-stack",
     name: "Toast Stack",
     registryCliName: "toast-stack",
-    description:
-      "Notifications that rest in a tidy stack, fan out into a list on hover or focus, and can be swiped away, with optional action buttons.",
+    description: "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open.",
     categorySlug: "cards",
-    tags: ["toast", "notification", "snackbar", "stack", "swipe", "dismiss", "feedback", "framer-motion"],
+    tags: ["toast", "notification", "snackbar", "stack", "swipe", "dismiss", "feedback", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 171,
     createdAt: "2026-10-19",
     animationKinds: ["hover", "drag", "spring", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "toasts", type: "ToastItem[]", description: "Toasts in arrival order; the last sits at the front. Each has id, title, description?, type? (success | error | info) and action? ({ label })." },
-      { name: "onDismiss", type: "(id: string) => void", description: "Called when a toast is swiped away, closed, or dismissed with Escape." },
+      { name: "toasts", type: "ToastItem[]", description: "Toasts in arrival order; the last sits at the front. Each has id, title, description?, type? (success | error | info | warning) and action? ({ label })." },
+      { name: "onDismiss", type: "(id: string) => void", description: "Called when a toast is swiped away, closed, times out, or dismissed with Escape." },
       { name: "onAction", type: "(toast: ToastItem) => void", description: "Called when a toast's action button is pressed." },
-      { name: "position", type: '"top" | "bottom"', defaultValue: '"bottom"', description: "Which edge the stack grows from." },
-      { name: "expand", type: '"hover" | "always"', defaultValue: '"hover"', description: "Fan out on hover/focus, or stay fanned out." },
+      { name: "position", type: "\"top\" | \"bottom\"", defaultValue: "\"bottom\"", description: "Which edge the stack grows from." },
+      { name: "expand", type: "\"hover\" | \"always\"", defaultValue: "\"hover\"", description: "Fan out on hover/focus, or stay fanned out." },
       { name: "max", type: "number", defaultValue: "3", description: "How many toasts are drawn at once." },
-      { name: "width", type: "number", defaultValue: "340", description: "Toast width in px." },
+      { name: "width", type: "number", defaultValue: "340", description: "Toast width in px; shrinks to fit narrow containers." },
+      { name: "duration", type: "number", defaultValue: "0", description: "Dismiss the front toast after this many ms, paused while the stack is open. 0 keeps toasts until closed." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fans the stack open and swipes the front toast away every few seconds until someone touches it." },
       { name: "className", type: "string", description: "Extra classes on the stack." },
     ],
-    Preview: Previews.PreviewToastStack,
+    Preview: Previews.PreviewToastStackRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -7891,6 +5109,7 @@ export function CheckoutNotifications() {
         <ToastStack
           toasts={toasts}
           onDismiss={dismiss}
+          duration={5000}
           onAction={(toast) => {
             dismiss(toast.id);
             void pay();
@@ -7906,41 +5125,41 @@ export function CheckoutNotifications() {
     slug: "upload-dropzone",
     name: "Upload Dropzone",
     registryCliName: "upload-dropzone",
-    description:
-      "A drag-and-drop upload card that lifts and marches its dashed edge while a file hovers, then lists each file with a type badge and a progress ring.",
+    description: "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone.",
     categorySlug: "inputs-controls",
-    tags: ["upload", "dropzone", "drag and drop", "file input", "progress", "attachments", "framer-motion"],
+    tags: ["upload", "dropzone", "file", "drag and drop", "progress", "form", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 158,
     createdAt: "2026-10-19",
     animationKinds: ["drag", "spring", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "accept", type: "string", description: 'Same syntax as the file input accept attribute, e.g. "image/*,.pdf".' },
-      { name: "maxSize", type: "number", defaultValue: "5242880", description: "Largest file accepted, in bytes. Bigger files are listed as errors and the card shakes." },
+      { name: "accept", type: "string", description: "Same syntax as the input accept attribute, e.g. \"image/*,.pdf\"." },
+      { name: "maxSize", type: "number", defaultValue: "5242880", description: "Largest file accepted, in bytes (5 MB)." },
       { name: "multiple", type: "boolean", defaultValue: "true", description: "Accept several files at once." },
       { name: "onFiles", type: "(files: File[]) => void", description: "Called with every batch of accepted files." },
-      { name: "onUpload", type: "(file: File, setProgress: (p: number) => void) => Promise<void>", description: "Upload one file and report progress from 0 to 1. Without it, uploads are simulated." },
-      { name: "initialFiles", type: "{ name: string; size: number; type?: string; progress?: number }[]", description: "Files shown on first render, such as ones already uploaded." },
-      { name: "title", type: "string", defaultValue: '"Drag a file here"', description: "Main line of the card." },
+      { name: "onUpload", type: "(file: File, setProgress: (p: number) => void) => Promise<void>", description: "Upload one file and report progress 0-1; reject to mark it failed. Simulated when omitted." },
+      { name: "initialFiles", type: "{ name: string; size: number; type?: string; progress?: number }[]", description: "Files shown on first render; unfinished ones keep uploading." },
+      { name: "title", type: "string", defaultValue: "\"Drag a file here\"", description: "Main line inside the zone." },
       { name: "hint", type: "string", description: "Secondary line. Defaults to the size limit." },
-      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Tint and dashed edge colour while a file is dragged over." },
-      { name: "disabled", type: "boolean", defaultValue: "false", description: "Ignore drops and clicks." },
-      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+      { name: "accent", type: "string", description: "Tray, marching edge and drag tint colour. Defaults to system blue." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drops a few example files in by itself until someone touches it." },
+      { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the zone and ignores drops and clicks." },
+      { name: "className", type: "string", description: "Extra classes for the 340px-wide wrapper." },
     ],
-    Preview: Previews.PreviewUploadDropzone,
+    Preview: Previews.PreviewUploadDropzoneRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
 import { UploadDropzone } from "@/components/upload-dropzone";
 
-async function upload(file: File, setProgress: (p: number) => void) {
-  await new Promise<void>((resolve, reject) => {
+function upload(file: File, setProgress: (p: number) => void) {
+  return new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "/api/upload");
     xhr.upload.onprogress = (e) => setProgress(e.loaded / e.total);
-    xhr.onload = () => (xhr.status < 300 ? resolve() : reject());
-    xhr.onerror = () => reject();
+    xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(xhr.statusText)));
+    xhr.onerror = () => reject(new Error("Network error"));
     const body = new FormData();
     body.append("file", file);
     xhr.send(body);
@@ -7950,8 +5169,9 @@ async function upload(file: File, setProgress: (p: number) => void) {
 export function Attachments() {
   return (
     <UploadDropzone
-      accept="image/*,video/*,.pdf"
-      maxSize={5 * 1024 * 1024}
+      title="Drop your files"
+      accept="image/*,.pdf"
+      maxSize={10 * 1024 * 1024}
       onUpload={upload}
     />
   );
@@ -7962,44 +5182,41 @@ export function Attachments() {
     slug: "hold-to-record",
     name: "Hold to Record",
     registryCliName: "hold-to-record",
-    description:
-      "A press-and-hold voice button that grows into a live waveform with a timer, cancels when you slide away, and settles into a playable voice note.",
+    description: "Press and hold to record a voice note, release to keep it. A soft halo behind the record dot swells with your voice, the live waveform scrolls in from the right, and sliding left morphs the dot into a bin whose lid opens; let go there to throw the note away. Kept notes become a small player.",
     categorySlug: "inputs-controls",
-    tags: ["voice note", "record", "audio", "microphone", "press and hold", "waveform", "chat", "framer-motion"],
+    tags: ["voice note", "record", "audio", "microphone", "hold", "waveform", "chat", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 162,
     createdAt: "2026-10-19",
-    animationKinds: ["press", "drag", "spring"],
-    dependencies: ["framer-motion", "lucide-react"],
+    animationKinds: ["press", "drag", "layout", "spring"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "onRecorded", type: "(result: { durationMs: number; levels: number[] }) => void", description: "Called when a recording is kept. levels holds loudness samples from 0 to 1." },
+      { name: "onRecorded", type: "(result: { durationMs: number; levels: number[] }) => void", description: "Called when a recording is kept." },
       { name: "onCancel", type: "() => void", description: "Called when a recording is cancelled by sliding left or pressing Escape." },
-      { name: "onDelete", type: "() => void", description: "Called when the kept voice note is deleted." },
-      { name: "maxDuration", type: "number", defaultValue: "60000", description: "Recording stops by itself after this many milliseconds." },
-      { name: "minDuration", type: "number", defaultValue: "400", description: "Holds shorter than this are ignored." },
+      { name: "onDelete", type: "() => void", description: "Called when the kept note is deleted." },
+      { name: "maxDuration", type: "number", defaultValue: "60000", description: "Recording stops by itself after this many ms." },
+      { name: "minDuration", type: "number", defaultValue: "400", description: "Holds shorter than this are ignored, in ms." },
       { name: "useMicrophone", type: "boolean", defaultValue: "false", description: "Drive the waveform from the real microphone (asks for permission). Simulated otherwise." },
-      { name: "cancelDistance", type: "number", defaultValue: "90", description: "How far to slide left, in pixels, before releasing cancels." },
-      { name: "label", type: "string", defaultValue: '"Hold to record"', description: "Button label." },
-      { name: "accent", type: "string", defaultValue: '"#ef4444"', description: "Colour of the recording dot and the live waveform." },
-      { name: "className", type: "string", description: "Extra classes on the wrapper." },
+      { name: "cancelDistance", type: "number", defaultValue: "90", description: "How far to slide left, in px, before releasing cancels." },
+      { name: "label", type: "string", defaultValue: "\"Hold to record\"", description: "Button label." },
+      { name: "accent", type: "string", defaultValue: "\"#ff3b30\"", description: "Colour of the record button, the halo and the live waveform." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Records, plays and deletes a demo note on a loop (no callbacks fire) until someone touches it." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
     ],
-    Preview: Previews.PreviewHoldToRecord,
+    Preview: Previews.PreviewHoldToRecordRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
 import { HoldToRecord } from "@/components/hold-to-record";
 
-export function ChatComposer() {
+export function ChatComposerMic() {
   return (
-    <div className="flex items-center justify-center p-8">
-      <HoldToRecord
-        useMicrophone
-        maxDuration={120_000}
-        onRecorded={({ durationMs }) => {
-          console.log("Voice note", Math.round(durationMs / 1000), "s");
-        }}
-      />
-    </div>
+    <HoldToRecord
+      useMicrophone
+      maxDuration={30_000}
+      onRecorded={({ durationMs, levels }) => console.log("note", durationMs, levels.length)}
+      onCancel={() => console.log("discarded")}
+    />
   );
 }`,
     tailwindSource: tw,
@@ -8008,26 +5225,28 @@ export function ChatComposer() {
     slug: "cursor-buddy",
     name: "Cursor Buddy",
     registryCliName: "cursor-buddy",
-    description:
-      "A soft little character whose eyes follow the pointer across the page, sliding round its curved face, blinking now and then, flinching when you come close and dozing off when left alone.",
+    description: "A soft little character whose eyes follow the pointer anywhere on the page, sliding round its curved face and narrowing near the edge. It blinks, flinches when you come close, dozes off when left alone, and hops with a squash and stretch when you click it or press Enter.",
     categorySlug: "motion-effects",
-    tags: ["eyes", "cursor", "follow", "mascot", "character", "playful", "empty state", "framer-motion"],
+    tags: ["eyes", "cursor", "follow", "mascot", "character", "playful", "empty state", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 172,
     createdAt: "2026-10-19",
-    animationKinds: ["hover", "spring", "3d"],
+    animationKinds: ["hover", "press", "spring", "3d"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "shape", type: '"squircle" | "pill" | "circle"', defaultValue: '"squircle"', description: "Silhouette of the character." },
-      { name: "fill", type: '"light" | "dark" | string', defaultValue: '"light"', description: "Body colour: the light or dark preset, or any CSS colour." },
-      { name: "eyes", type: '"dots" | "slits" | "squares"', defaultValue: '"dots"', description: "Eye style." },
+      { name: "shape", type: "\"squircle\" | \"pill\" | \"circle\"", defaultValue: "\"squircle\"", description: "Silhouette of the character." },
+      { name: "fill", type: "\"light\" | \"dark\" | string", defaultValue: "\"light\"", description: "Body colour: the light or dark preset, or any CSS colour." },
+      { name: "eyes", type: "\"dots\" | \"slits\" | \"squares\"", defaultValue: "\"dots\"", description: "Eye style." },
       { name: "size", type: "number", defaultValue: "120", description: "Height of the body in px. The pill is wider than it is tall." },
-      { name: "follow", type: "number", defaultValue: "60", description: "How far the head turns towards the pointer, 0–100." },
-      { name: "sleepAfter", type: "number", defaultValue: "9000", description: "Fall asleep after this many ms without pointer movement. 0 keeps it awake." },
+      { name: "follow", type: "number", defaultValue: "60", description: "How far the head turns towards the pointer, 0 to 100." },
+      { name: "sleepAfter", type: "number", defaultValue: "9000", description: "Falls asleep after this many ms without pointer movement. 0 keeps it awake." },
       { name: "eyeColor", type: "string", description: "Eye colour. Defaults to ink on light bodies and white on dark ones." },
+      { name: "poke", type: "boolean", defaultValue: "true", description: "Click, tap, Enter or Space makes it hop. Turn off for a purely decorative buddy." },
+      { name: "onPoke", type: "() => void", description: "Called after each poke." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Looks around and hops now and then until the pointer first moves." },
       { name: "className", type: "string", description: "Classes for the outer wrapper." },
     ],
-    Preview: Previews.PreviewCursorBuddy,
+    Preview: Previews.PreviewCursorBuddyRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -8036,10 +5255,10 @@ import { CursorBuddy } from "@/components/cursor-buddy";
 export function EmptyInbox() {
   return (
     <div className="flex flex-col items-center gap-5 py-16 text-center">
-      <CursorBuddy shape="squircle" eyes="dots" size={96} follow={70} />
+      <CursorBuddy shape="squircle" eyes="dots" size={96} follow={70} onPoke={() => console.log("boop")} />
       <div>
-        <p className="text-base font-medium text-neutral-900 dark:text-white">Nothing here yet</p>
-        <p className="text-sm text-neutral-500">New messages will land right here.</p>
+        <p className="text-base font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Nothing here yet</p>
+        <p className="text-sm text-[#6e6e73] dark:text-[#a1a1a6]">New messages will land right here.</p>
       </div>
     </div>
   );
@@ -8050,26 +5269,28 @@ export function EmptyInbox() {
     slug: "dot-sphere",
     name: "Dot Sphere",
     registryCliName: "dot-sphere",
-    description:
-      "A slowly turning sphere of dots drawn on canvas: move the pointer across it and the dots part and spring back, drag it to spin and let go to watch it coast.",
+    description: "A turning sphere of dots drawn on canvas: the pointer parts the dots as it passes, and dragging spins it in any direction before it coasts back to its idle turn. Tap it and a ripple rolls out from that spot, swelling the dots and lighting them in the accent colour as it wraps round the far side.",
     categorySlug: "motion-effects",
-    tags: ["canvas", "sphere", "dots", "globe", "particles", "repel", "drag", "interactive", "hero visual"],
+    tags: ["canvas", "sphere", "globe", "dots", "particles", "ripple", "drag", "hero visual", "motion kit"],
     premium: false,
     trendingScore: 168,
     createdAt: "2026-10-19",
-    animationKinds: ["hover", "drag", "3d"],
+    animationKinds: ["hover", "drag", "press", "3d"],
     dependencies: ["framer-motion"],
     props: [
       { name: "dots", type: "number", defaultValue: "420", description: "Number of dots spread over the sphere." },
-      { name: "radius", type: "number", defaultValue: "130", description: "Sphere radius in px. The canvas adds room around it for dots pushed outwards." },
-      { name: "color", type: "string", description: "Dot colour. Defaults to the current text colour, so it follows your theme." },
+      { name: "radius", type: "number", defaultValue: "130", description: "Sphere radius in px. The canvas adds room for dots pushed outwards; it scales down in narrow containers." },
+      { name: "color", type: "string", description: "Dot colour. Defaults to near-black, or near-white in dark mode." },
+      { name: "accent", type: "string", description: "Ripple colour. Defaults to system blue." },
       { name: "repel", type: "number", defaultValue: "55", description: "How hard the pointer pushes dots away, 0–100." },
       { name: "speed", type: "number", defaultValue: "30", description: "Idle spin speed, 0–100." },
-      { name: "interactive", type: "boolean", defaultValue: "true", description: "Let the pointer push dots and drag to spin the sphere." },
       { name: "dotSize", type: "number", defaultValue: "3.4", description: "Base dot diameter in px; front dots draw larger, back dots smaller." },
-      { name: "className", type: "string", description: "Classes for the canvas element." },
+      { name: "interactive", type: "boolean", defaultValue: "true", description: "Let the pointer push dots, drag to spin and tap for ripples." },
+      { name: "hint", type: "string", defaultValue: "\"Drag to spin. Tap for a ripple.\"", description: "Hint under the sphere. An empty string hides it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sends ripples from different points and flicks the sphere round until someone touches it." },
+      { name: "className", type: "string", description: "Classes for the root." },
     ],
-    Preview: Previews.PreviewDotSphere,
+    Preview: Previews.PreviewDotSphereRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -8080,12 +5301,10 @@ export function GlobalHero() {
     <section className="grid items-center gap-10 py-20 md:grid-cols-2">
       <div>
         <h1 className="text-5xl font-semibold tracking-tight">Everywhere at once.</h1>
-        <p className="mt-4 max-w-md text-lg text-neutral-500">
-          Edge regions on every continent, one deploy away.
-        </p>
+        <p className="mt-4 max-w-md text-lg text-neutral-500">Edge regions on every continent, one deploy away.</p>
       </div>
-      <div className="flex justify-center text-neutral-900 dark:text-white">
-        <DotSphere radius={160} dots={600} repel={60} speed={25} />
+      <div className="flex justify-center">
+        <DotSphere radius={160} dots={600} accent="#30d158" hint="" />
       </div>
     </section>
   );
@@ -8096,28 +5315,28 @@ export function GlobalHero() {
     slug: "dynamic-island",
     name: "Dynamic Island",
     registryCliName: "dynamic-island",
-    description:
-      "A black pill that morphs on a spring into whatever is happening, a running timer, the track that is playing or an incoming call, and opens into live controls when tapped.",
+    description: "A black pill that grows into whatever is happening: a running timer, the song that is playing or an incoming call. Each change stretches it, the width shooting out first and the height catching up on a looser spring, and tapping it opens live controls.",
     categorySlug: "cards",
-    tags: ["dynamic island", "pill", "morph", "timer", "music player", "notification", "call", "layout animation", "framer-motion"],
+    tags: ["dynamic island", "pill", "morph", "timer", "music player", "call", "notification", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 170,
     createdAt: "2026-10-19",
     animationKinds: ["press", "spring", "layout"],
-    dependencies: ["framer-motion", "lucide-react"],
+    dependencies: ["framer-motion"],
     props: [
-      { name: "state", type: '"idle" | "timer" | "music" | "call"', description: "Controlled activity shown in the island." },
-      { name: "defaultState", type: '"idle" | "timer" | "music" | "call"', defaultValue: '"timer"', description: "Starting activity when uncontrolled." },
+      { name: "state", type: "\"idle\" | \"timer\" | \"music\" | \"call\"", description: "Controlled activity shown in the island." },
+      { name: "defaultState", type: "\"idle\" | \"timer\" | \"music\" | \"call\"", defaultValue: "\"timer\"", description: "Starting activity when uncontrolled." },
       { name: "onStateChange", type: "(state: IslandState) => void", description: "Called when the island changes activity (stop, decline, or a cycle step)." },
       { name: "timerSeconds", type: "number", defaultValue: "300", description: "Length of the countdown in seconds. It really ticks." },
-      { name: "accent", type: "string", defaultValue: '"#ff9f0a"', description: "Accent colour for the timer and the music bars." },
-      { name: "cycle", type: "number", defaultValue: "0", description: "Uncontrolled only: step through `states` every this many ms. 0 stays put." },
-      { name: "states", type: "IslandState[]", defaultValue: '["timer", "music", "call"]', description: "Activities visited by `cycle`." },
-      { name: "track", type: "{ title: string; artist: string }", defaultValue: '{ title: "Midnight Drive", artist: "Neon Harbor" }', description: "Track shown in the music state." },
-      { name: "caller", type: "string", defaultValue: '"Ava Lin"', description: "Name shown in the call state." },
+      { name: "accent", type: "string", defaultValue: "\"#ff9f0a\"", description: "Accent colour for the timer and the music bars." },
+      { name: "cycle", type: "number", defaultValue: "0", description: "Uncontrolled only: step through states every this many ms. 0 stays put." },
+      { name: "states", type: "IslandState[]", defaultValue: "[\"timer\", \"music\", \"call\"]", description: "Activities visited by cycle and autoplay." },
+      { name: "track", type: "{ title: string; artist: string }", defaultValue: "{ title: \"Midnight Drive\", artist: \"Harbor Lights\" }", description: "Track shown in the music activity." },
+      { name: "caller", type: "string", defaultValue: "\"Ava Lin\"", description: "Name shown in the call activity." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uncontrolled only: morphs through the activities and opens each one until someone touches it." },
       { name: "className", type: "string", description: "Classes for the outer wrapper." },
     ],
-    Preview: Previews.PreviewDynamicIsland,
+    Preview: Previews.PreviewDynamicIslandRedesign,
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -8134,7 +5353,7 @@ export function AppTopBar() {
         onStateChange={setActivity}
         timerSeconds={25 * 60}
         accent="#ff9f0a"
-        track={{ title: "Midnight Drive", artist: "Neon Harbor" }}
+        track={{ title: "Midnight Drive", artist: "Harbor Lights" }}
       />
     </header>
   );

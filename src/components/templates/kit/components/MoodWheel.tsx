@@ -50,7 +50,7 @@ export default function MoodWheel({ moods = MOODS, autoplay = false }: { moods?:
   const touched = useRef(false);
   const wheelT = useRef<number | undefined>(undefined);
   useMotionValueEvent(pos, "change", (p) => setIdx(Math.max(0, Math.min(moods.length - 1, Math.round(p)))));
-  const settle = (velocity = 0) => animate(pos, pos.get(), { type: "inertia", velocity, power: 0.4, timeConstant: 260, modifyTarget: (t) => Math.max(0, Math.min(moods.length - 1, Math.round(t))), min: 0, max: moods.length - 1, bounceStiffness: 300, bounceDamping: 30 });
+  const settle = (velocity = 0) => animate(pos, [pos.get()], { type: "inertia", velocity, power: 0.4, timeConstant: 260, modifyTarget: (t) => Math.max(0, Math.min(moods.length - 1, Math.round(t))), min: 0, max: moods.length - 1, bounceStiffness: 300, bounceDamping: 30 });
   const go = (i: number) => animate(pos, i, { type: "spring", stiffness: 140, damping: 20 });
 
   useEffect(() => {

@@ -1,401 +1,337 @@
 "use client";
 
-import * as React from "react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useTransform,
+  type AnimationPlaybackControls,
+  type MotionValue,
+} from "framer-motion";
 
 export type ProfilePerson = {
+  /** Stable key; also picks the avatar colour when there is no photo. */
   seed: number;
   name: string;
   role: string;
   email: string;
+  /** Optional photo URL. Without it a coloured monogram is drawn. */
+  avatar?: string;
 };
 
 export interface ProfileOrbitProps {
   people?: ProfilePerson[];
-  /** Auto-rotation interval in ms. */
+  /** Time between autoplay steps, in ms. */
   autoRotateInterval?: number;
+  /** Called with the person whose Connect button is pressed, and whether they are now connected. */
+  onConnect?: (person: ProfilePerson, connected: boolean) => void;
+  /** Called with the index of the person in the card. */
+  onChange?: (index: number) => void;
+  /** Hint under the orbit. Empty string hides it. */
+  hint?: string;
+  /** Turns the ring to the next person until someone touches it. */
+  autoplay?: boolean;
   className?: string;
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
 const DEFAULT_PEOPLE: ProfilePerson[] = [
-  { seed: 10, name: "Jordan Lee",   role: "Head of Product",  email: "jordan@example.com"  },
-  { seed: 20, name: "Alex Chen",    role: "Lead Designer",    email: "alex@example.com"    },
-  { seed: 30, name: "Maya Patel",   role: "Engineering Lead", email: "maya@example.com"    },
-  { seed: 40, name: "Sam Rivera",   role: "Marketing Dir.",   email: "sam@example.com"     },
-  { seed: 50, name: "Chris Morgan", role: "Head of Sales",    email: "chris@example.com"   },
+  { seed: 10, name: "Jordan Lee", role: "Head of Product", email: "jordan@example.com" },
+  { seed: 20, name: "Alex Chen", role: "Lead Designer", email: "alex@example.com" },
+  { seed: 30, name: "Maya Patel", role: "Engineering Lead", email: "maya@example.com" },
+  { seed: 40, name: "Sam Rivera", role: "Marketing Director", email: "sam@example.com" },
+  { seed: 50, name: "Chris Morgan", role: "Head of Sales", email: "chris@example.com" },
+  { seed: 60, name: "Noa Berg", role: "Research Lead", email: "noa@example.com" },
 ];
 
-// 5 orbital slots. Upper-left and upper-right are pulled closer to the card
-// than a pure pentagon would place them.
-const ORBIT: { top: string; left: string }[] = [
-  { top: "17%", left: "50%" },  // top center
-  { top: "40%", left: "71%" },  // upper right  (pulled in)
-  { top: "77%", left: "68%" },  // lower right
-  { top: "77%", left: "32%" },  // lower left
-  { top: "40%", left: "29%" },  // upper left   (pulled in)
+const PALETTES = [
+  ["#64d2ff", "#0a84ff"],
+  ["#ffb3e6", "#bf5af2"],
+  ["#ffd60a", "#ff9f0a"],
+  ["#7ee3a1", "#30b65a"],
+  ["#ff9fb0", "#ff375f"],
+  ["#b4b2ff", "#5e5ce6"],
 ];
+const RX = 228;
+const RY = 126;
+const r3 = (v: number) => Math.round(v * 1000) / 1000;
+const wrap = (o: number, n: number) => ((((o + n / 2) % n) + n) % n) - n / 2;
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((w) => w[0] ?? "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
-const SPRING = "cubic-bezier(0.34, 1.56, 0.64, 1)";
-
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function ArrowButton({
-  onClick,
-  direction,
-  ariaLabel,
-}: {
-  onClick: () => void;
-  direction: "left" | "right";
-  ariaLabel: string;
-}) {
-  const [hovered, setHovered] = React.useState(false);
+function Avatar({ p, size, ring }: { p: ProfilePerson; size: number; ring?: boolean }) {
+  const [a, b] = PALETTES[Math.abs(Math.round(p.seed / 10)) % PALETTES.length];
   return (
-    <button
-      aria-label={ariaLabel}
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: 36,
-        height: 36,
-        borderRadius: "50%",
-        background: hovered ? "#e0e0e0" : "#f0f0f0",
-        border: "none",
-        cursor: "pointer",
-        fontSize: 16,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexShrink: 0,
-        color: "#111",
-        transition: "background 0.2s ease",
-        userSelect: "none",
-      }}
+    <span
+      className={`relative grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold text-white ${ring ? "shadow-[0_0_0_3px_#fff,0_8px_18px_-8px_rgba(0,0,0,.45)] dark:shadow-[0_0_0_3px_#1c1c1e,0_8px_18px_-8px_rgba(0,0,0,.9)]" : ""}`}
+      style={{ width: size, height: size, background: `linear-gradient(140deg, ${a}, ${b})`, fontSize: size * 0.36, letterSpacing: "-0.02em" }}
     >
-      {direction === "left" ? "←" : "→"}
-    </button>
+      {p.avatar ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={p.avatar} alt="" className="absolute inset-0 h-full w-full object-cover" draggable={false} />
+      ) : (
+        initials(p.name)
+      )}
+    </span>
   );
 }
 
-function ConnectButton() {
-  const [hovered, setHovered] = React.useState(false);
+function Satellite({ p, index, n, rot, onPick }: { p: ProfilePerson; index: number; n: number; rot: MotionValue<number>; onPick: () => void }) {
+  const off = useTransform(rot, (r) => wrap(index - r, n));
+  // Front of the ring is straight down (90deg); people further round sit higher and further back.
+  const ang = useTransform(off, (o) => ((90 + (o * 360) / n) * Math.PI) / 180);
+  const x = useTransform(ang, (a) => r3(Math.cos(a) * RX));
+  const y = useTransform(ang, (a) => r3(Math.sin(a) * RY));
+  const depth = useTransform(ang, (a) => Math.sin(a));
+  const scale = useTransform(depth, (d) => r3(0.62 + ((d + 1) / 2) * 0.42));
+  const opacity = useTransform(depth, (d) => r3(0.55 + ((d + 1) / 2) * 0.45));
+  const zIndex = useTransform(depth, (d) => (d > 0.05 ? 30 : 5));
+  const ring = useTransform(off, (o) => r3(Math.max(0, 1 - Math.abs(o) * 2)));
   return (
-    <button
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        flex: 1,
-        margin: "0 10px",
-        background: hovered ? "#333" : "#111",
-        color: "white",
-        borderRadius: 100,
-        padding: "10px 0",
-        fontSize: 14,
-        fontWeight: 600,
-        border: "none",
-        cursor: "pointer",
-        transition: "background 0.2s ease",
-      }}
-    >
-      Connect
-    </button>
+    <motion.div className="absolute left-1/2 top-1/2" style={{ x, y, scale, opacity, zIndex, marginLeft: -26, marginTop: -26 }}>
+      <motion.button
+        type="button"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={onPick}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        className="relative block rounded-full"
+      >
+        <Avatar p={p} size={52} ring />
+        <motion.span className="pointer-events-none absolute -inset-[5px] rounded-full border-2 border-[#0071e3] dark:border-[#0a84ff]" style={{ opacity: ring }} />
+      </motion.button>
+    </motion.div>
   );
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function Chevron({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={dir === "left" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
+    </svg>
+  );
+}
 
+/**
+ * A profile card with the whole team orbiting it on a tilted ring. Turn the
+ * ring (drag, arrows, or tap a face) and it spins the chosen person round to
+ * the front, the card swaps to them and their avatar drops in with a little
+ * bounce. People behind the ring pass under the card.
+ */
 export function ProfileOrbit({
   people = DEFAULT_PEOPLE,
-  autoRotateInterval = 3000,
-  className,
+  autoRotateInterval = 2800,
+  onConnect,
+  onChange,
+  hint = "Drag the ring or tap a face.",
+  autoplay = false,
+  className = "",
 }: ProfileOrbitProps) {
-  const [activeIndex, setActiveIndex]   = React.useState(0);
-  const [displayIndex, setDisplayIndex] = React.useState(0);
-  const cardInnerRef = React.useRef<HTMLDivElement>(null);
-  const timerRef     = React.useRef<ReturnType<typeof setInterval> | null>(null);
-  const pausedRef    = React.useRef(false);
-  const count = people.length;
+  const n = Math.max(1, people.length);
+  const still = useReducedMotion() === true;
+  const rot = useMotionValue(0);
+  const run = useRef<AnimationPlaybackControls | undefined>(undefined);
+  const touched = useRef(false);
+  const from = useRef(0);
+  const shown = useRef(0);
+  const [active, setActive] = useState(0);
+  const [dir, setDir] = useState(1);
+  const [connected, setConnected] = useState<Record<number, boolean>>({});
 
-  // ── Card fade: fade out → swap content → fade in ──────────────────────────
-  React.useEffect(() => {
-    const el = cardInnerRef.current;
-    if (!el) return;
-    el.style.opacity   = "0";
-    el.style.transform = "translateY(6px)";
-    const t = setTimeout(() => {
-      setDisplayIndex(activeIndex);
-      el.style.opacity   = "1";
-      el.style.transform = "translateY(0)";
-    }, 200);
-    return () => clearTimeout(t);
-  }, [activeIndex]);
+  useMotionValueEvent(rot, "change", (r) => {
+    const i = ((Math.round(r) % n) + n) % n;
+    if (i === shown.current) return;
+    setDir(wrap(i - shown.current, n) >= 0 ? 1 : -1);
+    shown.current = i;
+    setActive(i);
+    onChange?.(i);
+  });
 
-  // ── Auto-rotation ─────────────────────────────────────────────────────────
-  React.useEffect(() => {
-    timerRef.current = setInterval(() => {
-      if (!pausedRef.current) {
-        setActiveIndex((i) => (i + 1) % count);
+  const spin = (target: number, velocity = 0) => {
+    run.current?.stop();
+    run.current = animate(rot, target, still ? { duration: 0 } : { type: "spring", stiffness: 120, damping: 15, velocity });
+  };
+  const goTo = (i: number) => {
+    const r = rot.get();
+    spin(Math.round(r + wrap(i - r, n)));
+  };
+  const step = (d: number) => spin(Math.round(rot.get()) + d);
+
+  useEffect(() => () => run.current?.stop(), []);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
       }
-    }, autoRotateInterval);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [autoRotateInterval, count]);
+      run.current?.stop();
+      run.current = animate(rot, Math.round(rot.get()) + 1, { type: "spring", stiffness: 90, damping: 14 });
+    }, Math.max(1200, autoRotateInterval));
+    return () => clearInterval(t);
+  }, [autoplay, autoRotateInterval, rot]);
 
-  // ── Keyboard ──────────────────────────────────────────────────────────────
-  React.useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft")  setActiveIndex((i) => (i - 1 + count) % count);
-      if (e.key === "ArrowRight") setActiveIndex((i) => (i + 1) % count);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [count]);
+  const onKey = (e: KeyboardEvent) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === "ArrowRight") step(1);
+    else if (e.key === "ArrowLeft") step(-1);
+    else return;
+    e.preventDefault();
+    touched.current = true;
+  };
 
-  const pause  = () => { pausedRef.current = true;  };
-  const resume = () => { pausedRef.current = false; };
-  const prev   = () => setActiveIndex((i) => (i - 1 + count) % count);
-  const next   = () => setActiveIndex((i) => (i + 1) % count);
-
-  const person = people[displayIndex];
+  const person = people[active];
+  const isOn = person ? connected[person.seed] === true : false;
 
   return (
-    <div
-      className={className}
-      style={{
-        width: "100%",
-        height: "100%",
-        position: "relative",
-        overflow: "hidden",
-        background: "#0a0e1a",
-        backgroundImage: [
-          "radial-gradient(ellipse 60% 50% at 70% 40%, rgba(100,40,180,0.5) 0%, transparent 70%)",
-          "radial-gradient(ellipse 50% 60% at 20% 60%, rgba(20,80,160,0.4) 0%, transparent 70%)",
-        ].join(", "),
-      }}
-    >
-      {/* Dot-grid texture overlay */}
-      <div
-        aria-hidden
-        style={{
-          position: "absolute",
-          inset: 0,
-          backgroundImage:
-            "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-          pointerEvents: "none",
+    <div className={`flex w-full max-w-full flex-col items-center gap-2 overflow-hidden ${className}`}>
+      <motion.div
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Team"
+        tabIndex={0}
+        onKeyDown={onKey}
+        onPointerDown={() => {
+          touched.current = true;
+          run.current?.stop();
         }}
-      />
-
-      {/* ── Orbit avatars ──────────────────────────────────────────────────── */}
-      {people.map((p, i) => {
-        const isActive  = i === activeIndex;
-        // Each avatar slides to a new slot every time activeIndex changes —
-        // the active person always lands on slot 0 (top center).
-        const slotIndex = (i - activeIndex + count) % count;
-        const slot      = ORBIT[slotIndex];
-
-        return (
-          <button
-            key={p.seed}
-            aria-label={`View ${p.name}`}
-            onClick={() => setActiveIndex(i)}
-            onMouseEnter={pause}
-            onMouseLeave={resume}
-            style={{
-              position: "absolute",
-              top:  slot.top,
-              left: slot.left,
-              transform: "translate(-50%, -50%)",
-              width:  isActive ? 72 : 64,
-              height: isActive ? 72 : 64,
-              borderRadius: "50%",
-              border: `3px solid ${isActive ? "white" : "rgba(255,255,255,0.3)"}`,
-              boxShadow: isActive ? "0 0 0 4px rgba(255,255,255,0.15)" : "none",
-              padding: 0,
-              background: "none",
-              cursor: "pointer",
-              overflow: "hidden",
-              zIndex: isActive ? 3 : 2,
-              // top + left drive the physical movement; spring easing creates the bounce
-              transition: [
-                `top        0.55s ${SPRING}`,
-                `left       0.55s ${SPRING}`,
-                `width      0.4s ease`,
-                `height     0.4s ease`,
-                `box-shadow 0.4s ease`,
-                `border     0.4s ease`,
-              ].join(", "),
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`https://picsum.photos/seed/${p.seed}/300/300`}
-              alt={p.name}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: "50%",
-                display: "block",
-                pointerEvents: "none",
-              }}
-            />
-          </button>
-        );
-      })}
-
-      {/* ── Card + dots (stacked, centered as one unit) ─────────────────────
-        paddingTop: 48 reserves the space that the peeking avatar
-        overflows upward, so the whole visual block is truly centered.
-      ─────────────────────────────────────────────────────────────────────── */}
-      <div
-        onMouseEnter={pause}
-        onMouseLeave={resume}
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 48,
-          zIndex: 4,
+        onPanStart={() => {
+          from.current = rot.get();
         }}
+        onPan={(_, info) => rot.set(from.current - info.offset.x / 90)}
+        onPanEnd={(_, info) => {
+          run.current = animate(rot, [rot.get()], {
+            type: "inertia",
+            velocity: -info.velocity.x / 90,
+            power: 0.25,
+            timeConstant: 220,
+            modifyTarget: (v) => Math.round(Math.max(rot.get() - 3, Math.min(rot.get() + 3, v))),
+          });
+        }}
+        className="relative h-[330px] w-full max-w-[560px] touch-pan-y select-none rounded-[24px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
       >
-        {/* Card */}
-        <div
-          style={{
-            width: 280,
-            background: "white",
-            borderRadius: 20,
-            padding: "0 24px 24px",
-            boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
-            border: "1px solid rgba(255,255,255,0.1)",
-          }}
-        >
-          {/* Fading inner — opacity & translateY swap on index change */}
-          <div
-            ref={cardInnerRef}
-            style={{ transition: "opacity 0.25s ease, transform 0.25s ease" }}
-          >
-            {/* Profile photo — peeks 48px above card top */}
-            <div style={{ display: "flex", justifyContent: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={`https://picsum.photos/seed/${person.seed}/300/300`}
-                alt={person.name}
-                style={{
-                  width: 96,
-                  height: 96,
-                  borderRadius: "50%",
-                  objectFit: "cover",
-                  border: "3px solid white",
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-                  marginTop: -48,
-                  display: "block",
+        <svg className="pointer-events-none absolute left-1/2 top-1/2 overflow-visible" width="1" height="1" aria-hidden="true">
+          <ellipse cx="0" cy="0" rx={RX} ry={RY} fill="none" strokeWidth="1.5" strokeDasharray="2 6" strokeLinecap="round" className="stroke-[#d2d2d7] dark:stroke-[#3a3a3c]" />
+        </svg>
+
+        {people.map((p, i) => (
+          <Satellite
+            key={p.seed}
+            p={p}
+            index={i}
+            n={n}
+            rot={rot}
+            onPick={() => {
+              touched.current = true;
+              goTo(i);
+            }}
+          />
+        ))}
+
+        <span className="sr-only" aria-live="polite">
+          {person ? `${person.name}, ${person.role}` : ""}
+        </span>
+        <div className="absolute left-1/2 top-1/2 z-20 w-[248px] max-w-[calc(100%-32px)]" style={{ transform: "translate(-50%, -50%)" }}>
+          <div className="overflow-hidden rounded-[24px] bg-white px-4 pb-4 pt-5 text-center text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_48px_-26px_rgba(0,0,0,.45)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_48px_-26px_rgba(0,0,0,.9)]">
+            <AnimatePresence mode="popLayout" initial={false} custom={dir}>
+              {person ? (
+                <motion.div
+                  key={person.seed}
+                  custom={dir}
+                  variants={{
+                    enter: (d: number) => ({ x: d * 36, opacity: 0 }),
+                    center: { x: 0, opacity: 1 },
+                    exit: (d: number) => ({ x: d * -36, opacity: 0 }),
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                >
+                  <motion.div
+                    className="mx-auto w-fit"
+                    initial={still ? false : { scale: 0.55, y: 18 }}
+                    animate={{ scale: 1, y: 0 }}
+                    transition={{ type: "spring", stiffness: 520, damping: 14, delay: still ? 0 : 0.06 }}
+                  >
+                    <Avatar p={person} size={56} />
+                  </motion.div>
+                  <p className="mt-2.5 truncate text-[17px] font-semibold leading-tight tracking-[-0.02em]">{person.name}</p>
+                  <p className="mt-0.5 truncate text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">{person.role}</p>
+                  <p className="truncate text-[12px] text-[#86868b] dark:text-[#98989d]">{person.email}</p>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
+            <div className="mt-3 flex items-center gap-2">
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  touched.current = true;
+                  step(-1);
                 }}
-              />
-            </div>
-
-            {/* Name */}
-            <p
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: "#111",
-                marginTop: 12,
-                textAlign: "center",
-                lineHeight: 1.3,
-                margin: "12px 0 0",
-              }}
-            >
-              {person.name}
-            </p>
-
-            {/* Role */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 4,
-                marginTop: 6,
-                fontSize: 13,
-                color: "#666",
-              }}
-            >
-              <span aria-hidden>💼</span>
-              <span>{person.role}</span>
-            </div>
-
-            {/* Email */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 4,
-                marginTop: 4,
-                fontSize: 13,
-                color: "#666",
-              }}
-            >
-              <span aria-hidden>✉️</span>
-              <span>{person.email}</span>
-            </div>
-
-            {/* Nav row */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                marginTop: 16,
-              }}
-            >
-              <ArrowButton onClick={prev} direction="left"  ariaLabel="Previous profile" />
-              <ConnectButton />
-              <ArrowButton onClick={next} direction="right" ariaLabel="Next profile" />
+                aria-label="Previous person"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-[#f0f0f3] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:focus-visible:ring-[#0a84ff]"
+              >
+                <Chevron dir="left" />
+              </motion.button>
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.95 }}
+                aria-pressed={isOn}
+                onClick={() => {
+                  if (!person) return;
+                  touched.current = true;
+                  setConnected((c) => ({ ...c, [person.seed]: !isOn }));
+                  onConnect?.(person, !isOn);
+                }}
+                className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-full text-[13px] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e] ${isOn ? "bg-[#f0f0f3] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#f5f5f7]" : "bg-[#0071e3] text-white dark:bg-[#0a84ff]"}`}
+              >
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span
+                    key={isOn ? "on" : "off"}
+                    className="inline-flex items-center gap-1.5"
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -10, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  >
+                    {isOn ? (
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12.5l4.5 4.5L19 7.5" />
+                      </svg>
+                    ) : null}
+                    {isOn ? "Connected" : "Connect"}
+                  </motion.span>
+                </AnimatePresence>
+              </motion.button>
+              <motion.button
+                type="button"
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  touched.current = true;
+                  step(1);
+                }}
+                aria-label="Next person"
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-[#f0f0f3] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:focus-visible:ring-[#0a84ff]"
+              >
+                <Chevron dir="right" />
+              </motion.button>
             </div>
           </div>
         </div>
-
-        {/* Progress dots */}
-        <div
-          style={{
-            marginTop: 24,
-            display: "flex",
-            gap: 8,
-            alignItems: "center",
-          }}
-        >
-          {people.map((_, i) => {
-            const isActive = i === activeIndex;
-            return (
-              <button
-                key={i}
-                aria-label={`Go to profile ${i + 1}`}
-                onClick={() => setActiveIndex(i)}
-                style={{
-                  width:        isActive ? 24 : 8,
-                  height:       8,
-                  borderRadius: isActive ? 4 : "50%",
-                  background:   isActive ? "white" : "rgba(255,255,255,0.3)",
-                  border:       "none",
-                  cursor:       "pointer",
-                  padding:      0,
-                  transition:   "all 0.3s ease",
-                }}
-              />
-            );
-          })}
-        </div>
-      </div>
+      </motion.div>
+      {hint ? <span className="text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">{hint}</span> : null}
     </div>
   );
 }

@@ -1,13 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
-import { GithubIcon } from "./brand-icons";
-import { cn } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { motion, useReducedMotion } from "framer-motion";
+import { Divider, FloatField, SocialRow, SubmitMorph, cardClass, focusRing, playScript, typeSteps, type SubmitState } from "./form-parts";
 
 export type LoginFormValues = {
   email: string;
@@ -22,228 +17,165 @@ export type LoginFormProps = {
   successLabel?: string;
   className?: string;
   defaultValues?: Partial<LoginFormValues>;
+  /** Called after validation passes. Return a promise to show the loading state; throw (an Error's message is shown) to return to the form. Without it the form simulates success. */
   onSubmit?: (values: LoginFormValues) => Promise<void> | void;
   onForgotPassword?: () => void;
   showSocialLogins?: boolean;
   onSocialLogin?: (provider: "github" | "apple" | "google") => void;
+  /** Shows "New here? Create an account" when set. */
+  onSignUp?: () => void;
+  /** Types a demo sign-in and plays it through until someone touches the form. */
+  autoplay?: boolean;
 };
 
-function GoogleMark(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden {...props}>
-      <path d="M21.8 12.2c0-.7-.1-1.2-.2-1.8H12v3.4h5.5c-.1.9-.8 2.2-2.2 3.1l-.1 1.1 3.2 2.5.2.1c1.9-1.7 3.2-4.4 3.2-8.4Z" fill="#4285F4" />
-      <path d="M12 22c2.8 0 5.2-.9 6.9-2.4l-3.3-2.6c-.9.6-2.1 1-3.6 1a6.2 6.2 0 0 1-5.8-4.2l-1.1.1-3.3 2.6v.1A10.3 10.3 0 0 0 12 22Z" fill="#34A853" />
-      <path d="M6.2 13.8a6.4 6.4 0 0 1 0-3.7L6.1 9l-3.4-2.6-.1.1a10.2 10.2 0 0 0 0 9.2l3.6-2.9Z" fill="#FBBC05" />
-      <path d="M12 5.9c1.9 0 3.1.8 3.8 1.5l2.8-2.8A9.8 9.8 0 0 0 12 2a10.3 10.3 0 0 0-9.2 5.6l3.5 2.8A6.2 6.2 0 0 1 12 5.9Z" fill="#EA4335" />
-    </svg>
-  );
-}
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function AppleMark(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden {...props}>
-      <path d="M16.37 1.43c.1 1.2-.34 2.4-1.08 3.25-.78.87-2.03 1.52-3.19 1.44-.14-1.15.35-2.34 1.1-3.15.8-.88 2.13-1.52 3.17-1.54Zm4.24 16.39c-.56 1.28-.84 1.84-1.56 2.98-1.01 1.58-2.43 3.56-4.19 3.57-1.57.02-1.98-1.03-4.1-1.02-2.12.01-2.57 1.04-4.14 1-1.76-.02-3.1-1.8-4.11-3.38-2.82-4.38-3.11-9.53-1.38-12.16 1.23-1.86 3.16-2.96 4.97-2.96 1.85 0 3.01 1.02 4.53 1.02 1.48 0 2.38-1.02 4.52-1.02 1.61 0 3.31.88 4.54 2.4-3.98 2.18-3.34 8.1.92 9.57Z" />
-    </svg>
-  );
-}
-
+/**
+ * The login sibling of SignupForm: floating labels, an inline error that
+ * shakes the field, and the same squeeze-to-spinner, swell-to-green submit.
+ */
 export function LoginForm({
   title = "Welcome back",
   subtitle = "Sign in to your account to continue.",
   submitLabel = "Sign in",
   loadingLabel = "Signing in...",
   successLabel = "Signed in",
-  className,
+  className = "",
   defaultValues,
   onSubmit,
   onForgotPassword,
   showSocialLogins = true,
   onSocialLogin,
+  onSignUp,
+  autoplay = false,
 }: LoginFormProps) {
-  const reduceMotion = useReducedMotion() === true;
-  const [values, setValues] = React.useState<LoginFormValues>({
-    email: defaultValues?.email ?? "",
-    password: defaultValues?.password ?? "",
-  });
-  const [error, setError] = React.useState<string | null>(null);
-  const [state, setState] = React.useState<"idle" | "loading" | "success">("idle");
-  const [showPassword, setShowPassword] = React.useState(false);
+  const still = useReducedMotion() === true;
+  const id = React.useId().replace(/:/g, "");
+  const [values, setValues] = React.useState<LoginFormValues>({ email: defaultValues?.email ?? "", password: defaultValues?.password ?? "" });
+  const [errors, setErrors] = React.useState<Partial<Record<keyof LoginFormValues, string>>>({});
+  const [shakes, setShakes] = React.useState<Partial<Record<keyof LoginFormValues, number>>>({});
+  const [formError, setFormError] = React.useState<string | null>(null);
+  const [state, setState] = React.useState<SubmitState>("idle");
+  const touched = React.useRef(false);
+  const alive = React.useRef(true);
+  React.useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
 
-  const isLoading = state === "loading";
-
-  function updateField<K extends keyof LoginFormValues>(key: K, next: LoginFormValues[K]) {
+  const set = (key: keyof LoginFormValues) => (next: string) => {
+    touched.current = true;
     setValues((prev) => ({ ...prev, [key]: next }));
-  }
-
-  function validate(v: LoginFormValues): string | null {
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) return "Please enter a valid email address.";
-    if (v.password.length < 6) return "Password must be at least 6 characters.";
-    return null;
-  }
+    setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
+    setFormError(null);
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (isLoading) return;
-    setError(null);
-    const validationError = validate(values);
-    if (validationError) {
-      setState("idle");
-      setError(validationError);
+    touched.current = true;
+    if (state !== "idle") return;
+    const found: Partial<Record<keyof LoginFormValues, string>> = {};
+    if (!EMAIL.test(values.email.trim())) found.email = "Enter a valid email address.";
+    if (values.password.length < 6) found.password = "Password must be at least 6 characters.";
+    setErrors(found);
+    const bad = Object.keys(found) as (keyof LoginFormValues)[];
+    if (bad.length) {
+      setShakes((s) => Object.fromEntries([...Object.entries(s), ...bad.map((k) => [k, (s[k] ?? 0) + 1])]));
+      document.getElementById(`${id}-${bad[0]}`)?.focus();
       return;
     }
     try {
       setState("loading");
-      await onSubmit?.({ email: values.email.trim(), password: values.password });
-      setState("success");
-    } catch {
+      if (onSubmit) await onSubmit({ email: values.email.trim(), password: values.password });
+      else await new Promise<void>((r) => setTimeout(r, 1000));
+      if (alive.current) setState("success");
+    } catch (err) {
+      if (!alive.current) return;
       setState("idle");
-      setError("Unable to sign in. Please check your credentials.");
+      setFormError(err instanceof Error && err.message ? err.message : "Unable to sign in. Please check your details.");
+      setShakes((s) => ({ ...s, password: (s.password ?? 0) + 1 }));
     }
   }
 
+  React.useEffect(() => {
+    if (!autoplay) return;
+    const put = (k: keyof LoginFormValues) => (v: string) => setValues((p) => ({ ...p, [k]: v }));
+    return playScript(
+      [
+        [600, () => {}],
+        ...typeSteps("ada@northwind.co", put("email"), 50),
+        [250, () => {}],
+        ...typeSteps("orbit-2026", put("password"), 70),
+        [450, () => setState("loading")],
+        [1100, () => setState("success")],
+        [2200, () => {
+          setState("idle");
+          setValues({ email: "", password: "" });
+        }],
+      ],
+      () => touched.current,
+    );
+  }, [autoplay]);
+
+  const busy = state !== "idle";
+  const ink = "text-[#1d1d1f] dark:text-[#f5f5f7]";
+  const soft = "text-[#6e6e73] dark:text-[#a1a1a6]";
+
   return (
     <motion.form
+      noValidate
       onSubmit={handleSubmit}
-      initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.35 }}
-      transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn(
-        "w-full max-w-md space-y-4 rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-black",
-        className,
-      )}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      initial={still ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 260, damping: 26 }}
+      className={`${cardClass} ${className}`}
     >
-      <div className="space-y-1">
-        <h3 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">{title}</h3>
-        <p className="text-sm text-zinc-600 dark:text-zinc-300">{subtitle}</p>
+      {(title || subtitle) && (
+        <div>
+          {title && <h3 className={`text-[22px] font-semibold leading-tight tracking-[-0.035em] ${ink}`}>{title}</h3>}
+          {subtitle && <p className={`mt-1 text-[14px] leading-relaxed ${soft}`}>{subtitle}</p>}
+        </div>
+      )}
+
+      <div className={`${title || subtitle ? "mt-5" : ""} space-y-2.5`}>
+        <FloatField id={`${id}-email`} label="Email" type="email" autoComplete="email" value={values.email} onChange={set("email")} disabled={busy} error={errors.email} shake={shakes.email} valid={EMAIL.test(values.email.trim())} />
+        <FloatField id={`${id}-password`} label="Password" type="password" autoComplete="current-password" value={values.password} onChange={set("password")} disabled={busy} error={errors.password} shake={shakes.password} />
+      </div>
+      {onForgotPassword && (
+        <div className="mt-2 flex justify-end">
+          <button type="button" onClick={onForgotPassword} className={`rounded text-[13px] font-medium text-[#0066cc] hover:underline dark:text-[#64b5ff] ${focusRing}`}>
+            Forgot password?
+          </button>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <SubmitMorph state={state} label={submitLabel} loadingLabel={loadingLabel} successLabel={successLabel} />
       </div>
 
-      <div className="space-y-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="login-email" className="text-black dark:text-white">
-            Email address
-          </Label>
-          <div className="group/input rounded-md border border-zinc-300 bg-white transition duration-200 hover:border-sky-500 focus-within:border-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-sky-400 dark:focus-within:border-sky-400">
-            <Input
-              id="login-email"
-              type="email"
-              value={values.email}
-              onChange={(e) => updateField("email", e.target.value)}
-              placeholder="you@company.com"
-              autoComplete="email"
-              disabled={isLoading}
-              className="h-10 border-0 bg-transparent shadow-none focus-visible:ring-0"
-            />
-          </div>
+      {showSocialLogins && (
+        <div className="mt-4 space-y-4">
+          <Divider />
+          <SocialRow disabled={busy} onSocialLogin={onSocialLogin} />
         </div>
+      )}
 
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="login-password" className="text-black dark:text-white">
-              Password
-            </Label>
-            <button
-              type="button"
-              onClick={onForgotPassword}
-              className="text-[12px] font-medium text-sky-600 transition hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300"
-            >
-              Forgot password?
-            </button>
-          </div>
-          <div className="group/input relative rounded-md border border-zinc-300 bg-white transition duration-200 hover:border-sky-500 focus-within:border-sky-500 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-sky-400 dark:focus-within:border-sky-400">
-            <Input
-              id="login-password"
-              type={showPassword ? "text" : "password"}
-              value={values.password}
-              onChange={(e) => updateField("password", e.target.value)}
-              placeholder="••••••••"
-              autoComplete="current-password"
-              disabled={isLoading}
-              className="h-10 border-0 bg-transparent pr-10 shadow-none focus-visible:ring-0"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-0 inline-flex items-center px-3 text-zinc-500 transition hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <Button type="submit" className="h-10 w-full rounded-md" disabled={isLoading || state === "success"}>
-        <AnimatePresence initial={false} mode="wait">
-          <motion.span
-            key={state}
-            className="inline-flex items-center gap-2"
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: 4 }}
-            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            exit={reduceMotion ? { opacity: 0.9 } : { opacity: 0, y: -4 }}
-            transition={{ duration: reduceMotion ? 0.08 : 0.18 }}
-          >
-            {state === "loading" ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
-            {state === "success" ? <CheckCircle2 className="size-4" aria-hidden /> : null}
-            <span>
-              {state === "loading" ? loadingLabel : state === "success" ? successLabel : submitLabel}
-            </span>
-          </motion.span>
-        </AnimatePresence>
-      </Button>
-
-      {showSocialLogins ? (
-        <>
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
-          <div className="space-y-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 w-full justify-start gap-2.5 rounded-md"
-              disabled={isLoading}
-              onClick={() => onSocialLogin?.("github")}
-            >
-              <GithubIcon className="size-4" aria-hidden />
-              Continue with GitHub
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 w-full justify-start gap-2.5 rounded-md"
-              disabled={isLoading}
-              onClick={() => onSocialLogin?.("apple")}
-            >
-              <AppleMark className="size-4" />
-              Continue with Apple
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 w-full justify-start gap-2.5 rounded-md"
-              disabled={isLoading}
-              onClick={() => onSocialLogin?.("google")}
-            >
-              <GoogleMark className="size-4" />
-              Continue with Google
-            </Button>
-          </div>
-        </>
-      ) : null}
-
-      <AnimatePresence initial={false}>
-        {error ? (
-          <motion.p
-            key="login-error"
-            initial={reduceMotion ? { opacity: 1 } : { opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? { opacity: 0.9 } : { opacity: 0, y: -4 }}
-            className="text-sm text-destructive"
-            role="alert"
-          >
-            {error}
-          </motion.p>
-        ) : null}
-      </AnimatePresence>
+      <p className={`mt-3 min-h-[18px] text-center text-[13px] ${formError ? "text-[#d70015] dark:text-[#ff6961]" : soft}`} role={formError ? "alert" : "status"} aria-live="polite">
+        {formError ??
+          (onSignUp ? (
+            <>
+              New here?{" "}
+              <button type="button" onClick={onSignUp} className={`rounded font-medium text-[#0066cc] hover:underline dark:text-[#64b5ff] ${focusRing}`}>
+                Create an account
+              </button>
+            </>
+          ) : null)}
+      </p>
     </motion.form>
   );
 }

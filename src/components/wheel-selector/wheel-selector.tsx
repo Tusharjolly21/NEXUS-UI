@@ -1,29 +1,20 @@
 "use client";
-
-import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion, type PanInfo, type Transition } from "framer-motion";
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import {
-  BarChart3,
-  Boxes,
-  Brush,
-  Code2,
-  Compass,
-  Cpu,
-  Globe,
-  Layers3,
-  Lightbulb,
-  Megaphone,
-  PenTool,
-  Rocket,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Target,
-  type LucideIcon,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useTransform,
+  type AnimationPlaybackControls,
+  type MotionValue,
+} from "framer-motion";
 
+/** Kept for compatibility. The dial now follows the site's light or dark mode, so this is ignored. */
 export type WheelTheme = "obsidian" | "midnight" | "arctic" | "ember" | "custom";
+/** "responsive" puts the panel beside the dial when there is room, "desktop" always does, "mobile" always stacks. */
 export type WheelVariant = "responsive" | "desktop" | "mobile";
 export type WheelContentMode = "minimal" | "detailed" | "hidden";
 export type WheelAnimationSpeed = "slow" | "medium" | "fast";
@@ -47,13 +38,19 @@ export type WheelIconName =
 
 export type WheelItem = {
   id: string;
+  /** Short name on the dial's hub and in the accessible label. */
   label: string;
+  /** Headline in the panel. */
   title: string;
+  /** Eyebrow above the title. */
   subtitle?: string;
   description?: string;
+  /** Accent for this item's node, eyebrow and CTA. */
   accentColor?: string;
   icon?: WheelIconName;
+  /** Your own icon image instead of a built-in icon. */
   iconImageUrl?: string;
+  /** Optional picture shown in the detailed panel. */
   image?: string;
   ctaHref?: string;
   ctaLabel?: string;
@@ -61,681 +58,463 @@ export type WheelItem = {
 
 export type WheelSelectorProps = {
   items?: WheelItem[];
+  /** @deprecated Ignored; the dial follows light and dark mode. */
   theme?: WheelTheme;
   variant?: WheelVariant;
   contentMode?: WheelContentMode;
+  /** Controlled selection. */
   activeIndex?: number;
   onActiveChange?: (index: number) => void;
+  /** Radius of the ring of nodes, in px (80 to 220). */
   ringRadius?: number;
+  /** Ticks round the rim (12 to 120). */
   tickCount?: number;
   showTicks?: boolean;
+  /** The 02 / 06 counter in the hub. */
   showCounter?: boolean;
+  /** Show each item's CTA link in the panel. */
   showCTA?: boolean;
+  /** Turns the wheel one stop at a time until someone touches it. */
+  autoplay?: boolean;
+  /** Older name for `autoplay`. */
   autoRotate?: boolean;
+  /** Milliseconds between autoplay turns. */
   autoRotateInterval?: number;
+  /** How snappy the snap spring is. */
   animationSpeed?: WheelAnimationSpeed;
-  backgroundColor?: string;
+  /** Accent for items without their own accentColor. */
   accentColor?: string;
-  textColor?: string;
-  mutedTextColor?: string;
-  cardColor?: string;
-  ringStrokeColor?: string;
-  ctaBackgroundColor?: string;
-  ctaTextColor?: string;
-  ctaBorderColor?: string;
-  titleFontFamily?: string;
-  bodyFontFamily?: string;
-  labelFontFamily?: string;
-  fontFamily?: string;
   className?: string;
 };
 
-type ThemeTokens = {
-  background: string;
-  card: string;
-  text: string;
-  muted: string;
-  ring: string;
-  accent: string;
-  ctaBackground: string;
-  ctaText: string;
-  ctaBorder: string;
+const P: Record<WheelIconName, string> = {
+  analytics: "M2.5 13.5h11M4.5 11V8M8 11V4.5M11.5 11V6.5",
+  boxes: "M8 1.8l5.5 3v6.4L8 14.2l-5.5-3V4.8zM2.5 4.8L8 8l5.5-3.2M8 8v6.2",
+  brush: "M13.5 2.5L7 9M7 9c-1.6-.4-3 .6-3 2.2 0 1.2-.6 2-1.5 2.3 1 .5 4.5.6 5.6-1.3.6-1 .3-2.4-1.1-3.2z",
+  code: "M5.5 4.5L2 8l3.5 3.5M10.5 4.5L14 8l-3.5 3.5M9 3l-2 10",
+  compass: "M8 1.8a6.2 6.2 0 100 12.4A6.2 6.2 0 008 1.8zM10.6 5.4L9.2 9.2 5.4 10.6l1.4-3.8z",
+  cpu: "M4.5 4.5h7v7h-7zM6.5 6.5h3v3h-3zM6 2v2.5M10 2v2.5M6 11.5V14M10 11.5V14M2 6h2.5M2 10h2.5M11.5 6H14M11.5 10H14",
+  globe: "M8 1.8a6.2 6.2 0 100 12.4A6.2 6.2 0 008 1.8zM1.8 8h12.4M8 1.8c1.9 1.9 2.5 3.8 2.5 6.2S9.9 12.3 8 14.2C6.1 12.3 5.5 10.4 5.5 8S6.1 3.7 8 1.8z",
+  layers: "M8 2l6 3.2-6 3.2-6-3.2zM2 8.2l6 3.2 6-3.2M2 11l6 3.2 6-3.2",
+  idea: "M6 12h4M6.5 14h3M8 1.8a4.4 4.4 0 00-2.6 8c.4.3.6.8.6 1.2v1h4v-1c0-.4.2-.9.6-1.2A4.4 4.4 0 008 1.8z",
+  marketing: "M2.5 6.5v3h2l5 3v-9l-5 3zM12 5.5a3.5 3.5 0 010 5M4.5 9.5l1 4",
+  pen: "M10.5 2.5l3 3-8 8H2.5v-3zM9 4l3 3",
+  rocket: "M9.5 2.5c2.5 0 4 1.5 4 4L9 11 5 7zM5 7L2.5 7.5 4 5.5h3M9 11l-.5 2.5 2-1.5V9M4.5 11.5L2.5 13.5",
+  search: "M7 12.2a5.2 5.2 0 100-10.4 5.2 5.2 0 000 10.4zM14.2 14.2l-3.4-3.4",
+  security: "M8 1.5l5.5 2v4c0 3.5-2.4 6-5.5 7-3.1-1-5.5-3.5-5.5-7v-4zM5.5 8l2 2 3-3.5",
+  sparkles: "M8 1.5l1.3 3.7L13 6.5 9.3 7.8 8 11.5 6.7 7.8 3 6.5l3.7-1.3zM12.5 10.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z",
+  target: "M8 1.8a6.2 6.2 0 100 12.4A6.2 6.2 0 008 1.8zM8 4.6a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zM8 7.2a.8.8 0 100 1.6.8.8 0 000-1.6z",
 };
-
-const ICONS: Record<WheelIconName, LucideIcon> = {
-  analytics: BarChart3,
-  boxes: Boxes,
-  brush: Brush,
-  code: Code2,
-  compass: Compass,
-  cpu: Cpu,
-  globe: Globe,
-  layers: Layers3,
-  idea: Lightbulb,
-  marketing: Megaphone,
-  pen: PenTool,
-  rocket: Rocket,
-  search: Search,
-  security: ShieldCheck,
-  sparkles: Sparkles,
-  target: Target,
-};
-
-const THEMES: Record<Exclude<WheelTheme, "custom">, ThemeTokens> = {
-  obsidian: {
-    background: "#111112",
-    card: "#181819",
-    text: "#f5f4f7",
-    muted: "#929097",
-    ring: "#2b2a30",
-    accent: "#8b5cf6",
-    ctaBackground: "#f5f4f7",
-    ctaText: "#151318",
-    ctaBorder: "#f5f4f7",
-  },
-  midnight: {
-    background: "#07111d",
-    card: "#0b1827",
-    text: "#eef7ff",
-    muted: "#8192a8",
-    ring: "#203247",
-    accent: "#38bdf8",
-    ctaBackground: "#38bdf8",
-    ctaText: "#07111d",
-    ctaBorder: "#38bdf8",
-  },
-  arctic: {
-    background: "#eef4f8",
-    card: "#ffffff",
-    text: "#152333",
-    muted: "#68798c",
-    ring: "#cfd9e2",
-    accent: "#0284c7",
-    ctaBackground: "#152333",
-    ctaText: "#ffffff",
-    ctaBorder: "#152333",
-  },
-  ember: {
-    background: "#150e0c",
-    card: "#201512",
-    text: "#fff3eb",
-    muted: "#b1978b",
-    ring: "#423029",
-    accent: "#f97316",
-    ctaBackground: "#f97316",
-    ctaText: "#fff7ed",
-    ctaBorder: "#f97316",
-  },
-};
-
-const FALLBACK_IMAGES = [
-  "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=960&q=80",
-  "https://images.unsplash.com/photo-1558655146-9f40138edfeb?auto=format&fit=crop&w=960&q=80",
-  "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=960&q=80",
-  "https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=960&q=80",
-];
 
 export const DEFAULT_WHEEL_ITEMS: WheelItem[] = [
-  {
-    id: "strategy",
-    label: "Strategy",
-    title: "Product Strategy",
-    subtitle: "Direction",
-    description: "Define positioning, product narratives, and roadmaps that align teams around measurable outcomes.",
-    accentColor: "#38bdf8",
-    icon: "compass",
-    image: FALLBACK_IMAGES[0],
-    ctaHref: "#",
-  },
-  {
-    id: "design",
-    label: "Design",
-    title: "Experience Design",
-    subtitle: "Craft",
-    description: "Shape clear interfaces and expressive visual systems that make sophisticated products effortless to use.",
-    accentColor: "#f97316",
-    icon: "pen",
-    image: FALLBACK_IMAGES[1],
-    ctaHref: "#",
-  },
-  {
-    id: "engineering",
-    label: "Engineering",
-    title: "Digital Platforms",
-    subtitle: "Build",
-    description: "Create reliable, responsive experiences with scalable frontend systems and thoughtful motion.",
-    accentColor: "#22c55e",
-    icon: "code",
-    image: FALLBACK_IMAGES[2],
-    ctaHref: "#",
-  },
-  {
-    id: "growth",
-    label: "Growth",
-    title: "Launch Campaigns",
-    subtitle: "Reach",
-    description: "Translate your product story into launch moments that attract attention and turn interest into action.",
-    accentColor: "#f43f5e",
-    icon: "rocket",
-    image: FALLBACK_IMAGES[3],
-    ctaHref: "#",
-  },
-  {
-    id: "insights",
-    label: "Insights",
-    title: "User Research",
-    subtitle: "Learn",
-    description: "Deep-dive user studies and analytics that inform product decisions and drive meaningful engagement.",
-    accentColor: "#8b5cf6",
-    icon: "analytics",
-    image: FALLBACK_IMAGES[0],
-    ctaHref: "#",
-  },
-  {
-    id: "systems",
-    label: "Systems",
-    title: "Design Systems",
-    subtitle: "Scale",
-    description: "Unify components, tokens, and documentation into a coherent system your product teams can extend.",
-    accentColor: "#eab308",
-    icon: "layers",
-    image: FALLBACK_IMAGES[1],
-    ctaHref: "#",
-  },
+  { id: "strategy", label: "Strategy", title: "Product strategy", subtitle: "Direction", description: "Positioning, narratives and roadmaps that line teams up around outcomes you can measure.", accentColor: "#0071e3", icon: "compass", ctaHref: "#" },
+  { id: "design", label: "Design", title: "Experience design", subtitle: "Craft", description: "Clear interfaces and expressive visual systems that make hard products feel easy.", accentColor: "#ff9f0a", icon: "pen", ctaHref: "#" },
+  { id: "engineering", label: "Engineering", title: "Digital platforms", subtitle: "Build", description: "Fast, reliable front ends on scalable systems, with motion that earns its place.", accentColor: "#30d158", icon: "code", ctaHref: "#" },
+  { id: "growth", label: "Growth", title: "Launch campaigns", subtitle: "Reach", description: "Launch moments that turn your product story into attention, and attention into sign-ups.", accentColor: "#ff375f", icon: "rocket", ctaHref: "#" },
+  { id: "insights", label: "Insights", title: "User research", subtitle: "Learn", description: "Interviews and analytics that turn what users do into decisions you can defend.", accentColor: "#bf5af2", icon: "analytics", ctaHref: "#" },
+  { id: "systems", label: "Systems", title: "Design systems", subtitle: "Scale", description: "Components, tokens and docs in one system your teams can extend without asking.", accentColor: "#5ac8fa", icon: "layers", ctaHref: "#" },
 ];
 
-const SPEEDS: Record<WheelAnimationSpeed, { duration: number; spring: number }> = {
-  slow: { duration: 0.68, spring: 0.8 },
-  medium: { duration: 0.46, spring: 1 },
-  fast: { duration: 0.26, spring: 1.35 },
+const SPEED: Record<WheelAnimationSpeed, { stiffness: number; damping: number }> = {
+  slow: { stiffness: 110, damping: 14 },
+  medium: { stiffness: 170, damping: 16 },
+  fast: { stiffness: 260, damping: 20 },
 };
 
-function wrapIndex(index: number, total: number) {
-  return ((index % total) + total) % total;
-}
+const r3 = (n: number) => Math.round(n * 1000) / 1000;
+const wrap = (i: number, n: number) => ((i % n) + n) % n;
 
-function getShortestOffset(index: number, activeIndex: number, total: number) {
-  const raw = index - activeIndex;
-  if (raw > total / 2) return raw - total;
-  if (raw < -total / 2) return raw + total;
-  return raw;
-}
-
-function ItemIcon({ item }: { item: WheelItem }) {
+function Glyph({ item, className }: { item: WheelItem; className: string }) {
   if (item.iconImageUrl) {
-    // eslint-disable-next-line @next/next/no-img-element -- registry components accept arbitrary customer-hosted icon URLs
-    return <img src={item.iconImageUrl} alt="" className="size-6 object-contain" />;
+    // eslint-disable-next-line @next/next/no-img-element -- accepts any customer-hosted icon URL
+    return <img src={item.iconImageUrl} alt="" className={`${className} object-contain`} draggable={false} />;
   }
-  const Icon = ICONS[item.icon ?? "sparkles"];
-  return <Icon className="size-6" strokeWidth={1.7} />;
+  return (
+    <svg viewBox="0 0 16 16" className={className} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={P[item.icon ?? "sparkles"]} />
+    </svg>
+  );
 }
 
+/** One node on the ring. Rides the ring's rotation, stays upright, and swells as it nears the top. */
+function Node({
+  item,
+  index,
+  step,
+  radius,
+  rot,
+  counter,
+  accent,
+  active,
+}: {
+  item: WheelItem;
+  index: number;
+  step: number;
+  radius: number;
+  rot: MotionValue<number>;
+  counter: MotionValue<number>;
+  accent: string;
+  active: boolean;
+}) {
+  const theta = index * step;
+  const near = useTransform(rot, (r) => {
+    const a = wrap(theta + r + 180, 360) - 180;
+    return Math.max(0, 1 - Math.abs(a) / step);
+  });
+  const scale = useTransform(near, (k) => 0.86 + k * 0.34);
+  return (
+    <div className="absolute left-1/2 top-1/2 size-0" style={{ transform: `rotate(${theta}deg) translateY(${-radius}px) rotate(${-theta}deg)` }}>
+      <motion.div className="absolute" style={{ rotate: counter, left: -26, top: -26 }}>
+        <motion.span
+          data-node={index}
+          style={{ scale, background: active ? accent : undefined }}
+          className={`grid size-[52px] cursor-pointer place-items-center rounded-full transition-[background-color,color,box-shadow] duration-200 ${
+            active
+              ? "text-white shadow-[0_10px_22px_-10px_rgba(0,0,0,.55)]"
+              : "bg-white text-[#6e6e73] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_8px_18px_-12px_rgba(0,0,0,.4)] hover:text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#a1a1a6] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_8px_18px_-12px_rgba(0,0,0,.9)] dark:hover:text-[#f5f5f7]"
+          }`}
+        >
+          <Glyph item={item} className="size-[22px]" />
+        </motion.span>
+      </motion.div>
+    </div>
+  );
+}
+
+/**
+ * A radial selector. Drag the dial round and let go (or fling it): it coasts,
+ * snaps to the nearest stop and overshoots a touch before it settles. The
+ * node at the top swells and fills with its colour, the hub counter rolls,
+ * and the panel swaps to that item. Arrow keys, the scroll wheel and clicks
+ * on a node turn it too.
+ */
 export function WheelSelector({
   items = DEFAULT_WHEEL_ITEMS,
-  theme = "obsidian",
   variant = "responsive",
   contentMode = "detailed",
-  activeIndex: controlledIndex,
+  activeIndex: controlled,
   onActiveChange,
-  ringRadius = 186,
-  tickCount = 48,
+  ringRadius = 112,
+  tickCount = 60,
   showTicks = true,
   showCounter = true,
   showCTA = false,
+  autoplay = false,
   autoRotate = false,
-  autoRotateInterval = 4500,
+  autoRotateInterval = 3000,
   animationSpeed = "medium",
-  backgroundColor,
-  accentColor,
-  textColor,
-  mutedTextColor,
-  cardColor,
-  ringStrokeColor,
-  ctaBackgroundColor,
-  ctaTextColor,
-  ctaBorderColor,
-  titleFontFamily,
-  bodyFontFamily,
-  labelFontFamily,
-  fontFamily,
-  className,
+  accentColor = "#0071e3",
+  className = "",
 }: WheelSelectorProps) {
-  const safeItems = items.length ? items : DEFAULT_WHEEL_ITEMS;
-  const total = safeItems.length;
-  const [internalIndex, setInternalIndex] = React.useState(0);
-  const activeIndex = wrapIndex(controlledIndex ?? internalIndex, total);
-  const activeItem = safeItems[activeIndex];
-  const reducedMotion = useReducedMotion() === true;
-  const interactedRef = React.useRef(false);
-  const stageRef = React.useRef<HTMLDivElement>(null);
-  const lastWheelRef = React.useRef(0);
-  const speed = SPEEDS[animationSpeed];
-  const selectedAccent = activeItem.accentColor ?? accentColor;
-  const baseTokens = THEMES[theme === "custom" ? "obsidian" : theme];
-  const tokens: ThemeTokens = {
-    background: backgroundColor ?? baseTokens.background,
-    card: cardColor ?? baseTokens.card,
-    text: textColor ?? baseTokens.text,
-    muted: mutedTextColor ?? baseTokens.muted,
-    ring: ringStrokeColor ?? baseTokens.ring,
-    accent: selectedAccent ?? baseTokens.accent,
-    ctaBackground: ctaBackgroundColor ?? baseTokens.ctaBackground,
-    ctaText: ctaTextColor ?? baseTokens.ctaText,
-    ctaBorder: ctaBorderColor ?? baseTokens.ctaBorder,
+  const list = items.length ? items : DEFAULT_WHEEL_ITEMS;
+  const n = list.length;
+  const step = 360 / n;
+  const R = Math.max(80, Math.min(ringRadius, 220));
+  const S = 2 * (R + 42);
+  const ticks = Math.max(12, Math.min(tickCount, 120));
+  const reduce = useReducedMotion() === true;
+  const uid = useId().replace(/:/g, "");
+  const spring = SPEED[animationSpeed] ?? SPEED.medium;
+
+  const start = wrap(controlled ?? 0, n);
+  const rot = useMotionValue(-start * step);
+  const counter = useTransform(rot, (r) => -r);
+  const [active, setActive] = useState(start);
+  const anim = useRef<AnimationPlaybackControls | null>(null);
+  const dial = useRef<HTMLDivElement>(null);
+  const drag = useRef<{ last: number; t: number; v: number; moved: number; node: number | null } | null>(null);
+  const touched = useRef(false);
+  const lastWheel = useRef(0);
+  const report = useRef(onActiveChange);
+  useEffect(() => {
+    report.current = onActiveChange;
+  }, [onActiveChange]);
+
+  useMotionValueEvent(rot, "change", (r) => {
+    const i = wrap(Math.round(-r / step), n);
+    setActive((a) => (a === i ? a : i));
+  });
+
+  // Tell the parent once the wheel has settled on a new stop.
+  const settled = useRef(start);
+  const settle = (i: number) => {
+    if (settled.current !== i) {
+      settled.current = i;
+      report.current?.(i);
+    }
   };
-  const radius = Math.max(100, Math.min(ringRadius, 400));
-  const ticks = Math.max(10, Math.min(tickCount, 80));
 
-  const goTo = React.useCallback(
-    (nextIndex: number, byUser = true) => {
-      if (byUser) interactedRef.current = true;
-      const next = wrapIndex(nextIndex, total);
-      if (controlledIndex === undefined) setInternalIndex(next);
-      onActiveChange?.(next);
-    },
-    [controlledIndex, onActiveChange, total],
-  );
+  const snapTo = (target: number, velocity = 0) => {
+    anim.current?.stop();
+    const i = wrap(Math.round(-target / step), n);
+    if (reduce) {
+      rot.set(target);
+      settle(i);
+      return;
+    }
+    anim.current = animate(rot, target, { type: "spring", ...spring, velocity, onComplete: () => settle(i) });
+  };
 
-  const next = React.useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
-  const previous = React.useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+  const goIndex = (i: number) => {
+    const cur = rot.get();
+    const want = -i * step;
+    // Take the short way round.
+    const diff = wrap(want - cur + 180, 360) - 180;
+    snapTo(Math.round((cur + diff) / step) * step);
+  };
 
-  React.useEffect(() => {
-    if (!autoRotate) return;
-    const interval = window.setInterval(() => {
-      if (!interactedRef.current) goTo(activeIndex + 1, false);
-    }, Math.max(1000, Math.min(autoRotateInterval, 15000)));
-    return () => window.clearInterval(interval);
-  }, [activeIndex, autoRotate, autoRotateInterval, goTo]);
+  const nudge = (dir: number) => {
+    const target = Math.round(rot.get() / step) * step - dir * step;
+    snapTo(target);
+  };
 
-  React.useEffect(() => {
-    const node = stageRef.current;
-    if (!node) return;
-    const handleWheel = (event: WheelEvent) => {
-      event.preventDefault();
+  // Controlled selection.
+  useEffect(() => {
+    if (controlled === undefined) return;
+    const i = wrap(controlled, n);
+    const cur = wrap(Math.round(-rot.get() / step), n);
+    if (i === cur) return;
+    const diff = wrap(-i * step - rot.get() + 180, 360) - 180;
+    anim.current?.stop();
+    anim.current = animate(rot, Math.round((rot.get() + diff) / step) * step, reduce ? { duration: 0 } : { type: "spring", ...spring });
+    settled.current = i;
+  }, [controlled, n, step, rot, reduce, spring]);
+
+  const playing = autoplay || autoRotate;
+  useEffect(() => {
+    if (!playing || n < 2) return;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      anim.current?.stop();
+      const target = Math.round(rot.get() / step) * step - step;
+      anim.current = animate(rot, target, reduce ? { duration: 0 } : { type: "spring", ...spring });
+    }, Math.max(1200, Math.min(autoRotateInterval, 15000)));
+    return () => window.clearInterval(t);
+  }, [playing, n, step, rot, reduce, spring, autoRotateInterval]);
+
+  const angleOf = (e: RPointerEvent) => {
+    const el = dial.current;
+    if (!el) return 0;
+    const r = el.getBoundingClientRect();
+    return (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI;
+  };
+
+  const down = (e: RPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    touched.current = true;
+    anim.current?.stop();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const hit = (e.target as HTMLElement).closest("[data-node]");
+    drag.current = { last: angleOf(e), t: performance.now(), v: 0, moved: 0, node: hit ? Number(hit.getAttribute("data-node")) : null };
+  };
+  const move = (e: RPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const a = angleOf(e);
+    const delta = wrap(a - d.last + 180, 360) - 180;
+    const now = performance.now();
+    const dt = Math.max(1, now - d.t);
+    d.v = d.v * 0.6 + (delta / dt) * 1000 * 0.4;
+    d.last = a;
+    d.t = now;
+    d.moved += Math.abs(delta);
+    rot.set(rot.get() + delta);
+  };
+  const up = () => {
+    const d = drag.current;
+    if (!d) return;
+    drag.current = null;
+    if (d.moved < 3 && d.node !== null) {
+      goIndex(d.node);
+      return;
+    }
+    const v = Math.max(-1400, Math.min(1400, d.v));
+    // Coast a little in the direction of the fling, then snap with the release velocity.
+    const projected = rot.get() + v * 0.22;
+    snapTo(Math.round(projected / step) * step, v);
+  };
+
+  useEffect(() => {
+    const el = dial.current;
+    if (!el) return;
+    const wheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) + Math.abs(e.deltaX) < 4) return;
+      e.preventDefault();
+      touched.current = true;
       const now = Date.now();
-      if (now - lastWheelRef.current < 300) return;
-      lastWheelRef.current = now;
-      goTo(activeIndex + (event.deltaY > 0 || event.deltaX > 0 ? 1 : -1));
+      if (now - lastWheel.current < 260) return;
+      lastWheel.current = now;
+      const dir = e.deltaY > 0 || e.deltaX > 0 ? 1 : -1;
+      anim.current?.stop();
+      const target = Math.round(rot.get() / step) * step - dir * step;
+      const i = wrap(Math.round(-target / step), n);
+      anim.current = animate(rot, target, reduce ? { duration: 0 } : { type: "spring", ...spring, onComplete: () => report.current?.(i) });
     };
-    node.addEventListener("wheel", handleWheel, { passive: false });
-    return () => node.removeEventListener("wheel", handleWheel);
-  }, [activeIndex, goTo]);
+    el.addEventListener("wheel", wheel, { passive: false });
+    return () => el.removeEventListener("wheel", wheel);
+  }, [rot, step, n, reduce, spring]);
 
-  function handleDragEnd(_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) {
-    const axisMovement =
-      Math.abs(info.offset.x) >= Math.abs(info.offset.y) ? info.offset.x : -info.offset.y;
-    if (Math.abs(axisMovement) > 28) goTo(activeIndex + (axisMovement < 0 ? 1 : -1));
-  }
+  const key = (e: KeyboardEvent) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") nudge(1);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") nudge(-1);
+    else if (e.key === "Home") goIndex(0);
+    else if (e.key === "End") goIndex(n - 1);
+    else return;
+    e.preventDefault();
+    touched.current = true;
+  };
 
-  function handleKeyDown(event: React.KeyboardEvent) {
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      event.preventDefault();
-      next();
-    }
-    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      event.preventDefault();
-      previous();
-    }
-  }
-
-  const transition = reducedMotion
-    ? { duration: 0 }
-    : { duration: speed.duration, ease: [0.22, 1, 0.36, 1] as const };
+  const item = list[active];
+  const accent = item.accentColor ?? accentColor;
+  const side = variant === "desktop" ? "flex-row" : variant === "mobile" ? "flex-col" : "flex-col @min-[560px]:flex-row";
 
   return (
     <section
-      ref={stageRef}
-      tabIndex={0}
-      aria-label="Wheel selector"
       aria-roledescription="carousel"
-      onKeyDown={handleKeyDown}
-      className={cn(
-        "relative isolate w-full overflow-hidden rounded-2xl border outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-        className,
-      )}
-      style={{
-        background: tokens.background,
-        borderColor: tokens.ring,
-        color: tokens.text,
-        fontFamily,
-        ["--wheel-accent" as string]: tokens.accent,
-      }}
+      aria-label="Wheel selector"
+      className={`@container w-full rounded-[28px] bg-white p-5 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] ${className}`}
     >
-      <div
-        className={cn(
-          "min-h-[610px] items-center gap-12 px-14 py-12 grid-cols-[minmax(430px,1fr)_minmax(390px,0.92fr)]",
-          variant === "responsive" && "hidden lg:grid",
-          variant === "desktop" && "grid",
-          variant === "mobile" && "hidden",
-        )}
-      >
-        <WheelContent
-          item={activeItem}
-          activeIndex={activeIndex}
-          total={total}
-          mode={contentMode}
-          tokens={tokens}
-          showCTA={showCTA}
-          transition={transition}
-          titleFontFamily={titleFontFamily}
-          bodyFontFamily={bodyFontFamily}
-          labelFontFamily={labelFontFamily}
-        />
-        <DesktopWheel
-          items={safeItems}
-          activeIndex={activeIndex}
-          radius={radius}
-          ticks={ticks}
-          showTicks={showTicks}
-          showCounter={showCounter}
-          tokens={tokens}
-          onSelect={goTo}
-          onDragEnd={handleDragEnd}
-          transition={transition}
-          labelFontFamily={labelFontFamily}
-        />
-      </div>
+      <div className={`flex items-center gap-6 ${side}`}>
+        <div className="flex shrink-0 flex-col items-center gap-2">
+          <div
+            ref={dial}
+            role="slider"
+            tabIndex={0}
+            aria-label="Choose an item"
+            aria-valuemin={1}
+            aria-valuemax={n}
+            aria-valuenow={active + 1}
+            aria-valuetext={`${item.label}, ${active + 1} of ${n}`}
+            onKeyDown={key}
+            onPointerDown={down}
+            onPointerMove={move}
+            onPointerUp={up}
+            onPointerCancel={up}
+            className="relative max-w-full cursor-grab touch-none select-none rounded-full outline-none focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3] active:cursor-grabbing dark:focus-visible:outline-[#0a84ff]"
+            style={{ width: S, height: S }}
+          >
+            <div className="absolute inset-[14px] rounded-full bg-[#f5f5f7] shadow-[inset_0_1px_2px_rgba(0,0,0,.06)] dark:bg-[#2c2c2e] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,.5)]" />
+            <svg className="absolute inset-0 overflow-visible" width={S} height={S} aria-hidden="true">
+              <circle cx={S / 2} cy={S / 2} r={R} fill="none" className="stroke-[#e5e5ea] dark:stroke-[#3a3a3c]" strokeWidth="1" />
+              {showTicks ? (
+                <motion.g style={{ rotate: rot, originX: "50%", originY: "50%" }}>
+                  {Array.from({ length: ticks }, (_, i) => {
+                    const a = ((i / ticks) * 360 - 90) * (Math.PI / 180);
+                    const major = i % Math.max(1, Math.round(ticks / n)) === 0;
+                    const r1 = S / 2 - (major ? 12 : 9);
+                    const r2 = S / 2 - 4;
+                    return (
+                      <line
+                        key={i}
+                        x1={r3(S / 2 + Math.cos(a) * r1)}
+                        y1={r3(S / 2 + Math.sin(a) * r1)}
+                        x2={r3(S / 2 + Math.cos(a) * r2)}
+                        y2={r3(S / 2 + Math.sin(a) * r2)}
+                        strokeWidth={major ? 1.6 : 1}
+                        strokeLinecap="round"
+                        className={major ? "stroke-[#aeaeb2] dark:stroke-[#636366]" : "stroke-[#d2d2d7] dark:stroke-[#48484a]"}
+                      />
+                    );
+                  })}
+                </motion.g>
+              ) : null}
+              <path d={`M${S / 2 - 6} 1 L${S / 2 + 6} 1 L${S / 2} 10 Z`} style={{ fill: accent, transition: "fill .3s" }} />
+            </svg>
+            <motion.div className="absolute inset-0" style={{ rotate: rot }}>
+              {list.map((it, i) => (
+                <Node
+                  key={it.id}
+                  item={it}
+                  index={i}
+                  step={step}
+                  radius={R}
+                  rot={rot}
+                  counter={counter}
+                  accent={it.accentColor ?? accentColor}
+                  active={i === active}
+                />
+              ))}
+            </motion.div>
+            <div className="pointer-events-none absolute left-1/2 top-1/2 flex size-[96px] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_14px_28px_-16px_rgba(0,0,0,.45)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_14px_28px_-16px_rgba(0,0,0,.9)]">
+              {showCounter ? (
+                <span className="flex items-baseline text-[26px] font-semibold leading-none tracking-[-0.04em] tabular-nums">
+                  <span className="relative inline-flex h-[26px] overflow-hidden">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      <motion.span
+                        key={active}
+                        initial={reduce ? false : { y: "100%", opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={reduce ? undefined : { y: "-100%", opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+                      >
+                        {String(active + 1).padStart(2, "0")}
+                      </motion.span>
+                    </AnimatePresence>
+                  </span>
+                  <span className="ml-0.5 text-[12px] font-medium tracking-normal text-[#86868b] dark:text-[#8e8e93]">/{String(n).padStart(2, "0")}</span>
+                </span>
+              ) : null}
+              <span className="mt-1 max-w-[80px] truncate text-[11px] font-semibold" style={{ color: accent }}>
+                {item.label}
+              </span>
+            </div>
+          </div>
+          <span className="text-[12px] text-[#86868b] dark:text-[#a1a1a6]">Drag the dial, or fling it.</span>
+        </div>
 
-      <div
-        className={cn(
-          "min-h-[680px] flex-col px-5 pb-7 pt-5",
-          variant === "responsive" && "flex lg:hidden",
-          variant === "mobile" && "flex",
-          variant === "desktop" && "hidden",
-        )}
-      >
-        <MobileWheel
-          items={safeItems}
-          activeIndex={activeIndex}
-          showCounter={showCounter}
-          tokens={tokens}
-          onSelect={goTo}
-          onDragEnd={handleDragEnd}
-          transition={transition}
-          labelFontFamily={labelFontFamily}
-        />
-        <WheelContent
-          item={activeItem}
-          activeIndex={activeIndex}
-          total={total}
-          mode={contentMode}
-          tokens={tokens}
-          showCTA={showCTA}
-          transition={transition}
-          titleFontFamily={titleFontFamily}
-          bodyFontFamily={bodyFontFamily}
-          labelFontFamily={labelFontFamily}
-          compact
-        />
+        {contentMode !== "hidden" ? (
+          <div className="relative min-h-[150px] w-full min-w-0 flex-1" aria-live="polite" id={`${uid}-panel`}>
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div
+                key={item.id}
+                initial={reduce ? false : { opacity: 0, y: 14, filter: "blur(6px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={reduce ? undefined : { opacity: 0, y: -10, filter: "blur(6px)" }}
+                transition={{ type: "spring", stiffness: 300, damping: 28 }}
+              >
+                {item.subtitle ? (
+                  <p className="text-[12px] font-semibold uppercase tracking-[0.14em]" style={{ color: accent }}>
+                    {item.subtitle}
+                  </p>
+                ) : null}
+                <h3 className="mt-1.5 text-[28px] font-semibold leading-[1.08] tracking-[-0.035em] [text-wrap:balance]">{item.title}</h3>
+                {contentMode === "detailed" && item.description ? (
+                  <p className="mt-2.5 max-w-[34ch] text-[14px] leading-relaxed text-[#6e6e73] dark:text-[#a1a1a6]">{item.description}</p>
+                ) : null}
+                {contentMode === "detailed" && item.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- accepts any local or remote URL
+                  <img src={item.image} alt="" className="mt-4 aspect-[16/9] w-full max-w-[280px] rounded-[16px] object-cover" draggable={false} />
+                ) : null}
+                {showCTA && item.ctaHref ? (
+                  <a
+                    href={item.ctaHref}
+                    className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold text-white outline-none transition-transform focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] active:scale-[.97] dark:focus-visible:outline-[#0a84ff]"
+                    style={{ background: accent }}
+                  >
+                    {item.ctaLabel ?? "Learn more"}
+                    <svg viewBox="0 0 12 12" className="size-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M2.5 6h7M6.5 3l3 3-3 3" />
+                    </svg>
+                  </a>
+                ) : null}
+              </motion.div>
+            </AnimatePresence>
+            <div className="mt-5 flex gap-1.5" aria-hidden="true">
+              {list.map((it, i) => (
+                <motion.span
+                  key={it.id}
+                  className="h-1.5 rounded-full"
+                  animate={{ width: i === active ? 22 : 6, backgroundColor: i === active ? accent : "rgba(142,142,147,.35)" }}
+                  transition={{ type: "spring", stiffness: 420, damping: 30 }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
-  );
-}
-
-type WheelPartProps = {
-  items: WheelItem[];
-  activeIndex: number;
-  tokens: ThemeTokens;
-  onSelect: (index: number) => void;
-  onDragEnd: (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
-  transition: Transition;
-  labelFontFamily?: string;
-};
-
-function DesktopWheel({
-  items,
-  activeIndex,
-  radius,
-  ticks,
-  showTicks,
-  showCounter,
-  tokens,
-  onSelect,
-  onDragEnd,
-  transition,
-  labelFontFamily,
-}: WheelPartProps & { radius: number; ticks: number; showTicks: boolean; showCounter: boolean }) {
-  const dialSize = radius * 2 + 88;
-  return (
-    <motion.div
-      drag
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.08}
-      onDragEnd={onDragEnd}
-      className="relative mx-auto cursor-grab touch-none active:cursor-grabbing"
-      style={{ width: dialSize, height: dialSize }}
-    >
-      <div
-        className="absolute rounded-full border"
-        style={{ inset: 44, borderColor: tokens.ring }}
-      />
-      {showTicks &&
-        Array.from({ length: ticks }, (_, index) => {
-          const angle = (360 / ticks) * index;
-          const selectedAngle = 270;
-          const difference = Math.abs(((angle - selectedAngle + 540) % 360) - 180);
-          const nearActive = difference < 35;
-          return (
-            <span
-              key={angle}
-              className="absolute left-1/2 top-1/2 block origin-bottom rounded-full transition-colors duration-300"
-              style={{
-                width: 1,
-                height: nearActive ? 12 : 7,
-                background: nearActive ? tokens.accent : tokens.ring,
-                transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${radius + 44}px)`,
-              }}
-            />
-          );
-        })}
-
-      {items.map((item, index) => {
-        const offset = getShortestOffset(index, activeIndex, items.length);
-        const angle = 180 + (offset * 360) / items.length;
-        const radians = (angle * Math.PI) / 180;
-        const x = Math.cos(radians) * radius;
-        const y = Math.sin(radians) * radius;
-        const selected = index === activeIndex;
-        return (
-          <motion.button
-            key={item.id}
-            type="button"
-            aria-label={`Select ${item.title}`}
-            aria-current={selected}
-            onClick={() => onSelect(index)}
-            animate={{ x, y, scale: selected ? 1.08 : 1, opacity: selected ? 1 : 0.62 }}
-            transition={transition}
-            className="absolute left-1/2 top-1/2 grid size-[68px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border"
-            style={{
-              background: tokens.card,
-              borderColor: selected ? tokens.accent : tokens.ring,
-              color: selected ? tokens.accent : tokens.muted,
-              fontFamily: labelFontFamily,
-              boxShadow: selected ? `0 0 0 1px ${tokens.accent}33, 0 18px 44px ${tokens.accent}18` : undefined,
-            }}
-          >
-            <ItemIcon item={item} />
-          </motion.button>
-        );
-      })}
-
-      {showCounter && (
-        <div
-          className="absolute left-1/2 top-1/2 grid size-[108px] -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-center"
-          style={{ background: tokens.card, borderColor: tokens.ring }}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={activeIndex} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={transition}>
-              <p className="text-[34px] font-semibold tabular-nums" style={{ color: tokens.accent }}>
-                {String(activeIndex + 1).padStart(2, "0")}
-              </p>
-              <p className="text-xs tabular-nums" style={{ color: tokens.muted }}>
-                / {String(items.length).padStart(2, "0")}
-              </p>
-            </motion.div>
-          </AnimatePresence>
-        </div>
-      )}
-    </motion.div>
-  );
-}
-
-function MobileWheel({
-  items,
-  activeIndex,
-  showCounter,
-  tokens,
-  onSelect,
-  onDragEnd,
-  transition,
-  labelFontFamily,
-}: WheelPartProps & { showCounter: boolean }) {
-  return (
-    <motion.div
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.12}
-      onDragEnd={onDragEnd}
-      className="relative mb-7 h-48 cursor-grab touch-none overflow-hidden active:cursor-grabbing"
-    >
-      <div
-        className="absolute left-1/2 top-10 h-[230px] w-[430px] -translate-x-1/2 rounded-[50%] border"
-        style={{ borderColor: tokens.ring }}
-      />
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-12" style={{ background: `linear-gradient(90deg, ${tokens.background}, transparent)` }} />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-12" style={{ background: `linear-gradient(270deg, ${tokens.background}, transparent)` }} />
-      {items.map((item, index) => {
-        const offset = getShortestOffset(index, activeIndex, items.length);
-        const x = offset * 82;
-        const y = Math.min(76, Math.abs(offset) * 34);
-        const selected = index === activeIndex;
-        return (
-          <motion.button
-            key={item.id}
-            type="button"
-            onClick={() => onSelect(index)}
-            aria-label={`Select ${item.title}`}
-            aria-current={selected}
-            animate={{ x, y, scale: selected ? 1.08 : 0.92, opacity: Math.abs(offset) > 2 ? 0 : selected ? 1 : 0.62 }}
-            transition={transition}
-            className="absolute left-1/2 top-8 grid size-16 -translate-x-1/2 place-items-center rounded-full border"
-            style={{
-              background: tokens.card,
-              borderColor: selected ? tokens.accent : tokens.ring,
-              color: selected ? tokens.accent : tokens.muted,
-              fontFamily: labelFontFamily,
-            }}
-          >
-            <ItemIcon item={item} />
-          </motion.button>
-        );
-      })}
-      {showCounter && (
-        <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs tabular-nums" style={{ color: tokens.muted }}>
-          <span className="text-base font-semibold" style={{ color: tokens.accent }}>{String(activeIndex + 1).padStart(2, "0")}</span>
-          {" / "}
-          {String(items.length).padStart(2, "0")}
-        </p>
-      )}
-    </motion.div>
-  );
-}
-
-function WheelContent({
-  item,
-  activeIndex,
-  total,
-  mode,
-  tokens,
-  showCTA,
-  transition,
-  titleFontFamily,
-  bodyFontFamily,
-  labelFontFamily,
-  compact = false,
-}: {
-  item: WheelItem;
-  activeIndex: number;
-  total: number;
-  mode: WheelContentMode;
-  tokens: ThemeTokens;
-  showCTA: boolean;
-  transition: Transition;
-  titleFontFamily?: string;
-  bodyFontFamily?: string;
-  labelFontFamily?: string;
-  compact?: boolean;
-}) {
-  if (mode === "hidden") return null;
-  return (
-    <div className="relative pl-7" style={{ borderLeft: `3px solid ${tokens.ring}` }}>
-      <motion.span
-        layout
-        className="absolute -left-[3px] inset-y-0 block w-[3px] origin-top rounded-full"
-        initial={{ scaleY: 0.2 }}
-        animate={{ scaleY: 1 }}
-        transition={transition}
-        style={{ background: tokens.accent }}
-      />
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.article
-          key={item.id}
-          initial={{ opacity: 0, y: 16, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          exit={{ opacity: 0, y: -12, filter: "blur(8px)" }}
-          transition={transition}
-        >
-          <div
-            className="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]"
-            style={{ borderColor: `${tokens.accent}45`, color: tokens.accent, fontFamily: labelFontFamily }}
-          >
-            <span className="size-1.5 rounded-full" style={{ background: tokens.accent }} />
-            {item.label}
-          </div>
-          <h3
-            className={cn("mt-6 font-semibold tracking-tight", compact ? "text-3xl" : "text-4xl")}
-            style={{ color: tokens.text, fontFamily: titleFontFamily }}
-          >
-            {item.title}
-          </h3>
-          {item.subtitle && (
-            <p className="mt-2 text-xs uppercase tracking-[0.16em]" style={{ color: tokens.accent, fontFamily: labelFontFamily }}>
-              {item.subtitle}
-            </p>
-          )}
-          {mode === "detailed" && item.description && (
-            <p className="mt-4 max-w-[455px] text-[15px] leading-7" style={{ color: tokens.muted, fontFamily: bodyFontFamily }}>
-              {item.description}
-            </p>
-          )}
-          {mode === "detailed" && (
-            // eslint-disable-next-line @next/next/no-img-element -- keeps copied registry source independent of Next Image configuration
-            <img
-              src={item.image ?? FALLBACK_IMAGES[activeIndex % FALLBACK_IMAGES.length]}
-              alt=""
-              draggable={false}
-              className={cn("mt-6 w-full max-w-[468px] object-cover", compact ? "h-[206px] rounded-xl" : "h-[248px] rounded-2xl")}
-            />
-          )}
-          {showCTA && item.ctaHref && (
-            <a
-              href={item.ctaHref}
-              className="mt-6 inline-flex items-center rounded-full border px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-80"
-              style={{
-                background: tokens.ctaBackground,
-                borderColor: tokens.ctaBorder,
-                color: tokens.ctaText,
-                fontFamily: labelFontFamily,
-              }}
-            >
-              {item.ctaLabel ?? "Learn More"}
-            </a>
-          )}
-          <p className="mt-4 text-xs tabular-nums" style={{ color: tokens.muted, fontFamily: labelFontFamily }}>
-            {String(activeIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-          </p>
-        </motion.article>
-      </AnimatePresence>
-    </div>
   );
 }

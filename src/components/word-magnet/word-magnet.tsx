@@ -1,223 +1,223 @@
 "use client";
 
 import * as React from "react";
-import {
-  motion,
-  useMotionValue,
-  useSpring,
-  type MotionValue,
-} from "framer-motion";
+import { motion, useMotionValue, useReducedMotion, type MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type WordMagnetProps = {
+  /** Text split into magnetic words (letters never split). */
   text?: string;
+  /** Pointer influence radius in px. */
   radius?: number;
+  /** Push strength, 0 to 1. */
   force?: number;
+  /** Damping of the return spring. Lower wobbles longer, higher settles flat. */
   damping?: number;
+  /** Milliseconds a pushed word holds its place before it springs back. */
   returnDelay?: number;
+  /** Turns the effect off on touch screens and narrow viewports. */
   disableOnMobile?: boolean;
+  /** Whether pushed words may spill out of the text box. */
   overflow?: React.CSSProperties["overflow"];
   className?: string;
+  /** Classes for every word. */
   wordClassName?: string;
   style?: React.CSSProperties;
+  /** A ghost pointer drifts through the words until a real pointer arrives. */
+  autoplay?: boolean;
 };
 
-type MagneticWordProps = {
-  word: string;
-  mouseX: MotionValue<number>;
-  mouseY: MotionValue<number>;
-  containerRef: React.RefObject<HTMLDivElement | null>;
-  radius: number;
-  force: number;
-  damping: number;
-  returnDelay: number;
-  disabled: boolean;
-  className?: string;
-};
+type Slot = { el: HTMLSpanElement | null; x: MotionValue<number>; y: MotionValue<number>; r: MotionValue<number> };
+type Body = { x: number; y: number; vx: number; vy: number; tx: number; ty: number; hold: number };
 
-function useIsMobile(disabled: boolean) {
-  const [isMobile, setIsMobile] = React.useState(false);
-
-  React.useEffect(() => {
-    if (!disabled || typeof window === "undefined") return;
-
-    const check = () => {
-      setIsMobile(window.innerWidth < 768 || "ontouchstart" in window);
-    };
-
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, [disabled]);
-
-  return isMobile;
+function useNarrowOrTouch(enabled: boolean) {
+  return React.useSyncExternalStore(
+    (cb) => {
+      if (!enabled) return () => {};
+      const mq = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => enabled && window.matchMedia("(max-width: 767px), (pointer: coarse)").matches,
+    () => false,
+  );
 }
 
-function MagneticWord({
-  word,
-  mouseX,
-  mouseY,
-  containerRef,
-  radius,
-  force,
-  damping,
-  returnDelay,
-  disabled,
-  className,
-}: MagneticWordProps) {
-  const wordRef = React.useRef<HTMLSpanElement | null>(null);
-  const returnTimeout = React.useRef<number | null>(null);
-  const x = useSpring(0, { damping, stiffness: 200 });
-  const y = useSpring(0, { damping, stiffness: 200 });
+/** tailwind-merge drops a default `leading-*` whenever a later `text-*` size arrives, so the default goes last unless the caller set one. */
+const withLeading = (cls: string | undefined, fallback: string) => (/(^|\s)([\w-]+:)*leading-/.test(cls ?? "") ? undefined : fallback);
 
-  React.useEffect(() => {
-    if (disabled) {
-      x.set(0);
-      y.set(0);
-      return;
-    }
-
-    const updatePosition = () => {
-      const wordNode = wordRef.current;
-      const containerNode = containerRef.current;
-      if (!wordNode || !containerNode) return;
-
-      const wordRect = wordNode.getBoundingClientRect();
-      const containerRect = containerNode.getBoundingClientRect();
-      const wordCenterX = wordRect.left - containerRect.left + wordRect.width / 2;
-      const wordCenterY = wordRect.top - containerRect.top + wordRect.height / 2;
-      const dx = wordCenterX - mouseX.get();
-      const dy = wordCenterY - mouseY.get();
-      const distance = Math.hypot(dx, dy);
-
-      if (distance < radius) {
-        const angle = Math.atan2(dy, dx);
-        const strength = ((radius - distance) / radius) * force * 100;
-
-        x.set(Math.cos(angle) * strength);
-        y.set(Math.sin(angle) * strength);
-
-        if (returnTimeout.current !== null) {
-          window.clearTimeout(returnTimeout.current);
-        }
-
-        returnTimeout.current = window.setTimeout(() => {
-          x.set(0);
-          y.set(0);
-        }, returnDelay);
-      }
-    };
-
-    const unsubscribeX = mouseX.on("change", updatePosition);
-    const unsubscribeY = mouseY.on("change", updatePosition);
-
-    return () => {
-      unsubscribeX();
-      unsubscribeY();
-      if (returnTimeout.current !== null) {
-        window.clearTimeout(returnTimeout.current);
-      }
-    };
-  }, [containerRef, damping, disabled, force, mouseX, mouseY, radius, returnDelay, x, y]);
-
-  if (disabled) {
-    return (
-      <span className={cn("inline-block whitespace-nowrap", className)}>
-        {word}
-      </span>
-    );
-  }
-
+function Word({ word, index, register, className }: { word: string; index: number; register: (i: number, s: Slot) => () => void; className?: string }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const r = useMotionValue(0);
+  const el = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => register(index, { el: el.current, x, y, r }), [register, index, x, y, r]);
   return (
-    <motion.span
-      ref={wordRef}
-      className={cn("inline-block whitespace-nowrap will-change-transform", className)}
-      style={{ x, y }}
-    >
+    <motion.span ref={el} aria-hidden="true" className={cn("inline-block whitespace-nowrap will-change-transform", className)} style={{ x, y, rotate: r }}>
       {word}
     </motion.span>
   );
 }
 
+/**
+ * A headline whose words behave like fridge magnets. The pointer pushes nearby words away; each
+ * one tilts in the direction it is shoved, holds for a beat, then springs home on an under-damped
+ * spring so it wobbles before it settles. One rAF loop integrates every word and writes straight
+ * into motion values.
+ */
 export function WordMagnet({
   text = "Magnetic words react to your cursor and snap back into place",
   radius = 130,
   force = 0.45,
   damping = 28,
   returnDelay = 360,
-  disableOnMobile = true,
+  disableOnMobile = false,
   overflow = "visible",
   className,
   wordClassName,
   style,
+  autoplay = false,
 }: WordMagnetProps) {
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const mouseX = useMotionValue(-9999);
-  const mouseY = useMotionValue(-9999);
-  const rafRef = React.useRef<number | null>(null);
-  const isMobile = useIsMobile(disableOnMobile);
-  const words = React.useMemo(
-    () => text.split(" ").filter((word) => word.trim().length > 0),
-    [text],
-  );
-  const disabled = disableOnMobile && isMobile;
-
+  const still = useReducedMotion() === true;
+  const blocked = useNarrowOrTouch(disableOnMobile);
+  const off = still || blocked;
+  const words = React.useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
+  const root = React.useRef<HTMLDivElement>(null);
+  const slots = React.useRef<Slot[]>([]);
+  const pointer = React.useRef<{ x: number; y: number } | null>(null);
+  const touched = React.useRef(false);
+  const wake = React.useRef<() => void>(() => {});
+  const gx = useMotionValue(-100);
+  const gy = useMotionValue(-100);
+  const go = useMotionValue(0);
+  const cfg = React.useRef({ radius, force, damping, returnDelay });
   React.useEffect(() => {
+    cfg.current = { radius: Math.max(10, radius), force: Math.max(0, force), damping: Math.max(1, damping), returnDelay: Math.max(0, returnDelay) };
+  }, [radius, force, damping, returnDelay]);
+
+  const register = React.useCallback((i: number, s: Slot) => {
+    slots.current[i] = s;
     return () => {
-      if (rafRef.current !== null) {
-        window.cancelAnimationFrame(rafRef.current);
-      }
+      if (slots.current[i] === s) delete slots.current[i];
     };
   }, []);
 
-  function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
-    if (disabled) return;
-
-    const rect = event.currentTarget.getBoundingClientRect();
-    const nextX = event.clientX - rect.left;
-    const nextY = event.clientY - rect.top;
-
-    if (rafRef.current !== null) {
-      window.cancelAnimationFrame(rafRef.current);
+  React.useEffect(() => {
+    if (off) {
+      slots.current.forEach((s) => {
+        s?.x.set(0);
+        s?.y.set(0);
+        s?.r.set(0);
+      });
+      return;
     }
+    const bodies: Body[] = [];
+    let raf = 0;
+    let last = 0;
+    let t = 0;
+    const tick = (now: number) => {
+      const dt = last ? Math.min(0.033, (now - last) / 1000) : 0.016;
+      last = now;
+      const { radius: R, force: F, damping: D, returnDelay: hold } = cfg.current;
+      const host = root.current;
+      let ghost: { x: number; y: number } | null = null;
+      if (autoplay && !touched.current && host) {
+        t += dt;
+        ghost = { x: host.clientWidth * (0.5 + Math.sin(t * 0.7) * 0.46), y: host.clientHeight * (0.5 + Math.sin(t * 1.3 + 0.6) * 0.42) };
+        gx.set(ghost.x);
+        gy.set(ghost.y);
+        go.set(1);
+      } else go.set(0);
+      const p = pointer.current ?? ghost;
+      let moving = !!p;
+      slots.current.forEach((s, i) => {
+        if (!s?.el) return;
+        const b = (bodies[i] ??= { x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, hold: 0 });
+        if (p) {
+          // Rest position comes from layout offsets, which transforms do not change.
+          const cx = s.el.offsetLeft + s.el.offsetWidth / 2;
+          const cy = s.el.offsetTop + s.el.offsetHeight / 2;
+          const dx = cx - p.x;
+          const dy = cy - p.y;
+          const d = Math.hypot(dx, dy) || 1;
+          if (d < R) {
+            // Mostly vertical: words share a line, so a sideways shove would just pile them into their neighbours.
+            const k = (1 - d / R) ** 1.6 * F * 80;
+            b.tx = (dx / d) * k * 0.55;
+            b.ty = (dy / d) * k;
+            b.hold = now + hold;
+          }
+        }
+        if (now > b.hold) {
+          b.tx = 0;
+          b.ty = 0;
+        }
+        const stiff = 190;
+        const c = D * 0.5;
+        b.vx += (stiff * (b.tx - b.x) - c * b.vx) * dt;
+        b.vy += (stiff * (b.ty - b.y) - c * b.vy) * dt;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        s.x.set(Math.round(b.x * 100) / 100);
+        s.y.set(Math.round(b.y * 100) / 100);
+        s.r.set(Math.max(-14, Math.min(14, b.x * 0.16 + b.vx * 0.012)));
+        if (Math.abs(b.x) + Math.abs(b.y) + Math.abs(b.vx) + Math.abs(b.vy) > 0.05 || now < b.hold) moving = true;
+      });
+      raf = moving ? requestAnimationFrame(tick) : 0;
+      if (!moving) last = 0;
+    };
+    wake.current = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    if (autoplay) wake.current();
+    return () => {
+      cancelAnimationFrame(raf);
+      wake.current = () => {};
+    };
+  }, [off, autoplay, words, gx, gy, go]);
 
-    rafRef.current = window.requestAnimationFrame(() => {
-      mouseX.set(nextX);
-      mouseY.set(nextY);
-    });
-  }
-
-  function handlePointerLeave() {
-    mouseX.set(-9999);
-    mouseY.set(-9999);
-  }
+  const locate = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (off) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    touched.current = true;
+    pointer.current = { x: e.clientX - r.left, y: e.clientY - r.top };
+    wake.current();
+  };
 
   return (
     <div
-      ref={containerRef}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
+      ref={root}
+      onPointerEnter={locate}
+      onPointerMove={locate}
+      onPointerDown={locate}
+      onPointerLeave={() => {
+        pointer.current = null;
+      }}
+      onPointerCancel={() => {
+        pointer.current = null;
+      }}
       className={cn(
-        "relative flex max-w-5xl flex-wrap items-center justify-center gap-x-3 gap-y-2 text-center text-4xl font-semibold leading-tight tracking-[-0.03em] text-zinc-950 dark:text-white sm:text-6xl",
+        "relative flex max-w-5xl touch-pan-y flex-wrap items-center justify-center gap-x-[0.24em] gap-y-[0.08em] text-center text-[40px] font-semibold tracking-[-0.035em] text-[#1d1d1f] sm:text-[52px] dark:text-[#f5f5f7]",
         className,
+        withLeading(className, "leading-[1.12]"),
       )}
       style={{ overflow, ...style }}
     >
-      {words.map((word, index) => (
-        <MagneticWord
-          key={`${word}-${index}`}
-          word={word}
-          mouseX={mouseX}
-          mouseY={mouseY}
-          containerRef={containerRef}
-          radius={radius}
-          force={force}
-          damping={damping}
-          returnDelay={returnDelay}
-          disabled={disabled}
-          className={wordClassName}
-        />
-      ))}
+      <span className="sr-only">{text}</span>
+      {words.map((w, i) =>
+        off ? (
+          <span key={`${w}-${i}`} aria-hidden="true" className={cn("inline-block whitespace-nowrap", wordClassName)}>
+            {w}
+          </span>
+        ) : (
+          <Word key={`${w}-${i}`} word={w} index={i} register={register} className={wordClassName} />
+        ),
+      )}
+      {autoplay && !off ? (
+        <motion.span aria-hidden="true" className="pointer-events-none absolute left-0 top-0" style={{ x: gx, y: gy, opacity: go }}>
+          <span className="block size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0071e3]/15 shadow-[0_0_0_1.5px_rgba(0,113,227,.55)] dark:bg-[#0a84ff]/20 dark:shadow-[0_0_0_1.5px_rgba(10,132,255,.7)]" />
+        </motion.span>
+      ) : null}
     </div>
   );
 }

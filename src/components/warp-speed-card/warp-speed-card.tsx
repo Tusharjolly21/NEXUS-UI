@@ -1,29 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import * as React from "react";
+import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
-
-// Beams sized for the inline text region (~200-300px wide, ~50-70px tall)
-const BEAMS = [
-  { y: "8%",  length: 60,  thickness: 1, opacity: 0.9,  delay: 0,    duration: 0.46 },
-  { y: "20%", length: 95,  thickness: 1, opacity: 0.55, delay: 0.1,  duration: 0.7  },
-  { y: "30%", length: 45,  thickness: 1, opacity: 1.0,  delay: 0.04, duration: 0.4  },
-  { y: "42%", length: 115, thickness: 2, opacity: 0.42, delay: 0.18, duration: 0.86 },
-  { y: "55%", length: 65,  thickness: 1, opacity: 0.85, delay: 0.08, duration: 0.48 },
-  { y: "66%", length: 100, thickness: 1, opacity: 0.5,  delay: 0.22, duration: 0.78 },
-  { y: "78%", length: 50,  thickness: 1, opacity: 0.92, delay: 0.12, duration: 0.44 },
-  { y: "90%", length: 85,  thickness: 2, opacity: 0.6,  delay: 0.06, duration: 0.66 },
-] as const;
-
-const STARS = [
-  { x: 14, y: 22, r: 1,   delay: 0.1 },
-  { x: 36, y: 62, r: 1,   delay: 0.4 },
-  { x: 58, y: 16, r: 1.5, delay: 0.7 },
-  { x: 76, y: 76, r: 1,   delay: 0.2 },
-  { x: 50, y: 45, r: 1,   delay: 0.55 },
-  { x: 88, y: 38, r: 1,   delay: 0.35 },
-] as const;
 
 export interface WarpSpeedCardProps {
   children: React.ReactNode;
@@ -31,14 +10,15 @@ export interface WarpSpeedCardProps {
   contentClassName?: string;
 }
 
-/** Outer card container — just a styled wrapper. */
-export function WarpSpeedCard({
-  children,
-  className,
-  contentClassName,
-}: WarpSpeedCardProps) {
+/** The card the phrase lives in: a plain Motion Kit surface. */
+export function WarpSpeedCard({ children, className, contentClassName }: WarpSpeedCardProps) {
   return (
-    <div className={cn("relative overflow-hidden rounded-2xl bg-white", className)}>
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[24px] bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
+        className,
+      )}
+    >
       <div className={cn("relative", contentClassName)}>{children}</div>
     </div>
   );
@@ -47,115 +27,219 @@ export function WarpSpeedCard({
 export interface WarpTextTriggerProps {
   children: React.ReactNode;
   className?: string;
-  /** RGB triplet for beam color, e.g. "255,255,255" for white */
+  /** Star colour as an "r,g,b" triplet. */
   beamColor?: string;
+  /** Called with true when the jump starts and false when it drops out. */
+  onWarpChange?: (warping: boolean) => void;
+  /** Makes a jump every few seconds until someone hovers, focuses or taps the phrase. */
+  autoplay?: boolean;
 }
 
-/**
- * Inline warp-speed effect. Wrap a phrase to reveal — on hover — a contained
- * space scene with streaking beams that stays confined to the text's bounding
- * box. The text itself does not shrink or animate.
- */
-export function WarpTextTrigger({
-  children,
-  className,
-  beamColor = "255,255,255",
-}: WarpTextTriggerProps) {
-  const [hovered, setHovered] = useState(false);
+const STARS = 140;
 
-  const handleBorder = hovered ? "rgba(148,163,184,0.8)" : "rgb(59,130,246)";
-  const handleFill = hovered ? "rgb(24,24,27)" : "white";
-  const boxBorder = hovered ? "rgba(148,163,184,0.5)" : "rgba(59,130,246,0.5)";
+/**
+ * Wrap a phrase to give it a hyperdrive. Hover, focus or tap it and a starfield inside its box
+ * spools up on a spring: stars stretch into streaks as speed builds, overshoot into the jump, and
+ * the phrase squashes and stretches with the kick. Let go and it drops out of warp with a jolt.
+ */
+export function WarpTextTrigger({ children, className, beamColor = "255,255,255", onWarpChange, autoplay = false }: WarpTextTriggerProps) {
+  const still = useReducedMotion() === true;
+  const box = React.useRef<HTMLSpanElement>(null);
+  const canvas = React.useRef<HTMLCanvasElement>(null);
+  const touched = React.useRef(false);
+  const on = React.useRef(false);
+  const wake = React.useRef<() => void>(() => {});
+  const changed = React.useRef(onWarpChange);
+  React.useEffect(() => {
+    changed.current = onWarpChange;
+  }, [onWarpChange]);
+
+  const target = useMotionValue(0);
+  const speed = useSpring(target, { stiffness: 70, damping: 11, mass: 1 });
+  const space = useTransform(speed, (v) => Math.max(0, Math.min(1, v * 2.2)));
+  const sx = useMotionValue(1);
+  const sy = useMotionValue(1);
+  const jolt = useMotionValue(0);
+  const handle = useTransform(space, [0, 1], ["#0071e3", "#8e8e93"]);
+
+  const engage = React.useCallback(
+    (next: boolean) => {
+      if (on.current === next) return;
+      on.current = next;
+      box.current?.setAttribute("aria-pressed", String(next));
+      changed.current?.(next);
+      target.set(next ? 1 : 0);
+      wake.current();
+      if (still) return;
+      if (next) {
+        // Squash and stretch on the kick: velocity impulses into stiff springs.
+        animate(sx, 1, { type: "spring", stiffness: 420, damping: 11, velocity: 2.2 });
+        animate(sy, 1, { type: "spring", stiffness: 420, damping: 11, velocity: -2.2 });
+      } else {
+        animate(jolt, 0, { type: "spring", stiffness: 500, damping: 9, velocity: -140 });
+      }
+    },
+    [target, sx, sy, jolt, still],
+  );
+
+  // The starfield. Stars live in 3D; each frame they fly toward the viewer at the current speed and are
+  // drawn as streaks from where they were to where they are. The loop sleeps once speed drops to zero.
+  React.useEffect(() => {
+    const el = canvas.current;
+    const host = box.current;
+    if (!el || !host) return;
+    const ctx = el.getContext("2d");
+    if (!ctx) return;
+    let seed = 11;
+    const rnd = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const stars = Array.from({ length: STARS }, () => ({ x: rnd() * 2 - 1, y: rnd() * 2 - 1, z: rnd() * 0.9 + 0.1 }));
+    let w = 0;
+    let h = 0;
+    const size = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = host.clientWidth;
+      h = host.clientHeight;
+      el.width = Math.round(w * dpr);
+      el.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+    const ro = new ResizeObserver(size);
+    ro.observe(host);
+    let raf = 0;
+    let last = 0;
+    const frame = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now;
+      const v = Math.max(0, speed.get());
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2;
+      const cy = h / 2;
+      const f = Math.max(w, h) * 0.5;
+      const dz = (0.08 + v * (still ? 0.4 : 2.6)) * dt;
+      ctx.lineCap = "round";
+      for (const s of stars) {
+        const z0 = s.z;
+        s.z -= dz;
+        if (s.z <= 0.02) {
+          s.x = rnd() * 2 - 1;
+          s.y = rnd() * 2 - 1;
+          s.z = 1;
+          continue;
+        }
+        const x1 = cx + (s.x / s.z) * f * 0.5;
+        const y1 = cy + (s.y / s.z) * f * 0.5;
+        const tail = Math.min(z0 + v * 0.22, 1.2);
+        const x0 = cx + (s.x / tail) * f * 0.5;
+        const y0 = cy + (s.y / tail) * f * 0.5;
+        const a = Math.min(1, (1 - s.z) * 1.4) * Math.min(1, 0.35 + v);
+        ctx.strokeStyle = `rgba(${beamColor},${a.toFixed(3)})`;
+        ctx.lineWidth = Math.max(0.6, (1 - s.z) * 1.8);
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+      }
+      const awake = on.current || Math.abs(v) > 0.002;
+      raf = awake ? requestAnimationFrame(frame) : 0;
+      if (!awake) {
+        last = 0;
+        ctx.clearRect(0, 0, w, h);
+      }
+    };
+    wake.current = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+      wake.current = () => {};
+    };
+  }, [speed, beamColor, still]);
+
+  React.useEffect(() => {
+    if (!autoplay) return;
+    let off: ReturnType<typeof setTimeout> | undefined;
+    const jump = () => {
+      if (touched.current) return;
+      engage(true);
+      off = setTimeout(() => {
+        if (!touched.current) engage(false);
+      }, 1700);
+    };
+    const first = setTimeout(jump, 800);
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      jump();
+    }, 4000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+      if (off) clearTimeout(off);
+    };
+  }, [autoplay, engage]);
+
+  const take = () => {
+    touched.current = true;
+  };
 
   return (
     <span
-      className={cn("relative inline-block cursor-default select-none align-baseline", className)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      ref={box}
+      role="button"
+      tabIndex={0}
+      aria-pressed={false}
+      className={cn(
+        "relative inline-block cursor-default select-none whitespace-nowrap align-baseline outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]",
+        className,
+      )}
+      onPointerEnter={(e) => {
+        take();
+        if (e.pointerType === "mouse") engage(true);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse") engage(false);
+      }}
+      onPointerDown={(e) => {
+        take();
+        if (e.pointerType !== "mouse") engage(!on.current);
+      }}
+      onFocus={() => {
+        take();
+        engage(true);
+      }}
+      onBlur={() => engage(false)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          take();
+          engage(!on.current);
+        }
+      }}
     >
-      {/* Confined warp scene — sits directly behind the text, clipped to the box */}
-      <span className="pointer-events-none absolute -inset-1 overflow-hidden" aria-hidden>
-        {/* Dark space background */}
-        <motion.span
-          className="absolute inset-0 block bg-zinc-950"
-          animate={{ opacity: hovered ? 1 : 0 }}
-          transition={{ duration: 0.35, ease: "easeOut" }}
-        />
-        {/* Stars */}
-        {STARS.map((s, i) => (
-          <motion.span
-            key={`s-${i}`}
-            className="absolute block rounded-full bg-white"
-            style={{ left: `${s.x}%`, top: `${s.y}%`, width: s.r, height: s.r }}
-            animate={hovered ? { opacity: [0, 1, 0.3, 1, 0] } : { opacity: 0 }}
-            transition={
-              hovered
-                ? { duration: 2.6, delay: s.delay, repeat: Infinity, ease: "easeInOut" }
-                : { duration: 0.2 }
-            }
-          />
-        ))}
-        {/* Warp beams */}
-        {BEAMS.map((beam, i) => (
-          <motion.span
-            key={`b-${i}`}
-            className="absolute block"
-            style={{
-              left: 0,
-              top: beam.y,
-              height: beam.thickness,
-              width: beam.length,
-              background: `linear-gradient(90deg, transparent 0%, rgba(${beamColor},0.75) 38%, rgba(${beamColor},1) 50%, rgba(${beamColor},0.75) 62%, transparent 100%)`,
-            }}
-            initial={{ x: -160, opacity: 0 }}
-            animate={
-              hovered
-                ? { x: [-160, 700], opacity: [0, beam.opacity, beam.opacity, 0] }
-                : { x: -160, opacity: 0 }
-            }
-            transition={
-              hovered
-                ? {
-                    duration: beam.duration,
-                    delay: beam.delay,
-                    repeat: Infinity,
-                    ease: [0.18, 0.52, 0.82, 1],
-                    times: [0, 0.08, 0.92, 1],
-                  }
-                : { duration: 0.2 }
-            }
-          />
-        ))}
+      <span className="pointer-events-none absolute -inset-x-2 -inset-y-1 overflow-hidden rounded-[6px]" aria-hidden="true">
+        <motion.span className="absolute inset-0 block bg-[radial-gradient(120%_120%_at_50%_50%,#1c1c3a_0%,#05050a_70%)]" style={{ opacity: space }} />
+        <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
       </span>
-
-      {/* Static text on top — color flips so it stays legible on dark bg */}
-      <motion.span
-        className="relative inline-block px-0.5"
-        animate={{ color: hovered ? "rgb(255,255,255)" : "rgb(17,24,39)" }}
-        transition={{ duration: 0.3 }}
-      >
-        {children}
+      <motion.span className="relative inline-block" style={{ x: jolt }}>
+        <motion.span className="relative inline-block" style={{ scaleX: sx, scaleY: sy }}>
+          <span>{children}</span>
+          <motion.span aria-hidden="true" className="absolute inset-0 text-white" style={{ opacity: space }}>
+            {children}
+          </motion.span>
+        </motion.span>
       </motion.span>
-
-      {/* Figma-style selection handles */}
-      <span className="pointer-events-none absolute -inset-1" aria-hidden>
-        <span className="absolute inset-0 border" style={{ borderColor: boxBorder }} />
-        <span
-          className="absolute -top-0.75 -left-0.75 size-1.5 border"
-          style={{ borderColor: handleBorder, backgroundColor: handleFill }}
-        />
-        <span
-          className="absolute -top-0.75 -right-0.75 size-1.5 border"
-          style={{ borderColor: handleBorder, backgroundColor: handleFill }}
-        />
-        <span
-          className="absolute -bottom-0.75 -left-0.75 size-1.5 border"
-          style={{ borderColor: handleBorder, backgroundColor: handleFill }}
-        />
-        <span
-          className="absolute -bottom-0.75 -right-0.75 size-1.5 border"
-          style={{ borderColor: handleBorder, backgroundColor: handleFill }}
-        />
+      <span className="pointer-events-none absolute -inset-x-2 -inset-y-1" aria-hidden="true">
+        <motion.span className="absolute inset-0 rounded-[6px] border" style={{ borderColor: handle, opacity: 0.6 }} />
+        {(["-left-[4px] -top-[4px]", "-right-[4px] -top-[4px]", "-left-[4px] -bottom-[4px]", "-right-[4px] -bottom-[4px]"] as const).map((pos) => (
+          <motion.span key={pos} className={cn("absolute size-[7px] rounded-[2px] border-[1.5px] bg-white dark:bg-[#1c1c1e]", pos)} style={{ borderColor: handle }} />
+        ))}
       </span>
     </span>
   );

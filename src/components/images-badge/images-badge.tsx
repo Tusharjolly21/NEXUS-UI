@@ -1,189 +1,285 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export type BadgeImage = { src: string; alt: string };
+export type BadgeImage = {
+  /** Picture URL. Leave it out to show initials on a colour instead. */
+  src?: string;
+  /** Name: the image's alt text, the tooltip and the initials. */
+  alt: string;
+  /** Background for the initials when there is no `src`. Defaults to a colour picked from the name. */
+  color?: string;
+};
 
 export interface ImagesBadgeProps {
-  images: BadgeImage[];
-  /** Images shown in collapsed state. @default 3 */
+  /** People or pictures in the stack, front first. */
+  images?: BadgeImage[];
+  /** How many show while the stack is closed. */
   maxVisible?: number;
-  /** Additional images revealed on hover. @default 2 */
+  /** How many more fan out when it opens. Anyone beyond that is counted in the +N chip. */
   revealCount?: number;
-  /** Optional text label after the stack. */
+  /** Text after the stack. */
   label?: string;
   size?: "sm" | "md" | "lg";
-  /** Image shape. @default "rounded" */
   shape?: "circle" | "rounded" | "square";
+  /** Opens the stack and walks the name tag along it, again and again, until someone hovers or focuses it. */
+  autoplay?: boolean;
   className?: string;
   imageClassName?: string;
+  /** Makes the whole badge a button. */
   onClick?: () => void;
 }
 
-// ── Size tokens ───────────────────────────────────────────────────────────────
+const DEFAULT_PEOPLE: BadgeImage[] = [
+  { alt: "Ava Chen" },
+  { alt: "Noah Park" },
+  { alt: "Mira Shah" },
+  { alt: "Leo Grant" },
+  { alt: "Zoe Ito" },
+  { alt: "Kai Moss" },
+  { alt: "Sam Reyes" },
+];
+
 const CFG = {
-  sm: { px: 32,  gap: 8,  pill: "h-9  pl-2   pr-3.5 gap-2   text-[11px]", cnt: "text-[9px]"  },
-  md: { px: 42,  gap: 10, pill: "h-11 pl-2.5 pr-4   gap-2.5 text-xs",     cnt: "text-[10px]" },
-  lg: { px: 56,  gap: 12, pill: "h-14 pl-3   pr-5   gap-3   text-sm",      cnt: "text-[12px]" },
+  sm: { px: 30, gap: 6, text: "text-[12px]", pill: "h-10 pl-1.5 pr-3.5 gap-2.5" },
+  md: { px: 38, gap: 8, text: "text-[13px]", pill: "h-12 pl-[5px] pr-4 gap-3" },
+  lg: { px: 50, gap: 10, text: "text-[15px]", pill: "h-[62px] pl-1.5 pr-5 gap-3.5" },
 } as const;
 
-const SHAPE: Record<string, string> = {
-  circle:  "rounded-full",
-  rounded: "rounded-[10px]",
-  square:  "rounded-[4px]",
-};
+const RADIUS = { circle: "9999px", rounded: "32%", square: "18%" } as const;
 
-const SPRING = { type: "spring" as const, stiffness: 280, damping: 24 };
+/** Rest tilts, front to back, so the closed stack looks hand-placed. */
+const TILT = [0, -4, 3, -5, 4, -3, 4, -4];
 
-// ── Rotation table — gives each card a unique hand-placed feel ────────────────
-// Index 0 = back of stack (lowest z), higher index = front
-const REST_ROT  = [-14, -7, -2,  5,  11, -9,  3, -5] as const;
-const HOVER_ROT = [ -8, -4, -1,  2,   6, -6,  2, -3] as const;
+const FAN = { type: "spring" as const, stiffness: 340, damping: 19, mass: 0.8 };
 
-// ── Arc Y-offset in the spread state (outer cards drop, center stays high) ────
-function arcY(i: number, total: number): number {
-  if (total <= 1) return 0;
-  const mid = (total - 1) / 2;
-  const t   = (i - mid) / mid;          // -1 … 0 … +1
-  return t * t * (CFG.md.px * 0.22);    // parabola: 0 at centre, ~9px at edges
+const PALETTE = ["#0071e3", "#bf5af2", "#ff9f0a", "#30d158", "#ff375f", "#5ac8fa", "#ffd60a", "#64d2ff"];
+
+function colourOf(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return PALETTE[h % PALETTE.length];
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
+
+/**
+ * A pill of overlapping avatars. Hover or focus it and the stack fans out
+ * along a gentle arc, each face springing into place a beat after the last,
+ * the +N count rolls down and a name tag glides from face to face under the
+ * pointer (or the arrow keys).
+ */
 export function ImagesBadge({
-  images,
-  maxVisible   = 3,
-  revealCount  = 2,
+  images = DEFAULT_PEOPLE,
+  maxVisible = 3,
+  revealCount = 2,
   label,
-  size         = "md",
-  shape        = "rounded",
-  className,
-  imageClassName,
+  size = "md",
+  shape = "circle",
+  autoplay = false,
+  className = "",
+  imageClassName = "",
   onClick,
 }: ImagesBadgeProps) {
-  const [hovered, setHovered] = React.useState(false);
-  const reduced = useReducedMotion();
+  const still = useReducedMotion() === true;
+  const cfg = CFG[size] ?? CFG.md;
+  const { px, gap } = cfg;
+  const [open, setOpen] = React.useState(false);
+  const [active, setActive] = React.useState<number | null>(null);
+  const touched = React.useRef(false);
+  const labelRef = React.useRef<HTMLSpanElement>(null);
+  /** Width the face strip may use when open: the screen width minus the label and padding. */
+  const [room, setRoom] = React.useState<number | null>(null);
 
-  const { px, gap, pill, cnt } = CFG[size];
+  React.useEffect(() => {
+    const measure = () => {
+      const label = labelRef.current ? labelRef.current.offsetWidth + 16 : 0;
+      setRoom(Math.max(0, window.innerWidth - 32 - label - 40));
+    };
+    const id = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
 
-  const rendered = images.slice(0, maxVisible + revealCount);
-  const overflow = Math.max(0, images.length - maxVisible - revealCount);
-  const slots: Array<BadgeImage | null> = overflow > 0 ? [...rendered, null] : rendered;
-  const total = slots.length;
+  const vis = Math.max(1, maxVisible);
+  const shownList = images.slice(0, vis + Math.max(0, revealCount));
+  const overflow = Math.max(0, images.length - shownList.length);
+  const hiddenNow = Math.max(0, images.length - Math.min(vis, images.length));
+  const count = open ? overflow : hiddenNow;
 
-  // ── Collapsed geometry ───────────────────────────────────────────────────
-  // Images heavily overlapped; only maxVisible worth of width consumed
-  const peekPx       = Math.round(px * 0.32); // how much of each card peeks out
-  const collapsedW   = px + (Math.min(maxVisible, total) - 1) * peekPx;
+  const peek = Math.round(px * 0.5);
+  // Fan step: full spacing when there's room, squeezed (never below the closed peek) on narrow screens.
+  const slots = shownList.length - 1 + (overflow > 0 ? 1 : 0);
+  const fit = room === null || slots <= 0 ? px + gap : Math.floor((room - px) / slots);
+  const step = Math.max(peek, Math.min(px + gap, fit));
+  const closedW = px + (Math.min(vis, shownList.length) - 1) * peek + (hiddenNow > 0 ? peek + 6 : 0);
+  const openW = px + slots * step;
 
-  // ── Spread geometry ──────────────────────────────────────────────────────
-  const spreadW      = total * px + (total - 1) * gap;
+  const n = useSpring(count, { stiffness: 200, damping: 24 });
+  React.useEffect(() => {
+    n.set(count);
+  }, [count, n]);
+  const shownCount = useTransform(n, (v) => `+${Math.round(v)}`);
 
-  // x position in spread state (left-aligned)
-  const spreadX = (i: number) => i * (px + gap);
+  const ids = images.map((i) => i.alt).join("\u0000");
+  React.useEffect(() => {
+    const len = ids ? Math.min(ids.split("\u0000").length, vis + Math.max(0, revealCount)) : 0;
+    if (!autoplay || len === 0) return;
+    let step = 0;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      const cycle = len + 3;
+      const k = step++ % cycle;
+      if (k === 0) setOpen(true);
+      if (k >= 1 && k <= len) setActive(k - 1);
+      if (k === len + 1) setActive(null);
+      if (k === len + 2) setOpen(false);
+    }, 650);
+    return () => window.clearInterval(t);
+  }, [autoplay, ids, vis, revealCount]);
 
-  // x position in collapsed state — visible cards peek from right; hidden cards hide behind
-  const collapsedX = (i: number) => {
-    if (i >= maxVisible) return (maxVisible - 1) * peekPx; // stack behind last visible
-    return i * peekPx;
+  const enter = () => {
+    touched.current = true;
+    setOpen(true);
   };
+  const leave = () => {
+    setOpen(false);
+    setActive(null);
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      onClick();
+      return;
+    }
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      touched.current = true;
+      setOpen(true);
+      setActive((a) => {
+        const last = shownList.length - 1;
+        if (a === null) return e.key === "ArrowRight" ? 0 : last;
+        return Math.max(0, Math.min(last, a + (e.key === "ArrowRight" ? 1 : -1)));
+      });
+    }
+    if (e.key === "Escape") leave();
+  };
+
+  const names = images.map((i) => i.alt).join(", ");
+  const radius = RADIUS[shape] ?? RADIUS.circle;
 
   return (
     <motion.div
-      className={cn(
-        "inline-flex cursor-default select-none items-center rounded-full",
-        "border border-border/60 bg-background/90 backdrop-blur-sm",
-        "shadow-[0_2px_12px_rgba(0,0,0,.10)] dark:shadow-[0_2px_16px_rgba(0,0,0,.35)]",
-        "dark:bg-zinc-900/80 dark:border-white/[0.09]",
-        "transition-shadow duration-300",
-        "hover:shadow-[0_6px_24px_rgba(0,0,0,.16)] dark:hover:shadow-[0_6px_28px_rgba(0,0,0,.55)]",
-        pill,
-        onClick && "cursor-pointer",
-        className,
-      )}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
+      role={onClick ? "button" : "group"}
+      tabIndex={0}
+      aria-label={`${label ? `${label}. ` : ""}${names}`}
+      aria-expanded={open}
+      onPointerEnter={(e) => e.pointerType !== "touch" && enter()}
+      onPointerLeave={(e) => e.pointerType !== "touch" && leave()}
+      onPointerDown={(e) => {
+        if (e.pointerType === "touch") {
+          touched.current = true;
+          setOpen((o) => !o);
+        }
+      }}
+      onFocus={enter}
+      onBlur={leave}
+      onKeyDown={onKey}
       onClick={onClick}
-      whileHover={reduced ? undefined : { y: -2, scale: 1.015 }}
-      transition={SPRING}
-      role={onClick ? "button" : undefined}
-      tabIndex={onClick ? 0 : undefined}
-      onKeyDown={onClick ? (e) => { if (e.key === "Enter" || e.key === " ") onClick(); } : undefined}
+      animate={still ? undefined : { y: open ? -2 : 0 }}
+      transition={FAN}
+      className={cn(`inline-flex select-none items-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black ${onClick ? "cursor-pointer" : ""} ${cfg.pill}`, className)}
     >
-      {/* ── Image strip ──────────────────────────────────────── */}
-      <motion.div
-        className="relative shrink-0"
-        style={{ height: px + 12 }} // extra height for arc + rotation overflow
-        animate={{ width: reduced ? collapsedW : (hovered ? spreadW : collapsedW) }}
-        transition={SPRING}
-      >
-        {slots.map((slot, i) => {
-          const isHidden   = i >= maxVisible && slot !== null;
-          const isOverflow = slot === null;
-
-          const tx      = hovered ? spreadX(i) : collapsedX(i);
-          const ty      = hovered ? arcY(i, total) : 0;
-          const rotate  = reduced ? 0
-            : hovered  ? (HOVER_ROT[i] ?? 0)
-            : (REST_ROT[i] ?? 0);
-          const opacity = isHidden ? (hovered ? 1 : 0) : 1;
-          const scale   = isHidden ? (hovered ? 1 : 0.6) : 1;
-          // Front-most card has highest z when collapsed; all equal when spread
-          const zIdx    = hovered ? i + 1 : (total - i);
-
+      <motion.div className="relative shrink-0" style={{ height: px }} initial={false} animate={{ width: still || !open ? closedW : openW }} transition={FAN}>
+        {shownList.map((img, i) => {
+          const hidden = i >= vis;
+          const mid = (shownList.length - 1) / 2;
+          const arc = mid > 0 ? ((i - mid) / mid) ** 2 * px * 0.07 : 0;
+          const x = open ? i * step : hidden ? (vis - 1) * peek : i * peek;
+          const lift = active === i ? -px * 0.22 : 0;
           return (
             <motion.div
-              key={i}
-              className={cn(
-                "absolute top-0 left-0 flex shrink-0 items-center justify-center",
-                !isOverflow && "overflow-hidden",
-                SHAPE[isOverflow ? "circle" : shape],
-                "border-2 border-background dark:border-zinc-900",
-                "shadow-[0_2px_8px_rgba(0,0,0,.28)]",
-                isOverflow && "bg-muted",
-                imageClassName,
-              )}
-              style={{ width: px, height: px, zIndex: zIdx }}
+              key={`${img.alt}-${i}`}
+              className={cn(`absolute left-0 top-0 overflow-hidden ring-[2.5px] ring-white dark:ring-[#1c1c1e]`, imageClassName)}
+              style={{ width: px, height: px, borderRadius: radius, zIndex: active === i ? 50 : shownList.length - i }}
+              initial={false}
               animate={{
-                x: reduced ? spreadX(i) : tx,
-                y: reduced ? 0 : ty,
-                rotate: rotate,
-                opacity,
-                scale,
+                x,
+                y: (open ? arc : 0) + lift,
+                rotate: still ? 0 : open ? 0 : TILT[i % TILT.length],
+                scale: hidden && !open ? 0.6 : active === i ? 1.12 : 1,
+                opacity: hidden && !open ? 0 : 1,
               }}
-              transition={{
-                ...SPRING,
-                delay: !reduced && isHidden
-                  ? (i - maxVisible) * 0.06
-                  : 0,
-              }}
+              transition={{ ...FAN, delay: still ? 0 : open ? i * 0.035 : (shownList.length - i) * 0.02 }}
+              onPointerEnter={() => open && setActive(i)}
             >
-              {isOverflow ? (
-                <span className={cn("font-semibold text-muted-foreground", cnt)}>
-                  +{overflow}
-                </span>
+              {img.src ? (
+                // eslint-disable-next-line @next/next/no-img-element -- any avatar URL
+                <img src={img.src} alt={img.alt} width={px} height={px} draggable={false} className="h-full w-full object-cover" />
               ) : (
-                <img
-                  src={slot!.src}
-                  alt={slot!.alt}
-                  width={px}
-                  height={px}
-                  className="h-full w-full object-cover"
-                  draggable={false}
-                />
+                <span
+                  className="grid h-full w-full place-items-center font-semibold text-white"
+                  style={{ background: `linear-gradient(140deg, ${img.color ?? colourOf(img.alt)}, color-mix(in srgb, ${img.color ?? colourOf(img.alt)} 70%, #000))`, fontSize: px * 0.36 }}
+                  role="img"
+                  aria-label={img.alt}
+                >
+                  {initials(img.alt)}
+                </span>
               )}
             </motion.div>
           );
         })}
+        {(count > 0 || overflow > 0) && (
+          <motion.span
+            className={`absolute left-0 top-0 grid place-items-center bg-[#f0f0f3] font-semibold tabular-nums text-[#1d1d1f] ring-[2.5px] ring-white dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:ring-[#1c1c1e] ${cfg.text}`}
+            style={{ width: px, height: px, borderRadius: radius, zIndex: 0 }}
+            initial={false}
+            animate={{
+              x: open ? shownList.length * step : Math.min(vis, shownList.length) * peek + 6,
+              opacity: open && overflow === 0 ? 0 : 1,
+              scale: open && overflow === 0 ? 0.5 : 1,
+            }}
+            transition={FAN}
+            aria-hidden="true"
+          >
+            <motion.span>{shownCount}</motion.span>
+          </motion.span>
+        )}
+        <AnimatePresence>
+          {open && active !== null && shownList[active] && (
+            <motion.span
+              key="tag"
+              className="pointer-events-none absolute left-0 top-0 z-[60]"
+              initial={{ opacity: 0, y: 6, scale: 0.8, x: active * step + px / 2 }}
+              animate={{ opacity: 1, y: -px * 0.62 - 14, scale: 1, x: active * step + px / 2 }}
+              exit={{ opacity: 0, y: 0, scale: 0.8, transition: { duration: 0.12 } }}
+              transition={{ type: "spring", stiffness: 420, damping: 26 }}
+            >
+              <span className="block -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d1d1f] px-2.5 py-1 text-[11px] font-medium text-white shadow-[0_6px_14px_-6px_rgba(0,0,0,.5)] dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+                <motion.span key={active} className="block" initial={{ opacity: 0, filter: "blur(3px)" }} animate={{ opacity: 1, filter: "blur(0px)" }} transition={{ duration: 0.18, delay: 0.06 }}>
+                  {shownList[active].alt}
+                </motion.span>
+              </span>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </motion.div>
-
-      {/* ── Label ─────────────────────────────────────────────── */}
-      {label && (
-        <span className="whitespace-nowrap font-medium text-foreground/80 dark:text-foreground/70 leading-none">
-          {label}
-        </span>
-      )}
+      {label && <span ref={labelRef} className={`whitespace-nowrap font-medium tracking-[-0.01em] ${cfg.text}`}>{label}</span>}
     </motion.div>
   );
 }

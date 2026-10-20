@@ -1,35 +1,32 @@
 "use client";
-
-import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion, type Transition } from "framer-motion";
-import { Pause, Phone, PhoneOff, Play, SkipBack, SkipForward, Square, Timer } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type Transition } from "framer-motion";
 
 export type IslandState = "idle" | "timer" | "music" | "call";
 
 export type DynamicIslandProps = {
-  /** Controlled state. */
+  /** Controlled activity. */
   state?: IslandState;
-  /** Starting state when uncontrolled. */
+  /** Starting activity when uncontrolled. */
   defaultState?: IslandState;
-  /** Called whenever the island asks to change state (stop, decline, end of a cycle step). */
+  /** Called whenever the island asks to change activity (stop, decline, a cycle step). */
   onStateChange?: (state: IslandState) => void;
-  /** Length of the timer, in seconds. */
+  /** Length of the timer, in seconds. It really ticks. */
   timerSeconds?: number;
-  /** Accent colour used by the timer and the music bars. */
+  /** Accent colour for the timer and the music bars. */
   accent?: string;
-  /** Uncontrolled only: step through `states` every `cycle` ms. `0` stays put. */
+  /** Uncontrolled only: step through `states` every this many ms. 0 stays put. */
   cycle?: number;
-  /** States visited by `cycle`. */
+  /** Activities visited by `cycle` and autoplay. */
   states?: IslandState[];
-  /** Track shown in the music state. */
+  /** Track shown in the music activity. */
   track?: { title: string; artist: string };
-  /** Caller shown in the call state. */
+  /** Name shown in the call activity. */
   caller?: string;
+  /** Morphs through the activities and opens each one, until someone touches it. Uncontrolled only. */
+  autoplay?: boolean;
   className?: string;
 };
-
-const SPRING: Transition = { type: "spring", stiffness: 420, damping: 34, mass: 0.9 };
 
 const SIZE: Record<IslandState, { compact: [number, number]; open: [number, number] }> = {
   idle: { compact: [126, 37], open: [126, 37] },
@@ -38,18 +35,22 @@ const SIZE: Record<IslandState, { compact: [number, number]; open: [number, numb
   call: { compact: [236, 37], open: [352, 88] },
 };
 
+/** Width leads, height follows a beat later on a looser spring: that lag is what makes it stretch. */
+const W_SPRING: Transition = { type: "spring", stiffness: 420, damping: 30, mass: 0.9 };
+const H_SPRING: Transition = { type: "spring", stiffness: 260, damping: 19, mass: 0.9, delay: 0.04 };
+
 function format(total: number) {
   const s = Math.max(0, Math.ceil(total));
   const m = Math.floor(s / 60);
   return `${m}:${String(s % 60).padStart(2, "0")}`;
 }
 
-/** Counts down from `seconds` while running; survives re-renders by tracking an end time. */
+/** Counts down from `seconds` while running; loops back to the start at 0:00 so a demo never stalls. */
 function useCountdown(seconds: number, active: boolean) {
-  const [left, setLeft] = React.useState(seconds);
-  const [running, setRunning] = React.useState(true);
-  const [prevSeconds, setPrevSeconds] = React.useState(seconds);
-  const endRef = React.useRef(0);
+  const [left, setLeft] = useState(seconds);
+  const [running, setRunning] = useState(true);
+  const [prevSeconds, setPrevSeconds] = useState(seconds);
+  const leftRef = useRef(seconds);
 
   if (seconds !== prevSeconds) {
     setPrevSeconds(seconds);
@@ -57,24 +58,67 @@ function useCountdown(seconds: number, active: boolean) {
     setRunning(true);
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
+    leftRef.current = left;
+  }, [left]);
+
+  useEffect(() => {
     if (!active || !running) return;
-    endRef.current = Date.now() + left * 1000;
+    const end = performance.now() + leftRef.current * 1000;
     const id = window.setInterval(() => {
-      const next = (endRef.current - Date.now()) / 1000;
-      setLeft(next <= 0 ? seconds : next); // loop the demo instead of sitting at 0:00
-    }, 200);
+      const next = (end - performance.now()) / 1000;
+      setLeft(next <= 0 ? seconds : next);
+    }, 250);
     return () => window.clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `left` seeds the end time only when (re)starting
   }, [active, running, seconds]);
 
   return { left, running, toggle: () => setRunning((r) => !r), reset: () => setLeft(seconds) };
 }
 
+const I = {
+  timer: (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <circle cx="8" cy="9" r="5.5" />
+      <path d="M8 6.5V9l1.6 1.2M6.5 1.5h3" />
+    </svg>
+  ),
+  play: (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+      <path d="M5 3.4v11.2c0 .8.9 1.3 1.6.9l8.6-5.6a1.1 1.1 0 0 0 0-1.8L6.6 2.5C5.9 2.1 5 2.6 5 3.4Z" />
+    </svg>
+  ),
+  pause: (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+      <rect x="3.5" y="2.5" width="4" height="13" rx="1.2" />
+      <rect x="10.5" y="2.5" width="4" height="13" rx="1.2" />
+    </svg>
+  ),
+  stop: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+      <rect x="1.5" y="1.5" width="11" height="11" rx="2.4" />
+    </svg>
+  ),
+  back: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M10 10.9 17 15.4c.6.4 1.4 0 1.4-.8V5.4c0-.8-.8-1.2-1.4-.8L10 9.1V5.4c0-.8-.8-1.2-1.4-.8L1.8 9.1a1.1 1.1 0 0 0 0 1.8l6.8 4.5c.6.4 1.4 0 1.4-.8Z" />
+    </svg>
+  ),
+  next: (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path d="M10 9.1 3 4.6c-.6-.4-1.4 0-1.4.8v9.2c0 .8.8 1.2 1.4.8l7-4.5v3.7c0 .8.8 1.2 1.4.8l6.8-4.5a1.1 1.1 0 0 0 0-1.8l-6.8-4.5c-.6-.4-1.4 0-1.4.8Z" />
+    </svg>
+  ),
+  phone: (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" aria-hidden="true">
+      <path d="M5.2 1.6 6.8 4.9c.3.6.1 1.3-.4 1.7l-1.2.9a9.6 9.6 0 0 0 5.3 5.3l.9-1.2c.4-.5 1.1-.7 1.7-.4l3.3 1.6c.6.3.9 1 .7 1.7l-.5 1.6c-.3.9-1.1 1.4-2 1.3C7.4 17 1 10.6.6 3.4c-.1-.9.4-1.7 1.3-2l1.6-.5c.7-.2 1.4.1 1.7.7Z" />
+    </svg>
+  ),
+};
+
 function Bars({ color, playing }: { color: string; playing: boolean }) {
   const reduce = useReducedMotion();
   return (
-    <span className="flex h-4 items-center gap-[3px]" aria-hidden>
+    <span className="flex h-4 items-center gap-[3px]" aria-hidden="true">
       {[0.55, 1, 0.7, 0.9, 0.5].map((h, i) => (
         <motion.span
           key={i}
@@ -88,41 +132,33 @@ function Bars({ color, playing }: { color: string; playing: boolean }) {
   );
 }
 
-function RoundButton({
-  label,
-  onClick,
-  className,
-  style,
-  children,
-}: {
-  label: string;
-  onClick: () => void;
-  className?: string;
-  style?: React.CSSProperties;
-  children: React.ReactNode;
-}) {
+function RoundButton({ label, onClick, className = "", style, children }: { label: string; onClick: () => void; className?: string; style?: CSSProperties; children: ReactNode }) {
   return (
-    <button
+    <motion.button
       type="button"
       aria-label={label}
+      whileTap={{ scale: 0.86 }}
+      transition={{ type: "spring", stiffness: 500, damping: 22 }}
       onClick={(e) => {
         e.stopPropagation();
         onClick();
       }}
-      className={cn(
-        "grid size-11 shrink-0 place-items-center rounded-full transition-transform active:scale-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-        className,
-      )}
+      className={`grid size-11 shrink-0 place-items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white/80 ${className}`}
       style={style}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }
 
+const ART = "bg-[conic-gradient(from_200deg,#ff9f0a,#ff375f,#bf5af2,#0a84ff,#ff9f0a)]";
+
 /**
- * A black pill that grows into whatever is happening: a running timer, the song that is playing,
- * an incoming call. Tap it to open the live controls, tap again (or press Escape) to tuck it away.
+ * A black pill that grows into whatever is happening: a running timer, the
+ * song that is playing, an incoming call. Every change stretches it: the
+ * width shoots out first and the height catches up on a looser spring, so the
+ * pill squashes and bulges into its new shape. Tap it to open live controls;
+ * tap again or press Escape to tuck it away.
  */
 export function DynamicIsland({
   state: controlled,
@@ -132,19 +168,22 @@ export function DynamicIsland({
   accent = "#ff9f0a",
   cycle = 0,
   states = ["timer", "music", "call"],
-  track = { title: "Midnight Drive", artist: "Neon Harbor" },
+  track = { title: "Midnight Drive", artist: "Harbor Lights" },
   caller = "Ava Lin",
-  className,
+  autoplay = false,
+  className = "",
 }: DynamicIslandProps) {
-  const reduce = useReducedMotion();
-  const [inner, setInner] = React.useState<IslandState>(defaultState);
+  const reduce = useReducedMotion() === true;
+  const [inner, setInner] = useState<IslandState>(defaultState);
   const state = controlled ?? inner;
-  const [open, setOpen] = React.useState(false);
-  const [playing, setPlaying] = React.useState(true);
-  const rootRef = React.useRef<HTMLDivElement | null>(null);
+  const [open, setOpen] = useState(false);
+  const [playing, setPlaying] = useState(true);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const touched = useRef(false);
   const timer = useCountdown(timerSeconds, state === "timer");
+  const squash = useMotionValue(1);
 
-  const setState = React.useCallback(
+  const setState = useCallback(
     (next: IslandState) => {
       if (controlled === undefined) setInner(next);
       onStateChange?.(next);
@@ -152,25 +191,57 @@ export function DynamicIsland({
     [controlled, onStateChange],
   );
 
-  // collapse whenever the activity changes
-  const [prevState, setPrevState] = React.useState(state);
+  // Collapse whenever the activity changes.
+  const [prevState, setPrevState] = useState(state);
   if (state !== prevState) {
     setPrevState(state);
     setOpen(false);
   }
 
-  // optional self-running demo (paused while open)
-  React.useEffect(() => {
+  const isOpen = open && state !== "idle";
+  // A quick vertical squash on every morph; the spring lets it bounce back past 1.
+  useEffect(() => {
+    if (reduce) return;
+    const a = animate(squash, [0.86, 1], { type: "spring", stiffness: 520, damping: 14 });
+    return () => a.stop();
+  }, [state, isOpen, squash, reduce]);
+
+  // Optional self-running demo (paused while open).
+  const statesKey = states.join(",");
+  useEffect(() => {
     if (!cycle || controlled !== undefined || open) return;
+    const list = statesKey.split(",") as IslandState[];
     const id = window.setTimeout(() => {
-      const i = states.indexOf(state);
-      setInner(states[(i + 1) % states.length] ?? states[0]);
+      const i = list.indexOf(state);
+      setInner(list[(i + 1) % list.length] ?? list[0]);
     }, cycle);
     return () => window.clearTimeout(id);
-  }, [cycle, controlled, open, state, states]);
+  }, [cycle, controlled, open, state, statesKey]);
 
-  // tap outside or Escape tucks it away
-  React.useEffect(() => {
+  // Autoplay: morph to the next activity, open it, close it, repeat.
+  useEffect(() => {
+    if (!autoplay || controlled !== undefined) return;
+    const list = statesKey.split(",") as IslandState[];
+    let k = 0;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      const beat = k++ % 3;
+      if (beat === 0) setOpen(true);
+      if (beat === 1) setOpen(false);
+      if (beat === 2)
+        setInner((s) => {
+          const i = list.indexOf(s);
+          return list[(i + 1) % list.length] ?? list[0];
+        });
+    }, 1700);
+    return () => window.clearInterval(t);
+  }, [autoplay, controlled, statesKey]);
+
+  // Tap outside or Escape tucks it away.
+  useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
       if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
@@ -186,14 +257,11 @@ export function DynamicIsland({
     };
   }, [open]);
 
-  const canOpen = state !== "idle";
-  const isOpen = open && canOpen;
   const [w, h] = isOpen ? SIZE[state].open : SIZE[state].compact;
-  const transition = reduce ? { duration: 0 } : SPRING;
   const fade = {
-    initial: { opacity: 0, scale: 0.92, filter: "blur(4px)" },
-    animate: { opacity: 1, scale: 1, filter: "blur(0px)", transition: { delay: reduce ? 0 : 0.08, duration: 0.22 } },
-    exit: { opacity: 0, scale: 0.96, filter: "blur(4px)", transition: { duration: 0.12 } },
+    initial: reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9, filter: "blur(6px)" },
+    animate: { opacity: 1, scale: 1, filter: "blur(0px)", transition: { delay: reduce ? 0 : 0.1, type: "spring" as const, stiffness: 320, damping: 26 } },
+    exit: reduce ? { opacity: 0 } : { opacity: 0, scale: 0.94, filter: "blur(6px)", transition: { duration: 0.12 } },
   };
 
   const label =
@@ -204,21 +272,36 @@ export function DynamicIsland({
         : state === "call"
           ? `Incoming call from ${caller}`
           : "Dynamic island";
+  const initials = caller
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2);
 
   return (
-    <div ref={rootRef} className={cn("relative inline-flex justify-center", className)} style={{ minWidth: w }}>
+    <div
+      ref={rootRef}
+      className={`relative inline-flex max-w-full justify-center ${className}`}
+      style={{ minWidth: Math.min(w, 352) }}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      onKeyDown={() => {
+        touched.current = true;
+      }}
+    >
       <motion.div
         role="group"
         aria-label={label}
-        className="relative overflow-hidden bg-black text-white shadow-[0_12px_30px_-10px_rgba(0,0,0,0.55),inset_0_0_0_1px_rgba(255,255,255,0.06)]"
+        className="relative max-w-full overflow-hidden bg-black text-white shadow-[0_14px_30px_-12px_rgba(0,0,0,.55)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.12),0_14px_30px_-12px_rgba(0,0,0,.9)]"
         initial={false}
         animate={{ width: w, height: h, borderRadius: isOpen ? 44 : 22 }}
-        transition={transition}
-        whileHover={canOpen && !isOpen && !reduce ? { scale: 1.04 } : undefined}
+        transition={reduce ? { duration: 0 } : { width: W_SPRING, height: H_SPRING, borderRadius: H_SPRING }}
+        style={{ scaleY: squash, originY: 0 }}
+        whileHover={state !== "idle" && !isOpen && !reduce ? { scale: 1.04 } : undefined}
         onClick={() => isOpen && setOpen(false)}
       >
         <AnimatePresence mode="popLayout" initial={false}>
-          {/* ── compact ─────────────────────────────── */}
           {!isOpen && state !== "idle" ? (
             <motion.button
               key={`c-${state}`}
@@ -229,29 +312,27 @@ export function DynamicIsland({
                 e.stopPropagation();
                 setOpen(true);
               }}
-              className="absolute inset-0 flex items-center justify-between rounded-[inherit] px-3.5 focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-white/70"
+              className="absolute inset-0 flex items-center justify-between rounded-[inherit] px-3.5 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
               {...fade}
             >
               {state === "timer" ? (
                 <>
                   <span className="grid size-6 place-items-center rounded-full" style={{ background: `${accent}2e`, color: accent }}>
-                    <Timer className="size-3.5" strokeWidth={2.5} />
+                    {I.timer}
                   </span>
-                  <span className="text-[15px] font-semibold tabular-nums tracking-tight" style={{ color: accent }}>
+                  <span className="text-[15px] font-semibold tabular-nums tracking-[-0.02em]" style={{ color: accent }}>
                     {format(timer.left)}
                   </span>
                 </>
               ) : state === "music" ? (
                 <>
-                  <span className="size-6 rounded-[7px] bg-[conic-gradient(from_200deg,#ff7b42,#f04a8d,#6d5cff,#ff7b42)]" />
+                  <span className={`size-6 rounded-[7px] ${ART}`} />
                   <Bars color={accent} playing={playing} />
                 </>
               ) : (
                 <>
                   <span className="flex items-center gap-2">
-                    <span className="grid size-6 place-items-center rounded-full bg-[#30d158]/20 text-[#30d158]">
-                      <Phone className="size-3.5" strokeWidth={2.5} />
-                    </span>
+                    <span className="grid size-6 place-items-center rounded-full bg-[#30d158]/20 text-[#30d158] [&_svg]:size-3.5">{I.phone}</span>
                     <span className="text-[13px] font-medium">{caller}</span>
                   </span>
                   <Bars color="#30d158" playing />
@@ -260,16 +341,11 @@ export function DynamicIsland({
             </motion.button>
           ) : null}
 
-          {/* ── open: timer ─────────────────────────── */}
           {isOpen && state === "timer" ? (
             <motion.div key="o-timer" className="absolute inset-0 flex items-center justify-between px-5" {...fade}>
               <div className="flex items-center gap-2.5">
-                <RoundButton
-                  label={timer.running ? "Pause timer" : "Resume timer"}
-                  onClick={timer.toggle}
-                  style={{ background: `${accent}38`, color: accent }}
-                >
-                  {timer.running ? <Pause className="size-5 fill-current" /> : <Play className="size-5 fill-current" />}
+                <RoundButton label={timer.running ? "Pause timer" : "Resume timer"} onClick={timer.toggle} style={{ background: `${accent}38`, color: accent }}>
+                  {timer.running ? I.pause : I.play}
                 </RoundButton>
                 <RoundButton
                   label="Stop timer"
@@ -280,32 +356,31 @@ export function DynamicIsland({
                   }}
                   className="bg-white/15 text-white"
                 >
-                  <Square className="size-4 fill-current" />
+                  {I.stop}
                 </RoundButton>
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-[13px] font-medium" style={{ color: accent }}>
                   Timer
                 </span>
-                <span className="text-[38px] font-light leading-none tabular-nums tracking-tight" style={{ color: accent }}>
+                <span className="text-[38px] font-light leading-none tabular-nums tracking-[-0.03em]" style={{ color: accent }}>
                   {format(timer.left)}
                 </span>
               </div>
             </motion.div>
           ) : null}
 
-          {/* ── open: music ─────────────────────────── */}
           {isOpen && state === "music" ? (
             <motion.div key="o-music" className="absolute inset-0 flex flex-col justify-between p-5" {...fade}>
               <div className="flex items-center gap-3.5">
-                <span className="size-14 shrink-0 rounded-[14px] bg-[conic-gradient(from_200deg,#ff7b42,#f04a8d,#6d5cff,#ff7b42)] shadow-[0_6px_18px_-6px_rgba(240,74,141,0.7)]" />
+                <span className={`size-14 shrink-0 rounded-[14px] shadow-[0_6px_18px_-6px_rgba(255,55,95,.7)] ${ART}`} />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-[15px] font-semibold">{track.title}</p>
-                  <p className="truncate text-[13px] text-white/55">{track.artist}</p>
+                  <p className="m-0 truncate text-[15px] font-semibold tracking-[-0.01em]">{track.title}</p>
+                  <p className="m-0 truncate text-[13px] text-white/60">{track.artist}</p>
                 </div>
                 <Bars color={accent} playing={playing} />
               </div>
-              <div className="flex items-center gap-2.5 text-[11px] tabular-nums text-white/50">
+              <div className="flex items-center gap-2.5 text-[11px] tabular-nums text-white/60">
                 <span>1:12</span>
                 <span className="relative h-1 flex-1 overflow-hidden rounded-full bg-white/15">
                   <motion.span
@@ -319,40 +394,33 @@ export function DynamicIsland({
               </div>
               <div className="-my-1 flex items-center justify-center gap-6">
                 <RoundButton label="Previous track" onClick={() => undefined} className="size-9 text-white/80">
-                  <SkipBack className="size-5 fill-current" />
+                  {I.back}
                 </RoundButton>
-                <RoundButton label={playing ? "Pause" : "Play"} onClick={() => setPlaying((p) => !p)} className="size-9 text-white">
-                  {playing ? <Pause className="size-6 fill-current" /> : <Play className="size-6 fill-current" />}
+                <RoundButton label={playing ? "Pause" : "Play"} onClick={() => setPlaying((p) => !p)} className="size-9 text-white [&_svg]:size-6">
+                  {playing ? I.pause : I.play}
                 </RoundButton>
                 <RoundButton label="Next track" onClick={() => undefined} className="size-9 text-white/80">
-                  <SkipForward className="size-5 fill-current" />
+                  {I.next}
                 </RoundButton>
               </div>
             </motion.div>
           ) : null}
 
-          {/* ── open: call ──────────────────────────── */}
           {isOpen && state === "call" ? (
             <motion.div key="o-call" className="absolute inset-0 flex items-center justify-between gap-3 px-5" {...fade}>
               <div className="flex min-w-0 items-center gap-3">
-                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-gradient-to-br from-[#6d5cff] to-[#f04a8d] text-[15px] font-semibold">
-                  {caller
-                    .split(" ")
-                    .map((p) => p[0])
-                    .join("")
-                    .slice(0, 2)}
-                </span>
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[linear-gradient(135deg,#0a84ff,#bf5af2)] text-[15px] font-semibold">{initials}</span>
                 <div className="min-w-0">
-                  <p className="text-[12px] text-white/55">mobile</p>
-                  <p className="truncate text-[16px] font-semibold">{caller}</p>
+                  <p className="m-0 text-[12px] text-white/60">mobile</p>
+                  <p className="m-0 truncate text-[16px] font-semibold tracking-[-0.01em]">{caller}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <RoundButton label="Decline" onClick={() => setState("idle")} className="bg-[#ff453a] text-white">
-                  <PhoneOff className="size-5" />
+                <RoundButton label="Decline" onClick={() => setState("idle")} className="bg-[#ff3b30] text-white [&_svg]:rotate-[135deg]">
+                  {I.phone}
                 </RoundButton>
                 <RoundButton label="Accept" onClick={() => setOpen(false)} className="bg-[#30d158] text-white">
-                  <Phone className="size-5" />
+                  {I.phone}
                 </RoundButton>
               </div>
             </motion.div>

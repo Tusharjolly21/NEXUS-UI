@@ -1,167 +1,89 @@
 "use client";
+import { useEffect, useId, useRef, useState, type CSSProperties, type JSX } from "react";
+import { animate, motion, useMotionTemplate, useMotionValue, useReducedMotion } from "framer-motion";
 
-import * as React from "react";
-import { motion, useInView, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
+export type SkeletonType = "chat" | "dashboard" | "avatar" | "workflow" | "calendar" | "code";
 
 export interface BentoSkeletonCard {
+  /** Stable key. */
   id: string;
+  /** Card title, shown under the scene. */
   title: string;
+  /** One line under the title. */
   description: string;
+  /** Small chip above the title. */
   tag?: string;
+  /** Columns x rows the card covers on wider containers. */
   span?: "1x1" | "2x1" | "1x2" | "2x2";
+  /** Which placeholder scene to draw. */
   skeletonType: SkeletonType;
 }
 
-export type SkeletonType =
-  | "chat"
-  | "dashboard"
-  | "avatar"
-  | "workflow"
-  | "calendar"
-  | "code";
-
 export interface BentoGridSkeletonProps {
-  cards: BentoSkeletonCard[];
+  /** Cards in reading order. Defaults to one of each scene. */
+  cards?: BentoSkeletonCard[];
+  /** Run the shimmer and the scene loops. */
   animated?: boolean;
+  /** Plays each card's scene in turn until someone points at the grid. */
+  autoplay?: boolean;
+  /** Extra classes for the grid. */
   className?: string;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+export const DEFAULT_SKELETON_CARDS: BentoSkeletonCard[] = [
+  { id: "chat", title: "Live conversations", description: "Messages stream in while the thread loads.", tag: "Chat", skeletonType: "chat" },
+  { id: "dash", title: "Dashboard", description: "Bars settle before the numbers arrive.", tag: "Stats", skeletonType: "dashboard" },
+  { id: "team", title: "Your team", description: "Faces fan out as profiles resolve.", tag: "People", skeletonType: "avatar" },
+  { id: "flow", title: "Workflows", description: "Steps light up as each one connects.", tag: "Automation", skeletonType: "workflow" },
+  { id: "cal", title: "Calendar", description: "The next free slot hops into place.", tag: "Schedule", skeletonType: "calendar" },
+  { id: "code", title: "Source", description: "Lines type themselves out.", tag: "Dev", skeletonType: "code" },
+];
 
-function spanClasses(span?: BentoSkeletonCard["span"]) {
-  switch (span) {
-    case "2x1": return "col-span-2 row-span-1";
-    case "1x2": return "col-span-1 row-span-2";
-    case "2x2": return "col-span-2 row-span-2";
-    default:   return "col-span-1 row-span-1";
-  }
-}
+const SPAN: Record<NonNullable<BentoSkeletonCard["span"]>, string> = {
+  "1x1": "",
+  "2x1": "@min-[480px]:col-span-2",
+  "1x2": "@min-[480px]:row-span-2",
+  "2x2": "@min-[480px]:col-span-2 @min-[480px]:row-span-2",
+};
 
-function minH(span?: BentoSkeletonCard["span"]) {
-  if (span === "1x2" || span === "2x2") return "min-h-[280px]";
-  return "min-h-[220px]";
-}
+/** Placeholder block colour. */
+const B = "bg-[#ececf0] dark:bg-[#2c2c2e]";
+const B2 = "bg-[#e1e1e6] dark:bg-[#3a3a3c]";
+const SPRING = { type: "spring" as const, stiffness: 320, damping: 20 };
 
-function clamp01(v: number) { return Math.max(0, Math.min(1, v)); }
+type SceneProps = { on: boolean; still: boolean; beat: number };
 
-// ── Shimmer base ───────────────────────────────────────────────────────────────
-
-function ShimmerBar({
-  className,
-  delay = 0,
-  duration = 1.6,
-}: {
-  className?: string;
-  delay?: number;
-  duration?: number;
-}) {
-  return (
-    <div className={cn("relative overflow-hidden rounded-md bg-white/[0.07]", className)}>
-      <motion.div
-        className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent"
-        animate={{ translateX: ["0%", "200%"] }}
-        transition={{ duration, repeat: Infinity, delay, ease: "easeInOut" }}
-        style={{ width: "50%", height: "100%" }}
-      />
-    </div>
-  );
-}
-
-function PulseBar({
-  className,
-  delay = 0,
-  style,
-}: {
-  className?: string;
-  delay?: number;
-  style?: React.CSSProperties;
-}) {
-  return (
-    <motion.div
-      className={cn("rounded-md bg-white/[0.07]", className)}
-      animate={{ opacity: [0.5, 1, 0.5] }}
-      transition={{ duration: 2.4, repeat: Infinity, delay, ease: "easeInOut" }}
-      style={style}
-    />
-  );
-}
-
-// ── Chat Skeleton ─────────────────────────────────────────────────────────────
-
-function ChatSkeleton() {
-  const reduce = useReducedMotion() === true;
-  const msgs = [
-    { side: "left", w: "w-16", delay: 0 },
-    { side: "right", w: "w-24", delay: 0.4 },
-    { side: "left", w: "w-20", delay: 0.8 },
-    { side: "right", w: "w-14", delay: 1.2 },
-    { side: "left", w: "w-18", delay: 1.6 },
+function Chat({ on, still, beat }: SceneProps) {
+  const rows = [
+    { me: false, w: "58%" },
+    { me: true, w: "46%" },
+    { me: false, w: "38%" },
   ];
-
   return (
-    <div className="flex h-full flex-col justify-end gap-2 px-3 pb-3">
-      {/* header avatar */}
-      <div className="mb-2 flex items-center gap-2">
-        <div className="size-5 shrink-0 rounded-full bg-white/[0.12]" />
-        <ShimmerBar className="h-2.5 w-20" />
-      </div>
-      {msgs.map((m, i) => (
+    <div className="flex h-full flex-col justify-center gap-2 px-5 py-3">
+      {rows.map((r, i) => (
         <motion.div
-          key={i}
-          className={cn(
-            "flex items-end gap-1.5",
-            m.side === "right" && "self-end flex-row-reverse",
-          )}
-          initial={reduce ? {} : { opacity: 0, y: 8 }}
-          animate={reduce ? { opacity: 1 } : { opacity: 1, y: 0 }}
-          transition={{ delay: m.delay, duration: 0.4, ease: "easeOut" }}
+          key={`${i}-${on ? beat : 0}`}
+          className={`flex items-end gap-2 ${r.me ? "flex-row-reverse" : ""}`}
+          initial={on && !still ? { opacity: 0, scale: 0.6 } : false}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ ...SPRING, delay: i * 0.35 }}
+          style={{ transformOrigin: r.me ? "100% 100%" : "0% 100%" }}
         >
-          {m.side === "left" && <div className="size-4 shrink-0 rounded-full bg-white/[0.1]" />}
-          <div className={cn("h-6 rounded-xl rounded-bl-sm bg-white/[0.08]", m.w)} />
-          {m.side === "right" && <div className="size-4 shrink-0 rounded-full bg-cyan-500/20" />}
+          <span className={`size-5 shrink-0 rounded-full ${B2}`} />
+          <span
+            className={`h-6 rounded-[12px] ${r.me ? "rounded-br-[4px] bg-[#0071e3]/20 dark:bg-[#0a84ff]/30" : `rounded-bl-[4px] ${B}`}`}
+            style={{ width: r.w }}
+          />
         </motion.div>
       ))}
-    </div>
-  );
-}
-
-// ── Dashboard Skeleton ─────────────────────────────────────────────────────────
-
-function DashboardSkeleton() {
-  const bars = [
-    { h: 18, delay: 0 },
-    { h: 28, delay: 0.15 },
-    { h: 22, delay: 0.3 },
-    { h: 36, delay: 0.45 },
-    { h: 26, delay: 0.6 },
-    { h: 30, delay: 0.75 },
-    { h: 20, delay: 0.9 },
-    { h: 34, delay: 1.05 },
-  ];
-
-  return (
-    <div className="flex h-full flex-col gap-3 p-3">
-      {/* top stat row */}
-      <div className="flex gap-2">
-        {["w-14", "w-16", "w-12"].map((w, i) => (
-          <div key={i} className="flex-1 rounded-xl bg-white/[0.05] p-2">
-            <ShimmerBar className="mb-1.5 h-2 w-8" />
-            <PulseBar className="h-4" style={{ animationDelay: `${i * 0.3}s` } as React.CSSProperties} />
-          </div>
-        ))}
-      </div>
-      {/* bar chart */}
-      <div className="lf-grid relative flex flex-1 items-end gap-1.5 rounded-xl border border-white/[0.06] bg-white/[0.02] p-2">
-        {bars.map((b, i) => (
-          <motion.div
-            key={i}
-            className="flex-1 rounded-sm bg-cyan-500/30"
-            style={{ height: b.h }}
-            animate={{ scaleY: [1, 0.7, 1], originY: 1 }}
-            transition={{ duration: 2.2, repeat: Infinity, delay: b.delay, ease: "easeInOut" }}
+      <div className="flex h-3 items-center gap-1 pl-7">
+        {[0, 1, 2].map((d) => (
+          <motion.span
+            key={d}
+            className={`size-1.5 rounded-full ${B2}`}
+            animate={on && !still ? { y: [0, -4, 0] } : { y: 0 }}
+            transition={on && !still ? { duration: 0.6, repeat: Infinity, delay: 1.1 + d * 0.12, repeatDelay: 0.25 } : { duration: 0.2 }}
           />
         ))}
       </div>
@@ -169,337 +91,334 @@ function DashboardSkeleton() {
   );
 }
 
-// ── Avatar / Community Skeleton ───────────────────────────────────────────────
+const HEIGHTS = [
+  [40, 62, 48, 78, 56, 88, 70],
+  [64, 44, 80, 52, 90, 60, 74],
+  [52, 76, 60, 42, 70, 50, 92],
+];
 
-function AvatarSkeleton() {
-  const reduce = useReducedMotion() === true;
-  const [active, setActive] = React.useState(0);
-  const ids = [0, 1, 2, 3];
-
-  React.useEffect(() => {
-    if (reduce) return;
-    const id = setInterval(() => setActive((a) => (a + 1) % ids.length), 2200);
-    return () => clearInterval(id);
-  }, [reduce]);
-
-  const positions: Record<number, string> = {
-    0: "top-4 left-4",
-    1: "top-4 right-4",
-    2: "bottom-12 left-6",
-    3: "bottom-4 right-8",
-  };
-
+function Dashboard({ on, still, beat }: SceneProps) {
+  const h = HEIGHTS[on ? beat % HEIGHTS.length : 0];
   return (
-    <div className="relative h-full p-4">
-      {ids.map((i) => {
-        const isActive = active === i;
-        return (
-          <motion.div
+    <div className="flex h-full flex-col justify-center gap-3 px-5">
+      <div className="flex gap-2">
+        {[0, 1, 2].map((i) => (
+          <span key={i} className={`h-8 flex-1 rounded-[10px] ${B}`} />
+        ))}
+      </div>
+      <div className="flex h-16 items-end gap-1.5">
+        {h.map((v, i) => (
+          <motion.span
             key={i}
-            className={cn(
-              "absolute flex size-10 items-center justify-center rounded-full text-xs font-semibold",
-              positions[i],
-              isActive
-                ? "z-10 border-2 border-cyan-400/60 bg-gradient-to-br from-cyan-500/30 to-indigo-500/30 shadow-lg shadow-cyan-500/20"
-                : "z-[1] border border-white/10 bg-white/[0.07]",
-            )}
-            animate={
-              reduce
-                ? undefined
-                : {
-                    scale: isActive ? [1, 1.15, 1] : [1, 1.04, 1],
-                    opacity: isActive ? [0.8, 1, 0.8] : [0.6, 0.75, 0.6],
-                  }
-            }
-            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            {["NX", "PR", "BL", "UK"][i]}
-          </motion.div>
-        );
-      })}
+            className={`flex-1 origin-bottom rounded-[5px] ${i === h.indexOf(Math.max(...h)) ? "bg-[#0071e3]/35 dark:bg-[#0a84ff]/45" : B}`}
+            initial={false}
+            animate={{ height: `${v}%` }}
+            transition={still ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 14, delay: i * 0.04 }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-// ── Workflow / Steps Skeleton ──────────────────────────────────────────────────
+function Avatars({ on, still }: SceneProps) {
+  const spread = on && !still;
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 px-5">
+      <div className="relative h-11 w-full">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <motion.span
+            key={i}
+            className={`absolute left-1/2 top-0 -ml-[22px] size-11 rounded-full ring-[3px] ring-white dark:ring-[#1c1c1e] ${i === 2 ? B2 : B}`}
+            style={{ zIndex: 5 - Math.abs(i - 2) }}
+            initial={false}
+            animate={{ x: (i - 2) * (spread ? 34 : 22), scale: i === 2 ? 1.1 : 1 - Math.abs(i - 2) * 0.06 }}
+            transition={{ type: "spring", stiffness: 300, damping: 16, delay: Math.abs(i - 2) * 0.05 }}
+          />
+        ))}
+      </div>
+      <span className={`h-2.5 w-24 rounded-full ${B}`} />
+      <span className={`h-2 w-16 rounded-full ${B}`} />
+    </div>
+  );
+}
 
-function WorkflowSkeleton() {
-  const reduce = useReducedMotion() === true;
-  const [progress, setProgress] = React.useState(0);
-
-  React.useEffect(() => {
-    if (reduce) return;
-    setProgress(0);
-    const id = setInterval(() => setProgress((p) => (p + 1) % 4), 1800);
-    return () => clearInterval(id);
-  }, [reduce]);
-
-  const steps = ["Draft", "Review", "Deploy", "Live"];
+function Workflow({ on, still, beat }: SceneProps) {
   const nodes = [
-    { cx: 28, cy: 56 },
-    { cx: 72, cy: 56 },
-    { cx: 116, cy: 56 },
-    { cx: 160, cy: 56 },
+    { x: 30, y: 30 },
+    { x: 110, y: 62 },
+    { x: 190, y: 30 },
   ];
-
+  const run = on && !still;
   return (
-    <div className="relative flex h-full items-center justify-center p-3">
-      {/* connecting line */}
-      <div className="absolute left-6 right-6 top-[56px] h-px bg-gradient-to-r from-white/10 via-cyan-500/30 to-white/10" />
-
-      {steps.map((step, i) => {
-        const isDone = progress > i;
-        const isActive = progress === i;
-        const isPending = progress < i;
-
-        return (
-          <React.Fragment key={step}>
-            {/* node */}
-            <motion.div
-              className={cn(
-                "absolute flex size-6 items-center justify-center rounded-full border text-[9px] font-bold",
-                isDone && "border-emerald-500/60 bg-emerald-500/20 text-emerald-400",
-                isActive && "border-cyan-400/60 bg-cyan-500/20 text-cyan-400",
-                isPending && "border-white/10 bg-white/[0.04] text-white/20",
-              )}
-              style={{ left: nodes[i].cx - 12, top: nodes[i].cy - 12 }}
-              animate={
-                isActive && !reduce
-                  ? { scale: [1, 1.2, 1] }
-                  : {}
-              }
-              transition={{ duration: 1.4, repeat: isActive && !reduce ? Infinity : 0 }}
-            >
-              {isDone ? "✓" : isActive ? "●" : i + 1}
-            </motion.div>
-
-            {/* label */}
-            <div
-              className="absolute text-[8px] font-medium"
-              style={{
-                left: nodes[i].cx - 12,
-                top: nodes[i].cy + 18,
-                width: 24,
-                textAlign: "center",
-                color: isDone ? "rgba(52,211,153,0.7)" : isActive ? "rgba(34,211,240,0.7)" : "rgba(255,255,255,0.2)",
-              }}
-            >
-              {step}
-            </div>
-          </React.Fragment>
-        );
-      })}
+    <div className="flex h-full items-center justify-center px-4">
+      <svg viewBox="0 0 220 92" className="h-full max-h-[110px] w-full" aria-hidden="true">
+        {[0, 1].map((i) => {
+          const a = nodes[i];
+          const b = nodes[i + 1];
+          const d = `M${a.x},${a.y} C${a.x + 40},${a.y} ${b.x - 40},${b.y} ${b.x},${b.y}`;
+          return (
+            <g key={i}>
+              <path d={d} fill="none" className="stroke-[#e1e1e6] dark:stroke-[#3a3a3c]" strokeWidth="2" strokeDasharray="4 4" />
+              <motion.path
+                key={`${i}-${run ? beat : 0}`}
+                d={d}
+                fill="none"
+                className="stroke-[#0071e3] dark:stroke-[#0a84ff]"
+                strokeWidth="2"
+                strokeLinecap="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: run ? 1 : 0 }}
+                transition={{ duration: 0.55, ease: [0.4, 0, 0.2, 1], delay: 0.15 + i * 0.6 }}
+              />
+            </g>
+          );
+        })}
+        {nodes.map((n, i) => (
+          <motion.g
+            key={`${i}-${run ? beat : 0}`}
+            initial={false}
+            animate={run ? { scale: [1, 1.18, 1] } : { scale: 1 }}
+            transition={{ duration: 0.45, delay: i * 0.6 + 0.1 }}
+            style={{ transformOrigin: `${n.x}px ${n.y}px` }}
+          >
+            <rect x={n.x - 18} y={n.y - 14} width="36" height="28" rx="9" className="fill-[#ececf0] dark:fill-[#2c2c2e]" />
+            <rect x={n.x - 9} y={n.y - 2.5} width="18" height="5" rx="2.5" className="fill-[#d2d2d7] dark:fill-[#48484a]" />
+          </motion.g>
+        ))}
+      </svg>
     </div>
   );
 }
 
-// ── Calendar Skeleton ───────────────────────────────────────────────────────────
+const SLOTS = [9, 17, 12, 24, 4, 19];
 
-function CalendarSkeleton() {
-  const days = Array.from({ length: 35 }, (_, i) => {
-    const highlighted = [3, 7, 12, 16, 21, 25, 28].includes(i + 1);
-    return { n: i + 1, highlighted };
-  });
-
-  const tasks = ["Design review", "Deploy", "QA check"];
-
+function Calendar({ on, still, beat }: SceneProps) {
+  const uid = useId().replace(/:/g, "");
+  const slot = on ? SLOTS[beat % SLOTS.length] : SLOTS[0];
   return (
-    <div className="flex h-full flex-col gap-2 p-3">
-      {/* header */}
-      <div className="mb-1 flex items-center justify-between">
-        <ShimmerBar className="h-2.5 w-24" />
-        <div className="flex gap-1">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="size-1.5 rounded-full bg-white/[0.12]" />
-          ))}
-        </div>
-      </div>
-
-      {/* day cells */}
-      <div className="grid grid-cols-7 gap-0.5">
-        {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-          <div key={i} className="flex items-center justify-center text-[7px] text-white/20">{d}</div>
-        ))}
-        {days.map((d, i) => (
-          <motion.div
-            key={i}
-            className={cn(
-              "flex items-center justify-center rounded-sm text-[8px]",
-              d.highlighted
-                ? "bg-cyan-500/25 text-cyan-300"
-                : "text-white/25",
-            )}
-            animate={d.highlighted && !useReducedMotion() ? { opacity: [0.7, 1, 0.7] } : {}}
-            transition={{ duration: 2.8, repeat: Infinity, delay: i * 0.04, ease: "easeInOut" }}
-          >
-            {d.n}
-          </motion.div>
+    <div className="flex h-full items-center justify-center px-5">
+      <div className="grid w-full max-w-[220px] grid-cols-7 gap-1">
+        {Array.from({ length: 28 }, (_, i) => (
+          <span key={i} className={`relative aspect-square rounded-[5px] ${B}`}>
+            {i === slot ? (
+              <motion.span
+                layoutId={`${uid}-slot`}
+                className="absolute -inset-[1px] rounded-[6px] bg-[#0071e3]/35 ring-2 ring-[#0071e3]/60 dark:bg-[#0a84ff]/40 dark:ring-[#0a84ff]/70"
+                transition={still ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 22 }}
+              />
+            ) : null}
+          </span>
         ))}
       </div>
+    </div>
+  );
+}
 
-      {/* task list */}
-      <div className="mt-auto space-y-1.5">
-        {tasks.map((task, i) => (
-          <div key={task} className="flex items-center gap-1.5">
-            <motion.div
-              className="size-1.5 rounded-full bg-cyan-500/40"
-              animate={{ scale: [1, 1.4, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity, delay: i * 0.4 }}
+const LINES = [
+  { w: 46, indent: 0 },
+  { w: 64, indent: 1 },
+  { w: 38, indent: 2 },
+  { w: 56, indent: 1 },
+  { w: 28, indent: 0 },
+];
+
+function Code({ on, still, beat }: SceneProps) {
+  const run = on && !still;
+  return (
+    <div className="flex h-full flex-col justify-center gap-2 px-5">
+      {LINES.map((l, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <span className="w-3 text-right text-[9px] tabular-nums text-[#86868b] dark:text-[#636366]">{i + 1}</span>
+          <motion.span
+            key={`${i}-${run ? beat : 0}`}
+            className={`h-2.5 origin-left rounded-full ${i === 1 ? "bg-[#bf5af2]/30 dark:bg-[#bf5af2]/45" : i === 3 ? "bg-[#30d158]/30 dark:bg-[#30d158]/40" : B}`}
+            style={{ width: `${l.w}%`, marginLeft: l.indent * 12 }}
+            initial={run ? { scaleX: 0 } : false}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.38, ease: [0.3, 0, 0.2, 1], delay: i * 0.32 }}
+          />
+          {i === LINES.length - 1 ? (
+            <motion.span
+              className="h-3.5 w-[2px] rounded-full bg-[#0071e3] dark:bg-[#0a84ff]"
+              animate={run ? { opacity: [1, 0, 1] } : { opacity: 0.6 }}
+              transition={run ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0.2 }}
             />
-            <ShimmerBar className="h-2 flex-1" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Code Skeleton ─────────────────────────────────────────────────────────────
-
-function CodeSkeleton() {
-  const lines = [
-    { w: "w-32", indent: 0 },
-    { w: "w-20", indent: 1 },
-    { w: "w-28", indent: 1 },
-    { w: "w-14", indent: 2 },
-    { w: "w-24", indent: 2 },
-    { w: "w-10", indent: 3 },
-    { w: "w-18", indent: 3 },
-    { w: "w-6",  indent: 2 },
-    { w: "w-22", indent: 1 },
-    { w: "w-16", indent: 0 },
-  ];
-
-  return (
-    <div className="flex h-full flex-col gap-1.5 overflow-hidden p-3">
-      {/* tab bar */}
-      <div className="mb-1 flex items-center gap-1.5">
-        {["app.tsx", "page.ts"].map((f, i) => (
-          <div
-            key={f}
-            className={cn(
-              "flex items-center gap-1 rounded px-2 py-0.5 text-[8px]",
-              i === 0
-                ? "bg-white/[0.08] text-white/50 border border-white/[0.1]"
-                : "text-white/20",
-            )}
-          >
-            <div className="size-1 rounded-full bg-emerald-400/40" />
-            {f}
-          </div>
-        ))}
-      </div>
-
-      {/* code lines */}
-      {lines.map((l, i) => (
-        <div key={i} className="flex items-center gap-2" style={{ paddingLeft: l.indent * 8 }}>
-          <span className="w-3 text-right text-[7px] text-white/[0.12]">{i + 1}</span>
-          <ShimmerBar className={cn("h-2", l.w)} delay={i * 0.08} duration={1.4} />
+          ) : null}
         </div>
       ))}
-
-      {/* lock badge */}
-      <div className="mt-auto flex items-center gap-1 rounded-md border border-white/[0.08] bg-white/[0.03] px-2 py-1">
-        <div className="size-3 rounded-full border border-white/[0.15] bg-white/[0.06]" />
-        <ShimmerBar className="h-1.5 w-16" />
-      </div>
     </div>
   );
 }
 
-// ── Skeleton renderer ─────────────────────────────────────────────────────────
+const SCENES: Record<SkeletonType, (p: SceneProps) => JSX.Element> = {
+  chat: Chat,
+  dashboard: Dashboard,
+  avatar: Avatars,
+  workflow: Workflow,
+  calendar: Calendar,
+  code: Code,
+};
 
-function renderSkeleton(type: SkeletonType) {
-  switch (type) {
-    case "chat":       return <ChatSkeleton />;
-    case "dashboard":  return <DashboardSkeleton />;
-    case "avatar":     return <AvatarSkeleton />;
-    case "workflow":   return <WorkflowSkeleton />;
-    case "calendar":   return <CalendarSkeleton />;
-    case "code":       return <CodeSkeleton />;
-  }
-}
-
-// ── Bento Card ─────────────────────────────────────────────────────────────────
-
-function BentoSkeletonCard({
+function Card({
   card,
   index,
-  reduce,
-  isInView,
+  on,
+  still,
+  beat,
+  grid,
+  onEnter,
+  onLeave,
 }: {
   card: BentoSkeletonCard;
   index: number;
-  reduce: boolean;
-  isInView: boolean;
+  on: boolean;
+  still: boolean;
+  beat: number;
+  grid: { w: number; h: number };
+  onEnter: () => void;
+  onLeave: () => void;
 }) {
+  const ref = useRef<HTMLElement>(null);
+  const [off, setOff] = useState({ x: 0, y: 0 });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setOff({ x: el.offsetLeft, y: el.offsetTop }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [grid.w, grid.h]);
+  const Scene = SCENES[card.skeletonType] ?? Chat;
+  const tall = card.span === "1x2" || card.span === "2x2";
+  // The band is one sheet of light sized to the whole grid; each card shows its own slice of it.
+  const sheen: CSSProperties = {
+    backgroundImage: "linear-gradient(105deg, transparent 38%, var(--sk-sheen) 50%, transparent 62%)",
+    backgroundSize: `${grid.w * 2}px ${grid.h}px`,
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: `calc(var(--sk-x) - ${off.x}px) ${-off.y}px`,
+  };
   return (
-    <motion.div
-      initial={reduce ? false : { opacity: 0, y: 16, scale: 0.97 }}
-      animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-      transition={
-        reduce
-          ? {}
-          : { delay: index * 0.06, duration: 0.44, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }
-      }
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-b from-white/[0.05] to-white/[0.02] transition-all duration-300 hover:-translate-y-1 hover:border-white/[0.14] hover:bg-white/[0.07] hover:shadow-xl hover:shadow-black/20 dark:from-white/[0.03] dark:to-transparent"
+    <motion.article
+      ref={ref}
+      tabIndex={0}
+      aria-label={`${card.title}, loading`}
+      onPointerEnter={onEnter}
+      onPointerLeave={onLeave}
+      onFocus={onEnter}
+      onBlur={onLeave}
+      initial={still ? false : { opacity: 0, y: 16, scale: 0.97 }}
+      animate={{ opacity: 1, y: on && !still ? -4 : 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 300, damping: 24, delay: on ? 0 : index * 0.06 }}
+      className={`group relative flex flex-col overflow-hidden rounded-[22px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] dark:focus-visible:outline-[#0a84ff] ${SPAN[card.span ?? "1x1"]}`}
     >
-      {/* skeleton preview */}
-      <div className={cn("relative flex-1 overflow-hidden", minH(card.span))}>
-        <div className="lf-grid absolute inset-0 opacity-40" />
-        {renderSkeleton(card.skeletonType)}
+      <div className={`relative overflow-hidden ${tall ? "min-h-[300px] flex-1" : "h-[132px]"}`}>
+        <Scene on={on} still={still} beat={beat} />
+        {!still ? <span aria-hidden="true" className="pointer-events-none absolute inset-0" style={sheen} /> : null}
       </div>
-
-      {/* card footer */}
-      <div className="relative z-10 border-t border-white/[0.06] bg-black/30 p-4 backdrop-blur-sm">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            {card.tag && (
-              <span className="mb-1.5 inline-block rounded-md border border-cyan-500/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-medium text-cyan-400/80">
-                {card.tag}
-              </span>
-            )}
-            <p className="text-sm font-semibold text-white">{card.title}</p>
-            <p className="mt-0.5 text-xs leading-relaxed text-white/40">{card.description}</p>
-          </div>
-          <div className="mt-1 shrink-0 size-5 rounded-full border border-white/10 bg-white/5" />
-        </div>
+      <div className="relative px-5 pb-4 pt-1">
+        {card.tag ? (
+          <span className="inline-block rounded-full bg-[#0071e3]/10 px-2 py-0.5 text-[11px] font-semibold text-[#0066cc] dark:bg-[#0a84ff]/15 dark:text-[#64a8ff]">
+            {card.tag}
+          </span>
+        ) : null}
+        <p className="mt-1.5 text-[14px] font-semibold tracking-[-0.01em] text-[#1d1d1f] dark:text-[#f5f5f7]">{card.title}</p>
+        <p className="mt-0.5 text-[12px] leading-relaxed text-[#6e6e73] dark:text-[#a1a1a6]">{card.description}</p>
       </div>
-    </motion.div>
+    </motion.article>
   );
 }
 
-// ── Main component ─────────────────────────────────────────────────────────────
-
-export function BentoGridSkeleton({
-  cards,
-  animated = true,
-  className,
-}: BentoGridSkeletonProps) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-40px" });
+/**
+ * A bento of loading cards, each with a small placeholder scene: a chat
+ * thread, a bar chart, a team, a workflow, a calendar and some code. One sheet
+ * of light sweeps across the whole grid at once rather than per card, and
+ * pointing at a card plays its scene: bubbles pop in, bars regrow, faces fan
+ * out, steps connect, the free slot hops, lines type themselves.
+ */
+export function BentoGridSkeleton({ cards = DEFAULT_SKELETON_CARDS, animated = true, autoplay = false, className = "" }: BentoGridSkeletonProps) {
   const reduce = useReducedMotion() === true;
+  const still = reduce || !animated;
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [grid, setGrid] = useState({ w: 600, h: 400 });
+  const [active, setActive] = useState<string | null>(null);
+  const [beat, setBeat] = useState(0);
+  const touched = useRef(false);
+  const sx = useMotionValue(-1200);
+  const sxPx = useMotionTemplate`${sx}px`;
+
+  useEffect(() => {
+    const el = gridRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setGrid({ w: el.offsetWidth, h: el.offsetHeight }));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (still) return;
+    const run = animate(sx, [-grid.w * 2, grid.w * 0.6], { duration: 2.4, ease: [0.45, 0, 0.25, 1], repeat: Infinity, repeatDelay: 0.5 });
+    return () => run.stop();
+  }, [still, grid.w, sx]);
+
+  // While a card is active its scene replays every 2.2s.
+  useEffect(() => {
+    if (!active || still) return;
+    const t = window.setInterval(() => setBeat((b) => b + 1), 2200);
+    return () => window.clearInterval(t);
+  }, [active, still]);
+
+  const ids = cards.map((c) => c.id).join("\u0000");
+  useEffect(() => {
+    if (!autoplay || still) return;
+    const order = ids.split("\u0000");
+    let k = 0;
+    const step = () => {
+      if (touched.current) return false;
+      setActive(order[k++ % order.length]);
+      setBeat((b) => b + 1);
+      return true;
+    };
+    const first = window.setTimeout(step, 700);
+    const t = window.setInterval(() => {
+      if (!step()) window.clearInterval(t);
+    }, 2400);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(t);
+    };
+  }, [autoplay, still, ids]);
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "grid gap-3",
-        "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-        "auto-rows-fr",
-        className,
-      )}
-    >
-      {cards.map((card, i) => (
-        <div key={card.id} className={spanClasses(card.span)}>
-          <BentoSkeletonCard
-            card={card}
+    <div className={`@container w-full ${className}`}>
+      <motion.div
+        ref={gridRef}
+        aria-busy="true"
+        aria-label="Loading content"
+        role="group"
+        onPointerDown={() => {
+          touched.current = true;
+        }}
+        className="grid grid-cols-1 gap-3 [--sk-sheen:rgba(255,255,255,.75)] @min-[480px]:grid-cols-2 @min-[760px]:grid-cols-3 dark:[--sk-sheen:rgba(255,255,255,.07)]"
+        style={{ ["--sk-x" as string]: sxPx }}
+      >
+        {cards.map((c, i) => (
+          <Card
+            key={c.id}
+            card={c}
             index={i}
-            reduce={reduce || !animated}
-            isInView={isInView}
+            on={active === c.id}
+            still={still}
+            beat={beat}
+            grid={grid}
+            onEnter={() => {
+              touched.current = true;
+              if (active !== c.id) setBeat((b) => b + 1);
+              setActive(c.id);
+            }}
+            onLeave={() => setActive((a) => (a === c.id ? null : a))}
           />
-        </div>
-      ))}
+        ))}
+      </motion.div>
     </div>
   );
 }

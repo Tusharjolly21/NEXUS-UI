@@ -1,11 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { Fragment, useEffect, useRef, useSyncExternalStore } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ── Public types ──────────────────────────────────────────────────────────────
 export interface CTAButton {
   label: string;
   href?: string;
@@ -13,387 +11,358 @@ export interface CTAButton {
 }
 
 export interface DotGridHeroProps {
+  /** Hero heading. Use \n for line breaks. */
   title?: string;
+  /** Supporting paragraph under the heading. */
   subtitle?: string;
+  /** Main action, drawn as a filled pill. */
   primaryCTA?: CTAButton;
+  /** Secondary action, drawn as a text link with a chevron. */
   secondaryCTA?: CTAButton;
-  /** Average spacing between particles in px. @default 72 */
+  /** Average spacing between dashes in px. */
   dotGap?: number;
-  /** Radius around cursor where particles repel (px). @default 120 */
+  /** Radius around the pointer where dashes turn and get pushed, in px. */
   interactionRadius?: number;
-  /** Repulsion force strength. @default 7 */
+  /** How hard the pointer pushes dashes away. */
   repulsionStrength?: number;
-  /** Spring constant pulling particles home. @default 0.065 */
+  /** Spring pulling dashes back to their spot (per frame). */
   springK?: number;
-  /** Velocity damping per frame (0–1). @default 0.80 */
+  /** Velocity kept per frame, 0 to 1. Lower settles faster. */
   damping?: number;
-  /** Particle colours. Defaults to multi-colour palette. */
+  /** Dash colours. */
   colors?: string[];
-  /** Hero background colour. @default "#ffffff" */
+  /** Hero background. Defaults to white, or black in dark mode. */
   background?: string;
-  /** Text colour. @default "#09090b" */
+  /** Heading colour. Defaults to the theme's primary text colour. */
   textColor?: string;
+  /** Caption at the bottom edge. Pass an empty string to hide it. */
+  hint?: string;
+  /** Sweeps a pretend pointer through the field and sends a ripple every few seconds until someone moves over it. */
+  autoplay?: boolean;
   className?: string;
 }
 
-// ── Particle type (canvas-internal) ──────────────────────────────────────────
-type Particle = {
-  ox: number; oy: number;   // rest / origin
-  x:  number; y:  number;   // current position
-  vx: number; vy: number;   // velocity
-  w:  number;               // dash width  (2–4 px)
-  h:  number;               // dash height (7–16 px)
-  rot: number;              // rotation radians (fixed)
-  color: string;
-  alpha: number;            // base opacity
-};
+type Dash = { ox: number; oy: number; x: number; y: number; vx: number; vy: number; a: number; av: number; rest: number; len: number; w: number; color: string; alpha: number; k: number };
+type Ring = { x: number; y: number; r: number };
 
-const DEFAULT_COLORS = [
-  "#4285f4", "#5b6ef5", "#7c3aed",
-  "#1d4ed8", "#ea4335", "#dc2626",
-  "#f97316", "#6366f1",
-];
+const DEFAULT_COLORS = ["#0a84ff", "#5e5ce6", "#bf5af2", "#ff375f", "#ff9f0a", "#30d158"];
 
-// ── Canvas particle field ─────────────────────────────────────────────────────
-interface FieldProps {
-  dotGap: number;
-  interactionRadius: number;
-  repulsionStrength: number;
-  springK: number;
-  damping: number;
-  colors: string[];
-  background: string;
-  reduceMotion: boolean;
+function subscribeTheme(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+/** Follows the site's class-based dark mode; false on the server and during hydration. */
+function useIsDark() {
+  return useSyncExternalStore(subscribeTheme, () => document.documentElement.classList.contains("dark"), () => false);
 }
 
-function ParticleField({
-  dotGap,
-  interactionRadius,
-  repulsionStrength,
-  springK,
-  damping,
-  colors,
-  background,
-  reduceMotion,
-}: FieldProps) {
-  const canvasRef    = React.useRef<HTMLCanvasElement>(null);
-  const mouseRef     = React.useRef({ x: -9999, y: -9999, active: false });
-  const particlesRef = React.useRef<Particle[]>([]);
-  const rafRef       = React.useRef<number>(0);
-
-  // ── Build / rebuild particle array to fill current canvas ──────────────────
-  function buildParticles(W: number, H: number): Particle[] {
-    const jitter  = dotGap * 0.55;
-    const cols    = Math.ceil(W / dotGap) + 1;
-    const rows    = Math.ceil(H / dotGap) + 1;
-    const ps: Particle[] = [];
-
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        const ox = c * dotGap + (Math.random() - 0.5) * jitter * 2;
-        const oy = r * dotGap + (Math.random() - 0.5) * jitter * 2;
-        ps.push({
-          ox, oy,
-          x: ox, y: oy,
-          vx: 0, vy: 0,
-          w:   1.8 + Math.random() * 1.6,
-          h:   7   + Math.random() * 9,
-          rot: Math.random() * Math.PI * 2,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          alpha: 0.55 + Math.random() * 0.35,
-        });
-      }
-    }
-    return ps;
-  }
-
-  // ── Mouse / touch tracking ──────────────────────────────────────────────────
-  React.useEffect(() => {
-    const updateMouse = (cx: number, cy: number) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const r = canvas.getBoundingClientRect();
-      mouseRef.current = { x: cx - r.left, y: cy - r.top, active: true };
-    };
-    const onMove  = (e: MouseEvent)  => updateMouse(e.clientX, e.clientY);
-    const onTouch = (e: TouchEvent)  => {
-      if (e.touches[0]) updateMouse(e.touches[0].clientX, e.touches[0].clientY);
-    };
-    const onLeave = () => { mouseRef.current.active = false; };
-
-    window.addEventListener("mousemove",  onMove,  { passive: true });
-    window.addEventListener("touchmove",  onTouch, { passive: true });
-    window.addEventListener("mouseleave", onLeave);
-    window.addEventListener("touchend",   onLeave);
-    return () => {
-      window.removeEventListener("mousemove",  onMove);
-      window.removeEventListener("touchmove",  onTouch);
-      window.removeEventListener("mouseleave", onLeave);
-      window.removeEventListener("touchend",   onLeave);
-    };
-  }, []);
-
-  // ── Animation loop ──────────────────────────────────────────────────────────
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Capture non-null refs for use inside nested functions
-    const cvs = canvas;
-    const c   = ctx;
-
-    let W = 0, H = 0;
-    let dpr = 1;
-
-    function resize() {
-      dpr      = Math.min(window.devicePixelRatio ?? 1, 2);
-      W        = cvs.offsetWidth;
-      H        = cvs.offsetHeight;
-      cvs.width  = W * dpr;
-      cvs.height = H * dpr;
-      c.setTransform(dpr, 0, 0, dpr, 0, 0);
-      particlesRef.current = buildParticles(W, H);
-    }
-
-    const isVisibleRef = { current: true };
-
-    const io = new IntersectionObserver(
-      ([e]) => {
-        isVisibleRef.current = e?.isIntersecting ?? true;
-        if (isVisibleRef.current && !document.hidden && !rafRef.current) {
-          rafRef.current = requestAnimationFrame(draw);
-        }
-      },
-      { threshold: 0.01 },
-    );
-    io.observe(cvs);
-
-    function onVisibilityChange() {
-      if (!document.hidden && isVisibleRef.current && !rafRef.current) {
-        rafRef.current = requestAnimationFrame(draw);
-      }
-    }
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    function draw() {
-      if (document.hidden || !isVisibleRef.current) {
-        rafRef.current = 0;
-        return;
-      }
-      c.clearRect(0, 0, W, H);
-
-      const mx      = mouseRef.current.x;
-      const my      = mouseRef.current.y;
-      const active  = mouseRef.current.active && !reduceMotion;
-      const ir      = interactionRadius;
-      const ir2     = ir * ir;
-
-      for (const p of particlesRef.current) {
-        // ── Physics ──────────────────────────────────────────────────────────
-        if (active) {
-          const dx    = p.x - mx;
-          const dy    = p.y - my;
-          const dist2 = dx * dx + dy * dy;
-
-          if (dist2 < ir2 && dist2 > 0.01) {
-            const dist  = Math.sqrt(dist2);
-            const force = ((ir - dist) / ir) ** 2 * repulsionStrength;
-            p.vx += (dx / dist) * force;
-            p.vy += (dy / dist) * force;
-          }
-        }
-
-        p.vx += (p.ox - p.x) * springK;
-        p.vy += (p.oy - p.y) * springK;
-        p.vx *= damping;
-        p.vy *= damping;
-        p.x  += p.vx;
-        p.y  += p.vy;
-
-        // ── Draw dash ────────────────────────────────────────────────────────
-        const speed   = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
-        const stretch = Math.min(speed * 0.6, 6);
-        const drawH   = p.h + stretch;
-
-        c.save();
-        c.translate(p.x, p.y);
-        const velAngle = speed > 0.5 ? Math.atan2(p.vy, p.vx) + Math.PI / 2 : p.rot;
-        c.rotate(speed > 0.5 ? velAngle : p.rot);
-        c.globalAlpha = p.alpha;
-        c.fillStyle   = p.color;
-
-        const hw = p.w / 2;
-        const hh = drawH / 2;
-        const cr = hw;
-        c.beginPath();
-        c.moveTo(-hw + cr, -hh);
-        c.lineTo( hw - cr, -hh);
-        c.quadraticCurveTo( hw, -hh,  hw, -hh + cr);
-        c.lineTo( hw,  hh - cr);
-        c.quadraticCurveTo( hw,  hh,  hw - cr,  hh);
-        c.lineTo(-hw + cr,  hh);
-        c.quadraticCurveTo(-hw,  hh, -hw,  hh - cr);
-        c.lineTo(-hw, -hh + cr);
-        c.quadraticCurveTo(-hw, -hh, -hw + cr, -hh);
-        c.closePath();
-        c.fill();
-        c.restore();
-      }
-
-      c.globalAlpha  = 1;
-      rafRef.current = requestAnimationFrame(draw);
-    }
-
-    const ro = new ResizeObserver(resize);
-    ro.observe(cvs);
-    resize();
-    rafRef.current = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
-      io.disconnect();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [
-    dotGap, interactionRadius, repulsionStrength,
-    springK, damping, colors, reduceMotion,
-  ]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      className="absolute inset-0 h-full w-full"
-      style={{ pointerEvents: "none", background }}
-    />
-  );
+function rng(seed: number) {
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6d2b79f5;
+    let n = Math.imul(t ^ (t >>> 15), 1 | t);
+    n ^= n + Math.imul(n ^ (n >>> 7), 61 | n);
+    return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-// ── Hero component ─────────────────────────────────────────────────────────────
-const FADE_UP = {
-  hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0  },
-};
-const EASE = [0.22, 1, 0.36, 1] as const;
+const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
 
+/**
+ * A hero over a field of coloured dashes, like iron filings round a magnet.
+ * Near the pointer every dash swings to point at it and is pushed aside, then
+ * wobbles back to its own heading on a spring. Click anywhere and a ripple
+ * rolls out, kicking and spinning the dashes it passes.
+ */
 export function DotGridHero({
-  title             = "Build interfaces\nthat ship.",
-  subtitle          = "A motion-native component library for React. Animated, accessible, and production-ready out of the box.",
-  primaryCTA        = { label: "Get started",         href: "#" },
-  secondaryCTA      = { label: "Browse components",   href: "#" },
-  dotGap            = 72,
-  interactionRadius = 120,
-  repulsionStrength = 7,
-  springK           = 0.065,
-  damping           = 0.80,
-  colors            = DEFAULT_COLORS,
-  background        = "#ffffff",
-  textColor         = "#09090b",
+  title = "Build interfaces\nthat ship.",
+  subtitle = "A motion-native component library for React. Animated, accessible and production-ready out of the box.",
+  primaryCTA = { label: "Get started", href: "#" },
+  secondaryCTA = { label: "Browse components", href: "#" },
+  dotGap = 44,
+  interactionRadius = 140,
+  repulsionStrength = 5,
+  springK = 0.06,
+  damping = 0.82,
+  colors = DEFAULT_COLORS,
+  background,
+  textColor,
+  hint = "Move to steer the field. Click to send a ripple.",
+  autoplay = false,
   className,
 }: DotGridHeroProps) {
-  const reduceMotion = useReducedMotion() === true;
+  const still = useReducedMotion() === true;
+  const dark = useIsDark();
+  const darkRef = useRef(dark);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const pointer = useRef({ x: 0, y: 0, inside: false });
+  const rings = useRef<Ring[]>([]);
+  const touched = useRef(false);
+  const palette = (colors.length ? colors : DEFAULT_COLORS).join("|");
+  const gap = Math.max(18, dotGap);
 
-  const titleLines = title.split("\n");
+  useEffect(() => {
+    darkRef.current = dark;
+  }, [dark]);
+  // The live loop reads darkRef; a still frame has to be redrawn when the theme flips.
+  const stillTheme = still ? dark : null;
+
+  useEffect(() => {
+    const cv = canvas.current;
+    const ctx = cv?.getContext("2d");
+    if (!cv || !ctx) return;
+    const tones = palette.split("|");
+    let w = 0;
+    let h = 0;
+    let dashes: Dash[] = [];
+    const build = () => {
+      const rand = rng(Math.round(w) * 3 + Math.round(h) * 7 + gap);
+      const out: Dash[] = [];
+      const cols = Math.ceil(w / gap) + 1;
+      const rowsN = Math.ceil(h / gap) + 1;
+      for (let r = 0; r < rowsN; r++) {
+        for (let c = 0; c < cols; c++) {
+          const ox = c * gap + (rand() - 0.5) * gap * 0.9;
+          const oy = r * gap + (rand() - 0.5) * gap * 0.9;
+          const rest = rand() * Math.PI;
+          out.push({ ox, oy, x: ox, y: oy, vx: 0, vy: 0, a: rest, av: 0, rest, len: 7 + rand() * 8, w: 2 + rand() * 1.4, color: tones[Math.floor(rand() * tones.length)], alpha: 0.5 + rand() * 0.4, k: 0 });
+        }
+      }
+      dashes = out;
+    };
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = cv.clientWidth;
+      h = cv.clientHeight;
+      cv.width = Math.max(1, Math.round(w * dpr));
+      cv.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      build();
+    };
+    resize();
+    const ro = new ResizeObserver(() => {
+      resize();
+      if (still) draw();
+    });
+    ro.observe(cv);
+
+    function draw() {
+      const isDark = darkRef.current;
+      ctx!.clearRect(0, 0, w, h);
+      for (const d of dashes) {
+        // Dashes near the pointer grow and brighten as they turn toward it.
+        const len = d.len * (1 + d.k * 0.9);
+        const hl = len / 2;
+        const hw = d.w / 2;
+        ctx!.save();
+        ctx!.translate(d.x, d.y);
+        ctx!.rotate(d.a);
+        ctx!.globalAlpha = Math.min(1, (d.alpha + d.k * 0.4) * (isDark ? 1.1 : 1));
+        ctx!.fillStyle = d.color;
+        ctx!.beginPath();
+        ctx!.roundRect(-hl, -hw, len, d.w, hw);
+        ctx!.fill();
+        ctx!.restore();
+      }
+      ctx!.globalAlpha = 1;
+    }
+
+    if (still) {
+      draw();
+      return () => ro.disconnect();
+    }
+
+    let raf = 0;
+    let last = performance.now();
+    let time = 0;
+    let demoClock = 0;
+    let visible = true;
+    const io = new IntersectionObserver(([e]) => {
+      visible = e?.isIntersecting ?? true;
+    });
+    io.observe(cv);
+
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (!visible) return;
+      time += dt;
+      const f = dt * 60;
+      const p = pointer.current;
+      let mx = 0;
+      let my = 0;
+      let active = false;
+      if (p.inside) {
+        mx = p.x;
+        my = p.y;
+        active = true;
+      } else if (autoplay && !touched.current) {
+        mx = w * (0.5 + 0.38 * Math.sin(time * 0.55));
+        my = h * (0.5 + 0.32 * Math.sin(time * 0.9 + 0.6));
+        active = true;
+        demoClock += dt;
+        if (demoClock > 3.2) {
+          demoClock = 0;
+          rings.current.push({ x: mx, y: my, r: 0 });
+        }
+      }
+      const ir = Math.max(20, interactionRadius);
+      const reach = ir * 1.9;
+      const rs = rings.current;
+      for (let i = rs.length - 1; i >= 0; i--) {
+        rs[i].r += 620 * dt;
+        if (rs[i].r > Math.hypot(w, h)) rs.splice(i, 1);
+      }
+
+      for (const d of dashes) {
+        let face = 0;
+        let target = d.rest;
+        if (active) {
+          const dx = d.x - mx;
+          const dy = d.y - my;
+          const dist = Math.hypot(dx, dy);
+          if (dist < reach && dist > 0.01) {
+            face = (1 - dist / reach) ** 1.5;
+            target = Math.atan2(dy, dx);
+            if (dist < ir) {
+              const force = ((ir - dist) / ir) ** 2 * repulsionStrength;
+              d.vx += (dx / dist) * force * f;
+              d.vy += (dy / dist) * force * f;
+            }
+          }
+        }
+        for (const ring of rs) {
+          const dx = d.x - ring.x;
+          const dy = d.y - ring.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const band = 1 - Math.abs(dist - ring.r) / 36;
+          if (band > 0) {
+            const fall = Math.max(0.15, 1 - ring.r / 900);
+            d.vx += (dx / dist) * band * 2.4 * fall * f;
+            d.vy += (dy / dist) * band * 2.4 * fall * f;
+            d.av += band * 0.09 * fall * f;
+          }
+        }
+        d.k += (face - d.k) * Math.min(1, 0.2 * f);
+        d.vx += (d.ox - d.x) * springK * f;
+        d.vy += (d.oy - d.y) * springK * f;
+        const keep = Math.pow(damping, f);
+        d.vx *= keep;
+        d.vy *= keep;
+        d.x += d.vx * f;
+        d.y += d.vy * f;
+        // Dashes are symmetric, so aim for whichever end is nearer the target heading.
+        let err = wrap(target - d.a);
+        if (Math.abs(err) > Math.PI / 2) err = wrap(err + Math.PI);
+        const rest = wrap(d.rest - d.a);
+        d.av += (err * 0.16 * face + (Math.abs(rest) > Math.PI / 2 ? wrap(rest + Math.PI) : rest) * 0.025 * (1 - face)) * f;
+        d.av *= Math.pow(0.86, f);
+        d.a += d.av * f;
+      }
+      draw();
+    };
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, [stillTheme, still, palette, gap, interactionRadius, repulsionStrength, springK, damping, autoplay]);
+
+  const lines = title.split("\n");
+  const tint = textColor ? { color: textColor } : undefined;
 
   return (
     <section
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        touched.current = true;
+        pointer.current = { x: e.clientX - r.left, y: e.clientY - r.top, inside: true };
+      }}
+      onPointerLeave={() => {
+        pointer.current.inside = false;
+      }}
+      onPointerDown={(e) => {
+        if ((e.target as HTMLElement).closest("a,button")) return;
+        const r = e.currentTarget.getBoundingClientRect();
+        touched.current = true;
+        rings.current.push({ x: e.clientX - r.left, y: e.clientY - r.top, r: 0 });
+      }}
       className={cn(
         "relative isolate flex min-h-[calc(100svh-4rem)] items-center justify-center overflow-hidden",
+        !background && "bg-white dark:bg-black",
         className,
       )}
-      style={{ background }}
+      style={background ? { background } : undefined}
     >
-      {/* ── Particle canvas ── */}
-      <ParticleField
-        dotGap={dotGap}
-        interactionRadius={interactionRadius}
-        repulsionStrength={repulsionStrength}
-        springK={springK}
-        damping={damping}
-        colors={colors}
-        background={background}
-        reduceMotion={reduceMotion}
+      <canvas
+        ref={canvas}
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -z-10 h-full w-full [mask-image:radial-gradient(ellipse_90%_85%_at_50%_50%,#000_55%,transparent)]"
       />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_34%_26%_at_50%_42%,rgba(255,255,255,.75),transparent)] dark:bg-[radial-gradient(ellipse_34%_26%_at_50%_42%,rgba(0,0,0,.7),transparent)]" style={background ? { display: "none" } : undefined} />
 
-      {/* ── Hero content ── */}
       <motion.div
-        className="relative z-10 mx-auto max-w-3xl px-6 text-center"
-        initial="hidden"
+        className="relative z-10 mx-auto max-w-3xl px-6 py-20 text-center"
+        initial={still ? false : "hidden"}
         animate="show"
-        variants={{ show: { transition: { staggerChildren: 0.1 } } }}
+        variants={{ show: { transition: { staggerChildren: 0.08 } } }}
       >
-        {/* Title */}
         <motion.h1
-          variants={FADE_UP}
-          transition={{ duration: 0.7, ease: EASE }}
-          className="text-balance text-5xl font-bold tracking-[-0.025em] sm:text-6xl lg:text-7xl"
-          style={{ color: textColor }}
+          variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
+          transition={{ type: "spring", stiffness: 220, damping: 22 }}
+          className={cn("text-[40px] font-semibold leading-[1.02] tracking-[-0.05em] [text-wrap:balance] sm:text-[64px]", !textColor && "text-[#1d1d1f] dark:text-[#f5f5f7]")}
+          style={tint}
         >
-          {titleLines.map((line, i) => (
-            <React.Fragment key={i}>
+          {lines.map((line, i) => (
+            <Fragment key={i}>
               {line}
-              {i < titleLines.length - 1 && <br />}
-            </React.Fragment>
+              {i < lines.length - 1 && <br />}
+            </Fragment>
           ))}
         </motion.h1>
-
-        {/* Subtitle */}
-        {subtitle && (
+        {subtitle ? (
           <motion.p
-            variants={FADE_UP}
-            transition={{ duration: 0.6, ease: EASE }}
-            className="mx-auto mt-6 max-w-xl text-[16px] leading-relaxed"
-            style={{ color: `${textColor}99` }}
+            variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
+            transition={{ type: "spring", stiffness: 220, damping: 22 }}
+            className={cn("mx-auto mt-5 max-w-xl text-[16px] leading-relaxed sm:text-[18px]", !textColor && "text-[#6e6e73] dark:text-[#a1a1a6]")}
+            style={textColor ? { color: textColor, opacity: 0.7 } : undefined}
           >
             {subtitle}
           </motion.p>
-        )}
-
-        {/* CTAs */}
+        ) : null}
         <motion.div
-          variants={FADE_UP}
-          transition={{ duration: 0.55, ease: EASE }}
-          className="mt-10 flex flex-wrap items-center justify-center gap-3"
+          variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
+          transition={{ type: "spring", stiffness: 220, damping: 22 }}
+          className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3"
         >
-          {primaryCTA && (
-            <a
+          {primaryCTA ? (
+            <motion.a
               href={primaryCTA.href ?? "#"}
               onClick={primaryCTA.onClick}
-              className={cn(
-                "group inline-flex items-center gap-2 rounded-full px-6 py-2.5",
-                "text-sm font-semibold shadow-sm",
-                "transition-all duration-200 hover:gap-3 hover:opacity-90",
-              )}
-              style={{ background: textColor, color: background }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex h-11 items-center rounded-full bg-[#0071e3] px-6 text-[15px] font-medium text-white outline-none hover:bg-[#0077ed] focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#0a84ff] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
             >
               {primaryCTA.label}
-              <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-            </a>
-          )}
-
-          {secondaryCTA && (
+            </motion.a>
+          ) : null}
+          {secondaryCTA ? (
             <a
               href={secondaryCTA.href ?? "#"}
               onClick={secondaryCTA.onClick}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full border px-6 py-2.5",
-                "text-sm font-medium",
-                "transition-all duration-200 hover:opacity-80",
-              )}
-              style={{
-                borderColor: `${textColor}22`,
-                color: `${textColor}bb`,
-                background: `${textColor}08`,
-              }}
+              className="group inline-flex items-center gap-1 rounded-md text-[15px] font-medium text-[#0066cc] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:text-[#2997ff] dark:focus-visible:ring-[#0a84ff]"
             >
               {secondaryCTA.label}
+              <svg aria-hidden viewBox="0 0 16 16" className="size-3.5 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 3.5 10.5 8 6 12.5" />
+              </svg>
             </a>
-          )}
+          ) : null}
         </motion.div>
       </motion.div>
+      {hint ? <p className="pointer-events-none absolute inset-x-0 bottom-4 text-center text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">{hint}</p> : null}
     </section>
   );
 }

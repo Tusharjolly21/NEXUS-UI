@@ -5,12 +5,12 @@ import { WarpSpeedCard, WarpTextTrigger } from "./warp-speed-card";
 export function WarpSpeedCardDemo() {
   return (
     <div className="flex min-h-64 items-center justify-center p-8">
-      <WarpSpeedCard className="w-full max-w-xl border border-gray-200 shadow-sm">
-        <div className="px-10 py-14 text-center">
-          <h2 className="text-4xl font-bold leading-tight tracking-tight text-gray-950 sm:text-5xl">
+      <WarpSpeedCard className="w-full max-w-xl">
+        <div className="px-8 py-14 text-center">
+          <h2 className="m-0 text-[40px] font-semibold leading-[1.12] tracking-[-0.035em] sm:text-[48px]">
             Build amazing websites
             <br />
-            at <WarpTextTrigger>warp speed</WarpTextTrigger>
+            at <WarpTextTrigger autoplay>warp speed</WarpTextTrigger>
           </h2>
         </div>
       </WarpSpeedCard>

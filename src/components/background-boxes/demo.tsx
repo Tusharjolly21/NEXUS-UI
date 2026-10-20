@@ -1,31 +1,17 @@
 "use client";
 
-import * as React from "react";
 import { BackgroundBoxes } from "./background-boxes";
 
+/** Standalone demo page: the grid behind a short headline. */
 export function BackgroundBoxesDemo() {
   return (
-    <section className="mx-auto max-w-6xl space-y-10 px-4 py-14">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Backgrounds</p>
-        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Background Boxes
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Isometric animated grid with hover color effects and cross markers.
-        </p>
-      </div>
-
-      <BackgroundBoxes
-        rows={80}
-        cols={60}
-        boxWidth={64}
-        boxHeight={32}
-        borderColor="#374151"
-        showCrosses
-        crossColor="#374151"
-        className="h-140 w-full rounded-2xl border border-zinc-800 bg-zinc-950"
-      />
+    <section className="mx-auto max-w-5xl px-4 py-16">
+      <BackgroundBoxes className="h-[520px] w-full rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#0b0b0d] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+        <div className="flex h-full flex-col items-center justify-center px-6 text-center text-[#1d1d1f] dark:text-[#f5f5f7]">
+          <h2 className="text-[40px] font-semibold leading-none tracking-[-0.045em]">Every cell is a key.</h2>
+          <p className="mt-3 text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">Run the pointer across the grid.</p>
+        </div>
+      </BackgroundBoxes>
     </section>
   );
 }
