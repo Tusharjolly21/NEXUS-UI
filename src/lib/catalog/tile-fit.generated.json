@@ -3659,6 +3659,26 @@
   "bg": "#fcfcfc",
   "coverage": 0.24
  },
+ "pulse-monitor": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   410,
+   224,
+   380,
+   372
+  ],
+  "content": [
+   430,
+   244,
+   340,
+   328
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.14
+ },
  "radio-cards": {
   "canvas": [
    960,
@@ -4179,6 +4199,26 @@
   "bg": "#0c0c12",
   "coverage": 1
  },
+ "spend-donut": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   410,
+   166,
+   380,
+   488
+  ],
+  "content": [
+   430,
+   186,
+   340,
+   440
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.19
+ },
  "split-contact-glass": {
   "canvas": [
    960,
@@ -4418,6 +4458,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 0.18
+ },
+ "stock-line": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   410,
+   240,
+   380,
+   340
+  ],
+  "content": [
+   430,
+   264,
+   350,
+   296
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.13
  },
  "streak-counter": {
   "canvas": [
@@ -4898,6 +4958,26 @@
   ],
   "bg": "#0c0c0c",
   "coverage": 1
+ },
+ "traffic-bars": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   410,
+   232,
+   380,
+   358
+  ],
+  "content": [
+   430,
+   252,
+   340,
+   314
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.13
  },
  "typewriter-effect": {
   "canvas": [

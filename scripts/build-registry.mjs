@@ -14,6 +14,7 @@ const catalogPath = path.join(root, "src", "lib", "catalog", "library-components
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencies ?? {}));
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
+const UI_SOUNDS_REGISTRY_NAME = "ui-sounds";
 const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
@@ -160,6 +161,21 @@ function buildNexusFontItem() {
         "--font-heading": "var(--font-sans)",
       },
     },
+  };
+}
+
+/** The free UI sounds library: one lib file, no dependencies. */
+function buildUiSoundsItem() {
+  const content = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds.ts"), "utf8");
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: UI_SOUNDS_REGISTRY_NAME,
+    type: "registry:lib",
+    title: "UI Sounds",
+    description: "24 interface sound effects synthesised with the Web Audio API. One file, no audio assets.",
+    dependencies: [],
+    registryDependencies: [],
+    files: [{ path: "next-ui/lib/ui-sounds.ts", type: "registry:lib", target: "lib/ui-sounds.ts", content }],
   };
 }
 
@@ -904,7 +920,7 @@ function buildBlockCollectionItem(blockPackage) {
 const catalogTs = fs.readFileSync(catalogPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
-const items = [buildNexusFontItem()];
+const items = [buildNexusFontItem(), buildUiSoundsItem()];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {
@@ -1031,6 +1047,7 @@ function writeRegistry(destination, registryItems) {
 
 const publicNames = new Set([
   NEXUS_FONT_REGISTRY_NAME,
+  UI_SOUNDS_REGISTRY_NAME,
   ...BLOCK_REGISTRY_PACKAGES
     .filter((blockPackage) => !blockPackage.premium)
     .map((blockPackage) => blockPackage.name),

@@ -1,0 +1,142 @@
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ */
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+type Def = { category: SoundCategory; label: string; play: (c: AudioContext, out: AudioNode) => void };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+let muted = false;
+
+/** Mute or unmute every sound (for a "Sounds off" preference). */
+export function setSoundsMuted(value: boolean) {
+  muted = value;
+}
+
+/** Play a sound by name. volume is 0..1 on top of the master level. */
+export function playSound(name: SoundName, volume = 1) {
+  if (muted || !(name in SOUNDS)) return;
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  (SOUNDS[name] as Def).play(c, g);
+  setTimeout(() => g.disconnect(), 2000);
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}

@@ -158,6 +158,10 @@ const SELF_DEMO = new Set([
   "scratch-reveal",
   "polaroid-develop",
   "wallet-stack",
+  "traffic-bars",
+  "stock-line",
+  "pulse-monitor",
+  "spend-donut",
 ]);
 
 /** Hover effects that look like nothing until a pointer passes over them. */
@@ -300,6 +304,10 @@ const TINT_OF: Record<string, TileTint> = {
   "scratch-reveal": "pink",
   "polaroid-develop": "peach",
   "wallet-stack": "butter",
+  "traffic-bars": "sky",
+  "stock-line": "mint",
+  "pulse-monitor": "pink",
+  "spend-donut": "sky",
   "avatar-group": "sky",
   "stateful-button": "mint",
   "gooey-search-input": "mint",
@@ -311,6 +319,11 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // eighth batch
+  "traffic-bars",
+  "stock-line",
+  "pulse-monitor",
+  "spend-donut",
   // seventh batch
   "bend-text",
   "pressure-text",
