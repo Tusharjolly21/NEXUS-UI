@@ -52,11 +52,11 @@ export default function TermsPage() {
             </>,
             <>
               <Strong>Premium components and templates</Strong>: full source code for animated components and
-              complete Next.js page templates. Some templates can be bought individually.
+              complete Next.js page templates, unlocked by either plan below.
             </>,
             <>
-              <Strong>Pro (annual plan)</Strong>: access to all premium components, templates, and blocks,
-              plus updates, for 12 months from the date of purchase.
+              <Strong>Pro (annual plan)</Strong>: a yearly plan with access to all premium components,
+              templates, and blocks, current and future, plus updates and requests, while the plan is active.
             </>,
             <>
               <Strong>All-Access (lifetime pass)</Strong>: a one-time payment for access to all premium
@@ -90,15 +90,15 @@ export default function TermsPage() {
       </LegalSection>
 
       <LegalSection id="refunds" title="4. Refunds">
-        {/* REVIEW: /pricing only promises refunds for lifetime purchases. Confirm the policy for the annual plan and single templates. */}
+        {/* REVIEW: /pricing only promises refunds for lifetime purchases. Confirm the policy for the annual plan. */}
         <p>
           <Strong>All-Access (lifetime pass):</Strong> if you&apos;re not satisfied, email{" "}
           <LegalLink href={`mailto:${contactEmail}`}>{contactEmail}</LegalLink> within 7 days of purchase for
           a full refund.
         </p>
         <p>
-          <Strong>Annual plan and individual templates:</Strong> because these are digital goods delivered
-          immediately, they are generally non-refundable once accessed or downloaded. If something doesn&apos;t
+          <Strong>Annual plan:</Strong> because it is a digital good delivered
+          immediately, it is generally non-refundable once accessed or downloaded. If something doesn&apos;t
           work as described, contact us within 7 days of purchase and we will fix it or refund you.
         </p>
         <p>

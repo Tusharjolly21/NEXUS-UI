@@ -1,19 +1,20 @@
 "use client";
 
 import * as React from "react";
-import Image from "next/image";
+import { PRICES, formatPrice } from "@/lib/pricing";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Check, ChevronRight, Download, Maximize2, Play, X } from "lucide-react";
 import { Band } from "@/components/site/band";
 import { InstallCard } from "@/components/site/install-card";
 import { PillLink, pillClassName } from "@/components/site/pill-link";
+import { CheckoutButton } from "@/components/pricing/checkout-button";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { BrowserFrame, TemplateCard, templateName, templateTagline } from "@/components/templates/template-card";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 
-const TEMPLATE_PRICE = 49;
-const PRO_PRICE = 99;
+const PRO_PRICE = formatPrice(PRICES.pro);
+const ALL_ACCESS_PRICE = formatPrice(PRICES.allAccess);
 
 // What a feature name means, for the ones whose name alone doesn't say.
 const FEATURE_COPY: Record<string, string> = {
@@ -52,97 +53,6 @@ const FEATURE_COPY: Record<string, string> = {
 
 // ─── Checkout ────────────────────────────────────────────────────────────────
 
-function CheckoutDialog({
-  tmpl,
-  open,
-  onOpenChange,
-}: {
-  tmpl: MarketplaceTemplate;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}) {
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-  const name = templateName(tmpl);
-
-  async function checkout() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/lemonsqueezy/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: "template", templateSlug: tmpl.slug }),
-      });
-      if (res.status === 401) {
-        window.location.href = `/login?next=/templates/${tmpl.slug}`;
-        return;
-      }
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (!res.ok || !data.url) {
-        setError(data.error ?? "Checkout didn't open. Try again in a moment.");
-        setLoading(false);
-        return;
-      }
-      window.location.href = data.url;
-    } catch {
-      setError("Couldn't reach checkout. Check your connection and try again.");
-      setLoading(false);
-    }
-  }
-
-  return (
-    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
-      <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-[#1d1d1f]/30 backdrop-blur-md transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
-        <DialogPrimitive.Popup className="pg-float fixed left-1/2 top-1/2 z-[61] w-[min(calc(100vw-32px),400px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-tile bg-card outline-none transition-[opacity,transform] duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-[calc(-50%+12px)] data-[starting-style]:translate-y-[calc(-50%+12px)] motion-reduce:transition-none">
-          {tmpl.previewImages ? (
-            <div className="relative aspect-[16/8] bg-muted">
-              <Image src={tmpl.previewImages.hero} alt="" fill sizes="400px" className="object-cover object-top" />
-            </div>
-          ) : null}
-          <DialogPrimitive.Close
-            aria-label="Close"
-            className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-card/90 text-foreground backdrop-blur transition-colors hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          >
-            <X className="size-4" aria-hidden />
-          </DialogPrimitive.Close>
-
-          <div className="p-6">
-            <DialogPrimitive.Title className="text-[22px] font-bold tracking-[-0.03em] text-foreground">
-              Buy {name}
-            </DialogPrimitive.Title>
-            <DialogPrimitive.Description className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
-              ${TEMPLATE_PRICE}, paid once, for the full source of this template.
-            </DialogPrimitive.Description>
-
-            {error ? (
-              <p role="alert" className="mt-4 rounded-2xl bg-tint-pink px-4 py-3 text-[14px] text-foreground">
-                {error}
-              </p>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={checkout}
-              disabled={loading}
-              className={pillClassName("ink", "md", "mt-6 w-full disabled:opacity-60")}
-            >
-              {loading ? "Opening checkout…" : `Pay $${TEMPLATE_PRICE}`}
-            </button>
-            <p className="mt-3 text-center text-[13px] text-muted-foreground">
-              Payment is handled by Lemon Squeezy. Want every template?{" "}
-              <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
-                Compare plans
-              </Link>
-            </p>
-          </div>
-        </DialogPrimitive.Popup>
-      </DialogPrimitive.Portal>
-    </DialogPrimitive.Root>
-  );
-}
-
 /** Shown after Lemon Squeezy sends people back, until the webhook grants access; reloads every 3s. */
 function CheckoutPending() {
   React.useEffect(() => {
@@ -153,7 +63,7 @@ function CheckoutPending() {
   return (
     <p role="status" className="mt-6 inline-flex items-center gap-2.5 rounded-full bg-tint-mint px-4 py-2 text-[14px] font-medium text-foreground">
       <span aria-hidden className="size-2 animate-pulse rounded-full bg-[#34c759]" />
-      Payment received. Unlocking your template, this takes a few seconds.
+      Payment received. Unlocking everything, this takes a few seconds.
     </p>
   );
 }
@@ -188,11 +98,9 @@ function useDownload(slug: string) {
 function AccessPanel({
   tmpl,
   hasAccess,
-  onBuy,
 }: {
   tmpl: MarketplaceTemplate;
   hasAccess: boolean;
-  onBuy: () => void;
 }) {
   const { state, download } = useDownload(tmpl.slug);
   const previewHref = `/template-preview/${tmpl.slug}`;
@@ -232,24 +140,28 @@ function AccessPanel({
         </>
       ) : (
         <>
-          <p className="flex items-baseline gap-2">
-            <span className="text-[40px] font-bold leading-none tracking-[-0.04em] text-foreground">${TEMPLATE_PRICE}</span>
-            <span className="text-[15px] text-muted-foreground">once</span>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">Included in Pro</p>
+          <p className="mt-2 flex items-baseline gap-2">
+            <span className="text-[40px] font-bold leading-none tracking-[-0.04em] text-foreground">{PRO_PRICE}</span>
+            <span className="text-[15px] text-muted-foreground">a year</span>
           </p>
           <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
-            The full source of this template. Change anything, ship it as yours.
+            This template and every other one, every block, and everything we release next.
           </p>
           <div className="mt-6 flex flex-col gap-2">
-            <button type="button" onClick={onBuy} className={pillClassName("ink", "md")}>
-              Buy template
-            </button>
+            <CheckoutButton plan="annual" returnPath={`/templates/${tmpl.slug}`}>
+              Get Pro
+            </CheckoutButton>
+            <CheckoutButton plan="lifetime" variant="white" returnPath={`/templates/${tmpl.slug}`}>
+              Lifetime, {ALL_ACCESS_PRICE} once
+            </CheckoutButton>
             <PillLink href={previewHref} variant="white">
               <Play className="size-4" aria-hidden />
               Live preview
             </PillLink>
           </div>
           <p className="mt-5 border-t border-border/60 pt-4 text-[14px] leading-relaxed text-muted-foreground">
-            Every template comes with Pro, ${PRO_PRICE} for 12 months.{" "}
+            Same access on both plans. Pro renews yearly, lifetime is paid once.{" "}
             <Link href="/pricing" className="font-semibold text-foreground underline underline-offset-2">
               Compare plans
             </Link>
@@ -315,7 +227,6 @@ export function TemplateDetailContent({
   isPremium?: boolean;
   checkoutPending?: boolean;
 }) {
-  const [buyOpen, setBuyOpen] = React.useState(false);
   const [shot, setShot] = React.useState<{ src: string; label: string } | null>(null);
 
   const hasAccess = isPremium || !tmpl.premium;
@@ -393,7 +304,7 @@ export function TemplateDetailContent({
             </Link>
           </div>
 
-          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} onBuy={() => setBuyOpen(true)} />
+          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} />
         </div>
       </section>
 
@@ -478,7 +389,7 @@ export function TemplateDetailContent({
               <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">
                 {hasAccess
                   ? "Download the source zip and unpack it where you keep projects."
-                  : "Buy the template, then download the source zip from this page."}
+                  : "Get Pro or lifetime access, then download the source zip from this page."}
               </p>
             </li>
             <li className="rounded-tile bg-tint-mint p-6">
@@ -524,16 +435,18 @@ export function TemplateDetailContent({
             <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
               {hasAccess
                 ? "Swap in your words and colours, or drop in more sections from the component library."
-                : `$${TEMPLATE_PRICE} once for the full source. Swap in your words and colours and ship it.`}
+                : `Included in Pro, ${PRO_PRICE} a year, along with every other template. Swap in your words and colours and ship it.`}
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
             {hasAccess ? (
               <PillLink href="/components">Browse components</PillLink>
             ) : (
-              <button type="button" onClick={() => setBuyOpen(true)} className={pillClassName("ink", "md")}>
-                Buy template
-              </button>
+              <div className="sm:w-44">
+                <CheckoutButton plan="annual" returnPath={`/templates/${tmpl.slug}`}>
+                  Get Pro
+                </CheckoutButton>
+              </div>
             )}
             <PillLink href={previewHref} variant="white">
               Live preview
@@ -542,7 +455,6 @@ export function TemplateDetailContent({
         </div>
       </Band>
 
-      <CheckoutDialog tmpl={tmpl} open={buyOpen} onOpenChange={setBuyOpen} />
       <ScreenshotViewer shot={shot} onClose={() => setShot(null)} />
     </>
   );
