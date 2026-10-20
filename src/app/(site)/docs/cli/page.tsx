@@ -98,7 +98,7 @@ npx shadcn@latest add card -c ./apps/web`}</DocPre>
         <p className="text-sm text-muted-foreground">
           Then pull any free component or block by its install name:
         </p>
-        <DocPre>{`npx shadcn@latest add @nexus-labs/wheel-selector
+        <DocPre>{`npx shadcn@latest add @nexus-labs/glow-button
 npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
         <p className="text-sm text-muted-foreground">
           The CLI installs declared dependencies (e.g.{" "}

@@ -194,7 +194,7 @@ export function cn(...inputs: ClassValue[]) {
     "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
   }
 }`}</DocPre>
-          <DocPre>{`npx shadcn@latest add @nexus-labs/wheel-selector`}</DocPre>
+          <DocPre>{`npx shadcn@latest add @nexus-labs/glow-button`}</DocPre>
           <p className="text-sm text-muted-foreground">
             The CLI installs declared dependencies (e.g.{" "}
             <code className={docInlineCodeClass}>framer-motion</code>), pulls the{" "}
