@@ -345,7 +345,7 @@ export function SideBPage() {
           <Reveal className="flex justify-center"><Fit><StickerToss autoplay text="SIDE B · PLAY IT LOUD · " color="#1d1d1f" accent="#d9a3ff" /></Fit></Reveal>
         </div>
       </section>
-      <Footer brand={<Logo />} note="Music for whatever today is. Side B is a Motion Kit template, not a real service." columns={[{ title: "Listen", links: ["Moods", "Mixtapes", "Lossless", "Plans"] }, { title: "Artists", links: ["Studio", "Payouts", "Upload"] }, { title: "Company", links: ["About", "Jobs", "Press", "Support"] }]} />
+      <Footer brand={<Logo />} note="Music for whatever today is." columns={[{ title: "Listen", links: ["Moods", "Mixtapes", "Lossless", "Plans"] }, { title: "Artists", links: ["Studio", "Payouts", "Upload"] }, { title: "Company", links: ["About", "Jobs", "Press", "Support"] }]} />
     </div>
     </MotionConfig>
   );

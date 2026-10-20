@@ -443,7 +443,7 @@ export function Footer({ brand, columns, note, dark = false }: { brand: ReactNod
           </div>
         ))}
       </div>
-      <div className="mx-auto w-full max-w-[1180px] px-5 pb-28 text-[12px]">© 2026. A Motion Kit template. All names and figures are placeholders.</div>
+      <div className="mx-auto w-full max-w-[1180px] px-5 pb-28 text-[12px]">© 2026. All rights reserved.</div>
     </footer>
   );
 }

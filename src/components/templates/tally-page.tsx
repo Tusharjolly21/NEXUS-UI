@@ -37,7 +37,7 @@ function Logo() {
 }
 
 const TX = [
-  { n: "Blue Bottle", c: "Coffee", a: -4.8, col: "#0a84ff" },
+  { n: "Northbeam Coffee", c: "Coffee", a: -4.8, col: "#0a84ff" },
   { n: "Maya K.", c: "Dinner split", a: 32.5, col: "#30d158" },
   { n: "Metro card", c: "Transport", a: -20, col: "#ff9f0a" },
   { n: "Salary", c: "Acme Studio", a: 2840, col: "#bf5af2" },
@@ -145,7 +145,7 @@ function Press() {
     <section className="border-y border-black/[.05] bg-white py-8" aria-label="Press">
       <Marquee speed={30}>
         {["The Ledger", "MONEYWEEK", "Daily Byte", "fintech/now", "The Saver", "PAYMENTS TODAY", "Hearth"].map((n, i) => (
-          <span key={n} className={`mx-10 text-[22px] text-[#a1a1a6] ${i % 2 ? "font-serif italic" : "font-semibold tracking-tight"}`}>{n}</span>
+          <span key={n} className={`mx-10 text-[22px] text-[#6e6e73] ${i % 2 ? "font-serif italic" : "font-semibold tracking-tight"}`}>{n}</span>
         ))}
       </Marquee>
     </section>
@@ -290,7 +290,7 @@ function Security() {
                   <span className="flex flex-col">
                     <span className="text-[16px] font-medium">{r.l}</span>
                     <AnimatePresence mode="popLayout" initial={false}>
-                      <motion.span key={r.d} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-[13px] text-[#a1a1a6]">{r.d}</motion.span>
+                      <motion.span key={r.d} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} className="text-[13px] text-[#6e6e73]">{r.d}</motion.span>
                     </AnimatePresence>
                   </span>
                   <Switch checked={r.v} onChange={r.s} label={r.l} accent={G} />

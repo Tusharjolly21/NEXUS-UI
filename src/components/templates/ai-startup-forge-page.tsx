@@ -81,10 +81,10 @@ const CODE = [
 
 /** What Forge knows about a symbol. line / col / len locate it in CODE. */
 const NOTES = [
-  { key: "Callers", line: 3, col: 22, len: 13, tone: A, title: "14 callers in 3 packages", body: "Two of them, in cart/ and pos/, ignore the returned cart." },
-  { key: "Throws", line: 7, col: 21, len: 10, tone: "#c2410c", title: "rules.find can throw", body: "RuleExpired, for codes past their end date. pricing/rules.ts:41" },
-  { key: "Missing case", line: 10, col: 6, len: 9, tone: "#7c3aed", title: "'bogo' isn't handled", body: "Added to RuleKind in #2291 last week. Falls through to fixed." },
-  { key: "Untested", line: 14, col: 25, len: 22, tone: "#0369a1", title: "Can go below zero", body: "total.test.ts only covers percent. No test for fixed > total." },
+  { key: "Callers", line: 3, col: 22, len: 13, tone: A, title: "14 callers in 3 packages", short: "Two callers ignore the result.", body: "Two of them, in cart/ and pos/, ignore the returned cart." },
+  { key: "Throws", line: 7, col: 21, len: 10, tone: "#c2410c", title: "rules.find can throw", short: "RuleExpired, for codes past their end date.", body: "RuleExpired, for codes past their end date. pricing/rules.ts:41" },
+  { key: "Missing case", line: 10, col: 6, len: 9, tone: "#7c3aed", title: "'bogo' isn't handled", short: "Added to RuleKind last week.", body: "Added to RuleKind in #2291 last week. Falls through to fixed." },
+  { key: "Untested", line: 14, col: 25, len: 22, tone: "#0369a1", title: "Can go below zero", short: "Only percent discounts are tested.", body: "total.test.ts only covers percent. No test for fixed > total." },
 ];
 
 /** Coverage per line in the X-ray layer: 2 covered, 1 partly, 0 not, -1 no code. */
@@ -242,7 +242,7 @@ function XrayEditor() {
         ))}
       </div>
       <p className="m-0 h-5 text-center text-[13px] text-[#6e6e73]" aria-live="polite">
-        {active >= 0 ? <><span className="font-semibold text-[#1d1d1f]">{NOTES[active].title}.</span> {NOTES[active].body.split(".")[0]}.</> : "Move the lens over the code to see what Forge knows."}
+        {active >= 0 ? <><span className="font-semibold text-[#1d1d1f]">{NOTES[active].title}.</span> {NOTES[active].short}</> : "Move the lens over the code to see what Forge knows."}
       </p>
     </div>
   );
@@ -705,7 +705,7 @@ function Pricing() {
           </div>
           <div className="flex justify-center"><Fit><ElasticStepper label="Seats" min={1} max={30} defaultValue={8} accent={AD} onChange={setSeats} /></Fit></div>
           <div className="flex items-baseline justify-center gap-1.5 whitespace-nowrap text-[#1d1d1f] lg:justify-end">
-            <span className="flex text-[40px] font-semibold tracking-[-0.045em] tabular-nums">$<RollingNumber value={seats * 19} /></span>
+            <span className="flex text-[40px] font-semibold leading-none tracking-[-0.045em] tabular-nums">$<RollingNumber value={seats * 19} /></span>
             <span className="text-[14px] text-[#6e6e73]">/ month</span>
           </div>
         </div>

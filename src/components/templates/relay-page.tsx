@@ -129,7 +129,7 @@ function Logos() {
       <Reveal><p className="m-0 mb-6 text-center text-[13px] font-medium text-[#86868b]">Routing traffic for teams at</p></Reveal>
       <Marquee speed={36}>
         {BRANDS.map((b) => (
-          <span key={b.n} className={`mx-10 text-[24px] text-[#a1a1a6] transition-colors hover:text-[#1d1d1f] ${b.c}`}>{b.n}</span>
+          <span key={b.n} className={`mx-10 text-[24px] text-[#6e6e73] transition-colors hover:text-[#1d1d1f] ${b.c}`}>{b.n}</span>
         ))}
       </Marquee>
     </section>

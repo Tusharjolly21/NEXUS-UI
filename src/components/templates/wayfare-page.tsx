@@ -326,7 +326,7 @@ export function WayfarePage() {
       <div className="mx-auto max-w-[1180px] px-5 pb-20">
         <CtaBand title="Where to next?" sub="Plan your first trip free. Book when it feels right." cta="Plan a trip" secondary="Browse guides" accent={OD} glow="rgba(255,159,10,.3)" />
       </div>
-      <Footer brand={<Logo />} note="Flights, stays and plans in one calm place. Wayfare is a Motion Kit template." columns={[{ title: "Travel", links: ["Destinations", "Guides", "Flights", "Stays"] }, { title: "Club", links: ["Membership", "Lounges", "Gift cards"] }, { title: "Help", links: ["Support", "Changes", "Safety", "Contact"] }]} />
+      <Footer brand={<Logo />} note="Flights, stays and plans in one calm place." columns={[{ title: "Travel", links: ["Destinations", "Guides", "Flights", "Stays"] }, { title: "Club", links: ["Membership", "Lounges", "Gift cards"] }, { title: "Help", links: ["Support", "Changes", "Safety", "Contact"] }]} />
     </div>
     </MotionConfig>
   );

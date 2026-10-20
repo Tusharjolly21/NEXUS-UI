@@ -807,7 +807,7 @@ const KIT = [
 
 function KitBuilder() {
   const { add } = useCart();
-  const [on, setOn] = useState<Record<string, boolean>>({ mask: true, snorkel: true, fins: true, boots: true, computer: false, torch: false });
+  const [on, setOn] = useState<Record<string, boolean>>({ mask: true, snorkel: true, fins: true, boots: true, computer: false, torch: true });
   const picked = KIT.filter((k) => on[k.id]);
   const sum = picked.reduce((s, k) => s + k.price, 0);
   const discount = picked.length >= 4 ? Math.round(sum * 0.1) : 0;
@@ -1159,7 +1159,7 @@ export function OceanFlowPage() {
             <div className="mx-auto max-w-[1180px] px-5 pb-20">
               <CtaBand title="Your next dive starts at the door." sub="Order by 3 pm and it ships today, checked by someone who dives." cta="Shop the gear" secondary="Book a pool try-on" accent={A} glow="rgba(56,189,248,.32)" />
             </div>
-            <Footer brand={<Logo />} note="Dive gear, fitted and pressure-tested before it ships. Ocean Flow is a Motion Kit template, not a real store." columns={[{ title: "Shop", links: ["Masks", "Fins", "Suits", "Computers", "Kits"] }, { title: "Help", links: ["Sizing", "Returns", "Servicing", "Shipping"] }, { title: "Visit", links: ["San Diego store", "Pool try-ons", "Dive trips", "Contact"] }]} />
+            <Footer brand={<Logo />} note="Dive gear, fitted and pressure-tested before it ships." columns={[{ title: "Shop", links: ["Masks", "Fins", "Suits", "Computers", "Kits"] }, { title: "Help", links: ["Sizing", "Returns", "Servicing", "Shipping"] }, { title: "Visit", links: ["San Diego store", "Pool try-ons", "Dive trips", "Contact"] }]} />
 
             <AnimatePresence>
               {toast && (

@@ -518,7 +518,7 @@ export function AetherPortfolioPage() {
         <div className="mx-auto max-w-[1180px] px-5 pb-20">
           <CtaBand title="Have something that should feel quieter?" sub="Tell me what it is and who uses it. I reply within two working days." cta="Book a call" secondary="Copy email" accent={R} glow="rgba(244,114,182,.28)" />
         </div>
-        <Footer brand={<Logo />} note="The studio of Jordan Vale, independent designer and developer. Aether is a Motion Kit template; the people and projects are invented." columns={[{ title: "Work", links: ["Halden", "Fieldnote", "Kiln", "Line 4"] }, { title: "Studio", links: ["Process", "Writing", "Services"] }, { title: "Elsewhere", links: ["Email", "CV", "Source code", "Talks"] }]} />
+        <Footer brand={<Logo />} note="The studio of Jordan Vale, independent designer and developer." columns={[{ title: "Work", links: ["Halden", "Fieldnote", "Kiln", "Line 4"] }, { title: "Studio", links: ["Process", "Writing", "Services"] }, { title: "Elsewhere", links: ["Email", "CV", "Source code", "Talks"] }]} />
       </div>
     </MotionConfig>
   );

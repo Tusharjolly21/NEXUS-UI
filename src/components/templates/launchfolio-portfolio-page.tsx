@@ -638,7 +638,7 @@ export function LaunchfolioPortfolioPage() {
         <div className="mx-auto max-w-[1180px] px-5 pb-20">
           <CtaBand title="Bring me the screen people give up on." sub="Thirty minutes, no deck. You leave with one thing to try this week either way." cta="Book a call" secondary="Email Maya" accent={OD} glow="rgba(234,88,12,.3)" />
         </div>
-        <Footer brand={<Logo />} note="Product design case studies by Maya Okafor. Launchfolio is a Motion Kit template; the people, companies and numbers are invented." columns={[{ title: "Cases", links: ["Fernway", "Ledgerly", "Tidepool"] }, { title: "Working together", links: ["Process", "Pricing", "Contact"] }, { title: "Elsewhere", links: ["CV", "Writing", "Talks"] }]} />
+        <Footer brand={<Logo />} note="Product design case studies by Maya Okafor." columns={[{ title: "Cases", links: ["Fernway", "Ledgerly", "Tidepool"] }, { title: "Working together", links: ["Process", "Pricing", "Contact"] }, { title: "Elsewhere", links: ["CV", "Writing", "Talks"] }]} />
       </div>
     </MotionConfig>
   );
