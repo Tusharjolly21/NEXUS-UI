@@ -5,6 +5,27 @@ import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, u
 import { cn } from "@/lib/utils";
 
 export interface ParallaxStackHeroProps {
+  /** Accent line above the headline, beside the live dot. */
+  eyebrow?: string;
+  /** The headline. Each word rises in on its own. */
+  headline?: string;
+  /** Word(s) of the headline tinted in the accent (matched word by word, ignoring case and punctuation). */
+  highlight?: string;
+  /** Paragraph under the headline. */
+  description?: string;
+  /** Submit button label. */
+  ctaLabel?: string;
+  /** Submit button label while `onSubmit` is pending. */
+  pendingLabel?: string;
+  /** Email field placeholder. */
+  placeholder?: string;
+  /** Hint under the field before anything is submitted. */
+  note?: string;
+  /** Hint after a successful submit. */
+  successNote?: string;
+  /** Hint when the email is invalid or `onSubmit` throws. */
+  errorNote?: string;
+  /** Live dot, highlighted word, buttons, badges and the background glow. */
   accent?: string;
   /** Accent used in dark mode. Defaults to a lighter indigo when `accent` is left at its default. */
   accentDark?: string;
@@ -21,7 +42,12 @@ export interface ParallaxStackHeroProps {
 const DEFAULT_ACCENT = "#5e5ce6";
 const ease = [0.16, 1, 0.3, 1] as const;
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const HEADLINE = ["Run", "the", "whole", "week", "from", "one", "calm", "inbox."];
+/** Longest headline, in words, that gets per-word animation. */
+const MAX_WORDS = 40;
+
+function bareWord(word: string) {
+  return word.toLowerCase().replace(/^[.,!?;:"'“”‘’()[\]{}…—–-]+|[.,!?;:"'“”‘’()[\]{}…—–-]+$/g, "");
+}
 
 const card =
   "rounded-[22px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_30px_60px_-30px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_#3a3a3c,0_30px_60px_-30px_rgba(0,0,0,.9)]";
@@ -73,7 +99,23 @@ function Layer({
  * email field validates with a shake and turns into a confirmation in place.
  * The form never sends data; pass `onSubmit` to handle the address yourself.
  */
-export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autoplay = true, onSubmit, className }: ParallaxStackHeroProps) {
+export function ParallaxStackHero({
+  eyebrow = "2,400 teams joined this month",
+  headline = "Run the whole week from one calm inbox.",
+  highlight = "calm",
+  description = "Messages, meetings and payments land in one place, sorted by what needs you first.",
+  ctaLabel = "Join free",
+  pendingLabel = "Joining…",
+  placeholder = "you@company.com",
+  note = "Free for 14 days. No card needed.",
+  successNote = "You're on the list.",
+  errorNote = "That email doesn't look right.",
+  accent = DEFAULT_ACCENT,
+  accentDark,
+  autoplay = true,
+  onSubmit,
+  className,
+}: ParallaxStackHeroProps) {
   const reduce = useReducedMotion();
   const still = !autoplay || !!reduce;
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
@@ -125,6 +167,11 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
     }
   };
 
+  const words = headline.split(/\s+/).filter(Boolean);
+  const shown = words.slice(0, MAX_WORDS);
+  const rest = words.slice(MAX_WORDS).join(" ");
+  const tinted = new Set(highlight.split(/\s+/).map(bareWord).filter(Boolean));
+
   const dark = accentDark ?? (accent === DEFAULT_ACCENT ? "#7d7aff" : accent);
   const vars = { "--mk-accent": accent, "--mk-accent-dark": dark } as CSSProperties;
   const bad = state === "bad";
@@ -157,13 +204,13 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
               )}
               <span className={cn("h-2 w-2 rounded-full", accentBg)} />
             </span>
-            2,400 teams joined this month
+            {eyebrow}
           </motion.span>
           <h1 className={cn("m-0 text-[clamp(38px,7cqi,76px)] font-semibold leading-[1] tracking-[-0.05em] @4xl:text-[clamp(42px,6cqi,76px)]", title)}>
-            {HEADLINE.map((w, k) => (
+            {shown.map((w, k) => (
               <motion.span
                 key={k}
-                className={cn("mr-[0.22em] inline-block last:mr-0", w === "calm" && accentText)}
+                className={cn("mr-[0.22em] inline-block last:mr-0", tinted.has(bareWord(w)) && accentText)}
                 initial={{ opacity: 0, y: 30, filter: "blur(10px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.9, ease, delay: 0.1 + k * 0.06 }}
@@ -171,6 +218,17 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
                 {w}
               </motion.span>
             ))}
+            {rest ? (
+              <motion.span
+                className="inline"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.9, ease, delay: 0.1 + MAX_WORDS * 0.06 }}
+              >
+                {" "}
+                {rest}
+              </motion.span>
+            ) : null}
           </h1>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -178,7 +236,7 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
             transition={{ duration: 0.9, ease, delay: 0.45 }}
             className="m-0 max-w-[480px] text-[clamp(16px,2.4cqi,19px)] leading-[1.45] tracking-[-0.01em] text-[#6e6e73] dark:text-[#a1a1a6]"
           >
-            Messages, meetings and payments land in one place, sorted by what needs you first.
+            {description}
           </motion.p>
           <motion.form
             onSubmit={submit}
@@ -210,7 +268,7 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
                       maxLength={254}
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@company.com"
+                      placeholder={placeholder}
                       aria-invalid={bad || undefined}
                       aria-describedby={hintId}
                       className={cn("h-11 min-w-0 flex-1 rounded-full bg-transparent px-4 text-[16px] outline-none placeholder:text-[#a1a1a6] dark:placeholder:text-[#6e6e73] @sm:text-[15px]", title)}
@@ -224,7 +282,7 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
                         accentBg,
                       )}
                     >
-                      {state === "busy" ? "Joining…" : "Join free"}
+                      {state === "busy" ? pendingLabel : ctaLabel}
                     </motion.button>
                   </motion.div>
                 ) : (
@@ -253,7 +311,7 @@ export function ParallaxStackHero({ accent = DEFAULT_ACCENT, accentDark, autopla
               </AnimatePresence>
             </motion.div>
             <p id={hintId} className={cn("m-0 mt-3 px-4 text-[13px]", bad ? "text-[#d70015] dark:text-[#ff6961]" : muted)} aria-live="polite">
-              {bad ? "That email doesn't look right." : state === "done" ? "You're on the list." : "Free for 14 days. No card needed."}
+              {bad ? errorNote : state === "done" ? successNote : note}
             </p>
           </motion.form>
         </div>

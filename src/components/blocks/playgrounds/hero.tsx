@@ -49,9 +49,39 @@ const playgrounds: BlockPlaygrounds = {
     Component: ParallaxStackHero,
     props: [
       {
+        name: "headline",
+        type: "string",
+        description: "The headline. Each word rises in on its own.",
+        defaultValue: '"Run the whole week from one calm inbox."',
+      },
+      {
+        name: "highlight",
+        type: "string",
+        description: "Word(s) of the headline tinted in the accent, matched ignoring case and punctuation. Empty tints nothing.",
+        defaultValue: '"calm"',
+      },
+      {
+        name: "eyebrow",
+        type: "string",
+        description: "Accent line beside the live dot, above the headline.",
+        defaultValue: '"2,400 teams joined this month"',
+      },
+      {
+        name: "description",
+        type: "string",
+        description: "Paragraph under the headline.",
+        defaultValue: '"Messages, meetings and payments land in one place, sorted by what needs you first."',
+      },
+      {
+        name: "ctaLabel",
+        type: "string",
+        description: "Submit button label.",
+        defaultValue: '"Join free"',
+      },
+      {
         name: "accent",
         type: "string",
-        description: "Live dot, the word \"calm\", buttons, badges and the background glow.",
+        description: "Live dot, the highlighted word, buttons, badges and the background glow.",
         defaultValue: '"#5e5ce6"',
       },
       {
@@ -65,6 +95,36 @@ const playgrounds: BlockPlaygrounds = {
         type: "boolean",
         description: "Lets the product cards float and the live dot pulse. Pointer parallax works either way.",
         defaultValue: "true",
+      },
+      {
+        name: "note",
+        type: "string",
+        description: "Hint under the field before anything is submitted.",
+        defaultValue: '"Free for 14 days. No card needed."',
+      },
+      {
+        name: "placeholder",
+        type: "string",
+        description: "Email field placeholder.",
+        defaultValue: '"you@company.com"',
+      },
+      {
+        name: "pendingLabel",
+        type: "string",
+        description: "Button label while onSubmit is pending.",
+        defaultValue: '"Joining…"',
+      },
+      {
+        name: "successNote",
+        type: "string",
+        description: "Hint after a successful submit.",
+        defaultValue: "\"You're on the list.\"",
+      },
+      {
+        name: "errorNote",
+        type: "string",
+        description: "Hint when the email is invalid or onSubmit throws.",
+        defaultValue: "\"That email doesn't look right.\"",
       },
       {
         name: "onSubmit",

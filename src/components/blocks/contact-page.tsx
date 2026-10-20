@@ -31,12 +31,92 @@ export type ContactFormValues = { name: string; email: string; company: string; 
  */
 export type ContactSubmitHandler = (values: ContactFormValues) => Promise<void | { error?: string }>;
 
-type ContactVariantProps = { className?: string; onSubmit?: ContactSubmitHandler };
+/** Every fixed string inside the shared form: field labels, placeholders, and the sending/sent/error copy. */
+export type ContactFormCopy = {
+  nameLabel: string;
+  namePlaceholder: string;
+  emailLabel: string;
+  emailPlaceholder: string;
+  companyLabel: string;
+  companyPlaceholder: string;
+  /** Grey suffix after the Company label. */
+  optionalLabel: string;
+  messageLabel: string;
+  messagePlaceholder: string;
+  sendingLabel: string;
+  sentTitle: string;
+  sentMessage: string;
+  sendAnotherLabel: string;
+  /** Shown when `onSubmit` throws without a message. */
+  errorFallback: string;
+};
+
+export const DEFAULT_CONTACT_FORM_COPY: ContactFormCopy = {
+  nameLabel: "Name",
+  namePlaceholder: "Maya Srinivasan",
+  emailLabel: "Work email",
+  emailPlaceholder: "maya@northstar.dev",
+  companyLabel: "Company",
+  companyPlaceholder: "Northstar Labs",
+  optionalLabel: " (optional)",
+  messageLabel: "Message",
+  messagePlaceholder: "Share the goal, deadline, and what a great outcome looks like.",
+  sendingLabel: "Sending…",
+  sentTitle: "Message sent",
+  sentMessage: "We'll get back to you within 24 hours.",
+  sendAnotherLabel: "Send another message ›",
+  errorFallback: "Couldn't send that. Please try again.",
+};
+
+/** Props every contact layout shares: the submit handler, the accent, and the form card's copy. */
+export type ContactVariantProps = {
+  className?: string;
+  /** Sends the form. Without it the form simulates a 900 ms send. */
+  onSubmit?: ContactSubmitHandler;
+  /** Hex colour for the submit button, links, field focus, focus outlines (and the map pin). Unset keeps #0071e3 (#2997ff accents in dark mode). */
+  accent?: string;
+  /** Small grey label above the form title. */
+  formEyebrow?: string;
+  /** The form's heading. */
+  formTitle?: string;
+  /** Paragraph under the form title. */
+  formDescription?: string;
+  /** Submit button text. */
+  buttonLabel?: string;
+  /** Overrides for the form's field labels, placeholders and sent/error copy. */
+  formCopy?: Partial<ContactFormCopy>;
+};
 
 const simulateSend: ContactSubmitHandler = () => new Promise((resolve) => setTimeout(resolve, 900));
 
 const UI_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34 };
 const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+/** The same ring coloured by `--contact-accent`, used only when an `accent` prop is passed. */
+const accentFocusRing =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--contact-accent)]";
+const ringFor = (accent?: string) => (accent ? accentFocusRing : focusRing);
+const linkFor = (accent?: string) => (accent ? "text-[color:var(--contact-accent)]" : "text-[#0066cc] dark:text-[#2997ff]");
+
+/** Sets `--contact-accent` only when an accent is passed, so the built-in light/dark blues stay otherwise. */
+function accentStyle(accent?: string): React.CSSProperties | undefined {
+  return accent ? ({ "--contact-accent": accent } as React.CSSProperties) : undefined;
+}
+
+/** First letter of the first word, upper-cased (handles emoji and accented letters as one character). */
+function firstLetter(text: string) {
+  return (Array.from(text.trim())[0] ?? "").toUpperCase();
+}
+
+/** Up to two initials, one per word. */
+function initialsOf(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((part) => Array.from(part)[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 const ink = "text-[#1d1d1f] dark:text-[#f5f5f7]";
 const secondary = "text-[#6e6e73] dark:text-[#a1a1a6]";
 const tertiary = "text-[#86868b] dark:text-[#98989d]";
@@ -95,7 +175,44 @@ export function ContactPageBlock({ className, onSubmit }: ContactVariantProps) {
 
 export default ContactPageBlock;
 
-export function GlobalSignalContact({ className, onSubmit }: ContactVariantProps) {
+export type GlobalSignalContactProps = ContactVariantProps & {
+  /** Grey line above the heading. */
+  eyebrow?: string;
+  /** Large heading on the left. */
+  title?: string;
+  /** Paragraph under the heading. */
+  description?: string;
+  /** First contact link, opened with mailto:. */
+  email?: string;
+  /** Second contact link; everything but digits and + is stripped for the tel: link. */
+  phone?: string;
+  /** Plain grey note after the two links. Empty hides it. */
+  responseNote?: string;
+  /** Show the world map with the pulsing pin. Hiding it also skips loading the map data. */
+  showMap?: boolean;
+  /** Text of the pill above the map pin. */
+  mapLabel?: string;
+};
+
+export function GlobalSignalContact({
+  className,
+  onSubmit,
+  accent,
+  eyebrow = "A studio across three time zones",
+  title = "Let's shape the next interface.",
+  description = "Send a product brief, launch notes or a rough idea. A designer and an engineer read every message and reply with a concrete next step.",
+  email = "hello@northfield.design",
+  phone = "+44 20 7946 0321",
+  responseNote = "Replies within a working day",
+  showMap = true,
+  mapLabel = "We are here",
+  formEyebrow = "Project request",
+  formTitle = "Tell us what you want to build",
+  formDescription = "A few details are enough. We will reply with a practical next step, not a sales maze.",
+  buttonLabel = "Send request",
+  formCopy,
+}: GlobalSignalContactProps) {
+  const link = cn("rounded hover:underline", linkFor(accent), ringFor(accent));
   return (
     <AnimatedShell
       className={cn(
@@ -103,56 +220,67 @@ export function GlobalSignalContact({ className, onSubmit }: ContactVariantProps
         ink,
         className,
       )}
+      style={accentStyle(accent)}
     >
       <div className="flex min-w-0 flex-col justify-between px-1 pt-2 sm:px-2 lg:min-h-[620px]">
         <div>
           <Reveal>
-            <span className="grid size-12 place-items-center rounded-[14px] bg-white text-[#0071e3] shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#2c2c2e] dark:text-[#2997ff] dark:shadow-none">
+            <span
+              className={cn(
+                "grid size-12 place-items-center rounded-[14px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#2c2c2e] dark:shadow-none",
+                accent ? "text-[color:var(--contact-accent)]" : "text-[#0071e3] dark:text-[#2997ff]",
+              )}
+            >
               <Mail className="size-5" strokeWidth={1.75} aria-hidden />
             </span>
           </Reveal>
           <Reveal>
-            <p className={cn("mt-8 text-[17px] font-semibold sm:mt-10", tertiary)}>A studio across three time zones</p>
+            <p className={cn("mt-8 text-[17px] font-semibold sm:mt-10", tertiary)}>{eyebrow}</p>
           </Reveal>
           <Reveal>
             <h2 className="mt-2 max-w-xl text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-[52px] lg:text-[60px]">
-              Let&apos;s shape the next interface.
+              {title}
             </h2>
           </Reveal>
           <Reveal>
-            <p className={cn("mt-5 max-w-xl text-[17px] leading-[1.5] sm:text-[19px]", secondary)}>
-              Send a product brief, launch notes or a rough idea. A designer and an engineer read every message and
-              reply with a concrete next step.
-            </p>
+            <p className={cn("mt-5 max-w-xl text-[17px] leading-[1.5] sm:text-[19px]", secondary)}>{description}</p>
           </Reveal>
           <Reveal>
             <ul className="mt-7 flex flex-col gap-2.5 text-[15px] sm:flex-row sm:flex-wrap sm:gap-x-6">
-              <li>
-                <a href="mailto:hello@northfield.design" className={cn("rounded text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}>
-                  hello@northfield.design
-                </a>
-              </li>
-              <li>
-                <a href="tel:+442079460321" className={cn("rounded text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}>
-                  +44 20 7946 0321
-                </a>
-              </li>
-              <li className={secondary}>Replies within a working day</li>
+              {email ? (
+                <li className="min-w-0 break-words">
+                  <a href={`mailto:${email.trim()}`} className={link}>
+                    {email}
+                  </a>
+                </li>
+              ) : null}
+              {phone ? (
+                <li>
+                  <a href={`tel:${phone.replace(/[^\d+]/g, "")}`} className={link}>
+                    {phone}
+                  </a>
+                </li>
+              ) : null}
+              {responseNote ? <li className={secondary}>{responseNote}</li> : null}
             </ul>
           </Reveal>
         </div>
-        <Reveal>
-          <IndiaPulseMap />
-        </Reveal>
+        {showMap ? (
+          <Reveal>
+            <IndiaPulseMap label={mapLabel} accent={accent} />
+          </Reveal>
+        ) : null}
       </div>
 
       <Reveal className={cn("relative rounded-[24px] bg-white p-5 sm:p-8 lg:p-10 dark:bg-[#2c2c2e]/60", cardShadow)}>
         <ContactForm
           onSubmit={onSubmit}
-          eyebrow="Project request"
-          title="Tell us what you want to build"
-          description="A few details are enough. We will reply with a practical next step, not a sales maze."
-          buttonLabel="Send request"
+          accent={accent}
+          copy={formCopy}
+          eyebrow={formEyebrow}
+          title={formTitle}
+          description={formDescription}
+          buttonLabel={buttonLabel}
           dense
         />
       </Reveal>
@@ -160,7 +288,40 @@ export function GlobalSignalContact({ className, onSubmit }: ContactVariantProps
   );
 }
 
-export function CenteredContactForm({ className, onSubmit }: ContactVariantProps) {
+/** One row of the Centered layout's contact list. */
+export type ContactDetail = { label: string; value: string };
+
+export const CENTERED_CONTACT_DETAILS: ContactDetail[] = [
+  { label: "New projects", value: "hello@northfield.design" },
+  { label: "Existing clients", value: "Your Slack channel, or support@northfield.design" },
+  { label: "Office hours", value: "Monday to Friday, 9:00 to 18:00 GMT" },
+];
+
+export type CenteredContactFormProps = ContactVariantProps & {
+  /** Name beside the monogram; its first letter fills the monogram. */
+  brandName?: string;
+  /** Large heading on the left. */
+  title?: string;
+  /** Rows of the contact list under the heading. */
+  details?: ContactDetail[];
+  /** Show the row of round GitHub, LinkedIn and Chat buttons under the form. */
+  showSocial?: boolean;
+};
+
+export function CenteredContactForm({
+  className,
+  onSubmit,
+  accent,
+  brandName = "Northfield",
+  title = "Say hello. A real person reads it.",
+  details = CENTERED_CONTACT_DETAILS,
+  showSocial = true,
+  formEyebrow = "Quick hello",
+  formTitle = "What can we help with?",
+  formDescription = "Questions, partnerships or a project you want to start. We route every note to the right person.",
+  buttonLabel = "Start the conversation",
+  formCopy,
+}: CenteredContactFormProps) {
   const reduce = useReducedMotion();
   return (
     <AnimatedShell
@@ -169,69 +330,75 @@ export function CenteredContactForm({ className, onSubmit }: ContactVariantProps
         ink,
         className,
       )}
+      style={accentStyle(accent)}
     >
       <div className="relative z-10 grid w-full max-w-6xl gap-10 md:grid-cols-[0.75fr_minmax(0,1fr)] md:items-stretch">
         <div className="flex flex-col justify-center md:pl-6 lg:pl-12">
           <Reveal className="flex items-center gap-3">
-            <Monogram />
-            <p className="text-[15px] font-semibold">Northfield</p>
+            <Monogram letter={firstLetter(brandName)} />
+            <p className="min-w-0 truncate text-[15px] font-semibold">{brandName}</p>
           </Reveal>
           <Reveal>
             <h2 className="mt-8 max-w-sm text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-[48px]">
-              Say hello. A real person reads it.
+              {title}
             </h2>
           </Reveal>
-          <Reveal>
-            <dl className="mt-10 grid max-w-sm gap-0 text-[15px]">
-              {[
-                ["New projects", "hello@northfield.design"],
-                ["Existing clients", "Your Slack channel, or support@northfield.design"],
-                ["Office hours", "Monday to Friday, 9:00 to 18:00 GMT"],
-              ].map(([label, value]) => (
-                <div key={label} className="border-t border-black/[0.08] py-4 dark:border-white/[0.1]">
-                  <dt className={cn("text-[13px]", tertiary)}>{label}</dt>
-                  <dd className="mt-1 font-medium">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </Reveal>
+          {details.length > 0 ? (
+            <Reveal>
+              <dl className="mt-10 grid max-w-sm gap-0 text-[15px]">
+                {details.map(({ label, value }, index) => (
+                  <div key={`${label}-${index}`} className="border-t border-black/[0.08] py-4 dark:border-white/[0.1]">
+                    <dt className={cn("text-[13px]", tertiary)}>{label}</dt>
+                    <dd className="mt-1 break-words font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </Reveal>
+          ) : null}
         </div>
 
         <Reveal className="w-full max-w-lg self-center rounded-[28px] bg-[#f5f5f7] p-5 sm:p-8 dark:bg-[#1c1c1e]">
           <ContactForm
             onSubmit={onSubmit}
-            eyebrow="Quick hello"
-            title="What can we help with?"
-            description="Questions, partnerships or a project you want to start. We route every note to the right person."
-            buttonLabel="Start the conversation"
+            accent={accent}
+            copy={formCopy}
+            eyebrow={formEyebrow}
+            title={formTitle}
+            description={formDescription}
+            buttonLabel={buttonLabel}
             roundedButton
             dense
           />
-          <div className="mt-7 flex items-center justify-center gap-3 border-t border-black/[0.08] pt-6 dark:border-white/[0.1]">
-            {[GithubIcon, LinkedinIcon, MessageCircle].map((Icon, index) => (
-              <motion.a
-                key={index}
-                href="#"
-                aria-label={["GitHub", "LinkedIn", "Chat"][index]}
-                whileHover={reduce ? undefined : { y: -2 }}
-                whileTap={reduce ? undefined : { scale: 0.94 }}
-                transition={UI_SPRING}
-                className={cn(
-                  "grid size-10 place-items-center rounded-full bg-[#e8e8ed] text-[#1d1d1f] transition-colors hover:bg-[#dcdce1] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:hover:bg-[#3a3a3c]",
-                  focusRing,
-                )}
-              >
-                <Icon className="size-4" strokeWidth={1.75} aria-hidden />
-              </motion.a>
-            ))}
-          </div>
+          {showSocial ? (
+            <div className="mt-7 flex items-center justify-center gap-3 border-t border-black/[0.08] pt-6 dark:border-white/[0.1]">
+              {[GithubIcon, LinkedinIcon, MessageCircle].map((Icon, index) => (
+                <motion.a
+                  key={index}
+                  href="#"
+                  aria-label={["GitHub", "LinkedIn", "Chat"][index]}
+                  whileHover={reduce ? undefined : { y: -2 }}
+                  whileTap={reduce ? undefined : { scale: 0.94 }}
+                  transition={UI_SPRING}
+                  className={cn(
+                    "grid size-10 place-items-center rounded-full bg-[#e8e8ed] text-[#1d1d1f] transition-colors hover:bg-[#dcdce1] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:hover:bg-[#3a3a3c]",
+                    ringFor(accent),
+                  )}
+                >
+                  <Icon className="size-4" strokeWidth={1.75} aria-hidden />
+                </motion.a>
+              ))}
+            </div>
+          ) : null}
         </Reveal>
       </div>
     </AnimatedShell>
   );
 }
 
-const PROOF_QUOTES = [
+/** One testimonial in the Gradient Proof rotation. */
+export type ProofQuote = { quote: string; name: string; role: string };
+
+export const PROOF_QUOTES: ProofQuote[] = [
   {
     quote: "Northfield turned a vague redesign into a system we could launch. The new contact flow doubled qualified demo requests in a week.",
     name: "Ira Kapoor",
@@ -249,17 +416,44 @@ const PROOF_QUOTES = [
   },
 ];
 
-export function GradientProofContact({ className, onSubmit }: ContactVariantProps) {
+export type GradientProofContactProps = ContactVariantProps & {
+  /** Grey label at the top of the quote panel. */
+  proofLabel?: string;
+  /** Testimonials the panel cycles through. An empty list falls back to the built-in three. */
+  quotes?: ProofQuote[];
+  /** Advance to the next quote by itself (never under reduced motion, and paused while hovered). */
+  autoRotate?: boolean;
+  /** Seconds each quote stays before the next one (2 to 30). */
+  rotateSeconds?: number;
+};
+
+export function GradientProofContact({
+  className,
+  onSubmit,
+  accent,
+  proofLabel = "What teams say after launch",
+  quotes = PROOF_QUOTES,
+  autoRotate = true,
+  rotateSeconds = 6.5,
+  formEyebrow = "Customer success",
+  formTitle = "Need help designing a better intake flow?",
+  formDescription = "Share the workflow, audience, and deadline. We will suggest a component path that fits your product.",
+  buttonLabel = "Book a design review",
+  formCopy,
+}: GradientProofContactProps) {
   const reduce = useReducedMotion();
   const [index, setIndex] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
-  const quote = PROOF_QUOTES[index];
+  const list = quotes.length > 0 ? quotes : PROOF_QUOTES;
+  const current = index % list.length;
+  const quote = list[current];
+  const delay = Math.round((Number.isFinite(rotateSeconds) ? Math.min(30, Math.max(2, rotateSeconds)) : 6.5) * 1000);
 
   React.useEffect(() => {
-    if (reduce || paused) return;
-    const timer = window.setTimeout(() => setIndex((i) => (i + 1) % PROOF_QUOTES.length), 6500);
+    if (reduce || paused || !autoRotate || list.length < 2) return;
+    const timer = window.setTimeout(() => setIndex((i) => (i + 1) % list.length), delay);
     return () => window.clearTimeout(timer);
-  }, [index, paused, reduce]);
+  }, [index, paused, reduce, autoRotate, delay, list.length]);
 
   return (
     <AnimatedShell
@@ -268,9 +462,10 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
         ink,
         className,
       )}
+      style={accentStyle(accent)}
     >
       <Reveal className="relative flex min-h-[460px] flex-col justify-between overflow-hidden rounded-[24px] bg-[#1d1d1f] p-6 text-[#f5f5f7] sm:min-h-[540px] sm:p-10 dark:bg-[#1c1c1e]">
-        <p className="text-[17px] font-semibold text-white/60">What teams say after launch</p>
+        <p className="text-[17px] font-semibold text-white/60">{proofLabel}</p>
 
         <figure
           className="relative my-10 grid flex-1 items-center"
@@ -279,7 +474,7 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
         >
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div
-              key={index}
+              key={current}
               initial={reduce ? { opacity: 0 } : { opacity: 0, y: 24, filter: "blur(8px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={reduce ? { opacity: 0 } : { opacity: 0, y: -24, filter: "blur(8px)" }}
@@ -289,13 +484,10 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
                 &ldquo;{quote.quote}&rdquo;
               </blockquote>
               <figcaption className="mt-8 flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-full bg-white/10 text-[14px] font-semibold">
-                  {quote.name
-                    .split(" ")
-                    .map((part) => part[0])
-                    .join("")}
+                <span className="grid size-11 shrink-0 place-items-center rounded-full bg-white/10 text-[14px] font-semibold">
+                  {initialsOf(quote.name)}
                 </span>
-                <span>
+                <span className="min-w-0">
                   <span className="block text-[15px] font-semibold">{quote.name}</span>
                   <span className="block text-[13px] text-white/60">{quote.role}</span>
                 </span>
@@ -305,16 +497,16 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
         </figure>
 
         <div className="flex items-center gap-2" role="group" aria-label="Choose a testimonial">
-          {PROOF_QUOTES.map((item, i) => {
-            const active = i === index;
+          {list.map((item, i) => {
+            const active = i === current;
             return (
               <button
-                key={item.name}
+                key={`${item.name}-${i}`}
                 type="button"
                 aria-label={`Show testimonial from ${item.name}`}
                 aria-pressed={active}
                 onClick={() => setIndex(i)}
-                className={cn("flex h-6 items-center rounded-full", focusRing)}
+                className={cn("flex h-6 items-center rounded-full", ringFor(accent))}
               >
                 <motion.span
                   className={cn("block h-2 rounded-full", active ? "bg-white" : "bg-white/30 hover:bg-white/50")}
@@ -331,10 +523,12 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
       <Reveal className="flex items-center px-1 sm:px-4 lg:px-6">
         <ContactForm
           onSubmit={onSubmit}
-          eyebrow="Customer success"
-          title="Need help designing a better intake flow?"
-          description="Share the workflow, audience, and deadline. We will suggest a component path that fits your product."
-          buttonLabel="Book a design review"
+          accent={accent}
+          copy={formCopy}
+          eyebrow={formEyebrow}
+          title={formTitle}
+          description={formDescription}
+          buttonLabel={buttonLabel}
           className="w-full"
           roundedButton
         />
@@ -343,7 +537,34 @@ export function GradientProofContact({ className, onSubmit }: ContactVariantProp
   );
 }
 
-export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) {
+export type ImageStoryContactProps = ContactVariantProps & {
+  /** Testimonial on the frosted card over the photo (curly quotes are added). */
+  quote?: string;
+  /** Who said it; their initials fill the avatar. */
+  authorName?: string;
+  /** Their role, under the name. */
+  authorRole?: string;
+  /** Name beside the monogram on the form card; its first letter fills the monogram. */
+  brandName?: string;
+  /** Grey line under the brand name. */
+  brandTagline?: string;
+};
+
+export function ImageStoryContact({
+  className,
+  onSubmit,
+  accent,
+  quote = "Our launch page finally feels like the product: fast, composed, and unmistakably ours.",
+  authorName = "Sana Noor",
+  authorRole = "Founder, Meadow AI",
+  brandName = "Northfield",
+  brandTagline = "Launch support",
+  formEyebrow = "Talk to the team",
+  formTitle = "Write to the people who build it.",
+  formDescription = "Tell us where your page feels stuck. We can help with layout, motion, conversion details, or full section composition.",
+  buttonLabel = "Send message",
+  formCopy,
+}: ImageStoryContactProps) {
   return (
     <AnimatedShell
       className={cn(
@@ -351,6 +572,7 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
         ink,
         className,
       )}
+      style={accentStyle(accent)}
     >
       <div
         className="relative min-h-[420px] bg-cover bg-center sm:min-h-[500px] lg:min-h-full"
@@ -361,16 +583,14 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
       >
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/35 to-transparent" />
         <Reveal className="absolute inset-x-4 bottom-4 rounded-[22px] bg-white/80 p-5 shadow-[0_20px_40px_-24px_rgba(0,0,0,.4)] backdrop-blur-xl backdrop-saturate-150 sm:inset-x-8 sm:bottom-8 sm:p-7 lg:right-auto lg:w-[520px] dark:bg-[#1c1c1e]/80">
-          <p className="text-[21px] font-semibold leading-[1.3] tracking-[-0.02em] sm:text-[26px]">
-            &ldquo;Our launch page finally feels like the product: fast, composed, and unmistakably ours.&rdquo;
-          </p>
+          <p className="text-[21px] font-semibold leading-[1.3] tracking-[-0.02em] sm:text-[26px]">&ldquo;{quote}&rdquo;</p>
           <div className="mt-6 flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-full bg-[#1d1d1f] text-[14px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
-              SN
+            <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#1d1d1f] text-[14px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+              {initialsOf(authorName)}
             </span>
-            <div>
-              <p className="text-[15px] font-semibold">Sana Noor</p>
-              <p className={cn("text-[13px]", secondary)}>Founder, Meadow AI</p>
+            <div className="min-w-0">
+              <p className="text-[15px] font-semibold">{authorName}</p>
+              <p className={cn("text-[13px]", secondary)}>{authorRole}</p>
             </div>
           </div>
         </Reveal>
@@ -379,18 +599,20 @@ export function ImageStoryContact({ className, onSubmit }: ContactVariantProps) 
       <div className="flex items-center p-4 sm:p-10 lg:p-14">
         <Reveal className={cn("w-full max-w-lg rounded-[28px] bg-white p-5 sm:p-7 lg:mx-auto dark:bg-black", cardShadow)}>
           <div className="mb-6 flex items-center gap-3">
-            <Monogram />
-            <div>
-              <p className="text-[15px] font-semibold">Northfield</p>
-              <p className={cn("text-[13px]", tertiary)}>Launch support</p>
+            <Monogram letter={firstLetter(brandName)} />
+            <div className="min-w-0">
+              <p className="truncate text-[15px] font-semibold">{brandName}</p>
+              <p className={cn("truncate text-[13px]", tertiary)}>{brandTagline}</p>
             </div>
           </div>
           <ContactForm
             onSubmit={onSubmit}
-            eyebrow="Talk to the team"
-            title="Write to the people who build it."
-            description="Tell us where your page feels stuck. We can help with layout, motion, conversion details, or full section composition."
-            buttonLabel="Send message"
+            accent={accent}
+            copy={formCopy}
+            eyebrow={formEyebrow}
+            title={formTitle}
+            description={formDescription}
+            buttonLabel={buttonLabel}
             dense
           />
         </Reveal>

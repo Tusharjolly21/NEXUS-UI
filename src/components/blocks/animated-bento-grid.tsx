@@ -30,12 +30,18 @@ const ENCOURAGEMENT_MSGS: ChatMsg[] = [
   { from: "me", text: "Try: best using the first i items." },
 ];
 
-const MENTORS = [
+export type BentoMentor = { name: string; role: string; slot: string };
+
+/** The four mentors in the first tile's list (the default for `mentors`). */
+export const WHY_CHOOSE_US_MENTORS: BentoMentor[] = [
   { name: "Priya Nair", role: "Staff engineer, payments", slot: "Tue 7:30 pm" },
   { name: "Emily Ross", role: "Engineering manager", slot: "Wed 6:00 pm" },
   { name: "Daniel Kim", role: "Principal engineer", slot: "Thu 8:15 pm" },
   { name: "Sara Moreno", role: "Hiring manager, 120+ loops", slot: "Sat 10:00 am" },
-] as const;
+];
+
+/** Most mentor rows the list shows. */
+const MAX_MENTORS = 6;
 
 const COHORT = ["Alex Chen", "Jordan Lee", "Sam Patel", "Taylor Brooks", "Morgan Diaz", "Riley Park"] as const;
 
@@ -99,7 +105,7 @@ function Monogram({ name, size = 36, accent = false, className }: { name: string
       className={cn(
         "grid shrink-0 select-none place-items-center rounded-full font-semibold tracking-[-0.01em] text-white",
         accent
-          ? "bg-[#0071e3]"
+          ? "bg-[var(--bento-accent,#0071e3)]"
           : "bg-gradient-to-b from-[#a1a1a6] to-[#86868b] dark:from-[#636366] dark:to-[#48484a]",
         className,
       )}
@@ -207,10 +213,11 @@ function Tile({
 
 // ── Tile 1: Mentors ────────────────────────────────────────────────────────────
 
-function MentorList() {
+function MentorList({ mentors }: { mentors: BentoMentor[] }) {
   const id = React.useId();
   const rise = useRise();
   const [active, setActive] = React.useState(0);
+  if (mentors.length === 0) return null;
 
   return (
     <motion.ul
@@ -218,8 +225,8 @@ function MentorList() {
       onMouseLeave={() => setActive(0)}
       className="w-full rounded-[20px] bg-[#f5f5f7] p-1.5 dark:bg-[#2c2c2e] sm:w-[320px] sm:shrink-0"
     >
-      {MENTORS.map((m, i) => (
-        <motion.li key={m.name} variants={rise} onMouseEnter={() => setActive(i)} className="relative">
+      {mentors.map((m, i) => (
+        <motion.li key={`${i}-${m.name}`} variants={rise} onMouseEnter={() => setActive(i)} className="relative">
           {active === i ? (
             <motion.span
               layoutId={`${id}-mentor`}
@@ -283,7 +290,7 @@ function Bubble({ msg }: { msg: ChatMsg }) {
         className={cn(
           "max-w-[85%] rounded-[18px] px-3.5 py-2 text-[14px] leading-[1.35]",
           msg.from === "me"
-            ? "bg-[#0071e3] text-white"
+            ? "bg-[var(--bento-accent,#0071e3)] text-white"
             : "bg-[#e9e9eb] text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#f5f5f7]",
         )}
       >
@@ -341,10 +348,12 @@ function TypingDots() {
   );
 }
 
-function LiveChat({ messages }: { messages: ChatMsg[] }) {
+function LiveChat({ messages, autoplay }: { messages: ChatMsg[]; autoplay: boolean }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-40px" });
-  const reduced = useReducedMotion();
+  const reducedMotion = useReducedMotion();
+  // Without autoplay the thread sits finished, the same as under reduced motion.
+  const reduced = reducedMotion || !autoplay;
   const timeline = React.useMemo(() => buildTimeline(messages), [messages]);
   const [step, setStep] = React.useState(0);
 
@@ -393,7 +402,7 @@ function LiveChat({ messages }: { messages: ChatMsg[] }) {
 
 // ── Tile 5: Live room ──────────────────────────────────────────────────────────
 
-function LiveRoom() {
+function LiveRoom({ autoplay }: { autoplay: boolean }) {
   const id = React.useId();
   const ref = React.useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { margin: "-40px" });
@@ -401,10 +410,10 @@ function LiveRoom() {
   const [speaker, setSpeaker] = React.useState(0);
 
   React.useEffect(() => {
-    if (reduced || !inView) return;
+    if (reduced || !autoplay || !inView) return;
     const t = window.setInterval(() => setSpeaker((s) => (s + 1) % PARTICIPANTS.length), 2600);
     return () => window.clearInterval(t);
-  }, [inView, reduced]);
+  }, [autoplay, inView, reduced]);
 
   const name = PARTICIPANTS[speaker];
 
@@ -432,7 +441,7 @@ function LiveRoom() {
               <motion.span
                 layoutId={`${id}-speaker`}
                 transition={SPRING_UI}
-                className="absolute inset-0 rounded-[14px] shadow-[inset_0_0_0_2px_#0071e3]"
+                className="absolute inset-0 rounded-[14px] shadow-[inset_0_0_0_2px_var(--bento-accent,#0071e3)]"
               />
             ) : null}
             <Monogram name={p} size={26} className="from-[#8e8e93] to-[#636366] dark:from-[#8e8e93] dark:to-[#636366]" />
@@ -474,7 +483,7 @@ function WeekBars() {
         {WEEK.map((d, i) => (
           <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
             {i === TODAY ? (
-              <motion.span variants={rise} className="text-[12px] font-semibold tabular-nums text-[#0071e3] dark:text-[#2997ff]">
+              <motion.span variants={rise} className="text-[12px] font-semibold tabular-nums text-[var(--bento-accent,#0071e3)] dark:text-[var(--bento-accent,#2997ff)]">
                 {d.value}
               </motion.span>
             ) : null}
@@ -483,7 +492,7 @@ function WeekBars() {
               variants={bar}
               className={cn(
                 "block w-full origin-bottom rounded-[8px]",
-                i === TODAY ? "bg-[#0071e3]" : "bg-[#e8e8ed] dark:bg-[#3a3a3c]",
+                i === TODAY ? "bg-[var(--bento-accent,#0071e3)]" : "bg-[#e8e8ed] dark:bg-[#3a3a3c]",
               )}
               style={{ height: `${Math.round((d.value / WEEK_MAX) * 100)}%` }}
             />
@@ -509,11 +518,55 @@ function WeekBars() {
 
 // ── Main export ────────────────────────────────────────────────────────────────
 
-export default function WhyChooseUsBento() {
+export type WhyChooseUsBentoProps = {
+  /** Section headline. */
+  title?: string;
+  /** Supporting line beside the headline (below it on phones). */
+  description?: string;
+  /**
+   * Hex colour for the "You" monogram, sent bubbles, today's bar, its value and the speaker ring.
+   * Left unset (or at #0071e3), the block keeps its own blue, and today's value turns #2997ff in dark mode.
+   */
+  accent?: string;
+  /** Figure the first tile counts up to (0-99,999). */
+  mentorCount?: number;
+  /** Figure the last tile counts up to (0-99,999). */
+  solvedCount?: number;
+  /** Lets the help chat type itself and the live room rotate speakers. Off, both sit still. */
+  autoplay?: boolean;
+  /** Rows of the mentor list in the first tile (the first 6 are shown). */
+  mentors?: BentoMentor[];
+  /** Extra classes for the outer section. */
+  className?: string;
+};
+
+function clampCount(value: number | undefined, fallback: number) {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.round(Math.min(99_999, Math.max(0, value)));
+}
+
+export default function WhyChooseUsBento({
+  title = "Interview prep goes faster with people in your corner.",
+  description = "Daily practice, a cohort at your level, and engineers who have sat on the other side of the table.",
+  accent,
+  mentorCount = 140,
+  solvedCount = 38,
+  autoplay = true,
+  mentors = WHY_CHOOSE_US_MENTORS,
+  className,
+}: WhyChooseUsBentoProps = {}) {
   const rise = useRise();
+  // The default blue counts as "not set", so the built-in dark-mode tint stays.
+  const accentColor = accent?.trim();
+  const customAccent = accentColor && accentColor.toLowerCase() !== "#0071e3" ? accentColor : undefined;
+  const style = customAccent ? ({ "--bento-accent": customAccent } as React.CSSProperties) : undefined;
+  const mentorRows = React.useMemo(() => (Array.isArray(mentors) ? mentors.slice(0, MAX_MENTORS) : []), [mentors]);
 
   return (
-    <section className="bg-[#f5f5f7] px-4 py-16 dark:bg-black sm:px-6 sm:py-24 lg:px-8">
+    <section
+      style={style}
+      className={cn("bg-[#f5f5f7] px-4 py-16 dark:bg-black sm:px-6 sm:py-24 lg:px-8", className)}
+    >
       <motion.div
         className="mx-auto max-w-6xl"
         initial="hidden"
@@ -526,13 +579,13 @@ export default function WhyChooseUsBento() {
             variants={rise}
             className="text-balance text-[34px] font-semibold leading-[1.07] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7] sm:text-[48px]"
           >
-            Interview prep goes faster with people in your corner.
+            {title}
           </motion.h2>
           <motion.p
             variants={rise}
             className="max-w-md text-pretty text-[17px] leading-[1.47] text-[#6e6e73] dark:text-[#a1a1a6] md:justify-self-end md:pb-2"
           >
-            Daily practice, a cohort at your level, and engineers who have sat on the other side of the table.
+            {description}
           </motion.p>
         </div>
 
@@ -541,10 +594,10 @@ export default function WhyChooseUsBento() {
             <div className="flex h-full flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
               <TileCopy
                 title="Mentors who have hired"
-                figure={<CountUp to={140} />}
+                figure={<CountUp to={clampCount(mentorCount, 140)} />}
                 caption="Staff engineers and hiring managers who run real interview loops, on call for weekly 1:1s."
               />
-              <MentorList />
+              <MentorList mentors={mentorRows} />
             </div>
           </Tile>
 
@@ -573,7 +626,7 @@ export default function WhyChooseUsBento() {
               figure="24/7"
               caption="Ask the group when a problem stalls you. Someone has solved it before."
             />
-            <LiveChat messages={ENCOURAGEMENT_MSGS} />
+            <LiveChat messages={ENCOURAGEMENT_MSGS} autoplay={autoplay} />
           </Tile>
 
           <Tile inverse className="lg:col-span-2 lg:row-span-2">
@@ -592,14 +645,14 @@ export default function WhyChooseUsBento() {
               unit="min"
               caption="Median time to get unstuck. Drop in, share your screen, and talk it through."
             />
-            <LiveRoom />
+            <LiveRoom autoplay={autoplay} />
           </Tile>
 
           <Tile className="md:col-span-2 lg:col-span-4">
             <div className="flex h-full flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
               <TileCopy
                 title="Progress you can see"
-                figure={<CountUp to={38} />}
+                figure={<CountUp to={clampCount(solvedCount, 38)} />}
                 unit="solved"
                 caption="Problems this month, mock interviews booked, and a reminder before every session."
               />

@@ -17,7 +17,59 @@ const CLASS_NAME: PropDoc = {
 const playgrounds: BlockPlaygrounds = {
   "bento-mentorship": {
     Component: WhyChooseUsBento,
-    props: [],
+    props: [
+      {
+        name: "title",
+        type: "string",
+        description: "Section headline on the left.",
+        defaultValue: '"Interview prep goes faster with people in your corner."',
+      },
+      {
+        name: "description",
+        type: "string",
+        description: "Supporting line beside the headline (below it on phones).",
+        defaultValue:
+          '"Daily practice, a cohort at your level, and engineers who have sat on the other side of the table."',
+      },
+      {
+        name: "accent",
+        type: "string",
+        description:
+          "Hex colour for the \"You\" monogram, sent bubbles, today's bar and the speaker ring. Left at #0071e3, today's value keeps its #2997ff dark-mode tint.",
+        defaultValue: '"#0071e3"',
+      },
+      {
+        name: "mentorCount",
+        type: "number",
+        description: "Figure the mentors tile counts up to.",
+        defaultValue: "140",
+        min: 0,
+        max: 9999,
+        step: 1,
+      },
+      {
+        name: "solvedCount",
+        type: "number",
+        description: "Figure the progress tile counts up to.",
+        defaultValue: "38",
+        min: 0,
+        max: 9999,
+        step: 1,
+      },
+      {
+        name: "autoplay",
+        type: "boolean",
+        description: "Lets the help chat type itself and the live room rotate speakers. Off, both sit still.",
+        defaultValue: "true",
+      },
+      {
+        name: "mentors",
+        type: "BentoMentor[]",
+        description: "Rows of the mentor list ({ name, role, slot }); the first 6 are shown.",
+        defaultValue: "WHY_CHOOSE_US_MENTORS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "WhyChooseUsBento",
     importLine: 'import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";',
     frameClassName: "bg-[#f5f5f7] dark:bg-black",

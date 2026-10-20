@@ -100,7 +100,78 @@ const playgrounds: BlockPlaygrounds = {
 
   "blog-toc": {
     Component: BlogContentWithToc,
-    props: [CLASS_NAME],
+    props: [
+      {
+        name: "title",
+        type: "string",
+        description: "The article headline.",
+        defaultValue: '"The future of artificial intelligence"',
+      },
+      {
+        name: "tocLabel",
+        type: "string",
+        description: "Heading above the contents list (shown from a 64rem-wide container).",
+        defaultValue: '"On this page"',
+      },
+      {
+        name: "dek",
+        type: "string",
+        description: "Standfirst under the headline. Leave empty to hide it.",
+        defaultValue:
+          '"AI is leaving the demo stage and settling into the quiet parts of everyday work. Here is what that shift asks of the people who design it."',
+      },
+      {
+        name: "category",
+        type: "string",
+        description: "Small label above the headline, before the date.",
+        defaultValue: '"Feature"',
+      },
+      {
+        name: "author",
+        type: "string",
+        description: "Byline name. Its first two initials fill the grey monogram.",
+        defaultValue: '"Ava Sterling"',
+      },
+      {
+        name: "date",
+        type: "string",
+        description: "Publish date shown next to the category.",
+        defaultValue: '"February 14, 2026"',
+      },
+      {
+        name: "readingTime",
+        type: "string",
+        description: "Line under the author name.",
+        defaultValue: '"6 min read"',
+      },
+      {
+        name: "tocItems",
+        type: "BlogTocItem[]",
+        description:
+          'Contents entries ({ id, label }); ids are the body sections "introduction", "key-areas", "ethics", "conclusion".',
+        defaultValue: "BLOG_TOC_ITEMS",
+      },
+      {
+        name: "sectionIdPrefix",
+        type: "string",
+        description: "Prefix for the body section ids the entries link to (letters, digits, - and _).",
+        defaultValue: '"blog-with-toc"',
+        hidden: true,
+      },
+      {
+        name: "heroImage",
+        type: "string (image URL)",
+        description: "Wide 16:10 image under the header. Defaults to a stock photo.",
+        hidden: true,
+      },
+      {
+        name: "secondaryImage",
+        type: "string (image URL)",
+        description: "3:2 figure inside the body. Defaults to a circuit-board photo.",
+        hidden: true,
+      },
+      CLASS_NAME,
+    ],
     jsxName: "BlogContentWithToc",
     importLine: IMPORT("BlogContentWithToc"),
     frameClassName: SCROLL_FRAME,
@@ -108,7 +179,102 @@ const playgrounds: BlockPlaygrounds = {
 
   "blog-editorial": {
     Component: BlogContentEditorial,
-    props: [CLASS_NAME],
+    props: [
+      {
+        name: "title",
+        type: "string",
+        description: "The pinned headline.",
+        defaultValue: '"Designing AI products people can actually trust."',
+      },
+      {
+        name: "eyebrow",
+        type: "string",
+        description: "Small grey label above the headline.",
+        defaultValue: '"Field notes, issue 14"',
+      },
+      {
+        name: "description",
+        type: "string",
+        description: "Standfirst under the headline. Leave empty to hide it.",
+        defaultValue:
+          '"What a year of interviews with product teams taught us about explaining, steering, and correcting machine output."',
+      },
+      {
+        name: "author",
+        type: "string",
+        description: "Byline name; its first two initials fill the monogram. Also signs the quote.",
+        defaultValue: '"Lena Okafor"',
+      },
+      {
+        name: "authorRole",
+        type: "string",
+        description: "Line under the author name.",
+        defaultValue: '"Design lead, Fieldwork"',
+      },
+      {
+        name: "ctaLabel",
+        type: "string",
+        description: "Blue link beside the byline. Leave empty to hide it.",
+        defaultValue: '"Read the full issue ›"',
+      },
+      {
+        name: "sectionTitle",
+        type: "string",
+        description: "Heading of the first story section.",
+        defaultValue: '"Start with clarity, not magic."',
+      },
+      {
+        name: "quote",
+        type: "string",
+        description: "Pull quote at the end (curly quotes are added). Leave empty to hide it.",
+        defaultValue:
+          '"Trust is designed in layers: source, control, explanation, and a graceful way back when the output misses."',
+      },
+      {
+        name: "sectionBody",
+        type: "string",
+        description: "Paragraph under the section heading.",
+        defaultValue:
+          '"Teams adopt AI fastest when the interface explains what happened, what changed, and how a person can correct the outcome. The best systems feel powerful without becoming mysterious."',
+      },
+      {
+        name: "quoteAttribution",
+        type: "string",
+        description: "Name under the quote. Defaults to the author.",
+      },
+      {
+        name: "ctaHref",
+        type: "string (URL)",
+        description: "Where the link goes.",
+        defaultValue: '"#"',
+        hidden: true,
+      },
+      {
+        name: "imageAlt",
+        type: "string",
+        description: "Accessible description of the story image.",
+        defaultValue: '"Analytics dashboard and product research"',
+      },
+      {
+        name: "stats",
+        type: "BlogEditorialStat[]",
+        description: "Figures under the standfirst ({ value, label }); the first 3 are shown.",
+        defaultValue: "BLOG_EDITORIAL_STATS",
+      },
+      {
+        name: "principles",
+        type: "BlogEditorialPrinciple[]",
+        description: "Principle cards ({ title, text, icon }), icon a lucide-react component.",
+        defaultValue: "BLOG_EDITORIAL_PRINCIPLES",
+      },
+      {
+        name: "image",
+        type: "string (image URL)",
+        description: "The story image, cover-fitted. Defaults to an analytics-dashboard photo.",
+        hidden: true,
+      },
+      CLASS_NAME,
+    ],
     jsxName: "BlogContentEditorial",
     importLine: IMPORT("BlogContentEditorial"),
     frameClassName: SCROLL_FRAME,
