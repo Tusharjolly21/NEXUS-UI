@@ -1,1071 +1,619 @@
 "use client";
+/**
+ * Aurora: landing page template for an edge deploy platform.
+ * "Push once, live in 18 regions in 38 seconds." Motion Kit style: light page,
+ * one emerald accent. Built from Motion Kit components: Folder Peek (as a repo
+ * peek), Matrix Loaders, Toast Stack (deploy alerts), Bolting Sliders (canary
+ * controls), Hold to Confirm (rollback), Standing Calendar (deploy history),
+ * Copy Buttons and Radio Cards.
+ */
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent } from "framer-motion";
+import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
+import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
+import RadioCards from "@/components/templates/kit/components/RadioCards";
+import RepoPeek from "@/components/templates/aurora/RepoPeek";
+import CanarySliders from "@/components/templates/aurora/CanarySliders";
+import HoldToRollback from "@/components/templates/aurora/HoldToRollback";
+import DeployCalendar from "@/components/templates/aurora/DeployCalendar";
+import DeployToasts from "@/components/templates/aurora/DeployToasts";
+import { DOTS, MAP_H, MAP_W, REGIONS, project } from "@/components/templates/aurora/world";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import {
-  motion,
-  AnimatePresence,
-  useInView,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-  type MotionValue,
-} from "framer-motion";
-import {
-  ChevronDown,
-  Check,
-  ArrowRight,
-  Menu,
-  X,
-  Shield,
-  Globe,
-  Mail,
-  Copy,
-  GitBranch,
-} from "lucide-react";
+const A = "#059669"; // emerald for fills and graphics
+const AT = "#047857"; // emerald for text and buttons (5.5:1 on white)
+const INK = "#1d1d1f";
+const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+const MONO = "ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
+const spring = { type: "spring", stiffness: 260, damping: 26 } as const;
 
-// ─── Lenis smooth scroll hook ────────────────────────────────────────────────
-function useLenis() {
-  React.useEffect(() => {
-    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
-    let rafId: number;
-
-    import("@studio-freight/lenis").then(({ default: Lenis }) => {
-      lenis = new Lenis({ lerp: 0.08, smoothWheel: true } as ConstructorParameters<typeof Lenis>[0]);
-      function raf(time: number) {
-        lenis!.raf(time);
-        rafId = requestAnimationFrame(raf);
-      }
-      rafId = requestAnimationFrame(raf);
-    });
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      lenis?.destroy();
-    };
-  }, []);
+function Logo() {
+  return (
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M4 24 C 9 10, 23 10, 28 24" fill="none" stroke={A} strokeWidth="3.5" strokeLinecap="round" />
+        <path d="M9 24 C 12 16, 20 16, 23 24" fill="none" stroke="#6ee7b7" strokeWidth="3.5" strokeLinecap="round" />
+        <motion.circle cx="16" cy="24" r="3" fill={AT} animate={{ y: [0, -3, 0] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }} />
+      </svg>
+      Aurora
+    </span>
+  );
 }
 
-// ─── Reusable reveal wrapper ──────────────────────────────────────────────────
-const EASE = [0.22, 1, 0.36, 1] as const;
+/* ------------------------------------------------------------------ */
+/* Hero: push from any region and watch the rollout ripple outward.    */
+/* ------------------------------------------------------------------ */
 
-function Reveal({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px 0px" });
+const T_BUILD = 14.2;
+const T_UPLOAD = 17.4;
+const T_TOTAL = 37.6;
+const REPLAY = 5; // the rollout replays five times faster than real time
+const PTS = Object.fromEntries(REGIONS.map((r) => [r.id, project(r.lon, r.lat)]));
+const ORIGINS = ["fra", "iad", "sin", "syd"];
 
+function arc(a: { x: number; y: number }, b: { x: number; y: number }) {
+  const mx = (a.x + b.x) / 2;
+  const my = (a.y + b.y) / 2 - Math.min(120, Math.hypot(b.x - a.x, b.y - a.y) * 0.28);
+  return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} Q${mx.toFixed(1)} ${my.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+}
+
+function useRollout() {
+  const [origin, setOrigin] = useState("fra");
+  const [run, setRun] = useState(0);
+  const [stage, setStage] = useState(0); // 0 idle, 1 detected, 2 building, 3 uploading, 4 rolling out, 5 done
+  const [lit, setLit] = useState(0);
+  const elapsed = useMotionValue(0);
+  const ring = useMotionValue(0);
+  const ringOpacity = useMotionValue(0);
+  const clockRef = useRef<HTMLSpanElement>(null);
+  const ctl = useRef<{ stop: () => void } | null>(null);
+
+  const order = useMemo(() => {
+    const o = PTS[origin];
+    const d = REGIONS.map((r) => ({ id: r.id, d: Math.hypot(PTS[r.id].x - o.x, PTS[r.id].y - o.y) }));
+    const max = Math.max(...d.map((x) => x.d)) || 1;
+    return d.map((x) => ({ id: x.id, at: T_UPLOAD + (T_TOTAL - T_UPLOAD) * (x.d / max), d: x.d })).sort((p, q) => p.at - q.at);
+  }, [origin]);
+  const orderRef = useRef(order);
+  useEffect(() => { orderRef.current = order; }, [order]);
+
+  useMotionValueEvent(elapsed, "change", (e) => {
+    if (clockRef.current) clockRef.current.textContent = `${e.toFixed(1)}s`;
+    const s = e <= 0 ? 0 : e < 0.8 ? 1 : e < T_BUILD ? 2 : e < T_UPLOAD ? 3 : e < T_TOTAL ? 4 : 5;
+    setStage((p) => (p === s ? p : s));
+    const n = orderRef.current.filter((r) => e >= r.at).length;
+    setLit((p) => (p === n ? p : n));
+    const max = orderRef.current[orderRef.current.length - 1]?.d ?? 1;
+    const k = Math.max(0, Math.min(1, (e - T_UPLOAD) / (T_TOTAL - T_UPLOAD)));
+    ring.set(k * max);
+    ringOpacity.set(e < T_UPLOAD || e >= T_TOTAL ? 0 : 0.9 - k * 0.7);
+  });
+
+  const push = (from: string) => {
+    ctl.current?.stop();
+    setOrigin(from);
+    setRun((r) => r + 1);
+    elapsed.jump(0);
+    setStage(0);
+    setLit(0);
+    ctl.current = animate(elapsed, T_TOTAL, { duration: T_TOTAL / REPLAY, ease: "linear", delay: 0.15 });
+  };
+  useEffect(() => () => ctl.current?.stop(), []);
+
+  const litIds = new Set(order.slice(0, lit).map((r) => r.id));
+  return { origin, run, stage, lit, litIds, ring, ringOpacity, clockRef, push, order };
+}
+
+/** The static land dots, memoised so rollout state changes never re-render them. */
+const DotLayer = memo(function DotLayer() {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 32 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.72, ease: EASE, delay }}
-      className={className}
-    >
-      {children}
+    <g fill="#d4d7dd">
+      {DOTS.map((d, i) => <circle key={i} cx={d.x} cy={d.y} r="2.3" />)}
+    </g>
+  );
+});
+
+function LogLine({ done, running, children }: { done: boolean; running: boolean; children: ReactNode }) {
+  return (
+    <motion.div layout initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={spring} className="flex items-center gap-2.5">
+      <span className="flex h-4 w-4 flex-none items-center justify-center">
+        {done ? (
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+        ) : running ? (
+          <MatrixLoader pattern={0} size={14} color="#6ee7b7" />
+        ) : (
+          <span className="h-1.5 w-1.5 rounded-full bg-white/30" />
+        )}
+      </span>
+      <span className="min-w-0 truncate">{children}</span>
     </motion.div>
   );
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
-const NAV_LINKS = ["Product", "Pricing", "Docs", "Blog"];
+function Hero() {
+  const { origin, run, stage, lit, litIds, ring, ringOpacity, clockRef, push } = useRollout();
+  const touched = useRef(false);
+  const o = PTS[origin];
+  const city = REGIONS.find((r) => r.id === origin)!.city;
+  const running = stage > 0 && stage < 5;
 
-const LOGO_CLOUD = [
-  { name: "Northwind", className: "text-lg font-bold tracking-tight" },
-  { name: "QUANTUMIO", className: "text-sm font-semibold tracking-[0.2em]" },
-  { name: "elevate", className: "text-xl font-medium italic tracking-tight" },
-  { name: "Pulse/HQ", className: "font-mono text-base" },
-  { name: "SkyBridge", className: "text-lg font-light tracking-wide" },
-  { name: "corelogic", className: "text-lg font-black tracking-tighter" },
-];
+  useEffect(() => {
+    let k = 0;
+    const go = () => { if (!touched.current) push(ORIGINS[k++ % ORIGINS.length]); };
+    const a = window.setTimeout(go, 1000);
+    const b = window.setInterval(go, 13000);
+    return () => { clearTimeout(a); clearInterval(b); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-type Testimonial = {
-  initials: string;
-  name: string;
-  role: string;
-  company: string;
-  quote: string;
-  color: string;
-};
-
-const TESTIMONIALS: Testimonial[] = [
-  {
-    initials: "SL",
-    name: "Sarah Lin",
-    role: "CTO",
-    company: "NovaTech",
-    quote:
-      "Aurora cut our deploy cycle from 40 minutes to under 4. The DX is the best we've ever shipped with — our engineers were productive on day one.",
-    color: "from-emerald-200 to-emerald-400",
-  },
-  {
-    initials: "MK",
-    name: "Marcus Kim",
-    role: "VP Engineering",
-    company: "Elevate AI",
-    quote:
-      "We evaluated five platforms. Aurora was the only one that gave us zero-config edge deployments AND the observability our enterprise clients require.",
-    color: "from-violet-200 to-violet-400",
-  },
-  {
-    initials: "PR",
-    name: "Priya Rao",
-    role: "Head of Product",
-    company: "QuantumIO",
-    quote:
-      "The analytics dashboard alone saved us two full sprints of custom tooling. Pricing is honest and scales predictably — rare in this space.",
-    color: "from-teal-200 to-cyan-300",
-  },
-];
-
-type PricingTier = {
-  name: string;
-  monthlyPrice: string;
-  annualPrice: string;
-  description: string;
-  features: string[];
-  cta: string;
-  highlighted: boolean;
-};
-
-const PRICING: PricingTier[] = [
-  {
-    name: "Starter",
-    monthlyPrice: "$0",
-    annualPrice: "$0",
-    description: "For indie hackers and small side projects.",
-    features: [
-      "3 projects",
-      "100 GB bandwidth",
-      "Community support",
-      "Shared infrastructure",
-      "Basic analytics",
-    ],
-    cta: "Get started free",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    monthlyPrice: "$49",
-    annualPrice: "$39",
-    description: "For growing teams shipping real products.",
-    features: [
-      "Unlimited projects",
-      "1 TB bandwidth",
-      "Priority support",
-      "Dedicated edge nodes",
-      "Advanced analytics",
-      "Custom domains",
-      "Team collaboration",
-    ],
-    cta: "Start free trial",
-    highlighted: true,
-  },
-  {
-    name: "Enterprise",
-    monthlyPrice: "Custom",
-    annualPrice: "Custom",
-    description: "For large orgs with complex requirements.",
-    features: [
-      "Everything in Pro",
-      "Unlimited bandwidth",
-      "SLA guarantees",
-      "SSO / SAML",
-      "Dedicated account manager",
-      "Custom contracts",
-      "99.99% uptime SLA",
-    ],
-    cta: "Contact sales",
-    highlighted: false,
-  },
-];
-
-type FaqItem = {
-  q: string;
-  a: string;
-};
-
-const FAQS: FaqItem[] = [
-  {
-    q: "How does the free trial work?",
-    a: "Start a 14-day Pro trial with no credit card required. You get full access to every Pro feature. At the end of the trial, choose a plan or stay on Starter for free — no surprises.",
-  },
-  {
-    q: "Can I migrate from another platform?",
-    a: "Yes. Our migration CLI detects your existing configuration (Vercel, Netlify, Railway, Render) and generates an equivalent Aurora config automatically. Most teams complete migration in under an hour.",
-  },
-  {
-    q: "Where are your data centers located?",
-    a: "Aurora runs on a global edge network with PoPs in 18 regions across North America, Europe, Asia-Pacific, and South America. Your workloads run closest to your users automatically.",
-  },
-  {
-    q: "Is Aurora SOC 2 compliant?",
-    a: "Aurora is SOC 2 Type II certified. We also offer HIPAA-ready configurations for healthcare customers and GDPR data residency controls for EU-based organizations.",
-  },
-  {
-    q: "How does billing work for teams?",
-    a: "Billing is per workspace, not per seat. Add as many collaborators as you need. You only pay for what you use — bandwidth and compute are metered and visible in real time on your dashboard.",
-  },
-];
-
-const FOOTER_LINKS: Record<string, string[]> = {
-  Product: ["Features", "Changelog", "Roadmap", "Status"],
-  Company: ["About", "Blog", "Careers", "Press"],
-  Developers: ["Docs", "API Reference", "CLI", "Open Source"],
-  Legal: ["Privacy", "Terms", "Cookie Policy", "Security"],
-};
-
-// ─── Main component ───────────────────────────────────────────────────────────
-export default function SaasLaunchAuroraPage() {
-  useLenis();
-
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [annual, setAnnual] = React.useState(false);
-  const [openFaq, setOpenFaq] = React.useState<number | null>(null);
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
-
-  // Navbar scroll frost
-  const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY, [0, 80], ["rgba(9,9,11,0)", "rgba(9,9,11,0.85)"]);
-  const navBlur = useTransform(scrollY, [0, 80], ["blur(0px)", "blur(16px)"]);
-  const navBorder = useTransform(scrollY, [0, 80], ["rgba(255,255,255,0)", "rgba(255,255,255,0.08)"]);
-
-  // Orb parallax
-  const orbY = useTransform(scrollY, [0, 600], [0, 120]);
-
-  function handleEmailSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (email.trim()) setSubmitted(true);
-  }
+  const userPush = (from: string) => { touched.current = true; push(from); };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white overflow-x-hidden font-sans antialiased">
-      {/* ── Navbar ─────────────────────────────────────────────────────── */}
-      <motion.header
-        style={{
-          backgroundColor: navBg,
-          backdropFilter: navBlur,
-          WebkitBackdropFilter: navBlur,
-          borderBottomColor: navBorder,
-        }}
-        className="fixed top-0 inset-x-0 z-50 border-b"
-      >
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <a href="#" className="flex items-center gap-2 select-none">
-            <AuroraMark className="w-7 h-7" />
-            <span className="text-lg font-bold tracking-tight">Aurora</span>
-          </a>
-
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map((link) => (
-              <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                className="text-sm text-zinc-400 hover:text-white transition-colors duration-200"
-              >
-                {link}
-              </a>
-            ))}
-          </nav>
-
-          {/* CTA */}
-          <div className="hidden md:flex items-center gap-4">
-            <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors">
-              Sign in
-            </a>
-            <a
-              href="#"
-              className="text-sm bg-white text-zinc-950 font-semibold px-4 py-2 rounded-lg hover:bg-zinc-100 transition-colors"
-            >
-              Start free
-            </a>
-          </div>
-
-          {/* Mobile burger */}
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className="md:hidden text-zinc-400 hover:text-white"
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+    <section id="top" className="relative overflow-hidden pb-10">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[720px]" aria-hidden="true" style={{ background: "radial-gradient(50% 50% at 30% 0%, rgba(5,150,105,.12), transparent 70%), radial-gradient(35% 35% at 90% 50%, rgba(110,231,183,.14), transparent 70%)" }} />
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-end gap-8 px-5 pt-14 lg:grid-cols-[1.35fr_1fr] lg:gap-14 lg:pt-20">
+        <div className="flex flex-col items-start gap-6">
+          <motion.span initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">
+            <motion.span className="h-2 w-2 rounded-full" style={{ background: A }} animate={{ opacity: [1, 0.35, 1] }} transition={{ duration: 1.6, repeat: Infinity }} />
+            All 18 regions operational
+          </motion.span>
+          <h1 className="m-0 text-[clamp(44px,7vw,88px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+            <Words text="Push once. Live in 18 regions in 38 seconds." accentWords={["38", "seconds."]} accent={AT} />
+          </h1>
         </div>
-
-        {/* Mobile drawer */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.28, ease: EASE }}
-              className="md:hidden border-t border-white/[0.08] bg-zinc-950/95 backdrop-blur-xl"
-            >
-              <div className="px-6 py-6 flex flex-col gap-5">
-                {NAV_LINKS.map((link) => (
-                  <a
-                    key={link}
-                    href={`#${link.toLowerCase()}`}
-                    onClick={() => setMobileOpen(false)}
-                    className="text-zinc-300 hover:text-white text-sm"
-                  >
-                    {link}
-                  </a>
-                ))}
-                <a
-                  href="#"
-                  className="mt-2 text-center text-sm bg-white text-zinc-950 font-semibold px-4 py-2.5 rounded-lg"
-                >
-                  Start free
-                </a>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.header>
-
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-28 pb-20 sm:pt-36 lg:pb-28">
-        <AuroraSky offsetY={orbY} />
-
-        <div className="relative z-10 max-w-7xl mx-auto px-6 grid gap-14 lg:grid-cols-[1.05fr_1fr] lg:items-center">
-          <div>
-            <Reveal>
-              <a
-                href="#"
-                className="inline-flex items-center gap-2.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-3 text-xs text-zinc-300 hover:border-white/20 transition-colors"
-              >
-                <span className="rounded-full bg-emerald-300 px-2 py-0.5 font-semibold text-zinc-950">v4.2</span>
-                Preview deploys now run in all 18 regions
-              </a>
-            </Reveal>
-
-            <Reveal delay={0.08}>
-              <h1 className="mt-7 text-[2.75rem] leading-[1.02] sm:text-6xl lg:text-[4.25rem] font-semibold tracking-[-0.035em]">
-                Push once.
-                <br />
-                <span className="text-zinc-500">Live in 18 regions in 38&nbsp;seconds.</span>
-              </h1>
-            </Reveal>
-
-            <Reveal delay={0.14}>
-              <p className="mt-6 max-w-xl text-lg text-zinc-400 leading-relaxed">
-                Aurora builds your app once, ships it to eighteen edge regions in parallel and rolls it back on its own
-                when error rates move. Your B2B customers never see a bad deploy.
-              </p>
-            </Reveal>
-
-            <Reveal delay={0.2}>
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <a
-                  href="#"
-                  className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-zinc-950 hover:bg-zinc-200 transition-colors"
-                >
-                  Start deploying
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-                <CopyCommand command="npx aurora deploy" />
-              </div>
-            </Reveal>
-
-            <Reveal delay={0.28}>
-              <dl className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-white/[0.08] pt-6">
-                {[
-                  ["18", "edge regions"],
-                  ["99.99%", "uptime, 12 mo"],
-                  ["< 2s", "p50 cold start"],
-                ].map(([v, l]) => (
-                  <div key={l}>
-                    <dt className="sr-only">{l}</dt>
-                    <dd className="text-xl font-semibold tracking-tight tabular-nums">{v}</dd>
-                    <dd className="mt-1 text-xs text-zinc-500">{l}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Reveal>
-          </div>
-
-          <Reveal delay={0.18}>
-            <DeployPanel />
+        <div className="flex flex-col items-start gap-6 lg:pb-3">
+          <Reveal delay={0.3} y={14}>
+            <p className="m-0 max-w-[460px] text-[clamp(17px,2vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+              Aurora builds your app once, ships it to every edge region in parallel, and rolls back on its own if errors climb. Click any region on the map to push from there.
+            </p>
+          </Reveal>
+          <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">
+            <Magnetic className="text-white" style={{ background: AT }} onClick={() => scrollToId("pricing")}>Deploy free</Magnetic>
+            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("pipeline")}>How a push works</Magnetic>
           </Reveal>
         </div>
-      </section>
+      </div>
 
-      {/* ── Logo Cloud ─────────────────────────────────────────────────── */}
-      <section className="border-y border-white/[0.06] bg-white/[0.015]">
-        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-zinc-500 md:max-w-[14rem]">
-            Shipping production traffic for 50,000 teams, including
-          </p>
-          <div className="grid grid-cols-2 gap-x-10 gap-y-5 sm:grid-cols-4 md:flex md:flex-1 md:flex-wrap md:justify-end md:gap-x-12">
-            {LOGO_CLOUD.map((logo) => (
-              <span key={logo.name} className={`text-zinc-400 whitespace-nowrap ${logo.className}`}>
-                {logo.name}
+      <div className="relative mx-auto mt-10 max-w-[1260px] px-3 sm:px-5 lg:pb-[200px]">
+        <motion.div initial={{ scale: 0.985 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }} className="relative">
+          <div className="relative w-full" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
+            <svg viewBox={`0 0 ${MAP_W} ${MAP_H}`} className="absolute inset-0 h-full w-full" aria-hidden="true">
+              <DotLayer />
+              <motion.circle cx={o.x} cy={o.y} r={ring} fill="none" stroke={A} strokeWidth="1.5" style={{ opacity: ringOpacity }} />
+              <g fill="none" stroke={A} strokeWidth="1.4" strokeLinecap="round">
+                {REGIONS.filter((r) => r.id !== origin && litIds.has(r.id)).map((r) => (
+                  <motion.path key={`${run}-${r.id}`} d={arc(o, PTS[r.id])} initial={{ pathLength: 0, opacity: 0.9 }} animate={{ pathLength: 1, opacity: 0.45 }} transition={{ type: "spring", stiffness: 60, damping: 18 }} />
+                ))}
+              </g>
+              {REGIONS.map((r) => {
+                const p = PTS[r.id];
+                const on = litIds.has(r.id);
+                return (
+                  <g key={r.id}>
+                    {on && <motion.circle key={`p${run}`} cx={p.x} cy={p.y} fill={A} initial={{ r: 5, opacity: 0.5 }} animate={{ r: 18, opacity: 0 }} transition={{ duration: 1.1, ease: "easeOut" }} />}
+                    <motion.circle cx={p.x} cy={p.y} initial={false} animate={{ r: on ? 6 : 4.5, fill: on ? A : "#ffffff" }} transition={{ type: "spring", stiffness: 500, damping: 20 }} stroke={on ? "#ffffff" : "#9ca3af"} strokeWidth="2" />
+                  </g>
+                );
+              })}
+            </svg>
+            {REGIONS.map((r) => {
+              const p = PTS[r.id];
+              return (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => userPush(r.id)}
+                  aria-label={`Push from ${r.city}`}
+                  title={`Push from ${r.city}`}
+                  className="absolute -ml-3 -mt-3 h-6 w-6 rounded-full outline-none hover:bg-[#059669]/15 focus-visible:ring-2 focus-visible:ring-[#047857] sm:-ml-4 sm:-mt-4 sm:h-8 sm:w-8"
+                  style={{ left: `${(p.x / MAP_W) * 100}%`, top: `${(p.y / MAP_H) * 100}%` }}
+                />
+              );
+            })}
+            <motion.span key={`label-${origin}`} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={spring} className="pointer-events-none absolute hidden -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d1d1f] px-2.5 py-1 text-[12px] font-medium text-white sm:block" style={{ left: `${(o.x / MAP_W) * 100}%`, top: `calc(${(o.y / MAP_H) * 100}% - 40px)` }}>
+              {city}
+            </motion.span>
+          </div>
+
+          <div className={`${card} mt-4 flex items-center justify-between gap-4 px-5 py-3.5 lg:absolute lg:right-5 lg:top-0 lg:mt-0 lg:w-[300px]`} aria-live="polite">
+            <span className="flex flex-col">
+              <span className="text-[12px] font-medium text-[#6e6e73]">Regions live</span>
+              <span className="text-[26px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f]">{lit}<span className="text-[#6e6e73]"> / 18</span></span>
+            </span>
+            <span className="flex flex-col items-end">
+              <span className="text-[12px] font-medium text-[#6e6e73]">Since push</span>
+              <span ref={clockRef} className="text-[26px] font-semibold tabular-nums tracking-[-0.04em]" style={{ color: stage === 5 ? AT : INK }}>0.0s</span>
+            </span>
+          </div>
+
+          <div className="mt-4 overflow-hidden rounded-[24px] bg-[#1d1d1f] text-[#e8e8ed] shadow-[0_40px_80px_-40px_rgba(4,120,87,.55)] lg:absolute lg:left-5 lg:top-[80%] lg:mt-0 lg:w-[440px]">
+            <div className="flex items-center gap-2 border-b border-white/[.08] px-4 py-3">
+              {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />)}
+              <span className="ml-2 text-[12px] text-[#a1a1a6]">acme-web · main</span>
+              <span className="ml-auto text-[12px] tabular-nums text-[#a1a1a6]">replayed at {REPLAY}× speed</span>
+            </div>
+            <div className="flex min-h-[172px] flex-col gap-1.5 px-4 py-3.5 text-[13px] leading-[1.5]" style={{ fontFamily: MONO }}>
+              <span className="text-white"><span className="text-[#6ee7b7]">$</span> git push aurora main <span className="text-[#a1a1a6]">--from {origin}</span></span>
+              {stage >= 1 && <LogLine done running={false}>Detected Next.js 16 · 214 files</LogLine>}
+              {stage >= 2 && <LogLine done={stage > 2} running={stage === 2}>{stage > 2 ? `Built in ${T_BUILD}s, 81% cache hits` : "Building…"}</LogLine>}
+              {stage >= 3 && <LogLine done={stage > 3} running={stage === 3}>{stage > 3 ? "Uploaded 31.4 MB in 3.2s" : "Uploading to the edge…"}</LogLine>}
+              {stage >= 4 && <LogLine done={stage > 4} running={stage === 4}>{stage > 4 ? `Live in 18 regions · ${T_TOTAL}s` : `Rolling out from ${city}…`}</LogLine>}
+              {stage === 0 && <span className="text-[#a1a1a6]">Pick a region, then push.</span>}
+            </div>
+            <div className="flex flex-wrap items-center gap-2 border-t border-white/[.08] px-4 py-3">
+              <span className="mr-1 text-[12px] text-[#a1a1a6]">Push from</span>
+              {ORIGINS.map((id) => (
+                <button key={id} type="button" onClick={() => userPush(id)} aria-pressed={origin === id} className="h-8 rounded-full px-3 text-[12px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7]" style={origin === id ? { background: "#6ee7b7", color: "#022c22" } : { background: "rgba(255,255,255,.08)", color: "#e8e8ed" }}>
+                  {REGIONS.find((r) => r.id === id)!.city}
+                </button>
+              ))}
+              <motion.button type="button" whileTap={{ scale: 0.95 }} onClick={() => userPush(origin)} disabled={running} className="ml-auto h-8 rounded-full bg-white px-3.5 text-[12px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] disabled:opacity-60">
+                {running ? "Rolling out…" : stage === 5 ? "Push again" : "git push"}
+              </motion.button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+const BRANDS = [
+  { n: "Fernway", c: "font-serif italic" },
+  { n: "KILN", c: "tracking-[0.34em] font-semibold" },
+  { n: "outpost labs", c: "font-bold lowercase" },
+  { n: "Quillmark", c: "font-medium" },
+  { n: "SALTBOX", c: "font-black tracking-tight" },
+  { n: "Harbor & Pine", c: "font-serif" },
+  { n: "Novarum", c: "font-semibold italic" },
+  { n: "TELLER", c: "tracking-[0.22em]" },
+];
+
+function Logos() {
+  return (
+    <section className="pb-8 pt-16" aria-label="Customers">
+      <p className="m-0 mb-6 text-center text-[13px] font-medium text-[#6e6e73]">Shipping to the edge for 9,400 teams, including</p>
+      <Marquee speed={32}>
+        {BRANDS.map((b) => <span key={b.n} className={`mx-10 text-[24px] text-[#6e6e73] transition-colors hover:text-[#1d1d1f] ${b.c}`}>{b.n}</span>)}
+      </Marquee>
+    </section>
+  );
+}
+
+function Stats() {
+  const items = [
+    { to: 38, f: (n: number) => `${Math.round(n)}s`, l: "median from push to live everywhere" },
+    { to: 18, f: (n: number) => `${Math.round(n)}`, l: "edge regions on every plan" },
+    { to: 99.99, f: (n: number) => `${n.toFixed(2)}%`, l: "edge availability, last 90 days" },
+    { to: 0.4, f: (n: number) => `${n.toFixed(1)}s`, l: "median time to roll back" },
+  ];
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 py-14">
+      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
+            <Counter to={it.to} format={it.f} className="text-[clamp(36px,5vw,56px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
+            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
+          </div>
+        ))}
+      </Stagger>
+    </section>
+  );
+}
+
+/* ------------------------------ Pipeline ------------------------------ */
+
+const BUILD_STEPS = [
+  { t: "Install dependencies", s: "cached · 0.8s" },
+  { t: "Compile 214 routes", s: "6.1s" },
+  { t: "Optimise 1,180 images", s: "4.4s" },
+  { t: "Bundle edge functions", s: "2.9s" },
+];
+
+function BuildLog() {
+  const [step, setStep] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setStep((s) => (s + 1) % (BUILD_STEPS.length + 2)), 1300);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="flex w-full flex-col gap-1">
+      {BUILD_STEPS.map((b, i) => {
+        const done = step > i;
+        const active = step === i;
+        return (
+          <div key={b.t} className="flex items-center gap-3 rounded-2xl px-3 py-2.5" style={{ background: active ? "#ecfdf5" : "transparent" }}>
+            <span className="flex h-7 w-7 flex-none items-center justify-center">
+              {done ? (
+                <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 18 }} className="flex h-6 w-6 items-center justify-center rounded-full" style={{ background: A }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                </motion.span>
+              ) : active ? (
+                <MatrixLoader pattern={i % 2 ? 3 : 0} size={24} color={A} />
+              ) : (
+                <span className="h-2 w-2 rounded-full bg-[#d2d2d7]" />
+              )}
+            </span>
+            <span className="flex flex-1 flex-col">
+              <span className="text-[15px] font-medium text-[#1d1d1f]">{b.t}</span>
+              <span className="text-[13px] tabular-nums text-[#6e6e73]">{done ? b.s : active ? "Running…" : "Queued"}</span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Pipeline() {
+  const cards = [
+    { k: "01 · Detect", t: "It reads the repo.", d: "Next.js, Remix, Astro, SvelteKit, plain Node or a Dockerfile. Aurora picks the build and tells you what it found.", v: <RepoPeek color={AT} autoplay />, fit: true },
+    { k: "02 · Build", t: "Once, with a warm cache.", d: "One build per commit, reused for every region. Unchanged steps come straight from cache.", v: <BuildLog />, fit: false },
+    { k: "03 · Ship", t: "Everywhere, and it tells you.", d: "Deploys, previews and alerts land in your inbox, chat and the dashboard. Swipe one away when you have read it.", v: <DeployToasts autoplay />, fit: false },
+  ];
+  return (
+    <section id="pipeline" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
+      <SectionHead eyebrow="The pipeline" title="From git push to everywhere." sub="No YAML to start. Connect a repository and every push to main ships, every pull request gets its own preview." accent={AT} />
+      <Stagger className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        {cards.map((c) => (
+          <div key={c.k} className={`${card} flex h-full flex-col gap-3 p-7`}>
+            <span className="text-[14px] font-semibold" style={{ color: AT }}>{c.k}</span>
+            <h3 className="m-0 text-[22px] font-semibold tracking-[-0.025em] text-[#1d1d1f]">{c.t}</h3>
+            <p className="m-0 text-[15px] leading-[1.5] text-[#6e6e73]">{c.d}</p>
+            <div className="mt-4 flex min-h-[330px] w-full flex-1 items-center justify-center">{c.fit ? <Fit>{c.v}</Fit> : c.v}</div>
+          </div>
+        ))}
+      </Stagger>
+    </section>
+  );
+}
+
+/* ------------------------------ Rollouts ------------------------------ */
+
+function Rollouts() {
+  return (
+    <section id="rollouts" className="bg-[#f5f5f7] py-20 sm:py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Safe rollouts" title="Ship to five percent first." sub="New versions take a slice of traffic while Aurora watches error rates and latency. If the numbers slip past your budget, it rolls back before most users notice." accent={AT} />
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.2fr_1fr]">
+          <Reveal y={16}>
+            <div className={`${card} flex h-full flex-col gap-6 p-7 sm:p-8`}>
+              <div>
+                <h3 className="m-0 text-[22px] font-semibold tracking-[-0.025em] text-[#1d1d1f]">Canary controls</h3>
+                <p className="m-0 mt-1.5 text-[15px] leading-[1.5] text-[#6e6e73]">Set the slice, the error budget and how long to watch before going wide.</p>
+              </div>
+              <div className="flex flex-1 items-center justify-center">
+                <Fit>
+                  <CanarySliders
+                    accent={A}
+                    autoplay
+                    title="Rollout for a41f9c2"
+                    hint="Click a track and the knob jumps there."
+                    settings={[
+                      { id: "canary", label: "Canary traffic", min: 0, max: 100, unit: "%", value: 5 },
+                      { id: "budget", label: "Error budget", min: 0, max: 5, unit: "%", value: 1 },
+                      { id: "bake", label: "Watch for", min: 1, max: 30, unit: " min", value: 10 },
+                    ]}
+                    demoValues={[[25, 50, 5], [0.5, 2, 1], [15, 5, 10]]}
+                  />
+                </Fit>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal y={16} delay={0.08}>
+            <div className={`${card} flex h-full flex-col gap-6 p-7 sm:p-8`}>
+              <div>
+                <h3 className="m-0 text-[22px] font-semibold tracking-[-0.025em] text-[#1d1d1f]">Rollback, by hand or by itself</h3>
+                <p className="m-0 mt-1.5 text-[15px] leading-[1.5] text-[#6e6e73]">The previous version stays warm in every region, so going back is a pointer swap, not a rebuild.</p>
+              </div>
+              <div className="flex items-center gap-3 rounded-2xl bg-[#f5f5f7] px-4 py-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-[#d97706]" />
+                <span className="flex-1 text-[14px] text-[#1d1d1f]">a41f9c2 · error rate <span className="font-semibold tabular-nums">2.1%</span> in Singapore</span>
+                <span className="text-[12px] tabular-nums text-[#6e6e73]">budget 1%</span>
+              </div>
+              <div className="flex flex-1 items-center justify-center py-4"><Fit><HoldToRollback label="Hold to roll back" holdingLabel="Rolling back…" doneLabel="v412 is live again" color={AT} autoplay /></Fit></div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------ History ------------------------------ */
+
+function History() {
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
+      <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_1.5fr]">
+        <SectionHead eyebrow="Deploy history" title="Deploy often. Sleep fine." sub="The median team on Aurora ships 13 times a week. Every deploy is kept, so you can open, compare or promote any of them." accent={AT} />
+        <Reveal y={16}>
+          <div className={`${card} overflow-hidden px-4 py-7 sm:px-7`}>
+            <Fit><DeployCalendar weeks={30} noun="deploys from one team in 30 weeks" autoplay /></Fit>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------ Developers ------------------------------ */
+
+const TOML: [string, string][][] = [
+  [["# aurora.toml", "#6e6e73"]],
+  [["[build]", "#b45309"]],
+  [["framework", "#1d1d1f"], [" = ", "#6e6e73"], ['"nextjs"', AT]],
+  [["output", "#1d1d1f"], [" = ", "#6e6e73"], ['".next"', AT]],
+  [["", ""]],
+  [["[rollout]", "#b45309"]],
+  [["regions", "#1d1d1f"], [" = ", "#6e6e73"], ['"all"', AT], ["          # 18 today", "#6e6e73"]],
+  [["canary", "#1d1d1f"], [" = ", "#6e6e73"], ["5", "#7c3aed"], ["             # percent", "#6e6e73"]],
+  [["error_budget", "#1d1d1f"], [" = ", "#6e6e73"], ["1.0", "#7c3aed"]],
+  [["auto_rollback", "#1d1d1f"], [" = ", "#6e6e73"], ["true", "#7c3aed"]],
+  [["", ""]],
+  [["[previews]", "#b45309"]],
+  [["on_pull_request", "#1d1d1f"], [" = ", "#6e6e73"], ["true", "#7c3aed"]],
+];
+
+function Developers() {
+  return (
+    <section id="developers" className="bg-[#f5f5f7] py-20 sm:py-24">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.15fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Developers" title="One command, one small file." sub="Deploy from your laptop with the CLI, or connect the repo and never think about it. The config is optional and fits on one screen." accent={AT} />
+          <Reveal y={12}><CopyCommand command="npx aurora deploy" autoplay /></Reveal>
+          <Stagger className="flex flex-col gap-3.5">
+            {["Preview URL for every pull request", "Environment variables per branch", "Logs streamed from all 18 regions", "Works with any Git host"].map((t) => (
+              <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#d1fae5]" style={{ color: AT }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                </span>
+                {t}
               </span>
             ))}
-          </div>
+          </Stagger>
         </div>
-      </section>
-
-      {/* ── Bento Metrics ──────────────────────────────────────────────── */}
-      <section id="product" className="py-24 sm:py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <Reveal>
-            <div className="max-w-2xl mb-14">
-              <h2 className="text-3xl sm:text-5xl font-semibold tracking-[-0.03em] text-balance">
-                Reliability you can show your customers.
-              </h2>
-              <p className="mt-5 text-lg text-zinc-400 leading-relaxed">
-                Every Aurora workspace gets the same status page we run ourselves. These are the numbers on it.
-              </p>
+        <Reveal y={16}>
+          <div className={`${card} overflow-hidden`}>
+            <div className="flex items-center gap-2 border-b border-black/[.06] px-5 py-3.5">
+              <span className="text-[13px] font-semibold text-[#1d1d1f]">aurora.toml</span>
+              <span className="ml-auto rounded-full bg-[#ecfdf5] px-2.5 py-1 text-[12px] font-semibold" style={{ color: AT }}>Optional</span>
             </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-            <Reveal className="md:col-span-4 md:row-span-2">
-              <DeployTimeCard />
-            </Reveal>
-            <Reveal delay={0.08} className="md:col-span-2">
-              <UptimeCard />
-            </Reveal>
-            <Reveal delay={0.14} className="md:col-span-2">
-              <RegionsCard />
-            </Reveal>
+            <pre className="m-0 overflow-x-auto px-5 py-5 text-[13.5px] leading-[1.8]" style={{ fontFamily: MONO }}>
+              {TOML.map((line, i) => (
+                <motion.div key={i} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.1 }} transition={{ ...spring, delay: i * 0.03 }} className="flex gap-5">
+                  <span className="w-5 flex-none select-none text-right text-[#6e6e73]">{i + 1}</span>
+                  <code>{line.map(([t, c], j) => <span key={j} style={{ color: c || undefined }}>{t}</span>)}{line.length === 1 && line[0][0] === "" ? " " : null}</code>
+                </motion.div>
+              ))}
+            </pre>
           </div>
-        </div>
-      </section>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
-      {/* ── Testimonials ───────────────────────────────────────────────── */}
-      <section className="py-24 sm:py-32 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto px-6">
-          <Reveal>
-            <div className="mb-14 max-w-2xl">
-              <h2 className="text-3xl sm:text-5xl font-semibold tracking-[-0.03em] text-balance mb-4">
-                Teams that stopped dreading Friday deploys
-              </h2>
-              <p className="text-lg text-zinc-400">
-                Real feedback from teams who ship production products on Aurora every day.
-              </p>
+/* ------------------------------ Pricing ------------------------------ */
+
+function Pricing() {
+  const [plan, setPlan] = useState("pro");
+  const summary: Record<string, { price: string; note: string }> = {
+    hobby: { price: "$0", note: "For side projects. One member, fair-use bandwidth." },
+    pro: { price: "$24", note: "Per member per month. 1 TB of bandwidth included, then $0.06 per GB." },
+    scale: { price: "Talk to us", note: "Committed-use pricing, private regions and a 99.99% SLA." },
+  };
+  return (
+    <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-20 sm:py-24">
+      <SectionHead eyebrow="Pricing" title="Every plan gets every region." sub="We don't sell regions or rollbacks as add-ons. Plans differ by team size, bandwidth and support." accent={AT} center />
+      <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
+        <Reveal y={16}>
+          <div className={`${card} flex h-full flex-col gap-6 p-7`}>
+            <div>
+              <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Choose a plan</h3>
+              <p className="m-0 mt-1 text-[15px] text-[#6e6e73]">Change plans any time. Billing is prorated by the day.</p>
             </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-            {TESTIMONIALS.map((t, i) => (
-              <Reveal key={t.name} delay={i * 0.1} className={i === 0 ? "md:col-span-3 md:row-span-2" : "md:col-span-2"}>
-                <figure
-                  className={`h-full flex flex-col justify-between gap-8 rounded-2xl border border-white/[0.08] ${
-                    i === 0 ? "bg-gradient-to-br from-emerald-400/[0.06] to-transparent p-8 sm:p-10" : "bg-white/[0.025] p-6"
-                  }`}
-                >
-                  <blockquote
-                    className={
-                      i === 0
-                        ? "text-2xl sm:text-[1.75rem] leading-snug tracking-[-0.015em] text-zinc-100 text-pretty"
-                        : "text-sm leading-relaxed text-zinc-300"
-                    }
-                  >
-                    &ldquo;{t.quote}&rdquo;
-                  </blockquote>
-                  <figcaption className="flex items-center gap-3">
-                    <span
-                      className={`w-10 h-10 rounded-full bg-gradient-to-br ${t.color} flex items-center justify-center text-xs font-semibold text-zinc-950 flex-shrink-0`}
-                    >
-                      {t.initials}
-                    </span>
-                    <span>
-                      <span className="block text-sm font-semibold text-white">{t.name}</span>
-                      <span className="block text-xs text-zinc-500">
-                        {t.role}, {t.company}
-                      </span>
-                    </span>
-                  </figcaption>
-                </figure>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pricing ────────────────────────────────────────────────────── */}
-      <section id="pricing" className="py-24 border-t border-white/[0.06]">
-        <div className="max-w-6xl mx-auto px-6">
-          <Reveal>
-            <div className="text-center mb-12">
-              <h2 className="text-3xl sm:text-5xl font-semibold tracking-[-0.03em] mb-4">
-                Pricing per workspace, never per seat
-              </h2>
-              <p className="text-zinc-400 max-w-xl mx-auto mb-8">
-                Add every engineer, designer and PM you like. You pay for bandwidth and compute, metered live on your dashboard.
-              </p>
-
-              {/* Toggle */}
-              <div className="inline-flex items-center gap-3 p-1 rounded-xl bg-white/[0.06] border border-white/[0.08]">
-                <button
-                  onClick={() => setAnnual(false)}
-                  className="relative px-4 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <motion.span
-                    animate={{ opacity: annual ? 0.4 : 1 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    Monthly
-                  </motion.span>
-                  {!annual && (
-                    <motion.div
-                      layoutId="pricing-pill"
-                      className="absolute inset-0 bg-white/10 rounded-lg"
-                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
-                    />
-                  )}
-                </button>
-                <button
-                  onClick={() => setAnnual(true)}
-                  className="relative px-4 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-                >
-                  <motion.span
-                    animate={{ opacity: annual ? 1 : 0.4 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    Annual
-                  </motion.span>
-                  <span className="text-xs text-emerald-300 font-semibold">–20%</span>
-                  {annual && (
-                    <motion.div
-                      layoutId="pricing-pill"
-                      className="absolute inset-0 bg-white/10 rounded-lg"
-                      transition={{ type: "spring", stiffness: 380, damping: 34 }}
-                    />
-                  )}
-                </button>
-              </div>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PRICING.map((tier, i) => (
-              <Reveal key={tier.name} delay={i * 0.1}>
-                <div
-                  className={`relative h-full flex flex-col p-7 rounded-2xl border transition-all duration-300 ${
-                    tier.highlighted
-                      ? "border-emerald-300/40 bg-gradient-to-b from-emerald-400/[0.07] to-zinc-950 shadow-xl shadow-emerald-500/5"
-                      : "border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14]"
-                  }`}
-                >
-                  {tier.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="px-3 py-1 rounded-full bg-emerald-300 text-xs font-semibold text-zinc-950">
-                        Most popular
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="mb-6">
-                    <h3 className="text-lg font-bold mb-1">{tier.name}</h3>
-                    <p className="text-zinc-500 text-sm">{tier.description}</p>
-                  </div>
-
-                  <div className="mb-6">
-                    <AnimatePresence mode="wait">
-                      <motion.span
-                        key={annual ? "annual" : "monthly"}
-                        initial={{ opacity: 0, y: -8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: 0.22, ease: EASE }}
-                        className="text-4xl font-semibold tracking-tight tabular-nums"
-                      >
-                        {annual ? tier.annualPrice : tier.monthlyPrice}
-                      </motion.span>
-                    </AnimatePresence>
-                    {tier.name !== "Enterprise" && (
-                      <span className="text-zinc-500 text-sm ml-1">/mo</span>
-                    )}
-                  </div>
-
-                  <ul className="flex flex-col gap-3 mb-8 flex-1">
-                    {tier.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2.5 text-sm text-zinc-300">
-                        <Check className="w-4 h-4 text-emerald-300 flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <a
-                    href="#"
-                    className={`w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-colors ${
-                      tier.highlighted
-                        ? "bg-emerald-300 hover:bg-emerald-200 text-zinc-950"
-                        : "border border-white/20 hover:bg-white/5 text-white"
-                    }`}
-                  >
-                    {tier.cta}
-                  </a>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ────────────────────────────────────────────────────────── */}
-      <section className="py-24 border-t border-white/[0.06]">
-        <div className="max-w-3xl mx-auto px-6">
-          <Reveal>
-            <div className="text-center mb-14">
-              <h2 className="text-3xl sm:text-5xl font-semibold tracking-[-0.03em] mb-4">
-                Questions teams ask before migrating
-              </h2>
-              <p className="text-zinc-400">
-                Can&apos;t find an answer?{" "}
-                <a href="#" className="text-emerald-300 hover:text-emerald-200 underline underline-offset-4">
-                  Chat with us
-                </a>
-                .
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="flex flex-col gap-3">
-            {FAQS.map((faq, i) => (
-              <FaqItem
-                key={i}
-                faq={faq}
-                index={i}
-                open={openFaq === i}
-                onToggle={() => setOpenFaq(openFaq === i ? null : i)}
+            <div className="flex justify-center">
+              <RadioCards
+                accent={AT}
+                defaultValue="pro"
+                onChange={setPlan}
+                options={[
+                  { id: "hobby", title: "Hobby", description: "For side projects", meta: "Free", features: ["18 regions", "Previews for every PR", "Community support"] },
+                  { id: "pro", title: "Pro", description: "For teams in production", meta: "$24/member", features: ["Canary rollouts and auto-rollback", "1 TB bandwidth included", "Email support, 1-day reply"] },
+                  { id: "scale", title: "Scale", description: "For high-traffic products", meta: "Custom", features: ["Private regions", "SSO and audit logs", "99.99% SLA"] },
+                ]}
               />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA Section ────────────────────────────────────────────────── */}
-      <section className="py-28 border-t border-white/[0.06]">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <Reveal>
-            <div className="relative overflow-hidden rounded-3xl p-12 sm:p-16 bg-zinc-900/60 border border-white/[0.08]">
-              {/* Background glow */}
-              <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -top-24 left-[-10%] h-[260px] w-[120%] -skew-y-6 rounded-[50%] bg-[linear-gradient(90deg,transparent,rgba(52,211,153,.30)_35%,rgba(139,92,246,.25)_70%,transparent)] blur-[60px]" />
-              </div>
-
-              <div className="relative z-10">
-                <h2 className="text-3xl sm:text-5xl font-semibold tracking-[-0.03em] text-balance mb-4">
-                  Your next deploy could be your first on Aurora.
-                </h2>
-                <p className="text-zinc-400 text-lg mb-10 max-w-lg mx-auto">
-                  Import a repo, keep your build command, and watch it go live in 18 regions. Free for 14 days, no card.
-                </p>
-
-                {submitted ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, ease: EASE }}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-medium"
-                  >
-                    <Check className="w-4 h-4" />
-                    You&apos;re on the list — we&apos;ll be in touch!
-                  </motion.div>
-                ) : (
-                  <form
-                    onSubmit={handleEmailSubmit}
-                    className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto"
-                  >
-                    <div className="flex-1 relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                      <input
-                        type="email"
-                        required
-                        value={email}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                        placeholder="you@company.com"
-                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/[0.06] border border-white/[0.12] text-white placeholder-zinc-500 text-sm focus:outline-none focus:border-emerald-300 focus:ring-1 focus:ring-emerald-300 transition-colors"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="inline-flex items-center justify-center gap-2 bg-white text-zinc-950 font-semibold px-6 py-3 rounded-xl hover:bg-zinc-100 transition-colors text-sm flex-shrink-0"
-                    >
-                      Start free
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </form>
-                )}
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/[0.06] py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-12">
-            {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <AuroraMark className="w-7 h-7" />
-                <span className="text-lg font-bold tracking-tight">Aurora</span>
-              </div>
-              <p className="text-zinc-500 text-sm leading-relaxed max-w-xs">
-                The edge deployment platform for serious B2B teams.
-              </p>
-            </div>
-
-            {/* Link columns */}
-            {Object.entries(FOOTER_LINKS).map(([group, links]) => (
-              <div key={group}>
-                <h4 className="text-sm font-medium text-zinc-200 mb-4">
-                  {group}
-                </h4>
-                <ul className="flex flex-col gap-2.5">
-                  {links.map((l) => (
-                    <li key={l}>
-                      <a
-                        href="#"
-                        className="text-sm text-zinc-400 hover:text-white transition-colors"
-                      >
-                        {l}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-zinc-600 text-xs">
-              © {new Date().getFullYear()} Aurora Technologies, Inc. All rights reserved.
-            </p>
-            <div className="flex items-center gap-1">
-              <Shield className="w-3.5 h-3.5 text-zinc-600" />
-              <span className="text-zinc-600 text-xs">SOC 2 Type II · GDPR · HIPAA ready</span>
             </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </Reveal>
+        <Reveal y={16} delay={0.08}>
+          <div className="flex h-full flex-col gap-6 rounded-[28px] bg-[#1d1d1f] p-7 text-white sm:p-8">
+            <span className="text-[13px] text-[#a1a1a6]">You picked</span>
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div key={plan} initial={{ opacity: 0, y: 12, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -10, filter: "blur(6px)" }} transition={spring} className="flex flex-col gap-2">
+                <span className="text-[52px] font-semibold leading-none tracking-[-0.05em]">{summary[plan].price}</span>
+                <span className="max-w-[360px] text-[15px] leading-[1.5] text-[#d2d2d7]">{summary[plan].note}</span>
+              </motion.div>
+            </AnimatePresence>
+            <ul className="m-0 mt-2 flex list-none flex-col gap-3 p-0 text-[15px] text-[#d2d2d7]">
+              {["All 18 regions, no surcharge", "Instant rollback on every plan", "DDoS protection and free TLS", "No per-seat fee for viewers"].map((f) => (
+                <li key={f} className="flex items-center gap-3">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6ee7b7" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <motion.button type="button" whileTap={{ scale: 0.96 }} className="mt-auto h-12 rounded-full bg-white text-[15px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#6ee7b7] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1d1d1f]">
+              {plan === "scale" ? "Talk to sales" : "Deploy your first app"}
+            </motion.button>
+          </div>
+        </Reveal>
+      </div>
+    </section>
   );
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function AuroraMark({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 28 28" className={className} aria-hidden>
-      <rect width="28" height="28" rx="8" fill="#0b0f0e" stroke="rgba(255,255,255,.12)" />
-      <path d="M5 18c4-7 7-7 9-3s5 4 9-4" fill="none" stroke="#6ee7b7" strokeWidth="2.2" strokeLinecap="round" />
-      <path d="M5 13c4-5 7-5 9-2s5 3 9-3" fill="none" stroke="#a78bfa" strokeWidth="1.6" strokeLinecap="round" opacity=".8" />
-    </svg>
-  );
-}
-
-/** Slow-moving aurora ribbons behind the hero. Static when the visitor prefers reduced motion. */
-function AuroraSky({ offsetY }: { offsetY: MotionValue<number> }) {
-  return (
-    <motion.div style={{ y: offsetY }} className="pointer-events-none absolute inset-0" aria-hidden>
-      <style>{`
-        @keyframes aurora-drift { 0%,100% { transform: translate3d(-4%,0,0) skewY(-8deg) } 50% { transform: translate3d(4%,-3%,0) skewY(-4deg) } }
-        @keyframes aurora-drift-b { 0%,100% { transform: translate3d(3%,2%,0) skewY(6deg) } 50% { transform: translate3d(-5%,-2%,0) skewY(2deg) } }
-        .aurora-band { animation: aurora-drift 18s ease-in-out infinite; }
-        .aurora-band-b { animation: aurora-drift-b 24s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { .aurora-band, .aurora-band-b { animation: none; } }
-      `}</style>
-      <div className="aurora-band absolute -top-40 left-[-10%] h-[420px] w-[120%] rounded-[50%] bg-[linear-gradient(90deg,transparent_5%,rgba(52,211,153,.32)_30%,rgba(45,212,191,.22)_50%,rgba(139,92,246,.28)_72%,transparent_95%)] blur-[70px]" />
-      <div className="aurora-band-b absolute top-10 left-[-20%] h-[260px] w-[110%] rounded-[50%] bg-[linear-gradient(90deg,transparent,rgba(167,139,250,.22)_35%,rgba(110,231,183,.18)_65%,transparent)] blur-[60px]" />
-      <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,.5)_1px,transparent_1px)] [background-size:56px_56px] opacity-[0.06] [mask-image:linear-gradient(to_bottom,black,transparent_70%)]" />
-      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-zinc-950 to-transparent" />
-    </motion.div>
-  );
-}
-
-function CopyCommand({ command }: { command: string }) {
-  const [copied, setCopied] = React.useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        navigator.clipboard?.writeText(command).catch(() => {});
-        setCopied(true);
-        window.setTimeout(() => setCopied(false), 1600);
-      }}
-      className="group inline-flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 font-mono text-sm text-zinc-300 hover:border-white/20 transition-colors"
-    >
-      <span className="text-emerald-300">$</span>
-      {command}
-      <span className="w-4 text-zinc-500 group-hover:text-zinc-200 transition-colors">
-        {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-      </span>
-    </button>
-  );
-}
-
-type RegionState = "queued" | "building" | "live";
-
-const DEPLOY_REGIONS = [
-  { id: "iad1", city: "Washington, D.C.", ms: 4.1 },
-  { id: "sfo1", city: "San Francisco", ms: 6.8 },
-  { id: "gru1", city: "São Paulo", ms: 11.2 },
-  { id: "lhr1", city: "London", ms: 5.3 },
-  { id: "fra1", city: "Frankfurt", ms: 5.9 },
-  { id: "bom1", city: "Mumbai", ms: 9.4 },
-  { id: "hnd1", city: "Tokyo", ms: 7.7 },
-  { id: "syd1", city: "Sydney", ms: 12.6 },
+const QUOTES = [
+  { q: "Our deploys went from a nervous twenty minutes to under a minute. The canary caught a bad release in Singapore before our on-call did.", n: "Lena Fischer", c: "Platform lead, Fernway" },
+  { q: "We moved forty services in a weekend. The config file is shorter than our old README.", n: "Kwame Asante", c: "CTO, Saltbox" },
+  { q: "Rollback is a pointer swap. I held the button, it was back in under a second, and I went back to dinner.", n: "Mia Takahashi", c: "Staff engineer, Kiln" },
+  { q: "Previews on every pull request changed how design reviews work here. Nobody asks for screenshots any more.", n: "Diego Ruiz", c: "Engineering manager, Quillmark" },
 ];
 
-/** A deploy rolling out region by region; loops every few seconds. */
-function DeployPanel() {
-  const reduce = useReducedMotion();
-  const total = DEPLOY_REGIONS.length;
-  // tick 0..total*2: each region spends one tick building, then goes live
-  const [tick, setTick] = React.useState(reduce ? total * 2 : 0);
-
-  React.useEffect(() => {
-    if (reduce) return;
-    const id = window.setInterval(() => {
-      setTick((t) => (t >= total * 2 + 6 ? 0 : t + 1));
-    }, 520);
-    return () => window.clearInterval(id);
-  }, [reduce, total]);
-
-  const stateOf = (i: number): RegionState => (tick > i + 1 ? "live" : tick > i ? "building" : "queued");
-  const live = DEPLOY_REGIONS.filter((_, i) => stateOf(i) === "live").length;
-  const done = live === total;
-  const elapsed = Math.min(38.2, (tick * 38.2) / (total + 1)).toFixed(1);
-
+function Quotes() {
   return (
-    <div className="relative">
-      <div className="absolute -inset-px rounded-[20px] bg-gradient-to-b from-emerald-300/30 via-white/5 to-violet-400/20" aria-hidden />
-      <div className="relative rounded-[19px] bg-zinc-950/90 backdrop-blur-xl shadow-2xl shadow-black/60 overflow-hidden">
-        <div className="flex items-center justify-between gap-3 border-b border-white/[0.07] px-5 py-3.5">
-          <div className="flex min-w-0 items-center gap-2.5 font-mono text-xs text-zinc-400">
-            <GitBranch className="w-3.5 h-3.5 shrink-0 text-zinc-500" />
-            <span className="truncate">acme/console · main · 8f3c2a1</span>
+    <section className="bg-[#f5f5f7] py-20" aria-label="What teams say">
+      <Marquee speed={26}>
+        {QUOTES.map((q) => (
+          <figure key={q.n} className={`${card} m-0 mx-2.5 flex w-[340px] flex-none flex-col gap-5 p-7 sm:w-[380px]`}>
+            <blockquote className="m-0 text-[18px] leading-[1.45] tracking-[-0.01em] text-[#1d1d1f]">“{q.q}”</blockquote>
+            <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span> · {q.c}</figcaption>
+          </figure>
+        ))}
+      </Marquee>
+    </section>
+  );
+}
+
+export default function SaasLaunchAuroraPage() {
+  return (
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
+        <Nav brand={<Logo />} accent={AT} cta="Deploy free" onCta={() => scrollToId("pricing")} links={[{ label: "Pipeline", id: "pipeline" }, { label: "Rollouts", id: "rollouts" }, { label: "Developers", id: "developers" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <main>
+          <Hero />
+          <Logos />
+          <Stats />
+          <Pipeline />
+          <Rollouts />
+          <History />
+          <Developers />
+          <Pricing />
+          <Quotes />
+          <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-20 sm:py-24 lg:grid-cols-[1fr_1.4fr]">
+            <SectionHead eyebrow="FAQ" title="Before you push." accent={AT} />
+            <Reveal y={16}>
+              <Faq
+                accent={AT}
+                items={[
+                  { q: "Is 38 seconds real?", a: "It is the median from git push to the new version answering in all 18 regions, measured across Pro workspaces over the last 30 days. Big builds take longer; the rollout itself is usually under 20 seconds." },
+                  { q: "How does auto-rollback decide?", a: "During the watch window Aurora compares the new version's error rate and p95 latency against the previous one. If either passes the budget you set, traffic goes back to the old version and you get an alert with the failing requests." },
+                  { q: "Can I move from another host?", a: "Yes. Aurora reads common framework configs and environment files, and the CLI imports variables in one step. Most teams are running in an afternoon." },
+                  { q: "Where does my data live?", a: "Static assets and functions run in all regions. Logs and build artifacts stay in the home region you pick, in the EU or the US." },
+                  { q: "Is there a free plan?", a: "Hobby is free for personal projects with every region, previews and rollback. You only pay when a team or real bandwidth gets involved." },
+                ]}
+              />
+            </Reveal>
+          </section>
+          <div className="mx-auto max-w-[1180px] px-5 pb-20">
+            <CtaBand title="Your next push could be live everywhere." sub="Connect a repo and ship to 18 regions in about a minute. Free for personal projects." cta="Deploy free" secondary="Read the docs" accent={AT} glow="rgba(110,231,183,.25)" />
           </div>
-          <span
-            className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${
-              done ? "bg-emerald-400/10 text-emerald-300" : "bg-amber-400/10 text-amber-300"
-            }`}
-          >
-            <span className={`h-1.5 w-1.5 rounded-full ${done ? "bg-emerald-300" : "bg-amber-300 animate-pulse"}`} />
-            {done ? "Live" : "Rolling out"}
-          </span>
-        </div>
-
-        <ul className="divide-y divide-white/[0.05]">
-          {DEPLOY_REGIONS.map((r, i) => {
-            const st = stateOf(i);
-            return (
-              <li key={r.id} className="grid grid-cols-[3.25rem_1fr_auto] items-center gap-3 px-5 py-2.5 text-sm">
-                <span className="font-mono text-xs text-zinc-500">{r.id}</span>
-                <span className="truncate text-zinc-300">{r.city}</span>
-                <span className="flex items-center gap-2 font-mono text-xs tabular-nums">
-                  {st === "live" && (
-                    <>
-                      <span className="text-zinc-500">{r.ms.toFixed(1)}s</span>
-                      <span className="text-emerald-300">live</span>
-                    </>
-                  )}
-                  {st === "building" && <span className="text-amber-300">building…</span>}
-                  {st === "queued" && <span className="text-zinc-600">queued</span>}
-                </span>
-              </li>
-            );
-          })}
-        </ul>
-
-        <div className="border-t border-white/[0.07] px-5 py-4">
-          <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
-            <motion.div
-              className="h-full rounded-full bg-gradient-to-r from-emerald-300 to-violet-400"
-              animate={{ width: `${(live / total) * 100}%` }}
-              transition={{ duration: 0.4, ease: EASE }}
-            />
-          </div>
-          <div className="mt-3 flex items-center justify-between text-xs text-zinc-500">
-            <span className="tabular-nums">
-              {live}/{total} regions live
-            </span>
-            <span className="font-mono tabular-nums">{done ? "38.2s" : `${elapsed}s`} total</span>
-          </div>
-        </div>
+        </main>
+        <Footer brand={<Logo />} note="The edge deploy platform for teams that ship daily. Build once, roll out everywhere, roll back in a second." columns={[{ title: "Platform", links: ["Pipeline", "Rollouts", "Previews", "Pricing"] }, { title: "Developers", links: ["Docs", "CLI", "Status", "Changelog"] }, { title: "Company", links: ["About", "Careers", "Security", "Contact"] }]} />
       </div>
-    </div>
-  );
-}
-
-const DEPLOY_WEEKS = [41, 39, 36, 31, 24, 19, 14, 11, 8.5, 6.2, 4.6, 3.8];
-
-function DeployTimeCard() {
-  const max = 44;
-  const w = 600;
-  const h = 220;
-  const pts = DEPLOY_WEEKS.map((v, i) => [(i / (DEPLOY_WEEKS.length - 1)) * w, h - (v / max) * h] as const);
-  const line = pts.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px 0px" });
-
-  return (
-    <div ref={ref} className="h-full rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6 sm:p-8 flex flex-col">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-sm text-zinc-400">Median deploy time after moving to Aurora</p>
-          <p className="mt-2 text-5xl sm:text-6xl font-semibold tracking-[-0.04em] tabular-nums">
-            3.8<span className="text-2xl text-zinc-500"> min</span>
-          </p>
-        </div>
-        <p className="text-sm text-zinc-500">
-          from <span className="text-zinc-300 tabular-nums">41 min</span> in week one
-        </p>
-      </div>
-      <svg viewBox={`0 0 ${w} ${h + 24}`} className="mt-8 w-full flex-1 min-h-[160px]" preserveAspectRatio="none" aria-hidden>
-        <defs>
-          <linearGradient id="aurora-area" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#6ee7b7" stopOpacity=".28" />
-            <stop offset="1" stopColor="#6ee7b7" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        {[0.25, 0.5, 0.75].map((f) => (
-          <line key={f} x1="0" x2={w} y1={h * f} y2={h * f} stroke="rgba(255,255,255,.06)" strokeDasharray="3 5" />
-        ))}
-        <motion.path
-          d={`${line} L${w},${h} L0,${h} Z`}
-          fill="url(#aurora-area)"
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ duration: 1, delay: 0.6 }}
-        />
-        <motion.path
-          d={line}
-          fill="none"
-          stroke="#6ee7b7"
-          strokeWidth="2.5"
-          vectorEffect="non-scaling-stroke"
-          initial={{ pathLength: 0 }}
-          animate={inView ? { pathLength: 1 } : {}}
-          transition={{ duration: 1.4, ease: EASE }}
-        />
-        {["W1", "W4", "W8", "W12"].map((l, i) => (
-          <text key={l} x={(i / 3) * (w - 24)} y={h + 20} fill="#71717a" fontSize="12" fontFamily="ui-monospace, monospace">
-            {l}
-          </text>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-/** 90 days of uptime bars, one degraded day. */
-function UptimeCard() {
-  return (
-    <div className="h-full rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
-      <div className="flex items-baseline justify-between">
-        <p className="text-3xl font-semibold tracking-tight tabular-nums">99.99%</p>
-        <p className="text-xs text-zinc-500">last 90 days</p>
-      </div>
-      <p className="mt-1 text-sm text-zinc-400">API and edge uptime</p>
-      <div className="mt-6 flex h-9 items-end gap-[2px]" aria-hidden>
-        {Array.from({ length: 60 }, (_, i) => (
-          <span
-            key={i}
-            className={`flex-1 rounded-[1px] ${i === 41 ? "h-2/3 bg-amber-300" : "h-full bg-emerald-300/70"}`}
-          />
-        ))}
-      </div>
-      <p className="mt-3 text-xs text-zinc-500">One 4-minute partial outage in fra1, auto-rerouted.</p>
-    </div>
-  );
-}
-
-function RegionsCard() {
-  return (
-    <div className="h-full rounded-2xl border border-white/[0.08] bg-white/[0.025] p-6">
-      <div className="flex items-baseline justify-between">
-        <p className="text-3xl font-semibold tracking-tight tabular-nums">
-          &lt; 2s<span className="text-base text-zinc-500"> p50</span>
-        </p>
-        <Globe className="w-4 h-4 text-zinc-500" />
-      </div>
-      <p className="mt-1 text-sm text-zinc-400">Cold start, measured from every region</p>
-      <div className="mt-5 grid grid-cols-4 gap-x-3 gap-y-2 font-mono text-[11px]">
-        {DEPLOY_REGIONS.map((r) => (
-          <span key={r.id} className="flex items-center gap-1.5 text-zinc-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-            {r.id}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function FaqItem({
-  faq,
-  index,
-  open,
-  onToggle,
-}: {
-  faq: FaqItem;
-  index: number;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px 0px" });
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, ease: EASE, delay: index * 0.07 }}
-      className={`rounded-xl border transition-colors duration-200 overflow-hidden ${
-        open
-          ? "border-emerald-300/30 bg-emerald-400/[0.04]"
-          : "border-white/[0.08] bg-white/[0.03] hover:border-white/[0.14]"
-      }`}
-    >
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between gap-4 px-6 py-4 text-left"
-      >
-        <span className="text-sm font-semibold text-white">{faq.q}</span>
-        <motion.div
-          animate={{ rotate: open ? 180 : 0 }}
-          transition={{ duration: 0.28, ease: EASE }}
-          className="flex-shrink-0"
-        >
-          <ChevronDown className="w-4 h-4 text-zinc-500" />
-        </motion.div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="answer"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.32, ease: EASE }}
-          >
-            <div className="px-6 pb-5">
-              <p className="text-sm text-zinc-400 leading-relaxed">{faq.a}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    </MotionConfig>
   );
 }

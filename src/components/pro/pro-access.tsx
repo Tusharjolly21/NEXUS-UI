@@ -56,14 +56,24 @@ type CopyState = "idle" | "loading" | "copied" | "error";
  * the server checks again and answers 403 if the session has no access, which also opens the
  * dialog. The clipboard write starts inside the click (a ClipboardItem holding the pending
  * fetch), so Safari keeps the user activation it needs.
+ *
+ * Options, for things other than components: `endpoint` is the gated API to fetch (default
+ * `/api/prompt/<slug>`), and `hasAccess` replaces the site-wide Pro check (a template bought on its
+ * own unlocks its prompt without a plan). Without access, nothing is fetched.
  */
 export function useCopyBuildPrompt(
   slug: string,
   name: string,
-  /** Where the prompt comes from; block sections use /api/prompt/blocks/<id>. */
-  endpoint = `/api/prompt/${encodeURIComponent(slug)}`,
+  /**
+   * Where the prompt comes from (block sections use /api/prompt/blocks/<id>), or options:
+   * `endpoint` plus `hasAccess`, which replaces the site-wide Pro check (templates use it).
+   */
+  options: string | { endpoint?: string; hasAccess?: boolean } = {},
 ): [CopyState, () => void] {
-  const { isPro, requestUpgrade } = useProAccess();
+  const opts = typeof options === "string" ? { endpoint: options } : options;
+  const { isPro: sitePro, requestUpgrade } = useProAccess();
+  const isPro = opts.hasAccess ?? sitePro;
+  const endpoint = opts.endpoint ?? `/api/prompt/${encodeURIComponent(slug)}`;
   const [state, setState] = React.useState<CopyState>("idle");
 
   React.useEffect(() => {

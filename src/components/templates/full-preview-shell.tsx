@@ -21,209 +21,48 @@ import {
   Tablet as TabletIcon,
 } from "lucide-react";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
+import { getTemplateSource } from "@/lib/template-sources";
 import { cn } from "@/lib/utils";
 
+function pascalCase(slug: string) {
+  return slug.replace(/(^|-)([a-z0-9])/g, (_, __, c: string) => c.toUpperCase());
+}
+
+/**
+ * The route file a buyer drops into their app to render this template. Generated from the
+ * shared slug → file map and the catalog, so it always matches the real page and the download.
+ * It contains no template source, so it's safe to show to everyone.
+ */
 function getTemplateCode(tmpl: MarketplaceTemplate): string {
-  if (tmpl.slug === "nexus-ai-launch") {
-    return `// ${tmpl.title} — Production Template
+  const source = getTemplateSource(tmpl.slug);
+  const header = `// ${tmpl.title}
 // Stack: ${tmpl.techStack.join(", ")}
 // Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-import { NexusAiLaunchTemplatePage } from "@/components/templates/nexus-ai-launch-template-page";
-
-export const metadata: Metadata = {
-  title: "Asteria AI — Launch with a page that converts",
-  description:
-    "A modern AI launch landing page with animated hero, bento proof, workflow, testimonials, FAQ, and cinematic media.",
-  openGraph: {
-    title: "Asteria AI",
-    description: "Turn a messy idea into a launch page that feels inevitable.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
-};
-
-export default function HomePage() {
-  return <NexusAiLaunchTemplatePage />;
-}`;
+`;
+  if (!source) {
+    return `${header}
+// The full source comes with Pro or All-Access.
+`;
   }
-
-  if (tmpl.slug === "talent-hub-landing") {
-    return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
+  const file = source.file.replace(/\.tsx$/, "");
+  const name = source.exportName === "default" ? `${pascalCase(tmpl.slug)}Page` : source.exportName;
+  const importLine =
+    source.exportName === "default"
+      ? `import ${name} from "@/components/templates/${file}";`
+      : `import { ${name} } from "@/components/templates/${file}";`;
+  return `${header}
 import type { Metadata } from "next";
-import { TalentHubPage } from "@/components/templates/talent-hub-page";
+${importLine}
 
 export const metadata: Metadata = {
-  title: "TalentHub — Scale Faster with Unicorn Talent",
-  description:
-    "World-class Admin, Ops, Marketing, Support & Finance talent " +
-    "from the Philippines and LATAM at 60–70% less.",
-  openGraph: {
-    title: "TalentHub",
-    description: "Unicorn talent at 70% less.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
+  title: ${JSON.stringify(tmpl.title)},
+  description: ${JSON.stringify(tmpl.description)},
 };
 
 export default function HomePage() {
-  return <TalentHubPage />;
-}`;
-  }
-
-  if (tmpl.slug === "startup-landing-page") {
-    return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-import { StartupLandingPage } from "@/components/templates/startup-landing-page";
-
-export const metadata: Metadata = {
-  title: "Launchly — Launch your startup with a landing page that feels alive",
-  description:
-    "Ship beautiful, high-converting landing pages in hours. " +
-    "Built for founders who care about design, performance, and growth from day one.",
-  openGraph: {
-    title: "Launchly",
-    description: "The fastest way to launch a startup landing page that converts.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
-};
-
-export default function HomePage() {
-  return <StartupLandingPage />;
-}`;
-  }
-
-  if (tmpl.slug === "noir-studio") {
-    return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-import MoonStudioPage from "@/components/templates/moon-studio-page";
-
-export const metadata: Metadata = {
-  title: "NOVA STUDIO — Building Lasting Digital Connections",
-  description: "NOVA STUDIO is a creative agency specializing in building, launching, and revitalizing brand identities with impactful branding solutions.",
-  openGraph: {
-    title: "NOVA STUDIO",
-    description: "Building lasting digital connections.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
-};
-
-export default function HomePage() {
-  return <MoonStudioPage />;
-}`;
-  }
-
-  if (tmpl.slug === "macbook-pro-showcase") {
-    return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-import GsapMacbookLandingPage from "@/components/templates/gsap-macbook-landing-page";
-
-export const metadata: Metadata = {
-  title: "Halcyon — Cinematic Product Launch",
-  description: "An immersive product landing page featuring interactive 3D model configuration (Graphite & Silver, 14\\" & 16\\"), GSAP scroll-driven animations, and performance metric collages.",
-  openGraph: {
-    title: "Halcyon — Cinematic Product Launch",
-    description: "Immersive GSAP product showcase.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
-};
-
-export default function HomePage() {
-  return <GsapMacbookLandingPage />;
-}`;
-  }
-
-  if (tmpl.slug === "nova-landing-page") {
-    return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-import { NovaLandingPage } from "@/components/templates/nova-landing-page";
-
-export const metadata: Metadata = {
-  title: "Nova — The AI that thinks with you",
-  description:
-    "Next-generation AI model built for the way you actually work. " +
-    "Reasoning, creating, coding, and deciding alongside you in real time.",
-  openGraph: {
-    title: "Nova AI",
-    description: "Intelligence, reimagined.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
-};
-
-export default function HomePage() {
-  return <NovaLandingPage />;
-}`;
-  }
-
-  if (tmpl.slug === "simplistic-saas-template") {
-    return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-import { SimplisticSaaSPage } from "@/components/templates/simplistic-saas-page";
-
-export const metadata: Metadata = {
-  title: "Your Product — AI that works while you sleep",
-  description:
-    "Deploy intelligent agents in minutes. Automate workflows, " +
-    "analyse data, and ship faster with our AI-native platform.",
-  openGraph: {
-    title: "Your Product",
-    description: "The AI platform for ambitious teams.",
-    images: [{ url: "/og.png", width: 1200, height: 630 }],
-  },
-};
-
-export default function HomePage() {
-  return <SimplisticSaaSPage />;
-}`;
-  }
-
-  return `// ${tmpl.title} — Production Template
-// Stack: ${tmpl.techStack.join(", ")}
-// Pages: ${tmpl.pages.join(", ")}
-
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "${tmpl.title}",
-  description: "${tmpl.description}",
-};
-
-export default function HomePage() {
-  return (
-    <main className="relative min-h-screen bg-background antialiased">
-      {/* ── Hero ─────────────────────────────────── */}
-      <section className="relative overflow-hidden pt-24 pb-20 lg:pt-32 lg:pb-28">
-        <div className="mx-auto max-w-7xl px-6">
-          <h1 className="text-5xl font-bold tracking-tight text-foreground">
-            ${tmpl.title}
-          </h1>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">
-            ${tmpl.description}
-          </p>
-        </div>
-      </section>
-
-      {/* Full source included after All-Access purchase */}
-    </main>
-  );
-}`;
+  return <${name} />;
+}
+`;
 }
 
 function LockedCodeRow({ w }: { w: string }) {

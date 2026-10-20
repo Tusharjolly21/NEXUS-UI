@@ -1,1016 +1,567 @@
 "use client";
+/**
+ * Halcyon: cinematic launch page template for a pro laptop.
+ * The hero is a CSS 3D laptop (no WebGL, no model files) that opens as you
+ * scroll and turns when you drag it. Built in the Motion Kit style from
+ * Glass Lens, Scrub Inputs, Squeeze Progress, Upload Chips (as Offload Chips),
+ * Stretch Nav, Matrix Loaders and the Price Odometer's rolling number.
+ *
+ * The name is kept for routing; the page no longer uses GSAP or three.js.
+ */
+import { useMemo, useRef, useState, type ReactNode } from "react";
+import { MotionConfig, animate, motion, useMotionValue, useReducedMotion, useScroll, useSpring, useTransform, type MotionValue, type PanInfo } from "framer-motion";
+import GlassLens from "@/components/templates/kit/components/GlassLens";
+import { ScrubField } from "@/components/templates/kit/components/ScrubInput";
+import SqueezeProgress from "@/components/templates/kit/components/SqueezeProgress";
+import StretchNav from "@/components/templates/kit/components/StretchNav";
+import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
+import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
+import OffloadChips from "@/components/templates/halcyon/OffloadChips";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Spotlight, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import dynamic from "next/dynamic";
-import NavBar from "./gsap-macbook-landing/components/NavBar";
-import Hero from "./gsap-macbook-landing/components/Hero";
-import Showcase from "./gsap-macbook-landing/components/Showcase";
-import Performance from "./gsap-macbook-landing/components/Performance";
-import Highlights from "./gsap-macbook-landing/components/Highlights";
-import Footer from "./gsap-macbook-landing/components/Footer";
+const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const A = "#475569"; // slate: 7.5:1 on white
+const SKY = "#7dd3fc"; // screen glow only
 
-const ProductViewer = dynamic(() => import("./gsap-macbook-landing/components/ProductViewer"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', height: '80vh', width: '100%' }}>
-      <p style={{ color: '#888' }}>Loading interactive 3D model...</p>
+const FINISHES = [
+  { id: "slate", n: "Slate", top: "#5b6472", side: "#3f4651", deck: "linear-gradient(180deg,#646d7b,#535b68)" },
+  { id: "mist", n: "Mist", top: "#d5d8dd", side: "#aeb3ba", deck: "linear-gradient(180deg,#dfe2e6,#cdd1d6)" },
+];
+
+function Logo() {
+  return (
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="3" y="3" width="26" height="26" rx="8" fill="#1d1d1f" />
+        <motion.path d="M9 19c3-5 11-5 14 0" fill="none" stroke={SKY} strokeWidth="2.6" strokeLinecap="round" animate={{ pathLength: [0.2, 1, 0.2] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />
+        <circle cx="16" cy="12" r="2.4" fill="#fff" />
+      </svg>
+      Halcyon
+    </span>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Art: a film still drawn with gradients                              */
+/* ------------------------------------------------------------------ */
+
+function Still({ filter }: { filter?: MotionValue<string> | string }) {
+  return (
+    <motion.div className="absolute inset-0 overflow-hidden" style={{ filter }} aria-hidden="true">
+      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,#0b2545 0%,#13406b 30%,#3f7aa6 52%,#f2b38a 66%,#e98a5e 72%)" }} />
+      <div className="absolute left-[64%] top-[52%] h-[18%] w-[12%] rounded-full" style={{ background: "radial-gradient(circle,#fff5e0 0 35%,rgba(255,230,190,0) 70%)" }} />
+      <div className="absolute inset-x-0 bottom-0 h-[38%]" style={{ background: "#1d2d44", clipPath: "polygon(0 30%,14% 18%,30% 34%,48% 12%,66% 30%,82% 16%,100% 28%,100% 100%,0 100%)" }} />
+      <div className="absolute inset-x-0 bottom-0 h-[22%]" style={{ background: "linear-gradient(180deg,#5f7d95,#2a3d52)" }} />
+      <div className="absolute bottom-[12%] left-[22%] h-[16%] w-[2.2%] rounded-t-full bg-[#0d1726]" />
+      <div className="absolute bottom-[27%] left-[21.6%] h-[3.5%] w-[3%] rounded-full bg-[#0d1726]" />
+    </motion.div>
+  );
+}
+
+function ScreenUI() {
+  return (
+    <div className="absolute inset-0 flex flex-col bg-[#101114] text-white">
+      <div className="flex h-[22px] flex-none items-center gap-1.5 px-3">
+        {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-[8px] w-[8px] rounded-full" style={{ background: c }} />)}
+        <span className="ml-3 text-[9px] font-medium text-white/60">Reel 3 · Shot 14 · Grade</span>
+      </div>
+      <div className="flex min-h-0 flex-1 gap-2 px-2">
+        <div className="relative flex-1 overflow-hidden rounded-[4px]"><Still /></div>
+        <div className="flex w-[22%] flex-col gap-2 rounded-[4px] bg-white/[.06] p-2">
+          {["Lift", "Gamma", "Gain"].map((l, i) => (
+            <div key={l} className="flex items-center gap-2">
+              <span className="h-6 w-6 rounded-full" style={{ background: `conic-gradient(from ${i * 40}deg,#f87171,#facc15,#4ade80,#38bdf8,#a78bfa,#f87171)` }} />
+              <span className="text-[8px] text-white/70">{l}</span>
+            </div>
+          ))}
+          <div className="mt-auto h-[30%] rounded-[3px]" style={{ background: "linear-gradient(0deg,rgba(125,211,252,.5),rgba(125,211,252,0))", clipPath: "polygon(0 100%,0 70%,12% 50%,24% 62%,40% 20%,55% 45%,70% 30%,85% 55%,100% 40%,100% 100%)" }} />
+        </div>
+      </div>
+      <div className="flex h-[24%] flex-none flex-col gap-1 p-2">
+        {[0, 1, 2].map((r) => (
+          <div key={r} className="flex h-[30%] gap-[2px]">
+            {[18, 26, 12, 30, 14].map((w, i) => <span key={i} className="rounded-[2px]" style={{ width: `${w}%`, background: r === 0 ? (i === 2 ? SKY : "#3b4b63") : r === 1 ? "#2b3647" : "#36463a" }} />)}
+          </div>
+        ))}
+      </div>
     </div>
-  ),
-});
+  );
+}
 
-const Features = dynamic(() => import("./gsap-macbook-landing/components/Features"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', height: '100vh', width: '100%' }}>
-      <p style={{ color: '#888' }}>Loading interactive 3D model...</p>
+/* ------------------------------------------------------------------ */
+/* Hero: scroll to open the lid, drag to turn the machine              */
+/* ------------------------------------------------------------------ */
+
+const W = 600; // base width
+const D = 404; // base depth
+const H = 390; // lid height
+const T = 14; // base thickness
+
+function Machine({ lid, screenOn, finish }: { lid: MotionValue<number>; screenOn: MotionValue<number>; finish: (typeof FINISHES)[number] }) {
+  const glow = useTransform(screenOn, [0, 1], [0, 0.55]);
+  const off = useTransform(screenOn, (v) => 1 - v);
+  const face = { position: "absolute" as const, backfaceVisibility: "hidden" as const, WebkitBackfaceVisibility: "hidden" as const };
+  return (
+    <>
+      {/* floor shadow */}
+      <div style={{ ...face, left: -W * 0.62, top: -D * 0.62, width: W * 1.24, height: D * 1.24, transform: `translateY(${T + 2}px) rotateX(90deg)`, background: "radial-gradient(50% 50% at 50% 50%, rgba(15,23,42,.38), rgba(15,23,42,0) 70%)" }} />
+      {/* base: top deck */}
+      <div style={{ ...face, left: -W / 2, top: -D / 2, width: W, height: D, transform: "rotateX(90deg)", background: finish.deck, borderRadius: 18, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.18)" }}>
+        <div className="absolute left-[6%] right-[6%] top-[7%] h-[50%] rounded-[10px] bg-[#16181c] p-[10px]">
+          <div className="grid h-full grid-cols-[repeat(14,1fr)] grid-rows-6 gap-[4px]">
+            {Array.from({ length: 84 }, (_, i) => <span key={i} className="rounded-[3px] bg-[#2a2d33] shadow-[inset_0_-1px_0_rgba(0,0,0,.5)]" />)}
+          </div>
+        </div>
+        <div className="absolute left-1/2 top-[62%] h-[31%] w-[42%] -translate-x-1/2 rounded-[10px]" style={{ background: "rgba(255,255,255,.08)", boxShadow: "inset 0 0 0 1px rgba(0,0,0,.12)" }} />
+      </div>
+      {/* base: edges */}
+      <div style={{ ...face, left: -W / 2, top: 0, width: W, height: T, transform: `translateZ(${D / 2}px)`, background: finish.side, borderRadius: "0 0 10px 10px" }}>
+        <span className="absolute left-1/2 top-0 h-[5px] w-[90px] -translate-x-1/2 rounded-b-[5px] bg-black/20" />
+      </div>
+      <div style={{ ...face, left: -D / 2, top: 0, width: D, height: T, transform: `translateX(${W / 2}px) rotateY(90deg)`, background: finish.side }} />
+      <div style={{ ...face, left: -D / 2, top: 0, width: D, height: T, transform: `translateX(${-W / 2}px) rotateY(-90deg)`, background: finish.side }} />
+      <div style={{ ...face, left: -W / 2, top: 0, width: W, height: T, transform: `translateZ(${-D / 2}px) rotateY(180deg)`, background: finish.side }} />
+      {/* lid, hinged on the back edge */}
+      <motion.div style={{ position: "absolute", left: -W / 2, top: -H - 3, width: W, height: H, transformOrigin: "50% 100%", transformStyle: "preserve-3d", z: -D / 2 + 6, rotateX: lid }}>
+        <div style={{ ...face, inset: 0, borderRadius: 18, background: "#0b0c0e", padding: 12, boxShadow: "0 0 0 1.5px #2a2c31" }}>
+          <div className="relative h-full w-full overflow-hidden rounded-[8px]">
+            <ScreenUI />
+            <motion.div className="absolute inset-0 bg-black" style={{ opacity: off }} />
+            <div className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(115deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,0) 38%)" }} />
+          </div>
+          <span className="absolute left-1/2 top-[4px] h-[4px] w-[4px] -translate-x-1/2 rounded-full bg-[#2a2c31]" />
+        </div>
+        <div style={{ ...face, inset: 0, borderRadius: 18, transform: "rotateY(180deg)", background: `linear-gradient(160deg, ${finish.top}, ${finish.side})`, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.16)" }}>
+          <svg className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-40" width="54" height="54" viewBox="0 0 32 32" aria-hidden="true"><path d="M9 19c3-5 11-5 14 0" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" /><circle cx="16" cy="12" r="2.2" fill="#fff" /></svg>
+        </div>
+        <motion.div className="pointer-events-none absolute -inset-10 rounded-[40px] blur-3xl" style={{ background: SKY, opacity: glow, transform: "translateZ(-2px)" }} aria-hidden="true" />
+      </motion.div>
+    </>
+  );
+}
+
+function StageText({ p, range, children, className = "" }: { p: MotionValue<number>; range: [number, number, number, number]; children: ReactNode; className?: string }) {
+  const opacity = useTransform(p, range, [0, 1, 1, 0]);
+  const y = useTransform(p, [range[0], range[1], range[2], range[3]], [20, 0, 0, -20]);
+  const events = useTransform(opacity, (o) => (o > 0.5 ? "auto" : "none"));
+  return (
+    <motion.div className={`absolute inset-x-0 top-[8vh] flex flex-col items-center gap-4 px-5 text-center ${className}`} style={{ opacity, y, pointerEvents: events }}>
+      {children}
+    </motion.div>
+  );
+}
+
+function Hero() {
+  const wrap = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const { scrollYProgress } = useScroll({ target: wrap, offset: ["start start", "end end"] });
+  const p = useSpring(scrollYProgress, { stiffness: 140, damping: 28, restDelta: 0.0005 });
+  const lidScroll = useTransform(p, [0.04, 0.46], [-88, 14]);
+  const lid = useTransform(lidScroll, (v) => (reduce ? 14 : v));
+  const screenOn = useTransform(p, (v) => (reduce ? 1 : Math.max(0, Math.min(1, (v - 0.3) / 0.18))));
+  const tilt = useTransform(p, [0, 0.5, 1], [-32, -14, -11]);
+  const scale = useTransform(p, [0, 0.5, 1], [0.84, 0.94, 0.98]);
+  const turnScroll = useTransform(p, [0, 0.5, 1], [-26, -6, 8]);
+  const spin = useMotionValue(0);
+  const spinS = useSpring(spin, { stiffness: 80, damping: 14 });
+  const rotY = useTransform([turnScroll, spinS], ([a, b]: number[]) => a + b);
+  const lift = useTransform(p, [0, 0.4], [-110, 0]);
+  const bar = useTransform(p, [0, 1], [0, 1]);
+  const [hint, setHint] = useState(true);
+
+  const onPan = (_: unknown, info: PanInfo) => {
+    setHint(false);
+    spin.set(Math.max(-70, Math.min(70, spin.get() + info.delta.x * 0.35)));
+  };
+  const onPanEnd = (_: unknown, info: PanInfo) => {
+    animate(spin, 0, { type: "spring", stiffness: 50, damping: 9, velocity: info.velocity.x * 0.08 });
+  };
+
+  return (
+    <section ref={wrap} className="relative h-[230vh] sm:h-[260vh]" aria-label="Halcyon 16">
+      <div className="sticky top-0 h-[100svh] overflow-hidden" style={{ background: "radial-gradient(70% 55% at 50% 70%, #ffffff 0%, #eef0f3 55%, #e3e6ea 100%)" }}>
+        <StageText p={p} range={[-1, 0, 0.14, 0.24]}>
+          <span className="text-[15px] font-semibold" style={{ color: A }}>New · Halcyon 14 and 16</span>
+          <h1 className="m-0 text-[clamp(52px,10vw,132px)] font-semibold leading-[0.92] tracking-[-0.06em] text-[#1d1d1f]">Halcyon</h1>
+          <p className="m-0 max-w-[520px] text-[clamp(17px,2vw,21px)] leading-[1.45] text-[#424245]">A laptop for people who finish films on it. Scroll to open it, drag to turn it.</p>
+        </StageText>
+        <StageText p={p} range={[0.26, 0.36, 0.5, 0.6]}>
+          <span className="text-[15px] font-semibold" style={{ color: A }}>Studio display</span>
+          <h2 className="m-0 max-w-[820px] text-[clamp(32px,4.8vw,64px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">1,600 nits, the moment it opens.</h2>
+        </StageText>
+        <StageText p={p} range={[0.62, 0.72, 1.5, 2]}>
+          <span className="text-[15px] font-semibold" style={{ color: A }}>HX2 Max</span>
+          <h2 className="m-0 max-w-[860px] text-[clamp(32px,4.8vw,64px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">Full-speed 8K, unplugged.</h2>
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <Magnetic className="text-white focus-visible:ring-[#475569]" style={{ background: A }} onClick={() => scrollToId("buy")}>Order from $2,099</Magnetic>
+            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:ring-[#475569]" onClick={() => scrollToId("performance")}>See performance</Magnetic>
+          </div>
+        </StageText>
+
+        <motion.div
+          className="absolute inset-x-0 bottom-0 top-[40vh] flex cursor-grab items-center justify-center active:cursor-grabbing"
+          style={{ touchAction: "pan-y" }}
+          onPan={onPan}
+          onPanEnd={onPanEnd}
+          role="img"
+          aria-label="Halcyon 16 in Slate. It opens as you scroll; drag sideways to turn it."
+        >
+          <div className="origin-center scale-[0.5] sm:scale-[0.8] lg:scale-100" style={{ perspective: 1900 }}>
+            <div className="relative h-[520px] w-[760px]">
+              <motion.div className="absolute left-1/2 top-[72%] h-0 w-0" style={{ transformStyle: "preserve-3d", rotateX: tilt, rotateY: rotY, scale, y: lift }}>
+                <Machine lid={lid} screenOn={screenOn} finish={FINISHES[0]} />
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 flex flex-col items-center gap-2">
+          <motion.span className="rounded-full bg-white/85 px-3 py-1 text-[12px] font-medium text-[#424245] shadow-[0_0_0_1px_rgba(0,0,0,.05)] backdrop-blur" animate={{ opacity: hint ? 1 : 0 }}>Scroll to open · drag to turn</motion.span>
+          <div className="h-[3px] w-[120px] overflow-hidden rounded-full bg-black/10">
+            <motion.div className="h-full origin-left rounded-full" style={{ scaleX: bar, background: A }} />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
+function Stats() {
+  const items = [
+    { to: 3.1, f: (n: number) => `${n.toFixed(1)}×`, l: "faster 8K renders than Halcyon 15 (2023)" },
+    { to: 1600, f: (n: number) => `${Math.round(n).toLocaleString("en-US")}`, l: "nits of HDR peak brightness" },
+    { to: 18, f: (n: number) => `${Math.round(n)} hrs`, l: "of battery, or a full day in an edit suite" },
+    { to: 80, f: (n: number) => `${Math.round(n)} Gb/s`, l: "on each of the three USB-C ports" },
+  ];
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 py-20" aria-label="Key numbers">
+      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
+            <Counter to={it.to} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
+            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
+          </div>
+        ))}
+      </Stagger>
+    </section>
+  );
+}
+
+function Performance() {
+  const race = [
+    { l: "Halcyon 16 · HX2 Max", s: 252, c: "#1d1d1f" },
+    { l: "Halcyon 16 · HX2", s: 400, c: A },
+    { l: "Halcyon 15 · 2023", s: 785, c: "#c4cad3" },
+  ];
+  const jobs = [
+    { p: 1, t: "Transcribing interview", s: "41 min of audio · on device" },
+    { p: 4, t: "Tracking roto masks", s: "Frame 212 of 412" },
+    { p: 2, t: "Denoising dialogue", s: "Scene 14 · 6 tracks" },
+    { p: 5, t: "Building proxies", s: "38 clips · 1080p" },
+  ];
+  const mmss = (s: number) => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, "0")}`;
+  return (
+    <section id="performance" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Performance" title="Built for the long render, not the benchmark." sub="HX2 Max has 16 performance cores and a 40-core graphics engine. More to the point, it holds its speed at minute forty, plugged in or not." accent={A} />
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.25fr_1fr]">
+          <Reveal y={20} amount={0.15}>
+            <div className={`${card} flex h-full flex-col gap-6 p-6 sm:p-8`}>
+              <div>
+                <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Export a 10-minute 8K timeline</h3>
+                <p className="m-0 mt-1 text-[15px] text-[#6e6e73]">Minutes and seconds, shorter is better. On battery.</p>
+              </div>
+              <div className="flex flex-1 flex-col justify-center gap-5">
+                {race.map((r, i) => (
+                  <div key={r.l} className="flex flex-col gap-2">
+                    <div className="flex items-baseline justify-between text-[15px]">
+                      <span className="text-[#1d1d1f]">{r.l}</span>
+                      <Counter to={r.s} format={mmss} className="font-semibold text-[#1d1d1f]" />
+                    </div>
+                    <div className="h-3.5 overflow-hidden rounded-full bg-[#eef0f3]">
+                      <motion.div className="h-full origin-left rounded-full" style={{ width: `${(r.s / 785) * 100}%`, background: r.c }} initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true, amount: 0.6 }} transition={{ type: "spring", stiffness: 70, damping: 18, delay: i * 0.15 }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="m-0 text-[12px] text-[#6e6e73]">Tested by Halcyon in September 2026 with a pre-release build. Your timeline will vary.</p>
+            </div>
+          </Reveal>
+          <div className="flex flex-col gap-5">
+            <Reveal y={20} delay={0.06} amount={0.15}>
+              <div className={`${card} flex flex-col items-center gap-4 p-6`}>
+                <div className="w-full">
+                  <h3 className="m-0 text-[19px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Pause an export, take the call.</h3>
+                  <p className="m-0 mt-1 text-[14px] text-[#6e6e73]">It picks up from the same frame.</p>
+                </div>
+                <Fit><SqueezeProgress accent={A} autoplay /></Fit>
+              </div>
+            </Reveal>
+            <Reveal y={20} delay={0.12} amount={0.15}>
+              <div className={`${card} flex flex-col gap-1 p-4`}>
+                <span className="px-3 pb-1 pt-2 text-[12px] font-semibold text-[#6e6e73]">Running on the neural engine, right now</span>
+                {jobs.map((j) => (
+                  <div key={j.t} className="flex items-center gap-4 rounded-2xl px-3 py-2.5">
+                    <MatrixLoader pattern={j.p} size={28} color={A} />
+                    <span className="flex flex-col">
+                      <span className="text-[15px] font-medium text-[#1d1d1f]">{j.t}</span>
+                      <span className="text-[13px] tabular-nums text-[#6e6e73]">{j.s}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LensFrame() {
+  return (
+    <div className="relative h-full w-full overflow-hidden bg-[#0b0c0e]">
+      <Still />
+      <div className="absolute inset-x-0 bottom-0 flex items-end justify-between p-4 text-white">
+        <div className="flex flex-col">
+          <span className="text-[7px] font-semibold uppercase tracking-[0.2em] text-white/80">Reel 3 · Shot 14 · Take 2</span>
+          <span className="text-[6px] text-white/70">ARRI-style log · 23.976 · 8192 × 4320 · ISO 800 · 180° · 5600 K</span>
+        </div>
+        <span className="text-[7px] tabular-nums text-white/80">01:04:12:09</span>
+      </div>
+      <div className="absolute left-4 top-4 flex gap-[2px]" aria-hidden="true">
+        {Array.from({ length: 24 }, (_, i) => <span key={i} className="h-[6px] w-[2px] rounded-[1px]" style={{ background: i < 17 ? "#a3e635" : "#3f3f46" }} />)}
+      </div>
+      <div className="absolute right-4 top-4 rounded-[3px] border border-white/40 px-1 text-[6px] font-semibold tracking-[0.1em] text-white/80">HDR</div>
     </div>
-  ),
-});
+  );
+}
 
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/all";
+function Display() {
+  return (
+    <section id="display" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1.3fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Display" title="Detail you can check without a loupe." sub="254 pixels per inch on a 16.2-inch mini-LED panel. Drag the lens over the frame: the six-point slate in the corner is still readable type." accent={A} />
+          <Stagger className="flex flex-col">
+            {[["3456 × 2234", "16.2-inch, 120 Hz"], ["1,600 nits", "HDR peak, 1,000 sustained"], ["1,000,000 : 1", "contrast across 2,500 dimming zones"]].map(([k, v]) => (
+              <div key={k} className="flex items-baseline justify-between gap-4 border-t border-black/[.08] py-4">
+                <span className="text-[22px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">{k}</span>
+                <span className="text-right text-[14px] text-[#6e6e73]">{v}</span>
+              </div>
+            ))}
+          </Stagger>
+        </div>
+        <Reveal y={20} amount={0.15} className="flex justify-center">
+          <Fit>
+            <GlassLens width={640} height={360} size={170} zoom={2.2} autoplay>
+              <LensFrame />
+            </GlassLens>
+          </Fit>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
+function Grade() {
+  const [exp, setExp] = useState(0);
+  const [con, setCon] = useState(10);
+  const [warm, setWarm] = useState(20);
+  const [vib, setVib] = useState(15);
+  const filter = useMemo(
+    () => `brightness(${(1 + exp / 100).toFixed(2)}) contrast(${(1 + con / 100).toFixed(2)}) saturate(${(1 + vib / 100).toFixed(2)}) sepia(${Math.max(0, warm / 220).toFixed(2)}) hue-rotate(${Math.min(0, warm / 4).toFixed(1)}deg)`,
+    [exp, con, warm, vib],
+  );
+  return (
+    <section id="grade" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Pro apps" title="Grade on battery, at full brightness." sub="Drag a label sideways to grade the shot. The same controls you'd use in an edit suite, running on a machine you can carry into one." accent={A} center />
+        <Reveal y={20} amount={0.15} className="mt-12">
+          <div className={`${card} grid grid-cols-1 gap-6 p-5 sm:p-7 lg:grid-cols-[1fr_270px]`}>
+            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[18px] bg-black">
+              <Still filter={filter} />
+              <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-white backdrop-blur">Shot 14 · graded live</span>
+            </div>
+            <div className="flex flex-col justify-center gap-2.5">
+              <ScrubField label="Exposure" value={exp} onChange={setExp} min={-40} max={40} unit="%" accent={A} />
+              <ScrubField label="Contrast" value={con} onChange={setCon} min={-30} max={60} unit="%" accent={A} />
+              <ScrubField label="Warmth" value={warm} onChange={setWarm} min={-40} max={80} unit="" accent={A} />
+              <ScrubField label="Vibrance" value={vib} onChange={setVib} min={-60} max={80} unit="%" accent={A} />
+              <span className="pt-1 text-[12px] leading-[1.45] text-[#6e6e73]">Drag a label, or type a value. Shift for big steps.</span>
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Ports() {
+  const left = ["Magnetic charging, 140 W", "Two USB-C, 80 Gb/s", "Headphone jack, high impedance"];
+  const right = ["USB-C, 80 Gb/s", "HDMI 2.1, 8K at 60 Hz", "Full-size SD card slot"];
+  return (
+    <section id="ports" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Connectivity" title="Off the card before you've packed the camera." sub="A full card of 8K raw copies in under four minutes. Drop some footage in to try it." accent={A} />
+          <div className="grid grid-cols-2 gap-6">
+            {[{ t: "Left side", v: left }, { t: "Right side", v: right }].map((g) => (
+              <div key={g.t} className="flex flex-col gap-3">
+                <span className="text-[13px] font-semibold" style={{ color: A }}>{g.t}</span>
+                {g.v.map((x) => <span key={x} className="border-t border-black/[.08] pt-3 text-[15px] text-[#1d1d1f]">{x}</span>)}
+              </div>
+            ))}
+          </div>
+        </div>
+        <Reveal y={20} amount={0.15}>
+          <div className={`${card} flex justify-center px-5 py-8`}>
+            <OffloadChips accent={A} autoplay />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Details() {
+  const items = [
+    { t: "Six speakers", b: "Force-cancelling woofers, so the desk doesn't buzz when the score swells." },
+    { t: "12 MP camera", b: "Keeps you centred on calls as you lean back from the timeline." },
+    { t: "Wi-Fi 7", b: "Pull proxies off the shared drive as fast as the office network allows." },
+    { t: "Full-height function row", b: "Real keys for scrubbing, marking and ripple delete." },
+  ];
+  return (
+    <section className="bg-[#f5f5f7] py-24" aria-label="More details">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="And the rest" title="The small things, done properly." accent={A} />
+        <Stagger className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {items.map((it) => (
+            <Spotlight key={it.t} className={`${card} h-full p-6`} color="rgba(71,85,105,.12)">
+              <h3 className="m-0 text-[19px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{it.t}</h3>
+              <p className="m-0 mt-2 text-[15px] leading-[1.5] text-[#6e6e73]">{it.b}</p>
+            </Spotlight>
+          ))}
+        </Stagger>
+      </div>
+    </section>
+  );
+}
+
+const SIZES = [
+  { n: "14-inch", base: 2099, scale: 0.86 },
+  { n: "16-inch", base: 2599, scale: 1 },
+];
+const CHIPS = [
+  { id: "hx2", n: "HX2", s: "12-core CPU · 24-core GPU · 24 GB", add: 0 },
+  { id: "max", n: "HX2 Max", s: "16-core CPU · 40-core GPU · 48 GB", add: 800 },
+];
+
+function Buy() {
+  const [size, setSize] = useState(1);
+  const [chip, setChip] = useState("hx2");
+  const [finish, setFinish] = useState(FINISHES[0]);
+  const total = SIZES[size].base + (CHIPS.find((c) => c.id === chip)?.add ?? 0);
+  return (
+    <section id="buy" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Buy" title="Pick a size. The rest follows." sub="Both sizes have the same display quality, ports and battery life per inch." accent={A} center />
+      <Reveal y={20} amount={0.1} className="mt-12">
+        <div className={`${card} grid grid-cols-1 gap-8 p-6 sm:p-8 lg:grid-cols-[1.1fr_1fr]`}>
+          <div className="flex min-h-[300px] items-center justify-center rounded-[22px]" style={{ background: "radial-gradient(70% 70% at 50% 60%, #ffffff, #eceef1)" }}>
+            <motion.div className="flex flex-col items-center" animate={{ scale: SIZES[size].scale }} transition={{ type: "spring", stiffness: 200, damping: 20 }}>
+              <div className="h-[190px] w-[300px] rounded-t-[14px] bg-[#0b0c0e] p-[7px]">
+                <div className="relative h-full w-full overflow-hidden rounded-[5px]"><Still /></div>
+              </div>
+              <motion.div className="h-[10px] w-[336px] rounded-b-[10px]" initial={false} animate={{ backgroundColor: finish.side }} transition={{ duration: 0.4 }} />
+            </motion.div>
+          </div>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
+              <span className="text-[13px] font-semibold text-[#6e6e73]">Size</span>
+              <StretchNav items={SIZES.map((s) => s.n)} defaultIndex={1} onChange={setSize} />
+            </div>
+            <div role="radiogroup" aria-label="Chip" className="flex flex-col gap-2.5">
+              <span className="text-[13px] font-semibold text-[#6e6e73]">Chip</span>
+              {CHIPS.map((c) => {
+                const on = c.id === chip;
+                return (
+                  <button key={c.id} type="button" role="radio" aria-checked={on} onClick={() => setChip(c.id)} className="relative flex items-center justify-between gap-4 rounded-[18px] px-5 py-4 text-left shadow-[0_0_0_1px_rgba(0,0,0,.07)] outline-none focus-visible:ring-2 focus-visible:ring-[#475569]">
+                    {on && <motion.span layoutId="halcyon-chip" className="absolute inset-0 rounded-[18px]" style={{ boxShadow: `inset 0 0 0 2px ${A}`, background: "rgba(71,85,105,.05)" }} transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
+                    <span className="relative flex flex-col">
+                      <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{c.n}</span>
+                      <span className="text-[13px] tabular-nums text-[#6e6e73]">{c.s}</span>
+                    </span>
+                    <span className="relative text-[15px] font-semibold tabular-nums text-[#1d1d1f]">{c.add ? `+$${c.add}` : "Included"}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-[13px] font-semibold text-[#6e6e73]">Finish · {finish.n}</span>
+              <div role="radiogroup" aria-label="Finish" className="flex gap-3">
+                {FINISHES.map((f) => {
+                  const on = f.id === finish.id;
+                  return (
+                    <button key={f.id} type="button" role="radio" aria-checked={on} aria-label={f.n} onClick={() => setFinish(f)} className="relative flex h-11 w-11 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#475569] focus-visible:ring-offset-2">
+                      {on && <motion.span layoutId="halcyon-finish" className="absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 0 2px ${A}` }} transition={{ type: "spring", stiffness: 420, damping: 30 }} />}
+                      <span className="h-8 w-8 rounded-full" style={{ background: `linear-gradient(140deg, ${f.top}, ${f.side})`, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.12)" }} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex flex-wrap items-end justify-between gap-4 border-t border-black/[.06] pt-5">
+              <div className="flex flex-col">
+                <span className="text-[12px] font-medium text-[#6e6e73]">Halcyon {SIZES[size].n.replace("-inch", "")} · {CHIPS.find((c) => c.id === chip)?.n}</span>
+                <span className="text-[34px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f] leading-none">$<RollingNumber value={total} /></span>
+              </div>
+              <Magnetic className="text-white focus-visible:ring-[#475569]" style={{ background: A }}>Order</Magnetic>
+            </div>
+            <span className="text-[12px] text-[#6e6e73]">Ships in one to two weeks. Free returns within 14 days.</span>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
 }
 
 export default function GsapMacbookLandingPage() {
   return (
-    <div className="macbook-landing-page text-[#86868b] bg-black font-semibold selection:bg-neutral-800 selection:text-white relative min-h-screen antialiased overflow-x-hidden">
-      {/* Dynamic Scoped CSS Injection to ensure clean look & absolute styling isolation */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @font-face {
-          font-family: "MacRegular";
-          src: url("/fonts/regular.otf");
-        }
-        @font-face {
-          font-family: "MacMedium";
-          src: url("/fonts/medium.otf");
-        }
-        @font-face {
-          font-family: "MacSemiBold";
-          src: url("/fonts/semibold.otf");
-        }
-        @font-face {
-          font-family: "MacBold";
-          src: url("/fonts/bold.otf");
-        }
-
-        .macbook-landing-page {
-          --font-regular: "MacRegular", sans-serif;
-          --font-medium: "MacMedium", sans-serif;
-          --font-semibold: "MacSemiBold", sans-serif;
-          --font-bold: "MacBold", sans-serif;
-          --color-primary: #0071e3;
-          --color-dark-100: #86868b;
-          --color-dark-200: #2e2e30;
-          --color-light-100: #adb5bd;
-          font-family: var(--font-semibold);
-        }
-
-        .macbook-landing-page * {
-          scrollbar-color: var(--color-dark-100) #000;
-        }
-
-        /* Missing Tailwind v4 Utility Compilations */
-        .macbook-landing-page .flex-center {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .macbook-landing-page .flex-between {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .macbook-landing-page .col-center {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .macbook-landing-page .abs-center {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-
-        .macbook-landing-page .h3-semibold {
-          font-weight: 600;
-          font-size: 1.25rem;
-          color: var(--color-dark-100);
-        }
-
-        .macbook-landing-page .base-semibold {
-          font-weight: 600;
-          font-size: 1.0rem;
-          color: var(--color-dark-100);
-        }
-
-        .macbook-landing-page .small-medium {
-          font-weight: 500;
-          font-size: 0.75rem;
-        }
-
-        .macbook-landing-page .bg-primary {
-          background-color: var(--color-primary);
-        }
-
-        .macbook-landing-page .text-primary {
-          color: var(--color-primary);
-        }
-
-        .macbook-landing-page .text-dark-100 {
-          color: var(--color-dark-100);
-        }
-
-        .macbook-landing-page .text-light-100 {
-          color: var(--color-light-100);
-        }
-
-        .macbook-landing-page .bg-neutral-800 {
-          background-color: #2e2e30;
-        }
-
-        .macbook-landing-page header {
-          width: 100vw;
-          position: fixed;
-          top: 0;
-          left: 0;
-          z-index: 50;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background-color: #000;
-          min-height: 7vh;
-        }
-
-        .macbook-landing-page header nav {
-          width: 100%;
-          max-width: 1200px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 20px;
-        }
-
-        .macbook-landing-page header nav img {
-          cursor: pointer;
-          transition: all 0.35s ease-in-out;
-        }
-        .macbook-landing-page header nav img:hover {
-          transform: translateY(-2px);
-        }
-
-        .macbook-landing-page header nav ul {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 32px;
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-
-        .macbook-landing-page header nav ul li a {
-          display: none;
-          color: #fff;
-          opacity: 0.8;
-          font-family: var(--font-regular);
-          font-size: 14px;
-          text-decoration: none;
-          cursor: pointer;
-          transition: all 0.3s ease-in-out;
-        }
-        @media (min-width: 768px) {
-          .macbook-landing-page header nav ul li a {
-            display: block;
-          }
-        }
-        .macbook-landing-page header nav ul li a:hover {
-          opacity: 1;
-        }
-
-        .macbook-landing-page #hero {
-          height: fit-content;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          margin-top: 160px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #hero {
-            height: 80vh;
-            margin-top: 80px;
-          }
-        }
-        @media (min-width: 1536px) {
-          .macbook-landing-page #hero {
-            margin-top: 7vh;
-          }
-        }
-
-        .macbook-landing-page #hero div {
-          position: relative;
-          z-index: 10;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #hero div {
-            transform: translateY(64px);
-          }
-        }
-
-        .macbook-landing-page #hero div h1 {
-          font-weight: 600;
-          color: #fff;
-          font-size: 24px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #hero div h1 {
-            font-size: 32px;
-          }
-        }
-        @media (min-width: 1536px) {
-          .macbook-landing-page #hero div h1 {
-            font-size: 48px;
-          }
-        }
-
-        .macbook-landing-page #hero div img {
-          max-width: 400px;
-          width: 66%;
-          margin: 0 auto;
-        }
-
-        /* gradient wordmark line under the product name */
-        .macbook-landing-page #hero div p.hero-tagline {
-          margin: 6px auto 0;
-          font-size: clamp(22px, 3vw, 40px);
-          font-weight: 600;
-          letter-spacing: -0.02em;
-          line-height: 1.1;
-          color: transparent;
-          background: linear-gradient(90deg, #38bdf8 0%, #a855f7 38%, #ef4444 70%, #f97316 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.45));
-        }
-
-        .macbook-landing-page #hero video {
-          margin: 0 auto;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #hero video {
-            transform: translateY(20px);
-          }
-        }
-
-        .macbook-landing-page #hero button {
-          position: relative;
-          z-index: 10;
-          background-color: var(--color-primary);
-          color: #fff;
-          border: none;
-          padding: 8px 24px;
-          margin-top: 40px;
-          margin-bottom: 20px;
-          border-radius: 9999px;
-          font-weight: 600;
-          font-size: 18px;
-          cursor: pointer;
-          transition: all 0.3s ease-in-out;
-        }
-        .macbook-landing-page #hero button:hover {
-          background-color: #fff;
-          color: #000;
-        }
-
-        .macbook-landing-page #hero p {
-          font-weight: 600;
-          font-size: 16px;
-          color: var(--color-dark-100);
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #hero p {
-            font-size: 20px;
-          }
-        }
-
-        .macbook-landing-page #product-viewer {
-          position: relative;
-          min-height: 93vh;
-          max-width: 1200px;
-          margin: 160px auto 0 auto;
-          padding: 0 20px;
-        }
-
-        .macbook-landing-page #product-viewer h2 {
-          color: #fff;
-          font-weight: 600;
-          font-size: 30px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #product-viewer h2 {
-            font-size: 60px;
-          }
-        }
-
-        .macbook-landing-page #product-viewer .controls {
-          position: absolute;
-          z-index: 45;
-          bottom: 160px;
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 16px;
-        }
-        @media (min-width: 1536px) {
-          .macbook-landing-page #product-viewer .controls {
-            bottom: 208px;
-          }
-        }
-
-        .macbook-landing-page #product-viewer .controls .color-control {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          background-color: #2e2e30;
-          border-radius: 9999px;
-          padding: 12px 24px;
-          gap: 16px;
-        }
-
-        .macbook-landing-page #product-viewer .controls .color-control div {
-          width: 28px;
-          height: 28px;
-          border-radius: 9999px;
-          cursor: pointer;
-          transition: all 0.2s ease-in-out;
-        }
-
-        .macbook-landing-page #product-viewer .controls .color-control div.active {
-          box-shadow: 0 0 0 4px #adb5bd;
-          transform: scale(0.9);
-        }
-
-        .macbook-landing-page #product-viewer .controls .size-control {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          background-color: #2e2e30;
-          border-radius: 9999px;
-          padding: 10px 24px;
-          gap: 8px;
-          font-size: 12px;
-          font-weight: 500;
-        }
-
-        .macbook-landing-page #product-viewer .controls .size-control div {
-          width: 32px;
-          height: 32px;
-          border-radius: 9999px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s ease-in-out;
-        }
-
-        .macbook-landing-page #product-viewer #canvas {
-          width: 100% !important;
-          height: 80vh !important;
-          position: relative;
-          z-index: 40;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #product-viewer #canvas {
-            height: 100vh !important;
-          }
-        }
-
-        .macbook-landing-page #showcase {
-          position: relative;
-        }
-
-        .macbook-landing-page #showcase .media {
-          position: relative;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .media {
-            overflow: hidden;
-          }
-        }
-
-        .macbook-landing-page #showcase .media video {
-          width: 100%;
-          object-fit: cover;
-          object-position: center;
-        }
-
-        .macbook-landing-page #showcase .media .mask {
-          position: absolute;
-          height: 100%;
-          top: 0;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .media .mask {
-            top: -80px;
-          }
-        }
-        @media (min-width: 1280px) {
-          .macbook-landing-page #showcase .media .mask {
-            top: 0;
-          }
-        }
-
-        .macbook-landing-page #showcase .media .mask img {
-          height: 100%;
-          transform: matrix(1, 0, 0, 1, 0, 0);
-          transition: all 0.1s ease-out;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .media .mask img {
-            transform: matrix(80, 0, 0, 80, 0, 0);
-          }
-        }
-
-        .macbook-landing-page #showcase .content {
-          position: relative;
-          z-index: 10;
-          margin-top: 20px;
-          background-color: #000;
-          font-weight: 600;
-          font-size: 20px;
-          color: var(--color-dark-100);
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .content {
-            margin-top: -160px;
-            opacity: 0;
-            transform: translateY(40px);
-          }
-        }
-
-        .macbook-landing-page #showcase .content .wrapper {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px 80px 20px;
-          display: flex;
-          flex-direction: column;
-          gap: 80px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .content .wrapper {
-            flex-direction: row;
-            justify-content: center;
-          }
-        }
-
-        .macbook-landing-page #showcase .content h2 {
-          font-weight: 600;
-          font-size: 30px;
-          color: #fff;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .content h2 {
-            font-size: 72px;
-          }
-        }
-
-        .macbook-landing-page #showcase .content h3 {
-          font-weight: 600;
-          font-size: 20px;
-          color: #fff;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #showcase .content h3 {
-            font-size: 48px;
-          }
-        }
-
-        .macbook-landing-page #performance {
-          width: 100vw;
-          height: auto;
-          overflow: hidden;
-          padding-top: 80px;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          position: relative;
-        }
-
-        .macbook-landing-page #performance h2 {
-          font-weight: 600;
-          font-size: 30px;
-          color: #fff;
-          max-width: 672px;
-          text-align: center;
-          padding: 0 20px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #performance h2 {
-            font-size: 60px;
-          }
-        }
-
-        .macbook-landing-page #performance .wrapper {
-          width: min(1200px, 100vw);
-          height: 50vh;
-          position: relative;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #performance .wrapper {
-            height: 100vh;
-          }
-        }
-        @media (min-width: 1536px) {
-          .macbook-landing-page #performance .wrapper {
-            width: min(100rem, 100vw);
-          }
-        }
-
-        .macbook-landing-page #performance .wrapper img {
-          max-width: 160px;
-          object-fit: cover;
-          object-position: center;
-          will-change: left, right, bottom, transform;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #performance .wrapper img {
-            max-width: 432px;
-          }
-        }
-        @media (min-width: 1536px) {
-          .macbook-landing-page #performance .wrapper img {
-            max-width: 560px;
-          }
-        }
-
-        .macbook-landing-page #performance .wrapper .p1 {
-          position: absolute;
-          bottom: 50%;
-          left: 23%;
-          z-index: 1;
-        }
-        .macbook-landing-page #performance .wrapper .p2 {
-          position: absolute;
-          bottom: 40%;
-          right: 17%;
-          z-index: 3;
-        }
-        .macbook-landing-page #performance .wrapper .p3 {
-          position: absolute;
-          bottom: 25%;
-          right: 15%;
-          z-index: 2;
-        }
-        .macbook-landing-page #performance .wrapper .p4 {
-          position: absolute;
-          bottom: 15%;
-          right: 10%;
-          z-index: 1;
-        }
-        .macbook-landing-page #performance .wrapper .p5 {
-          position: absolute;
-          bottom: 20%;
-          left: 50%;
-          transform: translateX(-50%) scale(1.5);
-        }
-        .macbook-landing-page #performance .wrapper .p6 {
-          position: absolute;
-          bottom: 25%;
-          left: 25%;
-          z-index: 2;
-        }
-        .macbook-landing-page #performance .wrapper .p7 {
-          position: absolute;
-          bottom: 5%;
-          left: 15%;
-          z-index: 3;
-        }
-
-        @media (max-width: 640px) {
-          .macbook-landing-page #performance .wrapper .p1 {
-            left: 33%;
-          }
-          .macbook-landing-page #performance .wrapper .p2 {
-            right: 37%;
-          }
-          .macbook-landing-page #performance .wrapper .p6,
-          .macbook-landing-page #performance .wrapper .p7 {
-            left: 35%;
-          }
-          .macbook-landing-page #performance .wrapper .p3 {
-            right: 35%;
-          }
-          .macbook-landing-page #performance .wrapper .p4 {
-            right: 30%;
-          }
-        }
-
-        .macbook-landing-page #performance .content {
-          margin: 96px auto 0 auto;
-          max-width: 576px;
-          padding: 0 20px;
-        }
-
-        .macbook-landing-page #performance .content p {
-          text-align: center;
-          font-size: 16px;
-          font-weight: 600;
-          color: var(--color-dark-100);
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #performance .content p {
-            font-size: 20px;
-            transform: translateY(40px);
-            opacity: 0;
-          }
-        }
-
-        .macbook-landing-page #features {
-          padding-top: 160px;
-          position: relative;
-        }
-
-        .macbook-landing-page #features h2 {
-          color: #fff;
-          font-weight: 600;
-          font-size: 30px;
-          text-align: center;
-          max-width: 768px;
-          margin: 0 auto;
-          padding: 0 20px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #features h2 {
-            font-size: 72px;
-          }
-        }
-
-        .macbook-landing-page #features #f-canvas {
-          width: 100% !important;
-          height: 100vh !important;
-          position: relative;
-          z-index: 40;
-        }
-
-        .macbook-landing-page #features .feature-media-display {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: min(34vw, 500px);
-          aspect-ratio: 16 / 9;
-          transform: translate(-50%, -72%);
-          overflow: hidden;
-          border-radius: 5px;
-          background-color: #050505;
-          pointer-events: none;
-        }
-
-        .macbook-landing-page #features .feature-media-display video {
-          position: absolute;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          opacity: 0;
-          transition: opacity 180ms ease-out;
-        }
-
-        .macbook-landing-page #features .feature-media-display video.active {
-          opacity: 1;
-        }
-
-        @media (max-width: 1024px) {
-          .macbook-landing-page #features .feature-media-display {
-            width: min(58vw, 480px);
-            transform: translate(-50%, -66%);
-          }
-        }
-
-        .macbook-landing-page #features .box {
-          max-width: 320px;
-          position: absolute;
-          z-index: 50;
-          opacity: 0;
-          transform: translateY(20px);
-        }
-
-        .macbook-landing-page #features .box1 {
-          left: 20px;
-          top: 20%;
-        }
-        .macbook-landing-page #features .box2 {
-          right: 20px;
-          top: 30%;
-        }
-        .macbook-landing-page #features .box3 {
-          left: 20px;
-          top: 50%;
-        }
-        .macbook-landing-page #features .box4 {
-          right: 20px;
-          top: 70%;
-        }
-        .macbook-landing-page #features .box5 {
-          left: 20px;
-          top: 90%;
-        }
-        @media (min-width: 768px) {
-          .macbook-landing-page #features .box1,
-          .macbook-landing-page #features .box3,
-          .macbook-landing-page #features .box5 {
-            left: 80px;
-          }
-          .macbook-landing-page #features .box2,
-          .macbook-landing-page #features .box4 {
-            right: 80px;
-          }
-        }
-
-        .macbook-landing-page #features .box p {
-          font-weight: 600;
-          font-size: 16px;
-          color: var(--color-dark-100);
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #features .box p {
-            font-size: 20px;
-          }
-        }
-
-        .macbook-landing-page #highlights {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 160px 20px;
-        }
-
-        .macbook-landing-page #highlights h2 {
-          color: #fff;
-          font-weight: 600;
-          font-size: 30px;
-          text-align: center;
-          max-width: 768px;
-          margin: 0 auto;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #highlights h2 {
-            font-size: 72px;
-          }
-        }
-
-        .macbook-landing-page #highlights h3 {
-          color: #f5f5f7;
-          font-weight: 600;
-          font-size: 20px;
-          text-align: center;
-          margin-top: 40px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #highlights h3 {
-            font-size: 30px;
-          }
-        }
-
-        .macbook-landing-page #highlights .masonry {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 20px;
-          margin-top: 80px;
-          color: #f5f5f7;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #highlights .masonry {
-            grid-template-columns: 1fr 1fr;
-          }
-        }
-
-        .macbook-landing-page #highlights .masonry .left-column,
-        .macbook-landing-page #highlights .masonry .right-column {
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          gap: 20px;
-          opacity: 0;
-          transform: translateY(-20px);
-        }
-
-        .macbook-landing-page #highlights .masonry .left-column div:first-of-type {
-          background-image: url("/highlight-bg.png");
-          background-repeat: no-repeat;
-          background-size: cover;
-          padding: 40px;
-          border-radius: 24px;
-          height: 100%;
-          min-height: 280px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #highlights .masonry .left-column div:first-of-type,
-          .macbook-landing-page #highlights .masonry .right-column div:last-of-type {
-            padding-top: 80px;
-          }
-        }
-        @media (min-width: 1536px) {
-          .macbook-landing-page #highlights .masonry .left-column div:first-of-type,
-          .macbook-landing-page #highlights .masonry .right-column div:last-of-type {
-            padding-top: 128px;
-          }
-        }
-
-        .macbook-landing-page #highlights .masonry .left-column div:first-of-type p,
-        .macbook-landing-page #highlights .masonry .left-column p,
-        .macbook-landing-page #highlights .masonry .right-column p {
-          font-weight: 600;
-          font-size: 36px;
-          max-width: 250px;
-        }
-
-        .macbook-landing-page #highlights .masonry .left-column div:last-of-type {
-          background-color: #1d1d1f;
-          padding: 40px;
-          border-radius: 24px;
-          display: flex;
-          align-items: center;
-          gap: 28px;
-        }
-
-        .macbook-landing-page #highlights .masonry .left-column div:last-of-type p {
-          font-weight: 600;
-          font-size: 20px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #highlights .masonry .left-column div:last-of-type p {
-            font-size: 24px;
-          }
-          .macbook-landing-page #highlights .masonry .left-column div:last-of-type p {
-            font-size: 30px;
-          }
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column .ai-gradient {
-          padding: 40px;
-          border-radius: 24px;
-          display: flex;
-          align-items: center;
-          gap: 28px;
-          position: relative;
-          background: #1d1d1f;
-          background-clip: padding-box;
-          border: 3px solid transparent;
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column .ai-gradient::before {
-          content: "";
-          pointer-events: none;
-          position: absolute;
-          inset: 0px;
-          z-index: -1;
-          margin: -5px;
-          border-radius: 24px;
-          background: linear-gradient(91deg, #0096ff 0%, #bb64ff 42%, #f2416b 74%, #eb7500 100%);
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column .ai-gradient p {
-          font-weight: 600;
-          font-size: 20px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page #highlights .masonry .right-column .ai-gradient p {
-            font-size: 24px;
-          }
-          .macbook-landing-page #highlights .masonry .right-column .ai-gradient p {
-            font-size: 30px;
-          }
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column .ai-gradient p span {
-          background: linear-gradient(91deg, #0096ff 0%, #bb64ff 42%, #f2416b 74%, #eb7500 100%);
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column div:last-of-type {
-          background-color: #1d1d1f;
-          padding: 40px;
-          border-radius: 24px;
-          height: 100%;
-          min-height: 280px;
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column div:last-of-type p {
-          font-weight: 600;
-          font-size: 36px;
-          max-width: 384px;
-        }
-
-        .macbook-landing-page #highlights .masonry .right-column div:last-of-type p .green-gradient {
-          background: linear-gradient(90deg, #35a98a 0%, #6dd400 100%);
-          background-clip: text;
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .macbook-landing-page footer {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 28px 20px;
-        }
-
-        .macbook-landing-page footer .info {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-
-        .macbook-landing-page footer .info p {
-          font-size: 14px;
-          font-weight: 500;
-        }
-
-        .macbook-landing-page footer .info p span {
-          color: var(--color-primary);
-          margin: 0 2px;
-        }
-
-        .macbook-landing-page footer hr {
-          margin: 28px 0;
-          border: 0;
-          border-top: 1px solid #424245;
-        }
-
-        .macbook-landing-page footer .links {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-          font-size: 14px;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page footer .links {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-          }
-        }
-
-        .macbook-landing-page footer .links ul {
-          display: flex;
-          flex-direction: column;
-          gap: 10px;
-          list-style: none;
-          margin: 0;
-          padding: 0;
-        }
-        @media (min-width: 1024px) {
-          .macbook-landing-page footer .links ul {
-            flex-direction: row;
-            gap: 0;
-          }
-          .macbook-landing-page footer .links ul li {
-            border-left: 1px solid #424245;
-            padding: 0 20px;
-          }
-          .macbook-landing-page footer .links ul li:first-child {
-            border-left: none;
-            padding-left: 0;
-          }
-        }
-
-        .macbook-landing-page footer .links ul li a {
-          color: #86868b;
-          text-decoration: none;
-          cursor: pointer;
-          transition: all 0.3s ease-in-out;
-        }
-        .macbook-landing-page footer .links ul li a:hover {
-          color: var(--color-primary);
-        }
-      ` }} />
-
-      <NavBar />
-      <Hero />
-      <div key="product-viewer-wrap">
-        <ProductViewer />
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <Nav brand={<Logo />} accent={A} cta="Order" onCta={() => scrollToId("buy")} links={[{ label: "Performance", id: "performance" }, { label: "Display", id: "display" }, { label: "Pro apps", id: "grade" }, { label: "Ports", id: "ports" }, { label: "Buy", id: "buy" }]} />
+        <Hero />
+        <Stats />
+        <Performance />
+        <Display />
+        <Grade />
+        <Ports />
+        <Details />
+        <Buy />
+        <section id="faq" className="bg-[#f5f5f7]">
+          <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
+            <SectionHead eyebrow="FAQ" title="Questions from the edit suite." accent={A} />
+            <Reveal y={16} amount={0.1}>
+              <Faq
+                accent={A}
+                items={[
+                  { q: "Does it slow down on battery?", a: "No. HX2 and HX2 Max run at the same clocks on battery as plugged in. Battery life drops under a heavy export, of course: plan on about four hours of continuous 8K rendering." },
+                  { q: "How loud do the fans get?", a: "Under a long render they reach about 30 dB(A) at arm's length, roughly a quiet office. For editing and grading they usually stay off." },
+                  { q: "Can I drive external monitors?", a: "HX2 drives two external displays, HX2 Max drives four, including one 8K screen over HDMI." },
+                  { q: "Is the display colour-accurate out of the box?", a: "Each panel is calibrated at the factory and ships with reference presets for HDR video, broadcast, photography and print." },
+                  { q: "What's the 14-inch missing?", a: "Nothing but size: same chips, ports and display quality. It has a smaller battery, so it runs about 2 hours less." },
+                ]}
+              />
+            </Reveal>
+          </div>
+        </section>
+        <div className="mx-auto max-w-[1180px] px-5 py-20">
+          <CtaBand title="Finish the film on the plane home." sub="Halcyon 14 from $2,099. Halcyon 16 from $2,599. Order now, ships in one to two weeks." cta="Order Halcyon" secondary="Compare models" accent={A} glow="rgba(125,211,252,.28)" />
+        </div>
+        <Footer brand={<Logo />} note="Halcyon is a template. The brand, products, people and figures on this page are invented." columns={[{ title: "Shop", links: ["Halcyon 14", "Halcyon 16", "Accessories", "Education"] }, { title: "Support", links: ["Care plans", "Repairs", "Returns", "Contact"] }, { title: "Company", links: ["About", "Environment", "Careers", "Press"] }]} />
       </div>
-      <Showcase />
-      <Performance />
-      <div key="features-wrap">
-        <Features />
-      </div>
-      <Highlights />
-      <Footer />
-    </div>
+    </MotionConfig>
   );
 }

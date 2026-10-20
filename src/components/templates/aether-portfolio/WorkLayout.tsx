@@ -1,0 +1,149 @@
+"use client";
+// Local copy of the Motion Kit Layout Switch for the Aether portfolio: takes project tiles
+// (title, meta and optional artwork inside), an accent, and an optional controlled open tile.
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+
+type Layout = "grid" | "row" | "feature" | "pile";
+interface Rect { x: number; y: number; w: number; h: number; r: number; z: number }
+
+export interface WorkTile { id: string; title: string; meta?: string; art: string; ui?: ReactNode }
+
+const PHOTOS: WorkTile[] = [
+  { id: "a", title: "Salt flats", art: "radial-gradient(80% 60% at 30% 25%, #fff3d6, rgba(255,243,214,0) 60%), linear-gradient(180deg,#9ec9ff,#e8f1ff 55%,#f5e9dd)" },
+  { id: "b", title: "Red canyon", art: "radial-gradient(70% 60% at 70% 20%, #ffd2a6, rgba(255,210,166,0) 60%), linear-gradient(160deg,#ff9f6b,#c4553d 60%,#5b2a2a)" },
+  { id: "c", title: "Pine ridge", art: "radial-gradient(60% 50% at 50% 15%, #e7fff1, rgba(231,255,241,0) 60%), linear-gradient(180deg,#bfe3d0,#3f8f6b 60%,#173d2e)" },
+  { id: "d", title: "Night pier", art: "radial-gradient(40% 30% at 70% 30%, #fff6c7, rgba(255,246,199,0) 60%), linear-gradient(180deg,#1b2140,#3a3f78 60%,#0c0f22)" },
+  { id: "e", title: "Lavender", art: "radial-gradient(70% 60% at 30% 30%, #fff, rgba(255,255,255,0) 55%), linear-gradient(170deg,#e4d4ff,#a98bf0 55%,#5e4bb3)" },
+  { id: "f", title: "Low tide", art: "radial-gradient(70% 50% at 60% 20%, #fffbe8, rgba(255,251,232,0) 60%), linear-gradient(180deg,#a7e3f2,#5fb6c9 55%,#d9c7a8)" },
+];
+
+const W = 640;
+const H = 320;
+const G = 10;
+
+function rects(layout: Layout, n: number): Rect[] {
+  return Array.from({ length: n }, (_, i) => {
+    switch (layout) {
+      case "grid": {
+        const w = (W - G * 2) / 3, h = (H - G) / 2;
+        return { x: (i % 3) * (w + G), y: Math.floor(i / 3) * (h + G), w, h, r: 0, z: 1 };
+      }
+      case "row": {
+        const w = (W - G * (n - 1)) / n, h = 170;
+        return { x: i * (w + G), y: (H - h) / 2, w, h, r: 0, z: 1 };
+      }
+      case "feature": {
+        if (i === 0) return { x: 0, y: 0, w: 420, h: H, r: 0, z: 1 };
+        const h = (H - G * (n - 2)) / (n - 1);
+        return { x: 430, y: (i - 1) * (h + G), w: W - 430, h, r: 0, z: 1 };
+      }
+      case "pile": {
+        const rot = [-9, 6, -4, 10, -2, 3][i % 6];
+        return { x: W / 2 - 120 + (i - n / 2) * 14, y: H / 2 - 85 + Math.abs(i - n / 2) * 4, w: 240, h: 170, r: rot, z: i + 1 };
+      }
+    }
+  });
+}
+
+export interface WorkLayoutProps {
+  items?: WorkTile[];
+  accent?: string;
+  /** Changes layouts by itself until the user interacts. */
+  autoplay?: boolean;
+  /** Controlled open tile (optional). */
+  openId?: string | null;
+  onOpenChange?: (id: string | null) => void;
+}
+
+/**
+ * The same project tiles glide between four arrangements. Nothing fades or cuts: each
+ * one springs from its old box to its new one, and clicking a tile grows it to fill
+ * the frame with its details.
+ */
+export default function WorkLayout({ items = PHOTOS, accent = "#0071e3", autoplay = false, openId, onOpenChange }: WorkLayoutProps) {
+  const [layout, setLayout] = useState<Layout>("grid");
+  const [innerOpen, setInnerOpen] = useState<string | null>(null);
+  const open = openId !== undefined ? openId : innerOpen;
+  const setOpen = (id: string | null) => { setInnerOpen(id); onOpenChange?.(id); };
+  const touched = useRef(false);
+  const boxes = rects(layout, items.length);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    const order: Layout[] = ["feature", "pile", "row", "grid"];
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      setLayout(order[k++ % order.length]);
+    }, 2600);
+    return () => clearInterval(t);
+  }, [autoplay]);
+
+  useEffect(() => {
+    if (openId) touched.current = true;
+  }, [openId]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setInnerOpen(null);
+      onOpenChange?.(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onOpenChange]);
+
+  return (
+    <div className="flex w-full flex-col items-center gap-5" onPointerDown={() => (touched.current = true)}>
+      <div role="group" aria-label="Layout" className="relative grid grid-cols-4 rounded-xl bg-[#e8e8ed] p-[3px]">
+        {(["grid", "row", "feature", "pile"] as Layout[]).map((l) => (
+          <button key={l} type="button" aria-pressed={layout === l} onClick={() => { touched.current = true; setOpen(null); setLayout(l); }} className="relative z-10 h-8 rounded-[9px] px-5 text-[13px] font-medium capitalize text-[#1d1d1f] focus-visible:outline focus-visible:outline-2" style={{ outlineColor: accent }}>
+            {layout === l && <motion.span layoutId="aether-work-seg" transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
+            {l}
+          </button>
+        ))}
+      </div>
+      <div className="relative w-[640px] overflow-hidden" style={{ height: H }}>
+        <div className="absolute left-0 top-0" style={{ width: W, height: H }}>
+          {items.map((p, i) => {
+            const isOpen = open === p.id;
+            const b = isOpen ? { x: 0, y: 0, w: W, h: H, r: 0, z: 50 } : boxes[i];
+            return (
+              <motion.button
+                key={p.id}
+                type="button"
+                aria-label={isOpen ? `Close ${p.title}` : `Open ${p.title}`}
+                aria-expanded={isOpen}
+                onClick={() => { touched.current = true; setOpen(isOpen ? null : p.id); }}
+                className="absolute left-0 top-0 overflow-hidden text-left outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+                initial={false}
+                animate={{ x: b.x, y: b.y, width: b.w, height: b.h, rotate: b.r, zIndex: b.z, opacity: open && !isOpen ? 0.25 : 1, borderRadius: isOpen ? 24 : 16 }}
+                transition={{ type: "spring", stiffness: 220, damping: 26, mass: 0.9, delay: open ? 0 : i * 0.025, zIndex: { duration: 0 } }}
+                style={{ background: p.art, boxShadow: layout === "pile" || isOpen ? "0 18px 40px -16px rgba(0,0,0,.45)" : "0 0 0 1px rgba(0,0,0,.04)", ["--tw-ring-color" as string]: accent }}
+                whileHover={{ scale: open ? 1 : 1.02 }}
+              >
+                {p.ui && <span className="pointer-events-none absolute inset-0" aria-hidden="true">{p.ui}</span>}
+                <AnimatePresence>
+                  {(isOpen || (layout !== "row" && !open)) && (
+                    <motion.span
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bottom-3 left-3.5 right-3.5 flex flex-col"
+                    >
+                      <span className="text-[14px] font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,.45)]">{p.title}</span>
+                      {isOpen && p.meta && <span className="text-[13px] text-white/90 [text-shadow:0_1px_8px_rgba(0,0,0,.45)]">{p.meta}</span>}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+      <span className="text-[13px] text-[#6e6e73]">Switch layouts, or open a project. Esc closes it.</span>
+    </div>
+  );
+}

@@ -1,1137 +1,751 @@
 "use client";
+/**
+ * Forge: landing page template for an AI coding copilot that has read the
+ * whole repository. Motion Kit style: light page, one amber accent.
+ * Kit components: Folder Peek, Matrix Loader, Stagger Menu, Before / After,
+ * Dock, Copy Command, Capsule Toggle, Elastic Stepper and the Rolling Number
+ * from Price Odometer.
+ */
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
+import { AnimatePresence, MotionConfig, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import FolderPeek from "@/components/templates/kit/components/FolderPeek";
+import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
+import StaggerMenu from "@/components/templates/kit/components/StaggerMenu";
+import BeforeAfter from "@/components/templates/kit/components/BeforeAfter";
+import Dock from "@/components/templates/kit/components/Dock";
+import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
+import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
+import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
+import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import {
-  motion,
-  AnimatePresence,
-  useInView,
-  useScroll,
-  useTransform,
-} from "framer-motion";
-import {
-  Zap,
-  ArrowRight,
-  Shield,
-  Lock,
-  Database,
-  Check,
-  ChevronDown,
-  Terminal,
-  GitBranch,
-  Github,
-  Mail,
-  Twitter,
-  Linkedin,
-} from "lucide-react";
+const A = "#d97706"; // amber, for fills and graphics
+const AD = "#b45309"; // darker amber for text and buttons on white (5:1)
+const INK = "#1d1d1f";
+const MONO = "ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace";
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-/* ── Lenis smooth scroll hook ──────────────────────────────────── */
-function useLenis() {
-  React.useEffect(() => {
-    let lenis: { raf: (time: number) => void; destroy: () => void } | null =
-      null;
-    let rafId: number;
-
-    import("@studio-freight/lenis")
-      .then((mod) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const LenisClass = (mod.default ?? (mod as any).Lenis) as any;
-        lenis = new LenisClass({ lerp: 0.1, duration: 1.2 }) as typeof lenis;
-        function raf(time: number) {
-          lenis?.raf(time);
-          rafId = requestAnimationFrame(raf);
-        }
-        rafId = requestAnimationFrame(raf);
-      })
-      .catch(() => {});
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      lenis?.destroy();
-    };
-  }, []);
-}
-
-/* ── FadeUp ──────────────────────────────────────────────────────── */
-function FadeUp({
-  children,
-  delay = 0,
-  className,
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+function Logo() {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, ease: EASE, delay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-/* ── Typewriter ──────────────────────────────────────────────────── */
-const WORDS = ["code", "review", "deploy", "debug"];
-
-function Typewriter() {
-  const [wordIndex, setWordIndex] = React.useState(0);
-  const [displayed, setDisplayed] = React.useState("");
-  const [deleting, setDeleting] = React.useState(false);
-
-  React.useEffect(() => {
-    const word = WORDS[wordIndex];
-    let timeout: ReturnType<typeof setTimeout>;
-
-    if (!deleting && displayed.length < word.length) {
-      timeout = setTimeout(
-        () => setDisplayed(word.slice(0, displayed.length + 1)),
-        80
-      );
-    } else if (!deleting && displayed.length === word.length) {
-      timeout = setTimeout(() => setDeleting(true), 1400);
-    } else if (deleting && displayed.length > 0) {
-      timeout = setTimeout(
-        () => setDisplayed(word.slice(0, displayed.length - 1)),
-        45
-      );
-    } else if (deleting && displayed.length === 0) {
-      timeout = setTimeout(() => {
-        setDeleting(false);
-        setWordIndex((i) => (i + 1) % WORDS.length);
-      }, 120);
-    }
-
-    return () => clearTimeout(timeout);
-  }, [displayed, deleting, wordIndex]);
-
-  return (
-    <span className="text-orange-300">
-      {displayed}
-      <span className="animate-pulse">|</span>
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <span className="relative flex h-[26px] w-[26px] items-center justify-center rounded-[8px]" style={{ background: INK }} aria-hidden="true">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M5 15h14l-2 4H7z" fill="#fff" />
+          <motion.path d="M12 3c2 3 3.5 4.6 3.5 7a3.5 3.5 0 0 1-7 0c0-1.2.5-2.2 1.3-3 .2 1.3.9 2 1.7 2.2C11 7.6 11.2 5.4 12 3z" fill={A} animate={{ scaleY: [1, 1.08, 1] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }} style={{ originY: "12px" }} />
+        </svg>
+      </span>
+      Forge
     </span>
   );
 }
 
-/* ── Prompt Rail Demo ────────────────────────────────────────────── */
-const DEMO_MESSAGES = [
-  {
-    role: "user",
-    text: "Refactor this auth middleware to use JWT refresh tokens",
-  },
-  {
-    role: "ai",
-    text: `Here's the refactored middleware with JWT refresh token support:
+/* ------------------------------------------------------------------ */
+/* Syntax colouring for the light code panels                           */
+/* ------------------------------------------------------------------ */
 
-\`\`\`ts
-export async function authMiddleware(req, res, next) {
-  const token = req.cookies.access_token;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+const KW = /^(import|from|export|async|function|const|await|if|return|switch|case|throw|new|type)$/;
 
-  try {
-    const payload = verifyAccessToken(token);
-    req.user = payload;
-    next();
-  } catch (err) {
-    // Token expired — attempt refresh
-    const refreshToken = req.cookies.refresh_token;
-    if (!refreshToken) return res.status(401).json({ error: 'Session expired' });
-    const newTokens = await rotateRefreshToken(refreshToken);
-    res.cookie('access_token', newTokens.access, { httpOnly: true });
-    res.cookie('refresh_token', newTokens.refresh, { httpOnly: true });
-    req.user = verifyAccessToken(newTokens.access);
-    next();
-  }
+function hl(line: string, dim = false) {
+  const parts = line.split(/("[^"]*"|'[^']*'|\/\/.*$|\b(?:import|from|export|async|function|const|await|if|return|switch|case|throw|new|type)\b)/g);
+  return parts.map((p, i) => {
+    if (!p) return null;
+    let c = dim ? "#a1a1a6" : INK;
+    if (/^["']/.test(p)) c = dim ? "#b8c9b0" : "#2f7d32";
+    else if (/^\/\//.test(p)) c = dim ? "#c7c7cc" : "#6e6e73";
+    else if (KW.test(p)) c = dim ? "#c9b3d9" : "#9b2c9b";
+    return <span key={i} style={{ color: c }}>{p}</span>;
+  });
 }
-\`\`\`
 
-This handles silent token rotation, keeping sessions alive without re-login.`,
-  },
-  { role: "user", text: "Add rate limiting to the refresh endpoint" },
-  {
-    role: "ai",
-    text: "Adding Redis-backed rate limiting — 5 refresh attempts per 15 minutes per IP...",
-  },
+/* ------------------------------------------------------------------ */
+/* Hero: the X-ray lens                                                 */
+/* ------------------------------------------------------------------ */
+
+const CODE = [
+  `import { rules } from "@/pricing/rules";`,
+  `import { round } from "@/money/round";`,
+  ``,
+  `export async function applyDiscount(`,
+  `  cart: Cart,`,
+  `  code: string,`,
+  `): Promise<Cart> {`,
+  `  const rule = await rules.find(code);`,
+  `  if (!rule) return cart;`,
+  ``,
+  `  if (rule.kind === "percent") {`,
+  `    const off = cart.total * rule.value;`,
+  `    return withTotal(cart, round(cart.total - off));`,
+  `  }`,
+  `  return withTotal(cart, cart.total - rule.value);`,
+  `}`,
 ];
 
-function PromptRail() {
-  // the first prompt is already on screen; the replies stream in
-  const [visibleCount, setVisibleCount] = React.useState(1);
-  const [typing, setTyping] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-100px" });
+/** What Forge knows about a symbol. line / col / len locate it in CODE. */
+const NOTES = [
+  { key: "Callers", line: 3, col: 22, len: 13, tone: A, title: "14 callers in 3 packages", short: "Two callers ignore the result.", body: "Two of them, in cart/ and pos/, ignore the returned cart." },
+  { key: "Throws", line: 7, col: 21, len: 10, tone: "#c2410c", title: "rules.find can throw", short: "RuleExpired, for codes past their end date.", body: "RuleExpired, for codes past their end date. pricing/rules.ts:41" },
+  { key: "Missing case", line: 10, col: 6, len: 9, tone: "#7c3aed", title: "'bogo' isn't handled", short: "Added to RuleKind last week.", body: "Added to RuleKind in #2291 last week. Falls through to fixed." },
+  { key: "Untested", line: 14, col: 25, len: 22, tone: "#0369a1", title: "Can go below zero", short: "Only percent discounts are tested.", body: "total.test.ts only covers percent. No test for fixed > total." },
+];
 
-  React.useEffect(() => {
-    if (!inView) return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    let i = 1;
-    function showNext() {
-      if (i >= DEMO_MESSAGES.length) return;
-      setTyping(true);
-      timers.push(
-        setTimeout(() => {
-          setTyping(false);
-          setVisibleCount((c) => c + 1);
-          i++;
-          if (i < DEMO_MESSAGES.length) timers.push(setTimeout(showNext, 700));
-        }, 900),
-      );
-    }
-    timers.push(setTimeout(showNext, 250));
-    return () => timers.forEach(clearTimeout);
-  }, [inView]);
+/** Coverage per line in the X-ray layer: 2 covered, 1 partly, 0 not, -1 no code. */
+const COVER = [-1, -1, -1, 2, 2, 2, 2, 1, 2, -1, 2, 2, 2, -1, 0, -1];
+
+const LH = 26; // line height
+const PADX = 20;
+const PADY = 18;
+const GUT = 34; // gutter width
+const PANEL_W = 556;
+const R = 124; // lens radius
+
+function XrayEditor() {
+  const panel = useRef<HTMLDivElement>(null);
+  const meter = useRef<HTMLSpanElement>(null);
+  const [cw, setCw] = useState(7.8);
+  const [active, setActive] = useState(0);
+  const touched = useRef(false);
+  const idleTimer = useRef<number | undefined>(undefined);
+  const dragging = useRef(false);
+  const tx = useMotionValue(300);
+  const ty = useMotionValue(130);
+  const sx = useSpring(tx, { stiffness: 210, damping: 24, mass: 0.9 });
+  const sy = useSpring(ty, { stiffness: 210, damping: 24, mass: 0.9 });
+  const clip = useMotionTemplate`circle(${R}px at ${sx}px ${sy}px)`;
+  const ringX = useTransform(sx, (v) => v - R);
+  const ringY = useTransform(sy, (v) => v - R);
+  const panelH = PADY * 2 + CODE.length * LH;
+
+  useLayoutEffect(() => {
+    if (meter.current) setCw(meter.current.getBoundingClientRect().width / 20);
+  }, []);
+
+  const centre = (i: number) => {
+    const n = NOTES[i];
+    const symX = PADX + GUT + (n.col + n.len / 2) * cw;
+    return { x: Math.max(R - 10, Math.min(PANEL_W - R + 10, symX)), y: PADY + n.line * LH + 46 };
+  };
+
+  // Which note is under the lens. Only re-renders when that changes.
+  const pick = () => {
+    let best = -1, bd = Infinity;
+    NOTES.forEach((_, i) => {
+      const c = centre(i);
+      const d = Math.hypot(c.x - sx.get(), c.y - sy.get());
+      if (d < bd) { bd = d; best = i; }
+    });
+    const next = bd < R * 0.9 ? best : -1;
+    setActive((a) => (a === next ? a : next));
+  };
+  useMotionValueEvent(sx, "change", pick);
+  useMotionValueEvent(sy, "change", pick);
+
+  // Tour the notes until someone takes over; resume after a quiet spell.
+  useEffect(() => {
+    let k = 0;
+    const go = () => {
+      if (touched.current) return;
+      const c = centre(k % NOTES.length);
+      tx.set(c.x);
+      ty.set(c.y);
+      k++;
+    };
+    const a = window.setTimeout(go, 900);
+    const t = window.setInterval(go, 3000);
+    return () => { clearTimeout(a); clearInterval(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cw]);
+
+  const hold = () => {
+    touched.current = true;
+    window.clearTimeout(idleTimer.current);
+    idleTimer.current = window.setTimeout(() => { touched.current = false; }, 6000);
+  };
+
+  const toLocal = (e: RPointerEvent) => {
+    const el = panel.current!;
+    const r = el.getBoundingClientRect();
+    const s = el.offsetWidth / r.width; // undo the Fit scale
+    return { x: (e.clientX - r.left) * s, y: (e.clientY - r.top) * s };
+  };
+
+  const onMove = (e: RPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse" && !dragging.current) return; // touch moves the lens only by dragging it
+    const p = toLocal(e);
+    hold();
+    tx.set(Math.max(0, Math.min(PANEL_W, p.x)));
+    ty.set(Math.max(0, Math.min(panelH, p.y)));
+  };
+
+  const jump = (i: number) => {
+    hold();
+    const c = centre(i);
+    tx.set(c.x);
+    ty.set(c.y);
+  };
 
   return (
-    <div
-      ref={ref}
-      className="rounded-2xl border border-white/10 bg-[#0e0b09] overflow-hidden shadow-2xl shadow-black/60 ring-1 ring-orange-400/10"
-    >
-      {/* Editor bar */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-[#111]">
-        <div className="w-3 h-3 rounded-full bg-red-500/70" />
-        <div className="w-3 h-3 rounded-full bg-yellow-500/70" />
-        <div className="w-3 h-3 rounded-full bg-green-500/70" />
-        <div className="ml-4 flex items-center gap-2 text-xs text-white/40">
-          <Terminal className="w-3 h-3" />
-          <span>auth/middleware.ts · forge</span>
-        </div>
-      </div>
-      {/* Messages */}
-      <div className="p-5 h-[400px] sm:h-[440px] overflow-hidden flex flex-col justify-end gap-4">
-        <AnimatePresence>
-          {DEMO_MESSAGES.slice(0, visibleCount).map((msg, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
-              className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {msg.role === "ai" && (
-                <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Zap className="w-3.5 h-3.5 text-black" />
-                </div>
-              )}
-              <div
-                className={`max-w-[85%] rounded-xl px-4 py-3 font-mono leading-relaxed whitespace-pre-wrap ${
-                  msg.role === "user"
-                    ? "text-sm bg-orange-500/15 border border-orange-400/25 text-orange-50"
-                    : "text-[11.5px] bg-white/[0.04] border border-white/10 text-stone-300"
-                }`}
-              >
-                {msg.text}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {typing && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex gap-3"
-          >
-            <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center flex-shrink-0">
-              <Zap className="w-3.5 h-3.5 text-black" />
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-              <div className="flex gap-1 items-center h-4">
-                {[0, 1, 2].map((i) => (
-                  <motion.div
-                    key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-orange-300"
-                    animate={{ y: [0, -4, 0] }}
-                    transition={{
-                      duration: 0.6,
-                      repeat: Infinity,
-                      delay: i * 0.15,
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </div>
-      {/* Input bar */}
-      <div className="px-5 pb-5">
-        <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-3">
-          <span className="text-sm text-white/30 font-mono flex-1">
-            Ask Forge anything...
+    <div className="flex flex-col items-center gap-4">
+      <div className={`${card} overflow-hidden`} style={{ width: PANEL_W }}>
+        <div className="flex items-center gap-2 border-b border-black/[.06] px-4 py-3">
+          {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-3 w-3 rounded-full" style={{ background: c }} aria-hidden="true" />)}
+          <span className="ml-2 text-[12px] font-medium text-[#6e6e73]" style={{ fontFamily: MONO }}>checkout/applyDiscount.ts</span>
+          <span className="ml-auto flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ background: "rgba(217,119,6,.12)", color: AD }}>
+            <MatrixLoader pattern={1} size={12} color={AD} />
+            4,812 files read
           </span>
-          <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center">
-            <ArrowRight className="w-3.5 h-3.5 text-black" />
-          </div>
+        </div>
+        <div
+          ref={panel}
+          className="relative select-none"
+          style={{ height: panelH, touchAction: "pan-y", fontFamily: MONO }}
+          onPointerMove={onMove}
+          onPointerUp={() => { dragging.current = false; }}
+          onPointerCancel={() => { dragging.current = false; }}
+          aria-label="Code with Forge's annotations. Use the buttons below to move the lens."
+          role="group"
+        >
+          <span ref={meter} className="invisible absolute left-0 top-0 whitespace-pre text-[13.5px]" aria-hidden="true">{"0".repeat(20)}</span>
+          {/* Plain editor */}
+          <CodeLayer />
+          {/* What Forge sees: only inside the lens */}
+          <motion.div className="pointer-events-none absolute inset-0" style={{ clipPath: clip, WebkitClipPath: clip, background: "#fffaf0" }} aria-hidden="true">
+            <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(rgba(180,83,9,.16) 1px, transparent 1px)", backgroundSize: "14px 14px" }} />
+            <CodeLayer xray cw={cw} active={active} />
+          </motion.div>
+          {/* Lens ring, draggable on touch */}
+          <motion.div
+            className="absolute left-0 top-0 cursor-grab rounded-full active:cursor-grabbing"
+            style={{ x: ringX, y: ringY, width: R * 2, height: R * 2, touchAction: "none", boxShadow: `0 0 0 2px ${A}, 0 0 0 7px rgba(217,119,6,.14), 0 24px 50px -20px rgba(180,83,9,.45)` }}
+            onPointerDown={(e) => { dragging.current = true; hold(); (e.target as Element).setPointerCapture?.(e.pointerId); }}
+            aria-hidden="true"
+          >
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-white" style={{ background: AD, fontFamily: "inherit" }}>Forge sees</span>
+          </motion.div>
         </div>
       </div>
+      <div className="flex w-full max-w-[556px] flex-wrap items-center justify-center gap-2" role="group" aria-label="Move the lens to">
+        {NOTES.map((n, i) => (
+          <button
+            key={n.key}
+            type="button"
+            onClick={() => jump(i)}
+            className="relative h-9 rounded-full px-3.5 text-[13px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={{ color: active === i ? "#fff" : INK, ["--tw-ring-color" as string]: AD }}
+            aria-pressed={active === i}
+          >
+            {active === i ? (
+              <motion.span layoutId="forge-note-pill" className="absolute inset-0 rounded-full" style={{ background: AD }} transition={{ type: "spring", stiffness: 480, damping: 34 }} />
+            ) : (
+              <span className="absolute inset-0 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,.08)]" />
+            )}
+            <span className="relative">{n.key}</span>
+          </button>
+        ))}
+      </div>
+      <p className="m-0 h-5 text-center text-[13px] text-[#6e6e73]" aria-live="polite">
+        {active >= 0 ? <><span className="font-semibold text-[#1d1d1f]">{NOTES[active].title}.</span> {NOTES[active].short}</> : "Move the lens over the code to see what Forge knows."}
+      </p>
     </div>
   );
 }
 
-/* ── Integration badges ──────────────────────────────────────────── */
-const INTEGRATIONS = [
-  { name: "VS Code", kind: "Editor" },
-  { name: "JetBrains", kind: "Editor" },
-  { name: "Neovim", kind: "Editor" },
-  { name: "GitHub", kind: "Code host" },
-  { name: "GitLab", kind: "Code host" },
-  { name: "Bitbucket", kind: "Code host" },
-  { name: "Slack", kind: "Chat" },
-  { name: "Linear", kind: "Issues" },
-  { name: "Jira", kind: "Issues" },
-  { name: "Buildkite", kind: "CI" },
-  { name: "CircleCI", kind: "CI" },
-  { name: "Sentry", kind: "Errors" },
-];
-
-/* ── Pricing ─────────────────────────────────────────────────────── */
-const PLANS = [
-  {
-    name: "Hobby",
-    price: { monthly: 0, annual: 0 },
-    description: "For personal projects and exploration",
-    features: [
-      "500 AI completions / mo",
-      "1 workspace",
-      "VS Code + GitHub",
-      "Community support",
-      "7-day history",
-    ],
-    cta: "Get started free",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: { monthly: 20, annual: 16 },
-    description: "For professional developers who move fast",
-    features: [
-      "Unlimited completions",
-      "5 workspaces",
-      "All integrations",
-      "Priority support",
-      "90-day history",
-      "Custom instructions",
-    ],
-    cta: "Start free trial",
-    highlighted: true,
-  },
-  {
-    name: "Team",
-    price: { monthly: 50, annual: 40 },
-    description: "For engineering teams who ship together",
-    features: [
-      "Everything in Pro",
-      "Unlimited workspaces",
-      "SSO / SAML",
-      "Audit logs",
-      "Dedicated Slack support",
-      "Custom data retention",
-      "SLA guarantee",
-    ],
-    cta: "Contact sales",
-    highlighted: false,
-  },
-];
-
-/* ── FAQ ─────────────────────────────────────────────────────────── */
-const FAQ_ITEMS = [
-  {
-    q: "How does Forge keep my code private?",
-    a: "Forge uses end-to-end encryption for all code in transit and at rest. We operate on a zero-retention policy — your code is never stored on our servers beyond the immediate inference window, and we never use customer code to train our models.",
-  },
-  {
-    q: "Which AI models power Forge?",
-    a: "Forge runs a custom ensemble of frontier models fine-tuned on millions of real developer workflows, including code generation, review, and deployment automation. The underlying models are continuously updated without any action required on your part.",
-  },
-  {
-    q: "Can I self-host Forge for my enterprise?",
-    a: "Yes. Forge Enterprise supports fully air-gapped, on-premises deployment with your own model weights. Contact our sales team for custom pricing and deployment timelines — typical rollout is under two weeks.",
-  },
-  {
-    q: "Does Forge support all programming languages?",
-    a: "Forge supports 40+ languages out of the box including TypeScript, Python, Go, Rust, Java, C#, Ruby, and more. Language-specific context engines provide idiomatic completions tailored to each ecosystem.",
-  },
-  {
-    q: "How does the annual billing discount work?",
-    a: "When you switch to annual billing, you receive a 20% discount applied immediately. You'll be charged for the full year upfront and can cancel anytime for a prorated refund on unused months.",
-  },
-];
-
-/* ── Navbar ──────────────────────────────────────────────────────── */
-function Navbar() {
-  const [scrolled, setScrolled] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
-
+function CodeLayer({ xray = false, cw = 7.8, active = -1 }: { xray?: boolean; cw?: number; active?: number }) {
   return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: EASE }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-[#0a0806]/80 backdrop-blur-xl border-b border-white/10"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-black fill-black" />
-          </div>
-          <span className="text-white font-semibold text-lg tracking-tight">
-            Forge
+    <div className="absolute inset-0" style={{ padding: `${PADY}px ${PADX}px` }}>
+      {CODE.map((l, i) => (
+        <div key={i} className="relative flex text-[13.5px]" style={{ height: LH, lineHeight: `${LH}px` }}>
+          <span className="flex-none select-none pr-3 text-right tabular-nums" style={{ width: GUT, color: xray ? "#b45309" : "#aeaeb2" }}>
+            {xray && COVER[i] >= 0 ? (
+              <span className="absolute left-[-12px] top-[5px] h-4 w-[3px] rounded-full" style={{ background: COVER[i] === 2 ? "#34c759" : COVER[i] === 1 ? "#ff9f0a" : "#ff3b30" }} />
+            ) : null}
+            {i + 1}
           </span>
+          <code className="whitespace-pre">{hl(l, xray)}{l === "" ? " " : null}</code>
         </div>
-
-        {/* Desktop links */}
-        <div className="hidden md:flex items-center gap-8">
-          {["Product", "Docs", "Security", "Pricing"].map((link) => (
-            <a
-              key={link}
-              href="#"
-              className="text-sm text-white/60 hover:text-white transition-colors"
-            >
-              {link}
-            </a>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <div className="hidden md:flex items-center gap-3">
-          <a href="#" className="text-sm text-white/60 hover:text-white">
-            Sign in
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 text-black text-sm font-medium transition-colors"
-          >
-            Get started
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="md:hidden text-white/60 hover:text-white"
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          <div className="w-5 h-4 flex flex-col justify-between">
-            <span className="block w-full h-px bg-current" />
-            <span className="block w-full h-px bg-current" />
-            <span className="block w-full h-px bg-current" />
-          </div>
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-white/10 bg-[#0a0806]/95 backdrop-blur-xl"
-          >
-            <div className="px-6 py-4 space-y-3">
-              {["Product", "Docs", "Security", "Pricing"].map((link) => (
-                <a
-                  key={link}
-                  href="#"
-                  className="block text-sm text-white/60 hover:text-white py-1"
-                >
-                  {link}
-                </a>
-              ))}
-              <a
-                href="#"
-                className="block w-full text-center px-4 py-2 rounded-lg bg-orange-500 text-black text-sm font-medium"
-              >
-                Get started
-              </a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.nav>
-  );
-}
-
-/* ── Hero ────────────────────────────────────────────────────────── */
-function Hero() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref });
-  const y = useTransform(scrollYProgress, [0, 1], [0, -80]);
-
-  return (
-    <section ref={ref} className="relative overflow-hidden pt-32 pb-24 md:pt-40">
-      {/* Ember glow rising from below the fold, plus a faint forge-grate grid */}
-      <motion.div style={{ y }} className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -bottom-40 left-1/2 h-[520px] w-[1100px] -translate-x-1/2 rounded-[50%] bg-[radial-gradient(closest-side,rgba(249,115,22,0.28),rgba(234,88,12,0.10)_55%,transparent)] blur-2xl" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)]" />
-      </motion.div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-6 grid gap-14 lg:grid-cols-[1fr_1.05fr] lg:items-center">
-        <div>
-          <motion.a
-            href="#"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.1 }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs text-white/70 hover:border-white/20 transition-colors"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
-            Forge 2.0 reads monorepos up to 4M lines
-          </motion.a>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: EASE, delay: 0.2 }}
-            className="mt-7 text-[2.75rem] sm:text-6xl lg:text-[4.1rem] font-semibold tracking-[-0.035em] text-white leading-[1.02]"
-          >
-            The copilot that has read your whole repo.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.35 }}
-            className="mt-6 text-lg text-white/55 max-w-lg leading-relaxed"
-          >
-            Forge indexes every file, commit and open PR, so its suggestions match how your team actually writes
-            code, not how a tutorial would.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, ease: EASE, delay: 0.5 }}
-            className="mt-7 inline-flex items-center gap-3 rounded-lg border border-white/10 bg-black/40 px-4 py-2.5 font-mono text-sm text-white/70"
-          >
-            <span className="text-orange-300">forge</span>
-            <span className="text-white/30">›</span>
-            <Typewriter />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.55 }}
-            className="mt-9 flex flex-col sm:flex-row gap-3"
-          >
-            <a
-              href="#"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-black font-semibold text-sm transition-colors"
-            >
-              Install for VS Code
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-white/15 hover:border-white/30 text-white/80 hover:text-white font-medium text-sm transition-all"
-            >
-              <Terminal className="w-4 h-4" />
-              Try it on a public repo
-            </a>
-          </motion.div>
-
-          <motion.dl
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, ease: EASE, delay: 0.7 }}
-            className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-white/10 pt-6"
-          >
-            {[
-              ["10M+", "completions a day"],
-              ["200ms", "p99 latency"],
-              ["0 days", "code retention"],
-            ].map(([v, l]) => (
-              <div key={l}>
-                <dt className="sr-only">{l}</dt>
-                <dd className="text-xl font-semibold tracking-tight text-white tabular-nums">{v}</dd>
-                <dd className="mt-1 text-xs text-white/40">{l}</dd>
-              </div>
-            ))}
-          </motion.dl>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: EASE, delay: 0.3 }}
-        >
-          <PromptRail />
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Context section: what "whole repo" means in practice ────────── */
-const REPO_TREE = [
-  { path: "apps/web", files: 1842, done: true },
-  { path: "apps/api", files: 964, done: true },
-  { path: "packages/auth", files: 211, done: true },
-  { path: "packages/billing", files: 388, done: true },
-  { path: "packages/ui", files: 1207, done: false },
-];
-
-function ContextSection() {
-  return (
-    <section id="product" className="py-24 md:py-32 px-6 border-t border-white/[0.06]">
-      <div className="max-w-6xl mx-auto">
-        <FadeUp className="max-w-2xl mb-14">
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-[-0.03em] text-white text-balance">
-            Context first. Then code.
-          </h2>
-          <p className="mt-5 text-white/55 text-lg leading-relaxed">
-            Most assistants see the file you have open. Forge sees the package that imports it, the test that covers it
-            and the PR that last broke it.
-          </p>
-        </FadeUp>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {/* Index */}
-          <FadeUp className="md:row-span-2">
-            <div className="h-full rounded-2xl border border-white/10 bg-white/[0.025] p-6 flex flex-col">
-              <p className="text-sm text-white/50">Indexing acme/platform</p>
-              <p className="mt-2 text-4xl font-semibold tracking-tight text-white tabular-nums">4,612 files</p>
-              <ul className="mt-8 space-y-4 font-mono text-xs">
-                {REPO_TREE.map((d) => (
-                  <li key={d.path}>
-                    <div className="flex justify-between text-white/60">
-                      <span>{d.path}</span>
-                      <span className="tabular-nums text-white/35">{d.files}</span>
-                    </div>
-                    <div className="mt-2 h-1 rounded-full bg-white/[0.06] overflow-hidden">
-                      <div className={`h-full rounded-full ${d.done ? "w-full bg-orange-400/80" : "w-2/3 bg-orange-400/40"}`} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-auto pt-8 text-sm text-white/45">Re-indexes incrementally on every push, in under 9 seconds.</p>
-            </div>
-          </FadeUp>
-
-          {/* Review */}
-          <FadeUp delay={0.08} className="md:col-span-2">
-            <div className="h-full rounded-2xl border border-white/10 bg-white/[0.025] p-6">
-              <div className="flex items-center gap-2 text-xs text-white/45">
-                <GitBranch className="w-3.5 h-3.5" />
-                <span className="font-mono">#4182 · billing: prorate seat changes</span>
-              </div>
-              <div className="mt-5 rounded-xl border border-white/10 bg-black/40 p-4">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-orange-500">
-                    <Zap className="w-3 h-3 text-black fill-black" />
-                  </span>
-                  <span className="text-sm font-medium text-white">Forge</span>
-                  <span className="text-xs text-white/35">reviewed proration.ts:48</span>
-                </div>
-                <p className="mt-3 text-sm leading-relaxed text-white/70">
-                  <span className="text-white">This rounds before converting currencies.</span> packages/billing/fx.ts
-                  rounds after, and invoice snapshots in apps/api expect that order. JPY seats will be off by up to ¥1
-                  per line item.
-                </p>
-              </div>
-              <p className="mt-4 text-sm text-white/45">Reviews read like a teammate who knows the codebase, because it does.</p>
-            </div>
-          </FadeUp>
-
-          {/* Diff */}
-          <FadeUp delay={0.14} className="md:col-span-2">
-            <div className="h-full rounded-2xl border border-white/10 bg-white/[0.025] p-6">
-              <p className="text-sm text-white/50">Suggested fix, matching fx.ts</p>
-              <pre className="mt-4 overflow-x-auto rounded-xl border border-white/10 bg-black/40 p-4 font-mono text-xs leading-6">
-                <code>
-                  <span className="block text-red-300/80">- const amount = Math.round(seats * unit * ratio);</span>
-                  <span className="block text-red-300/80">- return convert(amount, currency);</span>
-                  <span className="block text-emerald-300/90">+ const amount = convert(seats * unit * ratio, currency);</span>
-                  <span className="block text-emerald-300/90">+ return roundMinorUnits(amount, currency);</span>
-                </code>
-              </pre>
-            </div>
-          </FadeUp>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Integrations ────────────────────────────────────────────────── */
-function Integrations() {
-  return (
-    <section className="py-24 px-6 border-t border-white/[0.06]">
-      <div className="max-w-6xl mx-auto grid gap-12 md:grid-cols-[1fr_1.4fr] md:items-start">
-        <FadeUp>
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-[-0.03em] text-white">Works where you already work</h2>
-          <p className="mt-4 text-white/55 text-lg leading-relaxed">
-            One index, shared by your editor, your code host and your chat. No migration, no new tab.
-          </p>
-        </FadeUp>
-        <FadeUp delay={0.1}>
-          <ul className="grid grid-cols-2 sm:grid-cols-3 border-t border-l border-white/10">
-            {INTEGRATIONS.map((item) => (
-              <li
-                key={item.name}
-                className="flex items-baseline justify-between gap-3 border-b border-r border-white/10 px-5 py-4 hover:bg-white/[0.03] transition-colors"
-              >
-                <span className="text-sm font-medium text-white/85">{item.name}</span>
-                <span className="text-[11px] text-white/35">{item.kind}</span>
-              </li>
-            ))}
-          </ul>
-        </FadeUp>
-      </div>
-    </section>
-  );
-}
-
-/* ── Security ────────────────────────────────────────────────────── */
-function Security() {
-  const cards = [
-    {
-      icon: <Shield className="w-6 h-6 text-orange-300" />,
-      title: "SOC 2 Type II",
-      description:
-        "Independently audited and certified. Our security controls are verified annually by a third-party auditor, ensuring your data meets the highest compliance standards.",
-      badge: "Certified",
-    },
-    {
-      icon: <Lock className="w-6 h-6 text-orange-300" />,
-      title: "End-to-end encryption",
-      description:
-        "All code and context is encrypted with AES-256 at rest and TLS 1.3 in transit. Keys are managed in isolated HSMs and rotated automatically.",
-      badge: "AES-256",
-    },
-    {
-      icon: <Database className="w-6 h-6 text-orange-300" />,
-      title: "Zero data retention",
-      description:
-        "Your code is never stored after inference completes. We enforce a hard zero-retention policy and never use customer code to improve or train our models.",
-      badge: "Zero logs",
-    },
-  ];
-
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-5xl mx-auto">
-        <FadeUp className="max-w-2xl mb-14">
-          <h2 className="text-3xl md:text-5xl font-semibold tracking-[-0.03em] text-white mb-4">
-            Your code is read, never kept.
-          </h2>
-          <p className="text-white/55 text-lg">
-            Built for engineering teams who can&apos;t compromise on compliance or
-            data privacy.
-          </p>
-        </FadeUp>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {cards.map((card, i) => (
-            <FadeUp key={card.title} delay={i * 0.1}>
-              <div className="relative p-6 rounded-2xl border border-white/10 bg-white/3 hover:bg-white/5 transition-all group h-full">
-                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full border border-orange-400/30 bg-orange-400/10 text-orange-300 text-xs">
-                  {card.badge}
-                </div>
-                <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-400/20 flex items-center justify-center mb-4">
-                  {card.icon}
-                </div>
-                <h3 className="text-white font-semibold text-lg mb-2">
-                  {card.title}
-                </h3>
-                <p className="text-white/50 text-sm leading-relaxed">
-                  {card.description}
-                </p>
-              </div>
-            </FadeUp>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── Pricing ─────────────────────────────────────────────────────── */
-function Pricing() {
-  const [annual, setAnnual] = React.useState(false);
-
-  return (
-    <section id="pricing" className="py-24 px-6">
-      <div className="max-w-5xl mx-auto">
-        <FadeUp className="text-center mb-12">
-          <p className="text-orange-300 text-sm font-medium mb-3">
-            Pricing
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Start free. Scale with your team.
-          </h2>
-          <p className="text-white/50 text-lg max-w-xl mx-auto mb-8">
-            No credit card required. Upgrade or downgrade at any time.
-          </p>
-
-          {/* Toggle */}
-          <div className="inline-flex items-center gap-3 p-1 rounded-xl border border-white/10 bg-white/5">
-            <button
-              onClick={() => setAnnual(false)}
-              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                !annual
-                  ? "bg-white/15 text-white"
-                  : "text-white/50 hover:text-white"
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setAnnual(true)}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                annual
-                  ? "bg-white/15 text-white"
-                  : "text-white/50 hover:text-white"
-              }`}
-            >
-              Annual
-              <span className="px-1.5 py-0.5 rounded-full bg-orange-500 text-black text-xs font-semibold">
-                -20%
-              </span>
-            </button>
-          </div>
-        </FadeUp>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {PLANS.map((plan, i) => (
-            <FadeUp key={plan.name} delay={i * 0.1}>
-              <div
-                className={`relative p-6 rounded-2xl border h-full flex flex-col transition-all ${
-                  plan.highlighted
-                    ? "border-orange-400/60 bg-orange-500/8 shadow-xl shadow-orange-950/40"
-                    : "border-white/10 bg-white/3 hover:bg-white/5"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-orange-500 text-black text-xs font-semibold">
-                    Most popular
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <h3 className="text-white font-bold text-xl mb-1">
-                    {plan.name}
-                  </h3>
-                  <p className="text-white/40 text-sm mb-4">
-                    {plan.description}
-                  </p>
-                  <div className="flex items-end gap-1">
-                    <span className="text-4xl font-bold text-white">
-                      {plan.price[annual ? "annual" : "monthly"] === 0
-                        ? "Free"
-                        : `$${plan.price[annual ? "annual" : "monthly"]}`}
-                    </span>
-                    {plan.price[annual ? "annual" : "monthly"] > 0 && (
-                      <span className="text-white/40 text-sm mb-1">
-                        /seat/mo
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <ul className="space-y-2.5 mb-8 flex-1">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-start gap-2.5 text-sm text-white/70"
-                    >
-                      <Check className="w-4 h-4 text-orange-300 mt-0.5 flex-shrink-0" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href="#"
-                  className={`w-full py-3 rounded-xl text-sm font-semibold text-center transition-all ${
-                    plan.highlighted
-                      ? "bg-orange-500 hover:bg-orange-400 text-black shadow-lg shadow-orange-950/40"
-                      : "border border-white/15 hover:border-white/30 bg-white/5 text-white/80 hover:text-white"
-                  }`}
-                >
-                  {plan.cta}
-                </a>
-              </div>
-            </FadeUp>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── FAQ ─────────────────────────────────────────────────────────── */
-function FAQ() {
-  const [open, setOpen] = React.useState<number | null>(null);
-
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-3xl mx-auto">
-        <FadeUp className="text-center mb-16">
-          <p className="text-orange-300 text-sm font-medium mb-3">
-            FAQ
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-white">
-            Common questions
-          </h2>
-        </FadeUp>
-
-        <div className="space-y-3">
-          {FAQ_ITEMS.map((item, i) => (
-            <FadeUp key={i} delay={i * 0.07}>
-              <div
-                className={`rounded-xl border transition-all overflow-hidden ${
-                  open === i
-                    ? "border-orange-400/40 bg-orange-500/5"
-                    : "border-white/10 bg-white/3 hover:bg-white/5"
-                }`}
-              >
-                <button
-                  className="w-full flex items-center justify-between px-5 py-4 text-left"
-                  onClick={() => setOpen(open === i ? null : i)}
-                >
-                  <span className="text-white font-medium text-sm pr-4">
-                    {item.q}
-                  </span>
-                  <motion.div
-                    animate={{ rotate: open === i ? 180 : 0 }}
-                    transition={{ duration: 0.3, ease: EASE }}
-                    className="flex-shrink-0"
-                  >
-                    <ChevronDown className="w-4 h-4 text-white/40" />
-                  </motion.div>
-                </button>
-                <AnimatePresence initial={false}>
-                  {open === i && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.35, ease: EASE }}
-                    >
-                      <p className="px-5 pb-5 text-sm text-white/55 leading-relaxed">
-                        {item.a}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </FadeUp>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ── CTA Section ─────────────────────────────────────────────────── */
-function CTASection() {
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (email) setSubmitted(true);
-  }
-
-  return (
-    <section className="py-24 px-6">
-      <FadeUp>
-        <div className="max-w-4xl mx-auto relative rounded-3xl overflow-hidden border border-orange-400/20 bg-gradient-to-br from-orange-950/60 via-[#170d06] to-[#0a0806] p-12 text-center">
-          {/* Glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_rgba(249,115,22,0.15)_0%,_transparent_65%)] pointer-events-none" />
-
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-orange-400/30 bg-orange-400/10 text-orange-200 text-xs font-medium mb-6">
-              <Zap className="w-3 h-3 fill-orange-300 text-orange-300" />
-              No credit card required
-            </div>
-
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-[-0.03em] text-white mb-4 leading-tight">
-              Point Forge at your repo.
-            </h2>
-            <p className="text-white/50 text-lg max-w-xl mx-auto mb-10">
-              It finishes indexing before your coffee does. Then ask it about
-              the code nobody on the team wants to touch.
-            </p>
-
-            <AnimatePresence mode="wait">
-              {!submitted ? (
-                <motion.form
-                  key="form"
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  onSubmit={handleSubmit}
-                  className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md mx-auto"
-                >
-                  <div className="relative flex-1 w-full">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                    <input
-                      type="email"
-                      placeholder="you@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/8 border border-white/15 text-white placeholder-white/30 text-sm outline-none focus:border-orange-400/60 focus:ring-1 focus:ring-orange-400/30 transition-all"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="flex items-center gap-2 px-5 py-3 rounded-xl bg-orange-500 hover:bg-orange-400 text-black text-sm font-semibold transition-colors whitespace-nowrap shadow-lg shadow-orange-950/40"
-                  >
-                    Get started
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </motion.form>
-              ) : (
-                <motion.div
-                  key="success"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-center justify-center gap-2 text-green-400 font-medium"
-                >
-                  <Check className="w-5 h-5" />
-                  You&apos;re on the list! Check your inbox.
+      ))}
+      {xray && NOTES.map((n, k) => {
+        const left = PADX + GUT + n.col * cw;
+        const top = PADY + n.line * LH;
+        const boxW = 232;
+        const boxLeft = Math.max(8, Math.min(PANEL_W - boxW - 8, left + (n.len * cw) / 2 - boxW / 2));
+        return (
+          <div key={n.key}>
+            <span className="absolute rounded-[5px]" style={{ left: left - 2, top: top + 3, width: n.len * cw + 4, height: LH - 6, background: `${n.tone}22`, boxShadow: `inset 0 -2px 0 ${n.tone}` }} />
+            <AnimatePresence>
+              {active === k && (
+                <motion.div key="c" className="absolute rounded-[12px] bg-white px-3 py-2 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_24px_-12px_rgba(0,0,0,.35)]" style={{ left: boxLeft, top: top + LH + 2, width: boxW, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif" }} initial={{ opacity: 0, y: -6, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4, scale: 0.98 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}>
+                  <span className="flex items-center gap-1.5 text-[12px] font-semibold text-[#1d1d1f]"><span className="h-1.5 w-1.5 rounded-full" style={{ background: n.tone }} />{n.title}</span>
+                  <span className="mt-0.5 block text-[11.5px] leading-[1.35] text-[#515154]">{n.body}</span>
                 </motion.div>
               )}
             </AnimatePresence>
-
-            <p className="mt-5 text-white/25 text-xs">
-              By signing up you agree to our Terms of Service and Privacy
-              Policy.
-            </p>
           </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function Hero() {
+  return (
+    <section id="top" className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(45% 55% at 22% 45%, rgba(217,119,6,.14), transparent 70%), radial-gradient(30% 40% at 90% 10%, rgba(255,204,0,.12), transparent 70%)" }} />
+      <div className="relative mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 pb-16 pt-12 lg:grid-cols-[1.12fr_1fr] lg:gap-14 lg:pb-24 lg:pt-20">
+        <motion.div className="order-2 min-w-0 lg:order-1" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.15 }}>
+          <Fit><XrayEditor /></Fit>
+        </motion.div>
+        <div className="order-1 flex min-w-0 flex-col items-start gap-6 lg:order-2">
+          <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
+            <span className="h-2 w-2 rounded-full" style={{ background: A }} aria-hidden="true" />
+            Reads monorepos up to 4 million lines
+          </motion.span>
+          <h1 className="m-0 text-[clamp(44px,6.6vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+            <Words text="It already read the rest of your code." accentWords={["read"]} accent={AD} />
+          </h1>
+          <Reveal delay={0.35} y={14}>
+            <p className="m-0 max-w-[500px] text-[clamp(17px,2vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+              Forge indexes every file, commit and open pull request in your repo. So its suggestions call the helpers you already wrote, and it warns you about the caller three packages away before you break it.
+            </p>
+          </Reveal>
+          <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">
+            <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(180,83,9,.8)]" style={{ background: AD }} onClick={() => scrollToId("pricing")}>Install Forge</Magnetic>
+            <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("review")}>See a review</Magnetic>
+          </Reveal>
+          <Reveal delay={0.55} y={10} className="w-full max-w-[360px]">
+            <CopyCommand command="npx forge init" />
+            <span className="mt-2.5 block text-[13px] text-[#6e6e73]">Indexing a 1M-line repo takes about six minutes, then stays in sync on every push.</span>
+          </Reveal>
         </div>
-      </FadeUp>
+      </div>
     </section>
   );
 }
 
-/* ── Footer ──────────────────────────────────────────────────────── */
-function Footer() {
-  const columns = [
-    {
-      heading: "Product",
-      links: ["Features", "Integrations", "Changelog", "Roadmap", "Status"],
-    },
-    {
-      heading: "Developers",
-      links: ["Documentation", "API Reference", "SDKs", "VS Code Extension", "GitHub"],
-    },
-    {
-      heading: "Company",
-      links: ["About", "Blog", "Careers", "Press", "Contact"],
-    },
-    {
-      heading: "Legal",
-      links: ["Privacy Policy", "Terms of Service", "Cookie Policy", "Security", "DPA"],
-    },
+/* ------------------------------------------------------------------ */
+/* Stats                                                                */
+/* ------------------------------------------------------------------ */
+
+function Stats() {
+  const items = [
+    { to: 71, f: (n: number) => `${Math.round(n)}%`, l: "of suggestions merged without edits" },
+    { to: 6, f: (n: number) => `${Math.round(n)} min`, l: "to index a million lines" },
+    { to: 14, f: (n: number) => `${Math.round(n)}`, l: "files read, on average, per answer" },
+    { to: 0, from: 30, f: (n: number) => `${Math.round(n)} days`, l: "of your code kept after a request" },
   ];
-
   return (
-    <footer className="border-t border-white/8 pt-16 pb-10 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-                <Zap className="w-4 h-4 text-black fill-black" />
-              </div>
-              <span className="text-white font-semibold text-lg">Forge</span>
-            </div>
-            <p className="text-white/40 text-sm leading-relaxed mb-5">
-              AI copilot for the entire dev stack.
-            </p>
-            <div className="flex items-center gap-3">
-              {[
-                { icon: <Twitter className="w-4 h-4" />, label: "Twitter" },
-                { icon: <Github className="w-4 h-4" />, label: "GitHub" },
-                { icon: <Linkedin className="w-4 h-4" />, label: "LinkedIn" },
-              ].map((s) => (
-                <a
-                  key={s.label}
-                  href="#"
-                  aria-label={s.label}
-                  className="w-8 h-8 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/50 hover:text-white transition-all"
-                >
-                  {s.icon}
-                </a>
-              ))}
-            </div>
+    <section className="mx-auto max-w-[1180px] px-5 pb-8 pt-4" aria-label="Forge in numbers">
+      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
+            <Counter to={it.to} from={it.from ?? 0} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
+            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
           </div>
-
-          {/* Columns */}
-          {columns.map((col) => (
-            <div key={col.heading}>
-              <h4 className="text-white/70 text-xs font-semibold uppercase tracking-widest mb-4">
-                {col.heading}
-              </h4>
-              <ul className="space-y-2.5">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-white/40 hover:text-white text-sm transition-colors"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-8 border-t border-white/8">
-          <p className="text-white/25 text-xs">
-            © {new Date().getFullYear()} Forge AI, Inc. All rights reserved.
-          </p>
-          <div className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            <span className="text-white/25 text-xs">All systems operational</span>
-          </div>
-        </div>
-      </div>
-    </footer>
+        ))}
+      </Stagger>
+      <p className="m-0 mt-6 text-[12px] text-[#6e6e73]">Measured on our own 1.2M-line monorepo over the last 90 days. Your numbers will differ.</p>
+    </section>
   );
 }
 
-/* ── Page ────────────────────────────────────────────────────────── */
-export default function AiStartupForgePage() {
-  useLenis();
+/* ------------------------------------------------------------------ */
+/* Story visuals                                                        */
+/* ------------------------------------------------------------------ */
 
+function IndexCard() {
+  const rows = [
+    { t: "packages/payments", s: "1,204 files", state: "done" },
+    { t: "Commit history", s: "18,330 commits", state: "run" },
+    { t: "Open pull requests", s: "37 of 41", state: "run2" },
+  ];
   return (
-    <div className="min-h-screen bg-[#0a0806] text-white antialiased">
-      <Navbar />
-      <Hero />
-      <ContextSection />
-      <Integrations />
-      <Security />
-      <Pricing />
-      <FAQ />
-      <CTASection />
-      <Footer />
+    <div className={`${card} flex w-[440px] flex-col items-center gap-2 px-6 pb-6`}>
+      <FolderPeek title="northwind/checkout" meta="4,812 files · 1.2M lines" color={A} autoplay />
+      <div className="mt-2 flex w-full flex-col gap-1">
+        {rows.map((r, i) => (
+          <div key={r.t} className="flex items-center gap-3 rounded-2xl px-3 py-2.5 hover:bg-[#f5f5f7]">
+            {r.state === "done" ? (
+              <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full" style={{ background: "#34c759" }} aria-label="Done">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+              </span>
+            ) : (
+              <MatrixLoader pattern={i === 1 ? 0 : 3} size={22} color={A} />
+            )}
+            <span className="flex-1 text-[15px] font-medium text-[#1d1d1f]">{r.t}</span>
+            <span className="text-[13px] tabular-nums text-[#6e6e73]">{r.s}</span>
+          </div>
+        ))}
+      </div>
     </div>
+  );
+}
+
+const I = (d: string) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+
+function AskCard() {
+  return (
+    <div className={`${card} flex h-[440px] w-[440px] flex-col gap-5 p-6`}>
+      <div className="rounded-2xl bg-[#f5f5f7] p-4 text-[13px] leading-[1.9]" style={{ fontFamily: MONO }}>
+        <div className="whitespace-pre text-[#86868b]">{"  if (!rule) return cart;"}</div>
+        <div className="whitespace-pre">
+          {"  const off = "}
+          <span className="rounded-[4px] px-0.5" style={{ background: "rgba(217,119,6,.2)", boxShadow: `inset 0 -2px 0 ${A}` }}>discountFor</span>
+          {"(rule, cart);"}
+        </div>
+        <div className="whitespace-pre text-[#86868b]">{"  return withTotal(cart, off);"}</div>
+      </div>
+      <div className="flex flex-1 justify-center">
+        <StaggerMenu
+          label="Ask Forge"
+          autoplay
+          items={[
+            { id: "explain", label: "Explain this", icon: I("M12 18h.01M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"), done: "Explained in chat" },
+            { id: "callers", label: "Find every caller", icon: I("M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM20 20l-4-4"), done: "14 callers found" },
+            { id: "test", label: "Write a test", icon: I("M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"), done: "Test drafted" },
+            { id: "refactor", label: "Refactor safely", icon: I("M4 7h11l-3-3M20 17H9l3 3"), done: "Plan ready" },
+            { id: "forget", label: "Forget this file", icon: I("M4 7h16M10 11v6M14 11v6M6 7l1 12h10l1-12M9 7V4h6v3"), danger: true, done: "Removed from index" },
+          ]}
+        />
+      </div>
+    </div>
+  );
+}
+
+const GHOST = [`  const rule = await findActiveRule(code);`, `  if (!rule) return cart;`, `  const off = discountFor(rule, cart);`, `  return withTotal(cart, atLeast0(cart.total - off));`];
+
+function SuggestCard() {
+  return (
+    <div className={`${card} flex w-[480px] flex-col gap-5 p-6`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#6e6e73]">Suggestion</span>
+        <span className="flex items-center gap-1.5 text-[12px] text-[#6e6e73]">
+          <kbd className="rounded-md bg-[#f5f5f7] px-1.5 py-0.5 text-[11px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]">Tab</kbd> to accept
+        </span>
+      </div>
+      <div className="rounded-2xl bg-[#f5f5f7] p-4 text-[12px] leading-[1.9]" style={{ fontFamily: MONO }}>
+        <div className="whitespace-pre text-[#1d1d1f]">{"export async function applyDiscount(cart, code) {"}</div>
+        {GHOST.map((g, i) => (
+          <motion.div key={i} className="whitespace-pre" style={{ color: "#a16207" }} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 0.85, x: 0 }} transition={{ type: "spring", stiffness: 200, damping: 24, delay: 0.3 + i * 0.25 }}>
+            {g}
+          </motion.div>
+        ))}
+        <div className="whitespace-pre text-[#1d1d1f]">{"}"}</div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-[13px] font-medium text-[#1d1d1f]">Read before suggesting</span>
+        <div className="flex flex-wrap gap-2">
+          {["pricing/active.ts", "pricing/off.ts", "money/clamp.ts", "total.test.ts"].map((f, i) => (
+            <motion.span key={f} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 420, damping: 22, delay: 1.3 + i * 0.1 }} className="rounded-full bg-[#fff7ed] px-2.5 py-1 text-[12px] font-medium" style={{ color: AD, fontFamily: MONO }}>
+              {f}
+            </motion.span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LearnCard() {
+  const rows = [
+    { t: "Errors return Result<T>, they don't throw", p: 94 },
+    { t: "Tests build carts with makeCart()", p: 97 },
+    { t: "zod schemas sit next to each handler", p: 88 },
+    { t: "No default exports under /lib", p: 100 },
+  ];
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-4 p-6`}>
+      <div className="flex flex-col gap-1">
+        <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">House style, learned</span>
+        <span className="text-[13px] text-[#6e6e73]">From 18,330 commits. Share of the codebase that follows each one.</span>
+      </div>
+      {rows.map((r, i) => (
+        <div key={r.t} className="flex flex-col gap-1.5">
+          <div className="flex items-baseline justify-between gap-3 text-[14px]">
+            <span className="text-[#1d1d1f]">{r.t}</span>
+            <span className="font-semibold tabular-nums" style={{ color: AD }}>{r.p}%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-[#f0f0f2]">
+            <motion.div className="h-full origin-left rounded-full" style={{ background: A, width: `${r.p}%` }} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ type: "spring", stiffness: 90, damping: 18, delay: 0.2 + i * 0.12 }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Story() {
+  return (
+    <section id="how" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="How Forge knows" title="Context is the whole product." sub="Most assistants see the file you have open. Forge sees the package that imports it, the test that covers it, and the pull request that changed it last week." accent={AD} />
+      <div className="mt-10">
+        <StickyStory
+          accent={AD}
+          steps={[
+            { kicker: "01 · Index", title: "It reads the whole repo, not the open tab.", body: "Point Forge at a repository and it builds a map of every symbol, import, test and commit. Pushes update the map in seconds, so it never answers from last month's code.", visual: <IndexCard /> },
+            { kicker: "02 · Ask", title: "Ask about any symbol, from where you are.", body: "Select something and ask. Forge answers with the callers, the tests and the history it found, and links each claim to the line it came from.", visual: <AskCard /> },
+            { kicker: "03 · Suggest", title: "Suggestions that use your helpers.", body: "Instead of inventing a new rounding function, Forge calls the one in money/. Every suggestion lists the files it read, so you can check its homework.", visual: <SuggestCard /> },
+            { kicker: "04 · Learn", title: "It picks up how your team writes.", body: "Naming, error handling, where tests live. Forge learns the conventions from your history and follows them. When the codebase disagrees with itself, it tells you.", visual: <LearnCard /> },
+          ]}
+        />
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Review: Before / After                                               */
+/* ------------------------------------------------------------------ */
+
+const BEFORE = [
+  `// checkout/applyDiscount.ts · your draft`,
+  `const rule = await rules.find(code);`,
+  `if (!rule) return cart;`,
+  ``,
+  `if (rule.kind === "percent") {`,
+  `  const off = cart.total * rule.value;`,
+  `  return withTotal(cart, cart.total - off);`,
+  `}`,
+  `return withTotal(cart, cart.total - rule.value);`,
+];
+
+const AFTER = [
+  `// Forge: handles "bogo" (#2291), never below 0`,
+  `const rule = await findActiveRule(code);`,
+  `if (!rule) return cart;`,
+  ``,
+  `const off = discountFor(rule, cart);`,
+  `return withTotal(cart, atLeast0(cart.total - off));`,
+  ``,
+  `// + total.test.ts: 3 new cases`,
+  ``,
+];
+
+function CodePane({ lines, tone, bg, mark }: { lines: string[]; tone: string; bg: string; mark: number[] }) {
+  return (
+    <div className="flex h-full w-full items-center justify-center px-3 py-5 text-[9.5px] leading-[1.75] sm:text-[14px] lg:text-[17px]" style={{ background: bg, fontFamily: MONO }}>
+      <div className="flex w-[34em] max-w-full flex-col">
+      {lines.map((l, i) => (
+        <div key={i} className="relative flex gap-3 sm:gap-5">
+          <span className="w-3 flex-none select-none text-right tabular-nums text-[#86868b] sm:w-5">{i + 1}</span>
+          {mark.includes(i) && <span className="absolute -left-2 top-0 h-full w-[3px] rounded-full sm:-left-4" style={{ background: tone }} aria-hidden="true" />}
+          <code className="whitespace-pre">{hl(l)}{l === "" ? " " : null}</code>
+        </div>
+      ))}
+      </div>
+    </div>
+  );
+}
+
+function Review() {
+  return (
+    <section id="review" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.2fr_1fr]">
+          <SectionHead eyebrow="Review" title="Drag to see what it would change." accent={AD} />
+          <Reveal y={14}>
+            <p className="m-0 max-w-[460px] text-[17px] leading-[1.5] text-[#6e6e73]">Forge reviews your branch before you open the pull request. It ran your tests on this suggestion, found the missing case, and reused two helpers you already had.</p>
+          </Reveal>
+        </div>
+        <Reveal className="mt-12" y={20} amount={0.15}>
+          <BeforeAfter
+            autoplay
+            beforeLabel="Your draft"
+            afterLabel="Forge"
+            before={<CodePane lines={BEFORE} tone="#ff3b30" bg="#fff" mark={[4, 5, 6, 8]} />}
+            after={<CodePane lines={AFTER} tone="#34c759" bg="#fffaf0" mark={[1, 4, 5, 7]} />}
+          />
+        </Reveal>
+        <Stagger className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[
+            { t: "Runs your tests first", b: "Suggestions that break the suite never reach you. This one passed 42 of 42." },
+            { t: "Cites its sources", b: "Every change links the files and pull requests it was based on." },
+            { t: "One click to undo", b: "Accepted changes land as a separate commit you can revert on its own." },
+          ].map((f) => (
+            <div key={f.t} className={`${card} h-full p-6`}>
+              <h3 className="m-0 text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{f.t}</h3>
+              <p className="m-0 mt-1.5 text-[15px] leading-[1.5] text-[#6e6e73]">{f.b}</p>
+            </div>
+          ))}
+        </Stagger>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Editors: Dock                                                        */
+/* ------------------------------------------------------------------ */
+
+const G = (d: string) => (
+  <svg width="56%" height="56%" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+
+const EDITORS = [
+  { id: "vscode", label: "VS Code", bg: "linear-gradient(180deg,#4fa8ff,#0a66d6)", glyph: G("M8 8l-4 4 4 4M16 8l4 4-4 4M13.5 5l-3 14") },
+  { id: "jetbrains", label: "JetBrains IDEs", bg: "linear-gradient(180deg,#a78bfa,#6d28d9)", glyph: G("M5 5h14v14H5zM8 15h5") },
+  { id: "neovim", label: "Neovim", bg: "linear-gradient(180deg,#6ee7a8,#15803d)", glyph: G("M6 18V6l12 12V6") },
+  { id: "terminal", label: "Terminal", bg: "linear-gradient(180deg,#48484a,#1d1d1f)", glyph: G("M5 8l4 4-4 4M12 16h7") },
+  { id: "github", label: "Pull requests", bg: "linear-gradient(180deg,#fbbf24,#d97706)", glyph: G("M7 5v14M7 5a2 2 0 1 0 0 .1M17 19a2 2 0 1 0 0-.1M17 17V9a3 3 0 0 0-3-3h-3M13 4l-2 2 2 2") },
+  { id: "chat", label: "Team chat", bg: "linear-gradient(180deg,#fb7185,#e11d48)", glyph: G("M5 6h14v9H9l-4 3z") },
+];
+
+function Editors() {
+  return (
+    <section id="editors" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+        <div className="flex flex-col gap-6">
+          <SectionHead eyebrow="Everywhere you write code" title="Same brain in every editor." sub="One index, shared by the extension, the CLI and the pull request bot. Ask in your terminal, pick it up in the IDE, see the review on the PR." accent={AD} />
+          <Reveal y={12}>
+            <ul className="m-0 flex list-none flex-col gap-3 p-0">
+              {["Extensions for VS Code, JetBrains IDEs and Neovim", "A CLI for scripts and CI: forge ask, forge review", "Review comments on every pull request, if you want them"].map((t) => (
+                <li key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
+                  <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: "rgba(217,119,6,.14)", color: AD }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                  </span>
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        </div>
+        <Reveal y={18}>
+          <div className={`${card} relative flex flex-col items-center gap-3 overflow-hidden px-6 pb-8 pt-10`} style={{ background: "linear-gradient(180deg,#fff,#fff7ed)" }}>
+            <span className="text-[13px] font-medium text-[#6e6e73]">Hover the dock. Click an editor to start it.</span>
+            <Fit><Dock apps={EDITORS} autoplay /></Fit>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Privacy: Capsule toggles                                             */
+/* ------------------------------------------------------------------ */
+
+function Privacy() {
+  const [retain, setRetain] = useState(false);
+  const [train, setTrain] = useState(false);
+  const [vpc, setVpc] = useState(true);
+  const rows = [
+    { id: "retain", label: "Keep request logs for 30 days", hint: retain ? "Logs kept for 30 days, encrypted, then deleted." : "Snippets are dropped as soon as the answer is sent.", v: retain, set: setRetain },
+    { id: "train", label: "Use my code to improve models", hint: train ? "Only for your own fine-tuned model. Never shared." : "Off. Your code never trains anyone's model.", v: train, set: setTrain },
+    { id: "vpc", label: "Keep the index in my cloud", hint: vpc ? "The index lives in your VPC. Forge only sees the snippets it needs." : "The index is hosted by Forge, encrypted per repo.", v: vpc, set: setVpc },
+  ];
+  return (
+    <section id="privacy" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.1fr]">
+        <SectionHead eyebrow="Privacy" title="Your code stays your code." sub="Every setting is visible and every default is the strict one. Admins can lock them for the whole organisation." accent={AD} />
+        <Reveal y={18}>
+          <div className={`${card} flex flex-col divide-y divide-black/[.06] px-6`}>
+            {rows.map((r) => (
+              <div key={r.id} className="flex items-center justify-between gap-5 py-5">
+                <div className="flex min-w-0 flex-col gap-1">
+                  <span className="text-[16px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{r.label}</span>
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span key={String(r.v)} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="text-[13px] leading-[1.4] text-[#6e6e73]">
+                      {r.hint}
+                    </motion.span>
+                  </AnimatePresence>
+                </div>
+                <CapsuleToggle checked={r.v} onChange={r.set} label={r.label} onColor={A} />
+              </div>
+            ))}
+            <div className="flex flex-wrap items-center gap-2 py-4 text-[12px] text-[#6e6e73]">
+              {["SOC 2 Type II", "SSO and SCIM", "Audit log export", "Self-hosted option"].map((b) => (
+                <span key={b} className="rounded-full bg-[#f5f5f7] px-2.5 py-1 font-medium text-[#424245]">{b}</span>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Pricing: plans + seat stepper with rolling total                     */
+/* ------------------------------------------------------------------ */
+
+function Pricing() {
+  const [seats, setSeats] = useState(8);
+  const plans = [
+    { n: "Solo", p: "Free", s: "For public repos and side projects", f: ["Repos up to 200k lines", "Editor and CLI", "Community support"] },
+    { n: "Team", p: "$19", s: "per seat, per month", f: ["Repos up to 4M lines", "Pull request reviews", "Shared conventions", "Admin controls"], hot: true },
+    { n: "Enterprise", p: "Custom", s: "For regulated teams", f: ["Index in your VPC", "SSO, SCIM, audit log", "99.9% uptime SLA"] },
+  ];
+  return (
+    <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Pricing" title="Priced per seat. Repos are free." sub="Index as many repositories as you like on any plan. Try Team free for 14 days, no card." accent={AD} center />
+      <Stagger className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        {plans.map((p) => (
+          <div key={p.n} className={`${card} relative flex h-full flex-col gap-5 p-7`} style={p.hot ? { boxShadow: `0 0 0 2px ${A}, 0 24px 48px -32px rgba(180,83,9,.5)` } : undefined}>
+            {p.hot && <span className="absolute right-6 top-6 rounded-full px-2.5 py-1 text-[11px] font-semibold text-white" style={{ background: AD }}>Most teams</span>}
+            <div className="flex flex-col gap-1">
+              <h3 className="m-0 text-[20px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{p.n}</h3>
+              <span className="text-[40px] font-semibold tracking-[-0.045em] text-[#1d1d1f] tabular-nums">{p.p}</span>
+              <span className="text-[14px] text-[#6e6e73]">{p.s}</span>
+            </div>
+            <ul className="m-0 flex list-none flex-col gap-2.5 p-0">
+              {p.f.map((f) => (
+                <li key={f} className="flex items-center gap-2.5 text-[15px] text-[#1d1d1f]">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={AD} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </Stagger>
+      <Reveal className="mt-5" y={16}>
+        <div className={`${card} grid grid-cols-1 items-center gap-6 p-7 lg:grid-cols-[1fr_auto_1fr]`}>
+          <div className="flex flex-col gap-1 text-center lg:text-left">
+            <span className="text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Team, for your whole team</span>
+            <span className="text-[14px] text-[#6e6e73]">Add or remove seats any time. We prorate to the day.</span>
+          </div>
+          <div className="flex justify-center"><Fit><ElasticStepper label="Seats" min={1} max={30} defaultValue={8} accent={AD} onChange={setSeats} /></Fit></div>
+          <div className="flex items-baseline justify-center gap-1.5 whitespace-nowrap text-[#1d1d1f] lg:justify-end">
+            <span className="flex text-[40px] font-semibold leading-none tracking-[-0.045em] tabular-nums">$<RollingNumber value={seats * 19} /></span>
+            <span className="text-[14px] text-[#6e6e73]">/ month</span>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+export default function AiStartupForgePage() {
+  return (
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
+        <Nav brand={<Logo />} accent={AD} cta="Install Forge" onCta={() => scrollToId("pricing")} links={[{ label: "How it works", id: "how" }, { label: "Review", id: "review" }, { label: "Editors", id: "editors" }, { label: "Privacy", id: "privacy" }, { label: "Pricing", id: "pricing" }]} />
+        <Hero />
+        <Stats />
+        <Story />
+        <Review />
+        <Editors />
+        <Privacy />
+        <Pricing />
+        <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
+          <SectionHead eyebrow="FAQ" title="Fair questions." accent={AD} />
+          <Reveal y={14}>
+            <Faq
+              accent={AD}
+              items={[
+                { q: "Does Forge send my whole repo to a model?", a: "No. The index lives on Forge's servers or in your cloud. For each request Forge retrieves the few snippets that matter, usually 10 to 20, and sends only those. They are not stored after the answer comes back unless you turn on logging." },
+                { q: "How big a repo can it handle?", a: "Team indexes repositories up to 4 million lines; Enterprise has no hard limit. A 1M-line repo takes about six minutes to index the first time and a few seconds per push after that." },
+                { q: "Which languages does it understand?", a: "Symbol-level indexing covers TypeScript, JavaScript, Python, Go, Rust, Java, Kotlin, C# and Ruby. Other languages are indexed as text, which still works for search and questions but not for call graphs." },
+                { q: "Will it write code in our style?", a: "It tries. Forge learns conventions from your history and shows you what it learned, so you can correct it. Where the codebase disagrees with itself, it follows the newer code and says so." },
+                { q: "What happens when it's wrong?", a: "Every answer links to the lines it relied on, so mistakes are easy to spot. Suggestions run against your tests before you see them, and accepted changes land as their own commit." },
+              ]}
+            />
+          </Reveal>
+        </section>
+        <div className="mx-auto max-w-[1180px] px-5 pb-20">
+          <CtaBand title="Point Forge at your repo." sub="Free for public repositories, and for 14 days on private ones. Indexing starts the moment you connect." cta="Install Forge" secondary="Book a demo" accent={AD} glow="rgba(217,119,6,.32)" />
+        </div>
+        <Footer brand={<Logo />} note="The coding assistant that reads your whole repository before it answers." columns={[{ title: "Product", links: ["Editor", "CLI", "Reviews", "Pricing"] }, { title: "Developers", links: ["Docs", "Changelog", "Status", "Security"] }, { title: "Company", links: ["About", "Careers", "Privacy", "Contact"] }]} />
+      </div>
+    </MotionConfig>
   );
 }

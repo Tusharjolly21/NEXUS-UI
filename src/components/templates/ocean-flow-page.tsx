@@ -1,1144 +1,1181 @@
 "use client";
+/**
+ * Ocean Flow: landing page template for a diving equipment store.
+ * Built from Motion Kit components: Radio Cards, Ruler Picker (local copy),
+ * Elastic Stepper, Capsule Toggles, Price Odometer's rolling number,
+ * Todo List, Flight Tracker and Receipt Unfold.
+ * The hero is a depth gauge: drag it down the reef and the water, the colours,
+ * the readouts and the recommended kit all change with depth.
+ */
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionTemplate, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue } from "framer-motion";
+import RadioCards from "@/components/templates/ocean-flow/RadioCards";
+import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
+import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
+import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
+import TodoList from "@/components/templates/kit/components/TodoList";
+import FlightTracker from "@/components/templates/kit/components/FlightTracker";
+import ReceiptUnfold from "@/components/templates/ocean-flow/ReceiptUnfold";
+import RulerPicker from "@/components/templates/ocean-flow/RulerPicker";
+import { Story } from "@/components/templates/ocean-flow/Story";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-  AnimatePresence,
-} from "framer-motion";
-import { cn } from "@/lib/utils";
-import { InfiniteMovingCards } from "@/components/infinite-moving-cards/InfiniteMovingCards";
-import type { InfiniteMovingCardItem } from "@/components/infinite-moving-cards/InfiniteMovingCards";
+const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const A = "#0284c7"; // graphics
+const AD = "#0369a1"; // blue text and buttons (5.9:1 on white)
+const INK = "#1d1d1f";
+const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 
-// ── Lenis smooth scroll ──────────────────────────────────────────────────────
-function useLenis() {
-  React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let lenis: any = null;
-    let rafId: number;
+/* ------------------------------------------------------------------ cart */
 
-    import("@studio-freight/lenis").then(({ default: Lenis }) => {
-      lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-      const raf = (time: number) => {
-        lenis.raf(time);
-        rafId = requestAnimationFrame(raf);
-      };
-      rafId = requestAnimationFrame(raf);
-    });
+interface CartLine { key: string; name: string; variant: string; price: number; qty: number; tint: string }
+type AddInput = Omit<CartLine, "qty"> & { qty?: number };
+const CartCtx = createContext<{ add: (items: AddInput[]) => void; open: () => void }>({ add: () => {}, open: () => {} });
+const useCart = () => useContext(CartCtx);
 
-    return () => {
-      if (lenis) lenis.destroy();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
-}
+/* ------------------------------------------------------------------ logo */
 
-// ── Reveal wrapper ───────────────────────────────────────────────────────────
-function Reveal({
-  children,
-  className,
-  delay = 0,
-  direction = "up",
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-  direction?: "up" | "left" | "right";
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-8% 0px" });
-
-  const initial =
-    direction === "left"
-      ? { opacity: 0, x: -40 }
-      : direction === "right"
-        ? { opacity: 0, x: 40 }
-        : { opacity: 0, y: 36 };
-
+function Logo() {
   return (
-    <motion.div
-      ref={ref}
-      initial={initial}
-      animate={isInView ? { opacity: 1, x: 0, y: 0 } : {}}
-      transition={{ duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ── Count-up number ──────────────────────────────────────────────────────────
-function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
-  const ref = React.useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const [val, setVal] = React.useState(0);
-
-  React.useEffect(() => {
-    if (!isInView) return;
-    let start = 0;
-    const dur = 1800;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / dur, 1);
-      const e = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(e * to));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [isInView, to]);
-
-  return (
-    <span ref={ref} className="tabular-nums">
-      {val}
-      {suffix}
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="15" fill={A} />
+        <motion.path
+          d="M3 17c3-3 6-3 9 0s6 3 9 0 6-3 9 0"
+          fill="none"
+          stroke="#fff"
+          strokeWidth="2.6"
+          strokeLinecap="round"
+          animate={{ x: [0, -3, 0] }}
+          transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <path d="M6 23c3-2 6-2 9 0s6 2 9 0" fill="none" stroke="#bae6fd" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="21" cy="9" r="2" fill="#e0f2fe" />
+      </svg>
+      Ocean Flow
     </span>
   );
 }
 
-// ── FAQ Accordion ────────────────────────────────────────────────────────────
-function FAQ({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = React.useState(false);
+/* ------------------------------------------------------------------ product art */
+
+function MaskArt({ skirt = "#1d1d1f", strap = "#0284c7", w = 220 }: { skirt?: string; strap?: string; w?: number }) {
   return (
-    <div className="border-b border-white/10">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between py-5 text-left text-[15px] font-medium text-white/90 transition hover:text-white"
-      >
-        {q}
-        <span
-          className={cn(
-            "ml-4 flex size-6 shrink-0 items-center justify-center rounded-full border border-white/20 text-white/60 transition-transform duration-300",
-            open && "rotate-45 border-cyan-400/60 bg-cyan-400/10 text-cyan-300",
-          )}
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10">
-            <path
-              d="M5 1v8M1 5h8"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-        </span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden"
-          >
-            <p className="pb-5 text-[14px] leading-relaxed text-white/50">
-              {a}
-            </p>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <svg width={w} viewBox="0 0 220 130" aria-hidden="true">
+      <defs>
+        <linearGradient id={`glass-${skirt.slice(1)}`} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#e0f2fe" />
+          <stop offset=".55" stopColor="#7dd3fc" />
+          <stop offset="1" stopColor="#0ea5e9" />
+        </linearGradient>
+      </defs>
+      <rect x="4" y="56" width="212" height="17" rx="8.5" fill={strap} />
+      <path d="M40 34 Q110 16 180 34 Q202 40 198 70 Q192 104 150 106 Q127 108 117 91 Q110 80 103 91 Q93 108 70 106 Q28 104 22 70 Q18 40 40 34Z" fill={skirt} />
+      <path d="M46 48 Q76 38 101 47 L101 82 Q87 96 66 94 Q44 92 41 74Z" fill={`url(#glass-${skirt.slice(1)})`} />
+      <path d="M119 47 Q144 38 174 48 L179 74 Q176 92 154 94 Q133 96 119 82Z" fill={`url(#glass-${skirt.slice(1)})`} />
+      <path d="M54 52 Q66 47 78 48" stroke="#fff" strokeWidth="4" strokeLinecap="round" opacity=".8" />
+      <path d="M128 52 Q140 47 152 48" stroke="#fff" strokeWidth="4" strokeLinecap="round" opacity=".8" />
+    </svg>
+  );
+}
+
+function FinsArt({ color = "#0ea5e9", w = 200 }: { color?: string; w?: number }) {
+  const fin = (dx: number, rot: number) => (
+    <g transform={`translate(${dx} 0) rotate(${rot} 60 100)`}>
+      <path d="M38 16 Q60 6 82 16 L90 64 Q118 150 104 196 Q60 210 16 196 Q2 150 30 64Z" fill={color} />
+      <path d="M38 16 Q60 6 82 16 L88 58 Q60 66 32 58Z" fill="#1d1d1f" />
+      <path d="M60 70 L60 190" stroke="rgba(255,255,255,.45)" strokeWidth="3" />
+      <path d="M40 76 Q30 140 26 188M80 76 Q90 140 94 188" stroke="rgba(0,0,0,.18)" strokeWidth="3" fill="none" />
+    </g>
+  );
+  return (
+    <svg width={w} viewBox="0 0 220 220" aria-hidden="true">
+      {fin(8, -8)}
+      {fin(92, 8)}
+    </svg>
+  );
+}
+
+function ComputerArt({ strap = "#1d1d1f", w = 170, depth = 18, ndl = "56" }: { strap?: string; w?: number; depth?: number; ndl?: string }) {
+  return (
+    <svg width={w} viewBox="0 0 170 220" aria-hidden="true">
+      <rect x="55" y="0" width="60" height="220" rx="16" fill={strap} />
+      <circle cx="85" cy="110" r="66" fill="#2c2c2e" />
+      <circle cx="85" cy="110" r="58" fill="#0b1720" stroke="#3a3a3c" strokeWidth="3" />
+      {Array.from({ length: 24 }, (_, i) => {
+        const a = (i / 24) * Math.PI * 2;
+        // Rounded so the server and client print the same attribute strings.
+        const p = (r: number, c: number, f: (x: number) => number) => (c + f(a) * r).toFixed(2);
+        return <line key={i} x1={p(62, 85, Math.cos)} y1={p(62, 110, Math.sin)} x2={p(65, 85, Math.cos)} y2={p(65, 110, Math.sin)} stroke="#8e8e93" strokeWidth="2" />;
+      })}
+      <text x="85" y="104" textAnchor="middle" fontSize="30" fontWeight="700" fill="#e0f2fe" style={{ fontFamily: SYSTEM_FONT }}>{depth.toFixed(0)}<tspan fontSize="14" fill="#7dd3fc"> m</tspan></text>
+      <text x="85" y="128" textAnchor="middle" fontSize="11" fontWeight="600" fill="#7dd3fc" letterSpacing="1" style={{ fontFamily: SYSTEM_FONT }}>NO-STOP {ndl}</text>
+      <rect x="60" y="140" width="50" height="5" rx="2.5" fill="#1e3a4c" />
+      <rect x="60" y="140" width="32" height="5" rx="2.5" fill="#22c55e" />
+    </svg>
+  );
+}
+
+function TorchArt({ w = 220 }: { w?: number }) {
+  return (
+    <svg width={w} viewBox="0 0 240 110" aria-hidden="true">
+      <defs>
+        <linearGradient id="beam" x1="0" x2="1">
+          <stop offset="0" stopColor="#fef9c3" stopOpacity=".95" />
+          <stop offset="1" stopColor="#fef9c3" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path d="M150 38 L240 6 L240 104 L150 72Z" fill="url(#beam)" />
+      <rect x="18" y="40" width="96" height="30" rx="10" fill="#1d1d1f" />
+      <rect x="30" y="44" width="10" height="22" rx="3" fill="#3a3a3c" />
+      <rect x="48" y="44" width="10" height="22" rx="3" fill="#3a3a3c" />
+      <path d="M110 34 L150 28 L150 82 L110 76Z" fill="#2c2c2e" />
+      <rect x="146" y="28" width="8" height="54" rx="3" fill="#fde68a" />
+      <circle cx="84" cy="55" r="6" fill={A} />
+    </svg>
+  );
+}
+
+function SnorkelArt({ w = 90 }: { w?: number }) {
+  return (
+    <svg width={w} viewBox="0 0 90 200" aria-hidden="true">
+      <path d="M58 10 L58 150 Q58 186 30 186 L22 186" fill="none" stroke="#facc15" strokeWidth="16" strokeLinecap="round" />
+      <rect x="44" y="4" width="28" height="22" rx="8" fill="#1d1d1f" />
+      <rect x="10" y="176" width="22" height="20" rx="6" fill="#1d1d1f" />
+    </svg>
+  );
+}
+
+function BootsArt({ w = 120 }: { w?: number }) {
+  return (
+    <svg width={w} viewBox="0 0 140 120" aria-hidden="true">
+      {[0, 64].map((dx) => (
+        <g key={dx} transform={`translate(${dx} 0)`}>
+          <path d="M14 8 H50 V78 Q50 84 58 86 L70 90 Q76 92 76 100 V108 H10 Q6 108 6 100 V20 Q6 8 14 8Z" fill="#1d1d1f" />
+          <path d="M8 98 H76 V108 H10 Q6 108 6 104Z" fill="#334155" />
+          <path d="M28 12 V70" stroke={A} strokeWidth="3" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ hero: the depth gauge */
+
+const DMAX = 40;
+const NDL: [number, number][] = [[10, 219], [12, 147], [14, 98], [16, 72], [18, 56], [20, 45], [22, 37], [25, 29], [30, 20], [35, 14], [40, 9]];
+function ndlAt(d: number) {
+  if (d < 10) return null;
+  for (let i = 0; i < NDL.length - 1; i++) {
+    const [a, am] = NDL[i], [b, bm] = NDL[i + 1];
+    if (d <= b) return Math.round(am + ((bm - am) * (d - a)) / (b - a));
+  }
+  return 9;
+}
+const tempAt = (d: number) => 27 - d * 0.22;
+
+const SUITS = [
+  { id: "s3", title: "3 mm Current suit", description: "Water 24 °C and warmer", meta: "$219", price: 219, features: ["Back zip, glued and blind-stitched seams", "Tropical reefs and summer lakes", "Packs into a carry-on"] },
+  { id: "s5", title: "5 mm Current suit", description: "Water 20 to 24 °C", meta: "$269", price: 269, features: ["Chest zip with a sealed flap", "Knee pads for shore entries", "The one most people own"] },
+  { id: "s7", title: "7 mm Current suit", description: "Water below 20 °C", meta: "$329", price: 329, features: ["Attached hood option", "Double-lined cuffs and ankles", "Quarry, kelp forest and wreck season"] },
+];
+const suitFor = (t: number) => (t >= 24 ? SUITS[0] : t >= 20 ? SUITS[1] : SUITS[2]);
+
+function rangeFor(d: number) {
+  if (d <= 18) return "Open Water range";
+  if (d <= 30) return "Advanced range";
+  return "Deep specialty range";
+}
+
+/** Rising bubbles with fixed positions so the server and client agree. */
+function Bubbles() {
+  return (
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      {Array.from({ length: 16 }, (_, i) => {
+        const left = (i * 37 + 11) % 100;
+        const size = 4 + (i % 4) * 3;
+        return (
+          <motion.span
+            key={i}
+            className="absolute bottom-[-20px] rounded-full border border-white/70 bg-white/20"
+            style={{ left: `${left}%`, width: size, height: size }}
+            animate={{ y: [0, -680], x: [0, i % 2 ? 10 : -10, 0], opacity: [0, 0.9, 0] }}
+            transition={{ duration: 7 + (i % 5), repeat: Infinity, delay: i * 0.55, ease: "easeOut" }}
+          />
+        );
+      })}
     </div>
   );
 }
 
-// ── Data ─────────────────────────────────────────────────────────────────────
-const PRODUCTS = [
-  {
-    name: "AquaVision Pro Mask",
-    tagline: "See the deep in full clarity",
-    price: "$349",
-    image:
-      "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&q=80&auto=format&fit=crop",
-    badge: "Best Seller",
-  },
-  {
-    name: "TidalForce Fins",
-    tagline: "Engineered for effortless thrust",
-    price: "$229",
-    image:
-      "https://images.unsplash.com/photo-1682687982107-14492010e05e?w=800&q=80&auto=format&fit=crop",
-    badge: "New",
-  },
-  {
-    name: "DeepBreath Regulator",
-    tagline: "Smooth air delivery at any depth",
-    price: "$689",
-    image:
-      "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=800&q=80&auto=format&fit=crop",
-    badge: null,
-  },
-  {
-    name: "OceanGuard BCD",
-    tagline: "Lift when you need, trim when you don't",
-    price: "$879",
-    image:
-      "https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=800&q=80&auto=format&fit=crop",
-    badge: "Pro Pick",
-  },
-];
-
-const GALLERY = [
-  "https://images.unsplash.com/photo-1498623116890-37e912163d5d?w=900&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?w=900&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=900&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=900&q=80&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1573843981267-be1999ff37cd?w=900&q=80&auto=format&fit=crop",
-];
-
-const TESTIMONIALS_ROW_1: InfiniteMovingCardItem[] = [
-  {
-    id: "r1-1",
-    description: "Ocean Flow gear changed how I experience the water. The mask clarity alone is worth every penny — I can finally see the reef the way it deserves to be seen.",
-    name: "Mara Tanaka",
-    role: "PADI Dive Master · Palawan",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=240&q=80",
-    tags: ["AquaVision Pro Mask"],
-  },
-  {
-    id: "r1-2",
-    description: "TidalForce fins are the only pair I'll bring on a trip now. Fifteen years of diving and nothing comes close for thrust efficiency.",
-    name: "Jonas Becker",
-    role: "Underwater Photographer · Red Sea",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80",
-    tags: ["TidalForce Fins"],
-  },
-  {
-    id: "r1-3",
-    description: "From the packaging to the first breath at 30 m — every detail screams quality. The DeepBreath regulator is buttery smooth at any depth.",
-    name: "Celia Moreno",
-    role: "Marine Biologist · Galapagos",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=240&q=80",
-    tags: ["DeepBreath Regulator"],
-  },
-  {
-    id: "r1-4",
-    description: "The OceanGuard BCD fit perfectly out of the box. Trim is spot-on and the lift bladder responds instantly. Best piece of kit I've owned.",
-    name: "Sam Reeves",
-    role: "Technical Diver · Great Barrier Reef",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=240&q=80",
-    tags: ["OceanGuard BCD"],
-  },
-  {
-    id: "r1-5",
-    description: "I run dive courses for beginners. Ocean Flow gear is the first thing I recommend — robust enough to survive students, precise enough for pros.",
-    name: "Aiko Hashimoto",
-    role: "SSI Instructor · Okinawa",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&w=240&q=80",
-    tags: ["Full Gear Set"],
-  },
-];
-
-const TESTIMONIALS_ROW_2: InfiniteMovingCardItem[] = [
-  {
-    id: "r2-1",
-    description: "The anti-fog coating on the AquaVision mask is no gimmick — 40 dives in and I haven't touched defogging solution once.",
-    name: "Luca Ferrari",
-    role: "Spearfisher · Sardinia",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=240&q=80",
-    tags: ["AquaVision Pro Mask"],
-  },
-  {
-    id: "r2-2",
-    description: "Customer service sorted my regulator service in 48 hours, zero hassle. That kind of post-sale care is rare in dive equipment.",
-    name: "Priya Nair",
-    role: "Rescue Diver · Lakshadweep",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=80",
-    tags: ["Service & Support"],
-  },
-  {
-    id: "r2-3",
-    description: "Took the TidalForce fins to a 3-knot current dive in the Azores. My legs thanked me. Would not attempt that site with anything lighter.",
-    name: "Erik Lindqvist",
-    role: "Expedition Diver · Azores",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=240&q=80",
-    tags: ["TidalForce Fins"],
-  },
-  {
-    id: "r2-4",
-    description: "I shot a full documentary series using Ocean Flow gear. The equipment never missed a beat, even under production pressure at depth.",
-    name: "Mei Chen",
-    role: "Ocean Filmmaker · Taiwan",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=240&q=80",
-    tags: ["Full Gear Set"],
-  },
-  {
-    id: "r2-5",
-    description: "The salt-water grade alloys actually hold up. After two years diving in the Red Sea, my kit still looks and performs like new.",
-    name: "Omar Khalil",
-    role: "Cave Diver · Dahab",
-    rating: 5,
-    avatar: "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&w=240&q=80",
-    tags: ["DeepBreath Regulator"],
-  },
-];
-
-const FAQS = [
-  {
-    q: "What certification do I need to use the DeepBreath Regulator?",
-    a: "Any open-water certification (PADI, SSI, NAUI) qualifies you to use all Ocean Flow regulators recreationally down to 40 m. Technical divers will need appropriate tec certifications for depth beyond that.",
-  },
-  {
-    q: "Do you offer a trial period?",
-    a: "Yes — every product ships with a 60-day ocean-tested guarantee. If it doesn't perform as described, we cover return shipping and issue a full refund.",
-  },
-  {
-    q: "Can I service my regulator myself?",
-    a: "We recommend annual servicing by a certified technician. Ocean Flow service kits are available for experienced divers, and our service network covers 48 countries.",
-  },
-  {
-    q: "Are your products suitable for cold water diving?",
-    a: "All Ocean Flow gear is rated for water temperatures from 4 °C to 35 °C. For drysuit diving in sub-10 °C water we recommend our Arctic Series add-ons.",
-  },
-];
-
-const TECH_FEATURES = [
-  {
-    icon: "◈",
-    title: "Hydrodynamic shell",
-    body: "Computational fluid dynamics used on every fin blade. Less drag, more distance per kick.",
-  },
-  {
-    icon: "◉",
-    title: "Anti-fog nanotec",
-    body: "Our proprietary SilverCoat nano-layer eliminates fogging without chemicals — rated 500+ dives.",
-  },
-  {
-    icon: "◎",
-    title: "Depth-matched seals",
-    body: "Regulator seats re-calibrate automatically as pressure changes. Consistent flow from surface to 60 m.",
-  },
-  {
-    icon: "◐",
-    title: "Salt-water grade alloys",
-    body: "316L marine stainless and DuoChrome anodised aluminium on every load-bearing part.",
-  },
-];
-
-// ── Nav ──────────────────────────────────────────────────────────────────────
-function Nav() {
-  const [scrolled, setScrolled] = React.useState(false);
-  const [menuOpen, setMenuOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
+function Fish({ ds, color, fade, y, scale = 1, dur, delay = 0, flip = false }: { ds: MotionValue<number>; color: string; fade: [number, number]; y: string; scale?: number; dur: number; delay?: number; flip?: boolean }) {
+  const fill = useTransform(ds, fade, [color, "#5b6f82"]);
   return (
-    <header
-      className={cn(
-        "fixed top-0 z-50 w-full transition-all duration-500",
-        scrolled
-          ? "border-b border-white/5 bg-[#050d1a]/90 backdrop-blur-xl"
-          : "bg-transparent",
-      )}
+    <motion.svg
+      width={46 * scale}
+      viewBox="0 0 46 24"
+      className="absolute"
+      style={{ top: y, left: flip ? "70%" : "18%", scaleX: flip ? -1 : 1 }}
+      animate={{ x: flip ? [0, -120, 0] : [0, 140, 0], y: [0, -8, 0] }}
+      transition={{ duration: dur, repeat: Infinity, ease: "easeInOut", delay }}
+      aria-hidden="true"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex items-center gap-2"
-        >
-          <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600">
-            <svg viewBox="0 0 20 20" className="size-4 fill-white">
-              <path d="M10 2C6 2 3 6 3 10s3 8 7 8 7-3.6 7-8-3-8-7-8zm0 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 10c-2.5 0-4.7-1.3-6-3.3.03-2 4-3.1 6-3.1s5.97 1.1 6 3.1C14.7 13.7 12.5 15 10 15z" />
-            </svg>
-          </div>
-          <span className="text-[15px] font-bold tracking-tight text-white">
-            OceanFlow
-          </span>
-        </motion.div>
-
-        {/* Desktop links */}
-        <motion.nav
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="hidden items-center gap-8 md:flex"
-        >
-          {["Gear", "Technology", "About", "Journal"].map((item) => (
-            <a
-              key={item}
-              href="#"
-              className="text-[13px] font-medium text-white/60 transition hover:text-white"
-            >
-              {item}
-            </a>
-          ))}
-        </motion.nav>
-
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="hidden items-center gap-3 md:flex"
-        >
-          <a
-            href="#"
-            className="text-[13px] font-medium text-white/60 transition hover:text-white"
-          >
-            Log in
-          </a>
-          <a
-            href="#"
-            className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-2 text-[13px] font-semibold text-white shadow-lg shadow-cyan-500/20 transition hover:brightness-110"
-          >
-            Shop now
-          </a>
-        </motion.div>
-
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen((v) => !v)}
-          className="flex size-9 items-center justify-center rounded-full border border-white/10 text-white/70 transition hover:bg-white/5 md:hidden"
-        >
-          {menuOpen ? (
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path
-                d="M1 1l12 12M13 1L1 13"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-              />
-            </svg>
-          ) : (
-            <svg width="16" height="12" viewBox="0 0 16 12" fill="none">
-              <path
-                d="M0 1h16M0 6h16M0 11h16"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-              />
-            </svg>
-          )}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {menuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="overflow-hidden border-t border-white/5 bg-[#050d1a]/95 backdrop-blur-xl md:hidden"
-          >
-            <div className="flex flex-col gap-1 px-6 py-4">
-              {["Gear", "Technology", "About", "Journal"].map((item) => (
-                <a
-                  key={item}
-                  href="#"
-                  className="py-2 text-[14px] font-medium text-white/70 transition hover:text-white"
-                >
-                  {item}
-                </a>
-              ))}
-              <a
-                href="#"
-                className="mt-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 py-2.5 text-center text-[13px] font-semibold text-white"
-              >
-                Shop now
-              </a>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
+      <motion.path d="M2 12 Q16 0 32 12 Q16 24 2 12Z M31 12 L44 3 L41 12 L44 21Z" style={{ fill }} />
+      <circle cx="10" cy="10" r="1.6" fill="#0b1720" />
+    </motion.svg>
   );
 }
 
-// ── Hero section ─────────────────────────────────────────────────────────────
-function HeroSection() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"],
-  });
-  const y = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.6], [1, 0]);
-
+function Reef({ ds }: { ds: MotionValue<number> }) {
+  const grey = "#53667a";
+  const red = useTransform(ds, [2, 8], ["#ef4444", grey]);
+  const red2 = useTransform(ds, [2, 8], ["#f87171", "#60738a"]);
+  const orange = useTransform(ds, [7, 18], ["#f97316", grey]);
+  const yellow = useTransform(ds, [14, 30], ["#facc15", "#6b7f73"]);
+  const green = useTransform(ds, [20, 40], ["#22c55e", "#2f6b5a"]);
+  const purple = useTransform(ds, [25, 40], ["#a855f7", "#4c4f8f"]);
+  const sand = useTransform(ds, [0, 20, 40], ["#e7d6ae", "#9fa79f", "#3b4a57"]);
+  const rock = useTransform(ds, [0, 40], ["#475569", "#1e2b38"]);
+  const y = useTransform(ds, [0, DMAX], [90, -10]);
+  const scale = useTransform(ds, [0, DMAX], [0.92, 1.12]);
   return (
-    <section
-      ref={ref}
-      className="relative flex h-[100svh] items-center justify-center overflow-hidden"
-    >
-      {/* Parallax background */}
-      <motion.div className="absolute inset-0" style={{ y }}>
-        <img
-          src="https://images.unsplash.com/photo-1510074232337-05d50fa189ba?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt="Ocean diver"
-          className="h-full w-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050d1a]/60 via-[#050d1a]/30 to-[#050d1a]" />
-      </motion.div>
+    <motion.svg viewBox="0 0 1200 320" preserveAspectRatio="xMidYMax slice" className="absolute inset-x-0 bottom-0 h-[52%] w-full origin-bottom" style={{ y, scale }} aria-hidden="true">
+      <motion.path d="M0 262 Q300 228 600 250 T1200 244 V320 H0Z" style={{ fill: sand }} />
+      <motion.path d="M110 272 Q150 186 262 196 Q336 202 356 272Z" style={{ fill: rock }} />
+      <motion.path d="M742 264 Q790 168 900 178 Q992 188 1014 264Z" style={{ fill: rock }} />
+      {/* red branching coral */}
+      <motion.path d="M232 236 L232 170 M232 202 L204 164 M232 188 L262 150 M204 164 L192 138 M262 150 L274 124 M232 170 L240 136" style={{ stroke: red }} strokeWidth="11" strokeLinecap="round" fill="none" />
+      <motion.ellipse cx="420" cy="252" rx="46" ry="26" style={{ fill: red2 }} />
+      <motion.path d="M388 248 Q420 232 452 248 M392 258 Q420 244 448 258" stroke="rgba(0,0,0,.18)" strokeWidth="3" fill="none" />
+      {/* orange sea fan */}
+      <motion.path d="M540 256 C482 196 488 128 540 116 C592 128 598 196 540 256Z" style={{ fill: orange }} />
+      <path d="M540 250 L540 128 M540 200 L510 158 M540 186 L570 150 M540 226 L516 196 M540 220 L566 190" stroke="rgba(0,0,0,.16)" strokeWidth="3" fill="none" />
+      {/* yellow tube coral */}
+      {[0, 22, 44, 66].map((dx, i) => (
+        <motion.rect key={dx} x={846 + dx} y={170 + (i % 2) * 22} width="17" height={90 - (i % 2) * 22} rx="8.5" style={{ fill: yellow }} />
+      ))}
+      {/* sea grass */}
+      {[640, 660, 680, 1080, 1100, 1120].map((x, i) => (
+        <motion.path key={x} d={`M${x} 262 Q${x - 18} ${206 - i * 4} ${x + 6} ${150 - (i % 3) * 14}`} style={{ stroke: green }} strokeWidth="7" strokeLinecap="round" fill="none" />
+      ))}
+      {/* purple anemone */}
+      {[-24, -8, 8, 24].map((dx) => (
+        <motion.circle key={dx} cx={1000 + dx} cy={224 - Math.abs(dx) * 0.4} r="12" style={{ fill: purple }} />
+      ))}
+      <motion.path d="M60 290 Q90 250 130 286" style={{ stroke: red }} strokeWidth="8" strokeLinecap="round" fill="none" />
+    </motion.svg>
+  );
+}
 
-      {/* Animated water ripples */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-400/10"
-            animate={{ scale: [1, 2.5], opacity: [0.4, 0] }}
-            transition={{
-              duration: 4,
-              delay: i * 1.3,
-              repeat: Infinity,
-              ease: "easeOut",
-            }}
-            style={{ width: 300, height: 300 }}
-          />
+function Gauge({ depth, onTouch }: { depth: MotionValue<number>; onTouch: () => void }) {
+  const track = useRef<HTMLDivElement>(null);
+  const [drag, setDrag] = useState(false);
+  const [now, setNow] = useState(0);
+  useMotionValueEvent(depth, "change", (v) => setNow(Math.round(v)));
+  const top = useTransform(depth, (v) => `${(v / DMAX) * 100}%`);
+  const fill = useTransform(depth, (v) => v / DMAX);
+  const at = (clientY: number) => {
+    const r = track.current!.getBoundingClientRect();
+    return Math.max(0, Math.min(DMAX, ((clientY - r.top) / r.height) * DMAX));
+  };
+  const nudge = (to: number) => {
+    onTouch();
+    animate(depth, Math.max(0, Math.min(DMAX, to)), { type: "spring", stiffness: 220, damping: 26 });
+  };
+  return (
+    <div className="absolute bottom-5 right-4 top-5 flex w-[70px] flex-col items-center rounded-full bg-white/85 py-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.45)] backdrop-blur-md sm:right-5">
+      <span className="text-[11px] font-semibold text-[#424245]">Depth</span>
+      <div
+        ref={track}
+        className="relative mt-3 w-full flex-1 cursor-ns-resize touch-none select-none"
+        onPointerDown={(e) => {
+          (e.target as Element).setPointerCapture?.(e.pointerId);
+          setDrag(true);
+          nudge(at(e.clientY));
+        }}
+        onPointerMove={(e) => {
+          if (!drag) return;
+          depth.stop();
+          depth.set(at(e.clientY));
+        }}
+        onPointerUp={() => setDrag(false)}
+        onPointerCancel={() => setDrag(false)}
+      >
+        <span className="absolute bottom-0 left-1/2 top-0 w-[4px] -translate-x-1/2 rounded-full bg-[#e5e7eb]" />
+        <motion.span className="absolute left-1/2 top-0 h-full w-[4px] -translate-x-1/2 origin-top rounded-full" style={{ scaleY: fill, background: A }} />
+        {[0, 10, 20, 30, 40].map((t) => (
+          <span key={t} className="absolute right-[6px] -translate-y-1/2 text-[10px] font-medium tabular-nums text-[#6e6e73]" style={{ top: `${(t / DMAX) * 100}%` }}>{t}</span>
         ))}
+        {Array.from({ length: 9 }, (_, i) => (
+          <span key={i} className="absolute left-[8px] h-px w-[8px] bg-[#c7c7cc]" style={{ top: `${(i / 8) * 100}%` }} />
+        ))}
+        <motion.span
+          role="slider"
+          tabIndex={0}
+          aria-label="Dive depth in metres"
+          aria-valuemin={0}
+          aria-valuemax={DMAX}
+          aria-valuenow={now}
+          aria-valuetext={`${now} metres`}
+          onKeyDown={(e) => {
+            const v = depth.get();
+            if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); nudge(Math.round(v) + 1); }
+            if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); nudge(Math.round(v) - 1); }
+            if (e.key === "PageDown") { e.preventDefault(); nudge(Math.round(v) + 5); }
+            if (e.key === "PageUp") { e.preventDefault(); nudge(Math.round(v) - 5); }
+            if (e.key === "Home") { e.preventDefault(); nudge(0); }
+            if (e.key === "End") { e.preventDefault(); nudge(DMAX); }
+          }}
+          animate={{ scale: drag ? 1.12 : 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: drag ? 22 : 14 }}
+          className="absolute left-1/2 -ml-[25px] -mt-[17px] flex h-[34px] w-[50px] items-center justify-center rounded-full text-[13px] font-semibold tabular-nums text-white shadow-[0_8px_18px_-6px_rgba(3,105,161,.7)] outline-none focus-visible:ring-2 focus-visible:ring-[#1d1d1f] focus-visible:ring-offset-2"
+          style={{ top, background: AD }}
+        >
+          {now}m
+        </motion.span>
       </div>
-
-      {/* Content */}
-      <motion.div
-        className="relative z-10 mx-auto max-w-4xl px-6 text-center"
-        style={{ opacity }}
-      >
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-          className="mb-5 font-mono text-[11px] uppercase tracking-[0.25em] text-cyan-400/80"
-        >
-          Precision diving equipment
-        </motion.p>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-          className="font-bold leading-[1.0] tracking-[-0.03em] text-white"
-          style={{ fontSize: "clamp(52px, 8vw, 108px)" }}
-        >
-          Dive deeper.
-          <br />
-          <span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-cyan-500 bg-clip-text text-transparent">
-            Fear less.
-          </span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.55 }}
-          className="mx-auto mt-7 max-w-md text-[16px] leading-relaxed text-white/55"
-        >
-          Equipment born from the world&apos;s most demanding dive sites. Built
-          for professionals, perfect for everyone beneath the surface.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.7 }}
-          className="mt-10 flex flex-wrap items-center justify-center gap-4"
-        >
-          <a
-            href="#gear"
-            className="rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-8 py-3.5 text-[14px] font-semibold text-white shadow-xl shadow-cyan-500/25 transition hover:brightness-110"
-          >
-            Explore the gear
-          </a>
-          <a
-            href="#"
-            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-3.5 text-[14px] font-medium text-white/80 backdrop-blur transition hover:bg-white/10"
-          >
-            Watch film
-            <svg className="size-4" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M6 4l6 4-6 4V4z" />
-            </svg>
-          </a>
-        </motion.div>
-      </motion.div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-          className="flex h-10 w-6 items-start justify-center rounded-full border border-white/20 p-1.5"
-        >
-          <div className="h-2 w-1 rounded-full bg-cyan-400/70" />
-        </motion.div>
-      </motion.div>
-    </section>
+    </div>
   );
 }
 
-// ── Stats band ───────────────────────────────────────────────────────────────
-function StatsSection() {
-  const stats = [
-    { value: 60, suffix: " m", label: "Max tested depth" },
-    { value: 500, suffix: "+", label: "Dive-rated durability" },
-    { value: 48, suffix: "", label: "Service countries" },
-    { value: 12, suffix: "yr", label: "Ocean-tested R&D" },
+function Readout({ d, ds }: { d: number; ds: MotionValue<number> }) {
+  const r = useTransform(ds, [3, 8], [1, 0.12]);
+  const o = useTransform(ds, [8, 18], [1, 0.12]);
+  const yl = useTransform(ds, [15, 30], [1, 0.12]);
+  const ndl = ndlAt(d);
+  const rows = [
+    { l: "Pressure", v: `${(1 + d / 10).toFixed(1)} bar` },
+    { l: "Water", v: `${tempAt(d).toFixed(0)} °C` },
+    { l: "No-stop time", v: ndl === null ? "Over 3 h" : `${ndl} min` },
   ];
-
   return (
-    <section className="border-y border-white/5 bg-[#071020]/80 py-14 backdrop-blur">
-      <div className="mx-auto max-w-5xl px-6">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          {stats.map((s, i) => (
-            <Reveal key={s.label} delay={i * 0.08}>
-              <div className="text-center">
-                <p className="text-4xl font-bold tracking-tight text-white md:text-5xl">
-                  <CountUp to={s.value} suffix={s.suffix} />
-                </p>
-                <p className="mt-2 text-[12px] uppercase tracking-[0.15em] text-white/40">
-                  {s.label}
-                </p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+    <div className="flex w-[230px] flex-col gap-3 rounded-[22px] bg-white/90 p-4 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.45)] backdrop-blur-md sm:w-[250px] sm:p-5">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[12px] font-semibold text-[#6e6e73]">Punta Vela reef</span>
+        <span className="text-[11px] font-medium text-[#6e6e73]">{rangeFor(d)}</span>
       </div>
-    </section>
-  );
-}
-
-// ── Philosophy ───────────────────────────────────────────────────────────────
-function PhilosophySection() {
-  return (
-    <section className="py-28 md:py-40">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid items-center gap-16 md:grid-cols-2 lg:gap-28">
-          <Reveal direction="left">
-            <div>
-              <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/70">
-                Our philosophy
-              </p>
-              <h2
-                className="font-bold leading-[1.05] tracking-[-0.02em] text-white"
-                style={{ fontSize: "clamp(36px, 4.5vw, 58px)" }}
-              >
-                Built by divers,
-                <br />
-                <span className="text-white/40">tested by the ocean.</span>
-              </h2>
-              <p className="mt-7 text-[15px] leading-relaxed text-white/50">
-                Every piece of Ocean Flow equipment spends a minimum of 300
-                hours underwater before it reaches your hands. Our design team
-                are active divers. Our test team are professional instructors.
-                The ocean is the only lab that matters.
-              </p>
-              <div className="mt-10 flex flex-col gap-4">
-                {[
-                  "Designed in partnership with PADI professionals",
-                  "Carbon-neutral manufacturing since 2022",
-                  "300+ hours pre-release ocean testing",
-                ].map((item) => (
-                  <div
-                    key={item}
-                    className="flex items-start gap-3 text-[14px] text-white/60"
-                  >
-                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-cyan-400 text-[10px]">
-                      ✓
-                    </span>
-                    {item}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </Reveal>
-
-          <Reveal direction="right" delay={0.15}>
-            <div className="relative">
-              <div className="overflow-hidden rounded-3xl">
-                <img
-                  src="https://images.unsplash.com/photo-1517627043994-b991abb62fc8?q=80&w=1017&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                  alt="Diver testing gear"
-                  className="aspect-[4/5] w-full object-cover transition duration-700 hover:scale-[1.03]"
-                />
-              </div>
-              {/* Float badge */}
-              <div className="absolute -bottom-5 -left-5 rounded-2xl border border-white/10 bg-[#071020]/90 p-4 backdrop-blur-lg">
-                <p className="text-[11px] uppercase tracking-[0.15em] text-white/40">
-                  Est.
-                </p>
-                <p className="text-2xl font-bold text-white">2012</p>
-                <p className="text-[12px] text-cyan-400/80">Coral Bay, WA</p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
+      <div className="flex items-baseline gap-1 text-[44px] font-semibold leading-none tracking-[-0.04em] text-[#1d1d1f] tabular-nums" aria-live="polite">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span key={d} initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }} transition={{ type: "spring", stiffness: 600, damping: 36 }}>{d}</motion.span>
+        </AnimatePresence>
+        <span className="text-[17px] font-medium tracking-normal text-[#6e6e73]">m</span>
       </div>
-    </section>
-  );
-}
-
-// ── Horizontal gallery ───────────────────────────────────────────────────────
-function GallerySection() {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-  const x = useTransform(scrollYProgress, [0, 1], ["5%", "-20%"]);
-
-  return (
-    <section ref={containerRef} className="overflow-hidden py-24 md:py-36">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/70">
-            The world below
-          </p>
-          <h2
-            className="mb-16 font-bold tracking-[-0.02em] text-white"
-            style={{ fontSize: "clamp(32px, 4vw, 52px)" }}
-          >
-            Every dive, a new world.
-          </h2>
-        </Reveal>
-      </div>
-
-      <div className="overflow-hidden">
-        <motion.div
-          style={{ x }}
-          className="flex gap-5 pl-[max(1.5rem,calc((100vw-80rem)/2))]"
-        >
-          {GALLERY.map((src, i) => (
-            <div
-              key={i}
-              className="relative aspect-[3/4] w-[min(320px,70vw)] shrink-0 overflow-hidden rounded-3xl"
-            >
-              <img
-                src={src}
-                alt={`Gallery ${i + 1}`}
-                className="h-full w-full object-cover transition duration-700 hover:scale-[1.06]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-            </div>
-          ))}
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ── Products grid ────────────────────────────────────────────────────────────
-function ProductsSection() {
-  const [hovered, setHovered] = React.useState<number | null>(null);
-
-  return (
-    <section id="gear" className="py-24 md:py-36">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/70">
-            Featured gear
-          </p>
-          <h2
-            className="mb-4 font-bold tracking-[-0.02em] text-white"
-            style={{ fontSize: "clamp(32px, 4vw, 52px)" }}
-          >
-            The essentials.
-          </h2>
-          <p className="mb-16 max-w-lg text-[15px] leading-relaxed text-white/45">
-            Four flagship products. Each one designed from first principles with
-            ocean professionals.
-          </p>
-        </Reveal>
-
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {PRODUCTS.map((p, i) => (
-            <Reveal key={p.name} delay={i * 0.07}>
-              <div
-                onMouseEnter={() => setHovered(i)}
-                onMouseLeave={() => setHovered(null)}
-                className="group relative cursor-pointer overflow-hidden rounded-[24px] border border-white/8 bg-white/3"
-              >
-                {/* Image */}
-                <div className="relative aspect-square overflow-hidden">
-                  <img
-                    src={p.image}
-                    alt={p.name}
-                    className={cn(
-                      "h-full w-full object-cover transition duration-700",
-                      hovered === i ? "scale-[1.06]" : "scale-100",
-                    )}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#050d1a] via-transparent to-transparent" />
-                  {p.badge && (
-                    <span className="absolute left-3 top-3 rounded-full bg-cyan-500/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
-                      {p.badge}
-                    </span>
-                  )}
-                </div>
-
-                {/* Info */}
-                <div className="p-5">
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-white/35">
-                    {p.tagline}
-                  </p>
-                  <h3 className="mt-1 text-[16px] font-semibold text-white">
-                    {p.name}
-                  </h3>
-                  <div className="mt-4 flex items-center justify-between">
-                    <span className="text-[15px] font-bold text-cyan-400">
-                      {p.price}
-                    </span>
-                    <button
-                      type="button"
-                      className="rounded-full border border-white/15 px-3.5 py-1.5 text-[11px] font-medium text-white/70 transition hover:border-cyan-400/40 hover:text-cyan-300"
-                    >
-                      Add to cart
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── Technology ───────────────────────────────────────────────────────────────
-function TechnologySection() {
-  return (
-    <section className="py-24 md:py-36">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid items-start gap-16 lg:grid-cols-2 lg:gap-24">
-          <div className="lg:sticky lg:top-28">
-            <Reveal>
-              <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/70">
-                How we engineer it
-              </p>
-              <h2
-                className="font-bold leading-[1.05] tracking-[-0.02em] text-white"
-                style={{ fontSize: "clamp(36px, 4.5vw, 56px)" }}
-              >
-                Technology at the
-                <br />
-                <span className="bg-gradient-to-r from-cyan-300 to-blue-500 bg-clip-text text-transparent">
-                  edge of physics.
-                </span>
-              </h2>
-              <p className="mt-6 text-[15px] leading-relaxed text-white/50">
-                Years of R&D distilled into products that perform where most
-                materials fail — cold, pressurized, and salt-laden water.
-              </p>
-            </Reveal>
+      <div className="flex flex-col divide-y divide-black/[.06]">
+        {rows.map((row) => (
+          <div key={row.l} className="flex items-center justify-between py-1.5 text-[13px]">
+            <span className="text-[#6e6e73]">{row.l}</span>
+            <span className="font-semibold tabular-nums text-[#1d1d1f]">{row.v}</span>
           </div>
-
-          <div className="flex flex-col gap-6">
-            {TECH_FEATURES.map((f, i) => (
-              <Reveal key={f.title} delay={i * 0.09}>
-                <div className="rounded-2xl border border-white/8 bg-white/3 p-6 transition hover:border-cyan-500/20 hover:bg-cyan-500/3">
-                  <span className="text-2xl text-cyan-400/70">{f.icon}</span>
-                  <h3 className="mt-3 text-[16px] font-semibold text-white">
-                    {f.title}
-                  </h3>
-                  <p className="mt-2 text-[14px] leading-relaxed text-white/45">
-                    {f.body}
-                  </p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
+        ))}
+        <div className="flex items-center justify-between py-1.5 text-[13px]">
+          <span className="text-[#6e6e73]">Colour left</span>
+          <span className="flex items-center gap-1.5" role="img" aria-label={`Reds ${d < 6 ? "visible" : "gone"}, oranges ${d < 14 ? "visible" : "gone"}, yellows ${d < 24 ? "visible" : "gone"}`}>
+            <motion.span className="h-3 w-3 rounded-full bg-[#ef4444]" style={{ opacity: r }} />
+            <motion.span className="h-3 w-3 rounded-full bg-[#f97316]" style={{ opacity: o }} />
+            <motion.span className="h-3 w-3 rounded-full bg-[#facc15]" style={{ opacity: yl }} />
+            <span className="h-3 w-3 rounded-full bg-[#22c55e]" />
+            <span className="h-3 w-3 rounded-full bg-[#3b82f6]" />
+          </span>
         </div>
       </div>
-    </section>
+      <span className="text-[11px] leading-[1.35] text-[#6e6e73]">Planning figures for air, first dive of the day. Not a dive table.</span>
+    </div>
   );
 }
 
-// ── Full-bleed video / editorial ──────────────────────────────────────────────
-function EditorialSection() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"],
-  });
-  const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.92, 1, 0.92]);
-  const textY = useTransform(scrollYProgress, [0, 0.5], [40, 0]);
-
+function Packed({ d }: { d: number }) {
+  const { add } = useCart();
+  const suit = suitFor(tempAt(d));
+  const items = [
+    { why: "Low volume, clears in one breath", item: { key: "tern-black", name: "Tern mask", variant: "Black", price: 89, tint: "#1d1d1f" } },
+    { why: `For ${tempAt(d).toFixed(0)} °C water`, item: { key: `${suit.id}-m`, name: suit.title, variant: "Size M", price: suit.price, tint: A } },
+    ...(d >= 10 ? [{ why: "Tracks your no-stop time", item: { key: "fathom-graphite", name: "Fathom computer", variant: "Graphite", price: 429, tint: "#3a3a3c" } }] : []),
+    ...(d >= 15 ? [{ why: "Brings the reds back", item: { key: "lumen", name: "Lumen 1200 torch", variant: "One size", price: 119, tint: "#facc15" } }] : []),
+  ];
+  const total = items.reduce((s, i) => s + i.item.price, 0);
   return (
-    <section ref={ref} className="py-16 md:py-24">
-      <motion.div
-        style={{ scale }}
-        className="relative mx-auto max-w-[1600px] overflow-hidden rounded-[40px]"
+    <div className="flex w-full flex-col gap-3 rounded-[22px] bg-white/90 p-4 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.45)] backdrop-blur-md sm:w-[320px] sm:p-5">
+      <span className="text-[13px] font-semibold text-[#1d1d1f]">Packed for {d} m</span>
+      <motion.ul layout className="m-0 flex list-none flex-col gap-1.5 p-0">
+        <AnimatePresence initial={false} mode="popLayout">
+          {items.map(({ why, item: it }) => (
+            <motion.li key={it.key.split("-")[0]} layout initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ type: "spring", stiffness: 380, damping: 30 }} className="flex items-center gap-2.5 text-[13px]">
+              <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: it.tint }} />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-medium text-[#1d1d1f]">{it.name}</span>
+                <span className="truncate text-[11px] text-[#6e6e73]">{why}</span>
+              </span>
+              <span className="tabular-nums text-[#424245]">{money(it.price)}</span>
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </motion.ul>
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.96 }}
+        onClick={() => add(items.map((i) => i.item))}
+        className="mt-1 flex h-11 items-center justify-center gap-2 rounded-full text-[14px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        style={{ background: AD }}
       >
-        <img
-          src="https://images.unsplash.com/photo-1567628065080-ecdec09a7588?q=80&w=1960&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-          alt="Ocean depth"
-          className="h-[60vh] w-full object-cover md:h-[80vh]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050d1a]/80 via-[#050d1a]/20 to-transparent" />
-        <motion.div
-          style={{ y: textY }}
-          className="absolute bottom-10 left-10 right-10 md:bottom-16 md:left-16"
-        >
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/80">
-            New for 2026
+        Add this kit · <span className="tabular-nums">{money(total)}</span>
+      </motion.button>
+    </div>
+  );
+}
+
+/** The hero's depth, shared as a motion value so the page never re-renders while you drag. */
+const DepthCtx = createContext<MotionValue<number> | null>(null);
+
+function Hero({ shared }: { shared: MotionValue<number> }) {
+  const depth = useMotionValue(4);
+  const ds = useSpring(depth, { stiffness: 110, damping: 22, mass: 0.8 });
+  const [d, setD] = useState(4);
+  const touched = useRef(false);
+  useMotionValueEvent(depth, "change", (v) => {
+    const r = Math.round(v);
+    setD(r);
+    shared.set(r);
+  });
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (!touched.current) animate(depth, 18, { type: "spring", stiffness: 26, damping: 14 });
+    }, 900);
+    return () => clearTimeout(t);
+  }, [depth]);
+  const top = useTransform(ds, [0, 10, 25, 40], ["#bdeafe", "#38bdf8", "#0369a1", "#062437"]);
+  const bottom = useTransform(ds, [0, 10, 25, 40], ["#38bdf8", "#0284c7", "#074b70", "#03131f"]);
+  const bg = useMotionTemplate`linear-gradient(180deg, ${top}, ${bottom})`;
+  const rays = useTransform(ds, [0, 22], [0.55, 0]);
+  const surfaceY = useTransform(ds, [0, 8], [0, -170]);
+  const dark = useTransform(ds, [20, 40], [0, 0.35]);
+  return (
+    <section id="top" className="relative overflow-hidden pb-16 pt-10 sm:pt-12">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px]" aria-hidden="true" style={{ background: "radial-gradient(55% 60% at 50% 0%, rgba(56,189,248,.20), transparent 70%)" }} />
+      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
+        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
+          <span className="h-2 w-2 rounded-full" style={{ background: A }} />
+          Fitted and pressure-tested before it ships
+        </motion.span>
+        <h1 className="m-0 max-w-[900px] text-[clamp(42px,6.4vw,84px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+          <Words text="Gear for the depth you actually dive." className="justify-center" accentWords={["depth"]} accent={AD} />
+        </h1>
+        <Reveal delay={0.3} y={14}>
+          <p className="m-0 max-w-[620px] text-[clamp(17px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+            Drag the gauge down the reef. Watch the reds go, the water cool and the no-stop time shrink, and we&apos;ll pack the kit that suits that dive.
           </p>
-          <h2
-            className="max-w-2xl font-bold leading-[1.05] tracking-[-0.02em] text-white"
-            style={{ fontSize: "clamp(30px, 4vw, 60px)" }}
-          >
-            AquaVision Pro Mk II — see in three dimensions.
-          </h2>
-          <a
-            href="#"
-            className="mt-7 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-[13px] font-medium text-white backdrop-blur transition hover:bg-white/15"
-          >
-            Discover more
-            <svg className="size-3.5" viewBox="0 0 14 14" fill="none">
-              <path
-                d="M1 7h12M8 3l5 4-5 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+        </Reveal>
+        <Reveal delay={0.4} y={12} className="flex flex-wrap justify-center gap-3">
+          <Magnetic className="text-white" style={{ background: AD }} onClick={() => scrollToId("gear")}>Shop the gear</Magnetic>
+          <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("fit")}>Find my size</Magnetic>
+        </Reveal>
+      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.25 }}
+        className="relative mx-auto mt-8 max-w-[1240px] px-3 sm:px-5"
+      >
+        <div className="relative h-[700px] overflow-hidden rounded-[32px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_40px_80px_-40px_rgba(3,105,161,.55)] sm:h-[620px]" onPointerDown={() => (touched.current = true)}>
+          <motion.div className="absolute inset-0" style={{ background: bg }} aria-hidden="true" />
+          <motion.div className="pointer-events-none absolute inset-0" style={{ opacity: rays }} aria-hidden="true">
+            {[12, 30, 52, 70, 86].map((l, i) => (
+              <motion.span
+                key={l}
+                className="absolute -top-10 h-[120%] w-[70px] origin-top bg-gradient-to-b from-white/70 to-transparent blur-[6px]"
+                style={{ left: `${l}%`, rotate: 14 - i * 3 }}
+                animate={{ opacity: [0.5, 1, 0.5], x: [0, 14, 0] }}
+                transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
               />
+            ))}
+          </motion.div>
+          <motion.div className="pointer-events-none absolute inset-x-0 top-0" style={{ y: surfaceY }} aria-hidden="true">
+            <svg viewBox="0 0 1200 60" preserveAspectRatio="none" className="block h-[44px] w-full">
+              <path d="M0 30 Q50 14 100 30 T200 30 T300 30 T400 30 T500 30 T600 30 T700 30 T800 30 T900 30 T1000 30 T1100 30 T1200 30 V0 H0Z" fill="rgba(255,255,255,.85)" />
             </svg>
-          </a>
-        </motion.div>
+          </motion.div>
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <Fish ds={ds} color="#ef4444" fade={[2, 8]} y="30%" dur={14} />
+            <Fish ds={ds} color="#facc15" fade={[14, 30]} y="44%" scale={0.8} dur={11} delay={1.5} flip />
+            <Fish ds={ds} color="#38bdf8" fade={[38, 40]} y="22%" scale={0.7} dur={16} delay={3} flip />
+          </div>
+          <Reef ds={ds} />
+          <motion.div className="pointer-events-none absolute inset-0 bg-[#020c14]" style={{ opacity: dark }} aria-hidden="true" />
+          <Bubbles />
+          <div className="absolute left-3 top-3 sm:left-5 sm:top-5">
+            <Readout d={d} ds={ds} />
+          </div>
+          <div className="absolute bottom-3 left-3 right-[92px] sm:bottom-5 sm:left-auto sm:right-[100px]">
+            <Packed d={d} />
+          </div>
+          <Gauge depth={depth} onTouch={() => (touched.current = true)} />
+        </div>
+        <p className="m-0 mt-4 text-center text-[13px] text-[#6e6e73]">Drag the depth gauge, or focus it and use the arrow keys. Red light is gone by about 6 m, orange by 15 m.</p>
       </motion.div>
     </section>
   );
 }
 
-// ── Testimonials ─────────────────────────────────────────────────────────────
-function OceanTestimonialCard({ item }: { item: InfiniteMovingCardItem }) {
-  const rating = item.rating ?? 5;
+/* ------------------------------------------------------------------ promise strip */
+
+function Promises() {
+  const items = [
+    { to: 150, f: (n: number) => `$${Math.round(n)}`, l: "free shipping from" },
+    { to: 60, f: (n: number) => `${Math.round(n)} days`, l: "to return it, even wet" },
+    { to: 3, f: (n: number) => `${Math.round(n)} pm`, l: "order by, ships today" },
+    { to: 4.8, f: (n: number) => n.toFixed(1), l: "from 3,214 diver reviews" },
+  ];
   return (
-    <div
-      className="flex w-[min(22rem,calc(100vw-3rem))] shrink-0 flex-col rounded-2xl border border-white/8 bg-white/3 p-6 transition-transform hover:-translate-y-0.5"
-      style={{ backdropFilter: "blur(8px)" }}
+    <section className="mx-auto max-w-[1180px] px-5 pb-8 pt-4">
+      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.l} className="flex flex-col gap-1 border-t border-black/[.08] pt-5">
+            <Counter to={it.to} format={it.f} className="text-[clamp(32px,4.2vw,46px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
+            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
+          </div>
+        ))}
+      </Stagger>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ featured gear */
+
+function AddButton({ onAdd, label = "Add to bag" }: { onAdd: () => void; label?: string }) {
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    if (!done) return;
+    const t = setTimeout(() => setDone(false), 1600);
+    return () => clearTimeout(t);
+  }, [done]);
+  return (
+    <motion.button
+      type="button"
+      onClick={() => { onAdd(); setDone(true); }}
+      whileTap={{ scale: 0.94 }}
+      initial={false}
+      animate={{ backgroundColor: done ? "#15803d" : AD }}
+      transition={{ type: "spring", stiffness: 400, damping: 28 }}
+      className="relative flex h-11 min-w-[132px] items-center justify-center overflow-hidden rounded-full px-5 text-[14px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      aria-live="polite"
     >
-      {/* Stars */}
-      <div className="mb-4 flex gap-0.5">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <svg
-            key={i}
-            className={cn("size-3", i < rating ? "text-cyan-400" : "text-white/15")}
-            viewBox="0 0 12 12"
-            fill="currentColor"
-          >
-            <path d="M6 1l1.4 3h3.1L8 6.2l1 3L6 7.4l-3 1.8 1-3L1.5 4H4.6z" />
-          </svg>
-        ))}
-      </div>
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span key={done ? "d" : "i"} initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -16, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }} className="flex items-center gap-2">
+          {done ? (
+            <>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><motion.path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.3 }} /></svg>
+              Added
+            </>
+          ) : (
+            <>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2" /></svg>
+              {label}
+            </>
+          )}
+        </motion.span>
+      </AnimatePresence>
+    </motion.button>
+  );
+}
 
-      <p className="flex-1 text-[14px] leading-relaxed text-white/65">
-        &ldquo;{item.description}&rdquo;
-      </p>
-
-      {item.tags?.length ? (
-        <div className="mt-4 flex flex-wrap gap-1.5">
-          {item.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-cyan-500/20 bg-cyan-500/8 px-2.5 py-0.5 text-[10px] font-medium text-cyan-400/80"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
-
-      <div className="mt-5 flex items-center gap-3 border-t border-white/6 pt-5">
-        {item.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.avatar}
-            alt={item.name ?? ""}
-            className="size-9 rounded-full border border-white/10 object-cover"
-            loading="lazy"
-          />
-        ) : null}
-        <div>
-          <p className="text-[13px] font-semibold text-white">{item.name}</p>
-          <p className="text-[11px] text-white/40">{item.role}</p>
-        </div>
-      </div>
+function Swatches({ options, value, onChange, group }: { options: { id: string; name: string; hex: string }[]; value: string; onChange: (id: string) => void; group: string }) {
+  return (
+    <div className="flex items-center gap-2" role="radiogroup" aria-label="Colour">
+      {options.map((o) => {
+        const on = o.id === value;
+        return (
+          <button key={o.id} type="button" role="radio" aria-checked={on} aria-label={o.name} onClick={() => onChange(o.id)} className="relative flex h-8 w-8 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-1" style={{ ["--tw-ring-color" as string]: AD }}>
+            {on && <motion.span layoutId={`sw-${group}`} className="absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 0 2px ${AD}` }} transition={{ type: "spring", stiffness: 500, damping: 32 }} />}
+            <span className="h-5 w-5 rounded-full shadow-[inset_0_0_0_1px_rgba(0,0,0,.12)]" style={{ background: o.hex }} />
+          </button>
+        );
+      })}
     </div>
   );
 }
 
-function TestimonialsSection() {
+const MASK_COLOURS = [
+  { id: "black", name: "Black", hex: "#1d1d1f", strap: "#0284c7" },
+  { id: "clear", name: "Clear", hex: "#dbe4ea", strap: "#94a3b8" },
+  { id: "reef", name: "Reef blue", hex: "#0369a1", strap: "#1d1d1f" },
+];
+const FIN_COLOURS = [
+  { id: "sky", name: "Sky", hex: "#0ea5e9" },
+  { id: "coral", name: "Coral", hex: "#fb7185" },
+  { id: "graphite", name: "Graphite", hex: "#475569" },
+];
+const STRAPS = [
+  { id: "graphite", name: "Graphite", hex: "#1d1d1f" },
+  { id: "sea", name: "Sea glass", hex: "#5eead4" },
+];
+
+function Gear() {
+  const { add } = useCart();
+  const heroDepth = useContext(DepthCtx);
+  const [depth, setDepth] = useState(18);
+  useEffect(() => {
+    if (!heroDepth) return;
+    return heroDepth.on("change", (v) => setDepth(v));
+  }, [heroDepth]);
+  const [mask, setMask] = useState("black");
+  const [fin, setFin] = useState("sky");
+  const [strap, setStrap] = useState("graphite");
+  const [qty, setQty] = useState(1);
+  const m = MASK_COLOURS.find((c) => c.id === mask)!;
+  const f = FIN_COLOURS.find((c) => c.id === fin)!;
+  const s = STRAPS.find((c) => c.id === strap)!;
+  const ndl = ndlAt(depth);
   return (
-    <section className="overflow-hidden py-24 md:py-36">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/70">
-            From the community
-          </p>
-          <h2
-            className="mb-16 font-bold tracking-[-0.02em] text-white"
-            style={{ fontSize: "clamp(32px, 4vw, 52px)" }}
-          >
-            Trusted below 30 m.
-          </h2>
-        </Reveal>
-      </div>
-
-      <div className="flex flex-col gap-4">
-        {[
-          { items: TESTIMONIALS_ROW_1, direction: "left" as const },
-          { items: TESTIMONIALS_ROW_2, direction: "right" as const },
-        ].map(({ items, direction }) => (
-          <div key={direction} className="relative">
-            <InfiniteMovingCards
-              items={items}
-              direction={direction}
-              speed="slow"
-              pauseOnHover
-              gap={16}
-              showGradientMask={false}
-              renderItem={(item) => <OceanTestimonialCard item={item} />}
-            />
-            {/* Ocean-matched gradient masks */}
-            <div className="pointer-events-none absolute inset-y-0 left-0 w-20 bg-linear-to-r from-[#050d1a] to-transparent" />
-            <div className="pointer-events-none absolute inset-y-0 right-0 w-20 bg-linear-to-l from-[#050d1a] to-transparent" />
-          </div>
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ── FAQ section ───────────────────────────────────────────────────────────────
-function FAQSection() {
-  return (
-    <section className="py-24 md:py-36">
-      <div className="mx-auto max-w-3xl px-6">
-        <Reveal>
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-cyan-400/70">
-            Have questions?
-          </p>
-          <h2
-            className="mb-12 font-bold tracking-[-0.02em] text-white"
-            style={{ fontSize: "clamp(32px, 4vw, 52px)" }}
-          >
-            Common dives.
-          </h2>
-        </Reveal>
-
-        <div className="rounded-3xl border border-white/8 bg-white/3 px-6 py-2 md:px-8">
-          {FAQS.map((faq) => (
-            <FAQ key={faq.q} q={faq.q} a={faq.a} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ── Footer ────────────────────────────────────────────────────────────────────
-function Footer() {
-  return (
-    <footer className="border-t border-white/5 py-16">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-10 md:grid-cols-4">
-          {/* Brand */}
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-400 to-blue-600">
-                <svg viewBox="0 0 20 20" className="size-4 fill-white">
-                  <path d="M10 2C6 2 3 6 3 10s3 8 7 8 7-3.6 7-8-3-8-7-8zm0 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 10c-2.5 0-4.7-1.3-6-3.3.03-2 4-3.1 6-3.1s5.97 1.1 6 3.1C14.7 13.7 12.5 15 10 15z" />
-                </svg>
+    <section id="gear" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Featured gear" title="Five things every diver ends up buying." sub="We stock fewer models and test every one in the pool before it ships. Pick a colour, add it, keep scrolling." accent={AD} />
+      <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-3">
+        <Reveal y={20} className="lg:col-span-2">
+          <div className={`${card} grid h-full grid-cols-1 items-center gap-8 overflow-hidden p-7 sm:grid-cols-[1fr_1.1fr] sm:p-9`}>
+            <div className="relative flex items-center justify-center rounded-[24px] py-8" style={{ background: "radial-gradient(70% 70% at 50% 40%, #e0f2fe, #f5f5f7 75%)" }}>
+              <motion.div key={strap} initial={{ rotate: -6, scale: 0.94 }} animate={{ rotate: 0, scale: 1 }} transition={{ type: "spring", stiffness: 260, damping: 16 }}>
+                <ComputerArt strap={s.hex} depth={depth} ndl={ndl === null ? "3H+" : `${ndl}`} />
+              </motion.div>
+              <span className="absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white px-3 py-1 text-[11px] font-medium text-[#424245] shadow-[0_0_0_1px_rgba(0,0,0,.06)]">Screen shows your hero depth</span>
+            </div>
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[13px] font-semibold" style={{ color: AD }}>Best seller</span>
+                <h3 className="m-0 text-[28px] font-semibold tracking-[-0.03em] text-[#1d1d1f]">Fathom dive computer</h3>
+                <p className="m-0 text-[15px] leading-[1.5] text-[#6e6e73]">Air and nitrox up to 40%, a screen you can read at 30 m in green water, and a battery that lasts a week on a liveaboard.</p>
               </div>
-              <span className="text-[15px] font-bold text-white">
-                OceanFlow
-              </span>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-[28px] font-semibold tracking-[-0.03em] tabular-nums text-[#1d1d1f]">{money(429 * qty)}</span>
+                <Swatches options={STRAPS} value={strap} onChange={setStrap} group="strap" />
+              </div>
+              <div className="flex flex-wrap items-end justify-between gap-5">
+                <ElasticStepper label="Quantity" min={1} max={4} defaultValue={1} onChange={setQty} accent={AD} />
+                <AddButton onAdd={() => add([{ key: `fathom-${strap}`, name: "Fathom computer", variant: s.name, price: 429, tint: s.hex, qty }])} />
+              </div>
             </div>
-            <p className="mt-4 text-[13px] leading-relaxed text-white/40">
-              Precision diving equipment. Built for the ocean, tested below it.
-            </p>
           </div>
-
-          {/* Links */}
-          {[
-            {
-              heading: "Gear",
-              links: ["Masks", "Fins", "Regulators", "BCDs", "Wetsuits"],
-            },
-            {
-              heading: "Company",
-              links: ["About", "Journal", "Careers", "Press"],
-            },
-            {
-              heading: "Support",
-              links: ["FAQ", "Warranty", "Service Centers", "Contact"],
-            },
-          ].map((col) => (
-            <div key={col.heading}>
-              <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.15em] text-white/35">
-                {col.heading}
-              </p>
-              <ul className="space-y-2.5">
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <a
-                      href="#"
-                      className="text-[13px] text-white/50 transition hover:text-white"
-                    >
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/5 pt-8 text-[12px] text-white/30 md:flex-row md:items-center">
-          <p>© 2026 OceanFlow. All rights reserved.</p>
-          <div className="flex gap-6">
-            {["Privacy", "Terms", "Cookies"].map((l) => (
-              <a key={l} href="#" className="transition hover:text-white/60">
-                {l}
-              </a>
-            ))}
-          </div>
-        </div>
+        </Reveal>
+        <Reveal y={20} delay={0.08}>
+          <ProductCard
+            name="Tern low-volume mask"
+            spec="Tempered glass, anti-fog treated at the factory. Fits most faces with a soft, wide skirt."
+            price={89}
+            art={<motion.div key={mask} initial={{ y: 8, opacity: 0.6 }} animate={{ y: 0, opacity: 1 }} transition={{ type: "spring", stiffness: 300, damping: 20 }}><MaskArt skirt={m.hex} strap={m.strap} w={200} /></motion.div>}
+            swatches={<Swatches options={MASK_COLOURS} value={mask} onChange={setMask} group="mask" />}
+            onAdd={() => add([{ key: `tern-${mask}`, name: "Tern mask", variant: m.name, price: 89, tint: m.hex }])}
+          />
+        </Reveal>
+        <Reveal y={20}>
+          <ProductCard
+            name="Glide open-heel fins"
+            spec="Soft, long blade that's kind to your calves on a long reef drift. Sized by foot length below."
+            price={149}
+            art={<motion.div key={fin} initial={{ rotate: -4 }} animate={{ rotate: 0 }} transition={{ type: "spring", stiffness: 300, damping: 12 }}><FinsArt color={f.hex} w={150} /></motion.div>}
+            swatches={<Swatches options={FIN_COLOURS} value={fin} onChange={setFin} group="fin" />}
+            onAdd={() => add([{ key: `glide-${fin}`, name: "Glide fins", variant: `${f.name} · M`, price: 149, tint: f.hex }])}
+          />
+        </Reveal>
+        <Reveal y={20} delay={0.08}>
+          <ProductCard
+            name="Lumen 1200 torch"
+            spec="1,200 lumens with a wide, even beam. Brings back the reds that the water takes away past 6 m."
+            price={119}
+            art={<TorchArt w={220} />}
+            onAdd={() => add([{ key: "lumen", name: "Lumen 1200 torch", variant: "One size", price: 119, tint: "#facc15" }])}
+          />
+        </Reveal>
+        <Reveal y={20} delay={0.16}>
+          <ProductCard
+            name="Drift snorkel"
+            spec="Dry top that closes when a wave breaks over it, and a purge valve you'll use more than you think."
+            price={29}
+            art={<div className="rotate-[24deg]"><SnorkelArt w={70} /></div>}
+            onAdd={() => add([{ key: "drift", name: "Drift snorkel", variant: "Yellow", price: 29, tint: "#facc15" }])}
+          />
+        </Reveal>
       </div>
-    </footer>
+    </section>
   );
 }
 
-// ── Root export ───────────────────────────────────────────────────────────────
-export function OceanFlowPage() {
-  useLenis();
-
+function ProductCard({ name, spec, price, art, swatches, onAdd }: { name: string; spec: string; price: number; art: ReactNode; swatches?: ReactNode; onAdd: () => void }) {
   return (
-    <div className="min-h-screen bg-[#050d1a] font-sans antialiased">
-      <Nav />
-      <HeroSection />
-      <StatsSection />
-      <PhilosophySection />
-      <GallerySection />
-      <ProductsSection />
-      <TechnologySection />
-      <EditorialSection />
-      <TestimonialsSection />
-      <FAQSection />
-      <Footer />
+    <motion.div whileHover={{ y: -4 }} transition={{ type: "spring", stiffness: 300, damping: 22 }} className={`${card} flex h-full flex-col gap-4 p-6`}>
+      <div className="flex h-[190px] items-center justify-center rounded-[20px] bg-[#f5f5f7]">{art}</div>
+      <div className="flex flex-col gap-1">
+        <h3 className="m-0 text-[19px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{name}</h3>
+        <p className="m-0 text-[14px] leading-[1.5] text-[#6e6e73]">{spec}</p>
+      </div>
+      <div className="mt-auto flex items-center justify-between gap-3">
+        <span className="text-[20px] font-semibold tabular-nums tracking-[-0.02em] text-[#1d1d1f]">{money(price)}</span>
+        {swatches}
+      </div>
+      <AddButton onAdd={onAdd} />
+    </motion.div>
+  );
+}
+
+/* ------------------------------------------------------------------ sizing */
+
+const FIN_SIZES = [
+  { s: "XS", eu: "34–36", min: 220, max: 234 },
+  { s: "S", eu: "37–39", min: 235, max: 249 },
+  { s: "M", eu: "40–42", min: 250, max: 269 },
+  { s: "L", eu: "43–45", min: 270, max: 289 },
+  { s: "XL", eu: "46–48", min: 290, max: 320 },
+];
+
+function Sizing() {
+  const { add } = useCart();
+  const [foot, setFoot] = useState(262);
+  const [suit, setSuit] = useState("s5");
+  const [size, setSize] = useState("M");
+  const fin = FIN_SIZES.find((x) => foot >= x.min && foot <= x.max) ?? FIN_SIZES[2];
+  const chosen = SUITS.find((x) => x.id === suit)!;
+  return (
+    <section id="fit" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Sizing" title="Measured once, fitted for good." sub="Most returns are fins that pinch and suits that flush. Two quick choices here prevent both." accent={AD} center />
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <Reveal y={20}>
+            <div className={`${card} flex h-full flex-col p-7`}>
+              <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Fins, by foot length.</h3>
+              <p className="m-0 mt-1.5 text-[15px] text-[#6e6e73]">Stand on a sheet of paper, mark heel and big toe, measure. Then drag the ruler to match.</p>
+              <div className="mt-8 flex flex-1 flex-col items-center justify-center gap-7">
+                <RulerPicker min={220} max={320} defaultValue={262} unit="mm" presets={[240, 255, 270, 285]} accent={A} onChange={setFoot} label="Foot length in millimetres" labelEvery={10} />
+                <div className="flex w-full items-center justify-between rounded-[20px] bg-[#f5f5f7] px-5 py-4">
+                  <span className="flex flex-col">
+                    <span className="text-[12px] font-semibold text-[#6e6e73]">Your Glide fin size</span>
+                    <span className="text-[13px] text-[#6e6e73]">EU {fin.eu}, with 5 mm boots</span>
+                  </span>
+                  <span className="relative flex h-12 w-16 items-center justify-center overflow-hidden text-[32px] font-semibold tracking-[-0.04em] text-[#1d1d1f]" aria-live="polite">
+                    <AnimatePresence mode="popLayout" initial={false}>
+                      <motion.span key={fin.s} initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -24, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}>{fin.s}</motion.span>
+                    </AnimatePresence>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal y={20} delay={0.08}>
+            <div className={`${card} flex h-full flex-col p-7`}>
+              <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Wetsuits, by the water.</h3>
+              <p className="m-0 mt-1.5 text-[15px] text-[#6e6e73]">Pick the thickness from where you dive, not the time of year. Then a size.</p>
+              <div className="mt-6 flex flex-1 flex-col items-center gap-5">
+                <RadioCards
+                  options={SUITS}
+                  defaultValue="s5"
+                  onChange={setSuit}
+                  accent={AD}
+                  ctaPrefix={`Add size ${size}`}
+                  onConfirm={(id) => {
+                    const sx = SUITS.find((x) => x.id === id)!;
+                    add([{ key: `${id}-${size}`, name: sx.title, variant: `Size ${size}`, price: sx.price, tint: A }]);
+                  }}
+                  footer={
+                <div className="flex w-full flex-wrap items-center justify-between gap-3">
+                  <span className="text-[13px] font-medium text-[#424245]">Size, from the chart on the tag</span>
+                  <div className="relative flex rounded-full bg-[#f0f0f3] p-1" role="radiogroup" aria-label="Wetsuit size">
+                    {["XS", "S", "M", "L", "XL"].map((z) => (
+                      <button key={z} type="button" role="radio" aria-checked={size === z} onClick={() => setSize(z)} className="relative h-9 w-10 rounded-full text-[13px] font-semibold outline-none focus-visible:ring-2" style={{ color: size === z ? INK : "#6e6e73" }}>
+                        {size === z && <motion.span layoutId="suit-size" className="absolute inset-0 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,.12)]" transition={{ type: "spring", stiffness: 500, damping: 34 }} />}
+                        <span className="relative">{z}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                  }
+                />
+                <span className="text-[13px] text-[#6e6e73]">Chosen: {chosen.title}, size {size}. Swap free if it flushes.</span>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ kit builder */
+
+const KIT = [
+  { id: "mask", name: "Tern mask", price: 89, hue: "#0284c7", art: <MaskArt w={150} />, pos: { left: "6%", top: "8%" } },
+  { id: "snorkel", name: "Drift snorkel", price: 29, hue: "#ca8a04", art: <div className="rotate-[64deg]"><SnorkelArt w={52} /></div>, pos: { left: "60%", top: "2%" } },
+  { id: "fins", name: "Glide fins", price: 149, hue: "#0ea5e9", art: <FinsArt w={150} />, pos: { left: "4%", top: "44%" } },
+  { id: "boots", name: "5 mm boots", price: 59, hue: "#475569", art: <BootsArt w={100} />, pos: { left: "44%", top: "60%" } },
+  { id: "computer", name: "Fathom computer", price: 429, hue: "#3a3a3c", art: <ComputerArt w={92} />, pos: { left: "72%", top: "34%" } },
+  { id: "torch", name: "Lumen torch", price: 119, hue: "#facc15", art: <TorchArt w={150} />, pos: { left: "36%", top: "30%" } },
+];
+
+function KitBuilder() {
+  const { add } = useCart();
+  const [on, setOn] = useState<Record<string, boolean>>({ mask: true, snorkel: true, fins: true, boots: true, computer: false, torch: true });
+  const picked = KIT.filter((k) => on[k.id]);
+  const sum = picked.reduce((s, k) => s + k.price, 0);
+  const discount = picked.length >= 4 ? Math.round(sum * 0.1) : 0;
+  const total = sum - discount;
+  return (
+    <section id="kit" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 items-stretch gap-10 lg:grid-cols-[1.1fr_1fr]">
+        <Reveal y={20} className="h-full">
+          <div className="relative h-[360px] overflow-hidden rounded-[28px] sm:h-[460px] lg:h-full lg:min-h-[560px]" style={{ background: "radial-gradient(70% 60% at 30% 20%, #fff7e6, rgba(255,247,230,0) 60%), linear-gradient(160deg, #f3e7cf, #e6d3ad)" }} aria-label={`Kit flat lay: ${picked.map((p) => p.name).join(", ") || "empty"}`} role="img">
+            {KIT.map((k, i) => (
+              <motion.div
+                key={k.id}
+                className="absolute origin-center drop-shadow-[0_16px_14px_rgba(70,50,20,.25)]"
+                style={{ left: k.pos.left, top: k.pos.top }}
+                initial={false}
+                animate={on[k.id] ? { opacity: 1, scale: 1, rotate: (i % 2 ? 1 : -1) * 6, y: 0 } : { opacity: 0, scale: 0.6, rotate: 0, y: 20 }}
+                transition={{ type: "spring", stiffness: 320, damping: 18 }}
+              >
+                <div className="scale-[.72] sm:scale-100">{k.art}</div>
+              </motion.div>
+            ))}
+            <AnimatePresence>
+              {picked.length === 0 && (
+                <motion.span key="e" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 flex items-center justify-center text-[15px] font-medium text-[#5c4a2a]">Switch something on to start a kit.</motion.span>
+              )}
+            </AnimatePresence>
+          </div>
+        </Reveal>
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Build a kit" title="Your first kit, priced honestly." sub="Four pieces or more and we take 10% off the lot. No bundles padded with things you won't use." accent={AD} />
+          <Reveal y={16}>
+            <div className={`${card} flex flex-col p-2`}>
+              {KIT.map((k) => (
+                <div key={k.id} className="flex items-center gap-4 rounded-[18px] px-4 py-2.5">
+                  <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: k.hue }} />
+                  <span className="flex-1 text-[15px] font-medium text-[#1d1d1f]">{k.name}</span>
+                  <span className="text-[14px] tabular-nums text-[#6e6e73]">{money(k.price)}</span>
+                  <CapsuleToggle checked={!!on[k.id]} onChange={(v) => setOn((o) => ({ ...o, [k.id]: v }))} label={`Include ${k.name}`} onColor={A} />
+                </div>
+              ))}
+              <div className="mx-2 mt-2 flex flex-wrap items-center justify-between gap-4 rounded-[20px] bg-[#f5f5f7] px-5 py-4">
+                <span className="flex flex-col">
+                  <span className="flex items-baseline gap-0.5 text-[34px] font-semibold leading-none tracking-[-0.04em] text-[#1d1d1f] tabular-nums">$<RollingNumber value={total} /></span>
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span key={discount ? "d" : "n"} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="text-[13px]" style={{ color: discount ? "#15803d" : "#6e6e73" }}>
+                      {discount ? `You save ${money(discount)} on ${picked.length} pieces` : `${Math.max(0, 4 - picked.length)} more for 10% off`}
+                    </motion.span>
+                  </AnimatePresence>
+                </span>
+                <AddButton label="Add kit" onAdd={() => picked.length && add(picked.map((k) => ({ key: `kit-${k.id}`, name: k.name, variant: discount ? "Kit, 10% off" : "Kit", price: discount ? Math.round(k.price * 0.9) : k.price, tint: k.hue })))} />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ delivery */
+
+function ReturnLabel() {
+  return (
+    <div className={`${card} w-[340px] overflow-hidden`}>
+      <div className="flex items-center justify-between px-6 py-4" style={{ background: AD }}>
+        <span className="text-[14px] font-semibold text-white">Prepaid return</span>
+        <span className="text-[12px] font-medium tabular-nums text-white/90">OF-20419</span>
+      </div>
+      <div className="flex flex-col gap-4 p-6">
+        <div className="flex flex-col gap-1">
+          <span className="text-[12px] font-semibold text-[#6e6e73]">Reason</span>
+          <span className="text-[17px] font-semibold text-[#1d1d1f]">Suit flushes at the neck</span>
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="text-[12px] font-semibold text-[#6e6e73]">What happens next</span>
+          <span className="text-[14px] leading-[1.45] text-[#424245]">Rinse it, drop it at any parcel locker. The next size ships the day we scan your return.</span>
+        </div>
+        <div className="flex h-12 items-end gap-[3px]" aria-hidden="true">
+          {Array.from({ length: 44 }, (_, i) => (
+            <span key={i} className="bg-[#1d1d1f]" style={{ width: i % 3 === 0 ? 3 : 1.5, height: i % 7 === 0 ? "100%" : "82%" }} />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
+
+function Delivery() {
+  return (
+    <section id="delivery" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Delivery and returns" title="From our pool to your dive bag." accent={AD} />
+        <div className="mt-6">
+          <Story
+            accent={AD}
+            steps={[
+              { kicker: "Packed today", title: "Checked by a diver, not a scanner.", body: "Orders placed by 3 pm ship the same day. Before anything leaves, someone who dives every week runs through the checklist and signs the tag.", visual: <div className={`${card} p-7`}><TodoList accent={AD} autoplay initial={["Regulator flow-tested at 200 bar", "Mask lens checked for scratches", "Computer charged and set to your units", "Fins matched to your foot length"]} /></div> },
+              { kicker: "Island express", title: "Shipping to an island? We fly it.", body: "Dive centres and liveaboards on islands get kits by air in two to four days, with a tracking page that shows the plane, not just a postcode.", visual: <FlightTracker from="SAN" to="HNL" /> },
+              { kicker: "60-day fit returns", title: "Get it wet, then decide.", body: "Try your suit and fins in a pool or on a dive. If the fit is wrong, send it back within 60 days and we cover the label.", visual: <ReturnLabel /> },
+            ]}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ reviews */
+
+const REVIEWS = [
+  { n: "Marisol Tavares", m: "312 logged dives", p: "Tern mask", t: "First mask that hasn't fogged on the second dive of the day. My buddy is relieved I've stopped spitting in it." },
+  { n: "Dev Ramaswamy", m: "Certified this spring", p: "Glide fins", t: "Measured my foot with the ruler on this page, ordered an M, and it fit over 5 mm boots exactly as the chart said." },
+  { n: "Hanna Lindqvist", m: "Divemaster", p: "Fathom computer", t: "Readable at 30 m in murky green water, and the battery lasted a full week on a liveaboard with four dives a day." },
+  { n: "Tomás Ibarra", m: "Cold-water diver", p: "7 mm Current suit", t: "Sent my first suit back after one pool session. No questions, and the next size down arrived two days later." },
+  { n: "Aiko Brennan", m: "Shoots macro", p: "Lumen 1200 torch", t: "The reds came back in my photos at 20 m. That's the whole review, really." },
+  { n: "Priya Natarajan", m: "Runs a dive centre", p: "Six starter kits", t: "Flown to our island in four days. Every regulator still had its pressure-test tag on, signed and dated." },
+];
+
+function Stars({ n = 5 }: { n?: number }) {
+  return (
+    <span className="flex gap-0.5" aria-label={`${n} out of 5 stars`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <svg key={i} width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill={i < n ? "#f59e0b" : "#d2d2d7"} d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18.3 5.5 22l1.7-7.4L1.5 9.6 9 8.9z" /></svg>
+      ))}
+    </span>
+  );
+}
+
+function Reviews() {
+  const dist = [82, 12, 4, 1, 1];
+  return (
+    <section id="reviews" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 gap-10 lg:grid-cols-[0.8fr_1.6fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Reviews" title="Divers who came back up happy." accent={AD} />
+          <Reveal y={16}>
+            <div className={`${card} flex flex-col gap-4 p-6`}>
+              <div className="flex items-baseline gap-3">
+                <Counter to={4.8} format={(n) => n.toFixed(1)} className="text-[52px] font-semibold leading-none tracking-[-0.045em] text-[#1d1d1f]" />
+                <span className="flex flex-col gap-1"><Stars /><span className="text-[13px] text-[#6e6e73]">3,214 verified orders</span></span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {dist.map((p, i) => (
+                  <div key={i} className="flex items-center gap-3 text-[12px] tabular-nums text-[#6e6e73]">
+                    <span className="w-3">{5 - i}</span>
+                    <span className="relative h-2 flex-1 overflow-hidden rounded-full bg-[#f0f0f3]">
+                      <motion.span className="absolute inset-y-0 left-0 origin-left rounded-full" style={{ width: `${p}%`, background: A }} initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={{ once: true }} transition={{ type: "spring", stiffness: 90, damping: 20, delay: i * 0.06 }} />
+                    </span>
+                    <span className="w-8 text-right">{p}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Reveal>
+        </div>
+        <Stagger className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {REVIEWS.map((r) => (
+            <figure key={r.n} className={`${card} m-0 flex h-full flex-col gap-4 p-6`}>
+              <div className="flex items-center justify-between gap-3">
+                <Stars n={r.n === "Tomás Ibarra" ? 4 : 5} />
+                <span className="rounded-full bg-[#f0f9ff] px-2.5 py-1 text-[12px] font-medium" style={{ color: AD }}>{r.p}</span>
+              </div>
+              <blockquote className="m-0 text-[16px] leading-[1.5] tracking-[-0.01em] text-[#1d1d1f]">&ldquo;{r.t}&rdquo;</blockquote>
+              <figcaption className="mt-auto flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: AD }}>{r.n.split(" ").map((w) => w[0]).join("")}</span>
+                <span className="flex flex-col">
+                  <span className="text-[14px] font-semibold text-[#1d1d1f]">{r.n}</span>
+                  <span className="text-[12px] text-[#6e6e73]">{r.m}</span>
+                </span>
+              </figcaption>
+            </figure>
+          ))}
+        </Stagger>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ cart drawer */
+
+function CartDrawer({ open, onClose, lines, setLines }: { open: boolean; onClose: () => void; lines: CartLine[]; setLines: (fn: (l: CartLine[]) => CartLine[]) => void }) {
+  const [placed, setPlaced] = useState<CartLine[] | null>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const subtotal = lines.reduce((s, l) => s + l.price * l.qty, 0);
+  const FREE = 150;
+  const ship = subtotal >= FREE || subtotal === 0 ? 0 : 9;
+  const left = Math.max(0, FREE - subtotal);
+  useEffect(() => {
+    if (!open) return;
+    closeRef.current?.focus();
+    const k = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [open, onClose]);
+  const step = (key: string, d: number) => setLines((ls) => ls.map((l) => (l.key === key ? { ...l, qty: Math.max(0, Math.min(9, l.qty + d)) } : l)).filter((l) => l.qty > 0));
+  const receipt = useMemo(() => {
+    if (!placed) return null;
+    const sub = placed.reduce((s, l) => s + l.price * l.qty, 0);
+    const shipping = sub >= FREE ? 0 : 9;
+    // The slip has room for four rows: up to three items (or two plus a "more" row) and shipping.
+    const keep = placed.length > 3 ? 2 : 3;
+    const top = placed.slice(0, keep).map((l) => ({ label: `${l.name} × ${l.qty}`, amount: money(l.price * l.qty) }));
+    const rest = placed.slice(keep).reduce((s, l) => s + l.price * l.qty, 0);
+    return { lines: [...top, ...(rest ? [{ label: `${placed.length - keep} more items`, amount: money(rest) }] : []), { label: "Shipping", amount: shipping ? money(shipping) : "Free" }], total: money(sub + shipping) };
+  }, [placed]);
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div key="cart" className="fixed inset-0 z-[60]" initial={{ opacity: 1 }} exit={{ opacity: 1 }}>
+          <motion.button type="button" aria-label="Close bag" onClick={onClose} className="absolute inset-0 h-full w-full cursor-default bg-black/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.aside
+            role="dialog"
+            aria-modal="true"
+            aria-label="Your bag"
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 320, damping: 34 }}
+            className="absolute bottom-0 right-0 top-0 flex w-full max-w-[420px] flex-col bg-[#fbfbfd] text-[#1d1d1f] shadow-[-30px_0_60px_-30px_rgba(0,0,0,.35)]"
+          >
+            <div className="flex items-center justify-between border-b border-black/[.06] px-6 py-5">
+              <span className="text-[20px] font-semibold tracking-[-0.02em]">{placed ? "Order placed" : "Your bag"}</span>
+              <button ref={closeRef} type="button" onClick={onClose} aria-label="Close bag" className="flex h-9 w-9 items-center justify-center rounded-full bg-black/5 outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: AD }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+              </button>
+            </div>
+            {placed && receipt ? (
+              <div className="flex flex-1 flex-col items-center gap-6 overflow-y-auto px-6 py-8">
+                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#15803d]">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><motion.path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.4, delay: 0.1 }} /></svg>
+                </span>
+                <div className="flex flex-col items-center gap-1 text-center">
+                  <span className="text-[17px] font-semibold">Order OF-20419 is in.</span>
+                  <span className="text-[14px] text-[#6e6e73]">This is a demo store, so nothing was charged.</span>
+                </div>
+                <Fit><ReceiptUnfold lines={receipt.lines} total={receipt.total} number="Order OF-20419" from="Ocean Flow" billedTo="Shipped to your saved address" paidWith="Demo order · no card charged" /></Fit>
+                <button type="button" onClick={() => { setPlaced(null); onClose(); }} className="mt-auto h-11 rounded-full bg-black/5 px-6 text-[14px] font-semibold outline-none focus-visible:ring-2">Keep shopping</button>
+              </div>
+            ) : (
+              <>
+                <div className="px-6 pt-5">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-[#424245]">{left > 0 ? `${money(left)} away from free shipping` : "Shipping is free"}</span>
+                    <span className="tabular-nums text-[#6e6e73]">{money(Math.min(subtotal, FREE))} / {money(FREE)}</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#e8e8ed]">
+                    <motion.div className="h-full rounded-full" initial={false} animate={{ width: `${Math.min(100, (subtotal / FREE) * 100)}%`, backgroundColor: left > 0 ? A : "#15803d" }} transition={{ type: "spring", stiffness: 160, damping: 22 }} />
+                  </div>
+                </div>
+                <ul className="m-0 flex flex-1 list-none flex-col gap-2 overflow-y-auto p-4">
+                  <AnimatePresence initial={false}>
+                    {lines.length === 0 && (
+                      <motion.li key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="px-2 py-10 text-center text-[15px] text-[#6e6e73]">Your bag is empty. The depth gauge up top packs a kit in one tap.</motion.li>
+                    )}
+                    {lines.map((l) => (
+                      <motion.li key={l.key} layout initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 60, height: 0, marginTop: 0 }} transition={{ type: "spring", stiffness: 360, damping: 32 }} className="flex items-center gap-3 overflow-hidden rounded-[18px] bg-white p-3 shadow-[0_0_0_1px_rgba(0,0,0,.05)]">
+                        <span className="h-10 w-10 flex-none rounded-[12px]" style={{ background: `linear-gradient(140deg, ${l.tint}, #e0f2fe)` }} aria-hidden="true" />
+                        <span className="flex min-w-0 flex-1 flex-col">
+                          <span className="truncate text-[14px] font-semibold">{l.name}</span>
+                          <span className="truncate text-[12px] text-[#6e6e73]">{l.variant}</span>
+                        </span>
+                        <span className="flex items-center gap-1 rounded-full bg-[#f0f0f3] p-1">
+                          <button type="button" aria-label={`One fewer ${l.name}`} onClick={() => step(l.key, -1)} className="flex h-7 w-7 items-center justify-center rounded-full text-[16px] outline-none hover:bg-white focus-visible:ring-2">−</button>
+                          <span className="w-4 text-center text-[13px] font-semibold tabular-nums" aria-live="polite">{l.qty}</span>
+                          <button type="button" aria-label={`One more ${l.name}`} onClick={() => step(l.key, 1)} className="flex h-7 w-7 items-center justify-center rounded-full text-[16px] outline-none hover:bg-white focus-visible:ring-2">+</button>
+                        </span>
+                        <span className="w-14 text-right text-[14px] font-semibold tabular-nums">{money(l.price * l.qty)}</span>
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
+                </ul>
+                <div className="flex flex-col gap-3 border-t border-black/[.06] px-6 py-5">
+                  <div className="flex justify-between text-[14px] text-[#6e6e73]"><span>Subtotal</span><span className="tabular-nums">{money(subtotal)}</span></div>
+                  <div className="flex justify-between text-[14px] text-[#6e6e73]"><span>Shipping</span><span className="tabular-nums">{ship ? money(ship) : "Free"}</span></div>
+                  <div className="flex justify-between text-[18px] font-semibold"><span>Total</span><span className="tabular-nums">{money(subtotal + ship)}</span></div>
+                  <motion.button type="button" disabled={!lines.length} whileTap={{ scale: 0.97 }} onClick={() => { setPlaced(lines); setLines(() => []); }} className="mt-1 h-12 rounded-full text-[15px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-40" style={{ background: AD }}>
+                    Check out
+                  </motion.button>
+                  <span className="text-center text-[12px] text-[#6e6e73]">Demo checkout. No card needed, nothing is charged.</span>
+                </div>
+              </>
+            )}
+          </motion.aside>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ------------------------------------------------------------------ page */
+
+export function OceanFlowPage() {
+  const [lines, setLinesState] = useState<CartLine[]>([]);
+  const [open, setOpen] = useState(false);
+  const [toast, setToast] = useState<{ id: number; text: string } | null>(null);
+  const depth = useMotionValue(18);
+  const toastId = useRef(0);
+  const count = lines.reduce((s, l) => s + l.qty, 0);
+  const setLines = (fn: (l: CartLine[]) => CartLine[]) => setLinesState(fn);
+  const add = (items: AddInput[]) => {
+    if (!items.length) return;
+    setLinesState((ls) => {
+      const next = [...ls];
+      items.forEach((it) => {
+        const i = next.findIndex((l) => l.key === it.key);
+        if (i >= 0) next[i] = { ...next[i], qty: Math.min(9, next[i].qty + (it.qty ?? 1)) };
+        else next.push({ ...it, qty: it.qty ?? 1 });
+      });
+      return next;
+    });
+    toastId.current += 1;
+    setToast({ id: toastId.current, text: items.length > 1 ? `${items.length} items added to your bag` : `${items[0].name} added to your bag` });
+  };
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 2600);
+    return () => clearTimeout(t);
+  }, [toast]);
+  const ctx = { add, open: () => setOpen(true) };
+
+  return (
+    <MotionConfig reducedMotion="user">
+      <CartCtx.Provider value={ctx}>
+        <DepthCtx.Provider value={depth}>
+          <div className="min-h-screen bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+            <Nav brand={<Logo />} accent={AD} cta={count ? `Bag · ${count}` : "Bag"} onCta={() => setOpen(true)} links={[{ label: "Gear", id: "gear" }, { label: "Sizing", id: "fit" }, { label: "Kits", id: "kit" }, { label: "Delivery", id: "delivery" }, { label: "Reviews", id: "reviews" }]} />
+            <Hero shared={depth} />
+            <Promises />
+            <Gear />
+            <Sizing />
+            <KitBuilder />
+            <Delivery />
+            <Reviews />
+            <section className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
+              <SectionHead eyebrow="FAQ" title="Before you get wet." accent={AD} />
+              <Reveal y={16}>
+                <Faq
+                  accent={AD}
+                  items={[
+                    { q: "What if my fins or suit don't fit?", a: "Send them back within 60 days, even after a pool session or a dive. Rinse them, use the prepaid label, and we ship the next size the day your return is scanned." },
+                    { q: "Do you service regulators?", a: "Yes. Every regulator we sell gets its first yearly service free, and we service other brands for a flat $85 with a 48-hour turnaround." },
+                    { q: "How does island shipping work?", a: "Orders to island addresses and dive centres go by air in two to four days. The tracking page shows the flight your parcel is on." },
+                    { q: "Are the depth figures on this page safe to dive with?", a: "No. They're planning figures to explain how depth changes a dive. Always dive within your training and follow your computer or your agency's tables." },
+                    { q: "Can I try gear before buying?", a: "Our San Diego store has a pool open on weekends. Book a free 30-minute slot to try masks, fins and suits in the water." },
+                  ]}
+                />
+              </Reveal>
+            </section>
+            <div className="mx-auto max-w-[1180px] px-5 pb-20">
+              <CtaBand title="Your next dive starts at the door." sub="Order by 3 pm and it ships today, checked by someone who dives." cta="Shop the gear" secondary="Book a pool try-on" accent={A} glow="rgba(56,189,248,.32)" />
+            </div>
+            <Footer brand={<Logo />} note="Dive gear, fitted and pressure-tested before it ships." columns={[{ title: "Shop", links: ["Masks", "Fins", "Suits", "Computers", "Kits"] }, { title: "Help", links: ["Sizing", "Returns", "Servicing", "Shipping"] }, { title: "Visit", links: ["San Diego store", "Pool try-ons", "Dive trips", "Contact"] }]} />
+
+            <AnimatePresence>
+              {toast && (
+                <motion.div key={toast.id} role="status" initial={{ opacity: 0, y: 24, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.98 }} transition={{ type: "spring", stiffness: 420, damping: 30 }} className="fixed bottom-5 left-1/2 z-50 flex w-[calc(100%-32px)] max-w-[420px] -translate-x-1/2 items-center gap-3 rounded-full bg-[#1d1d1f] py-2 pl-5 pr-2 text-white shadow-[0_20px_40px_-16px_rgba(0,0,0,.5)]">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7dd3fc" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                  <span className="min-w-0 flex-1 truncate text-[14px] font-medium">{toast.text}</span>
+                  <button type="button" onClick={() => { setToast(null); setOpen(true); }} className="h-9 flex-none rounded-full bg-white px-4 text-[13px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#7dd3fc]">View bag</button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <CartDrawer open={open} onClose={() => setOpen(false)} lines={lines} setLines={setLines} />
+          </div>
+        </DepthCtx.Provider>
+      </CartCtx.Provider>
+    </MotionConfig>
+  );
+}
+
+export default OceanFlowPage;

@@ -42,20 +42,25 @@ const securityHeaders = [
 ];
 
 const nextConfig = {
+  // No dev badge: template preview images are captured from the dev server.
+  devIndicators: false,
   poweredByHeader: false,
   compress: true,
   outputFileTracingIncludes: {
+    // The template zip (src/lib/template-zip.ts) reads the page, its imports, the public files it
+    // references, the versions to pin, and the template's build prompt (PROMPT.md).
     "/api/download/template": [
       "./package.json",
-      "./src/app/globals.css",
+      "./package-lock.json",
       "./src/components/**/*",
+      "./src/hooks/**/*",
       "./src/lib/utils.ts",
-      "./public/templates/**/*",
-      "./public/videos/**/*",
-      "./public/models/**/*",
-      "./public/fonts/**/*",
-      "./public/*.{png,jpg,jpeg,webp,svg}",
+      "./src/@types/*.d.ts",
+      "./public/**/*",
+      "./content/build-prompts/templates/*.md",
     ],
+    // Template build prompts: outside public/, only read by this gated route.
+    "/api/prompt/template/[slug]": ["./content/build-prompts/templates/*.md"],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
     "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
     // Component pages list the guides that link to them.

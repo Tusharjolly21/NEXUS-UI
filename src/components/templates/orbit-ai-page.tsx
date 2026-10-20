@@ -1,1112 +1,716 @@
 "use client";
+/**
+ * Orbit: landing page template for five AI agents that review every pull
+ * request (tests, security, performance, style, docs). Motion Kit style:
+ * light page, one blue accent.
+ * Kit components: Progress Button, Hold to Confirm, Ruler Picker, Switch
+ * (from Animated Tabs), Liquid Dial, Standing Calendar and Price Odometer.
+ */
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useTransform, type MotionValue } from "framer-motion";
+import ProgressButton from "@/components/templates/kit/components/ProgressButton";
+import HoldToConfirm from "@/components/templates/kit/components/HoldToConfirm";
+import RulerPicker from "@/components/templates/orbit-ai/budget-ruler";
+import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
+import GooeyDial from "@/components/templates/kit/components/GooeyDial";
+import StandingCalendar from "@/components/templates/kit/components/StandingCalendar";
+import PriceOdometer from "@/components/templates/kit/components/PriceOdometer";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import {
-  motion,
-  AnimatePresence,
-  useInView,
-  useScroll,
-  useTransform,
-  type Variants,
-} from "framer-motion";
-import {
-  Circle,
-  GitMerge,
-  Eye,
-  Files,
-  FlaskConical,
-  Shield,
-  GitBranch,
-  ArrowRight,
-  Terminal,
-  Code2,
-  Check,
-  Zap,
-  Menu,
-  X,
-} from "lucide-react";
+const A = "#2563eb"; // blue: fills, graphics and text (5.2:1 on white)
+const INK = "#1d1d1f";
+const MONO = "ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, monospace";
+const OK = "#1a7f37";
+const WARN = "#b25000";
+const BLOCK = "#d70015";
 
-// ─── Lenis smooth scroll ────────────────────────────────────────────────────
-
-function useLenis() {
-  React.useEffect(() => {
-    let lenis: { raf: (t: number) => void; destroy: () => void } | null = null;
-    let rafId: number;
-    import("@studio-freight/lenis")
-      .then((mod) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const LenisClass = (mod.default ?? (mod as any).Lenis) as any;
-        lenis = new LenisClass({ lerp: 0.08 });
-        function raf(time: number) {
-          lenis?.raf(time);
-          rafId = requestAnimationFrame(raf);
-        }
-        rafId = requestAnimationFrame(raf);
-      })
-      .catch(() => {});
-    return () => {
-      if (lenis) lenis.destroy();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
+function Logo() {
+  return (
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <ellipse cx="16" cy="16" rx="13" ry="6" fill="none" stroke={A} strokeWidth="2.4" transform="rotate(-24 16 16)" />
+        <circle cx="16" cy="16" r="5.2" fill={INK} />
+        <motion.circle r="2.6" cx={4.6} cy={21.2} fill={A} initial={{ cx: 4.6, cy: 21.2 }} animate={{ cx: [4.6, 27.4, 4.6], cy: [21.2, 10.8, 21.2] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
+      </svg>
+      Orbit
+    </span>
+  );
 }
 
-// ─── Reveal wrapper ──────────────────────────────────────────────────────────
-
-const fadeUpVariants: Variants = {
-  hidden: { opacity: 0, y: 32 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-  },
+type Status = "pass" | "warn" | "block";
+const STATUS: Record<Status, { c: string; bg: string; l: string }> = {
+  pass: { c: OK, bg: "rgba(52,199,89,.14)", l: "Pass" },
+  warn: { c: WARN, bg: "rgba(255,159,10,.16)", l: "Note" },
+  block: { c: BLOCK, bg: "rgba(255,59,48,.12)", l: "Blocking" },
 };
 
-function Reveal({
-  children,
-  delay = 0,
-  className = "",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+const AGENTS: { id: string; name: string; status: Status; verdict: string; finding: string; where: string; d: string }[] = [
+  { id: "tests", name: "Tests", status: "warn", verdict: "2 untested branches", finding: "retry() gained two branches with no test. Orbit drafted both in deliver.test.ts for you to keep or bin.", where: "webhooks/deliver.ts:44", d: "M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" },
+  { id: "security", name: "Security", status: "block", verdict: "Secret written to logs", finding: "The signing secret is logged at debug level on every retry. Blocking the merge until it's removed.", where: "webhooks/deliver.ts:58", d: "M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z" },
+  { id: "perf", name: "Performance", status: "warn", verdict: "+38 ms at p95", finding: "Backoff sleeps on the request thread. In the load replay p95 went from 212 to 250 ms, over your 25 ms budget.", where: "webhooks/deliver.ts:51", d: "M13 3L5 13h6l-1 8 8-10h-6z" },
+  { id: "style", name: "Style", status: "pass", verdict: "1 nit", finding: "Matches house style. One nit: an early return on line 31 would drop a level of nesting.", where: "webhooks/deliver.ts:31", d: "M4 20l4-1 11-11-3-3L5 16zM14 6l3 3" },
+  { id: "docs", name: "Docs", status: "pass", verdict: "Docs drafted", finding: "RETRY_MAX is a new public option. Orbit added it to docs/webhooks.md and the changelog.", where: "docs/webhooks.md", d: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5" },
+];
+
+const TAU = Math.PI * 2;
+const STEP = TAU / AGENTS.length;
+const FRONT = Math.PI / 2; // bottom of the ellipse faces the viewer
+
+const Icon = ({ d, size = 20, color = "currentColor" }: { d: string; size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
+);
+
+/* ------------------------------------------------------------------ */
+/* Hero: the agent ring                                                 */
+/* ------------------------------------------------------------------ */
+
+function AgentNode({ i, rot, geo, selected, onPick, compact = false }: { i: number; rot: MotionValue<number>; geo: { cx: number; cy: number; rx: number; ry: number }; selected: boolean; onPick: (i: number) => void; compact?: boolean }) {
+  const a = AGENTS[i];
+  const theta = useTransform(rot, (r) => r + i * STEP);
+  const x = useTransform(theta, (t) => geo.cx + geo.rx * Math.cos(t) - 36);
+  const y = useTransform(theta, (t) => geo.cy + geo.ry * Math.sin(t) - 36);
+  const depth = useTransform(theta, (t) => Math.sin(t));
+  const k = compact ? 0.74 : 1;
+  const scale = useTransform(depth, [-1, 1], [0.7 * k, 1.08 * k]);
+  const opacity = useTransform(depth, [-1, 0, 1], [0.55, 0.85, 1]);
+  const zIndex = useTransform(depth, (d) => (d > 0.05 ? 30 : 5));
+  const s = STATUS[a.status];
   return (
-    <motion.div
-      ref={ref}
-      variants={fadeUpVariants}
-      initial="hidden"
-      animate={inView ? "visible" : "hidden"}
-      transition={{ delay }}
-      className={className}
-    >
-      {children}
+    <motion.div className="absolute left-0 top-0" style={{ x, y, scale, opacity, zIndex }}>
+      <button
+        type="button"
+        onClick={() => onPick(i)}
+        aria-pressed={selected}
+        aria-label={`${a.name} agent: ${a.verdict}`}
+        className="group relative flex h-[72px] w-[72px] flex-col items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        style={{ ["--tw-ring-color" as string]: A }}
+      >
+        <motion.span
+          className="absolute inset-0 rounded-full"
+          animate={{ backgroundColor: selected ? A : "#ffffff", boxShadow: selected ? "0 0 0 6px rgba(37,99,235,.16), 0 18px 34px -14px rgba(37,99,235,.7)" : "0 0 0 1px rgba(0,0,0,.07), 0 14px 28px -16px rgba(0,0,0,.4)" }}
+          transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        />
+        <span className="relative" style={{ color: selected ? "#fff" : INK }}><Icon d={a.d} size={24} /></span>
+        <span className="absolute -right-0.5 top-0.5 h-3.5 w-3.5 rounded-full ring-[3px] ring-white" style={{ background: s.c }} />
+        {(!compact || selected) && <span className="absolute top-[78px] whitespace-nowrap rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)] backdrop-blur" style={compact ? { fontSize: 15 } : undefined}>{a.name}</span>}
+      </button>
     </motion.div>
   );
 }
 
-// ─── Orbit SVG icon ──────────────────────────────────────────────────────────
-
-function OrbitIcon({ size = 28 }: { size?: number }) {
+function PrCard({ sel, onPick }: { sel: number; onPick: (i: number) => void }) {
+  const a = AGENTS[sel];
+  const blocked = AGENTS.some((x) => x.status === "block");
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 28 28"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <ellipse
-        cx="14"
-        cy="14"
-        rx="12"
-        ry="5.5"
-        stroke="#06b6d4"
-        strokeWidth="1.5"
-        fill="none"
-        transform="rotate(-30 14 14)"
-      />
-      <ellipse
-        cx="14"
-        cy="14"
-        rx="12"
-        ry="5.5"
-        stroke="#06b6d4"
-        strokeWidth="1.5"
-        fill="none"
-        transform="rotate(30 14 14)"
-        opacity="0.5"
-      />
-      <circle cx="14" cy="14" r="3" fill="#06b6d4" />
-      <circle cx="22" cy="10" r="2" fill="#06b6d4" opacity="0.8" />
-    </svg>
+    <div className={`${card} flex w-[420px] flex-col gap-4 p-5`}>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full" style={{ background: "rgba(37,99,235,.12)", color: A }}>
+          <Icon d="M7 5v14M7 5a2 2 0 1 0 0 .1M17 19a2 2 0 1 0 0-.1M17 17V9a3 3 0 0 0-3-3h-3M13 4l-2 2 2 2" size={16} />
+        </span>
+        <div className="flex min-w-0 flex-col">
+          <span className="text-[16px] font-semibold leading-[1.3] tracking-[-0.01em] text-[#1d1d1f]">Retry failed webhook deliveries</span>
+          <span className="text-[12px] text-[#6e6e73]"><span className="tabular-nums">#4127</span> · mara.okafor wants to merge into main · <span className="tabular-nums" style={{ color: OK }}>+184</span> <span className="tabular-nums" style={{ color: BLOCK }}>−37</span></span>
+        </div>
+      </div>
+      <div className="flex flex-col gap-0.5">
+        {AGENTS.map((g, i) => {
+          const s = STATUS[g.status];
+          const on = i === sel;
+          return (
+            <button key={g.id} type="button" onClick={() => onPick(i)} className="relative flex items-center gap-3 rounded-xl px-2.5 py-1.5 text-left outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }} aria-pressed={on}>
+              {on && <motion.span layoutId="orbit-row" className="absolute inset-0 rounded-xl bg-[#f0f5ff]" transition={{ type: "spring", stiffness: 480, damping: 36 }} />}
+              <span className="relative" style={{ color: on ? A : "#6e6e73" }}><Icon d={g.d} size={16} /></span>
+              <span className="relative flex-1 text-[14px] font-medium text-[#1d1d1f]">{g.name}</span>
+              <span className="relative text-[12px] text-[#6e6e73]">{g.verdict}</span>
+              <span className="relative rounded-full px-2 py-0.5 text-[11px] font-semibold" style={{ color: s.c, background: s.bg }}>{s.l}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="relative min-h-[80px] overflow-hidden rounded-2xl bg-[#f5f5f7] p-3.5" aria-live="polite">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div key={a.id} initial={{ opacity: 0, y: 14, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -14, filter: "blur(4px)" }} transition={{ type: "spring", stiffness: 340, damping: 30 }}>
+            <span className="block text-[11px] font-semibold" style={{ color: A, fontFamily: MONO }}>{a.where}</span>
+            <span className="mt-1 block text-[13.5px] leading-[1.45] text-[#1d1d1f]">{a.finding}</span>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[12px] text-[#6e6e73]">Reviewed in 3 min 40 s</span>
+        <span className="rounded-full px-3 py-1.5 text-[12px] font-semibold" style={blocked ? { background: "rgba(255,59,48,.1)", color: BLOCK } : { background: "rgba(52,199,89,.14)", color: OK }}>
+          {blocked ? "Merge blocked by Security" : "Ready to merge"}
+        </span>
+      </div>
+    </div>
   );
 }
 
-// ─── Navbar ──────────────────────────────────────────────────────────────────
+function AgentRing() {
+  const stage = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(1140);
+  const [sel, setSel] = useState(1);
+  const rot = useMotionValue(FRONT - 1 * STEP);
+  const vel = useRef(0);
+  const drag = useRef<{ x: number; last: number; t: number; moved: boolean } | null>(null);
+  const touched = useRef(0);
+  const ctl = useRef<{ stop: () => void } | null>(null);
 
-function Navbar() {
-  const [scrolled, setScrolled] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 60);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+  useLayoutEffect(() => {
+    const el = stage.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setW(el.clientWidth));
+    ro.observe(el);
+    setW(el.clientWidth);
+    return () => ro.disconnect();
   }, []);
 
-  const navLinks = ["Product", "Docs", "Pricing", "Features"];
+  const wide = w >= 760;
+  const H = wide ? 620 : 262;
+  const geo = wide ? { cx: w / 2, cy: 285, rx: Math.min(w / 2 - 60, 500), ry: 240 } : { cx: w / 2, cy: 112, rx: w / 2 - 40, ry: 74 };
+
+  const frontIndex = (r: number) => {
+    let best = 0, bv = -2;
+    AGENTS.forEach((_, i) => { const v = Math.sin(r + i * STEP); if (v > bv) { bv = v; best = i; } });
+    return best;
+  };
+  useMotionValueEvent(rot, "change", (r) => { const f = frontIndex(r); setSel((s) => (s === f ? s : f)); });
+
+  const settle = (velocity = 0) => {
+    // Coast a little, then snap the nearest agent to the front.
+    const projected = rot.get() + velocity * 0.35;
+    const k = Math.round((FRONT - projected) / STEP);
+    const target = FRONT - k * STEP;
+    ctl.current?.stop();
+    ctl.current = animate(rot, target, { type: "spring", stiffness: 70, damping: 16, velocity });
+  };
+
+  const pick = (i: number) => {
+    touched.current = Date.now();
+    const cur = rot.get();
+    let delta = (FRONT - (cur + i * STEP)) % TAU;
+    if (delta > Math.PI) delta -= TAU;
+    if (delta < -Math.PI) delta += TAU;
+    ctl.current?.stop();
+    ctl.current = animate(rot, cur + delta, { type: "spring", stiffness: 90, damping: 17 });
+  };
+
+  // Autoplay: bring the next agent round every few seconds while nobody is touching.
+  useEffect(() => {
+    const t = setInterval(() => {
+      if (drag.current || Date.now() - touched.current < 7000) return;
+      ctl.current?.stop();
+      ctl.current = animate(rot, rot.get() - STEP, { type: "spring", stiffness: 60, damping: 15 });
+    }, 3600);
+    return () => clearInterval(t);
+  }, [rot]);
+
+  const down = (e: RPointerEvent<HTMLDivElement>) => {
+    ctl.current?.stop();
+    vel.current = 0;
+    drag.current = { x: e.clientX, last: e.clientX, t: performance.now(), moved: false };
+    touched.current = Date.now();
+  };
+  const move = (e: RPointerEvent<HTMLDivElement>) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.last;
+    if (!d.moved && Math.abs(e.clientX - d.x) > 6) {
+      d.moved = true;
+      (e.currentTarget as Element).setPointerCapture?.(e.pointerId);
+    }
+    if (!d.moved) return;
+    const now = performance.now();
+    const dr = -dx / geo.rx; // drag right spins the front agent to the right
+    rot.set(rot.get() + dr);
+    vel.current = dr / Math.max(1, now - d.t) * 1000;
+    d.last = e.clientX;
+    d.t = now;
+  };
+  const up = () => {
+    const d = drag.current;
+    drag.current = null;
+    touched.current = Date.now();
+    if (d?.moved) settle(Math.max(-12, Math.min(12, vel.current)));
+  };
+
+  // The ring itself: back half sits behind the card, front half in front of it.
+  const ell = (half: "back" | "front") => {
+    const { cx, cy, rx, ry } = geo;
+    return half === "back" ? `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 1 ${cx + rx} ${cy}` : `M ${cx + rx} ${cy} A ${rx} ${ry} 0 0 1 ${cx - rx} ${cy}`;
+  };
 
   return (
-    <nav
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "border-b border-white/10 backdrop-blur-md bg-[#080810]/80"
-          : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center gap-2">
-          <OrbitIcon size={26} />
-          <span className="text-white font-semibold text-lg tracking-tight">
-            Orbit
-          </span>
-        </div>
-
-        {/* Desktop nav */}
-        <ul className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <li key={link}>
-              <a
-                href="#"
-                className="text-sm text-zinc-400 hover:text-white transition-colors duration-200"
-              >
-                {link}
-              </a>
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA */}
-        <div className="hidden md:flex items-center gap-4">
-          <a href="#" className="text-sm text-zinc-400 hover:text-white transition-colors">
-            Sign in
-          </a>
-          <a
-            href="#"
-            className="text-sm px-4 py-2 border border-cyan-500 text-cyan-400 rounded-md hover:bg-cyan-500/10 transition-all duration-200"
-          >
-            Get started
-          </a>
-        </div>
-
-        {/* Mobile toggle */}
-        <button
-          className="md:hidden text-zinc-400 hover:text-white"
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-        </button>
-      </div>
-
-      {/* Mobile menu */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="md:hidden border-t border-white/10 bg-[#080810]/95 backdrop-blur-md overflow-hidden"
-          >
-            <ul className="px-6 py-4 flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <li key={link}>
-                  <a href="#" className="text-zinc-300 hover:text-white text-sm">
-                    {link}
-                  </a>
-                </li>
-              ))}
-              <li>
-                <a
-                  href="#"
-                  className="inline-block text-sm px-4 py-2 border border-cyan-500 text-cyan-400 rounded-md"
-                >
-                  Get started
-                </a>
-              </li>
-            </ul>
+    <div className="flex flex-col items-center gap-6">
+      <div
+        ref={stage}
+        className="relative w-full cursor-grab select-none active:cursor-grabbing"
+        style={{ height: H, touchAction: "pan-y" }}
+        onPointerDown={down}
+        onPointerMove={move}
+        onPointerUp={up}
+        onPointerCancel={up}
+        role="group"
+        aria-label="Orbit's five review agents. Drag sideways to spin, or press an agent."
+      >
+        <svg className="pointer-events-none absolute inset-0" width={w} height={H} aria-hidden="true" style={{ zIndex: 4 }}>
+          <defs>
+            <radialGradient id="orbit-floor" cx="50%" cy="50%" r="50%"><stop offset="0" stopColor="rgba(37,99,235,.10)" /><stop offset="1" stopColor="rgba(37,99,235,0)" /></radialGradient>
+          </defs>
+          <ellipse cx={geo.cx} cy={geo.cy} rx={geo.rx + 30} ry={geo.ry + 24} fill="url(#orbit-floor)" />
+          <path d={ell("back")} fill="none" stroke="rgba(37,99,235,.28)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
+        </svg>
+        <svg className="pointer-events-none absolute inset-0" width={w} height={H} aria-hidden="true" style={{ zIndex: 25 }}>
+          <path d={ell("front")} fill="none" stroke="rgba(37,99,235,.45)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
+        </svg>
+        {wide && (
+          <motion.div className="absolute left-1/2 top-[60px] -translate-x-1/2" style={{ zIndex: 20 }} initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }}>
+            <PrCard sel={sel} onPick={pick} />
           </motion.div>
         )}
-      </AnimatePresence>
-    </nav>
-  );
-}
-
-// ─── Typewriter Hero ─────────────────────────────────────────────────────────
-
-const SATELLITES = [
-  { ring: 0, start: 20, icon: Eye, label: "Reviewing #482", tone: "bg-cyan-400" },
-  { ring: 1, start: 140, icon: FlaskConical, label: "Writing 3 tests", tone: "bg-emerald-400" },
-  { ring: 1, start: 320, icon: Shield, label: "Secret scan clean", tone: "bg-emerald-400" },
-  { ring: 2, start: 230, icon: GitMerge, label: "Rebasing on main", tone: "bg-amber-300" },
-  { ring: 2, start: 60, icon: Files, label: "Refactor: 14 files", tone: "bg-cyan-400" },
-];
-const RINGS = [
-  { r: 30, period: 46 },
-  { r: 41, period: 70 },
-  { r: 50, period: 96 },
-];
-
-/** Agents circling a repository. Each ring turns at its own speed; labels stay upright. */
-function OrbitSystem() {
-  return (
-    <div className="relative mx-auto aspect-square w-full max-w-[540px]" aria-hidden>
-      <style>{`
-        @keyframes orbit-spin { to { transform: rotate(360deg); } }
-        @keyframes orbit-spin-rev { to { transform: rotate(-360deg); } }
-        @media (prefers-reduced-motion: reduce) { .orbit-ring, .orbit-upright { animation: none !important; } }
-      `}</style>
-      <div className="absolute inset-[18%] rounded-full bg-[radial-gradient(closest-side,rgba(6,182,212,0.16),transparent)]" />
-      {RINGS.map((ring, ri) => (
-        <div
-          key={ri}
-          className="absolute rounded-full border border-dashed border-white/[0.09]"
-          style={{ inset: `${50 - ring.r}%` }}
-        />
-      ))}
-
-      {/* Repository core */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2">
-        <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-cyan-400/30 bg-[#0a1014] shadow-[0_0_60px_-10px_rgba(6,182,212,0.5)]">
-          <OrbitIcon size={40} />
-        </div>
-        <span className="font-mono text-xs text-zinc-400">acme/api</span>
-      </div>
-
-      {SATELLITES.map((s, i) => {
-        const ring = RINGS[s.ring];
-        const Icon = s.icon;
-        const delay = -(s.start / 360) * ring.period;
-        return (
-          <div
-            key={i}
-            className="orbit-ring absolute inset-0"
-            style={{ animation: `orbit-spin ${ring.period}s linear infinite`, animationDelay: `${delay}s` }}
-          >
-            <div className="absolute left-1/2" style={{ top: `${50 - ring.r}%` }}>
-              <div
-                className="orbit-upright -translate-x-1/2 -translate-y-1/2"
-                style={{ animation: `orbit-spin-rev ${ring.period}s linear infinite`, animationDelay: `${delay}s` }}
-              >
-                <div className="flex items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-[#0b0f12]/95 py-1.5 pl-1.5 pr-3 text-xs text-zinc-200 shadow-lg shadow-black/50 backdrop-blur">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/[0.06]">
-                    <Icon size={12} className="text-cyan-300" />
-                  </span>
-                  {s.label}
-                  <span className={`h-1.5 w-1.5 rounded-full ${s.tone}`} />
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function HeroSection() {
-  return (
-    <section className="relative overflow-hidden px-6 pt-32 pb-20 lg:pt-36">
-      <div
-        className="absolute inset-0 pointer-events-none opacity-[0.035]"
-        style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.5) 1px, transparent 1px)",
-          backgroundSize: "60px 60px",
-          maskImage: "radial-gradient(ellipse at 70% 40%, black 10%, transparent 65%)",
-          WebkitMaskImage: "radial-gradient(ellipse at 70% 40%, black 10%, transparent 65%)",
-        }}
-      />
-
-      <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1fr_1.1fr]">
-        <div>
-          <motion.a
-            href="#"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-zinc-300 hover:border-white/20 transition-colors"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
-            Orbit agents now run on self-hosted runners
-          </motion.a>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-7 text-[2.75rem] sm:text-6xl lg:text-[3.6rem] font-semibold leading-[1.03] tracking-[-0.035em] text-white text-balance"
-          >
-            Five agents in orbit around every pull request.
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-6 max-w-lg text-lg leading-relaxed text-zinc-400"
-          >
-            Orbit reviews, tests, refactors, scans and rebases while you keep typing. You approve the diff; it does
-            the rest.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-9 flex flex-col gap-3 sm:flex-row"
-          >
-            <a
-              href="#"
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-cyan-400 px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-cyan-300"
-            >
-              Connect a repository <ArrowRight size={14} />
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/15 px-6 py-3 text-sm text-white transition-colors hover:border-white/30 hover:bg-white/5"
-            >
-              <Terminal size={14} /> Watch a 2-minute run
-            </a>
-          </motion.div>
-
-          <motion.dl
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.45 }}
-            className="mt-12 grid max-w-md grid-cols-3 gap-6 border-t border-white/10 pt-6"
-          >
-            {[
-              ["10M+", "lines reviewed"],
-              ["< 80ms", "inline latency"],
-              ["SOC 2", "Type II"],
-            ].map(([v, l]) => (
-              <div key={l}>
-                <dt className="sr-only">{l}</dt>
-                <dd className="text-xl font-semibold tracking-tight text-white tabular-nums">{v}</dd>
-                <dd className="mt-1 text-xs text-zinc-500">{l}</dd>
-              </div>
-            ))}
-          </motion.dl>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.94 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <OrbitSystem />
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Workspace Mockup ─────────────────────────────────────────────────────────
-
-function WorkspaceMockup() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const rotateX = useTransform(scrollYProgress, [0, 0.3], [8, 0]);
-
-  const fileTree = [
-    "src/",
-    "  agent.ts",
-    "  context.ts",
-    "  executor.ts",
-    "  tools/",
-    "  index.ts",
-  ];
-
-  const codeLines: { tokens: { text: string; color: string }[] }[] = [
-    {
-      tokens: [
-        { text: "import", color: "text-cyan-400" },
-        { text: " { Agent } ", color: "text-white" },
-        { text: "from", color: "text-cyan-400" },
-        { text: " './core'", color: "text-amber-400" },
-      ],
-    },
-    { tokens: [{ text: "", color: "text-white" }] },
-    {
-      tokens: [
-        { text: "export", color: "text-cyan-400" },
-        { text: " ", color: "text-white" },
-        { text: "async", color: "text-cyan-400" },
-        { text: " function ", color: "text-white" },
-        { text: "runOrbit", color: "text-white" },
-        { text: "(ctx: Context) {", color: "text-zinc-300" },
-      ],
-    },
-    {
-      tokens: [
-        { text: "  ", color: "text-white" },
-        { text: "// Initialize autonomous agent", color: "text-zinc-500" },
-      ],
-    },
-    {
-      tokens: [
-        { text: "  ", color: "text-white" },
-        { text: "const", color: "text-cyan-400" },
-        { text: " agent = ", color: "text-white" },
-        { text: "new", color: "text-cyan-400" },
-        { text: " Agent(ctx)", color: "text-white" },
-      ],
-    },
-    {
-      tokens: [
-        { text: "  ", color: "text-white" },
-        { text: "await", color: "text-cyan-400" },
-        { text: " agent.", color: "text-white" },
-        { text: "readContext", color: "text-white" },
-        { text: "()", color: "text-zinc-300" },
-      ],
-    },
-    {
-      tokens: [
-        { text: "  ", color: "text-white" },
-        { text: "const", color: "text-cyan-400" },
-        { text: " plan = ", color: "text-white" },
-        { text: "await", color: "text-cyan-400" },
-        { text: " agent.", color: "text-white" },
-        { text: "buildPlan", color: "text-white" },
-        { text: "()", color: "text-zinc-300" },
-      ],
-    },
-    {
-      tokens: [
-        { text: "  ", color: "text-white" },
-        { text: "return", color: "text-cyan-400" },
-        { text: " agent.", color: "text-white" },
-        { text: "execute", color: "text-white" },
-        { text: "(plan)", color: "text-zinc-300" },
-      ],
-    },
-    { tokens: [{ text: "}", color: "text-zinc-300" }] },
-    { tokens: [{ text: "", color: "text-white" }] },
-  ];
-
-  return (
-    <section className="py-24 px-6 relative overflow-hidden">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 60% at 50% 50%, rgba(6,182,212,0.04) 0%, transparent 70%)",
-        }}
-      />
-
-      <div className="max-w-5xl mx-auto">
-        <Reveal className="text-center mb-12">
-          <p className="text-sm text-cyan-400 mb-3 font-medium">
-            Inside your editor
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            AI that lives inside your editor
-          </h2>
-        </Reveal>
-
-        <div ref={ref} style={{ perspective: "1000px" }}>
-          <motion.div
-            initial={{ rotateX: 8, opacity: 0 }}
-            animate={{ rotateX: 0, opacity: 1 }}
-            style={{ rotateX }}
-            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
-            className="rounded-xl border border-white/10 bg-[#0d0d1a] overflow-hidden shadow-2xl shadow-cyan-500/5"
-          >
-            {/* Window top bar */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-[#0a0a16]">
-              <span className="w-3 h-3 rounded-full bg-red-500/80" />
-              <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <span className="w-3 h-3 rounded-full bg-green-500/80" />
-              <span className="ml-3 text-xs text-zinc-500 font-mono">agent.ts — Orbit</span>
-            </div>
-
-            <div className="flex" style={{ minHeight: "320px" }}>
-              {/* File tree */}
-              <div className="hidden sm:flex flex-col w-44 border-r border-white/10 bg-[#090915] px-3 py-4 gap-1">
-                {fileTree.map((file, i) => (
-                  <div
-                    key={i}
-                    className={`text-xs font-mono py-0.5 ${
-                      file === "  agent.ts"
-                        ? "text-cyan-400 bg-cyan-500/10 -mx-1 px-1 rounded"
-                        : "text-zinc-500"
-                    }`}
-                  >
-                    {file}
-                  </div>
-                ))}
-              </div>
-
-              {/* Code panel */}
-              <div className="flex-1 px-5 py-4 font-mono text-sm overflow-x-auto">
-                {codeLines.map((line, lineIndex) => (
-                  <div key={lineIndex} className="flex items-center gap-4 leading-6">
-                    <span className="text-zinc-700 text-xs select-none w-4 text-right shrink-0">
-                      {lineIndex + 1}
-                    </span>
-                    <span>
-                      {line.tokens.map((token, ti) => (
-                        <span key={ti} className={token.color}>
-                          {token.text}
-                        </span>
-                      ))}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* AI chat strip */}
-            <div className="border-t border-white/10 bg-[#080813] px-4 py-3 flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-cyan-500/20 border border-cyan-500/50 flex items-center justify-center shrink-0">
-                <Circle size={8} className="text-cyan-400 fill-cyan-400" />
-              </div>
-              <span className="text-xs font-mono text-zinc-300">
-                <span className="text-cyan-400">Orbit:</span> Refactoring complete — 3 files
-                updated{" "}
-                <span className="text-green-400">✓</span>
-              </span>
-              <div className="ml-auto flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-xs text-zinc-600">running</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Agent Workflow Steps ─────────────────────────────────────────────────────
-
-function WorkflowSection() {
-  const sectionRef = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(sectionRef, { once: true, margin: "-100px" });
-
-  const steps: {
-    number: string;
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-  }[] = [
-    {
-      number: "01",
-      icon: <GitBranch size={20} className="text-cyan-400" />,
-      title: "Connect repo",
-      description: "Link your GitHub or GitLab repository in one click.",
-    },
-    {
-      number: "02",
-      icon: <Code2 size={20} className="text-cyan-400" />,
-      title: "Orbit reads context",
-      description: "Ingests your codebase, history, and conventions.",
-    },
-    {
-      number: "03",
-      icon: <Zap size={20} className="text-cyan-400" />,
-      title: "Agent executes",
-      description: "Writes, tests, and refactors autonomously in minutes.",
-    },
-    {
-      number: "04",
-      icon: <Check size={20} className="text-cyan-400" />,
-      title: "You review & ship",
-      description: "Inspect the diff, approve the PR, and deploy.",
-    },
-  ];
-
-  return (
-    <section className="py-24 px-6 relative" ref={sectionRef}>
-      <div className="max-w-6xl mx-auto">
-        <Reveal className="text-center mb-16">
-          <p className="text-sm text-cyan-400 mb-3 font-medium">
-            Workflow
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">How Orbit works</h2>
-        </Reveal>
-
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-0 md:gap-0">
-          {steps.map((step, i) => (
-            <React.Fragment key={step.number}>
-              {/* Step card */}
-              <motion.div
-                initial={{ opacity: 0, y: 24 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{
-                  duration: 0.6,
-                  delay: i * 0.1,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="flex-1 flex flex-col items-center text-center px-4 py-6"
-              >
-                {/* Number badge */}
-                <div className="w-10 h-10 rounded-full border border-cyan-500/40 bg-cyan-500/10 flex items-center justify-center mb-4 relative">
-                  <span className="text-xs font-bold text-cyan-400">{step.number}</span>
-                </div>
-                {/* Icon */}
-                <div className="mb-3">{step.icon}</div>
-                <h3 className="text-white font-semibold text-sm mb-2">{step.title}</h3>
-                <p className="text-zinc-500 text-xs leading-relaxed max-w-[160px]">
-                  {step.description}
-                </p>
-              </motion.div>
-
-              {/* Connector line */}
-              {i < steps.length - 1 && (
-                <div className="hidden md:block flex-shrink-0 w-16 h-px bg-white/5 relative overflow-hidden">
-                  <motion.div
-                    initial={{ scaleX: 0 }}
-                    animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
-                    transition={{
-                      duration: 0.6,
-                      delay: i * 0.15 + 0.3,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    className="absolute inset-0 bg-cyan-500/40 origin-left"
-                    style={{ transformOrigin: "left" }}
-                  />
-                </div>
-              )}
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Feature Grid ─────────────────────────────────────────────────────────────
-
-function FeatureGrid() {
-  const features: {
-    icon: React.ReactNode;
-    title: string;
-    description: string;
-  }[] = [
-    {
-      icon: <GitMerge size={22} className="text-cyan-400" />,
-      title: "Autonomous PRs",
-      description:
-        "Orbit opens pull requests with full context, linked issues, and meaningful commit messages — no human needed.",
-    },
-    {
-      icon: <Eye size={22} className="text-cyan-400" />,
-      title: "Real-time code review",
-      description:
-        "Get instant inline suggestions, complexity scores, and idiomatic refactors as you write.",
-    },
-    {
-      icon: <Files size={22} className="text-cyan-400" />,
-      title: "Multi-file refactors",
-      description:
-        "Rename, reorganize, and rewrite across your entire codebase with zero conflicts.",
-    },
-    {
-      icon: <FlaskConical size={22} className="text-cyan-400" />,
-      title: "Test generation",
-      description:
-        "Automatically generates unit, integration, and edge-case tests with 90%+ branch coverage.",
-    },
-    {
-      icon: <Shield size={22} className="text-cyan-400" />,
-      title: "Security scanning",
-      description:
-        "Identifies CVEs, injection risks, and secret leaks before code reaches production.",
-    },
-    {
-      icon: <GitBranch size={22} className="text-cyan-400" />,
-      title: "CI/CD integration",
-      description:
-        "Hooks into GitHub Actions, GitLab CI, and CircleCI to monitor pipelines and fix failing builds.",
-    },
-  ];
-
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-6xl mx-auto">
-        <Reveal className="text-center mb-16">
-          <p className="text-sm text-cyan-400 mb-3 font-medium">
-            Capabilities
-          </p>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            Built for serious engineering
-          </h2>
-          <p className="text-zinc-400 mt-4 max-w-xl mx-auto text-sm leading-relaxed">
-            Every feature is designed to amplify—not replace—your engineering judgment.
-          </p>
-        </Reveal>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((feature, i) => (
-            <Reveal key={feature.title} delay={i * 0.05}>
-              <div className="group relative p-6 rounded-xl border border-white/8 bg-white/[0.02] hover:border-cyan-500/30 hover:bg-cyan-500/[0.03] transition-all duration-300 h-full">
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-white font-semibold mb-2 text-sm">{feature.title}</h3>
-                <p className="text-zinc-500 text-xs leading-relaxed">{feature.description}</p>
-                <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{ boxShadow: "inset 0 0 0 1px rgba(6,182,212,0.15)" }}
-                />
-              </div>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Split Showcase ───────────────────────────────────────────────────────────
-
-function GitDiffMockup() {
-  const diffLines = [
-    { type: "meta", text: "--- a/src/api/handler.ts" },
-    { type: "meta", text: "+++ b/src/api/handler.ts" },
-    { type: "meta", text: "@@ -12,7 +12,9 @@" },
-    { type: "context", text: "  const data = await fetch(url)" },
-    { type: "removed", text: "-  return JSON.parse(data)" },
-    { type: "added", text: "+  if (!data.ok) throw new ApiError(data.status)" },
-    { type: "added", text: "+  const json = await data.json()" },
-    { type: "added", text: "+  return json" },
-    { type: "context", text: "  }" },
-  ];
-
-  return (
-    <div className="rounded-xl border border-white/10 bg-[#0d0d1a] overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10 bg-[#0a0a16]">
-        <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
-        <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
-        <span className="ml-2 text-xs text-zinc-500 font-mono">diff — handler.ts</span>
-      </div>
-      <div className="px-4 py-4 font-mono text-xs">
-        {diffLines.map((line, i) => (
-          <div
-            key={i}
-            className={`leading-5 px-2 -mx-2 rounded ${
-              line.type === "added"
-                ? "text-green-400 bg-green-500/5"
-                : line.type === "removed"
-                ? "text-red-400 bg-red-500/5 line-through decoration-red-600/50"
-                : line.type === "meta"
-                ? "text-zinc-600"
-                : "text-zinc-400"
-            }`}
-          >
-            {line.text}
-          </div>
+        {AGENTS.map((_, i) => (
+          <AgentNode key={`${AGENTS[i].id}-${w}`} i={i} rot={rot} geo={geo} selected={sel === i} onPick={pick} compact={!wide} />
         ))}
       </div>
-      <div className="border-t border-white/10 bg-[#080813] px-4 py-2.5 flex items-center gap-2">
-        <Circle size={7} className="text-cyan-400 fill-cyan-400" />
-        <span className="text-xs font-mono text-zinc-400">
-          <span className="text-cyan-400">Orbit</span> suggested this change
-        </span>
-      </div>
+      {!wide && <Fit><PrCard sel={sel} onPick={pick} /></Fit>}
+      <p className="m-0 text-center text-[13px] text-[#6e6e73]">Drag the ring to spin it. Whoever lands in front reports on the pull request.</p>
     </div>
   );
 }
 
-function TestRunnerMockup() {
-  const lines = [
-    { text: "PASS  src/api/handler.test.ts", color: "text-green-400" },
-    { text: "  ✓ returns parsed JSON on success (12ms)", color: "text-zinc-400" },
-    { text: "  ✓ throws ApiError on non-ok response (8ms)", color: "text-zinc-400" },
-    { text: "  ✓ handles network timeout gracefully (5ms)", color: "text-zinc-400" },
-    { text: "", color: "" },
-    { text: "Test Suites: 1 passed, 1 total", color: "text-white" },
-    { text: "Tests:       3 passed, 3 total", color: "text-white" },
-    { text: "Coverage:    94.2% statements", color: "text-cyan-400" },
-  ];
-
+function Hero() {
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0d0d1a] overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-white/10 bg-[#0a0a16]">
-        <Terminal size={12} className="text-zinc-500" />
-        <span className="ml-1 text-xs text-zinc-500 font-mono">jest — test runner</span>
-      </div>
-      <div className="px-4 py-4 font-mono text-xs">
-        {lines.map((line, i) => (
-          <div key={i} className={`leading-5 ${line.color}`}>
-            {line.text || " "}
+    <section id="top" className="relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 40% at 50% 70%, rgba(37,99,235,.12), transparent 70%), radial-gradient(30% 30% at 12% 8%, rgba(90,200,250,.14), transparent 70%)" }} />
+      <div className="relative mx-auto max-w-[1180px] px-5 pt-10 lg:pt-14">
+        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
+          <div className="flex flex-col gap-5">
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[14px] font-semibold" style={{ color: A }}>
+              Code review, five ways at once
+            </motion.span>
+            <h1 className="m-0 text-[clamp(42px,5.6vw,72px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+              <Words text="Five reviewers on every pull request." accentWords={["Five"]} accent={A} />
+            </h1>
           </div>
-        ))}
-      </div>
-      <div className="border-t border-white/10 bg-[#080813] px-4 py-2.5 flex items-center gap-2">
-        <Check size={10} className="text-green-400" />
-        <span className="text-xs font-mono text-zinc-400">
-          <span className="text-green-400">3 tests</span> generated by Orbit
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function SplitShowcase() {
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-24">
-        {/* Row 1 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <Reveal className="order-2 md:order-1">
-            <p className="text-sm text-cyan-400 mb-3 font-medium">
-              Seamless
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
-              Zero context switching
-            </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-              Orbit lives inside your IDE. It watches your cursor, understands your intent,
-              and suggests production-ready changes inline — no tab-switching, no copy-pasting
-              from a chat window.
-            </p>
-            <ul className="flex flex-col gap-3">
-              {[
-                "Inline diff previews",
-                "One-click accept or reject",
-                "Explainability panel for every suggestion",
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
-                  <Check size={14} className="text-cyan-400 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-          <Reveal delay={0.1} className="order-1 md:order-2">
-            <GitDiffMockup />
-          </Reveal>
-        </div>
-
-        {/* Row 2 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          <Reveal>
-            <TestRunnerMockup />
-          </Reveal>
-          <Reveal delay={0.1}>
-            <p className="text-sm text-cyan-400 mb-3 font-medium">
-              Automated
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-5">
-              Tests written automatically
-            </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed mb-6">
-              Every function Orbit writes or modifies ships with a comprehensive test suite.
-              Unit, integration, and edge-case coverage — generated from your codebase&apos;s own
-              patterns and idioms.
-            </p>
-            <ul className="flex flex-col gap-3">
-              {[
-                "Jest, Vitest, and Pytest support",
-                "90%+ branch coverage by default",
-                "Automatically runs in CI on every PR",
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-3 text-sm text-zinc-300">
-                  <Check size={14} className="text-cyan-400 shrink-0" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── CTA Gradient Section ──────────────────────────────────────────────────────
-
-function CTASection() {
-  const [email, setEmail] = React.useState("");
-  const [submitted, setSubmitted] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email) return;
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSubmitted(true);
-    }, 900);
-  }
-
-  return (
-    <section className="py-32 px-6 relative overflow-hidden">
-      {/* Glow */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            "radial-gradient(ellipse 70% 70% at 50% 50%, rgba(6,182,212,0.10) 0%, transparent 65%)",
-        }}
-      />
-
-      <div className="relative max-w-2xl mx-auto text-center">
-        <Reveal>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/5 mb-6">
-            <Zap size={12} className="text-cyan-400" />
-            <span className="text-xs text-cyan-400 font-medium">Limited early access</span>
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white mb-5 leading-tight">
-            Ready to ship 10x faster?
-          </h2>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-10">
-            Join 3,000+ engineers already on the waitlist. Be the first to experience
-            autonomous AI-native development.
-          </p>
-
-          <AnimatePresence mode="wait">
-            {submitted ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                className="flex flex-col items-center gap-3"
-              >
-                <div className="w-12 h-12 rounded-full bg-green-500/20 border border-green-500/40 flex items-center justify-center">
-                  <Check size={22} className="text-green-400" />
-                </div>
-                <p className="text-white font-semibold">You&apos;re on the list!</p>
-                <p className="text-zinc-500 text-sm">
-                  We&apos;ll reach out to{" "}
-                  <span className="text-cyan-400">{email}</span> when your spot is ready.
-                </p>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onSubmit={handleSubmit}
-                className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-              >
-                <input
-                  type="email"
-                  required
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-md bg-white/5 border border-white/15 text-white placeholder-zinc-600 text-sm focus:outline-none focus:border-cyan-500/50 transition-colors"
-                />
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-3 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-60 text-black font-semibold rounded-md text-sm transition-all duration-200 flex items-center justify-center gap-2 shrink-0"
-                >
-                  {loading ? (
-                    <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      Join waitlist <ArrowRight size={14} />
-                    </>
-                  )}
-                </button>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-// ─── Footer ───────────────────────────────────────────────────────────────────
-
-function Footer() {
-  const columns: { heading: string; links: string[] }[] = [
-    {
-      heading: "Product",
-      links: ["Features", "Pricing", "Changelog", "Roadmap"],
-    },
-    {
-      heading: "Developers",
-      links: ["Documentation", "API Reference", "SDKs", "Status"],
-    },
-    {
-      heading: "Company",
-      links: ["About", "Blog", "Careers", "Press"],
-    },
-    {
-      heading: "Legal",
-      links: ["Privacy", "Terms", "Security", "Cookies"],
-    },
-  ];
-
-  return (
-    <footer className="border-t border-white/8 px-6 pt-16 pb-10">
-      <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-14">
-          {/* Brand */}
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-3">
-              <OrbitIcon size={22} />
-              <span className="text-white font-semibold text-base">Orbit</span>
-            </div>
-            <p className="text-zinc-600 text-xs leading-relaxed max-w-[160px]">
-              Code at the speed of thought.
-            </p>
-          </div>
-
-          {/* Columns */}
-          {columns.map((col) => (
-            <div key={col.heading}>
-              <p className="text-white text-sm font-medium mb-4">
-                {col.heading}
+          <div className="flex flex-col gap-6 lg:pb-3">
+            <Reveal delay={0.3} y={14}>
+              <p className="m-0 text-[clamp(17px,2vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+                Orbit runs a tests, security, performance, style and docs agent on each PR, then posts one combined review. Your human reviewers get to talk about the design.
               </p>
-              <ul className="flex flex-col gap-2.5">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-zinc-500 hover:text-white text-xs transition-colors duration-200"
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        <div className="border-t border-white/8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-zinc-600 text-xs">
-            © {new Date().getFullYear()} Orbit AI, Inc. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6">
-            {["Twitter", "GitHub", "Discord"].map((s) => (
-              <a
-                key={s}
-                href="#"
-                className="text-zinc-600 hover:text-white text-xs transition-colors duration-200"
-              >
-                {s}
-              </a>
-            ))}
+            </Reveal>
+            <Reveal delay={0.42} y={14} className="flex flex-wrap gap-3">
+              <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(37,99,235,.75)]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Add to GitHub</Magnetic>
+              <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("diff")}>Read a sample review</Magnetic>
+            </Reveal>
           </div>
         </div>
       </div>
-    </footer>
+      <div className="relative mx-auto mt-4 max-w-[1240px] px-5 pb-16 lg:-mt-2">
+        <AgentRing />
+      </div>
+    </section>
   );
 }
 
-// ─── Main export ──────────────────────────────────────────────────────────────
+/* ------------------------------------------------------------------ */
+/* Stats                                                                */
+/* ------------------------------------------------------------------ */
+
+function Stats() {
+  const items = [
+    { to: 4, f: (n: number) => `${Math.round(n)} min`, l: "median time to a full review" },
+    { to: 31, f: (n: number) => `${Math.round(n)}%`, l: "fewer reverted merges after 90 days" },
+    { to: 0, from: 12, f: (n: number) => `${Math.round(n)}`, l: "comments on a clean PR. It stays quiet." },
+    { to: 1, f: (n: number) => `${Math.round(n)}`, l: "combined review, not five bot threads" },
+  ];
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 pb-6" aria-label="Orbit in numbers">
+      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
+            <Counter to={it.to} from={it.from ?? 0} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
+            <span className="text-[15px] text-[#6e6e73]">{it.l}</span>
+          </div>
+        ))}
+      </Stagger>
+      <p className="m-0 mt-6 text-[12px] text-[#6e6e73]">Across 212 beta teams, compared with their own previous quarter. Placeholder figures.</p>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Agents story visuals                                                 */
+/* ------------------------------------------------------------------ */
+
+function AgentHead({ i }: { i: number }) {
+  const a = AGENTS[i];
+  const s = STATUS[a.status];
+  return (
+    <div className="flex items-center gap-3">
+      <span className="flex h-10 w-10 items-center justify-center rounded-full text-white" style={{ background: A }}><Icon d={a.d} size={18} /></span>
+      <span className="flex flex-1 flex-col">
+        <span className="text-[16px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">{a.name} agent</span>
+        <span className="text-[12px] text-[#6e6e73]" style={{ fontFamily: MONO }}>{a.where}</span>
+      </span>
+      <span className="rounded-full px-2.5 py-1 text-[11px] font-semibold" style={{ color: s.c, background: s.bg }}>{s.l}</span>
+    </div>
+  );
+}
+
+function TestsCard() {
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-5 p-6`}>
+      <AgentHead i={0} />
+      <div className="rounded-2xl bg-[#f5f5f7] p-4 text-[12.5px] leading-[1.85]" style={{ fontFamily: MONO }}>
+        {[
+          { l: "  if (res.status >= 500) {", c: 2 },
+          { l: "    return schedule(attempt + 1);", c: 0 },
+          { l: "  }", c: -1 },
+          { l: "  if (attempt >= RETRY_MAX) {", c: 2 },
+          { l: "    return deadLetter(event);", c: 0 },
+          { l: "  }", c: -1 },
+        ].map((r, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <span className="h-4 w-[3px] flex-none rounded-full" style={{ background: r.c === 0 ? "#ff3b30" : r.c === 2 ? "#34c759" : "transparent" }} aria-hidden="true" />
+            <span className="whitespace-pre text-[#1d1d1f]">{r.l}</span>
+          </div>
+        ))}
+      </div>
+      <p className="m-0 text-[14px] leading-[1.5] text-[#6e6e73]">Red lines never run in your test suite. Orbit wrote a test for each, using your existing fixtures.</p>
+      <div className="flex justify-center"><ProgressButton label="Add 2 tests to this PR" doneLabel="View the commit" accent={A} autoplay /></div>
+    </div>
+  );
+}
+
+function SecurityCard() {
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-5 p-6`}>
+      <AgentHead i={1} />
+      <div className="rounded-2xl bg-[#1d1d1f] p-4 text-[12.5px] leading-[1.85] text-[#e8e8ed]" style={{ fontFamily: MONO }}>
+        <div className="whitespace-pre"><span style={{ color: "#8e8e93" }}>{"57  "}</span>{"  log.debug(\"retrying\", {"}</div>
+        <div className="whitespace-pre rounded-[4px]" style={{ background: "rgba(255,59,48,.22)" }}><span style={{ color: "#8e8e93" }}>{"58  "}</span>{"    url, attempt, secret: hook.secret,"}</div>
+        <div className="whitespace-pre"><span style={{ color: "#8e8e93" }}>{"59  "}</span>{"  });"}</div>
+      </div>
+      <p className="m-0 text-[14px] leading-[1.5] text-[#6e6e73]">Blocking findings stop the merge. If you really need to ship, an owner can override. It takes a deliberate hold, and it goes in the audit log.</p>
+      <div className="flex justify-center"><HoldToConfirm label="Hold to merge anyway" holdingLabel="Keep holding…" doneLabel="Override logged" color={INK} holdMs={1600} autoplay /></div>
+    </div>
+  );
+}
+
+function PerfCard() {
+  const [budget, setBudget] = useState(25);
+  const cost = 38;
+  const over = cost > budget;
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-5 p-6`}>
+      <AgentHead i={2} />
+      <div className="flex items-center justify-between rounded-2xl bg-[#f5f5f7] px-4 py-3">
+        <span className="text-[14px] text-[#1d1d1f]">This PR adds <b className="font-semibold tabular-nums">+{cost} ms</b> at p95</span>
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.span key={String(over)} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ type: "spring", stiffness: 500, damping: 26 }} className="rounded-full px-2.5 py-1 text-[12px] font-semibold" style={over ? { color: WARN, background: STATUS.warn.bg } : { color: OK, background: STATUS.pass.bg }}>
+            {over ? "Over budget" : "Within budget"}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+      <span className="text-[13px] font-medium text-[#6e6e73]">Latency budget per pull request. Drag the ruler.</span>
+      <RulerPicker min={0} max={90} defaultValue={25} unit="ms" presets={[10, 25, 50]} accent={A} onChange={setBudget} autoplay />
+    </div>
+  );
+}
+
+function StyleCard() {
+  const [rules, setRules] = useState([
+    { l: "Prefer early returns", n: 1, on: true },
+    { l: "No default exports in lib/", n: 0, on: true },
+    { l: "Booleans start with is or has", n: 2, on: false },
+    { l: "Only comment on changed lines", n: 0, on: true },
+  ]);
+  const nits = rules.reduce((s, r) => s + (r.on ? r.n : 0), 0);
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-4 p-6`}>
+      <AgentHead i={3} />
+      <div className="flex flex-col divide-y divide-black/[.06]">
+        {rules.map((r, i) => (
+          <div key={r.l} className="flex items-center justify-between gap-4 py-3">
+            <span className="flex flex-col">
+              <span className="text-[15px] text-[#1d1d1f]">{r.l}</span>
+              <span className="text-[12px] text-[#6e6e73]">{r.n ? `${r.n} in this PR` : "Nothing in this PR"}</span>
+            </span>
+            <Switch checked={r.on} onChange={(v) => setRules((rs) => rs.map((x, k) => (k === i ? { ...x, on: v } : x)))} label={r.l} accent={A} />
+          </div>
+        ))}
+      </div>
+      <span className="text-[13px] text-[#6e6e73]">Orbit will leave <b className="font-semibold tabular-nums text-[#1d1d1f]">{nits}</b> {nits === 1 ? "nit" : "nits"}. Rules live in .orbit.yml.</span>
+    </div>
+  );
+}
+
+function DocsCard() {
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-5 p-6`}>
+      <AgentHead i={4} />
+      <div className="overflow-hidden rounded-2xl bg-[#f5f5f7] text-[12.5px] leading-[1.85]" style={{ fontFamily: MONO }}>
+        <div className="border-b border-black/[.06] px-4 py-2 text-[11px] font-semibold text-[#6e6e73]">docs/webhooks.md</div>
+        <div className="p-4">
+          <div className="whitespace-pre text-[#6e6e73]">{"  ## Retries"}</div>
+          {["+ Failed deliveries retry with backoff.", "+ Set RETRY_MAX (default 5) to change", "+ how many times before dead-letter."].map((l, i) => (
+            <motion.div key={l} className="whitespace-pre" style={{ color: OK }} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", stiffness: 260, damping: 24, delay: 0.25 + i * 0.18 }}>{l}</motion.div>
+          ))}
+        </div>
+      </div>
+      <p className="m-0 text-[14px] leading-[1.5] text-[#6e6e73]">New config, new endpoints and breaking changes get a docs and changelog draft in the same PR. Accept it, edit it, or ignore it.</p>
+    </div>
+  );
+}
+
+function Agents() {
+  return (
+    <section id="agents" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="The agents" title="Each one does one job, properly." sub="Specialists beat one generalist bot. Every agent has its own checks, its own config and its own line in the review." accent={A} />
+      <div className="mt-10">
+        <StickyStory
+          accent={A}
+          steps={[
+            { kicker: "01 · Tests", title: "Finds the lines your tests never run.", body: "Orbit runs coverage on the diff, not the repo. New branches with no test get a drafted test that uses your fixtures and naming.", visual: <TestsCard /> },
+            { kicker: "02 · Security", title: "Stops secrets and injections at the door.", body: "Leaked credentials, unsafe queries, risky dependencies. Blocking findings hold the merge until fixed or deliberately overridden.", visual: <SecurityCard /> },
+            { kicker: "03 · Performance", title: "Measures the change against a real budget.", body: "Orbit replays recorded traffic against the branch and compares p95 with main. You set the budget; it tells you when a PR spends it.", visual: <PerfCard /> },
+            { kicker: "04 · Style", title: "Your style guide, not a generic one.", body: "Rules come from your .orbit.yml and your history. Turn one off and its comments disappear from every open PR.", visual: <StyleCard /> },
+            { kicker: "05 · Docs", title: "Docs that ship with the code.", body: "When a PR changes something users can see, the docs agent drafts the update in the same branch, so the docs never lag a release.", visual: <DocsCard /> },
+          ]}
+        />
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* The review, in the diff (whitespace preserved)                       */
+/* ------------------------------------------------------------------ */
+
+type DiffLine = { n: string; k: " " | "+" | "-"; t: string; note?: { agent: number; text: string } };
+const DIFF: DiffLine[] = [
+  { n: "41", k: " ", t: "export async function deliver(hook: Hook, event: Event) {" },
+  { n: "42", k: "-", t: "  const res = await post(hook.url, event);" },
+  { n: "42", k: "+", t: "  for (let attempt = 1; ; attempt++) {" },
+  { n: "43", k: "+", t: "    const res = await post(hook.url, event);" },
+  { n: "44", k: "+", t: "    if (res.ok) return res;" },
+  { n: "45", k: "+", t: "    if (attempt >= RETRY_MAX) {" },
+  { n: "46", k: "+", t: "      return deadLetter(event);", note: { agent: 0, text: "No test reaches this line. Drafted one in deliver.test.ts." } },
+  { n: "47", k: "+", t: "    }" },
+  { n: "48", k: "+", t: "    log.debug(\"retrying\", { attempt, secret: hook.secret });", note: { agent: 1, text: "Signing secret written to logs. Remove it before merge." } },
+  { n: "49", k: "+", t: "    await sleep(backoff(attempt));", note: { agent: 2, text: "Blocks the request thread. Move retries to the queue worker." } },
+  { n: "50", k: "+", t: "  }" },
+  { n: "51", k: " ", t: "}" },
+];
+
+function DiffPanel() {
+  return (
+    <div className="overflow-hidden rounded-[24px] bg-[#16181d] shadow-[0_0_0_1px_rgba(255,255,255,.06),0_40px_80px_-40px_rgba(37,99,235,.45)]">
+      <div className="flex items-center gap-2 border-b border-white/[.08] px-5 py-3.5">
+        {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-3 w-3 rounded-full" style={{ background: c }} aria-hidden="true" />)}
+        <span className="ml-2 text-[12px] font-medium text-[#a1a1a6]" style={{ fontFamily: MONO }}>webhooks/deliver.ts</span>
+        <span className="ml-auto text-[12px] tabular-nums text-[#a1a1a6]">3 comments</span>
+      </div>
+      <div className="overflow-x-auto py-3 text-[12.5px] leading-[1.8] sm:text-[13px]" style={{ fontFamily: MONO }}>
+        <div className="min-w-max">
+          {DIFF.map((d, i) => (
+            <div key={i}>
+              <div className="flex whitespace-pre pr-6" style={{ background: d.k === "+" ? "rgba(46,160,67,.16)" : d.k === "-" ? "rgba(248,81,73,.16)" : undefined }}>
+                <span className="w-12 flex-none select-none pr-3 text-right tabular-nums text-[#8b949e]">{d.n}</span>
+                <span className="w-5 flex-none select-none text-center" style={{ color: d.k === "+" ? "#56d364" : d.k === "-" ? "#f85149" : "#8b949e" }}>{d.k}</span>
+                <code className="whitespace-pre text-[#e6edf3]">{d.t}</code>
+              </div>
+              {d.note && (
+                <motion.div initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ type: "spring", stiffness: 260, damping: 24 }} className="sticky left-[68px] my-1.5 ml-[68px] mr-5 flex w-[min(520px,calc(100vw-120px))] items-start gap-2.5 rounded-xl bg-[#22262e] px-3 py-2.5" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" }}>
+                  <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full text-white" style={{ background: A }}><Icon d={AGENTS[d.note.agent].d} size={13} /></span>
+                  <span className="flex flex-col whitespace-normal">
+                    <span className="text-[12px] font-semibold text-[#f5f5f7]">Orbit · {AGENTS[d.note.agent].name}</span>
+                    <span className="text-[13px] leading-[1.45] text-[#c9d1d9]">{d.note.text}</span>
+                  </span>
+                </motion.div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Diff() {
+  const [picked, setPicked] = useState<string | null>(null);
+  const said: Record<string, string> = { fix: "Fix pushed as a commit on your branch.", explain: "Orbit replied with the reasoning and a link to the rule.", rerun: "Security agent re-running on the latest commit.", dismiss: "Comment dismissed. Orbit won't raise it on this PR again." };
+  return (
+    <section id="diff" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="The review" title="Comments where the problem is." sub="One review, posted as you'd want a colleague to post it: on the exact line, with the reason, and with a fix when there is one." accent={A} />
+        <div className="mt-12 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1.5fr_1fr]">
+          <Reveal y={18} amount={0.15}><DiffPanel /></Reveal>
+          <Reveal y={18} delay={0.1}>
+            <div className={`${card} flex flex-col items-center gap-2 p-6`}>
+              <span className="self-start text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Answer a comment</span>
+              <span className="self-start text-[14px] text-[#6e6e73]">Press the button and pick what Orbit should do with the security finding.</span>
+              <Fit>
+                <GooeyDial
+                  accent={A}
+                  color={INK}
+                  autoplay
+                  onSelect={setPicked}
+                  actions={[
+                    { id: "fix", label: "Apply fix", d: "M5 12.5l4.5 4.5L19 7.5" },
+                    { id: "explain", label: "Explain", d: "M12 18h.01M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14" },
+                    { id: "rerun", label: "Re-run", d: "M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5" },
+                    { id: "dismiss", label: "Dismiss", d: "M7 7l10 10M17 7L7 17" },
+                  ]}
+                />
+              </Fit>
+              <p className="m-0 min-h-[40px] text-center text-[13px] text-[#6e6e73]" aria-live="polite">{picked ? said[picked] : "Nothing picked yet."}</p>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Setup                                                                */
+/* ------------------------------------------------------------------ */
+
+const YML = `# .orbit.yml
+agents:
+  tests:
+    min_diff_coverage: 80
+  security:
+    block_on: [secrets, sql_injection]
+  performance:
+    p95_budget_ms: 25
+    replay: traffic/checkout-api
+  style:
+    rules: ./docs/style.md
+  docs:
+    paths: [docs/, CHANGELOG.md]
+quiet_on_clean: true`;
+
+function Setup() {
+  const steps = [
+    { t: "Install the GitHub app", b: "Pick the repositories. Orbit only asks for read access to code and write access to PR comments." },
+    { t: "Add .orbit.yml, or don't", b: "Sensible defaults work on day one. The file lets you set budgets, blocking rules and which agents run." },
+    { t: "Open a pull request", b: "The first review lands in about four minutes. After that, every push gets a fresh pass on the new commits only." },
+  ];
+  return (
+    <section id="setup" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1fr_1.1fr]">
+        <div className="flex flex-col gap-10">
+          <SectionHead eyebrow="Setup" title="Ten minutes, then forget it." accent={A} />
+          <Stagger className="flex flex-col gap-6">
+            {steps.map((s, i) => (
+              <div key={s.t} className="flex gap-4">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full text-[14px] font-semibold tabular-nums text-white" style={{ background: A }}>{i + 1}</span>
+                <span className="flex flex-col gap-1">
+                  <span className="text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{s.t}</span>
+                  <span className="text-[15px] leading-[1.5] text-[#6e6e73]">{s.b}</span>
+                </span>
+              </div>
+            ))}
+          </Stagger>
+        </div>
+        <Reveal y={18}>
+          <div className={`${card} overflow-hidden`}>
+            <div className="flex items-center justify-between border-b border-black/[.06] px-5 py-3.5">
+              <span className="text-[12px] font-medium text-[#6e6e73]" style={{ fontFamily: MONO }}>.orbit.yml</span>
+              <span className="text-[12px] text-[#6e6e73]">optional</span>
+            </div>
+            <pre className="m-0 overflow-x-auto whitespace-pre p-5 text-[13px] leading-[1.75] text-[#1d1d1f]" style={{ fontFamily: MONO }}>
+              {YML.split("\n").map((l, i) => {
+                const m = l.match(/^(\s*)([\w_]+)(:)(.*)$/);
+                return (
+                  <div key={i} className="whitespace-pre">
+                    {l.startsWith("#") ? <span className="text-[#6e6e73]">{l}</span> : m ? <>{m[1]}<span style={{ color: A }}>{m[2]}</span>{m[3]}<span className="text-[#9a3412]">{m[4]}</span></> : l}
+                  </div>
+                );
+              })}
+            </pre>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Activity, pricing                                                    */
+/* ------------------------------------------------------------------ */
+
+function Activity() {
+  return (
+    <section id="activity" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-12 px-5">
+        <SectionHead eyebrow="Your team's year" title="Every review, standing up." sub="A day's column is as tall as the pull requests Orbit reviewed. Hover a column for the day. Press the button to stand the grid up." accent={A} center />
+        <Reveal y={18} className="w-full">
+          <div className={`${card} flex w-full justify-center px-4 py-10`}><Fit><StandingCalendar weeks={30} noun="pull requests reviewed" autoplay /></Fit></div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Pricing() {
+  return (
+    <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
+      <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[1fr_1fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Pricing" title="Pay for the people who open PRs." sub="All five agents on every plan. Reviewers and bots are free. Open-source repositories are free forever." accent={A} />
+          <Stagger className="flex flex-col gap-3">
+            {["Unlimited repositories and reviews", "Self-hosted runners for private networks", "SSO, audit log and data residency on Business", "14-day trial with the full product, no card"].map((t) => (
+              <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
+                <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full" style={{ background: "rgba(37,99,235,.12)", color: A }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+                </span>
+                {t}
+              </span>
+            ))}
+          </Stagger>
+        </div>
+        <Reveal y={18} className="flex justify-center">
+          <Fit><div className="w-[460px]"><PriceOdometer monthlyRate={24} yearlyRate={19} maxSeats={200} accent={A} autoplay /></div></Fit>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
 
 export default function OrbitAIPage() {
-  useLenis();
-
   return (
-    <div className="min-h-screen text-white" style={{ backgroundColor: "#080810" }}>
-      <Navbar />
-      <HeroSection />
-      <WorkspaceMockup />
-      <WorkflowSection />
-      <FeatureGrid />
-      <SplitShowcase />
-      <CTASection />
-      <Footer />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" }}>
+        <Nav brand={<Logo />} accent={A} cta="Add to GitHub" onCta={() => scrollToId("pricing")} links={[{ label: "Agents", id: "agents" }, { label: "Review", id: "diff" }, { label: "Setup", id: "setup" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <Hero />
+        <Stats />
+        <Agents />
+        <Diff />
+        <Setup />
+        <Activity />
+        <Pricing />
+        <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
+          <SectionHead eyebrow="FAQ" title="Before you install." accent={A} />
+          <Reveal y={14}>
+            <Faq
+              accent={A}
+              items={[
+                { q: "Does Orbit replace human review?", a: "No, and it shouldn't. It takes the mechanical checks off your reviewers' plate so they can talk about design, naming and whether the change is a good idea at all. Many teams keep one required human approval." },
+                { q: "Will it flood our PRs with comments?", a: "It posts one combined review, comments only on changed lines, and says nothing when a PR is clean. Dismiss a comment once and it won't come back on that PR." },
+                { q: "Where does our code go?", a: "Reviews run in an isolated container per pull request that is deleted when the review is posted. Code is never used to train models. Business plans can run agents on self-hosted runners inside your network." },
+                { q: "How does the performance agent measure anything?", a: "You point it at recorded traffic (we provide a small recorder) or a load script. It replays the same requests against main and the branch and compares latency percentiles." },
+                { q: "Which languages and CI systems work?", a: "TypeScript, JavaScript, Python, Go, Java, Kotlin, Ruby and Rust today. Orbit reads results from GitHub Actions, CircleCI, Buildkite and GitLab CI if you already run tests there." },
+              ]}
+            />
+          </Reveal>
+        </section>
+        <div className="mx-auto max-w-[1180px] px-5 pb-20">
+          <CtaBand title="Get your next PR reviewed five ways." sub="Install on one repository, open a pull request, and read the review in about four minutes." cta="Add to GitHub" secondary="Talk to us" accent={A} glow="rgba(37,99,235,.32)" />
+        </div>
+        <Footer brand={<Logo />} note="Five AI agents that review every pull request, so people can review the ideas." columns={[{ title: "Product", links: ["Agents", "Reviews", "Self-hosting", "Pricing"] }, { title: "Developers", links: ["Docs", ".orbit.yml", "Changelog", "Status"] }, { title: "Company", links: ["About", "Security", "Careers", "Contact"] }]} />
+      </div>
+    </MotionConfig>
   );
 }

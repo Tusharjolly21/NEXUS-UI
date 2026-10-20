@@ -190,6 +190,11 @@ html.dark {
   *::after {
     box-sizing: border-box;
   }
+  /* Tailwind 4 dropped the pointer cursor on buttons; restore it */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* Playground surfaces and type, shared by the site components in src/components/site */

@@ -1,1585 +1,606 @@
 "use client";
+/**
+ * Nova One: launch page template for a fanless 13.6-inch creative laptop.
+ * Built in the Motion Kit style from Lit Keyboard, Before / After, Text Reveal,
+ * Standing Calendar (as Battery Calendar), Capsule Toggles, Elastic Stepper,
+ * Progress Button and the Price Odometer's rolling number.
+ */
+import { useMemo, useRef, useState, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent, type ReactNode } from "react";
+import { MotionConfig, motion, useAnimationFrame, useMotionTemplate, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
+import LitKeyboard from "@/components/templates/kit/components/LitKeyboard";
+import BeforeAfter from "@/components/templates/kit/components/BeforeAfter";
+import TextReveal from "@/components/templates/kit/components/TextReveal";
+import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
+import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
+import ProgressButton from "@/components/templates/kit/components/ProgressButton";
+import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
+import BatteryCalendar from "@/components/templates/nova-one/BatteryCalendar";
+import StickyStory from "@/components/templates/nova-one/StickyStory";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 
-import * as React from "react";
-import {
-  motion,
-  useScroll,
-  useTransform,
-  useInView,
-  AnimatePresence,
-} from "framer-motion";
-import { cn } from "@/lib/utils";
+const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const A = "#b45309"; // amber text and buttons (5:1 on white)
+const GLOW = "#f59e0b"; // amber graphics
 
-// ── Lenis smooth scroll ─────────────────────────────────────────────────────
-function useLenis() {
-  React.useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let lenis: any = null;
-    let rafId: number;
-
-    import("@studio-freight/lenis").then(({ default: Lenis }) => {
-      lenis = new Lenis({
-        duration: 1.2,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        wheelMultiplier: 1,
-        touchMultiplier: 2,
-      });
-      function raf(time: number) {
-        lenis.raf(time);
-        rafId = requestAnimationFrame(raf);
-      }
-      rafId = requestAnimationFrame(raf);
-    });
-
-    return () => {
-      if (lenis) lenis.destroy();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
-}
-
-// ── Scroll reveal wrapper ───────────────────────────────────────────────────
-function Reveal({
-  children,
-  className,
-  delay = 0,
-}: {
-  children: React.ReactNode;
-  className?: string;
-  delay?: number;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-6% 0px" });
-
+function Logo() {
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 28 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.9, delay, ease: [0.2, 0.7, 0.2, 1] }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ── Animated big number counter ─────────────────────────────────────────────
-function Counter({
-  to,
-  suffix = "",
-  smallSuffix,
-}: {
-  to: number | string;
-  suffix?: string;
-  smallSuffix?: string;
-}) {
-  const ref = React.useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const [value, setValue] = React.useState(0);
-  const numericTo = typeof to === "number" ? to : parseFloat(to);
-
-  React.useEffect(() => {
-    if (!isInView || typeof to === "string") return;
-    let start = 0;
-    const duration = 1600;
-    const step = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / duration, 1);
-      const e = 1 - Math.pow(1 - p, 3);
-      setValue(Math.round(e * numericTo * 10) / 10);
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [isInView, numericTo, to]);
-
-  const display = typeof to === "string" ? to : value % 1 ? value.toFixed(1) : value;
-
-  return (
-    <span ref={ref} className="tabular-nums">
-      {display}
-      {suffix}
-      {smallSuffix && (
-        <span className="text-zinc-400" style={{ fontSize: "0.6em", verticalAlign: "top" }}>
-          {smallSuffix}
-        </span>
-      )}
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+        <circle cx="16" cy="16" r="14" fill="#1d1d1f" />
+        <motion.circle cx="16" cy="16" r="6" fill={GLOW} style={{ originX: "16px", originY: "16px" }} animate={{ scale: [0.92, 1.15, 0.92] }} transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }} />
+      </svg>
+      Nova
     </span>
   );
 }
 
-// ── FAQ/Spec Accordion item ─────────────────────────────────────────────────
-function AccordionRow({
-  summary,
-  children,
-  defaultOpen = false,
-}: {
-  summary: string;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = React.useState(defaultOpen);
+/* ------------------------------------------------------------------ */
+/* Shared art: a dusk landscape drawn with gradients (no images)       */
+/* ------------------------------------------------------------------ */
 
+function Scene({ className = "" }: { className?: string }) {
   return (
-    <div className="border-t border-zinc-200">
-      <button
-        type="button"
-        className="flex w-full items-center justify-between py-[22px] text-left text-[17px] font-medium tracking-tight text-zinc-900 transition hover:text-zinc-600"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-      >
-        {summary}
-        <span
-          className={cn(
-            "flex size-[22px] shrink-0 items-center justify-center rounded-full border border-zinc-300 text-zinc-600 transition-all duration-300",
-            open && "rotate-45 border-zinc-900 bg-zinc-900 text-white",
-          )}
-        >
-          <svg width="10" height="10" viewBox="0 0 10 10">
-            <path d="M5 1v8M1 5h8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-          </svg>
-        </span>
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.2, 0.7, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="pb-6 text-zinc-600">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+    <div className={`absolute inset-0 overflow-hidden ${className}`} aria-hidden="true">
+      <div className="absolute inset-0" style={{ background: "linear-gradient(180deg,#263a63 0%,#7b6a9a 38%,#f0a46b 62%,#f7c98b 70%)" }} />
+      <div className="absolute left-[58%] top-[46%] h-[16%] w-[10%] rounded-full" style={{ background: "radial-gradient(circle,#fff4d6 0 40%,rgba(255,226,170,.0) 72%)" }} />
+      <div className="absolute inset-x-0 bottom-0 h-[42%]" style={{ background: "#7a4630", clipPath: "polygon(0 38%,18% 22%,36% 40%,55% 18%,74% 36%,100% 20%,100% 100%,0 100%)" }} />
+      <div className="absolute inset-x-0 bottom-0 h-[30%]" style={{ background: "#4b2a1f", clipPath: "polygon(0 30%,24% 52%,46% 26%,70% 50%,88% 32%,100% 44%,100% 100%,0 100%)" }} />
+      <div className="absolute inset-x-0 bottom-0 h-[14%]" style={{ background: "#2a1812" }} />
     </div>
   );
 }
 
-// ── Scramble text effect ────────────────────────────────────────────────────
-const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&";
+/* ------------------------------------------------------------------ */
+/* Hero: drag the lamp, the display retunes itself to the room          */
+/* ------------------------------------------------------------------ */
 
-function ScrambleText({
-  text,
-  active,
-  className,
-  style,
-}: {
-  text: string;
-  active: boolean;
-  className?: string;
-  style?: React.CSSProperties;
-}) {
-  const [display, setDisplay] = React.useState(text);
-  const frameRef = React.useRef<number>(0);
-  const iterRef = React.useRef(0);
-
-  React.useEffect(() => {
-    if (!active) {
-      setDisplay(text);
-      return;
-    }
-
-    iterRef.current = 0;
-    const totalFrames = text.length * 5; // frames to fully reveal
-
-    const animate = () => {
-      iterRef.current += 1;
-      const revealed = Math.floor(iterRef.current / 5);
-
-      setDisplay(
-        text
-          .split("")
-          .map((char, i) => {
-            if (char === " ") return " ";
-            if (i < revealed) return char;
-            return SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
-          })
-          .join(""),
-      );
-
-      if (iterRef.current < totalFrames + 8) {
-        frameRef.current = requestAnimationFrame(animate);
-      } else {
-        setDisplay(text);
-      }
-    };
-
-    frameRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(frameRef.current);
-  }, [active, text]);
-
-  return (
-    <span className={className} style={style}>
-      {display}
-    </span>
-  );
-}
-
-// ── Scroll story (walkthrough) ──────────────────────────────────────────────
-const STORY_IMAGES = [
-  "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=1400&q=85&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1400&q=85&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1551033406-611cf9a28f67?w=1400&q=85&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=1400&q=85&auto=format&fit=crop",
+const FINISHES = [
+  { id: "sand", n: "Sand", c: "#d9ccb6", edge: "#b9ab93" },
+  { id: "graphite", n: "Graphite", c: "#5a5b60", edge: "#3f4044" },
+  { id: "copper", n: "Copper", c: "#bf8262", edge: "#9b6045" },
 ];
 
-const STORY_STEPS = [
-  {
-    num: "01 / Wake",
-    headline: "It's awake before you've sat down.",
-    body: "Open the lid and Nova One is already where you left it — no boot, no logo, no waiting for the cursor to find itself.",
-  },
-  {
-    num: "02 / Work",
-    headline: "A keyboard that listens, quietly.",
-    body: "Each switch was tuned by hand to the same 38g actuation. Type for an hour without noticing — that's the goal.",
-  },
-  {
-    num: "03 / Night",
-    headline: "The display reads the room.",
-    body: "Dim the room, and Nova One follows — colour temperature, contrast, and refresh rate all shift to match where the light is going.",
-  },
-  {
-    num: "04 / Carry",
-    headline: "Lighter than the bag it lives in.",
-    body: "At 0.92 kg, you can forget it's there until you need it. Engineered around the daily reality of leaving the studio.",
-  },
-];
-
-function StoryStep({
-  step,
-  index,
-  onActive,
-  isActive,
-}: {
-  step: (typeof STORY_STEPS)[0];
-  index: number;
-  onActive: (i: number) => void;
-  isActive: boolean;
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { margin: "-35% 0px -35% 0px" });
-  const cb = React.useCallback(() => onActive(index), [index, onActive]);
-
-  React.useEffect(() => {
-    if (isInView) cb();
-  }, [isInView, cb]);
-
+function Laptop({ width = 760, finish = FINISHES[0], screen, tint, dim, glare }: { width?: number; finish?: (typeof FINISHES)[number]; screen: ReactNode; tint?: MotionValue<string>; dim?: MotionValue<number>; glare?: MotionValue<string> }) {
+  const h = Math.round(width * 0.64);
   return (
-    <div ref={ref} className="flex min-h-[70vh] items-center py-[5vh]">
-      <div>
-        <motion.p
-          animate={{ opacity: isActive ? 1 : 0.35 }}
-          transition={{ duration: 0.4 }}
-          className="mb-3 font-mono text-[11px] uppercase tracking-[0.18em]"
-          style={{ color: "oklch(58% 0.14 252)" }}
-        >
-          {step.num}
-        </motion.p>
-        <h3
-          className="font-medium leading-[1.05] tracking-tight text-zinc-900"
-          style={{ fontSize: "clamp(32px, 3.5vw, 52px)" }}
-        >
-          <ScrambleText
-            text={step.headline}
-            active={isActive}
-          />
-        </h3>
-        <motion.p
-          animate={{ opacity: isActive ? 1 : 0.35 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
-          className="mt-5 max-w-md text-[15px] leading-relaxed text-zinc-500"
-        >
-          {step.body}
-        </motion.p>
-      </div>
-    </div>
-  );
-}
-
-function ScrollStory() {
-  const [activeStep, setActiveStep] = React.useState(0);
-  const onActive = React.useCallback((i: number) => setActiveStep(i), []);
-
-  return (
-    <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
-      {/* Sticky image */}
-      <div className="hidden lg:block">
-        <div className="sticky top-28">
-          <div
-            className="relative overflow-hidden rounded-[22px] border border-zinc-200 bg-zinc-100"
-            style={{ aspectRatio: "4/5" }}
-          >
-            {STORY_IMAGES.map((src, i) => (
-              <img
-                key={i}
-                src={src}
-                alt=""
-                loading="lazy"
-                className={cn(
-                  "absolute inset-0 h-full w-full object-cover transition-all duration-700",
-                  activeStep === i
-                    ? "scale-100 opacity-100"
-                    : "scale-[1.04] opacity-0",
-                )}
-              />
-            ))}
-          </div>
+    <div className="relative flex flex-col items-center" style={{ width: width * 1.12 }}>
+      <div className="relative overflow-hidden rounded-t-[22px] bg-[#16161a] p-[10px] pb-[18px]" style={{ width, height: h, boxShadow: "0 0 0 1.5px #2c2c30" }}>
+        <div className="relative h-full w-full overflow-hidden rounded-[10px] bg-[#f4f1ec]">
+          {screen}
+          {tint !== undefined && <motion.div className="pointer-events-none absolute inset-0" style={{ background: tint, mixBlendMode: "multiply" }} />}
+          {dim !== undefined && <motion.div className="pointer-events-none absolute inset-0 bg-black" style={{ opacity: dim }} />}
+          {glare !== undefined && <motion.div className="pointer-events-none absolute inset-0" style={{ background: glare }} />}
         </div>
+        <span className="absolute left-1/2 top-[3px] h-[5px] w-[5px] -translate-x-1/2 rounded-full bg-[#2c2c30]" aria-hidden="true" />
       </div>
-
-      {/* Scrollable steps */}
-      <div>
-        {STORY_STEPS.map((step, i) => (
-          <StoryStep key={i} step={step} index={i} onActive={onActive} isActive={activeStep === i} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Marquee ─────────────────────────────────────────────────────────────────
-const MARQUEE_ITEMS = [
-  { text: "Built quietly", italic: "in", end: "Copenhagen" },
-  { text: "Designed to last", italic: "a", end: "decade" },
-  { text: "Zero compromise", italic: "on", end: "material" },
-  { text: "A single port", italic: "for", end: "everything" },
-];
-
-function Marquee() {
-  const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
-  return (
-    <div
-      className="overflow-hidden border-y border-zinc-200"
-      style={{ background: "oklch(96.5% 0.006 80)" }}
-      aria-hidden="true"
-    >
-      <motion.div
-        className="flex"
-        animate={{ x: ["0%", "-50%"] }}
-        transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
-      >
-        {items.map((item, i) => (
-          <div
-            key={i}
-            className="inline-flex shrink-0 items-center gap-14 whitespace-nowrap py-5"
-            style={{
-              fontSize: "clamp(36px, 6vw, 88px)",
-              fontWeight: 500,
-              letterSpacing: "-0.04em",
-              color: "oklch(14% 0.012 255)",
-              paddingInline: "3.5rem",
-            }}
-          >
-            {item.text}{" "}
-            <span
-              className="shrink-0 rounded-full"
-              style={{ width: 10, height: 10, background: "oklch(58% 0.14 252)" }}
-            />
-            <span
-              style={{
-                fontFamily: "'Georgia', 'Times New Roman', serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                color: "oklch(65% 0.01 255)",
-              }}
-            >
-              {item.italic}
-            </span>{" "}
-            {item.end}
-          </div>
-        ))}
+      <motion.div className="relative h-[16px] rounded-b-[14px]" style={{ width: width * 1.12 }} initial={false} animate={{ background: `linear-gradient(180deg, ${finish.c} 0%, ${finish.edge} 100%)` }} transition={{ duration: 0.4 }}>
+        <span className="absolute left-1/2 top-0 h-[5px] w-[16%] -translate-x-1/2 rounded-b-[6px]" style={{ background: "rgba(0,0,0,.14)" }} />
       </motion.div>
     </div>
   );
 }
 
-// ── Section eyebrow tag ──────────────────────────────────────────────────────
-function SectionTag({ label }: { label: string }) {
+function HeroScreen({ kelvin, nits }: { kelvin: MotionValue<string>; nits: MotionValue<string> }) {
   return (
-    <div className="mb-6 flex items-center gap-2">
-      <span
-        className="inline-block size-1.5 rounded-full"
-        style={{ background: "oklch(58% 0.14 252)" }}
-      />
-      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">{label}</span>
-    </div>
-  );
-}
-
-// ── Main component ──────────────────────────────────────────────────────────
-export function NovaLandingPage() {
-  useLenis();
-
-  const [navScrolled, setNavScrolled] = React.useState(false);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  // Parallax on hero image
-  const heroImgRef = React.useRef<HTMLDivElement>(null);
-  const { scrollYProgress: heroScroll } = useScroll({
-    target: heroImgRef,
-    offset: ["start start", "end start"],
-  });
-  const heroImgY = useTransform(heroScroll, [0, 1], ["0%", "8%"]);
-
-  React.useEffect(() => {
-    const handler = () => setNavScrolled(window.scrollY > 40);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
-
-  const navLinks = ["Product", "Features", "Gallery", "Specs", "Pricing"];
-
-  // Accent blue
-  const accent = "oklch(58% 0.14 252)";
-
-  // ─── Template styles ──────────────────────────────────────────────────────
-  const bg = "#F9F7F3"; // warm off-white
-  const ink = "oklch(14% 0.012 255)";
-  const borderColor = "oklch(90% 0.006 80)";
-
-  const darken = "oklch(13% 0.012 255)";
-  const darkLine = "oklch(28% 0.012 255)";
-
-  return (
-    <div
-      className="relative min-h-screen overflow-x-hidden font-sans antialiased selection:bg-blue-500 selection:text-white"
-      style={{ background: bg, color: ink }}
-    >
-
-      {/* ── Navbar ──────────────────────────────────────────────────────── */}
-      <header
-        className="fixed inset-x-0 top-0 z-50 transition-all duration-300"
-        style={{
-          background: navScrolled ? "color-mix(in oklch, #F9F7F3 72%, transparent)" : "transparent",
-          backdropFilter: navScrolled ? "saturate(180%) blur(16px)" : "none",
-          WebkitBackdropFilter: navScrolled ? "saturate(180%) blur(16px)" : "none",
-          borderBottom: navScrolled ? `1px solid ${borderColor}` : "1px solid transparent",
-        }}
-      >
-        <div className="mx-auto flex h-[52px] max-w-[1320px] items-center justify-between px-6 lg:px-10">
-          {/* Logo */}
-          <a href="#" className="flex shrink-0 items-center gap-2">
-            <span
-              className="inline-flex size-6 items-center justify-center rounded-[6px]"
-              style={{ background: ink }}
-            >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <path d="M2 12 L7 2 L12 12 M4.2 8.5 H9.8" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </span>
-            <span className="text-[14px] font-semibold tracking-tight">Nova</span>
-          </a>
-
-          {/* Center nav */}
-          <nav className="hidden items-center gap-7 text-[13px] md:flex" style={{ color: "oklch(38% 0.012 255)" }}>
-            {navLinks.map((link) => (
-              <a key={link} href={`#${link.toLowerCase()}`} className="transition-colors hover:text-black">
-                {link}
-              </a>
-            ))}
-          </nav>
-
-          {/* Right side */}
-          <div className="flex shrink-0 items-center gap-3">
-            <a
-              href="#pricing"
-              className="hidden rounded-full border border-zinc-300 px-4 py-1.5 text-[13px] font-medium transition hover:border-zinc-900 hover:bg-zinc-900 hover:text-white md:inline-flex"
-              style={{ color: ink }}
-            >
-              Buy →
-            </a>
-            <button
-              className="inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 md:hidden"
-              onClick={() => setMobileOpen((v) => !v)}
-              aria-label="Toggle menu"
-            >
-              {mobileOpen ? (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 5h10M3 11h10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                </svg>
-              )}
-            </button>
+    <div className="absolute inset-0 flex flex-col">
+      <div className="flex h-[26px] flex-none items-center gap-1.5 bg-white/80 px-3">
+        {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-[9px] w-[9px] rounded-full" style={{ background: c }} />)}
+        <span className="ml-3 text-[11px] font-medium text-[#6e6e73]">Dusk, Wadi Rum · edit</span>
+      </div>
+      <div className="flex min-h-0 flex-1 gap-3 p-3">
+        <div className="relative flex-1 overflow-hidden rounded-[8px]"><Scene /></div>
+        <div className="flex w-[30%] flex-col gap-2.5 rounded-[8px] bg-white p-3 text-[#1d1d1f]">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6e6e73]">Ambient</span>
+          <div className="flex flex-col">
+            <span className="text-[11px] text-[#6e6e73]">White point</span>
+            <motion.span className="text-[20px] font-semibold tabular-nums tracking-[-0.03em]">{kelvin}</motion.span>
           </div>
-        </div>
-
-        {/* Mobile menu */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.nav
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.25, ease: [0.2, 0.7, 0.2, 1] }}
-              className="overflow-hidden border-t border-zinc-200 px-6 py-5"
-              style={{ background: bg }}
-            >
-              <div className="flex flex-col gap-4 text-[15px]">
-                {navLinks.map((link) => (
-                  <a
-                    key={link}
-                    href={`#${link.toLowerCase()}`}
-                    onClick={() => setMobileOpen(false)}
-                    style={{ color: ink }}
-                  >
-                    {link}
-                  </a>
-                ))}
-                <a
-                  href="#pricing"
-                  onClick={() => setMobileOpen(false)}
-                  className="mt-2 self-start rounded-full px-5 py-2.5 text-sm font-medium text-white"
-                  style={{ background: ink }}
-                >
-                  Buy Nova One
-                </a>
-              </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-      </header>
-
-      {/* ── Hero ────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden">
-        {/* Top text block — centered, text-only */}
-        <div
-          className="px-6 pb-12 pt-36 text-center lg:px-10 lg:pt-44"
-          style={{
-            background:
-              "radial-gradient(70% 55% at 50% 0%, oklch(92% 0.04 252 / 0.55) 0%, transparent 65%), #F9F7F3",
-          }}
-        >
-          {/* Pill */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.2, 0.7, 0.2, 1] }}
-            className="mb-7 inline-flex items-center gap-2 rounded-full border border-zinc-300 px-3 py-1.5 text-[11px] font-medium text-zinc-600"
-            style={{ background: "white" }}
-          >
-            <span className="size-1.5 animate-pulse rounded-full" style={{ background: accent }} />
-            Introducing Nova One — Gen 02
-          </motion.div>
-
-          {/* Headline — one big statement */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.08, ease: [0.2, 0.7, 0.2, 1] }}
-            style={{
-              fontSize: "clamp(52px, 9vw, 148px)",
-              letterSpacing: "-0.038em",
-              lineHeight: "0.92",
-              fontWeight: 600,
-              textWrap: "balance",
-            }}
-          >
-            A new kind of{" "}
-            <em
-              style={{
-                fontFamily: "'Georgia', 'Times New Roman', serif",
-                fontStyle: "italic",
-                fontWeight: 400,
-                letterSpacing: "-0.02em",
-              }}
-            >
-              quiet
-            </em>{" "}
-            power.
-          </motion.h1>
-
-          {/* One-liner */}
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.18, ease: [0.2, 0.7, 0.2, 1] }}
-            className="mx-auto mt-6 max-w-lg text-[16px] leading-relaxed"
-            style={{ color: "oklch(35% 0.012 255)" }}
-          >
-            Engineered around a single silent surface — and the things it lets you forget about.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.28, ease: [0.2, 0.7, 0.2, 1] }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-4"
-          >
-            <a
-              href="#pricing"
-              className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-[14px] font-medium text-white transition hover:opacity-85"
-              style={{ background: ink }}
-            >
-              Buy — from $1,499
-            </a>
-            <a
-              href="#product"
-              className="inline-flex items-center gap-1.5 text-[14px] font-medium transition hover:opacity-60"
-              style={{ color: accent }}
-            >
-              Learn more ↓
-            </a>
-          </motion.div>
-        </div>
-
-        {/* Full-width hero image — no padding, bleeds edge-to-edge */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, delay: 0.1, ease: [0.2, 0.7, 0.2, 1] }}
-          className="relative w-full"
-        >
-          {/* Ambient glow behind image */}
-          <div
-            className="pointer-events-none absolute -inset-x-0 -top-20 -z-10 h-40"
-            style={{ background: "radial-gradient(50% 100% at 50% 100%, oklch(88% 0.06 252 / 0.3) 0%, transparent 100%)" }}
-          />
-          <motion.div ref={heroImgRef} style={{ y: heroImgY, aspectRatio: "16/8.5" }} className="relative w-full">
-            <img
-              src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=2800&q=90&auto=format&fit=crop"
-              alt="Nova One — open on a minimal desk"
-              className="h-full w-full object-cover"
-              loading="eager"
-            />
-            {/* Travelling light shimmer */}
-            <motion.div
-              className="pointer-events-none absolute -left-[10%] top-0 h-full w-[22%]"
-              style={{
-                background: "linear-gradient(90deg, transparent, oklch(98% 0.04 252 / 0.45), transparent)",
-                filter: "blur(32px)",
-                rotate: "6deg",
-              }}
-              animate={{ x: ["-20%", "180%"] }}
-              transition={{ duration: 9, repeat: Infinity, delay: 1.5, ease: "easeInOut" }}
-            />
-          </motion.div>
-
-          {/* Key-spec strip directly below the image */}
-          <div
-            className="border-b border-zinc-200 px-6 lg:px-10"
-            style={{ background: bg }}
-          >
-            <div className="mx-auto grid max-w-[1320px] grid-cols-2 gap-px border-x border-zinc-200 md:grid-cols-4">
-              {[
-                { label: "Build", value: "Aerograde recycled aluminum" },
-                { label: "Display", value: "14.2″ Retina XDR, 1,600 nits" },
-                { label: "Silicon", value: "Nova N2 · 18 cores · 0 dB idle" },
-                { label: "Battery", value: "Up to 22 hours sustained" },
-              ].map((item) => (
-                <div key={item.label} className="border-r border-zinc-200 px-6 py-6 last:border-r-0">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-400">{item.label}</p>
-                  <p className="mt-1.5 text-[13px] font-medium text-zinc-700">{item.value}</p>
-                </div>
-              ))}
-            </div>
+          <div className="flex flex-col">
+            <span className="text-[11px] text-[#6e6e73]">Brightness</span>
+            <motion.span className="text-[20px] font-semibold tabular-nums tracking-[-0.03em]">{nits}</motion.span>
           </div>
-        </motion.div>
-      </section>
-
-      {/* ── Product intro ────────────────────────────────────────────────── */}
-      <section id="product" className="px-6 py-28 lg:px-10 lg:py-40">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="grid items-end gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-7">
-              <Reveal>
-                <SectionTag label="Introducing Nova One" />
-                <h2
-                  className="font-semibold tracking-tight"
-                  style={{ fontSize: "clamp(40px, 6vw, 104px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-                >
-                  Designed to disappear
-                  <br />
-                  into the work.
-                </h2>
-              </Reveal>
-            </div>
-            <div className="lg:col-span-5">
-              <Reveal delay={0.1}>
-                <p className="max-w-md text-[17px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-                  We removed everything that wasn&apos;t the work. No fans. No bezels worth noticing. No status lights blinking at you in the dark. What&apos;s left is a quiet surface that responds the moment you do.
-                </p>
-                <a
-                  href="#features"
-                  className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium transition hover:opacity-70"
-                  style={{ color: accent }}
-                >
-                  Explore the design{" "}
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6h8m0 0L7 3m3 3L7 9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
-              </Reveal>
-            </div>
-          </div>
-
-          <Reveal className="mt-16 lg:mt-24">
-            <div className="overflow-hidden rounded-[28px] border border-zinc-200">
-              <div className="relative aspect-[21/9]">
-                <img
-                  src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=2520&q=85&auto=format&fit=crop"
-                  alt="Nova One wide"
-                  className="h-full w-full object-cover"
-                  loading="lazy"
-                />
-                <div
-                  className="pointer-events-none absolute inset-0"
-                  style={{ background: "linear-gradient(180deg, transparent 40%, oklch(10% 0.01 255 / 0.55))" }}
-                />
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── Feature showcase — 4 sections ──────────────────────────────── */}
-      <section id="features">
-
-        {/* Feature 01 — light */}
-        <div className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-40">
-          <div className="mx-auto grid max-w-[1320px] items-center gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <Reveal>
-                <SectionTag label="01 — Silicon" />
-                <h3
-                  className="font-semibold tracking-tight"
-                  style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-                >
-                  The fastest thing
-                  <br />
-                  that won&apos;t
-                  <br />
-                  make a sound.
-                </h3>
-                <p className="mt-8 max-w-md text-[17px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-                  The Nova N2 chip moves 38 trillion operations a second through a passive thermal stack you can&apos;t hear, even pressed against your ear.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-8">
-                  {[["38T", "ops / sec"], ["0 dB", "idle"], ["7 nm", "process"]].map(([val, lbl]) => (
-                    <div key={lbl}>
-                      <div className="text-3xl font-medium" style={{ letterSpacing: "-0.05em" }}>{val}</div>
-                      <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">{lbl}</div>
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
-            </div>
-            <div className="lg:col-span-7">
-              <Reveal delay={0.1}>
-                <div className="overflow-hidden rounded-[24px] border border-zinc-200">
-                  <div className="relative aspect-[5/4]">
-                    <img
-                      src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=2000&q=85&auto=format&fit=crop"
-                      alt="Silicon"
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 02 — dark */}
-        <div className="px-6 py-28 lg:px-10 lg:py-40" style={{ background: darken, color: "oklch(94% 0.004 80)" }}>
-          <div className="mx-auto grid max-w-[1320px] items-center gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="order-2 lg:order-1 lg:col-span-7">
-              <Reveal>
-                <div className="overflow-hidden rounded-[24px]" style={{ border: `1px solid ${darkLine}` }}>
-                  <div className="relative aspect-[5/4]">
-                    <img
-                      src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=2000&q=85&auto=format&fit=crop"
-                      alt="Display"
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-            <div className="order-1 lg:order-2 lg:col-span-5">
-              <Reveal delay={0.1}>
-                <SectionTag label="02 — Display" />
-                <h3
-                  className="font-semibold tracking-tight"
-                  style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-                >
-                  A black
-                  <br />
-                  you can fall
-                  <br />
-                  into.
-                </h3>
-                <p className="mt-8 max-w-md text-[17px] leading-relaxed" style={{ color: "oklch(80% 0.01 255)" }}>
-                  1,600 nits sustained. 1,000,000:1 contrast. A panel calibrated so closely to reference that colorists use it as one.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-8">
-                  {[["1,600", "nits sustained"], ["120Hz", "ProMotion"], ["P3", "wide color"]].map(([val, lbl]) => (
-                    <div key={lbl}>
-                      <div className="text-3xl font-medium" style={{ letterSpacing: "-0.05em" }}>{val}</div>
-                      <div className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: "oklch(65% 0.01 255)" }}>{lbl}</div>
-                    </div>
-                  ))}
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 03 — light */}
-        <div className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-40">
-          <div className="mx-auto grid max-w-[1320px] items-center gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <Reveal>
-                <SectionTag label="03 — Audio" />
-                <h3
-                  className="font-semibold tracking-tight"
-                  style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-                >
-                  Sound that
-                  <br />
-                  arrives from
-                  <br />
-                  nowhere.
-                </h3>
-                <p className="mt-8 max-w-md text-[17px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-                  Six-driver spatial array tuned in an anechoic chamber for three months by people who care deeply about cellos.
-                </p>
-              </Reveal>
-            </div>
-            <div className="lg:col-span-7">
-              <Reveal delay={0.1}>
-                <div className="overflow-hidden rounded-[24px] border border-zinc-200">
-                  <div className="relative aspect-[5/4]">
-                    <img
-                      src="https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=2000&q=85&auto=format&fit=crop"
-                      alt="Audio"
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-
-        {/* Feature 04 — dark */}
-        <div className="px-6 py-28 lg:px-10 lg:py-40" style={{ background: darken, color: "oklch(94% 0.004 80)" }}>
-          <div className="mx-auto grid max-w-[1320px] items-center gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <Reveal>
-                <SectionTag label="04 — Battery" />
-                <h3
-                  className="font-semibold tracking-tight"
-                  style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-                >
-                  A full day
-                  <br />
-                  and then
-                  <br />
-                  another half.
-                </h3>
-                <p className="mt-8 max-w-md text-[17px] leading-relaxed" style={{ color: "oklch(80% 0.01 255)" }}>
-                  22 hours of sustained creative work. 36 hours of reading. A graphite-lithium cell that takes only 28 minutes to half-charge.
-                </p>
-              </Reveal>
-            </div>
-            <div className="lg:col-span-7">
-              <Reveal delay={0.1}>
-                <div className="overflow-hidden rounded-[24px]" style={{ border: `1px solid ${darkLine}` }}>
-                  <div className="relative aspect-[5/4]">
-                    <img
-                      src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=2000&q=85&auto=format&fit=crop"
-                      alt="Battery"
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </Reveal>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Auto-scrolling Marquee ───────────────────────────────────────── */}
-      <Marquee />
-
-      {/* ── Cinematic sticky section ─────────────────────────────────────── */}
-      <div className="relative" style={{ height: "260vh", background: darken, color: "oklch(94% 0.004 80)" }}>
-        <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden">
-          {/* BG image with subtle parallax */}
-          <img
-            className="absolute inset-0 h-full w-full scale-105 object-cover"
-            src="https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=2600&q=85&auto=format&fit=crop"
-            alt=""
-            loading="lazy"
-          />
-          {/* Veil */}
-          <div
-            className="absolute inset-0"
-            style={{ background: "radial-gradient(60% 60% at 50% 50%, oklch(10% 0.01 255 / 0.25), oklch(8% 0.01 255 / 0.75))" }}
-          />
-          {/* Content */}
-          <div className="relative z-10 max-w-[1100px] px-6 text-center">
-            <div
-              className="mb-8 inline-flex items-center gap-2.5 rounded-full border px-3.5 py-2 backdrop-blur-lg"
-              style={{ borderColor: "oklch(70% 0.01 255 / 0.3)", color: "oklch(75% 0.01 255)", fontFamily: "monospace", fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase" }}
-            >
-              <span className="size-1.5 rounded-full" style={{ background: accent }} />
-              Chapter 02 — Material
-            </div>
-            <Reveal>
-              <h2
-                className="font-semibold tracking-tight"
-                style={{ fontSize: "clamp(56px, 7.5vw, 132px)", letterSpacing: "-0.035em", lineHeight: "0.95", textWrap: "balance" }}
-              >
-                Sculpted from{" "}
-                <em
-                  style={{
-                    fontFamily: "'Georgia', 'Times New Roman', serif",
-                    fontStyle: "italic",
-                    fontWeight: 400,
-                    letterSpacing: "-0.015em",
-                  }}
-                >
-                  one
-                </em>{" "}
-                piece of
-                <br />
-                recycled aluminum.
-              </h2>
-              <p
-                className="mx-auto mt-8 max-w-xl text-[17px] leading-relaxed"
-                style={{ color: "oklch(82% 0.01 255)" }}
-              >
-                It takes 14 hours of CNC milling to shape a single chassis, and 38 seconds to break the toolhead on the first one we tried. We kept trying.
-              </p>
-            </Reveal>
+          <div className="mt-auto flex flex-col gap-1.5">
+            {[82, 64, 74, 48].map((w, i) => <span key={i} className="h-[6px] rounded-full bg-[#ece8e2]" style={{ width: `${w}%` }} />)}
           </div>
         </div>
       </div>
-
-      {/* ── Walkthrough / Scroll story ───────────────────────────────────── */}
-      <section className="border-t border-zinc-200 px-6 py-24 lg:px-10 lg:py-32">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="mb-16 max-w-2xl">
-            <Reveal>
-              <SectionTag label="Walkthrough" />
-              <h2
-                className="font-semibold tracking-tight"
-                style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-              >
-                Four moments,
-                <br />
-                one device.
-              </h2>
-            </Reveal>
-          </div>
-          <ScrollStory />
-        </div>
-      </section>
-
-      {/* ── Gallery / Studio ─────────────────────────────────────────────── */}
-      <section id="gallery" className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-36">
-        <div className="mx-auto max-w-[1320px]">
-          <Reveal className="mb-12 flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <SectionTag label="Studio" />
-              <h2
-                className="font-semibold tracking-tight"
-                style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-              >
-                Every angle, considered.
-              </h2>
-            </div>
-            <a href="#" className="inline-flex items-center gap-1.5 text-[14px] font-medium transition hover:opacity-70" style={{ color: accent }}>
-              View the press kit →
-            </a>
-          </Reveal>
-
-          {/* Gallery grid */}
-          <div className="grid grid-cols-12 gap-4 lg:gap-6">
-            <Reveal className="col-span-12 lg:col-span-8">
-              <div className="group overflow-hidden rounded-[22px] border border-zinc-200">
-                <div className="relative aspect-[16/10]">
-                  <img
-                    src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=2400&q=85&auto=format&fit=crop"
-                    alt="Front three-quarter"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.045]"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </Reveal>
-            <Reveal delay={0.07} className="col-span-12 lg:col-span-4">
-              <div className="group overflow-hidden rounded-[22px] border border-zinc-200">
-                <div className="relative aspect-[4/5]">
-                  <img
-                    src="https://images.unsplash.com/photo-1535223289827-42f1e9919769?w=1400&q=85&auto=format&fit=crop"
-                    alt="Port detail"
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.045]"
-                    loading="lazy"
-                  />
-                </div>
-              </div>
-            </Reveal>
-            {[
-              { src: "https://images.unsplash.com/photo-1483478550801-ceba5fe50e8e?w=1400&q=85&auto=format&fit=crop", alt: "Hinge" },
-              { src: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=1400&q=85&auto=format&fit=crop", alt: "Keyboard" },
-              { src: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=1400&q=85&auto=format&fit=crop", alt: "Engraving" },
-            ].map((img, i) => (
-              <Reveal key={img.alt} delay={i * 0.06} className="col-span-6 lg:col-span-4">
-                <div className="group overflow-hidden rounded-[22px] border border-zinc-200">
-                  <div className="relative aspect-square">
-                    <img
-                      src={img.src}
-                      alt={img.alt}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.045]"
-                      loading="lazy"
-                    />
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Bento feature grid ───────────────────────────────────────────── */}
-      <section className="px-6 py-28 lg:px-10 lg:py-36">
-        <div className="mx-auto max-w-[1320px]">
-          <Reveal className="mb-14 max-w-2xl">
-            <SectionTag label="System" />
-            <h2
-              className="font-semibold tracking-tight"
-              style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-            >
-              Six small ideas
-              <br />
-              that add up to one big one.
-            </h2>
-          </Reveal>
-
-          <div className="grid grid-cols-12 gap-4 lg:gap-6">
-            {/* Wide card */}
-            <Reveal className="col-span-12 lg:col-span-7">
-              <div
-                className="rounded-[22px] border border-zinc-200 p-8 lg:p-10"
-                style={{ background: "linear-gradient(180deg, oklch(99% 0.003 80) 0%, oklch(96% 0.006 80) 100%)" }}
-              >
-                <div className="mb-6 inline-flex size-9 items-center justify-center rounded-[10px] border border-zinc-200 bg-zinc-100 text-zinc-600">
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/><circle cx="9" cy="9" r="1.6" fill="currentColor"/></svg>
-                </div>
-                <h3 className="text-2xl font-medium tracking-tight lg:text-3xl" style={{ letterSpacing: "-0.02em" }}>Privacy is the default, not a setting.</h3>
-                <p className="mt-4 max-w-md text-[15px] leading-relaxed text-zinc-500">Every neural workload runs on-device. The cloud sees only what you send it — and what you send is encrypted twice.</p>
-              </div>
-            </Reveal>
-            <Reveal delay={0.07} className="col-span-12 sm:col-span-6 lg:col-span-5">
-              <div className="rounded-[22px] border border-zinc-200 p-8 lg:p-10" style={{ background: "linear-gradient(180deg, oklch(99% 0.003 80) 0%, oklch(96% 0.006 80) 100%)" }}>
-                <div className="mb-6 inline-flex size-9 items-center justify-center rounded-[10px] border border-zinc-200 bg-zinc-100 text-zinc-600">
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 6h12M3 9h12M3 12h7" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
-                </div>
-                <h3 className="text-2xl font-medium tracking-tight lg:text-3xl" style={{ letterSpacing: "-0.02em" }}>Hand-off, anywhere.</h3>
-                <p className="mt-4 text-[15px] leading-relaxed text-zinc-500">Pick up from your phone, tablet, or studio rig — without thinking about it.</p>
-              </div>
-            </Reveal>
-            {[
-              { icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="3" y="3" width="12" height="12" rx="2.5" stroke="currentColor" strokeWidth="1.4"/><path d="M3 9h12M9 3v12" stroke="currentColor" strokeWidth="1.4"/></svg>, title: "One port. Everything.", desc: "Power, dual-8K display out, 80 Gbps data, MIDI, balanced audio. One cable." },
-              { icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v3M9 13v3M2 9h3M13 9h3M4 4l2 2M12 12l2 2M14 4l-2 2M4 14l2-2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>, title: "Adaptive ambient.", desc: "The display reads the room and changes its temperature 96 times a second." },
-              { icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M5 14l4-10 4 10M6.5 11h5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/></svg>, title: "Built to recycle.", desc: "100% recycled aluminum. 96% recycled rare earths. Zero adhesives in the chassis." },
-            ].map((card, i) => (
-              <Reveal key={card.title} delay={i * 0.07} className="col-span-12 sm:col-span-6 lg:col-span-4">
-                <div className="rounded-[22px] border border-zinc-200 p-8 lg:p-10" style={{ background: "linear-gradient(180deg, oklch(99% 0.003 80) 0%, oklch(96% 0.006 80) 100%)" }}>
-                  <div className="mb-6 inline-flex size-9 items-center justify-center rounded-[10px] border border-zinc-200 bg-zinc-100 text-zinc-600">{card.icon}</div>
-                  <h3 className="text-2xl font-medium tracking-tight lg:text-3xl" style={{ letterSpacing: "-0.02em" }}>{card.title}</h3>
-                  <p className="mt-4 text-[15px] leading-relaxed text-zinc-500">{card.desc}</p>
-                </div>
-              </Reveal>
-            ))}
-            {/* Wide bottom card */}
-            <Reveal className="col-span-12">
-              <div className="rounded-[22px] border border-zinc-200 p-8 lg:p-10" style={{ background: "linear-gradient(120deg, oklch(96% 0.02 252) 0%, oklch(98% 0.006 80) 60%)" }}>
-                <div className="grid items-center gap-6 lg:grid-cols-12">
-                  <div className="lg:col-span-7">
-                    <div className="mb-6 inline-flex size-9 items-center justify-center rounded-[10px] border border-zinc-200 bg-white/60 text-zinc-600">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.4"/><path d="M9 5v4l2.5 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/></svg>
-                    </div>
-                    <h3 className="text-2xl font-medium tracking-tight lg:text-3xl" style={{ letterSpacing: "-0.02em" }}>It updates while it&apos;s off.</h3>
-                    <p className="mt-4 max-w-lg text-[15px] leading-relaxed text-zinc-500">Quiet OTA channels mean your software is ready before you sit down. No download bars, ever.</p>
-                  </div>
-                  <div className="lg:col-span-5">
-                    <div className="overflow-hidden rounded-[16px] border border-zinc-200">
-                      <div className="relative aspect-[16/10]">
-                        <img src="https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=1600&q=85&auto=format&fit=crop" alt="OTA update" className="h-full w-full object-cover" loading="lazy" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Performance stats ────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-36">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="grid items-end gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-5">
-              <Reveal>
-                <SectionTag label="Numbers" />
-                <h2
-                  className="font-semibold tracking-tight"
-                  style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-                >
-                  Measured against itself.
-                </h2>
-                <p className="mt-6 max-w-md text-[16px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-                  All comparisons are against the previous Nova generation, tested under identical sustained loads.
-                </p>
-              </Reveal>
-            </div>
-            <div className="lg:col-span-7">
-              <div className="grid grid-cols-2 gap-x-6 gap-y-12 md:grid-cols-4">
-                {[
-                  { val: "3.4", suf: "×", label: "render speed" },
-                  { val: 22, suf: "h", label: "battery" },
-                  { val: 0.92, suf: "", smallSuf: "kg", label: "weight" },
-                  { val: 8.2, suf: "", smallSuf: "mm", label: "thickness" },
-                  { val: "38T", suf: "", label: "neural ops / sec" },
-                  { val: "1,600", suf: "", label: "nits sustained" },
-                  { val: 100, suf: "", smallSuf: "%", label: "recycled shell" },
-                  { val: 28, suf: "", smallSuf: "min", label: "half charge" },
-                ].map((s, i) => (
-                  <Reveal key={s.label} delay={i * 0.05}>
-                    <div
-                      className="font-medium"
-                      style={{ fontSize: "clamp(40px, 5vw, 64px)", letterSpacing: "-0.05em", lineHeight: 1 }}
-                    >
-                      <Counter
-                        to={typeof s.val === "string" ? s.val : s.val}
-                        suffix={s.suf}
-                        smallSuffix={s.smallSuf}
-                      />
-                    </div>
-                    <div className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500">{s.label}</div>
-                  </Reveal>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── In the box ───────────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 px-6 py-24 lg:px-10 lg:py-32">
-        <div className="mx-auto max-w-[1320px]">
-          <Reveal className="mb-14 flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <SectionTag label="In the box" />
-              <h2
-                className="font-semibold tracking-tight"
-                style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-              >
-                Five things,
-                <br />
-                nothing extra.
-              </h2>
-            </div>
-            <p className="max-w-xs text-[14px] text-zinc-500">Every Nova One ships in a single moulded-pulp tray. No foam, no ties, no plastics.</p>
-          </Reveal>
-
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5 lg:gap-6">
-            {[
-              { src: "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=900&q=85&auto=format&fit=crop", name: "Nova One", sub: "14.2″ chassis" },
-              { src: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=900&q=85&auto=format&fit=crop", name: "N-Cable", sub: "2m, braided" },
-              { src: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=900&q=85&auto=format&fit=crop", name: "96W Adapter", sub: "GaN, foldable" },
-              { src: "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=900&q=85&auto=format&fit=crop", name: "Polish cloth", sub: "Nano-microfiber" },
-              { src: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=900&q=85&auto=format&fit=crop", name: "Owner's card", sub: "Letterpress, A6" },
-            ].map((item, i) => (
-              <Reveal key={item.name} delay={i * 0.06}>
-                <div className="overflow-hidden rounded-[18px] border border-zinc-200 bg-white">
-                  <div className="relative border-b border-zinc-200 bg-zinc-50" style={{ aspectRatio: "4/3" }}>
-                    <img src={item.src} alt={item.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
-                  </div>
-                  <div className="p-5">
-                    <p className="text-[15px] font-medium">{item.name}</p>
-                    <p className="mt-1 text-[12px] text-zinc-500">{item.sub}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Comparison table ─────────────────────────────────────────────── */}
-      <section id="compare" className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-36">
-        <div className="mx-auto max-w-[1320px]">
-          <Reveal className="mb-14 max-w-2xl">
-            <SectionTag label="Compare" />
-            <h2
-              className="font-semibold tracking-tight"
-              style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-            >
-              Nova One, against the room.
-            </h2>
-            <p className="mt-6 max-w-md text-[16px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-              A short, honest accounting of where it lands versus the obvious alternatives.
-            </p>
-          </Reveal>
-
-          <Reveal>
-            <div className="overflow-hidden overflow-x-auto rounded-[22px] border border-zinc-200 bg-white">
-              <table className="w-full text-[14px]">
-                <thead>
-                  <tr className="border-b border-zinc-200">
-                    {["Specification", "Nova One", "Studio Pro Q", "Arc Book 14", "Halo M3"].map((h) => (
-                      <th key={h} className="px-5 py-[18px] text-left font-mono text-[11px] uppercase tracking-[0.16em] text-zinc-500 font-medium">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    ["Sustained CPU", "38T ops/s", "22T ops/s", "19T ops/s", "26T ops/s"],
-                    ["Display", "14.2″ XDR, 1,600 nits", "14″ OLED, 800 nits", "14″ IPS, 500 nits", "14″ Mini-LED, 1,200 nits"],
-                    ["Battery, sustained", "22 hours", "14 hours", "12 hours", "17 hours"],
-                    ["Passive cooling", "✓ Fully fanless", "— Active fan", "— Active fan", "✓ Hybrid"],
-                    ["On-device privacy", "✓ All workloads", "— Partial", "— Cloud-first", "✓ All workloads"],
-                    ["Recycled shell", "100%", "62%", "48%", "80%"],
-                    ["Weight", "0.92 kg", "1.30 kg", "1.45 kg", "1.10 kg"],
-                  ].map((row) => (
-                    <tr key={row[0]} className="border-t border-zinc-200 transition hover:bg-zinc-50">
-                      {row.map((cell, ci) => (
-                        <td
-                          key={ci}
-                          className={cn("px-5 py-[18px] align-middle",
-                            ci === 0 && "text-zinc-500",
-                            ci === 1 && "font-medium",
-                            cell.startsWith("✓") && "text-green-600",
-                            cell.startsWith("—") && "text-zinc-400",
-                          )}
-                        >
-                          {cell}
-                        </td>
-                      ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── Tech specs accordion ──────────────────────────────────────────── */}
-      <section id="specs" className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-36">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-            <Reveal className="lg:col-span-4">
-              <SectionTag label="Tech specs" />
-              <h2
-                className="font-semibold tracking-tight"
-                style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-              >
-                Everything,
-                <br />
-                for the engineers.
-              </h2>
-              <p className="mt-6 max-w-xs text-[14px] leading-relaxed text-zinc-500">
-                A complete data sheet — for the people who read those carefully.
-              </p>
-              <a href="#" className="mt-6 inline-flex items-center gap-1.5 text-[14px] font-medium transition hover:opacity-70" style={{ color: accent }}>
-                Download PDF data sheet →
-              </a>
-            </Reveal>
-            <Reveal delay={0.1} className="lg:col-span-8">
-              <AccordionRow summary="Silicon" defaultOpen>
-                <dl className="mt-2 grid grid-cols-1 gap-4 text-[14px] sm:grid-cols-2">
-                  {[["Chip", "Nova N2, 7 nm"], ["CPU", "18-core (12P + 6E)"], ["GPU", "24-core integrated"], ["Neural engine", "16-core, 38T ops/s"], ["Memory bandwidth", "400 GB/s"], ["Thermal design", "Passive, fanless"]].map(([k, v]) => (
-                    <div key={k}><dt className="text-zinc-400">{k}</dt><dd className="text-zinc-700">{v}</dd></div>
-                  ))}
-                </dl>
-              </AccordionRow>
-              <AccordionRow summary="Display">
-                <dl className="mt-2 grid grid-cols-1 gap-4 text-[14px] sm:grid-cols-2">
-                  {[["Size", "14.2″ Liquid Retina XDR"], ["Resolution", "3456 × 2234 at 254 ppi"], ["Brightness", "1,600 nits sustained"], ["Contrast", "1,000,000 : 1"], ["Color", "P3 wide gamut, 10-bit"], ["Refresh", "ProMotion 10–120 Hz"]].map(([k, v]) => (
-                    <div key={k}><dt className="text-zinc-400">{k}</dt><dd className="text-zinc-700">{v}</dd></div>
-                  ))}
-                </dl>
-              </AccordionRow>
-              <AccordionRow summary="Memory & storage">
-                <dl className="mt-2 grid grid-cols-1 gap-4 text-[14px] sm:grid-cols-2">
-                  {[["Unified memory", "16 / 32 / 64 GB"], ["Storage", "512 GB / 1 TB / 2 TB / 4 TB"], ["SSD read", "up to 7.4 GB/s"], ["SSD write", "up to 6.8 GB/s"]].map(([k, v]) => (
-                    <div key={k}><dt className="text-zinc-400">{k}</dt><dd className="text-zinc-700">{v}</dd></div>
-                  ))}
-                </dl>
-              </AccordionRow>
-              <AccordionRow summary="Battery & power">
-                <dl className="mt-2 grid grid-cols-1 gap-4 text-[14px] sm:grid-cols-2">
-                  {[["Battery", "72 Wh graphite-lithium"], ["Web browsing", "up to 22 hours"], ["Video playback", "up to 28 hours"], ["Half-charge", "28 minutes (96W)"], ["Idle drain", "0.4% / hr lid-closed"]].map(([k, v]) => (
-                    <div key={k}><dt className="text-zinc-400">{k}</dt><dd className="text-zinc-700">{v}</dd></div>
-                  ))}
-                </dl>
-              </AccordionRow>
-              <AccordionRow summary="Connectivity & ports">
-                <dl className="mt-2 grid grid-cols-1 gap-4 text-[14px] sm:grid-cols-2">
-                  {[["Wi-Fi", "Wi-Fi 7 (802.11be), tri-band"], ["Bluetooth", "5.4"], ["Port", "1 × Nova-Bus (80 Gbps, 240W)"], ["Display out", "Dual 8K at 60 Hz"]].map(([k, v]) => (
-                    <div key={k}><dt className="text-zinc-400">{k}</dt><dd className="text-zinc-700">{v}</dd></div>
-                  ))}
-                </dl>
-              </AccordionRow>
-              <AccordionRow summary="Dimensions & environment">
-                <dl className="mt-2 grid grid-cols-1 gap-4 text-[14px] sm:grid-cols-2">
-                  {[["Weight", "0.92 kg / 2.03 lb"], ["Thickness", "8.2 mm"], ["Material", "100% recycled aerograde aluminum"], ["Compliance", "ENERGY STAR, EPEAT Gold"]].map(([k, v]) => (
-                    <div key={k}><dt className="text-zinc-400">{k}</dt><dd className="text-zinc-700">{v}</dd></div>
-                  ))}
-                </dl>
-              </AccordionRow>
-              <div className="border-b border-zinc-200" />
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pricing ──────────────────────────────────────────────────────── */}
-      <section id="pricing" className="border-t border-zinc-200 px-6 py-28 lg:px-10 lg:py-36">
-        <div className="mx-auto max-w-[1320px]">
-          <Reveal className="mb-14 max-w-2xl">
-            <SectionTag label="Order" />
-            <h2
-              className="font-semibold tracking-tight"
-              style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-            >
-              Choose your Nova One.
-            </h2>
-            <p className="mt-6 max-w-md text-[16px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-              Configured to order. Ships in 5–7 days. Free returns for 30.
-            </p>
-          </Reveal>
-
-          <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
-            {[
-              {
-                eyebrow: "Essential",
-                sku: "N1-512",
-                price: "$1,499",
-                monthly: "$124/mo for 12 months",
-                desc: "A complete Nova One for everyday creative work and long days on battery.",
-                features: ["Nova N2 — 12-core", "16 GB unified memory", "512 GB storage", "14.2″ XDR display", "22-hour battery"],
-                cta: "Configure essential",
-                rec: false,
-              },
-              {
-                eyebrow: "Studio",
-                sku: "N1-1TB",
-                price: "$1,999",
-                monthly: "$166/mo for 12 months",
-                desc: "The configuration we ship to our own design studio. More memory, more storage, the same silence.",
-                features: ["Nova N2 — 14-core", "32 GB unified memory", "1 TB storage", "14.2″ XDR, nano-texture", "Engraving included"],
-                cta: "Configure studio",
-                rec: true,
-              },
-              {
-                eyebrow: "Atelier",
-                sku: "N1-2TB",
-                price: "$2,799",
-                monthly: "$232/mo for 12 months",
-                desc: "For the kind of work that fills a hard drive every quarter and asks for color you can trust.",
-                features: ["Nova N2 — 18-core", "64 GB unified memory", "2 TB storage", "Reference-calibrated XDR", "NovaCare+ included, 3 yr"],
-                cta: "Configure atelier",
-                rec: false,
-              },
-            ].map((plan, i) => (
-              <Reveal key={plan.eyebrow} delay={i * 0.08}>
-                <div
-                  className={cn(
-                    "relative flex h-full flex-col rounded-[22px] border p-8 lg:p-10",
-                    plan.rec ? "" : "border-zinc-200 bg-white",
-                  )}
-                  style={plan.rec ? { background: ink, border: `1px solid ${ink}`, color: "oklch(94% 0.004 80)" } : undefined}
-                >
-                  {plan.rec && (
-                    <div
-                      className="absolute -top-3 left-8 rounded-full px-3 py-1 text-[11px] font-mono uppercase tracking-widest text-white"
-                      style={{ background: accent }}
-                    >
-                      Most chosen
-                    </div>
-                  )}
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-mono text-[11px] uppercase tracking-[0.18em]" style={{ color: plan.rec ? "oklch(72% 0.01 255)" : "oklch(45% 0.012 255)" }}>{plan.eyebrow}</span>
-                    <span className="font-mono text-[12px]" style={{ color: plan.rec ? "oklch(60% 0.01 255)" : "oklch(65% 0.010 255)" }}>{plan.sku}</span>
-                  </div>
-                  <div className="mt-6">
-                    <div className="text-5xl font-medium" style={{ letterSpacing: "-0.03em" }}>{plan.price}</div>
-                    <div className="mt-2 text-[13px]" style={{ color: plan.rec ? "oklch(72% 0.01 255)" : "oklch(45% 0.012 255)" }}>{plan.monthly}</div>
-                  </div>
-                  <p className="mt-6 text-[14px] leading-relaxed" style={{ color: plan.rec ? "oklch(80% 0.01 255)" : "oklch(28% 0.012 255)" }}>{plan.desc}</p>
-                  <ul className="mt-8 grow space-y-3 text-[14px]">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex gap-3">
-                        <span className="mt-0.5" style={{ color: plan.rec ? "oklch(75% 0.13 150)" : "oklch(55% 0.13 150)" }}>✓</span>
-                        <span style={{ color: plan.rec ? "oklch(80% 0.01 255)" : "oklch(28% 0.012 255)" }}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-10">
-                    <a
-                      href="#"
-                      className="flex w-full items-center justify-center rounded-full py-3 text-[14px] font-medium transition hover:opacity-90"
-                      style={plan.rec
-                        ? { background: bg, color: ink }
-                        : i === 2
-                          ? { border: `1px solid ${ink}`, color: ink }
-                          : { background: ink, color: "white" }
-                      }
-                    >
-                      {plan.cta}
-                    </a>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ──────────────────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 px-6 py-24 lg:px-10 lg:py-32">
-        <div className="mx-auto max-w-[1320px]">
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
-            <Reveal className="lg:col-span-4">
-              <SectionTag label="Questions" />
-              <h2
-                className="font-semibold tracking-tight"
-                style={{ fontSize: "clamp(32px, 4.5vw, 72px)", letterSpacing: "-0.035em", lineHeight: "0.95" }}
-              >
-                Honest
-                <br />
-                answers.
-              </h2>
-              <p className="mt-6 max-w-xs text-[14px] leading-relaxed text-zinc-500">
-                If you don&apos;t see what you&apos;re looking for, write us — a real person responds within a day.
-              </p>
-            </Reveal>
-            <Reveal delay={0.1} className="lg:col-span-8">
-              {[
-                { q: "What's actually different about Nova One?", a: "A fully passive thermal stack — no fan, ever — paired with a chip designed around sustained workloads instead of bursts. The result is a machine that doesn't slow down at minute thirty and doesn't sound like one either." },
-                { q: "When does Nova One ship?", a: "Configured-to-order units ship within 5–7 business days. Engraved units add 2 days. Studio configuration is in stock at all Nova showrooms." },
-                { q: "What's the return policy?", a: "Free returns within 30 days, for any reason. We pay the shipping. Engraved devices are non-refundable but exchangeable." },
-                { q: "Is it really 100% recycled aluminum?", a: "Yes — sourced from beverage-can stream and post-industrial scrap, smelted using hydroelectric power. The number is audited annually by a third party." },
-                { q: "Can I run pro applications on it?", a: "Yes. Nova One ships with native builds of every major creative tool — DaVinci Resolve, Logic, Ableton, Houdini, Blender, and the JetBrains suite — and a translation layer for x86 binaries when needed." },
-                { q: "What does NovaCare+ cover?", a: "Three years of accidental damage coverage, priority support, and free battery replacement when capacity drops below 80%." },
-              ].map((item, i) => (
-                <AccordionRow key={item.q} summary={item.q} defaultOpen={i === 0}>
-                  {item.a}
-                </AccordionRow>
-              ))}
-              <div className="border-b border-zinc-200" />
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Final CTA ────────────────────────────────────────────────────── */}
-      <section className="border-t border-zinc-200 px-6 py-28 text-center lg:px-10 lg:py-40">
-        <div className="mx-auto max-w-[1320px]">
-          <Reveal>
-            <div
-              className="mb-8 inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] font-medium text-zinc-700"
-              style={{ borderColor: borderColor, background: "color-mix(in oklch, #F9F7F3 70%, white)" }}
-            >
-              <span className="size-1.5 rounded-full" style={{ background: accent }} />
-              Ships May 24
-            </div>
-          </Reveal>
-          <Reveal delay={0.05}>
-            <h2
-              className="mx-auto max-w-3xl font-semibold tracking-tight"
-              style={{ fontSize: "clamp(40px, 6vw, 104px)", letterSpacing: "-0.035em", lineHeight: "0.95", textWrap: "balance" }}
-            >
-              The most honest thing
-              <br />
-              we&apos;ve ever made.
-            </h2>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <p className="mx-auto mt-7 max-w-lg text-[17px] leading-relaxed" style={{ color: "oklch(28% 0.012 255)" }}>
-              Configure your Nova One today. Pre-order, take it home, return it inside a month if it doesn&apos;t quietly become the only one you reach for.
-            </p>
-          </Reveal>
-          <Reveal delay={0.15} className="mt-9 flex flex-wrap items-center justify-center gap-6">
-            <a
-              href="#pricing"
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[14px] font-medium text-white transition hover:opacity-90"
-              style={{ background: ink }}
-            >
-              Configure & buy →
-            </a>
-            <a href="#" className="inline-flex items-center gap-1.5 text-[15px] font-medium transition hover:opacity-70" style={{ color: accent }}>
-              Visit a Nova showroom →
-            </a>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── Footer ───────────────────────────────────────────────────────── */}
-      <footer id="support" className="border-t border-zinc-200 pb-10 pt-20">
-        <div className="mx-auto max-w-[1320px] px-6 lg:px-10">
-          <div className="grid grid-cols-2 gap-10 md:grid-cols-6">
-            <div className="col-span-2">
-              <a href="#" className="flex items-center gap-2">
-                <span className="inline-flex size-7 items-center justify-center rounded-md" style={{ background: ink }}>
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M2 12 L7 2 L12 12 M4.2 8.5 H9.8" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-                <span className="text-[15px] font-semibold tracking-tight">Nova</span>
-              </a>
-              <p className="mt-5 max-w-xs text-[13px] leading-relaxed text-zinc-500">
-                Built in Copenhagen, assembled in Kyoto. A small company making one thing carefully.
-              </p>
-            </div>
-            {[
-              { heading: "Shop", links: ["Nova One", "Accessories", "Gift cards", "Refurbished", "Educational pricing"] },
-              { heading: "Support", links: ["Help center", "NovaCare+", "Order status", "Repair", "Contact"] },
-              { heading: "Company", links: ["About", "Journal", "Sustainability", "Careers", "Press"] },
-              { heading: "Stay in touch", links: ["Newsletter", "Showrooms", "Events", "Developers", "Partners"] },
-            ].map((col) => (
-              <div key={col.heading}>
-                <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-400">{col.heading}</p>
-                <ul className="space-y-3 text-[13px]">
-                  {col.links.map((link) => (
-                    <li key={link}>
-                      <a href="#" className="text-zinc-500 transition hover:text-zinc-900">{link}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-zinc-200 pt-8 text-[12px] text-zinc-400">
-            <p>© {new Date().getFullYear()} Nova Systems, Inc. All rights reserved.</p>
-            <div className="flex gap-5">
-              {["Privacy Policy", "Terms of Use", "Cookies"].map((l) => (
-                <a key={l} href="#" className="transition hover:text-zinc-700">{l}</a>
-              ))}
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
+
+function AmbientStage() {
+  const stage = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const u = useMotionValue(0.26);
+  const v = useMotionValue(0.3);
+  const us = useSpring(u, { stiffness: 140, damping: 20 });
+  const vs = useSpring(v, { stiffness: 140, damping: 20 });
+  const touched = useRef(false);
+  const dragging = useRef(false);
+
+  // Until the visitor grabs it, the lamp wanders slowly around the room.
+  useAnimationFrame((t) => {
+    if (touched.current || reduce) return;
+    u.set(0.5 + 0.3 * Math.sin(t / 2600 - 0.9));
+    v.set(0.34 + 0.16 * Math.sin(t / 1900 + 0.4));
+  });
+
+  const setFrom = (e: RPointerEvent) => {
+    const r = stage.current!.getBoundingClientRect();
+    u.set(Math.max(0.04, Math.min(0.96, (e.clientX - r.left) / r.width)));
+    v.set(Math.max(0.06, Math.min(0.94, (e.clientY - r.top) / r.height)));
+  };
+  const onKey = (e: RKeyboardEvent) => {
+    const d = e.shiftKey ? 0.15 : 0.05;
+    const map: Record<string, [number, number]> = { ArrowLeft: [-d, 0], ArrowRight: [d, 0], ArrowUp: [0, -d], ArrowDown: [0, d] };
+    const m = map[e.key];
+    if (!m) return;
+    e.preventDefault();
+    touched.current = true;
+    u.set(Math.max(0.04, Math.min(0.96, u.get() + m[0])));
+    v.set(Math.max(0.06, Math.min(0.94, v.get() + m[1])));
+  };
+
+  const kelvinN = useTransform(us, [0, 1], [2700, 6500]);
+  const nitsN = useTransform(vs, [0.06, 0.94], [480, 90]);
+  const kelvin = useTransform(kelvinN, (k) => `${(Math.round(k / 100) * 100).toLocaleString("en-US")} K`);
+  const nits = useTransform(nitsN, (n) => `${Math.round(n / 10) * 10} nits`);
+  const lux = useTransform(vs, [0.06, 0.94], [900, 40]);
+  const luxText = useTransform(lux, (l) => `${Math.round(l / 10) * 10} lux`);
+  const roomText = useTransform(us, (x): string => (x < 0.35 ? "Warm lamp" : x > 0.65 ? "Daylight" : "Mixed light"));
+
+  const lx = useTransform(us, (x) => x * 100);
+  const ly = useTransform(vs, (y) => y * 100);
+  const light = useTransform(us, [0, 0.5, 1], ["rgba(255,184,98,0.62)", "rgba(255,236,206,0.55)", "rgba(190,214,255,0.6)"]);
+  const base = useTransform(vs, [0, 1], ["#f4f1ec", "#d8d3cb"]);
+  const bg = useMotionTemplate`radial-gradient(640px circle at ${lx}% ${ly}%, ${light}, rgba(255,255,255,0) 64%), ${base}`;
+  const tint = useTransform(us, [0, 0.5, 1], ["rgba(255,170,90,0.26)", "rgba(255,255,255,0)", "rgba(160,190,255,0.2)"]);
+  const dim = useTransform(vs, [0, 1], [0, 0.22]);
+  const gx = useTransform(us, (x) => 100 - x * 100);
+  const glare = useMotionTemplate`radial-gradient(60% 80% at ${gx}% -10%, rgba(255,255,255,.28), rgba(255,255,255,0) 60%)`;
+  const shadowX = useTransform(us, [0, 1], [70, -70]);
+  const left = useMotionTemplate`${lx}%`;
+  const top = useMotionTemplate`${ly}%`;
+
+  return (
+    <motion.div
+      ref={stage}
+      className="relative mx-auto h-[400px] w-full select-none overflow-hidden rounded-[36px] sm:h-[600px]"
+      style={{ background: bg }}
+    >
+      <div className="absolute inset-x-0 bottom-[8%] flex justify-center sm:bottom-[12%]">
+        <div className="relative">
+          <motion.div className="absolute -bottom-6 left-[6%] right-[6%] h-10 rounded-[50%] bg-black/25 blur-2xl" style={{ x: shadowX }} aria-hidden="true" />
+          <Fit className="!w-[min(86vw,860px)]"><Laptop screen={<HeroScreen kelvin={kelvin} nits={nits} />} tint={tint} dim={dim} glare={glare} /></Fit>
+        </div>
+      </div>
+
+      <div className="pointer-events-none absolute left-4 top-4 flex flex-wrap gap-2 sm:left-6 sm:top-6">
+        <span className="flex items-center gap-2 rounded-full bg-white/85 px-3 py-1.5 text-[12px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)] backdrop-blur">
+          <span className="h-2 w-2 rounded-full" style={{ background: GLOW }} />
+          <motion.span>{roomText}</motion.span> · <motion.span className="tabular-nums">{luxText}</motion.span>
+        </span>
+      </div>
+
+      <motion.button
+        type="button"
+        aria-label="Lamp. Drag it, or use the arrow keys, to change the light in the room."
+        onKeyDown={onKey}
+        onPointerDown={(e) => { touched.current = true; dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); }}
+        onPointerMove={(e) => dragging.current && setFrom(e)}
+        onPointerUp={() => (dragging.current = false)}
+        onPointerCancel={() => (dragging.current = false)}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.94 }}
+        className="absolute z-10 -ml-7 -mt-7 flex h-14 w-14 cursor-grab touch-none items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#b45309] focus-visible:ring-offset-2 active:cursor-grabbing"
+        style={{ left, top, background: "radial-gradient(circle at 40% 35%, #fff 0 18%, #ffe2a8 40%, #f59e0b 100%)", boxShadow: "0 0 0 6px rgba(255,255,255,.55), 0 0 60px 18px rgba(255,190,100,.55)" }}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7c2d12" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" /></svg>
+      </motion.button>
+
+      <span className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-white/85 px-3 py-1 text-[12px] font-medium text-[#424245] backdrop-blur sm:bottom-4">Drag the lamp. The display follows the room.</span>
+    </motion.div>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="relative overflow-hidden pb-10 pt-12 sm:pt-16">
+      <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
+        <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 260, damping: 26 }} className="text-[15px] font-semibold" style={{ color: A }}>
+          Nova One · 13.6-inch · fanless
+        </motion.span>
+        <h1 className="m-0 max-w-[900px] text-[clamp(44px,7.4vw,92px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+          <Words text="A screen that reads the room." className="justify-center" accentWords={["room."]} accent={A} />
+        </h1>
+        <Reveal delay={0.3} y={14}>
+          <p className="m-0 max-w-[600px] text-[clamp(17px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+            0.92 kg, 22 hours on a charge, and not a single fan. Nova One matches its display to the light around you, so a late edit looks the way it will in daylight.
+          </p>
+        </Reveal>
+        <Reveal delay={0.4} y={14} className="flex flex-wrap items-center justify-center gap-3">
+          <Magnetic className="text-white focus-visible:ring-[#b45309]" style={{ background: A }} onClick={() => scrollToId("buy")}>Buy from $1,499</Magnetic>
+          <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:ring-[#b45309]" onClick={() => scrollToId("display")}>See the display</Magnetic>
+        </Reveal>
+      </div>
+      <motion.div className="mx-auto mt-10 max-w-[1280px] px-3 sm:px-5" initial={{ opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }}>
+        <AmbientStage />
+      </motion.div>
+    </section>
+  );
+}
+
+function Stats() {
+  const items = [
+    { to: 0.92, f: (n: number) => `${n.toFixed(2)} kg`, l: "lighter than most of the bags it goes in" },
+    { to: 22, f: (n: number) => `${Math.round(n)} hrs`, l: "of video playback, or about 15 of real work" },
+    { to: 0, f: () => "0 dB", l: "fan noise, because there is no fan" },
+    { to: 100, f: (n: number) => `${Math.round(n)}%`, l: "recycled aluminium in the case" },
+  ];
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 py-14" aria-label="Key numbers">
+      <Stagger className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+        {items.map((it) => (
+          <div key={it.l} className="flex flex-col gap-2 border-t border-black/[.08] pt-6">
+            <Counter to={it.to} format={it.f} className="text-[clamp(36px,4.6vw,52px)] font-semibold tracking-[-0.045em] text-[#1d1d1f]" />
+            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
+          </div>
+        ))}
+      </Stagger>
+    </section>
+  );
+}
+
+function Silent() {
+  return (
+    <section className="bg-[#f5f5f7] px-5 py-24" aria-label="Silent by design">
+      <Reveal y={16}>
+        <TextReveal lead="Silent while you're" words={["editing.", "mixing.", "writing.", "grading."]} sub="No fan anywhere. The N2 chip spreads its heat across the whole case, so there's nothing to spin up." accent={A} interval={2200} />
+      </Reveal>
+    </section>
+  );
+}
+
+function ScreenShot({ cool }: { cool: boolean }) {
+  return (
+    <div className="absolute inset-0">
+      <Scene />
+      <div className="absolute inset-0" style={{ background: cool ? "rgba(150,190,255,.34)" : "rgba(255,190,120,.10)", mixBlendMode: cool ? "screen" : "multiply" }} />
+      <div className="absolute bottom-4 left-4 rounded-full bg-black/45 px-3 py-1.5 text-[12px] font-semibold tabular-nums text-white backdrop-blur">{cool ? "Fixed at 6,500 K · 500 nits" : "Matched to room · 3,900 K · 210 nits"}</div>
+    </div>
+  );
+}
+
+function Display() {
+  const specs = [
+    ["2560 × 1664", "13.6-inch, 224 pixels per inch"],
+    ["10 to 120 Hz", "Slows down on still pages to save power"],
+    ["1,000 nits", "Readable outside, in actual sun"],
+    ["Two light sensors", "One on each side of the lid"],
+  ];
+  return (
+    <section id="display" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Display" title="Late-night edits that survive the morning." sub="Most screens stay cold and bright whatever the room is doing, so you overcorrect warm photos at night. Nova One shifts its white point and brightness with the light. Drag the divider to compare." accent={A} />
+      <div className="mt-12 grid grid-cols-1 items-start gap-10 lg:grid-cols-[1.5fr_1fr]">
+        <Reveal y={20} amount={0.15}>
+          <BeforeAfter autoplay beforeLabel="Ambient off" afterLabel="Ambient on" before={<ScreenShot cool />} after={<ScreenShot cool={false} />} />
+        </Reveal>
+        <Stagger className="flex flex-col">
+          {specs.map(([k, v]) => (
+            <div key={k} className="flex flex-col gap-1 border-t border-black/[.08] py-5">
+              <span className="text-[24px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">{k}</span>
+              <span className="text-[15px] text-[#6e6e73]">{v}</span>
+            </div>
+          ))}
+        </Stagger>
+      </div>
+    </section>
+  );
+}
+
+function Keyboard() {
+  return (
+    <section id="keyboard" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-12 px-5 lg:grid-cols-[1fr_1.2fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Keyboard" title="Every key, tuned to 38 grams." sub="We weighed each switch by hand until the whole board pressed the same. The backlight dims with the room, and lingers a moment where you typed." accent={A} />
+          <Stagger className="flex flex-col gap-3">
+            {["1.1 mm of travel, with a soft bottom-out", "Backlight follows the same light sensors as the display", "A fingerprint key that wakes and unlocks in one press"].map((t) => (
+              <span key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
+                <span className="h-2 w-2 flex-none rounded-full" style={{ background: GLOW }} />
+                {t}
+              </span>
+            ))}
+          </Stagger>
+        </div>
+        <Reveal y={20} amount={0.15}>
+          <div className={`${card} flex flex-col items-center gap-3 px-4 py-10`}>
+            <Fit><LitKeyboard glow={GLOW} autoplay /></Fit>
+            <span className="text-[12px] text-[#6e6e73]">Click the field and type. Record a line, then replay it.</span>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Design story visuals                                                */
+/* ------------------------------------------------------------------ */
+
+function WakeVisual() {
+  return (
+    <div className={`${card} flex h-[400px] w-[440px] flex-col items-center justify-center gap-8`}>
+      <div className="relative h-[150px] w-[260px]" style={{ perspective: 900 }}>
+        <motion.div
+          className="absolute bottom-[12px] left-[10px] h-[150px] w-[240px] origin-bottom overflow-hidden rounded-t-[12px] bg-[#16161a] p-[6px]"
+          initial={{ rotateX: -72 }}
+          animate={{ rotateX: [-72, -72, 0, 0, -72] }}
+          transition={{ duration: 4.4, times: [0, 0.12, 0.42, 0.85, 1], repeat: Infinity, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <motion.div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-[6px] bg-[#f4f1ec]" animate={{ opacity: [0, 0, 1, 1, 0] }} transition={{ duration: 4.4, times: [0, 0.3, 0.38, 0.85, 0.9], repeat: Infinity }}>
+            <span className="text-[13px] font-semibold text-[#1d1d1f]">Welcome back, Ines</span>
+            <span className="text-[11px] text-[#6e6e73]">Right where you left it</span>
+          </motion.div>
+        </motion.div>
+        <div className="absolute bottom-0 left-0 h-[12px] w-[260px] rounded-b-[8px]" style={{ background: "linear-gradient(180deg,#d9ccb6,#b9ab93)" }} />
+      </div>
+      <div className="flex flex-col items-center">
+        <span className="text-[56px] font-semibold tabular-nums leading-none tracking-[-0.05em] text-[#1d1d1f]">0.3 s</span>
+        <span className="mt-2 text-[14px] text-[#6e6e73]">from lid open to a working cursor</span>
+      </div>
+    </div>
+  );
+}
+
+function QuietVisual() {
+  const rows = [
+    { l: "Quiet bedroom at night", v: 28, c: "#d6d1c9" },
+    { l: "Laptop with a fan, under load", v: 41, c: "#a8a29a" },
+    { l: "Nova One, exporting 4K video", v: 0, c: GLOW },
+  ];
+  return (
+    <div className={`${card} flex w-[440px] flex-col gap-6 p-7`}>
+      <span className="text-[12px] font-semibold text-[#6e6e73]">Sound at 30 cm, dB(A)</span>
+      {rows.map((r, i) => (
+        <div key={r.l} className="flex flex-col gap-2">
+          <div className="flex items-baseline justify-between text-[15px]">
+            <span className="text-[#1d1d1f]">{r.l}</span>
+            <span className="font-semibold tabular-nums text-[#1d1d1f]">{r.v === 0 ? "none" : r.v}</span>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-[#f2efea]">
+            <motion.div className="h-full origin-left rounded-full" style={{ width: `${Math.max(2, (r.v / 45) * 100)}%`, background: r.c }} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ type: "spring", stiffness: 90, damping: 16, delay: 0.15 + i * 0.12 }} />
+          </div>
+        </div>
+      ))}
+      <svg viewBox="0 0 380 60" className="h-[60px] w-full" aria-hidden="true">
+        <motion.path d="M0 30 C 40 30, 60 30, 95 30 S 150 30, 190 30 S 250 30, 285 30 S 340 30, 380 30" fill="none" stroke={GLOW} strokeWidth="3" strokeLinecap="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ type: "spring", stiffness: 40, damping: 14 }} />
+      </svg>
+      <span className="text-[13px] text-[#6e6e73]">A flat line. That&apos;s the whole graph.</span>
+    </div>
+  );
+}
+
+function RepairVisual() {
+  const layers = [
+    { l: "Lid · recycled aluminium", c: "#d9ccb6" },
+    { l: "Display · swaps in 10 minutes", c: "#26262b" },
+    { l: "Logic board · N2 chip", c: "#3f6b4d" },
+    { l: "Battery · 6 screws, no glue", c: GLOW },
+  ];
+  return (
+    <div className={`${card} flex h-[420px] w-[460px] items-center gap-2 px-6`}>
+      <div className="relative h-[300px] w-[220px] flex-none" style={{ perspective: 1000 }}>
+        <div className="absolute inset-0" style={{ transformStyle: "preserve-3d", transform: "rotateX(58deg) rotateZ(-34deg)" }}>
+          {layers.map((ly, i) => (
+            <motion.div
+              key={ly.l}
+              className="absolute left-[30px] top-[70px] h-[150px] w-[160px] rounded-[14px]"
+              style={{ background: ly.c, boxShadow: "0 0 0 1px rgba(0,0,0,.08), 0 20px 30px -14px rgba(0,0,0,.4)" }}
+              initial={{ z: 0 }}
+              animate={{ z: [(3 - i) * 4, (3 - i) * 46, (3 - i) * 46, (3 - i) * 4] }}
+              transition={{ duration: 5, times: [0, 0.3, 0.75, 1], repeat: Infinity, ease: "easeInOut" }}
+            />
+          ))}
+        </div>
+      </div>
+      <ul className="m-0 flex list-none flex-col gap-4 p-0">
+        {layers.map((ly) => (
+          <li key={ly.l} className="flex items-center gap-2.5 text-[14px] text-[#1d1d1f]">
+            <span className="h-3 w-3 flex-none rounded-[4px]" style={{ background: ly.c, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.1)" }} />
+            {ly.l}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function Design() {
+  return (
+    <section id="design" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Designed to last" title="Small things you notice every day." accent={A} />
+      <div className="mt-6">
+        <StickyStory
+          accent={A}
+          steps={[
+            { kicker: "Instant on", title: "Awake before you sit down.", body: "Open the lid and Nova One is already where you left it. No boot screen, no logo, no waiting for the cursor.", visual: <WakeVisual /> },
+            { kicker: "Battery", title: "22 hours, measured on ordinary days.", body: "This is one tester's six months: most days ended with charge to spare. Stand the grid up to see the long ones.", visual: <div className={`${card} p-6`}><BatteryCalendar weeks={24} noun="hours on battery" autoplay /></div> },
+            { kicker: "Thermals", title: "Nothing to hear. Ever.", body: "A passive copper spreader and the aluminium case do the cooling. Under a long export it gets warm, and stays silent.", visual: <QuietVisual /> },
+            { kicker: "Repair", title: "Opens with one screwdriver.", body: "Standard screws, labelled cables and a battery that lifts out. Repair guides and parts are on our site, at cost.", visual: <RepairVisual /> },
+          ]}
+        />
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Configure and buy                                                   */
+/* ------------------------------------------------------------------ */
+
+const TIERS = [
+  { id: "essential", n: "Essential", s: "N2 · 12-core · 16 GB · 512 GB", p: 1499 },
+  { id: "studio", n: "Studio", s: "N2 · 14-core · 24 GB · 1 TB", p: 1999 },
+  { id: "atelier", n: "Atelier", s: "N2 · 18-core · 32 GB · 2 TB", p: 2799 },
+];
+const ADDONS = [
+  { id: "engrave", l: "Engraving", h: "Free · adds 2 days", p: 0 },
+  { id: "care", l: "NovaCare+ for 3 years", h: "Accidents and a battery swap · $199", p: 199 },
+  { id: "charger", l: "Second 35W charger", h: "One for the bag · $49", p: 49 },
+];
+
+function BuyScreen({ finish }: { finish: (typeof FINISHES)[number] }) {
+  return (
+    <div className="absolute inset-0">
+      <motion.div className="absolute inset-0" initial={false} animate={{ background: `radial-gradient(80% 90% at 30% 20%, #fff 0%, ${finish.c} 60%, ${finish.edge} 100%)` }} transition={{ duration: 0.5 }} />
+      <span className="absolute bottom-[10%] left-[8%] text-[28px] font-semibold tracking-[-0.04em] text-white drop-shadow-[0_1px_8px_rgba(0,0,0,.3)]">Nova One</span>
+    </div>
+  );
+}
+
+function Buy() {
+  const [finish, setFinish] = useState(FINISHES[0]);
+  const [tier, setTier] = useState(TIERS[1].id);
+  const [adds, setAdds] = useState<Record<string, boolean>>({ engrave: true, care: false, charger: false });
+  const [qty, setQty] = useState(1);
+  const t = TIERS.find((x) => x.id === tier)!;
+  const total = useMemo(() => (t.p + ADDONS.reduce((s, a) => s + (adds[a.id] ? a.p : 0), 0)) * qty, [t, adds, qty]);
+  return (
+    <section id="buy" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <SectionHead eyebrow="Buy" title="Make it yours." sub="Three configurations, three finishes. Every Nova One has the same display, keyboard and battery." accent={A} center />
+        <div className="mt-12 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
+          <Reveal y={20} amount={0.1}>
+            <div className={`${card} flex h-full flex-col items-center justify-center gap-8 px-5 py-10`}>
+              <Fit max={1}><Laptop width={420} finish={finish} screen={<BuyScreen finish={finish} />} /></Fit>
+              <div className="flex flex-col items-center gap-3">
+                <div role="radiogroup" aria-label="Finish" className="flex gap-3">
+                  {FINISHES.map((f) => {
+                    const on = f.id === finish.id;
+                    return (
+                      <button key={f.id} type="button" role="radio" aria-checked={on} aria-label={f.n} onClick={() => setFinish(f)} className="relative flex h-11 w-11 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#b45309] focus-visible:ring-offset-2">
+                        {on && <motion.span layoutId="nova-finish" className="absolute inset-0 rounded-full" style={{ boxShadow: `inset 0 0 0 2px ${A}` }} transition={{ type: "spring", stiffness: 420, damping: 30 }} />}
+                        <span className="h-8 w-8 rounded-full" style={{ background: `linear-gradient(140deg, ${f.c}, ${f.edge})`, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.12)" }} />
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="text-[14px] font-medium text-[#1d1d1f]">{finish.n}</span>
+              </div>
+            </div>
+          </Reveal>
+          <Reveal y={20} delay={0.06} amount={0.1}>
+            <div className={`${card} flex h-full flex-col gap-6 p-6 sm:p-7`}>
+              <div role="radiogroup" aria-label="Configuration" className="flex flex-col gap-2.5">
+                {TIERS.map((x) => {
+                  const on = x.id === tier;
+                  return (
+                    <button key={x.id} type="button" role="radio" aria-checked={on} onClick={() => setTier(x.id)} className="relative flex items-center justify-between gap-4 rounded-[18px] px-5 py-4 text-left shadow-[0_0_0_1px_rgba(0,0,0,.07)] outline-none focus-visible:ring-2 focus-visible:ring-[#b45309]">
+                      {on && <motion.span layoutId="nova-tier" className="absolute inset-0 rounded-[18px]" style={{ boxShadow: `inset 0 0 0 2px ${A}`, background: "rgba(245,158,11,.06)" }} transition={{ type: "spring", stiffness: 420, damping: 32 }} />}
+                      <span className="relative flex flex-col">
+                        <span className="text-[17px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{x.n}</span>
+                        <span className="text-[13px] tabular-nums text-[#6e6e73]">{x.s}</span>
+                      </span>
+                      <span className="relative text-[16px] font-semibold tabular-nums text-[#1d1d1f]">${x.p.toLocaleString("en-US")}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <ul className="m-0 flex list-none flex-col divide-y divide-black/[.06] p-0">
+                {ADDONS.map((a) => (
+                  <li key={a.id} className="flex items-center gap-3 py-3">
+                    <span className="flex flex-1 flex-col">
+                      <span className="text-[15px] font-medium text-[#1d1d1f]">{a.l}</span>
+                      <span className="text-[13px] text-[#6e6e73]">{a.h}</span>
+                    </span>
+                    <CapsuleToggle label={a.l} checked={adds[a.id]} onColor={GLOW} onChange={(val) => setAdds((s) => ({ ...s, [a.id]: val }))} />
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-black/[.06] pt-5">
+                <ElasticStepper label="Quantity" min={1} max={5} defaultValue={1} onChange={setQty} accent={A} />
+                <div className="flex flex-col items-end">
+                  <span className="text-[12px] font-medium text-[#6e6e73]">Total</span>
+                  <span className="text-[34px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f] leading-none">$<RollingNumber value={total} /></span>
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <ProgressButton label="Add to bag" doneLabel="Review bag" accent={A} />
+                <span className="text-[12px] text-[#6e6e73]">Ships in 5 to 7 business days. Free returns for 30 days.</span>
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Specs() {
+  const groups = [
+    { k: "Chip", v: ["N2, 12 to 18 cores", "16-core neural engine", "Up to 32 GB memory"] },
+    { k: "Display", v: ["13.6-inch, 2560 × 1664", "10 to 120 Hz", "1,000 nits peak, P3"] },
+    { k: "Battery", v: ["66 Wh", "Up to 22 hours video", "35W charger in the box"] },
+    { k: "Size and weight", v: ["0.92 kg", "11.3 mm thin", "30.4 × 21.5 cm"] },
+    { k: "Ports", v: ["Two USB-C, 40 Gb/s", "Headphone jack", "Charges from either side"] },
+    { k: "Wireless", v: ["Wi-Fi 7", "Bluetooth 5.4", "1080p camera, mic array"] },
+  ];
+  return (
+    <section id="specs" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Tech specs" title="The short version." accent={A} />
+      <Stagger className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {groups.map((g) => (
+          <div key={g.k} className={`${card} flex h-full flex-col gap-3 p-6`}>
+            <span className="text-[13px] font-semibold" style={{ color: A }}>{g.k}</span>
+            {g.v.map((x, i) => <span key={x} className={i === 0 ? "text-[20px] font-semibold tracking-[-0.02em] text-[#1d1d1f]" : "text-[15px] text-[#6e6e73]"}>{x}</span>)}
+          </div>
+        ))}
+      </Stagger>
+      <Reveal y={12} className="mt-8">
+        <p className="m-0 text-[15px] leading-[1.5] text-[#6e6e73]"><b className="font-semibold text-[#1d1d1f]">In the box:</b> Nova One, a 35W USB-C charger and a 2 m braided cable, in one moulded-pulp tray. No foam, no plastic ties.</p>
+      </Reveal>
+    </section>
+  );
+}
+
+export function NovaLandingPage() {
+  return (
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
+        <Nav brand={<Logo />} accent={A} cta="Buy" onCta={() => scrollToId("buy")} links={[{ label: "Display", id: "display" }, { label: "Keyboard", id: "keyboard" }, { label: "Design", id: "design" }, { label: "Specs", id: "specs" }, { label: "FAQ", id: "faq" }]} />
+        <Hero />
+        <Stats />
+        <Silent />
+        <Display />
+        <Keyboard />
+        <Design />
+        <Buy />
+        <Specs />
+        <section id="faq" className="bg-[#f5f5f7]">
+          <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 py-24 lg:grid-cols-[1fr_1.4fr]">
+            <SectionHead eyebrow="FAQ" title="Before you order." accent={A} />
+            <Reveal y={16} amount={0.1}>
+              <Faq
+                accent={A}
+                items={[
+                  { q: "What's actually different about Nova One?", a: "It has no fan at all, and the chip is tuned for long, steady work instead of short bursts. So it doesn't slow down half an hour into an export, and it never makes a sound." },
+                  { q: "Does the ambient display mess with colour work?", a: "Turn it off in one click, or lock it to a calibrated preset while you grade. It only adjusts white point and brightness, never contrast or saturation." },
+                  { q: "When will it ship?", a: "Most configurations ship in 5 to 7 business days. Engraving adds two days. You'll get a tracking link the day it leaves." },
+                  { q: "What if I don't like it?", a: "Send it back within 30 days for a full refund, and we pay the shipping. Engraved machines can be exchanged but not refunded." },
+                  { q: "Will my apps run?", a: "Most editing, audio, 3D and coding tools ship native builds for the N2. Older apps run through a built-in translation layer, usually without you noticing." },
+                ]}
+              />
+            </Reveal>
+          </div>
+        </section>
+        <div className="mx-auto max-w-[1180px] px-5 py-20">
+          <CtaBand title="Quiet, light, and ready when you open it." sub="Nova One starts at $1,499. Order today and it ships within a week." cta="Buy Nova One" secondary="Compare configurations" accent={A} glow="rgba(245,158,11,.32)" />
+        </div>
+        <Footer brand={<Logo />} note="Nova One is a template. The company, product and figures on this page are invented." columns={[{ title: "Shop", links: ["Nova One", "Accessories", "Education", "Gift cards"] }, { title: "Support", links: ["Repair guides", "NovaCare+", "Returns", "Contact"] }, { title: "Company", links: ["About", "Environment", "Careers", "Press"] }]} />
+      </div>
+    </MotionConfig>
+  );
+}
+
+export default NovaLandingPage;
