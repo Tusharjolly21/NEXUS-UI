@@ -42,10 +42,10 @@ function Logo() {
 
 function Chrome({ children, tone = "#fff" }: { children: ReactNode; tone?: string }) {
   return (
-    <div className="flex h-full w-full flex-col" style={{ background: tone }}>
-      <div className="flex h-7 flex-none items-center gap-1.5 border-b border-black/[.06] bg-[#f5f5f7] px-3">
-        {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-2 w-2 rounded-full" style={{ background: c }} />)}
-        <span className="ml-2 truncate text-[10px] text-[#6e6e73]">fernway.shop/checkout</span>
+    <div className="isolate flex h-full w-full flex-col" style={{ background: tone }}>
+      {/* Tall bar with a centred address, so the Before / After chips can sit on its ends. */}
+      <div className="flex h-[52px] flex-none items-center justify-center border-b border-black/[.06] bg-[#f5f5f7] px-3">
+        <span className="truncate rounded-full bg-white px-3 py-1 text-[10px] text-[#6e6e73] shadow-[0_0_0_1px_rgba(0,0,0,.05)]">fernway.shop/checkout</span>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
     </div>
@@ -152,9 +152,9 @@ function Hero() {
   const smooth = useSpring(pos, { stiffness: 380, damping: 34, mass: 0.6 });
   const sec = (n: number) => `${Math.floor(n / 60)}:${String(Math.round(n % 60)).padStart(2, "0")}`;
   return (
-    <section className="relative overflow-hidden pb-16 pt-10 sm:pt-16">
+    <section className="relative overflow-hidden pb-16 pt-8 sm:pt-12">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: `radial-gradient(45% 50% at 20% 30%, ${OT}, transparent 70%), radial-gradient(30% 30% at 90% 10%, rgba(234,88,12,.08), transparent 70%)` }} />
-      <div className="relative mx-auto grid max-w-[1240px] grid-cols-1 items-center gap-10 px-5 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
+      <div className="relative mx-auto grid max-w-[1240px] grid-cols-1 items-start gap-10 px-5 lg:grid-cols-[1.35fr_1fr] lg:gap-14">
         <motion.div className="order-2 lg:order-1" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 120, damping: 22, delay: 0.2 }}>
           <div className="mb-3 flex items-center justify-between text-[13px]">
             <span className="font-semibold text-[#1d1d1f]">Case 01 · Fernway checkout</span>
@@ -162,11 +162,11 @@ function Hero() {
           </div>
           <BeforeAfter before={<CheckoutBefore />} after={<CheckoutAfter />} beforeLabel="Before · 3 steps" afterLabel="After · 1 page" value={pos} autoplay aspect="aspect-[4/5] sm:aspect-[16/10]" accent={OD} />
         </motion.div>
-        <div className="order-1 flex flex-col gap-6 lg:order-2">
+        <div className="order-1 flex flex-col gap-5 lg:order-2">
           <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[14px] font-semibold" style={{ color: OD }}>
             Maya Okafor · Product designer
           </motion.span>
-          <h1 className="m-0 text-[clamp(42px,5.6vw,76px)] font-semibold leading-[0.98] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
+          <h1 className="m-0 text-[clamp(40px,4.4vw,62px)] font-semibold leading-[1] tracking-[-0.045em] text-[#1d1d1f] [text-wrap:balance]">
             <Words text="I redesign the screens where customers give up." accentWords={["give", "up."]} accent={OD} />
           </h1>
           <Reveal delay={0.3} y={14}>
