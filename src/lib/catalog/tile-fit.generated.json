@@ -65,19 +65,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   240,
+   302,
+   528,
+   108
   ],
   "content": [
-   62,
-   340,
-   844,
-   48
+   514,
+   312,
+   244,
+   62
   ],
-  "bg": "#ffffff",
-  "coverage": 0.99
+  "bg": null,
+  "coverage": 0.01
  },
  "animated-tabs": {
   "canvas": [
@@ -125,19 +125,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   210,
+   290,
+   540,
+   142
   ],
   "content": [
-   192,
-   294,
-   576,
-   138
+   232,
+   300,
+   508,
+   102
   ],
-  "bg": "#ffffff",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.05
  },
  "aspect-crop": {
   "canvas": [
@@ -185,19 +185,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   336,
+   270,
+   290,
+   180
   ],
   "content": [
-   350,
-   264,
-   260,
-   196
+   364,
+   280,
+   232,
+   144
   ],
-  "bg": "#f6f6f6",
-  "coverage": 1
+  "bg": "#ffffff",
+  "coverage": 0.07
  },
  "background-boxes": {
   "canvas": [
@@ -205,19 +205,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   200,
+   210,
+   560,
+   300
   ],
   "content": [
-   10,
-   10,
-   940,
-   700
+   210,
+   220,
+   540,
+   280
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": "#ffffff",
+  "coverage": 0.23
  },
  "background-gradient": {
   "canvas": [
@@ -225,19 +225,19 @@
    720
   ],
   "surface": [
+   320,
    258,
-   266,
-   444,
-   188
+   320,
+   200
   ],
   "content": [
-   274,
-   282,
-   412,
-   154
+   330,
+   278,
+   300,
+   170
   ],
   "bg": "#ffffff",
-  "coverage": 0.12
+  "coverage": 0.08
  },
  "backgrounds-aurora-lines": {
   "canvas": [
@@ -326,18 +326,18 @@
   ],
   "surface": [
    24,
-   150,
+   158,
    912,
-   420
+   406
   ],
   "content": [
    34,
-   182,
-   712,
-   378
+   168,
+   892,
+   386
   ],
   "bg": "#06060c",
-  "coverage": 0.55
+  "coverage": 0.44
  },
  "before-after": {
   "canvas": [
@@ -885,19 +885,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   1100,
-   720
+   470,
+   224,
+   238,
+   296
   ],
   "content": [
-   88,
-   76,
-   934,
-   590
+   488,
+   248,
+   204,
+   234
   ],
-  "bg": "#eaeaea",
-  "coverage": 0.94
+  "bg": null,
+  "coverage": 0.05
  },
  "card-stack-rotator": {
   "canvas": [
@@ -905,19 +905,19 @@
    800
   ],
   "surface": [
-   0,
-   0,
-   1200,
-   800
+   432,
+   270,
+   336,
+   264
   ],
   "content": [
-   66,
-   182,
-   1070,
-   446
+   442,
+   288,
+   316,
+   228
   ],
-  "bg": "#0c0c0c",
-  "coverage": 0.97
+  "bg": "#ffffff",
+  "coverage": 0.06
  },
  "chat-messages": {
   "canvas": [
@@ -925,19 +925,19 @@
    720
   ],
   "surface": [
-   256,
-   0,
-   448,
-   338
+   280,
+   196,
+   400,
+   330
   ],
   "content": [
-   266,
-   16,
-   428,
-   312
+   290,
+   208,
+   380,
+   306
   ],
-  "bg": null,
-  "coverage": 0.22
+  "bg": "#ffffff",
+  "coverage": 0.19
  },
  "checkout-pay": {
   "canvas": [
@@ -1005,19 +1005,19 @@
    800
   ],
   "surface": [
-   0,
-   0,
-   1200,
-   800
+   440,
+   242,
+   320,
+   314
   ],
   "content": [
-   268,
-   10,
-   898,
-   774
+   450,
+   260,
+   300,
+   196
   ],
-  "bg": "#000000",
-  "coverage": 0.93
+  "bg": null,
+  "coverage": 0.07
  },
  "cinematic-logo-cloud": {
   "canvas": [
@@ -1045,19 +1045,19 @@
    720
   ],
   "surface": [
-   384,
-   186,
-   192,
-   102
+   256,
+   242,
+   436,
+   250
   ],
   "content": [
-   402,
-   210,
-   156,
-   56
+   272,
+   252,
+   380,
+   228
   ],
   "bg": null,
-  "coverage": 0.01
+  "coverage": 0.05
  },
  "cloth-banner": {
   "canvas": [
@@ -1085,19 +1085,19 @@
    800
   ],
   "surface": [
-   0,
-   0,
-   1200,
-   800
+   330,
+   234,
+   540,
+   328
   ],
   "content": [
-   312,
-   240,
-   576,
-   320
+   340,
+   248,
+   520,
+   278
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.17
  },
  "command-palette": {
   "canvas": [
@@ -1125,19 +1125,19 @@
    720
   ],
   "surface": [
-   288,
-   252,
-   384,
-   216
+   330,
+   234,
+   300,
+   250
   ],
   "content": [
-   298,
-   262,
-   350,
-   196
+   340,
+   244,
+   280,
+   214
   ],
-  "bg": "#0c0c0c",
-  "coverage": 0.12
+  "bg": null,
+  "coverage": 0.1
  },
  "component-layers": {
   "canvas": [
@@ -1325,19 +1325,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   220,
+   204,
+   520,
+   308
   ],
   "content": [
+   232,
    224,
-   270,
-   514,
-   182
+   498,
+   278
   ],
   "bg": "#ffffff",
-  "coverage": 1
+  "coverage": 0.19
  },
  "curved-reel": {
   "canvas": [
@@ -1365,19 +1365,19 @@
    800
   ],
   "surface": [
-   220,
-   164,
-   760,
-   472
+   360,
+   232,
+   480,
+   308
   ],
   "content": [
-   336,
-   174,
-   530,
-   422
+   384,
+   252,
+   428,
+   264
   ],
-  "bg": "#fcfcfc",
-  "coverage": 0.37
+  "bg": null,
+  "coverage": 0.11
  },
  "dot-globe": {
   "canvas": [
@@ -1445,19 +1445,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   376,
+   198,
+   214,
+   320
   ],
   "content": [
-   302,
-   156,
-   336,
-   474
+   386,
+   208,
+   194,
+   288
   ],
-  "bg": "#0c0c12",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.08
  },
  "dynamic-island": {
   "canvas": [
@@ -1545,19 +1545,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   270,
+   252,
+   420,
+   212
   ],
   "content": [
-   350,
-   330,
-   258,
-   22
+   280,
+   276,
+   398,
+   162
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": "#ffffff",
+  "coverage": 0.11
  },
  "expandable-cards": {
   "canvas": [
@@ -1565,19 +1565,19 @@
    720
   ],
   "surface": [
-   16,
-   16,
-   928,
-   314
+   210,
+   186,
+   540,
+   348
   ],
   "content": [
-   26,
-   26,
-   868,
-   294
+   220,
+   196,
+   520,
+   328
   ],
-  "bg": "#18181e",
-  "coverage": 0.4
+  "bg": "#ffffff",
+  "coverage": 0.27
  },
  "falloff-accordion": {
   "canvas": [
@@ -1685,19 +1685,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   310,
+   198,
+   340,
+   324
   ],
   "content": [
-   288,
-   122,
-   384,
-   476
+   326,
+   214,
+   308,
+   286
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": "#ffffff",
+  "coverage": 0.15
  },
  "feedback-pill": {
   "canvas": [
@@ -1765,19 +1765,19 @@
    720
   ],
   "surface": [
-   304,
-   630,
-   352,
-   74
+   160,
+   214,
+   640,
+   286
   ],
   "content": [
-   314,
-   644,
-   332,
-   50
+   170,
+   224,
+   620,
+   250
   ],
-  "bg": "#f0f0f6",
-  "coverage": 0.03
+  "bg": null,
+  "coverage": 0.22
  },
  "fold-note": {
   "canvas": [
@@ -1825,19 +1825,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   252,
+   234,
+   458,
+   248
   ],
   "content": [
-   10,
-   584,
-   940,
-   126
+   262,
+   244,
+   438,
+   226
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": "#ffffff",
+  "coverage": 0.14
  },
  "generate-image": {
   "canvas": [
@@ -1905,19 +1905,19 @@
    720
   ],
   "surface": [
-   40,
-   54,
-   880,
-   612
+   120,
+   100,
+   720,
+   516
   ],
   "content": [
-   106,
-   80,
-   792,
-   576
+   130,
+   110,
+   694,
+   496
   ],
   "bg": null,
-  "coverage": 0.78
+  "coverage": 0.51
  },
  "glow-button": {
   "canvas": [
@@ -1925,18 +1925,18 @@
    800
   ],
   "surface": [
-   516,
-   380,
-   170,
-   42
+   472,
+   360,
+   254,
+   78
   ],
   "content": [
-   532,
-   394,
-   134,
-   14
+   524,
+   374,
+   126,
+   24
   ],
-  "bg": "#000000",
+  "bg": null,
   "coverage": 0.01
  },
  "glowing-effect-cards": {
@@ -1945,19 +1945,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   630
+   200,
+   188,
+   560,
+   344
   ],
   "content": [
-   136,
-   90,
-   682,
-   442
+   210,
+   198,
+   540,
+   324
   ],
-  "bg": null,
-  "coverage": 0.57
+  "bg": "#ffffff",
+  "coverage": 0.26
  },
  "goo-reorder": {
   "canvas": [
@@ -1985,19 +1985,19 @@
    720
   ],
   "surface": [
-   402,
-   342,
-   158,
-   38
+   344,
+   212,
+   274,
+   472
   ],
   "content": [
-   418,
-   354,
-   112,
-   14
+   358,
+   228,
+   250,
+   148
   ],
-  "bg": "#18181e",
-  "coverage": 0.01
+  "bg": null,
+  "coverage": 0.05
  },
  "heat-field": {
   "canvas": [
@@ -2065,19 +2065,19 @@
    720
   ],
   "surface": [
-   396,
-   336,
-   168,
-   48
+   316,
+   332,
+   328,
+   56
   ],
   "content": [
-   418,
-   352,
-   126,
-   18
+   326,
+   342,
+   308,
+   36
   ],
   "bg": "#ffffff",
-  "coverage": 0.01
+  "coverage": 0.02
  },
  "hop-labels": {
   "canvas": [
@@ -2105,19 +2105,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   340,
+   264,
+   284,
+   194
   ],
   "content": [
-   184,
-   336,
-   594,
-   60
+   350,
+   306,
+   246,
+   106
   ],
-  "bg": "#000000",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.01
  },
  "image-trail": {
   "canvas": [
@@ -2125,19 +2125,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   42
+   32,
+   210,
+   896,
+   300
   ],
   "content": [
-   0,
-   2,
-   960,
-   42
+   102,
+   228,
+   740,
+   272
   ],
-  "bg": "#f6f0f6",
-  "coverage": 0.05
+  "bg": "#ffffff",
+  "coverage": 0.35
  },
  "images-badge": {
   "canvas": [
@@ -2145,19 +2145,19 @@
    720
   ],
   "surface": [
-   356,
-   332,
-   236,
-   46
+   272,
+   240,
+   416,
+   200
   ],
   "content": [
-   366,
-   342,
-   214,
-   26
+   282,
+   250,
+   392,
+   148
   ],
   "bg": null,
-  "coverage": 0
+  "coverage": 0.04
  },
  "infinite-moving-cards": {
   "canvas": [
@@ -2165,19 +2165,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   480
+   182,
+   226,
+   596,
+   276
   ],
   "content": [
-   100,
-   266,
-   760,
-   190
+   192,
+   236,
+   574,
+   230
   ],
-  "bg": null,
-  "coverage": 0.28
+  "bg": "#ffffff",
+  "coverage": 0.17
  },
  "ink-theme-switch": {
   "canvas": [
@@ -2205,19 +2205,19 @@
    820
   ],
   "surface": [
-   0,
-   0,
-   1200,
-   820
+   290,
+   240,
+   620,
+   340
   ],
   "content": [
-   66,
-   222,
-   972,
-   588
+   334,
+   250,
+   566,
+   320
   ],
-  "bg": "#f6f6f6",
-  "coverage": 0.98
+  "bg": "#ffffff",
+  "coverage": 0.21
  },
  "island-morph": {
   "canvas": [
@@ -2325,19 +2325,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   274,
+   322,
+   412,
+   330
   ],
   "content": [
-   192,
-   74,
-   570,
-   636
+   284,
+   332,
+   386,
+   282
   ],
-  "bg": "#ffffff",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.09
  },
  "liquid-dial": {
   "canvas": [
@@ -2525,19 +2525,19 @@
    560
   ],
   "surface": [
-   160,
-   158,
-   780,
-   244
+   250,
+   130,
+   600,
+   296
   ],
   "content": [
-   170,
-   168,
-   760,
-   224
+   260,
+   146,
+   580,
+   250
   ],
   "bg": null,
-  "coverage": 0.31
+  "coverage": 0.23
  },
  "magnet-select": {
   "canvas": [
@@ -2645,19 +2645,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   488
+   220,
+   200,
+   520,
+   320
   ],
   "content": [
-   10,
-   12,
-   940,
-   468
+   234,
+   210,
+   496,
+   300
   ],
   "bg": null,
-  "coverage": 0.3
+  "coverage": 0.23
  },
  "milestone-timeline": {
   "canvas": [
@@ -2665,19 +2665,39 @@
    720
   ],
   "surface": [
-   120,
-   70,
-   720,
-   580
+   220,
+   168,
+   520,
+   384
   ],
   "content": [
-   154,
-   112,
-   654,
-   484
+   246,
+   200,
+   470,
+   328
   ],
   "bg": "#ffffff",
-  "coverage": 0.6
+  "coverage": 0.29
+ },
+ "mk-animated-bento-grid": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   330,
+   240,
+   620,
+   376
+  ],
+  "content": [
+   340,
+   250,
+   600,
+   356
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.19
  },
  "mk-auto-advancing-tabs": {
   "canvas": [
@@ -2719,6 +2739,46 @@
   "bg": "#ffffff",
   "coverage": 1
  },
+ "mk-bento-grid-skeleton": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   360,
+   186,
+   560,
+   486
+  ],
+  "content": [
+   370,
+   196,
+   540,
+   466
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.23
+ },
+ "mk-bento-signal-grid": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   260,
+   206,
+   760,
+   450
+  ],
+  "content": [
+   270,
+   216,
+   740,
+   430
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.29
+ },
  "mk-changelog-pile": {
   "canvas": [
    1280,
@@ -2738,6 +2798,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 0.93
+ },
+ "mk-cinematic-logo-cloud": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   210,
+   254,
+   860,
+   346
+  ],
+  "content": [
+   222,
+   298,
+   838,
+   278
+  ],
+  "bg": "#fcfcfc",
+  "coverage": 0.25
  },
  "mk-collapsing-rail": {
   "canvas": [
@@ -2779,6 +2859,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "mk-dot-grid-hero": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   160,
+   208,
+   960,
+   446
+  ],
+  "content": [
+   190,
+   218,
+   920,
+   426
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.39
+ },
  "mk-drawn-timeline": {
   "canvas": [
    1280,
@@ -2819,6 +2919,46 @@
   "bg": "#f6f6f6",
   "coverage": 0.86
  },
+ "mk-editorial-blog-rail": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   260,
+   184,
+   760,
+   494
+  ],
+  "content": [
+   280,
+   210,
+   720,
+   448
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.34
+ },
+ "mk-float-glass-navbar": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   160,
+   234,
+   960,
+   386
+  ],
+  "content": [
+   180,
+   244,
+   922,
+   350
+  ],
+  "bg": null,
+  "coverage": 0.31
+ },
  "mk-gravity-404": {
   "canvas": [
    1280,
@@ -2858,6 +2998,26 @@
   ],
   "bg": "#fcfcfc",
   "coverage": 1
+ },
+ "mk-hero-aurora-spotlight": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   160,
+   120,
+   960,
+   620
+  ],
+  "content": [
+   170,
+   130,
+   940,
+   600
+  ],
+  "bg": null,
+  "coverage": 0.5
  },
  "mk-instant-search-faq": {
   "canvas": [
@@ -2919,6 +3079,26 @@
   "bg": "#f6f6f6",
   "coverage": 0.99
  },
+ "mk-lattice-feature-grid": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   260,
+   192,
+   760,
+   478
+  ],
+  "content": [
+   284,
+   216,
+   696,
+   428
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.33
+ },
  "mk-live-demo-bento": {
   "canvas": [
    1280,
@@ -2978,6 +3158,66 @@
   ],
   "bg": "#fcfcfc",
   "coverage": 0.94
+ },
+ "mk-motion-faq-disclosure": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   360,
+   156,
+   560,
+   550
+  ],
+  "content": [
+   380,
+   182,
+   522,
+   488
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.25
+ },
+ "mk-nebula-cta-glow": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   210,
+   280,
+   860,
+   296
+  ],
+  "content": [
+   220,
+   290,
+   784,
+   260
+  ],
+  "bg": null,
+  "coverage": 0.19
+ },
+ "mk-orbit-footer": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   150,
+   124,
+   980,
+   608
+  ],
+  "content": [
+   160,
+   160,
+   960,
+   548
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.52
  },
  "mk-parallax-stack-hero": {
   "canvas": [
@@ -3059,6 +3299,26 @@
   "bg": "#fcfcfc",
   "coverage": 0.99
  },
+ "mk-scrolling-testimonials": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   324,
+   310,
+   632,
+   264
+  ],
+  "content": [
+   334,
+   320,
+   612,
+   244
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.11
+ },
  "mk-seat-ruler-pricing": {
   "canvas": [
    1280,
@@ -3078,6 +3338,26 @@
   ],
   "bg": "#ffffff",
   "coverage": 1
+ },
+ "mk-shooting-stars-grid": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   160,
+   200,
+   960,
+   460
+  ],
+  "content": [
+   176,
+   210,
+   926,
+   432
+  ],
+  "bg": "#eaf0fc",
+  "coverage": 0.39
  },
  "mk-slide-to-pay": {
   "canvas": [
@@ -3099,6 +3379,46 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "mk-split-contact-glass": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   190,
+   264,
+   900,
+   328
+  ],
+  "content": [
+   200,
+   274,
+   862,
+   292
+  ],
+  "bg": null,
+  "coverage": 0.24
+ },
+ "mk-split-signup-convert": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   200,
+   204,
+   880,
+   448
+  ],
+  "content": [
+   210,
+   214,
+   844,
+   420
+  ],
+  "bg": null,
+  "coverage": 0.34
+ },
  "mk-spotlight-hero": {
   "canvas": [
    1280,
@@ -3118,6 +3438,66 @@
   ],
   "bg": "#ffffff",
   "coverage": 1
+ },
+ "mk-starfield-hero": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   160,
+   230,
+   960,
+   400
+  ],
+  "content": [
+   170,
+   240,
+   940,
+   380
+  ],
+  "bg": "#000606",
+  "coverage": 0.34
+ },
+ "mk-step-flow": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   330,
+   248,
+   620,
+   364
+  ],
+  "content": [
+   346,
+   260,
+   592,
+   340
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.19
+ },
+ "mk-toggle-pricing-pro": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   340,
+   216,
+   600,
+   426
+  ],
+  "content": [
+   360,
+   226,
+   560,
+   390
+  ],
+  "bg": null,
+  "coverage": 0.19
  },
  "mk-typo-catching-signup": {
   "canvas": [
@@ -3178,6 +3558,26 @@
   ],
   "bg": "#f6f6f6",
   "coverage": 0.92
+ },
+ "mk-workbench-sidebar": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   218,
+   212,
+   844,
+   438
+  ],
+  "content": [
+   228,
+   222,
+   824,
+   402
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.31
  },
  "money-goo": {
   "canvas": [
@@ -3265,19 +3665,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   200,
+   200,
+   560,
+   320
   ],
   "content": [
-   0,
-   0,
-   960,
-   720
+   210,
+   210,
+   540,
+   300
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.24
  },
  "nebula-cta-glow": {
   "canvas": [
@@ -3305,19 +3705,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   344,
+   218,
+   272,
+   262
   ],
   "content": [
-   336,
-   272,
-   288,
-   176
+   354,
+   252,
+   252,
+   218
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.02
  },
  "notification-stack": {
   "canvas": [
@@ -3365,16 +3765,16 @@
    720
   ],
   "surface": [
-   400,
-   288,
-   156,
-   142
+   402,
+   284,
+   146,
+   154
   ],
   "content": [
-   444,
-   298,
-   88,
-   78
+   422,
+   294,
+   116,
+   106
   ],
   "bg": null,
   "coverage": 0
@@ -3505,19 +3905,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   396
+   330,
+   312,
+   300,
+   96
   ],
   "content": [
-   256,
-   328,
-   448,
-   60
+   344,
+   352,
+   274,
+   36
   ],
   "bg": null,
-  "coverage": 0.08
+  "coverage": 0.02
  },
  "pixel-select": {
   "canvas": [
@@ -3685,19 +4085,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   252,
+   234,
+   456,
+   282
   ],
   "content": [
-   10,
-   14,
-   940,
-   674
+   266,
+   248,
+   428,
+   258
   ],
-  "bg": "#0c0c18",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.08
  },
  "progress-button": {
   "canvas": [
@@ -3765,19 +4165,19 @@
    820
   ],
   "surface": [
-   120,
-   286,
-   960,
-   248
+   280,
+   278,
+   640,
+   266
   ],
   "content": [
-   134,
-   308,
-   934,
-   214
+   292,
+   298,
+   618,
+   228
   ],
-  "bg": "#fcfcfc",
-  "coverage": 0.24
+  "bg": "#f6f6f6",
+  "coverage": 0.17
  },
  "pulse-monitor": {
   "canvas": [
@@ -3825,19 +4225,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   210,
+   178,
+   540,
+   364
   ],
   "content": [
-   22,
-   22,
-   918,
-   688
+   220,
+   196,
+   520,
+   334
   ],
-  "bg": null,
-  "coverage": 0.97
+  "bg": "#ffffff",
+  "coverage": 0.28
  },
  "receipt-unfold": {
   "canvas": [
@@ -3985,19 +4385,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   220,
+   210,
+   520,
+   296
   ],
   "content": [
-   106,
-   10,
-   744,
-   700
+   230,
+   228,
+   500,
+   268
   ],
-  "bg": "#0c0c12",
-  "coverage": 0.95
+  "bg": "#ffffff",
+  "coverage": 0.19
  },
  "scroll-reveal-text": {
   "canvas": [
@@ -4005,19 +4405,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   250,
+   220,
+   460,
+   276
   ],
   "content": [
-   10,
-   10,
-   940,
-   700
+   260,
+   290,
+   438,
+   180
   ],
-  "bg": "#0c0c0c",
-  "coverage": 0.93
+  "bg": "#ffffff",
+  "coverage": 0.15
  },
  "scrolling-testimonials": {
   "canvas": [
@@ -4085,19 +4485,19 @@
    720
   ],
   "surface": [
-   34,
-   2,
-   894,
-   498
+   24,
+   170,
+   912,
+   380
   ],
   "content": [
-   44,
-   12,
-   874,
-   478
+   34,
+   180,
+   892,
+   360
   ],
   "bg": null,
-  "coverage": 0.64
+  "coverage": 0.27
  },
  "shared-element-cards": {
   "canvas": [
@@ -4225,19 +4625,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   270,
+   148,
+   420,
+   422
   ],
   "content": [
-   24,
-   210,
-   912,
-   304
+   280,
+   176,
+   398,
+   384
   ],
-  "bg": "#f6f6f6",
-  "coverage": 1
+  "bg": "#ffffff",
+  "coverage": 0.24
  },
  "slide-to-confirm": {
   "canvas": [
@@ -4285,19 +4685,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   586
+   220,
+   216,
+   520,
+   290
   ],
   "content": [
-   14,
-   44,
-   936,
-   532
+   238,
+   226,
+   490,
+   270
   ],
-  "bg": "#000000",
-  "coverage": 0.61
+  "bg": "#ffffff",
+  "coverage": 0.21
  },
  "spectra-frame": {
   "canvas": [
@@ -4305,19 +4705,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   210,
+   240,
+   540,
+   240
   ],
   "content": [
-   16,
-   16,
-   764,
-   456
+   220,
+   250,
+   520,
+   220
   ],
-  "bg": "#0c0c12",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.17
  },
  "spend-donut": {
   "canvas": [
@@ -4405,19 +4805,19 @@
    720
   ],
   "surface": [
-   18,
-   352,
-   184,
-   16
+   338,
+   282,
+   300,
+   158
   ],
   "content": [
-   18,
-   352,
-   184,
-   16
+   440,
+   324,
+   166,
+   44
   ],
   "bg": null,
-  "coverage": 0
+  "coverage": 0.01
  },
  "stagger-menu": {
   "canvas": [
@@ -4505,18 +4905,18 @@
    720
   ],
   "surface": [
-   410,
-   336,
-   142,
-   48
+   350,
+   322,
+   242,
+   72
   ],
   "content": [
    432,
-   354,
+   336,
    98,
-   14
+   16
   ],
-  "bg": "#00cc54",
+  "bg": null,
   "coverage": 0.01
  },
  "step-flow": {
@@ -4645,19 +5045,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   228,
+   216,
+   504,
+   290
   ],
   "content": [
-   12,
-   10,
-   938,
-   700
+   238,
+   226,
+   484,
+   270
   ],
   "bg": null,
-  "coverage": 1
+  "coverage": 0.1
  },
  "swipe-stack": {
   "canvas": [
@@ -4745,19 +5145,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   420
+   200,
+   210,
+   560,
+   300
   ],
   "content": [
-   10,
-   10,
-   940,
-   262
+   216,
+   226,
+   518,
+   126
   ],
-  "bg": null,
-  "coverage": 0.58
+  "bg": "#1e1e1e",
+  "coverage": 0.24
  },
  "text-blur-fade-in": {
   "canvas": [
@@ -4805,19 +5205,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   394
+   250,
+   266,
+   460,
+   184
   ],
   "content": [
-   132,
-   332,
-   688,
-   54
+   260,
+   290,
+   438,
+   134
   ],
-  "bg": null,
-  "coverage": 0.07
+  "bg": "#ffffff",
+  "coverage": 0.1
  },
  "text-reveal-card": {
   "canvas": [
@@ -4825,19 +5225,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   446
+   280,
+   232,
+   400,
+   256
   ],
   "content": [
-   10,
-   12,
-   940,
-   426
+   304,
+   256,
+   352,
+   206
   ],
-  "bg": null,
-  "coverage": 0.2
+  "bg": "#ffffff",
+  "coverage": 0.14
  },
  "text-typewriter-effect": {
   "canvas": [
@@ -4905,19 +5305,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   934,
-   694
+   330,
+   194,
+   300,
+   332
   ],
   "content": [
-   112,
-   204,
-   768,
-   312
+   340,
+   226,
+   280,
+   274
   ],
-  "bg": null,
-  "coverage": 0.13
+  "bg": "#ffffff",
+  "coverage": 0.14
  },
  "throw-wheel": {
   "canvas": [
@@ -4985,19 +5385,19 @@
    720
   ],
   "surface": [
-   330,
-   270,
-   300,
-   180
+   320,
+   256,
+   320,
+   208
   ],
   "content": [
-   368,
-   294,
-   226,
-   128
+   340,
+   280,
+   280,
+   166
   ],
   "bg": "#ffffff",
-  "coverage": 0.08
+  "coverage": 0.1
  },
  "toast-stack": {
   "canvas": [
@@ -5085,19 +5485,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   312,
+   210,
+   338,
+   298
   ],
   "content": [
-   10,
-   10,
-   354,
-   104
+   336,
+   220,
+   304,
+   238
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.13
  },
  "traffic-bars": {
   "canvas": [
@@ -5125,19 +5525,19 @@
    720
   ],
   "surface": [
-   0,
-   2,
-   960,
-   372
+   362,
+   304,
+   236,
+   112
   ],
   "content": [
-   262,
-   350,
-   432,
-   14
+   404,
+   348,
+   134,
+   26
   ],
   "bg": null,
-  "coverage": 0.06
+  "coverage": 0
  },
  "upload-chips": {
   "canvas": [
@@ -5165,19 +5565,19 @@
    720
   ],
   "surface": [
-   320,
-   216,
-   300,
-   290
+   308,
+   274,
+   346,
+   164
   ],
   "content": [
-   330,
-   226,
-   280,
-   270
+   318,
+   284,
+   326,
+   144
   ],
-  "bg": "#ffffff",
-  "coverage": 0.11
+  "bg": "#f6fcfc",
+  "coverage": 0.08
  },
  "usage-stack": {
   "canvas": [
@@ -5205,19 +5605,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   286,
+   202,
+   382,
+   314
   ],
   "content": [
-   336,
-   272,
-   288,
-   176
+   296,
+   212,
+   362,
+   278
   ],
-  "bg": "#0c0c0c",
-  "coverage": 1
+  "bg": null,
+  "coverage": 0.15
  },
  "voice-orb": {
   "canvas": [
@@ -5285,19 +5685,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   960,
-   720
+   240,
+   270,
+   480,
+   176
   ],
   "content": [
-   286,
-   94,
-   392,
-   90
+   252,
+   316,
+   458,
+   120
   ],
   "bg": "#ffffff",
-  "coverage": 1
+  "coverage": 0.1
  },
  "weather-puck": {
   "canvas": [
@@ -5325,19 +5725,19 @@
    800
   ],
   "surface": [
-   0,
-   0,
-   1200,
-   800
+   260,
+   222,
+   680,
+   358
   ],
   "content": [
-   20,
-   20,
-   1160,
-   612
+   284,
+   242,
+   600,
+   316
   ],
-  "bg": "#06060c",
-  "coverage": 0.97
+  "bg": "#ffffff",
+  "coverage": 0.22
  },
  "word-magnet": {
   "canvas": [
@@ -5345,19 +5745,19 @@
    720
   ],
   "surface": [
-   0,
-   0,
-   934,
-   694
+   288,
+   286,
+   376,
+   152
   ],
   "content": [
-   0,
-   0,
-   934,
-   694
+   536,
+   296,
+   118,
+   132
   ],
   "bg": null,
-  "coverage": 0.02
+  "coverage": 0.01
  },
  "workbench-sidebar": {
   "canvas": [
