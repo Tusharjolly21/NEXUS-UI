@@ -111,7 +111,7 @@ export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
     { q: "Can I put the glow around my own content?", a: "Yes. Wrap any content in `GlowingEffect`. `GlowingCard` is a ready-made card with title, description, icon and CTA, and `GlowingCardsLayout` is the 2-1-2 grid from the demo." },
     { q: "Which props control the glow?", a: "`intensity` (clamped between 0.45 and 2.4) scales the glow, `blur` softens it, `borderRadius` matches your card shape and `disabled` turns it off. The three glow colors are set inside GlowingEffect.tsx, so edit them there to match your brand." },
     { q: "Does it work with the keyboard?", a: "Each card is focusable and lights up on focus. For users who prefer reduced motion, the glow no longer tracks the pointer." },
-    { q: "How do I install it?", a: "Run `npx shadcn@latest add @nexus-labs/glowing-effect-cards`. It is a free component that uses framer-motion and lucide-react." },
+    { q: "How do I install it?", a: "Run `npx shadcn@latest add @nexus-labs/glowing-effect-cards`. It comes with Pro and uses framer-motion and lucide-react." },
   ],
   "gooey-search-input": [
     { q: "How do I install the gooey search input?", a: "Run `npx shadcn@latest add @nexus-labs/gooey-input`. Note that the registry name is `gooey-input`, not the page slug. It installs framer-motion and lucide-react." },
@@ -141,7 +141,7 @@ export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
     { q: "How do I change the speed and direction?", a: "Set `speed` to \"slow\", \"normal\" or \"fast\" (about 26, 44 or 74 px per second) and `direction` to \"left\" or \"right\". `pauseOnHover` is on by default." },
     { q: "Can I render my own card design?", a: "Yes. Pass `renderItem={(item, index) => ...}` to replace the default card. Without it, each card can show an image, title, description, star rating, tags and an avatar with name and role." },
     { q: "What happens for users who prefer reduced motion?", a: "The track stops scrolling and the cards are shown in place." },
-    { q: "How do I install it?", a: "Run `npx shadcn@latest add @nexus-labs/infinite-moving-cards`. It is free and only needs framer-motion; `showGradientMask` controls the faded edges." },
+    { q: "How do I install it?", a: "Run `npx shadcn@latest add @nexus-labs/infinite-moving-cards`. It comes with Pro and only needs framer-motion; `showGradientMask` controls the faded edges." },
   ],
   "interactive-globe-explorer": [
     { q: "How do I install the globe explorer?", a: "Run `npx shadcn@latest add @nexus-labs/interactive-globe-explorer`. It installs react-globe.gl, three and lucide-react along with the shadcn/ui button." },
@@ -291,7 +291,7 @@ export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
     { q: "How do I use the warp speed effect?", a: "Wrap a few words in `WarpTextTrigger` inside your heading. `WarpSpeedCard` is an optional card wrapper for the section." },
     { q: "Can I change the beam color?", a: "Yes. Pass `beamColor` as an RGB triplet string, for example \"255,255,255\" for white." },
     { q: "Does it work on touch screens?", a: "The effect is triggered by mouse hover only, so on touch screens and with keyboard focus the text stays in its normal style and remains readable." },
-    { q: "How do I install it?", a: "Run `npx shadcn@latest add @nexus-labs/warp-speed-card`. It is free and only depends on framer-motion." },
+    { q: "How do I install it?", a: "Run `npx shadcn@latest add @nexus-labs/warp-speed-card`. It comes with Pro and only depends on framer-motion." },
   ],
   "workbench-sidebar": [
     { q: "How do I install the Workbench Sidebar?", a: "Run `npx shadcn@latest add @nexus-labs/workbench-sidebar`. It installs framer-motion and lucide-react." },

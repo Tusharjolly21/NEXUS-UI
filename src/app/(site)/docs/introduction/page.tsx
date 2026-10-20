@@ -252,7 +252,7 @@ export default function IntroductionPage() {
                 <code className={docInlineCodeClass}>components.json</code> and pull any component by
                 slug:
                 <pre className="mt-2 overflow-x-auto rounded-xl border border-[#3e3e3e] bg-[#1e1e1e] p-4 text-[13px] leading-relaxed text-[#d4d4d4]">
-                  <code>{`npx shadcn@latest add @nexus-labs/terminal\nnpx shadcn@latest add @nexus-labs/gooey-input`}</code>
+                  <code>{`npx shadcn@latest add @nexus-labs/glow-button\nnpx shadcn@latest add @nexus-labs/typewriter-effect`}</code>
                 </pre>
               </span>
             </li>
