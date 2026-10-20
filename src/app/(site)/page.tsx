@@ -147,7 +147,7 @@ export default function Home() {
         <div className="mx-auto max-w-[1152px]">
           <StatRow
             items={[
-              { value: CATALOG_COUNTS.components, label: `components, ${CATALOG_COUNTS.freeComponents} free` },
+              { value: CATALOG_COUNTS.components, label: "animated components" },
               { value: CATALOG_COUNTS.templates, label: "full-page templates" },
               { value: CATALOG_COUNTS.blocks, label: "section blocks" },
               { value: "1", label: "command to install" },
