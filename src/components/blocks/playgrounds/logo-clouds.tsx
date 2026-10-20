@@ -54,14 +54,58 @@ const playgrounds: BlockPlaygrounds = {
 
   "logos-blur-reveal": {
     Component: LogoCloudBlur,
-    props: [CLASS_NAME],
+    props: [
+      {
+        name: "title",
+        type: "string",
+        description: "Headline above the grid.",
+        defaultValue: '"The teams behind the products you open every morning."',
+      },
+      {
+        name: "subtitle",
+        type: "string",
+        description: "Line under the headline. Leave empty to hide it.",
+        defaultValue: '"Hover a name to bring it into focus."',
+      },
+      { name: "count", type: "number", description: "How many marks to show. Defaults to every logo passed.", defaultValue: "12", min: 1, max: 12, step: 1 },
+      { name: "restOpacity", type: "number", description: "Opacity of every mark while nothing is hovered.", defaultValue: "0.5", min: 0.1, max: 1, step: 0.05 },
+      { name: "recedeOpacity", type: "number", description: "Opacity of the other marks while one is hovered.", defaultValue: "0.2", min: 0, max: 1, step: 0.05 },
+      { name: "recedeBlur", type: "number", description: "Blur in px on the other marks while one is hovered.", defaultValue: "2", min: 0, max: 8, step: 0.5 },
+      { name: "hoverScale", type: "number", description: "Scale of the hovered mark.", defaultValue: "1.06", min: 1, max: 1.3, step: 0.01 },
+      {
+        name: "logos",
+        type: "Logo[]",
+        description: "Marks: { name, Icon, color, wordmark? } from logos.tsx. Defaults to twelve placeholder brand lockups.",
+        defaultValue: "LOGOS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "LogoCloudBlur",
     importLine: 'import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";',
   },
 
   "logos-marquee": {
     Component: LogoCloudMarquee,
-    props: [CLASS_NAME],
+    props: [
+      { name: "eyebrow", type: "string", description: "Small grey label above the headline. Leave empty to hide it.", defaultValue: '"Customers"' },
+      {
+        name: "title",
+        type: "string",
+        description: "Headline above the band.",
+        defaultValue: '"Running in production at 2,400 teams, from two-person studios to public companies."',
+      },
+      { name: "speed", type: "number", description: "Drift speed in px per second.", defaultValue: "34", min: 5, max: 200, step: 1 },
+      { name: "rows", type: "number", description: "One row, or two rows drifting in opposite directions (the list split in half).", defaultValue: "2", min: 1, max: 2, step: 1 },
+      { name: "pauseOnHover", type: "boolean", description: "Pause a row while the pointer is over it.", defaultValue: "true" },
+      { name: "fadeEdges", type: "boolean", description: "Fade the band out at both edges with a mask.", defaultValue: "true" },
+      {
+        name: "logos",
+        type: "Logo[]",
+        description: "Marks (up to 24): { name, Icon, color, wordmark? } from logos.tsx. Defaults to twelve placeholder brand lockups.",
+        defaultValue: "LOGOS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "LogoCloudMarquee",
     importLine:
       '// npm install react-fast-marquee\nimport LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";',
@@ -69,7 +113,25 @@ const playgrounds: BlockPlaygrounds = {
 
   "logos-spotlight": {
     Component: LogoCloudSpotlight,
-    props: [CLASS_NAME],
+    props: [
+      { name: "title", type: "string", description: "Headline above the panel.", defaultValue: '"Twelve partners, one integration standard."' },
+      {
+        name: "subtitle",
+        type: "string",
+        description: "Line under the headline. Leave empty to hide it.",
+        defaultValue: '"Move across the grid to light up each partner."',
+      },
+      { name: "spotlightRadius", type: "number", description: "Radius of the circle of light in px.", defaultValue: "240", min: 80, max: 600, step: 10 },
+      { name: "dimOpacity", type: "number", description: "Strength of the marks outside the light. Unset keeps the built-in 25% ink.", defaultValue: "0.25", min: 0, max: 1, step: 0.05 },
+      { name: "count", type: "number", description: "How many marks to show. Defaults to every logo passed.", defaultValue: "12", min: 1, max: 12, step: 1 },
+      {
+        name: "logos",
+        type: "Logo[]",
+        description: "Marks: { name, Icon, color, wordmark? } from logos.tsx. Defaults to twelve placeholder brand lockups.",
+        defaultValue: "LOGOS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "LogoCloudSpotlight",
     importLine: 'import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";',
   },
@@ -129,7 +191,26 @@ const playgrounds: BlockPlaygrounds = {
 
   "logos-single-row": {
     Component: LogoCloudSingleRow,
-    props: [CLASS_NAME],
+    props: [
+      {
+        name: "title",
+        type: "string",
+        description: "Small grey line above the row. Leave empty to hide it.",
+        defaultValue: '"Product teams at these companies plan their week with us."',
+      },
+      { name: "count", type: "number", description: "How many marks to show, from the start of logos.", defaultValue: "6", min: 1, max: 12, step: 1 },
+      { name: "restOpacity", type: "number", description: "Opacity of every mark while nothing is hovered.", defaultValue: "0.55", min: 0.1, max: 1, step: 0.05 },
+      { name: "recedeOpacity", type: "number", description: "Opacity of the other marks while one is hovered.", defaultValue: "0.22", min: 0, max: 1, step: 0.01 },
+      { name: "lift", type: "number", description: "How far the hovered mark lifts, in px.", defaultValue: "4", min: 0, max: 16, step: 1 },
+      { name: "hoverScale", type: "number", description: "Scale of the hovered mark.", defaultValue: "1.06", min: 1, max: 1.3, step: 0.01 },
+      {
+        name: "logos",
+        type: "Logo[]",
+        description: "Marks: { name, Icon, color, wordmark? } from logos.tsx. Defaults to twelve placeholder brand lockups.",
+        defaultValue: "LOGOS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "LogoCloudSingleRow",
     importLine: 'import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";',
   },

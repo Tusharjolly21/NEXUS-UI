@@ -5,16 +5,31 @@ Build an editorial feature layout: on wide containers the headline column pins o
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS v4 (container queries), framer-motion (`motion`, `useReducedMotion`, `Variants`, `Transition`), lucide-react icons (`Eye`, `SlidersHorizontal`, `UserCheck`, `Undo2`).
-- File: `components/blocks/blog-content-sections/blog-content-editorial.tsx`, named export `BlogContentEditorial` (also export `BlogContentEditorialProps`).
+- File: `components/blocks/blog-content-sections/blog-content-editorial.tsx`, named export `BlogContentEditorial` (also export `BlogContentEditorialProps`, `BlogEditorialStat`, `BlogEditorialPrinciple`, `BLOG_EDITORIAL_STATS` and `BLOG_EDITORIAL_PRINCIPLES`).
 - A `cn()` class-merging helper (clsx + tailwind-merge).
 
 ## API
 
+Every prop is optional; the defaults are the Demo data below, so with no props the block renders exactly that. Text props render as plain text.
+
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `eyebrow` | `string` | `"Field notes, issue 14"` | Issue label above the headline. |
+| `title` | `string` | `"Designing AI products people can actually trust."` | The pinned `h1`. |
+| `description` | `string` | the standfirst below | Standfirst; empty hides it. |
+| `author` | `string` | `"Lena Okafor"` | Byline name; its first two initials (upper-cased) fill the monogram. |
+| `authorRole` | `string` | `"Design lead, Fieldwork"` | Line under the name. |
+| `ctaLabel` | `string` | `"Read the full issue ›"` | Link beside the byline; empty hides it. |
+| `ctaHref` | `string` | `"#"` | Link target (empty falls back to `#`). |
+| `sectionTitle` | `string` | `"Start with clarity, not magic."` | Story section `h2`. |
+| `sectionBody` | `string` | the paragraph below | Paragraph under it. |
+| `quote` | `string` | the quote below, without quote marks | Pull quote, wrapped in “ ”; empty hides the whole blockquote. |
+| `quoteAttribution` | `string` | `author` | Name under the quote; empty hides it. |
+| `stats` | `BlogEditorialStat[]` (`{ value, label }`) | `BLOG_EDITORIAL_STATS` | Stat strip; the first 3 are shown. |
+| `principles` | `BlogEditorialPrinciple[]` (`{ title, text, icon: LucideIcon }`) | `BLOG_EDITORIAL_PRINCIPLES` | Principle cards. |
+| `image` | `string` (URL) | the Unsplash dashboard photo | Story image, set as `background-image: url("<JSON-escaped url>")`; empty falls back to the default. |
+| `imageAlt` | `string` | `"Analytics dashboard and product research"` | `aria-label` of the image layer. |
 | `className` | `string` | — | Merged onto the outer section. |
-
-All content is fixed in the component (see Demo data).
 
 ## Layout and look
 
@@ -25,7 +40,7 @@ All content is fixed in the component (see Demo data).
   - Headline `h1`: 16px below, `text-balance`, 40px / 1.05, -0.035em, semibold; `@xl` 52px; `@5xl` 60px / 1.03.
   - Standfirst: 24px below, `max-w-lg`, `text-pretty`, 19px / 1.45 (`@xl` 21px), `#6e6e73` / dark `#a1a1a6`.
   - Stats: 40px below, `max-w-md`, three equal columns divided by hairlines (`rgba(0,0,0,.08)` / dark `rgba(255,255,255,.1)`), with hairlines top and bottom. Each cell: 16px padding (first cell no left padding), a `dl` pair rendered value-first: value 24px semibold, line-height 1, -0.025em; label 13px muted, 4px below.
-  - Author row: 32px below, wrapping flex, 24px × 12px gaps. Monogram "LO": 36px circle, gradient `#a1a1a6 → #86868b` (dark `#8e8e93 → #636366`), 12px semibold white. Name 14px semibold; role 14px `#86868b` / dark `#98989d`. Link "Read the full issue ›": 15px medium, `#0066cc` / dark `#2997ff`, underline on hover.
+  - Author row: 32px below, wrapping flex, 24px × 12px gaps. Monogram (author initials, "LO"): 36px circle, gradient `#a1a1a6 → #86868b` (dark `#8e8e93 → #636366`), 12px semibold white. Name 14px semibold; role 14px `#86868b` / dark `#98989d`. Link "Read the full issue ›": 15px medium, `#0066cc` / dark `#2997ff`, underline on hover.
 - Story column (`min-w-0`):
   - Image frame: relative, `aspect-[4/3]` (`@xl` 16:10), radius 28px, `overflow-hidden`, placeholder `#f5f5f7` / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -24px rgba(0,0,0,.25)` (dark ring `rgba(255,255,255,.08)`). Image as a cover `background-image` on a filling layer.
   - Story stack: 48px below, `space-y-12`, 8px horizontal padding at `@5xl`.

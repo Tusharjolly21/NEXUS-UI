@@ -5,15 +5,25 @@ Build an app shell with a frosted, floating sidebar on the left and a small anal
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS v4 (container queries `@container` / `@md:`), framer-motion (`motion`, `AnimatePresence`, `MotionConfig`, `useReducedMotion`, `layoutId`), lucide-react icons.
-- File: `simple-sidebar.tsx`, default export `SimpleSidebar`, exported type `SimpleSidebarProps`.
+- File: `simple-sidebar.tsx`, default export `SimpleSidebar`; also export the types `SimpleSidebarProps`, `SimpleSidebarSection`, `SimpleSidebarItem` and the constant `SIMPLE_SIDEBAR_SECTIONS`.
 
 ## API
 
+Every prop is optional; with none the block renders exactly the demo below.
+
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `workspaceName` | `string` | `"Nexus Labs"` | Sidebar header name; its first letter (upper-cased) fills the logo tile. |
+| `accent` | `string` | — | Hex colour for the selection pill, row icons, focus ring and the latest revenue bar, set as `--sb-accent` on the frame. Unset (or `#0071e3`) keeps `#0071e3`, with icons `#2997ff` in dark mode. |
+| `greeting` | `string` | `"Good morning, Alex"` | Dashboard headline. |
+| `dateLabel` | `string` | `"Tuesday, 14 October"` | Line above the headline. |
+| `userName` | `string` | `"Alex Morgan"` | Footer account name; its first two initials fill the monogram. |
+| `userEmail` | `string` | `"alex@nexuslabs.io"` | Line under the account name. |
+| `compactBreakpoint` | `number` | `640` | Frame width (px) below which the sidebar becomes a drawer; clamped to 0–2000. |
+| `sections` | `SimpleSidebarSection[]` (`{ id, title, items: { id, label, icon: LucideIcon, badge?, active? }[] }`) | `SIMPLE_SIDEBAR_SECTIONS` | Navigation groups. The item marked `active` (else the first) starts selected. |
 | `className` | `string` | — | Merged onto the 560px frame (e.g. another height or radius). |
 
-Navigation, user and dashboard content are constants in the file.
+The dashboard figures (stats, revenue, pages, sign-ups) stay constants in the file.
 
 ## Layout and look
 
@@ -29,7 +39,7 @@ Navigation, user and dashboard content are constants in the file.
 - Footer: `border-t border-black/[0.06]` (dark white/8) `p-2`; a full-width account button `rounded-[12px] p-2`: 32px monogram "AM" (gradient `#a1a1a6 → #86868b`, dark `#8e8e93 → #636366`, white 11px semibold), "Alex Morgan" 13px medium, "alex@nexuslabs.io" 12px `#6e6e73`, and a `ChevronsUpDown` 16px icon.
 - Main column: header `h-12 px-4` with (compact only) a 32px round menu button (`Menu` 18px) and the swapping title (15px semibold, leading 24px, 24px-high clipped box).
 - Dashboard canvas (`@container`, `px-4 pb-4`, gap 12px): date "Tuesday, 14 October" (13px `#6e6e73`), "Good morning, Alex" 22px semibold tracking −0.025em, a "Last 12 months" chip (`#e8e8ed` / `#2c2c2e`, 12px). Three stat cards in a 3-column grid; a revenue bar chart card (spans 2 of 3 columns from `@md`) and a "Top pages" card (hidden below `@md`); a "Recent sign-ups" card (2 columns, 3 from `@md`). Cards: `rounded-[18px] bg-white` with `0 0 0 1px rgba(0,0,0,.05), 0 1px 2px rgba(0,0,0,.04)`; dark `#1c1c1e` with a white/8 ring. Bars `rounded-[5px]`, `#e8e8ed` (dark `#3a3a3c`), last bar `#0071e3`; month initials 10px.
-- Responsive: the frame watches its own width with a ResizeObserver; under 640px it is compact (drawer). Above, the sidebar sits inline.
+- Responsive: the frame watches its own width with a ResizeObserver; under `compactBreakpoint` (640px) it is compact (drawer). Above, the sidebar sits inline.
 
 ## Motion
 
@@ -44,7 +54,7 @@ Navigation, user and dashboard content are constants in the file.
 
 - Clicking a row selects it (title updates) and closes the drawer.
 - Compact: the menu button opens the drawer (`aria-expanded`); the scrim, the X button or Escape (handled on the frame) closes it. The hidden drawer gets `inert`.
-- Selection starts on Home.
+- Selection starts on the item marked `active` (Home in the demo).
 
 ## Demo data
 

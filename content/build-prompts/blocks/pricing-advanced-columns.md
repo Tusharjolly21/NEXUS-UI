@@ -9,13 +9,24 @@ Build a three-column pricing section where each card has a tinted inner "price w
 
 ## API
 
-`AdvancedPricingColumns` takes no props; content lives in a `comparisonPlans` constant.
+Every prop is optional; with none the section renders exactly as described below. Export the props type as `AdvancedPricingColumnsProps`.
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
-| — | — | — | No props. Edit `comparisonPlans` to change content. |
+| `title` | `string` | `"Pay for the questions you ask"` | Main heading. |
+| `description` | `string` | `"Every plan reads from the same warehouse. Upgrade when you need more seats, history or real-time data."` | Paragraph under the heading. |
+| `accentColor` | `string` | — | Primary button fill (hover mixes 12% white), focus rings, check icons and highlights and the badge (12% tint behind accent text). Unset keeps `#0071e3`, with `#2997ff` text/checks in dark mode; only overridden when set. Plain colour values only (hex, `rgb()`, `hsl()`, names). |
+| `defaultCycle` | `"monthly" \| "yearly"` | `"monthly"` | Billing period on mount. |
+| `savingsNote` | `string` | `"Save about 20% when you pay yearly."` | Small grey line under the toggle; empty string hides it. |
+| `showBillingToggle` | `boolean` | `true` | Show the toggle and its note. When `false`, prices stay on `defaultCycle`. |
+| `currency` | `string` | `"$"` | Symbol before every amount; empty string hides it. |
+| `ctaPrefix` | `string` | `"Get"` | Button text before the plan name ("Get Team"); empty string leaves just the name. |
+| `monthlyPeriod` | `string` | `"/month"` | Period after the amount when billed monthly. |
+| `yearlyPeriod` | `string` | `"/year"` | Period after the amount when billed yearly. |
+| `plans` | `AdvancedPricingPlan[]` | `DEFAULT_ADVANCED_PRICING_PLANS` | Columns, first 6 used. |
+| `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Internal plan shape: `{ label; monthly: string; yearly: string; badge?: string; features: string[]; inherited: string[] }`. Amounts are digits without the currency symbol.
+Exported plan shape `AdvancedPricingPlan`: `{ label; monthly: string; yearly: string; badge?: string; features: string[]; inherited: string[] }`. Amounts are digits without the currency symbol. A plan with a badge gets the primary button. Features are capped at 12 and inherited lines at 6. The demo data below is exported as `DEFAULT_ADVANCED_PRICING_PLANS`. All text from props renders as plain text.
 
 ## Layout and look
 

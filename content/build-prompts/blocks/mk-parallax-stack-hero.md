@@ -9,9 +9,21 @@ Build a split hero: copy and an email capture on the left, and on the right a st
 
 ## API
 
+Every prop is optional; with none the block renders exactly the copy below. Text props render as plain text.
+
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
-| `accent` | `string` | `"#5e5ce6"` | Live dot, the word "calm", buttons, badges and the glow. |
+| `eyebrow` | `string` | `"2,400 teams joined this month"` | Accent line beside the live dot. |
+| `headline` | `string` | `"Run the whole week from one calm inbox."` | The `h1`, split on whitespace into words that rise in one by one. Past 40 words the rest fades in as one span. |
+| `highlight` | `string` | `"calm"` | Word(s) tinted in the accent: a headline word is tinted when, lower-cased and stripped of leading/trailing punctuation, it equals one of these words (stripped the same way). Empty tints nothing. |
+| `description` | `string` | `"Messages, meetings and payments land in one place, sorted by what needs you first."` | Paragraph under the headline. |
+| `ctaLabel` | `string` | `"Join free"` | Submit button label. |
+| `pendingLabel` | `string` | `"Joining…"` | Button label while `onSubmit` is pending. |
+| `placeholder` | `string` | `"you@company.com"` | Email field placeholder. |
+| `note` | `string` | `"Free for 14 days. No card needed."` | Hint before submitting. |
+| `successNote` | `string` | `"You're on the list."` | Hint after a successful submit. |
+| `errorNote` | `string` | `"That email doesn't look right."` | Hint for an invalid email or a rejected `onSubmit`. |
+| `accent` | `string` | `"#5e5ce6"` | Live dot, the highlighted word, buttons, badges and the glow. |
 | `accentDark` | `string` | — | Dark accent. If omitted: `#7d7aff` when `accent` is the default, else `accent`. |
 | `autoplay` | `boolean` | `true` | Cards float and the live dot pulses. |
 | `onSubmit` | `(email: string) => void \| Promise<void>` | — | Receives the trimmed, validated email. Throw/reject to show the error state. Nothing is sent by the block. |
@@ -23,11 +35,11 @@ Build a split hero: copy and an email capture on the left, and on the right a st
 - Glow: 560×560 circle at `right: -160px; top: 40px`, `radial-gradient(closest-side, accent 18%, transparent)` (dark 24%), `blur-3xl`, `aria-hidden`.
 - Grid: max-width 1120px, single column with 48px gap; from `@4xl` columns `1fr 1.05fr`, gap 56px, items centred.
 - Left column: flex column, start-aligned, gap 20px (24px from `@2xl`).
-  - Eyebrow: 14px semibold accent, 8px gap, a 8×8 accent dot with a pulsing ring behind it, text "2,400 teams joined this month".
-  - `<h1>` "Run the whole week from one calm inbox.", each word an inline-block with 0.22em gap; "calm" in the accent. Size `clamp(38px, 7cqi, 76px)` (from `@4xl` `clamp(42px, 6cqi, 76px)`), semibold, line-height 1, tracking −0.05em, `#1d1d1f` / `#f5f5f7`.
-  - Paragraph: max-width 480px, `clamp(16px, 2.4cqi, 19px)`, line-height 1.45, `#6e6e73` / `#a1a1a6`: "Messages, meetings and payments land in one place, sorted by what needs you first."
-  - Form: max-width 460px, `noValidate`. Field row: fully rounded, padding 6px, gap 8px, white / `#1c1c1e`, ring `0 0 0 1px rgba(0,0,0,.08)` / `#3a3a3c`; on error a 2px `#ff3b30` / `#ff453a` ring. Input 44px tall, 16px text (15px from `@sm`), placeholder "you@company.com" (`#a1a1a6` / `#6e6e73`). Button 44px, padding 0 20px, 15px medium white on accent: "Join free" / "Joining…" while busy (opacity .7 disabled).
-  - Hint under the field (13px, 12px top margin, 16px side padding): "Free for 14 days. No card needed." (`#86868b` / `#a1a1a6`); error "That email doesn't look right." (`#d70015` / `#ff6961`); done "You're on the list."
+  - Eyebrow: 14px semibold accent, 8px gap, a 8×8 accent dot with a pulsing ring behind it, text `eyebrow` ("2,400 teams joined this month").
+  - `<h1>` `headline` ("Run the whole week from one calm inbox."), each word an inline-block with 0.22em gap; `highlight` words ("calm") in the accent. Size `clamp(38px, 7cqi, 76px)` (from `@4xl` `clamp(42px, 6cqi, 76px)`), semibold, line-height 1, tracking −0.05em, `#1d1d1f` / `#f5f5f7`.
+  - Paragraph: max-width 480px, `clamp(16px, 2.4cqi, 19px)`, line-height 1.45, `#6e6e73` / `#a1a1a6`: `description`.
+  - Form: max-width 460px, `noValidate`. Field row: fully rounded, padding 6px, gap 8px, white / `#1c1c1e`, ring `0 0 0 1px rgba(0,0,0,.08)` / `#3a3a3c`; on error a 2px `#ff3b30` / `#ff453a` ring. Input 44px tall, 16px text (15px from `@sm`), placeholder `placeholder` (`#a1a1a6` / `#6e6e73`). Button 44px, padding 0 20px, 15px medium white on accent: `ctaLabel` / `pendingLabel` while busy (opacity .7 disabled).
+  - Hint under the field (13px, 12px top margin, 16px side padding): `note` (`#86868b` / `#a1a1a6`); error `errorNote` (`#d70015` / `#ff6961`); done `successNote`.
 - Right column: relative stage 420px tall (460px from `@lg`), max-width 520px, centred, `aria-hidden`. Card surface: radius 22px, white / `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 30px 60px -30px rgba(0,0,0,.35)` (dark `#3a3a3c`, `.9`).
   1. Inbox (depth 0.6): `left 0, top 2%, width 88%`; from `@lg` `left 6%, top 4%, width 78%`. Padding 16px (20px `@lg`). Header "Inbox" 13px semibold + "12 new" accent badge (11px). Rows with a top hairline, 10px vertical padding: 32px initials avatars — Maya Chen "Q3 board deck, final" `#ff9f0a`; Leo Park "Can we move standup?" `#30d158`; Billing "Invoice #2041 paid" `#0a84ff`. Name 13px semibold, line 12px grey, both truncate.
   2. Meeting (depth 1.2, float 10): `right 0, top 46%, width 64%`; from `@lg` `top 44%, width 58%`. "Today, 2:30 PM" 12px grey, "Design review" 16px semibold, four overlapping 28px avatars (`#ff375f`, `#5e5ce6`, `#30d158`, `#ff9f0a`, 2px white / `#1c1c1e` border, −8px overlap), then "Join" (accent) and "Later" (`#f5f5f7` / `#2c2c2e`) pills, 12px semibold.
@@ -64,7 +76,7 @@ Build a split hero: copy and an email capture on the left, and on the right a st
 - [ ] Two columns from ~896px container width, stacked below.
 - [ ] Three cards enter one after another and float at different rates.
 - [ ] Moving the mouse shifts the payment card most and the inbox least.
-- [ ] "calm" is in the accent; changing `accent` recolours dot, badges, buttons and glow.
+- [ ] "calm" is in the accent; changing `accent` recolours dot, badges, buttons and glow; changing `highlight` moves the tint.
 - [ ] Submitting "abc" shakes the form, shows a red ring and the error hint, then clears after 0.6s.
 - [ ] A valid email shows "Joining…", then morphs into the green check confirmation.
 - [ ] A rejecting `onSubmit` shows the error state instead.

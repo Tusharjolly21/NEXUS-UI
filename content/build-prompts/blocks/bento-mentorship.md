@@ -5,11 +5,24 @@ Build a "why choose us" bento section for an interview-prep community: six tiles
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `animate`, `useInView`, `useMotionValue`, `useTransform`, `useReducedMotion`, variants).
-- File: `components/blocks/animated-bento-grid.tsx`, default export `WhyChooseUsBento`.
+- File: `components/blocks/animated-bento-grid.tsx`, default export `WhyChooseUsBento`; also export `WhyChooseUsBentoProps`, `BentoMentor` and `WHY_CHOOSE_US_MENTORS`.
 
 ## API
 
-No props. All copy and data are constants at the top of the file (see Demo data).
+Every prop is optional; with none the block renders exactly the demo below.
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `title` | `string` | `"Interview prep goes faster with people in your corner."` | Section headline. |
+| `description` | `string` | `"Daily practice, a cohort at your level, and engineers who have sat on the other side of the table."` | Supporting line beside the headline. |
+| `accent` | `string` | — | Hex colour for the "You" monogram, sent bubbles, today's bar and value, and the speaker ring, set as `--bento-accent` on the section. Unset (or `#0071e3`) keeps `#0071e3`, with today's value `#2997ff` in dark mode. |
+| `mentorCount` | `number` | `140` | Figure the mentors tile counts up to; rounded and clamped to 0–99,999. |
+| `solvedCount` | `number` | `38` | Figure the progress tile counts up to; same clamp. |
+| `autoplay` | `boolean` | `true` | Runs the help-chat timeline and the speaker rotation. Off, the chat shows the full thread and the speaker stays put. |
+| `mentors` | `BentoMentor[]` (`{ name, role, slot }`) | `WHY_CHOOSE_US_MENTORS` | Mentor list rows; only the first 6 are shown, and an empty list hides the list. |
+| `className` | `string` | — | Merged onto the outer section. |
+
+The chats, cohort, room and week data stay constants at the top of the file (see Demo data).
 
 ## Layout and look
 
@@ -42,7 +55,7 @@ No props. All copy and data are constants at the top of the file (see Demo data)
 
 ## Interaction and states
 
-- Hovering mentor rows moves the highlight; everything else is ambient. Intervals run only while their tile is in view and stop under reduced motion (live chat then shows the full thread).
+- Hovering mentor rows moves the highlight; everything else is ambient. Intervals run only while their tile is in view and stop under reduced motion or `autoplay={false}` (live chat then shows the full thread).
 
 ## Demo data
 

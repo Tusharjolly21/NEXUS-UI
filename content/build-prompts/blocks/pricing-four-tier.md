@@ -9,13 +9,21 @@ Build a centred pricing section with a monthly/yearly segmented control above fo
 
 ## API
 
-`PricingPlanGrid` takes no props; the copy and plans are constants in the file.
+Every prop is optional; with none the section renders exactly as described below. Export the props type as `PricingPlanGridProps`.
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
-| — | — | — | No props. Edit the `gridPlans` array to change content. |
+| `title` | `string` | `"Plans that grow with your audience"` | Main heading. |
+| `description` | `string` | `"Start on the plan that fits the channels you run today. Switch tiers whenever you like and we prorate the difference."` | Paragraph under the heading. |
+| `accentColor` | `string` | — | Primary button fill (hover mixes 12% white), focus rings, check icons and highlights, the featured card's 2px ring (set as an inline `box-shadow`) and its badge. Unset keeps `#0071e3`, with `#2997ff` text/checks in dark mode; only overridden when set. Plain colour values only (hex, `rgb()`, `hsl()`, names). |
+| `defaultCycle` | `"monthly" \| "yearly"` | `"monthly"` | Billing period on mount. |
+| `savingsNote` | `string` | `"Save about 20% when you pay yearly."` | Small grey line under the toggle; empty string hides it. |
+| `showBillingToggle` | `boolean` | `true` | Show the toggle and its note. When `false`, prices stay on `defaultCycle`. |
+| `featuredBadge` | `string` | `"Most popular"` | Label on the featured card; empty string hides it. |
+| `plans` | `PricingGridPlan[]` | `DEFAULT_PRICING_GRID_PLANS` | Cards, first 8 used. |
+| `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Internal plan shape: `{ label; monthly: string; yearly: string; copy; features: string[]; action; featured?: boolean }`. Prices are display strings, so "Let's talk" works too.
+Exported plan shape `PricingGridPlan`: `{ label; monthly: string; yearly: string; copy; features: string[]; action; featured?: boolean }`. Prices are display strings, so "Let's talk" works too. Feature lists are capped at 12. The demo data below is exported as `DEFAULT_PRICING_GRID_PLANS`. All text from props renders as plain text.
 
 ## Layout and look
 

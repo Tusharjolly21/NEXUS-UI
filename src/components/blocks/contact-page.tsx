@@ -658,29 +658,39 @@ function SentMark() {
   );
 }
 
-export function ContactForm({
-  onSubmit = simulateSend,
-  eyebrow,
-  title,
-  description,
-  buttonLabel,
-  roundedButton = false,
-  dense = false,
-  className,
-}: {
+export type ContactFormProps = {
   /** Called with the field values on submit. Defaults to a simulated send. */
   onSubmit?: ContactSubmitHandler;
   eyebrow: string;
   title: string;
   description: string;
   buttonLabel: string;
+  /** Hex colour for the button, field focus, the sent link and focus outlines. Unset keeps the built-in blues. */
+  accent?: string;
+  /** Overrides for field labels, placeholders and the sending/sent/error copy. */
+  copy?: Partial<ContactFormCopy>;
   /** Stretch the submit button to the full width of the form. */
   roundedButton?: boolean;
   /** Tighter spacing for forms that sit inside a card. */
   dense?: boolean;
   className?: string;
-}) {
+};
+
+export function ContactForm({
+  onSubmit = simulateSend,
+  eyebrow,
+  title,
+  description,
+  buttonLabel,
+  accent,
+  copy,
+  roundedButton = false,
+  dense = false,
+  className,
+}: ContactFormProps) {
   const reduce = useReducedMotion();
+  const text = { ...DEFAULT_CONTACT_FORM_COPY, ...copy };
+  const ring = ringFor(accent);
   const uid = React.useId();
   const [fields, setFields] = React.useState({ name: "", email: "", company: "", message: "" });
   const [status, setStatus] = React.useState<"idle" | "loading" | "success" | "error">("idle");
@@ -704,21 +714,29 @@ export function ContactForm({
         setFields({ name: "", email: "", company: "", message: "" });
       }
     } catch (err) {
-      setErrorMsg(err instanceof Error && err.message ? err.message : "Couldn't send that. Please try again.");
+      setErrorMsg(err instanceof Error && err.message ? err.message : text.errorFallback);
       setStatus("error");
     }
   }
 
   const fieldKeys = [
-    { key: "name" as const, label: "Name", placeholder: "Maya Srinivasan", type: "text", autoComplete: "name" },
-    { key: "email" as const, label: "Work email", placeholder: "maya@northstar.dev", type: "email", autoComplete: "email" },
-    { key: "company" as const, label: "Company", placeholder: "Northstar Labs", type: "text", autoComplete: "organization" },
+    { key: "name" as const, label: text.nameLabel, placeholder: text.namePlaceholder, type: "text", autoComplete: "name" },
+    { key: "email" as const, label: text.emailLabel, placeholder: text.emailPlaceholder, type: "email", autoComplete: "email" },
+    {
+      key: "company" as const,
+      label: text.companyLabel,
+      placeholder: text.companyPlaceholder,
+      type: "text",
+      autoComplete: "organization",
+    },
   ];
 
   const fieldClass = cn(
     "mt-1.5 w-full rounded-[12px] bg-white px-3.5 text-[16px] text-[#1d1d1f] shadow-[inset_0_0_0_1px_rgba(0,0,0,.12)] outline-none transition-shadow placeholder:text-[#a1a1a6]",
-    "focus:shadow-[inset_0_0_0_1px_#0071e3,0_0_0_3px_rgba(0,113,227,.25)] disabled:opacity-60",
-    "dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,.1)] dark:placeholder:text-[#8e8e93] dark:focus:shadow-[inset_0_0_0_1px_#2997ff,0_0_0_3px_rgba(41,151,255,.3)]",
+    "disabled:opacity-60 dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,.1)] dark:placeholder:text-[#8e8e93]",
+    accent
+      ? "focus:shadow-[inset_0_0_0_1px_var(--contact-accent),0_0_0_3px_color-mix(in_srgb,var(--contact-accent)_25%,transparent)] dark:focus:shadow-[inset_0_0_0_1px_var(--contact-accent),0_0_0_3px_color-mix(in_srgb,var(--contact-accent)_30%,transparent)]"
+      : "focus:shadow-[inset_0_0_0_1px_#0071e3,0_0_0_3px_rgba(0,113,227,.25)] dark:focus:shadow-[inset_0_0_0_1px_#2997ff,0_0_0_3px_rgba(41,151,255,.3)]",
   );
 
   const swap = {
@@ -733,6 +751,7 @@ export function ContactForm({
       layout={!reduce}
       transition={{ type: "spring", stiffness: 260, damping: 32 }}
       className={cn("mx-auto max-w-2xl", ink, className)}
+      style={accentStyle(accent)}
     >
       <AnimatePresence mode="popLayout" initial={false}>
         {status === "success" ? (
@@ -744,15 +763,15 @@ export function ContactForm({
           >
             <SentMark />
             <div>
-              <p className="text-[21px] font-semibold tracking-[-0.02em]">Message sent</p>
-              <p className={cn("mt-1 text-[15px]", secondary)}>We&apos;ll get back to you within 24 hours.</p>
+              <p className="text-[21px] font-semibold tracking-[-0.02em]">{text.sentTitle}</p>
+              <p className={cn("mt-1 text-[15px]", secondary)}>{text.sentMessage}</p>
             </div>
             <button
               type="button"
               onClick={() => setStatus("idle")}
-              className={cn("rounded text-[15px] font-medium text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}
+              className={cn("rounded text-[15px] font-medium hover:underline", linkFor(accent), ring)}
             >
-              Send another message ›
+              {text.sendAnotherLabel}
             </button>
           </motion.div>
         ) : (
@@ -775,7 +794,9 @@ export function ContactForm({
                   <div key={field.key} className={cn(!dense && field.key === "company" && "sm:col-span-2")}>
                     <label htmlFor={`${uid}-${field.key}`} className="text-[13px] font-medium">
                       {field.label}
-                      {field.key === "company" ? <span className={cn("font-normal", tertiary)}> (optional)</span> : null}
+                      {field.key === "company" && text.optionalLabel ? (
+                        <span className={cn("font-normal", tertiary)}>{text.optionalLabel}</span>
+                      ) : null}
                     </label>
                     <input
                       id={`${uid}-${field.key}`}
@@ -794,14 +815,14 @@ export function ContactForm({
               </div>
               <div>
                 <label htmlFor={`${uid}-message`} className="text-[13px] font-medium">
-                  Message
+                  {text.messageLabel}
                 </label>
                 <textarea
                   id={`${uid}-message`}
                   name="message"
                   value={fields.message}
                   onChange={handleChange}
-                  placeholder="Share the goal, deadline, and what a great outcome looks like."
+                  placeholder={text.messagePlaceholder}
                   required
                   disabled={status === "loading"}
                   className={cn(fieldClass, "resize-none py-3", dense ? "min-h-24" : "min-h-32")}
@@ -831,8 +852,11 @@ export function ContactForm({
               whileTap={status !== "loading" && !reduce ? { scale: 0.97 } : undefined}
               transition={UI_SPRING}
               className={cn(
-                "relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full bg-[#0071e3] px-6 text-[17px] font-medium text-white transition-colors hover:bg-[#0077ed] disabled:cursor-not-allowed disabled:opacity-80",
-                focusRing,
+                "relative inline-flex h-12 w-full items-center justify-center overflow-hidden rounded-full px-6 text-[17px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-80",
+                accent
+                  ? "bg-[color:var(--contact-accent)] transition-[filter] hover:brightness-110"
+                  : "bg-[#0071e3] transition-colors hover:bg-[#0077ed]",
+                ring,
                 dense ? "mt-5" : "mt-7",
                 roundedButton ? "sm:w-full" : "sm:w-auto sm:min-w-[200px]",
               )}
@@ -851,7 +875,7 @@ export function ContactForm({
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
                       <path className="opacity-90" stroke="currentColor" strokeWidth="3" strokeLinecap="round" d="M22 12a10 10 0 0 0-10-10" />
                     </svg>
-                    Sending…
+                    {text.sendingLabel}
                   </motion.span>
                 ) : (
                   <motion.span
@@ -875,10 +899,20 @@ export function ContactForm({
 }
 
 /** "We are here" marker on a dotted world map: a blue pin with soft rings breathing out of it. */
-function IndiaPulseMap({ compact = false }: { compact?: boolean }) {
+function IndiaPulseMap({
+  compact = false,
+  label = "We are here",
+  accent,
+}: {
+  compact?: boolean;
+  label?: string;
+  accent?: string;
+}) {
   const reduce = useReducedMotion();
+  const pin = accent || "#0071e3";
   const marker = compact ? { x: 548, y: 124, labelY: 42 } : { x: 552, y: 126, labelY: 34 };
-  const labelWidth = compact ? 104 : 116;
+  // wide enough for longer labels; the pill stays centred on the pin and truncates past this
+  const labelWidth = compact ? 208 : 232;
   const stemTop = marker.labelY + 36;
 
   return (
@@ -890,7 +924,7 @@ function IndiaPulseMap({ compact = false }: { compact?: boolean }) {
           x2={marker.x}
           y1={stemTop}
           y2={marker.y}
-          stroke="#0071e3"
+          stroke={pin}
           strokeWidth={compact ? 1 : 1.5}
           strokeLinecap="round"
           initial={reduce ? false : { pathLength: 0 }}
@@ -900,8 +934,8 @@ function IndiaPulseMap({ compact = false }: { compact?: boolean }) {
         />
         <foreignObject x={marker.x - labelWidth / 2} y={marker.labelY} width={labelWidth} height="40">
           <div className="flex justify-center">
-            <span className="rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_6px_16px_-6px_rgba(0,0,0,.2)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
-              We are here
+            <span className="max-w-full truncate whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_6px_16px_-6px_rgba(0,0,0,.2)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)]">
+              {label}
             </span>
           </div>
         </foreignObject>
@@ -914,7 +948,7 @@ function IndiaPulseMap({ compact = false }: { compact?: boolean }) {
                 cx={marker.x}
                 cy={marker.y}
                 r={compact ? 4 : 6}
-                fill="#0071e3"
+                fill={pin}
                 initial={{ scale: 1, opacity: 0.28 }}
                 animate={{ scale: compact ? 4 : 6, opacity: 0 }}
                 transition={{ duration: 2.2, repeat: Infinity, delay, ease: [0.22, 1, 0.36, 1] }}
@@ -922,7 +956,7 @@ function IndiaPulseMap({ compact = false }: { compact?: boolean }) {
               />
             ))}
         <circle cx={marker.x} cy={marker.y} r={compact ? 4 : 6} fill="#ffffff" />
-        <circle cx={marker.x} cy={marker.y} r={compact ? 2.6 : 4} fill="#0071e3" />
+        <circle cx={marker.x} cy={marker.y} r={compact ? 2.6 : 4} fill={pin} />
       </svg>
     </div>
   );
@@ -1075,9 +1109,11 @@ function WorldAtlasCanvas({ compact }: { compact: boolean }) {
 function AnimatedShell({
   children,
   className,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   const reduce = useReducedMotion() === true;
   const container: Variants = {
@@ -1092,6 +1128,7 @@ function AnimatedShell({
       whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
       className={className}
+      style={style}
     >
       {children}
     </motion.section>

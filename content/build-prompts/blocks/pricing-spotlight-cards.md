@@ -9,13 +9,21 @@ Build a three-card pricing section where the middle plan is a dark, taller "spot
 
 ## API
 
-`SpotlightPricingCards` takes no props; content lives in a `spotlightPlans` constant.
+Every prop is optional; with none the section renders exactly as described below. Export the props type as `SpotlightPricingCardsProps`.
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
-| — | — | — | No props. Edit `spotlightPlans` to change content. |
+| `title` | `string` | `"One assistant, three ways to run it"` | Main heading. |
+| `description` | `string` | `"Start on Hobby for free for 14 days. Every plan keeps your history when you move up."` | Paragraph under the heading. |
+| `accentColor` | `string` | — | Primary button fill (hover mixes 12% white), focus rings, check icons and highlights (including the pale checks on the dark card). Unset keeps `#0071e3`, with `#2997ff` text/checks in dark mode; only overridden when set. Plain colour values only (hex, `rgb()`, `hsl()`, names). |
+| `defaultCycle` | `"monthly" \| "yearly"` | `"monthly"` | Billing period on mount. |
+| `savingsNote` | `string` | `"Save about 20% when you pay yearly."` | Small grey line under the toggle; empty string hides it. |
+| `showBillingToggle` | `boolean` | `true` | Show the toggle and its note. When `false`, prices stay on `defaultCycle`. |
+| `featuresHeading` | `string` | `"Includes"` | Small heading above each feature list; empty string hides it. |
+| `plans` | `SpotlightPricingPlan[]` | `DEFAULT_SPOTLIGHT_PRICING_PLANS` | Cards, first 6 used. |
+| `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Internal plan shape: `{ label; copy; monthly: string; yearly: string; periodMonthly; periodYearly; action; featured?: boolean; features: string[] }`. A plan whose monthly value is `"Custom"` hides its period.
+Exported plan shape `SpotlightPricingPlan`: `{ label; copy; monthly: string; yearly: string; periodMonthly; periodYearly; action; featured?: boolean; features: string[]; hidePeriod?: boolean }`. `hidePeriod` defaults to `true` when the monthly value is `"Custom"`, so that plan hides its period. Features are capped at 12. The demo data below is exported as `DEFAULT_SPOTLIGHT_PRICING_PLANS`. All text from props renders as plain text.
 
 ## Layout and look
 
