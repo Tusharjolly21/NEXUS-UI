@@ -1,5 +1,9 @@
 import type { ComponentType } from "react";
 import { MorphingNavStage } from "./stages";
+import { KineticHeroStage } from "./kinetic-hero-stage";
+import { DriftGallery } from "./drift-gallery";
+import { ChangelogPile } from "./changelog-pile";
+import { Gravity404 } from "./gravity-404";
 import { SpotlightHero } from "./spotlight-hero";
 import { HalftonePlanet } from "./halftone-planet";
 import { ParallaxStackHero } from "./parallax-stack-hero";
@@ -44,4 +48,8 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-collapsing-rail": CollapsingRail,
   "mk-voice-note-contact": VoiceNoteContact,
   "mk-typo-catching-signup": TypoCatchingSignup,
+  "mk-kinetic-hero": KineticHeroStage,
+  "mk-drift-gallery": DriftGallery,
+  "mk-changelog-pile": ChangelogPile,
+  "mk-gravity-404": Gravity404,
 };

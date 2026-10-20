@@ -160,7 +160,7 @@ const playgrounds: BlockPlaygrounds = {
       {
         name: "words",
         type: "string[]",
-        description: "Endings the drum turns through, one face each. The headline reads the first; the last is where it stops.",
+        description: "Endings the drum turns through, one face each. Screen readers hear the first; the drum stops on the last.",
         defaultValue: '["love", "remember", "share", "pay for"]',
       },
       {
