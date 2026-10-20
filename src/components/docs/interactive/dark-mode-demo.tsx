@@ -185,11 +185,11 @@ export function DarkModeDemo({ autoplay = true, className }: DarkModeDemoProps) 
             </div>
 
             {/* Explicit light container: the page theme never reaches the card. */}
-            <div className="flex-1 rounded-[20px] bg-[#f5f5f7] p-2 shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
+            <div className="flex flex-1 flex-col rounded-[20px] bg-[#f5f5f7] p-2 shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)]">
               <div
                 data-testid="dark-mode-demo-wrapper"
                 className={cn(
-                  "flex h-full min-h-[210px] items-center justify-center rounded-[14px] p-4 transition-colors duration-300 motion-reduce:transition-none",
+                  "flex min-h-[210px] flex-1 items-center justify-center rounded-[14px] p-4 transition-colors duration-300 motion-reduce:transition-none",
                   isDark ? "dark nx-dm-scope bg-black" : "bg-[#f5f5f7]",
                 )}
               >

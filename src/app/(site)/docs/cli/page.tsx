@@ -38,7 +38,7 @@ export default function CliDocsPage() {
           Pick something to add and run it. The terminal shows each step the shadcn CLI takes and the tree shows the
           files that land in your project.
         </p>
-        <CliSimulator />
+        <div data-doc-widget><CliSimulator /></div>
       </DocSection>
 
       <DocSection title="Initialize shadcn/ui">

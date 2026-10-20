@@ -62,8 +62,9 @@ export function SetupChecklist({ steps }: { steps: Step[] }) {
   const dash = useTransform(progress, (v) => `${Math.max(0, Math.min(1.08, v)) * C} ${C}`);
 
   const toggle = (id: string) => {
-    const next = doneSet.has(id) ? done.filter((d) => d !== id) : [...done, id];
-    write(next);
+    // Read the stored list now, not the render's copy, so quick taps don't drop each other.
+    const latest = read();
+    write(latest.includes(id) ? latest.filter((d) => d !== id) : [...latest, id]);
   };
 
   return (

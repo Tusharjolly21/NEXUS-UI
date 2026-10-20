@@ -177,7 +177,7 @@ html.dark {
             <code className={docInlineCodeClass}>{"<html>"}</code> via your theme provider (
             <code className={docInlineCodeClass}>next-themes</code> or a custom script).
           </p>
-          <DarkModeDemo />
+          <div data-doc-widget><DarkModeDemo /></div>
         </DocSection>
 
         <DocSection title="6. Start the dev server">

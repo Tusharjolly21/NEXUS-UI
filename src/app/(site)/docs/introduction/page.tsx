@@ -264,7 +264,7 @@ export default function IntroductionPage() {
             </Link>{" "}
             for full registry setup instructions.
           </p>
-          <CliSimulator autoplay={false} />
+          <div data-doc-widget><CliSimulator autoplay={false} /></div>
         </DocSection>
 
         <DocSection title="Get started">

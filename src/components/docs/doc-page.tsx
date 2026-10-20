@@ -200,10 +200,11 @@ export function DocPageShell({
   className?: string;
 }) {
   // Page bodies were written with 14px muted text; lift paragraphs and lists to a reading size here.
+  // Interactive widgets ([data-doc-widget]) keep their own type.
   return (
     <div
       className={cn(
-        "max-w-[760px] space-y-12 [&_section_li]:text-[16px] [&_section_li]:leading-[1.65] [&_section_p]:text-[16.5px] [&_section_p]:leading-[1.7] [&_section_p]:text-body [&_section_a]:text-link [&_section_a]:underline-offset-4 [&_section_a:hover]:underline",
+        "max-w-[760px] space-y-12 [&_section_li:not([data-doc-widget]_*)]:text-[16px] [&_section_li:not([data-doc-widget]_*)]:leading-[1.65] [&_section_p:not([data-doc-widget]_*)]:text-[16.5px] [&_section_p:not([data-doc-widget]_*)]:leading-[1.7] [&_section_p:not([data-doc-widget]_*)]:text-body [&_section_a:not([data-doc-widget]_*)]:text-link [&_section_a:not([data-doc-widget]_*)]:underline-offset-4 [&_section_a:not([data-doc-widget]_*):hover]:underline",
         className,
       )}
     >

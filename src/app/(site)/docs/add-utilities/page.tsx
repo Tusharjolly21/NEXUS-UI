@@ -97,7 +97,7 @@ cn("p-4", isActive && "p-6")        // → "p-6"      (clsx, then twMerge)`}</Do
           <p className="text-sm leading-relaxed text-muted-foreground">
             This runs the real clsx and tailwind-merge. Switch the props and watch which classes survive.
           </p>
-          <CnPlayground />
+          <div data-doc-widget><CnPlayground /></div>
         </DocSection>
 
         <DocSection title="1. Install dependencies">
