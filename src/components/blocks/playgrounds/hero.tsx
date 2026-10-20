@@ -2,6 +2,7 @@
 
 import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
 import { ParallaxStackHero } from "@/components/blocks/motion-kit/parallax-stack-hero";
+import { KineticHero } from "@/components/blocks/motion-kit/kinetic-hero";
 import type { BlockPlaygrounds } from "./types";
 
 const playgrounds: BlockPlaygrounds = {
@@ -135,6 +136,49 @@ const playgrounds: BlockPlaygrounds = {
     ],
     jsxName: "ParallaxStackHero",
     importLine: 'import { ParallaxStackHero } from "@/components/blocks/motion-kit/parallax-stack-hero";',
+  },
+  "mk-kinetic-hero": {
+    Component: KineticHero,
+    props: [
+      { name: "lead", type: "string", description: "First line of the headline. Its letters tumble up into place.", defaultValue: '"Build something"' },
+      { name: "subject", type: "string", description: "Word before the turning drum on the second line.", defaultValue: '"people"' },
+      {
+        name: "sub",
+        type: "string",
+        description: "Paragraph under the headline.",
+        defaultValue: '"The component library for interfaces that feel made, not assembled."',
+      },
+      { name: "primaryLabel", type: "string", description: "Blue button that lands at the end.", defaultValue: '"Start building"' },
+      { name: "secondaryLabel", type: "string", description: "Outlined button beside it.", defaultValue: '"Browse components"' },
+      {
+        name: "autoplay",
+        type: "boolean",
+        description: "Contained mode only: scrolls the box to the end and back in a loop until the first wheel, touch, click or key.",
+        defaultValue: "false",
+      },
+      { name: "hint", type: "string", description: "Scroll cue at the bottom; fades out as the letters arrive.", defaultValue: '"Scroll"' },
+      {
+        name: "words",
+        type: "string[]",
+        description: "Endings the drum turns through, one face each. The headline reads the first; the last is where it stops.",
+        defaultValue: '["love", "remember", "share", "pay for"]',
+      },
+      {
+        name: "contained",
+        type: "boolean",
+        description:
+          "Off: a 260vh section scrubbed by page scroll with a sticky stage. On: its own scroll box `height` px tall, for frames that clip overflow (the preview here uses it).",
+        defaultValue: "false",
+        hidden: true,
+      },
+      { name: "height", type: "number", description: "Scroll box height in contained mode, in px.", defaultValue: "640", min: 400, max: 1000, step: 20, hidden: true },
+      { name: "onAction", type: '(label: "primary" | "secondary") => void', description: "Called with the button that was pressed. Buttons never navigate on their own." },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    baseProps: { contained: true },
+    jsxName: "KineticHero",
+    importLine: 'import { KineticHero } from "@/components/blocks/motion-kit/kinetic-hero";',
+    frameClassName: "bg-[#f5f5f7] dark:bg-black",
   },
 };
 

@@ -11900,6 +11900,153 @@ export function BudgetPanel() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "tag-pit",
+    name: "Tag Pit",
+    registryCliName: "tag-pit",
+    description:
+      "An interests picker where every tag is a physical pill dropped into a tray. Grab and throw the pills, shake the tray, and tap one to pick it so it hops up and lights; Continue unlocks once enough are picked.",
+    categorySlug: "inputs-controls",
+    tags: ["tags", "interests", "picker", "onboarding", "chips", "physics", "throw", "matter-js", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "press", "spring", "layout"],
+    dependencies: ["framer-motion", "matter-js"],
+    props: [
+      { name: "tags", type: "string[]", defaultValue: '["Design", "Motion", "Typography", "3D", "Photography", "AI", "Music", "Startups", "Travel", "Coffee", "Gaming", "Writing", "Code", "Film", "Architecture", "Fitness"]', description: "The interests to pick from. Each one becomes a physical pill sized to its label." },
+      { name: "min", type: "number", defaultValue: "3", description: "How many picks unlock the Continue button." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of picked pills, the picked chips and the Continue button (6-digit hex)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Picks a few tags and shakes the tray by itself until someone touches it." },
+    ],
+    Preview: Previews.PreviewTagPit,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TagPit } from "@/components/tag-pit";
+
+const INTERESTS = ["Design", "Motion", "AI", "Music", "Travel", "Coffee", "Code", "Film", "Fitness", "Writing"];
+
+export function OnboardingInterests() {
+  return (
+    <div className="flex min-h-[520px] items-center justify-center">
+      <TagPit tags={INTERESTS} min={3} accent="#0071e3" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "usage-stack",
+    name: "Usage Stack",
+    registryCliName: "usage-stack",
+    description:
+      "Usage-based pricing you can see: every 10,000 requests is a block that drops into a bin, coloured by the tier it falls in. Slide the volume up and blocks rain in, slide it down and the newest pop, while the monthly price rolls with it and the blocks can be grabbed and thrown.",
+    categorySlug: "pricing-sections",
+    tags: ["pricing", "usage based", "metered billing", "slider", "tiers", "calculator", "matter-js", "physics", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion", "matter-js"],
+    props: [
+      { name: "defaultValue", type: "number", defaultValue: "120000", description: "Requests per month to start from, rounded to the nearest 10,000 (0 to 600,000)." },
+      { name: "onChange", type: "(requests: number, price: number) => void", description: "Called whenever the volume changes, with the request count and the monthly price in dollars." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps the volume through a few sample values every 2.6s until someone touches the slider or the bin. Off when reduced motion is preferred." },
+    ],
+    Preview: Previews.PreviewUsageStack,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { UsageStack } from "@/components/usage-stack";
+
+export function PricingCalculator() {
+  return (
+    <section className="flex flex-col items-center gap-6 py-16">
+      <h2 className="text-3xl font-semibold tracking-tight">Pay for what you use</h2>
+      <UsageStack
+        defaultValue={200_000}
+        onChange={(requests, price) => console.log(requests, price)}
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "marble-progress",
+    name: "Marble Progress",
+    registryCliName: "marble-progress",
+    description:
+      "An onboarding checklist that keeps score with marbles: tick a step and a marble of its colour rolls down three ramps into a jar, untick it and that marble pops. When every step is done the jar glows.",
+    categorySlug: "cards",
+    tags: ["onboarding", "checklist", "progress", "marbles", "jar", "physics", "canvas", "matter-js", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion", "matter-js"],
+    props: [
+      { name: "steps", type: "MarbleStep[]", defaultValue: "5 setup steps", description: "Each step has a label (unique) and a color (6-digit hex) used for its checkbox and marble." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks the steps one by one, then clears them, until someone clicks a step. Off under reduced motion." },
+    ],
+    Preview: Previews.PreviewMarbleProgress,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MarbleProgress } from "@/components/marble-progress";
+
+const STEPS = [
+  { label: "Add a payment method", color: "#0071e3" },
+  { label: "Import your contacts", color: "#30d158" },
+  { label: "Send your first invoice", color: "#ff9f0a" },
+];
+
+export function SetupChecklist() {
+  return <MarbleProgress steps={STEPS} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "cloth-banner",
+    name: "Cloth Banner",
+    registryCliName: "cloth-banner",
+    description:
+      "An announcement printed on cloth and pinned to a rail by five pins. It sways in the breeze and drapes under your hand; yank it down hard and the pins pop one by one until it drops away, or press Dismiss to let it fall.",
+    categorySlug: "cta-sections",
+    tags: ["announcement", "banner", "dismissible", "cloth", "verlet", "canvas", "launch", "physics", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Launch Week"', description: "Big line printed on the cloth." },
+      { name: "subtitle", type: "string", defaultValue: '"Oct 27–31 · five drops, one a day"', description: "Smaller line printed under the title." },
+      { name: "from", type: "string", defaultValue: '"#0071e3"', description: "Gradient start colour of the cloth (top left)." },
+      { name: "to", type: "string", defaultValue: '"#5e5ce6"', description: "Gradient end colour of the cloth (bottom right)." },
+      { name: "onDismiss", type: "() => void", description: "Called once the banner has dropped away, whether it was yanked down or dismissed with the button." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sends a gust of wind every 2.2s until someone grabs the cloth or presses a button. Off when reduced motion is preferred." },
+    ],
+    Preview: Previews.PreviewClothBanner,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ClothBanner } from "@/components/cloth-banner";
+
+export function LaunchAnnouncement() {
+  return (
+    <div className="flex justify-center py-10">
+      <ClothBanner
+        title="Launch Week"
+        subtitle="Oct 27–31 · five drops, one a day"
+        onDismiss={() => localStorage.setItem("launch-week-dismissed", "1")}
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 export function getLibraryComponent(slugOrRegistryName: string) {
