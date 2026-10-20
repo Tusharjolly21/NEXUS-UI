@@ -7,10 +7,11 @@ import { getAllPosts } from "@/lib/blog";
 import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 
-// Every page's markup changed with the site redesign on this date, so no lastmod is older than it.
+// Every page's markup changed on this date (component redesign, Pro-only templates, new pricing),
+// so no lastmod is older than it.
 // (/demos/* pages are full-screen versions of component pages and canonicalise to them, so they
 // are left out of the sitemap.)
-const REDESIGN = "2026-10-19";
+const REDESIGN = "2026-10-20";
 const since = (date: string | undefined) => (date && date > REDESIGN ? date : REDESIGN);
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
