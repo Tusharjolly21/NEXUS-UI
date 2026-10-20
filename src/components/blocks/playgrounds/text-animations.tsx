@@ -129,12 +129,14 @@ const playgrounds: BlockPlaygrounds = {
     props: [
       {
         name: "text",
+        required: true,
         type: "string",
         description: "The headline that types itself out. Required. A new value starts typing again from the first letter.",
         defaultValue: '"Release notes people read."',
       },
       {
         name: "description",
+        required: true,
         type: "string",
         description: "Paragraph that blurs in under the headline once typing starts. Leave empty to hide it.",
         defaultValue:
@@ -248,6 +250,7 @@ const playgrounds: BlockPlaygrounds = {
     props: [
       {
         name: "text",
+        required: true,
         type: "string",
         description: "The paragraph to reveal. Required. Line breaks in it are kept.",
         defaultValue:
@@ -326,6 +329,7 @@ const playgrounds: BlockPlaygrounds = {
     props: [
       {
         name: "text",
+        required: true,
         type: "string",
         description: "The reply to type out, one character per tick. Required.",
         defaultValue:

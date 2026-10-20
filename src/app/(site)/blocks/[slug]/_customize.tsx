@@ -105,10 +105,11 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
     .map((p) => String(values[p.name]))
     .join("|");
   const snippet = React.useMemo(() => {
-    const attrs = [...snippetProps, ...changed.map((p) => `${p.name}=${propValueToCode(values[p.name], p)}`)];
+    const written = editable.filter((p) => p.required || changed.includes(p));
+    const attrs = [...snippetProps, ...written.map((p) => `${p.name}=${propValueToCode(values[p.name], p)}`)];
     const tag = attrs.length ? `<${jsxName}\n${attrs.map((a) => `  ${a}`).join("\n")}\n/>` : `<${jsxName} />`;
     return `${importLine}\n\n${tag}`;
-  }, [changed, importLine, jsxName, snippetProps, values]);
+  }, [changed, editable, importLine, jsxName, snippetProps, values]);
 
   return (
     <div className="grid gap-4">

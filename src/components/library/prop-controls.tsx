@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 export const PROP_CONTROL_LIMIT = 8;
 
 /** Longest text a playground accepts for a string prop. */
-export const PROP_TEXT_LIMIT = 160;
+export const PROP_TEXT_LIMIT = 400;
 
 export type PropDoc = {
   name: string;
@@ -22,11 +22,16 @@ export type PropDoc = {
   min?: number;
   max?: number;
   step?: number;
+  /** Always written into copied JSX, changed or not (the component needs it). */
+  required?: boolean;
+  /** Documented in the props table but never given a control (URLs, file paths, start-only switches). */
+  hidden?: boolean;
 };
 
 export function getEditableProps(props: PropDoc[] = []) {
   return props
     .filter((prop) => {
+      if (prop.hidden) return false;
       const type = prop.type.toLowerCase();
       if (/^on[A-Z]/.test(prop.name)) return false;
       if (["className", "style", "children"].includes(prop.name) || /ClassName$/.test(prop.name)) return false;
