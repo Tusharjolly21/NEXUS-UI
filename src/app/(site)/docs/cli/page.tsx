@@ -10,6 +10,7 @@ import {
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
+import { CliSimulator } from "@/components/docs/interactive/cli-simulator";
 
 export const metadata: Metadata = createMetadata({
   title: "CLI",
@@ -31,6 +32,14 @@ export default function CliDocsPage() {
         title="CLI"
         description="Nexus-UI ships hand-written React and Tailwind you copy from each component page. For primitives (button, dialog, tabs), the shadcn/ui CLI remains the fastest way to align with the same stack this project uses."
       />
+
+      <DocSection title="See what add does">
+        <p className="text-sm text-muted-foreground">
+          Pick something to add and run it. The terminal shows each step the shadcn CLI takes and the tree shows the
+          files that land in your project.
+        </p>
+        <CliSimulator />
+      </DocSection>
 
       <DocSection title="Initialize shadcn/ui">
         <p className="text-sm text-muted-foreground">
