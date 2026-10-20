@@ -40,7 +40,7 @@ export const blocksManifest: BlockManifestEntry[] = [
     category: "Pricing blocks",
     tags: ["pricing", "plans", "comparison", "subscription", "framer-motion"],
     premium: false,
-    variants: ["Radio Plan Selector", "Four Tier Billing Switch", "Advanced Pricing Columns", "Spotlight Pricing Cards"],
+    variants: ["Radio Plan Selector", "Four Tier Billing Switch", "Advanced Pricing Columns", "Spotlight Pricing Cards", "Seat Ruler Pricing", "Beam Pricing"],
     reactSource: `import { RadioPlanPricing } from "@/components/blocks/pricing-section";
 
 export default function PricingPage() {
@@ -61,6 +61,8 @@ export default function PricingPage() {
       "Typewriter Effect",
       "Blur Fade In",
       "Generate Typewriter with Sound",
+      "Scramble Heading",
+      "Scroll-read Manifesto",
     ],
     reactSource: `import {
   TextAnimationBlurFadeIn,
@@ -105,6 +107,7 @@ export default function Page() {
       "Cursor Spotlight",
       "Swap Animation",
       "Single Row Lift",
+      "Loupe Logo Cloud",
     ],
     reactSource: `import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
 import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
@@ -135,7 +138,7 @@ export default function Page() {
     category: "Interactive backgrounds",
     tags: ["background animation for website", "background animation css", "background animation react", "interactive background", "cursor", "canvas", "waves", "particles"],
     premium: true,
-    variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise", "Aurora Wavy Lines"],
+    variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise", "Aurora Wavy Lines", "Halftone Planet"],
     reactSource: `export { InteractiveDots } from "@/components/interactive-dots";
 export { WavyLines } from "@/components/wavy-lines";`,
   },
@@ -147,7 +150,7 @@ export { WavyLines } from "@/components/wavy-lines";`,
     category: "Feature grids",
     tags: ["bento", "features", "animated", "ats", "upload", "framer-motion"],
     premium: true,
-    variants: ["Mentorship Bento", "ATS Bento Grid", "Upload Flow", "Progress Tracker", "Interview Cards"],
+    variants: ["Mentorship Bento", "ATS Bento Grid", "Upload Flow", "Progress Tracker", "Interview Cards", "Pulse Bento", "Live Demo Bento"],
     reactSource: `import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";\n\nexport default function Page() {\n  return <WhyChooseUsBento />;\n}`,
   },
   {
@@ -159,7 +162,7 @@ export { WavyLines } from "@/components/wavy-lines";`,
     category: "FAQ sections",
     tags: ["faq", "accordion", "chat", "support", "framer-motion"],
     premium: true,
-    variants: ["Questions & Answers FAQ", "Searchable FAQ", "Chat FAQ"],
+    variants: ["Questions & Answers FAQ", "Searchable FAQ", "Chat FAQ", "Instant Search FAQ"],
     reactSource: `import {
   ChatFaqSection,
   FaqFolderCard,
@@ -198,7 +201,7 @@ export default function Page() {
     category: "Navigation",
     tags: ["sidebar component react", "sidebar component react tailwind", "sidebar ui component react", "collapsible sidebar react", "navigation", "dashboard", "framer-motion"],
     premium: false,
-    variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar"],
+    variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar", "Collapsing Rail"],
     reactSource: `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
@@ -222,7 +225,7 @@ export default function Page() {
     category: "Contact sections",
     tags: ["contact", "forms", "map", "testimonial", "landing page", "framer-motion"],
     premium: false,
-    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story"],
+    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story", "Voice Note Contact"],
     reactSource: `import ContactPageBlock from "@/components/blocks/contact-page";
 
 export default function Page() {
@@ -268,7 +271,7 @@ export default function BlogPage() {
     category: "CTA sections",
     tags: ["checkout", "payment", "slide to pay", "3d secure", "otp", "tip", "rating", "order summary", "framer-motion"],
     premium: true,
-    variants: ["Pay & Confirm", "Verify Payment", "Tip & Rate"],
+    variants: ["Pay & Confirm", "Verify Payment", "Tip & Rate", "Slide to Pay"],
     reactSource: `"use client";
 
 import { PayAndConfirm, TipAndRate, VerifyPayment } from "@/components/blocks/checkout-moments";
@@ -285,6 +288,86 @@ export default function CheckoutPage() {
       <TipAndRate courier="Maya Chen" orderTotal={4200} />
     </main>
   );
+}`,
+  },
+  {
+    slug: "block-navigation",
+    registryCliName: "navigation-blocks",
+    name: "Navigation",
+    description:
+      "Site navigation that moves well: one dropdown panel that resizes and slides between menus, with a caret that follows the item, and a menu button on phones.",
+    category: "Navigation",
+    tags: ["navigation", "navbar", "mega menu", "dropdown", "header", "motion kit", "framer-motion"],
+    premium: true,
+    variants: ["Morphing Nav"],
+    reactSource: `import { MorphingNav } from "@/components/blocks/motion-kit/morphing-nav";
+
+export default function Header() {
+  return <MorphingNav />;
+}`,
+  },
+  {
+    slug: "block-hero",
+    registryCliName: "hero-blocks",
+    name: "Hero Sections",
+    description:
+      "Landing page heroes with real motion: a pointer-lit dot grid with a rotating last word, and copy beside product cards that part as you scroll.",
+    category: "Hero blocks",
+    tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
+    premium: true,
+    variants: ["Spotlight Hero", "Parallax Stack Hero"],
+    reactSource: `import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
+
+export default function Home() {
+  return <SpotlightHero />;
+}`,
+  },
+  {
+    slug: "block-features",
+    registryCliName: "feature-blocks",
+    name: "Feature Sections",
+    description:
+      "Ways to explain a product: tabs that advance on their own with a progress line, a timeline that draws itself in, and an orbit of integrations around your logo.",
+    category: "Feature grids",
+    tags: ["features", "feature section", "tabs", "timeline", "integrations", "motion kit", "framer-motion"],
+    premium: true,
+    variants: ["Auto-advancing Tabs", "Drawn Timeline", "Integrations Orbit"],
+    reactSource: `import { AutoAdvancingTabs } from "@/components/blocks/motion-kit/auto-advancing-tabs";
+
+export default function Features() {
+  return <AutoAdvancingTabs />;
+}`,
+  },
+  {
+    slug: "block-social-proof",
+    registryCliName: "social-proof-blocks",
+    name: "Social Proof",
+    description:
+      "Numbers that count up as they arrive and a wall of testimonials that drifts past, for the part of the page where people decide to trust you.",
+    category: "Testimonials",
+    tags: ["social proof", "testimonials", "stats", "reviews", "wall of love", "motion kit", "framer-motion"],
+    premium: true,
+    variants: ["Counting Stats", "Wall of Love"],
+    reactSource: `import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
+
+export default function Testimonials() {
+  return <WallOfLove />;
+}`,
+  },
+  {
+    slug: "block-newsletter",
+    registryCliName: "newsletter-blocks",
+    name: "Newsletter Signup",
+    description:
+      "An email signup that catches typos like gmial.com and offers the fix before you submit, then counts you in.",
+    category: "CTA sections",
+    tags: ["newsletter", "email signup", "waitlist", "cta", "form", "motion kit", "framer-motion"],
+    premium: true,
+    variants: ["Typo-catching Signup"],
+    reactSource: `import { TypoCatchingSignup } from "@/components/blocks/motion-kit/typo-catching-signup";
+
+export default function Newsletter() {
+  return <TypoCatchingSignup onSubmit={async (email) => { /* add to your list */ }} />;
 }`,
   },
 ];

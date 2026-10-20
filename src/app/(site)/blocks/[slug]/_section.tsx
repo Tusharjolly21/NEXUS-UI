@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Code2, Lock, Maximize2, Minimize2, Monitor, RotateCcw } from "lucide-react";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { UsageSnippet } from "@/components/library/usage-snippet";
+import { ProBadge, useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
 
 type View = "preview" | "code";
@@ -22,6 +23,7 @@ export function BlockSection({
   code,
   usageCode,
   locked = false,
+  pro = false,
   children,
 }: {
   id: string;
@@ -31,6 +33,8 @@ export function BlockSection({
   code: string;
   usageCode: string;
   locked?: boolean;
+  /** Show the Pro badge (a Pro section, whether or not this visitor has Pro). */
+  pro?: boolean;
   children: React.ReactNode;
 }) {
   const uid = React.useId();
@@ -64,8 +68,9 @@ export function BlockSection({
     <section id={id} aria-labelledby={`${uid}-title`} className="scroll-mt-28">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-[13px] font-medium tabular-nums text-muted-foreground">
+          <p className="flex items-center gap-2 text-[13px] font-medium tabular-nums text-muted-foreground">
             {index} of {total}
+            {pro ? <ProBadge className="px-2 py-0.5 text-[11px]" /> : null}
           </p>
           <h2 id={`${uid}-title`} className="mt-1 text-[28px] font-semibold leading-[1.1] tracking-[-0.025em] text-foreground">
             <a href={`#${id}`} className="rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
@@ -162,7 +167,7 @@ export function BlockSection({
               transition={{ duration: 0.22 }}
             >
               {locked ? (
-                <LockedCode code={code} />
+                <LockedCode title={title} />
               ) : (
                 <div className="grid max-w-full gap-4 overflow-hidden xl:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
                   <UsageSnippet code={usageCode} description="Copy this into your page." />
@@ -208,12 +213,31 @@ function IconButton({ label, onClick, children }: { label: string; onClick: () =
   );
 }
 
-function LockedCode({ code }: { code: string }) {
+/** Decorative stand-in shown blurred behind the lock. Never the real source: locked pages are sent no code. */
+const LOCKED_PLACEHOLDER = `"use client";
+
+import { motion } from "framer-motion";
+
+export function Section(props: SectionProps) {
+  const [active, setActive] = useState(0);
+  return (
+    <section className="relative mx-auto w-full max-w-6xl px-6 py-24">
+      <motion.div layout className="grid gap-6 md:grid-cols-2">
+        {items.map((item, i) => (
+          <Card key={item.id} active={i === active} onSelect={() => setActive(i)} />
+        ))}
+      </motion.div>
+    </section>
+  );
+}`;
+
+function LockedCode({ title }: { title: string }) {
+  const { requestUpgrade } = useProAccess();
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-card shadow-[0_0_0_0.5px_var(--border)]">
       <div className="pointer-events-none h-56 w-full select-none blur-[10px]" aria-hidden>
         <CodeBlock
-          code={code.slice(0, 1600)}
+          code={LOCKED_PLACEHOLDER}
           language="tsx"
           theme="dark"
           header={{ enabled: false }}
@@ -229,12 +253,21 @@ function LockedCode({ code }: { code: string }) {
         <p className="max-w-[340px] text-[14px] text-muted-foreground">
           Every block section, with its full source and the shadcn install, for your projects and client work.
         </p>
-        <Link
-          href="/pricing"
-          className="mt-1 inline-flex h-10 items-center rounded-full bg-action px-5 text-[14px] font-medium text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        >
-          See plans
-        </Link>
+        <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => requestUpgrade(title, "source")}
+            className="inline-flex h-10 items-center rounded-full bg-action px-5 text-[14px] font-medium text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            Upgrade to Pro
+          </button>
+          <Link
+            href="/pricing"
+            className="inline-flex h-10 items-center rounded-full px-3 text-[14px] font-medium text-link hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            See plans
+          </Link>
+        </div>
       </div>
     </div>
   );

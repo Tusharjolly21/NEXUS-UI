@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
+import { MOTION_KIT_SECTIONS } from "@/components/blocks/motion-kit/sections";
+import { sessionHasPro } from "@/lib/component-access";
 import path from "node:path";
 import { ArrowUpRight, ChevronRight, File, Folder } from "lucide-react";
 import { getBlock, blocks, type BlockManifestEntry } from "@/lib/catalog/blocks";
@@ -51,10 +53,8 @@ import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { createClient } from "@/lib/supabase/server";
-import { hasPremiumAccess } from "@/lib/entitlements";
 import { InstallCard, RainbowWord } from "@/components/site";
-import { variantAnchor, variantsOf } from "@/lib/catalog/block-variants";
+import { motionKitSectionsOf, variantAnchor, variantsOf } from "@/lib/catalog/block-variants";
 import {
   AuroraWavyLinesDemo,
   BlurFadeInDemo,
@@ -108,10 +108,17 @@ export default async function BlockDetailPage({ params }: Props) {
       { "@type": "ListItem", position: 3, name: block.name, item: `${siteConfig.url}/blocks/${slug}` },
     ],
   };
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const isPremium = user ? await hasPremiumAccess(user.id) : false;
+  // Decided on the server: locked sections get no source or usage code at all (see PreviewCodeSection).
+  const isPremium = await sessionHasPro();
   const locked = block.premium && !isPremium;
+  // Motion Kit sections are Pro on their own, even inside a free block.
+  const mkSections = motionKitSectionsOf(block.slug);
+  const mkLocked = !isPremium;
+  const mkCode = new Map(
+    mkLocked
+      ? []
+      : await Promise.all(mkSections.map(async (v) => [v.id, await readSourceFile(v.source ?? "", "")] as const)),
+  );
   const installDetails = getBlockInstallDetails(block.slug, block.registryCliName ?? block.slug);
 
   const Preview = block.Preview;
@@ -277,6 +284,9 @@ export default async function BlockDetailPage({ params }: Props) {
               {locked
                 ? "One command adds every section. Pro blocks need your API key in the registry settings."
                 : "One command adds every section and its dependencies."}
+              {!block.premium && mkSections.length
+                ? " The Pro sections install on their own, with the command shown in each one's code."
+                : ""}
             </p>
             <InstallCard wrap command={installCommand} className="mt-4" />
             <details className="group mt-4">
@@ -671,11 +681,29 @@ export default async function BlockDetailPage({ params }: Props) {
             </CheckoutStage>
           </PreviewCodeSection>
         </>
-) : (
+) : mkSections.length ? null : (
         <PreviewCodeSection block={block.slug} title={block.name} code={code} locked={locked}>
           <Preview />
         </PreviewCodeSection>
       )}
+
+      {mkSections.map((v) => {
+        const Section = MOTION_KIT_SECTIONS[v.id];
+        if (!Section) return null;
+        return (
+          <PreviewCodeSection
+            key={v.id}
+            block={block.slug}
+            title={v.title}
+            code={mkCode.get(v.id) ?? ""}
+            usageCode={motionKitUsage(v.registryCliName ?? "", v.component ?? "Section")}
+            locked={mkLocked}
+            pro
+          >
+            <Section />
+          </PreviewCodeSection>
+        );
+      })}
 
         </div>
 
@@ -808,7 +836,9 @@ const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
 function getBlockInstallDetails(slug: string, registryName: string): BlockInstallDetails {
   return {
     registryName,
-    files: BLOCK_INSTALL_FILES[slug] ?? [],
+    files:
+      BLOCK_INSTALL_FILES[slug] ??
+      motionKitSectionsOf(slug).map((v) => (v.source ?? "").replace(/^src\//, "")),
     notes: BLOCK_INSTALL_NOTES[slug] ?? [],
   };
 }
@@ -1046,6 +1076,7 @@ function PreviewCodeSection({
   usageCode,
   children,
   locked = false,
+  pro = false,
 }: {
   block: string;
   title: string;
@@ -1054,22 +1085,34 @@ function PreviewCodeSection({
   className?: string;
   children: React.ReactNode;
   locked?: boolean;
+  pro?: boolean;
 }) {
   const sections = variantsOf(block);
   const at = sections.findIndex((v) => v.title === title);
+  // Never serialise source or usage of a locked section into the page: the client only gets "".
   return (
     <BlockSection
       id={variantAnchor(title)}
       index={at === -1 ? 1 : at + 1}
       total={Math.max(1, sections.length)}
       title={title}
-      code={code}
-      usageCode={usageCode ?? defaultUsageForTitle(title)}
+      code={locked ? "" : code}
+      usageCode={locked ? "" : (usageCode ?? defaultUsageForTitle(title))}
       locked={locked}
+      pro={pro}
     >
       {children}
     </BlockSection>
   );
+}
+
+function motionKitUsage(registryName: string, component: string) {
+  return `// npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}
+import { ${component} } from "@/components/blocks/motion-kit/${registryName}";
+
+export default function Section() {
+  return <${component} />;
+}`;
 }
 
 function defaultUsageForTitle(title: string) {
