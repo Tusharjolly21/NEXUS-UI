@@ -4,3 +4,6 @@
 - Detail page /templates/[slug] uses supabase directly → fails closed without env; consider getSessionUser
 - kit captions #86868b on small text (contrast 3.5:1)
 - nova-landing-page type error
+- full-preview-shell.tsx: stale per-slug snippet titles/descriptions (Launchly, "Nova — The AI that thinks with you", others) → update from notes for all 22
+- Regenerate previews: startup-landing-page (Aureon), nova-landing-page
+- Remove unused local StickyStory copies? (harmless; optional)

@@ -49,7 +49,7 @@ function Hero() {
           Branching on confidence is here
         </motion.span>
         <h1 className="m-0 max-w-[900px] text-[clamp(42px,6.4vw,82px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
-          <Words text="Draw your agent. Test it. Ship it." className="justify-center" accentWords={["Ship", "it."]} accent={AD} />
+          <Words text="Draw your agent. Test it live. Ship it." className="justify-center" accentWords={["Ship", "it."]} accent={AD} />
         </h1>
         <Reveal delay={0.35} y={14}>
           <p className="m-0 max-w-[640px] text-[clamp(18px,2.1vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">

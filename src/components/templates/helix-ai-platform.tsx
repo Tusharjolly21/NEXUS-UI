@@ -355,7 +355,7 @@ function Hero() {
             Live demo: five agents, one of you
           </motion.span>
           <h1 className="m-0 text-[clamp(44px,7vw,84px)] font-semibold leading-[0.98] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
-            <Words text="Agents do the work. You make the calls." accentWords={["make", "the", "calls."]} accent={A} />
+            <Words text="Agents do the work. You make every call." accentWords={["make", "every", "call."]} accent={A} />
           </h1>
           <Reveal delay={0.35} y={14}>
             <p className="m-0 max-w-[520px] text-[clamp(18px,2vw,21px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
