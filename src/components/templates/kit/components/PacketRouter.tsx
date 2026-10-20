@@ -121,7 +121,7 @@ export default function PacketRouter({ autoplay = false }: { autoplay?: boolean 
             {MODELS.map((m, i) => (
               <motion.path
                 key={m.id}
-                ref={(el) => (paths.current[i] = el)}
+                ref={(el) => { paths.current[i] = el; }}
                 d={pathFor(i)}
                 fill="none"
                 strokeLinecap="round"

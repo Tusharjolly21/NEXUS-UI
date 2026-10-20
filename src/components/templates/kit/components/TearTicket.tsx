@@ -27,7 +27,7 @@ export default function TearTicket({ title = "Light & Matter", venue = "Hall 3 Â
   const stub = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number } | null>(null);
   const touched = useRef(false);
-  const tearT = useRef<number>();
+  const tearT = useRef<number | undefined>(undefined);
 
   const tear = () => {
     setTorn(true);

@@ -126,7 +126,7 @@ export default function StaggerMenu({ label = "Share", items = ITEMS, onSelect, 
               <div key={it.id}>
                 {it.danger && <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.05 + i * 0.04 }} className="mx-2 my-1 h-px bg-[#e8e8ed]" />}
                 <motion.button
-                  ref={(el) => (itemRefs.current[i] = el)}
+                  ref={(el) => { itemRefs.current[i] = el; }}
                   role="menuitem"
                   type="button"
                   onPointerEnter={() => setHover(it.id)}

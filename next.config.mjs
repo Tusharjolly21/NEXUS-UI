@@ -45,17 +45,20 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   outputFileTracingIncludes: {
+    // The template zip (src/lib/template-zip.ts) reads the page, its imports, the public files it
+    // references, the versions to pin, and the template's build prompt (PROMPT.md).
     "/api/download/template": [
       "./package.json",
-      "./src/app/globals.css",
+      "./package-lock.json",
       "./src/components/**/*",
+      "./src/hooks/**/*",
       "./src/lib/utils.ts",
-      "./public/templates/**/*",
-      "./public/videos/**/*",
-      "./public/models/**/*",
-      "./public/fonts/**/*",
-      "./public/*.{png,jpg,jpeg,webp,svg}",
+      "./src/@types/*.d.ts",
+      "./public/**/*",
+      "./content/build-prompts/templates/*.md",
     ],
+    // Template build prompts: outside public/, only read by this gated route.
+    "/api/prompt/template/[slug]": ["./content/build-prompts/templates/*.md"],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
     "/components/[slug]": ["./.generated/registry/**/*.json"],
     // Pro build prompts live outside public/ and are only read by this gated route.

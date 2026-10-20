@@ -84,7 +84,7 @@ export default function StretchNav({ items = ["Home", "Work", "Writing", "About"
       {items.map((label, i) => (
         <motion.button
           key={label}
-          ref={(el) => (refs.current[i] = el)}
+          ref={(el) => { refs.current[i] = el; }}
           type="button"
           aria-current={i === active ? "page" : undefined}
           onPointerEnter={() => setHover(i)}

@@ -1,611 +1,434 @@
 "use client";
+/**
+ * Orion: landing page template for autonomous enterprise operations. Agents
+ * run runbooks and incidents inside guardrails, with a full audit trail.
+ * Built from Motion Kit components: Capsule Toggles, Folder Peek, Copy Buttons
+ * (command line), Page Curl, Standing Calendar (teal copy), Radio Cards and
+ * Matrix Loaders. The hero is an incident console with an autonomy dial.
+ */
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useSpring, useTransform, useVelocity } from "framer-motion";
+import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
+import FolderPeek from "@/components/templates/kit/components/FolderPeek";
+import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
+import PageCurl from "@/components/templates/kit/components/PageCurl";
+import RadioCards from "@/components/templates/kit/components/RadioCards";
+import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
+import IncidentCalendar from "@/components/templates/orion/incident-calendar";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Words, ease, scrollToId } from "@/components/templates/kit/parts";
+import { StickyStory } from "@/components/templates/kit-ports/sticky-story";
 
-import * as React from "react";
-import {
-  motion,
-  AnimatePresence,
-  useInView,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useScroll,
-} from "framer-motion";
-import {
-  ArrowRight,
-  BarChart3,
-  Bot,
-  Check,
-  ChevronRight,
-  Clock,
-  GitBranch,
-  Globe,
-  Lock,
-  Play,
-  Plus,
-  RefreshCw,
-  Shield,
-  Sparkles,
-  Star,
-  TrendingUp,
-  Users,
-  Zap,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
+const MONO = "ui-monospace, 'SF Mono', Menlo, monospace";
+const A = "#0e7490";
+const AMBER = "#8a4b00";
+const C = "rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]";
+const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-/* ── FadeUp ─────────────────────────────────────────────────────────── */
-function FadeUp({
-  children,
-  delay = 0,
-  className,
-  from = "bottom",
-}: {
-  children: React.ReactNode;
-  delay?: number;
-  className?: string;
-  from?: "bottom" | "left" | "right";
-}) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+function Logo() {
   return (
-    <motion.div
-      ref={ref}
-      initial={{
-        opacity: 0,
-        filter: "blur(8px)",
-        y: from === "bottom" ? 30 : 0,
-        x: from === "left" ? -36 : from === "right" ? 36 : 0,
-      }}
-      animate={inView ? { opacity: 1, y: 0, x: 0, filter: "blur(0px)" } : {}}
-      transition={{ duration: 0.7, delay, ease: EASE }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <span className="flex items-center gap-2 text-[19px] font-semibold tracking-[-0.03em]">
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+        <path d="M6 22L16 16L26 10" stroke="#a5dbe6" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="6" cy="22" r="3.4" fill={A} />
+        <motion.circle cx="16" cy="16" r="3.4" fill={A} animate={{ scale: [1, 1.25, 1] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }} />
+        <circle cx="26" cy="10" r="3.4" fill={A} />
+      </svg>
+      Orion
+    </span>
   );
 }
 
-/* ── TiltCard ───────────────────────────────────────────────────────── */
-function TiltCard({ children, className }: { children: React.ReactNode; className?: string }) {
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 200, damping: 22 });
-  const sy = useSpring(my, { stiffness: 200, damping: 22 });
-  const rotateX = useTransform(sy, [-80, 80], [4, -4]);
-  const rotateY = useTransform(sx, [-80, 80], [-4, 4]);
-  return (
-    <motion.div
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-      onMouseMove={(e) => {
-        const r = e.currentTarget.getBoundingClientRect();
-        mx.set(e.clientX - r.left - r.width / 2);
-        my.set(e.clientY - r.top - r.height / 2);
-      }}
-      onMouseLeave={() => { mx.set(0); my.set(0); }}
-      whileHover={{ scale: 1.016, transition: { type: "spring", stiffness: 260, damping: 24 } }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
+/* ------------------------------------------------------------------ */
+/* Hero: incident console with an autonomy dial                        */
+/* ------------------------------------------------------------------ */
 
-/* ── AnimatedCounter ─────────────────────────────────────────────────── */
-function AnimatedCounter({ to, prefix = "", suffix = "" }: { to: number; prefix?: string; suffix?: string }) {
-  const ref = React.useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true });
-  const [val, setVal] = React.useState(0);
-  React.useEffect(() => {
-    if (!inView) return;
-    let start: number;
-    const dur = 1400;
-    const tick = (ts: number) => {
-      if (!start) start = ts;
-      const p = Math.min((ts - start) / dur, 1);
-      const e = 1 - Math.pow(1 - p, 3);
-      setVal(Math.round(e * to));
-      if (p < 1) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  }, [inView, to]);
-  return <span ref={ref}>{prefix}{val.toLocaleString()}{suffix}</span>;
-}
+const STAGES = ["Detect", "Diagnose", "Plan", "Act", "Verify", "Close"];
+const LEVELS = [
+  { n: "Observe", d: "Diagnose and page a person. Never act." },
+  { n: "Suggest", d: "Prepare the fix. A person approves every action." },
+  { n: "Safe actions", d: "Run reversible steps alone. Ask before anything else." },
+  { n: "Autonomous", d: "Act inside the guardrails. Tell people afterwards." },
+];
+const CAPS = [25, 50, 100];
 
-/* ─────────────────────────────────────────────────────────────────────
-   NAVBAR
-───────────────────────────────────────────────────────────────────── */
-function Navbar() {
-  const [scrolled, setScrolled] = React.useState(false);
-  React.useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
-  }, []);
+type Who = "agent" | "human" | "gate";
+interface Ev { s: number; t: string; who: Who; text: string }
 
-  return (
-    <motion.header
-      initial={{ y: -64, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: EASE }}
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        scrolled ? "border-b border-gray-100 bg-white/95 shadow-sm backdrop-blur-xl" : "bg-transparent",
-      )}
-    >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        {/* Logo */}
-        <motion.a href="#" className="flex items-center gap-2.5" whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-          <motion.div
-            className="flex size-7 items-center justify-center rounded-lg bg-gray-950"
-            whileHover={{ rotate: [0, -8, 8, 0], transition: { duration: 0.35 } }}
-          >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="3" cy="3" r="2" fill="white" />
-              <circle cx="11" cy="3" r="2" fill="white" fillOpacity="0.45" />
-              <circle cx="3" cy="11" r="2" fill="white" fillOpacity="0.45" />
-              <circle cx="11" cy="11" r="2" fill="white" />
-            </svg>
-          </motion.div>
-          <span className="text-[15px] font-bold tracking-tight text-gray-900">Orion</span>
-        </motion.a>
-
-        {/* Nav */}
-        <nav className="hidden items-center gap-8 md:flex">
-          {["Features", "Platform", "Pricing", "Docs"].map((item) => (
-            <motion.a
-              key={item}
-              href="#"
-              className="relative text-sm text-gray-500 transition hover:text-gray-900"
-            >
-              {item}
-              <motion.span
-                className="absolute -bottom-0.5 left-0 h-px w-full origin-left bg-gray-900"
-                initial={{ scaleX: 0 }}
-                whileHover={{ scaleX: 1 }}
-                transition={{ duration: 0.2, ease: EASE }}
-              />
-            </motion.a>
-          ))}
-        </nav>
-
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          <a href="#" className="hidden text-sm text-gray-500 transition hover:text-gray-900 md:block">Log in</a>
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 4px 20px rgba(0,0,0,0.22)" }}
-            whileTap={{ scale: 0.96 }}
-            className="rounded-full bg-gray-950 px-4 py-2 text-[13px] font-semibold text-white"
-          >
-            Get early access
-          </motion.button>
-        </div>
-      </div>
-    </motion.header>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   HERO
-───────────────────────────────────────────────────────────────────── */
-const HERO_LINE1 = ["Agents", "that", "execute."];
-const HERO_LINE2 = ["Teams", "that", "govern."];
-
-function KanbanMockup() {
-  const { scrollY } = useScroll();
-  const rotateX = useTransform(scrollY, [0, 400], [14, 4]);
-
-  const cols = [
-    {
-      label: "Queued",
-      count: 4,
-      color: "bg-gray-100 text-gray-500",
-      dot: "bg-gray-400",
-      cards: [
-        { title: "Sync CRM contacts", agent: "Agent-012", pct: 0, avatars: ["#374151", "#6B7280"] },
-        { title: "Generate Q3 report", agent: "Agent-019", pct: 0, avatars: ["#10B981"] },
-      ],
-    },
-    {
-      label: "Running",
-      count: 3,
-      color: "bg-sky-50 text-sky-600",
-      dot: "bg-sky-500",
-      cards: [
-        { title: "Deploy staging build", agent: "Agent-007", pct: 64, avatars: ["#F97316", "#374151"] },
-        { title: "Scan security logs", agent: "Agent-031", pct: 38, avatars: ["#10B981", "#374151"] },
-      ],
-    },
-    {
-      label: "Approval",
-      count: 2,
-      color: "bg-amber-50 text-amber-600",
-      dot: "bg-amber-400",
-      cards: [
-        { title: "Merge PR #2841", agent: "Agent-003", pct: 100, avatars: ["#6B7280"] },
-        { title: "Publish blog post", agent: "Agent-014", pct: 100, avatars: ["#F97316", "#10B981"] },
-      ],
-    },
-    {
-      label: "Completed",
-      count: 8,
-      color: "bg-emerald-50 text-emerald-600",
-      dot: "bg-emerald-500",
-      cards: [
-        { title: "Invoice reconciliation", agent: "Agent-005", pct: 100, avatars: ["#374151", "#6B7280", "#F97316"] },
-        { title: "Email campaign sent", agent: "Agent-022", pct: 100, avatars: ["#10B981"] },
-      ],
-    },
+function script(level: number, cap: number): { ev: Ev[]; mttr: string; paged: number } {
+  const base: Ev[] = [
+    { s: 0, t: "02:14:07", who: "agent", text: "Alert: checkout-api p95 at 2.4 s for 3 min (SLO 400 ms)" },
+    { s: 1, t: "02:14:19", who: "agent", text: "Linked to deploy 4f2a1c from 12 min ago. Errors up from 0.4% to 6.1%" },
+    { s: 2, t: "02:14:31", who: "agent", text: "Matched runbook RB-12, roll back a bad deploy. Touches 38 hosts" },
   ];
+  const ask = (t: string, why: string, ok: string): Ev[] => [
+    { s: 3, t, who: "gate", text: `${why} Asked Dana Okafor (on call)` },
+    { s: 3, t: ok, who: "human", text: "Dana approved the rollback from Slack" },
+  ];
+  if (level === 0)
+    return {
+      ev: [...base, { s: 2, t: "02:14:32", who: "gate", text: "Policy is Observe. Paged Dana Okafor with the plan" }, { s: 3, t: "02:27:48", who: "human", text: "Dana rolled back deploy 4f2a1c by hand" }, { s: 4, t: "02:33:10", who: "agent", text: "p95 back to 310 ms. Error rate 0.3%" }, { s: 5, t: "02:39:02", who: "agent", text: "Closed. Timeline and postmortem draft attached" }],
+      mttr: "24m 55s",
+      paged: 1,
+    };
+  if (level === 1)
+    return {
+      ev: [...base, ...ask("02:14:32", "Policy is Suggest.", "02:19:05"), { s: 3, t: "02:19:06", who: "agent", text: "Rolling back 38 hosts in 4 waves" }, { s: 4, t: "02:22:40", who: "agent", text: "p95 back to 320 ms. Error rate 0.3%" }, { s: 5, t: "02:24:15", who: "agent", text: "Closed. Postmortem draft attached" }],
+      mttr: "10m 08s",
+      paged: 1,
+    };
+  if (level === 2 || cap < 38)
+    return {
+      ev: [
+        ...base,
+        { s: 3, t: "02:14:33", who: "agent", text: "Scaled checkout-api from 12 to 18 pods (reversible, allowed)" },
+        ...ask("02:14:34", level === 2 ? "A rollback is not on the safe list." : `Rollback needs 38 hosts, the limit is ${cap}.`, "02:16:50"),
+        { s: 3, t: "02:16:51", who: "agent", text: "Rolling back 38 hosts in 4 waves" },
+        { s: 4, t: "02:19:30", who: "agent", text: "p95 back to 315 ms. Error rate 0.3%" },
+        { s: 5, t: "02:20:12", who: "agent", text: "Closed. Pods scaled back to 12" },
+      ],
+      mttr: "6m 05s",
+      paged: 1,
+    };
+  return {
+    ev: [
+      ...base,
+      { s: 3, t: "02:14:33", who: "agent", text: `Inside the guardrails: 38 of ${cap} hosts, reversible. Running RB-12` },
+      { s: 3, t: "02:14:34", who: "agent", text: "Rolling back 38 hosts in 4 waves" },
+      { s: 4, t: "02:17:02", who: "agent", text: "p95 back to 305 ms. Error rate 0.3%" },
+      { s: 5, t: "02:18:40", who: "agent", text: "Closed. Dana gets the summary when she wakes up" },
+    ],
+    mttr: "4m 33s",
+    paged: 0,
+  };
+}
+
+/** The signature control: a dial with four detents. Drag the knob, it stretches with speed and snaps. */
+function AutonomyDial({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const track = useRef<HTMLDivElement>(null);
+  const frac = useMotionValue(value / 3);
+  const smooth = useSpring(frac, { stiffness: 520, damping: 34 });
+  const left = useTransform(smooth, (f) => `${f * 100}%`);
+  const vel = useVelocity(smooth);
+  const stretch = useTransform(vel, (v) => 1 + Math.min(0.5, Math.abs(v) * 0.12));
+  const [drag, setDrag] = useState<number | null>(null);
+  const shown = drag ?? value;
+
+  useEffect(() => {
+    if (drag === null) frac.set(value / 3);
+  }, [value, drag, frac]);
+
+  const at = (e: RPointerEvent) => {
+    const r = track.current!.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  };
+  const down = (e: RPointerEvent<HTMLDivElement>) => {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const f = at(e);
+    frac.set(f);
+    setDrag(Math.round(f * 3));
+  };
+  const move = (e: RPointerEvent) => {
+    if (drag === null) return;
+    const f = at(e);
+    frac.set(f);
+    const n = Math.round(f * 3);
+    if (n !== drag) setDrag(n);
+  };
+  const up = () => {
+    if (drag === null) return;
+    const n = drag;
+    setDrag(null);
+    animate(frac, n / 3, { type: "spring", stiffness: 500, damping: 26 });
+    if (n !== value) onChange(n);
+  };
+  const key = (e: KeyboardEvent) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") { e.preventDefault(); onChange(Math.min(3, value + 1)); }
+    if (e.key === "ArrowLeft" || e.key === "ArrowDown") { e.preventDefault(); onChange(Math.max(0, value - 1)); }
+  };
 
   return (
-    <div className="overflow-hidden" style={{ perspective: "1300px" }}>
-      <motion.div
-        animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        style={{ rotateX }}
-        className="origin-top overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_32px_96px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)]"
+    <div className="flex flex-col gap-4">
+      <div className="flex items-baseline justify-between">
+        <span className="text-[13px] font-semibold text-[#1d1d1f]">Autonomy</span>
+        <span className="relative h-5 overflow-hidden text-right text-[13px] font-semibold" style={{ color: A }}>
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={shown} className="block" initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -16, opacity: 0 }} transition={{ type: "spring", stiffness: 500, damping: 30 }}>{LEVELS[shown].n}</motion.span>
+          </AnimatePresence>
+        </span>
+      </div>
+      <div
+        ref={track}
+        role="slider"
+        tabIndex={0}
+        aria-label="Autonomy level"
+        aria-valuemin={0}
+        aria-valuemax={3}
+        aria-valuenow={value}
+        aria-valuetext={LEVELS[value].n}
+        onKeyDown={key}
+        onPointerDown={down}
+        onPointerMove={move}
+        onPointerUp={up}
+        onPointerCancel={up}
+        className="relative mx-3 h-11 cursor-grab touch-none select-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-offset-4 active:cursor-grabbing"
+        style={{ ["--tw-ring-color" as string]: A }}
       >
-        {/* Browser chrome */}
-        <div className="flex h-10 items-center gap-2 border-b border-gray-100 bg-gray-50 px-4">
-          <div className="flex gap-1.5">
-            {["bg-red-400", "bg-yellow-400", "bg-green-400"].map((c) => (
-              <motion.span key={c} whileHover={{ scale: 1.3 }} className={cn("size-3 rounded-full cursor-pointer", c)} />
-            ))}
-          </div>
-          <div className="mx-auto flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 py-0.5 text-[11px] text-gray-400">
-            <span className="size-1.5 rounded-full bg-emerald-400" />
-            orion.ai/workspace/core
-          </div>
-          <div className="ml-auto flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-100 px-2.5 py-0.5">
-            <motion.span
-              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.4, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
-              className="size-1.5 rounded-full bg-gray-500"
-            />
-            <span className="text-[10px] font-semibold text-gray-600">24 agents live</span>
-          </div>
-        </div>
+        <span className="absolute inset-x-[-12px] top-1/2 h-2 -translate-y-1/2 rounded-full bg-[#e3e6ea]" />
+        <motion.span className="absolute left-[-12px] top-1/2 h-2 -translate-y-1/2 rounded-full" style={{ width: left, background: `linear-gradient(90deg, #a5dbe6, ${A})` }} />
+        {[0, 1, 2, 3].map((i) => (
+          <span key={i} className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white" style={{ left: `${(i / 3) * 100}%`, background: i <= shown ? A : "#c7ccd1" }} />
+        ))}
+        <motion.span className="absolute top-1/2 -ml-[17px] -mt-[17px] h-[34px] w-[34px] rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,.08),0_8px_18px_-6px_rgba(0,0,0,.35)]" style={{ left, scaleX: stretch }}>
+          <span className="absolute inset-[9px] rounded-full" style={{ background: A }} />
+        </motion.span>
+      </div>
+      <div className="grid grid-cols-4 gap-1">
+        {LEVELS.map((l, i) => (
+          <button key={l.n} type="button" onClick={() => onChange(i)} className="rounded-lg px-1 py-1 text-center text-[11px] font-semibold leading-[1.2] outline-none focus-visible:ring-2" style={{ color: i === value ? A : "#6e6e73", ["--tw-ring-color" as string]: A }}>
+            {l.n}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-        {/* App layout */}
-        <div className="flex" style={{ height: 380 }}>
-          {/* Sidebar */}
-          <div className="w-14 shrink-0 border-r border-gray-100 bg-gray-950 py-4">
-            <div className="mb-5 flex justify-center">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-gray-700">
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                  <circle cx="3" cy="3" r="2" fill="white" />
-                  <circle cx="11" cy="3" r="2" fill="white" fillOpacity="0.45" />
-                  <circle cx="3" cy="11" r="2" fill="white" fillOpacity="0.45" />
-                  <circle cx="11" cy="11" r="2" fill="white" />
-                </svg>
-              </div>
-            </div>
-            {[BarChart3, Bot, GitBranch, Shield, Users].map((Icon, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.6 + i * 0.07, ease: EASE }}
-                className={cn("mb-1 flex justify-center py-2.5 cursor-pointer relative")}
-              >
-                <Icon className={cn("size-4", i === 1 ? "text-white" : "text-gray-600")} />
-                {i === 1 && (
-                  <span className="absolute right-1.5 top-1.5 size-1.5 rounded-full bg-white" />
-                )}
-              </motion.div>
-            ))}
+function Console() {
+  const [level, setLevel] = useState(3);
+  const [cap, setCap] = useState(50);
+  const [run, setRun] = useState(0);
+  const [step, setStep] = useState(0);
+  const { ev, mttr, paged } = script(level, cap);
+  const cur = ev[Math.min(step, ev.length - 1)];
+  const finished = step >= ev.length - 1;
+  const pos = useSpring(0, { stiffness: 120, damping: 20 });
+  const packet = useTransform(pos, (v) => `${(v / 5) * 100}%`);
+  const fill = useTransform(pos, (v) => v / 5);
+
+  useEffect(() => {
+    pos.set(cur.s);
+  }, [cur.s, pos]);
+
+  // Replay the incident whenever the policy changes, one event at a time.
+  useEffect(() => {
+    const ts: number[] = [];
+    ts.push(window.setTimeout(() => setStep(0), 0));
+    let at = 500;
+    const list = script(level, cap).ev;
+    for (let i = 1; i < list.length; i++) {
+      at += list[i - 1].who === "gate" ? 1700 : 850;
+      ts.push(window.setTimeout(() => setStep(i), at));
+    }
+    return () => ts.forEach(clearTimeout);
+  }, [level, cap, run]);
+
+  const shownEv = ev.slice(0, step + 1);
+  const agentActs = ev.filter((e) => e.who === "agent" && e.s >= 3).length;
+
+  return (
+    <div className={`${C} overflow-hidden`}>
+      <div className="flex flex-wrap items-center gap-3 border-b border-black/[.06] px-5 py-3.5">
+        <span className="flex items-center gap-2 text-[13px] font-medium text-[#424245]" style={{ fontFamily: MONO }}>orion / incidents / INC-2291</span>
+        <span className="ml-auto flex items-center gap-1.5 text-[12px] font-semibold" style={{ color: finished ? A : AMBER }}>
+          <motion.span className="h-2 w-2 rounded-full" style={{ background: finished ? A : "#f59e0b" }} animate={finished ? { opacity: 1 } : { opacity: [1, 0.3, 1] }} transition={{ duration: 1.2, repeat: finished ? 0 : Infinity }} />
+          {finished ? "Resolved" : "Replaying"}
+        </span>
+        <button type="button" onClick={() => setRun((r) => r + 1)} className="h-8 rounded-full bg-[#f0f0f3] px-3.5 text-[12px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }}>Replay</button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr]">
+        <div className="flex flex-col gap-7 border-b border-black/[.06] bg-[#f7f8f9] p-6 lg:border-b-0 lg:border-r">
+          <div>
+            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">Policy for checkout-api</span>
+            <p className="m-0 mt-2 min-h-[42px] text-[14px] leading-[1.45] text-[#424245]">{LEVELS[level].d}</p>
           </div>
-
-          {/* Main */}
-          <div className="flex-1 overflow-hidden bg-gray-50 p-4">
-            {/* Header row */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, ease: EASE }}
-              className="mb-3 flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2 text-[11px] text-gray-400">
-                <span>Orion Core</span>
-                <ChevronRight className="size-3" />
-                <span className="font-medium text-gray-700">My Workspace</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-[10px] text-gray-400">
-                  Filter
-                </div>
-                <div className="rounded-lg bg-gray-950 px-3 py-1.5 text-[10px] font-semibold text-white">
-                  + New Agent
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Kanban columns */}
-            <div className="grid grid-cols-4 gap-3 h-[calc(100%-2rem)]">
-              {cols.map((col, ci) => (
-                <div key={col.label} className="flex flex-col gap-2">
-                  <motion.div
-                    initial={{ opacity: 0, y: -8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.55 + ci * 0.08, ease: EASE }}
-                    className="flex items-center justify-between px-1"
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span className={cn("size-1.5 rounded-full", col.dot)} />
-                      <span className="text-[10px] font-semibold text-gray-600">{col.label}</span>
-                    </div>
-                    <span className={cn("rounded-full px-1.5 py-0.5 text-[9px] font-bold", col.color)}>
-                      {col.count}
-                    </span>
-                  </motion.div>
-
-                  {col.cards.map((card, ki) => (
-                    <motion.div
-                      key={card.title}
-                      initial={{ opacity: 0, y: 14, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ delay: 0.7 + ci * 0.1 + ki * 0.08, ease: EASE }}
-                      whileHover={{ y: -2, boxShadow: "0 6px 20px rgba(0,0,0,0.08)", transition: { duration: 0.18 } }}
-                      className="cursor-default rounded-xl border border-gray-100 bg-white p-3 shadow-sm"
-                    >
-                      <p className="mb-1 text-[11px] font-semibold leading-tight text-gray-800 line-clamp-1">
-                        {card.title}
-                      </p>
-                      <p className="mb-2 text-[9px] text-gray-400">{card.agent}</p>
-                      {card.pct > 0 && card.pct < 100 && (
-                        <div className="mb-2 h-1 overflow-hidden rounded-full bg-gray-100">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${card.pct}%` }}
-                            transition={{ delay: 0.9 + ci * 0.1, duration: 0.8, ease: EASE }}
-                            className="h-full rounded-full bg-gray-800"
-                          />
-                        </div>
-                      )}
-                      {card.pct === 100 && col.label !== "Completed" && (
-                        <div className="mb-2 flex items-center gap-1">
-                          <Check className="size-2.5 text-emerald-500" />
-                          <span className="text-[9px] text-emerald-500">Ready for review</span>
-                        </div>
-                      )}
-                      <div className="flex -space-x-1">
-                        {card.avatars.map((color, ai) => (
-                          <div
-                            key={ai}
-                            className="size-4 rounded-full border border-white text-[7px] font-bold text-white grid place-items-center"
-                            style={{ background: color }}
-                          />
-                        ))}
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
+          <AutonomyDial value={level} onChange={setLevel} />
+          <div className="flex flex-col gap-3">
+            <span className="text-[13px] font-semibold text-[#1d1d1f]">Max hosts per action</span>
+            <div className="relative grid grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px]" role="radiogroup" aria-label="Max hosts per action">
+              {CAPS.map((c) => (
+                <button key={c} type="button" role="radio" aria-checked={cap === c} onClick={() => setCap(c)} className="relative z-10 h-8 rounded-[9px] text-[13px] font-semibold tabular-nums text-[#1d1d1f] outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }}>
+                  {cap === c && <motion.span layoutId="orion-cap" transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1)]" />}
+                  {c}
+                </button>
               ))}
             </div>
+            <span className="text-[12px] leading-[1.4] text-[#6e6e73]">This rollback touches 38 hosts. Set 25 and watch Orion ask first.</span>
           </div>
         </div>
-      </motion.div>
+
+        <div className="flex min-w-0 flex-col gap-6 p-5 sm:p-7">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <span className="text-[12px] font-semibold text-[#6e6e73]">Sev 2 · started 02:14 · checkout-api</span>
+              <h3 className="m-0 mt-1 text-[clamp(18px,2.2vw,22px)] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Checkout is slow after a deploy</h3>
+            </div>
+            <div className="flex gap-5">
+              <span className="flex flex-col items-end">
+                <span className="relative h-[30px] overflow-hidden text-[24px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.span key={finished ? mttr : "run"} className="block" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -24, opacity: 0 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}>{finished ? mttr : "…"}</motion.span>
+                  </AnimatePresence>
+                </span>
+                <span className="text-[12px] text-[#6e6e73]">time to resolve</span>
+              </span>
+              <span className="flex flex-col items-end">
+                <span className="text-[24px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">{paged}</span>
+                <span className="text-[12px] text-[#6e6e73]">people woken</span>
+              </span>
+            </div>
+          </div>
+
+          {/* stage rail */}
+          <div className="relative px-3 pt-2" aria-label={`Stage: ${STAGES[cur.s]}`}>
+            <div className="relative h-1.5 rounded-full bg-[#e8eaed]">
+              <motion.div className="absolute inset-y-0 left-0 w-full origin-left rounded-full" style={{ scaleX: fill, background: A }} />
+              <motion.div className="absolute top-1/2 -ml-2.5 -mt-2.5 h-5 w-5 rounded-full" style={{ left: packet, background: A, boxShadow: "0 0 0 6px rgba(14,116,144,.18)" }} />
+            </div>
+            <ol className="m-0 mt-4 grid list-none grid-cols-6 p-0">
+              {STAGES.map((s, i) => {
+                const done = i < cur.s || (finished && i === cur.s);
+                const active = i === cur.s && !finished;
+                const waiting = active && cur.who === "gate";
+                return (
+                  <li key={s} className="flex flex-col items-center gap-1 text-center">
+                    <motion.span
+                      className="flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold"
+                      animate={{ backgroundColor: done ? A : waiting ? "#fff4e0" : active ? "#e0f2f6" : "#f0f0f3", color: done ? "#fff" : waiting ? AMBER : active ? A : "#6e6e73", scale: active ? 1.1 : 1 }}
+                      transition={spring}
+                    >
+                      {done ? "✓" : i + 1}
+                    </motion.span>
+                    <span className="text-[11px] font-semibold sm:text-[12px]" style={{ color: active || done ? "#1d1d1f" : "#6e6e73" }}>{s}</span>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+
+          <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-[1fr_200px]">
+            <div className="flex min-w-0 flex-col rounded-[18px] bg-[#f7f8f9] p-4">
+              <span className="flex items-center justify-between text-[12px] font-semibold text-[#6e6e73]">
+                <span>Audit trail</span>
+                <span className="tabular-nums">{shownEv.length} of {ev.length} entries</span>
+              </span>
+              <ul className="m-0 mt-3 flex h-[204px] list-none flex-col justify-end gap-1.5 overflow-hidden p-0" aria-live="polite">
+                <AnimatePresence initial={false}>
+                  {shownEv.map((e, i) => (
+                    <motion.li key={`${run}-${level}-${cap}-${i}`} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={spring} className="flex min-w-0 items-start gap-2.5 text-[12.5px] leading-[1.4]">
+                      <span className="flex-none tabular-nums text-[#6e6e73]" style={{ fontFamily: MONO }}>{e.t}</span>
+                      <span className="mt-[1px] flex-none rounded px-1.5 text-[10.5px] font-bold uppercase tracking-[0.04em]" style={{ background: e.who === "agent" ? "#e0f2f6" : e.who === "gate" ? "#fff4e0" : "#ececf0", color: e.who === "agent" ? A : e.who === "gate" ? AMBER : "#1d1d1f" }}>
+                        {e.who === "agent" ? "Orion" : e.who === "gate" ? "Policy" : "Human"}
+                      </span>
+                      <span className="min-w-0 text-[#1d1d1f]">{e.text}</span>
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
+              </ul>
+            </div>
+            <div className="flex flex-row gap-4 rounded-[18px] bg-[#f7f8f9] p-4 md:flex-col">
+              <div className="flex flex-1 flex-col gap-1">
+                <span className="text-[12px] font-semibold text-[#6e6e73]">Now</span>
+                <span className="flex items-center gap-2 text-[14px] font-semibold text-[#1d1d1f]">
+                  {!finished && <MatrixLoader pattern={cur.who === "gate" ? 4 : 1} size={18} color={cur.who === "gate" ? "#d97706" : A} />}
+                  {finished ? "Incident closed" : cur.who === "gate" ? "Waiting for a person" : cur.who === "human" ? "Person acting" : `Orion: ${STAGES[cur.s].toLowerCase()}`}
+                </span>
+              </div>
+              <div className="flex flex-1 flex-col gap-1">
+                <span className="text-[12px] font-semibold text-[#6e6e73]">Agent actions</span>
+                <span className="text-[14px] font-semibold tabular-nums text-[#1d1d1f]">{agentActs} logged, 0 outside policy</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
 function Hero() {
-  let wi = 0;
-
   return (
-    <section className="relative overflow-hidden bg-white pt-28 pb-0">
-      {/* Subtle dot grid */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: "radial-gradient(circle, #000 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-      />
-
-      {/* Subtle warm glow */}
-      <motion.div
-        animate={{ opacity: [0.3, 0.55, 0.3], scale: [1, 1.06, 1] }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-gray-200/50 blur-3xl"
-      />
-
-      <div className="relative mx-auto max-w-7xl px-6">
-        {/* Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: -16, scale: 0.88 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.55, ease: EASE }}
-          className="mb-7 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-100 px-3.5 py-1.5 text-xs font-medium text-gray-600"
-        >
-          <motion.span
-            animate={{ scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
-            transition={{ duration: 1.8, repeat: Infinity }}
-            className="size-1.5 rounded-full bg-gray-500"
-          />
-          Now available for enterprise teams
-          <ChevronRight className="size-3 text-gray-400" />
-        </motion.div>
-
-        {/* Headline — word-by-word blur reveal */}
-        <h1 className="max-w-3xl text-[4rem] font-black leading-[1.0] tracking-tight text-gray-950 sm:text-[5rem] md:text-[5.5rem]">
-          {[HERO_LINE1, HERO_LINE2].map((line, li) => (
-            <div key={li} className={cn("block", li === 1 ? "text-gray-400" : "")}>
-              {line.map((word) => {
-                const delay = 0.07 + wi++ * 0.07;
-                return (
-                  <motion.span
-                    key={word + li}
-                    initial={{ opacity: 0, y: 52, filter: "blur(12px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    transition={{ delay, duration: 0.7, ease: EASE }}
-                    className="inline-block mr-[0.2em]"
-                  >
-                    {word}
-                  </motion.span>
-                );
-              })}
-            </div>
-          ))}
-        </h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6, ease: EASE }}
-          className="mt-7 max-w-xl text-lg leading-relaxed text-gray-500"
-        >
-          Orion orchestrates AI agents across your entire operation — from code review to contract
-          approval — with human oversight built in at every step.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.82, duration: 0.55, ease: EASE }}
-          className="mt-9 flex flex-wrap items-center gap-4"
-        >
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: "0 8px 32px rgba(0,0,0,0.22)" }}
-            whileTap={{ scale: 0.96 }}
-            className="flex items-center gap-2 rounded-full bg-gray-950 px-6 py-3 text-sm font-semibold text-white"
-          >
-            Start your free pilot
-            <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-              <ArrowRight className="size-4" />
+    <section id="top" className="relative overflow-hidden pb-16 pt-14 lg:pb-24 lg:pt-20">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 45% at 20% 0%, rgba(165,219,230,.45), transparent 70%), radial-gradient(40% 40% at 90% 30%, rgba(14,116,144,.10), transparent 70%)" }} />
+      <div className="relative mx-auto max-w-[1180px] px-5">
+        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.45fr_1fr] lg:gap-14">
+          <div className="flex flex-col items-start gap-6">
+            <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]" style={{ fontFamily: MONO }}>
+              <span className="h-2 w-2 rounded-full" style={{ background: A }} />
+              INC-2291 is replaying below
             </motion.span>
-          </motion.button>
-          <motion.button
-            whileHover={{ gap: "10px" }}
-            className="flex items-center gap-2 text-sm font-medium text-gray-700 transition-all hover:text-gray-900"
-          >
-            <div className="grid size-8 place-items-center rounded-full border border-gray-200 bg-white shadow-sm">
-              <Play className="size-3.5 fill-gray-700 text-gray-700" />
-            </div>
-            See role-based demos
-          </motion.button>
-        </motion.div>
-
-        {/* Social proof */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.0, duration: 0.5 }}
-          className="mt-8 flex flex-wrap items-center gap-4 text-xs text-gray-400"
-        >
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {["#1F2937", "#374151", "#4B5563", "#6B7280", "#111827"].map((c, i) => (
-                <motion.div
-                  key={c}
-                  initial={{ opacity: 0, scale: 0, x: -8 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  transition={{ delay: 1.0 + i * 0.07, type: "spring", stiffness: 380, damping: 18 }}
-                  className="size-7 rounded-full border-2 border-white shadow-sm"
-                  style={{ background: c }}
-                />
-              ))}
-            </div>
-            <span className="font-medium text-gray-600">500+ enterprise teams</span>
+            <h1 className="m-0 text-[clamp(42px,6.6vw,86px)] font-semibold leading-[0.98] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
+              <Words text="Incidents fixed at machine speed. Inside the rules you set." accentWords={["Inside", "the", "rules", "you", "set."]} accent={A} />
+            </h1>
           </div>
-          <span className="text-gray-200">·</span>
-          <div className="flex items-center gap-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <motion.span
-                key={i}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 1.1 + i * 0.06, type: "spring", stiffness: 340, damping: 14 }}
-              >
-                <Star className="size-3.5 fill-amber-400 text-amber-400" />
-              </motion.span>
-            ))}
-            <span className="ml-1 font-medium text-gray-600">4.9 / 5 on G2</span>
+          <div className="flex flex-col items-start gap-6 lg:pb-3">
+            <Reveal delay={0.35} y={14}>
+              <p className="m-0 text-[clamp(17px,1.8vw,20px)] leading-[1.45] tracking-[-0.015em] text-[#6e6e73]">
+                Orion agents run your runbooks when alerts fire: diagnose, plan, act, verify. How far they go on their own is a policy you set per service, and every step lands in an audit trail you can hand to a regulator.
+              </p>
+            </Reveal>
+            <Reveal delay={0.45} y={14} className="flex flex-wrap gap-3">
+              <Magnetic className="text-white shadow-[0_12px_30px_-12px_rgba(14,116,144,.8)]" style={{ background: A }} onClick={() => scrollToId("pricing")}>Book a pilot</Magnetic>
+              <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("governance")}>How governance works</Magnetic>
+            </Reveal>
           </div>
-          <span className="text-gray-200">·</span>
-          <span>SOC 2 Type II certified</span>
+        </div>
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.25 }} className="mt-12">
+          <Console />
         </motion.div>
+        <Reveal y={10} delay={0.2} className="mt-4">
+          <p className="m-0 text-center text-[13px] text-[#6e6e73]">Drag the autonomy dial or change the host limit. The same 02:14 incident replays under your rule.</p>
+        </Reveal>
       </div>
-
-      {/* Kanban mockup */}
-      <motion.div
-        initial={{ opacity: 0, y: 80 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.55, duration: 1.0, ease: EASE }}
-        className="relative mx-auto mt-16 max-w-6xl px-6"
-      >
-        <KanbanMockup />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent to-white" />
-      </motion.div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   LOGO STRIP
-───────────────────────────────────────────────────────────────────── */
-const LOGOS = ["Salesforce", "Atlassian", "HubSpot", "Notion", "GitHub", "Slack", "Linear", "Datadog", "Figma", "Workday"];
+/* ------------------------------------------------------------------ */
 
-function LogoStrip() {
+function Proof() {
+  const items = [
+    { to: 71, f: (n: number) => `${Math.round(n)}%`, l: "of Sev 2 and Sev 3 incidents closed without paging anyone" },
+    { to: 4.6, f: (n: number) => `${n.toFixed(1)} min`, l: "median time to resolve with autonomy on" },
+    { to: 0, f: () => "0", l: "actions taken outside a written policy" },
+  ];
   return (
-    <section className="overflow-hidden border-y border-gray-100 bg-white py-10">
-      <FadeUp className="mb-6 text-center text-xs font-medium tracking-widest text-gray-300 uppercase">
-        Deployed inside the world&apos;s best teams
-      </FadeUp>
-      <div className="flex flex-col gap-4">
-        {[
-          { logos: LOGOS, duration: 28, dir: "left" as const },
-          { logos: [...LOGOS.slice(5), ...LOGOS.slice(0, 5)], duration: 22, dir: "right" as const },
-        ].map(({ logos, duration, dir }, ri) => (
-          <div key={ri} className="flex overflow-hidden mask-[linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
-            <motion.div
-              animate={{ x: dir === "left" ? ["0%", "-50%"] : ["-50%", "0%"] }}
-              transition={{ duration, repeat: Infinity, ease: "linear" }}
-              className="flex shrink-0 gap-16 pr-16"
-            >
-              {[...logos, ...logos].map((logo, i) => (
-                <motion.span
-                  key={i}
-                  whileHover={{ color: "#111827", scale: 1.1, transition: { duration: 0.15 } }}
-                  className="cursor-default select-none whitespace-nowrap text-sm font-semibold tracking-tight text-gray-200"
-                >
-                  {logo}
-                </motion.span>
-              ))}
-            </motion.div>
-          </div>
+    <section className="border-y border-black/[.06] bg-white" aria-label="Orion in numbers">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-8 px-5 py-12 md:grid-cols-3">
+        {items.map((it, i) => (
+          <Reveal key={it.l} delay={i * 0.06} y={14} className="flex items-baseline gap-4">
+            <Counter to={it.to} format={it.f} className="flex-none text-[clamp(36px,4.4vw,48px)] font-semibold tracking-[-0.045em]" />
+            <span className="text-[15px] leading-[1.4] text-[#6e6e73]">{it.l}</span>
+          </Reveal>
         ))}
       </div>
+      <p className="mx-auto mb-0 mt-0 max-w-[1180px] px-5 pb-8 text-[12px] text-[#6e6e73]">Figures from a sample pilot of 40 services over 90 days. Placeholder data.</p>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   STATS STRIP
-───────────────────────────────────────────────────────────────────── */
-function StatsStrip() {
-  const stats = [
-    { label: "Agents deployed", to: 12400, suffix: "+" },
-    { label: "Task completion rate", to: 97, suffix: "%" },
-    { label: "Avg ops cost reduction", to: 41, suffix: "%" },
-    { label: "Enterprise customers", to: 520, suffix: "+" },
-  ];
-
+function Runbooks() {
   return (
-    <section className="bg-gray-950 py-16">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-          {stats.map(({ label, to, suffix }, i) => (
-            <FadeUp key={label} delay={i * 0.08}>
-              <div className="text-center">
-                <div className="text-4xl font-black tracking-tight text-white">
-                  <AnimatedCounter to={to} suffix={suffix} />
-                </div>
-                <p className="mt-1.5 text-sm text-gray-500">{label}</p>
+    <section id="runbooks" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto max-w-[1180px] px-5">
+        <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.3fr_1fr]">
+          <SectionHead eyebrow="Runbooks" title="The runbooks you already wrote, finally executable." sub="Import Markdown, wiki pages or scripts. Orion turns each one into steps, marks which are reversible, and runs them in a dry run before anything is live." accent={A} />
+          <Reveal y={16} className="flex flex-col gap-3">
+            <CopyCommand command="orion runbooks import ./runbooks --dry-run" />
+            <span className="text-[13px] text-[#6e6e73]">Read-only by default. Nothing runs until a policy says it may.</span>
+          </Reveal>
+        </div>
+        <div className="mt-14 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          {[
+            { t: "Deploys", m: "14 runbooks · 9 reversible", c: A },
+            { t: "Databases", m: "8 runbooks · 2 reversible", c: "#155e75" },
+            { t: "Capacity", m: "11 runbooks · 11 reversible", c: "#0891b2" },
+          ].map((f, i) => (
+            <Reveal key={f.t} delay={i * 0.06} y={18}>
+              <div className={`${C} flex h-full flex-col items-center px-6 pb-6`}>
+                <FolderPeek title={f.t} meta={f.m} color={f.c} autoplay={i === 1} />
               </div>
-            </FadeUp>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -613,822 +436,304 @@ function StatsStrip() {
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FEATURES — alternating sections
-───────────────────────────────────────────────────────────────────── */
-function WorkflowDAG() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
+/* ------------------------------------------------------------------ */
 
-  const nodes = [
-    { id: "T", label: "Trigger", sub: "Webhook", x: 30, y: 50, color: "bg-gray-900" },
-    { id: "A1", label: "Fetch data", sub: "Agent-01", x: 165, y: 20, color: "bg-gray-700" },
-    { id: "A2", label: "Analyze", sub: "Agent-02", x: 165, y: 80, color: "bg-gray-600" },
-    { id: "P", label: "Approve", sub: "Human step", x: 300, y: 50, color: "bg-amber-500" },
-    { id: "D", label: "Deploy", sub: "Auto-exec", x: 435, y: 50, color: "bg-emerald-500" },
-  ];
+const SCOPES = [
+  { id: "restart", l: "Restart pods", h: "Reversible · used 212 times" },
+  { id: "scale", l: "Scale up to 2x", h: "Reversible · used 87 times" },
+  { id: "rollback", l: "Roll back a deploy", h: "Reversible · needs 38+ hosts check" },
+  { id: "dns", l: "Change DNS", h: "Slow to undo" },
+  { id: "db", l: "Fail over a database", h: "Not reversible" },
+];
 
-  const edges = [
-    { x1: 72, y1: 95, x2: 150, y2: 55 },
-    { x1: 72, y1: 95, x2: 150, y2: 135 },
-    { x1: 210, y1: 55, x2: 285, y2: 95 },
-    { x1: 210, y1: 135, x2: 285, y2: 95 },
-    { x1: 345, y1: 95, x2: 420, y2: 95 },
-  ];
-
+function ScopeCard() {
+  const [on, setOn] = useState<Record<string, boolean>>({ restart: true, scale: true, rollback: true, dns: false, db: false });
+  const count = Object.values(on).filter(Boolean).length;
   return (
-    <div ref={ref} className="relative h-44 w-full">
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 500 190">
-        {edges.map((e, i) => (
-          <motion.line
-            key={i}
-            x1={e.x1} y1={e.y1} x2={e.x2} y2={e.y2}
-            stroke="#e5e7eb" strokeWidth="1.5" strokeDasharray="4 3"
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={inView ? { pathLength: 1, opacity: 1 } : {}}
-            transition={{ delay: 0.2 + i * 0.1, duration: 0.6, ease: EASE }}
-          />
+    <div className={`${C} w-[420px] overflow-hidden`}>
+      <div className="flex items-center justify-between px-5 pb-2 pt-5">
+        <span className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">Scope · checkout-api</span>
+        <span className="text-[13px] font-semibold tabular-nums" style={{ color: A }}>{count} of 5 allowed</span>
+      </div>
+      <ul className="m-0 list-none divide-y divide-[#f0f0f3] p-0">
+        {SCOPES.map((s) => (
+          <li key={s.id} className="flex items-center gap-3 px-5 py-3">
+            <span className="flex flex-1 flex-col">
+              <span className="text-[15px] font-medium text-[#1d1d1f]">{s.l}</span>
+              <span className="text-[12px] text-[#6e6e73]">{on[s.id] ? s.h : "Orion will ask a person"}</span>
+            </span>
+            <CapsuleToggle label={s.l} checked={on[s.id]} onColor={A} onChange={(v) => setOn((x) => ({ ...x, [s.id]: v }))} />
+          </li>
         ))}
-        {inView && edges.map((e, i) => (
-          <motion.circle
-            key={i}
-            r="3" fill="#111827"
-            initial={{ cx: e.x1, cy: e.y1, opacity: 0 }}
-            animate={{ cx: [e.x1, e.x2], cy: [e.y1, e.y2], opacity: [0, 1, 0] }}
-            transition={{ delay: 0.8 + i * 0.3, duration: 1.2, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-          />
-        ))}
-      </svg>
-      {nodes.map((n, i) => (
-        <motion.div
-          key={n.id}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={inView ? { opacity: 1, scale: 1 } : {}}
-          transition={{ delay: 0.15 + i * 0.12, type: "spring", stiffness: 300, damping: 18 }}
-          whileHover={{ scale: 1.08, transition: { duration: 0.18 } }}
-          className="absolute cursor-default"
-          style={{ left: `${n.x}px`, top: `${n.y}%`, transform: "translate(-50%,-50%)" }}
-        >
-          <div className={cn("grid size-10 place-items-center rounded-2xl text-xs font-black text-white shadow-md", n.color)}>
-            {n.id}
-          </div>
-          <p className="mt-1 text-center text-[9px] font-semibold text-gray-700 leading-tight">{n.label}</p>
-          <p className="text-center text-[8px] text-gray-400">{n.sub}</p>
-        </motion.div>
-      ))}
+      </ul>
     </div>
   );
 }
 
-function ApprovalCard() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [approved, setApproved] = React.useState<boolean | null>(null);
-
+function PauseCard() {
+  const [paused, setPaused] = useState(false);
+  const steps = ["Drain wave 1 of 4", "Roll back wave 1", "Check error rate", "Roll back wave 2"];
   return (
-    <div ref={ref} className="flex items-center justify-center p-8">
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.94 }}
-        animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-        transition={{ duration: 0.5, ease: EASE }}
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md"
-      >
-        <div className="border-b border-amber-100 bg-amber-50 px-5 py-3">
-          <div className="flex items-center gap-2">
-            <motion.span
-              animate={{ scale: [1, 1.4, 1], opacity: [1, 0.4, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity }}
-              className="size-2 rounded-full bg-amber-500"
-            />
-            <span className="text-xs font-semibold text-amber-700">Awaiting your approval</span>
-          </div>
-        </div>
-        <div className="p-5">
-          <p className="text-sm font-semibold text-gray-900">Merge PR #2841 to production</p>
-          <p className="mt-1 text-xs leading-relaxed text-gray-500">
-            Agent-003 completed testing with 99.4% pass rate. 3 reviewers signed off. Ready to merge.
-          </p>
-          <div className="mt-3 flex items-center gap-2 rounded-xl bg-gray-50 p-3 text-[11px]">
-            <div className="grid size-6 place-items-center rounded-md bg-gray-100 text-gray-700 font-bold text-[9px]">AI</div>
-            <span className="text-gray-500">Confidence: <strong className="text-gray-800">98.1%</strong> — Low risk deployment</span>
-          </div>
-          <AnimatePresence mode="wait">
-            {approved === null ? (
-              <motion.div
-                key="actions"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0, y: -8 }}
-                className="mt-4 flex gap-2"
-              >
-                <motion.button
-                  whileHover={{ scale: 1.04, boxShadow: "0 4px 16px rgba(0,0,0,0.18)" }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => setApproved(true)}
-                  className="flex-1 rounded-xl bg-gray-950 py-2.5 text-xs font-semibold text-white"
-                >
-                  ✓ Approve & Deploy
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.04 }}
-                  whileTap={{ scale: 0.96 }}
-                  onClick={() => { setApproved(false); setTimeout(() => setApproved(null), 2000); }}
-                  className="flex-1 rounded-xl border border-gray-200 py-2.5 text-xs font-medium text-gray-600"
-                >
-                  Request changes
-                </motion.button>
-              </motion.div>
+    <div className={`${C} flex w-[420px] flex-col gap-5 p-6`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-semibold text-[#1d1d1f]">RB-12 · Roll back a bad deploy</span>
+        <span className="text-[12px] font-semibold" style={{ color: paused ? AMBER : A }}>{paused ? "Paused at step 3" : "Running"}</span>
+      </div>
+      <ol className="m-0 flex list-none flex-col gap-2 p-0">
+        {steps.map((s, i) => (
+          <li key={s} className="flex items-center gap-3 rounded-xl bg-[#f7f8f9] px-3 py-2.5 text-[14px] text-[#1d1d1f]">
+            {i < 2 ? (
+              <span className="flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold text-white" style={{ background: A }}>✓</span>
+            ) : i === 2 ? (
+              paused ? <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#fff4e0] text-[11px] font-bold" style={{ color: AMBER }}>II</span> : <MatrixLoader pattern={0} size={20} color={A} />
             ) : (
-              <motion.div
-                key="result"
-                initial={{ opacity: 0, y: 8, scale: 0.94 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className={cn(
-                  "mt-4 flex items-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold",
-                  approved ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600",
-                )}
-              >
-                {approved ? <Check className="size-4" /> : <Plus className="size-4 rotate-45" />}
-                {approved ? "Deployment initiated by Orion" : "Agent paused — feedback sent"}
-              </motion.div>
+              <span className="h-5 w-5 rounded-full border-2 border-[#d2d2d7]" />
             )}
-          </AnimatePresence>
-        </div>
-      </motion.div>
+            {s}
+          </li>
+        ))}
+      </ol>
+      <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => setPaused((p) => !p)} className="h-11 rounded-full text-[14px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2" animate={{ backgroundColor: paused ? A : "#1d1d1f" }} style={{ ["--tw-ring-color" as string]: A }}>
+        {paused ? "Resume from step 3" : "Pause this run"}
+      </motion.button>
     </div>
   );
 }
 
-function AuditLog() {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-40px" });
-  const entries = [
-    { time: "09:41:03", agent: "Agent-003", action: "PR #2841 merged to main", type: "success" },
-    { time: "09:40:57", agent: "Human", action: "Marcus approved deployment", type: "approval" },
-    { time: "09:38:22", agent: "Agent-003", action: "Test suite passed (247/249)", type: "success" },
-    { time: "09:31:05", agent: "Agent-003", action: "Staging deploy completed", type: "info" },
-    { time: "09:14:40", agent: "Agent-003", action: "PR #2841 created from feature/auth", type: "info" },
+function TwoPersonCard() {
+  const people = [
+    { n: "Dana Okafor", r: "On call, payments", t: "02:16:41" },
+    { n: "Luis Ferreira", r: "Database owner", t: "02:17:58" },
   ];
-  const typeStyles = {
-    success: "bg-emerald-50 text-emerald-600 border-emerald-100",
-    approval: "bg-gray-100 text-gray-600 border-gray-200",
-    info: "bg-gray-50 text-gray-500 border-gray-100",
-  };
   return (
-    <div ref={ref} className="p-6">
-      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-        <div className="flex items-center justify-between border-b border-gray-100 bg-gray-50 px-5 py-3">
-          <span className="text-xs font-semibold text-gray-700">Audit Trail — PR #2841</span>
-          <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-600">Live</span>
-        </div>
-        <div className="divide-y divide-gray-50">
-          {entries.map((e, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, x: -16 }}
-              animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ delay: 0.1 + i * 0.1, duration: 0.4, ease: EASE }}
-              className="flex items-start gap-3 px-5 py-3"
-            >
-              <span className="mt-0.5 shrink-0 font-mono text-[9px] text-gray-300">{e.time}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs leading-relaxed text-gray-700 line-clamp-1">{e.action}</p>
-              </div>
-              <span className={cn("shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-medium", typeStyles[e.type as keyof typeof typeStyles])}>
-                {e.agent}
-              </span>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+    <div className={`${C} flex w-[420px] flex-col gap-5 p-6`}>
+      <span className="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">Needs two people</span>
+      <span className="text-[19px] font-semibold leading-[1.3] tracking-[-0.02em] text-[#1d1d1f]">Fail over the orders database to us-east-2</span>
+      <ul className="m-0 flex list-none flex-col gap-2 p-0">
+        {people.map((p, i) => (
+          <motion.li key={p.n} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ ...spring, delay: 0.2 + i * 0.5 }} className="flex items-center gap-3 rounded-xl bg-[#f7f8f9] px-3 py-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: A }}>{p.n.split(" ").map((w) => w[0]).join("")}</span>
+            <span className="flex flex-1 flex-col"><span className="text-[14px] font-semibold text-[#1d1d1f]">{p.n}</span><span className="text-[12px] text-[#6e6e73]">{p.r}</span></span>
+            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 500, damping: 14, delay: 0.5 + i * 0.5 }} className="text-[12px] font-semibold tabular-nums" style={{ color: A }}>✓ {p.t}</motion.span>
+          </motion.li>
+        ))}
+      </ul>
+      <span className="text-[13px] text-[#6e6e73]">The second approver must be from a different team. Orion checks.</span>
     </div>
   );
 }
 
-function FeaturesSection() {
-  const features = [
-    {
-      label: "Autonomous execution",
-      heading: "Agents that plan, execute, and adapt.",
-      desc: "Orion agents understand context, chain multi-step tasks, and self-correct when something changes — without waiting for a human to press go.",
-      bullets: ["Multi-step task orchestration", "Real-time tool integration", "Self-healing on failure"],
-      visual: <WorkflowDAG />,
-      flip: false,
-    },
-    {
-      label: "Human-in-the-loop",
-      heading: "Control without micromanaging.",
-      desc: "Define exactly where you want human sign-off. Agents pause, surface a clear decision card, and resume the moment you approve.",
-      bullets: ["Configurable approval thresholds", "One-click approve or redirect", "Full context surfaced instantly"],
-      visual: <ApprovalCard />,
-      flip: true,
-    },
-    {
-      label: "Complete audit trail",
-      heading: "Every action. Fully traceable.",
-      desc: "Every agent decision is logged with timestamp, reasoning, and outcome. Search, export, and share any run for compliance or debugging.",
-      bullets: ["Immutable execution logs", "SOC 2 compliant storage", "Exportable to your SIEM"],
-      visual: <AuditLog />,
-      flip: false,
-    },
+function ChainCard() {
+  const rows = [
+    ["02:14:07", "alert.received", "9c1e"],
+    ["02:14:31", "runbook.matched RB-12", "4b07"],
+    ["02:14:33", "policy.allowed rollback", "e21a"],
+    ["02:14:34", "action.started wave 1/4", "77d3"],
+    ["02:17:02", "check.passed p95 305ms", "0fa8"],
   ];
-
   return (
-    <section className="bg-white py-28">
-      <div className="mx-auto max-w-6xl px-6">
-        <FadeUp className="mb-20 text-center">
-          <p className="mb-3 text-sm font-semibold text-gray-400 uppercase tracking-widest">Platform capabilities</p>
-          <h2 className="text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">
-            Everything you need.<br />Nothing you don&apos;t.
-          </h2>
-        </FadeUp>
+    <div className={`${C} flex w-[440px] flex-col gap-3 p-6`}>
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-semibold text-[#1d1d1f]">Audit trail · INC-2291</span>
+        <span className="flex items-center gap-2 text-[12px] font-semibold" style={{ color: A }}><MatrixLoader pattern={5} size={16} color={A} /> Chain verified</span>
+      </div>
+      <ul className="m-0 flex list-none flex-col p-0" style={{ fontFamily: MONO }}>
+        {rows.map(([t, e, h], i) => (
+          <motion.li key={h} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ ...spring, delay: i * 0.08 }} className="flex items-center gap-3 border-b border-black/[.05] py-2 text-[12px]">
+            <span className="text-[#6e6e73]">{t}</span>
+            <span className="min-w-0 flex-1 truncate text-[#1d1d1f]">{e}</span>
+            <span className="rounded bg-[#e0f2f6] px-1.5 py-0.5 text-[11px]" style={{ color: A }}>#{h}</span>
+          </motion.li>
+        ))}
+      </ul>
+      <span className="text-[12px] leading-[1.45] text-[#6e6e73]">Each entry includes the hash of the one before it, so a deleted or edited line breaks the chain.</span>
+    </div>
+  );
+}
 
-        <div className="space-y-24">
-          {features.map((feat) => (
-            <FadeUp key={feat.label} delay={0.05}>
-              <div className={cn("grid items-center gap-12 lg:grid-cols-2", feat.flip && "lg:[&>*:first-child]:order-2")}>
-                <div>
-                  <motion.span
-                    initial={{ opacity: 0, x: -16 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.45, ease: EASE }}
-                    className="mb-4 inline-block rounded-full border border-gray-200 bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600"
-                  >
-                    {feat.label}
-                  </motion.span>
-                  <h3 className="text-3xl font-black leading-tight tracking-tight text-gray-950 sm:text-4xl">
-                    {feat.heading}
-                  </h3>
-                  <p className="mt-4 text-base leading-relaxed text-gray-500">{feat.desc}</p>
-                  <ul className="mt-6 space-y-2.5">
-                    {feat.bullets.map((b, bi) => (
-                      <motion.li
-                        key={b}
-                        initial={{ opacity: 0, x: -12 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.1 + bi * 0.08, duration: 0.4, ease: EASE }}
-                        className="flex items-center gap-2.5 text-sm text-gray-700"
-                      >
-                        <div className="grid size-5 shrink-0 place-items-center rounded-full bg-gray-100">
-                          <Check className="size-3 text-gray-700" />
-                        </div>
-                        {b}
-                      </motion.li>
-                    ))}
-                  </ul>
-                </div>
-                <TiltCard className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50 shadow-sm">
-                  {feat.visual}
-                </TiltCard>
-              </div>
-            </FadeUp>
-          ))}
-        </div>
+function Governance() {
+  return (
+    <section id="governance" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Governance" title="Autonomy you can explain to your auditor." sub="Every agent works inside a scope, can be stopped mid-step, and leaves a record that cannot be quietly edited." accent={A} />
+      <div className="mt-10">
+        <StickyStory
+          accent={A}
+          steps={[
+            { kicker: "01 · Scope", title: "Each service gets a scope.", body: "List what an agent may do on its own. Anything outside the list becomes a request to a person, with the plan and the evidence attached.", visual: <ScopeCard /> },
+            { kicker: "02 · Pause", title: "Stop any run mid-step.", body: "Every runbook checkpoints between steps. Pause from the console, Slack or the API, and Orion resumes from exactly where it stopped.", visual: <PauseCard /> },
+            { kicker: "03 · Two people", title: "Two people for the big moves.", body: "Database failovers, region moves and anything irreversible need two approvers from different teams. Orion enforces it, nobody has to remember.", visual: <TwoPersonCard /> },
+            { kicker: "04 · Record", title: "A trail nobody can quietly edit.", body: "Alerts, decisions, approvals and commands are chained by hash and streamed to your SIEM. Export a full incident as one file.", visual: <ChainCard /> },
+          ]}
+        />
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   HOW IT WORKS
-───────────────────────────────────────────────────────────────────── */
-function WorkflowSection() {
-  const steps = [
-    { n: "01", icon: Globe, title: "Connect your stack", desc: "One-click integrations with 200+ tools. Orion reads your existing workflows and maps data sources automatically." },
-    { n: "02", icon: Bot, title: "Define agent behaviors", desc: "Set tasks, triggers, and approval rules in plain language. No prompt engineering. No YAML configs." },
-    { n: "03", icon: TrendingUp, title: "Ship with confidence", desc: "Agents execute live. You get real-time status, full audit logs, and one-click rollback if anything looks off." },
-  ];
+/* ------------------------------------------------------------------ */
 
+const PM_FRONT = (
+  <div className="flex h-full flex-col gap-3 p-6">
+    <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73]">Postmortem draft · INC-2291</span>
+    <span className="text-[20px] font-semibold leading-[1.2] tracking-[-0.025em] text-[#1d1d1f]">Checkout slowed for 4 minutes after deploy 4f2a1c.</span>
+    <span className="text-[13px] leading-[1.5] text-[#424245]">A config change doubled database connections per pod. Orion rolled back in 4 waves; p95 recovered by 02:17. No orders were lost.</span>
+    <span className="mt-auto text-[12px] text-[#6e6e73]">Grab the corner to see the raw evidence.</span>
+  </div>
+);
+const PM_BACK = (
+  <div className="flex h-full flex-col gap-1.5 bg-[#0b2a33] p-6 text-[11.5px] leading-[1.5] text-[#cfe9ef]" style={{ fontFamily: MONO }}>
+    <span className="text-[#7fd0e0]">$ orion incident export INC-2291</span>
+    <span>02:14:07 alert p95=2412ms slo=400ms</span>
+    <span>02:14:19 deploy 4f2a1c db_pool 20→40</span>
+    <span>02:14:31 runbook RB-12 hosts=38</span>
+    <span>02:14:33 policy autonomous cap=50 ok</span>
+    <span>02:17:02 check p95=305ms err=0.3%</span>
+    <span>02:18:40 closed by orion</span>
+    <span className="text-[#7fd0e0]">chain: 9c1e → 4b07 → e21a → 0fa8 ✓</span>
+  </div>
+);
+
+function Postmortem() {
   return (
-    <section className="bg-gray-50 py-28">
-      <div className="mx-auto max-w-6xl px-6">
-        <FadeUp className="mb-16 text-center">
-          <p className="mb-3 text-sm font-semibold text-gray-400 uppercase tracking-widest">Getting started</p>
-          <h2 className="text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">Up and running in an afternoon.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-base text-gray-500">
-            No ML expertise required. Orion handles the complexity — you handle the strategy.
-          </p>
-        </FadeUp>
-
-        <div className="grid gap-6 lg:grid-cols-3">
-          {steps.map(({ n, icon: Icon, title, desc }, i) => (
-            <FadeUp key={n} delay={i * 0.1}>
-              <TiltCard className="h-full rounded-2xl border border-gray-200 bg-white p-7 shadow-sm">
-                <div className="mb-5 flex items-start justify-between">
-                  <motion.div
-                    whileHover={{ scale: 1.12, rotate: -5 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                    className="grid size-11 place-items-center rounded-xl border border-gray-200 bg-gray-100"
-                  >
-                    <Icon className="size-5 text-gray-700" />
-                  </motion.div>
-                  <span className="font-black text-[2rem] leading-none text-gray-100">{n}</span>
-                </div>
-                <h3 className="text-lg font-bold text-gray-950">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-gray-500">{desc}</p>
-              </TiltCard>
-            </FadeUp>
-          ))}
+    <section id="audit" className="bg-[#f5f5f7] py-24">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 items-center gap-14 px-5 lg:grid-cols-[1fr_1.1fr]">
+        <div className="flex flex-col gap-8">
+          <SectionHead eyebrow="Postmortems" title="It writes the postmortem. The evidence stays underneath." sub="Orion drafts the summary from the audit trail, so the story and the facts never drift apart. Peel back the page to see what it was written from." accent={A} />
+          <ul className="m-0 flex list-none flex-col gap-3 p-0">
+            {["Timeline built from the chained trail", "Root cause linked to the change that caused it", "Follow-ups filed as tickets in your tracker"].map((t) => (
+              <li key={t} className="flex items-center gap-3 text-[16px] text-[#1d1d1f]">
+                <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-[#e0f2f6] text-[12px] font-bold" style={{ color: A }}>✓</span>
+                {t}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   TESTIMONIALS
-───────────────────────────────────────────────────────────────────── */
-const TESTIMONIALS = [
-  { quote: "We replaced an entire ops rotation with Orion agents. They never miss SLAs, never need stand-ups, and escalate with full context.", author: "Priya Mehta", role: "VP Engineering, Meridian Health", color: "#1F2937" },
-  { quote: "The approval flow is what sold us. Our compliance team finally trusts an AI tool because they're always in the loop.", author: "Jordan Blake", role: "CTO, Beacon Financial", color: "#374151" },
-  { quote: "Orion handles our nightly data reconciliation across 14 systems. We shipped that workflow in two hours.", author: "Tomás Reyes", role: "Head of Data, Solstice Retail", color: "#4B5563" },
-];
-
-function TestimonialsSection() {
-  const [active, setActive] = React.useState(0);
-  React.useEffect(() => {
-    const t = setInterval(() => setActive((i) => (i + 1) % TESTIMONIALS.length), 5000);
-    return () => clearInterval(t);
-  }, []);
-
-  return (
-    <section className="bg-white py-28">
-      <div className="mx-auto max-w-6xl px-6">
-        <FadeUp className="mb-12 text-center">
-          <h2 className="text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">
-            Trusted by teams who ship.
-          </h2>
-        </FadeUp>
-
-        <div className="grid gap-5 md:grid-cols-3">
-          {TESTIMONIALS.map((t, i) => (
-            <FadeUp key={t.author} delay={0.07 * i}>
-              <motion.div
-                onClick={() => setActive(i)}
-                animate={active === i ? {
-                  scale: 1.03, y: -6,
-                  boxShadow: "0 20px 56px rgba(0,0,0,0.10)",
-                  borderColor: "rgb(209,213,219)",
-                } : { scale: 1, y: 0, boxShadow: "none", borderColor: "rgb(243,244,246)" }}
-                transition={{ duration: 0.35, ease: EASE }}
-                className="h-full cursor-pointer rounded-2xl border bg-white p-6"
-              >
-                <div className="mb-4 flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <motion.span key={j} initial={{ scale: 0 }} whileInView={{ scale: 1 }} viewport={{ once: true }}
-                      transition={{ delay: 0.07 * i + j * 0.05, type: "spring", stiffness: 320, damping: 16 }}>
-                      <Star className="size-4 fill-amber-400 text-amber-400" />
-                    </motion.span>
-                  ))}
-                </div>
-                <AnimatePresence mode="wait">
-                  {active === i ? (
-                    <motion.p key="active" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.28, ease: EASE }}
-                      className="text-sm leading-relaxed text-gray-800">
-                      &ldquo;{t.quote}&rdquo;
-                    </motion.p>
-                  ) : (
-                    <p className="text-sm leading-relaxed text-gray-400">&ldquo;{t.quote}&rdquo;</p>
-                  )}
-                </AnimatePresence>
-                <div className="mt-5 flex items-center gap-3">
-                  <motion.div whileHover={{ scale: 1.1 }}
-                    className="grid size-9 place-items-center rounded-full text-sm font-black text-white"
-                    style={{ background: t.color }}>
-                    {t.author[0]}
-                  </motion.div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">{t.author}</p>
-                    <p className="text-[11px] text-gray-400">{t.role}</p>
-                  </div>
-                </div>
-              </motion.div>
-            </FadeUp>
-          ))}
-        </div>
-
-        <div className="mt-8 flex justify-center gap-2">
-          {TESTIMONIALS.map((_, i) => (
-            <motion.button key={i} type="button" onClick={() => setActive(i)}
-              animate={{ width: active === i ? 28 : 8, backgroundColor: active === i ? "#111827" : "#e5e7eb" }}
-              transition={{ duration: 0.3, ease: EASE }}
-              className="h-2 rounded-full"
-            />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   PRICING
-───────────────────────────────────────────────────────────────────── */
-const PLANS = [
-  {
-    name: "Team",
-    monthly: 0,
-    yearly: 0,
-    desc: "For small teams exploring autonomous ops.",
-    cta: "Start free",
-    highlight: false,
-    features: ["10 active agents", "5,000 executions/mo", "3 integrations", "Community support", "Basic audit logs"],
-  },
-  {
-    name: "Growth",
-    monthly: 79,
-    yearly: 63,
-    desc: "For scaling teams with production workloads.",
-    cta: "Start free trial",
-    highlight: true,
-    features: ["100 active agents", "200,000 executions/mo", "Unlimited integrations", "Priority support", "Advanced audit + export", "Custom approval flows"],
-  },
-  {
-    name: "Enterprise",
-    monthly: 299,
-    yearly: 239,
-    desc: "For large orgs with compliance requirements.",
-    cta: "Talk to sales",
-    highlight: false,
-    features: ["Unlimited agents", "Unlimited executions", "SSO + SAML", "Dedicated CSM", "SOC 2 / HIPAA", "Custom SLA"],
-  },
-];
-
-function PricingSection() {
-  const [yearly, setYearly] = React.useState(false);
-
-  return (
-    <section className="bg-gray-50 py-28">
-      <div className="mx-auto max-w-6xl px-6">
-        <FadeUp className="text-center">
-          <p className="mb-3 text-sm font-semibold text-gray-400 uppercase tracking-widest">Pricing</p>
-          <h2 className="text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">Simple pricing. Serious power.</h2>
-          <p className="mx-auto mt-4 max-w-lg text-base text-gray-500">
-            Start free. Scale your agent fleet as your operations grow.
-          </p>
-
-          {/* Toggle */}
-          <div className="mt-8 inline-flex items-center gap-3">
-            <span className={cn("text-sm transition-colors", !yearly ? "font-bold text-gray-900" : "text-gray-400")}>Monthly</span>
-            <button
-              type="button"
-              onClick={() => setYearly((v) => !v)}
-              className={cn("relative h-6 w-11 rounded-full transition-colors duration-300", yearly ? "bg-gray-950" : "bg-gray-200")}
-            >
-              <motion.span
-                animate={{ x: yearly ? 22 : 2 }}
-                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                className="absolute top-0.5 block h-5 w-5 rounded-full bg-white shadow"
-              />
-            </button>
-            <span className={cn("text-sm transition-colors", yearly ? "font-bold text-gray-900" : "text-gray-400")}>Yearly</span>
-            <AnimatePresence>
-              {yearly && (
-                <motion.span
-                  initial={{ opacity: 0, scale: 0.75, x: -8 }}
-                  animate={{ opacity: 1, scale: 1, x: 0 }}
-                  exit={{ opacity: 0, scale: 0.75, x: -8 }}
-                  transition={{ duration: 0.22, ease: EASE }}
-                  className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-600"
-                >
-                  Save 20%
-                </motion.span>
-              )}
-            </AnimatePresence>
+        <Reveal y={20}>
+          <div className={`${C} flex justify-center px-4 py-10`}>
+            <Fit><PageCurl width={440} height={300} front={PM_FRONT} back={PM_BACK} autoplay /></Fit>
           </div>
-        </FadeUp>
-
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
-          {PLANS.map((plan, i) => (
-            <FadeUp key={plan.name} delay={0.07 * i}>
-              <motion.div
-                whileHover={!plan.highlight ? { y: -6, boxShadow: "0 20px 56px rgba(0,0,0,0.08)", transition: { duration: 0.22 } } : {}}
-                className={cn(
-                  "relative h-full overflow-hidden rounded-2xl border p-7",
-                  plan.highlight
-                    ? "border-gray-800 bg-gray-950 shadow-[0_24px_64px_rgba(0,0,0,0.18)]"
-                    : "border-gray-200 bg-white",
-                )}
-              >
-                {plan.highlight && (
-                  <>
-                    <motion.div
-                      animate={{ x: ["-100%", "200%"] }}
-                      transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 3.5 }}
-                      className="pointer-events-none absolute inset-y-0 w-1/3 -skew-x-12 bg-linear-to-r from-transparent via-white/5 to-transparent"
-                    />
-                    <span className="absolute right-5 top-5 rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-white">
-                      Most popular
-                    </span>
-                  </>
-                )}
-
-                <p className={cn("text-sm font-bold", plan.highlight ? "text-gray-400" : "text-gray-500")}>{plan.name}</p>
-
-                <div className="mt-3 flex items-end gap-1">
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={`${plan.name}-${yearly}`}
-                      initial={{ opacity: 0, y: 16, filter: "blur(6px)" }}
-                      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                      exit={{ opacity: 0, y: -16, filter: "blur(6px)" }}
-                      transition={{ duration: 0.26, ease: EASE }}
-                      className={cn("text-4xl font-black tracking-tight", plan.highlight ? "text-white" : "text-gray-950")}
-                    >
-                      {plan.monthly === 0 ? "Free" : `$${yearly ? plan.yearly : plan.monthly}`}
-                    </motion.span>
-                  </AnimatePresence>
-                  {plan.monthly > 0 && <span className="mb-1 text-sm text-gray-400">/mo</span>}
-                </div>
-
-                <p className={cn("mt-1.5 text-sm", plan.highlight ? "text-gray-400" : "text-gray-500")}>{plan.desc}</p>
-
-                <motion.button
-                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                  className={cn(
-                    "mt-6 w-full rounded-xl py-2.5 text-sm font-bold transition",
-                    plan.highlight
-                      ? "bg-white text-gray-950 hover:bg-gray-100"
-                      : "border border-gray-200 bg-white text-gray-950 hover:bg-gray-50",
-                  )}
-                >
-                  {plan.cta}
-                </motion.button>
-
-                <div className={cn("my-5 h-px", plan.highlight ? "bg-white/10" : "bg-gray-100")} />
-
-                <ul className="space-y-3">
-                  {plan.features.map((f, fi) => (
-                    <motion.li key={f} initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }} transition={{ delay: 0.06 * i + fi * 0.05, duration: 0.35, ease: EASE }}
-                      className="flex items-center gap-2.5 text-sm">
-                      <Check className={cn("size-4 shrink-0", plan.highlight ? "text-gray-400" : "text-gray-500")} />
-                      <span className={plan.highlight ? "text-gray-300" : "text-gray-600"}>{f}</span>
-                    </motion.li>
-                  ))}
-                </ul>
-              </motion.div>
-            </FadeUp>
-          ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   FAQ
-───────────────────────────────────────────────────────────────────── */
-const FAQS = [
-  { q: "How quickly can I deploy my first agent?", a: "Most teams ship their first agent within an afternoon. Connect your tools, describe the task in plain language, and Orion generates the execution plan. No ML expertise needed." },
-  { q: "What tools and APIs does Orion integrate with?", a: "Orion has pre-built connectors for 200+ tools including GitHub, Jira, Salesforce, Slack, HubSpot, Linear, and any REST/GraphQL API. Custom connectors are available on Growth and Enterprise plans." },
-  { q: "How does human-in-the-loop approval work?", a: "You define approval gates per agent or per task type. When triggered, the agent pauses and surfaces a decision card — with full context and confidence score — to the right person via Slack, email, or the Orion dashboard." },
-  { q: "Is Orion SOC 2 compliant?", a: "Yes. Orion is SOC 2 Type II certified. All execution logs are immutable, encrypted at rest with AES-256, and available for export to your SIEM. Enterprise plans include HIPAA BAA on request." },
-  { q: "Can agents be paused, edited, or rolled back?", a: "Yes. Every agent can be paused instantly from the dashboard, the Slack bot, or via API. Execution history is retained so you can re-run, modify, or roll back any workflow." },
+function History() {
+  return (
+    <section className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="History" title="Thirty weeks of incidents, standing up." sub="Every column is a day. Taller means busier. Hover a day for the count, switch to Standing for the shape of the quarter." accent={A} center />
+      <Reveal y={20} className="mt-12">
+        <div className={`${C} px-4 py-10 sm:px-10`}>
+          <Fit><IncidentCalendar weeks={30} noun="incidents handled" autoplay /></Fit>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+const QUOTES = [
+  { q: "We let Orion restart and scale on its own in week one. By week six it was closing most of our overnight pages before anyone woke up.", n: "Mei Tanaka", r: "SRE Lead, Lattice Freight" },
+  { q: "Compliance asked how an AI could touch production. I exported one incident and the conversation was over.", n: "Owen Brandt", r: "Head of Infrastructure, Corvid Bank" },
+  { q: "The autonomy dial is per service. Payments stays on Suggest, everything else runs. That nuance is why we bought it.", n: "Priya Nair", r: "VP Engineering, Tessellate" },
 ];
 
-function FAQSection() {
-  const [open, setOpen] = React.useState<number | null>(0);
-
+function Quotes() {
   return (
-    <section className="bg-white py-28">
-      <div className="mx-auto max-w-3xl px-6">
-        <FadeUp className="mb-12 text-center">
-          <p className="mb-3 text-sm font-semibold text-gray-400 uppercase tracking-widest">FAQ</p>
-          <h2 className="text-4xl font-black tracking-tight text-gray-950 sm:text-5xl">Common questions.</h2>
-        </FadeUp>
-
-        <div className="space-y-2">
-          {FAQS.map((faq, i) => {
-            const isOpen = open === i;
-            return (
-              <FadeUp key={i} delay={i * 0.04}>
-                <motion.div
-                  animate={isOpen ? { borderColor: "rgb(209,213,219)" } : { borderColor: "rgb(243,244,246)" }}
-                  transition={{ duration: 0.2 }}
-                  className="overflow-hidden rounded-2xl border bg-white"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpen(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between px-6 py-5 text-left"
-                  >
-                    <span className={cn("pr-4 text-[15px] font-bold transition-colors", isOpen ? "text-gray-950" : "text-gray-700")}>
-                      {faq.q}
-                    </span>
-                    <motion.div
-                      animate={{ rotate: isOpen ? 45 : 0, backgroundColor: isOpen ? "rgb(17,24,39)" : "rgb(243,244,246)" }}
-                      transition={{ duration: 0.22, ease: EASE }}
-                      className="grid size-7 shrink-0 place-items-center rounded-full"
-                    >
-                      <Plus className={cn("size-3.5 transition-colors", isOpen ? "text-white" : "text-gray-400")} />
-                    </motion.div>
-                  </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ height: { duration: 0.32, ease: EASE }, opacity: { duration: 0.2 } }}
-                      >
-                        <div className="border-t border-gray-100 px-6 pb-5 pt-4">
-                          <p className="text-sm leading-relaxed text-gray-500">{faq.a}</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              </FadeUp>
-            );
-          })}
-        </div>
+    <section className="bg-[#f5f5f7] py-24" aria-label="What teams say">
+      <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-5 px-5 md:grid-cols-3">
+        {QUOTES.map((q, i) => (
+          <Reveal key={q.n} delay={i * 0.06} y={18}>
+            <figure className={`${C} m-0 flex h-full flex-col justify-between gap-6 p-7`}>
+              <blockquote className="m-0 text-[18px] leading-[1.45] tracking-[-0.01em] text-[#1d1d1f]">“{q.q}”</blockquote>
+              <figcaption className="text-[14px] text-[#6e6e73]"><span className="font-semibold text-[#1d1d1f]">{q.n}</span> · {q.r}</figcaption>
+            </figure>
+          </Reveal>
+        ))}
       </div>
     </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   CTA
-───────────────────────────────────────────────────────────────────── */
-function CTASection() {
+function Pricing() {
   return (
-    <section className="relative overflow-hidden bg-gray-950 py-28">
-      {/* Subtle grid */}
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.04]"
-        style={{
-          backgroundImage: "linear-gradient(rgba(255,255,255,1) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,1) 1px,transparent 1px)",
-          backgroundSize: "48px 48px",
-        }}
-      />
-      {/* Soft glow */}
-      <motion.div
-        animate={{ opacity: [0.15, 0.3, 0.15], scale: [1, 1.1, 1] }}
-        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        className="pointer-events-none absolute left-1/2 top-1/2 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/10 blur-3xl"
-      />
-
-      <div className="relative mx-auto max-w-4xl px-6 text-center">
-        <FadeUp>
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-4 text-sm font-semibold text-gray-500 uppercase tracking-widest"
-          >
-            Start your pilot today
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.08, duration: 0.6, ease: EASE }}
-            className="text-4xl font-black text-white sm:text-5xl md:text-6xl"
-          >
-            Your ops team,<br />
-            <span className="text-gray-300">supercharged.</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.16, duration: 0.5, ease: EASE }}
-            className="mx-auto mt-5 max-w-lg text-base text-gray-500"
-          >
-            Join 500+ enterprise teams running Orion in production. Free pilot. No credit card. Cancel anytime.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.24, duration: 0.5, ease: EASE }}
-            className="mt-9 flex flex-wrap justify-center gap-3"
-          >
-            <motion.button
-              whileHover={{ scale: 1.06, boxShadow: "0 8px 32px rgba(255,255,255,0.18)" }}
-              whileTap={{ scale: 0.96 }}
-              className="flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold text-gray-950"
-            >
-              Start your free pilot
-              <motion.span animate={{ x: [0, 4, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
-                <ArrowRight className="size-4" />
-              </motion.span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.06, backgroundColor: "rgba(255,255,255,0.08)" }}
-              whileTap={{ scale: 0.96 }}
-              className="rounded-full border border-white/15 px-7 py-3.5 text-sm font-medium text-white transition"
-            >
-              Talk to sales
-            </motion.button>
-          </motion.div>
-        </FadeUp>
-      </div>
-    </section>
-  );
-}
-
-/* ─────────────────────────────────────────────────────────────────────
-   FOOTER
-───────────────────────────────────────────────────────────────────── */
-function Footer() {
-  const cols = [
-    { heading: "Product", links: ["Features", "Platform", "Integrations", "Changelog", "Roadmap"] },
-    { heading: "Company", links: ["About", "Blog", "Careers", "Press", "Partners"] },
-    { heading: "Resources", links: ["Docs", "API Reference", "Community", "Status", "Security"] },
-    { heading: "Legal", links: ["Privacy", "Terms", "SOC 2", "DPA", "Cookies"] },
-  ];
-
-  return (
-    <footer className="border-t border-gray-100 bg-white px-6 py-16">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="lg:col-span-1">
-            <motion.div whileHover={{ scale: 1.04 }} className="inline-flex cursor-default items-center gap-2.5">
-              <div className="flex size-7 items-center justify-center rounded-lg bg-gray-950">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <circle cx="3" cy="3" r="2" fill="white" />
-                  <circle cx="11" cy="3" r="2" fill="white" fillOpacity="0.45" />
-                  <circle cx="3" cy="11" r="2" fill="white" fillOpacity="0.45" />
-                  <circle cx="11" cy="11" r="2" fill="white" />
-                </svg>
-              </div>
-              <span className="text-[15px] font-black text-gray-950">Orion</span>
-            </motion.div>
-            <p className="mt-3 text-sm leading-relaxed text-gray-400">
-              Autonomous enterprise AI. Built for teams that can&apos;t afford to slow down.
-            </p>
-            <div className="mt-4 flex gap-3">
-              {["X", "LI", "GH"].map((s) => (
-                <motion.button
-                  key={s}
-                  whileHover={{ scale: 1.1, backgroundColor: "#f9fafb" }}
-                  className="grid size-8 place-items-center rounded-lg border border-gray-200 text-[10px] font-bold text-gray-400 transition"
-                >
-                  {s}
-                </motion.button>
-              ))}
+    <section id="pricing" className="mx-auto max-w-[1180px] px-5 py-24">
+      <SectionHead eyebrow="Pricing" title="Priced per protected service." sub="Agents, runbooks and seats are unlimited on every plan. Start with a 30-day pilot on up to 10 services." accent={A} center />
+      <div className="mt-14 grid grid-cols-1 gap-5 lg:grid-cols-[1.1fr_1fr]">
+        <Reveal y={20}>
+          <div className={`${C} flex h-full flex-col gap-6 p-6 sm:p-8`}>
+            <div>
+              <h3 className="m-0 text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Choose a plan</h3>
+              <p className="m-0 mt-1 text-[15px] text-[#6e6e73]">Annual billing. Move up or down at renewal.</p>
             </div>
+            <Fit>
+              <RadioCards
+                accent={A}
+                defaultValue="business"
+                options={[
+                  { id: "team", title: "Team", description: "Up to 25 services", meta: "$900/mo", features: ["Observe and Suggest", "Slack approvals", "90-day audit trail"] },
+                  { id: "business", title: "Business", description: "Up to 150 services", meta: "$3,600/mo", features: ["All four autonomy levels", "Two-person rule", "SIEM streaming"] },
+                  { id: "enterprise", title: "Enterprise", description: "Unlimited services", meta: "Custom", features: ["Self-hosted runners", "Custom retention", "24/7 support"] },
+                ]}
+              />
+            </Fit>
           </div>
-          {cols.map((col) => (
-            <div key={col.heading}>
-              <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-400">{col.heading}</p>
-              <ul className="space-y-3">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <motion.a href="#" whileHover={{ x: 3, color: "#111827" }} transition={{ duration: 0.15 }}
-                      className="text-sm text-gray-500">
-                      {link}
-                    </motion.a>
-                  </li>
+        </Reveal>
+        <Reveal y={20} delay={0.08}>
+          <div className="flex h-full flex-col justify-between gap-8 rounded-[24px] p-8 text-white" style={{ background: "linear-gradient(160deg,#0b3b48,#0e7490)" }}>
+            <div className="flex flex-col gap-3">
+              <span className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#bfe6ee]">Every plan includes</span>
+              <ul className="m-0 flex list-none flex-col gap-3 p-0">
+                {["Unlimited agents and runbooks", "Dry runs before anything goes live", "SSO, SCIM and role-based scopes", "Hash-chained audit trail export", "EU or US data residency"].map((f) => (
+                  <li key={f} className="flex items-center gap-3 text-[16px]"><span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 text-[11px] font-bold">✓</span>{f}</li>
                 ))}
               </ul>
             </div>
-          ))}
-        </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-8 sm:flex-row">
-          <p className="text-xs text-gray-400">© 2026 Orion AI, Inc. All rights reserved.</p>
-          <p className="text-xs text-gray-300">Built with Next.js · Tailwind CSS · Framer Motion</p>
-        </div>
+            <div className="flex flex-col gap-3">
+              <Magnetic className="w-full bg-white text-[#0b3b48]" onClick={() => scrollToId("top")}>Book a 30-day pilot</Magnetic>
+              <span className="text-center text-[13px] text-[#cfe9ef]">A solutions engineer imports your first runbooks with you.</span>
+            </div>
+          </div>
+        </Reveal>
       </div>
-    </footer>
+    </section>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
-   MAIN EXPORT
-───────────────────────────────────────────────────────────────────── */
 export function OrionAIPage() {
-  React.useEffect(() => {
-    let lenis: any = null;
-    (async () => {
-      const LenisClass = (await import("@studio-freight/lenis")).default;
-      lenis = new LenisClass({ lerp: 0.1, smoothWheel: true });
-      const raf = (t: number) => { lenis.raf(t); requestAnimationFrame(raf); };
-      requestAnimationFrame(raf);
-    })();
-    return () => { if (lenis) lenis.destroy(); };
-  }, []);
-
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900 antialiased">
-      <Navbar />
-      <Hero />
-      <LogoStrip />
-      <StatsStrip />
-      <FeaturesSection />
-      <WorkflowSection />
-      <TestimonialsSection />
-      <PricingSection />
-      <FAQSection />
-      <CTASection />
-      <Footer />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen overflow-x-clip bg-[#fbfbfd] text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: FONT }}>
+        <Nav brand={<Logo />} accent={A} cta="Book a pilot" onCta={() => scrollToId("pricing")} links={[{ label: "Runbooks", id: "runbooks" }, { label: "Governance", id: "governance" }, { label: "Audit", id: "audit" }, { label: "Pricing", id: "pricing" }, { label: "FAQ", id: "faq" }]} />
+        <Hero />
+        <Proof />
+        <Runbooks />
+        <Governance />
+        <Postmortem />
+        <History />
+        <Quotes />
+        <Pricing />
+        <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
+          <SectionHead eyebrow="FAQ" title="Questions from operators." accent={A} />
+          <Reveal y={16}>
+            <Faq
+              accent={A}
+              items={[
+                { q: "What stops an agent doing something we did not allow?", a: "Agents only receive credentials for the actions in a service's scope, and every action is checked against the policy before it runs. A check that fails becomes a request to a person instead." },
+                { q: "Do we have to start autonomous?", a: "No. Most teams start every service on Observe, move quiet services to Safe actions after a few weeks, and keep critical paths like payments on Suggest." },
+                { q: "Where do the agents run?", a: "In our cloud by default, or in self-hosted runners inside your network on Enterprise. Runners only make outbound connections." },
+                { q: "Can we use our existing alerting and chat?", a: "Yes. Orion listens to the alerts you already send and asks for approvals in Slack, Microsoft Teams or the console." },
+                { q: "What does the audit trail contain?", a: "Every alert, decision, approval, command and result, with timestamps and the policy that allowed it. Entries are hash-chained and can be streamed to your SIEM." },
+              ]}
+            />
+          </Reveal>
+        </section>
+        <div className="mx-auto max-w-[1180px] px-5 pb-20">
+          <CtaBand title="Let the 2 a.m. page handle itself." sub="A 30-day pilot on ten services, starting in Observe. You decide when it acts." cta="Book a pilot" secondary="Read the security paper" accent={A} glow="rgba(14,116,144,.38)" />
+        </div>
+        <Footer brand={<Logo />} note="Autonomous operations for enterprises, with governance and a full audit trail. Orion is a template; the company and figures are placeholders." columns={[{ title: "Product", links: ["Console", "Runbooks", "Governance", "Pricing"] }, { title: "Resources", links: ["Docs", "Security", "Status", "Changelog"] }, { title: "Company", links: ["About", "Customers", "Careers", "Contact"] }]} />
+      </div>
+    </MotionConfig>
   );
 }
+
+export default OrionAIPage;

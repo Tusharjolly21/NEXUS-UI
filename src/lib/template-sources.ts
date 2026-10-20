@@ -56,6 +56,15 @@ export function getTemplateSource(slug: string): TemplateSource | null {
   return TEMPLATE_SOURCES[slug as TemplateSourceSlug];
 }
 
+/**
+ * Project-relative path of a template's build prompt (outside public/, read only by gated routes),
+ * or null for anything that isn't a plain kebab-case slug.
+ */
+export function templatePromptPath(slug: string): string | null {
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) return null;
+  return `content/build-prompts/templates/${slug}.md`;
+}
+
 /** Project-relative path of a template's page file, e.g. "src/components/templates/relay-page.tsx". */
 export function templateEntryPath(source: TemplateSource) {
   return `${TEMPLATE_SOURCE_DIR}/${source.file}`;

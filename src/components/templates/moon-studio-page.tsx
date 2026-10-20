@@ -5,7 +5,7 @@
  * Fan Deck, Scrub Inputs, Component Layers, Glass Lens, Capsule Toggles and
  * Sign & Seal, plus the shared template parts.
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion, useMotionValue, useSpring, useTransform, useVelocity } from "framer-motion";
 import CurvedReel from "@/components/templates/kit/components/CurvedReel";
 import BeforeAfter from "@/components/templates/kit/components/BeforeAfter";
@@ -180,7 +180,8 @@ function Hero() {
   const wide = useMq("(min-width: 768px)");
   const [active, setActive] = useState(0);
   const [hovering, setHovering] = useState(false);
-  const [ready, setReady] = useState(false);
+  const parked = useRef(false);
+  const shown = useMotionValue(0);
   const box = useRef<HTMLDivElement>(null);
   const rows = useRef<(HTMLButtonElement | null)[]>([]);
   const tx = useMotionValue(0);
@@ -201,10 +202,11 @@ function Hero() {
   }, [active, tx, ty, x, y]);
 
   useLayoutEffect(() => {
-    if (!wide) return;
-    if (!hovering) park(!ready);
-    if (!ready) setReady(true);
-  }, [wide, hovering, park, ready]);
+    if (!wide) { parked.current = false; return; }
+    if (!hovering) park(!parked.current);
+    parked.current = true;
+    shown.set(1);
+  }, [wide, hovering, park, shown]);
 
   useEffect(() => {
     const on = () => park();
@@ -281,7 +283,7 @@ function Hero() {
             );
           })}
           {wide && (
-            <motion.div className="pointer-events-none absolute left-0 top-0 z-10" style={{ x, y, rotate, width: PW, height: PH, opacity: ready ? 1 : 0 }} aria-hidden="true">
+            <motion.div className="pointer-events-none absolute left-0 top-0 z-10" style={{ x, y, rotate, width: PW, height: PH, opacity: shown }} aria-hidden="true">
               <motion.div className="h-full w-full" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: hovering ? 1.04 : 1, opacity: 1 }} transition={{ type: "spring", stiffness: 260, damping: 20, delay: hovering ? 0 : 0.4 }}>
                 <Reel key={active} d={active} className="h-full w-full" />
               </motion.div>
@@ -638,24 +640,18 @@ function Contact() {
 
 /* ------------------------------------------------------------------ page */
 
-function Section({ children }: { children: ReactNode }) {
-  return <>{children}</>;
-}
-
 export default function MoonStudioPage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="min-h-screen overflow-x-clip bg-white text-[#1d1d1f] antialiased" style={{ colorScheme: "light", fontFamily: SYSTEM_FONT }}>
         <Nav brand={<Logo />} accent={A} cta="Start a project" onCta={() => scrollToId("contact")} links={[{ label: "Work", id: "work" }, { label: "Case study", id: "case" }, { label: "Services", id: "services" }, { label: "Studio", id: "studio" }, { label: "Contact", id: "contact" }]} />
-        <Section>
-          <Hero />
-          <Work />
-          <CaseStudy />
-          <Services />
-          <Studio />
-          <Engagements />
-          <Contact />
-        </Section>
+        <Hero />
+        <Work />
+        <CaseStudy />
+        <Services />
+        <Studio />
+        <Engagements />
+        <Contact />
         <section id="faq" className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 px-5 pb-24 lg:grid-cols-[1fr_1.4fr]">
           <SectionHead eyebrow="FAQ" title="Before you write to us." accent={A} />
           <Reveal y={16}>
@@ -673,7 +669,7 @@ export default function MoonStudioPage() {
         <div className="mx-auto max-w-[1180px] px-5 pb-20">
           <CtaBand title="Have something that needs to move?" sub="Tell us about it. We take on three projects at a time, so there's always a short wait list." cta="Start a project" secondary="See the reel" accent={A} glow="rgba(225,29,72,.32)" />
         </div>
-        <Footer brand={<Logo />} note="An independent studio for branding, motion and web. Lisbon and remote." columns={[{ title: "Studio", links: ["Work", "Services", "People", "Journal"] }, { title: "Work with us", links: ["Start a project", "Engagements", "Careers"] }, { title: "Elsewhere", links: ["Newsletter", "Instagram", "Vimeo"] }]} />
+        <Footer brand={<Logo />} note="An independent studio for branding, motion and web. Lisbon and remote." columns={[{ title: "Studio", links: ["Work", "Services", "People", "Journal"] }, { title: "Work with us", links: ["Start a project", "Engagements", "Careers"] }, { title: "Elsewhere", links: ["Newsletter", "Showreel", "Press kit"] }]} />
       </div>
     </MotionConfig>
   );

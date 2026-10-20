@@ -33,7 +33,7 @@ export default function SignBadge({ name = "Alex Rivera", title = "Founding memb
   const canvas = useRef<HTMLCanvasElement>(null);
   const strokes = useRef<[number, number][][]>([]);
   const drawing = useRef(false);
-  const idle = useRef<number>();
+  const idle = useRef<number | undefined>(undefined);
   const [inked, setInked] = useState(false);
   const [sealed, setSealed] = useState(false);
   const touched = useRef(false);

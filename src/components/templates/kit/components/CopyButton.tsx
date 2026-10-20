@@ -28,7 +28,7 @@ export interface CopyChipProps {
 export function CopyChip({ value, display, label = "Copy", accent = "#0071e3", autoplay = false }: CopyChipProps) {
   const [copied, setCopied] = useState(false);
   const [burst, setBurst] = useState(0);
-  const timer = useRef<number>();
+  const timer = useRef<number | undefined>(undefined);
   const touched = useRef(false);
 
   const copy = async (real = true) => {

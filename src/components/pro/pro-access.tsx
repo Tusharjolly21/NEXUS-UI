@@ -56,9 +56,19 @@ type CopyState = "idle" | "loading" | "copied" | "error";
  * the server checks again and answers 403 if the session has no access, which also opens the
  * dialog. The clipboard write starts inside the click (a ClipboardItem holding the pending
  * fetch), so Safari keeps the user activation it needs.
+ *
+ * Options, for things other than components: `endpoint` is the gated API to fetch (default
+ * `/api/prompt/<slug>`), and `hasAccess` replaces the site-wide Pro check (a template bought on its
+ * own unlocks its prompt without a plan). Without access, nothing is fetched.
  */
-export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () => void] {
-  const { isPro, requestUpgrade } = useProAccess();
+export function useCopyBuildPrompt(
+  slug: string,
+  name: string,
+  options: { endpoint?: string; hasAccess?: boolean } = {},
+): [CopyState, () => void] {
+  const { isPro: sitePro, requestUpgrade } = useProAccess();
+  const isPro = options.hasAccess ?? sitePro;
+  const endpoint = options.endpoint ?? `/api/prompt/${encodeURIComponent(slug)}`;
   const [state, setState] = React.useState<CopyState>("idle");
 
   React.useEffect(() => {
@@ -71,7 +81,7 @@ export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () =
     if (!isPro) return requestUpgrade(name, "build prompt");
     setState("loading");
     let denied = false;
-    const text = fetch(`/api/prompt/${encodeURIComponent(slug)}`, { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
+    const text = fetch(endpoint, { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
       if (r.status === 401 || r.status === 403) {
         denied = true;
         throw new Error("denied");
@@ -93,7 +103,7 @@ export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () =
           requestUpgrade(name, "build prompt");
         } else setState("error");
       });
-  }, [isPro, requestUpgrade, name, slug]);
+  }, [isPro, requestUpgrade, name, endpoint]);
 
   return [state, copy];
 }

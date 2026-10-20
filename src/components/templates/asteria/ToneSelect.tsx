@@ -47,9 +47,9 @@ export default function ToneSelect({ options = MOODS, onChange, autoplay = false
         const c = i % cols, r = Math.floor(i / cols);
         // Build from the top-left corner outwards, with jitter.
         const dist = Math.hypot(c / cols, r / rows);
-        return { c, r, delay: dist * 0.22 + Math.random() * 0.08, fall: 40 + Math.random() * 140, drift: (Math.random() - 0.5) * 60, spin: (Math.random() - 0.5) * 180 };
+        const rnd = (k: number) => { const x = Math.sin((i + 1) * 12.9898 + (seed + 1) * 78.233 + k * 37.719) * 43758.5453; return x - Math.floor(x); };
+        return { c, r, delay: dist * 0.22 + rnd(1) * 0.08, fall: 40 + rnd(2) * 140, drift: (rnd(3) - 0.5) * 60, spin: (rnd(4) - 0.5) * 180 };
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [cols, rows, seed],
   );
 

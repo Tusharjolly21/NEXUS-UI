@@ -4,13 +4,14 @@ import * as React from "react";
 import { PRICES, formatPrice } from "@/lib/pricing";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Check, ChevronRight, Download, Maximize2, Play, X } from "lucide-react";
+import { Check, ChevronRight, Download, Lock, Maximize2, Play, Sparkles, X } from "lucide-react";
 import { Band } from "@/components/site/band";
 import { InstallCard } from "@/components/site/install-card";
 import { PillLink, pillClassName } from "@/components/site/pill-link";
 import { CheckoutButton } from "@/components/pricing/checkout-button";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { BrowserFrame, TemplateCard, templateName, templateTagline } from "@/components/templates/template-card";
+import { ProBadge, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import type { MarketplaceTemplate } from "@/lib/catalog/templates";
 
 const PRO_PRICE = formatPrice(PRICES.pro);
@@ -70,20 +71,39 @@ function CheckoutPending() {
 
 // ─── Download (owners) ───────────────────────────────────────────────────────
 
-function useDownload(slug: string) {
-  const [state, setState] = React.useState<"idle" | "loading" | "failed">("idle");
+type DownloadState = "idle" | "loading" | "failed" | "signed-out" | "busy";
+
+const DOWNLOAD_ERRORS: Record<Exclude<DownloadState, "idle" | "loading">, string> = {
+  failed: "The download didn't start. Try again, or download it from the live preview.",
+  "signed-out": "Your session has ended. Sign in again, then download.",
+  busy: "That's a lot of downloads in a minute. Wait a moment and try again.",
+};
+
+/** Fetches the zip (the server checks access again) and saves it. A 403 opens the upgrade dialog. */
+function useDownload(slug: string, name: string) {
+  const { requestUpgrade } = useProAccess();
+  const [state, setState] = React.useState<DownloadState>("idle");
 
   async function download() {
     setState("loading");
     try {
-      const res = await fetch(`/api/download/template?slug=${slug}`);
+      const res = await fetch(`/api/download/template?slug=${encodeURIComponent(slug)}`, {
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (res.status === 401) return setState("signed-out");
+      if (res.status === 403) {
+        setState("idle");
+        return requestUpgrade(name);
+      }
+      if (res.status === 429) return setState("busy");
       if (!res.ok) throw new Error(String(res.status));
       const url = URL.createObjectURL(await res.blob());
       const a = document.createElement("a");
       a.href = url;
       a.download = `${slug}.zip`;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
       setState("idle");
     } catch {
       setState("failed");
@@ -93,16 +113,66 @@ function useDownload(slug: string) {
   return { state, download };
 }
 
+// ─── Build prompt ────────────────────────────────────────────────────────────
+
+/**
+ * Copies the template's build prompt. Owners fetch it from the gated API; everyone else gets the
+ * upgrade dialog and nothing is fetched (the server would answer 401/403 anyway).
+ */
+function BuildPromptButton({ slug, name, hasAccess }: { slug: string; name: string; hasAccess: boolean }) {
+  const [state, copy] = useCopyBuildPrompt(slug, name, {
+    endpoint: `/api/prompt/template/${encodeURIComponent(slug)}`,
+    hasAccess,
+  });
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={copy}
+        disabled={state === "loading"}
+        aria-describedby={`${slug}-prompt-hint`}
+        className={pillClassName("white", "md", "disabled:opacity-60")}
+      >
+        {state === "copied" ? (
+          <Check className="size-4 text-[#34c759]" aria-hidden />
+        ) : hasAccess ? (
+          <Sparkles className="size-4" aria-hidden />
+        ) : (
+          <Lock className="size-4" aria-hidden />
+        )}
+        <span aria-live="polite">
+          {state === "loading"
+            ? "Copying…"
+            : state === "copied"
+              ? "Copied, paste it into your agent"
+              : state === "error"
+                ? "Couldn't copy, try again"
+                : "Copy build prompt"}
+        </span>
+        {hasAccess ? null : <ProBadge className="ml-0.5" />}
+      </button>
+      <p id={`${slug}-prompt-hint`} className="px-1 text-[13px] leading-relaxed text-muted-foreground">
+        The brief to rebuild {name} with Claude, Cursor or v0. It&apos;s also in the zip as PROMPT.md.
+      </p>
+    </>
+  );
+}
+
 // ─── Panel ───────────────────────────────────────────────────────────────────
 
 function AccessPanel({
   tmpl,
   hasAccess,
+  promptAccess,
 }: {
   tmpl: MarketplaceTemplate;
   hasAccess: boolean;
+  /** The build prompt is Pro even on a free template: a plan, lifetime or a purchase of this one. */
+  promptAccess: boolean;
 }) {
-  const { state, download } = useDownload(tmpl.slug);
+  const name = templateName(tmpl);
+  const { state, download } = useDownload(tmpl.slug, name);
   const previewHref = `/template-preview/${tmpl.slug}`;
 
   return (
@@ -115,7 +185,8 @@ function AccessPanel({
           </p>
           <h2 className="mt-3 text-[22px] font-bold tracking-[-0.03em] text-foreground">Take the source</h2>
           <p className="mt-1 text-[15px] leading-relaxed text-muted-foreground">
-            A zip of the whole Next.js project, ready for <code className="font-mono text-[13px]">npm install</code>.
+            A zip of the whole Next.js project, ready for <code className="font-mono text-[13px]">npm install</code>, with
+            step-by-step setup in its README.
           </p>
           <div className="mt-6 flex flex-col gap-2">
             <button
@@ -125,16 +196,17 @@ function AccessPanel({
               className={pillClassName("ink", "md", "disabled:opacity-60")}
             >
               <Download className="size-4" aria-hidden />
-              {state === "loading" ? "Preparing the zip…" : "Download source"}
+              <span aria-live="polite">{state === "loading" ? "Preparing the zip…" : "Download source (.zip)"}</span>
             </button>
+            <BuildPromptButton slug={tmpl.slug} name={name} hasAccess={promptAccess} />
             <PillLink href={previewHref} variant="white">
               <Play className="size-4" aria-hidden />
               Live preview
             </PillLink>
           </div>
-          {state === "failed" ? (
+          {state !== "idle" && state !== "loading" ? (
             <p role="alert" className="mt-3 text-[13px] text-foreground">
-              The download didn&apos;t start. Try again, or download it from the live preview.
+              {DOWNLOAD_ERRORS[state]}
             </p>
           ) : null}
         </>
@@ -155,6 +227,7 @@ function AccessPanel({
             <CheckoutButton plan="lifetime" variant="white" returnPath={`/templates/${tmpl.slug}`}>
               Lifetime, {ALL_ACCESS_PRICE} once
             </CheckoutButton>
+            <BuildPromptButton slug={tmpl.slug} name={name} hasAccess={promptAccess} />
             <PillLink href={previewHref} variant="white">
               <Play className="size-4" aria-hidden />
               Live preview
@@ -304,7 +377,7 @@ export function TemplateDetailContent({
             </Link>
           </div>
 
-          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} />
+          <AccessPanel tmpl={tmpl} hasAccess={hasAccess} promptAccess={isPremium} />
         </div>
       </section>
 
