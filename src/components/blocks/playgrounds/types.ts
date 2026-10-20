@@ -28,6 +28,8 @@ export type SectionPlayground = {
   snippetProps?: string[];
   /** Optional wrapper class for the live preview frame (e.g. a background colour or min height). */
   frameClassName?: string;
+  /** Block the entry belongs to (sections moved over from the components library). */
+  block?: string;
 };
 
 /** One module per block: section id -> playground. */

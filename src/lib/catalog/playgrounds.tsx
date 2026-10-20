@@ -123,6 +123,63 @@ import { PageCurl } from "@/components/page-curl";
 import { SignAndSeal } from "@/components/sign-and-seal";
 import { StreakCounter } from "@/components/streak-counter";
 import { CapsuleToggles } from "@/components/capsule-toggles";
+import { AnimatedSelectHeadline } from "@/components/animated-select-headline";
+import { AskNexusInput } from "@/components/ask-nexus-input";
+import { BackgroundGradient } from "@/components/background-gradient";
+import { BeamField } from "@/components/beam-sweep-field";
+import { CardCarousel3D } from "@/components/card-carousel-3d";
+import { CardStackRotator } from "@/components/card-stack-rotator";
+import { ChatMessages } from "@/components/chat-messages";
+import { CinematicCardDeck } from "@/components/cinematic-card-deck";
+import { CircularCarousel } from "@/components/circular-carousel";
+import { CodeBlock } from "@/components/code-block";
+import { Compare } from "@/components/compare";
+import { CursorTextReveal } from "@/components/cursor-text-reveal";
+import { DepthTestimonials } from "@/components/depth-testimonials";
+import { DraggableCardStack } from "@/components/draggable-card-stack";
+import { ExpandableCards } from "@/components/expandable-cards";
+import { FloatingDock } from "@/components/floating-dock";
+import {
+  Calendar as DockCalendar,
+  Camera as DockCamera,
+  Compass as DockCompass,
+  FolderOpen as DockFolderOpen,
+  Mail as DockMail,
+  MessageCircle as DockMessageCircle,
+  Music as DockMusic,
+  Settings as DockSettings,
+} from "lucide-react";
+import { AiCommandBar } from "@/components/forge-ai-command-bar";
+import { GlassLogin } from "@/components/glass-login-stack";
+import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
+import { HoverHighlightText } from "@/components/hover-highlight-text";
+import { ImagesBadge } from "@/components/images-badge";
+import { InfiniteMovingCards, type InfiniteMovingCardItem } from "@/components/infinite-moving-cards";
+import { InteractiveGlobeExplorer } from "@/components/interactive-globe-explorer";
+import { LinkPreview } from "@/components/link-preview";
+import { MacKeyboard } from "@/components/keyboard";
+import { MilestoneTimeline } from "@/components/milestone-timeline";
+import { MotionLayerScroller } from "@/components/motion-layer-scroller";
+import { NebulaGlassCard } from "@/components/nebula-glass-card";
+import { OrbitalLoader } from "@/components/orbital-loader";
+import { PhoneInput } from "@/components/phone-input";
+import { ProfileOrbit } from "@/components/profile-orbit";
+import { KpiStrip } from "@/components/pulse-dashboard-kpis";
+import { RealTimeCursors } from "@/components/real-time-cursors";
+import { ScrollProgressBar } from "@/components/scroll-progress-bar";
+import { ScrollRevealText } from "@/components/scroll-reveal-text";
+import { SignupForm } from "@/components/signup-form";
+import { SpectraFrame } from "@/components/spectra-frame";
+import { SquigglyText } from "@/components/squiggly-text";
+import { StatefulButton } from "@/components/stateful-button";
+import { SvgNoise } from "@/components/svg-noise-shader";
+import { Terminal, type TerminalCommand } from "@/components/terminal";
+import { TextRevealCard } from "@/components/text-reveal-card";
+import { ThreeDFolder } from "@/components/three-d-folder";
+import { TracingSpotlightPanel } from "@/components/tracing-spotlight-panel";
+import { VectorTiltScene } from "@/components/vector-tilt-scene";
+import { WarpSpeedCard, WarpTextTrigger } from "@/components/warp-speed-card";
+import { WheelSelector } from "@/components/wheel-selector";
 
 // matter-js stays out of the shared playground bundle: these load lazily.
 const TagPit = React.lazy(() => import("@/components/tag-pit").then((m) => ({ default: m.TagPit })));
@@ -135,6 +192,30 @@ const MarbleProgress = React.lazy(() => import("@/components/marble-progress").t
  * Each control's `defaultValue` must match the component's own default so the generated
  * snippet only lists props the visitor actually changed.
  */
+const DEMO_BADGE_TEAM = [
+  { alt: "Ava Chen" },
+  { alt: "Noah Park" },
+  { alt: "Mira Shah" },
+  { alt: "Leo Grant" },
+  { alt: "Zoe Ito" },
+  { alt: "Kai Moss" },
+  { alt: "Sam Reyes" },
+  { alt: "Iris Vale" },
+];
+const DEMO_MOVING_CARDS: InfiniteMovingCardItem[] = [
+  { id: "a", title: "Launch week, sorted", description: "We rebuilt the landing page in two days and it still feels hand-made.", name: "Ariana Shaw", role: "Product lead, Orbitstack", rating: 5, tags: ["SaaS"] },
+  { id: "b", title: "Smooth on every screen", description: "The loop never jumps, even on a 49-inch monitor in the office.", name: "Marcus Lee", role: "Frontend, Sprintops", rating: 5, tags: ["Motion"] },
+  { id: "c", title: "People play with it", description: "Visitors grab the reviews and fling them. Time on page went up.", name: "Lena Okafor", role: "Design manager, Cloudframe", rating: 5, tags: ["Growth"] },
+  { id: "d", title: "Readable by default", description: "It slows to a stop when you hover, so nobody chases a sentence.", name: "Noah Kimura", role: "Growth designer, Metricly", rating: 4, tags: ["UX"] },
+  { id: "e", title: "One less dependency", description: "Replaced two carousel libraries and a custom marquee with this.", name: "Sofia Brandt", role: "Staff engineer, Kitehaus", rating: 5, tags: ["React"] },
+];
+const ShaderFlow = React.lazy(() => import("@/components/shader-flow").then((m) => ({ default: m.ShaderFlow })));
+const DEMO_TERMINAL_SCRIPT: TerminalCommand[] = [
+  { input: "npx shadcn@latest add @nexus-labs/terminal", runDelayMs: 800, output: ["fetching registry...", { text: "wrote components/terminal/terminal.tsx", tone: "success" }] },
+  { input: "npm run dev", runDelayMs: 600, output: ["  ready in 412 ms", { text: "  Local: http://localhost:3000", tone: "info" }] },
+  { input: 'git commit -m "ship the terminal"', runDelayMs: 400, output: [{ text: "[main 8f2c1d4] ship the terminal", tone: "success" }, "2 files changed, 318 insertions(+)"] },
+];
+
 export type PlaygroundControl =
   | {
       kind: "range";
@@ -247,38 +328,6 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
 
-  meteors: {
-    componentName: "Meteors",
-    importPath: "@/components/meteors",
-    snippetBaseProps: ['className="absolute inset-0"'],
-    defaultFill: "dark",
-    controls: [
-      { kind: "range", prop: "number", label: "Meteors", min: 4, max: 60, step: 1, defaultValue: 18 },
-      { kind: "range", prop: "angle", label: "Angle", min: 180, max: 270, step: 1, unit: "°", defaultValue: 215 },
-      { kind: "range", prop: "maxDuration", label: "Max duration", min: 2, max: 12, step: 0.1, unit: "s", defaultValue: 7.2 },
-      { kind: "range", prop: "stars", label: "Stars", min: 0, max: 160, step: 10, defaultValue: 60 },
-      { kind: "color", prop: "color", label: "Color", options: ["#cfe6ff", "#c4b5fd", "#fda4af", "#ffd60a", "#64d2ff"], defaultValue: "#cfe6ff" },
-      { kind: "select", prop: "intensity", label: "Intensity", options: ["low", "medium", "high"], defaultValue: "medium" },
-      { kind: "toggle", prop: "glow", label: "Glow", defaultValue: true },
-      { kind: "toggle", prop: "interactive", label: "Gravity and strikes", defaultValue: true },
-      { kind: "toggle", prop: "hoverOnly", label: "Only on hover", defaultValue: false },
-    ],
-    render: (v) => (
-      <Meteors
-        className="absolute inset-0"
-        number={v.number as number}
-        angle={v.angle as number}
-        maxDuration={v.maxDuration as number}
-        minDuration={Math.min(3.2, (v.maxDuration as number) - 0.5)}
-        stars={v.stars as number}
-        color={v.color as string}
-        intensity={v.intensity as "medium"}
-        glow={v.glow as boolean}
-        interactive={v.interactive as boolean}
-        hoverOnly={v.hoverOnly as boolean}
-      />
-    ),
-  },
 
   "word-magnet": {
     componentName: "WordMagnet",
@@ -1831,6 +1880,1120 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "autoplay", label: "Gusts", defaultValue: false },
     ],
     render: (v) => <ClothBanner key={String(v.autoplay)} from={v.from as string} title={v.title as string} autoplay={v.autoplay as boolean} />,
+  },
+  "animated-select-headline": {
+    componentName: "AnimatedSelectHeadline",
+    importPath: "@/components/animated-select-headline",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "interval", label: "Hold", min: 800, max: 5000, step: 100, unit: "ms", defaultValue: 2500 },
+      { kind: "toggle", prop: "showCursor", label: "Cursors", defaultValue: true },
+      { kind: "toggle", prop: "showSize", label: "Size badge", defaultValue: true },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[520px]">
+        <AnimatedSelectHeadline
+          words={["warp speed", "record time", "pure flow", "light speed"]}
+          interval={v.interval as number}
+          showCursor={v.showCursor as boolean}
+          showSize={v.showSize as boolean}
+          headingClassName="text-[36px] sm:text-[44px]"
+        />
+      </div>
+    ),
+  },
+  "ask-nexus-input": {
+    componentName: "AskNexusInput",
+    importPath: "@/components/ask-nexus-input",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Title", options: ["Ask Nexus UI anything", "Ask the docs", "What's on your mind?"], defaultValue: "Ask Nexus UI anything" },
+      { kind: "range", prop: "placeholderInterval", label: "Rotate every", min: 1200, max: 5000, step: 100, unit: "ms", defaultValue: 2800 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <AskNexusInput
+        key={String(v.autoplay)}
+        title={v.title as string}
+        placeholderInterval={v.placeholderInterval as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "background-gradient": {
+    componentName: "BackgroundGradient",
+    importPath: "@/components/background-gradient",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "animationSpeed", label: "Spin", min: 0.2, max: 3, step: 0.1, unit: "×", defaultValue: 1 },
+      { kind: "range", prop: "ringWidth", label: "Ring", min: 1, max: 6, step: 0.5, unit: "px", defaultValue: 1.5 },
+      { kind: "range", prop: "blur", label: "Glow blur", min: 0, max: 48, step: 2, unit: "px", defaultValue: 24 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[320px] text-[#1d1d1f] dark:text-[#f5f5f7]">
+        <BackgroundGradient
+          key={String(v.autoplay)}
+          className="w-full"
+          containerClassName="p-6"
+          animationSpeed={v.animationSpeed as number}
+          ringWidth={v.ringWidth as number}
+          blur={v.blur as number}
+          autoplay={v.autoplay as boolean}
+        >
+          <div className="flex items-center justify-between">
+            <p className="text-[12px] font-medium uppercase tracking-[0.14em] text-[#6e6e73] dark:text-[#a1a1a6]">Pro</p>
+            <span className="rounded-full bg-[#0071e3]/10 px-2 py-0.5 text-[11px] font-semibold text-[#0066cc] dark:bg-[#0a84ff]/20 dark:text-[#64b5ff]">Popular</span>
+          </div>
+          <p className="mt-2 text-[40px] font-semibold leading-none tracking-[-0.045em] tabular-nums">
+            $18<span className="text-[15px] font-medium tracking-normal text-[#6e6e73] dark:text-[#a1a1a6]"> / month</span>
+          </p>
+          <p className="mt-3 text-[14px] leading-relaxed text-[#6e6e73] dark:text-[#a1a1a6]">Unlimited projects, team seats and priority builds.</p>
+        </BackgroundGradient>
+      </div>
+    ),
+  },
+  "beam-sweep-field": {
+    componentName: "BeamField",
+    importPath: "@/components/beam-sweep-field",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "color", label: "Beam", options: ["#67e8f9", "#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#67e8f9" },
+      { kind: "range", prop: "beams", label: "Beams", min: 1, max: 5, step: 1, defaultValue: 3 },
+      { kind: "range", prop: "speed", label: "Sweep", min: 4, max: 20, step: 1, unit: "s", defaultValue: 11 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <BeamField
+        key={String(v.autoplay)}
+        color={v.color as string}
+        beams={v.beams as number}
+        speed={v.speed as number}
+        autoplay={v.autoplay as boolean}
+        className="min-h-[400px] max-w-[960px]"
+      />
+    ),
+  },
+  "card-carousel-3d": {
+    componentName: "CardCarousel3D",
+    importPath: "@/components/card-carousel-3d",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "itemWidth", label: "Card width", min: 140, max: 220, step: 4, unit: "px", defaultValue: 168 },
+      { kind: "range", prop: "perspective", label: "Perspective", min: 600, max: 1800, step: 50, unit: "px", defaultValue: 1100 },
+      { kind: "toggle", prop: "autoRotate", label: "Drift", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <CardCarousel3D
+        key={String(v.autoplay)}
+        itemWidth={v.itemWidth as number}
+        perspective={v.perspective as number}
+        autoRotate={v.autoRotate as boolean}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "card-stack-rotator": {
+    componentName: "CardStackRotator",
+    importPath: "@/components/card-stack-rotator",
+    snippetBaseProps: ["cards={cards}"],
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "stackOffset", label: "Peek", min: 0, max: 30, step: 1, unit: "px", defaultValue: 14 },
+      { kind: "range", prop: "maxVisible", label: "Visible", min: 1, max: 4, step: 1, defaultValue: 3 },
+      { kind: "select", prop: "direction", label: "Throw", options: ["forward", "backward"], defaultValue: "forward" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <CardStackRotator
+        key={String(v.autoplay)}
+        cards={[
+          { id: "c1", content: "We shipped the new onboarding in **three days**. The stack alone got more replies than the launch email.", name: "Sana Whitfield", designation: "Head of Design", company: "Pebblework" },
+          { id: "c2", content: "The motion is **tuned, not decorated**. It feels like the product, not a demo of a library.", name: "Diego Marchetti", designation: "Staff Engineer", company: "Northwake" },
+          { id: "c3", content: "Swapped our carousel for this and **time on page doubled**. People flick through every single card.", name: "Hana Ito", designation: "Growth Lead", company: "Tidepool" },
+          { id: "c4", content: "Keyboard, screen reader and reduced motion all **just worked** in review. That never happens.", name: "Owen Abara", designation: "Accessibility Lead", company: "Brightfold" },
+        ]}
+        cardWidth="400px"
+        stackOffset={v.stackOffset as number}
+        maxVisible={v.maxVisible as number}
+        direction={v.direction as "forward"}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "chat-messages": {
+    componentName: "ChatMessages",
+    importPath: "@/components/chat-messages",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Name", options: ["Nexus AI", "Support", "Maya"], defaultValue: "Nexus AI" },
+      { kind: "range", prop: "typingDuration", label: "Typing", min: 400, max: 3000, step: 100, unit: "ms", defaultValue: 1300 },
+      { kind: "toggle", prop: "showReplay", label: "Replay button", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <ChatMessages
+        key={String(v.autoplay)}
+        title={v.title as string}
+        typingDuration={v.typingDuration as number}
+        showReplay={v.showReplay as boolean}
+        autoplay={v.autoplay as boolean}
+        className="h-[350px]"
+      />
+    ),
+  },
+  "cinematic-card-deck": {
+    componentName: "CinematicCardDeck",
+    importPath: "@/components/cinematic-card-deck",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "intensity", label: "Intensity", options: ["subtle", "standard", "cinematic"], defaultValue: "standard" },
+      { kind: "select", prop: "exitDirection", label: "Peel", options: ["up", "down"], defaultValue: "up" },
+      { kind: "toggle", prop: "showAmbientGlow", label: "Glow", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <CinematicCardDeck
+        key={String(v.autoplay)}
+        intensity={v.intensity as "standard"}
+        exitDirection={v.exitDirection as "up"}
+        showAmbientGlow={v.showAmbientGlow as boolean}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "circular-carousel": {
+    componentName: "CircularCarousel",
+    importPath: "@/components/circular-carousel",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "autoPlayInterval", label: "Step every", min: 1000, max: 5000, step: 100, unit: "ms", defaultValue: 2600 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <CircularCarousel key={String(v.autoplay)} autoPlayInterval={v.autoPlayInterval as number} autoplay={v.autoplay as boolean} />
+    ),
+  },
+  "code-block": {
+    componentName: "CodeBlock",
+    importPath: "@/components/code-block",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "theme", label: "Theme", options: ["dark", "light", "auto"], defaultValue: "dark" },
+      { kind: "toggle", prop: "hoverHighlight", label: "Glide bar", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[540px]" style={{ height: 340 }}>
+        <CodeBlock
+          key={String(v.autoplay)}
+          theme={v.theme as "dark"}
+          hoverHighlight={v.hoverHighlight as boolean}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  compare: {
+    componentName: "Compare",
+    importPath: "@/components/compare",
+    snippetBaseProps: ['beforeLabel="Original"', 'afterLabel="Graded"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "initialPosition", label: "Start at", min: 5, max: 95, step: 1, unit: "%", defaultValue: 50 },
+      { kind: "select", prop: "mode", label: "Mode", options: ["drag", "hover"], defaultValue: "drag" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <Compare
+        key={`${v.initialPosition}-${v.autoplay}`}
+        beforeLabel="Original"
+        afterLabel="Graded"
+        initialPosition={v.initialPosition as number}
+        mode={v.mode as "drag"}
+        autoplay={v.autoplay as boolean}
+        className="max-w-[400px]"
+      />
+    ),
+  },
+  "cursor-text-reveal": {
+    componentName: "CursorTextReveal",
+    importPath: "@/components/cursor-text-reveal",
+    snippetBaseProps: ['baseText="The first rule of motion is clarity."', 'revealText="The second rule is feeling."'],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "mode", label: "Lens", options: ["text", "image"], defaultValue: "text" },
+      { kind: "range", prop: "maskSize", label: "Lens size", min: 60, max: 180, step: 2, unit: "px", defaultValue: 120 },
+      { kind: "toggle", prop: "enableGlow", label: "Ring", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[520px]">
+        <CursorTextReveal
+          key={String(v.autoplay)}
+          baseText="The first rule of motion is clarity."
+          revealText="The second rule is feeling."
+          mode={v.mode as "text"}
+          maskSize={v.maskSize as number}
+          enableGlow={v.enableGlow as boolean}
+          autoplay={v.autoplay as boolean}
+          fontSize="40px"
+          containerClassName="min-h-[260px] sm:min-h-[280px]"
+        />
+      </div>
+    ),
+  },
+  "depth-testimonials": {
+    componentName: "DepthTestimonials",
+    importPath: "@/components/depth-testimonials",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "heading", label: "Heading", options: ["Loved by people who ship", "Wall of love", "What teams say"], defaultValue: "Loved by people who ship" },
+      { kind: "select", prop: "eyebrow", label: "Eyebrow", options: ["Testimonials", "Reviews", "Customers"], defaultValue: "Testimonials" },
+      { kind: "range", prop: "interval", label: "Auto-advance", min: 0, max: 6000, step: 500, unit: "ms", defaultValue: 0 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <DepthTestimonials
+        key={String(v.autoplay)}
+        heading={v.heading as string}
+        eyebrow={v.eyebrow as string}
+        interval={v.interval as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "draggable-card-stack": {
+    componentName: "DraggableCardStack",
+    importPath: "@/components/draggable-card-stack",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "maxRotation", label: "Tilt", min: 0, max: 20, step: 1, unit: "°", defaultValue: 9 },
+      { kind: "range", prop: "stackOffset", label: "Offset", min: 0, max: 24, step: 1, unit: "px", defaultValue: 0 },
+      { kind: "toggle", prop: "showOverlay", label: "Captions", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <DraggableCardStack
+        key={String(v.autoplay)}
+        maxRotation={v.maxRotation as number}
+        stackOffset={v.stackOffset as number}
+        showOverlay={v.showOverlay as boolean}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "expandable-cards": {
+    componentName: "ExpandableCards",
+    importPath: "@/components/expandable-cards",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "expandInto", label: "Open into", options: ["grid", "viewport"], defaultValue: "grid" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    // Autoplay only runs in grid mode: in viewport mode each step would open a page-wide dialog and lock scrolling.
+    render: (v) => (
+      <ExpandableCards
+        key={`${v.expandInto}-${v.autoplay}`}
+        expandInto={v.expandInto as "grid"}
+        autoplay={(v.autoplay as boolean) && v.expandInto === "grid"}
+        className="max-w-[580px]"
+      />
+    ),
+  },
+  "floating-dock": {
+    componentName: "FloatingDock",
+    importPath: "@/components/floating-dock",
+    snippetBaseProps: ["items={items}", 'position="inline"', "disableLinks"],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "activeHref", label: "Running", options: ["none", "#finder", "#messages", "#music", "#photos"], defaultValue: "none" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="relative flex h-[300px] w-full max-w-[640px] items-end justify-center overflow-hidden rounded-[24px] bg-white pb-6 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)]">
+        <div
+          aria-hidden
+          className="absolute inset-0 rounded-[24px] opacity-90 dark:opacity-60"
+          style={{
+            background:
+              "radial-gradient(70% 60% at 20% 20%, rgba(90,200,250,.45), transparent 70%), radial-gradient(60% 60% at 85% 30%, rgba(191,90,242,.35), transparent 70%), radial-gradient(70% 60% at 50% 100%, rgba(255,159,10,.3), transparent 70%)",
+          }}
+        />
+        <div className="relative">
+          <FloatingDock
+            key={String(v.autoplay)}
+            items={[
+              { title: "Finder", icon: <DockFolderOpen />, href: "#finder", tint: "linear-gradient(160deg,#64d2ff,#0071e3)" },
+              { title: "Safari", icon: <DockCompass />, href: "#safari", tint: "linear-gradient(160deg,#5ac8fa,#0a84ff)" },
+              { title: "Messages", icon: <DockMessageCircle />, href: "#messages", tint: "linear-gradient(160deg,#5ef08a,#30b94d)", badge: 3 },
+              { title: "Mail", icon: <DockMail />, href: "#mail", tint: "linear-gradient(160deg,#6ac4ff,#1a73e8)" },
+              { title: "Music", icon: <DockMusic />, href: "#music", tint: "linear-gradient(160deg,#ff7a8a,#ff2d55)" },
+              { title: "Photos", icon: <DockCamera />, href: "#photos", tint: "linear-gradient(160deg,#ffd60a,#ff9f0a)" },
+              { title: "Calendar", icon: <DockCalendar />, href: "#calendar" },
+              { title: "Settings", icon: <DockSettings />, href: "#settings", tint: "linear-gradient(160deg,#aeaeb2,#636366)" },
+            ]}
+            position="inline"
+            disableLinks
+            activeHref={v.activeHref === "none" ? undefined : (v.activeHref as string)}
+            autoplay={v.autoplay as boolean}
+          />
+        </div>
+      </div>
+    ),
+  },
+  "forge-ai-command-bar": {
+    componentName: "AiCommandBar",
+    importPath: "@/components/forge-ai-command-bar",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultMode", label: "Start in", options: ["ask", "edit", "build"], defaultValue: "build" },
+      { kind: "select", prop: "placeholder", label: "Placeholder", options: ["Describe what you need...", "Ask the copilot...", "What should we build?"], defaultValue: "Describe what you need..." },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    // hotkey="" keeps Cmd/Ctrl+K free for the site's own search on the docs page.
+    render: (v) => (
+      <div className="w-full max-w-[520px]">
+        <AiCommandBar
+          key={`${v.defaultMode}-${v.autoplay}`}
+          defaultMode={v.defaultMode as "build"}
+          placeholder={v.placeholder as string}
+          autoplay={v.autoplay as boolean}
+          hotkey=""
+        />
+      </div>
+    ),
+  },
+  "glass-login-stack": {
+    componentName: "GlassLogin",
+    importPath: "@/components/glass-login-stack",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "brand", label: "Brand", options: ["Halo", "Orbit", "Nexus"], defaultValue: "Halo" },
+      { kind: "select", prop: "title", label: "Title", options: ["Welcome back", "Sign in", "Good to see you"], defaultValue: "Welcome back" },
+      { kind: "toggle", prop: "backdrop", label: "Aurora backdrop", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="flex w-full max-w-[720px] justify-center">
+        <GlassLogin
+          key={String(v.autoplay)}
+          brand={v.brand as string}
+          title={v.title as string}
+          backdrop={v.backdrop as boolean}
+          autoplay={v.autoplay as boolean}
+          onSignUp={() => {}}
+        />
+      </div>
+    ),
+  },
+  "glowing-effect-cards": {
+    componentName: "GlowingCardsLayout",
+    importPath: "@/components/glowing-effect-cards",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "hint", label: "Caption", options: ["Move across the cards.", "Hover a card.", ""], defaultValue: "Move across the cards." },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <GlowingCardsLayout key={String(v.autoplay)} hint={v.hint as string} autoplay={v.autoplay as boolean} className="max-w-[560px]" />
+    ),
+  },
+  "hover-highlight-text": {
+    componentName: "HoverHighlightText",
+    importPath: "@/components/hover-highlight-text",
+    snippetBaseProps: ['text="Build interfaces people remember long after they close the tab."'],
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "markerColor", label: "Marker", options: ["#ffd60a", "#0071e355", "#30b15855", "#ff375f55", "#bf5af255"], defaultValue: "#ffd60a" },
+      { kind: "range", prop: "reach", label: "Reach", min: 8, max: 140, step: 2, unit: "px", defaultValue: 40 },
+      { kind: "range", prop: "linger", label: "Linger", min: 0.1, max: 3, step: 0.1, unit: "s", defaultValue: 0.9 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="flex w-full max-w-[520px] justify-center">
+        <HoverHighlightText
+          key={String(v.autoplay)}
+          text="Build interfaces people remember long after they close the tab."
+          baseClassName="max-w-[15ch] text-[36px] sm:text-[44px]"
+          markerColor={v.markerColor === "#ffd60a" ? undefined : (v.markerColor as string)}
+          reach={v.reach as number}
+          linger={v.linger as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "images-badge": {
+    componentName: "ImagesBadge",
+    importPath: "@/components/images-badge",
+    snippetBaseProps: ["images={team}", 'label="Editing now"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { kind: "select", prop: "shape", label: "Shape", options: ["circle", "rounded", "square"], defaultValue: "circle" },
+      { kind: "range", prop: "revealCount", label: "Fan out", min: 0, max: 5, step: 1, defaultValue: 2 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <ImagesBadge
+        key={String(v.autoplay)}
+        images={DEMO_BADGE_TEAM}
+        label="Editing now"
+        size={v.size as "md"}
+        shape={v.shape as "circle"}
+        revealCount={v.revealCount as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "infinite-moving-cards": {
+    componentName: "InfiniteMovingCards",
+    importPath: "@/components/infinite-moving-cards",
+    snippetBaseProps: ["items={items}"],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "direction", label: "Direction", options: ["left", "right"], defaultValue: "left" },
+      { kind: "select", prop: "speed", label: "Speed", options: ["slow", "normal", "fast"], defaultValue: "normal" },
+      { kind: "range", prop: "gap", label: "Gap", min: 4, max: 40, step: 2, unit: "px", defaultValue: 16 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[720px]">
+        <InfiniteMovingCards
+          key={String(v.autoplay)}
+          items={DEMO_MOVING_CARDS}
+          cardClassName="w-[290px]"
+          direction={v.direction as "left"}
+          speed={v.speed as "normal"}
+          gap={v.gap as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "interactive-globe-explorer": {
+    componentName: "InteractiveGlobeExplorer",
+    importPath: "@/components/interactive-globe-explorer",
+    snippetBaseProps: ['className="h-[420px]"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Heading", options: ["Our offices", "Where we work", "Find us"], defaultValue: "Our offices" },
+      // ids from the built-in list: 4 London, 6 Tokyo, 3 New York, 8 Sydney, 11 Mumbai
+      { kind: "select", prop: "initialLocationId", label: "First city (id)", options: ["4", "6", "3", "8", "11"], defaultValue: "4" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <InteractiveGlobeExplorer
+        key={`${v.initialLocationId}-${v.autoplay}`}
+        className="h-[420px] max-w-[720px]"
+        title={v.title as string}
+        initialLocationId={v.initialLocationId as string}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "link-preview": {
+    componentName: "LinkPreview",
+    importPath: "@/components/link-preview",
+    snippetBaseProps: ['href="https://motion.dev/docs/react-transitions"', 'title="Transitions"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "width", label: "Card width", min: 200, max: 380, step: 10, unit: "px", defaultValue: 300 },
+      { kind: "range", prop: "height", label: "Picture height", min: 90, max: 220, step: 2, unit: "px", defaultValue: 168 },
+      { kind: "range", prop: "delay", label: "Delay", min: 0, max: 0.8, step: 0.02, unit: "s", defaultValue: 0.08 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="flex h-full min-h-[360px] w-full items-end justify-center pb-16">
+        <p className="max-w-[440px] text-center text-[21px] font-medium leading-[1.45] tracking-[-0.02em]">
+          Read the{" "}
+          <LinkPreview
+            key={String(v.autoplay)}
+            href="https://motion.dev/docs/react-transitions"
+            title="Transitions"
+            description="Springs, tweens and inertia, and when to use each."
+            width={v.width as number}
+            height={v.height as number}
+            delay={v.delay as number}
+            autoplay={v.autoplay as boolean}
+          >
+            spring guide
+          </LinkPreview>{" "}
+          before you tune the motion, then ship it.
+        </p>
+      </div>
+    ),
+  },
+  "mac-keyboard": {
+    componentName: "MacKeyboard",
+    importPath: "@/components/keyboard",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Backlight", options: ["#0a84ff", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0a84ff" },
+      { kind: "select", prop: "theme", label: "Finish", options: ["auto", "light", "dark"], defaultValue: "auto" },
+      { kind: "select", prop: "layout", label: "Layout", options: ["mac", "compact"], defaultValue: "mac" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[600px]">
+        <MacKeyboard
+          key={String(v.autoplay)}
+          accent={v.accent as string}
+          theme={v.theme as "auto"}
+          layout={v.layout as "mac"}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  // REPLACES the existing `meteors` entry: its "stars" control had defaultValue 60 while the
+  // component default is 0 (snippet dropped stars={60}), and it had no autoplay control.
+  meteors: {
+    componentName: "Meteors",
+    importPath: "@/components/meteors",
+    snippetBaseProps: ['className="absolute inset-0"'],
+    defaultFill: "dark",
+    controls: [
+      { kind: "range", prop: "number", label: "Meteors", min: 4, max: 60, step: 1, defaultValue: 18 },
+      { kind: "range", prop: "angle", label: "Angle", min: 180, max: 270, step: 1, unit: "°", defaultValue: 215 },
+      { kind: "range", prop: "maxDuration", label: "Max duration", min: 2, max: 12, step: 0.1, unit: "s", defaultValue: 7.2 },
+      { kind: "range", prop: "stars", label: "Stars", min: 0, max: 160, step: 10, defaultValue: 0 },
+      { kind: "color", prop: "color", label: "Color", options: ["#cfe6ff", "#c4b5fd", "#fda4af", "#ffd60a", "#64d2ff"], defaultValue: "#cfe6ff" },
+      { kind: "select", prop: "intensity", label: "Intensity", options: ["low", "medium", "high"], defaultValue: "medium" },
+      { kind: "toggle", prop: "glow", label: "Glow", defaultValue: true },
+      { kind: "toggle", prop: "interactive", label: "Gravity and strikes", defaultValue: true },
+      { kind: "toggle", prop: "hoverOnly", label: "Only on hover", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <Meteors
+        key={String(v.autoplay)}
+        className="absolute inset-0"
+        number={v.number as number}
+        angle={v.angle as number}
+        maxDuration={v.maxDuration as number}
+        minDuration={Math.min(3.2, (v.maxDuration as number) - 0.5)}
+        stars={v.stars as number}
+        color={v.color as string}
+        intensity={v.intensity as "medium"}
+        glow={v.glow as boolean}
+        interactive={v.interactive as boolean}
+        hoverOnly={v.hoverOnly as boolean}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "milestone-timeline": {
+    componentName: "MilestoneTimeline",
+    importPath: "@/components/milestone-timeline",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "heading", label: "Heading", options: ["Roadmap", "Our journey", "What's next"], defaultValue: "Roadmap" },
+      // Unset, the current milestone (index 2 in the built-in list) opens first.
+      { kind: "range", prop: "defaultOpen", label: "Open first", min: 0, max: 3, step: 1, defaultValue: 2 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <MilestoneTimeline
+        key={`${v.defaultOpen}-${v.autoplay}`}
+        className="max-w-[640px]"
+        heading={v.heading as string}
+        defaultOpen={v.defaultOpen as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "motion-layer-scroller": {
+    componentName: "MotionLayerScroller",
+    importPath: "@/components/motion-layer-scroller",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "direction", label: "Direction", options: ["vertical", "horizontal"], defaultValue: "vertical" },
+      { kind: "range", prop: "scrollHeight", label: "Height", min: 260, max: 480, step: 10, unit: "px", defaultValue: 420 },
+      { kind: "toggle", prop: "showGrid", label: "Grid", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[560px]">
+        <MotionLayerScroller
+          key={`${v.direction}-${v.autoplay}`}
+          direction={v.direction as "vertical"}
+          scrollHeight={v.scrollHeight as number}
+          showGrid={v.showGrid as boolean}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "nebula-glass-card": {
+    componentName: "NebulaGlassCard",
+    importPath: "@/components/nebula-glass-card",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "tiltStrength", label: "Tilt", min: 0, max: 24, step: 1, unit: "°", defaultValue: 12 },
+      { kind: "select", prop: "title", label: "Title", options: ["Render anywhere", "Ship at the edge", "Built for speed"], defaultValue: "Render anywhere" },
+      { kind: "select", prop: "cta", label: "Button", options: ["Upgrade", "Start free", "Deploy now"], defaultValue: "Upgrade" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <NebulaGlassCard
+        key={String(v.autoplay)}
+        tiltStrength={v.tiltStrength as number}
+        title={v.title as string}
+        cta={v.cta as string}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "orbital-loader": {
+    componentName: "OrbitalLoader",
+    importPath: "@/components/orbital-loader",
+    snippetBaseProps: ['messages={["Uploading your files", "Checking for duplicates", "Making thumbnails"]}', 'doneMessage="All 24 files uploaded"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "color", label: "Accent", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "size", label: "Size", min: 64, max: 180, step: 4, unit: "px", defaultValue: 112 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <OrbitalLoader
+        key={String(v.autoplay)}
+        messages={["Uploading your files", "Checking for duplicates", "Making thumbnails"]}
+        doneMessage="All 24 files uploaded"
+        color={v.color === "#0071e3" ? undefined : (v.color as string)}
+        size={v.size as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "phone-input": {
+    componentName: "PhoneInput",
+    importPath: "@/components/phone-input",
+    snippetBaseProps: ['label="Mobile number"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultCountry", label: "Country", options: ["US", "GB", "IN", "JP", "DE", "BR"], defaultValue: "US" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[340px]">
+        <PhoneInput
+          key={`${v.defaultCountry}-${v.autoplay}`}
+          label="Mobile number"
+          defaultCountry={v.defaultCountry as string}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "profile-orbit": {
+    componentName: "ProfileOrbit",
+    importPath: "@/components/profile-orbit",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "autoRotateInterval", label: "Step every", min: 1200, max: 6000, step: 100, unit: "ms", defaultValue: 2800 },
+      { kind: "select", prop: "hint", label: "Hint", options: ["Drag the ring or tap a face.", "Meet the team.", ""], defaultValue: "Drag the ring or tap a face." },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <ProfileOrbit
+        key={String(v.autoplay)}
+        autoRotateInterval={v.autoRotateInterval as number}
+        hint={v.hint as string}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "pulse-dashboard-kpis": {
+    componentName: "KpiStrip",
+    importPath: "@/components/pulse-dashboard-kpis",
+    defaultFill: "light",
+    controls: [
+      // Unset, the first built-in period ("7d") is selected.
+      { kind: "select", prop: "defaultPeriod", label: "Period", options: ["7d", "30d", "90d"], defaultValue: "7d" },
+      { kind: "select", prop: "title", label: "Title", options: ["This week at a glance", "Growth pulse", "Key metrics"], defaultValue: "This week at a glance" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <KpiStrip
+        key={`${v.defaultPeriod}-${v.autoplay}`}
+        className="max-w-[900px]"
+        defaultPeriod={v.defaultPeriod as string}
+        title={v.title as string}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "real-time-cursors": {
+    componentName: "RealTimeCursors",
+    importPath: "@/components/real-time-cursors",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "youColor", label: "Your colour", options: ["#30d158", "#0071e3", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#30d158" },
+      { kind: "select", prop: "title", label: "Board", options: ["Launch board", "Sprint 42", "Brand refresh"], defaultValue: "Launch board" },
+      { kind: "toggle", prop: "showYou", label: "Show you", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <RealTimeCursors
+        key={String(v.autoplay)}
+        youColor={v.youColor as string}
+        title={v.title as string}
+        showYou={v.showYou as boolean}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "scroll-progress-bar": {
+    componentName: "ScrollProgressBar",
+    importPath: "@/components/scroll-progress-bar",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "fillColor", label: "Fill", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "orientation", label: "Orientation", options: ["vertical", "horizontal"], defaultValue: "vertical" },
+      { kind: "range", prop: "markerCount", label: "Milestones", min: 2, max: 8, step: 1, defaultValue: 4 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className={v.orientation === "horizontal" ? "w-full max-w-[420px]" : undefined}>
+        <ScrollProgressBar
+          key={String(v.autoplay)}
+          fillColor={v.fillColor === "#0071e3" ? undefined : (v.fillColor as string)}
+          orientation={v.orientation as "vertical"}
+          markerCount={v.markerCount as number}
+          autoplay={v.autoplay as boolean}
+          ariaLabel="Article progress"
+        />
+      </div>
+    ),
+  },
+  "scroll-reveal-text": {
+    componentName: "ScrollRevealText",
+    importPath: "@/components/scroll-reveal-text",
+    snippetBaseProps: ['text="We design tools that people actually want to open every single morning."', 'fontSize="30px"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accentColor", label: "Accent", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "mode", label: "Reveal by", options: ["word", "character", "line"], defaultValue: "word" },
+      { kind: "range", prop: "blurAmount", label: "Blur", min: 0, max: 16, step: 1, unit: "px", defaultValue: 6 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[460px]">
+        <ScrollRevealText
+          key={`${v.autoplay}-${v.mode}`}
+          text="We design tools that people actually want to open every single morning."
+          fontSize="30px"
+          accentColor={v.accentColor === "#0071e3" ? undefined : (v.accentColor as string)}
+          mode={v.mode as "word"}
+          blurAmount={v.blurAmount as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "shader-flow": {
+    componentName: "ShaderFlow",
+    importPath: "@/components/shader-flow",
+    defaultFill: "dark",
+    controls: [
+      { kind: "select", prop: "intensity", label: "Intensity", options: ["low", "medium", "high"], defaultValue: "medium" },
+      { kind: "range", prop: "speed", label: "Speed", min: 0.2, max: 3, step: 0.1, unit: "×", defaultValue: 1 },
+      { kind: "toggle", prop: "cursorReactive", label: "Stir with pointer", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <React.Suspense fallback={null}>
+        <ShaderFlow
+          key={String(v.autoplay)}
+          className="min-h-[400px] w-full max-w-[960px]"
+          intensity={v.intensity as "medium"}
+          speed={v.speed as number}
+          cursorReactive={v.cursorReactive as boolean}
+          autoplay={v.autoplay as boolean}
+        />
+      </React.Suspense>
+    ),
+  },
+  "signup-form": {
+    componentName: "SignupForm",
+    importPath: "@/components/signup-form",
+    snippetBaseProps: ['subtitle="Start free. No card needed."'],
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "showNameField", label: "Name fields", defaultValue: true },
+      { kind: "toggle", prop: "showConfirmPasswordField", label: "Confirm password", defaultValue: true },
+      { kind: "toggle", prop: "showSocialLogins", label: "Social buttons", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="flex w-full max-w-[420px] justify-center">
+        <SignupForm
+          key={`${v.autoplay}-${v.showNameField}-${v.showConfirmPasswordField}`}
+          subtitle="Start free. No card needed."
+          showNameField={v.showNameField as boolean}
+          showConfirmPasswordField={v.showConfirmPasswordField as boolean}
+          showSocialLogins={v.showSocialLogins as boolean}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "spectra-frame": {
+    componentName: "SpectraFrame",
+    importPath: "@/components/spectra-frame",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "columns", label: "Columns", min: 2, max: 4, step: 1, defaultValue: 4 },
+      { kind: "range", prop: "borderRadius", label: "Radius", min: 0, max: 28, step: 1, unit: "px", defaultValue: 16 },
+      { kind: "range", prop: "grayscaleIntensity", label: "Greyscale", min: 0, max: 100, step: 5, unit: "%", defaultValue: 100 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="w-full max-w-[540px]">
+        <SpectraFrame
+          key={String(v.autoplay)}
+          columns={v.columns as number}
+          borderRadius={v.borderRadius as number}
+          grayscaleIntensity={v.grayscaleIntensity as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "squiggly-text": {
+    componentName: "SquigglyText",
+    importPath: "@/components/squiggly-text",
+    snippetBaseProps: ['text="a little life"', "underline"],
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "underlineColor", label: "Underline", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "stepDuration", label: "Frame time", min: 30, max: 240, step: 10, unit: "ms", defaultValue: 80 },
+      { kind: "range", prop: "baseFrequency", label: "Wiggle", min: 0.005, max: 0.06, step: 0.001, defaultValue: 0.02 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <SquigglyText
+        key={String(v.autoplay)}
+        text="a little life"
+        underline
+        underlineColor={v.underlineColor === "#0071e3" ? undefined : (v.underlineColor as string)}
+        stepDuration={v.stepDuration as number}
+        baseFrequency={v.baseFrequency as number}
+        autoplay={v.autoplay as boolean}
+        className="text-[48px] font-semibold leading-[1.06] tracking-[-0.035em] text-[#1d1d1f] sm:text-[60px] dark:text-[#f5f5f7]"
+      />
+    ),
+  },
+  "stateful-button": {
+    componentName: "StatefulButton",
+    importPath: "@/components/stateful-button",
+    snippetBaseProps: ['loadingText="Publishing"', 'successText="Published"', "onClick={publish}"],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "variant", label: "Variant", options: ["default", "outline", "ghost", "destructive"], defaultValue: "default" },
+      { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { kind: "toggle", prop: "showSuccess", label: "Success state", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <StatefulButton
+        key={String(v.autoplay)}
+        variant={v.variant as "default"}
+        size={v.size as "md"}
+        showSuccess={v.showSuccess as boolean}
+        autoplay={v.autoplay as boolean}
+        loadingText="Publishing"
+        successText="Published"
+        onClick={() => new Promise<void>((resolve) => setTimeout(resolve, 1400))}
+      >
+        Publish post
+      </StatefulButton>
+    ),
+  },
+  "svg-noise-shader": {
+    componentName: "SvgNoise",
+    importPath: "@/components/svg-noise-shader",
+    defaultFill: "dark",
+    controls: [
+      { kind: "range", prop: "grain", label: "Grain", min: 0, max: 1, step: 0.05, defaultValue: 0.35 },
+      { kind: "range", prop: "distortion", label: "Melt", min: 0, max: 200, step: 5, unit: "px", defaultValue: 90 },
+      { kind: "range", prop: "speed", label: "Flow speed", min: 0.2, max: 3, step: 0.1, unit: "×", defaultValue: 1 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <SvgNoise
+        key={String(v.autoplay)}
+        grain={v.grain as number}
+        distortion={v.distortion as number}
+        speed={v.speed as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  terminal: {
+    componentName: "Terminal",
+    importPath: "@/components/terminal",
+    snippetBaseProps: ["commands={commands}"],
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "theme", label: "Theme", options: ["carbon", "midnight", "paper"], defaultValue: "carbon" },
+      { kind: "range", prop: "typingSpeed", label: "Typing", min: 10, max: 100, step: 2, unit: "ms", defaultValue: 34 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="flex h-[360px] w-full max-w-[560px] flex-col">
+        <Terminal
+          key={`${v.autoplay}-${v.typingSpeed}`}
+          fillHeight
+          className="min-h-0 flex-1"
+          commands={DEMO_TERMINAL_SCRIPT}
+          theme={v.theme as "carbon"}
+          typingSpeed={v.typingSpeed as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "text-reveal-card": {
+    componentName: "TextRevealCard",
+    importPath: "@/components/text-reveal-card",
+    snippetBaseProps: ['title="Launch review"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "intensity", label: "Sparks", min: 0.5, max: 2.2, step: 0.1, unit: "×", defaultValue: 1 },
+      { kind: "toggle", prop: "disabled", label: "Show revealed", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <TextRevealCard
+        key={`${v.autoplay}-${v.disabled}`}
+        title="Launch review"
+        intensity={v.intensity as number}
+        disabled={v.disabled as boolean}
+        autoplay={v.autoplay as boolean}
+        className="max-w-[440px]"
+      />
+    ),
+  },
+  "three-d-folder": {
+    componentName: "ThreeDFolder",
+    importPath: "@/components/three-d-folder",
+    snippetBaseProps: ['title="Launch Assets"'],
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "folderBackColor", label: "Back", options: ["#3d9cf0", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#3d9cf0" },
+      { kind: "color", prop: "folderFrontColor", label: "Front", options: ["#6cb8f6", "#5fd47f", "#ff7a93", "#d48cf7", "#ffbf4d"], defaultValue: "#6cb8f6" },
+      { kind: "select", prop: "size", label: "Size", options: ["md", "sm"], defaultValue: "md" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <ThreeDFolder
+        key={String(v.autoplay)}
+        title="Launch Assets"
+        folderBackColor={v.folderBackColor as string}
+        folderFrontColor={v.folderFrontColor as string}
+        size={v.size as "md"}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "tracing-spotlight-panel": {
+    componentName: "TracingSpotlightPanel",
+    importPath: "@/components/tracing-spotlight-panel",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "color", label: "Light", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "size", label: "Spotlight", min: 120, max: 420, step: 10, unit: "px", defaultValue: 260 },
+      { kind: "range", prop: "lap", label: "Lap time", min: 2, max: 12, step: 0.5, unit: "s", defaultValue: 5 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <TracingSpotlightPanel
+        key={String(v.autoplay)}
+        color={v.color === "#0071e3" ? undefined : (v.color as string)}
+        size={v.size as number}
+        lap={v.lap as number}
+        autoplay={v.autoplay as boolean}
+        className="max-w-[320px]"
+      />
+    ),
+  },
+  "vector-tilt-scene": {
+    componentName: "VectorTiltScene",
+    importPath: "@/components/vector-tilt-scene",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "maxTilt", label: "Max tilt", min: 0, max: 30, step: 1, unit: "°", defaultValue: 14 },
+      { kind: "range", prop: "depth", label: "Depth", min: 0, max: 60, step: 1, unit: "px", defaultValue: 26 },
+      { kind: "toggle", prop: "glare", label: "Glare", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <VectorTiltScene
+        key={String(v.autoplay)}
+        maxTilt={v.maxTilt as number}
+        depth={v.depth as number}
+        glare={v.glare as boolean}
+        autoplay={v.autoplay as boolean}
+        className="max-w-[360px]"
+      />
+    ),
+  },
+  "warp-speed-card": {
+    componentName: "WarpTextTrigger",
+    importPath: "@/components/warp-speed-card",
+    snippetBaseProps: ['children="warp speed"'],
+    defaultFill: "light",
+    controls: [
+      {
+        kind: "select",
+        prop: "beamColor",
+        label: "Stars (r,g,b)",
+        options: ["255,255,255", "0,113,227", "48,177,88", "255,55,95", "191,90,242", "255,159,10"],
+        defaultValue: "255,255,255",
+      },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="flex w-full max-w-[480px] flex-col items-center">
+        <WarpSpeedCard className="w-full">
+          <div className="flex flex-col items-center px-6 py-14 text-center">
+            <h2 className="m-0 text-[36px] font-semibold leading-[1.14] tracking-[-0.035em] sm:text-[40px]">
+              Build amazing websites
+              <br />
+              at{" "}
+              <WarpTextTrigger key={String(v.autoplay)} beamColor={v.beamColor as string} autoplay={v.autoplay as boolean}>
+                warp speed
+              </WarpTextTrigger>
+            </h2>
+          </div>
+        </WarpSpeedCard>
+      </div>
+    ),
+  },
+  "wheel-selector": {
+    componentName: "WheelSelector",
+    importPath: "@/components/wheel-selector",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "contentMode", label: "Panel", options: ["detailed", "minimal", "hidden"], defaultValue: "detailed" },
+      { kind: "select", prop: "animationSpeed", label: "Snap", options: ["slow", "medium", "fast"], defaultValue: "medium" },
+      { kind: "range", prop: "ringRadius", label: "Ring radius", min: 80, max: 180, step: 4, unit: "px", defaultValue: 112 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <WheelSelector
+        key={String(v.autoplay)}
+        contentMode={v.contentMode as "detailed"}
+        animationSpeed={v.animationSpeed as "medium"}
+        ringRadius={v.ringRadius as number}
+        autoplay={v.autoplay as boolean}
+        className="max-w-[760px]"
+      />
+    ),
   },
 };
 

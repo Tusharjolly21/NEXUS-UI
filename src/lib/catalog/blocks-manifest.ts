@@ -19,7 +19,9 @@ export type BlockCategory =
   | "Navigation"
   | "Gallery sections"
   | "Changelog sections"
-  | "Error pages";
+  | "Error pages"
+  | "Footers"
+  | "Signup sections";
 
 export type BlockManifestEntry = {
   slug: string;
@@ -43,7 +45,7 @@ export const blocksManifest: BlockManifestEntry[] = [
     category: "Pricing blocks",
     tags: ["pricing", "plans", "comparison", "subscription", "framer-motion"],
     premium: false,
-    variants: ["Radio Plan Selector", "Four Tier Billing Switch", "Advanced Pricing Columns", "Spotlight Pricing Cards", "Seat Ruler Pricing", "Beam Pricing"],
+    variants: ["Radio Plan Selector", "Four Tier Billing Switch", "Advanced Pricing Columns", "Spotlight Pricing Cards", "Seat Ruler Pricing", "Beam Pricing", "Toggle Pricing"],
     reactSource: `import { RadioPlanPricing } from "@/components/blocks/pricing-section";
 
 export default function PricingPage() {
@@ -111,6 +113,7 @@ export default function Page() {
       "Swap Animation",
       "Single Row Lift",
       "Loupe Logo Cloud",
+      "Cinematic Logo Cloud",
     ],
     reactSource: `import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
 import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
@@ -153,7 +156,7 @@ export { WavyLines } from "@/components/wavy-lines";`,
     category: "Feature grids",
     tags: ["bento", "features", "animated", "ats", "upload", "framer-motion"],
     premium: true,
-    variants: ["Mentorship Bento", "ATS Bento Grid", "Upload Flow", "Progress Tracker", "Interview Cards", "Pulse Bento", "Live Demo Bento"],
+    variants: ["Mentorship Bento", "ATS Bento Grid", "Upload Flow", "Progress Tracker", "Interview Cards", "Pulse Bento", "Live Demo Bento", "Signal Bento Grid", "Animated Bento Grid", "Bento Grid Skeleton"],
     reactSource: `import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";\n\nexport default function Page() {\n  return <WhyChooseUsBento />;\n}`,
   },
   {
@@ -165,7 +168,7 @@ export { WavyLines } from "@/components/wavy-lines";`,
     category: "FAQ sections",
     tags: ["faq", "accordion", "chat", "support", "framer-motion"],
     premium: true,
-    variants: ["Questions & Answers FAQ", "Searchable FAQ", "Chat FAQ", "Instant Search FAQ"],
+    variants: ["Questions & Answers FAQ", "Searchable FAQ", "Chat FAQ", "Instant Search FAQ", "Motion FAQ Disclosure"],
     reactSource: `import {
   ChatFaqSection,
   FaqFolderCard,
@@ -204,7 +207,7 @@ export default function Page() {
     category: "Navigation",
     tags: ["sidebar component react", "sidebar component react tailwind", "sidebar ui component react", "collapsible sidebar react", "navigation", "dashboard", "framer-motion"],
     premium: false,
-    variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar", "Collapsing Rail"],
+    variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar", "Collapsing Rail", "Workbench Sidebar"],
     reactSource: `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
@@ -228,7 +231,7 @@ export default function Page() {
     category: "Contact sections",
     tags: ["contact", "forms", "map", "testimonial", "landing page", "framer-motion"],
     premium: false,
-    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story", "Voice Note Contact"],
+    variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story", "Voice Note Contact", "Split Contact Glass"],
     reactSource: `import ContactPageBlock from "@/components/blocks/contact-page";
 
 export default function Page() {
@@ -244,7 +247,7 @@ export default function Page() {
     category: "Blog sections",
     tags: ["blog", "article", "content", "toc", "editorial", "featured posts", "blog card", "single post", "seo"],
     premium: false,
-    variants: ["Blog Content Centered", "Blog Content With TOC", "Blog Content Editorial", "Blog Header Featured Posts", "Blog Hover Image Card"],
+    variants: ["Blog Content Centered", "Blog Content With TOC", "Blog Content Editorial", "Blog Header Featured Posts", "Blog Hover Image Card", "Editorial Blog Rail"],
     reactSource: `import {
   BlogContentCentered,
   BlogContentEditorial,
@@ -302,7 +305,7 @@ export default function CheckoutPage() {
     category: "Navigation",
     tags: ["navigation", "navbar", "mega menu", "dropdown", "header", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Morphing Nav"],
+    variants: ["Morphing Nav", "Float Glass Navbar"],
     reactSource: `import { MorphingNav } from "@/components/blocks/motion-kit/morphing-nav";
 
 export default function Header() {
@@ -318,7 +321,7 @@ export default function Header() {
     category: "Hero blocks",
     tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero"],
+    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid"],
     reactSource: `import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
 
 export default function Home() {
@@ -334,7 +337,7 @@ export default function Home() {
     category: "Feature grids",
     tags: ["features", "feature section", "tabs", "timeline", "integrations", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Auto-advancing Tabs", "Drawn Timeline", "Integrations Orbit"],
+    variants: ["Auto-advancing Tabs", "Drawn Timeline", "Integrations Orbit", "Step Flow", "Lattice Feature Grid"],
     reactSource: `import { AutoAdvancingTabs } from "@/components/blocks/motion-kit/auto-advancing-tabs";
 
 export default function Features() {
@@ -350,7 +353,7 @@ export default function Features() {
     category: "Testimonials",
     tags: ["social proof", "testimonials", "stats", "reviews", "wall of love", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Counting Stats", "Wall of Love"],
+    variants: ["Counting Stats", "Wall of Love", "Scrolling Testimonials"],
     reactSource: `import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
 
 export default function Testimonials() {
@@ -419,6 +422,54 @@ export default function Changelog() {
 
 export default function NotFound() {
   return <Gravity404 />;
+}`,
+  },
+  {
+    slug: "block-cta",
+    registryCliName: "cta-blocks",
+    name: "CTA Sections",
+    description:
+      "The last push before the footer: a call to action on a slow nebula, with a glow that follows the pointer to the button and a press that answers back.",
+    category: "CTA sections",
+    tags: ["cta", "call to action", "landing page", "signup", "motion kit", "framer-motion"],
+    premium: true,
+    variants: ["Nebula CTA Glow"],
+    reactSource: `import { NebulaCtaGlow } from "@/components/nebula-cta-glow";
+
+export default function Cta() {
+  return <NebulaCtaGlow />;
+}`,
+  },
+  {
+    slug: "block-footer",
+    registryCliName: "footer-blocks",
+    name: "Footers",
+    description:
+      "A site footer with link columns, a newsletter field, a status line and an oversized wordmark that lights up under the pointer.",
+    category: "Footers",
+    tags: ["footer", "site footer", "newsletter", "links", "motion kit", "framer-motion"],
+    premium: false,
+    variants: ["Orbit Footer"],
+    reactSource: `import { OrbitFooter } from "@/components/orbit-footer";
+
+export default function Footer() {
+  return <OrbitFooter />;
+}`,
+  },
+  {
+    slug: "block-signup",
+    registryCliName: "signup-blocks",
+    name: "Sign-up Sections",
+    description:
+      "A split sign-up page: the pitch and a checklist that ticks itself off on one side, the form with social sign-in and a strength meter on the other.",
+    category: "Signup sections",
+    tags: ["signup", "sign up", "register", "onboarding", "form", "motion kit", "framer-motion"],
+    premium: false,
+    variants: ["Split Signup Convert"],
+    reactSource: `import { SplitSignup } from "@/components/split-signup-convert";
+
+export default function SignUp() {
+  return <SplitSignup />;
 }`,
   },
 ];

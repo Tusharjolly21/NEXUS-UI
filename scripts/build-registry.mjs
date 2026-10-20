@@ -944,6 +944,27 @@ const BLOCK_REGISTRY_PACKAGES = [
     dependencies: ["framer-motion", "matter-js"],
     components: ["blocks/motion-kit/gravity-404"],
   },
+  {
+    name: "cta-blocks",
+    title: "CTA Blocks",
+    description: "A call to action on a slow nebula with a glow that follows the pointer.",
+    premium: true,
+    components: ["nebula-cta-glow"],
+  },
+  {
+    name: "footer-blocks",
+    title: "Footer Blocks",
+    description: "A site footer with link columns, newsletter, status and a lit wordmark.",
+    premium: false,
+    components: ["orbit-footer"],
+  },
+  {
+    name: "signup-blocks",
+    title: "Sign-up Blocks",
+    description: "A split sign-up page with a self-ticking checklist and a strength meter.",
+    premium: false,
+    components: ["split-signup-convert"],
+  },
 ];
 
 function buildBlockCollectionItem(blockPackage) {
@@ -971,7 +992,10 @@ function buildBlockCollectionItem(blockPackage) {
   };
 }
 
-const catalogTs = fs.readFileSync(catalogPath, "utf8");
+// Sections that moved from the components library to the Blocks pages keep their install names;
+// their entries share the catalog's shape, so they are read the same way.
+const movedPath = path.join(root, "src", "lib", "catalog", "moved-sections.ts");
+const catalogTs = fs.readFileSync(catalogPath, "utf8") + "\n" + fs.readFileSync(movedPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
 const items = [buildNexusFontItem(), buildUiSoundsItem()];

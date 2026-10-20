@@ -35,7 +35,7 @@ Keep this section scannable. Logo clouds work better than testimonial cards at t
 
 ### Product depth
 
-This is where you justify the headline claim. [Bento grid layouts](/components/animated-bento-grid) work well here because they let you show multiple distinct capabilities in a single view without requiring the visitor to scroll through a long feature list. Pair each capability with a real screenshot or animated preview rather than an icon.
+This is where you justify the headline claim. [Bento grid layouts](/blocks/block-why-choose-us#animated-bento-grid) work well here because they let you show multiple distinct capabilities in a single view without requiring the visitor to scroll through a long feature list. Pair each capability with a real screenshot or animated preview rather than an icon.
 
 The most common mistake at this position is writing about features rather than outcomes. "Framer Motion animations built in" is a feature. "Components that feel polished on first install" is the outcome that feature enables. Write the outcome first.
 
@@ -57,9 +57,9 @@ Visitors who reach the bottom of the page have spent time with your product. The
 
 ## Shipping as composable blocks
 
-Nexus UI ships each section as a standalone React component you can drop into any Next.js page. [Hero blocks](/blocks/block-interactive-dots), pricing sections, [logo clouds](/components/cinematic-logo-cloud), [FAQ accordions](/blocks/block-faq-folder-card), and CTA footers are each self-contained: their own Tailwind styles, their own Framer Motion animations, their own TypeScript props interface.
+Nexus UI ships each section as a standalone React component you can drop into any Next.js page. [Hero blocks](/blocks/block-interactive-dots), pricing sections, [logo clouds](/blocks/block-logo-clouds#cinematic-logo-cloud), [FAQ accordions](/blocks/block-faq-folder-card), and CTA footers are each self-contained: their own Tailwind styles, their own Framer Motion animations, their own TypeScript props interface.
 
-This means you can assemble a complete landing page from individual [UI blocks](/blocks) in an afternoon, then iterate on each section independently. Swap a pricing layout without touching the hero. Test two FAQ sections simultaneously. Replace the logo cloud with a [testimonial carousel](/components/scrolling-testimonials) when you have enough customer quotes.
+This means you can assemble a complete landing page from individual [UI blocks](/blocks) in an afternoon, then iterate on each section independently. Swap a pricing layout without touching the hero. Test two FAQ sections simultaneously. Replace the logo cloud with a [testimonial carousel](/blocks/block-social-proof#scrolling-testimonials) when you have enough customer quotes.
 
 The architecture enforces what good landing page structure already requires: each section should have a clear, independent purpose. If you cannot isolate a section into a standalone component, it is probably trying to do too much.
 
