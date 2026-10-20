@@ -1,9 +1,9 @@
 "use client";
 /**
- * Hydration-safe copy of the kit's StickyStory (kit/parts.tsx), used by the Relay and Wayfare
- * templates. The only change: the "wide" media query is read with useSyncExternalStore, so the
- * server render and the first client render agree (the kit's useMedia reads matchMedia in its
- * initial state, which makes desktop hydration fail). Everything else is identical.
+ * Hydration-safe copy of the kit's StickyStory (kit/parts.tsx). The only change: the "wide"
+ * media query is read with useSyncExternalStore, so the server render and the first client
+ * render agree. Everything else is identical. (kit/parts.tsx has since been fixed the same way,
+ * so new code can import StickyStory from the kit directly; this file stays for existing importers.)
  */
 import { useState, useRef, useSyncExternalStore, type ReactNode } from "react";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll, useSpring } from "framer-motion";

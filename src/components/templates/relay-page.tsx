@@ -18,8 +18,7 @@ import FeedbackPill from "@/components/templates/kit/components/FeedbackPill";
 import ProgressButton from "@/components/templates/kit/components/ProgressButton";
 import RadioCards from "@/components/templates/kit/components/RadioCards";
 import PriceOdometer from "@/components/templates/kit/components/PriceOdometer";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Spotlight, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
-import { StickyStory } from "@/components/templates/kit-ports/sticky-story";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Marquee, Nav, Reveal, SectionHead, Spotlight, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const A = "#0071e3";
