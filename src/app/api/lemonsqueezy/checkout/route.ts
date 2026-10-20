@@ -10,30 +10,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "You must be signed in to purchase." }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({})) as {
-    plan?: "annual" | "lifetime" | "template";
-    templateSlug?: string;
-  };
+  // Only the two plans are for sale: Pro (yearly) and All-Access (lifetime). Nothing is sold on its own.
+  const body = await req.json().catch(() => ({})) as { plan?: string };
   const plan = body.plan ?? "lifetime";
-
-  let variantId: string | undefined;
-  let successUrl: string;
-  let customData: Record<string, string> | undefined;
+  if (plan !== "annual" && plan !== "lifetime") {
+    return NextResponse.json({ error: "Unknown plan." }, { status: 400 });
+  }
 
   const origin = new URL(req.url).origin;
-
-  if (plan === "template") {
-    const slug = body.templateSlug;
-    if (!slug) return NextResponse.json({ error: "Missing templateSlug." }, { status: 400 });
-    variantId = process.env.LEMONSQUEEZY_VARIANT_TEMPLATE;
-    successUrl = `${origin}/templates/${slug}?checkout=success`;
-    customData = { template_slug: slug };
-  } else {
-    variantId = plan === "annual"
-      ? process.env.LEMONSQUEEZY_VARIANT_ANNUAL
-      : process.env.LEMONSQUEEZY_VARIANT_LIFETIME;
-    successUrl = `${origin}/dashboard?checkout=success&plan=${plan}`;
-  }
+  const variantId = plan === "annual"
+    ? process.env.LEMONSQUEEZY_VARIANT_ANNUAL
+    : process.env.LEMONSQUEEZY_VARIANT_LIFETIME;
+  const successUrl = `${origin}/dashboard?checkout=success&plan=${plan}`;
 
   if (!variantId) {
     return NextResponse.json({ error: "Payment not configured." }, { status: 501 });
@@ -45,10 +33,7 @@ export async function POST(req: Request) {
       userId: user.id,
       email: user.email,
       successUrl,
-      cancelUrl: plan === "template"
-        ? `${origin}/templates/${body.templateSlug}?checkout=cancel`
-        : `${origin}/pricing?checkout=cancel`,
-      customData,
+      cancelUrl: `${origin}/pricing?checkout=cancel`,
       embed: true,
     });
 

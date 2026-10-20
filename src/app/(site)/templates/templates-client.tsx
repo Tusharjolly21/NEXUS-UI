@@ -15,8 +15,7 @@ const CATEGORIES = (() => {
   return [...counts.entries()].sort((a, b) => b[1] - a[1]).map(([c]) => c);
 })();
 
-export default function TemplatesGallery({ isPremium = false, ownedSlugs = [] }: { isPremium?: boolean; ownedSlugs?: string[] }) {
-  const owned = React.useMemo(() => new Set(ownedSlugs), [ownedSlugs]);
+export default function TemplatesGallery({ isPremium = false }: { isPremium?: boolean }) {
   const [param, setParam] = useUrlParam("category");
   const category = CATEGORIES.find((c) => c === param) ?? null;
 
@@ -44,7 +43,7 @@ export default function TemplatesGallery({ isPremium = false, ownedSlugs = [] }:
       <ul className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
         {shown.map((t, i) => (
           <li key={t.slug}>
-            <TemplateTile tmpl={t} owned={isPremium || owned.has(t.slug)} priority={i < 2} />
+            <TemplateTile tmpl={t} isPro={isPremium} priority={i < 2} />
           </li>
         ))}
       </ul>

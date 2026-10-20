@@ -246,7 +246,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
                           className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-zinc-950 transition hover:bg-zinc-200"
                         >
                           <Sparkles className="size-3.5 text-amber-500" />
-                          Unlock All-Access
+                          Get Pro
                         </Link>
                       </div>
                       <div className="mt-6 w-full space-y-2 px-6 opacity-30 select-none">
@@ -263,10 +263,10 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
 
               <div className="border-t border-zinc-800 bg-zinc-900/40 px-4 py-2 text-center text-[11px] text-zinc-500">
                 {codeIsLocked
-                  ? "Full source · All-Access license · Instant download after purchase"
+                  ? "Full source comes with Pro or All-Access · Download it from the template page"
                   : tmpl.premium
-                  ? "Full source included · All-Access license · Copy and deploy"
-                  : "MIT license · Zero attribution required · Ready to deploy"}
+                  ? "Full source included with your plan · Copy and deploy"
+                  : "Free template · Sign in to download the source"}
               </div>
             </div>
           </motion.div>
@@ -368,7 +368,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
             ) : (
               <Link
                 href="/pricing"
-                title="Get All-Access"
+                title="Get Pro"
                 className="hidden rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground dark:hover:bg-white/5 sm:inline-flex"
               >
                 <ShoppingCart className="size-3.5" />
@@ -391,7 +391,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
                 className="inline-flex items-center gap-1 rounded-full bg-zinc-950 px-3 py-1.5 text-xs font-semibold text-white shadow transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200 sm:gap-1.5 sm:px-4"
               >
                 <Sparkles className="size-3 fill-current text-amber-400 dark:text-amber-500 sm:size-3.5" />
-                All Access
+                Get Pro
               </Link>
             </div>
           )}

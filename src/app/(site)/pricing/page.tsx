@@ -9,7 +9,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
-const { components, freeComponents, proComponents, templates, blocks } = CATALOG_COUNTS;
+const { components, freeComponents, proComponents, templates, freeTemplates, blocks } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 
 const PRO_PRICE = formatPrice(PRICES.pro);
@@ -41,7 +41,7 @@ const PLANS: Plan[] = [
     features: [
       `${freeComponents} components with full source`,
       `${freeBlocks} of the ${blocks} section blocks`,
-      `Live previews of all ${templates} templates`,
+      `${freeTemplates} full templates, plus a first look at all ${templates}`,
       "Commercial and client projects",
       "Install with the shadcn CLI",
     ],
@@ -105,7 +105,7 @@ const FAQ = [
   },
   {
     q: "Can I buy a single template?",
-    a: `Templates come with a plan. Pro unlocks all ${templates} of them, plus everything we add later, for ${PRO_PRICE} a year.`,
+    a: `Templates aren't sold one by one. ${freeTemplates} are free; Pro unlocks all ${templates}, plus everything we add later, for ${PRO_PRICE} a year, or ${ALL_ACCESS_PRICE} once for lifetime.`,
   },
   {
     q: "Can I request a component or template?",
@@ -168,7 +168,7 @@ export default function PricingPage() {
             Pay once for <RainbowWord>everything</RainbowWord>.
           </h1>
           <p className="mx-auto mt-6 max-w-[580px] text-[19px] leading-[1.55] text-muted-foreground">
-            Every component is free. A plan unlocks the source of all {templates} templates and the premium blocks.
+            {freeComponents} components and {freeTemplates} templates are free. One plan unlocks every Pro component, all {templates} templates and every block.
           </p>
         </div>
       </section>

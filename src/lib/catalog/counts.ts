@@ -12,5 +12,6 @@ export const CATALOG_COUNTS = {
   freeComponents: libraryComponents.filter((c) => !c.premium).length,
   proComponents: libraryComponents.filter((c) => c.premium).length,
   templates: templates.length,
+  freeTemplates: templates.filter((t) => !t.premium).length,
   blocks: blocksManifest.length,
 } as const;

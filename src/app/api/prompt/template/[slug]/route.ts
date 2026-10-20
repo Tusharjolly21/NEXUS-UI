@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { withLicense } from "@/lib/license-stamp";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { getTemplate } from "@/lib/catalog/templates";
@@ -44,7 +45,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (!file) return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
 
   try {
-    const prompt = await readFile(path.join(process.cwd(), file), "utf8");
+    const prompt = withLicense(await readFile(path.join(process.cwd(), file), "utf8"), (await getSessionUser())?.id, tmpl.slug);
     return NextResponse.json({ name: tmpl.title, prompt }, { headers: PRIVATE });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });

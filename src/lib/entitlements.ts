@@ -141,49 +141,14 @@ async function hasLifetimeAccess(userId: string): Promise<boolean> {
   return data !== null;
 }
 
-/**
- * Returns true if the user purchased this specific component à la carte.
- */
-async function hasPurchasedComponent(userId: string, slug: string): Promise<boolean> {
-  const admin = getAdminClient();
-  const { data } = await admin
-    .from("orders")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("product_type", "component")
-    .eq("product_slug", slug)
-    .eq("status", "paid")
-    .limit(1)
-    .maybeSingle();
-  return data !== null;
-}
-
-/**
- * Returns true if the user purchased this specific template à la carte.
- */
-async function hasPurchasedTemplate(userId: string, slug: string): Promise<boolean> {
-  const admin = getAdminClient();
-  const { data } = await admin
-    .from("orders")
-    .select("id")
-    .eq("user_id", userId)
-    .eq("product_type", "template")
-    .eq("product_slug", slug)
-    .eq("status", "paid")
-    .limit(1)
-    .maybeSingle();
-  return data !== null;
-}
-
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
  * Can this user download/access a given component slug?
  *
- * Checks in order:
- *  1. Lifetime order
- *  2. Active subscription
- *  3. Individual component purchase
+ * Only the two plans unlock Pro items: Pro (an active yearly subscription) or All-Access (a
+ * lifetime order). Nothing is sold on its own, so the slug doesn't change the answer; it stays in
+ * the signature so callers say what they're asking about.
  */
 export async function canAccessComponent(
   userId: string,
@@ -191,7 +156,7 @@ export async function canAccessComponent(
 ): Promise<boolean> {
   if (await hasLifetimeAccess(userId)) return true;
   if (await hasActiveSubscription(userId)) return true;
-  if (await hasPurchasedComponent(userId, slug)) return true;
+  void slug;
   return false;
 }
 
@@ -204,28 +169,10 @@ export async function canAccessTemplate(
 ): Promise<boolean> {
   if (await hasLifetimeAccess(userId)) return true;
   if (await hasActiveSubscription(userId)) return true;
-  if (await hasPurchasedTemplate(userId, slug)) return true;
+  void slug;
   return false;
 }
 
-/**
- * Returns the set of template slugs the user has purchased individually.
- * Returns null if the user has lifetime/subscription access (meaning all templates are accessible).
- */
-export async function getOwnedTemplateSlugs(userId: string): Promise<Set<string> | null> {
-  if (await hasLifetimeAccess(userId)) return null;
-  if (await hasActiveSubscription(userId)) return null;
-
-  const admin = getAdminClient();
-  const { data } = await admin
-    .from("orders")
-    .select("product_slug")
-    .eq("user_id", userId)
-    .eq("product_type", "template")
-    .eq("status", "paid");
-
-  return new Set((data ?? []).map((r) => r.product_slug).filter(Boolean) as string[]);
-}
 
 /**
  * Broad check: does this user have ANY premium access?

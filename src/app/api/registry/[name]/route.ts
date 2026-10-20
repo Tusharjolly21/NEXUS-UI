@@ -28,7 +28,8 @@ import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { getVariantByRegistryName } from "@/lib/catalog/block-variants";
 import { resolveApiToken, adminCanAccessComponent } from "@/lib/entitlements";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { sessionCanAccessComponent } from "@/lib/component-access";
+import { getSessionUser, sessionCanAccessComponent } from "@/lib/component-access";
+import { stampRegistryItem } from "@/lib/license-stamp";
 
 type Params = { params: Promise<{ name: string }> };
 
@@ -83,7 +84,8 @@ export async function GET(_req: Request, { params }: Params) {
     // The site's own inspector asks with the browser session instead of a CLI token. Same
     // entitlement check, same private no-store response; cross-origin pages can't read it (no CORS).
     if (entitlementSlug && (await sessionCanAccessComponent(entitlementSlug, true))) {
-      return serveRegistryFile(name, "private");
+      const user = await getSessionUser();
+      return serveRegistryFile(name, "private", user?.id);
     }
     return new NextResponse(
       JSON.stringify({
@@ -129,8 +131,8 @@ export async function GET(_req: Request, { params }: Params) {
     );
   }
 
-  // ── 5. Serve ─────────────────────────────────────────────────────
-  return serveRegistryFile(name, "private");
+  // ── 5. Serve, stamped with the account it was issued to ─────────
+  return serveRegistryFile(name, "private", userId);
 }
 
 const PRIVATE_JSON_HEADERS = {
@@ -148,10 +150,13 @@ const CACHE_CONTROL = {
 async function serveRegistryFile(
   name: string,
   visibility: keyof typeof CACHE_CONTROL,
+  /** Pro items get a licence line naming this account on every source file. */
+  licensedTo?: string,
 ): Promise<NextResponse> {
   try {
     const filePath = path.join(process.cwd(), ".generated", "registry", `${name}.json`);
-    const contents = await readFile(filePath, "utf-8");
+    const raw = await readFile(filePath, "utf-8");
+    const contents = licensedTo ? stampRegistryItem(raw, licensedTo, name) : raw;
 
     return new NextResponse(contents, {
       status: 200,

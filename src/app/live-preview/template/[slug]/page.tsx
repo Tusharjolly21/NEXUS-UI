@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import nextDynamic from "next/dynamic";
-import { getTemplate, templates } from "@/lib/catalog/templates";
+import { getTemplate } from "@/lib/catalog/templates";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { TemplateSceneLoader } from "@/components/templates/template-scene-loader";
 import { ThemeReceiver } from "@/components/templates/theme-receiver";
+import { LockedTemplatePreview } from "@/components/templates/locked-template-preview";
+import { templateName } from "@/components/templates/template-card";
+import { sessionCanAccessTemplate } from "@/lib/template-access";
 
-export const revalidate = 86400;
+// Rendered per request: whether the visitor gets the running template or the locked preview
+// depends on their session. A Pro template's page code is only sent to people who can open it.
+export const dynamic = "force-dynamic";
 
 // Each template is its own dynamic chunk — only the matching slug's JS is sent to the browser.
 const TemplateFallback = () => (
@@ -108,10 +113,6 @@ const SideBPage = nextDynamic(
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return templates.map((t) => ({ slug: t.slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const t = getTemplate(slug);
@@ -127,6 +128,11 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
   const { slug } = await params;
   const tmpl = getTemplate(slug);
   if (!tmpl) notFound();
+
+  // Fails closed: without a session, or if the access check errors, a Pro template stays locked.
+  if (tmpl.premium && !(await sessionCanAccessTemplate(tmpl.slug))) {
+    return <LockedTemplatePreview tmpl={tmpl} name={templateName(tmpl)} />;
+  }
 
   if (tmpl.slug === "relay") {
     return <ThemeReceiver><RelayPage /></ThemeReceiver>;

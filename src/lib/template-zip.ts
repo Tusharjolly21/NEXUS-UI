@@ -933,13 +933,22 @@ Downloaded from Nexus UI, ${SITE_URL}`);
 // ─── Zip ─────────────────────────────────────────────────────────────────────
 
 /** Builds the archive in memory. Every file sits under one top-level folder named after the slug. */
-export async function createTemplateZip(slug: string, root: string = process.cwd()) {
+export async function createTemplateZip(
+  slug: string,
+  root: string = process.cwd(),
+  /** A licence comment put on top of every source file (Pro downloads). */
+  stamp?: string,
+) {
   const plan = await planTemplateZip(slug, root);
   const zip = new JSZip();
   const folder = zip.folder(plan.folder)!;
   const entrySource = await fs.readFile(path.join(root, plan.entry), "utf8");
 
-  for (const file of [...plan.sources, ...plan.assets]) {
+  for (const file of plan.sources) {
+    const body = await fs.readFile(path.join(root, file), "utf8");
+    folder.file(file, stamp && /\.(tsx?|jsx?|css)$/.test(file) ? stamp + body : body);
+  }
+  for (const file of plan.assets) {
     folder.file(file, await fs.readFile(path.join(root, file)));
   }
 
