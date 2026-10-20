@@ -47,6 +47,7 @@ const chipCls =
   "rounded-xl bg-white p-2.5 text-[12px] font-medium shadow-[0_0_0_1px_rgba(0,0,0,.05),0_6px_12px_-8px_rgba(0,0,0,.25)] sm:p-3 dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]";
 
 function Kanban({ live }: AutoAdvancingTabVisualProps) {
+  const group = useId();
   const [moved, setMoved] = useState(false);
   useEffect(() => {
     if (!live) return;
@@ -65,7 +66,7 @@ function Kanban({ live }: AutoAdvancingTabVisualProps) {
     </motion.div>
   );
   return (
-    <LayoutGroup id="kanban">
+    <LayoutGroup id={group}>
       <div className="flex w-full gap-2 sm:gap-3">
         {col("To do", <>{chip("Write launch post")}{!moved && chip("Pricing page copy", "ft-move")}</>)}
         {col("Doing", <>{chip("Onboarding emails")}{moved && chip("Pricing page copy", "ft-move")}</>)}

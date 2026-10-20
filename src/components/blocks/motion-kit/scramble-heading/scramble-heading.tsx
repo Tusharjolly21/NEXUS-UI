@@ -66,10 +66,14 @@ function Scramble({ text, run, speed = 28, enabled }: { text: string; run: numbe
   // Before the first tick of a run, show the empty start of the decode rather than the answer.
   const pending = enabled && run > 0;
   const shown = frame && frame.key === key ? frame.value : pending ? text.replace(/\S/g, "\u00a0") : text;
+  // The finished text reserves the space, so the line never jitters while the glyphs churn.
   return (
     <>
       <span className="sr-only">{text}</span>
-      <span aria-hidden="true">{shown}</span>
+      <span className="relative inline-block max-w-full" aria-hidden="true">
+        <span className="invisible">{text}</span>
+        <span className="absolute inset-0 overflow-x-clip">{shown}</span>
+      </span>
     </>
   );
 }

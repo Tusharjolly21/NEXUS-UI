@@ -2399,6 +2399,426 @@
   "bg": "#ffffff",
   "coverage": 0.6
  },
+ "mk-auto-advancing-tabs": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   216,
+   1120,
+   424
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "mk-beam-pricing": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   70,
+   1122,
+   780
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "mk-collapsing-rail": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   116,
+   150,
+   1048,
+   594
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-counting-stats": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   198,
+   1260,
+   466
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-drawn-timeline": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   140,
+   86,
+   1002,
+   764
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-halftone-planet": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   192,
+   1040,
+   476
+  ],
+  "bg": "#fcfcfc",
+  "coverage": 1
+ },
+ "mk-instant-search-faq": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   122,
+   200,
+   1036,
+   474
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-integrations-orbit": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   182,
+   1086,
+   504
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.99
+ },
+ "mk-live-demo-bento": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   86,
+   1122,
+   764
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-loupe-logo-cloud": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   108,
+   306,
+   1066,
+   260
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.99
+ },
+ "mk-morphing-nav": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   100,
+   24,
+   1082,
+   368
+  ],
+  "bg": "#fcfcfc",
+  "coverage": 0.94
+ },
+ "mk-parallax-stack-hero": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   78,
+   178,
+   1192,
+   480
+  ],
+  "bg": "#fcfcfc",
+  "coverage": 0.99
+ },
+ "mk-pulse-bento": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   86,
+   1122,
+   764
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-scramble-heading": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   122,
+   212,
+   976,
+   446
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "mk-scroll-read-manifesto": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   140,
+   230,
+   972,
+   408
+  ],
+  "bg": "#fcfcfc",
+  "coverage": 0.99
+ },
+ "mk-seat-ruler-pricing": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   280,
+   52,
+   720,
+   762
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "mk-slide-to-pay": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   120,
+   182,
+   1042,
+   498
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-spotlight-hero": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   10,
+   10,
+   1256,
+   840
+  ],
+  "bg": "#ffffff",
+  "coverage": 1
+ },
+ "mk-typo-catching-signup": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   256,
+   180,
+   768,
+   544
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-voice-note-contact": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   120,
+   238,
+   1044,
+   418
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
+ },
+ "mk-wall-of-love": {
+  "canvas": [
+   1280,
+   860
+  ],
+  "surface": [
+   0,
+   0,
+   1280,
+   860
+  ],
+  "content": [
+   80,
+   86,
+   1120,
+   764
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 0.92
+ },
  "money-goo": {
   "canvas": [
    960,

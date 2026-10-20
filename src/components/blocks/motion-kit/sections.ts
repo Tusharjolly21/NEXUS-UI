@@ -1,5 +1,5 @@
 import type { ComponentType } from "react";
-import { MorphingNav } from "./morphing-nav";
+import { MorphingNavStage } from "./stages";
 import { SpotlightHero } from "./spotlight-hero";
 import { HalftonePlanet } from "./halftone-planet";
 import { ParallaxStackHero } from "./parallax-stack-hero";
@@ -22,9 +22,8 @@ import { VoiceNoteContact } from "./voice-note-contact";
 import { TypoCatchingSignup } from "./typo-catching-signup";
 
 /** Motion Kit block sections by variant id, as rendered on their block's page. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const MOTION_KIT_SECTIONS: Record<string, ComponentType<any>> = {
-  "mk-morphing-nav": MorphingNav,
+export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: boolean }>> = {
+  "mk-morphing-nav": MorphingNavStage,
   "mk-spotlight-hero": SpotlightHero,
   "mk-halftone-planet": HalftonePlanet,
   "mk-parallax-stack-hero": ParallaxStackHero,

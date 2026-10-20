@@ -700,7 +700,7 @@ export default async function BlockDetailPage({ params }: Props) {
             locked={mkLocked}
             pro
           >
-            <Section />
+            <Section autoplay />
           </PreviewCodeSection>
         );
       })}
