@@ -10,6 +10,7 @@ import {
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
+import { CnPlayground } from "@/components/docs/interactive/cn-playground";
 
 export const metadata: Metadata = createMetadata({
   // The long explainer ("what is cn()", clsx vs tailwind-merge) lives in the blog guide; this page is
@@ -90,6 +91,13 @@ export default function AddUtilitiesPage() {
           <DocPre>{`clsx("p-4", isActive && "p-6")     // → "p-4 p-6"  (both kept)
 twMerge("p-4 p-6")                  // → "p-6"      (conflict resolved)
 cn("p-4", isActive && "p-6")        // → "p-6"      (clsx, then twMerge)`}</DocPre>
+        </DocSection>
+
+        <DocSection title="Try it">
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            This runs the real clsx and tailwind-merge. Switch the props and watch which classes survive.
+          </p>
+          <CnPlayground />
         </DocSection>
 
         <DocSection title="1. Install dependencies">
