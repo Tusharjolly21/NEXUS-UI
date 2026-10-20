@@ -5,12 +5,26 @@ Build a two-column contact section in a large grey panel: on the left an envelop
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`, variants, `whileInView`), `lucide-react` (`Mail`), a `cn` helper, and `topojson-client` (imported dynamically) for the map.
-- File: `components/blocks/contact-page.tsx`, named export `GlobalSignalContact`. Export the types `ContactFormValues` (`{ name; email; company; message }`, all strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`), and the shared `ContactForm` component.
+- File: `components/blocks/contact-page.tsx`, named export `GlobalSignalContact`. Export the types `ContactFormValues` (`{ name; email; company; message }`, all strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`), the shared `ContactForm` component with its `ContactFormProps`, the `ContactFormCopy` type with `DEFAULT_CONTACT_FORM_COPY`, and the `ContactVariantProps` / `GlobalSignalContactProps` types. All copy below is the prop defaults; every string renders as plain text.
 
 ## API
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
+| `eyebrow` | `string` | `"A studio across three time zones"` | Grey line above the heading. |
+| `title` | `string` | `"Let's shape the next interface."` | Large `h2`. |
+| `description` | `string` | `"Send a product brief, launch notes or a rough idea. A designer and an engineer read every message and reply with a concrete next step."` | Paragraph under the heading. |
+| `email` | `string` | `"hello@northfield.design"` | First contact link (`mailto:`). Empty hides it. |
+| `phone` | `string` | `"+44 20 7946 0321"` | Second contact link; the `tel:` href keeps only digits and `+`. Empty hides it. |
+| `responseNote` | `string` | `"Replies within a working day"` | Plain secondary note after the links. Empty hides it. |
+| `showMap` | `boolean` | `true` | Show the world map. When false the map is not rendered and its data is never fetched. |
+| `mapLabel` | `string` | `"We are here"` | Text of the pill above the pin. |
+| `formEyebrow` | `string` | `"Project request"` | Small grey label above the form title. |
+| `formTitle` | `string` | `"Tell us what you want to build"` | The form's `h3`. |
+| `formDescription` | `string` | `"A few details are enough. We will reply with a practical next step, not a sales maze."` | Paragraph under the form title. |
+| `buttonLabel` | `string` | `"Send request"` | Submit button text. |
+| `accent` | `string` (hex) | unset | Colours the submit button (hover `brightness(1.1)`), links, field focus (1px inset plus a 3px ring at a 25% mix, 30% in dark), the "Send another message" link and focus outlines, plus the map stem, pulse rings and pin through a `--contact-accent` variable set only when passed. Unset keeps the built-in blues: button and outlines `#0071e3` (hover `#0077ed`), links `#0066cc` / dark `#2997ff`, field focus `#0071e3` / dark `#2997ff`. |
+| `formCopy` | `Partial<ContactFormCopy>` | `DEFAULT_CONTACT_FORM_COPY` | Overrides for the form's fixed strings: `nameLabel` "Name", `namePlaceholder` "Maya Srinivasan", `emailLabel` "Work email", `emailPlaceholder` "maya@northstar.dev", `companyLabel` "Company", `companyPlaceholder` "Northstar Labs", `optionalLabel` " (optional)" (empty hides it), `messageLabel` "Message", `messagePlaceholder` "Share the goal, deadline, and what a great outcome looks like.", `sendingLabel` "Sending…", `sentTitle` "Message sent", `sentMessage` "We'll get back to you within 24 hours.", `sendAnotherLabel` "Send another message ›", `errorFallback` "Couldn't send that. Please try again." |
 | `onSubmit` | `ContactSubmitHandler` | simulated send (resolves after 900ms) | Receives the field values. Resolve to show the sent state; throw, or resolve `{ error }`, to show the message under the form. |
 | `className` | `string` | — | Extra classes on the section. |
 
@@ -26,7 +40,7 @@ Colours: ink `#1d1d1f` / dark `#f5f5f7`; secondary `#6e6e73` / `#a1a1a6`; tertia
   - Paragraph 20px below, max width `xl`, 17px (19px from `sm`), line height 1.5, secondary: "Send a product brief, launch notes or a rough idea. A designer and an engineer read every message and reply with a concrete next step."
   - Contact list 28px below, 15px: a column with 10px gap; from `sm` a wrapping row with 24px column gap. Items: link `hello@northfield.design` (`mailto:`), link `+44 20 7946 0321` (`tel:+442079460321`), both link-blue with underline on hover; then plain secondary text "Replies within a working day".
   - World map at the bottom: 40px top margin (48px from `sm`), 288px tall (416px from `sm`), full width, relative.
-- Form card (right): radius 24px, white (dark `#2c2c2e` at 60%), padding 20px / 32px `sm` / 40px `lg`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -24px rgba(0,0,0,.25)` (dark `0 0 0 1px rgba(255,255,255,.08)`). Holds the dense form with eyebrow "Project request", title "Tell us what you want to build", description "A few details are enough. We will reply with a practical next step, not a sales maze.", button "Send request".
+- Form card (right): radius 24px, white (dark `#2c2c2e` at 60%), padding 20px / 32px `sm` / 40px `lg`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -24px rgba(0,0,0,.25)` (dark `0 0 0 1px rgba(255,255,255,.08)`). Holds the dense form with the `form*` props: eyebrow "Project request", title "Tell us what you want to build", description "A few details are enough. We will reply with a practical next step, not a sales maze.", button "Send request".
 
 ### World map
 
@@ -34,7 +48,7 @@ Colours: ink `#1d1d1f` / dark `#f5f5f7`; secondary `#6e6e73` / `#a1a1a6`; tertia
 - Size the canvas to its wrapper times `min(devicePixelRatio, 2)`. Equirectangular projection: `mapWidth = width × 1.04`, `mapHeight = height × 0.76`, `offsetX = (width − mapWidth) / 2`, `offsetY = height × 0.16`; `x = offsetX + (lon + 180) / 360 × mapWidth`, `y = offsetY + (90 − lat) / 180 × mapHeight`. Start a new subpath when consecutive points jump more than 45% of `mapWidth` (antimeridian). Fill each polygon with the `evenodd` rule.
 - Fill colour comes from a CSS variable on the wrapper: `rgba(0,0,0,.13)` light, `rgba(255,255,255,.16)` dark. Redraw on resize (`ResizeObserver`) and when the `class` attribute on `<html>` changes (theme switch).
 - A gradient over the bottom third fades from the panel colour (`#f5f5f7` / `#1c1c1e`) to transparent.
-- On top, an SVG with `viewBox="0 0 760 280"` filling the box. Marker at (552, 126). A label "We are here" in a `foreignObject` 116px wide, 40px tall, centred on the marker x at y 34: a white pill (dark `#2c2c2e`), 12px/6px padding, 13px semibold ink, shadow `0 0 0 1px rgba(0,0,0,.06), 0 6px 16px -6px rgba(0,0,0,.2)` (dark `0 0 0 1px rgba(255,255,255,.1)`). A 1.5px `#0071e3` stem with round caps runs from y 70 to the marker. The pin is a white circle r 6 with a `#0071e3` circle r 4 inside.
+- On top, an SVG with `viewBox="0 0 760 280"` filling the box. Marker at (552, 126). A label (`mapLabel`) in a `foreignObject` 232 units wide, 40px tall, centred on the marker x at y 34, its content a centred flex row: a white single-line pill that truncates past that width (dark `#2c2c2e`), 12px/6px padding, 13px semibold ink, shadow `0 0 0 1px rgba(0,0,0,.06), 0 6px 16px -6px rgba(0,0,0,.2)` (dark `0 0 0 1px rgba(255,255,255,.1)`). A 1.5px `#0071e3` (or `accent`) stem with round caps runs from y 70 to the marker. The pin is a white circle r 6 with a `#0071e3` (or `accent`) circle r 4 inside; the pulse rings use the same colour.
 
 ### Shared contact form (dense)
 
@@ -64,7 +78,7 @@ Colours: ink `#1d1d1f` / dark `#f5f5f7`; secondary `#6e6e73` / `#a1a1a6`; tertia
 
 ## Demo data
 
-Everything above is the demo content; there is no autoplay.
+Everything above is the prop defaults; there is no autoplay.
 
 ## Accessibility
 

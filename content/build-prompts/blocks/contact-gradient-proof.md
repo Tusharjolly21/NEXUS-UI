@@ -5,12 +5,22 @@ Build a contact section that pairs social proof with the form: on the left a dar
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence` with `mode="popLayout"`, `useReducedMotion`, variants, `whileInView`), and a `cn` helper.
-- File: `components/blocks/contact-page.tsx`, named export `GradientProofContact`. Export `ContactFormValues` (`{ name; email; company; message }`, strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`).
+- File: `components/blocks/contact-page.tsx`, named export `GradientProofContact`. Export `ContactFormValues` (`{ name; email; company; message }`, strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`), plus `ProofQuote`, `PROOF_QUOTES`, `ContactFormCopy`, `DEFAULT_CONTACT_FORM_COPY` and `GradientProofContactProps`. All copy below is the prop defaults; every string renders as plain text.
 
 ## API
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
+| `proofLabel` | `string` | `"What teams say after launch"` | Label at the top of the quote panel. |
+| `quotes` | `ProofQuote[]` (`{ quote; name; role }`) | `PROOF_QUOTES` (exported; the three below) | Testimonials to cycle through. An empty array falls back to `PROOF_QUOTES`; the index wraps if the list shrinks. Avatar initials are the first letter of up to two name words. |
+| `autoRotate` | `boolean` | `true` | Advance the quotes on a timer. Never under reduced motion or with fewer than two quotes. |
+| `rotateSeconds` | `number` | `6.5` | Seconds per quote, clamped to 2–30 (non-numbers fall back to 6.5). |
+| `formEyebrow` | `string` | `"Customer success"` | Small grey label above the form title. |
+| `formTitle` | `string` | `"Need help designing a better intake flow?"` | The form's `h3`. |
+| `formDescription` | `string` | `"Share the workflow, audience, and deadline. We will suggest a component path that fits your product."` | Paragraph under the form title. |
+| `buttonLabel` | `string` | `"Book a design review"` | Submit button text. |
+| `accent` | `string` (hex) | unset | Colours the submit button (hover `brightness(1.1)`), links, field focus (1px inset plus a 3px ring at a 25% mix, 30% in dark), the "Send another message" link and focus outlines through a `--contact-accent` variable set only when passed. Unset keeps the built-in blues: button and outlines `#0071e3` (hover `#0077ed`), links `#0066cc` / dark `#2997ff`, field focus `#0071e3` / dark `#2997ff`. |
+| `formCopy` | `Partial<ContactFormCopy>` | `DEFAULT_CONTACT_FORM_COPY` | Overrides for the form's fixed strings: `nameLabel` "Name", `namePlaceholder` "Maya Srinivasan", `emailLabel` "Work email", `emailPlaceholder` "maya@northstar.dev", `companyLabel` "Company", `companyPlaceholder` "Northstar Labs", `optionalLabel` " (optional)" (empty hides it), `messageLabel` "Message", `messagePlaceholder` "Share the goal, deadline, and what a great outcome looks like.", `sendingLabel` "Sending…", `sentTitle` "Message sent", `sentMessage` "We'll get back to you within 24 hours.", `sendAnotherLabel` "Send another message ›", `errorFallback` "Couldn't send that. Please try again." |
 | `onSubmit` | `ContactSubmitHandler` | simulated send (resolves after 900ms) | Receives the field values. Resolve to show the sent state; throw, or resolve `{ error }`, to show the message under the form. |
 | `className` | `string` | — | Extra classes on the section. |
 
@@ -49,13 +59,13 @@ Colours: ink `#1d1d1f` / dark `#f5f5f7`; secondary `#6e6e73` / `#a1a1a6`; tertia
 
 ## Interaction and states
 
-- Quote rotation: state `index` (0) and `paused`. A timeout advances `index → (index + 1) % 3` 6500ms after each change; re-arm on every index change so a manual pick restarts the 6.5s wait. Hovering the figure pauses; leaving resumes. No rotation under reduced motion.
+- Quote rotation: state `index` (0) and `paused`. A timeout advances `index → (index + 1) % quotes.length` `rotateSeconds` (6.5s) after each change; re-arm on every index change so a manual pick restarts the 6.5s wait. Hovering the figure pauses; leaving resumes. No rotation under reduced motion.
 - Clicking a pager dot jumps to that quote.
 - Form statuses idle, loading, success, error. Submit prevents default, disables inputs, awaits `onSubmit(values)`. `{ error }` → error with that text; a throw → its message or "Couldn't send that. Please try again."; otherwise success and clear fields. "Send another message ›" returns to idle. Without `onSubmit`, a 900ms simulated send succeeds.
 
 ## Autoplay demo
 
-The quotes rotate on their own every 6.5s (see above):
+The quotes rotate on their own every 6.5s (see above). These are the `PROOF_QUOTES` defaults:
 
 1. "Northfield turned a vague redesign into a system we could launch. The new contact flow doubled qualified demo requests in a week." — Ira Kapoor, Growth lead, Orbitstack
 2. "They asked better questions about our customers than we did. The intake form now does half of our sales team's first call." — Tomas Lindqvist, Head of product, Fernway

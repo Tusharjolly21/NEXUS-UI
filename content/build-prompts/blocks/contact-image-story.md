@@ -5,12 +5,23 @@ Build a split contact section: the left half is a full-bleed landscape photo wit
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS (incl. `backdrop-blur`), framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`, variants, `whileInView`), and a `cn` helper.
-- File: `components/blocks/contact-page.tsx`, named export `ImageStoryContact`. Export `ContactFormValues` (`{ name; email; company; message }`, strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`).
+- File: `components/blocks/contact-page.tsx`, named export `ImageStoryContact`. Export `ContactFormValues` (`{ name; email; company; message }`, strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`), plus `ContactFormCopy`, `DEFAULT_CONTACT_FORM_COPY` and `ImageStoryContactProps`. All copy below is the prop defaults; every string renders as plain text. The photo is fixed in the component, not a prop.
 
 ## API
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
+| `quote` | `string` | `"Our launch page finally feels like the product: fast, composed, and unmistakably ours."` | Testimonial on the glass card; curly quotes are added around it. |
+| `authorName` | `string` | `"Sana Noor"` | Byline name; the avatar shows the first letter of up to two of its words ("SN"). |
+| `authorRole` | `string` | `"Founder, Meadow AI"` | Byline role. |
+| `brandName` | `string` | `"Northfield"` | Name in the form card header (truncates); its first character, upper-cased, fills the monogram. |
+| `brandTagline` | `string` | `"Launch support"` | Tertiary line under the brand name. |
+| `formEyebrow` | `string` | `"Talk to the team"` | Small grey label above the form title. |
+| `formTitle` | `string` | `"Write to the people who build it."` | The form's `h3`. |
+| `formDescription` | `string` | `"Tell us where your page feels stuck. We can help with layout, motion, conversion details, or full section composition."` | Paragraph under the form title. |
+| `buttonLabel` | `string` | `"Send message"` | Submit button text. |
+| `accent` | `string` (hex) | unset | Colours the submit button (hover `brightness(1.1)`), links, field focus (1px inset plus a 3px ring at a 25% mix, 30% in dark), the "Send another message" link and focus outlines through a `--contact-accent` variable set only when passed. Unset keeps the built-in blues: button and outlines `#0071e3` (hover `#0077ed`), links `#0066cc` / dark `#2997ff`, field focus `#0071e3` / dark `#2997ff`. |
+| `formCopy` | `Partial<ContactFormCopy>` | `DEFAULT_CONTACT_FORM_COPY` | Overrides for the form's fixed strings: `nameLabel` "Name", `namePlaceholder` "Maya Srinivasan", `emailLabel` "Work email", `emailPlaceholder` "maya@northstar.dev", `companyLabel` "Company", `companyPlaceholder` "Northstar Labs", `optionalLabel` " (optional)" (empty hides it), `messageLabel` "Message", `messagePlaceholder` "Share the goal, deadline, and what a great outcome looks like.", `sendingLabel` "Sending…", `sentTitle` "Message sent", `sentMessage` "We'll get back to you within 24 hours.", `sendAnotherLabel` "Send another message ›", `errorFallback` "Couldn't send that. Please try again." |
 | `onSubmit` | `ContactSubmitHandler` | simulated send (resolves after 900ms) | Receives the field values. Resolve to show the sent state; throw, or resolve `{ error }`, to show the message under the form. |
 | `className` | `string` | — | Extra classes on the section. |
 
@@ -55,7 +66,7 @@ Colours: ink `#1d1d1f` / dark `#f5f5f7`; secondary `#6e6e73` / `#a1a1a6`; tertia
 
 ## Demo data
 
-The copy above is the demo content (Northfield studio, Sana Noor quote). There is no autoplay.
+The copy above is the prop defaults (Northfield studio, Sana Noor quote). There is no autoplay.
 
 ## Accessibility
 

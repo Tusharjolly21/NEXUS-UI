@@ -5,12 +5,22 @@ Build a contact section on a white card: on the left a monogram and studio name,
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`, variants, `whileInView`), `lucide-react` (`MessageCircle`) plus inline GitHub and LinkedIn SVG marks, and a `cn` helper.
-- File: `components/blocks/contact-page.tsx`, named export `CenteredContactForm`. Export `ContactFormValues` (`{ name; email; company; message }`, strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`).
+- File: `components/blocks/contact-page.tsx`, named export `CenteredContactForm`. Export `ContactFormValues` (`{ name; email; company; message }`, strings) and `ContactSubmitHandler` (`(values) => Promise<void | { error?: string }>`), plus `ContactDetail`, `CENTERED_CONTACT_DETAILS`, `ContactFormCopy`, `DEFAULT_CONTACT_FORM_COPY` and `CenteredContactFormProps`. All copy below is the prop defaults; every string renders as plain text.
 
 ## API
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
+| `brandName` | `string` | `"Northfield"` | Name beside the monogram (truncates); its first character, upper-cased, fills the monogram. |
+| `title` | `string` | `"Say hello. A real person reads it."` | Large `h2`. |
+| `details` | `ContactDetail[]` (`{ label; value }`) | `CENTERED_CONTACT_DETAILS` (exported; the three rows below) | Rows of the contact list. An empty array hides the list. |
+| `showSocial` | `boolean` | `true` | Show the row of round social links under the form. |
+| `formEyebrow` | `string` | `"Quick hello"` | Small grey label above the form title. |
+| `formTitle` | `string` | `"What can we help with?"` | The form's `h3`. |
+| `formDescription` | `string` | `"Questions, partnerships or a project you want to start. We route every note to the right person."` | Paragraph under the form title. |
+| `buttonLabel` | `string` | `"Start the conversation"` | Submit button text. |
+| `accent` | `string` (hex) | unset | Colours the submit button (hover `brightness(1.1)`), links, field focus (1px inset plus a 3px ring at a 25% mix, 30% in dark), the "Send another message" link and focus outlines through a `--contact-accent` variable set only when passed. Unset keeps the built-in blues: button and outlines `#0071e3` (hover `#0077ed`), links `#0066cc` / dark `#2997ff`, field focus `#0071e3` / dark `#2997ff`. |
+| `formCopy` | `Partial<ContactFormCopy>` | `DEFAULT_CONTACT_FORM_COPY` | Overrides for the form's fixed strings: `nameLabel` "Name", `namePlaceholder` "Maya Srinivasan", `emailLabel` "Work email", `emailPlaceholder` "maya@northstar.dev", `companyLabel` "Company", `companyPlaceholder` "Northstar Labs", `optionalLabel` " (optional)" (empty hides it), `messageLabel` "Message", `messagePlaceholder` "Share the goal, deadline, and what a great outcome looks like.", `sendingLabel` "Sending…", `sentTitle` "Message sent", `sentMessage` "We'll get back to you within 24 hours.", `sendAnotherLabel` "Send another message ›", `errorFallback` "Couldn't send that. Please try again." |
 | `onSubmit` | `ContactSubmitHandler` | simulated send (resolves after 900ms) | Receives the field values. Resolve to show the sent state; throw, or resolve `{ error }`, to show the message under the form. |
 | `className` | `string` | — | Extra classes on the section. |
 
@@ -59,7 +69,7 @@ Colours: ink `#1d1d1f` / dark `#f5f5f7`; secondary `#6e6e73` / `#a1a1a6`; tertia
 
 ## Demo data
 
-The copy above is the demo content. There is no autoplay.
+The copy above is the prop defaults. There is no autoplay.
 
 ## Accessibility
 

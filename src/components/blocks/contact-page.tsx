@@ -689,7 +689,11 @@ export function ContactForm({
   className,
 }: ContactFormProps) {
   const reduce = useReducedMotion();
-  const text = { ...DEFAULT_CONTACT_FORM_COPY, ...copy };
+  const text: ContactFormCopy = { ...DEFAULT_CONTACT_FORM_COPY };
+  // only string overrides win, so an explicit `undefined` keeps the default
+  for (const [key, value] of Object.entries(copy ?? {})) {
+    if (typeof value === "string" && key in text) text[key as keyof ContactFormCopy] = value;
+  }
   const ring = ringFor(accent);
   const uid = React.useId();
   const [fields, setFields] = React.useState({ name: "", email: "", company: "", message: "" });

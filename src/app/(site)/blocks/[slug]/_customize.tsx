@@ -94,10 +94,10 @@ function Playground({ playground, title }: { playground: SectionPlayground; titl
   const [run, setRun] = React.useState(0);
 
   // Only values that differ from the component's defaults are passed (and written into the JSX), so
-  // an untouched accent keeps the component's own light/dark pair.
+  // an untouched accent keeps the component's own light/dark pair. Required props always go through.
   const changed = editable.filter((p) => !Object.is(values[p.name], defaults[p.name]));
   const live: Record<string, unknown> = { ...baseProps };
-  for (const p of changed) live[p.name] = values[p.name];
+  for (const p of editable) if (p.required || changed.includes(p)) live[p.name] = values[p.name];
   if ("autoplay" in values) live.autoplay = values.autoplay;
   // Props that only set where a section starts (defaultX, initialX, autoplay) need a fresh mount to show.
   const startKey = editable
