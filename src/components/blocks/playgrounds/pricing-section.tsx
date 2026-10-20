@@ -10,7 +10,35 @@ import {
   RadioPlanPricing,
   SpotlightPricingCards,
 } from "@/components/blocks/pricing-section";
+import type { PropDoc } from "@/components/library/prop-controls";
 import type { BlockPlaygrounds } from "./types";
+
+// Shared by the three billing-toggle sections (PricingPlanGrid, AdvancedPricingColumns, SpotlightPricingCards)
+const ACCENT_COLOR: PropDoc = {
+  name: "accentColor",
+  type: "string",
+  description: "Buttons, checks, focus rings and highlights. Empty = Apple blue that brightens in dark mode.",
+  defaultValue: '"#0071e3"',
+};
+const DEFAULT_CYCLE: PropDoc = {
+  name: "defaultCycle",
+  type: '"monthly" | "yearly"',
+  description: "Billing period shown on mount.",
+  defaultValue: '"monthly"',
+};
+const SAVINGS_NOTE: PropDoc = {
+  name: "savingsNote",
+  type: "string",
+  description: "Small line under the billing toggle. Empty hides it.",
+  defaultValue: '"Save about 20% when you pay yearly."',
+};
+const SHOW_BILLING_TOGGLE: PropDoc = {
+  name: "showBillingToggle",
+  type: "boolean",
+  description: "Show the Monthly / Yearly toggle. When off, prices stay on defaultCycle.",
+  defaultValue: "true",
+};
+const CLASS_NAME: PropDoc = { name: "className", type: "string", description: "Extra classes on the outer section." };
 
 const PRICING_IMPORT = 'import { RadioPlanPricing } from "@/components/blocks/pricing-section";';
 
@@ -74,19 +102,84 @@ const playgrounds: BlockPlaygrounds = {
   },
   "pricing-four-tier": {
     Component: PricingPlanGrid,
-    props: [],
+    props: [
+      { name: "title", type: "string", description: "Main heading.", defaultValue: '"Plans that grow with your audience"' },
+      {
+        name: "description",
+        type: "string",
+        description: "Paragraph under the heading.",
+        defaultValue:
+          '"Start on the plan that fits the channels you run today. Switch tiers whenever you like and we prorate the difference."',
+      },
+      ACCENT_COLOR,
+      DEFAULT_CYCLE,
+      { name: "featuredBadge", type: "string", description: "Label on the featured card. Empty hides it.", defaultValue: '"Most popular"' },
+      SAVINGS_NOTE,
+      SHOW_BILLING_TOGGLE,
+      {
+        name: "plans",
+        type: "PricingGridPlan[]",
+        description: "Up to 8 cards: label, monthly, yearly (display strings), copy, features, action, featured.",
+        defaultValue: "DEFAULT_PRICING_GRID_PLANS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "PricingPlanGrid",
     importLine: 'import { PricingPlanGrid } from "@/components/blocks/pricing-section";',
   },
   "pricing-advanced-columns": {
     Component: AdvancedPricingColumns,
-    props: [],
+    props: [
+      { name: "title", type: "string", description: "Main heading.", defaultValue: '"Pay for the questions you ask"' },
+      {
+        name: "description",
+        type: "string",
+        description: "Paragraph under the heading.",
+        defaultValue: '"Every plan reads from the same warehouse. Upgrade when you need more seats, history or real-time data."',
+      },
+      ACCENT_COLOR,
+      DEFAULT_CYCLE,
+      { name: "currency", type: "string", description: "Symbol before every amount. Empty hides it.", defaultValue: '"$"' },
+      { name: "ctaPrefix", type: "string", description: 'Button text before the plan name ("Get Team").', defaultValue: '"Get"' },
+      SAVINGS_NOTE,
+      SHOW_BILLING_TOGGLE,
+      { name: "monthlyPeriod", type: "string", description: "Period after the amount when billed monthly.", defaultValue: '"/month"' },
+      { name: "yearlyPeriod", type: "string", description: "Period after the amount when billed yearly.", defaultValue: '"/year"' },
+      {
+        name: "plans",
+        type: "AdvancedPricingPlan[]",
+        description: "Up to 6 columns: label, monthly, yearly (no currency), badge (also makes the button primary), features, inherited.",
+        defaultValue: "DEFAULT_ADVANCED_PRICING_PLANS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "AdvancedPricingColumns",
     importLine: 'import { AdvancedPricingColumns } from "@/components/blocks/pricing-section";',
   },
   "pricing-spotlight-cards": {
     Component: SpotlightPricingCards,
-    props: [],
+    props: [
+      { name: "title", type: "string", description: "Main heading.", defaultValue: '"One assistant, three ways to run it"' },
+      {
+        name: "description",
+        type: "string",
+        description: "Paragraph under the heading.",
+        defaultValue: '"Start on Hobby for free for 14 days. Every plan keeps your history when you move up."',
+      },
+      ACCENT_COLOR,
+      DEFAULT_CYCLE,
+      { name: "featuresHeading", type: "string", description: "Small heading above each feature list. Empty hides it.", defaultValue: '"Includes"' },
+      SAVINGS_NOTE,
+      SHOW_BILLING_TOGGLE,
+      {
+        name: "plans",
+        type: "SpotlightPricingPlan[]",
+        description:
+          'Up to 6 cards: label, copy, monthly, yearly, periodMonthly, periodYearly, action, features, featured (dark card), hidePeriod (default: monthly is "Custom").',
+        defaultValue: "DEFAULT_SPOTLIGHT_PRICING_PLANS",
+      },
+      CLASS_NAME,
+    ],
     jsxName: "SpotlightPricingCards",
     importLine: 'import { SpotlightPricingCards } from "@/components/blocks/pricing-section";',
   },
