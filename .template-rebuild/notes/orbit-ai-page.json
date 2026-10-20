@@ -1,0 +1,64 @@
+{
+ "slug": "orbit-ai-page",
+ "title": "Orbit — five AI agents that review every pull request",
+ "description": "A light, spring-animated landing page for an AI code review product. Five agents (tests, security, performance, style, docs) orbit a pull request card; drag the ring to spin it and whichever agent lands in front reports its finding. A five-step pinned story, an inline-commented diff, a config panel, a 3D review calendar and per-seat pricing follow.",
+ "category": "AI Tools",
+ "tags": [
+  "ai",
+  "developer tools",
+  "code review",
+  "pull requests",
+  "agents",
+  "motion kit",
+  "framer motion",
+  "light"
+ ],
+ "techStack": [
+  "Next.js",
+  "TypeScript",
+  "Tailwind CSS",
+  "Framer Motion"
+ ],
+ "pages": [
+  "/"
+ ],
+ "sections": [
+  "Navigation",
+  "Hero with agent ring",
+  "Stats",
+  "The agents (pinned scroll story)",
+  "The review (diff with inline comments)",
+  "Setup",
+  "Your team's year",
+  "Pricing",
+  "FAQ",
+  "CTA band",
+  "Footer"
+ ],
+ "features": [
+  "Spinnable agent ring with inertia and spring snap, driven by one motion value",
+  "Agents pass behind and in front of the pull request card",
+  "Five agent visuals: test writer, hold-to-override, latency budget ruler, style switches, docs diff",
+  "Unified diff with inline agent comments that keeps indentation",
+  "Liquid dial for answering a comment",
+  "Standing 3D calendar of reviews",
+  "Per-seat odometer pricing",
+  "Reduced-motion aware, hydration-safe, responsive to 390px"
+ ],
+ "pageLabels": [
+  "Hero",
+  "Agents",
+  "Review",
+  "Pricing"
+ ],
+ "accent": "#2563eb",
+ "kitComponents": [
+  "ProgressButton",
+  "HoldToConfirm",
+  "RulerPicker",
+  "AnimatedTabs",
+  "GooeyDial",
+  "StandingCalendar",
+  "PriceOdometer"
+ ]
+}

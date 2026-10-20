@@ -1,0 +1,65 @@
+{
+ "slug": "synapse-ai-platform",
+ "title": "Synapse — a visual builder for AI agents",
+ "description": "A light, spring-animated landing page for a no-code AI agent builder. The whole hero is a dotted canvas: every node drags with its wires following, one connection is missing, and the visitor draws it from the dangling port to unlock Run, which sends a pulse down the flow and reports a test result. A glue-code versus canvas comparison, a build bento, a pinned testing story, a deploy dock and pricing follow.",
+ "category": "AI Tools",
+ "tags": [
+  "ai",
+  "agents",
+  "no-code",
+  "visual builder",
+  "node editor",
+  "motion kit",
+  "framer motion",
+  "light"
+ ],
+ "techStack": [
+  "Next.js",
+  "TypeScript",
+  "Tailwind CSS",
+  "Framer Motion"
+ ],
+ "pages": [
+  "/"
+ ],
+ "sections": [
+  "Navigation",
+  "Hero node canvas",
+  "Glue code vs canvas",
+  "Build bento",
+  "Test (pinned scroll story)",
+  "Deploy dock",
+  "Numbers",
+  "Testimonials",
+  "Pricing",
+  "FAQ",
+  "CTA band",
+  "Footer"
+ ],
+ "features": [
+  "Draggable node canvas whose bezier wires follow through motion values, re-laid out vertically on phones",
+  "Drag-to-connect the missing step (or press Enter on the port), with an elastic wire that springs back if dropped short",
+  "Run sends a pulse along every wire, lights each node in turn and reports a test result",
+  "Before and after slider: a prompt-and-glue file against the same agent as steps",
+  "Liquid add-step dial, design-tool scrub fields and knowledge upload chips",
+  "Voice test orb, run trace, version scores and one-click rollback",
+  "Channel dock that switches deploy targets on, plus a copyable agent ID",
+  "Reduced-motion aware, hydration-safe, responsive to 390px"
+ ],
+ "pageLabels": [
+  "Build",
+  "Test",
+  "Deploy",
+  "Pricing"
+ ],
+ "accent": "#db2777",
+ "kitComponents": [
+  "BeforeAfter",
+  "GooeyDial",
+  "ScrubInput",
+  "UploadChips",
+  "VoiceOrb",
+  "Dock",
+  "CopyButton"
+ ]
+}

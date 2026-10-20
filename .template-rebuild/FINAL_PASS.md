@@ -1,0 +1,6 @@
+- Tally: replace "Blue Bottle" merchant with invented name; remove "a Motion Kit template" footer credit on relay/tally/wayfare/side-b (check others); raise marquee text #a1a1a6 → #6e6e73 (Relay customers, Tally press)
+- helix/orion/synapse import kit-ports/sticky-story.tsx → switch to kit StickyStory, delete kit-ports if unused; asteria/simplistic/nova-studio etc local StickyStory copies can stay (fine) or switch
+- Regenerate all previews without dev badge (tally definitely; check every set for "Compiling"/badge)
+- Detail page /templates/[slug] uses supabase directly → fails closed without env; consider getSessionUser
+- kit captions #86868b on small text (contrast 3.5:1)
+- nova-landing-page type error

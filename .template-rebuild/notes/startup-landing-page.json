@@ -1,0 +1,23 @@
+{
+ "slug": "startup-landing-page",
+ "title": "Aureon — an AI portfolio co-pilot for DIY investors",
+ "description": "A light, spring-animated startup landing page for a portfolio co-pilot that links accounts read-only, looks inside every fund and drafts trades you approve. The hero is a full-width allocation bar that re-splits live as you drag a risk dial, followed by a holdings cluster, a pinned how-it-works story with swipeable trade drafts, a scrubbable retirement planner, ground rules, flat pricing and FAQ.",
+ "category": "Fintech",
+ "tags": ["startup", "fintech", "investing", "portfolio", "ai", "motion kit", "framer motion", "light"],
+ "techStack": ["Next.js", "TypeScript", "Tailwind CSS", "Framer Motion"],
+ "pages": ["/"],
+ "sections": ["Navigation", "Hero with risk dial and allocation band", "Beta stats", "The X-ray (holdings cluster)", "How it works (pinned scroll story)", "What-if planner", "Ground rules", "Pricing and fee math", "FAQ", "CTA band", "Footer"],
+ "features": [
+  "Draggable risk dial that re-splits a full-width allocation bar through springs, driven by motion values",
+  "Live drafted trades and rolling dollar figures that follow the dial",
+  "Holdings bubble cluster that repacks per account",
+  "Swipeable deck of drafted trades with approve and skip",
+  "Hold-to-send order confirmation",
+  "Scrubbable retirement planner with a redrawing area chart",
+  "Radio-card plan picker and animated fee comparison",
+  "Reduced-motion aware, hydration-safe, responsive to 390px"
+ ],
+ "pageLabels": ["X-ray", "How it works", "Planner", "Pricing"],
+ "accent": "#4d7c0f",
+ "kitComponents": ["BubbleCluster", "SwipeStack", "HoldToConfirm", "FolderPeek", "MatrixLoaders", "ScrubInput", "RadioCards", "PriceOdometer"]
+}

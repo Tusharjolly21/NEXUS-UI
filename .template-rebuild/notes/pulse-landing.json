@@ -1,0 +1,62 @@
+{
+ "slug": "pulse-landing",
+ "title": "Pulse — engineering operations for issues, incidents and roadmaps",
+ "description": "A light, spring-animated landing page for an engineering operations platform. In the hero you scrub a playhead along a heartbeat line through the week and the issue board rewinds, cards springing between columns as an incident spikes on Wednesday. A swipeable triage deck, a pinned incident story, a roadmap with rolling initiative progress and a plan picker follow.",
+ "category": "Productivity",
+ "tags": [
+  "engineering",
+  "issue tracker",
+  "incidents",
+  "roadmap",
+  "on-call",
+  "motion kit",
+  "framer motion",
+  "light"
+ ],
+ "techStack": [
+  "Next.js",
+  "TypeScript",
+  "Tailwind CSS",
+  "Framer Motion"
+ ],
+ "pages": [
+  "/"
+ ],
+ "sections": [
+  "Navigation",
+  "Hero with week scrubber and board",
+  "Signals",
+  "Triage deck",
+  "Incident mode (pinned scroll story)",
+  "Roadmap and initiatives",
+  "Pricing",
+  "FAQ",
+  "CTA band",
+  "Footer"
+ ],
+ "features": [
+  "Week scrubber: drag, keys or autoplay replay the board with shared-layout springs",
+  "Heartbeat timeline computed from issue history, with a pausable autoplay",
+  "Swipeable triage deck (accept to cycle or close)",
+  "Hold-to-declare incident, paging status, runbook checklist and postmortem timeline",
+  "Now / Next / Later roadmap with spring progress bars",
+  "Radio-card plan picker",
+  "Reduced-motion aware, hydration-safe, responsive to 390px"
+ ],
+ "pageLabels": [
+  "Hero",
+  "Triage",
+  "Incidents",
+  "Roadmap"
+ ],
+ "accent": "#dc2626",
+ "kitComponents": [
+  "SwipeStack",
+  "HoldToConfirm",
+  "MatrixLoaders",
+  "TodoList",
+  "CopyButton",
+  "StretchNav",
+  "RadioCards"
+ ]
+}

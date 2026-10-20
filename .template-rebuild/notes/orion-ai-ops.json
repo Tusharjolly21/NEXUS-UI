@@ -1,0 +1,66 @@
+{
+ "slug": "orion-ai-ops",
+ "title": "Orion — autonomous incident response inside your guardrails",
+ "description": "A light, spring-animated landing page for an enterprise AI operations platform. The hero is an incident console: drag the autonomy dial (Observe, Suggest, Safe actions, Autonomous) or change the host limit and the same 02:14 incident replays under that rule, with the stage rail, audit trail, time to resolve and people woken updating live. Runbook folders, a pinned governance story, a peelable postmortem, a 3D incident calendar and plan cards follow.",
+ "category": "AI Tools",
+ "tags": [
+  "ai",
+  "ops",
+  "incident response",
+  "sre",
+  "governance",
+  "audit",
+  "motion kit",
+  "framer motion",
+  "light"
+ ],
+ "techStack": [
+  "Next.js",
+  "TypeScript",
+  "Tailwind CSS",
+  "Framer Motion"
+ ],
+ "pages": [
+  "/"
+ ],
+ "sections": [
+  "Navigation",
+  "Editorial hero with incident console",
+  "Proof numbers",
+  "Runbooks",
+  "Governance (pinned scroll story)",
+  "Postmortems",
+  "Incident history",
+  "Testimonials",
+  "Pricing",
+  "FAQ",
+  "CTA band",
+  "Footer"
+ ],
+ "features": [
+  "Autonomy dial with four detents: drag, the knob stretches with speed and snaps on a spring; keyboard arrows work",
+  "Same incident replays under each policy and host limit, with a different outcome and audit trail each time",
+  "Stage rail with a packet that springs between Detect, Diagnose, Plan, Act, Verify and Close",
+  "Runbook folders that peek open, plus a copyable CLI command",
+  "Scope card with capsule toggles, a pausable runbook, a two-person approval and a hash-chained audit trail",
+  "Postmortem draft you peel back to reveal the raw evidence",
+  "Standing 3D calendar of incidents handled",
+  "Reduced-motion aware, hydration-safe, responsive to 390px"
+ ],
+ "pageLabels": [
+  "Runbooks",
+  "Governance",
+  "Postmortems",
+  "Pricing"
+ ],
+ "accent": "#0e7490",
+ "kitComponents": [
+  "CapsuleToggle",
+  "FolderPeek",
+  "CopyButton",
+  "PageCurl",
+  "StandingCalendar",
+  "RadioCards",
+  "MatrixLoaders"
+ ]
+}

@@ -1,0 +1,70 @@
+# Motion Kit components (src/components/templates/kit/components/)
+
+Name | File | What it does | Already used by
+
+- **OTP Input** (`OtpInput.tsx`): A focus ring that glides between boxes, digits that spring in, a shake on a wrong code, and boxes that fold into a confirmation pill. Used by: Tally.
+- **Radio Cards** (`RadioCards.tsx`): The selection ring travels between options while the chosen card grows to reveal what is included. Used by: Relay.
+- **Dynamic Island** (`DynamicIsland.tsx`): One black pill that morphs between a timer, an incoming call and a full player. Size, radius and content all move on a single spring.
+- **Hold to Confirm** (`HoldToConfirm.tsx`): For destructive actions. The fill tracks how long you hold, springs back if you let go, then bursts into a check with an undo timer. Used by: Tally.
+- **Price Odometer** (`PriceOdometer.tsx`): Digits roll like a mechanical counter when the billing period or seat count changes. Columns appear and collapse as the number grows. Used by: Relay.
+- **Before / After** (`BeforeAfter.tsx`): Drag anywhere on the image. The divider follows through a spring, so it trails your finger slightly and settles with weight.
+- **Tilt Pass** (`TiltCard.tsx`): A 3D card that leans toward the pointer, with a glare and an iridescent sheen that track the angle. Click to flip. Used by: Tally.
+- **Toast Stack** (`ToastStack.tsx`): Notifications stack into a deck and fan out on hover. Swipe one sideways to dismiss it. The promise toast resolves in place. Used by: Relay.
+- **Password Strength** (`PasswordStrength.tsx`): Meter bars spring in with color, the strength word rolls over, and each rule draws its own check as it is met. Used by: Tally.
+- **Settings Tabs** (`AnimatedTabs.tsx`): A segmented control whose pill slides between tabs, panels that slide in from the side you came from, and switches whose knob stretches while pressed. Used by: Tally.
+- **Expanding Card** (`ExpandableCard.tsx`): A card that opens into a sheet the way App Store stories do. Title and artwork are shared elements, so nothing jumps. Used by: Wayfare.
+- **Text Reveal** (`TextReveal.tsx`): Words arrive one at a time out of a blur. The last word cycles, and the line reflows smoothly as its width changes.
+- **Stretch Nav** (`StretchNav.tsx`): The active pill reaches for the next item with its leading edge, then the trailing edge catches up. A softer pill follows your hover.
+- **Feedback Pill** (`FeedbackPill.tsx`): A small pill that opens into a feedback card, sends, thanks you, and folds back into the pill. Used by: Relay.
+- **Dock** (`Dock.tsx`): Icons swell as the pointer passes over them and settle as it leaves. Click one and it bounces, then keeps a running dot.
+- **Stagger Menu** (`StaggerMenu.tsx`): The menu grows out of its button, items arrive one after another, and a highlight glides under the pointer. The button confirms what you picked.
+- **Ruler Picker** (`RulerPicker.tsx`): Drag or flick the ruler and it coasts, then snaps to the nearest tick. The number rolls in the direction you moved. Used by: Tally.
+- **Todo List** (`TodoList.tsx`): Tick a task and the line strikes through, then the row sinks away and the completed count bumps. Undo brings it back. Used by: Wayfare.
+- **Upload Chips** (`UploadChips.tsx`): Drop files and each one becomes a chip that fills as it uploads, then swaps its ring for a check.
+- **Animated Icons** (`AnimatedIcons.tsx`): Eight toggles with real state changes: path morphs, masks, clip fills and a like burst that is different every time.
+- **Progress Button** (`ProgressButton.tsx`): The button stretches into its own progress bar while the work runs, then lands on a done state you can act on. Used by: Relay.
+- **Copy Buttons** (`CopyButton.tsx`): An ID chip whose icon turns into a check with a ripple and a tooltip, and a command line whose label rolls to Copied.
+- **Elastic Stepper** (`ElasticStepper.tsx`): Numbers roll up or down with the direction you pressed. Push past the limit and the control gives a little, then pulls back. Used by: Wayfare.
+- **Folder Peek** (`FolderPeek.tsx`): A folder that tips its front open on hover so the files inside fan up and show what is there.
+- **Lanyard Badge** (`LanyardBadge.tsx`): A conference badge on a strap. Grab it and throw it around; it swings back as a damped pendulum and twists with its sideways speed. Used by: Wayfare.
+- **Glass Lens** (`GlassLens.tsx`): A glass puck you drag over content. It magnifies the centre and splits colour toward the rim, built from three offset copies instead of a shader.
+- **ASCII Wake** (`AsciiWake.tsx`): Your pointer leaves a trail of characters that thickens where you linger and thins as it ages. Switch the glyph set, or let it follow the direction you moved.
+- **Liquid Dial** (`GooeyDial.tsx`): Actions bud out of the button like liquid. The highlight is two blobs on different springs, so it pulls into a thread before wrapping the next action.
+- **Voice Orb** (`VoiceOrb.tsx`): One shape for an assistant's four states. Hold it to talk: a dotted ring becomes a glow, a dark thinking sphere, then a churning voice. Used by: Relay, SideB.
+- **Sagging Field** (`SaggingField.tsx`): A text box that bends under the weight of what you type. Letters ride the curve, and the ones that run off the end fall away.
+- **Tear-off Ticket** (`TearTicket.tsx`): Pull the stub and the perforation gives from the top. Let go early and it snaps back; pull through and it hangs on the last tooth, then drops. Used by: Wayfare.
+- **Throw Wheel** (`ThrowWheel.tsx`): Cards on a 3D drum. Throw it and every card turns edge-on and blurs with speed, then they straighten one by one as it snaps to the front. Used by: SideB.
+- **Pixel Select** (`PixelSelect.tsx`): A dropdown that assembles out of pixels in the colour of your mood, and dissolves into a falling shower when you choose.
+- **Scrub Inputs** (`ScrubInput.tsx`): Design-tool number fields. Drag a label sideways to change the value; a badge shows how far you moved, then reports the change when you let go.
+- **Lit Keyboard** (`LitKeyboard.tsx`): A tilted keyboard that lights up under your typing with a slow afterglow. Record a run and replay it with the original timing. Used by: SideB.
+- **Ripple Field** (`RippleField.tsx`): Click anywhere and a ring travels across a grid of dots. Each dot it crosses bursts into colour, gets kicked outward and springs home.
+- **Dot Globe** (`DotGlobe.tsx`): A dotted globe with flight arcs drawing themselves along great circles. Drag to spin it and it coasts; pick a city and it springs round to face you. Used by: Relay, Wayfare.
+- **Component Layers** (`ComponentLayers.tsx`): A finished player card tips into an isometric view and peels apart into surface, spacing, layout and content, each with a leader-line label.
+- **Standing Calendar** (`StandingCalendar.tsx`): A contribution grid that stands up into a 3D field of columns. Each day becomes a box as tall as its count, rising in a wave across the weeks. Used by: SideB.
+- **Money Goo** (`MoneyGoo.tsx`): Drag the amount out of your avatar. A liquid neck stretches, thins and snaps; drop it on a friend and it pours in while both balances roll. Used by: Tally.
+- **Weather Puck** (`WeatherPuck.tsx`): Drag the light across a field of dots. The dots lift and warm near it, and the landscape above relights from dawn to night. Used by: Wayfare.
+- **Metal Orbs** (`MetalOrbs.tsx`): Two liquid-metal blobs that bulge toward each other and pool when they meet. Shaded per pixel with a fake chrome reflection, no WebGL.
+- **Bending Rail** (`BendRail.tsx`): A slider whose rail follows the knob. Pull it off the groove and the rail bends toward you; let go and it twangs straight. Used by: SideB.
+- **Layout Switch** (`LayoutSwitch.tsx`): The same photos glide between grid, row, feature and pile. Nothing fades or cuts. Click a photo and it grows to fill the frame. Used by: Wayfare.
+- **Fan Deck** (`FanDeck.tsx`): A paint-chip deck that tips over and fans into a colour-graded half circle around its rivet. Hover lifts a chip; click copies the hex.
+- **Receipt Unfold** (`ReceiptUnfold.tsx`): Press Get invoice and a folded slip rises out of the row, unfolds panel by panel, and the total gets circled by hand. Used by: Tally.
+- **Page Curl** (`PageCurl.tsx`): Grab the corner and peel. The fold is computed live from your pointer, the flap shows the paper's back, and there is something underneath.
+- **Sign & Seal** (`SignBadge.tsx`): Sign the card with your pointer. Pause, and a clear plastic sleeve slides down over it with a glint running across.
+- **Streak Counter** (`StreakCounter.tsx`): Log a day: the number rolls up, the week slides along, and the flame bursts into embers that fall back in, burning hotter each time. Used by: Tally.
+- **Capsule Toggles** (`CapsuleToggle.tsx`): A ball sealed in a glass capsule. It stretches into a pill mid-flight and takes on the row's colour as it lands.
+- **Glass Bubbles** (`GlassBubbles.tsx`): Glass orbs hanging on threads. Sweep the pointer through them and they swing, knock together and spin before settling back.
+- **Box Spill** (`BoxSpill.tsx`): Open the box and its contents burst out, bounce off each other and pile up on the floor. Pack it up and they fly home.
+- **Curved Reel** (`CurvedReel.tsx`): Posters on the inside of a curve: the centre pinches back, the edges swing round and come forward. It drifts by itself; drag or fling it. Used by: Wayfare.
+- **Squeeze Progress** (`SqueezeProgress.tsx`): Pause and the tip of the progress line bunches into a springy squiggle while the panel warms up. Resume and it stretches back out. Used by: Relay.
+- **Bolting Sliders** (`BoltSliders.tsx`): Click a track and the knob leaps there in an arc, leaving a dotted trail and reading out its value mid-air, then lands with a squash.
+- **Crumple to Trash** (`CrumpleTrash.tsx`): The page scrunches into a ball, arcs into the bin and the lid snaps shut. Undo throws it back out and smooths it flat.
+- **Tape Shelf** (`TapeShelf.tsx`): Cassette cases on a shelf, spine out. Hover slides one up; pick one and it swings round to show its cover with the reels turning. Used by: SideB.
+- **Packet Router** (`PacketRouter.tsx`): Requests flow from a router to four models. Change the strategy and traffic rebalances live while shares and the blended price roll over. Used by: Relay.
+- **Stamp Swirl** (`StampSwirl.tsx`): Postage stamps whose artwork slowly swirls like wet ink. Hover one and it lifts out, swirls harder, and its name appears. Used by: Wayfare.
+- **Bubble Cluster** (`BubbleCluster.tsx`): Contacts packed into one cluster, sized by closeness, with a liquid backdrop. Switch groups and everyone springs to new places.
+- **Sticker Toss** (`StickerToss.tsx`): Peel the logo sticker off the header and throw it. It stretches along its flight path, its text spins faster, then it springs home. Used by: SideB.
+- **Context Meter** (`ContextMeter.tsx`): A token meter drawn as dots. Hover a category to isolate it; compact the chat and its dots fall out while the rest reflow. Used by: Relay.
+- **Mood Wheel** (`MoodWheel.tsx`): Feelings on the rim of a wheel. Drag or scroll it; the word at the centre gets bracketed and the orb melts into its colours. Used by: SideB.
+- **Swipe Stack** (`SwipeStack.tsx`): Payments to review as a deck. Drag right to approve or left to flag; the card tilts, a stamp fades in, the next one rises. Used by: Tally.
+- **Flight Tracker** (`FlightTracker.tsx`): A plane banks along a dotted arc while the flown part fills in. Status and countdown update; expand it for altitude and speed. Used by: Wayfare.
+- **Matrix Loaders** (`MatrixLoaders.tsx`): Six dot-matrix loaders from one pulse. Only the phase offset per dot changes: wave, ripple, spiral, rain, sweep, checker. Used by: Relay.

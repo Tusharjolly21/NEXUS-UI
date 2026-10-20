@@ -1,0 +1,63 @@
+{
+  "slug": "noir-studio",
+  "title": "Nova Studio — Creative Studio for Branding, Motion and Web",
+  "description": "An editorial landing page for an independent creative studio. A giant discipline index with a pointer-following, velocity-tilted reel preview, a curved 3D work reel, a before/after rebrand case study, a pinned services story and a brief you sign by hand.",
+  "category": "Agency",
+  "tags": [
+    "creative studio",
+    "branding",
+    "motion",
+    "portfolio",
+    "editorial",
+    "case study",
+    "motion kit"
+  ],
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "Framer Motion"
+  ],
+  "pages": [
+    "/"
+  ],
+  "sections": [
+    "Navigation",
+    "Hero discipline index with live reel preview",
+    "Selected work reel",
+    "Client marquee",
+    "Case study (before / after)",
+    "Services scroll story",
+    "Studio and team",
+    "Engagements",
+    "Start a project brief",
+    "FAQ",
+    "CTA",
+    "Footer"
+  ],
+  "features": [
+    "Pointer-following preview card that tilts with velocity and plays each discipline's mini reel",
+    "Curved 3D poster reel you can drag and fling",
+    "Before / after rebrand slider with keyboard support",
+    "Pinned scroll story with palette deck, scrub fields, exploding layers and a glass lens",
+    "Project brief with capsule toggles, segmented controls and a hand-signed card",
+    "Hydration-safe, reduced-motion aware, no remote assets"
+  ],
+  "pageLabels": [
+    "Selected work",
+    "Case study",
+    "Studio",
+    "Start a project"
+  ],
+  "accent": "#e11d48",
+  "kitComponents": [
+    "CurvedReel",
+    "BeforeAfter",
+    "FanDeck",
+    "ScrubInput",
+    "ComponentLayers",
+    "GlassLens",
+    "CapsuleToggle",
+    "SignBadge"
+  ]
+}

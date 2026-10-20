@@ -1,0 +1,63 @@
+{
+  "slug": "claura-agency",
+  "title": "Lumis — AI Automation Agency",
+  "description": "A landing page for an agency that builds and runs custom AI agents. The hero is a live workflow canvas: pick a job, watch the agent steps assemble, approve the human step, and drag the nodes while the wires follow. Includes a review-queue process story, case studies, an ROI calculator and a call booking picker.",
+  "category": "Agency",
+  "tags": [
+    "ai agency",
+    "automation",
+    "ai agents",
+    "booking",
+    "roi calculator",
+    "case studies",
+    "motion kit"
+  ],
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "Framer Motion"
+  ],
+  "pages": [
+    "/"
+  ],
+  "sections": [
+    "Navigation",
+    "Hero workflow canvas",
+    "Numbers",
+    "Services",
+    "Process scroll story",
+    "Client results",
+    "ROI calculator and pricing",
+    "Book a call",
+    "FAQ",
+    "CTA",
+    "Footer"
+  ],
+  "features": [
+    "Self-building workflow with draggable nodes, live wires and a human approval step",
+    "Hours-saved counter with rolling digits",
+    "Swipeable review queue for drafted agent actions",
+    "ROI calculator with elastic stepper and ruler picker",
+    "Day and time slot booking with a progress button",
+    "Hydration-safe, reduced-motion aware, no remote assets"
+  ],
+  "pageLabels": [
+    "Services",
+    "Client results",
+    "ROI and pricing",
+    "Book a call"
+  ],
+  "accent": "#a21caf",
+  "kitComponents": [
+    "UploadChips",
+    "MatrixLoaders",
+    "SwipeStack",
+    "StandingCalendar",
+    "ExpandableCard",
+    "ElasticStepper",
+    "RulerPicker",
+    "PriceOdometer",
+    "ProgressButton"
+  ]
+}

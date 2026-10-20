@@ -1,0 +1,66 @@
+{
+  "slug": "saas-launch-aurora",
+  "title": "Aurora — edge deploy platform",
+  "description": "A light, emerald landing page for an edge deploy platform: push once, live in 18 regions in 38 seconds. The hero is a dotted world map where you click any region to push from it and watch the rollout ripple outward while a terminal logs the build. Includes a pipeline bento, canary and rollback controls, a 3D deploy history, a config file and plan picker.",
+  "category": "SaaS",
+  "tags": [
+    "developer tools",
+    "deploy",
+    "edge",
+    "devops",
+    "motion kit",
+    "light",
+    "interactive hero"
+  ],
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "Framer Motion"
+  ],
+  "pages": [
+    "/"
+  ],
+  "sections": [
+    "Navigation",
+    "Hero with rollout map and terminal",
+    "Customer marquee",
+    "Stats",
+    "Pipeline",
+    "Safe rollouts",
+    "Deploy history",
+    "Developers",
+    "Pricing",
+    "Testimonials",
+    "FAQ",
+    "Call to action",
+    "Footer"
+  ],
+  "features": [
+    "Dotted world map generated from continent outlines, identical on server and client",
+    "Click any of 18 regions to push from it; a ring and arcs light regions by distance",
+    "Terminal log, timer and live count driven by one motion value",
+    "Repo folder peek, build log with dot-matrix loaders and deploy notifications",
+    "Canary sliders and a hold-to-roll-back button with undo",
+    "Standing 3D deploy calendar",
+    "Plan radio cards with a springing summary panel",
+    "Reduced-motion aware, keyboard accessible, no horizontal scroll at 390px"
+  ],
+  "pageLabels": [
+    "Pipeline",
+    "Safe rollouts",
+    "Developers",
+    "Pricing"
+  ],
+  "accent": "#059669",
+  "kitComponents": [
+    "FolderPeek",
+    "MatrixLoaders",
+    "ToastStack",
+    "BoltSliders",
+    "HoldToConfirm",
+    "StandingCalendar",
+    "CopyButton",
+    "RadioCards"
+  ]
+}

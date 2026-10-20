@@ -1,0 +1,69 @@
+{
+  "slug": "nexus-ai-launch",
+  "title": "Asteria — AI launch-page builder",
+  "description": "A light, single-accent landing page for an AI tool that turns a one-sentence product idea into a launch page. The hero lets visitors type or pick an idea and watch a real page assemble block by block, followed by a pinned how-it-works story, a notes-versus-draft comparison, publish and export flows, and odometer pricing.",
+  "category": "AI Tools",
+  "tags": [
+    "ai",
+    "landing page",
+    "page builder",
+    "saas",
+    "motion kit",
+    "light",
+    "interactive hero"
+  ],
+  "techStack": [
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "Framer Motion"
+  ],
+  "pages": [
+    "/"
+  ],
+  "sections": [
+    "Navigation",
+    "Hero with live page assembler",
+    "Launch marquee",
+    "Stats",
+    "How it works (pinned scroll story)",
+    "Before and after",
+    "Publish and export",
+    "Pricing",
+    "Testimonials",
+    "FAQ",
+    "Call to action",
+    "Footer"
+  ],
+  "features": [
+    "Type an idea and watch a launch page assemble stage by stage",
+    "Deterministic drafts from typed ideas, with guessed lines flagged",
+    "Tone-of-voice picker that rewrites the sample headline",
+    "Fan-out brand palette with click-to-copy hex",
+    "Design-tool scrub fields on a live mini hero",
+    "Draggable notes-versus-draft comparison",
+    "Publish button that becomes its own progress bar",
+    "Yearly switch with rolling prices",
+    "Hydration-safe pinned scroll story",
+    "Reduced-motion aware, keyboard accessible, no horizontal scroll at 390px"
+  ],
+  "pageLabels": [
+    "How it works",
+    "Before and after",
+    "Publish",
+    "Pricing"
+  ],
+  "accent": "#7c3aed",
+  "kitComponents": [
+    "UploadChips",
+    "PixelSelect",
+    "FanDeck",
+    "ScrubInput",
+    "BeforeAfter",
+    "ProgressButton",
+    "CopyButton",
+    "MatrixLoaders",
+    "AnimatedTabs",
+    "PriceOdometer"
+  ]
+}
