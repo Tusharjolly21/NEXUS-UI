@@ -50,7 +50,7 @@ function Scramble({ text, run, speed = 28, enabled }: { text: string; run: numbe
       last = now;
       n++;
       if (n > total) {
-        setFrame(null);
+        setFrame({ key, value: text });
         return;
       }
       const value = text
@@ -63,7 +63,9 @@ function Scramble({ text, run, speed = 28, enabled }: { text: string; run: numbe
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [run, text, speed, enabled, key]);
-  const shown = frame && frame.key === key ? frame.value : text;
+  // Before the first tick of a run, show the empty start of the decode rather than the answer.
+  const pending = enabled && run > 0;
+  const shown = frame && frame.key === key ? frame.value : pending ? text.replace(/\S/g, "\u00a0") : text;
   return (
     <>
       <span className="sr-only">{text}</span>

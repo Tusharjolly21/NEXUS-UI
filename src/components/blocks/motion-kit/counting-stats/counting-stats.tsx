@@ -148,30 +148,30 @@ export function CountingStats({
   const accentStyle = accent ? ({ "--mk-accent": accent } as CSSProperties) : undefined;
   return (
     <MotionConfig reducedMotion="user">
-    <section
-      style={accentStyle}
-      className={cn(
-        "@container relative w-full bg-black px-4 py-16 [--mk-accent:#0a84ff] sm:px-5 sm:py-20 dark:border-y dark:border-[#1c1c1e]",
-        className,
-      )}
-    >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div
-          className="absolute -top-40 left-1/2 h-[480px] w-[min(900px,100%)] -translate-x-1/2 rounded-full blur-3xl"
-          style={{ background: "radial-gradient(closest-side, color-mix(in srgb, var(--mk-accent) 20%, transparent), transparent)" }}
-        />
-      </div>
-      <div className="relative mx-auto max-w-[1120px]">
-        <h2 className="m-0 mb-10 max-w-[640px] text-balance text-[clamp(32px,5vw,54px)] font-semibold leading-[1.04] tracking-[-0.04em] text-white sm:mb-12">
-          {title}
-        </h2>
-        <div className="grid grid-cols-1 gap-x-10 gap-y-10 @xl:grid-cols-2 @xl:gap-y-12 @5xl:grid-cols-4">
-          {stats.map((stat, i) => (
-            <StatCard key={`${i}-${stat.label}`} stat={stat} index={i} autoplay={autoplay} />
-          ))}
+      <section
+        style={accentStyle}
+        className={cn(
+          "@container relative w-full bg-black px-4 py-16 [--mk-accent:#0a84ff] sm:px-5 sm:py-20 dark:border-y dark:border-[#1c1c1e]",
+          className,
+        )}
+      >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div
+            className="absolute -top-40 left-1/2 h-[480px] w-[min(900px,100%)] -translate-x-1/2 rounded-full blur-3xl"
+            style={{ background: "radial-gradient(closest-side, color-mix(in srgb, var(--mk-accent) 20%, transparent), transparent)" }}
+          />
         </div>
-      </div>
-    </section>
+        <div className="relative mx-auto max-w-[1120px]">
+          <h2 className="m-0 mb-10 max-w-[640px] text-balance text-[clamp(32px,5vw,54px)] font-semibold leading-[1.04] tracking-[-0.04em] text-white sm:mb-12">
+            {title}
+          </h2>
+          <div className="grid grid-cols-1 gap-x-10 gap-y-10 @xl:grid-cols-2 @xl:gap-y-12 @5xl:grid-cols-4">
+            {stats.map((stat, i) => (
+              <StatCard key={`${i}-${stat.label}`} stat={stat} index={i} autoplay={autoplay} />
+            ))}
+          </div>
+        </div>
+      </section>
     </MotionConfig>
   );
 }
