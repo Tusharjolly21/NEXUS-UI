@@ -12,9 +12,16 @@ Build the most restrained logo strip: a small grey line of copy over one row of 
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `title` | `string` | `"Product teams at these companies plan their week with us."` | Small grey line above the row; empty string hides it (and the row's 36px top margin). |
+| `count` | `number` | `6` | How many marks to show from the start of `logos`, clamped 1–12. |
+| `restOpacity` | `number` | `0.55` | Opacity of every mark while nothing is hovered, clamped 0.1–1. |
+| `recedeOpacity` | `number` | `0.22` | Opacity of the other marks while one is hovered, clamped 0–1. |
+| `lift` | `number` | `4` | How far the hovered mark rises, in px, clamped 0–16. |
+| `hoverScale` | `number` | `1.06` | Scale of the hovered mark, clamped 1–1.3. |
+| `logos` | `Logo[]` | `LOGOS` | Marks from `logos.tsx` (`{ name, Icon, color, wordmark? }`). |
 | `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Copy and marks are fixed inside the component.
+Export the props type as `LogoCloudSingleRowProps`. Every prop is optional and the defaults reproduce the section exactly as described below; the hover numbers in "Motion" are these defaults. Text from props renders as plain text.
 
 ## Layout and look
 
@@ -59,7 +66,7 @@ Twelve invented brands (only the first six are used here). `LogoLockup({ logo, t
 
 ## Demo data
 
-The fixed line above and the first six placeholder lockups.
+The default line above and the first six placeholder lockups.
 
 ## Accessibility
 

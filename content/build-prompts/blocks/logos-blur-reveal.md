@@ -12,9 +12,17 @@ Build a logo cloud where monochrome brand lockups rest at half strength. Hoverin
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `title` | `string` | `"The teams behind the products you open every morning."` | Headline. |
+| `subtitle` | `string` | `"Hover a name to bring it into focus."` | Line under the headline; empty string hides it. |
+| `count` | `number` | all logos (12) | How many marks to show, clamped 1–24. |
+| `restOpacity` | `number` | `0.5` | Opacity of every mark while nothing is hovered, clamped 0.1–1. |
+| `recedeOpacity` | `number` | `0.2` | Opacity of the other marks while one is hovered, clamped 0–1. |
+| `recedeBlur` | `number` | `2` | Blur in px on the other marks while one is hovered, clamped 0–8. |
+| `hoverScale` | `number` | `1.06` | Scale of the hovered mark, clamped 1–1.3. |
+| `logos` | `Logo[]` | `LOGOS` | Marks from `logos.tsx` (`{ name, Icon, color, wordmark? }`); first 24 used. |
 | `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Copy and marks are fixed inside the component.
+Export the props type as `LogoCloudBlurProps`. Every prop is optional and the defaults reproduce the section exactly as described below; the focus-state numbers in "Motion" are these defaults. Text from props renders as plain text.
 
 ## Layout and look
 
@@ -61,7 +69,7 @@ Twelve invented brands, so the section never implies a real company is a custome
 
 ## Demo data
 
-The fixed copy above and all twelve placeholder lockups in their listed order.
+The default copy above and all twelve placeholder lockups in their listed order.
 
 ## Accessibility
 

@@ -12,9 +12,16 @@ Build a customer band: an eyebrow and headline over two rows of monochrome brand
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `eyebrow` | `string` | `"Customers"` | Small grey label above the headline; empty string hides it (and the headline's 8px top margin). |
+| `title` | `string` | `"Running in production at 2,400 teams, from two-person studios to public companies."` | Headline. |
+| `speed` | `number` | `34` | Drift speed in px/s for both rows, clamped 5–200. |
+| `rows` | `number` | `2` | `2` splits the list in half (first half moves left, second right); `1` puts every mark in one left-moving row. Clamped 1–2. |
+| `pauseOnHover` | `boolean` | `true` | Pause a row while the pointer is over it. |
+| `fadeEdges` | `boolean` | `true` | Apply the edge mask. |
+| `logos` | `Logo[]` | `LOGOS` | Marks from `logos.tsx` (`{ name, Icon, color, wordmark? }`); first 24 used. |
 | `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Copy, speed and marks are fixed inside the component.
+Export the props type as `LogoCloudMarqueeProps`. Every prop is optional and the defaults reproduce the section exactly as described below. Text from props renders as plain text.
 
 ## Layout and look
 
@@ -50,7 +57,7 @@ Row one is `LOGOS.slice(0, 6)` (Arcwell to fieldnote), row two `LOGOS.slice(6, 1
 ## Motion
 
 - Entrance: a wrapper `motion.div` with `initial="hidden"`, `whileInView="visible"`, `viewport={{ once: true, margin: "-80px" }}`, staggering children 0.08s. Eyebrow, headline and the band each use the "rise" variant: hidden `opacity 0, y 16, blur(6px)` → visible `opacity 1, y 0, blur(0px)`, spring stiffness 240, damping 30. Reduced motion: opacity only, 0.4s.
-- Loops: `<Marquee speed={34} gradient={false} pauseOnHover>` for row one (moves left, the default) and the same with `direction="right"` for row two. Each row renders its six marks twice (`[...row, ...row]`, keys `${name}-${i}`) so the strip is always longer than the viewport and never shows a gap.
+- Loops: `<Marquee speed={speed} gradient={false} pauseOnHover={pauseOnHover}>` (34px/s by default) for row one (moves left, the default) and the same with `direction="right"` for row two (left out when `rows` is 1 or the second half is empty). Each row renders its marks twice (`[...row, ...row]`, keys `${name}-${i}`) so the strip is always longer than the viewport and never shows a gap.
 - Hover colour change is a CSS transition (300ms ease-out), independent of the loop.
 
 ## Interaction and states
@@ -61,7 +68,7 @@ Row one is `LOGOS.slice(0, 6)` (Arcwell to fieldnote), row two `LOGOS.slice(6, 1
 
 ## Demo data
 
-The fixed eyebrow and headline above, and the twelve placeholder lockups split into two rows of six, at 34px/s.
+The default eyebrow and headline above, and the twelve placeholder lockups split into two rows of six, at 34px/s.
 
 ## Accessibility
 

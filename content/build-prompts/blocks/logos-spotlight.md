@@ -13,9 +13,15 @@ Build a partner grid on a raised white panel: twelve monochrome lockups sit dimm
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `title` | `string` | `"Twelve partners, one integration standard."` | Headline. |
+| `subtitle` | `string` | `"Move across the grid to light up each partner."` | Line under the headline; empty string hides it. |
+| `spotlightRadius` | `number` | `240` | Radius of the circle of light in px, clamped 80–600. |
+| `dimOpacity` | `number` | — (25% ink) | Strength of the dim layer, clamped 0–1. Unset keeps the `/25` text colours; when set, dim cells use full ink and wrap the lockup in an `inline-flex` span with this opacity. |
+| `count` | `number` | all logos (12) | How many marks to show, clamped 1–24. |
+| `logos` | `Logo[]` | `LOGOS` | Marks from `logos.tsx` (`{ name, Icon, color, wordmark? }`); first 24 used. |
 | `className` | `string` | — | Merged onto the outer `<section>`. |
 
-Copy, radius and marks are fixed inside the component.
+Export the props type as `LogoCloudSpotlightProps`. Every prop is optional and the defaults reproduce the section exactly as described below. Both grid layers render the same marks. Text from props renders as plain text.
 
 ## Layout and look
 
@@ -52,7 +58,7 @@ Twelve invented brands. `LogoLockup({ logo, tinted = false, className })` render
 ## Motion
 
 - Entrance: wrapper `motion.div` with `initial="hidden"`, `whileInView="visible"`, `viewport={{ once: true, margin: "-80px" }}`, stagger 0.08s. Headline, paragraph and the panel use "rise": hidden `opacity 0, y 16, blur(6px)` → visible `opacity 1, y 0, blur(0px)`, spring stiffness 240, damping 30. Reduced motion: opacity only, 0.4s.
-- Light: raw motion values `mouseX`, `mouseY` start at −9999 (light off-canvas). Springs `x = useSpring(mouseX, { stiffness: 260, damping: 30, mass: 0.6 })`, same for `y`, so the light trails the pointer. The mask string is built with `useMotionTemplate` from the springs; radius constant 240px.
+- Light: raw motion values `mouseX`, `mouseY` start at −9999 (light off-canvas). Springs `x = useSpring(mouseX, { stiffness: 260, damping: 30, mass: 0.6 })`, same for `y`, so the light trails the pointer. The mask string is built with `useMotionTemplate` from the springs; radius `spotlightRadius` (240px by default).
 
 ## Interaction and states
 
@@ -65,7 +71,7 @@ Twelve invented brands. `LogoLockup({ logo, tinted = false, className })` render
 
 ## Demo data
 
-The fixed headline and line above with all twelve placeholder lockups (4×3 on desktop, 3×4 on tablet, 2×6 on phones).
+The default headline and line above with all twelve placeholder lockups (4×3 on desktop, 3×4 on tablet, 2×6 on phones).
 
 ## Accessibility
 

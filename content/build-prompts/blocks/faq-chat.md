@@ -5,13 +5,21 @@ Build an FAQ that plays out as a messaging thread. On the left, a heading and a 
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence` incl. `mode="popLayout"`, `layoutId`, keyframe arrays, `useReducedMotion`), `lucide-react` (`RotateCcw`), and a `cn` helper.
-- File: `components/blocks/faq-folder-card.tsx`, named export `ChatFaqSection`. Uses the shared `FaqItem` type `{ question: string; answer: string; tag?: string }` (tags are ignored here).
+- File: `components/blocks/faq-folder-card.tsx`, named export `ChatFaqSection`, plus the `ChatFaqSectionProps` type and the `CHAT_FAQS` default data. All copy below is the prop defaults. Uses the shared `FaqItem` type `{ question: string; answer: string; tag?: string }` (tags are ignored here).
 
 ## API
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `items` | `FaqItem[]` | six coffee-subscription questions (below) | Each question becomes a chip; the first is selected on mount. |
+| `items` | `FaqItem[]` | `CHAT_FAQS` (exported; six coffee-subscription questions, below) | Each question becomes a chip; the first is selected on mount. |
+| `title` | `string` | `"Ask before your first box."` | Heading on the left. |
+| `description` | `string` | `"Tap a question and the roastery answers. Real replies, usually within minutes."` | Paragraph under the heading. |
+| `eyebrow` | `string` | `""` | Optional 15px semibold label 12px above the heading, `#0066cc` (dark `#2997ff`) or the accent. Empty renders nothing. |
+| `agentName` | `string` | `"Hearth Roasters"` | Name in the chat header; its first character, upper-cased, fills the avatar. |
+| `agentStatus` | `string` | `"Usually replies in minutes"` | Grey line under the name (truncates). |
+| `timestamp` | `string` | `"Today 10:07"` | Centred timestamp above the bubbles. |
+| `typingSeconds` | `number` | `0.9` | How long the typing dots show, clamped to 0–3 (non-numbers fall back to 0.9). 0 skips the dots; reduced motion always does. |
+| `accent` | `string` (hex) | unset | Colours the selected chip pill, the question bubble and focus outlines through a `--faq-accent` variable set on the section only when passed. Unset keeps `#0071e3`. |
 | `className` | `string` | — | Extra classes on the outer `<section>`. |
 
 ## Layout and look
@@ -36,7 +44,7 @@ Build an FAQ that plays out as a messaging thread. On the left, a heading and a 
 - Chip highlight: shared `layoutId` (scoped with `useId`), spring stiffness 380, damping 32. Chips press to `scale 0.97`; the reset button to `0.92`.
 - Question bubble: keyed by the active index in `AnimatePresence mode="popLayout" initial={false}`. Enters from `opacity 0, scale 0.6, y 12`; exits to `opacity 0, y -12, blur(6px)`; spring stiffness 420, damping 30; `transform-origin: 100% 100%` so it grows from its tail.
 - Typing bubble: keyed by index, `AnimatePresence initial={false}`. Starts `opacity 0, scale 0.6`, then keyframes `opacity [0, 1, 1, 0]` and `scale [0.6, 1, 1, 0.9]` at times `[0, 0.2, 0.85, 1]` over 1.05s (`typing 0.9 + 0.15`) after a 0.15s delay; origin `0% 100%`. Each dot loops `opacity [0.35, 1, 0.35]` over 0.9s, infinite, staggered by 0.15s.
-- Answer bubble: keyed by index, `mode="popLayout"`. Enters from `opacity 0, scale 0.85, y 10, blur(6px)`; exits to `opacity 0, y -10, blur(6px)`; spring stiffness 340, damping 30 with a delay of 1.05s (typing 0.9 + 0.15) so it lands as the dots fade. Origin `0% 100%`.
+- Answer bubble: keyed by index, `mode="popLayout"`. Enters from `opacity 0, scale 0.85, y 10, blur(6px)`; exits to `opacity 0, y -10, blur(6px)`; spring stiffness 340, damping 30 with a delay of 1.05s (typing 0.9 + 0.15, i.e. `typingSeconds + 0.15`) so it lands as the dots fade. Origin `0% 100%`.
 
 ## Interaction and states
 

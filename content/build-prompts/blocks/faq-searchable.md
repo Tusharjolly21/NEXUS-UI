@@ -5,13 +5,24 @@ Build a help-centre card: a heading, a search field and a segmented topic contro
 ## Stack
 
 - React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence` with `mode="popLayout"`, `layout`, `layoutId`, `useReducedMotion`), `lucide-react` (`Search`, `Plus`), and a `cn` helper.
-- File: `components/blocks/faq-folder-card.tsx`, named export `SearchableFaqSection`. Uses the shared `FaqItem` type `{ question: string; answer: string; tag?: string }`.
+- File: `components/blocks/faq-folder-card.tsx`, named export `SearchableFaqSection`, plus the `SearchableFaqSectionProps` type and the `SEARCHABLE_FAQS` default data. Uses the shared `FaqItem` type `{ question: string; answer: string; tag?: string }`. All copy below is the prop defaults.
 
 ## API
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `items` | `FaqItem[]` | six help-centre questions (below) | The questions. Each distinct `tag`, in first-seen order, becomes a topic after "All". |
+| `items` | `FaqItem[]` | `SEARCHABLE_FAQS` (exported; six help-centre questions, below) | The questions. Each distinct `tag`, in first-seen order, becomes a topic after the All topic. |
+| `title` | `string` | `"Help centre"` | Card heading. |
+| `description` | `string` | `"Answers about your account, billing and security. Search, or pick a topic."` | Paragraph under the heading. |
+| `eyebrow` | `string` | `""` | Optional 15px semibold label 8px above the heading, in the link/accent colour. Empty renders nothing. |
+| `searchPlaceholder` | `string` | `"Search the help centre"` | Search placeholder and its visually hidden label. |
+| `allLabel` | `string` | `"All"` | Label of the first topic. The "all" topic is tracked separately from tags, so a tag can share its name. |
+| `emptyLabel` | `string` | `"No questions match"` | Start of the empty-state line. |
+| `supportTitle` | `string` | `"Still have questions?"` | Bold footer line. |
+| `supportText` | `string` | `"Our support team replies within four working hours."` | Smaller footer line. |
+| `supportLabel` | `string` | `"Message support ›"` | Footer link text. |
+| `supportHref` | `string` | `"mailto:hello@example.com"` | Footer link target. |
+| `accent` | `string` (hex) | unset | Colours the open toggle, the search focus glow (35% mix), the footer link, the eyebrow and focus outlines through a `--faq-accent` variable set on the section only when passed. Unset keeps `#0071e3`, with the link and eyebrow `#0066cc` (dark `#2997ff`). |
 | `className` | `string` | — | Extra classes on the outer `<section>`. |
 
 ## Layout and look
