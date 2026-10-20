@@ -5,7 +5,7 @@ import { MeteorsDemo } from "@/components/meteors";
 export const metadata: Metadata = createMetadata({
   title: "Meteor effect demo",
   description: "Animated diagonal meteor shower with glowing streak trails for hero sections, cards, and feature banners. Configurable density, speed, and angle in React.",
-  alternates: { canonical: "/demos/meteors" },
+  alternates: { canonical: "/components/meteors" },
 });
 
 export default function MeteorsDemoPage() {

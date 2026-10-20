@@ -64,11 +64,16 @@ type CopyState = "idle" | "loading" | "copied" | "error";
 export function useCopyBuildPrompt(
   slug: string,
   name: string,
-  options: { endpoint?: string; hasAccess?: boolean } = {},
+  /**
+   * Where the prompt comes from (block sections use /api/prompt/blocks/<id>), or options:
+   * `endpoint` plus `hasAccess`, which replaces the site-wide Pro check (templates use it).
+   */
+  options: string | { endpoint?: string; hasAccess?: boolean } = {},
 ): [CopyState, () => void] {
+  const opts = typeof options === "string" ? { endpoint: options } : options;
   const { isPro: sitePro, requestUpgrade } = useProAccess();
-  const isPro = options.hasAccess ?? sitePro;
-  const endpoint = options.endpoint ?? `/api/prompt/${encodeURIComponent(slug)}`;
+  const isPro = opts.hasAccess ?? sitePro;
+  const endpoint = opts.endpoint ?? `/api/prompt/${encodeURIComponent(slug)}`;
   const [state, setState] = React.useState<CopyState>("idle");
 
   React.useEffect(() => {

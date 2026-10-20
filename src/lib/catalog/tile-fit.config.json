@@ -289,6 +289,37 @@
         340
       ],
       "span": 2
+    },
+    "todo-tower": {
+      "focus": [
+        300,
+        170,
+        360,
+        420
+      ],
+      "object": true
+    },
+    "fold-note": {
+      "focus": [
+        300,
+        236,
+        360,
+        236
+      ],
+      "object": true
+    },
+    "seek-search": {
+      "focus": [
+        320,
+        214,
+        340,
+        310
+      ],
+      "object": true
+    },
+    "goo-reorder": {
+      "object": true,
+      "bg": null
     }
   },
   "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."

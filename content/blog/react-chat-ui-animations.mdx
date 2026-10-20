@@ -1,0 +1,234 @@
+---
+title: "React Chat UI Animations: Messages, Typing, Auto-Scroll"
+description: "Animate a React chat UI with Framer Motion: message bubbles that enter cleanly, a typing indicator, grouped messages, auto-scroll, and aria-live support."
+date: "2026-10-20"
+---
+
+Chat interfaces look simple and are full of small decisions. A new message should slide in without making the history jump. The typing indicator should hand over to the real reply without a flicker. The list should follow new messages, unless the user has scrolled up to read something. And screen reader users need to hear new messages without hearing every streamed token. This guide builds an animated React chat UI with Framer Motion and Tailwind CSS, one behaviour at a time. To see the finished effect, the [chat messages component](/components/chat-messages) combines sequential reveal, a typing indicator, and auto-scroll.
+
+## What data does a chat UI need?
+
+Keep the message model small and give every message a stable id. The id becomes the React `key`, which is what lets Framer Motion know which bubble is new and which has merely moved.
+
+```ts
+export type Message = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  /** Unix time in ms, used for grouping. */
+  createdAt: number;
+  /** Set while an assistant reply is still streaming in. */
+  status?: "streaming" | "done";
+};
+```
+
+Never use the array index as the key. When a message is inserted or removed, index keys shift, and every bubble after that point re-animates as if it were new.
+
+## How do you animate new chat messages in React?
+
+Wrap the list in `AnimatePresence` and give each bubble `initial`, `animate`, and `exit` states. Two settings do most of the work:
+
+```tsx
+"use client";
+
+import { AnimatePresence, motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export function MessageList({ messages, typing }: { messages: Message[]; typing: boolean }) {
+  return (
+    <div role="log" aria-label="Conversation" className="relative flex flex-col px-4 py-6">
+      <AnimatePresence initial={false} mode="popLayout">
+        {messages.map((m, i) => {
+          const isUser = m.role === "user";
+          return (
+            <motion.div
+              key={m.id}
+              layout="position"
+              initial={{ opacity: 0, y: 12, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 500, damping: 40 }}
+              style={{ originX: isUser ? 1 : 0, originY: 1 }}
+              className={cn("flex", isUser ? "justify-end" : "justify-start")}
+            >
+              <Bubble message={m} {...groupPosition(messages, i)} />
+            </motion.div>
+          );
+        })}
+        {typing ? <TypingIndicator key="typing" /> : null}
+      </AnimatePresence>
+    </div>
+  );
+}
+```
+
+What each piece is doing:
+
+- **`initial={false}`** on `AnimatePresence` skips the entrance animation for messages already present on first render. Without it, opening a conversation with fifty messages animates all fifty.
+- **`originX` and `originY`** make each bubble grow from the bottom corner on its own side, so user messages appear to come from the right and replies from the left.
+- **`layout="position"`** animates a bubble's position when something above or below it changes, but not its size. That matters for streaming replies.
+- **`mode="popLayout"`** removes an exiting element from the document flow immediately, so the bubble replacing it can take its place while it fades. Framer Motion needs the parent to be positioned for this, hence `relative` on the container.
+
+A spring with high stiffness and damping settles quickly without bouncing, which suits UI that appears many times per session. Save visible overshoot for rare moments.
+
+## How do you build a typing indicator in React?
+
+The typing indicator is three dots animating in sequence. It lives inside the same `AnimatePresence` as the messages, so when the reply arrives, the indicator pops out and the new bubble takes its slot in one motion.
+
+```tsx
+// popLayout measures exiting children through a ref, so pass it to the motion element.
+function TypingIndicator({ ref }: { ref?: React.Ref<HTMLDivElement> }) {
+  return (
+    <motion.div
+      ref={ref}
+      layout="position"
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, transition: { duration: 0.12 } }}
+      className="mt-3 flex w-fit items-center gap-1 rounded-2xl rounded-bl-md bg-zinc-100 px-4 py-3"
+    >
+      <span className="sr-only">Assistant is typing</span>
+      {[0, 1, 2].map((i) => (
+        <motion.span
+          key={i}
+          aria-hidden
+          className="size-1.5 rounded-full bg-zinc-400"
+          animate={{ y: [0, -3, 0], opacity: [0.4, 1, 0.4] }}
+          transition={{ duration: 0.9, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
+        />
+      ))}
+    </motion.div>
+  );
+}
+```
+
+In React 19, `ref` arrives as an ordinary prop; on React 18, wrap the component in `forwardRef` instead. Without it, `popLayout` cannot measure the indicator as it leaves. Keep the exit fast. The user cares about the reply, not the indicator leaving. The dots are `aria-hidden`; the visually hidden text is what assistive technology reads.
+
+Only show the indicator when something is actually happening, such as between sending a request and receiving the first token. Faking a typing delay for instant responses makes the interface feel slower than it is.
+
+## Grouping consecutive messages
+
+Messages from the same sender in quick succession read better as a group: tighter spacing, one avatar, and inner corners that flatten where bubbles touch. Work out each message's position in its group from its neighbours:
+
+```ts
+const GROUP_WINDOW_MS = 2 * 60 * 1000;
+
+export function groupPosition(messages: Message[], i: number) {
+  const m = messages[i];
+  const prev = messages[i - 1];
+  const next = messages[i + 1];
+  const joinsPrev = !!prev && prev.role === m.role && m.createdAt - prev.createdAt < GROUP_WINDOW_MS;
+  const joinsNext = !!next && next.role === m.role && next.createdAt - m.createdAt < GROUP_WINDOW_MS;
+  return { first: !joinsPrev, last: !joinsNext };
+}
+```
+
+Then let `first` and `last` drive spacing and corners:
+
+```tsx
+function Bubble({ message, first, last }: { message: Message; first: boolean; last: boolean }) {
+  const isUser = message.role === "user";
+  return (
+    <div
+      className={cn(
+        "max-w-[75%] rounded-2xl px-4 py-2 text-[15px] leading-relaxed",
+        first ? "mt-3" : "mt-0.5",
+        isUser ? "bg-indigo-600 text-white" : "bg-zinc-100 text-zinc-900",
+        // flatten the corners that face a neighbouring bubble
+        isUser && !first && "rounded-tr-md",
+        isUser && !last && "rounded-br-md",
+        !isUser && !first && "rounded-tl-md",
+        !isUser && !last && "rounded-bl-md",
+      )}
+    >
+      {message.content}
+    </div>
+  );
+}
+```
+
+This depends on `tailwind-merge` keeping `rounded-2xl` alongside a later `rounded-tr-md`, because the second refines one corner of the first. The [cn() utility guide](/blog/cn-utility-tailwind) explains which class combinations merge and which do not. Show the avatar and timestamp only when `last` is true.
+
+Because grouping is calculated from neighbours, a new message changes the previous bubble's `last` value and its corner flattens. That is the behaviour you want, and with `layout="position"` the change happens without any jump.
+
+## How do you auto-scroll a chat to the bottom?
+
+The naive version, scrolling to the bottom on every change, breaks the moment someone scrolls up to reread an earlier answer. The usual rule is to stick to the bottom only if the user was already there, and to always scroll when they send a message themselves.
+
+```tsx
+"use client";
+
+import { useLayoutEffect, useRef, useState } from "react";
+
+export function ChatScroller({ messages, typing }: { messages: Message[]; typing: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const atBottom = useRef(true);
+  const [hasUnseen, setHasUnseen] = useState(false);
+
+  function handleScroll() {
+    const el = ref.current;
+    if (!el) return;
+    atBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+    if (atBottom.current) setHasUnseen(false);
+  }
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const sentByUser = messages.at(-1)?.role === "user";
+    if (atBottom.current || sentByUser) {
+      el.scrollTop = el.scrollHeight;
+    } else {
+      setHasUnseen(true);
+    }
+  }, [messages, typing]);
+
+  return (
+    <div className="relative min-h-0 flex-1">
+      <div ref={ref} onScroll={handleScroll} className="h-full overflow-y-auto overscroll-contain">
+        <MessageList messages={messages} typing={typing} />
+      </div>
+      {hasUnseen ? (
+        <button
+          type="button"
+          onClick={() => ref.current?.scrollTo({ top: ref.current.scrollHeight, behavior: "smooth" })}
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-zinc-950 px-4 py-2 text-sm text-white"
+        >
+          New messages
+        </button>
+      ) : null}
+    </div>
+  );
+}
+```
+
+Some details that are easy to miss:
+
+- **`useLayoutEffect`, not `useEffect`.** It runs after the DOM updates and before the browser paints, so users never see a frame where the new message is below the fold.
+- **Entrance transforms do not change `scrollHeight`.** The bubble's `y` offset and scale are transforms, so the scroll position is correct before the animation finishes.
+- **Use an instant jump while streaming.** Setting `scrollTop` directly keeps up with tokens. Smooth scrolling restarted on every token stutters.
+- **`overscroll-contain`** stops scrolling past the end of the chat from scrolling the page behind it.
+- **Streaming bubbles grow on every token.** With a full `layout` prop, Framer Motion would animate that growth and stretch the text; `layout="position"` lets the size snap while position changes still animate.
+
+## Chat accessibility: aria-live and role="log"
+
+For a chat where messages arrive whole, `role="log"` on the message list is enough. It is a live region with polite announcements by default, so screen readers read each new message once the user is idle, and they announce additions rather than the whole list. The typing indicator's hidden text is read the same way when it appears.
+
+Streaming changes this. A live region announces text changes too, so a streamed reply inside it can be read out in fragments. For streaming chats, leave the visible list without a live role and announce completed replies through a separate hidden region:
+
+```tsx
+const last = messages.at(-1);
+const announcement = last?.role === "assistant" && last.status === "done" ? last.content : "";
+
+<div aria-live="polite" className="sr-only">
+  {announcement}
+</div>
+```
+
+The region must already exist in the DOM, empty, before the text arrives, or some screen readers will miss it. A few more points:
+
+- **Leave focus in the input after sending.** Moving focus to the new message pulls keyboard users away from where they are typing.
+- **Respect reduced motion** by wrapping the chat in `MotionConfig reducedMotion="user"`. Framer Motion then skips transform and layout animations while keeping opacity fades, so the typing dots pulse in place instead of bouncing.
+- **Make the send button a real `button`** inside a `form`, so Enter works without custom key handling. If you use a textarea, handle Enter to submit and Shift+Enter for a new line.
+
+The [Framer Motion in Next.js guide](/blog/framer-motion-nextjs-animations) covers `AnimatePresence` and layout animations in more depth. For finished pieces, start with the [chat messages component](/components/chat-messages), add [emoji reactions](/components/emoji-reactions) to individual messages, and pair it with the [Ask Nexus input](/components/ask-nexus-input) for an AI prompt box.

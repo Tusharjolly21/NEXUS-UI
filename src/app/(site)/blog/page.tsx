@@ -25,7 +25,7 @@ export default async function BlogIndexPage() {
     url: `${siteConfig.url}/blog`,
     publisher: {
       "@type": "Organization",
-      name: siteConfig.name,
+      name: siteConfig.siteName,
       url: siteConfig.url,
       logo: { "@type": "ImageObject", url: `${siteConfig.url}/icon2`, width: 192, height: 192 },
     },

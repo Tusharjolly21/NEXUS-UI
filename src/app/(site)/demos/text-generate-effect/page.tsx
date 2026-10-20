@@ -5,7 +5,7 @@ import { TextGenerateEffectDemo } from "@/components/text-generate-effect";
 export const metadata: Metadata = createMetadata({
   title: "Text generate effect demo",
   description: "Staggered word, character, and line text reveal with blur and upward motion. Smooth entrance effect for headings and body copy in React and Next.js.",
-  alternates: { canonical: "/demos/text-generate-effect" },
+  alternates: { canonical: "/components/text-generate-effect" },
 });
 
 export default function TextGenerateEffectDemoPage() {

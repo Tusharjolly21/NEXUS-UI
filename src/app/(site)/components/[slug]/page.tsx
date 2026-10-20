@@ -9,6 +9,8 @@ import {
 } from "@/lib/catalog/library-components";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
+import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
+import { getGuidesForComponent } from "@/lib/blog";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { allGalleryItems, hasBuildPrompt } from "@/lib/catalog/gallery-items";
@@ -89,6 +91,11 @@ async function getRegistryInstallInfo(
   }
 }
 
+/** JSON for a <script> tag: escape "<" so text can never close the tag early. */
+function jsonLdSafe(value: unknown) {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
 export function generateStaticParams() {
   return libraryComponents.map((c) => ({ slug: c.slug }));
 }
@@ -101,7 +108,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return createMetadata({
     title: seo?.title ?? `${item.name} — Animated React Component`,
     description: seo?.description ?? item.description,
-    openGraph: { title: `${item.name} · ${siteConfig.name}` },
+    openGraph: { title: `${item.name} · ${siteConfig.siteName}` },
     alternates: { canonical: `/components/${item.slug}` },
   });
 }
@@ -156,6 +163,15 @@ export default async function ComponentDetailPage({ params }: Props) {
     ],
   };
 
+  const faq = COMPONENT_FAQ[item.slug] ?? [];
+  const faqJsonLd = faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      }
+    : null;
+
   const galleryItems = allGalleryItems();
   const self = galleryItems.find((g) => g.slug === slug);
   const related = self ? galleryItems.filter((g) => g.group === self.group && g.slug !== slug).slice(0, 4) : [];
@@ -176,6 +192,9 @@ export default async function ComponentDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {faqJsonLd ? (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdSafe(faqJsonLd) }} />
+      ) : null}
       <ComponentDetailPageClient
         slug={slug}
         isPremium={isPremium}
@@ -197,6 +216,8 @@ export default async function ComponentDetailPage({ params }: Props) {
         serializedPreviewSections={serializedPreviewSections}
         tint={self?.tint}
         related={related}
+        faq={faq}
+        guides={getGuidesForComponent(item.slug)}
       />
     </>
   );

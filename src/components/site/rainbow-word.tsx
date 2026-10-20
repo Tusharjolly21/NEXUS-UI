@@ -23,7 +23,7 @@ export function rainbowColor(t: number) {
 /**
  * One word or short line set as a continuous spectrum, each letter sampled from it so the
  * letters can still drop in one by one. Use at most once per page.
- * Letters are server-rendered (visible without JS); screen readers get the plain text.
+ * Letters are server-rendered (visible without JS) and read as one word.
  */
 export function RainbowWord({
   children,
@@ -38,12 +38,13 @@ export function RainbowWord({
   const chars = Array.from(children);
   const last = Math.max(1, chars.length - 1);
   return (
+    // The letters are the only copy of the word: a separate screen-reader copy made search engines
+    // read headings twice ("ImageImage Trail"). Inline spans read as one word.
     <span className={cn("whitespace-nowrap", className)}>
-      <span className="sr-only">{children}</span>
-      <span aria-hidden>
+      <span>
         {chars.map((char, i) =>
           char === " " ? (
-            <span key={i}>&nbsp;</span>
+            <span key={i}> </span>
           ) : (
             <span
               key={i}

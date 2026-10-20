@@ -26,11 +26,11 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com https://app.lemonsqueezy.com ${adsenseScriptHosts}`,
+      `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://va.vercel-scripts.com https://www.gstatic.com https://app.lemonsqueezy.com https://static.cloudflareinsights.com ${adsenseScriptHosts}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       `img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://cdn.simpleicons.org https://*.google-analytics.com https://*.googletagmanager.com ${adsenseBeaconHosts}`,
       "font-src 'self' https://fonts.gstatic.com",
-      `connect-src 'self' blob: https://cdn.jsdelivr.net https://*.supabase.co https://api.lemonsqueezy.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com ${adsenseBeaconHosts}`,
+      `connect-src 'self' blob: https://cdn.jsdelivr.net https://*.supabase.co https://api.lemonsqueezy.com https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com https://cloudflareinsights.com ${adsenseBeaconHosts}`,
       "worker-src 'self' blob:",
       `frame-src 'self' https://*.lemonsqueezy.com https://checkout.stripe.com ${adsenseFrameHosts}`,
       "frame-ancestors 'self'",
@@ -62,6 +62,15 @@ const nextConfig = {
     // Template build prompts: outside public/, only read by this gated route.
     "/api/prompt/template/[slug]": ["./content/build-prompts/templates/*.md"],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
+    "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
+    // Component pages list the guides that link to them.
+    "/components/[slug]": ["./content/blog/*.mdx"],
+    // Block pages read section source at request time (only for sessions allowed to see it).
+    "/blocks/[slug]": [
+      "./src/components/blocks/**/*.{ts,tsx}",
+      "./src/components/{interactive-dots,layered-wave-background,particle-noise,wavy-lines}/**/*.{ts,tsx}",
+      "./src/app/globals.css",
+    ],
     "/components/[slug]": ["./.generated/registry/**/*.json"],
     // Pro build prompts live outside public/ and are only read by this gated route.
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
@@ -81,6 +90,15 @@ const nextConfig = {
   // Section roots without their own page — Search Console reported these as 404s.
   async redirects() {
     return [
+      // The project's production vercel.app address serves the same site; send it to the one
+      // canonical host so search engines never index a second copy. (Preview deployments use other
+      // hostnames and are unaffected.)
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "nexus-ui-olive.vercel.app" }],
+        destination: "https://www.nexus-ui.com/:path*",
+        permanent: true,
+      },
       { source: "/docs", destination: "/docs/introduction", permanent: true },
       { source: "/demos", destination: "/components", permanent: true },
       { source: "/Nexus", destination: "/", permanent: true },

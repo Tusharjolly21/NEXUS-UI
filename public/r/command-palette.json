@@ -3,7 +3,7 @@
   "name": "command-palette",
   "type": "registry:component",
   "title": "Command Palette",
-  "description": "Animated command palette with ⌘K shortcut, grouped navigation/actions/theme commands, backdrop blur overlay, and Framer Motion enter/exit transitions.",
+  "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions.",
   "dependencies": [
     "framer-motion",
     "lucide-react",

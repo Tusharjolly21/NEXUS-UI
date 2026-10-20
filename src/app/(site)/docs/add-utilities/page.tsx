@@ -12,10 +12,11 @@ import {
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  // Searchers arrive asking what cn() is and how clsx and tailwind-merge differ — lead with that.
-  title: "cn() in Tailwind: clsx + tailwind-merge Setup",
+  // The long explainer ("what is cn()", clsx vs tailwind-merge) lives in the blog guide; this page is
+  // the setup step, so the two don't compete for the same searches.
+  title: "Set Up the cn() Helper: clsx + tailwind-merge",
   description:
-    "What cn() is in Tailwind CSS, how clsx and tailwind-merge differ, and how to set up the cn() helper in Next.js — the className utility every Nexus UI component uses.",
+    "Install clsx and tailwind-merge and add the cn() helper to lib/utils.ts in a Next.js project: the className utility every Nexus UI component imports.",
   alternates: { canonical: "/docs/add-utilities" },
 });
 
@@ -50,7 +51,7 @@ export default function AddUtilitiesPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <TechArticleJsonLd
-        title="cn() in Tailwind: clsx + tailwind-merge Setup"
+        title="Set Up the cn() Helper: clsx + tailwind-merge"
         description="Install clsx, tailwind-merge, and a cn() helper — the same composition pattern Nexus UI uses across components."
         slug="add-utilities"
       />
@@ -61,6 +62,13 @@ export default function AddUtilitiesPage() {
         />
 
         <DocSection title="What is cn() in Tailwind?">
+          <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
+            New to it? The{" "}
+            <Link href="/blog/cn-utility-tailwind" className="font-medium text-link hover:underline">
+              cn() guide
+            </Link>{" "}
+            explains clsx vs tailwind-merge in depth, with the mistakes that silently drop classes.
+          </p>
           <p className="text-sm leading-relaxed text-muted-foreground">
             <code className={docInlineCodeClass}>cn()</code> is not part of Tailwind CSS — it is a
             two-line helper that most React + Tailwind codebases (and every shadcn/ui project) keep in{" "}

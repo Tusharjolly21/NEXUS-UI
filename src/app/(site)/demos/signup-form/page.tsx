@@ -5,7 +5,7 @@ import { SignupFormDemo } from "@/components/signup-form";
 export const metadata: Metadata = createMetadata({
   title: "Signup form demo",
   description: "Animated signup and auth form built with shadcn/ui inputs, Framer Motion micro-interactions, and accessible error handling. Drop into any Next.js project.",
-  alternates: { canonical: "/demos/signup-form" },
+  alternates: { canonical: "/components/signup-form" },
 });
 
 export default function SignupFormDemoPage() {

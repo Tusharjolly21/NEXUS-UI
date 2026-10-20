@@ -36,21 +36,24 @@ import { cn } from "@/lib/utils";
 /*  Data                                                                      */
 /* -------------------------------------------------------------------------- */
 
-type NavItem = {
+export type SimpleSidebarItem = {
   id: string;
   label: string;
   icon: LucideIcon;
+  /** Small count on the right of the row (read out as "unread"). */
   badge?: string;
+  /** The row selected on first render (the first item if none is marked). */
   active?: boolean;
 };
 
-type NavSection = {
+export type SimpleSidebarSection = {
   id: string;
   title: string;
-  items: NavItem[];
+  items: SimpleSidebarItem[];
 };
 
-const SECTIONS: NavSection[] = [
+/** The default navigation: a Workspace and a Resources group. */
+export const SIMPLE_SIDEBAR_SECTIONS: SimpleSidebarSection[] = [
   {
     id: "workspace",
     title: "Workspace",
@@ -79,8 +82,9 @@ const SECTIONS: NavSection[] = [
   },
 ];
 
-const ALL_ITEMS = SECTIONS.flatMap((section) => section.items);
-const INITIAL_ID = ALL_ITEMS.find((item) => item.active)?.id ?? ALL_ITEMS[0].id;
+function initialId(items: SimpleSidebarItem[]) {
+  return items.find((item) => item.active)?.id ?? items[0]?.id ?? "";
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Motion                                                                    */
@@ -92,7 +96,7 @@ const PANEL: Transition = { type: "spring", stiffness: 260, damping: 32 };
 const INSTANT: Transition = { duration: 0 };
 
 const focusRing =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--sb-accent,#0071e3)]";
 
 /** Switches to the overlay layout when the block itself (not the window) is narrow. */
 function useCompact(ref: React.RefObject<HTMLElement | null>, breakpoint = 640) {
@@ -133,7 +137,7 @@ function SidebarRow({
   highlightId,
   onSelect,
 }: {
-  item: NavItem;
+  item: SimpleSidebarItem;
   selected: boolean;
   highlightId: string;
   onSelect: () => void;
@@ -158,7 +162,7 @@ function SidebarRow({
         <motion.span
           layoutId={highlightId}
           transition={HIGHLIGHT}
-          className="absolute inset-0 rounded-[10px] bg-[#0071e3] shadow-[0_1px_2px_rgba(0,0,0,.12),inset_0_.5px_0_rgba(255,255,255,.2)]"
+          className="absolute inset-0 rounded-[10px] bg-[var(--sb-accent,#0071e3)] shadow-[0_1px_2px_rgba(0,0,0,.12),inset_0_.5px_0_rgba(255,255,255,.2)]"
         />
       )}
       <Icon
@@ -166,7 +170,7 @@ function SidebarRow({
         strokeWidth={1.75}
         className={cn(
           "relative size-4 shrink-0 transition-colors duration-150",
-          selected ? "text-white" : "text-[#0071e3] dark:text-[#2997ff]",
+          selected ? "text-white" : "text-[var(--sb-accent,#0071e3)] dark:text-[var(--sb-accent,#2997ff)]",
         )}
       />
       <span className="relative min-w-0 flex-1 truncate">{item.label}</span>
@@ -246,13 +250,14 @@ function Monogram({ name, className }: { name: string; className?: string }) {
     >
       {name
         .split(" ")
-        .map((part) => part[0])
-        .join("")}
+        .map((part) => part.charAt(0))
+        .join("")
+        .slice(0, 2)}
     </span>
   );
 }
 
-function DashboardCanvas() {
+function DashboardCanvas({ greeting, dateLabel }: { greeting: string; dateLabel: string }) {
   const reduce = useReducedMotion();
   const max = Math.max(...REVENUE);
 
@@ -260,9 +265,9 @@ function DashboardCanvas() {
     <div className="@container flex h-full flex-col gap-3 overflow-hidden px-4 pb-4">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">Tuesday, 14 October</p>
+          <p className="text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">{dateLabel}</p>
           <h3 className="truncate text-[22px] font-semibold leading-[1.1] tracking-[-0.025em]">
-            Good morning, Alex
+            {greeting}
           </h3>
         </div>
         <span className="shrink-0 rounded-full bg-[#e8e8ed] px-3 py-1 text-[12px] font-medium dark:bg-[#2c2c2e]">
@@ -308,7 +313,7 @@ function DashboardCanvas() {
                   transition={{ type: "spring", stiffness: 260, damping: 30, delay: i * 0.03 }}
                   className={cn(
                     "w-full origin-bottom rounded-[5px]",
-                    i === REVENUE.length - 1 ? "bg-[#0071e3]" : "bg-[#e8e8ed] dark:bg-[#3a3a3c]",
+                    i === REVENUE.length - 1 ? "bg-[var(--sb-accent,#0071e3)]" : "bg-[#e8e8ed] dark:bg-[#3a3a3c]",
                   )}
                   style={{ height: `${(v / max) * 100}%` }}
                 />
@@ -353,23 +358,62 @@ function DashboardCanvas() {
 /* -------------------------------------------------------------------------- */
 
 export type SimpleSidebarProps = {
+  /** Workspace name in the sidebar header; its first letter fills the logo tile. */
+  workspaceName?: string;
+  /** Account name in the footer; its initials fill the monogram. */
+  userName?: string;
+  /** Line under the account name. */
+  userEmail?: string;
+  /** Dashboard headline. */
+  greeting?: string;
+  /** Small line above the headline. */
+  dateLabel?: string;
+  /**
+   * Hex colour for the selection pill, row icons, focus ring and the latest revenue bar.
+   * Left unset (or at #0071e3), the block keeps its own blue, and the icons turn #2997ff in dark mode.
+   */
+  accent?: string;
+  /** Frame width in px below which the sidebar becomes a slide-over drawer (0-2000). */
+  compactBreakpoint?: number;
+  /** Navigation groups and rows. Mark one item `active` to start on it. */
+  sections?: SimpleSidebarSection[];
+  /** Merged onto the 560px frame (e.g. another height or radius). */
   className?: string;
 };
 
-export default function SimpleSidebar({ className }: SimpleSidebarProps = {}) {
+export default function SimpleSidebar({
+  workspaceName = "Nexus Labs",
+  userName = "Alex Morgan",
+  userEmail = "alex@nexuslabs.io",
+  greeting = "Good morning, Alex",
+  dateLabel = "Tuesday, 14 October",
+  accent,
+  compactBreakpoint = 640,
+  sections = SIMPLE_SIDEBAR_SECTIONS,
+  className,
+}: SimpleSidebarProps = {}) {
   const scope = React.useId();
   const rootRef = React.useRef<HTMLDivElement>(null);
-  const { compact, ready } = useCompact(rootRef);
-  const [selected, setSelected] = React.useState(INITIAL_ID);
+  const breakpoint = Number.isFinite(compactBreakpoint) ? Math.min(2000, Math.max(0, compactBreakpoint)) : 640;
+  const { compact, ready } = useCompact(rootRef, breakpoint);
+  const navSections = Array.isArray(sections) ? sections : [];
+  const allItems = navSections.flatMap((section) => section.items ?? []);
+  const [selected, setSelected] = React.useState(() => initialId(allItems));
   const [menuOpen, setMenuOpen] = React.useState(false);
 
   const open = compact && menuOpen;
-  const current = ALL_ITEMS.find((item) => item.id === selected) ?? ALL_ITEMS[0];
+  const current = allItems.find((item) => item.id === selected) ?? allItems[0];
+  const logoLetter = workspaceName.trim().charAt(0).toUpperCase();
+  // The default blue counts as "not set", so the built-in dark-mode tint stays.
+  const accentColor = accent?.trim();
+  const customAccent = accentColor && accentColor.toLowerCase() !== "#0071e3" ? accentColor : undefined;
+  const style = customAccent ? ({ "--sb-accent": customAccent } as React.CSSProperties) : undefined;
 
   return (
     <MotionConfig reducedMotion="user">
       <div
         ref={rootRef}
+        style={style}
         onKeyDown={(event) => {
           if (event.key === "Escape") setMenuOpen(false);
         }}
@@ -408,10 +452,10 @@ export default function SimpleSidebar({ className }: SimpleSidebarProps = {}) {
         >
           <div className="flex items-center gap-2.5 px-4 pb-2 pt-3.5">
             <span className="grid size-7 shrink-0 place-items-center rounded-[8px] bg-[#1d1d1f] text-[12px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
-              N
+              {logoLetter}
             </span>
             <span className="min-w-0 flex-1 truncate text-[14px] font-semibold tracking-[-0.01em]">
-              Nexus Labs
+              {workspaceName}
             </span>
             {compact && (
               <motion.button
@@ -433,13 +477,13 @@ export default function SimpleSidebar({ className }: SimpleSidebarProps = {}) {
             aria-label="Main"
             className="min-h-0 flex-1 overflow-y-auto px-2 pb-2 [scrollbar-width:none]"
           >
-            {SECTIONS.map((section, index) => (
+            {navSections.map((section, index) => (
               <div key={section.id} className={index === 0 ? "mt-1" : "mt-4"}>
                 <p className="px-2.5 pb-1 text-[11px] font-semibold text-[#86868b] dark:text-[#98989d]">
                   {section.title}
                 </p>
                 <ul className="flex flex-col gap-px">
-                  {section.items.map((item) => (
+                  {(section.items ?? []).map((item) => (
                     <li key={item.id}>
                       <SidebarRow
                         item={item}
@@ -466,11 +510,11 @@ export default function SimpleSidebar({ className }: SimpleSidebarProps = {}) {
                 focusRing,
               )}
             >
-              <Monogram name="Alex Morgan" className="size-8 text-[11px]" />
+              <Monogram name={userName} className="size-8 text-[11px]" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-medium">Alex Morgan</span>
+                <span className="block truncate text-[13px] font-medium">{userName}</span>
                 <span className="block truncate text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">
-                  alex@nexuslabs.io
+                  {userEmail}
                 </span>
               </span>
               <ChevronsUpDown aria-hidden className="size-4 shrink-0 text-[#86868b]" strokeWidth={1.75} />
@@ -495,10 +539,10 @@ export default function SimpleSidebar({ className }: SimpleSidebarProps = {}) {
                 <Menu className="size-[18px]" strokeWidth={1.75} />
               </motion.button>
             )}
-            <SwapTitle title={current.label} />
+            <SwapTitle title={current?.label ?? ""} />
           </header>
           <div className="min-h-0 flex-1">
-            <DashboardCanvas />
+            <DashboardCanvas greeting={greeting} dateLabel={dateLabel} />
           </div>
         </div>
       </div>

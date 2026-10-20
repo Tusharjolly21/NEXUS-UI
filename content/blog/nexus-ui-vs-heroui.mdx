@@ -1,0 +1,117 @@
+---
+title: "Nexus UI vs HeroUI (formerly NextUI)"
+description: "HeroUI, formerly NextUI, is a full React design system. Nexus UI is copy-paste animated components, blocks and templates. How they differ and which to pick."
+date: "2026-10-20"
+---
+
+If you search for NextUI today, you end up at HeroUI. The library was renamed, and in 2026 it shipped a ground-up rewrite. Nexus UI is a different kind of tool: a catalogue of animated React components, section blocks and full-page templates that you install as source code. Both use React and Tailwind CSS, so people compare them, but they solve different problems, and many projects can use both.
+
+## From NextUI to HeroUI
+
+HeroUI is the new name for NextUI. The team gave two reasons: the library had grown beyond Next.js to the wider React ecosystem (Vite, Remix, Astro, Laravel), and they wanted to avoid any suggestion that it was built by the Next.js team. The packages moved from the `@nextui-org` scope to `@heroui`, so `@nextui-org/react` became `@heroui/react` and `nextui-cli` became `heroui-cli`. The rename itself brought no breaking changes, and no new fixes or features ship to the old `@nextui-org` packages.
+
+## What HeroUI is today
+
+HeroUI v3 reached stable in March 2026 as a complete rewrite:
+
+- **Foundations.** Built on React Aria Components for accessibility and Tailwind CSS v4 for styling, with CSS-first theming using OKLCH colour tokens and CSS variables.
+- **Scope.** More than 75 web components, plus a separate React Native library (`heroui-native`) with 37 components.
+- **API.** Compound components, with no provider wrapper. Animations moved to CSS, with no JavaScript animation runtime.
+- **Install.** Two npm packages, `@heroui/styles` and `@heroui/react`, with the styles imported after Tailwind in your global CSS. React 19 and Tailwind CSS v4 are required.
+- **Licence.** Apache 2.0, free for commercial use.
+- **Paid tier.** HeroUI Pro adds Pro components, premium templates and AI tooling, sold as a perpetual licence with optional yearly renewals for updates.
+- **Pace.** Minor releases roughly monthly. The latest at the time of writing is v3.2.6, from September 17, 2026.
+
+HeroUI is often summed up as "a component kit you wrap in a theme provider." That described earlier versions; v3 dropped the provider and themes through CSS. The model is the same, though: HeroUI is a design system you depend on as a package, with one consistent API across buttons, inputs, selects, modals, tabs, calendars and more.
+
+## What Nexus UI is
+
+Nexus UI is a library of animated components, landing page blocks and Next.js templates built with React 19, Next.js, Tailwind CSS v4 and Framer Motion. It does not ship as a runtime package. Each item installs as source files through the shadcn CLI and the `@nexus-labs` registry:
+
+```bash
+npx shadcn@latest add @nexus-labs/animated-tabs
+```
+
+The CLI writes the files into your project and installs dependencies such as `framer-motion`. After that the code is yours.
+
+The catalogue currently has:
+
+- **More than 170 components**, over 100 of them free with full source for personal, commercial and client work.
+- **15 section blocks** (pricing, hero, features, FAQ, navigation and more), several with multiple variants.
+- **18 full-page templates** for SaaS, AI startups, agencies and portfolios. Anyone can preview them; the source comes with Pro.
+
+The style leans toward Apple-like interaction design: segmented controls with a sliding thumb, springy switches, a Dynamic Island, slide-to-confirm. The [animated tabs](/components/animated-tabs) component is a good example. Many component pages include a live playground where you set props and copy matching JSX, and Pro members get build prompts: written briefs an AI coding agent can follow to rebuild a component from scratch.
+
+The free tier is free forever, Pro is $49.99 a year, and All-Access unlocks the same content for a one-time $79.99. See [pricing](/pricing) for details.
+
+## Two different philosophies
+
+The core difference is **dependency versus ownership**.
+
+With HeroUI, you install a versioned package. You get consistent behaviour across every component, accessibility from React Aria, and upgrades through npm. The trade-off is that you work inside its API and theming model, and major versions need migrating: v2 and v3 cannot run side by side in one project.
+
+With Nexus UI, you copy source into your project. You can change anything, and each component stands alone. The trade-off is that you maintain the code you install, and Nexus UI does not try to be a complete design system. It has no data table, and its inputs are standalone interactions rather than a uniform form toolkit.
+
+The other difference is **what each library is for**. HeroUI covers the everyday building blocks of an application. Nexus UI covers the moments that make a product feel crafted: hero sections, motion effects, interactive cards, pricing sections and complete [templates](/templates) for launch pages.
+
+## Side-by-side comparison
+
+<div className="mt-6 overflow-x-auto rounded-[20px] border border-border text-[15px] leading-[1.55] text-body [&_table]:w-full [&_table]:border-collapse [&_th]:bg-muted [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:align-bottom [&_th]:font-semibold [&_th]:text-foreground [&_td]:border-t [&_td]:border-border [&_td]:px-4 [&_td]:py-3 [&_td]:align-top">
+
+| | HeroUI (v3) | Nexus UI |
+|---|---|---|
+| What it is | Full design system for app UI | Animated components, blocks and templates |
+| Install | npm packages (`@heroui/react`, `@heroui/styles`) | Source files via the shadcn CLI (`@nexus-labs/<name>`) |
+| Who owns the code | The package; you upgrade it | You; the files live in your repo |
+| Accessibility base | React Aria Components | Per component, hand-written |
+| Animation | CSS, no JS runtime | Framer Motion |
+| Styling | Tailwind CSS v4, CSS-variable theming | Tailwind CSS v4 utility classes |
+| React Native | Yes, `heroui-native` | No |
+| Licence and price | Apache 2.0, free; HeroUI Pro is paid | Free tier; Pro $49.99/year or All-Access $79.99 once |
+| Templates | Premium templates in HeroUI Pro | 18 Next.js templates with Pro |
+
+</div>
+
+## When HeroUI is the better choice
+
+Pick HeroUI when you are building an application rather than a marketing site. If your screens are mostly forms, menus, dialogs and settings, you want one consistent component API with keyboard handling and screen reader support built in. React Aria gives HeroUI a strong accessibility base, and Nexus UI does not try to replace that.
+
+HeroUI is also the better fit if:
+
+- You want one design system that looks the same everywhere, and you would rather upgrade a package than maintain component code.
+- You ship to mobile as well as web, since `heroui-native` shares the design language.
+- You want every component under an open-source licence (Apache 2.0), with no paid tier needed.
+- Your team works from Figma; HeroUI offers a Figma kit that matches its components.
+
+## When Nexus UI is the better choice
+
+Pick Nexus UI when the job is making a page feel alive: a launch site, a SaaS landing page, a portfolio or a product tour. Its strength is motion detail, and owning the source means you can tune timings, springs and colours without fighting a theme.
+
+Nexus UI is also the better fit if:
+
+- You already use shadcn/ui and want animated pieces that install the same way.
+- You want ready-made [landing page blocks](/blocks) or a complete template rather than assembling sections yourself.
+- You use an AI coding agent and want build prompts that describe exactly how a component should look and move.
+
+## Can you use both?
+
+Yes, and for a typical SaaS product it is a sensible split: HeroUI for the signed-in app, Nexus UI for the marketing site and the occasional standout interaction inside the app. A few practical notes:
+
+1. **Both use Tailwind CSS v4**, so there is no version conflict. Import HeroUI's styles right after Tailwind in your global CSS.
+2. **Check your design tokens.** HeroUI themes through CSS variables, and `npx shadcn@latest init` writes CSS variables too. After setting up both, read through `globals.css` and make sure the names do not overlap.
+3. **Expect two animation approaches.** HeroUI animates with CSS and Nexus UI uses Framer Motion. That works fine; keep heavy motion to the pages that benefit from it.
+4. **Keep Nexus components in their own folder**, so it stays clear which code is yours to edit and which comes from a package.
+
+## The short version
+
+If you are looking for "NextUI", you want HeroUI: a strong, accessible, free design system for application UI. If you want animated sections, blocks and templates that you own and can reshape, browse the [Nexus UI components](/components).
+
+## Sources
+
+- [Introducing HeroUI (HeroUI blog)](https://heroui.com/blog/introducing-heroui)
+- [HeroUI v3 rewrite (InfoQ, July 2026)](https://infoq.com/news/2026/07/heroui-v3-rewrite)
+- [HeroUI React releases](https://heroui.com/en/docs/react/releases)
+- [HeroUI quick start](https://heroui.com/docs/react/getting-started/quick-start)
+- [HeroUI on GitHub](https://github.com/heroui-inc/heroui)
+- [HeroUI Pro pricing](https://heroui.pro/pricing)
+- [shadcn/ui documentation](https://ui.shadcn.com/docs)

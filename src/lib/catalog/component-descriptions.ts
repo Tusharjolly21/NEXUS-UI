@@ -26,7 +26,7 @@ export const componentDescriptions: Record<string, ComponentDescription> = {
   },
   "phone-input": {
     about:
-      "The Phone Input component is an animated international phone number field with a searchable country selector, flag icons, and libphonenumber-style validation feedback. The dropdown opens with a Framer Motion spring animation and filters country codes as the user types, reducing friction for international forms. Built for Next.js App Router with full keyboard navigation and TypeScript prop types. Drop it into any signup form, checkout flow, or contact page that requires validated phone collection.",
+      "Phone Input is an animated international phone field: a searchable country selector with flags and dial codes that opens with a Framer Motion spring, next to a number input with simple length validation. Typing in the dropdown filters the country list. Use it in signup forms, checkout flows and contact pages; for strict number validation, pair it with a library such as libphonenumber-js.",
     useCases: [
       "Signup and registration forms",
       "Checkout and payment pages",
@@ -216,7 +216,7 @@ export const componentDescriptions: Record<string, ComponentDescription> = {
   },
   "nebula-cta-glow": {
     about:
-      "Nebula CTA Glow renders a pulsing dual nebula glow behind a high-contrast call-to-action section. The two glow spots breathe on slightly offset animation cycles using CSS keyframes, creating an organic depth effect without canvas or WebGL. The section is structured for a headline, supporting text, and primary CTA button. Best placed at the end of a landing page as a final conversion push after the visitor has read the product value proposition.",
+      "Nebula CTA Glow is a compact call-to-action: a button with a soft nebula glow behind it that breathes slowly, animated with Framer Motion rather than canvas or WebGL. It draws the eye to a single primary action without a full section around it, so it fits at the end of a landing page, in a pricing card or inside a hero.",
     useCases: [
       "End-of-page conversion sections",
       "Promotional and campaign banners",
@@ -546,7 +546,7 @@ export const componentDescriptions: Record<string, ComponentDescription> = {
   },
   "animated-select-headline": {
     about:
-      "The Animated Select Headline cycles through keyword variants in a hero heading, highlighting each active word with a Figma-style selection rectangle — thin border with corner handle markers — that blur-fades as the next word appears. Built entirely with Framer Motion layout animations, the highlight rectangle repositions and resizes smoothly for words of different lengths. A distinctive hero pattern for multi-audience products that rotates through different value propositions.",
+      "Animated Select Headline is a hero heading that cycles through keyword variants, blurring each word out as the next one fades in. The last two words carry a gradient so the rotating phrase reads as the emphasis. Built with Framer Motion, it suits multi-audience products that want one headline to speak to several use cases.",
     useCases: [
       "Multi-audience hero headlines",
       "Product value proposition rotation",
@@ -772,6 +772,26 @@ export const componentDescriptions: Record<string, ComponentDescription> = {
       "Developer tool command interfaces",
       "Keyboard-first navigation patterns",
       "Power user and productivity tool UIs",
+    ],
+  },
+  "cinematic-card-deck": {
+    about:
+      "Cinematic Card Deck pins a stack of large cards in a sticky viewport and moves them with the page scroll. As the visitor scrolls, the front card tilts away in 3D and the cards behind it move forward, while progress dots show the position and the deck leans slightly toward the cursor. Each card takes a title, description, tag, colors and an optional background image, and the depth, smoothing, glow and section height are all set through props.",
+    useCases: [
+      "Scroll-driven feature storytelling",
+      "Product pillars and value props",
+      "Case study chapter sections",
+      "Portfolio project showcases",
+    ],
+  },
+  "step-flow": {
+    about:
+      "Step Flow is a two-column process section: numbered steps on one side and a large image on the other. Hovering or clicking a step slides a shared highlight behind it, reveals that step's description and swaps the image with a blur crossfade, all driven by Framer Motion. Steps, image alt text, the highlight color and optional autoplay are set through props, and the layout stacks into one column on smaller screens.",
+    useCases: [
+      "How-it-works sections on landing pages",
+      "Product onboarding walkthroughs",
+      "Agency or service process overviews",
+      "Feature tours with screenshots",
     ],
   },
 };

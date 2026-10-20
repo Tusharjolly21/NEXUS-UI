@@ -21,7 +21,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 
 export const metadata: Metadata = {
   ...createMetadata({ alternates: { canonical: "/" } }),
-  title: { absolute: `${siteConfig.name} — ${siteConfig.tagline}` },
+  title: { absolute: `${siteConfig.siteName} — ${siteConfig.tagline}` },
 };
 
 const WALL_SLUGS = ["noir-studio", "helix-ai-platform", "launchfolio-portfolio", "ocean-flow", "aether-portfolio", "nexus-ai-launch"];
@@ -69,7 +69,8 @@ export default function Home() {
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: siteConfig.name,
+      name: siteConfig.siteName,
+      alternateName: siteConfig.alternateNames,
       description: siteConfig.description,
       url: siteConfig.url,
       potentialAction: {
@@ -86,7 +87,8 @@ export default function Home() {
     {
       "@context": "https://schema.org",
       "@type": "Organization",
-      name: siteConfig.name,
+      name: siteConfig.siteName,
+      alternateName: siteConfig.alternateNames,
       url: siteConfig.url,
       logo: { "@type": "ImageObject", url: `${siteConfig.url}/nexus-ui-logo.png`, width: 192, height: 192 },
       ...(siteConfig.socialProfiles.length > 0 ? { sameAs: siteConfig.socialProfiles } : {}),
@@ -95,7 +97,7 @@ export default function Home() {
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      name: siteConfig.name,
+      name: siteConfig.siteName,
       url: siteConfig.url,
       description: siteConfig.description,
       applicationCategory: "DeveloperApplication",

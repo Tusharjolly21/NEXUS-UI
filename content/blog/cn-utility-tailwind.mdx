@@ -1,0 +1,210 @@
+---
+title: "cn() Utility in Tailwind: clsx vs tailwind-merge Explained"
+description: "What the cn() helper in Tailwind does, how clsx and tailwind-merge differ, why you need both, and the mistakes that silently drop classes from components."
+date: "2026-10-20"
+---
+
+Open almost any React project that uses Tailwind CSS and you will find a function called `cn()` wrapped around every `className`. It is not part of Tailwind, React, or Next.js. It is a two-line helper that combines two small libraries, `clsx` and `tailwind-merge`, and it exists to fix one specific problem: Tailwind classes that conflict with each other. This guide explains what each half does, why you need both, and the mistakes that cause classes to disappear without an error. If you only want the setup steps, the [add utilities docs page](/docs/add-utilities) has the install commands.
+
+## What is cn() in Tailwind?
+
+`cn()` (short for "class names") takes any mix of strings, conditionals, arrays, and objects, and returns a single `className` string with conflicting Tailwind utilities removed. The shadcn/ui project made it popular, and most component libraries built on Tailwind, Nexus UI included, use the same file.
+
+Here is the entire implementation, usually saved as `lib/utils.ts`:
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
+
+Install both packages first:
+
+```bash
+npm install clsx tailwind-merge
+```
+
+`clsx` runs first and turns your inputs into a flat string. `twMerge` runs second and removes any class that a later class overrides. Each library does one job, and neither does the other's.
+
+## What does clsx do?
+
+`clsx` builds a class string from conditional input. It knows nothing about Tailwind. It accepts strings, objects whose keys are included when the value is truthy, nested arrays, and falsy values that it skips.
+
+```ts
+import { clsx } from "clsx";
+
+clsx("btn", isActive && "btn-active");
+// isActive true  -> "btn btn-active"
+// isActive false -> "btn"
+
+clsx("btn", { "opacity-50": disabled, "cursor-wait": loading });
+// -> "btn opacity-50" when only disabled is true
+
+clsx(["a", ["b", null]], undefined, false, "");
+// -> "a b"
+```
+
+That is all it does. If you pass it `"p-4"` and `"p-6"`, you get `"p-4 p-6"` back, both classes intact.
+
+## What does tailwind-merge do?
+
+`tailwind-merge` understands Tailwind's utility groups. When two classes set the same CSS property, it keeps the one that appears later in the string and drops the earlier one.
+
+```ts
+import { twMerge } from "tailwind-merge";
+
+twMerge("p-4 p-6");                   // "p-6"
+twMerge("bg-red-500 bg-blue-500");    // "bg-blue-500"
+twMerge("grid flex");                 // "flex"
+```
+
+It also knows how utilities relate to each other, which is where it earns its place:
+
+```ts
+twMerge("px-4 p-6");                  // "p-6"         p-6 overrides both sides
+twMerge("p-6 px-4");                  // "p-6 px-4"    px-4 refines p-6, both kept
+twMerge("rounded-lg rounded-t-none"); // both kept     top corners refined
+twMerge("w-6 size-4");                // "size-4"      size sets width and height
+twMerge("text-sm text-red-500");      // both kept     size and colour don't conflict
+twMerge("hover:bg-red-500 bg-blue-500"); // both kept  different variants
+twMerge("md:p-4 md:p-2");             // "md:p-2"
+```
+
+Notice that order matters in a way it does not for `clsx`. A shorthand that comes after a longhand wins, but a longhand that comes after a shorthand is treated as a refinement and kept.
+
+## twMerge vs clsx: why do you need both?
+
+Because they solve different halves of the problem. `clsx` gives you a clean way to write conditional classes, but it happily produces conflicts. `twMerge` resolves conflicts, but its conditional syntax is limited: it accepts strings, arrays, and falsy values, not the object syntax `clsx` offers. Chaining them gives you both.
+
+The reason conflicts matter at all comes down to how CSS works. When an element has `class="p-4 p-6"`, the browser does not care about the order of names in the attribute. Both rules have the same specificity, so whichever rule appears later in the generated stylesheet wins. You do not control that order from your component, so `"p-4 p-6"` might render with `p-4`. `tailwind-merge` removes the ambiguity by making sure only one of them reaches the DOM.
+
+This is what makes the `className` prop on a component safe to override:
+
+```tsx
+import { cn } from "@/lib/utils";
+
+export function Card({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("rounded-2xl border bg-card p-6", className)}
+      {...props}
+    />
+  );
+}
+
+// <Card className="p-4" />  ->  "rounded-2xl border bg-card p-4"
+```
+
+Without `twMerge`, the consumer's `p-4` and the default `p-6` would both be applied and the result would depend on stylesheet order.
+
+## How to use cn() for conditional classes
+
+Put classes in a predictable order: base styles first, then state, then the consumer's `className` last so it always wins.
+
+```tsx
+<button
+  className={cn(
+    "inline-flex h-10 items-center rounded-full px-5 text-sm font-medium",
+    isActive ? "bg-zinc-950 text-white" : "bg-zinc-100 text-zinc-700",
+    disabled && "pointer-events-none opacity-50",
+    className,
+  )}
+/>
+```
+
+A ternary is clearer than two `&&` checks when there are exactly two states. The [chat messages component](/components/chat-messages) uses this pattern to switch bubble alignment and colour by sender, and the [milestone timeline](/components/milestone-timeline) uses it to style done, current, and upcoming nodes.
+
+## Using cn() with variants
+
+Once a component has more than one or two options, a lookup object keeps the JSX readable:
+
+```tsx
+const sizes = {
+  sm: "h-8 px-3 text-[13px]",
+  md: "h-10 px-5 text-sm",
+  lg: "h-12 px-6 text-base",
+} as const;
+
+type ButtonProps = React.ComponentProps<"button"> & { size?: keyof typeof sizes };
+
+export function Button({ size = "md", className, ...props }: ButtonProps) {
+  return <button className={cn("rounded-full font-medium", sizes[size], className)} {...props} />;
+}
+```
+
+For components with several variant axes, `class-variance-authority` (cva) generates the lookup for you. It returns a plain string, so you still pass it through `cn()` to merge the consumer's overrides:
+
+```tsx
+import { cva, type VariantProps } from "class-variance-authority";
+
+const button = cva("inline-flex items-center rounded-full font-medium", {
+  variants: {
+    intent: { primary: "bg-zinc-950 text-white", ghost: "bg-transparent text-zinc-700" },
+    size: { sm: "h-8 px-3 text-[13px]", md: "h-10 px-5 text-sm" },
+  },
+  defaultVariants: { intent: "primary", size: "md" },
+});
+
+type Props = React.ComponentProps<"button"> & VariantProps<typeof button>;
+
+export function Button({ intent, size, className, ...props }: Props) {
+  return <button className={cn(button({ intent, size }), className)} {...props} />;
+}
+```
+
+## Is cn() slow?
+
+For normal component rendering, no. `tailwind-merge` keeps a cache of recent results (500 entries by default), so the same input string is only parsed once. A few things are still worth knowing:
+
+- The cost is in `twMerge`, not `clsx`. If a call can never contain conflicts, for example a fixed list of classes with no overrides, use plain `clsx` or `twJoin` from `tailwind-merge`, which joins without merging.
+- Wrapping `cn()` in `useMemo` is rarely worth it. The built-in cache already short-circuits repeated inputs, and the memo adds its own bookkeeping to every render.
+- In very large lists with unique class strings per row (say, a virtualised table with inline computed widths), the cache stops helping. Move the varying value into `style` and keep the class string identical across rows.
+
+## Common mistakes with cn() and tailwind-merge
+
+### Custom theme tokens get removed
+
+This is the one that costs people hours. If you define a custom font size in Tailwind v4 with `--text-caption` in your `@theme` block, `tailwind-merge` does not read your CSS. It sees `text-caption`, cannot tell whether it is a size or a colour, and treats it as a colour:
+
+```ts
+twMerge("text-caption text-white"); // "text-white"  your font size is gone
+```
+
+Fix it by telling `tailwind-merge` about your scale with `extendTailwindMerge`:
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { extendTailwindMerge } from "tailwind-merge";
+
+const twMerge = extendTailwindMerge({
+  extend: { theme: { text: ["caption", "display"] } },
+});
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+// cn("text-caption text-white") -> "text-caption text-white"
+// cn("text-caption text-lg")    -> "text-lg"
+```
+
+The same applies to custom shadows, radii, and spacing names. Arbitrary values like `text-[13px]` are detected correctly without configuration.
+
+### Passing className first
+
+`cn(className, "p-6")` means your default always beats the consumer's override. Put `className` last.
+
+### Building class names from strings
+
+``cn(`bg-${color}-500`)`` does not work, and `cn()` cannot fix it. Tailwind only generates classes it can find as complete strings in your source. Map values to full class names instead: `{ red: "bg-red-500", blue: "bg-blue-500" }[color]`.
+
+### Mismatched versions
+
+`tailwind-merge` v3 targets Tailwind CSS v4. If your project is still on Tailwind v3, stay on `tailwind-merge` v2, or newer v4-only class names will be misread.
+
+## Where to go next
+
+If you are setting up a new project, the [Tailwind install guide](/docs/install-tailwindcss) and the [add utilities page](/docs/add-utilities) cover the full setup. For how `cn()` fits into larger component APIs, the [React chat UI guide](/blog/react-chat-ui-animations) uses it to build grouped message bubbles whose corners change with their position in a run.

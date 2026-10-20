@@ -5,7 +5,7 @@ import { GlowingEffectCardsDemo } from "@/components/glowing-effect-cards";
 export const metadata: Metadata = createMetadata({
   title: "Glowing effect cards demo",
   description: "Cursor-reactive glowing border cards arranged in a responsive 2-1-2 bento grid. WebGL-powered gradient border follows the pointer position in real time.",
-  alternates: { canonical: "/demos/glowing-effect-cards" },
+  alternates: { canonical: "/components/glowing-effect-cards" },
 });
 
 export default function GlowingEffectCardsDemoPage() {

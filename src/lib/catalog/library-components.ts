@@ -2548,7 +2548,7 @@ export function TerminalExample() {
       { label: "SVG filters (MDN)", href: "https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feTurbulence" },
     ],
     description:
-      "Hero-grade headline with an animated wave underline, turbulence + Gaussian blur + displacement, optional glyph micro-warp, and reduced-motion fallbacks.",
+      "A hero headline that wobbles like hand-drawn ink: an SVG turbulence and displacement filter steps through frames, with a still fallback when reduced motion is on.",
     categorySlug: "motion-effects",
     tags: ["typography", "svg", "motion", "hero", "underline", "filters"],
     premium: false,
@@ -3136,7 +3136,6 @@ export function PortfolioRevealCard() {
     props: [
       { name: "children", type: "React.ReactNode", description: "Content rendered inside `GlowingEffect`." },
       { name: "className", type: "string", description: "Class names for `GlowingEffect` or `GlowingCard` wrapper." },
-      { name: "glowColor", type: "string", defaultValue: "\"hsl(var(--primary) / 0.9)\"", description: "Glow color used by `GlowingEffect`." },
       { name: "borderRadius", type: "string", defaultValue: "\"1rem\"", description: "Border radius applied to the glowing container." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables pointer-reactive glow behavior." },
       { name: "intensity", type: "number", defaultValue: "1", description: "Glow spread/intensity multiplier." },
@@ -3624,8 +3623,7 @@ export function KeyboardSilent() {
       { name: "revealCount",    type: "number",               defaultValue: "2",       description: "Extra images revealed on hover." },
       { name: "label",          type: "string",               description: "Optional text label after the stack." },
       { name: "size",           type: '"sm" | "md" | "lg"',                  defaultValue: '"md"',       description: "Controls image diameter and pill height." },
-      { name: "shape",          type: '"circle" | "rounded" | "square"',   defaultValue: '"circle"',   description: "Clipping shape applied to each image." },
-      { name: "direction",      type: '"left" | "right"',                  defaultValue: '"right"',    description: "Direction the stack fans out toward on hover." },
+      { name: "shape",          type: '"circle" | "rounded" | "square"',   defaultValue: '"rounded"',  description: "Clipping shape applied to each image." },
       { name: "className",      type: "string",               description: "Extra classes on the pill container." },
       { name: "imageClassName", type: "string",               description: "Extra classes on every image wrapper." },
       { name: "onClick",        type: "() => void",           description: "Makes the badge interactive (button role + keyboard)." },
@@ -3960,7 +3958,7 @@ export function EmberStormHero() {
     name: "Before / After Compare",
     registryCliName: "compare",
     description:
-      "Drag a vertical handle to compare two images side-by-side. Supports mouse and touch, optional labels, custom start position, and any aspect ratio.",
+      "Compare two images side by side: the divider follows the mouse on desktop and drags on touch screens. Optional labels, custom start position, and any aspect ratio.",
     categorySlug: "motion-effects",
     tags: ["compare", "slider", "before-after", "image", "interactive", "drag", "cursor"],
     premium: false,
@@ -4885,7 +4883,7 @@ export function ChatMessages({
   {
     slug: "shader-flow",
     name: "Shader Flow",
-    description: "A soft animated shader-style background with flowing gradient motion.",
+    description: "A soft, shader-style background: blurred gradient blobs drifting with Framer Motion, no WebGL needed.",
     categorySlug: "background-effects",
     tags: ["background", "shader", "gradient", "animation", "flowing", "blobs", "framer-motion"],
     premium: false,
@@ -5600,8 +5598,8 @@ export function InteractiveGlobeExplorerDemo() {
     ],
   },
   {
-    name: "Code Block",
     slug: "code-block",
+    name: "Code Block",
     description: "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",
     categorySlug: "feature-sections",
     tags: ["code", "syntax", "highlight", "copy", "snippet", "dark", "light"],
@@ -5701,8 +5699,8 @@ export function CodeBlockExample() {
     ],
   },
   {
-    name: "Card Stack Rotator",
     slug: "card-stack-rotator",
+    name: "Card Stack Rotator",
     description: "A polished stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
     categorySlug: "testimonials",
     tags: ["testimonials", "carousel", "cards", "motion", "stack"],
@@ -5741,7 +5739,6 @@ export function CardStackRotatorDemo() {
       { name: "cardBorderColor", type: "string", description: "Card border color.", defaultValue: "\"rgba(255,255,255,0.08)\"" },
       { name: "textColor", type: "string", description: "Primary text color.", defaultValue: "\"#fafafa\"" },
       { name: "mutedColor", type: "string", description: "Muted/secondary text color.", defaultValue: "\"rgba(250,250,250,0.5)\"" },
-      { name: "highlightBackground", type: "string", description: "Background color for **bold** text highlights.", defaultValue: "\"rgba(129,140,248,0.18)\"" },
       { name: "highlightTextColor", type: "string", description: "Text color for **bold** highlights.", defaultValue: "\"#a5b4fc\"" },
       { name: "contentFontSize", type: "string", description: "Font size of card content.", defaultValue: "\"15px\"" },
       { name: "nameFontSize", type: "string", description: "Font size of card author name.", defaultValue: "\"15px\"" },
@@ -6562,7 +6559,7 @@ export function ProfileOrbitDemo() {
   {
     slug: "command-palette",
     name: "Command Palette",
-    description: "Animated command palette with ⌘K shortcut, grouped navigation/actions/theme commands, backdrop blur overlay, and Framer Motion enter/exit transitions.",
+    description: "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions.",
     categorySlug: "motion-effects",
     tags: ["command", "search", "keyboard", "modal", "framer-motion", "shadcn"],
     premium: false,
@@ -10377,6 +10374,682 @@ export function GeneratingState() {
     <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-[#1c1c1e]">
       <MatrixLoader pattern="ripple" size={28} label="Generating answer" />
       <span className="text-[14px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Thinking…</span>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "todo-tower",
+    name: "Todo Tower",
+    registryCliName: "todo-tower",
+    description:
+      "A to-do list stacked like bricks. Tick a task or drag it out sideways and the pile drops into the gap with a bounce; any brick left hanging too far over the one below tips off the edge.",
+    categorySlug: "cards",
+    tags: ["todo", "tasks", "stack", "bricks", "physics", "drag", "checklist", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tasks", type: "TodoTowerTask[]", defaultValue: "TODO_TOWER_TASKS", description: "Starting pile, top to bottom. Each task has text and x, its sideways offset in px." },
+      { name: "moreTasks", type: "string[]", defaultValue: "TODO_TOWER_MORE", description: "Labels the Add a task button drops onto the top of the pile, in turn." },
+      { name: "overhang", type: "number", defaultValue: "24", description: "How far (px) a brick may hang past the one beneath it before it tips off." },
+      { name: "maxBricks", type: "number", defaultValue: "8", description: "Most bricks the pile holds; adding does nothing past this." },
+      { name: "onComplete", type: "(text: string) => void", description: "Called with a task's label when it is ticked off." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks tasks off and adds new ones by itself until someone touches the pile." },
+    ],
+    Preview: Previews.PreviewTodoTower,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TodoTower } from "@/components/todo-tower";
+
+export function TodayPile() {
+  return (
+    <TodoTower
+      tasks={[
+        { text: "Draft the proposal", x: -12 },
+        { text: "Review pull requests", x: 8 },
+        { text: "Plan the sprint", x: 20 },
+        { text: "Answer support tickets", x: 0 },
+      ]}
+      moreTasks={["Update the changelog", "Book a design review"]}
+      onComplete={(task) => console.log("done:", task)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "peek-login",
+    name: "Peek Login",
+    registryCliName: "peek-login",
+    description:
+      "A sign-in card with a little face whose eyes follow the pointer and read along as you type your email. It covers its eyes with its paws while you type a password and peeks when you show it.",
+    categorySlug: "login-forms",
+    tags: ["login", "sign in", "form", "mascot", "eyes", "password", "playful", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the face, the focus rings and the Show/Hide button." },
+      { name: "onSubmit", type: "(values: PeekLoginValues) => void", description: "Called with { email, password } on submit. The component sends nothing itself; it only plays a short local signing-in state." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample email and password and peeks at it, on a loop, until someone interacts." },
+    ],
+    Preview: Previews.PreviewPeekLogin,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PeekLogin } from "@/components/peek-login";
+
+export function SignInPage() {
+  return (
+    <main className="flex min-h-[560px] items-center justify-center">
+      <PeekLogin
+        accent="#5e5ce6"
+        onSubmit={({ email }) => {
+          // Hand the values to your own auth call here.
+          console.log("sign in", email);
+        }}
+      />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "heat-field",
+    name: "Heat Field",
+    registryCliName: "heat-field",
+    description:
+      "A field of grey dots that melts into a heat map under the cursor, swelling and blending from yellow through red to violet. Press and hold to leave heat behind that slowly cools.",
+    categorySlug: "background-effects",
+    tags: ["heat map", "dots", "canvas", "goo", "cursor", "interactive", "grid", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 147,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "radius", type: "number", defaultValue: "46", description: "Spread of the heat around the pointer in px; held heat spreads a little wider." },
+      { name: "hint", type: "string", defaultValue: '"Move across the dots. Press and hold to leave heat behind."', description: "Line under the field. Pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "An invisible hand wanders across the field, now and then pressing, until someone points at it." },
+    ],
+    Preview: Previews.PreviewHeatField,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { HeatField } from "@/components/heat-field";
+
+export function ActivityHero() {
+  return (
+    <section className="flex flex-col items-center gap-6 py-16">
+      <h2 className="text-3xl font-semibold tracking-tight">Where people click</h2>
+      <HeatField radius={56} hint="" autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "particle-mark",
+    name: "Particle Mark",
+    registryCliName: "particle-mark",
+    description:
+      "A word drawn as a few hundred dots that scatter away from the pointer and spring home, warming to the accent colour the further they are pushed. Click anywhere for a shockwave.",
+    categorySlug: "motion-effects",
+    tags: ["particles", "text", "logo", "canvas", "dots", "shockwave", "springs", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 155,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press", "spring", "magnetic"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: '"motion"', description: "The word drawn in dots; long words are shrunk to fit." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Hex colour the dots warm to as they are pushed away from home." },
+      { name: "hint", type: "string", defaultValue: '"Brush through the dots. Click for a shockwave."', description: "Line under the canvas. Pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "An invisible pointer loops through the word, with a shockwave every few seconds, until someone points at it." },
+    ],
+    Preview: Previews.PreviewParticleMark,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ParticleMark } from "@/components/particle-mark";
+
+export function BrandIntro() {
+  return (
+    <section className="flex justify-center py-20">
+      <ParticleMark text="hello" accent="#ff375f" hint="" />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "generate-image",
+    name: "Generate Image",
+    registryCliName: "generate-image",
+    description:
+      "An image-generation card: press Generate and the picture arrives coarse to fine with the noise easing off, under a sheet of glass with light sweeping across it and a denoising counter.",
+    categorySlug: "ai-components",
+    tags: ["ai", "image generation", "prompt", "progressive", "loading", "canvas", "glass", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "type", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "prompt", type: "string", defaultValue: '"Pink dusk over soft hills"', description: "Prompt the field starts with." },
+      { name: "onGenerate", type: "(prompt: string) => void", description: "Called with the prompt each time Generate is pressed." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Generates a new scene every few seconds, cycling the sample prompts, until someone interacts." },
+    ],
+    Preview: Previews.PreviewGenerateImage,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { GenerateImage } from "@/components/generate-image";
+
+export function PromptPlayground() {
+  return (
+    <div className="flex justify-center py-12">
+      <GenerateImage
+        prompt="Moonlit ridge, deep teal"
+        onGenerate={(prompt) => console.log("generate:", prompt)}
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "falloff-accordion",
+    name: "Falloff Accordion",
+    registryCliName: "falloff-accordion",
+    description:
+      "A row of photo strips where the one you point at opens and its neighbours give way on a smooth Gaussian falloff, so the whole row leans toward the pointer while a caption rises on the open strip.",
+    categorySlug: "cards",
+    tags: ["accordion", "gallery", "photo strips", "hover", "falloff", "expand", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "strips", type: "FalloffStrip[]", defaultValue: "DEFAULT_FALLOFF_STRIPS", description: "Each strip has a unique title, a meta line and art (any CSS background, e.g. a gradient or url(...) center / cover)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens every other strip in turn until someone points at the row." },
+    ],
+    Preview: Previews.PreviewFalloffAccordion,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FalloffAccordion } from "@/components/falloff-accordion";
+
+const places = [
+  { title: "Glacier", meta: "Iceland", art: "url(/photos/glacier.jpg) center / cover" },
+  { title: "Dune", meta: "Morocco", art: "url(/photos/dune.jpg) center / cover" },
+  { title: "Fern", meta: "New Zealand", art: "linear-gradient(170deg,#e4f7c7,#8fd16a 40%,#2f7d4a 75%,#123a26)" },
+  { title: "Lagoon", meta: "Maldives", art: "linear-gradient(170deg,#e0fffb,#6fe3d6 40%,#1695a3 78%,#0b3c55)" },
+];
+
+export function Destinations() {
+  return <FalloffAccordion strips={places} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "magnet-select",
+    name: "Magnet Select",
+    registryCliName: "magnet-select",
+    description:
+      "A status picker where the selection is a liquid orb: a bead reaches toward the option you point at, and picking it sends the orb sliding over with a stretching liquid tail, nudging the options it passes out of the way.",
+    categorySlug: "inputs-controls",
+    tags: ["select", "status", "radio", "goo", "liquid", "picker", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press", "spring", "magnetic"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "options", type: "MagnetOption[]", defaultValue: "DEFAULT_MAGNET_OPTIONS", description: "Each option has id, label and d (SVG path for a 24×24 stroked icon). The last one sits in the centre, the rest on a ring." },
+      { name: "defaultValue", type: "string", description: "id of the option selected at first. Defaults to the last (centre) option." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the option id when the user picks one." },
+      { name: "label", type: "string", defaultValue: '"Status"', description: "Accessible name of the radio group." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Points at and picks options by itself until someone touches it." },
+    ],
+    Preview: Previews.PreviewMagnetSelect,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { MagnetSelect } from "@/components/magnet-select";
+
+export function StatusPicker() {
+  const [status, setStatus] = useState("here");
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <MagnetSelect defaultValue={status} onChange={setStatus} />
+      <p className="text-sm text-neutral-500">Saved as: {status}</p>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "aspect-crop",
+    name: "Aspect Crop",
+    registryCliName: "aspect-crop",
+    description:
+      "An aspect-ratio picker whose crop frame keeps the same area at every ratio, so switching reads as re-cropping the same photo. The frame springs to its new shape and rule-of-thirds lines flash while it moves.",
+    categorySlug: "inputs-controls",
+    tags: ["crop", "aspect ratio", "image editor", "segmented control", "photo", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 147,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "ratios", type: "AspectRatioOption[]", defaultValue: "DEFAULT_ASPECT_RATIOS", description: "Ratios to offer, each { id, w, h } (4:3, 1:1, 3:4 and 9:16 by default)." },
+      { name: "src", type: "string", description: "Photo to crop. Without it a drawn sunset illustration is shown." },
+      { name: "alt", type: "string", defaultValue: '""', description: "Alt text for src." },
+      { name: "onChange", type: "(id: string) => void", description: "Called with the ratio id when the user picks one." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the ratios until someone touches it." },
+    ],
+    Preview: Previews.PreviewAspectCrop,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { AspectCrop } from "@/components/aspect-crop";
+
+export function CoverCrop() {
+  return (
+    <AspectCrop
+      src="/images/cover.jpg"
+      alt="Album cover"
+      ratios={[
+        { id: "1:1", w: 1, h: 1 },
+        { id: "4:5", w: 4, h: 5 },
+        { id: "16:9", w: 16, h: 9 },
+      ]}
+      onChange={(ratio) => console.log("crop to", ratio)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "slosh-slider",
+    name: "Slosh Slider",
+    registryCliName: "slosh-slider",
+    description:
+      "A slider whose value has mass: the rigid handle stays under your finger while the liquid fill lags behind, leans with the speed you drag at and sloshes back and forth before it settles.",
+    categorySlug: "inputs-controls",
+    tags: ["slider", "range", "liquid", "volume", "velocity", "physics", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"Volume"', description: "Label above the track; also the slider's accessible name." },
+      { name: "defaultValue", type: "number", defaultValue: "55", description: "Starting value, 0 to 100." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Liquid colour and focus ring." },
+      { name: "onChange", type: "(value: number) => void", description: "Called with the rounded value (0 to 100) whenever it changes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws the handle to a series of values until someone touches it." },
+    ],
+    Preview: Previews.PreviewSloshSlider,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SloshSlider } from "@/components/slosh-slider";
+
+export function MixerPanel() {
+  return (
+    <div className="flex flex-col gap-8">
+      <SloshSlider label="Volume" defaultValue={55} />
+      <SloshSlider label="Bass" defaultValue={30} accent="#ff9f0a" onChange={(v) => console.log("bass", v)} />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "goo-reorder",
+    name: "Goo Reorder",
+    registryCliName: "goo-reorder",
+    description:
+      "A drag-to-reorder list made of ink: rows stay joined to their neighbours by a liquid neck that stretches as one leaves and pinches off as it lands, while the text stays sharp on top.",
+    categorySlug: "inputs-controls",
+    tags: ["reorder", "sortable", "drag and drop", "list", "goo", "liquid", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "GooReorderItem[]", defaultValue: "DEFAULT_GOO_ITEMS", description: "Starting rows, each { id, label, color } where color tints the numbered badge." },
+      { name: "onReorder", type: "(items: GooReorderItem[]) => void", description: "Called with the new order after the user drags a row or moves it with the arrow keys." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Swaps two random rows every 1.6s until someone touches the list." },
+    ],
+    Preview: Previews.PreviewGooReorder,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { GooReorder } from "@/components/goo-reorder";
+
+const steps = [
+  { id: "plan", label: "Plan the sprint", color: "#ff9f0a" },
+  { id: "build", label: "Build the feature", color: "#5ac8fa" },
+  { id: "test", label: "Test on devices", color: "#30d158" },
+  { id: "ship", label: "Ship it", color: "#ff375f" },
+];
+
+export function ReleaseSteps() {
+  return <GooReorder items={steps} onReorder={(next) => console.log(next.map((s) => s.id))} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "hop-labels",
+    name: "Hop Labels",
+    registryCliName: "hop-labels",
+    description:
+      "Outlined text fields whose label sits inside like a placeholder, then lifts into the border on focus with a hop running along its letters while the outline parts to make room. The email field checks itself on blur with a shake or a tick.",
+    categorySlug: "inputs-controls",
+    tags: ["input", "text field", "floating label", "outlined", "form", "validation", "material", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Outline and label colour while a field is focused." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a name and an email into the form by itself, until someone touches it." },
+    ],
+    Preview: Previews.PreviewHopLabels,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { HopField } from "@/components/hop-labels";
+
+export function SignupForm() {
+  return (
+    <form className="flex w-[320px] flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+      <HopField label="Full name" accent="#5e5ce6" />
+      <HopField
+        label="Work email"
+        type="email"
+        accent="#5e5ce6"
+        validate={(v) => /^\\S+@\\S+\\.\\S+$/.test(v)}
+        errorMessage="Use your work email."
+      />
+      <HopField label="Password" type="password" accent="#5e5ce6" validate={(v) => v.length >= 8} errorMessage="At least 8 characters." />
+    </form>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "step-player",
+    name: "Step Player",
+    registryCliName: "step-player",
+    description:
+      "An onboarding player: the current step's dot stretches into a bar that fills while it plays, then eases over to the next dot as a small wave runs through the ones ahead. Play, pause, or tap a dot to jump to a step.",
+    categorySlug: "inputs-controls",
+    tags: ["onboarding", "stepper", "progress", "dots", "pagination", "carousel", "tour", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-20",
+    animationKinds: ["spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the filling bar, finished dots and the \"Step n of m\" line." },
+      { name: "steps", type: "StepPlayerStep[]", defaultValue: "DEFAULT_STEPS", description: "Steps to play through, each { t: title, b: one-line body }." },
+      { name: "stepDuration", type: "number", defaultValue: "3.2", description: "Seconds each step plays before moving on." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Starts playing on mount. Set to false to start paused; the play button still works." },
+    ],
+    Preview: Previews.PreviewStepPlayer,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StepPlayer, type StepPlayerStep } from "@/components/step-player";
+
+const tour: StepPlayerStep[] = [
+  { t: "Import your tracks", b: "Drag a folder in, we sort the rest." },
+  { t: "Make a playlist", b: "Hold a song to add it anywhere." },
+  { t: "Share it", b: "Friends can listen without an account." },
+];
+
+export function WelcomeTour() {
+  return <StepPlayer steps={tour} accent="#ff375f" stepDuration={4} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "pull-to-refresh",
+    name: "Pull to Refresh",
+    registryCliName: "pull-to-refresh",
+    description:
+      "A balance card you pull down to refresh: it rubber-bands and stretches while a ring draws itself, closes the ring past the line, holds while it spins, then springs back with a little overshoot as the digits roll and the chart redraws.",
+    categorySlug: "loaders",
+    tags: ["pull to refresh", "refresh", "drag", "elastic", "rubber band", "balance", "finance", "spinner", "mobile", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 154,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "initialBalance", type: "number", defaultValue: "58834.75", description: "Balance shown before the first refresh." },
+      { name: "onRefresh", type: "(balance: number, delta: number) => void", defaultValue: "undefined", description: "Called each time a pull commits, with the new balance and the change." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pulls the card down and refreshes every 4.2 s, until someone drags it or uses the keyboard." },
+    ],
+    Preview: Previews.PreviewPullToRefresh,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PullToRefresh } from "@/components/pull-to-refresh";
+
+export function WalletScreen() {
+  return (
+    <PullToRefresh
+      initialBalance={12480.5}
+      onRefresh={(balance, delta) => console.log("New balance", balance, "change", delta)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "runaway-button",
+    name: "Runaway Button",
+    registryCliName: "runaway-button",
+    description:
+      "A cancel-subscription dialog whose cancel button slips away from the pointer, getting less sure of itself each time, then gives up after a few tries and lets you click it. Keyboard users get a normal button that never moves while focused.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "playful", "dialog", "cancel", "dark pattern", "easter egg", "pointer", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 157,
+    createdAt: "2026-10-20",
+    animationKinds: ["magnetic", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "onCancel", type: "() => void", defaultValue: "undefined", description: "Called when the cancel button is finally clicked or activated from the keyboard." },
+      { name: "onKeep", type: "() => void", defaultValue: "undefined", description: "Called when \"Keep my plan\" is clicked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Hops the cancel button around the dialog every 1.1 s, until someone points at it, focuses it or presses a key." },
+    ],
+    Preview: Previews.PreviewRunawayButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { RunawayButton } from "@/components/runaway-button";
+
+export function CancelPlan() {
+  return (
+    <RunawayButton
+      onKeep={() => console.log("Stayed on the plan")}
+      onCancel={() => fetch("/api/subscription", { method: "DELETE" })}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "wake-slider",
+    name: "Wake Slider",
+    registryCliName: "wake-slider",
+    description:
+      "A thumbless range made of 56 thin bars. Drag across it and the bars you pass spring up in a wake behind the pointer, taller the faster you move, then ripple back down; the value is wherever the colour ends.",
+    categorySlug: "inputs-controls",
+    tags: ["slider", "range", "bars", "spring", "ripple", "drag", "volume", "brightness", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: '"Brightness"', description: "Label above the bars; also the slider's accessible name." },
+      { name: "defaultValue", type: "number", defaultValue: "40", description: "Starting value, 0 to 100." },
+      { name: "accent", type: "string", defaultValue: '"#ff9f0a"', description: "Colour of the bars up to the current value." },
+      { name: "onValueChange", type: "(value: number) => void", defaultValue: "undefined", description: "Called with the rounded value whenever it changes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps back and forth by itself until the user drags or presses a key." },
+    ],
+    Preview: Previews.PreviewWakeSlider,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { WakeSlider } from "@/components/wake-slider";
+
+export function DisplaySettings() {
+  const [volume, setVolume] = useState(60);
+  return (
+    <div className="flex flex-col gap-8">
+      <WakeSlider label="Brightness" defaultValue={40} />
+      <WakeSlider label="Volume" defaultValue={volume} accent="#0a84ff" onValueChange={setVolume} />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "seek-search",
+    name: "Seek Search",
+    registryCliName: "seek-search",
+    description:
+      "A round search button that opens into a field as one object: the pill springs wider while the magnifier turns, and a list of local suggestions drops in underneath and filters as you type. Escape, or leaving it empty, folds it back.",
+    categorySlug: "inputs-controls",
+    tags: ["search", "input", "expand", "suggestions", "autocomplete", "command", "popLayout", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["spring", "layout", "type"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "suggestions", type: "string[]", defaultValue: '["Quarterly report", "Design review notes", …]', description: "Local suggestions shown under the field and filtered as you type. Nothing is fetched." },
+      { name: "placeholder", type: "string", defaultValue: '"Search files"', description: "Placeholder and accessible name of the field." },
+      { name: "maxLength", type: "number", defaultValue: "64", description: "Longest query the field accepts; the query is trimmed before filtering." },
+      { name: "onSelect", type: "(suggestion: string) => void", defaultValue: "undefined", description: "Called with a suggestion when it is clicked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens, types a word, clears and folds back on a loop until the user interacts." },
+    ],
+    Preview: Previews.PreviewSeekSearch,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useRouter } from "next/navigation";
+import { SeekSearch } from "@/components/seek-search";
+
+const DOCS = ["Getting started", "Billing and invoices", "Team permissions", "API keys", "Webhooks"];
+
+export function DocsSearch() {
+  const router = useRouter();
+  return (
+    <SeekSearch
+      suggestions={DOCS}
+      placeholder="Search docs"
+      onSelect={(title) => router.push(\`/docs?q=\${encodeURIComponent(title)}\`)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "fold-note",
+    name: "Fold Note",
+    registryCliName: "fold-note",
+    description:
+      "A printed credit note you fold on its centre crease. Drag the right half over and it turns in 3D, shading as it goes and showing its patterned back; past halfway it snaps shut with a bounce, and a tap opens it again.",
+    categorySlug: "cards",
+    tags: ["fold", "note", "voucher", "gift card", "3d", "rotateY", "pan", "paper", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 147,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Store Credit"', description: "Small caps heading printed top left." },
+      { name: "amount", type: "string", defaultValue: '"50"', description: "Denomination printed top right and, smaller, bottom right." },
+      { name: "serial", type: "string", defaultValue: '"NOT LEGAL TENDER · SC 000042"', description: "Fine print along the bottom edge." },
+      { name: "backLabel", type: "string", defaultValue: '"Thanks"', description: "Word printed on the back of the folding half." },
+      { name: "onFoldChange", type: "(folded: boolean) => void", defaultValue: "undefined", description: "Called with true when the note snaps shut and false when it opens." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Folds and unfolds every two seconds until the user grabs or taps it." },
+    ],
+    Preview: Previews.PreviewFoldNote,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FoldNote } from "@/components/fold-note";
+
+export function RewardCard() {
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <p className="text-[15px] text-neutral-500">You earned a reward. Fold it to keep it.</p>
+      <FoldNote title="Reward" amount="25" serial="VALID UNTIL 31 DEC · RW 001284" backLabel="Saved" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "assign-picker",
+    name: "Assign Picker",
+    registryCliName: "assign-picker",
+    description:
+      "An assignee pill with a multi-select menu. Tick people and each avatar flies from its row into the pill, which grows to hold them and stacks them with a count past three; the label reads one name, two names or a number.",
+    categorySlug: "inputs-controls",
+    tags: ["assign", "assignee", "avatar", "multi-select", "people", "picker", "layout", "dropdown", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-20",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "people", type: "AssignPerson[]", defaultValue: "five sample people", description: "People in the menu: { id, name, role, colors: [from, to] }. Avatars are gradient circles with initials." },
+      { name: "defaultValue", type: "string[]", defaultValue: "[]", description: "Ids selected on first render." },
+      { name: "onChange", type: "(ids: string[]) => void", defaultValue: "undefined", description: "Called with the selected ids, in the order they were picked." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens the menu, ticks four people, closes and clears, on a loop until the user clicks." },
+    ],
+    Preview: Previews.PreviewAssignPicker,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { AssignPicker, type AssignPerson } from "@/components/assign-picker";
+
+const TEAM: AssignPerson[] = [
+  { id: "ln", name: "Lena Novak", role: "Design", colors: ["#ff6fd8", "#ff9f0a"] },
+  { id: "ok", name: "Omar Khan", role: "Engineering", colors: ["#5ac8fa", "#5e5ce6"] },
+  { id: "sf", name: "Sofia Ferreira", role: "Product", colors: ["#30d158", "#0b8f6a"] },
+];
+
+export function TaskAssignees() {
+  const [ids, setIds] = useState<string[]>(["ok"]);
+  return (
+    <div className="flex flex-col gap-2">
+      <AssignPicker people={TEAM} defaultValue={ids} onChange={setIds} />
+      <p className="text-[13px] text-neutral-500">{ids.length} assigned</p>
     </div>
   );
 }`,

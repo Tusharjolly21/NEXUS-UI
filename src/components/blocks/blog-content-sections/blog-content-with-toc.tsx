@@ -5,24 +5,72 @@ import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { BlogContentCentered } from "./blog-content-centered";
 
-export type BlogContentWithTocProps = {
-  className?: string;
-};
+/** The four body sections of the article, by id. */
+export type BlogTocSectionId = "introduction" | "key-areas" | "ethics" | "conclusion";
 
-const tocItems = [
+export type BlogTocItem = { id: BlogTocSectionId; label: string };
+
+/** The default contents: one entry per body section, in reading order. */
+export const BLOG_TOC_ITEMS: BlogTocItem[] = [
   { id: "introduction", label: "Introduction" },
   { id: "key-areas", label: "Key areas of AI development" },
   { id: "ethics", label: "Ethical considerations" },
   { id: "conclusion", label: "Conclusion" },
 ];
 
-const sectionIdPrefix = "blog-with-toc";
+export type BlogContentWithTocProps = {
+  /** The article headline. */
+  title?: string;
+  /** Standfirst under the headline. Leave empty to hide it. */
+  dek?: string;
+  /** Small label above the headline, before the date. */
+  category?: string;
+  /** Byline name; its first two initials fill the monogram. */
+  author?: string;
+  /** Publish date next to the category. */
+  date?: string;
+  /** Line under the author name. */
+  readingTime?: string;
+  /** Heading above the contents list. */
+  tocLabel?: string;
+  /** Contents entries (ids must be body section ids; unknown ids are skipped). */
+  tocItems?: BlogTocItem[];
+  /** Prefix for the body section ids the entries link to (`<prefix>-introduction`, ...). Letters, digits, `-` and `_` only. */
+  sectionIdPrefix?: string;
+  /** Wide image under the header. Defaults to the centred article's stock photo. */
+  heroImage?: string;
+  /** Figure inside the body. Defaults to the centred article's circuit-board photo. */
+  secondaryImage?: string;
+  /** Merged onto the outer section. */
+  className?: string;
+};
 
-export function BlogContentWithToc({ className }: BlogContentWithTocProps) {
+const SECTION_IDS: readonly string[] = ["introduction", "key-areas", "ethics", "conclusion"];
+
+export function BlogContentWithToc({
+  title,
+  dek,
+  category,
+  author,
+  date,
+  readingTime,
+  tocLabel = "On this page",
+  tocItems: tocItemsProp = BLOG_TOC_ITEMS,
+  sectionIdPrefix: prefixProp = "blog-with-toc",
+  heroImage,
+  secondaryImage,
+  className,
+}: BlogContentWithTocProps) {
   const scope = React.useId();
   const reduce = useReducedMotion();
   const rootRef = React.useRef<HTMLElement>(null);
-  const [active, setActive] = React.useState(tocItems[0].id);
+  // Ids go into querySelector, so only plain id characters are kept.
+  const sectionIdPrefix = String(prefixProp ?? "").replace(/[^a-zA-Z0-9_-]/g, "") || "blog-with-toc";
+  const tocItems = React.useMemo(
+    () => (Array.isArray(tocItemsProp) ? tocItemsProp : []).filter((item) => Boolean(item) && SECTION_IDS.includes(item.id)),
+    [tocItemsProp],
+  );
+  const [active, setActive] = React.useState<string>(tocItems[0]?.id ?? "");
 
   // Track the section nearest the top of whichever box is scrolling: the block
   // itself when it is height-constrained, otherwise the page.
@@ -45,7 +93,7 @@ export function BlogContentWithToc({ className }: BlogContentWithTocProps) {
     );
     targets.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [tocItems, sectionIdPrefix]);
 
   function jumpTo(event: React.MouseEvent<HTMLAnchorElement>, id: string) {
     const target = rootRef.current?.querySelector<HTMLElement>(`[id="${sectionIdPrefix}-${id}"]`);
@@ -72,7 +120,7 @@ export function BlogContentWithToc({ className }: BlogContentWithTocProps) {
             className="sticky top-10"
             aria-label="Table of contents"
           >
-            <p className="px-3 text-[12px] font-semibold text-[#86868b] dark:text-[#98989d]">On this page</p>
+            <p className="px-3 text-[12px] font-semibold text-[#86868b] dark:text-[#98989d]">{tocLabel}</p>
             <ul className="mt-2 flex flex-col gap-0.5">
               {tocItems.map((item) => {
                 const isActive = item.id === active;
@@ -110,6 +158,14 @@ export function BlogContentWithToc({ className }: BlogContentWithTocProps) {
         <BlogContentCentered
           className="min-h-0 overflow-visible bg-transparent px-0 py-0 dark:bg-transparent sm:px-0 lg:py-0"
           sectionIdPrefix={sectionIdPrefix}
+          title={title}
+          dek={dek}
+          category={category}
+          author={author}
+          date={date}
+          readingTime={readingTime}
+          heroImage={heroImage}
+          secondaryImage={secondaryImage}
         />
       </div>
     </section>
