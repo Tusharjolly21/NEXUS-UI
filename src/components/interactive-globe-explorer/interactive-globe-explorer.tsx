@@ -128,7 +128,7 @@ const isLand = (lat: number, lng: number) => {
 /** Dots on land, from an even spread over the sphere. Built once; the same on server and client. */
 const LAND_DOTS: [number, number, number][] = (() => {
   const out: [number, number, number][] = [];
-  const n = 5200;
+  const n = 12000;
   const golden = Math.PI * (3 - Math.sqrt(5));
   for (let i = 0; i < n; i++) {
     const y = 1 - (i / (n - 1)) * 2;
@@ -376,12 +376,12 @@ export function InteractiveGlobeExplorer({
       ctx.stroke();
 
       // Land dots, fading toward the rim.
-      ctx.fillStyle = dk ? "#c7d2ea" : "#5d6b82";
-      const dot = Math.max(0.9, size / 300);
+      ctx.fillStyle = dk ? "#d5def2" : "#3d4a5f";
+      const dot = Math.max(1.3, size / 190);
       for (const v of LAND_DOTS) {
         const [x, y, z] = proj(v);
         if (z <= 0.02) continue;
-        ctx.globalAlpha = 0.18 + z * 0.62;
+        ctx.globalAlpha = 0.22 + z * 0.68;
         ctx.fillRect(x - dot / 2, y - dot / 2, dot, dot);
       }
       ctx.globalAlpha = 1;
