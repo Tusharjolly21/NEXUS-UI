@@ -28,9 +28,8 @@ Build a signup section as a rounded two-panel card. The left value panel makes t
 
 ## Layout and look
 
-- Root: `@container`, overflow hidden, radius 28px, white / `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`, `.9`). Grid one column; at ≥540px columns `1fr 1.1fr`.
-- Ink `#1d1d1f` / `#f5f5f7`; soft `#6e6e73` / `#a1a1a6`; focus ring 2px `#0071e3` / `#0a84ff`.
-- Value panel: padding 24px (28px at ≥540px), `isolate`. Wash `radial-gradient(80% 60% at 0% 0%, rgba(90,200,250,.45), transparent 70%), radial-gradient(70% 60% at 100% 100%, rgba(191,90,242,.35), transparent 70%), linear-gradient(180deg, #f5f5f7, #ececf1)`; dark `rgba(10,132,255,.35)`, `rgba(191,90,242,.28)`, `#232326 → #18181a`.
+- Root: `@container`, overflow hidden, radius 28px, white / `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`, `.9`). Columns `1fr 1.1fr` at ≥540px. Ink `#1d1d1f` / `#f5f5f7`; soft `#6e6e73` / `#a1a1a6`; focus ring 2px `#0071e3` / `#0a84ff`.
+- Value panel: padding 24px (28px at ≥540px). Wash `radial-gradient(80% 60% at 0% 0%, rgba(90,200,250,.45), transparent 70%), radial-gradient(70% 60% at 100% 100%, rgba(191,90,242,.35), transparent 70%), linear-gradient(180deg, #f5f5f7, #ececf1)`; dark `rgba(10,132,255,.35)`, `rgba(191,90,242,.28)`, `#232326 → #18181a`.
   - Badge: rounded-full, `white/70` (dark `white/10`), 1px `black/5` ring (dark `white/10`), blur, padding 4px 10px, 12px medium, 6px green `#30d158` dot.
   - `<h2>` 16px below: 24px (30px at ≥760px), semibold, line-height 1.08, tracking −0.04em, balanced.
   - Subhead 14px relaxed soft, 10px top; hidden between 540px and 720px containers.
@@ -38,12 +37,12 @@ Build a signup section as a rounded two-panel card. The left value panel makes t
   - Progress line: 20px top, 4px tall, rounded, track `black/6` / `white/10`, green fill.
   - Proof: 20px top, four 24px overlapping avatars (−8px overlap, 2px white ring / `#1c1c1e`) with gradients `#ffb38a→#ff375f`, `#5ac8fa→#0071e3`, `#b7f7c5→#0b8f6a`, `#d0b3ff→#7d3cff` at 135°, then 12.5px soft text.
 - Form panel: padding 24px (28px). `<h3>` "Create your workspace" 19px semibold tracking −0.03em; "Takes about a minute." 13.5px soft.
-  - SSO row (16px top, gap 8px): two 40px buttons, radius 12px, white with 1px `black/8` ring (dark `#2c2c2e`, `white/10`), hover `#f5f5f7` / `#3a3a3c`, 13.5px medium, 16px brand marks (four-colour Google G, GitHub cat). Divider: 14px vertical margin, two 1px lines `black/8` / `white/10` around "or" 12px soft.
-  - Fields (10px apart): 44px tall label wrappers, radius 12px, `#f5f5f7` / `#2c2c2e`, padding 0 14px, 1px `black/4` ring (dark `white/6`); focus-within white (dark stays) with 2px blue ring. Inputs 14.5px, placeholder `#86868b` / `#8e8e93`. Email shows a 20px green circle with a white check when valid. Password has a "Show"/"Hide" text toggle, 12.5px medium `#0066cc` / `#64b5ff`.
-  - Meter (8px below): four 6px tall rounded segments (gap 4px) on `#e8e8ed` / `#3a3a3c`, lit segments filled with the level colour; a 64px right-aligned 12px medium label: "Strength" when empty, else Too short / Weak / Fair / Good / Strong. Fill colours `#d2d2d7`, `#ff3b30`, `#ff9f0a`, `#0a84ff`, `#30d158`; label colours grey, `#d70015`/`#ff6961`, `#b25000`/`#ffb340`, `#0066cc`/`#64b5ff`, `#248a3d`/`#30d158`.
-  - Submit: 16px top, full width, 44px, radius 12px, blue, 15px semibold white, shadow `0 10px 24px -12px rgba(0,113,227,.9)`, hover `#0077ed`.
-  - Footnote (10px top, min-height 18px, centred, 12.5px): the error in red with `role="alert"`, else the sign-in line, else "By continuing you agree to the Terms and Privacy Policy."
-  - Done view (`role="status"`, min-height 330px, centred): 56px green circle with shadow `0 12px 30px -10px rgba(48,209,88,.8)` and a 28px check; "Your workspace is ready" 20px semibold; "We sent a link to {email} to confirm it's you." 14px soft, email medium ink, max 260px.
+  - SSO row (16px top, gap 8px): two 40px buttons, radius 12px, white with 1px `black/8` ring (dark `#2c2c2e`, `white/10`), 13.5px medium, 16px Google and GitHub marks. Divider: 14px vertical margin, 1px lines `black/8` / `white/10` around "or" 12px soft.
+  - Fields (10px apart): 44px label wrappers, radius 12px, `#f5f5f7` / `#2c2c2e`, padding 0 14px, 1px `black/4` ring (dark `white/6`); focus-within white (light only) with a 2px blue ring. Inputs 14.5px. A valid email shows a 20px green circle with a white check. Password has a "Show"/"Hide" toggle, 12.5px medium `#0066cc` / `#64b5ff`.
+  - Meter (8px below): four 6px rounded segments (gap 4px) on `#e8e8ed` / `#3a3a3c`, lit ones in the level colour; a 64px right-aligned 12px medium label: "Strength" when empty, else Too short / Weak / Fair / Good / Strong. Fills `#d2d2d7 #ff3b30 #ff9f0a #0a84ff #30d158`; label colours grey, `#d70015`/`#ff6961`, `#b25000`/`#ffb340`, `#0066cc`/`#64b5ff`, `#248a3d`/`#30d158`.
+  - Submit: 16px top, full width, 44px, radius 12px, blue, 15px semibold white, shadow `0 10px 24px -12px rgba(0,113,227,.9)`.
+  - Footnote (10px top, centred, 12.5px): the error in red (`role="alert"`), else the sign-in line, else "By continuing you agree to the Terms and Privacy Policy."
+  - Done view (`role="status"`, min-height 330px, centred): 56px green circle, shadow `0 12px 30px -10px rgba(48,209,88,.8)`, 28px check; "Your workspace is ready" 20px semibold; "We sent a link to {email} to confirm it's you." 14px soft.
 
 ## Motion
 

@@ -132,7 +132,7 @@ const moved: BlockPlaygrounds = {
       {"name": "showNewsletter", "type": "boolean", "description": "Show the newsletter form.", "defaultValue": "true"},
       {"name": "showWordmark", "type": "boolean", "description": "Draw the giant ghost wordmark.", "defaultValue": "true"},
       {"name": "socials", "type": "{ label: string; href: string; icon: ReactNode }[]", "description": "Icon links next to the status pill.", "defaultValue": "X and GitHub"},
-      {"name": "year", "type": "number", "description": "Year in the copyright line; omitted when not given."},
+      {"name": "year", "type": "number", "description": "Year in the copyright line; omitted when not given.", "hidden": true},
       {"name": "legal", "type": "string", "description": "Text after the copyright sign. Defaults to the brand."},
       {"name": "autoplay", "type": "boolean", "description": "Sweeps a wave through the wordmark until someone points at the footer.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the footer."},

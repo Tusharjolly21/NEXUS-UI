@@ -1,4 +1,4 @@
-Build an office finder card: a dotted globe drawn on a 2D canvas beside a list of cities, with the selected city's address and email ready to copy. Pick a city (in the list or by tapping its pin) and the globe swings round on a soft spring, overshoots a touch and settles with the city in the middle, where its pin drops in with a bounce and sends out a slow ripple. Drag the globe to spin it and it coasts to a stop. Clean, Apple-light, and calm.
+Build an office finder card: a dotted globe drawn on a 2D canvas beside a list of cities, with the selected city's address and email ready to copy. Pick a city (or tap its pin) and the globe swings round on a soft spring, overshoots a touch and settles with the city centred, where its pin drops in with a bounce and sends out a ripple. Drag to spin; it coasts. Calm and Apple-light.
 
 ## Stack
 
@@ -12,7 +12,7 @@ Build an office finder card: a dotted globe drawn on a 2D canvas beside a list o
 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
-| `locations` | `GlobeLocation[]` | 20 cities | Places to pin. Defaults (ids "1"–"20"): Milan, Cape Town, New York, London, Johannesburg, Tokyo, Paris, Sydney, Dubai, Singapore, Mumbai, Sao Paulo, Toronto, Berlin, Hong Kong, Los Angeles, Barcelona, Amsterdam, Seoul, Istanbul, with real lat/lng, a plausible street address each and one shared placeholder email. |
+| `locations` | `GlobeLocation[]` | 20 cities | Ids "1"–"20": Milan, Cape Town, New York, London, Johannesburg, Tokyo, Paris, Sydney, Dubai, Singapore, Mumbai, Sao Paulo, Toronto, Berlin, Hong Kong, Los Angeles, Barcelona, Amsterdam, Seoul, Istanbul (real lat/lng, a street address each, one shared placeholder email). |
 | `initialLocationId` | `string` | `"4"` (London) | Selected first; falls back to the first location. |
 | `onSelect` | `(location) => void` | – | Fires on every selection (keep it in a ref). |
 | `title` | `string` | `"Our offices"` | Heading above the list. |
@@ -22,7 +22,7 @@ Build an office finder card: a dotted globe drawn on a 2D canvas beside a list o
 ## Layout and look
 
 - Card: `@container`, flex, `min-height: 420px`, full width, radius 24, `overflow: hidden`, white, text `#1d1d1f`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)`. Dark: `#1c1c1e`, text `#f5f5f7`, shadow `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.9)`.
-- Below 500px container width it stacks (globe stage 250px tall on top); at 500px and up it is a row: stage `flex-1` on the left, a 230px side panel on the right with a left border. Borders are `rgba(0,0,0,.06)` (dark `rgba(255,255,255,.08)`).
+- Below 500px container width it stacks (stage 250px tall); from 500px it is a row: stage `flex-1`, then a 230px panel with a left border. Borders `rgba(0,0,0,.06)` (dark `rgba(255,255,255,.08)`).
 - Stage: centred square canvas, size = `max(120, min(stageWidth, stageHeight))`, DPR capped at 2, refit with a ResizeObserver. Hint text "Drag to spin. Tap a pin." at bottom 12px, 12px, `#86868b` (dark `#a1a1a6`), pointer-events none.
 - Panel header: padding 16px top, 8px bottom, 20px sides; title 15px semibold tracking −0.01em; count on the right, 12px tabular `#86868b` / `#a1a1a6`.
 - List: `role="listbox"`, padding 0 8px 8px, scrolls (`max-height: 180px` when stacked, unbounded side-by-side), thin scrollbar. Rows: full-width buttons, radius 12, padding 8×12, 14px; name on the left (semibold when selected), latitude on the right as `51.5°N` (one decimal, N/S), 11px tabular grey. The selected row has a highlight pill `#f0f0f3` (dark `#2c2c2e`) shared via `layoutId`.
@@ -32,7 +32,7 @@ Build an office finder card: a dotted globe drawn on a 2D canvas beside a list o
 
 - Radius `R = size × 0.44`, centre `c = size/2`. Rotate a unit vector by yaw about Y then pitch about X: `x1 = x·cos(yaw) + z·sin(yaw)`, `z1 = −x·sin(yaw) + z·cos(yaw)`, `y2 = y·cos(p) − z1·sin(p)`, `z2 = y·sin(p) + z1·cos(p)`; screen = `(c + x1·R, c − y2·R)`, depth `z2`. `toVec(lat,lng) = [cos(lat)·sin(lng), sin(lat), cos(lat)·cos(lng)]`.
 - Sphere: radial gradient from (c − 0.35R, c − 0.4R, r 0.1R) to (c, c, R): `#ffffff → #e4ebf5` (dark `#26304a → #121726`), 1px rim stroke `rgba(0,0,0,.06)` (dark `rgba(255,255,255,.08)`).
-- Land dots: build once at module level. Take 12,000 Fibonacci-sphere points (golden angle `π(3 − √5)`, `y = 1 − 2i/(n−1)`), convert to lat/lng and keep those on land according to a coarse 120×60 bitmask of 3° cells (60 hex strings of 30 chars, row 0 at 90°N, column 0 at 180°W, MSB first), traced from a public-domain world map. Draw kept dots with `z > 0.02` as squares of side `max(1.3, size/190)`, alpha `0.22 + z·0.68`, colour `#3d4a5f` (dark `#d5def2`).
+- Land dots (built once at module level): 12,000 Fibonacci-sphere points (golden angle `π(3 − √5)`), kept if on land per a coarse 120×60 bitmask of 3° cells (60 hex rows of 30 chars from 90°N, columns from 180°W, MSB first) traced from a public-domain world map. Draw kept dots with `z > 0.02` as squares of side `max(1.3, size/190)`, alpha `0.22 + z·0.68`, colour `#3d4a5f` (dark `#d5def2`).
 - Pins (front side only, alpha `min(1, z·2.2)`), accent `#0071e3` (dark `#0a84ff`): unselected = 3px-radius accent dot at 85% (hovered: 4.5px, full alpha). Selected = white disc r 7.5 with accent disc r 5.5, both scaled by the drop factor, plus a ripple. When drop > 0.6, draw a label pill 22px tall, radius 11, 34px above the pin, clamped 4px inside the canvas, text `600 12px` system font with 8px padding; fill `#1d1d1f` text white (dark: fill `#f5f5f7`, text `#1d1d1f`).
 
 ## Motion
@@ -45,11 +45,11 @@ Build an office finder card: a dotted globe drawn on a 2D canvas beside a list o
 
 ## Interaction and states
 
-- Canvas pointerdown captures the pointer, stops the flight and any coasting. A release within 5px is a tap: choose the nearest visible pin within 16px of the press point. Hovering (no drag) highlights the nearest pin and sets the cursor to `pointer`, otherwise `grab`. `touch-action: none`, no text selection. Pointerup is listened to on `window`.
-- Choosing a city: set it selected, fly, call `onSelect`, and if its row is outside the list's visible area, scroll the list (not the page) to centre it, smooth unless reduced motion.
+- Canvas pointerdown captures the pointer and stops flight and coasting. A release within 5px is a tap: choose the nearest visible pin within 16px. Hover highlights the nearest pin (cursor `pointer`, else `grab`). `touch-action: none`; pointerup on `window`.
+- Choosing a city: select, fly, call `onSelect`, and if its row is out of view scroll the list (not the page) to centre it.
 - Clipboard failures are swallowed; the button still confirms.
-- Reduced motion: flights jump instantly, no coasting, pins appear without bounce or ripple, highlight moves without spring, detail block only fades, list scroll is instant.
-- Keep live values (dark, selection, locations, reduce, landedAt) in a ref so one rAF loop runs for the component's life; cancel it and disconnect the ResizeObserver on unmount, and stop flights.
+- Reduced motion: flights jump, no coasting, no pin bounce or ripple, no highlight spring, detail only fades, list scroll instant.
+- Keep live values in a ref so one rAF loop runs for the component's life; on unmount cancel it, disconnect the ResizeObserver and stop flights.
 
 ## Autoplay demo
 
@@ -63,8 +63,8 @@ With `autoplay` and at least two locations, every 3.2s select the next city in o
 
 ## Acceptance checklist
 
-- The globe shows dotted continents shaded toward the rim and centres London on load.
-- Clicking a city swings the globe with a slight overshoot and the pin drops in with a bounce, label and repeating ripple.
+- Dotted continents fade toward the rim; London is centred on load.
+- Picking a city swings the globe with a slight overshoot; the pin bounces in with a label and ripple.
 - Tapping a pin on the globe selects it; dragging spins the globe and it coasts after release.
 - The highlight pill glides between rows; the detail block cross-fades with a blur.
 - Copy buttons copy and show a green check for 1.4s.

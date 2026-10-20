@@ -27,11 +27,9 @@ Build a complete site footer section in a rounded white card: brand with an orbi
 
 ## Layout and look
 
-- `<footer>`: `@container`, relative, full width, overflow hidden, radius 28px, white, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)`; dark `#1c1c1e`, `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.9)`.
-- Ink `#1d1d1f` / `#f5f5f7`; soft `#6e6e73` / `#a1a1a6`. Focus rings 2px `#0071e3` / `#0a84ff`.
-- Body padding 24px sides, 24px top (40px / 36px at ≥720px).
-- Top row: stacked with gap 20px; at ≥560px a row, space-between, gap 32px.
-  - Brand block (max-width 280px): logo mark + brand 19px semibold tracking −0.03em, gap 10px; tagline margin-top 12px, 14px relaxed, soft.
+- `<footer>`: `@container`, overflow hidden, radius 28px, white / `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`, `.9`). Ink `#1d1d1f` / `#f5f5f7`; soft `#6e6e73` / `#a1a1a6`; focus rings 2px `#0071e3` / `#0a84ff`.
+- Body padding 24px sides and top (40px / 36px at ≥720px). Top row stacked (gap 20px); at ≥560px a space-between row, gap 32px.
+  - Brand block (max 280px): mark + brand 19px semibold tracking −0.03em, gap 10px; tagline 12px below, 14px relaxed soft.
   - Logo mark (32px): 1.5px ring at `#1d1d1f/15` (dark `white/20`), a 12px ink centre dot, and a 6px `#0071e3` (dark `#0a84ff`) satellite at the top centre glowing `0 0 8px rgba(0,113,227,.7)`.
   - Newsletter (full width, max 320px at ≥560px): label "Get the monthly changelog" 13px semibold. Field 44px tall pill, `#f0f0f3` / `#2c2c2e`, padding 4px with 16px left, gap 4px, 1px transparent ring that becomes 2px blue on focus-within, red `#ff3b30` in error. Input 14px, placeholder "you@company.com" `#86868b` / `#8e8e93`. Submit 36px tall pill, 13px semibold white, `#0071e3` (hover `#0077ed`, dark `#0a84ff`) with 16px padding; when done it becomes a 36px green `#30d158` circle with a check. Hint below (margin-top 8px, min-height 18px, 12.5px): "One email a month. No spam." soft, errors `#d70015` / `#ff6961`.
 - Nav (`aria-label="Footer"`): margin-top 24px (32px at ≥720px), 2 columns (3 at ≥480px), gap 24px. Column title 12px semibold uppercase tracking .08em soft. List margin-top 10px, 6px between items. Links 14px, tracking −0.01em, ink, gap 6px, with an underline (1px, current colour) that scales in from the left over 300ms on hover. Badge: rounded-full, padding 1px 6px, 11px semibold tabular, `#0071e3/10` with `#0066cc` (dark `#0a84ff/20` with `#64b5ff`).
@@ -69,6 +67,5 @@ After 500ms, while untouched, tween `wave` from `−10%` to `110%` of the wordma
 - [ ] The wordmark is partly hidden behind the legal bar.
 - [ ] An invalid email shakes the field red with a message.
 - [ ] A valid email shows bouncing dots, then the button shrinks to a green check.
-- [ ] Hovering links draws an underline from the left; badges show beside Blocks and Careers.
-- [ ] Columns go 2 → 3 and the top row goes stacked → side by side as the container widens.
+- [ ] Columns go 2 → 3 and the top row goes side by side as the container widens.
 - [ ] Autoplay sweeps the wave back and forth until touched.
