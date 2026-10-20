@@ -44,7 +44,8 @@ const DEFAULT_FAQS: FaqItem[] = [
   },
 ];
 
-const SEARCHABLE_FAQS: FaqItem[] = [
+/** Default questions for `SearchableFaqSection`: six help-centre questions tagged Account, Billing or Security. */
+export const SEARCHABLE_FAQS: FaqItem[] = [
   {
     question: "How do I invite my team?",
     answer:
@@ -83,7 +84,8 @@ const SEARCHABLE_FAQS: FaqItem[] = [
   },
 ];
 
-const CHAT_FAQS: FaqItem[] = [
+/** Default questions for `ChatFaqSection`: six coffee-subscription questions. */
+export const CHAT_FAQS: FaqItem[] = [
   {
     question: "When will my first box ship?",
     answer:
@@ -119,6 +121,18 @@ const CHAT_FAQS: FaqItem[] = [
 const UI_SPRING: Transition = { type: "spring", stiffness: 420, damping: 34 };
 const HEIGHT_SPRING: Transition = { type: "spring", stiffness: 260, damping: 32 };
 const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]";
+/** Same ring, coloured by the `--faq-accent` variable a section sets when its `accent` prop is passed. */
+const accentFocusRing =
+  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--faq-accent)]";
+
+/** Sets `--faq-accent` only when an accent is passed, so the built-in light/dark colours stay otherwise. */
+function accentStyle(accent?: string): React.CSSProperties | undefined {
+  return accent ? ({ "--faq-accent": accent } as React.CSSProperties) : undefined;
+}
+
+function clampNumber(value: number, min: number, max: number, fallback: number) {
+  return Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
+}
 
 function useReveal(stagger = 0.06) {
   const reduce = useReducedMotion();
@@ -165,7 +179,7 @@ function Collapse({ open, id, children }: { open: boolean; id: string; children:
 }
 
 /** The round plus that turns into a close mark. */
-function ToggleMark({ open, filled = false }: { open: boolean; filled?: boolean }) {
+function ToggleMark({ open, filled = false, accented = false }: { open: boolean; filled?: boolean; accented?: boolean }) {
   const reduce = useReducedMotion();
   return (
     <motion.span
@@ -175,7 +189,9 @@ function ToggleMark({ open, filled = false }: { open: boolean; filled?: boolean 
       className={cn(
         "grid size-7 shrink-0 place-items-center rounded-full transition-colors duration-200",
         open && filled
-          ? "bg-[#0071e3] text-white"
+          ? accented
+            ? "bg-[color:var(--faq-accent)] text-white"
+            : "bg-[#0071e3] text-white"
           : "bg-[#e8e8ed] text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#f5f5f7]",
       )}
     >
@@ -321,28 +337,67 @@ function FaqRow({
   );
 }
 
+export type SearchableFaqSectionProps = {
+  /** Questions; each distinct `tag`, in first-seen order, becomes a topic after the All topic. */
+  items?: FaqItem[];
+  /** Card heading. */
+  title?: string;
+  /** Paragraph under the heading. */
+  description?: string;
+  /** Small label above the heading. Empty (the default) hides it. */
+  eyebrow?: string;
+  /** Placeholder and screen-reader label of the search field. */
+  searchPlaceholder?: string;
+  /** Label of the first topic, which shows every question. */
+  allLabel?: string;
+  /** Start of the empty-state line; the query (or topic) follows in curly quotes. */
+  emptyLabel?: string;
+  /** Bold footer line. */
+  supportTitle?: string;
+  /** Smaller footer line under it. */
+  supportText?: string;
+  /** Footer link text. */
+  supportLabel?: string;
+  /** Footer link target. */
+  supportHref?: string;
+  /** Hex colour for the open toggle, search focus ring, footer link and focus outlines. Unset keeps #0071e3 (link #0066cc, #2997ff in dark mode). */
+  accent?: string;
+  className?: string;
+};
+
 export function SearchableFaqSection({
   items = SEARCHABLE_FAQS,
+  title = "Help centre",
+  description = "Answers about your account, billing and security. Search, or pick a topic.",
+  eyebrow = "",
+  searchPlaceholder = "Search the help centre",
+  allLabel = "All",
+  emptyLabel = "No questions match",
+  supportTitle = "Still have questions?",
+  supportText = "Our support team replies within four working hours.",
+  supportLabel = "Message support ›",
+  supportHref = "mailto:hello@example.com",
+  accent,
   className,
-}: {
-  items?: FaqItem[];
-  className?: string;
-}) {
+}: SearchableFaqSectionProps) {
   const uid = React.useId();
   const reduce = useReducedMotion();
   const [open, setOpen] = React.useState<string | null>(items[0]?.question ?? null);
   const [search, setSearch] = React.useState("");
-  const [activeTab, setActiveTab] = React.useState("All");
+  // null is the "all topics" segment, so a tag can never collide with its label
+  const [activeTab, setActiveTab] = React.useState<string | null>(null);
   const { container, item } = useReveal(0.05);
+  const ring = accent ? accentFocusRing : focusRing;
+  const linkTone = accent ? "text-[color:var(--faq-accent)]" : "text-[#0066cc] dark:text-[#2997ff]";
   const categories = React.useMemo(
-    () => ["All", ...Array.from(new Set(items.map((faq) => faq.tag).filter((t): t is string => Boolean(t))))],
+    () => [null, ...Array.from(new Set(items.map((faq) => faq.tag).filter((t): t is string => Boolean(t))))],
     [items],
   );
 
   const filtered = React.useMemo(() => {
     const query = search.trim().toLowerCase();
     return items.filter((faq) => {
-      const tabMatch = activeTab === "All" || faq.tag === activeTab;
+      const tabMatch = activeTab === null || faq.tag === activeTab;
       const searchMatch =
         !query || faq.question.toLowerCase().includes(query) || faq.answer.toLowerCase().includes(query);
       return tabMatch && searchMatch;
@@ -350,7 +405,10 @@ export function SearchableFaqSection({
   }, [activeTab, items, search]);
 
   return (
-    <section className={cn("w-full bg-[#f5f5f7] p-3 py-10 text-[#1d1d1f] sm:p-6 sm:py-14 dark:bg-black dark:text-[#f5f5f7]", className)}>
+    <section
+      className={cn("w-full bg-[#f5f5f7] p-3 py-10 text-[#1d1d1f] sm:p-6 sm:py-14 dark:bg-black dark:text-[#f5f5f7]", className)}
+      style={accentStyle(accent)}
+    >
       <motion.div
         variants={container}
         initial="hidden"
@@ -358,17 +416,22 @@ export function SearchableFaqSection({
         viewport={{ once: true, margin: "-80px" }}
         className="mx-auto w-full max-w-[860px] rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] sm:p-9 dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
       >
+        {eyebrow ? (
+          <motion.p variants={item} className={cn("mb-2 text-[15px] font-semibold", linkTone)}>
+            {eyebrow}
+          </motion.p>
+        ) : null}
         <motion.h3 variants={item} className="text-[32px] font-semibold leading-[1.1] tracking-[-0.03em]">
-          Help centre
+          {title}
         </motion.h3>
         <motion.p variants={item} className="mt-2 max-w-2xl text-[17px] leading-[1.5] text-[#6e6e73] dark:text-[#a1a1a6]">
-          Answers about your account, billing and security. Search, or pick a topic.
+          {description}
         </motion.p>
 
         <motion.div variants={item} className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="relative min-w-0 flex-1">
             <label htmlFor={`${uid}-search`} className="sr-only">
-              Search the help centre
+              {searchPlaceholder}
             </label>
             <Search
               aria-hidden
@@ -380,10 +443,13 @@ export function SearchableFaqSection({
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search the help centre"
+              placeholder={searchPlaceholder}
               className={cn(
                 "h-11 w-full rounded-[12px] bg-[#f5f5f7] pl-10 pr-3 text-[15px] text-[#1d1d1f] outline-none transition-shadow placeholder:text-[#a1a1a6]",
-                "focus:shadow-[0_0_0_3px_rgba(0,113,227,.35)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:placeholder:text-[#8e8e93]",
+                accent
+                  ? "focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--faq-accent)_35%,transparent)]"
+                  : "focus:shadow-[0_0_0_3px_rgba(0,113,227,.35)]",
+                "dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:placeholder:text-[#8e8e93]",
               )}
             />
           </div>
@@ -397,7 +463,7 @@ export function SearchableFaqSection({
               const selected = activeTab === category;
               return (
                 <button
-                  key={category}
+                  key={category ?? "\u0000all"}
                   type="button"
                   role="radio"
                   aria-checked={selected}
@@ -405,7 +471,7 @@ export function SearchableFaqSection({
                   className={cn(
                     "relative h-[38px] min-w-0 flex-1 rounded-[8px] px-3 text-[13px] font-medium transition-colors sm:flex-none",
                     selected ? "text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7]",
-                    focusRing,
+                    ring,
                   )}
                 >
                   {selected ? (
@@ -416,7 +482,7 @@ export function SearchableFaqSection({
                       transition={reduce ? { duration: 0 } : UI_SPRING}
                     />
                   ) : null}
-                  <span className="relative z-10 block truncate">{category}</span>
+                  <span className="relative z-10 block truncate">{category ?? allLabel}</span>
                 </button>
               );
             })}
@@ -440,9 +506,10 @@ export function SearchableFaqSection({
                 >
                   <SearchableFaqRow
                     item={faq}
-                    showTag={activeTab === "All"}
+                    showTag={activeTab === null}
                     panelId={`${uid}-q${items.indexOf(faq)}`}
                     open={open === faq.question}
+                    accented={Boolean(accent)}
                     onToggle={() => setOpen((current) => (current === faq.question ? null : faq.question))}
                   />
                 </motion.li>
@@ -458,7 +525,7 @@ export function SearchableFaqSection({
                 exit={{ opacity: 0 }}
                 className="rounded-[16px] bg-[#f5f5f7] py-10 text-center text-[15px] text-[#6e6e73] dark:bg-[#2c2c2e] dark:text-[#a1a1a6]"
               >
-                No questions match &ldquo;{search.trim() || activeTab}&rdquo;.
+                {emptyLabel} &ldquo;{search.trim() || (activeTab ?? allLabel)}&rdquo;.
               </motion.p>
             ) : null}
           </AnimatePresence>
@@ -469,14 +536,11 @@ export function SearchableFaqSection({
           className="mt-7 flex flex-wrap items-center justify-between gap-3 border-t border-black/[0.08] pt-6 dark:border-white/[0.1]"
         >
           <div>
-            <p className="text-[15px] font-semibold">Still have questions?</p>
-            <p className="mt-0.5 text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">Our support team replies within four working hours.</p>
+            <p className="text-[15px] font-semibold">{supportTitle}</p>
+            <p className="mt-0.5 text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">{supportText}</p>
           </div>
-          <a
-            href="mailto:hello@example.com"
-            className={cn("rounded-full text-[15px] font-medium text-[#0066cc] hover:underline dark:text-[#2997ff]", focusRing)}
-          >
-            Message support ›
+          <a href={supportHref} className={cn("rounded-full text-[15px] font-medium hover:underline", linkTone, ring)}>
+            {supportLabel}
           </a>
         </motion.div>
       </motion.div>
@@ -489,12 +553,14 @@ function SearchableFaqRow({
   open,
   showTag,
   panelId,
+  accented,
   onToggle,
 }: {
   item: FaqItem;
   open: boolean;
   showTag: boolean;
   panelId: string;
+  accented: boolean;
   onToggle: () => void;
 }) {
   return (
@@ -509,7 +575,10 @@ function SearchableFaqRow({
         onClick={onToggle}
         aria-expanded={open}
         aria-controls={panelId}
-        className={cn("flex w-full items-center justify-between gap-4 rounded-[16px] px-4 py-3.5 text-left", focusRing)}
+        className={cn(
+          "flex w-full items-center justify-between gap-4 rounded-[16px] px-4 py-3.5 text-left",
+          accented ? accentFocusRing : focusRing,
+        )}
       >
         <span className="min-w-0 flex-1">
           <span className="block text-[16px] font-semibold leading-[1.4] tracking-[-0.01em]">{item.question}</span>
@@ -517,7 +586,7 @@ function SearchableFaqRow({
             <span className="mt-0.5 block text-[12px] text-[#86868b] dark:text-[#98989d]">{item.tag}</span>
           ) : null}
         </span>
-        <ToggleMark open={open} filled />
+        <ToggleMark open={open} filled accented={accented} />
       </button>
       <Collapse open={open} id={panelId}>
         <p className="px-4 pb-4 pr-14 text-[15px] leading-[1.6] text-[#6e6e73] dark:text-[#a1a1a6]">{item.answer}</p>
@@ -526,23 +595,56 @@ function SearchableFaqRow({
   );
 }
 
+export type ChatFaqSectionProps = {
+  /** Questions; each becomes a chip and the first is selected on mount. Tags are ignored. */
+  items?: FaqItem[];
+  /** Heading on the left. */
+  title?: string;
+  /** Paragraph under the heading. */
+  description?: string;
+  /** Small label above the heading. Empty (the default) hides it. */
+  eyebrow?: string;
+  /** Name in the chat header; its first letter fills the avatar. */
+  agentName?: string;
+  /** Grey line under the name. */
+  agentStatus?: string;
+  /** Centred timestamp above the bubbles. */
+  timestamp?: string;
+  /** How long the typing dots show before the answer lands, in seconds (0 to 3; 0 skips them). Reduced motion always skips them. */
+  typingSeconds?: number;
+  /** Hex colour for the selected chip, the question bubble and focus outlines. Unset keeps #0071e3. */
+  accent?: string;
+  className?: string;
+};
+
 export function ChatFaqSection({
   items = CHAT_FAQS,
+  title = "Ask before your first box.",
+  description = "Tap a question and the roastery answers. Real replies, usually within minutes.",
+  eyebrow = "",
+  agentName = "Hearth Roasters",
+  agentStatus = "Usually replies in minutes",
+  timestamp = "Today 10:07",
+  typingSeconds = 0.9,
+  accent,
   className,
-}: {
-  items?: FaqItem[];
-  className?: string;
-}) {
+}: ChatFaqSectionProps) {
   const uid = React.useId();
   const reduce = useReducedMotion();
   const [active, setActive] = React.useState(0);
   const activeItem = items[active] ?? items[0] ?? CHAT_FAQS[0];
   const { container, item } = useReveal(0.05);
   // the "typing" bubble shows for this long before the answer lands
-  const typing = reduce ? 0 : 0.9;
+  const typing = reduce ? 0 : clampNumber(typingSeconds, 0, 3, 0.9);
+  const ring = accent ? accentFocusRing : focusRing;
+  const accentFill = accent ? "bg-[color:var(--faq-accent)]" : "bg-[#0071e3]";
+  const initial = (Array.from(agentName.trim())[0] ?? "").toUpperCase();
 
   return (
-    <section className={cn("w-full bg-white p-3 text-[#1d1d1f] sm:p-6 dark:bg-black dark:text-[#f5f5f7]", className)}>
+    <section
+      className={cn("w-full bg-white p-3 text-[#1d1d1f] sm:p-6 dark:bg-black dark:text-[#f5f5f7]", className)}
+      style={accentStyle(accent)}
+    >
       <motion.div
         variants={container}
         initial="hidden"
@@ -551,14 +653,25 @@ export function ChatFaqSection({
         className="mx-auto grid min-h-[640px] w-full max-w-[1360px] gap-8 rounded-[32px] bg-[#f5f5f7] p-5 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:p-12 dark:bg-[#1c1c1e]"
       >
         <div className="flex min-w-0 flex-col justify-center">
+          {eyebrow ? (
+            <motion.p
+              variants={item}
+              className={cn(
+                "mb-3 text-[15px] font-semibold",
+                accent ? "text-[color:var(--faq-accent)]" : "text-[#0066cc] dark:text-[#2997ff]",
+              )}
+            >
+              {eyebrow}
+            </motion.p>
+          ) : null}
           <motion.h2
             variants={item}
             className="max-w-md text-[36px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[44px]"
           >
-            Ask before your first box.
+            {title}
           </motion.h2>
           <motion.p variants={item} className="mt-4 max-w-md text-[17px] leading-[1.5] text-[#6e6e73] dark:text-[#a1a1a6]">
-            Tap a question and the roastery answers. Real replies, usually within minutes.
+            {description}
           </motion.p>
 
           <div role="radiogroup" aria-label="Questions" className="mt-8 flex flex-col items-start gap-2">
@@ -578,14 +691,14 @@ export function ChatFaqSection({
                     selected
                       ? "text-white"
                       : "bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05)] hover:bg-[#fafafa] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-none dark:hover:bg-[#3a3a3c]",
-                    focusRing,
+                    ring,
                   )}
                 >
                   {selected ? (
                     <motion.span
                       layoutId={`${uid}-chip`}
                       aria-hidden
-                      className="absolute inset-0 rounded-full bg-[#0071e3]"
+                      className={cn("absolute inset-0 rounded-full", accentFill)}
                       transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 32 }}
                     />
                   ) : null}
@@ -601,12 +714,12 @@ export function ChatFaqSection({
           className="relative flex min-h-[460px] min-w-0 flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-24px_rgba(0,0,0,.25)] dark:bg-black dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
         >
           <header className="flex items-center gap-3 border-b border-black/[0.06] px-5 py-4 dark:border-white/[0.08]">
-            <span className="grid size-9 place-items-center rounded-full bg-[#1d1d1f] text-[14px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
-              H
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[#1d1d1f] text-[14px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+              {initial}
             </span>
             <div className="min-w-0 flex-1 leading-tight">
-              <p className="truncate text-[15px] font-semibold">Hearth Roasters</p>
-              <p className="text-[12px] text-[#86868b] dark:text-[#98989d]">Usually replies in minutes</p>
+              <p className="truncate text-[15px] font-semibold">{agentName}</p>
+              <p className="truncate text-[12px] text-[#86868b] dark:text-[#98989d]">{agentStatus}</p>
             </div>
             <motion.button
               type="button"
@@ -614,8 +727,8 @@ export function ChatFaqSection({
               aria-label="Reset chat FAQ"
               whileTap={reduce ? undefined : { scale: 0.92 }}
               className={cn(
-                "grid size-9 place-items-center rounded-full bg-[#f5f5f7] text-[#6e6e73] transition-colors hover:text-[#1d1d1f] dark:bg-[#1c1c1e] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7]",
-                focusRing,
+                "grid size-9 shrink-0 place-items-center rounded-full bg-[#f5f5f7] text-[#6e6e73] transition-colors hover:text-[#1d1d1f] dark:bg-[#1c1c1e] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7]",
+                ring,
               )}
             >
               <RotateCcw className="size-4" strokeWidth={1.75} />
@@ -623,7 +736,7 @@ export function ChatFaqSection({
           </header>
 
           <div className="flex flex-1 flex-col justify-end gap-3 px-4 pb-6 pt-5 sm:px-6" aria-live="polite">
-            <p className="text-center text-[12px] font-medium text-[#86868b] dark:text-[#98989d]">Today 10:07</p>
+            <p className="text-center text-[12px] font-medium text-[#86868b] dark:text-[#98989d]">{timestamp}</p>
 
             <AnimatePresence mode="popLayout" initial={false}>
               <motion.div
@@ -633,7 +746,10 @@ export function ChatFaqSection({
                 exit={reduce ? { opacity: 0 } : { opacity: 0, y: -12, filter: "blur(6px)" }}
                 transition={{ type: "spring", stiffness: 420, damping: 30 }}
                 style={{ transformOrigin: "100% 100%" }}
-                className="ml-auto max-w-[80%] rounded-[20px] rounded-br-[6px] bg-[#0071e3] px-4 py-2.5 text-[16px] leading-[1.4] text-white"
+                className={cn(
+                  "ml-auto max-w-[80%] rounded-[20px] rounded-br-[6px] px-4 py-2.5 text-[16px] leading-[1.4] text-white",
+                  accentFill,
+                )}
               >
                 {activeItem.question}
               </motion.div>

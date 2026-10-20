@@ -57,6 +57,7 @@ const nextConfig = {
       "./public/*.{png,jpg,jpeg,webp,svg}",
     ],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
+    "/api/prompt/blocks/[id]": ["./content/build-prompts/blocks/*.md"],
     // Block pages read section source at request time (only for sessions allowed to see it).
     "/blocks/[slug]": [
       "./src/components/blocks/**/*.{ts,tsx}",

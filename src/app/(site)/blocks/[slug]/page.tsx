@@ -278,7 +278,7 @@ export default async function BlockDetailPage({ params }: Props) {
             </ol>
           </nav>
 
-          <aside aria-label="Install" className="rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
+          <aside id="install" aria-label="Install" className="scroll-mt-28 rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
             <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">Install</h2>
             <p className="mt-1 text-[14px] text-muted-foreground">
               {locked
@@ -1089,6 +1089,9 @@ function PreviewCodeSection({
 }) {
   const sections = variantsOf(block);
   const at = sections.findIndex((v) => v.title === title);
+  const variant = at === -1 ? undefined : sections[at];
+  const entry = getBlock(block);
+  const registryName = variant?.registryCliName ?? entry?.registryCliName ?? block;
   // Never serialise source or usage of a locked section into the page: the client only gets "".
   return (
     <BlockSection
@@ -1100,6 +1103,9 @@ function PreviewCodeSection({
       usageCode={locked ? "" : (usageCode ?? defaultUsageForTitle(title))}
       locked={locked}
       pro={pro}
+      block={block}
+      sectionId={variant?.id}
+      installCommand={locked ? undefined : `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}`}
     >
       {children}
     </BlockSection>
