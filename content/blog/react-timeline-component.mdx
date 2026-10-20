@@ -1,0 +1,215 @@
+---
+title: "React Timeline Component: Animated Project Roadmaps"
+description: "Build an accessible React timeline for roadmaps and project milestones: semantic list markup, a scroll-linked progress line, and a vertical-to-horizontal layout."
+date: "2026-10-20"
+---
+
+A timeline is one of the few UI patterns where the markup matters as much as the visuals. It shows order, it shows status (done, in progress, planned), and on a roadmap page it is often the main content. This guide builds a React timeline component from the data model up: semantic HTML, a vertical layout with a status rail, a progress line that fills as you scroll, and a responsive version that turns horizontal on wide screens. The code uses React, Tailwind CSS, and Framer Motion. If you want a finished version, the [milestone timeline component](/components/milestone-timeline) implements the same ideas.
+
+## What data does a timeline component need?
+
+Start with the shape of a milestone, because every visual decision follows from it:
+
+```ts
+export type MilestoneStatus = "done" | "current" | "upcoming";
+
+export type Milestone = {
+  id: string;
+  title: string;
+  /** Machine-readable date for <time>, e.g. "2026-06" or "2026-06-14". */
+  date: string;
+  /** Human label, e.g. "Jun 2026" or "Q3". */
+  label: string;
+  description?: string;
+  status: MilestoneStatus;
+};
+
+const STATUS_TEXT: Record<MilestoneStatus, string> = {
+  done: "Completed",
+  current: "In progress",
+  upcoming: "Planned",
+};
+```
+
+Store status explicitly rather than deriving it from today's date. Roadmaps slip, and "the date has passed" does not mean "the work is done".
+
+## What is the right HTML for a timeline?
+
+A timeline is an ordered list, so use `ol` and `li`. Screen readers announce "list, 5 items" and the position of each item, which is exactly the information a sighted user gets from the rail.
+
+Three more details make it fully accessible:
+
+- **Dates in a `time` element** with a `dateTime` attribute, so the date is machine-readable while the label stays friendly.
+- **Status as text, not only colour.** A filled dot versus an outlined dot means nothing to a screen reader, and colour alone fails WCAG 1.4.1. Add a visually hidden status label.
+- **`aria-current="step"`** on the milestone in progress, which assistive tech announces as "current step".
+
+The connecting rail is decoration, so it gets `aria-hidden`. One HTML gotcha: an `ol` may only contain `li` elements, so do not drop a `span` for the rail directly inside it. Use a pseudo-element or put the rail in a wrapper next to the list.
+
+## Building a vertical timeline in React and Tailwind
+
+Here is a static vertical timeline. Each item is a two-column grid, a 24px node column and the content, and each item draws its own connector to the next one with a `before:` pseudo-element.
+
+```tsx
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+function Node({ status }: { status: MilestoneStatus }) {
+  return (
+    <span
+      className={cn(
+        "relative z-10 grid size-6 place-items-center rounded-full",
+        status === "done" && "bg-zinc-950 text-white",
+        status === "current" && "bg-indigo-600 ring-4 ring-indigo-600/20",
+        status === "upcoming" && "border-2 border-dashed border-zinc-300 bg-white",
+      )}
+    >
+      {status === "done" ? <Check aria-hidden className="size-3.5" strokeWidth={3} /> : null}
+      {status === "current" ? <span className="size-2 rounded-full bg-white" /> : null}
+    </span>
+  );
+}
+
+export function Timeline({ items }: { items: Milestone[] }) {
+  return (
+    <ol>
+      {items.map((m) => (
+        <li
+          key={m.id}
+          aria-current={m.status === "current" ? "step" : undefined}
+          className={cn(
+            "relative grid grid-cols-[24px_1fr] gap-x-4 pb-8 last:pb-0",
+            // connector: from below this node to the top of the next item
+            "before:absolute before:top-6 before:bottom-0 before:left-[11px] before:w-px before:bg-zinc-200 last:before:hidden",
+          )}
+        >
+          <Node status={m.status} />
+          <div>
+            <p className="font-semibold text-zinc-950">
+              {m.title}
+              <span className="sr-only"> ({STATUS_TEXT[m.status]})</span>
+            </p>
+            <time dateTime={m.date} className="text-sm text-zinc-500">
+              {m.label}
+            </time>
+            {m.description ? <p className="mt-1 text-sm text-zinc-600">{m.description}</p> : null}
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+```
+
+The connector sits at `left-[11px]` so a 1px line runs through the centre of the 24px node column. Spacing comes from `pb-8` on each item rather than `space-y-8` on the list, so the connector covers the gap and meets the next node. A single rail drawn on the whole list looks simpler, but it overshoots the last node whenever the final item has a description. Status classes are switched with `cn()`; if that helper is new to you, the [cn() utility guide](/blog/cn-utility-tailwind) explains why it beats string concatenation.
+
+## How do you animate a timeline progress line on scroll?
+
+A scroll-linked line fills from top to bottom as the reader moves through the timeline. Framer Motion's `useScroll` gives you a 0 to 1 progress value for a target element, and `scaleY` turns it into a growing line without triggering layout.
+
+```tsx
+"use client";
+
+import { useRef, useState } from "react";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export function ScrollTimeline({ items }: { items: Milestone[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  const [reached, setReached] = useState(0);
+
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start center", "end center"],
+  });
+  const smooth = useSpring(scrollYProgress, { stiffness: 200, damping: 40, restDelta: 0.001 });
+
+  // Light up each node once the line has passed its centre.
+  useMotionValueEvent(scrollYProgress, "change", (v) => {
+    const root = ref.current;
+    if (!root) return;
+    const top = root.getBoundingClientRect().top;
+    const line = v * root.offsetHeight;
+    const nodes = root.querySelectorAll<HTMLElement>("[data-node]");
+    let count = 0;
+    nodes.forEach((n) => {
+      const r = n.getBoundingClientRect();
+      if (r.top - top + r.height / 2 <= line) count++;
+    });
+    setReached(count);
+  });
+
+  return (
+    <div ref={ref} className="relative">
+      <div aria-hidden className="absolute inset-y-0 left-[11px] w-px bg-zinc-200" />
+      <motion.div
+        aria-hidden
+        style={{ scaleY: reduce ? scrollYProgress : smooth }}
+        className="absolute inset-y-0 left-[11px] w-px origin-top bg-indigo-500"
+      />
+      <ol className="relative space-y-10">
+        {items.map((m, i) => (
+          <li key={m.id} className="grid grid-cols-[24px_1fr] gap-x-4">
+            <span
+              data-node
+              className={cn(
+                "size-6 rounded-full border-2 bg-white transition-colors duration-300",
+                i < reached ? "border-indigo-500 bg-indigo-500" : "border-zinc-300",
+              )}
+            />
+            <div>{/* title, time, description as above */}</div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+```
+
+The `offset` pair is the part people get wrong. `["start center", "end center"]` means progress is 0 when the top of the timeline reaches the middle of the viewport and 1 when its bottom does, so the end of the line tracks the middle of the screen, where the reader's eye is. Use `"start end"` instead if you want filling to begin as soon as the timeline enters from the bottom.
+
+`useMotionValueEvent` runs on every scroll change without re-rendering, and `setReached` only re-renders when the count actually changes. Measuring the nodes, rather than assuming they are evenly spaced, keeps the highlight accurate when descriptions have different lengths.
+
+For reduced motion, the line still follows the scroll position (the user is driving it), but it skips the spring so nothing lags or overshoots. The same `useScroll` technique powers the [scroll progress bar](/components/scroll-progress-bar), and the [scroll choreography guide](/blog/motion-scroll-choreography) covers offsets in more depth.
+
+### Status fill instead of scroll fill
+
+For a product roadmap, the line often means "how far along are we", not "how far have you scrolled". In that case, measure the centre of the current node, size the coloured rail to that height, and animate it once with `whileInView`. Re-measure with a `ResizeObserver` so the rail stays correct when text wraps. That is how the [milestone timeline](/components/milestone-timeline) works.
+
+## How do you make a timeline horizontal on desktop?
+
+A horizontal timeline reads well on wide screens but breaks on phones. The simplest responsive approach is one list whose direction and connector orientation change at a breakpoint:
+
+```tsx
+<ol className="flex flex-col md:flex-row">
+  {items.map((m) => (
+    <li
+      key={m.id}
+      className={cn(
+        "relative grid grid-cols-[24px_1fr] gap-x-4 pb-8 last:pb-0",
+        "md:flex-1 md:grid-cols-1 md:gap-y-4 md:pr-6 md:pb-0",
+        "before:absolute before:bg-zinc-200 last:before:hidden",
+        // vertical connector on mobile
+        "before:top-6 before:bottom-0 before:left-[11px] before:w-px",
+        // horizontal connector from md up
+        "md:before:top-[11px] md:before:right-0 md:before:bottom-auto md:before:left-6 md:before:h-px md:before:w-auto",
+      )}
+    >
+      <Node status={m.status} />
+      <div>{/* content */}</div>
+    </li>
+  ))}
+</ol>
+```
+
+On mobile each item is a row with the node on the left and a connector running down to the next item. From `md` up, items share the width equally, the node sits above the text, and the connector runs right from each node to the start of the next item. Because spacing is padding inside each item (`pb-8`, then `md:pr-6`) rather than a `gap` on the list, the segments always join up.
+
+This works up to around five milestones. Beyond that, let the horizontal list scroll: wrap it in a container with `overflow-x-auto snap-x snap-mandatory`, give each item a fixed width and `snap-start`, and make the scroll container keyboard reachable with `tabIndex={0}`, `role="region"`, and an `aria-label`. Without `tabIndex`, keyboard users cannot scroll a region that contains no focusable elements.
+
+## Animation details that keep timelines usable
+
+- **Do not hide content behind entrance animations.** If each item starts at `opacity: 0` and waits for `whileInView`, server-rendered HTML ships invisible text until JavaScript loads. Animate the rail and nodes, or keep entrances short and pass `initial={false}` when reduced motion is on.
+- **Pulse only the current node,** and turn the pulse off under reduced motion. One moving element tells the reader where things stand; five compete for attention.
+- **Stagger by index, capped.** A delay of `0.1 + i * 0.08` seconds is fine for five items and slow for twenty. Clamp it.
+
+For multi-step flows that the user moves through, rather than a record of progress, a stepper fits better than a timeline. The [step flow component](/components/step-flow) shows that pattern.

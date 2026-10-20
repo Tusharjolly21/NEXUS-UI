@@ -2548,7 +2548,7 @@ export function TerminalExample() {
       { label: "SVG filters (MDN)", href: "https://developer.mozilla.org/en-US/docs/Web/SVG/Element/feTurbulence" },
     ],
     description:
-      "Hero-grade headline with an animated wave underline, turbulence + Gaussian blur + displacement, optional glyph micro-warp, and reduced-motion fallbacks.",
+      "A hero headline that wobbles like hand-drawn ink: an SVG turbulence and displacement filter steps through frames, with a still fallback when reduced motion is on.",
     categorySlug: "motion-effects",
     tags: ["typography", "svg", "motion", "hero", "underline", "filters"],
     premium: false,
@@ -3136,7 +3136,6 @@ export function PortfolioRevealCard() {
     props: [
       { name: "children", type: "React.ReactNode", description: "Content rendered inside `GlowingEffect`." },
       { name: "className", type: "string", description: "Class names for `GlowingEffect` or `GlowingCard` wrapper." },
-      { name: "glowColor", type: "string", defaultValue: "\"hsl(var(--primary) / 0.9)\"", description: "Glow color used by `GlowingEffect`." },
       { name: "borderRadius", type: "string", defaultValue: "\"1rem\"", description: "Border radius applied to the glowing container." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Disables pointer-reactive glow behavior." },
       { name: "intensity", type: "number", defaultValue: "1", description: "Glow spread/intensity multiplier." },
@@ -3624,8 +3623,7 @@ export function KeyboardSilent() {
       { name: "revealCount",    type: "number",               defaultValue: "2",       description: "Extra images revealed on hover." },
       { name: "label",          type: "string",               description: "Optional text label after the stack." },
       { name: "size",           type: '"sm" | "md" | "lg"',                  defaultValue: '"md"',       description: "Controls image diameter and pill height." },
-      { name: "shape",          type: '"circle" | "rounded" | "square"',   defaultValue: '"circle"',   description: "Clipping shape applied to each image." },
-      { name: "direction",      type: '"left" | "right"',                  defaultValue: '"right"',    description: "Direction the stack fans out toward on hover." },
+      { name: "shape",          type: '"circle" | "rounded" | "square"',   defaultValue: '"rounded"',  description: "Clipping shape applied to each image." },
       { name: "className",      type: "string",               description: "Extra classes on the pill container." },
       { name: "imageClassName", type: "string",               description: "Extra classes on every image wrapper." },
       { name: "onClick",        type: "() => void",           description: "Makes the badge interactive (button role + keyboard)." },
@@ -3960,7 +3958,7 @@ export function EmberStormHero() {
     name: "Before / After Compare",
     registryCliName: "compare",
     description:
-      "Drag a vertical handle to compare two images side-by-side. Supports mouse and touch, optional labels, custom start position, and any aspect ratio.",
+      "Compare two images side by side: the divider follows the mouse on desktop and drags on touch screens. Optional labels, custom start position, and any aspect ratio.",
     categorySlug: "motion-effects",
     tags: ["compare", "slider", "before-after", "image", "interactive", "drag", "cursor"],
     premium: false,
@@ -4885,7 +4883,7 @@ export function ChatMessages({
   {
     slug: "shader-flow",
     name: "Shader Flow",
-    description: "A soft animated shader-style background with flowing gradient motion.",
+    description: "A soft, shader-style background: blurred gradient blobs drifting with Framer Motion, no WebGL needed.",
     categorySlug: "background-effects",
     tags: ["background", "shader", "gradient", "animation", "flowing", "blobs", "framer-motion"],
     premium: false,
@@ -5600,8 +5598,8 @@ export function InteractiveGlobeExplorerDemo() {
     ],
   },
   {
-    name: "Code Block",
     slug: "code-block",
+    name: "Code Block",
     description: "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",
     categorySlug: "feature-sections",
     tags: ["code", "syntax", "highlight", "copy", "snippet", "dark", "light"],
@@ -5701,8 +5699,8 @@ export function CodeBlockExample() {
     ],
   },
   {
-    name: "Card Stack Rotator",
     slug: "card-stack-rotator",
+    name: "Card Stack Rotator",
     description: "A polished stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
     categorySlug: "testimonials",
     tags: ["testimonials", "carousel", "cards", "motion", "stack"],
@@ -5741,7 +5739,6 @@ export function CardStackRotatorDemo() {
       { name: "cardBorderColor", type: "string", description: "Card border color.", defaultValue: "\"rgba(255,255,255,0.08)\"" },
       { name: "textColor", type: "string", description: "Primary text color.", defaultValue: "\"#fafafa\"" },
       { name: "mutedColor", type: "string", description: "Muted/secondary text color.", defaultValue: "\"rgba(250,250,250,0.5)\"" },
-      { name: "highlightBackground", type: "string", description: "Background color for **bold** text highlights.", defaultValue: "\"rgba(129,140,248,0.18)\"" },
       { name: "highlightTextColor", type: "string", description: "Text color for **bold** highlights.", defaultValue: "\"#a5b4fc\"" },
       { name: "contentFontSize", type: "string", description: "Font size of card content.", defaultValue: "\"15px\"" },
       { name: "nameFontSize", type: "string", description: "Font size of card author name.", defaultValue: "\"15px\"" },
@@ -6562,7 +6559,7 @@ export function ProfileOrbitDemo() {
   {
     slug: "command-palette",
     name: "Command Palette",
-    description: "Animated command palette with ⌘K shortcut, grouped navigation/actions/theme commands, backdrop blur overlay, and Framer Motion enter/exit transitions.",
+    description: "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions.",
     categorySlug: "motion-effects",
     tags: ["command", "search", "keyboard", "modal", "framer-motion", "shadcn"],
     premium: false,

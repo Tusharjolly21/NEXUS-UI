@@ -3,7 +3,7 @@
   "name": "shader-flow",
   "type": "registry:component",
   "title": "Shader Flow",
-  "description": "A soft animated shader-style background with flowing gradient motion.",
+  "description": "A soft, shader-style background: blurred gradient blobs drifting with Framer Motion, no WebGL needed.",
   "dependencies": [
     "framer-motion",
     "react"

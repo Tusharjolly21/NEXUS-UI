@@ -1,0 +1,127 @@
+---
+title: "Aceternity UI and Magic UI Alternatives for React"
+description: "Aceternity UI and Magic UI set the bar for animated React components. Here is what each does best, how Nexus UI differs, and other free libraries worth a look."
+date: "2026-10-20"
+---
+
+Aceternity UI and Magic UI are two of the best-known animated React component libraries. Both give you eye-catching effects built with React, Tailwind CSS and Motion, and both install through the shadcn CLI. If you are reading this, you have probably used one of them and want to know what else is out there, perhaps because you need a different licence, a different visual style, more full-page templates or a different pricing model.
+
+This guide covers what Aceternity UI and Magic UI do well, how Nexus UI differs, and three other libraries worth knowing. All facts were checked against each project's own site in October 2026. Prices and component counts change often, so confirm on the source before you buy.
+
+## Aceternity UI: bold landing page effects
+
+Aceternity UI describes itself as "the React component library for beautiful landing pages", and that is exactly where it shines. Its free library has more than 100 copy-paste components, including backgrounds, cards, carousels, text effects and 3D elements, built with Tailwind CSS and Motion.
+
+**Install.** Components install with the shadcn CLI, either from a direct URL or through the `@aceternity` namespace once you add it to `components.json`:
+
+```bash
+npx shadcn@latest add @aceternity/3d-marquee
+```
+
+It also supports the shadcn MCP server, so AI coding agents can search and install components for you.
+
+**Paid tier.** Aceternity sells one-time licences rather than a subscription. At the time of writing its pricing page lists a 1-year licence at $169, lifetime access at $199 and a team licence (up to 10 people) at $1,590, all shown as discounts from higher list prices. Paid plans include more than 200 premium blocks and over 15 templates.
+
+**Licence.** You can use items in unlimited end products for yourself or clients, but you cannot redistribute or resell the source.
+
+**Best for:** dramatic, high-contrast hero sections and a very large catalogue of paid marketing blocks. If you want the widest choice of ready-made landing sections, Aceternity's paid library is hard to beat.
+
+## Magic UI: open source and shadcn-native
+
+Magic UI calls itself a "UI library for design engineers" and positions itself as a companion to shadcn/ui. Its site advertises more than 150 free, open-source animated components and effects built with React, TypeScript, Tailwind CSS and Motion. The code is MIT-licensed on GitHub, where the project has over 22,000 stars.
+
+**Install.** It uses the same process as shadcn/ui:
+
+```bash
+npx shadcn@latest add @magicui/globe
+```
+
+**Paid tier.** Magic UI Pro adds landing page sections and website templates (SaaS, AI agent, dev tool, portfolio, changelog and more), sold as a one-time payment with lifetime access and updates.
+
+**Best for:** teams that want a genuinely open-source (MIT) animation library that sits naturally next to shadcn/ui. If licence freedom matters most, Magic UI is one of the strongest choices.
+
+## How Nexus UI differs
+
+Nexus UI covers similar ground (React 19, Next.js, Tailwind CSS v4, Framer Motion, installed as source through the shadcn CLI), but it makes different choices in five areas.
+
+**1. Apple-style motion.** Aceternity UI and Magic UI excel at striking visual effects. Nexus UI leans toward interactions that feel like a well-made native app: a [Dynamic Island](/components/dynamic-island), segmented tabs with a sliding thumb and springy switches, slide-to-confirm, wheel and ruler pickers. Effects are there too (aurora gradients, dot grids, shaders, 3D), but the house style favours precise, physical motion: springs, shared layouts and controls that respond to touch.
+
+**2. Blocks with variants.** Nexus UI has 15 section [blocks](/blocks), each a complete page section, and several ship in multiple layouts. The pricing section block alone comes in six variants, from a radio plan selector to a seat-based ruler.
+
+**3. Full templates.** There are 18 Next.js [templates](/templates) for SaaS, AI startups, agencies, portfolios and product launches, built with TypeScript, Tailwind CSS v4 and Framer Motion. Anyone can preview them; the source comes with Pro.
+
+**4. Build prompts.** Pro members get build prompts for many components. Each is a written brief describing the stack, the props API and exactly how the component should look and move, so an AI coding agent can rebuild or adapt it from scratch. It is useful when you want a component's behaviour in a different stack, or a variation the original does not cover.
+
+**5. Live playgrounds.** Many component pages include a playground where you adjust props and see the result instantly, then copy JSX that matches what you set.
+
+Install looks the same as the libraries above, once the `@nexus-labs` registry is added to `components.json`:
+
+```bash
+npx shadcn@latest add @nexus-labs/dynamic-island
+```
+
+**Pricing.** More than 100 of the 170-plus components are free for personal, commercial and client work. Pro costs $49.99 a year, and All-Access unlocks the same content for a one-time $79.99. Both include every Pro component, block and template. Details are on the [pricing](/pricing) page.
+
+To be fair about the trade-offs: Nexus UI's free catalogue is smaller than Magic UI's or React Bits', and its free components are free to use rather than released under an open-source licence like MIT. If either of those matters most to you, one of the other libraries here is the better fit.
+
+## Three more alternatives worth knowing
+
+### React Bits
+
+React Bits is a large free collection of animated text effects, backgrounds, interactive cards and micro-interactions. Its GitHub README lists more than 215 components, and the project has close to 50,000 stars. Its standout feature is choice of flavour: every component comes in JavaScript or TypeScript, styled with plain CSS or Tailwind. You can install through the shadcn CLI (`npx shadcn@latest add @react-bits/SplitText-TS-TW`), through jsrepo, or by copying the code.
+
+It is licensed MIT plus Commons Clause, which allows personal and commercial use but not selling the components themselves. **Best for:** the biggest free catalogue of creative effects, and projects not using Tailwind.
+
+### Animate UI
+
+Animate UI takes a different approach. Instead of standalone effects, it provides animated versions of the primitives you already use: "animated drop-in primitives for Radix UI, Base UI and React Aria, built with Motion." You keep your shadcn/ui components and API and swap the import, or run its CLI to animate every installed shadcn component at once:
+
+```bash
+npx @animate-ui/cli@latest animate all
+```
+
+It is licensed MIT plus Commons Clause: free to use in any app or product, but not to resell. **Best for:** adding motion to an existing shadcn/ui app (menus, dialogs, tabs, accordions) without changing its design.
+
+### shadcn/ui itself
+
+shadcn/ui is the base most of these libraries build on. It describes itself as "not a component library" but "how you build your component library": you get open, editable component source and a CLI and registry format for distributing it. It is MIT-licensed and not animation-focused, but if you mostly need solid, accessible primitives, start here and add animated pieces from any of the libraries above. They all install the same way, so mixing them is straightforward.
+
+## Quick comparison
+
+<div className="mt-6 overflow-x-auto rounded-[20px] border border-border text-[15px] leading-[1.55] text-body [&_table]:w-full [&_table]:border-collapse [&_th]:bg-muted [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:align-bottom [&_th]:font-semibold [&_th]:text-foreground [&_td]:border-t [&_td]:border-border [&_td]:px-4 [&_td]:py-3 [&_td]:align-top">
+
+| Library | Free tier | Licence | Paid option | Strength |
+|---|---|---|---|---|
+| Aceternity UI | 100+ components | Custom (no resale) | One-time: 1-year or lifetime | Bold effects, huge block catalogue |
+| Magic UI | 150+ components | MIT | Pro, one-time lifetime | Open source, shadcn companion |
+| Nexus UI | 100+ components | Custom (no resale) | $49.99/year or $79.99 once | Apple-style motion, blocks, templates, build prompts |
+| React Bits | 215+ components | MIT + Commons Clause | None required | JS/TS and CSS/Tailwind variants |
+| Animate UI | Animated primitives | MIT + Commons Clause | None required | Animates existing shadcn/ui |
+
+</div>
+
+## How to choose
+
+- **You want the most landing page sections and don't mind a one-time payment:** Aceternity UI.
+- **You need an MIT licence and a shadcn-native workflow:** Magic UI.
+- **You want the largest free catalogue, or you don't use Tailwind:** React Bits.
+- **You want your existing shadcn/ui components to animate:** Animate UI.
+- **You want refined, native-feeling interactions plus blocks, templates and build prompts for AI agents:** Nexus UI.
+
+Because every library here installs as source through the shadcn CLI, you don't have to commit to one. Pick each component on its merits, keep them in your own codebase, and adjust them to match your design. A good place to start is the free [Nexus UI components](/components) alongside whichever library you already use.
+
+## Sources
+
+- [Aceternity UI](https://ui.aceternity.com/)
+- [Aceternity UI CLI docs](https://ui.aceternity.com/docs/cli)
+- [Aceternity UI pricing](https://ui.aceternity.com/pricing)
+- [Aceternity UI licence](https://ui.aceternity.com/licence)
+- [Magic UI](https://magicui.design/)
+- [Magic UI installation](https://magicui.design/docs/installation)
+- [Magic UI on GitHub](https://github.com/magicuidesign/magicui)
+- [Magic UI Pro](https://pro.magicui.design/)
+- [React Bits on GitHub](https://github.com/DavidHDev/react-bits)
+- [Animate UI](https://animate-ui.com/)
+- [Animate UI on GitHub](https://github.com/imskyleen/animate-ui)
+- [shadcn/ui documentation](https://ui.shadcn.com/docs)
+- [shadcn/ui on GitHub](https://github.com/shadcn-ui/ui)

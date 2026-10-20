@@ -3,7 +3,7 @@
   "name": "compare",
   "type": "registry:component",
   "title": "Before / After Compare",
-  "description": "Drag a vertical handle to compare two images side-by-side. Supports mouse and touch, optional labels, custom start position, and any aspect ratio.",
+  "description": "Compare two images side by side: the divider follows the mouse on desktop and drags on touch screens. Optional labels, custom start position, and any aspect ratio.",
   "dependencies": [
     "lucide-react",
     "react"
