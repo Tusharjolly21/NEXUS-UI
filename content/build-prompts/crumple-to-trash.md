@@ -83,3 +83,76 @@ With `autoplay`, run a toggle 900ms after mount and then every 3000ms: undo if t
 - [ ] Double clicks mid-animation do nothing extra.
 - [ ] Autoplay alternates toss and undo every 3s and stops after the first click.
 - [ ] Dark mode uses the dark paper, lines, bin and an inverted button.
+
+---
+
+<!-- variant: shatter-delete -->
+
+# Shatter Delete
+
+Build a delete you can feel. A file card has a Delete button; pressing it cracks the card from the point you clicked, the pieces drift apart for a beat and then fall with gravity, spinning and fading, nearest pieces first. A dark "File deleted" pill with Undo slides in, and Undo springs every shard back up into place until the seams close.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, keyframes).
+- File: `components/crumple-to-trash/shatter-delete.tsx`. Named export `ShatterDelete` and its `ShatterDeleteProps` type.
+
+## API
+
+- `fileName?: string`, default `"Q3-board-report.pdf"`.
+- `meta?: string`, default `"2.4 MB · edited 2 days ago"`.
+- `badge?: string`, default `"PDF"`.
+- `badgeColor?: string`, default `"#ff3b30"`.
+- `onDelete?: () => void`: called when the user presses Delete (the component only plays the effect).
+- `onUndo?: () => void`: called when the user presses Undo.
+- `autoplay?: boolean`, default `false`.
+
+## Layout and look
+
+- Root: 320×300 (`max-width: 100%`), column, centred both ways, 24px gap.
+- Card box: 300×112 (`max-width: 100%`), `position: relative`.
+- Card: fills the box, radius 20px, white, ring shadow `0 0 0 1px rgba(0,0,0,.06)` (dark `#1c1c1e`, `0 0 0 1px rgba(255,255,255,.08)`), 20px horizontal padding, 16px gap. A 48×56 badge (radius 8px, `badgeColor`, text 10px bold white, bottom-aligned with 6px bottom padding), then a column with 76px right padding (room for the button): file name 15px semibold `#1d1d1f` (dark `#f5f5f7`) and meta 12px `#86868b` (dark `#98989d`), both truncating.
+- Delete button: absolute, 16px from the right, vertically centred (`top 50%`, `y −50%`), rounded-full, 14px × 8px padding, 13px semibold, background `#fff1f0` text `#d70015` (dark `#3a1a1a` / `#ff6961`).
+- Shards: the card is cut into a 6×3 grid of cells, each split into two triangles (36 shards). Grid points are in percent; interior points are jittered by `(r − 0.5) · 12` horizontally and `(r − 0.5) · 22` vertically with a seeded LCG `s = (s · 9301 + 49297) % 233280; r = s / 233280`; edge points are not jittered. Cells where `(i + j)` is odd split along a→c (`[a,b,c]`, `[a,c,d]`), others along b→d (`[a,b,d]`, `[b,c,d]`) where a, b, c, d are the top-left, top-right, bottom-right and bottom-left corners. Each shard is a full copy of the card clipped with `polygon()` to its triangle, `transform-origin` at its centroid. The seed starts at 7 and grows by 13 on every break so each break looks different.
+- Crack lines: while broken, an SVG over the card (viewBox `0 0 100 100`, `preserveAspectRatio="none"`) draws lines from the hit point to the first 14 shard centroids, stroke `#1d1d1f` (dark white), opacity .25, width .5 with `vector-effect: non-scaling-stroke`.
+- Toast: rounded-full, `#1d1d1f` (dark `#3a3a3c`), 13px white, 16px left / 8px right / 8px vertical padding, 16px gap; "File deleted" then an Undo button (rounded-full, `rgba(255,255,255,.15)`, hover `.25`, 12px × 6px padding, 13px semibold).
+
+## Motion
+
+- For each shard: `dx, dy` from the hit point (percent) to its centroid, `dist = hypot(dx, dy) || 1`.
+- Break: keyframes over 1.15s, `times [0, 0.14, 1]`, ease `[0.45, 0, 0.8, 0.6]`, `delay = dist / 260`:
+  - `x: [0, dx/dist · 6, dx/dist · 40 + ((i % 3) − 1) · 20]`
+  - `y: [0, dy/dist · 6, 360 + (i % 5) · 30]`
+  - `rotate: [0, 0, ±(40 + (i % 7) · 15)]` (positive for odd `i`)
+  - `opacity: [1, 1, 0]`
+- Crack lines: `pathLength 0 → 1` and `opacity 1 → 0` over 0.25s.
+- Mend: every shard springs back to `x 0, y 0, rotate 0, opacity 1`, stiffness 260, damping 24, `delay = (1 − dist / 120) · 0.25` (farthest pieces first). After 900ms swap the shards for the whole card.
+- Toast: `AnimatePresence`; enters from `opacity 0, y 16, scale 0.95` with a 0.35s delay; exits to `opacity 0, y 8`.
+- Delete button: `whileTap` scale 0.9.
+
+## Interaction and states
+
+- States: `whole` → (Delete) → `broken` → (Undo) → `mending` → 900ms → `whole`.
+- The hit point is the click position as a percentage of the card box. Keyboard activation (`event.detail === 0`) cracks from (85%, 50%).
+- After a user delete, focus moves to Undo when it mounts; after Undo, focus returns to the new Delete button.
+- Keep the mend timer in a ref, clear it on unmount.
+
+## Autoplay demo
+
+With `autoplay`, every 2300ms: if whole, break from a random point (x 60–90%, y 30–70%, drawn inside the interval callback); if broken, mend. Callbacks are not called. A `touched` ref is set on pointer down anywhere on the root or by pressing Delete or Undo; the next tick clears the interval for good.
+
+## Accessibility
+
+- Delete and Undo are native buttons; Delete is labelled "Delete {fileName}". Focus rings 2px `#0071e3` (dark `#0a84ff`) on Delete, white on Undo.
+- Shards, crack lines and the badge are `aria-hidden`. A persistent visually hidden `role="status"` announces "{fileName} deleted".
+
+## Acceptance checklist
+
+- [ ] Clicking Delete near the right cracks the card there: nearby shards fall first, far shards follow.
+- [ ] Shards first nudge outward a few pixels, then drop ~360px while spinning and fading.
+- [ ] Each break uses a different crack pattern.
+- [ ] Undo flies every piece back into place and the seams disappear; the card becomes one piece again after 0.9s.
+- [ ] Keyboard Delete then Enter on Undo works without losing focus.
+- [ ] Autoplay breaks and mends every 2.3s and stops for good on the first pointer down.
+- [ ] At 296px wide the card fits and the name truncates.
+- [ ] Dark mode swaps the card, button, crack lines and toast.

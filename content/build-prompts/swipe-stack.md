@@ -70,3 +70,80 @@ Every 1700ms: if touched, stop the interval for good; if the deck is empty, relo
 - [ ] After the last card, "All caught up." and "Load more" appear and both buttons are disabled.
 - [ ] With `autoplay`, cards throw themselves every 1.7s and the deck reloads, until you touch it.
 - [ ] Dark mode swaps the card, text, button and stamp colours listed above.
+
+---
+
+<!-- variant: swipe-rows -->
+
+# Swipe Rows
+
+Build an inbox list with iOS-style swipe actions. Swipe a row right and green grows in behind it with an archive icon that jumps forward once you have gone far enough; let go past that point and the row flies off. Swipe left to reveal orange Flag and red Delete; keep going and Delete swallows Flag and takes the row. Removed rows close up and an Undo pill slides in from the bottom.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `animate`, `useMotionValue`, `useTransform`, `useMotionValueEvent`, `drag`).
+- File: `components/swipe-stack/swipe-rows.tsx`. Named export `SwipeRows`, plus the `SwipeRowItem` and `SwipeAction` types and a `DEFAULT_SWIPE_MAIL` array.
+
+## API
+
+`SwipeRowItem = { id: string | number; from: string; subject: string; time: string; color: string }`. `SwipeAction = "archive" | "delete"`.
+
+Default rows: Maya Chen "Board deck, final version" 9:41 `#ff9f0a`; Stripe "Your payout is on the way" 8:02 `#5e5ce6`; Leo Park "Can we move standup to 10?" Yesterday `#30d158`; Figma "Ana commented on Onboarding" Mon `#ff375f`.
+
+`SwipeRows` props:
+
+- `items?: SwipeRowItem[]`, default `DEFAULT_SWIPE_MAIL`.
+- `title?: string`, default `"Inbox"`.
+- `onArchive?: (item) => void`, `onDelete?: (item) => void`: called when the user removes a row (not during autoplay).
+- `onFlag?: (item) => void`: called when the user taps Flag on a half-open row.
+- `onUndo?: (item, action) => void`.
+- `autoplay?: boolean`, default `false`.
+
+## Layout and look
+
+- Root: column, centred, 12px gap, `max-width: 100%`. Under the card: "Swipe a row left or right.", 13px `#86868b` (dark `#98989d`).
+- Card: 320×300 (`max-width: 100%`), radius 22px, `overflow: hidden`, white, shadow `0 0 0 1px rgba(0,0,0,.06), 0 20px 40px -26px rgba(0,0,0,.35)`. Dark: `#1c1c1e`, shadow `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.8)`. The fourth row is partly cut off by the 300px height; that is intended.
+- Header: 16px × 12px padding, bottom border `rgba(0,0,0,.06)` (dark `rgba(255,255,255,.08)`); title 17px semibold, letter-spacing −0.02em, `#1d1d1f` (dark `#f5f5f7`); on the right "{n} unread", 12px `#86868b` (dark `#98989d`).
+- Row (`li`): 68px tall, `overflow: hidden`, bottom border as above. Three layers:
+  - Archive layer, left-anchored, width = `max(0, x)`, 20px left padding, background `#8fd9a1`, switching to `#30d158` once armed. A 22px archive icon (white stroke 2.2, round caps/joins, path `M3 7h18v4H3zM5 11v9h14v-9M10 15h4`).
+  - Action layer, right-anchored, width = `max(0, −x)`, `overflow: hidden`, two buttons side by side: Flag `#ff9f0a` (width 50% of the layer, animating to 0 when Delete is armed), then Delete `#ff3b30` filling the rest. Both 13px semibold white, centred.
+  - Foreground: the draggable row, 16px horizontal padding, 12px gap, white (dark `#1c1c1e`); focus-visible background `#f5f5f7` (dark `#2c2c2e`). A 36px avatar circle in the item colour with the first letter (12px semibold white); then a column: name (14px semibold `#1d1d1f` / dark `#f5f5f7`, truncates) with the time on the right (11px `#86868b` / dark `#98989d`), and the subject below (13px `#6e6e73` / dark `#a1a1a6`, truncates). Cursor grab / grabbing.
+- Undo pill: absolutely placed 12px from the left, right and bottom; rounded-full; `#1d1d1f` (dark `#3a3a3c`); 13px white; 16px left / 8px right / 8px vertical padding. Text "Archived" or "Deleted" then the subject in curly quotes (first 18 characters plus `…` when longer). Undo button: rounded-full, `rgba(255,255,255,.15)` (hover `.25`), 12px × 4px padding, semibold.
+
+## Motion
+
+- Thresholds use the 320px width `W`: archive armed past `x > 0.42 W` (134.4px); delete armed past `x < −0.55 W` (−176px); actions "open" past `x < −70`.
+- Archive icon `scale` maps `x` `[0, 60, 0.42 W] → [0.4, 1, 1.15]`; when armed it animates `x` to 6px (default spring).
+- Flag width: spring stiffness 400, damping 32.
+- Release (`drag="x"`, `dragMomentum={false}`): if `x > 0.42 W` or velocity > 900 archive; else if `x < −0.55 W` or velocity < −1100 delete; else if `x < −70` spring to −150 (actions open); else spring to 0. Snap spring: stiffness 400, damping 34.
+- Finishing: tween `x` to `±W` over 0.22s `easeIn`, then remove the row.
+- Rows: `layout`; enter from `opacity 0, height 0` to `opacity 1, height 68`; exit to `opacity 0, height 0` over 0.25s, inside `AnimatePresence initial={false}`.
+- Undo pill: enters from `y 60, opacity 0`, exits the same way, spring stiffness 400, damping 30.
+
+## Interaction and states
+
+- Dragging stops any running row animation. Tapping Flag calls `onFlag` and springs the row closed. Tapping Delete finishes a delete.
+- Removing a row remembers it with its index; Undo re-inserts it at that index, calls `onUndo(item, action)` and hides the pill.
+- Keyboard on a focused row: ArrowRight archives, Delete or Backspace deletes. Flag and Delete are only tabbable while the row is open (and Flag not swallowed).
+
+## Autoplay demo
+
+With `autoplay`, every 1800ms: if 2 or fewer rows remain, reset to `items` and clear the pill; otherwise tell row `k % 2` of the current list to demo (`archive` when `k` is even, `delete` when odd) and increment `k`. A demo drags the row to `0.6 W` (archive) or `−0.7 W` (delete) over 0.6s with ease `[0.3, 0, 0.3, 1]`, then finishes as above. Demo removals do not call callbacks. A `touched` ref is set on pointer down or any key on the root; the next tick clears the interval for good. Stop every running animation on unmount.
+
+## Accessibility
+
+- Each row foreground is focusable (`tabIndex 0`), `role="group"`, labelled "{from}: {subject}. Right arrow archives, Delete removes."
+- Flag, Delete and Undo are native buttons; focus rings 2px (white inset on the action buttons, white on Undo). Hidden action buttons are `aria-hidden` and `tabIndex -1`.
+- A persistent visually hidden `role="status"` announces "Archived/Deleted {subject}".
+
+## Acceptance checklist
+
+- [ ] Dragging right grows pale green behind the row; past ~134px it turns saturated green and the icon nudges forward and grows.
+- [ ] Releasing short of a threshold springs the row back; a short left swipe parks it open on Flag and Delete.
+- [ ] Dragging far left makes Delete swallow Flag; releasing removes the row.
+- [ ] A fast flick in either direction completes the action.
+- [ ] Rows below close up smoothly and the unread count updates; Undo puts the row back where it was.
+- [ ] Callbacks fire for the user's actions only, never for the autoplay demo.
+- [ ] Autoplay archives and deletes rows alternately, refills, and stops for good on the first pointer down.
+- [ ] At 296px wide nothing overflows; text truncates.
+- [ ] Dark mode swaps card, rows, text, borders, pill and shadow; action colours stay.

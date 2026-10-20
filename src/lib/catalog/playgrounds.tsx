@@ -66,6 +66,16 @@ import { WakeSlider } from "@/components/wake-slider";
 import { SeekSearch } from "@/components/seek-search";
 import { FoldNote } from "@/components/fold-note";
 import { AssignPicker } from "@/components/assign-picker";
+import { BendText } from "@/components/bend-text";
+import { PressureText } from "@/components/pressure-text";
+import { MorphCursor } from "@/components/morph-cursor";
+import { InkThemeSwitch } from "@/components/ink-theme-switch";
+import { LiquidGauge } from "@/components/liquid-gauge";
+import { ThermoDial } from "@/components/thermo-dial";
+import { PullCord } from "@/components/pull-cord";
+import { ScratchReveal } from "@/components/scratch-reveal";
+import { PolaroidDevelop } from "@/components/polaroid-develop";
+import { WalletStack } from "@/components/wallet-stack";
 import { GlassBubbles } from "@/components/glass-bubbles";
 import { BoxSpill } from "@/components/box-spill";
 import { CurvedReel } from "@/components/curved-reel";
@@ -1554,6 +1564,134 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
     render: (v) => <AssignPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "bend-text": {
+    componentName: "BendText",
+    importPath: "@/components/bend-text",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "text", label: "Text", options: ["PLUCK THE LINE · MAKE IT SING · ", "NEW SEASON · NEW SOUNDS · ", "HELLO THERE · "], defaultValue: "PLUCK THE LINE · MAKE IT SING · " },
+      { kind: "color", prop: "accent", label: "Grab point", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Pluck by itself", defaultValue: false },
+    ],
+    render: (v) => <BendText key={String(v.autoplay)} text={v.text as string} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "pressure-text": {
+    componentName: "PressureText",
+    importPath: "@/components/pressure-text",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "spread", label: "Spread", min: 0.08, max: 0.4, step: 0.02, defaultValue: 0.18 },
+      { kind: "toggle", prop: "autoplay", label: "Breathe by itself", defaultValue: false },
+    ],
+    render: (v) => <PressureText key={String(v.autoplay)} accent={v.accent as string} spread={v.spread as number} autoplay={v.autoplay as boolean} />,
+  },
+  "morph-cursor": {
+    componentName: "MorphCursor",
+    importPath: "@/components/morph-cursor",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Caret", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "buttonLabel", label: "Button", options: ["Start a project", "New board", "Invite team"], defaultValue: "Start a project" },
+      { kind: "toggle", prop: "autoplay", label: "Tour by itself", defaultValue: false },
+    ],
+    render: (v) => <MorphCursor key={String(v.autoplay)} accent={v.accent as string} buttonLabel={v.buttonLabel as string} autoplay={v.autoplay as boolean} />,
+  },
+  "ink-theme-switch": {
+    componentName: "InkThemeSwitch",
+    importPath: "@/components/ink-theme-switch",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "defaultDark", label: "Start dark", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <InkThemeSwitch key={`${String(v.autoplay)}-${String(v.defaultDark)}`} defaultDark={v.defaultDark as boolean} autoplay={v.autoplay as boolean} />
+    ),
+  },
+  "liquid-gauge": {
+    componentName: "LiquidGauge",
+    importPath: "@/components/liquid-gauge",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Liquid", options: ["#0a84ff", "#30d158", "#5e5ce6", "#ff375f", "#64d2ff"], defaultValue: "#0a84ff" },
+      { kind: "range", prop: "defaultUsed", label: "Used", min: 0, max: 200, step: 2, unit: " GB", defaultValue: 136 },
+      { kind: "toggle", prop: "autoplay", label: "Slosh by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <LiquidGauge
+        key={`${String(v.autoplay)}-${String(v.defaultUsed)}`}
+        accent={v.accent as string}
+        defaultUsed={v.defaultUsed as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "thermo-dial": {
+    componentName: "ThermoDial",
+    importPath: "@/components/thermo-dial",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "room", label: "Room", min: 10, max: 30, step: 0.5, unit: "°", defaultValue: 19.5 },
+      { kind: "range", prop: "defaultValue", label: "Start at", min: 10, max: 30, step: 0.5, unit: "°", defaultValue: 21 },
+      { kind: "toggle", prop: "autoplay", label: "Turn by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <ThermoDial
+        key={`${String(v.autoplay)}-${String(v.defaultValue)}`}
+        room={v.room as number}
+        defaultValue={v.defaultValue as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "pull-cord": {
+    componentName: "PullCord",
+    importPath: "@/components/pull-cord",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "defaultOn", label: "Start on", defaultValue: false },
+      { kind: "select", prop: "hint", label: "Hint", options: ["Pull the cord.", "Give it a tug.", "Pull to toggle."], defaultValue: "Pull the cord." },
+      { kind: "toggle", prop: "autoplay", label: "Tug by itself", defaultValue: false },
+    ],
+    render: (v) => (
+      <PullCord
+        key={`${String(v.autoplay)}-${String(v.defaultOn)}`}
+        defaultOn={v.defaultOn as boolean}
+        hint={v.hint as string}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "scratch-reveal": {
+    componentName: "ScratchReveal",
+    importPath: "@/components/scratch-reveal",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "headline", label: "Prize", options: ["20% off Pro", "Free month", "Free shipping"], defaultValue: "20% off Pro" },
+      { kind: "color", prop: "accent", label: "Eyebrow", options: ["#bf5af2", "#ff375f", "#0a84ff", "#30b158", "#ff9f0a"], defaultValue: "#bf5af2" },
+      { kind: "toggle", prop: "autoplay", label: "Scratch by itself", defaultValue: false },
+    ],
+    render: (v) => <ScratchReveal key={String(v.autoplay)} headline={v.headline as string} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "polaroid-develop": {
+    componentName: "PolaroidDevelop",
+    importPath: "@/components/polaroid-develop",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Shake by itself", defaultValue: false }],
+    render: (v) => <PolaroidDevelop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "wallet-stack": {
+    componentName: "WalletStack",
+    importPath: "@/components/wallet-stack",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "label", label: "Label", options: ["Wallet", "Cards", "Pay"], defaultValue: "Wallet" },
+      { kind: "select", prop: "hint", label: "Hint", options: ["Pick a card.", "Tap a card to see the back.", ""], defaultValue: "Pick a card." },
+      { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false },
+    ],
+    render: (v) => <WalletStack key={String(v.autoplay)} label={v.label as string} hint={v.hint as string} autoplay={v.autoplay as boolean} />,
   },
 };
 

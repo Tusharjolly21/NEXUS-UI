@@ -3,7 +3,7 @@
   "name": "squiggly-text",
   "type": "registry:component",
   "title": "RippleLine squiggly text",
-  "description": "Hero-grade headline with an animated wave underline, turbulence + Gaussian blur + displacement, optional glyph micro-warp, and reduced-motion fallbacks.",
+  "description": "A hero headline that wobbles like hand-drawn ink: an SVG turbulence and displacement filter steps through frames, with a still fallback when reduced motion is on.",
   "dependencies": [
     "framer-motion",
     "react"

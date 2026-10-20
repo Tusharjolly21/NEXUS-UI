@@ -985,7 +985,7 @@
       "name": "squiggly-text",
       "type": "registry:component",
       "title": "RippleLine squiggly text",
-      "description": "Hero-grade headline with an animated wave underline, turbulence + Gaussian blur + displacement, optional glyph micro-warp, and reduced-motion fallbacks.",
+      "description": "A hero headline that wobbles like hand-drawn ink: an SVG turbulence and displacement filter steps through frames, with a still fallback when reduced motion is on.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1749,7 +1749,7 @@
       "name": "animated-countdown",
       "type": "registry:component",
       "title": "Animated Countdown",
-      "description": "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion.",
+      "description": "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1766,6 +1766,10 @@
         {
           "path": "next-ui/animated-countdown/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/animated-countdown/split-flap-board.tsx",
+          "type": "registry:component"
         },
         {
           "path": "next-ui/animated-countdown.tsx",
@@ -1962,7 +1966,7 @@
       "name": "command-palette",
       "type": "registry:component",
       "title": "Command Palette",
-      "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions.",
+      "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions. Also includes the Motion Kit Command Morph variant.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
@@ -1976,6 +1980,10 @@
         "command"
       ],
       "files": [
+        {
+          "path": "next-ui/command-palette/command-morph.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/command-palette/command-palette.tsx",
           "type": "registry:component"
@@ -2156,7 +2164,7 @@
       "name": "emoji-reactions",
       "type": "registry:component",
       "title": "Emoji Reactions",
-      "description": "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation.",
+      "description": "A message with reaction chips that pop and roll their counts when tapped, plus a spring picker that adds new reactions with a layout animation. Also includes the Motion Kit Spark Reactions variant.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
@@ -2174,6 +2182,10 @@
         {
           "path": "next-ui/emoji-reactions/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/emoji-reactions/spark-reactions.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -2181,7 +2193,7 @@
       "name": "like-burst",
       "type": "registry:component",
       "title": "Like Burst",
-      "description": "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit.",
+      "description": "A like button whose heart squashes and fills with a ring shockwave and a particle burst, while the count rolls digit by digit. Also includes the Motion Kit Confetti Like variant.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
@@ -2192,6 +2204,10 @@
         "utils"
       ],
       "files": [
+        {
+          "path": "next-ui/like-burst/confetti-like.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/like-burst/index.ts",
           "type": "registry:lib"

@@ -359,6 +359,26 @@
   "bg": null,
   "coverage": 0.25
  },
+ "bend-text": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   310,
+   214,
+   340,
+   288
+  ],
+  "content": [
+   320,
+   320,
+   320,
+   172
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.12
+ },
  "bending-rail": {
   "canvas": [
    960,
@@ -2139,6 +2159,26 @@
   "bg": null,
   "coverage": 0.28
  },
+ "ink-theme-switch": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   320,
+   210,
+   320,
+   300
+  ],
+  "content": [
+   330,
+   220,
+   300,
+   280
+  ],
+  "bg": "#121212",
+  "coverage": 0.14
+ },
  "interactive-globe-explorer": {
   "canvas": [
    1200,
@@ -2298,6 +2338,26 @@
   ],
   "bg": null,
   "coverage": 0.02
+ },
+ "liquid-gauge": {
+  "canvas": [
+   1200,
+   820
+  ],
+  "surface": [
+   510,
+   254,
+   180,
+   322
+  ],
+  "content": [
+   520,
+   264,
+   160,
+   302
+  ],
+  "bg": null,
+  "coverage": 0.01
  },
  "lit-keyboard": {
   "canvas": [
@@ -3039,6 +3099,26 @@
   "bg": "#ffffff",
   "coverage": 0.17
  },
+ "morph-cursor": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   320,
+   196,
+   320,
+   330
+  ],
+  "content": [
+   344,
+   224,
+   258,
+   288
+  ],
+  "bg": "#ffffff",
+  "coverage": 0.15
+ },
  "motion-faq-disclosure": {
   "canvas": [
    1200,
@@ -3339,6 +3419,46 @@
   "bg": "#ffffff",
   "coverage": 0.01
  },
+ "polaroid-develop": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   378,
+   216,
+   206,
+   288
+  ],
+  "content": [
+   394,
+   228,
+   180,
+   266
+  ],
+  "bg": null,
+  "coverage": 0.05
+ },
+ "pressure-text": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   286,
+   312,
+   394,
+   112
+  ],
+  "content": [
+   314,
+   322,
+   356,
+   36
+  ],
+  "bg": null,
+  "coverage": 0
+ },
  "price-odometer": {
   "canvas": [
    1200,
@@ -3478,6 +3598,26 @@
   ],
   "bg": "#36c65a",
   "coverage": 0.01
+ },
+ "pull-cord": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   320,
+   210,
+   320,
+   300
+  ],
+  "content": [
+   330,
+   220,
+   300,
+   280
+  ],
+  "bg": null,
+  "coverage": 0.14
  },
  "pull-to-refresh": {
   "canvas": [
@@ -3678,6 +3818,26 @@
   ],
   "bg": null,
   "coverage": 0.03
+ },
+ "scratch-reveal": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   320,
+   250,
+   320,
+   216
+  ],
+  "content": [
+   330,
+   260,
+   300,
+   180
+  ],
+  "bg": null,
+  "coverage": 0.09
  },
  "scroll-progress-bar": {
   "canvas": [
@@ -4519,6 +4679,26 @@
   "bg": "#f6f6f6",
   "coverage": 1
  },
+ "thermo-dial": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   354,
+   218,
+   252,
+   282
+  ],
+  "content": [
+   364,
+   228,
+   232,
+   206
+  ],
+  "bg": null,
+  "coverage": 0.04
+ },
  "three-d-folder": {
   "canvas": [
    960,
@@ -4838,6 +5018,26 @@
   ],
   "bg": null,
   "coverage": 0
+ },
+ "wallet-stack": {
+  "canvas": [
+   960,
+   720
+  ],
+  "surface": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "content": [
+   0,
+   0,
+   960,
+   720
+  ],
+  "bg": "#f6f6f6",
+  "coverage": 1
  },
  "warp-speed-card": {
   "canvas": [
