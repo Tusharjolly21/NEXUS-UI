@@ -31,7 +31,7 @@ function Logo() {
       <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
         <ellipse cx="16" cy="16" rx="13" ry="6" fill="none" stroke={A} strokeWidth="2.4" transform="rotate(-24 16 16)" />
         <circle cx="16" cy="16" r="5.2" fill={INK} />
-        <motion.circle r="2.6" fill={A} animate={{ cx: [4.6, 27.4, 4.6], cy: [21.2, 10.8, 21.2] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
+        <motion.circle r="2.6" cx={4.6} cy={21.2} fill={A} initial={{ cx: 4.6, cy: 21.2 }} animate={{ cx: [4.6, 27.4, 4.6], cy: [21.2, 10.8, 21.2] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
       </svg>
       Orbit
     </span>
@@ -117,7 +117,7 @@ function PrCard({ sel, onPick }: { sel: number; onPick: (i: number) => void }) {
           const s = STATUS[g.status];
           const on = i === sel;
           return (
-            <button key={g.id} type="button" onClick={() => onPick(i)} className="relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-left outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }} aria-pressed={on}>
+            <button key={g.id} type="button" onClick={() => onPick(i)} className="relative flex items-center gap-3 rounded-xl px-2.5 py-1.5 text-left outline-none focus-visible:ring-2" style={{ ["--tw-ring-color" as string]: A }} aria-pressed={on}>
               {on && <motion.span layoutId="orbit-row" className="absolute inset-0 rounded-xl bg-[#f0f5ff]" transition={{ type: "spring", stiffness: 480, damping: 36 }} />}
               <span className="relative" style={{ color: on ? A : "#6e6e73" }}><Icon d={g.d} size={16} /></span>
               <span className="relative flex-1 text-[14px] font-medium text-[#1d1d1f]">{g.name}</span>
@@ -127,7 +127,7 @@ function PrCard({ sel, onPick }: { sel: number; onPick: (i: number) => void }) {
           );
         })}
       </div>
-      <div className="relative min-h-[86px] overflow-hidden rounded-2xl bg-[#f5f5f7] p-3.5" aria-live="polite">
+      <div className="relative min-h-[80px] overflow-hidden rounded-2xl bg-[#f5f5f7] p-3.5" aria-live="polite">
         <AnimatePresence mode="popLayout" initial={false}>
           <motion.div key={a.id} initial={{ opacity: 0, y: 14, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} exit={{ opacity: 0, y: -14, filter: "blur(4px)" }} transition={{ type: "spring", stiffness: 340, damping: 30 }}>
             <span className="block text-[11px] font-semibold" style={{ color: A, fontFamily: MONO }}>{a.where}</span>
@@ -165,8 +165,8 @@ function AgentRing() {
   }, []);
 
   const wide = w >= 760;
-  const H = wide ? 640 : 230;
-  const geo = wide ? { cx: w / 2, cy: 330, rx: Math.min(w / 2 - 60, 500), ry: 200 } : { cx: w / 2, cy: 104, rx: w / 2 - 44, ry: 58 };
+  const H = wide ? 620 : 230;
+  const geo = wide ? { cx: w / 2, cy: 285, rx: Math.min(w / 2 - 60, 500), ry: 240 } : { cx: w / 2, cy: 104, rx: w / 2 - 44, ry: 58 };
 
   const frontIndex = (r: number) => {
     let best = 0, bv = -2;
@@ -263,7 +263,7 @@ function AgentRing() {
           <path d={ell("front")} fill="none" stroke="rgba(37,99,235,.45)" strokeWidth="1.5" strokeDasharray="2 7" strokeLinecap="round" />
         </svg>
         {wide && (
-          <motion.div className="absolute left-1/2 top-[130px] -translate-x-1/2" style={{ zIndex: 20 }} initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }}>
+          <motion.div className="absolute left-1/2 top-[60px] -translate-x-1/2" style={{ zIndex: 20 }} initial={{ opacity: 0, y: 20, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 140, damping: 22, delay: 0.3 }}>
             <PrCard sel={sel} onPick={pick} />
           </motion.div>
         )}
@@ -281,13 +281,13 @@ function Hero() {
   return (
     <section id="top" className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 40% at 50% 70%, rgba(37,99,235,.12), transparent 70%), radial-gradient(30% 30% at 12% 8%, rgba(90,200,250,.14), transparent 70%)" }} />
-      <div className="relative mx-auto max-w-[1180px] px-5 pt-12 lg:pt-20">
+      <div className="relative mx-auto max-w-[1180px] px-5 pt-10 lg:pt-14">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
           <div className="flex flex-col gap-5">
             <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[14px] font-semibold" style={{ color: A }}>
               Code review, five ways at once
             </motion.span>
-            <h1 className="m-0 text-[clamp(44px,6.8vw,88px)] font-semibold leading-[0.97] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+            <h1 className="m-0 text-[clamp(42px,5.6vw,72px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
               <Words text="Five reviewers on every pull request." accentWords={["Five"]} accent={A} />
             </h1>
           </div>
@@ -304,7 +304,7 @@ function Hero() {
           </div>
         </div>
       </div>
-      <div className="relative mx-auto mt-6 max-w-[1240px] px-5 pb-16 lg:mt-2">
+      <div className="relative mx-auto mt-4 max-w-[1240px] px-5 pb-16 lg:-mt-2">
         <AgentRing />
       </div>
     </section>

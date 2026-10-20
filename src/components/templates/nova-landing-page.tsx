@@ -15,7 +15,8 @@ import ElasticStepper from "@/components/templates/kit/components/ElasticStepper
 import ProgressButton from "@/components/templates/kit/components/ProgressButton";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import BatteryCalendar from "@/components/templates/nova-one/BatteryCalendar";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, scrollToId } from "@/components/templates/kit/parts";
+import StickyStory from "@/components/templates/nova-one/StickyStory";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 
 const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const A = "#b45309"; // amber text and buttons (5:1 on white)
@@ -521,7 +522,7 @@ function Buy() {
                 <ElasticStepper label="Quantity" min={1} max={5} defaultValue={1} onChange={setQty} accent={A} />
                 <div className="flex flex-col items-end">
                   <span className="text-[12px] font-medium text-[#6e6e73]">Total</span>
-                  <span className="text-[34px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f]">$<RollingNumber value={total} /></span>
+                  <span className="text-[34px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f] leading-none">$<RollingNumber value={total} /></span>
                 </div>
               </div>
               <div className="flex flex-col items-center gap-2">

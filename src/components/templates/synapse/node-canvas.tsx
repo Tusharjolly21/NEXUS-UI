@@ -38,8 +38,8 @@ function layoutFor(w: number): Layout {
     return { pts: NODES.map((_, i) => ({ x: cx + (i % 2 ? off : -off), y: 18 + i * 118 })), h: 18 + 4 * 118 + NH + 96, vertical: true };
   }
   const span = w - NW;
-  const ys = [36, 214, 36, 214, 125];
-  return { pts: NODES.map((_, i) => ({ x: (span * i) / 4, y: ys[i] })), h: 420, vertical: false };
+  const ys = [20, 190, 20, 190, 105];
+  return { pts: NODES.map((_, i) => ({ x: (span * i) / 4, y: ys[i] })), h: 300, vertical: false };
 }
 
 /** Output port (right or bottom) and input port (left or top) of a node in stage coordinates. */
@@ -241,7 +241,7 @@ export default function NodeCanvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected]);
 
-  const h = lay?.h ?? 420;
+  const h = lay?.h ?? 300;
 
   return (
     <div className="relative w-full">

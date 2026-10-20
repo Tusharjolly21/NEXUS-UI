@@ -45,7 +45,7 @@ const NIGHT_HOURS = 9; // 22:00 to 07:00
 const LOG = [
   { at: 0.5, agent: "Inbox triage", body: "Sorted 146 emails. Drafted 38 replies and held them for you.", waits: true },
   { at: 1.7, agent: "Invoice chaser", body: "Sent 9 polite reminders. Two over $5,000 wait for your OK.", waits: true },
-  { at: 3.25, agent: "Inventory sync", body: "Merged 3 supplier sheets. 4 items are below reorder level.", waits: false },
+  { at: 3.25, agent: "Inventory sync", body: "Merged 3 supplier sheets. 4 items need reordering, waiting for your OK.", waits: true },
   { at: 5.1, agent: "CRM tidy-up", body: "Merged 61 duplicate contacts. Nothing was deleted.", waits: false },
   { at: 7.3, agent: "Weekly numbers", body: "Pulled revenue, refunds and churn into Monday's report.", waits: false },
   { at: 8.75, agent: "Morning brief", body: "6 jobs done, 3 things need you. Coffee first.", waits: false },

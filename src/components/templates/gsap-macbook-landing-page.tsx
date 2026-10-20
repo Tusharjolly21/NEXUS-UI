@@ -514,7 +514,7 @@ function Buy() {
             <div className="flex flex-wrap items-end justify-between gap-4 border-t border-black/[.06] pt-5">
               <div className="flex flex-col">
                 <span className="text-[12px] font-medium text-[#6e6e73]">Halcyon {SIZES[size].n.replace("-inch", "")} · {CHIPS.find((c) => c.id === chip)?.n}</span>
-                <span className="text-[34px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f]">$<RollingNumber value={total} /></span>
+                <span className="text-[34px] font-semibold tabular-nums tracking-[-0.04em] text-[#1d1d1f] leading-none">$<RollingNumber value={total} /></span>
               </div>
               <Magnetic className="text-white focus-visible:ring-[#475569]" style={{ background: A }}>Order</Magnetic>
             </div>

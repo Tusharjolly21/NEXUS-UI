@@ -2,13 +2,13 @@
 /**
  * Aureon: landing page template for an AI portfolio co-pilot for
  * self-directed investors. Built in the Motion Kit style from Bubble Cluster
- * (as Holdings Cluster), Swipe Stack (as Draft Stack), Hold to Confirm,
+ * (as Holdings Cluster), Swipe Stack (as Draft Stack), Hold to Confirm (as
+ * Hold to Send),
  * Folder Peek, Matrix Loaders, Scrub Inputs, Radio Cards and the Price
  * Odometer's rolling number.
  */
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as RKeyboardEvent } from "react";
 import { AnimatePresence, MotionConfig, animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue } from "framer-motion";
-import HoldToConfirm from "@/components/templates/kit/components/HoldToConfirm";
 import FolderPeek from "@/components/templates/kit/components/FolderPeek";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import { ScrubField } from "@/components/templates/kit/components/ScrubInput";
@@ -16,7 +16,9 @@ import RadioCards from "@/components/templates/kit/components/RadioCards";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import HoldingsCluster from "@/components/templates/aureon/HoldingsCluster";
 import DraftStack from "@/components/templates/aureon/DraftStack";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, scrollToId } from "@/components/templates/kit/parts";
+import HoldToSend from "@/components/templates/aureon/HoldToSend";
+import StickyStory from "@/components/templates/aureon/StickyStory";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, scrollToId } from "@/components/templates/kit/parts";
 
 const SYSTEM_FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const A = "#4d7c0f"; // olive: 5:1 on white
@@ -244,11 +246,11 @@ function RiskBand() {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_1fr_1.6fr]">
           <div className="flex flex-col gap-1 rounded-[18px] bg-[#f7f7f4] p-4">
             <span className="text-[12px] font-medium text-[#6e6e73]">Largest single company</span>
-            <span className="text-[26px] font-semibold tabular-nums tracking-[-0.03em]" style={{ color: planOn ? A : WARN }}><RollingNumber value={Math.round(target.emp * 100)} />%</span>
+            <span className="text-[26px] font-semibold tabular-nums tracking-[-0.03em] leading-none" style={{ color: planOn ? A : WARN }}><RollingNumber value={Math.round(target.emp * 100)} />%</span>
           </div>
           <div className="flex flex-col gap-1 rounded-[18px] bg-[#f7f7f4] p-4">
             <span className="text-[12px] font-medium text-[#6e6e73]">A bad year could cost</span>
-            <span className="text-[26px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">−$<RollingNumber value={badYear} /></span>
+            <span className="text-[26px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f] leading-none">−$<RollingNumber value={badYear} /></span>
           </div>
           <div className="flex min-h-[112px] flex-col gap-1.5 rounded-[18px] bg-[#f7f7f4] p-4">
             <span className="text-[12px] font-medium text-[#6e6e73]">{planOn ? "Drafted moves, waiting for you" : "No moves drafted yet"}</span>
@@ -260,7 +262,7 @@ function RiskBand() {
                       <span className="h-2 w-2 rounded-full" style={{ background: m.c, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.1)" }} />
                       {m.d < 0 ? "Sell" : "Buy"} {m.label.toLowerCase()}
                     </span>
-                    <span className="font-semibold tabular-nums" style={{ color: m.d < 0 ? "#9a3412" : A }}>{m.d < 0 ? "−" : "+"}$<RollingNumber value={Math.abs(m.d)} /></span>
+                    <span className="font-semibold tabular-nums leading-none" style={{ color: m.d < 0 ? "#9a3412" : A }}>{m.d < 0 ? "−" : "+"}$<RollingNumber value={Math.abs(m.d)} /></span>
                   </motion.li>
                 ))}
               </AnimatePresence>
@@ -398,7 +400,7 @@ function SendBoard() {
           <li key={l} className="flex justify-between border-b border-black/[.06] pb-2 text-[#1d1d1f]"><span>{l}</span><span className="font-semibold tabular-nums">{v}</span></li>
         ))}
       </ul>
-      <div className="flex justify-center pt-1"><HoldToConfirm label="Hold to send orders" holdingLabel="Keep holding…" doneLabel="Sent. Fills in 1–2 min" color={A} autoplay /></div>
+      <div className="flex justify-center pt-1"><HoldToSend label="Hold to send orders" holdingLabel="Keep holding…" doneLabel="Sent. Fills in 1–2 min" color={A} autoplay /></div>
       <span className="text-center text-[12px] text-[#6e6e73]">You can still cancel at your brokerage until they fill.</span>
     </div>
   );
@@ -473,7 +475,7 @@ function Planner() {
               <span className="pt-1 text-[12px] leading-[1.45] text-[#6e6e73]">Drag a label sideways; hold Shift for big steps. Or type a number.</span>
               <div className="mt-2 flex flex-col gap-1 rounded-[18px] bg-[#f7f7f4] p-4">
                 <span className="text-[12px] font-medium text-[#6e6e73]">At {retire} you&apos;d have about</span>
-                <span className="text-[30px] font-semibold tabular-nums tracking-[-0.035em] text-[#1d1d1f]">$<RollingNumber value={Math.round(atRetire / 10000) * 10000} /></span>
+                <span className="text-[30px] font-semibold tabular-nums tracking-[-0.035em] text-[#1d1d1f] leading-none">$<RollingNumber value={Math.round(atRetire / 10000) * 10000} /></span>
                 <span className="text-[13px] text-[#424245]">Roughly <b className="font-semibold tabular-nums">${income.toLocaleString("en-US")}/month</b> at a 4% draw.</span>
               </div>
             </div>
@@ -508,7 +510,7 @@ function Planner() {
 const PRINCIPLES = [
   { t: "Read-only links", b: "Aureon can see balances and lots. It has no way to withdraw or transfer money.", d: "M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" },
   { t: "Nothing trades without you", b: "Every order needs a long press from you. Turn drafts off entirely if you just want the X-ray.", d: "M12 3v10M7 8l5 5 5-5M5 21h14" },
-  { t: "One flat price", b: "No commissions, no percentage of your assets, no paid fund placement.", d: "M4 12h16M12 4v16" },
+  { t: "One flat price", b: "No commissions, no percentage of your assets, no paid fund placement.", d: "M3 12V4h8l10 10-8 8zM7.5 7.5h.01" },
   { t: "Your data isn't for sale", b: "We don't sell or rent it. Delete your account and it's gone within 30 days.", d: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z" },
 ];
 

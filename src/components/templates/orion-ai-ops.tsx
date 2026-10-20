@@ -265,7 +265,7 @@ function Console() {
             </div>
             <div className="flex gap-5">
               <span className="flex flex-col items-end">
-                <span className="relative h-[30px] overflow-hidden text-[24px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">
+                <span className="relative h-[30px] overflow-hidden text-[24px] font-semibold leading-[30px] tabular-nums tracking-[-0.03em] text-[#1d1d1f]">
                   <AnimatePresence mode="popLayout" initial={false}>
                     <motion.span key={finished ? mttr : "run"} className="block" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -24, opacity: 0 }} transition={{ type: "spring", stiffness: 420, damping: 30 }}>{finished ? mttr : "…"}</motion.span>
                   </AnimatePresence>
@@ -273,7 +273,7 @@ function Console() {
                 <span className="text-[12px] text-[#6e6e73]">time to resolve</span>
               </span>
               <span className="flex flex-col items-end">
-                <span className="text-[24px] font-semibold tabular-nums tracking-[-0.03em] text-[#1d1d1f]">{paged}</span>
+                <span className="h-[30px] text-[24px] font-semibold leading-[30px] tabular-nums tracking-[-0.03em] text-[#1d1d1f]">{paged}</span>
                 <span className="text-[12px] text-[#6e6e73]">people woken</span>
               </span>
             </div>
@@ -348,7 +348,7 @@ function Console() {
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-14 lg:pb-24 lg:pt-20">
+    <section id="top" className="relative overflow-hidden pb-16 pt-12 lg:pb-24 lg:pt-14">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(50% 45% at 20% 0%, rgba(165,219,230,.45), transparent 70%), radial-gradient(40% 40% at 90% 30%, rgba(14,116,144,.10), transparent 70%)" }} />
       <div className="relative mx-auto max-w-[1180px] px-5">
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.45fr_1fr] lg:gap-14">
@@ -357,8 +357,8 @@ function Hero() {
               <span className="h-2 w-2 rounded-full" style={{ background: A }} />
               INC-2291 is replaying below
             </motion.span>
-            <h1 className="m-0 text-[clamp(42px,6.6vw,86px)] font-semibold leading-[0.98] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
-              <Words text="Incidents fixed at machine speed. Inside the rules you set." accentWords={["Inside", "the", "rules", "you", "set."]} accent={A} />
+            <h1 className="m-0 text-[clamp(40px,5.8vw,74px)] font-semibold leading-[1] tracking-[-0.05em] text-[#1d1d1f] [text-wrap:balance]">
+              <Words text="Incidents fixed at machine speed, inside your rules." accentWords={["inside", "your", "rules."]} accent={A} />
             </h1>
           </div>
           <div className="flex flex-col items-start gap-6 lg:pb-3">
@@ -373,7 +373,7 @@ function Hero() {
             </Reveal>
           </div>
         </div>
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.25 }} className="mt-12">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.25 }} className="mt-10">
           <Console />
         </motion.div>
         <Reveal y={10} delay={0.2} className="mt-4">
@@ -414,7 +414,7 @@ function Runbooks() {
         <div className="grid grid-cols-1 items-end gap-8 lg:grid-cols-[1.3fr_1fr]">
           <SectionHead eyebrow="Runbooks" title="The runbooks you already wrote, finally executable." sub="Import Markdown, wiki pages or scripts. Orion turns each one into steps, marks which are reversible, and runs them in a dry run before anything is live." accent={A} />
           <Reveal y={16} className="flex flex-col gap-3">
-            <CopyCommand command="orion runbooks import ./runbooks --dry-run" />
+            <CopyCommand command="orion import ./runbooks --dry-run" />
             <span className="text-[13px] text-[#6e6e73]">Read-only by default. Nothing runs until a policy says it may.</span>
           </Reveal>
         </div>

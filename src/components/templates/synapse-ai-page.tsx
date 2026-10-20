@@ -41,15 +41,15 @@ function Logo() {
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-14 sm:pt-20">
+    <section id="top" className="relative overflow-hidden pb-16 pt-10 sm:pt-12">
       <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ backgroundImage: DOTS, backgroundSize: "22px 22px", maskImage: "radial-gradient(80% 70% at 50% 45%, #000 40%, transparent 100%)", WebkitMaskImage: "radial-gradient(80% 70% at 50% 45%, #000 40%, transparent 100%)" }} />
       <div className="pointer-events-none absolute inset-0" aria-hidden="true" style={{ background: "radial-gradient(40% 35% at 50% 8%, rgba(249,168,212,.35), transparent 70%)" }} />
-      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-6 px-5 text-center">
+      <div className="relative mx-auto flex max-w-[1180px] flex-col items-center gap-5 px-5 text-center">
         <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="inline-flex items-center gap-2 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">
           <span className="rounded-full px-2 py-0.5 text-[11px] font-semibold text-white" style={{ background: A }}>New</span>
           Branching on confidence is here
         </motion.span>
-        <h1 className="m-0 max-w-[900px] text-[clamp(44px,7.6vw,96px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
+        <h1 className="m-0 max-w-[900px] text-[clamp(42px,6.4vw,82px)] font-semibold leading-[0.98] tracking-[-0.055em] text-[#1d1d1f] [text-wrap:balance]">
           <Words text="Draw your agent. Test it. Ship it." className="justify-center" accentWords={["Ship", "it."]} accent={AD} />
         </h1>
         <Reveal delay={0.35} y={14}>
@@ -62,7 +62,7 @@ function Hero() {
           <Magnetic className="bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)]" onClick={() => scrollToId("build")}>See the builder</Magnetic>
         </Reveal>
       </div>
-      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.3 }} className="relative mx-auto mt-10 max-w-[1180px] px-5">
+      <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ type: "spring", stiffness: 110, damping: 20, delay: 0.3 }} className="relative mx-auto mt-4 max-w-[1180px] px-5">
         <NodeCanvas />
       </motion.div>
     </section>
@@ -88,7 +88,7 @@ const SPAGHETTI = [
 
 function Before() {
   return (
-    <div className="h-full w-full overflow-hidden bg-[#1c1c1e] p-6 text-left sm:p-8">
+    <div className="h-full w-full overflow-hidden bg-[#1c1c1e] px-6 pb-6 pt-14 text-left sm:px-8">
       <div className="flex items-center gap-2 pb-4">
         {["#ff5f57", "#febc2e", "#28c840"].map((c) => <span key={c} className="h-2.5 w-2.5 rounded-full" style={{ background: c }} />)}
         <span className="ml-2 text-[12px] text-[#a1a1a6]" style={{ fontFamily: MONO }}>agent-final-v7.ts</span>
@@ -156,12 +156,12 @@ function Build() {
               <h3 className="m-0 text-[21px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Add a step from anywhere.</h3>
               <p className="m-0 mt-1.5 text-[15px] leading-[1.5] text-[#6e6e73]">Press the plus on any wire and pick what comes next.</p>
               <div className="flex flex-1 items-center justify-center pt-2">
-                <Fit><GooeyDial actions={DIAL} accent={A} color="#1d1d1f" autoplay onSelect={(id) => setAdded((a) => [DIAL.find((d) => d.id === id)!.label, ...a].slice(0, 3))} /></Fit>
+                <Fit><GooeyDial actions={DIAL} accent={A} color="#1d1d1f" autoplay onSelect={(id) => { const l = DIAL.find((d) => d.id === id)!.label; setAdded((a) => [l, ...a.filter((x) => x !== l)].slice(0, 3)); }} /></Fit>
               </div>
               <div className="flex min-h-[32px] flex-wrap gap-2" aria-live="polite">
                 <AnimatePresence initial={false}>
-                  {added.map((a, i) => (
-                    <motion.span key={`${a}-${added.length - i}`} layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={spring} className="rounded-full bg-[#fdf2f8] px-3 py-1 text-[13px] font-semibold" style={{ color: AD }}>+ {a}</motion.span>
+                  {added.map((a) => (
+                    <motion.span key={a} layout initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={spring} className="rounded-full bg-[#fdf2f8] px-3 py-1 text-[13px] font-semibold" style={{ color: AD }}>+ {a}</motion.span>
                   ))}
                 </AnimatePresence>
                 {added.length === 0 && <span className="text-[13px] text-[#6e6e73]">Pick an action to add it to the flow.</span>}
@@ -320,10 +320,10 @@ const G = (d: string) => (
 const CHANNELS: DockApp[] = [
   { id: "home", label: "Website chat", bg: `linear-gradient(180deg,#f472b6,${A})`, glyph: G("M4 5h16v11H9l-5 4z") },
   { id: "email", label: "Email inbox", bg: "linear-gradient(180deg,#4b4b52,#1d1d1f)", glyph: G("M4 6h16v12H4zM4 7l8 6 8-6") },
-  { id: "chat", label: "Team chat", bg: "linear-gradient(180deg,#a78bfa,#7c3aed)", glyph: G("M5 9h14M5 15h14M10 4L8 20M16 4l-2 16") },
+  { id: "chat", label: "Team chat", bg: "linear-gradient(180deg,#be185d,#831843)", glyph: G("M5 9h14M5 15h14M10 4L8 20M16 4l-2 16") },
   { id: "api", label: "REST API", bg: "linear-gradient(180deg,#9ca3af,#4b5563)", glyph: G("M8 8l-4 4 4 4M16 8l4 4-4 4M13 6l-2 12") },
-  { id: "sms", label: "SMS", bg: "linear-gradient(180deg,#fb923c,#ea580c)", glyph: G("M7 3h10v18H7zM11 18h2") },
-  { id: "voice", label: "Phone line", bg: "linear-gradient(180deg,#34d399,#059669)", glyph: G("M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z") },
+  { id: "sms", label: "SMS", bg: "linear-gradient(180deg,#f9a8d4,#ec4899)", glyph: G("M7 3h10v18H7zM11 18h2") },
+  { id: "voice", label: "Phone line", bg: "linear-gradient(180deg,#71717a,#3f3f46)", glyph: G("M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z") },
 ];
 
 function Deploy() {

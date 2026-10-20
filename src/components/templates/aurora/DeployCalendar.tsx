@@ -29,13 +29,12 @@ export default function DeployCalendar({ weeks = 30, noun = "deploys", autoplay 
 
   // Deterministic sample data with a weekly rhythm and a busy stretch.
   const data = useMemo(() => {
-    let seed = 7;
-    const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+    const rnd = (w: number, d: number) => { const x = Math.sin(w * 127.1 + d * 311.7 + 7) * 43758.5453; return x - Math.floor(x); };
     return Array.from({ length: weeks }, (_, w) =>
       Array.from({ length: 7 }, (_, d) => {
         const weekend = d >= 5 ? 0.4 : 1;
         const season = 0.55 + 0.45 * Math.sin((w / weeks) * Math.PI * 1.6 + 0.6);
-        const v = Math.max(0, Math.round(rnd() * 12 * weekend * season - 1.5));
+        const v = Math.max(0, Math.round(rnd(w, d) * 12 * weekend * season - 1.5));
         return v;
       }),
     );

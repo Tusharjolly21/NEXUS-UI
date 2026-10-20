@@ -12,11 +12,11 @@ import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoader
 import ExpandableCard from "@/components/templates/kit/components/ExpandableCard";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import RulerPicker from "@/components/templates/kit/components/RulerPicker";
-import ProgressButton from "@/components/templates/kit/components/ProgressButton";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
 import UploadChips from "@/components/templates/lumis/UploadChips";
 import ReviewStack from "@/components/templates/lumis/ReviewStack";
 import StandingCalendar from "@/components/templates/lumis/StandingCalendar";
+import BookButton from "@/components/templates/lumis/BookButton";
 import { StickyStory } from "@/components/templates/lumis/StickyStory";
 import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Spotlight, Stagger, card, scrollToId } from "@/components/templates/kit/parts";
 
@@ -587,7 +587,7 @@ function Book() {
               <span className="text-[14px] text-[#1d1d1f]" aria-live="polite">
                 {free ? <><span className="font-semibold">{D.d} {D.n}, {SLOTS[slot]}</span> · 30 min video call</> : "That slot just went. Pick another."}
               </span>
-              <ProgressButton key={`${day}-${slot}`} label="Book the call" doneLabel="Add to calendar" accent={A} />
+              <BookButton key={`${day}-${slot}`} label="Book the call" doneLabel="Booked · see invite" accent={A} />
             </div>
           </div>
         </Reveal>
