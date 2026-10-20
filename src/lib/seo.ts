@@ -6,6 +6,13 @@ const site = getSiteUrl();
 export const siteConfig = {
   name: "Nexus UI",
   shortName: "Nexus UI",
+  /**
+   * The name search engines show above the URL. "Nexus UI" alone collides with other projects, so
+   * Google fell back to the bare domain; a distinct site name (also used in WebSite / Organization
+   * structured data and og:site_name) gives it one name to trust.
+   */
+  siteName: "Nexus UI Labs",
+  alternateNames: ["Nexus Labs", "Nexus UI"],
   // Shown in the browser tab and Google title link — keep under 60 chars
   tagline: "Free React UI Components & Next.js Templates",
   // Shown as Google snippet — keep under 155 chars
@@ -31,7 +38,7 @@ export function createMetadata(override: Metadata = {}): Metadata {
   }
 
   const titleStr =
-    typeof override.title === "string" ? override.title : siteConfig.name;
+    typeof override.title === "string" ? override.title : siteConfig.siteName;
   const descStr =
     typeof override.description === "string"
       ? override.description
@@ -65,13 +72,14 @@ export function createMetadata(override: Metadata = {}): Metadata {
   return {
     metadataBase,
     title: {
-      default: `${siteConfig.name} — ${siteConfig.tagline}`,
-      template: `%s · ${siteConfig.name}`,
+      default: `${siteConfig.siteName} — ${siteConfig.tagline}`,
+      template: `%s · ${siteConfig.siteName}`,
     },
     description: siteConfig.description,
-    authors: [{ name: siteConfig.name, url: siteConfig.url }],
-    creator: siteConfig.name,
-    publisher: siteConfig.name,
+    applicationName: siteConfig.siteName,
+    authors: [{ name: siteConfig.siteName, url: siteConfig.url }],
+    creator: siteConfig.siteName,
+    publisher: siteConfig.siteName,
     category: "technology",
     robots: {
       index: true,
@@ -91,7 +99,7 @@ export function createMetadata(override: Metadata = {}): Metadata {
       title: titleStr,
       description: descStr,
       url: pageUrl,
-      siteName: siteConfig.name,
+      siteName: siteConfig.siteName,
       locale: "en_US",
       type: "website",
       images: ogImages,
