@@ -10,6 +10,7 @@ import {
   docInlineCodeClass,
 } from "@/components/docs/doc-page";
 import { createMetadata } from "@/lib/seo";
+import { DarkModeDemo } from "@/components/docs/interactive/dark-mode-demo";
 
 export const metadata: Metadata = createMetadata({
   title: "Install Tailwind CSS",
@@ -176,6 +177,7 @@ html.dark {
             <code className={docInlineCodeClass}>{"<html>"}</code> via your theme provider (
             <code className={docInlineCodeClass}>next-themes</code> or a custom script).
           </p>
+          <div data-doc-widget><DarkModeDemo /></div>
         </DocSection>
 
         <DocSection title="6. Start the dev server">
