@@ -83,6 +83,15 @@ const nextConfig = {
   // Section roots without their own page — Search Console reported these as 404s.
   async redirects() {
     return [
+      // The project's production vercel.app address serves the same site; send it to the one
+      // canonical host so search engines never index a second copy. (Preview deployments use other
+      // hostnames and are unaffected.)
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "nexus-ui-olive.vercel.app" }],
+        destination: "https://www.nexus-ui.com/:path*",
+        permanent: true,
+      },
       { source: "/docs", destination: "/docs/introduction", permanent: true },
       { source: "/demos", destination: "/components", permanent: true },
       { source: "/Nexus", destination: "/", permanent: true },

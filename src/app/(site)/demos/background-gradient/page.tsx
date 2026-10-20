@@ -5,7 +5,7 @@ import { BackgroundGradientDemo } from "@/components/background-gradient";
 export const metadata: Metadata = createMetadata({
   title: "Background gradient demo",
   description: "Animated gradient border wrapper with pointer-reactive glow and smooth color transitions. Works on cards, buttons, and hero sections in any React app.",
-  alternates: { canonical: "/demos/background-gradient" },
+  alternates: { canonical: "/components/background-gradient" },
 });
 
 export default function BackgroundGradientDemoPage() {

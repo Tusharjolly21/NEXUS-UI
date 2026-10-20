@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import {
@@ -644,6 +644,29 @@ function About({ slug, name }: { slug: string; name: string }) {
   );
 }
 
+function Faq({ name, items }: { name: string; items: { q: string; a: string }[] }) {
+  if (!items.length) return null;
+  return (
+    <section aria-labelledby="faq-heading" className="mt-20 grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+      <SectionTitle id="faq-heading">{name} questions</SectionTitle>
+      <div className="border-t border-border">
+        {items.map((f) => (
+          <details key={f.q} className="group border-b border-border">
+            <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-6 py-4 text-[17px] font-semibold tracking-[-0.3px] text-foreground [&::-webkit-details-marker]:hidden">
+              <h3 className="text-[17px] font-semibold">{f.q}</h3>
+              <Plus
+                className="size-5 shrink-0 text-muted-foreground transition-transform duration-200 group-open:rotate-45 motion-reduce:transition-none"
+                aria-hidden
+              />
+            </summary>
+            <p className="max-w-[620px] pb-5 text-[15.5px] leading-relaxed text-muted-foreground">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ── page ────────────────────────────────────────────────────────────
 
 type SerializedSection = {
@@ -677,6 +700,8 @@ type ComponentDetailProps = {
   locked?: boolean;
   /** Has a build prompt (Pro feature, fetched from the gated API on copy). */
   hasPrompt?: boolean;
+  /** Questions and answers about this component (also sent as FAQPage structured data). */
+  faq?: { q: string; a: string }[];
 };
 
 export function ComponentDetailPageClient({
@@ -698,6 +723,7 @@ export function ComponentDetailPageClient({
   premium,
   locked = false,
   hasPrompt = false,
+  faq = [],
 }: ComponentDetailProps) {
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
@@ -804,6 +830,7 @@ export function ComponentDetailPageClient({
           />
           </ProLock>
           <About slug={slug} name={name} />
+          <Faq name={name} items={faq} />
 
           {related.length ? (
             <section aria-labelledby="related-heading" className="mt-20">

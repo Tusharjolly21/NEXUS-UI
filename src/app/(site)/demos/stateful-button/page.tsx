@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Stateful button demo",
   description: "Animated button with idle, loading, success, and error states with async-safe transitions. Drop-in replacement for standard submit buttons in React.",
-  alternates: { canonical: "/demos/stateful-button" },
+  alternates: { canonical: "/components/stateful-button" },
 });
 
 export default function StatefulButtonDemoPage() {

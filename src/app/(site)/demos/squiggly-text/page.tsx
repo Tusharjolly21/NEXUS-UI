@@ -5,7 +5,7 @@ import { SquigglyTextDemo } from "@/components/squiggly-text";
 export const metadata: Metadata = createMetadata({
   title: "RippleLine squiggly text",
   description: "Premium SVG wave underline with turbulence, blur, and displacement filters powered by Framer Motion. Elegant animated annotation for React text.",
-  alternates: { canonical: "/demos/squiggly-text" },
+  alternates: { canonical: "/components/squiggly-text" },
 });
 
 export default function SquigglyTextDemoPage() {

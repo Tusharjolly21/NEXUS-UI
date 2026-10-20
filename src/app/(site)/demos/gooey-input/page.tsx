@@ -5,7 +5,7 @@ import { GooeyInputDemo } from "@/components/gooey-input";
 export const metadata: Metadata = createMetadata({
   title: "Gooey input demo",
   description: "Expandable search input pill with an SVG gooey filter effect and a detached floating icon bubble. Smooth open and close animations with Framer Motion.",
-  alternates: { canonical: "/demos/gooey-input" },
+  alternates: { canonical: "/components/gooey-search-input" },
 });
 
 export default function GooeyInputDemoPage() {

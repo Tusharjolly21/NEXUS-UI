@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Background boxes demo",
   description: "Interactive full-width box grid background with hover highlight and glow ripple effects. Cursor-tracking ambient lighting for React hero sections.",
-  alternates: { canonical: "/demos/background-boxes" },
+  alternates: { canonical: "/components/background-boxes" },
 });
 
 export default function BackgroundBoxesDemoPage() {
