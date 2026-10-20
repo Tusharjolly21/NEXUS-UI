@@ -71,6 +71,12 @@ export default function RootLayout({
             gtag('config', '${GOOGLE_TAG_ID}');
           `}
         </Script>
+        {/* Cloudflare Web Analytics */}
+        <Script
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          strategy="afterInteractive"
+          data-cf-beacon='{"token": "27b8689ab43848efa888f93f6c6e6b02"}'
+        />
         <Analytics />
         <SpeedInsights />
       </body>
