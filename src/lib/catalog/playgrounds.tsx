@@ -48,6 +48,24 @@ import { MagnifyDock } from "@/components/magnify-dock";
 import { UploadChips } from "@/components/upload-chips";
 import { NotificationStack } from "@/components/notification-stack";
 import { IslandMorph } from "@/components/island-morph";
+import { TodoTower } from "@/components/todo-tower";
+import { PeekLogin } from "@/components/peek-login";
+import { HeatField } from "@/components/heat-field";
+import { ParticleMark } from "@/components/particle-mark";
+import { GenerateImage } from "@/components/generate-image";
+import { FalloffAccordion } from "@/components/falloff-accordion";
+import { MagnetSelect } from "@/components/magnet-select";
+import { AspectCrop } from "@/components/aspect-crop";
+import { SloshSlider } from "@/components/slosh-slider";
+import { GooReorder } from "@/components/goo-reorder";
+import { HopLabels } from "@/components/hop-labels";
+import { StepPlayer } from "@/components/step-player";
+import { PullToRefresh } from "@/components/pull-to-refresh";
+import { RunawayButton } from "@/components/runaway-button";
+import { WakeSlider } from "@/components/wake-slider";
+import { SeekSearch } from "@/components/seek-search";
+import { FoldNote } from "@/components/fold-note";
+import { AssignPicker } from "@/components/assign-picker";
 import { GlassBubbles } from "@/components/glass-bubbles";
 import { BoxSpill } from "@/components/box-spill";
 import { CurvedReel } from "@/components/curved-reel";
@@ -1370,6 +1388,172 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "showLabels", label: "Labels", defaultValue: true },
     ],
     render: (v) => <MatrixLoaders size={v.size as number} showLabels={v.showLabels as boolean} />,
+  },
+  "todo-tower": {
+    componentName: "TodoTower",
+    importPath: "@/components/todo-tower",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "overhang", label: "Tip after", min: 12, max: 48, step: 2, unit: "px", defaultValue: 24 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => <TodoTower key={String(v.autoplay)} overhang={v.overhang as number} autoplay={v.autoplay as boolean} />,
+  },
+  "peek-login": {
+    componentName: "PeekLogin",
+    importPath: "@/components/peek-login",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Face", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false },
+    ],
+    render: (v) => <PeekLogin key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "heat-field": {
+    componentName: "HeatField",
+    importPath: "@/components/heat-field",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "radius", label: "Spread", min: 24, max: 80, step: 2, unit: "px", defaultValue: 46 },
+      { kind: "toggle", prop: "autoplay", label: "Wander by itself", defaultValue: false },
+    ],
+    render: (v) => <HeatField key={String(v.autoplay)} radius={v.radius as number} autoplay={v.autoplay as boolean} />,
+  },
+  "particle-mark": {
+    componentName: "ParticleMark",
+    importPath: "@/components/particle-mark",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "text", label: "Word", options: ["motion", "hello", "nexus", "spring"], defaultValue: "motion" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+    ],
+    render: (v) => <ParticleMark key={String(v.autoplay)} text={v.text as string} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "generate-image": {
+    componentName: "GenerateImage",
+    importPath: "@/components/generate-image",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "prompt", label: "Prompt", options: ["Pink dusk over soft hills", "Morning valley, mint and sky", "Moonlit ridge, deep teal", "Desert at golden hour"], defaultValue: "Pink dusk over soft hills" },
+      { kind: "toggle", prop: "autoplay", label: "Generate by itself", defaultValue: false },
+    ],
+    render: (v) => <GenerateImage key={`${v.prompt}-${v.autoplay}`} prompt={v.prompt as string} autoplay={v.autoplay as boolean} />,
+  },
+  "falloff-accordion": {
+    componentName: "FalloffAccordion",
+    importPath: "@/components/falloff-accordion",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false }],
+    render: (v) => <FalloffAccordion key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "magnet-select": {
+    componentName: "MagnetSelect",
+    importPath: "@/components/magnet-select",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultValue", label: "Start on", options: ["here", "focus", "meet", "lunch", "travel", "sick", "away"], defaultValue: "here" },
+      { kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false },
+    ],
+    render: (v) => <MagnetSelect key={`${v.defaultValue}-${v.autoplay}`} defaultValue={v.defaultValue as string} autoplay={v.autoplay as boolean} />,
+  },
+  "aspect-crop": {
+    componentName: "AspectCrop",
+    importPath: "@/components/aspect-crop",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false }],
+    render: (v) => <AspectCrop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "slosh-slider": {
+    componentName: "SloshSlider",
+    importPath: "@/components/slosh-slider",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Liquid", options: ["#0071e3", "#30d158", "#ff9f0a", "#ff375f", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "select", prop: "label", label: "Label", options: ["Volume", "Brightness", "Bass"], defaultValue: "Volume" },
+      { kind: "toggle", prop: "autoplay", label: "Slosh by itself", defaultValue: false },
+    ],
+    render: (v) => <SloshSlider key={String(v.autoplay)} accent={v.accent as string} label={v.label as string} autoplay={v.autoplay as boolean} />,
+  },
+  "goo-reorder": {
+    componentName: "GooReorder",
+    importPath: "@/components/goo-reorder",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Shuffle by itself", defaultValue: false }],
+    render: (v) => <GooReorder key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "hop-labels": {
+    componentName: "HopLabels",
+    importPath: "@/components/hop-labels",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false },
+    ],
+    render: (v) => <HopLabels key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "step-player": {
+    componentName: "StepPlayer",
+    importPath: "@/components/step-player",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "range", prop: "stepDuration", label: "Step length", min: 1.5, max: 6, step: 0.1, unit: "s", defaultValue: 3.2 },
+    ],
+    render: (v) => <StepPlayer accent={v.accent as string} stepDuration={v.stepDuration as number} />,
+  },
+  "pull-to-refresh": {
+    componentName: "PullToRefresh",
+    importPath: "@/components/pull-to-refresh",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pull by itself", defaultValue: false }],
+    render: (v) => <PullToRefresh key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "runaway-button": {
+    componentName: "RunawayButton",
+    importPath: "@/components/runaway-button",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Dodge by itself", defaultValue: false }],
+    render: (v) => <RunawayButton key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "wake-slider": {
+    componentName: "WakeSlider",
+    importPath: "@/components/wake-slider",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#ff9f0a", "#0a84ff", "#30d158", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
+      { kind: "select", prop: "label", label: "Label", options: ["Brightness", "Volume", "Warmth"], defaultValue: "Brightness" },
+      { kind: "range", prop: "defaultValue", label: "Start value", min: 0, max: 100, step: 1, defaultValue: 40 },
+    ],
+    render: (v) => <WakeSlider key={String(v.defaultValue)} accent={v.accent as string} label={v.label as string} defaultValue={v.defaultValue as number} />,
+  },
+  "seek-search": {
+    componentName: "SeekSearch",
+    importPath: "@/components/seek-search",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "placeholder", label: "Placeholder", options: ["Search files", "Search docs", "Find a teammate"], defaultValue: "Search files" },
+      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false },
+    ],
+    render: (v) => <SeekSearch key={String(v.autoplay)} placeholder={v.placeholder as string} autoplay={v.autoplay as boolean} />,
+  },
+  "fold-note": {
+    componentName: "FoldNote",
+    importPath: "@/components/fold-note",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "amount", label: "Amount", options: ["50", "25", "100"], defaultValue: "50" },
+      { kind: "select", prop: "backLabel", label: "Back", options: ["Thanks", "Saved", "Enjoy"], defaultValue: "Thanks" },
+      { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false },
+    ],
+    render: (v) => <FoldNote key={String(v.autoplay)} amount={v.amount as string} backLabel={v.backLabel as string} autoplay={v.autoplay as boolean} />,
+  },
+  "assign-picker": {
+    componentName: "AssignPicker",
+    importPath: "@/components/assign-picker",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
+    render: (v) => <AssignPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
 };
 
