@@ -1,6 +1,6 @@
 # Traffic Bars
 
-Build a stacked bar chart card of website visits by source over 28 days. Run a pointer along it and the column under you gets a thin ring, every other column dims, the big total counts to that column's value, and a dark tooltip glides beside it with the per-source breakdown. A Day/Week segmented control regroups the chart: every day's slices fly across and stack inside their week's bar, so you can see where each weekly total came from. The feel is a calm, Apple-like analytics widget with springy, physical motion.
+Build a stacked bar chart card of website visits by source over 28 days. Scrub along it and the column under you is ringed, the rest dim, the total counts to that column and a tooltip glides beside it. A Day/Week control regroups the chart: every day's slices fly across and stack inside their week's bar. The feel is a calm, Apple-like analytics widget with springy motion.
 
 ## Stack
 
@@ -23,14 +23,14 @@ Local, deterministic demo data: 28 days × 3 series from a seeded LCG `s = (s·9
 
 - Palette lives in CSS variables on the root so SVG and inline styles follow the theme. Light / dark: card `#ffffff` / `#1c1c1e`; text `#1d1d1f` / `#f5f5f7`; secondary `#6e6e73` / `#98989d`; grid `#ececf0` / `#2c2c2e`; segment track `#f0f0f3` / `#2c2c2e`; selected pill `#ffffff` / `#48484a`; tooltip bg `#1d1d1f` / `#f5f5f7`; tooltip text `#ffffff` / `#1d1d1f`; tooltip labels `rgba(255,255,255,.6)` / `rgba(29,29,31,.6)`; ring `#1d1d1f` / `#f5f5f7`; card shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` / `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.8)`.
 - Card: 380px wide (`max-width: 100%`), radius 24px, padding 20px, `transition-colors 300ms`.
-- Header row: left "Traffic" (14px semibold) over a 12px secondary line ("Last 28 days", or the highlighted day/week label). Right: segmented control, rounded-full, 3px padding; buttons 28px tall, 12px horizontal padding, 12px medium, capitalised "day" / "week"; selected text primary, other secondary; selected pill has shadow `0 1px 3px rgba(0,0,0,.15)`.
+- Header: "Traffic" (14px semibold) over a 12px secondary line ("Last 28 days" or the highlighted label). Right: segmented control, rounded-full, 3px padding; buttons 28px tall, 12px padding-x, 12px medium, "day"/"week" capitalised; pill shadow `0 1px 3px rgba(0,0,0,.15)`.
 - Total: 12px below, 30px semibold, tabular numbers, tracking −0.03em, followed by "visits" in 13px regular secondary.
 - Plot: 16px below. SVG viewBox `0 0 336 150`, full width, height auto, `overflow: visible`. Dashed grid lines (`2 4`) at 25/50/75% height, a solid baseline at y 150.5.
 - Day mode: 28 columns, 4-unit gap, bar width `(336 − 4·27)/28`. Week mode: 4 columns, 18-unit gap. Vertical scale `yk = (150 − 6) / (max column total · 1.08)` for the current mode.
 - Stacking: Day mode stacks a day's three slices from the baseline. Week mode puts each day's slice inside its week's band for that series: series bands stack from the baseline, and inside a band day k sits above days 0…k−1 of that week. In Week mode slices get a 0.6 stroke in the card colour so the day seams show.
 - Ring: rounded rect from x −3, y −4, width `bw + 6`, height 158, radius `min(8, bw/2 + 3)`, no fill, stroke ring colour at .5 opacity, 1.2 wide.
-- Tooltip: absolutely positioned at top 0, min-width 136px, radius 12px, padding 8×12px, 11px text, shadow `0 10px 30px -10px rgba(0,0,0,.5)`. A semibold label, then three rows: 6px colour dot + series name (tooltip-label colour) on the left, formatted value on the right.
-- Under the plot: first and last date (11px, tabular, secondary) at either end, then a legend of 8px dots + names, 12px secondary, 16px gap.
+- Tooltip: absolute at top 0, min-width 136px, radius 12px, padding 8×12px, 11px, shadow `0 10px 30px -10px rgba(0,0,0,.5)`; a semibold label, then three rows of 6px dot + name (left) and value (right).
+- Below: first and last date (11px secondary), then a legend of 8px dots + names (12px, 16px gap).
 
 ## Motion
 
@@ -42,7 +42,7 @@ Local, deterministic demo data: 28 days × 3 series from a seeded LCG `s = (s·9
 
 ## Interaction and states
 
-- Pointer move/down over the plot picks `floor((x + gap/2)/(bw + gap))` in viewBox units, clamped. Leaving with a mouse clears it; touch keeps the last column. The plot uses `touch-action: none` and no text selection.
+- Pointer move/down picks `floor((x + gap/2)/(bw + gap))` in viewBox units, clamped. Mouse leave clears it; touch keeps the last column. `touch-action: none`.
 - Switching mode clears the highlight. A highlight index outside the current column count is treated as none (derive it; don't fix it in an effect).
 - The plot is focusable: Right/Up next column (from none → first), Left/Down previous (from none → last), Home/End, Escape clears; blur clears.
 
@@ -59,12 +59,10 @@ Every 260ms advance the highlight one column (wrapping); on every 26th tick clea
 
 ## Acceptance checklist
 
-- [ ] Data is identical on every load; there is no `Math.random`.
 - [ ] Hovering a column rings it, dims the rest to .32 and counts the total to that column.
 - [ ] The tooltip follows the ring, flips near the right edge and never leaves the card.
 - [ ] Day → Week: each day's slices fly into their week bar with a visible left-to-right stagger and seams between days.
 - [ ] Week → Day reverses with the stagger running the other way.
 - [ ] Arrow keys, Home, End and Escape scrub the chart; the live region announces values.
-- [ ] Touch scrubbing works and the page does not scroll while scrubbing.
 - [ ] `theme="auto"` follows `.dark`; light/dark pin the palette.
 - [ ] Autoplay sweeps and flips modes, then stops on the first interaction.

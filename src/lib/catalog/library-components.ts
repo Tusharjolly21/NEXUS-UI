@@ -11758,6 +11758,148 @@ export function PaymentMethods() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "traffic-bars",
+    name: "Traffic Bars",
+    registryCliName: "traffic-bars",
+    description:
+      "A stacked bar chart of daily visits by source: the column under your pointer is ringed, the others dim and a tooltip glides beside it with the breakdown. Switch Day to Week and every day's slices fly over and pile into their week.",
+    categorySlug: "dashboards",
+    tags: ["chart", "bar chart", "stacked bars", "analytics", "traffic", "tooltip", "data visualization", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "theme", type: '"auto" | "light" | "dark"', defaultValue: '"auto"', description: "\"auto\" follows the page's .dark class; \"light\" or \"dark\" pins the card's palette." },
+      { name: "colors", type: "string[]", defaultValue: '["#0071e3", "#64d2ff", "#bf5af2"]', description: "Fill for the Direct, Search and Referral slices, bottom to top." },
+      { name: "radius", type: "number", defaultValue: "2", description: "Corner radius of each slice, in SVG units." },
+      { name: "stagger", type: "number", defaultValue: "12", description: "Delay between neighbouring days when the slices regroup, in ms." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Scrubs along the columns and flips Day/Week until someone interacts." },
+    ],
+    Preview: Previews.PreviewTrafficBars,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TrafficBars } from "@/components/traffic-bars";
+
+export function AnalyticsOverview() {
+  return (
+    <section className="grid gap-6 md:grid-cols-2">
+      <TrafficBars />
+      <TrafficBars colors={["#ff9f0a", "#ffd60a", "#ff375f"]} radius={3} stagger={18} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stock-line",
+    name: "Stock Line",
+    registryCliName: "stock-line",
+    description:
+      "A trading-app price chart: scrub along it and a dot rides the line while the price rolls digit by digit and the change turns green or red. Switching range morphs the line into its new shape, and on 1D the last price keeps ticking live.",
+    categorySlug: "dashboards",
+    tags: ["chart", "line chart", "stock", "price", "finance", "trading", "rolling digits", "data visualization", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "theme", type: '"auto" | "light" | "dark"', defaultValue: '"auto"', description: "\"auto\" follows the page's .dark class; \"light\" or \"dark\" pins the card's palette." },
+      { name: "symbol", type: "string", defaultValue: '"NXUS"', description: "Ticker shown in the corner and read out in the chart's label." },
+      { name: "smooth", type: "boolean", defaultValue: "true", description: "Draw the line as smooth curves instead of straight segments." },
+      { name: "fill", type: "boolean", defaultValue: "true", description: "Fade a gradient area under the line." },
+      { name: "up", type: "string", defaultValue: '"#30d158"', description: "Line and change colour while the price is at or above the range's open." },
+      { name: "down", type: "string", defaultValue: '"#ff453a"', description: "Line and change colour while the price is below the range's open." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the ranges and sweeps the dot along each one until someone interacts." },
+    ],
+    Preview: Previews.PreviewStockLine,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StockLine } from "@/components/stock-line";
+
+export function Watchlist() {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <StockLine symbol="NXUS" />
+      <StockLine symbol="ACME" smooth={false} up="#0a84ff" down="#ff9f0a" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "pulse-monitor",
+    name: "Pulse Monitor",
+    registryCliName: "pulse-monitor",
+    description:
+      "A heart-rate card with a bedside-monitor ECG trace that sweeps and erases as it goes, a heart that beats on every spike and 24 hourly range bars you can scrub. Start a workout and the rate climbs, the beats close up and the colour warms.",
+    categorySlug: "dashboards",
+    tags: ["heart rate", "ecg", "health", "fitness", "canvas", "range bars", "chart", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press", "spring", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "bpm", type: "number", defaultValue: "68", description: "Resting heart rate. Also seeds the day's hourly ranges; a workout climbs to max(bpm + 50, 120)." },
+      { name: "color", type: "string", defaultValue: '"#ff375f"', description: "Colour of the trace, heart and range bars at rest." },
+      { name: "workoutColor", type: "string", defaultValue: '"#ff9f0a"', description: "Colour everything warms to, and the button fills with, during a workout." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Toggles a workout every ~10s and sweeps the hour readout along the bars until someone interacts." },
+    ],
+    Preview: Previews.PreviewPulseMonitor,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PulseMonitor } from "@/components/pulse-monitor";
+
+export function HealthSummary() {
+  return (
+    <section className="grid gap-6 sm:grid-cols-2">
+      <PulseMonitor bpm={62} />
+      <PulseMonitor bpm={74} color="#bf5af2" workoutColor="#30d158" />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "spend-donut",
+    name: "Spend Donut",
+    registryCliName: "spend-donut",
+    description:
+      "A monthly budget donut: the slice you point at slides out of the ring and thickens while the centre rolls to its amount. Switch month and every slice re-measures itself in one continuous spring sweep.",
+    categorySlug: "dashboards",
+    tags: ["donut chart", "pie chart", "budget", "spending", "finance", "chart", "legend", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "thickness", type: "number", defaultValue: "18", description: "Ring thickness in px (220px viewBox). The pointed-at slice grows by 6." },
+      { name: "gap", type: "number", defaultValue: "4", description: "Clear space between slices in px; the round caps are accounted for." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Points at each category in turn and changes month every ~8s until someone interacts." },
+    ],
+    Preview: Previews.PreviewSpendDonut,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SpendDonut } from "@/components/spend-donut";
+
+export function BudgetPanel() {
+  return (
+    <aside className="flex justify-center p-6">
+      <SpendDonut thickness={22} gap={6} />
+    </aside>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 export function getLibraryComponent(slugOrRegistryName: string) {

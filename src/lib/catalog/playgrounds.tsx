@@ -48,6 +48,10 @@ import { MagnifyDock } from "@/components/magnify-dock";
 import { UploadChips } from "@/components/upload-chips";
 import { NotificationStack } from "@/components/notification-stack";
 import { IslandMorph } from "@/components/island-morph";
+import { TrafficBars } from "@/components/traffic-bars";
+import { StockLine } from "@/components/stock-line";
+import { PulseMonitor } from "@/components/pulse-monitor";
+import { SpendDonut } from "@/components/spend-donut";
 import { TodoTower } from "@/components/todo-tower";
 import { PeekLogin } from "@/components/peek-login";
 import { HeatField } from "@/components/heat-field";
@@ -1692,6 +1696,62 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false },
     ],
     render: (v) => <WalletStack key={String(v.autoplay)} label={v.label as string} hint={v.hint as string} autoplay={v.autoplay as boolean} />,
+  },
+  "traffic-bars": {
+    componentName: "TrafficBars",
+    importPath: "@/components/traffic-bars",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "palette", label: "Palette", options: ["Ocean", "Sunset", "Forest"], defaultValue: "Ocean" },
+      { kind: "range", prop: "stagger", label: "Stagger", min: 0, max: 40, step: 2, unit: "ms", defaultValue: 12 },
+      { kind: "range", prop: "radius", label: "Radius", min: 0, max: 6, step: 0.5, defaultValue: 2 },
+    ],
+    render: (v) => (
+      <TrafficBars
+        colors={
+          ({
+            Ocean: ["#0071e3", "#64d2ff", "#bf5af2"],
+            Sunset: ["#ff375f", "#ff9f0a", "#ffd60a"],
+            Forest: ["#248a3d", "#30d158", "#a2e635"],
+          } as Record<string, string[]>)[v.palette as string]
+        }
+        stagger={v.stagger as number}
+        radius={v.radius as number}
+      />
+    ),
+  },
+  "stock-line": {
+    componentName: "StockLine",
+    importPath: "@/components/stock-line",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "smooth", label: "Smooth curve", defaultValue: true },
+      { kind: "toggle", prop: "fill", label: "Area fill", defaultValue: true },
+      { kind: "color", prop: "up", label: "Up colour", options: ["#30d158", "#0a84ff", "#64d2ff", "#bf5af2"], defaultValue: "#30d158" },
+    ],
+    render: (v) => <StockLine smooth={v.smooth as boolean} fill={v.fill as boolean} up={v.up as string} />,
+  },
+  "pulse-monitor": {
+    componentName: "PulseMonitor",
+    importPath: "@/components/pulse-monitor",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "bpm", label: "Resting BPM", min: 48, max: 100, step: 1, unit: "bpm", defaultValue: 68 },
+      { kind: "color", prop: "color", label: "Trace", options: ["#ff375f", "#0a84ff", "#30d158", "#bf5af2", "#64d2ff"], defaultValue: "#ff375f" },
+      { kind: "color", prop: "workoutColor", label: "Workout", options: ["#ff9f0a", "#ffd60a", "#ff375f", "#30d158"], defaultValue: "#ff9f0a" },
+    ],
+    render: (v) => <PulseMonitor bpm={v.bpm as number} color={v.color as string} workoutColor={v.workoutColor as string} />,
+  },
+  "spend-donut": {
+    componentName: "SpendDonut",
+    importPath: "@/components/spend-donut",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "thickness", label: "Thickness", min: 10, max: 30, step: 1, unit: "px", defaultValue: 18 },
+      { kind: "range", prop: "gap", label: "Gap", min: 0, max: 12, step: 1, unit: "px", defaultValue: 4 },
+      { kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false },
+    ],
+    render: (v) => <SpendDonut key={String(v.autoplay)} thickness={v.thickness as number} gap={v.gap as number} autoplay={v.autoplay as boolean} />,
   },
 };
 

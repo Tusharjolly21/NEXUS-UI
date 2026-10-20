@@ -1,6 +1,6 @@
 # Stock Line
 
-Build a price chart card in the style of a trading app. Scrub along it and a dot rides the line, a dashed crosshair follows, the big price rolls digit by digit like an odometer, and the change line turns green or red. A 1D/1W/1M/1Y control morphs the line from one shape into the next instead of redrawing it, and on 1D the last price keeps ticking live. The feel is precise, calm and springy, like Apple Stocks.
+Build a trading-app price chart card. Scrub along it and a dot rides the line, the price rolls digit by digit and the change turns green or red. A 1D/1W/1M/1Y control morphs the line into the next shape instead of redrawing it, and on 1D the last price ticks live. Precise, calm and springy, like Apple Stocks.
 
 ## Stack
 
@@ -24,12 +24,12 @@ Build a price chart card in the style of a trading app. Scrub along it and a dot
 
 - Palette in CSS variables. Light / dark: card `#ffffff` / `#1c1c1e`; text `#1d1d1f` / `#f5f5f7`; secondary `#6e6e73` / `#98989d`; grid `#ececf0` / `#2c2c2e`; range track `#f0f0f3` / `#2c2c2e`; selected pill `#ffffff` / `#48484a`; shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` / `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.8)`.
 - Card: 380px wide (`max-width: 100%`), radius 24px, padding 20px.
-- Top row: symbol (13px semibold, secondary) left; on 1D only, a "Live" badge right (11px medium, secondary) with an 8px dot in `up` and a pulsing copy behind it.
+- Top row: symbol (13px semibold, secondary); on 1D a "Live" badge (11px medium) with an 8px `up` dot and a pulsing copy.
 - Price: 4px below, 34px semibold, tracking −0.035em: "$", the whole part as rolling digits (commas static), then "." and the cents at 20px in secondary.
 - Change: 13px medium tabular, `+1,288.83 (+2.24%)` with a true minus `−` when negative, coloured `up`/`down`, then 8px later a regular secondary label: "Today" (1D) / "Past 1W" etc., or the scrubbed point's label.
 - Plot: 16px below; SVG viewBox `0 0 340 140`, full width, `overflow: visible`. Normalise prices to 0 (high) … 1 (low); `x = i/63·340`, `y = 8 + n·124`. A dashed (`2 4`) grid line at the first point's y. Smooth path: for each segment a cubic with both control points at the midpoint x and the endpoint ys. Area = line path + `L340 140 L0 140 Z`, filled by a vertical gradient of the current colour from .28 to 0 opacity (gradient id from a sanitised `useId`). Line stroke 2, round caps/joins; colours transition over .25s.
 - Dot: a 9px-radius halo in the colour at .18 opacity and a 4.5px circle filled with the card colour, 2.2 stroke in the colour. While scrubbing, a vertical dashed (`3 3`) line at the dot x, secondary at .5 opacity.
-- Range control: 16px below, full width, rounded-full, 3px padding; four equal buttons 28px tall, 12px semibold; selected primary, others secondary; pill shadow `0 1px 3px rgba(0,0,0,.15)`.
+- Range control: 16px below, full width, rounded-full, 3px padding; four equal 28px buttons, 12px semibold; pill shadow `0 1px 3px rgba(0,0,0,.15)`.
 
 ## Motion
 
@@ -37,7 +37,7 @@ Build a price chart card in the style of a trading app. Scrub along it and a dot
 - Morph: keep `from` and `to` arrays of normalised values and a progress motion value. On range change, set `from` to the currently interpolated shape (so mid-morph switches continue smoothly), `to` to the new range, reset progress to 0 and animate it to 1 with a spring, stiffness 120, damping 20. The path is a `useTransform` of progress and a `live` offset: `lerp(from, to, p)`, then add `live` to the last point clamped to 0..1.
 - Live tick (1D only): every 1.4s draw a seeded delta `(r − 0.45)·120` dollars, add it to the shown last price, and animate `live` to `−delta/(high − low)` with a spring, stiffness 200, damping 18. Changing range resets the delta and tweens `live` to 0 over 0.3s.
 - Dot: raw x/y motion values set from the displayed shape at the scrubbed index (or the last point), smoothed by springs (stiffness 600, damping 40). Re-place it whenever the path changes, so it rides the morph and the live tick.
-- Change colour animates over 0.25s. Live pulse: scale 1→2.4, opacity .6→0, 1.4s, repeating. Range pill: shared per-instance `layoutId`, spring 500/36.
+- Change colour animates over 0.25s. Live pulse: scale 1→2.4, opacity .6→0, 1.4s, repeating. Pill: per-instance `layoutId`, spring 500/36.
 
 ## Interaction and states
 
@@ -58,7 +58,6 @@ Every 4.2s switch to the next range; 0.9s later sweep the index from 0 to the en
 
 ## Acceptance checklist
 
-- [ ] Same curves on every load; no `Math.random` anywhere.
 - [ ] Scrubbing moves the dot along the line and the price digits roll individually.
 - [ ] The change flips to red with a true minus when below the open.
 - [ ] Switching range morphs the existing line into the new one; switching mid-morph continues smoothly.
