@@ -11,7 +11,8 @@ import { PricingTeaser } from "@/components/home/pricing-teaser";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
-import { Band, PillLink, StatRow } from "@/components/site";
+import { Band, PillLink } from "@/components/site";
+import { CatalogShelf } from "@/components/site/catalog-shelf";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { homeGalleryItems } from "@/lib/catalog/gallery-items";
 import { templates } from "@/lib/catalog/templates";
@@ -165,13 +166,12 @@ export default function Home() {
 
       <section className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
-          <StatRow
-            items={[
-              { value: CATALOG_COUNTS.components, label: `components, ${CATALOG_COUNTS.freeComponents} free` },
-              { value: CATALOG_COUNTS.templates, label: "full-page templates" },
-              { value: CATALOG_COUNTS.blocks, label: "section blocks" },
-              { value: "1", label: "command to install" },
-            ]}
+          <CatalogShelf
+            components={CATALOG_COUNTS.components}
+            freeComponents={CATALOG_COUNTS.freeComponents}
+            templates={CATALOG_COUNTS.templates}
+            blocks={CATALOG_COUNTS.blocks}
+            command="npx shadcn@latest add @nexus-labs/otp-input"
           />
           <StackStrip />
         </div>
