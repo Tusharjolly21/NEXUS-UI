@@ -1,27 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type CodeLanguage =
-  | "plain"
-  | "js"
-  | "ts"
-  | "jsx"
-  | "tsx"
-  | "css"
-  | "json"
-  | "html";
+export type CodeLanguage = "plain" | "js" | "ts" | "jsx" | "tsx" | "css" | "json" | "html";
 
 export type HeaderProps = {
+  /** Shows the title bar. */
   enabled?: boolean;
+  /** Shows the three window dots. */
   showDots?: boolean;
+  /** Title bar background (custom theme). */
   background?: string;
+  /** File name or label in the title bar. */
   title?: string;
+  /** Font overrides for the title and copy button. */
   font?: React.CSSProperties;
+  /** Title colour (custom theme). */
   titleColor?: string;
+  /** Copy button settings. */
   copy?: CopyProps;
 };
 
@@ -30,17 +29,22 @@ export type CopyProps = {
   label?: string;
   copiedLabel?: string;
   copiedDurationMs?: number;
+  /** Button colour (custom theme). */
   color?: string;
+  /** Button colour once copied (custom theme). */
   accentColor?: string;
 };
 
 export type CodeAreaProps = {
   showLineNumbers?: boolean;
+  /** Wraps long lines instead of scrolling sideways. */
   wrap?: boolean;
+  /** Inner padding in px. */
   padding?: number;
   background?: string;
   selectionColor?: string;
   textColor?: string;
+  /** Line number colour. */
   subtleTextColor?: string;
   font?: React.CSSProperties;
 };
@@ -54,39 +58,36 @@ export type BorderProps = {
 export type CodeBlockProps = {
   code?: string;
   language?: CodeLanguage;
-  theme?: "dark" | "light" | "custom";
+  /** `dark` and `light` are built in, `auto` follows the page's `dark` class, and `custom` reads the colours from `header`, `codeArea` and `border`. */
+  theme?: "dark" | "light" | "auto" | "custom";
   header?: HeaderProps;
   codeArea?: CodeAreaProps;
   border?: BorderProps;
+  /** 1-based line numbers to mark with an accent bar. */
+  highlightLines?: number[];
+  /** A soft bar glides to whichever line the pointer is on. */
+  hoverHighlight?: boolean;
+  /** Walks the glide bar through `highlightLines` (or every line) until the pointer comes over the code. */
+  autoplay?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
 
-const DEFAULT_CODE = `import React, { useState } from 'react';
+const DEFAULT_CODE = `import { useState } from "react";
 
-export default function PricingCard() {
-  const [isYearly, setIsYearly] = useState(false);
+export function PricingCard() {
+  const [yearly, setYearly] = useState(false);
+  const price = yearly ? 99 : 12;
 
   return (
-    <div className="pricing-card">
-      <h3>Pro Plan</h3>
-      <p className="price">
-        \${isYearly ? '99' : '12'}
-        <span className="duration">
-          /{isYearly ? 'year' : 'month'}
-        </span>
-      </p>
-
-      <button onClick={() => setIsYearly(!isYearly)}>
-        Toggle Billing
+    <div className="card">
+      <h3>Pro</h3>
+      <p className="price">\${price}</p>
+      <button onClick={() => setYearly(!yearly)}>
+        Bill {yearly ? "monthly" : "yearly"}
       </button>
-
-      <ul className="features">
-        <li>Unlimited Projects</li>
-        <li>Priority Support</li>
-      </ul>
     </div>
   );
 }`;
@@ -94,92 +95,98 @@ export default function PricingCard() {
 export const DEFAULT_HEADER: HeaderProps = {
   enabled: true,
   showDots: true,
-  background: "#1A1A1A",
-  title: "Example",
-  titleColor: "#E5E5E5",
-  copy: {
-    enabled: true,
-    label: "Copy",
-    copiedLabel: "Copied",
-    copiedDurationMs: 1200,
-    color: "#888888",
-    accentColor: "#E5E5E5",
-  },
+  title: "pricing-card.tsx",
+  copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 },
 };
 
 export const DEFAULT_CODE_AREA: CodeAreaProps = {
   showLineNumbers: true,
-  wrap: true,
-  padding: 16,
-  background: "#0D0D0D",
-  selectionColor: "rgba(255, 255, 255, 0.1)",
-  textColor: "#D4D4D4",
-  subtleTextColor: "#555555",
+  wrap: false,
+  padding: 18,
 };
 
 export const DEFAULT_BORDER: BorderProps = {
-  color: "#1A1A1A",
-  width: 1,
-  radius: "12px",
+  width: 0,
+  radius: "22px",
 };
 
-// ── Theme colors ───────────────────────────────────────────────────────────────
+// ── Theme colours ─────────────────────────────────────────────────────────────
 
-type ActiveColors = {
+type Palette = {
   border: string;
-  containerBg: string;
+  frame: string;
   headerBg: string;
   title: string;
   copy: string;
   copyAccent: string;
   codeBg: string;
   text: string;
-  subtleText: string;
+  subtle: string;
   selection: string;
-  isDark: boolean;
+  glide: string;
+  mark: string;
+  markBar: string;
+  dark: boolean;
 };
 
-function isColorDark(color: string): boolean {
-  if (!color) return false;
-  let r = 0, g = 0, b = 0;
-  const c = color.trim();
-  if (c.startsWith("#")) {
-    let hex = c.replace("#", "");
-    if (hex.length === 3) hex = hex.split("").map(x => x + x).join("");
-    r = parseInt(hex.substring(0, 2), 16) || 0;
-    g = parseInt(hex.substring(2, 4), 16) || 0;
-    b = parseInt(hex.substring(4, 6), 16) || 0;
-  } else if (c.startsWith("rgb")) {
-    const match = c.match(/\d+(\.\d+)?/g);
-    if (match && match.length >= 3) {
-      r = parseInt(match[0], 10);
-      g = parseInt(match[1], 10);
-      b = parseInt(match[2], 10);
-    }
-  }
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-}
+const DARK: Palette = {
+  border: "rgba(255,255,255,0.08)",
+  frame: "#1c1c1e",
+  headerBg: "#232325",
+  title: "#a1a1a6",
+  copy: "#a1a1a6",
+  copyAccent: "#30d158",
+  codeBg: "#1c1c1e",
+  text: "#e5e5ea",
+  subtle: "#636366",
+  selection: "rgba(10,132,255,0.35)",
+  glide: "rgba(255,255,255,0.06)",
+  mark: "rgba(10,132,255,0.14)",
+  markBar: "#0a84ff",
+  dark: true,
+};
 
-function setAlpha(color: string, alpha: number): string {
-  if (!color) return "transparent";
+const LIGHT: Palette = {
+  border: "rgba(0,0,0,0.06)",
+  frame: "#ffffff",
+  headerBg: "#f5f5f7",
+  title: "#6e6e73",
+  copy: "#6e6e73",
+  copyAccent: "#248a3d",
+  codeBg: "#ffffff",
+  text: "#1d1d1f",
+  subtle: "#aeaeb2",
+  selection: "rgba(0,113,227,0.18)",
+  glide: "rgba(0,0,0,0.04)",
+  mark: "rgba(0,113,227,0.08)",
+  markBar: "#0071e3",
+  dark: false,
+};
+
+/** Dark flag from the `dark` class on <html>; false on the server. */
+function subscribeDark(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+const readDark = () => document.documentElement.classList.contains("dark");
+
+function isColorDark(color: string): boolean {
   const c = color.trim();
+  let r = 0;
+  let g = 0;
+  let b = 0;
   if (c.startsWith("#")) {
-    let hex = c.replace("#", "");
-    if (hex.length === 3) hex = hex.split("").map(x => x + x).join("");
-    if (hex.length === 6) {
-      const a = Math.round(alpha * 255).toString(16).padStart(2, "0");
-      return `#${hex}${a}`;
-    }
-    if (hex.length === 8) return c;
-  }
-  if (c.startsWith("rgb")) {
+    let hex = c.slice(1);
+    if (hex.length === 3) hex = hex.split("").map((x) => x + x).join("");
+    r = parseInt(hex.slice(0, 2), 16) || 0;
+    g = parseInt(hex.slice(2, 4), 16) || 0;
+    b = parseInt(hex.slice(4, 6), 16) || 0;
+  } else if (c.startsWith("rgb")) {
     const m = c.match(/\d+(\.\d+)?/g);
-    if (m && m.length >= 3) {
-      return `rgba(${m[0]}, ${m[1]}, ${m[2]}, ${alpha})`;
-    }
-  }
-  return c;
+    if (m && m.length >= 3) [r, g, b] = m.map(Number);
+  } else return true;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
 }
 
 // ── Token types ───────────────────────────────────────────────────────────────
@@ -202,43 +209,44 @@ type TokenType =
 
 type Token = { t: TokenType; v: string };
 
-// ── Token color map ────────────────────────────────────────────────────────────
+// ── Token colours (Xcode-like) ────────────────────────────────────────────────
 
-function tokenColor(t: TokenType, baseColor: string, isDark: boolean): string {
-  if (isDark) {
-    switch (t) {
-      case "keyword": return "#D2A8FF";
-      case "function": return "#82AAFF";
-      case "class": return "#FFCB6B";
-      case "string": return "#C3E88D";
-      case "number": return "#F78C6C";
-      case "comment": return "#7A7A7A";
-      case "operator": return "#89DDFF";
-      case "punct": return "#D4D4D4";
-      case "tag": return "#F07178";
-      case "attr": return "#FFCB6B";
-      case "value": return "#C3E88D";
-      case "boolean": return "#F78C6C";
-      case "nullish": return "#F78C6C";
-      default: return baseColor;
-    }
-  }
-  switch (t) {
-    case "keyword": return "#8839EF";
-    case "function": return "#1E66F5";
-    case "class": return "#DF8E1D";
-    case "string": return "#40A02B";
-    case "number": return "#FE640B";
-    case "comment": return "#8C8FA1";
-    case "operator": return "#04A5E5";
-    case "punct": return "#4C4F69";
-    case "tag": return "#D20F39";
-    case "attr": return "#DF8E1D";
-    case "value": return "#40A02B";
-    case "boolean": return "#FE640B";
-    case "nullish": return "#FE640B";
-    default: return baseColor;
-  }
+const DARK_TOKENS: Record<TokenType, string> = {
+  keyword: "#ff7ab2",
+  function: "#67b7a4",
+  class: "#5dd8ff",
+  string: "#ff8170",
+  number: "#d9c97c",
+  comment: "#7f8c98",
+  operator: "#a1a1a6",
+  punct: "#c7c7cc",
+  tag: "#5dd8ff",
+  attr: "#d9c97c",
+  value: "#ff8170",
+  boolean: "#ff7ab2",
+  nullish: "#ff7ab2",
+  plain: "",
+};
+
+const LIGHT_TOKENS: Record<TokenType, string> = {
+  keyword: "#9b2393",
+  function: "#326d74",
+  class: "#0b4f79",
+  string: "#c41a16",
+  number: "#1c00cf",
+  comment: "#5d6c79",
+  operator: "#3c3c43",
+  punct: "#3c3c43",
+  tag: "#0b4f79",
+  attr: "#815f03",
+  value: "#c41a16",
+  boolean: "#9b2393",
+  nullish: "#9b2393",
+  plain: "",
+};
+
+function tokenColor(t: TokenType, base: string, dark: boolean): string {
+  return (dark ? DARK_TOKENS : LIGHT_TOKENS)[t] || base;
 }
 
 // ── Tokenizer ──────────────────────────────────────────────────────────────────
@@ -484,392 +492,360 @@ function tokenizeLine(line: string, language: CodeLanguage): Token[] | null {
   return tokenizeCodeLine(line);
 }
 
-// ── Icons ──────────────────────────────────────────────────────────────────────
+// ── Pieces ────────────────────────────────────────────────────────────────────
 
-function WindowDot({ color }: { color: string }) {
+const LANG_LABEL: Record<CodeLanguage, string> = { plain: "TXT", js: "JS", ts: "TS", jsx: "JSX", tsx: "TSX", css: "CSS", json: "JSON", html: "HTML" };
+
+const POP = { type: "spring" as const, stiffness: 600, damping: 22 };
+
+/** Two sheets turn into a tick: the tick draws itself and the badge overshoots. */
+function CopyGlyph({ copied, still }: { copied: boolean; still: boolean }) {
   return (
-    <span
-      style={{
-        width: 10,
-        height: 10,
-        borderRadius: 999,
-        background: color,
-        display: "inline-block",
-        boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.08)",
-      }}
-    />
+    <span className="relative inline-grid h-4 w-4 place-items-center" aria-hidden="true">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {copied ? (
+          <motion.svg key="ok" viewBox="0 0 16 16" width={16} height={16} initial={{ scale: 0.3, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0.3, opacity: 0 }} transition={POP}>
+            <motion.path
+              d="M3.5 8.4l2.9 2.8 6.1-6.4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: still ? 1 : 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.28, ease: "easeOut" }}
+            />
+          </motion.svg>
+        ) : (
+          <motion.svg key="copy" viewBox="0 0 16 16" width={16} height={16} initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={POP}>
+            <rect x="5.5" y="5.5" width="8" height="8" rx="2" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M10.5 3.5v-.2A1.3 1.3 0 0 0 9.2 2H3.8A1.3 1.3 0 0 0 2.5 3.3v5.4A1.3 1.3 0 0 0 3.8 10h.2" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </motion.svg>
+        )}
+      </AnimatePresence>
+    </span>
   );
 }
 
-function CopyIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path
-        d="M8 7.5V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-.5"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M6 9h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
+// ── Main component ────────────────────────────────────────────────────────────
 
-// ── HighlightedLine ────────────────────────────────────────────────────────────
-
-function HighlightedLine({
-  tokens,
-  baseColor,
-  isDark,
-}: {
-  tokens: Token[];
-  baseColor: string;
-  isDark: boolean;
-}) {
-  return (
-    <>
-      {tokens.map((tok, idx) => (
-        <span
-          key={idx}
-          style={{ color: tokenColor(tok.t, baseColor, isDark) }}
-        >
-          {tok.v.length > 0 ? tok.v : " "}
-        </span>
-      ))}
-    </>
-  );
-}
-
-// ── Main Component ────────────────────────────────────────────────────────────
-
+/**
+ * A syntax-highlighted code block with a title bar, line numbers and a copy
+ * button. A soft bar glides between lines as the pointer moves (the signature
+ * move), `highlightLines` marks lines with an accent bar, and copying turns
+ * the icon into a tick that draws itself.
+ */
 export function CodeBlock({
   code = DEFAULT_CODE,
-  language = "jsx",
+  language = "tsx",
   theme = "dark",
   header = DEFAULT_HEADER,
   codeArea = DEFAULT_CODE_AREA,
   border = DEFAULT_BORDER,
+  highlightLines,
+  hoverHighlight = true,
+  autoplay = false,
   className,
   style,
 }: CodeBlockProps) {
+  const uid = React.useId().replace(/:/g, "");
+  const still = useReducedMotion() === true;
+  const pageDark = React.useSyncExternalStore(subscribeDark, readDark, () => false);
   const [copied, setCopied] = React.useState(false);
-  const timerRef = React.useRef<number | null>(null);
+  const timer = React.useRef<number | null>(null);
+  const body = React.useRef<HTMLDivElement>(null);
+  const touched = React.useRef(false);
+  const spring = still ? { stiffness: 2000, damping: 100 } : { stiffness: 520, damping: 38, mass: 0.7 };
+  const barY = useSpring(0, spring);
+  const barH = useSpring(0, spring);
+  const barO = useSpring(0, { stiffness: 380, damping: 40 });
+  const barOn = React.useRef(false);
 
-  React.useEffect(() => {
-    return () => {
-      if (timerRef.current !== null && typeof window !== "undefined") {
-        window.clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
+  React.useEffect(
+    () => () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+    },
+    [],
+  );
+
+  const text = React.useMemo(() => (code ?? "").replace(/\r\n/g, "\n"), [code]);
+  const lines = React.useMemo(() => text.split("\n"), [text]);
+  const digits = String(Math.max(1, lines.length)).length;
+  const tokens = React.useMemo(() => (language === "plain" ? null : lines.map((l) => tokenizeLine(l, language))), [lines, language]);
+  const marked = React.useMemo(() => new Set(highlightLines ?? []), [highlightLines]);
+
+  const pal = React.useMemo<Palette>(() => {
+    if (theme === "light") return LIGHT;
+    if (theme === "dark") return DARK;
+    if (theme === "auto") return pageDark ? DARK : LIGHT;
+    const bg = codeArea.background ?? DARK.codeBg;
+    const base = isColorDark(bg) ? DARK : LIGHT;
+    return {
+      ...base,
+      border: border.color ?? base.border,
+      frame: bg,
+      headerBg: header.background ?? base.headerBg,
+      title: header.titleColor ?? base.title,
+      copy: header.copy?.color ?? base.copy,
+      copyAccent: header.copy?.accentColor ?? base.copyAccent,
+      codeBg: bg,
+      text: codeArea.textColor ?? base.text,
+      subtle: codeArea.subtleTextColor ?? base.subtle,
+      selection: codeArea.selectionColor ?? base.selection,
     };
-  }, []);
+  }, [theme, pageDark, border.color, header.background, header.titleColor, header.copy?.color, header.copy?.accentColor, codeArea.background, codeArea.textColor, codeArea.subtleTextColor, codeArea.selectionColor]);
 
-  const normalizedCode = React.useMemo(() => {
-    return (code ?? "").replace(/\r\n/g, "\n");
-  }, [code]);
+  /** Moves the glide bar onto a line element. */
+  const glideTo = (el: HTMLElement | null, jump = false) => {
+    if (!el) return;
+    if (jump || !barOn.current) {
+      barY.jump(el.offsetTop);
+      barH.jump(el.offsetHeight);
+    } else {
+      barY.set(el.offsetTop);
+      barH.set(el.offsetHeight);
+    }
+    barOn.current = true;
+    barO.set(1);
+  };
 
-  const lines = React.useMemo(() => {
-    const arr = normalizedCode.split("\n");
-    return arr.length === 0 ? [""] : arr;
-  }, [normalizedCode]);
+  const onMove = (e: React.PointerEvent) => {
+    if (!hoverHighlight) return;
+    touched.current = true;
+    const el = (e.target as HTMLElement).closest<HTMLElement>("[data-ln]");
+    if (el) glideTo(el);
+  };
 
-  const maxLineNumberDigits = React.useMemo(() => {
-    return String(Math.max(1, lines.length)).length;
-  }, [lines.length]);
+  // Autoplay: walk the bar through the marked lines (or every non-empty line).
+  const stops = React.useMemo(() => {
+    const list = highlightLines?.length ? highlightLines : lines.map((l, i) => (l.trim() ? i + 1 : 0)).filter(Boolean);
+    return list.join(",");
+  }, [highlightLines, lines]);
+  React.useEffect(() => {
+    if (!autoplay || !stops) return;
+    const order = stops.split(",").map(Number);
+    let k = 0;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      const el = body.current?.querySelector<HTMLElement>(`[data-ln="${order[k++ % order.length]}"]`);
+      glideTo(el ?? null);
+    }, 900);
+    return () => window.clearInterval(t);
+    // glideTo only touches motion values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay, stops]);
 
-  const tokensByLine = React.useMemo(() => {
-    if (language === "plain") return null;
-    return lines.map(line => tokenizeLine(line, language));
-  }, [lines, language]);
-
-  const copyToClipboard = React.useCallback(async () => {
-    if (typeof window === "undefined" || typeof document === "undefined") return;
-    const text = normalizedCode;
+  const copy = async () => {
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-      } else {
+      if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      else {
         const ta = document.createElement("textarea");
         ta.value = text;
         ta.setAttribute("readonly", "true");
-        ta.style.position = "absolute";
-        ta.style.left = "-9999px";
-        ta.style.top = "0";
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
         document.body.appendChild(ta);
         ta.select();
         document.execCommand("copy");
         document.body.removeChild(ta);
       }
       setCopied(true);
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => {
-        setCopied(false);
-      }, Math.max(200, header.copy?.copiedDurationMs ?? 1200));
+      if (timer.current !== null) window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setCopied(false), Math.max(300, header.copy?.copiedDurationMs ?? 1400));
     } catch {
-      // ignore clipboard errors silently
+      /* clipboard can be blocked; nothing to do */
     }
-  }, [header.copy?.copiedDurationMs, normalizedCode]);
+  };
 
-  // ── Active colors ──────────────────────────────────────────────────────────
-
-  const activeColors = React.useMemo<ActiveColors>(() => {
-    if (theme === "light") {
-      return {
-        border: "#E5E5E5",
-        containerBg: "#FFFFFF",
-        headerBg: "#F5F5F5",
-        title: "#000000",
-        copy: "#A6A6A6",
-        copyAccent: "#000000",
-        codeBg: "#FFFFFF",
-        text: "#383A42",
-        subtleText: "#A0A1A7",
-        selection: "rgba(0, 153, 255, 0.15)",
-        isDark: false,
-      };
-    }
-    if (theme === "dark") {
-      return {
-        border: "#1A1A1A",
-        containerBg: "#0D0D0D",
-        headerBg: "#1A1A1A",
-        title: "#E5E5E5",
-        copy: "#888888",
-        copyAccent: "#E5E5E5",
-        codeBg: "#0D0D0D",
-        text: "#D4D4D4",
-        subtleText: "#555555",
-        selection: "rgba(255, 255, 255, 0.1)",
-        isDark: true,
-      };
-    }
-    return {
-      border: border.color ?? "#1A1A1A",
-      containerBg: codeArea.background ?? "#0D0D0D",
-      headerBg: header.background ?? "#1A1A1A",
-      title: header.titleColor ?? "#E5E5E5",
-      copy: header.copy?.color ?? "#888888",
-      copyAccent: header.copy?.accentColor ?? "#E5E5E5",
-      codeBg: codeArea.background ?? "#0D0D0D",
-      text: codeArea.textColor ?? "#D4D4D4",
-      subtleText: codeArea.subtleTextColor ?? "#555555",
-      selection: codeArea.selectionColor ?? "rgba(255,255,255,0.1)",
-      isDark: isColorDark(codeArea.background ?? "#0D0D0D"),
-    };
-  }, [theme, border, header, codeArea]);
-
-  const containerBorder =
-    (border.width ?? 1) > 0
-      ? `${border.width}px solid ${activeColors.border}`
-      : "none";
-
-  const headerHeight = 44;
-
-  // ── Header ─────────────────────────────────────────────────────────────────
-
-  const headerEl = header.enabled ? (
-    <div
-      style={{
-        flex: "0 0 auto",
-        height: headerHeight,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-        padding: "0 12px 0 14px",
-        background: activeColors.headerBg,
-        borderBottom: `1px solid ${activeColors.border}`,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          minWidth: 0,
-          flex: 1,
-        }}
-      >
-        {header.showDots && (
-          <div
-            aria-hidden="true"
-            style={{ display: "flex", gap: 6, alignItems: "center", flex: "0 0 auto" }}
-          >
-            <WindowDot color="#F07178" />
-            <WindowDot color="#FFCB6B" />
-            <WindowDot color="#C3E88D" />
-          </div>
-        )}
-        <div
-          style={{
-            minWidth: 0,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            color: activeColors.title,
-            ...header.font,
-          }}
-        >
-          {header.title}
-        </div>
-      </div>
-
-      {header.copy?.enabled && (
-        <motion.button
-          type="button"
-          onClick={copyToClipboard}
-          whileTap={{ scale: 0.98 }}
-          style={{
-            appearance: "none",
-            border: "none",
-            outline: "none",
-            background: "transparent",
-            color: copied ? activeColors.copyAccent : activeColors.copy,
-            cursor: "pointer",
-            padding: "8px 10px",
-            margin: 0,
-            borderRadius: 8,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            ...header.font,
-          }}
-          aria-label={copied ? header.copy.copiedLabel : header.copy.label}
-        >
-          <span style={{ whiteSpace: "nowrap" }}>
-            {copied ? header.copy.copiedLabel : header.copy.label}
-          </span>
-          <CopyIcon />
-        </motion.button>
-      )}
-    </div>
-  ) : null;
-
-  // ── Render ─────────────────────────────────────────────────────────────────
-
-  const showLineNumbers = codeArea.showLineNumbers ?? true;
-  const wrap = codeArea.wrap ?? true;
-  const padding = codeArea.padding ?? 16;
+  const showNumbers = codeArea.showLineNumbers ?? true;
+  const wrap = codeArea.wrap ?? false;
+  const padding = codeArea.padding ?? 18;
+  const bw = border.width ?? (theme === "custom" ? 1 : 0);
+  const copyLabel = header.copy?.label ?? "Copy";
+  const copiedLabel = header.copy?.copiedLabel ?? "Copied";
 
   return (
     <div
-      className={className}
+      className={`cb-${uid} ${className ?? ""}`}
       style={{
         position: "relative",
         width: "100%",
         height: "100%",
-        overflow: "hidden",
-        border: containerBorder,
-        borderRadius: border.radius,
-        background: activeColors.containerBg,
         display: "flex",
         flexDirection: "column",
+        overflow: "hidden",
+        borderRadius: border.radius ?? "22px",
+        background: pal.frame,
+        boxShadow: `0 0 0 ${bw > 0 ? bw : 1}px ${bw > 0 ? (border.color ?? pal.border) : pal.border}, 0 20px 40px -26px rgba(0,0,0,${pal.dark ? 0.6 : 0.3})`,
         ...style,
       }}
     >
-      {headerEl}
+      <style>{`.cb-${uid} ::selection{background:${pal.selection}}.cb-${uid} .cb-scroll::-webkit-scrollbar{width:0;height:0}`}</style>
+      {header.enabled && (
+        <div
+          style={{ background: pal.headerBg, borderBottom: `1px solid ${pal.border}`, ...header.font }}
+          className="flex h-11 shrink-0 items-center gap-3 pl-4 pr-2 text-[12.5px]"
+        >
+          {header.showDots && (
+            <span className="flex shrink-0 gap-[7px]" aria-hidden="true">
+              <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+              <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+              <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+            </span>
+          )}
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            <span
+              className="shrink-0 rounded-[6px] px-1.5 py-[1px] text-[10px] font-semibold tracking-[0.04em]"
+              style={{ color: pal.title, background: pal.dark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.05)" }}
+            >
+              {LANG_LABEL[language] ?? "TXT"}
+            </span>
+            {header.title && (
+              <span className="truncate font-medium" style={{ color: pal.title }}>
+                {header.title}
+              </span>
+            )}
+          </span>
+          {header.copy?.enabled && (
+            <motion.button
+              type="button"
+              onClick={copy}
+              whileTap={{ scale: 0.92 }}
+              aria-label={copied ? copiedLabel : copyLabel}
+              className="relative flex h-8 shrink-0 items-center gap-1.5 overflow-hidden rounded-full px-3 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[#0a84ff]"
+              style={{ color: copied ? pal.copyAccent : pal.copy, background: copied ? (pal.dark ? "rgba(48,209,88,0.12)" : "rgba(36,138,61,0.08)") : "transparent", ...header.font }}
+            >
+              <CopyGlyph copied={copied} still={still} />
+              <span className="relative inline-flex overflow-hidden">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span key={copied ? "y" : "n"} initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }} transition={POP} className="whitespace-nowrap">
+                    {copied ? copiedLabel : copyLabel}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+            </motion.button>
+          )}
+        </div>
+      )}
 
       <div style={{ position: "relative", flex: "1 1 auto", minHeight: 0 }}>
-        {/* Code scroll area */}
         <div
+          className="cb-scroll"
           style={{
             height: "100%",
             overflowY: "auto",
             overflowX: wrap ? "hidden" : "auto",
             scrollbarWidth: "none",
-            msOverflowStyle: "none",
             padding,
-            background: activeColors.codeBg,
+            background: pal.codeBg,
           }}
         >
-          <style>{`
-            .code-block-scroll::-webkit-scrollbar { width: 0px; height: 0px; }
-            .code-block-scroll * { scrollbar-width: none; }
-            ::selection { background: ${activeColors.selection}; }
-          `}</style>
           <pre
             aria-label={`Code block (${language})`}
-            className="code-block-scroll"
             style={{
               margin: 0,
-              paddingBottom: "30px",
-              color: activeColors.text,
+              paddingBottom: 24,
+              color: pal.text,
               background: "transparent",
               tabSize: 2,
-              MozTabSize: 2,
-              position: "relative",
+              fontFamily: "var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace)",
+              fontSize: 13,
               ...codeArea.font,
-              lineHeight: codeArea.font?.lineHeight ?? "1.5em",
+              lineHeight: codeArea.font?.lineHeight ?? "1.65em",
               whiteSpace: wrap ? "pre-wrap" : "pre",
               overflowWrap: wrap ? "anywhere" : "normal",
               wordBreak: wrap ? "break-word" : "normal",
             }}
           >
-            <code style={{ display: "block" }}>
-              {lines.map((line, i) => {
-                const ln = i + 1;
-                const tokens = tokensByLine ? tokensByLine[i] : null;
-                return (
-                  <div
-                    key={i}
-                    style={{ display: "flex", alignItems: "flex-start", gap: 12 }}
-                  >
-                    {showLineNumbers && (
-                      <span
-                        aria-hidden="true"
-                        style={{
-                          flex: "0 0 auto",
-                          width: `${Math.max(2, maxLineNumberDigits) + 1}ch`,
-                          textAlign: "right",
-                          color: activeColors.subtleText,
-                          userSelect: "none",
-                          fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
-                        {ln}
-                      </span>
-                    )}
-                    <span
+            <div
+              ref={body}
+              style={{ position: "relative", minWidth: wrap ? undefined : "max-content" }}
+              onPointerMove={onMove}
+              onPointerLeave={() => {
+                if (autoplay) return;
+                barOn.current = false;
+                barO.set(0);
+              }}
+            >
+              <motion.div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  left: -padding,
+                  right: -padding,
+                  top: 0,
+                  y: barY,
+                  height: barH,
+                  opacity: barO,
+                  background: pal.glide,
+                  pointerEvents: "none",
+                }}
+              />
+              <code style={{ display: "block", position: "relative" }}>
+                {lines.map((line, i) => {
+                  const n = i + 1;
+                  const toks = tokens ? tokens[i] : null;
+                  const on = marked.has(n);
+                  return (
+                    <div
+                      key={i}
+                      data-ln={n}
                       style={{
-                        flex: "1 1 auto",
-                        minWidth: 0,
-                        maxWidth: "100%",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 14,
+                        position: "relative",
+                        background: on ? pal.mark : undefined,
+                        marginInline: on ? -padding : undefined,
+                        paddingInline: on ? padding : undefined,
+                        boxShadow: on ? `inset 3px 0 0 ${pal.markBar}` : undefined,
                       }}
                     >
-                      {tokens ? (
-                        <HighlightedLine
-                          tokens={tokens}
-                          baseColor={activeColors.text}
-                          isDark={activeColors.isDark}
-                        />
-                      ) : (
-                        <span style={{ color: activeColors.text }}>
-                          {line.length > 0 ? line : " "}
+                      {showNumbers && (
+                        <span
+                          aria-hidden="true"
+                          style={{
+                            flex: "0 0 auto",
+                            width: `${Math.max(2, digits)}ch`,
+                            textAlign: "right",
+                            color: on ? pal.markBar : pal.subtle,
+                            userSelect: "none",
+                            fontVariantNumeric: "tabular-nums",
+                          }}
+                        >
+                          {n}
                         </span>
                       )}
-                    </span>
-                  </div>
-                );
-              })}
-            </code>
+                      <span style={{ flex: "1 1 auto", minWidth: 0 }}>
+                        {toks
+                          ? toks.map((tok, j) => (
+                              <span key={j} style={{ color: tokenColor(tok.t, pal.text, pal.dark), fontStyle: tok.t === "comment" ? "italic" : undefined }}>
+                                {tok.v.length > 0 ? tok.v : " "}
+                              </span>
+                            ))
+                          : line || " "}
+                      </span>
+                    </div>
+                  );
+                })}
+              </code>
+            </div>
           </pre>
         </div>
-
-        {/* Bottom fade gradient */}
         <div
+          aria-hidden="true"
           style={{
             position: "absolute",
+            insetInline: 0,
             bottom: 0,
-            left: 0,
-            right: 0,
-            height: "50px",
+            height: 36,
             pointerEvents: "none",
-            background: `linear-gradient(to bottom, transparent, ${setAlpha(activeColors.codeBg, 0.7)})`,
+            background: `linear-gradient(to bottom, transparent, ${pal.codeBg})`,
+            opacity: 0.85,
           }}
         />
       </div>

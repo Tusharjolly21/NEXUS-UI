@@ -1,260 +1,277 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, useVelocity } from "framer-motion";
 import { createTerminalSpriteSfx } from "./sprite-audio";
+import { cn } from "@/lib/utils";
 
 export type TerminalTheme = "carbon" | "midnight" | "paper";
+export type TerminalTone = "muted" | "success" | "warning" | "error" | "info";
 
 export type TerminalLine =
   | { kind: "input"; text: string }
-  | { kind: "output"; text: string; tone?: "muted" | "success" | "warning" | "error" | "info" }
+  | { kind: "output"; text: string; tone?: TerminalTone }
   | { kind: "progress"; label: string; value: number; tone?: "info" | "success" }
   | { kind: "spinner"; text: string; tone?: "muted" | "info" };
 
+/** What a command prints: plain strings (muted) or `{ text, tone }`. */
+export type TerminalOutput = Array<string | { text: string; tone?: TerminalTone }>;
+
 export type TerminalCommand = {
-  /** Command string (without prompt). */
+  /** Command string, without the prompt. */
   input: string;
-  /** Optional output lines to reveal after the command. */
-  output?: Array<string | Omit<Extract<TerminalLine, { kind: "output" }>, "kind">>;
-  /** Optional simulated work time before outputs start (ms). */
+  /** Lines printed after the command runs. */
+  output?: TerminalOutput;
+  /** Simulated work time before the output appears, in ms. A spinner shows meanwhile. */
   runDelayMs?: number;
 };
 
 export type TerminalProps = {
-  /** Commands to type and run sequentially. */
-  commands: TerminalCommand[];
-  /** Visual prompt (e.g. "➜"). */
+  /** Script typed and run in order. Visitors can run these again by typing them. */
+  commands?: TerminalCommand[];
+  /** Prompt symbol before each command. */
   promptSymbol?: string;
-  /** Username shown in the prompt. */
+  /** Username in the prompt and title bar. */
   username?: string;
-  /** Hostname shown in the prompt. */
+  /** Hostname in the prompt and title bar. */
   hostname?: string;
-  /** Typing speed in ms per character. */
+  /** Base typing speed, in ms per character. */
   typingSpeed?: number;
-  /** Randomness added to typing cadence (ms). */
+  /** Random extra time per character, in ms, so the typing feels human. */
   typingJitter?: number;
-  /** Initial delay before starting (ms). */
+  /** Pause before the script starts, in ms. */
   startupDelay?: number;
-  /** Delay after a command finishes before next begins (ms). */
+  /** Pause after each command finishes, in ms. */
   delayBetweenCommands?: number;
-  /** Auto-start when component becomes visible. */
+  /** Starts the script when the terminal scrolls into view. */
   autoStart?: boolean;
-  /** Loop the script forever. */
+  /** Repeats the script forever. */
   loop?: boolean;
-  /** Delay between loops (ms). */
+  /** Pause between loops, in ms. */
   loopDelay?: number;
-  /** Show blinking cursor. */
+  /** Loops the script until someone clicks or types in the terminal, then hands them the prompt. */
+  autoplay?: boolean;
+  /** After the script (or the first click) the prompt takes real typing: help, clear, ls, echo, and the script's own commands. */
+  interactive?: boolean;
+  /** Answers a command the visitor types. Return lines to print, or nothing to fall back to the built-ins. */
+  onCommand?: (input: string) => TerminalOutput | void;
+  /** Shows the caret. */
   showCursor?: boolean;
-  /** Enable key/enter sound effects. */
+  /** Plays a key click while typing. Synthesised unless you pass a sprite. */
   enableSound?: boolean;
-  /**
-   * URL of the OGG sprite for keyboard sounds.
-   * Place `sound.ogg` in `public/sounds/` or set this to your CDN URL.
-   */
+  /** OGG sprite for real key sounds. Nothing is fetched unless you set this. */
   soundSpriteUrl?: string;
-  /** JSON timing map for the sprite (default matches the `config.json` shape). */
+  /** JSON timing map for the sprite. */
   soundSpriteConfigUrl?: string;
-  /**
-   * URL of a single audio file to play on every keypress (no sprite config needed).
-   * Takes precedence over soundSpriteUrl when set.
-   * Example: `/sounds/keypress.mp3` — place the file in `public/sounds/`.
-   */
+  /** A single audio file played on every key instead of a sprite. */
   simpleSoundUrl?: string;
-  /** Show sound toggle button in the header. */
+  /** Shows the sound button in the title bar. */
   showSoundToggle?: boolean;
-  /** Show pause/resume controls. */
+  /** Shows pause, resume and replay in the title bar. */
   showControls?: boolean;
-  /** Terminal theme variant (`paper` = light chrome). */
+  /** Window style. `paper` is light on light pages and turns dark with the site. */
   theme?: TerminalTheme;
-  /** When the parent gives a fixed height (`h-[…] flex flex-col`), set true so the body scrolls inside it. */
+  /** Let the body fill a parent with a fixed height (`h-[…] flex flex-col`) instead of the default 300px. */
   fillHeight?: boolean;
+  /** Line under the window. Pass an empty string to hide it. */
+  hint?: string;
   className?: string;
 };
 
-type RunState = "idle" | "running" | "paused" | "done";
+const DEFAULT_COMMANDS: TerminalCommand[] = [
+  { input: "npm create nexus@latest", runDelayMs: 700, output: [{ text: "Scaffolding project in ./my-app", tone: "info" }, { text: "Done. 214 packages installed in 2.1s", tone: "success" }] },
+  { input: "cd my-app && npm run dev", runDelayMs: 500, output: ["  ready in 412 ms", { text: "  Local: http://localhost:3000", tone: "info" }] },
+  { input: "git push origin main", runDelayMs: 650, output: ["Enumerating objects: 42, done.", { text: "main -> main", tone: "success" }] },
+];
 
-function useInViewport<T extends HTMLElement>(opts?: IntersectionObserverInit) {
-  const ref = React.useRef<T | null>(null);
-  const [inView, setInView] = React.useState(false);
+type Phase = "idle" | "running" | "paused" | "ready" | "done";
 
-  React.useEffect(() => {
-    if (!ref.current) return;
-    const el = ref.current;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setInView(true);
+const sleep = (ms: number, signal: AbortSignal) =>
+  new Promise<void>((resolve, reject) => {
+    if (signal.aborted) return reject(new DOMException("Aborted", "AbortError"));
+    const id = window.setTimeout(resolve, ms);
+    signal.addEventListener(
+      "abort",
+      () => {
+        window.clearTimeout(id);
+        reject(new DOMException("Aborted", "AbortError"));
       },
-      { root: null, threshold: 0.35, ...opts },
+      { once: true },
     );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, [opts]);
+  });
 
-  return { ref, inView } as const;
-}
+const isAbort = (e: unknown) => e instanceof DOMException && e.name === "AbortError";
 
-function clamp(n: number, a: number, b: number) {
-  return Math.max(a, Math.min(b, n));
-}
+type Tok = "cmd" | "flag" | "path" | "string" | "operator" | "var" | "text" | "space";
 
-function sleep(ms: number, signal?: AbortSignal) {
-  return new Promise<void>((resolve, reject) => {
-    if (signal?.aborted) return reject(new DOMException("Aborted", "AbortError"));
-    const id = setTimeout(resolve, ms);
-    const onAbort = () => {
-      clearTimeout(id);
-      reject(new DOMException("Aborted", "AbortError"));
-    };
-    signal?.addEventListener("abort", onAbort, { once: true });
+/** Just enough shell colouring to read well: the command, flags, paths, strings, operators and variables. */
+function tokenize(input: string): { text: string; tone: Tok }[] {
+  const parts = input.match(/(--?[A-Za-z0-9:_=.-]+|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\|\||&&|\||>|\$\w+|~\/\S*|\.{1,2}\/\S*|\/\S*|\S+|\s+)/g) ?? [input];
+  let first = true;
+  return parts.map((t) => {
+    if (/^\s+$/.test(t)) return { text: t, tone: "space" as const };
+    if (t === "&&" || t === "||" || t === "|" || t === ">") {
+      first = true;
+      return { text: t, tone: "operator" as const };
+    }
+    const tone: Tok = t.startsWith('"') || t.startsWith("'") ? "string" : /^--?\w/.test(t) ? "flag" : /^(~|\.{1,2}\/|\/)/.test(t) ? "path" : t.startsWith("$") ? "var" : first ? "cmd" : "text";
+    first = false;
+    return { text: t, tone };
   });
 }
 
-function tokenizeBash(input: string) {
-  // Small, non-exhaustive tokenizer for "premium" feeling without pretending to be a full parser.
-  // Produces spans with tone classes: cmd, flag, path, string, operator, dim.
-  const parts: Array<{ text: string; tone: string }> = [];
-  const push = (text: string, tone: string) => {
-    if (!text) return;
-    parts.push({ text, tone });
-  };
+type Skin = {
+  frame: string;
+  bar: string;
+  title: string;
+  btn: string;
+  body: string;
+  prompt: string;
+  host: string;
+  dim: string;
+  caret: string;
+  tok: Record<Tok, string>;
+  tone: Record<TerminalTone, string>;
+};
 
-  const tokens =
-    input.match(
-      /(--?[A-Za-z0-9:_-]+|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\|\||&&|\||>|\$\w+|~\/[^\s]*|\.{1,2}\/\S*|\/[^\s]*|\S+|\s+)/g,
-    ) ?? [input];
+const DARK_TOK: Record<Tok, string> = {
+  cmd: "text-[#64d2ff]",
+  flag: "text-[#da8fff]",
+  path: "text-[#30d158]",
+  string: "text-[#ffd60a]",
+  operator: "text-[#a1a1a6]",
+  var: "text-[#ff9f0a]",
+  text: "text-[#f5f5f7]",
+  space: "",
+};
+const DARK_TONE: Record<TerminalTone, string> = {
+  muted: "text-[#a1a1a6]",
+  success: "text-[#30d158]",
+  warning: "text-[#ffd60a]",
+  error: "text-[#ff6961]",
+  info: "text-[#64d2ff]",
+};
 
-  let isFirstWord = true;
-  for (const tok of tokens) {
-    if (/^\s+$/.test(tok)) {
-      push(tok, "dim");
-      continue;
-    }
-    if (tok === "&&" || tok === "||" || tok === "|" || tok === ">" || tok === "|>") {
-      push(tok, "operator");
-      isFirstWord = true;
-      continue;
-    }
-    if (tok.startsWith("\"") || tok.startsWith("'")) {
-      push(tok, "string");
-      isFirstWord = false;
-      continue;
-    }
-    if (tok.startsWith("--") || (tok.startsWith("-") && tok.length > 1)) {
-      push(tok, "flag");
-      isFirstWord = false;
-      continue;
-    }
-    if (
-      tok.startsWith("/") ||
-      tok.startsWith("~/") ||
-      tok.startsWith("./") ||
-      tok.startsWith("../") ||
-      tok === "~"
-    ) {
-      push(tok, "path");
-      isFirstWord = false;
-      continue;
-    }
-    if (/^\$\w+/.test(tok)) {
-      push(tok, "var");
-      isFirstWord = false;
-      continue;
-    }
-    if (isFirstWord) {
-      push(tok, "cmd");
-      isFirstWord = false;
-      continue;
-    }
-    push(tok, "text");
-  }
+const SKINS: Record<TerminalTheme, Skin> = {
+  carbon: {
+    frame: "bg-[#1c1c1e] shadow-[0_0_0_1px_rgba(255,255,255,.06),0_30px_60px_-30px_rgba(0,0,0,.6)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_30px_60px_-30px_rgba(0,0,0,.95)]",
+    bar: "bg-[#2c2c2e]/70 border-b border-white/[0.06]",
+    title: "text-[#a1a1a6]",
+    btn: "text-[#a1a1a6] hover:bg-white/10 hover:text-[#f5f5f7] focus-visible:ring-[#0a84ff]",
+    body: "text-[#f5f5f7]",
+    prompt: "text-[#30d158]",
+    host: "text-[#64d2ff]",
+    dim: "text-[#8e8e93]",
+    caret: "bg-[#f5f5f7]",
+    tok: DARK_TOK,
+    tone: DARK_TONE,
+  },
+  midnight: {
+    frame: "bg-[linear-gradient(180deg,#0f1630,#090d1d)] shadow-[0_0_0_1px_rgba(120,150,255,.14),0_30px_60px_-30px_rgba(10,20,80,.7)] dark:shadow-[0_0_0_1px_rgba(120,150,255,.2),0_30px_60px_-30px_rgba(0,0,0,.95)]",
+    bar: "bg-white/[0.03] border-b border-white/[0.07]",
+    title: "text-[#a3acd9]",
+    btn: "text-[#a3acd9] hover:bg-white/10 hover:text-white focus-visible:ring-[#0a84ff]",
+    body: "text-[#eef1ff]",
+    prompt: "text-[#bf5af2]",
+    host: "text-[#64d2ff]",
+    dim: "text-[#8a93bd]",
+    caret: "bg-[#64d2ff]",
+    tok: { ...DARK_TOK, cmd: "text-[#7aa2ff]", text: "text-[#eef1ff]" },
+    tone: { ...DARK_TONE, muted: "text-[#a3acd9]" },
+  },
+  paper: {
+    frame: "bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_60px_-34px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_30px_60px_-30px_rgba(0,0,0,.95)]",
+    bar: "bg-[#f5f5f7] border-b border-black/[0.06] dark:bg-[#2c2c2e]/70 dark:border-white/[0.06]",
+    title: "text-[#6e6e73] dark:text-[#a1a1a6]",
+    btn: "text-[#6e6e73] hover:bg-black/5 hover:text-[#1d1d1f] focus-visible:ring-[#0071e3] dark:text-[#a1a1a6] dark:hover:bg-white/10 dark:hover:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff]",
+    body: "text-[#1d1d1f] dark:text-[#f5f5f7]",
+    prompt: "text-[#248a3d] dark:text-[#30d158]",
+    host: "text-[#0071e3] dark:text-[#64d2ff]",
+    dim: "text-[#6e6e73] dark:text-[#8e8e93]",
+    caret: "bg-[#1d1d1f] dark:bg-[#f5f5f7]",
+    tok: {
+      cmd: "text-[#0071e3] dark:text-[#64d2ff]",
+      flag: "text-[#8e3fbf] dark:text-[#da8fff]",
+      path: "text-[#248a3d] dark:text-[#30d158]",
+      string: "text-[#a05a00] dark:text-[#ffd60a]",
+      operator: "text-[#6e6e73] dark:text-[#a1a1a6]",
+      var: "text-[#c93400] dark:text-[#ff9f0a]",
+      text: "text-[#1d1d1f] dark:text-[#f5f5f7]",
+      space: "",
+    },
+    tone: {
+      muted: "text-[#6e6e73] dark:text-[#a1a1a6]",
+      success: "text-[#248a3d] dark:text-[#30d158]",
+      warning: "text-[#a05a00] dark:text-[#ffd60a]",
+      error: "text-[#d70015] dark:text-[#ff6961]",
+      info: "text-[#0060c7] dark:text-[#64d2ff]",
+    },
+  },
+};
 
-  return parts;
+const LINE_IN = { type: "spring" as const, stiffness: 520, damping: 34 };
+
+/**
+ * The caret stretches with typing speed and squashes back when the typing
+ * stops (the signature move), and blinks only while it's waiting.
+ */
+function Caret({ count, className, hollow }: { count: number; className: string; hollow: boolean }) {
+  const n = useMotionValue(count);
+  React.useEffect(() => {
+    n.set(count);
+  }, [count, n]);
+  const v = useVelocity(n);
+  const target = useTransform(v, (x) => 1 + Math.min(Math.abs(x), 70) / 70);
+  const sx = useSpring(target, { stiffness: 420, damping: 18 });
+  const sy = useTransform(sx, (s) => 1 / Math.sqrt(s));
+  return (
+    <motion.span aria-hidden="true" className="relative ml-px inline-block h-[1.2em] w-[0.6em] translate-y-[0.22em] align-baseline" style={{ scaleX: sx, scaleY: sy, originX: 0, originY: 1 }}>
+      <motion.span
+        key={count}
+        className={`absolute inset-0 rounded-[2px] ${hollow ? "border border-current bg-transparent opacity-60" : className}`}
+        animate={{ opacity: [1, 1, 0, 0] }}
+        transition={{ duration: 1.06, times: [0, 0.5, 0.5, 1], repeat: Infinity, delay: 0.5 }}
+      />
+    </motion.span>
+  );
 }
 
-function syntaxSpanClass(tone: string, surface: TerminalTheme) {
-  if (surface === "paper") {
-    return tone === "cmd"
-      ? "text-fuchsia-900"
-      : tone === "flag"
-        ? "text-cyan-900"
-        : tone === "path"
-          ? "text-emerald-900"
-          : tone === "string"
-            ? "text-amber-900"
-            : tone === "operator"
-              ? "text-zinc-700"
-              : tone === "var"
-                ? "text-violet-900"
-                : tone === "dim"
-                  ? "text-zinc-500"
-                  : "text-zinc-800";
-  }
-  return tone === "cmd"
-    ? "text-fuchsia-200"
-    : tone === "flag"
-      ? "text-cyan-200"
-      : tone === "path"
-        ? "text-emerald-200"
-        : tone === "string"
-          ? "text-amber-200"
-          : tone === "operator"
-            ? "text-zinc-300/90"
-            : tone === "var"
-              ? "text-violet-200"
-              : tone === "dim"
-                ? "text-zinc-200/60"
-                : "text-zinc-200/85";
+function Icon({ d }: { d: string }) {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
+      <path d={d} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
-type TerminalMutedTone = NonNullable<Extract<TerminalLine, { kind: "output" }>["tone"]>;
+const HELP: TerminalOutput = [
+  "Commands: help, clear, ls, pwd, whoami, echo <text>, date, history, replay",
+  { text: "Or type any command from the script to run it again.", tone: "info" },
+];
 
-function toneToClass(tone?: TerminalMutedTone, surface: TerminalTheme = "carbon") {
-  if (surface === "paper") {
-    switch (tone) {
-      case "success":
-        return "text-emerald-800";
-      case "warning":
-        return "text-amber-800";
-      case "error":
-        return "text-rose-800";
-      case "info":
-        return "text-cyan-900";
-      case "muted":
-      default:
-        return "text-zinc-600";
-    }
-  }
-  switch (tone) {
-    case "success":
-      return "text-emerald-300";
-    case "warning":
-      return "text-amber-300";
-    case "error":
-      return "text-rose-300";
-    case "info":
-      return "text-cyan-200";
-    case "muted":
-    default:
-      return "text-zinc-300/80";
-  }
-}
-
+/**
+ * A macOS-style terminal window. It types a script of commands with human
+ * timing, shows a spinner while each one runs and prints its output; then the
+ * prompt is yours: click in and type `help`. Up and Down walk your history,
+ * Tab completes, Ctrl+C cancels and Ctrl+L clears.
+ */
 export function Terminal({
-  commands,
+  commands = DEFAULT_COMMANDS,
   promptSymbol = "➜",
-  username = "user",
+  username = "you",
   hostname = "nexus",
-  typingSpeed = 28,
-  typingJitter = 28,
+  typingSpeed = 34,
+  typingJitter = 30,
   startupDelay = 450,
-  delayBetweenCommands = 850,
+  delayBetweenCommands = 750,
   autoStart = true,
   loop = false,
-  loopDelay = 1400,
+  loopDelay = 1600,
+  autoplay = false,
+  interactive = true,
+  onCommand,
   showCursor = true,
-  enableSound = true,
+  enableSound = false,
   soundSpriteUrl,
   soundSpriteConfigUrl,
   simpleSoundUrl,
@@ -262,537 +279,430 @@ export function Terminal({
   showControls = true,
   theme = "carbon",
   fillHeight = false,
-  className,
+  hint = "Click in and type help.",
+  className = "",
 }: TerminalProps) {
-  const reduceMotion = useReducedMotion();
-  const { ref, inView } = useInViewport<HTMLDivElement>();
-  const [soundOn, setSoundOn] = React.useState(enableSound);
-  const soundOnRef = React.useRef(soundOn);
+  const still = useReducedMotion() === true;
+  const skin = SKINS[theme] ?? SKINS.carbon;
+  const root = React.useRef<HTMLDivElement>(null);
+  const scroller = React.useRef<HTMLDivElement>(null);
+  const field = React.useRef<HTMLInputElement>(null);
+  const abort = React.useRef<AbortController | null>(null);
+  const paused = React.useRef(false);
+  const touched = React.useRef(false);
+  /** True while the scripted demo (not a command the visitor ran) is playing. */
+  const demo = React.useRef(false);
+  const soundRef = React.useRef(enableSound);
+  const histRef = React.useRef<string[]>([]);
+  const histAt = React.useRef(-1);
 
-  const spriteSfx = React.useMemo(
+  const [phase, setPhase] = React.useState<Phase>("idle");
+  const [lines, setLines] = React.useState<TerminalLine[]>([]);
+  const [typed, setTyped] = React.useState("");
+  const [draft, setDraft] = React.useState("");
+  const [focused, setFocused] = React.useState(false);
+  const [soundOn, setSoundOn] = React.useState(enableSound);
+  const [inView, setInView] = React.useState(false);
+  const [working, setWorking] = React.useState(false);
+
+  const sfx = React.useMemo(
     () =>
       createTerminalSpriteSfx(
-        simpleSoundUrl
-          ? { soundUrl: simpleSoundUrl, simpleMode: true }
-          : { soundUrl: soundSpriteUrl, configUrl: soundSpriteConfigUrl },
+        simpleSoundUrl ? { soundUrl: simpleSoundUrl, simpleMode: true } : { soundUrl: soundSpriteUrl, configUrl: soundSpriteConfigUrl },
       ),
     [simpleSoundUrl, soundSpriteUrl, soundSpriteConfigUrl],
   );
 
   React.useEffect(() => {
-    soundOnRef.current = soundOn;
-    spriteSfx.setMuted(!soundOn);
-  }, [soundOn, spriteSfx]);
+    soundRef.current = soundOn;
+    sfx.setMuted(!soundOn);
+  }, [soundOn, sfx]);
 
-  const [state, setState] = React.useState<RunState>("idle");
-  const [audioPrimed, setAudioPrimed] = React.useState(false);
-  const soundPrimedRef = React.useRef(false);
-  const [lines, setLines] = React.useState<TerminalLine[]>([]);
-  const [activeInput, setActiveInput] = React.useState<string>("");
-  const [cursorOn, setCursorOn] = React.useState(true);
-
-  const scrollerRef = React.useRef<HTMLDivElement | null>(null);
-  const abortRef = React.useRef<AbortController | null>(null);
-  const pausedRef = React.useRef(false);
-
-  /** Unlock WebAudio after a user gesture (click/tap/drag). Required by browser autoplay rules. */
-  const unlockAudio = React.useCallback(async () => {
-    if (reduceMotion) return;
-    try {
-      await spriteSfx.resume();
-      soundPrimedRef.current = true;
-      setAudioPrimed(true);
-    } catch {
-      // ignore
-    }
-  }, [reduceMotion, spriteSfx]);
+  const click = React.useCallback(
+    (kind: "key" | "enter", ch = " ") => {
+      if (!soundRef.current || still) return;
+      try {
+        sfx.tick(kind === "enter" ? { kind: "enter" } : { kind: "key", ch });
+      } catch {
+        /* audio is optional */
+      }
+    },
+    [sfx, still],
+  );
 
   React.useEffect(() => {
-    if (!showCursor) return;
-    const id = window.setInterval(() => setCursorOn((v) => !v), 520);
-    return () => window.clearInterval(id);
-  }, [showCursor]);
+    const el = root.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => e?.isIntersecting && setInView(true), { threshold: 0.3 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   React.useEffect(() => {
-    if (!scrollerRef.current) return;
-    const el = scrollerRef.current;
+    const el = scroller.current;
+    if (!el) return;
     const id = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        el.scrollTop = el.scrollHeight;
-      });
+      el.scrollTop = el.scrollHeight;
     });
     return () => cancelAnimationFrame(id);
-  }, [lines, activeInput]);
+  }, [lines, typed, draft]);
 
-  const play = React.useCallback(
-    (kind: "key" | "enter", ch?: string) => {
-      if (!soundOnRef.current || reduceMotion) return;
-      if (!soundPrimedRef.current) return;
-      try {
-        if (kind === "enter") {
-          spriteSfx.tick({ kind: "enter" });
-        } else {
-          spriteSfx.tick({ kind: "key", ch: ch?.length ? ch[0]! : " " });
-        }
-      } catch {
-        // ignore audio failures (autoplay policies, etc.)
+  const print = (out: TerminalOutput | undefined) =>
+    (out ?? []).map((o): TerminalLine => (typeof o === "string" ? { kind: "output", text: o, tone: "muted" } : { kind: "output", text: o.text, tone: o.tone ?? "muted" }));
+
+  /** Spinner, then the output lines one by one. */
+  const runOutput = async (cmd: TerminalCommand, signal: AbortSignal) => {
+    setWorking(true);
+    try {
+      if (cmd.runDelayMs && cmd.runDelayMs > 0 && !still) {
+        setLines((p) => [...p, { kind: "spinner", text: "running", tone: "muted" }]);
+        await sleep(cmd.runDelayMs, signal);
+        setLines((p) => (p.length && p[p.length - 1].kind === "spinner" ? p.slice(0, -1) : p));
       }
-    },
-    [reduceMotion, spriteSfx],
-  );
-
-  const pause = React.useCallback(() => {
-    pausedRef.current = true;
-    setState((s) => (s === "running" ? "paused" : s));
-  }, []);
-
-  const resumeTyping = React.useCallback(() => {
-    pausedRef.current = false;
-    setState((s) => (s === "paused" ? "running" : s));
-  }, []);
-
-  const stop = React.useCallback(() => {
-    abortRef.current?.abort();
-    abortRef.current = null;
-    pausedRef.current = false;
-    setActiveInput("");
-    setState("idle");
-  }, []);
-
-  const runOnce = React.useCallback(
-    async (signal: AbortSignal) => {
-      setLines([]);
-      setActiveInput("");
-
-      await sleep(startupDelay, signal);
-
-      for (let i = 0; i < commands.length; i++) {
-        // Pause gate
-        while (pausedRef.current) {
-          await sleep(120, signal);
-        }
-
-        const cmd = commands[i];
-        const input = cmd.input ?? "";
-        setActiveInput("");
-
-        // Typing
-        if (reduceMotion) {
-          setActiveInput(input);
-        } else {
-          if (soundOnRef.current) {
-            try {
-              await spriteSfx.ensureLoaded();
-            } catch {
-              /* sprite optional */
-            }
-          }
-          for (let c = 0; c < input.length; c++) {
-            while (pausedRef.current) {
-              await sleep(120, signal);
-            }
-            const ch = input[c]!;
-            setActiveInput(input.slice(0, c + 1));
-            play("key", ch);
-            const base = typingSpeed;
-            const jitter = Math.random() * typingJitter;
-            const extra =
-              ch === " " ? 14 : ch === "/" || ch === "-" ? 10 : ch === "." ? 18 : 0;
-            await sleep(base + jitter + extra, signal);
-          }
-        }
-
-        // Commit input line
-        setLines((prev) => [...prev, { kind: "input", text: input }]);
-        setActiveInput("");
-        play("enter");
-
-        // Optional run delay (like "processing")
-        if (cmd.runDelayMs && cmd.runDelayMs > 0) {
-          const spinnerText = "running…";
-          setLines((prev) => [...prev, { kind: "spinner", text: spinnerText, tone: "muted" }]);
-          await sleep(cmd.runDelayMs, signal);
-          // Remove spinner line by replacing the last matching spinner.
-          setLines((prev) => {
-            const idx = [...prev].reverse().findIndex((l) => l.kind === "spinner" && l.text === spinnerText);
-            if (idx === -1) return prev;
-            const real = prev.length - 1 - idx;
-            return prev.filter((_, j) => j !== real);
-          });
-        }
-
-        // Output reveal
-        const outs = cmd.output ?? [];
-        for (const out of outs) {
-          while (pausedRef.current) {
-            await sleep(120, signal);
-          }
-          const line =
-            typeof out === "string"
-              ? ({ kind: "output", text: out, tone: "muted" } as const)
-              : ({ kind: "output", text: out.text, tone: out.tone ?? "muted" } as const);
-          setLines((prev) => [...prev, line]);
-          await sleep(reduceMotion ? 0 : 150 + Math.random() * 140, signal);
-        }
-
-        await sleep(delayBetweenCommands, signal);
+      for (const line of print(cmd.output)) {
+        setLines((p) => [...p, line]);
+        await sleep(still ? 0 : 90 + Math.random() * 110, signal);
       }
-    },
-    [
-      commands,
-      delayBetweenCommands,
-      play,
-      reduceMotion,
-      startupDelay,
-      typingJitter,
-      typingSpeed,
-      spriteSfx,
-    ],
-  );
+    } finally {
+      setWorking(false);
+    }
+  };
 
-  const start = React.useCallback(async () => {
-    abortRef.current?.abort();
+  const script = async (signal: AbortSignal) => {
+    setLines([]);
+    setTyped("");
+    await sleep(startupDelay, signal);
+    for (const cmd of commands) {
+      while (paused.current) await sleep(120, signal);
+      const input = cmd.input ?? "";
+      if (still) setTyped(input);
+      else {
+        if (soundRef.current) await sfx.ensureLoaded().catch(() => {});
+        for (let c = 0; c < input.length; c++) {
+          while (paused.current) await sleep(120, signal);
+          setTyped(input.slice(0, c + 1));
+          click("key", input[c]);
+          const ch = input[c];
+          await sleep(typingSpeed + Math.random() * typingJitter + (ch === " " ? 22 : ch === "-" || ch === "/" ? 12 : 0), signal);
+        }
+        await sleep(160, signal);
+      }
+      setLines((p) => [...p, { kind: "input", text: input }]);
+      setTyped("");
+      click("enter");
+      await runOutput(cmd, signal);
+      await sleep(delayBetweenCommands, signal);
+    }
+  };
+
+  const start = async () => {
+    abort.current?.abort();
     const ac = new AbortController();
-    abortRef.current = ac;
-    pausedRef.current = false;
-
-    setState("running");
+    abort.current = ac;
+    paused.current = false;
+    demo.current = true;
+    setPhase("running");
     try {
       do {
-        await runOnce(ac.signal);
-        if (!loop) break;
+        await script(ac.signal);
+        if (!(loop || (autoplay && !touched.current))) break;
         await sleep(loopDelay, ac.signal);
       } while (!ac.signal.aborted);
-      if (!ac.signal.aborted) setState("done");
+      setPhase(interactive ? "ready" : "done");
     } catch (e) {
-      if (!(e instanceof DOMException && e.name === "AbortError")) {
-        setState("idle");
-      }
+      if (!isAbort(e)) setPhase(interactive ? "ready" : "done");
+    } finally {
+      if (abort.current === ac) demo.current = false;
     }
-  }, [loop, loopDelay, runOnce]);
+  };
 
   React.useEffect(() => {
-    if (!autoStart) return;
-    if (!inView) return;
-    const id = window.setTimeout(() => {
-      void start();
-    }, 0);
+    if (!(autoStart || autoplay) || !inView) return;
+    const t = window.setTimeout(() => void start(), 0);
     return () => {
-      window.clearTimeout(id);
-      abortRef.current?.abort();
+      window.clearTimeout(t);
+      abort.current?.abort();
     };
-  }, [autoStart, inView, start]);
+    // Start once per mount when it scrolls into view.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart, autoplay, inView]);
 
-  const skin = React.useMemo(() => {
-    if (theme === "paper") {
-      return {
-        frame: "border-zinc-200/90 bg-zinc-50 shadow-[0_30px_90px_-35px_rgba(0,0,0,0.14)]",
-        header: "border-b border-zinc-200/80 bg-zinc-100/90",
-        headerTextTitle: "text-zinc-700",
-        headerTextSub: "text-zinc-500",
-        glass: "bg-white/95",
-        glow: "from-cyan-500/12 via-fuchsia-500/8 to-transparent",
-        btnGhost: "border-zinc-200/90 bg-white/80 text-zinc-800 hover:bg-white",
-        soundOn: "border-cyan-600/25 bg-cyan-500/15 text-cyan-900 hover:bg-cyan-500/20",
-        soundOff: "border-zinc-200/90 bg-white/70 text-zinc-600 hover:bg-white",
-        promptSym: "text-emerald-700",
-        promptUser: "text-cyan-900 font-medium",
-        promptTilde: "text-zinc-600",
-        typing: "text-zinc-900",
-        cursor: "bg-zinc-900/85",
-        badge: "border-amber-200/80 bg-amber-50 text-amber-950",
-      };
+  React.useEffect(() => () => abort.current?.abort(), []);
+
+  /** First click or key: stop the demo where it is and hand over the prompt. */
+  const takeOver = () => {
+    touched.current = true;
+    if (!interactive) return;
+    if (demo.current) {
+      demo.current = false;
+      abort.current?.abort();
+      abort.current = null;
+      paused.current = false;
+      setLines((p) => {
+        const next = p.filter((l) => l.kind !== "spinner");
+        return typed ? [...next, { kind: "input", text: `${typed}^C` }] : next;
+      });
+      setTyped("");
+      setPhase("ready");
+    } else if (phase === "idle") setPhase("ready");
+  };
+
+  const execute = async (raw: string) => {
+    const input = raw.trim();
+    setLines((p) => [...p, { kind: "input", text: raw }]);
+    click("enter");
+    if (!input) return;
+    histRef.current = [...histRef.current, input];
+    histAt.current = -1;
+    const custom = onCommand?.(input);
+    if (custom) {
+      setLines((p) => [...p, ...print(custom)]);
+      return;
     }
-    if (theme === "midnight") {
-      return {
-        frame: "border-white/10 bg-zinc-950/80 shadow-[0_30px_90px_-35px_rgba(0,0,0,0.75)]",
-        header: "border-b border-white/10 bg-zinc-950/70",
-        headerTextTitle: "text-zinc-300/80",
-        headerTextSub: "text-zinc-500/90",
-        glass: "bg-zinc-950/65",
-        glow: "from-cyan-500/20 via-fuchsia-500/12 to-transparent",
-        btnGhost: "border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/[0.07]",
-        soundOn: "border-white/10 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/14",
-        soundOff: "border-white/10 bg-white/[0.04] text-zinc-300/80 hover:bg-white/[0.07]",
-        promptSym: "text-emerald-300",
-        promptUser: "text-cyan-200",
-        promptTilde: "text-zinc-400",
-        typing: "text-zinc-200/85",
-        cursor: "bg-zinc-100/90",
-        badge: "border-amber-400/25 bg-amber-500/10 text-amber-100",
-      };
+    const known = commands.find((c) => c.input.trim() === input);
+    if (known) {
+      abort.current?.abort();
+      demo.current = false;
+      const ac = new AbortController();
+      abort.current = ac;
+      setPhase("running");
+      try {
+        await runOutput(known, ac.signal);
+      } catch {
+        /* cancelled */
+      }
+      if (!ac.signal.aborted) setPhase("ready");
+      return;
     }
-    return {
-      frame: "border-white/10 bg-zinc-950 shadow-[0_30px_90px_-35px_rgba(0,0,0,0.75)]",
-      header: "border-b border-white/10 bg-zinc-950/90",
-      headerTextTitle: "text-zinc-300/80",
-      headerTextSub: "text-zinc-500/90",
-      glass: "bg-zinc-950/70",
-      glow: "from-cyan-500/18 via-fuchsia-500/10 to-transparent",
-      btnGhost: "border-white/10 bg-white/[0.04] text-zinc-200 hover:bg-white/[0.07]",
-      soundOn: "border-white/10 bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/14",
-      soundOff: "border-white/10 bg-white/[0.04] text-zinc-300/80 hover:bg-white/[0.07]",
-      promptSym: "text-emerald-300",
-      promptUser: "text-cyan-200",
-      promptTilde: "text-zinc-400",
-      typing: "text-zinc-200/85",
-      cursor: "bg-zinc-100/90",
-      badge: "border-amber-400/25 bg-amber-500/10 text-amber-100",
+    const [name, ...rest] = input.split(/\s+/);
+    const out: Record<string, () => TerminalOutput | "clear" | "replay"> = {
+      help: () => HELP,
+      clear: () => "clear",
+      replay: () => "replay",
+      ls: () => ["app  components  lib  public  package.json  README.md"],
+      pwd: () => [`/Users/${username}`],
+      whoami: () => [username],
+      echo: () => [rest.join(" ")],
+      date: () => [new Date().toString()],
+      history: () => histRef.current.map((h, i) => `${String(i + 1).padStart(4)}  ${h}`),
     };
-  }, [theme]);
+    const res = out[name]?.();
+    if (res === "clear") setLines([]);
+    else if (res === "replay") {
+      touched.current = true;
+      void start();
+    } else if (res) setLines((p) => [...p, ...print(res)]);
+    else setLines((p) => [...p, { kind: "output", text: `command not found: ${name}`, tone: "error" }]);
+  };
 
-  const shellPrompt = (
-    <span className="select-none shrink-0">
-      <span className={skin.promptSym}>{promptSymbol}</span>{" "}
-      <span className={skin.promptUser}>
-        {username}@{hostname}
-      </span>{" "}
-      <span className={skin.promptTilde}>~</span>{" "}
+  const names = React.useMemo(() => ["help", "clear", "ls", "pwd", "whoami", "echo", "date", "history", "replay", ...commands.map((c) => c.input)], [commands]);
+
+  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.ctrlKey && e.key.toLowerCase() === "c") {
+      e.preventDefault();
+      if (phase === "running") abort.current?.abort();
+      setLines((p) => [...p.filter((l) => l.kind !== "spinner"), { kind: "input", text: `${draft}^C` }]);
+      setDraft("");
+      setPhase("ready");
+      return;
+    }
+    if (e.ctrlKey && e.key.toLowerCase() === "l") {
+      e.preventDefault();
+      setLines([]);
+      return;
+    }
+    if (phase !== "ready") return;
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const v = draft;
+      setDraft("");
+      void execute(v);
+    } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const h = histRef.current;
+      if (!h.length) return;
+      const at = histAt.current === -1 ? h.length : histAt.current;
+      const next = e.key === "ArrowUp" ? Math.max(0, at - 1) : at + 1;
+      histAt.current = next >= h.length ? -1 : next;
+      setDraft(next >= h.length ? "" : h[next]);
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      const hit = names.find((n) => draft && n.startsWith(draft) && n !== draft);
+      if (hit) setDraft(hit);
+    }
+  };
+
+  const Prompt = (
+    <span className="mr-[1ch] select-none whitespace-pre">
+      <span className={skin.prompt}>{promptSymbol}</span> <span className={skin.host}>{hostname}</span> <span className={skin.dim}>~</span>
     </span>
   );
 
+  const live = phase === "running" || phase === "paused" ? typed : phase === "ready" ? draft : "";
+  const showLive = phase !== "done" && !working;
+
   return (
     <motion.div
-      ref={ref}
-      initial={reduceMotion ? false : { opacity: 0, y: 14, scale: 0.985 }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, amount: 0.35 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className={cn("relative", fillHeight && "flex min-h-0 flex-1 flex-col", className)}
+      ref={root}
+      initial={still ? false : { opacity: 0, y: 16, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: "spring", stiffness: 220, damping: 24 }}
+      className={cn(`relative w-full ${fillHeight ? "flex min-h-0 flex-1 flex-col" : ""}`, className)}
+      onPointerDown={() => {
+        takeOver();
+        void sfx.resume().catch(() => {});
+      }}
     >
-      {/* Glow + noise */}
-      <div
-        aria-hidden
-        className={cn(
-          "pointer-events-none absolute -inset-8 rounded-[2.5rem] bg-gradient-to-br blur-3xl",
-          skin.glow,
-        )}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -inset-3 rounded-[2.3rem] opacity-[0.12] mix-blend-overlay [background-image:url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%223%22%20stitchTiles%3D%22stitch%22/%3E%3C/filter%3E%3Crect%20width%3D%22120%22%20height%3D%22120%22%20filter%3D%22url(%23n)%22%20opacity%3D%220.6%22/%3E%3C/svg%3E')]"
-      />
-
-      <div
-        className={cn(
-          "overflow-hidden rounded-[1.75rem] border",
-          fillHeight && "flex min-h-0 flex-1 flex-col",
-          skin.frame,
-        )}
-        onPointerDownCapture={() => {
-          void unlockAudio();
-        }}
-      >
-        {/* Header */}
-        <div className={cn("flex flex-wrap items-center justify-between gap-3 px-4 py-3", skin.header)}>
-          <div className="flex items-center gap-2">
-            <span className="flex gap-2">
-              <span className="size-2.5 rounded-full bg-red-400/90" aria-hidden />
-              <span className="size-2.5 rounded-full bg-amber-400/90" aria-hidden />
-              <span className="size-2.5 rounded-full bg-emerald-400/90" aria-hidden />
-            </span>
-            <div className="ml-2 hidden sm:block">
-              <p className={cn("text-[11px] font-medium", skin.headerTextTitle)}>{hostname} — bash</p>
-              <p className={cn("text-[11px]", skin.headerTextSub)}>{username}@{hostname}: ~</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {showControls ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => (state === "running" ? pause() : state === "paused" ? resumeTyping() : start())}
-                  className={cn(
-                    "rounded-full border px-3 py-1.5 text-[11px] font-medium transition",
-                    skin.btnGhost,
-                  )}
-                >
-                  {state === "running" ? "Pause" : state === "paused" ? "Resume" : "Replay"}
-                </button>
-                <button
-                  type="button"
-                  onClick={stop}
-                  className={cn(
-                    "hidden rounded-full border px-3 py-1.5 text-[11px] font-medium transition sm:inline-flex",
-                    skin.btnGhost,
-                  )}
-                >
-                  Reset
-                </button>
-              </div>
-            ) : null}
-
-            {showSoundToggle ? (
+      <div className={`overflow-hidden rounded-[22px] ${fillHeight ? "flex min-h-0 flex-1 flex-col" : ""} ${skin.frame}`}>
+        {/* The bar's own buttons shouldn't count as taking over the prompt. */}
+        <div className={`relative flex h-11 shrink-0 items-center px-4 ${skin.bar}`} onPointerDown={(e) => e.stopPropagation()}>
+          <span className="flex gap-2" aria-hidden="true">
+            <span className="h-3 w-3 rounded-full bg-[#ff5f57] shadow-[inset_0_0_0_.5px_rgba(0,0,0,.2)]" />
+            <span className="h-3 w-3 rounded-full bg-[#febc2e] shadow-[inset_0_0_0_.5px_rgba(0,0,0,.2)]" />
+            <span className="h-3 w-3 rounded-full bg-[#28c840] shadow-[inset_0_0_0_.5px_rgba(0,0,0,.2)]" />
+          </span>
+          <span className={`pointer-events-none absolute inset-x-24 truncate text-center text-[12px] font-medium ${skin.title}`}>
+            {username}@{hostname}: ~
+          </span>
+          <span className="ml-auto flex items-center gap-1">
+            {showControls && (
               <button
                 type="button"
-                onClick={() => {
-                  void unlockAudio();
-                  setSoundOn((v) => {
-                    const next = !v;
-                    soundOnRef.current = next;
-                    spriteSfx.setMuted(!next);
-                    return next;
-                  });
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (phase === "running") {
+                    touched.current = true;
+                    paused.current = true;
+                    setPhase("paused");
+                  } else if (phase === "paused") {
+                    paused.current = false;
+                    setPhase("running");
+                  } else {
+                    touched.current = true;
+                    void start();
+                  }
                 }}
-                className={cn(
-                  "rounded-full border px-3 py-1.5 text-[11px] font-medium transition",
-                  soundOn ? skin.soundOn : skin.soundOff,
-                )}
+                aria-label={phase === "running" ? "Pause" : phase === "paused" ? "Resume" : "Replay script"}
+                className={`grid h-7 w-7 place-items-center rounded-full outline-none transition-colors focus-visible:ring-2 ${skin.btn}`}
               >
-                Sound {soundOn ? "On" : "Off"}
+                {phase === "running" ? <Icon d="M5.5 3.5v9M10.5 3.5v9" /> : phase === "paused" ? <Icon d="M5 3.5l7 4.5-7 4.5z" /> : <Icon d="M3 8a5 5 0 1 0 1.6-3.7M3 2.5v2.8h2.8" />}
               </button>
-            ) : null}
-            {soundOn && !audioPrimed && !reduceMotion ? (
-              <span
-                className={cn(
-                  "inline-flex max-w-[140px] rounded-full border px-2.5 py-1 text-center text-[10px] font-medium leading-tight sm:max-w-none",
-                  skin.badge,
-                )}
+            )}
+            {showSoundToggle && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void sfx.resume().catch(() => {});
+                  setSoundOn((v) => !v);
+                }}
+                aria-label={soundOn ? "Mute key sounds" : "Play key sounds"}
+                aria-pressed={soundOn}
+                className={`grid h-7 w-7 place-items-center rounded-full outline-none transition-colors focus-visible:ring-2 ${skin.btn}`}
               >
-                Tap for sound
-              </span>
-            ) : null}
-          </div>
+                <Icon d={soundOn ? "M2.5 6h2.5l3.5-3v10l-3.5-3H2.5zM11 5.5a3.5 3.5 0 0 1 0 5M12.8 3.6a6 6 0 0 1 0 8.8" : "M2.5 6h2.5l3.5-3v10l-3.5-3H2.5zM11 6l3.5 4M14.5 6L11 10"} />
+              </button>
+            )}
+          </span>
         </div>
 
-        {/* Body */}
         <div
-          ref={scrollerRef}
-          className={cn(
-            "relative px-5 py-5 font-mono text-[13px] leading-relaxed",
-            fillHeight ? "min-h-0 flex-1 max-h-none overflow-y-auto" : "max-h-[min(68vh,560px)] overflow-auto",
-            skin.glass,
-          )}
+          ref={scroller}
+          onClick={() => {
+            takeOver();
+            if (interactive) field.current?.focus({ preventScroll: true });
+          }}
+          className={`relative cursor-text overflow-y-auto px-4 py-4 font-mono text-[13px] leading-[1.6] [scrollbar-width:none] sm:px-5 ${fillHeight ? "min-h-0 flex-1" : "h-[300px]"} ${skin.body}`}
         >
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/35 to-transparent" />
-          <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-black/45 to-transparent" />
-
-          <div className="space-y-2">
-            {lines.map((l, idx) => {
-              if (l.kind === "input") {
-                const spans = tokenizeBash(l.text);
+          <div role="log" aria-live="polite" aria-label="Terminal output">
+            {lines.map((l, i) => {
+              if (l.kind === "input")
                 return (
-                  <motion.div
-                    key={`${idx}-in`}
-                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.25 }}
-                    className="flex min-w-0 flex-wrap gap-x-1 gap-y-0.5"
-                  >
-                    {shellPrompt}
-                    <span className="min-w-0 flex-1 break-words">
-                      {spans.map((s, i) => (
-                        <span key={`${idx}-tok-${i}`} className={syntaxSpanClass(s.tone, theme)}>
-                          {s.text}
+                  <motion.div key={i} initial={still ? false : { opacity: 0.4, y: 3 }} animate={{ opacity: 1, y: 0 }} transition={LINE_IN} className="min-w-0 break-all">
+                    {Prompt}
+                    <span>
+                      {tokenize(l.text).map((t, j) => (
+                        <span key={j} className={skin.tok[t.tone]}>
+                          {t.text}
                         </span>
                       ))}
                     </span>
                   </motion.div>
                 );
-              }
-
-              if (l.kind === "progress") {
+              if (l.kind === "spinner")
                 return (
-                  <motion.div
-                    key={`${idx}-p`}
-                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-1"
-                  >
-                    <div
-                      className={cn(
-                        theme === "paper" ? "text-zinc-700" : "text-zinc-200/80",
-                        l.tone === "success"
-                          ? theme === "paper"
-                            ? "text-emerald-800"
-                            : "text-emerald-200"
-                          : theme === "paper"
-                            ? "text-cyan-900"
-                            : "text-cyan-200",
-                      )}
-                    >
-                      {l.label}
-                    </div>
-                    <div
-                      className={cn(
-                        "h-2 w-full overflow-hidden rounded-full",
-                        theme === "paper" ? "bg-zinc-200/80" : "bg-white/8",
-                      )}
-                    >
-                      <motion.div
-                        initial={reduceMotion ? false : { width: 0 }}
-                        animate={{ width: `${clamp(l.value, 0, 100)}%` }}
-                        transition={{ duration: reduceMotion ? 0 : 0.5 }}
-                        className={cn("h-full rounded-full", l.tone === "success" ? "bg-emerald-400/70" : "bg-cyan-400/70")}
-                      />
-                    </div>
-                  </motion.div>
-                );
-              }
-
-              if (l.kind === "spinner") {
-                return (
-                  <motion.div
-                    key={`${idx}-s`}
-                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn("flex items-center gap-2", toneToClass(l.tone, theme))}
-                  >
+                  <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`flex items-center gap-2 ${skin.tone[l.tone ?? "muted"]}`}>
                     <motion.span
-                      aria-hidden
-                      animate={reduceMotion ? undefined : { rotate: 360 }}
-                      transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
-                      className={cn(
-                        "inline-block size-3 rounded-full border",
-                        theme === "paper"
-                          ? "border-zinc-300 border-t-zinc-700"
-                          : "border-white/15 border-t-white/50",
-                      )}
+                      aria-hidden="true"
+                      className="inline-block h-3 w-3 rounded-full border-[1.5px] border-current border-t-transparent"
+                      animate={still ? undefined : { rotate: 360 }}
+                      transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
                     />
-                    <span>{l.text}</span>
+                    {l.text}
                   </motion.div>
                 );
-              }
-
+              if (l.kind === "progress")
+                return (
+                  <div key={i} className={skin.tone[l.tone ?? "info"]}>
+                    {l.label}
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-current/15">
+                      <motion.div className="h-full rounded-full bg-current" initial={{ width: 0 }} animate={{ width: `${Math.max(0, Math.min(100, l.value))}%` }} transition={{ type: "spring", stiffness: 120, damping: 20 }} />
+                    </div>
+                  </div>
+                );
               return (
                 <motion.div
-                  key={`${idx}-out`}
-                  initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className={cn("whitespace-pre-wrap break-words", toneToClass(l.tone, theme))}
+                  key={i}
+                  initial={still ? false : { opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={LINE_IN}
+                  className={`whitespace-pre-wrap break-words ${skin.tone[l.tone ?? "muted"]}`}
                 >
                   {l.text}
                 </motion.div>
               );
             })}
-
-            {/* Active typed input line */}
-            {state !== "idle" ? (
-              <div className="flex min-w-0 flex-wrap gap-x-1 gap-y-0.5">
-                {shellPrompt}
-                <span className={cn("min-w-0 flex-1 break-words", skin.typing)}>{activeInput}</span>
-                {showCursor ? (
-                  <span
-                    aria-hidden
-                    className={cn(
-                      "inline-block h-[1.15em] w-[8px] translate-y-[2px] rounded-[2px]",
-                      skin.cursor,
-                      cursorOn ? "opacity-90" : "opacity-25",
-                    )}
-                  />
-                ) : null}
-              </div>
-            ) : null}
           </div>
-
-          {/* A11y */}
-          <p className="sr-only" aria-live="polite">
-            Terminal is {state}. {lines.length} lines rendered.
-          </p>
+          {showLive && (
+            <div className="min-w-0 break-all" aria-hidden="true">
+              {Prompt}
+              <span>
+                {tokenize(live).map((t, j) => (
+                  <span key={j} className={skin.tok[t.tone]}>
+                    {t.text}
+                  </span>
+                ))}
+              </span>
+              {showCursor && <Caret count={live.length} className={skin.caret} hollow={phase === "ready" && !focused} />}
+            </div>
+          )}
+          {interactive && (
+            <input
+              ref={field}
+              value={draft}
+              onChange={(e) => {
+                setDraft(e.target.value);
+                click("key", e.target.value.slice(-1) || " ");
+              }}
+              onKeyDown={(e) => {
+                takeOver();
+                onKey(e);
+              }}
+              onFocus={() => {
+                setFocused(true);
+                takeOver();
+              }}
+              onBlur={() => setFocused(false)}
+              aria-label="Terminal command"
+              autoComplete="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              className="absolute left-0 top-0 h-px w-px opacity-0"
+            />
+          )}
         </div>
       </div>
+      {hint && <p className="mt-3 text-center text-[13px] text-[#86868b] dark:text-[#a1a1a6]">{hint}</p>}
     </motion.div>
   );
 }

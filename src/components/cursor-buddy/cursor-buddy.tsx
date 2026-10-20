@@ -30,6 +30,12 @@ export type CursorBuddyProps = {
   sleepAfter?: number;
   /** Colour of the eyes. Defaults to ink on light bodies and white on dark ones. */
   eyeColor?: string;
+  /** Click, tap, Enter or Space makes it hop with a squash and stretch. */
+  poke?: boolean;
+  /** Called after each poke. */
+  onPoke?: () => void;
+  /** Looks around on its own (and hops now and then) until the pointer first moves. */
+  autoplay?: boolean;
   className?: string;
 };
 
@@ -126,10 +132,21 @@ function Eye({
   );
 }
 
+/** Where the eyes wander during autoplay, as [yaw, pitch] fractions of the follow range. */
+const GAZE: [number, number][] = [
+  [-0.8, 0.2],
+  [0.7, -0.4],
+  [0.2, 0.55],
+  [-0.5, -0.5],
+  [0.9, 0.1],
+  [0, 0],
+];
+
 /**
  * A soft little character whose eyes follow the pointer anywhere on the page. The eyes sit on
  * the curved face, so they slide round it and narrow near the edge as the head turns. It blinks
- * now and then, flinches when the pointer comes very close, and dozes off when left alone.
+ * now and then, flinches when the pointer comes very close, dozes off when left alone, and hops
+ * with a squash and stretch when you poke it.
  */
 export function CursorBuddy({
   shape = "squircle",
@@ -139,10 +156,15 @@ export function CursorBuddy({
   follow = 60,
   sleepAfter = 9000,
   eyeColor,
+  poke = true,
+  onPoke,
+  autoplay = false,
   className,
 }: CursorBuddyProps) {
   const reduce = useReducedMotion();
   const ref = React.useRef<HTMLDivElement | null>(null);
+  const touched = React.useRef(false);
+  const hopTimers = React.useRef<number[]>([]);
 
   const width = shape === "pill" ? Math.round(size * 1.45) : size;
   const height = size;
@@ -159,6 +181,9 @@ export function CursorBuddy({
   const widen = useSpring(1, { stiffness: 400, damping: 18 });
   const squashY = useSpring(1, { stiffness: 380, damping: 14 });
   const squashX = useTransform(squashY, (v) => 1 + (1 - v) * 0.7);
+  const hopY = useSpring(0, { stiffness: 260, damping: 13, mass: 0.7 });
+  const shadowScale = useTransform(hopY, [-size * 0.3, 0], [0.55, 1]);
+  const shadowOpacity = useTransform(hopY, [-size * 0.3, 0], [0.12, 0.28]);
 
   const [asleep, setAsleep] = React.useState(false);
   const asleepRef = React.useRef(false);
@@ -177,6 +202,8 @@ export function CursorBuddy({
       window.clearTimeout(sleepTimer);
       if (sleepAfter > 0) {
         sleepTimer = window.setTimeout(() => {
+          // The autoplay demo keeps it awake until someone actually moves the pointer.
+          if (autoplay && !touched.current) return;
           asleepRef.current = true;
           setAsleep(true);
           yawRaw.set(0);
@@ -188,6 +215,7 @@ export function CursorBuddy({
     const onMove = (e: PointerEvent) => {
       const node = ref.current;
       if (!node) return;
+      touched.current = true;
       wake();
       const r = node.getBoundingClientRect();
       const dx = e.clientX - (r.left + r.width / 2);
@@ -210,7 +238,7 @@ export function CursorBuddy({
       window.removeEventListener("pointermove", onMove);
       window.clearTimeout(sleepTimer);
     };
-  }, [follow, sleepAfter, reduce, yawRaw, pitchRaw, widen, squashY]);
+  }, [follow, sleepAfter, reduce, yawRaw, pitchRaw, widen, squashY, autoplay]);
 
   // eyelids: closed while asleep, otherwise an occasional natural blink (sometimes a double)
   React.useEffect(() => {
@@ -236,15 +264,90 @@ export function CursorBuddy({
     return () => window.clearTimeout(t);
   }, [asleep, reduce, lid]);
 
+  React.useEffect(() => {
+    const pending = hopTimers;
+    return () => pending.current.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  /** Squash down, spring up stretched, land with a squash, settle. */
+  const hop = React.useCallback(() => {
+    if (reduce) return;
+    hopTimers.current.forEach((t) => window.clearTimeout(t));
+    const at = (f: () => void, ms: number) => hopTimers.current.push(window.setTimeout(f, ms));
+    squashY.set(0.78);
+    lid.set(0.35);
+    at(() => {
+      squashY.set(1.14);
+      hopY.set(-size * 0.32);
+    }, 90);
+    at(() => hopY.set(0), 270);
+    at(() => {
+      squashY.set(0.84);
+      lid.set(1);
+    }, 430);
+    at(() => squashY.set(1), 540);
+  }, [reduce, squashY, lid, hopY, size]);
+
+  // Autoplay: look around and hop now and then until the pointer moves.
+  React.useEffect(() => {
+    if (!autoplay || reduce) return;
+    const range = (Math.max(0, Math.min(100, follow)) / 100) * 1.05;
+    let k = 0;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      const [a, b] = GAZE[k % GAZE.length];
+      yawRaw.set(a * range);
+      pitchRaw.set(b * range * 0.8);
+      if (k % GAZE.length === GAZE.length - 1) hop();
+      k++;
+    }, 1300);
+    return () => window.clearInterval(t);
+  }, [autoplay, reduce, follow, yawRaw, pitchRaw, hop]);
+
+  const press = () => {
+    touched.current = true;
+    hop();
+    onPoke?.();
+  };
+
   const radius = shape === "squircle" ? "34%" : "9999px";
   const bodyStyle: React.CSSProperties = custom ? { background: fill } : {};
 
   return (
-    <div className={cn("relative inline-flex select-none", className)} style={{ width, height }} aria-hidden>
+    <div
+      className={cn(
+        "relative inline-flex select-none rounded-[30%] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-transparent",
+        poke && "cursor-pointer",
+        className,
+      )}
+      style={{ width, height }}
+      {...(poke
+        ? {
+            role: "button",
+            tabIndex: 0,
+            "aria-label": "Buddy, press to poke",
+            onClick: press,
+            onKeyDown: (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                press();
+              }
+            },
+          }
+        : { "aria-hidden": true })}
+    >
+      <motion.span
+        aria-hidden
+        className="pointer-events-none absolute left-[12%] right-[12%] rounded-[50%] bg-black blur-[6px] dark:bg-black"
+        style={{ bottom: -size * 0.1, height: size * 0.12, scaleX: shadowScale, opacity: shadowOpacity }}
+      />
       <motion.div
         ref={ref}
         className="relative h-full w-full"
-        style={{ scaleY: squashY, scaleX: squashX, originY: 1 }}
+        style={{ y: hopY, scaleY: squashY, scaleX: squashX, originY: 1 }}
         animate={asleep && !reduce ? { scale: [1, 1.035, 1] } : { scale: 1 }}
         transition={asleep && !reduce ? { duration: 3.2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
       >

@@ -1,4 +1,4 @@
-export { BentoGridSkeleton } from "./bento-grid-skeleton";
+export { BentoGridSkeleton, DEFAULT_SKELETON_CARDS } from "./bento-grid-skeleton";
 export type {
   BentoGridSkeletonProps,
   BentoSkeletonCard,

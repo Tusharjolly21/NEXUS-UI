@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { GooeyInput } from "./gooey-input";
-import { cn } from "@/lib/utils";
 
 /**
  * Centered playground for {@link GooeyInput}: default, controlled, disabled, and open-state readout.

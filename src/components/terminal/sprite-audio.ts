@@ -3,6 +3,7 @@
  * (`sprite-config.json`). Offsets/durations are in milliseconds from the start of the
  * decoded buffer. All playback routes through a master `GainNode` so toggling sound off
  * immediately silences in-flight sprite slices and fallback clicks (no refresh required).
+ * Without a `soundUrl` nothing is fetched and every key plays a short synthesised click.
  */
 
 export type TerminalSpriteTick =
@@ -56,7 +57,8 @@ export function createTerminalSpriteSfx(options?: {
   simpleMode?: boolean;
 }) {
   const simpleMode = options?.simpleMode ?? false;
-  const soundUrl = options?.soundUrl ?? "/sounds/sound.ogg";
+  // No URL means no fetch at all: every key uses the small synthesised click.
+  const soundUrl = options?.soundUrl;
   const configUrl = options?.configUrl ?? "/sounds/sprite-config.json";
 
   let ctx: AudioContext | null = null;
@@ -92,6 +94,7 @@ export function createTerminalSpriteSfx(options?: {
   };
 
   const loadOnce = async () => {
+    if (!soundUrl) throw new Error("No sound sprite configured");
     const ac = getCtx();
     getSink(ac);
     if (simpleMode) {

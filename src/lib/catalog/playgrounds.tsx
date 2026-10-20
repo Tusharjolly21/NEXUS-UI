@@ -169,15 +169,6 @@ const DEMO_AVATARS = [
   { fallback: "TR", tooltip: "Tomás Reyes", bgColor: "#0ea5e9" },
 ];
 
-// Unsplash is allowed by the site's img-src CSP
-const TRAIL_IMAGES = [
-  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
-  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
-  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
-  { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300&q=80", alt: "Autumn" },
-  { src: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=300&q=80", alt: "Lake" },
-];
-
 const TYPEWRITER_LINES = ["Ship faster.", "Build better.", "Delight users."];
 
 const DEMO_TOASTS = [
@@ -193,25 +184,28 @@ export const playgrounds: Record<string, Playground> = {
     snippetBaseProps: ["avatars={avatars}"],
     defaultFill: "light",
     controls: [
-      { kind: "range", prop: "size", label: "Size", min: 24, max: 72, step: 1, unit: "px", defaultValue: 40 },
-      { kind: "range", prop: "overlap", label: "Overlap", min: 0, max: 32, step: 1, unit: "px", defaultValue: 10 },
-      { kind: "range", prop: "borderWidth", label: "Border", min: 0, max: 6, step: 1, unit: "px", defaultValue: 2 },
-      { kind: "range", prop: "hoverScale", label: "Hover scale", min: 1, max: 1.5, step: 0.05, unit: "×", defaultValue: 1.1 },
+      { kind: "range", prop: "size", label: "Size", min: 28, max: 64, step: 1, unit: "px", defaultValue: 40 },
+      { kind: "range", prop: "overlap", label: "Overlap", min: 0, max: 24, step: 1, unit: "px", defaultValue: 10 },
+      { kind: "range", prop: "hoverScale", label: "Swell", min: 1, max: 1.6, step: 0.05, unit: "×", defaultValue: 1.3 },
+      { kind: "range", prop: "max", label: "Max shown", min: 2, max: 6, step: 1, defaultValue: 6 },
       { kind: "select", prop: "hoverAnimation", label: "Hover", options: ["lift", "scale", "rotate", "up", "none"], defaultValue: "lift" },
       { kind: "select", prop: "entranceAnimation", label: "Entrance", options: ["scale", "fade", "flip", "slide", "bounce", "none"], defaultValue: "scale" },
-      { kind: "toggle", prop: "showTooltips", label: "Tooltips", defaultValue: true },
+      { kind: "toggle", prop: "showTooltips", label: "Names", defaultValue: true },
     ],
     render: (v) => (
-      <AvatarGroup
-        avatars={DEMO_AVATARS}
-        size={v.size as number}
-        overlap={v.overlap as number}
-        borderWidth={v.borderWidth as number}
-        hoverScale={v.hoverScale as number}
-        hoverAnimation={v.hoverAnimation as "lift"}
-        entranceAnimation={v.entranceAnimation as "scale"}
-        showTooltips={v.showTooltips as boolean}
-      />
+      <div className="pt-12">
+        <AvatarGroup
+          key={`${v.entranceAnimation}-${v.max}`}
+          avatars={DEMO_AVATARS}
+          size={v.size as number}
+          overlap={v.overlap as number}
+          hoverScale={v.hoverScale as number}
+          max={v.max as number}
+          hoverAnimation={v.hoverAnimation as "lift"}
+          entranceAnimation={v.entranceAnimation as "scale"}
+          showTooltips={v.showTooltips as boolean}
+        />
+      </div>
     ),
   },
 
@@ -221,14 +215,14 @@ export const playgrounds: Record<string, Playground> = {
     snippetBaseProps: ["background"],
     defaultFill: "dark",
     controls: [
-      { kind: "range", prop: "count", label: "Count", min: 8, max: 240, step: 4, defaultValue: 36 },
+      { kind: "range", prop: "count", label: "Count", min: 8, max: 240, step: 4, defaultValue: 60 },
       { kind: "range", prop: "maxSize", label: "Max size", min: 1, max: 6, step: 0.1, unit: "px", defaultValue: 2.8 },
       { kind: "range", prop: "speed", label: "Speed", min: 0.2, max: 3, step: 0.05, unit: "×", defaultValue: 1 },
       { kind: "range", prop: "opacity", label: "Opacity", min: 0.1, max: 1, step: 0.05, defaultValue: 0.9 },
-      { kind: "color", prop: "color", label: "Color", options: ["#e5f4ff", "#a8d7ff", "#fde68a", "#f9a8d4", "#0f172a"], defaultValue: "#e5f4ff" },
+      { kind: "color", prop: "color", label: "Color", options: ["#e5f4ff", "#64d2ff", "#ffd60a", "#ff9fd0", "#0a84ff"], defaultValue: "#e5f4ff" },
       { kind: "select", prop: "direction", label: "Direction", options: ["random", "up", "down"], defaultValue: "random" },
       { kind: "toggle", prop: "enableGlow", label: "Glow", defaultValue: true },
-      { kind: "toggle", prop: "interactive", label: "Follow cursor", defaultValue: false },
+      { kind: "toggle", prop: "interactive", label: "Trail and bursts", defaultValue: true },
     ],
     render: (v) => (
       <div className="relative h-full w-full">
@@ -254,11 +248,13 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "dark",
     controls: [
       { kind: "range", prop: "number", label: "Meteors", min: 4, max: 60, step: 1, defaultValue: 18 },
-      { kind: "range", prop: "angle", label: "Angle", min: 180, max: 260, step: 1, unit: "°", defaultValue: 215 },
+      { kind: "range", prop: "angle", label: "Angle", min: 180, max: 270, step: 1, unit: "°", defaultValue: 215 },
       { kind: "range", prop: "maxDuration", label: "Max duration", min: 2, max: 12, step: 0.1, unit: "s", defaultValue: 7.2 },
-      { kind: "color", prop: "color", label: "Color", options: ["#93c5fd", "#c4b5fd", "#fda4af", "#fcd34d", "#0f172a"], defaultValue: "#93c5fd" },
+      { kind: "range", prop: "stars", label: "Stars", min: 0, max: 160, step: 10, defaultValue: 60 },
+      { kind: "color", prop: "color", label: "Color", options: ["#cfe6ff", "#c4b5fd", "#fda4af", "#ffd60a", "#64d2ff"], defaultValue: "#cfe6ff" },
       { kind: "select", prop: "intensity", label: "Intensity", options: ["low", "medium", "high"], defaultValue: "medium" },
       { kind: "toggle", prop: "glow", label: "Glow", defaultValue: true },
+      { kind: "toggle", prop: "interactive", label: "Gravity and strikes", defaultValue: true },
       { kind: "toggle", prop: "hoverOnly", label: "Only on hover", defaultValue: false },
     ],
     render: (v) => (
@@ -268,9 +264,11 @@ export const playgrounds: Record<string, Playground> = {
         angle={v.angle as number}
         maxDuration={v.maxDuration as number}
         minDuration={Math.min(3.2, (v.maxDuration as number) - 0.5)}
+        stars={v.stars as number}
         color={v.color as string}
         intensity={v.intensity as "medium"}
         glow={v.glow as boolean}
+        interactive={v.interactive as boolean}
         hoverOnly={v.hoverOnly as boolean}
       />
     ),
@@ -279,23 +277,25 @@ export const playgrounds: Record<string, Playground> = {
   "word-magnet": {
     componentName: "WordMagnet",
     importPath: "@/components/word-magnet",
-    snippetBaseProps: ['text="Magnetic words react to your cursor"'],
+    snippetBaseProps: ['text="Push these words around and watch them wobble back"'],
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "radius", label: "Radius", min: 40, max: 260, step: 2, unit: "px", defaultValue: 130 },
       { kind: "range", prop: "force", label: "Force", min: 0.05, max: 1, step: 0.01, defaultValue: 0.45 },
       { kind: "range", prop: "damping", label: "Damping", min: 6, max: 60, step: 1, defaultValue: 28 },
-      { kind: "range", prop: "returnDelay", label: "Return delay", min: 0, max: 1200, step: 20, unit: "ms", defaultValue: 360 },
+      { kind: "range", prop: "returnDelay", label: "Hold", min: 0, max: 1200, step: 20, unit: "ms", defaultValue: 360 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false },
     ],
     render: (v) => (
       <WordMagnet
-        text="Move your cursor through this magnetic headline and watch every word drift aside"
+        key={String(v.autoplay)}
+        text="Push these words around and watch them wobble back into place"
         radius={v.radius as number}
         force={v.force as number}
         damping={v.damping as number}
         returnDelay={v.returnDelay as number}
-        disableOnMobile={false}
-        className="max-w-xl text-center text-3xl font-medium leading-tight tracking-tight"
+        autoplay={v.autoplay as boolean}
+        className="max-w-xl text-4xl sm:text-5xl"
       />
     ),
   },
@@ -304,22 +304,20 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "GlowButton",
     importPath: "@/components/glow-button",
     snippetBaseProps: ['href="/signup"'],
-    defaultFill: "dark",
+    defaultFill: "light",
     controls: [
-      { kind: "range", prop: "radius", label: "Radius", min: 0, max: 32, step: 1, unit: "px", defaultValue: 8 },
-      { kind: "color", prop: "background", label: "Background", options: ["rgb(0, 0, 0)", "#4f46e5", "#e11d48", "#059669", "#f8fafc"], defaultValue: "rgb(0, 0, 0)" },
-      { kind: "color", prop: "textColor", label: "Text", options: ["rgb(255, 255, 255)", "#0a0a0a", "#fde68a"], defaultValue: "rgb(255, 255, 255)" },
-      { kind: "color", prop: "arrowColor", label: "Arrow", options: ["rgb(255, 255, 255)", "#0a0a0a", "#fde68a"], defaultValue: "rgb(255, 255, 255)" },
+      { kind: "range", prop: "radius", label: "Radius", min: 0, max: 28, step: 1, unit: "px", defaultValue: 28 },
+      { kind: "color", prop: "background", label: "Fill", options: ["#1d1d1f", "#0071e3", "#ffffff", "#2c2c2e"], defaultValue: "#1d1d1f" },
+      { kind: "toggle", prop: "openInNewTab", label: "New tab", defaultValue: false },
     ],
     render: (v) => (
       <GlowButton
         href="#playground"
         radius={v.radius as number}
-        background={v.background as string}
-        textColor={v.textColor as string}
-        arrowColor={v.arrowColor as string}
+        background={v.background === "#1d1d1f" ? undefined : (v.background as string)}
+        openInNewTab={v.openInNewTab as boolean}
       >
-        Get Started Now
+        Get started
       </GlowButton>
     ),
   },
@@ -336,14 +334,12 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "skewY", label: "Skew Y", min: -30, max: 30, step: 1, unit: "°", defaultValue: 14 },
       { kind: "range", prop: "scale", label: "Scale", min: 0.3, max: 1.2, step: 0.025, unit: "×", defaultValue: 0.675 },
       { kind: "range", prop: "rotation", label: "Rotation", min: -45, max: 45, step: 1, unit: "°", defaultValue: 0 },
-      { kind: "color", prop: "borderColor", label: "Lines", options: ["#374151", "#1e3a8a", "#4c1d95", "#d4d4d8"], defaultValue: "#374151" },
+      { kind: "color", prop: "borderColor", label: "Lines", options: ["#3a3a3c", "#d2d2d7", "#1e3a8a", "#4c1d95"], defaultValue: "#3a3a3c" },
       { kind: "toggle", prop: "showCrosses", label: "Crosses", defaultValue: true },
     ],
-    // A smaller grid than the component default keeps slider drags smooth (one motion node per cell)
+    // Drawn on one canvas, so the full grid stays smooth while sliders move.
     render: (v) => (
       <BackgroundBoxes
-        rows={40}
-        cols={32}
         boxWidth={v.boxWidth as number}
         boxHeight={v.boxHeight as number}
         skewX={v.skewX as number}
@@ -362,20 +358,21 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "FeatureToolsCard",
     importPath: "@/components/feature-tools-card",
     snippetBaseProps: ['title="Connects with your stack"'],
-    defaultFill: "dark",
+    defaultFill: "light",
     controls: [
       { kind: "range", prop: "tiltStrength", label: "Tilt", min: 0, max: 20, step: 1, unit: "°", defaultValue: 8 },
       { kind: "range", prop: "magneticStrength", label: "Magnet force", min: 0, max: 1, step: 0.05, defaultValue: 0.4 },
       { kind: "range", prop: "magneticRadius", label: "Magnet radius", min: 40, max: 240, step: 5, unit: "px", defaultValue: 120 },
-      { kind: "range", prop: "orbitSpeed", label: "Orbit period", min: 4, max: 40, step: 1, unit: "s", defaultValue: 18 },
+      { kind: "range", prop: "orbitSpeed", label: "Orbit period", min: 8, max: 90, step: 1, unit: "s", defaultValue: 36 },
       { kind: "toggle", prop: "enableTilt", label: "Tilt", defaultValue: true },
       { kind: "toggle", prop: "enableMagnetic", label: "Magnetic icons", defaultValue: true },
       { kind: "toggle", prop: "enableOrbit", label: "Orbit", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Autoplay", defaultValue: false },
     ],
     render: (v) => (
       <FeatureToolsCard
         title="Connects with your stack"
-        description="Drop-in integrations for the tools your team already uses."
+        description="Mail, chat, calendar, docs and storage, synced the moment they change."
         tiltStrength={v.tiltStrength as number}
         magneticStrength={v.magneticStrength as number}
         magneticRadius={v.magneticRadius as number}
@@ -383,6 +380,7 @@ export const playgrounds: Record<string, Playground> = {
         enableTilt={v.enableTilt as boolean}
         enableMagnetic={v.enableMagnetic as boolean}
         enableOrbit={v.enableOrbit as boolean}
+        autoplay={v.autoplay as boolean}
       />
     ),
   },
@@ -390,20 +388,21 @@ export const playgrounds: Record<string, Playground> = {
   "image-trail": {
     componentName: "ImageTrail",
     importPath: "@/components/image-trail",
-    snippetBaseProps: ["images={images}", 'className="h-96 w-full"'],
+    snippetBaseProps: ['className="h-96 w-full"'],
     defaultFill: "light",
     controls: [
-      { kind: "range", prop: "spacing", label: "Spacing", min: 8, max: 120, step: 2, unit: "px", defaultValue: 40 },
-      { kind: "range", prop: "imageSize", label: "Image size", min: 40, max: 220, step: 5, unit: "px", defaultValue: 100 },
+      { kind: "range", prop: "spacing", label: "Spacing", min: 12, max: 120, step: 2, unit: "px", defaultValue: 48 },
+      { kind: "range", prop: "imageSize", label: "Image size", min: 48, max: 200, step: 4, unit: "px", defaultValue: 112 },
       { kind: "range", prop: "duration", label: "Lifetime", min: 200, max: 3000, step: 50, unit: "ms", defaultValue: 1000 },
-      { kind: "range", prop: "cornerRadius", label: "Corner", min: 0, max: 40, step: 1, unit: "px", defaultValue: 4 },
-      { kind: "range", prop: "fadeOutBlur", label: "Fade blur", min: 0, max: 20, step: 1, unit: "px", defaultValue: 5 },
+      { kind: "range", prop: "cornerRadius", label: "Corner", min: 0, max: 60, step: 1, unit: "px", defaultValue: 14 },
+      { kind: "range", prop: "fadeOutBlur", label: "Fade blur", min: 0, max: 20, step: 1, unit: "px", defaultValue: 6 },
       { kind: "range", prop: "smoothness", label: "Smoothness", min: 0, max: 1, step: 0.05, defaultValue: 0.7 },
       { kind: "toggle", prop: "magneticEffect", label: "Magnetic", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false },
     ],
     render: (v) => (
       <ImageTrail
-        images={TRAIL_IMAGES}
+        key={String(v.autoplay)}
         spacing={v.spacing as number}
         imageSize={v.imageSize as number}
         duration={v.duration as number}
@@ -411,12 +410,9 @@ export const playgrounds: Record<string, Playground> = {
         fadeOutBlur={v.fadeOutBlur as number}
         smoothness={v.smoothness as number}
         magneticEffect={v.magneticEffect as boolean}
-        className="absolute inset-0 h-full w-full"
-      >
-        <div className="pointer-events-none flex h-full items-center justify-center">
-          <p className="select-none text-sm opacity-40">Move your cursor here</p>
-        </div>
-      </ImageTrail>
+        autoplay={v.autoplay as boolean}
+        className="absolute inset-0 h-full w-full rounded-none shadow-none"
+      />
     ),
   },
 
@@ -424,23 +420,24 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "EncryptedText",
     importPath: "@/components/encrypted-text",
     snippetBaseProps: ['text="ACCESS GRANTED"'],
-    defaultFill: "dark",
+    defaultFill: "light",
     controls: [
-      { kind: "range", prop: "speed", label: "Reveal speed", min: 10, max: 200, step: 5, unit: "ms", defaultValue: 50 },
-      { kind: "range", prop: "shuffleSpeed", label: "Shuffle speed", min: 10, max: 120, step: 5, unit: "ms", defaultValue: 35 },
-      { kind: "range", prop: "iterations", label: "Iterations", min: 1, max: 20, step: 1, defaultValue: 8 },
+      { kind: "range", prop: "speed", label: "Lock every", min: 10, max: 200, step: 5, unit: "ms", defaultValue: 50 },
+      { kind: "range", prop: "shuffleSpeed", label: "Shuffle every", min: 16, max: 120, step: 4, unit: "ms", defaultValue: 36 },
+      { kind: "range", prop: "iterations", label: "Warm-up", min: 1, max: 20, step: 1, defaultValue: 8 },
       { kind: "select", prop: "trigger", label: "Trigger", options: ["load", "hover", "click", "viewport"], defaultValue: "load" },
-      { kind: "toggle", prop: "loop", label: "Loop", defaultValue: false },
+      { kind: "toggle", prop: "loop", label: "Loop", defaultValue: true },
     ],
     render: (v) => (
       <EncryptedText
+        key={`${String(v.trigger)}-${String(v.loop)}`}
         text="ACCESS GRANTED"
         speed={v.speed as number}
         shuffleSpeed={v.shuffleSpeed as number}
         iterations={v.iterations as number}
         trigger={v.trigger as "load"}
         loop={v.loop as boolean}
-        className="cursor-default font-mono text-3xl font-bold tracking-[0.18em] sm:text-4xl"
+        className="text-3xl font-semibold tracking-[0.06em] text-[#1d1d1f] sm:text-4xl dark:text-[#f5f5f7]"
       />
     ),
   },
@@ -451,21 +448,23 @@ export const playgrounds: Record<string, Playground> = {
     snippetBaseProps: ['text={["Ship faster.", "Build better.", "Delight users."]}'],
     defaultFill: "light",
     controls: [
-      { kind: "range", prop: "typingSpeed", label: "Typing", min: 10, max: 200, step: 5, unit: "ms", defaultValue: 65 },
-      { kind: "range", prop: "deletingSpeed", label: "Deleting", min: 10, max: 200, step: 2, unit: "ms", defaultValue: 42 },
+      { kind: "range", prop: "typingSpeed", label: "Typing", min: 20, max: 200, step: 5, unit: "ms", defaultValue: 65 },
+      { kind: "range", prop: "deletingSpeed", label: "Deleting", min: 0, max: 150, step: 2, unit: "ms", defaultValue: 42 },
       { kind: "range", prop: "pauseDuration", label: "Pause", min: 0, max: 4000, step: 100, unit: "ms", defaultValue: 1200 },
-      { kind: "toggle", prop: "loop", label: "Loop", defaultValue: false },
-      { kind: "toggle", prop: "showCursor", label: "Cursor", defaultValue: true },
+      { kind: "toggle", prop: "loop", label: "Loop", defaultValue: true },
+      { kind: "toggle", prop: "showCursor", label: "Caret", defaultValue: true },
     ],
     render: (v) => (
-      <h2 className="text-center text-4xl font-semibold tracking-tight sm:text-5xl">
+      <h2 className="m-0 text-center text-4xl font-semibold tracking-[-0.035em] text-[#1d1d1f] sm:text-5xl dark:text-[#f5f5f7]">
         <TypewriterEffect
+          key={`${String(v.loop)}-${String(v.deletingSpeed)}`}
           text={TYPEWRITER_LINES}
           typingSpeed={v.typingSpeed as number}
           deletingSpeed={v.deletingSpeed as number}
           pauseDuration={v.pauseDuration as number}
           loop={v.loop as boolean}
           showCursor={v.showCursor as boolean}
+          className="text-[#0071e3] dark:text-[#0a84ff]"
         />
       </h2>
     ),
@@ -477,21 +476,25 @@ export const playgrounds: Record<string, Playground> = {
     snippetBaseProps: ['text="Build interfaces that feel alive."'],
     defaultFill: "light",
     controls: [
-      { kind: "select", prop: "mode", label: "Split by", options: ["word", "character"], defaultValue: "word" },
-      { kind: "range", prop: "duration", label: "Duration", min: 0.1, max: 2, step: 0.02, unit: "s", defaultValue: 0.48 },
-      { kind: "range", prop: "stagger", label: "Stagger", min: 0, max: 0.3, step: 0.01, unit: "s", defaultValue: 0.06 },
+      { kind: "select", prop: "mode", label: "Split by", options: ["word", "character", "line"], defaultValue: "word" },
+      { kind: "range", prop: "duration", label: "Settle", min: 0.15, max: 1.5, step: 0.01, unit: "s", defaultValue: 0.48 },
+      { kind: "range", prop: "stagger", label: "Stagger", min: 0.01, max: 0.3, step: 0.01, unit: "s", defaultValue: 0.06 },
       { kind: "toggle", prop: "blur", label: "Blur in", defaultValue: true },
       { kind: "toggle", prop: "lift", label: "Lift", defaultValue: true },
+      { kind: "toggle", prop: "showCaret", label: "Caret", defaultValue: true },
     ],
     render: (v) => (
       <TextGenerateEffect
+        key={`${String(v.mode)}-${String(v.duration)}-${String(v.stagger)}-${String(v.blur)}-${String(v.lift)}-${String(v.showCaret)}`}
         as="h2"
-        text="Build elegant interfaces that feel alive, readable, and deeply polished."
+        autoplay
+        text={"Build elegant interfaces that feel alive,\nreadable, and deeply polished."}
         mode={v.mode as "word"}
         duration={v.duration as number}
         stagger={v.stagger as number}
         blur={v.blur as boolean}
         lift={v.lift as boolean}
+        showCaret={v.showCaret as boolean}
         className="max-w-2xl text-center text-3xl font-semibold leading-tight tracking-tight sm:text-4xl"
       />
     ),
@@ -500,17 +503,18 @@ export const playgrounds: Record<string, Playground> = {
   "gooey-search-input": {
     componentName: "GooeyInput",
     importPath: "@/components/gooey-input",
-    snippetBaseProps: ['placeholder="Search catalog…"'],
+    snippetBaseProps: ['placeholder="Search catalog"', "suggestions={pages}"],
     defaultFill: "light",
     controls: [
-      { kind: "range", prop: "collapsedWidth", label: "Collapsed", min: 60, max: 240, step: 5, unit: "px", defaultValue: 115 },
-      { kind: "range", prop: "expandedWidth", label: "Expanded", min: 120, max: 420, step: 5, unit: "px", defaultValue: 200 },
-      { kind: "range", prop: "expandedOffset", label: "Offset", min: 0, max: 160, step: 2, unit: "px", defaultValue: 56 },
-      { kind: "range", prop: "gooeyBlur", label: "Goo", min: 0, max: 16, step: 0.5, unit: "px", defaultValue: 5 },
+      { kind: "range", prop: "collapsedWidth", label: "Collapsed", min: 90, max: 200, step: 5, unit: "px", defaultValue: 115 },
+      { kind: "range", prop: "expandedWidth", label: "Expanded", min: 160, max: 300, step: 5, unit: "px", defaultValue: 200 },
+      { kind: "range", prop: "expandedOffset", label: "Offset", min: 48, max: 120, step: 2, unit: "px", defaultValue: 56 },
+      { kind: "range", prop: "gooeyBlur", label: "Goo", min: 0, max: 12, step: 0.5, unit: "px", defaultValue: 5 },
     ],
     render: (v) => (
       <GooeyInput
-        placeholder="Search catalog…"
+        placeholder="Search catalog"
+        suggestions={["Motion kit", "Motion values", "Spring motion", "Layout animation", "Scroll reveal", "Gooey filter"]}
         collapsedWidth={v.collapsedWidth as number}
         expandedWidth={v.expandedWidth as number}
         expandedOffset={v.expandedOffset as number}
@@ -522,22 +526,26 @@ export const playgrounds: Record<string, Playground> = {
   "tick-slider": {
     componentName: "TickSlider",
     importPath: "@/components/tick-slider",
+    snippetBaseProps: ['label="Volume"', 'unit="%"'],
     defaultFill: "light",
     controls: [
-      { kind: "range", prop: "ticks", label: "Ticks", min: 12, max: 60, step: 1, defaultValue: 36 },
+      { kind: "range", prop: "ticks", label: "Ticks", min: 12, max: 48, step: 1, defaultValue: 36 },
       { kind: "range", prop: "step", label: "Step", min: 1, max: 25, step: 1, defaultValue: 1 },
       { kind: "range", prop: "magnify", label: "Wave", min: 0, max: 1.2, step: 0.05, unit: "×", defaultValue: 0.55 },
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
-      { kind: "color", prop: "accent", label: "Accent", options: ["#17181a", "#0071e3", "#0ea5e9", "#16a34a", "#f97316"], defaultValue: "#17181a" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff9f0a", "#bf5af2", "#ff3b30"], defaultValue: "#0071e3" },
       { kind: "toggle", prop: "showValue", label: "Number", defaultValue: true },
     ],
-    render: (v, fill) => (
+    render: (v) => (
       <TickSlider
+        label="Volume"
+        unit="%"
+        defaultValue={62}
         ticks={v.ticks as number}
         step={v.step as number}
         magnify={v.magnify as number}
         size={v.size as "md"}
-        accent={fill === "dark" && v.accent === "#17181a" ? "#ffffff" : (v.accent as string)}
+        accent={v.accent === "#0071e3" ? undefined : (v.accent as string)}
         showValue={v.showValue as boolean}
       />
     ),
@@ -545,19 +553,21 @@ export const playgrounds: Record<string, Playground> = {
   "time-scrubber": {
     componentName: "TimeScrubber",
     importPath: "@/components/time-scrubber",
+    snippetBaseProps: ['label="Pickup"'],
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "interval", label: "Snap", min: 5, max: 30, step: 5, unit: "min", defaultValue: 15 },
       { kind: "select", prop: "format", label: "Format", options: ["12h", "24h"], defaultValue: "12h" },
       { kind: "range", prop: "density", label: "Spread", min: 0.8, max: 3, step: 0.1, unit: "px", defaultValue: 1.6 },
-      { kind: "color", prop: "accent", label: "Needle", options: ["#ef4444", "#17181a", "#0071e3", "#0ea5e9", "#f97316"], defaultValue: "#ef4444" },
+      { kind: "color", prop: "accent", label: "Needle", options: ["#0071e3", "#ff3b30", "#ff9f0a", "#30d158", "#bf5af2"], defaultValue: "#0071e3" },
     ],
     render: (v) => (
       <TimeScrubber
+        label="Pickup"
         interval={v.interval as number}
         format={v.format as "12h"}
         density={v.density as number}
-        accent={v.accent as string}
+        accent={v.accent === "#0071e3" ? undefined : (v.accent as string)}
       />
     ),
   },
@@ -569,7 +579,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { kind: "range", prop: "threshold", label: "Threshold", min: 0.5, max: 1, step: 0.05, defaultValue: 0.9 },
       { kind: "range", prop: "resetAfter", label: "Reset after", min: 0, max: 5000, step: 100, unit: "ms", defaultValue: 2200 },
-      { kind: "color", prop: "successColor", label: "Success", options: ["#16a34a", "#17181a", "#0071e3", "#0ea5e9", "#f97316"], defaultValue: "#16a34a" },
+      { kind: "color", prop: "successColor", label: "Success", options: ["#248a3d", "#0071e3", "#1d1d1f", "#8944ab", "#b25000"], defaultValue: "#248a3d" },
       { kind: "select", prop: "label", label: "Label", options: ["Slide to confirm", "Slide to pay", "Slide to unlock"], defaultValue: "Slide to confirm" },
     ],
     render: (v) => (
@@ -643,7 +653,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "toggle", prop: "multiple", label: "Multiple", defaultValue: true },
-      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#2563eb", "#16a34a", "#ea580c", "#db2777"], defaultValue: "#0071e3" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff9f0a", "#bf5af2", "#ff3b30"], defaultValue: "#0071e3" },
       { kind: "select", prop: "title", label: "Title", options: ["Drag a file here", "Drop your files", "Add attachments"], defaultValue: "Drag a file here" },
       { kind: "select", prop: "hint", label: "Hint", options: ["Up to 5 MB", "PNG, JPG or MP4", "Max 10 files"], defaultValue: "Up to 5 MB" },
       { kind: "toggle", prop: "disabled", label: "Disabled", defaultValue: false },
@@ -651,11 +661,11 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <UploadDropzone
         multiple={v.multiple as boolean}
-        accent={v.accent as string}
+        accent={v.accent === "#0071e3" ? undefined : (v.accent as string)}
         title={v.title as string}
         hint={v.hint as string}
         disabled={v.disabled as boolean}
-        initialFiles={[{ name: "mood.png", size: 1240000, type: "image/png", progress: 1 }]}
+        initialFiles={[{ name: "Moodboard.png", size: 1240000, type: "image/png", progress: 1 }]}
       />
     ),
   },
@@ -664,7 +674,7 @@ export const playgrounds: Record<string, Playground> = {
     importPath: "@/components/hold-to-record",
     defaultFill: "light",
     controls: [
-      { kind: "color", prop: "accent", label: "Accent", options: ["#ef4444", "#0071e3", "#2563eb", "#16a34a", "#17181a"], defaultValue: "#ef4444" },
+      { kind: "color", prop: "accent", label: "Accent", options: ["#ff3b30", "#0071e3", "#30d158", "#bf5af2", "#1d1d1f"], defaultValue: "#ff3b30" },
       { kind: "range", prop: "cancelDistance", label: "Cancel distance", min: 40, max: 160, step: 5, unit: "px", defaultValue: 90 },
       { kind: "range", prop: "maxDuration", label: "Max length", min: 5000, max: 60000, step: 1000, unit: "ms", defaultValue: 60000 },
       { kind: "range", prop: "minDuration", label: "Min hold", min: 0, max: 1500, step: 50, unit: "ms", defaultValue: 400 },
@@ -691,15 +701,20 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "follow", label: "Follow", min: 0, max: 100, step: 1, defaultValue: 60 },
       { kind: "range", prop: "size", label: "Size", min: 60, max: 200, step: 2, unit: "px", defaultValue: 120 },
       { kind: "range", prop: "sleepAfter", label: "Sleep after", min: 0, max: 20000, step: 500, unit: "ms", defaultValue: 9000 },
+      { kind: "toggle", prop: "poke", label: "Poke to hop", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Autoplay", defaultValue: false },
     ],
     render: (v) => (
       <CursorBuddy
+        key={String(v.autoplay)}
         shape={v.shape as "squircle"}
         fill={v.fill as "light"}
         eyes={v.eyes as "dots"}
         follow={v.follow as number}
         size={v.size as number}
         sleepAfter={v.sleepAfter as number}
+        poke={v.poke as boolean}
+        autoplay={v.autoplay as boolean}
       />
     ),
   },
@@ -709,20 +724,25 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "dots", label: "Dots", min: 80, max: 1200, step: 20, defaultValue: 420 },
-      { kind: "range", prop: "radius", label: "Radius", min: 60, max: 200, step: 2, unit: "px", defaultValue: 130 },
+      { kind: "range", prop: "radius", label: "Radius", min: 60, max: 170, step: 2, unit: "px", defaultValue: 130 },
+      { kind: "color", prop: "accent", label: "Ripple", options: ["#0071e3", "#30d158", "#ff9f0a", "#bf5af2", "#ff3b30"], defaultValue: "#0071e3" },
       { kind: "range", prop: "repel", label: "Repel", min: 0, max: 100, step: 1, defaultValue: 55 },
       { kind: "range", prop: "speed", label: "Spin", min: 0, max: 100, step: 1, defaultValue: 30 },
       { kind: "range", prop: "dotSize", label: "Dot size", min: 1, max: 8, step: 0.2, unit: "px", defaultValue: 3.4 },
       { kind: "toggle", prop: "interactive", label: "Interactive", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Ripple by itself", defaultValue: false },
     ],
     render: (v) => (
       <DotSphere
+        key={String(v.autoplay)}
         dots={v.dots as number}
         radius={v.radius as number}
+        accent={v.accent as string}
         repel={v.repel as number}
         speed={v.speed as number}
         dotSize={v.dotSize as number}
         interactive={v.interactive as boolean}
+        autoplay={v.autoplay as boolean}
       />
     ),
   },
@@ -735,14 +755,16 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "timerSeconds", label: "Timer", min: 10, max: 1800, step: 10, unit: "s", defaultValue: 300 },
       { kind: "color", prop: "accent", label: "Accent", options: ["#ff9f0a", "#30d158", "#0a84ff", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
       { kind: "range", prop: "cycle", label: "Auto cycle", min: 0, max: 8000, step: 500, unit: "ms", defaultValue: 0 },
+      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false },
     ],
     render: (v) => (
       <DynamicIsland
-        key={v.defaultState as string}
+        key={`${v.defaultState as string}-${String(v.autoplay)}`}
         defaultState={v.defaultState as "timer"}
         timerSeconds={v.timerSeconds as number}
         accent={v.accent as string}
         cycle={v.cycle as number}
+        autoplay={v.autoplay as boolean}
       />
     ),
   },

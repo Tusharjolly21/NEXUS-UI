@@ -1,353 +1,332 @@
 "use client";
-
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export interface AskNexusInputProps {
+  /** Headline above the field. */
   title?: string;
-  /** Rotating placeholder suggestions shown while the input is empty. */
+  /** Questions that roll through the placeholder while the field is empty. Sending an empty field asks the one showing. */
   placeholders?: string[];
-  /** Interval (ms) between placeholder rotations. */
+  /** Time each placeholder stays up, in ms. */
   placeholderInterval?: number;
+  /** Text the field starts with. */
   defaultValue?: string;
-  /** Called with the trimmed query the instant the user submits — before the disintegration animation runs. */
+  /** Called with the trimmed question the moment it is sent, before the text turns to dust. */
   onSubmit?: (value: string) => void;
+  /** Types and sends the placeholders in turn until someone touches the field. */
+  autoplay?: boolean;
+  /** Extra classes for the root. */
   className?: string;
 }
 
-type Phase = "idle" | "disintegrating";
-
-const INPUT_FONT_PX = 14;
-const PARTICLE_RGB = "17,24,39";
-
 const DEFAULT_PLACEHOLDERS = [
-  "Who is Tyler Durden?",
-  "Explain quantum entanglement like I'm five",
-  "Write a haiku about the ocean at midnight",
-  "What's the best stack for a 2026 startup?",
-  "How do I become a 10x designer?",
+  "What makes a landing page convert?",
+  "Explain springs versus easing curves",
+  "Write a haiku about shipping on Friday",
+  "Which stack should a new startup pick?",
+  "How do I make a button feel alive?",
 ];
 
+/** Dark flag from the `dark` class on <html>; false on the server. */
+function subscribe(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+const useDark = () =>
+  useSyncExternalStore(
+    subscribe,
+    () => document.documentElement.classList.contains("dark"),
+    () => false,
+  );
+
+type Phase = "idle" | "dissolving";
+
+/**
+ * A headline over a pill-shaped question field. Placeholder questions roll
+ * past while it's empty; send one and the words break into dust that blows
+ * off to the right, letter by letter from the end, before the field resets.
+ */
 export function AskNexusInput({
-  title = "Ask Nexus UI Anything",
+  title = "Ask Nexus UI anything",
   placeholders = DEFAULT_PLACEHOLDERS,
   placeholderInterval = 2800,
   defaultValue = "",
   onSubmit,
-  className,
+  autoplay = false,
+  className = "",
 }: AskNexusInputProps) {
+  const id = useId().replace(/:/g, "");
+  const dark = useDark();
+  const still = useReducedMotion() === true;
   const [value, setValue] = useState(defaultValue);
   const [phase, setPhase] = useState<Phase>("idle");
   const [snapshot, setSnapshot] = useState("");
-  const [phIndex, setPhIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [font, setFont] = useState("");
+  const [ph, setPh] = useState(0);
+  const kick = useSpring(1, { stiffness: 520, damping: 13 });
+  const input = useRef<HTMLInputElement>(null);
+  const touched = useRef(false);
+  const ready = useRef<(() => void) | null>(null);
 
-  const activePlaceholder = placeholders[phIndex] ?? "";
+  const current = placeholders.length ? placeholders[ph % placeholders.length] : "";
 
-  // Cycle placeholder while the input is idle and empty.
   useEffect(() => {
     if (phase !== "idle" || value || placeholders.length <= 1) return;
-    const id = setInterval(
-      () => setPhIndex((i) => (i + 1) % placeholders.length),
-      placeholderInterval,
-    );
-    return () => clearInterval(id);
+    const t = window.setInterval(() => setPh((i) => (i + 1) % placeholders.length), placeholderInterval);
+    return () => window.clearInterval(t);
   }, [phase, value, placeholders.length, placeholderInterval]);
 
-  const handleSubmit = (e?: FormEvent) => {
-    e?.preventDefault();
-    if (phase !== "idle") return;
-    // If empty, the live placeholder is what gets submitted + dissolved.
-    const submitted = value.trim() || activePlaceholder.trim();
-    if (!submitted) return;
-    onSubmit?.(submitted);
-    setSnapshot(submitted);
-    setPhase("disintegrating");
+  const ask = (text: string) => {
+    const q = text.trim();
+    if (!q || phase !== "idle") return;
+    onSubmit?.(q);
+    setFont(input.current ? getComputedStyle(input.current).font : "");
+    setSnapshot(q);
+    if (!still) kick.jump(0.965);
+    kick.set(1);
+    setPhase(still ? "idle" : "dissolving");
+    if (still) setValue("");
   };
 
-  const handleComplete = useCallback(() => {
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    touched.current = true;
+    ask(value || current);
+  };
+
+  const done = () => {
     setSnapshot("");
     setValue("");
     setPhase("idle");
-    requestAnimationFrame(() => inputRef.current?.focus());
-  }, []);
+    ready.current?.();
+    ready.current = null;
+    if (touched.current) requestAnimationFrame(() => input.current?.focus());
+  };
 
-  const showPlaceholder = phase === "idle" && !value;
+  // Autoplay: type the showing placeholder, send it, wait, repeat.
+  const list = placeholders.join("\u0000");
+  useEffect(() => {
+    const qs = list ? list.split("\u0000") : [];
+    if (!autoplay || qs.length === 0) return;
+    const local: number[] = [];
+    let k = 1;
+    const later = (f: () => void, ms: number) => local.push(window.setTimeout(() => !touched.current && f(), ms));
+    const cycle = () => {
+      const q = qs[k++ % qs.length];
+      for (let c = 1; c <= q.length; c++) later(() => setValue(q.slice(0, c)), c * 42);
+      later(() => {
+        ready.current = () => later(cycle, 1500);
+        setFont(input.current ? getComputedStyle(input.current).font : "");
+        setSnapshot(q);
+        kick.jump(0.965);
+        kick.set(1);
+        setPhase("dissolving");
+      }, q.length * 42 + 600);
+    };
+    local.push(window.setTimeout(cycle, 1400));
+    return () => local.forEach((t) => window.clearTimeout(t));
+  }, [autoplay, list, kick]);
+
+  const showPh = phase === "idle" && !value;
 
   return (
-    <div className={cn("flex w-full flex-col items-center gap-10 py-12", className)}>
-      <motion.h1
-        initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
-        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="text-center text-3xl font-semibold tracking-tight text-gray-950 sm:text-4xl md:text-5xl"
-      >
+    <div
+      className={cn(`flex w-full flex-col items-center gap-8 px-1 py-6`, className)}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <h2 className="text-balance text-center text-[clamp(28px,6vw,44px)] font-semibold leading-[1.05] tracking-[-0.04em] text-[#1d1d1f] dark:text-[#f5f5f7]">
         {title}
-      </motion.h1>
+      </h2>
 
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-        className="w-full max-w-xl"
-      >
+      <form onSubmit={submit} className="w-full max-w-[540px]">
         <motion.div
-          animate={
-            phase === "disintegrating"
-              ? { scale: [1, 0.985, 1] }
-              : { scale: 1 }
-          }
-          transition={{ duration: 0.45, ease: "easeOut" }}
-          className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)] focus-within:border-gray-300"
+          style={{ scale: kick }}
+          className="flex h-14 items-center gap-2 rounded-full bg-white pl-5 pr-2 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-26px_rgba(0,0,0,.35)] transition-shadow focus-within:shadow-[0_0_0_1px_rgba(0,113,227,.5),0_0_0_5px_rgba(0,113,227,.12),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_20px_40px_-26px_rgba(0,0,0,.9)] dark:focus-within:shadow-[0_0_0_1px_rgba(10,132,255,.6),0_0_0_5px_rgba(10,132,255,.18),0_20px_40px_-26px_rgba(0,0,0,.9)]"
         >
-          <div className="relative h-6 flex-1">
-            {/* Inner clip wraps only the input + placeholder so the canvas can overflow. */}
+          <svg viewBox="0 0 20 20" className="h-[18px] w-[18px] shrink-0 text-[#86868b] dark:text-[#98989d]" aria-hidden="true">
+            <circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M12.6 12.6L17 17" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          <div className="relative h-7 min-w-0 flex-1">
             <div className="absolute inset-0 overflow-hidden">
+              <label htmlFor={`${id}-q`} className="sr-only">
+                Ask a question
+              </label>
               <input
-                ref={inputRef}
+                ref={input}
+                id={`${id}-q`}
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
-                disabled={phase !== "idle"}
+                onChange={(e) => {
+                  touched.current = true;
+                  setValue(e.target.value);
+                }}
+                onFocus={() => {
+                  touched.current = true;
+                }}
+                readOnly={phase !== "idle"}
                 spellCheck={false}
-                className={cn(
-                  "absolute inset-0 w-full bg-transparent text-sm text-gray-900 outline-none transition-opacity duration-300",
-                  phase === "disintegrating" && "opacity-0",
-                )}
+                autoComplete="off"
+                className={`absolute inset-0 w-full bg-transparent text-[16px] tracking-[-0.01em] text-[#1d1d1f] outline-none dark:text-[#f5f5f7] ${phase === "dissolving" ? "opacity-0" : ""}`}
               />
-
-              {/* Cycling placeholder overlay */}
-              <AnimatePresence mode="wait">
-                {showPlaceholder && (
+              <AnimatePresence mode="popLayout" initial={false}>
+                {showPh && (
                   <motion.span
-                    key={phIndex}
-                    initial={{ y: 10, opacity: 0, filter: "blur(4px)" }}
+                    key={ph}
+                    aria-hidden="true"
+                    initial={{ y: 18, opacity: 0, filter: "blur(4px)" }}
                     animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
-                    exit={{ y: -10, opacity: 0, filter: "blur(4px)" }}
-                    transition={{ duration: 0.35, ease: "easeOut" }}
-                    className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 truncate text-sm text-gray-400"
+                    exit={{ y: -18, opacity: 0, filter: "blur(4px)" }}
+                    transition={{ type: "spring", stiffness: 300, damping: 26 }}
+                    className="pointer-events-none absolute inset-0 flex items-center truncate text-[16px] tracking-[-0.01em] text-[#86868b] dark:text-[#8e8e93]"
                   >
-                    {activePlaceholder}
+                    {current}
                   </motion.span>
                 )}
               </AnimatePresence>
             </div>
-
-            {/* Disintegration canvas — sibling of the clip so dust can drift past the pill. */}
-            {phase === "disintegrating" && (
-              <DisintegratingText text={snapshot} onComplete={handleComplete} />
-            )}
+            {phase === "dissolving" && <Dust text={snapshot} font={font} rgb={dark ? "245,245,247" : "29,29,31"} onDone={done} />}
           </div>
-
           <motion.button
             type="submit"
             aria-label="Ask"
             disabled={phase !== "idle"}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
-            transition={{ type: "spring", stiffness: 420, damping: 18 }}
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-gray-100 text-gray-500 transition-colors hover:bg-gray-200 hover:text-gray-700 disabled:opacity-60"
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.86 }}
+            transition={{ type: "spring", stiffness: 520, damping: 18 }}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#0071e3] text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 disabled:opacity-60 dark:bg-[#0a84ff] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"
           >
-            <ArrowRight className="size-4" strokeWidth={2.25} />
+            <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden="true">
+              <path d="M3 8h9.5M8.5 3.5L13 8l-4.5 4.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </motion.button>
         </motion.div>
-      </motion.form>
+      </form>
+      <p className="-mt-4 text-[13px] text-[#86868b] dark:text-[#a1a1a6]">Press Enter to ask. Empty asks the one showing.</p>
+      <span className="sr-only" aria-live="polite">
+        {snapshot ? `Asked: ${snapshot}` : ""}
+      </span>
     </div>
   );
 }
 
-type Particle = {
-  ox: number;
-  oy: number;
-  vx: number;
-  vy: number;
-  delay: number;
-  life: number;
-  size: number;
-};
+type Grain = { ox: number; oy: number; vx: number; vy: number; delay: number; life: number; size: number };
 
-interface DisintegratingTextProps {
-  text: string;
-  onComplete: () => void;
-}
+/** Room on the right for the dust to blow into. */
+const OVERHANG = 110;
+/** Gap between each letter breaking up, right to left. */
+const LETTER_MS = 42;
 
-// Right-edge overhang so a little dust can drift past before fading.
-const RIGHT_OVERHANG_PX = 90;
-// Time between each character snapping. Smaller = faster wave.
-const CHAR_STEP_MS = 50;
-// Random jitter on each character's snap so adjacent chars overlap a touch.
-const CHAR_JITTER_MS = 22;
-
-function DisintegratingText({ text, onComplete }: DisintegratingTextProps) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
+/** Draws the text on a canvas, samples its pixels into grains and blows them away letter by letter from the end. */
+function Dust({ text, font, rgb, onDone }: { text: string; font: string; rgb: string; onDone: () => void }) {
+  const ref = useRef<HTMLCanvasElement>(null);
+  const doneRef = useRef(onDone);
+  useEffect(() => {
+    doneRef.current = onDone;
+  }, [onDone]);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const parent = canvas?.parentElement;
-    if (!canvas || !parent) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
+    const canvas = ref.current;
+    const host = canvas?.parentElement;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !host || !ctx) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const baseW = Math.max(parent.clientWidth, 1);
-    const H = Math.max(parent.clientHeight, 1);
-    const W = baseW + RIGHT_OVERHANG_PX;
-
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
+    const baseW = Math.max(host.clientWidth, 1);
+    const H = Math.max(host.clientHeight, 1);
+    const W = baseW + OVERHANG;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
     canvas.style.width = `${W}px`;
     canvas.style.height = `${H}px`;
     ctx.scale(dpr, dpr);
-
-    ctx.font = `${INPUT_FONT_PX}px ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`;
-    ctx.fillStyle = `rgb(${PARTICLE_RGB})`;
+    ctx.font = font || "16px system-ui, -apple-system, sans-serif";
+    ctx.fillStyle = `rgb(${rgb})`;
     ctx.textBaseline = "middle";
-    ctx.textAlign = "left";
     ctx.fillText(text, 0, H / 2);
 
-    // Map each x-range to the character that produced it, so the wave can snap
-    // one character at a time instead of bleeding across the whole phrase.
     const chars = Array.from(text);
-    const charBounds: { start: number; end: number }[] = [];
-    let cursor = 0;
+    const bounds: number[] = [];
+    let x = 0;
     for (const ch of chars) {
-      const w = ctx.measureText(ch).width;
-      charBounds.push({ start: cursor, end: cursor + w });
-      cursor += w;
+      x += ctx.measureText(ch).width;
+      bounds.push(x);
     }
-    const totalChars = chars.length;
-    const charDelay = (charIdx: number) => {
-      const fromRight = totalChars - 1 - charIdx;
-      return fromRight * CHAR_STEP_MS + Math.random() * CHAR_JITTER_MS;
-    };
-    const findCharIdx = (lx: number) => {
-      // Binary search on character bounds.
-      let lo = 0, hi = charBounds.length - 1;
-      while (lo <= hi) {
+    const letterOf = (lx: number) => {
+      let lo = 0;
+      let hi = bounds.length - 1;
+      while (lo < hi) {
         const mid = (lo + hi) >> 1;
-        const b = charBounds[mid];
-        if (lx < b.start) hi = mid - 1;
-        else if (lx >= b.end) lo = mid + 1;
-        else return mid;
+        if (lx < bounds[mid]) hi = mid;
+        else lo = mid + 1;
       }
-      return Math.min(Math.max(lo, 0), charBounds.length - 1);
+      return lo;
     };
 
-    const sampleW = baseW * dpr;
-    const img = ctx.getImageData(0, 0, sampleW, H * dpr);
-    const particles: Particle[] = [];
-    const stride = dpr;
-
-    for (let y = 0; y < H * dpr; y += stride) {
-      for (let x = 0; x < sampleW; x += stride) {
-        const i = (y * sampleW + x) * 4;
-        if (img.data[i + 3] > 110) {
-          const lx = x / dpr;
-          const ly = y / dpr;
-          const charIdx = findCharIdx(lx);
-
-          // Clean dispersion: small in-place burst with slight rightward bias.
-          // Most particles barely move; a few stragglers drift further.
-          const angle = (Math.random() - 0.5) * Math.PI * 0.6; // ±54°
-          const speed = 0.18 + Math.random() * 0.55;
-          const vx = Math.cos(angle) * speed + 0.12;
-          const vy = Math.sin(angle) * speed * 0.55; // squashed vertically — keeps the cloud near the text baseline
-
-          // Size variance — fine dust with a few larger flecks.
-          const sizeRoll = Math.random();
-          const size = sizeRoll < 0.65 ? 1 : sizeRoll < 0.92 ? 1.4 : 1.8;
-
-          particles.push({
-            ox: lx,
-            oy: ly,
-            vx,
-            vy,
-            delay: charDelay(charIdx),
-            // Short life — clean snap, not a long drifting cloud.
-            life: 480 + Math.random() * 320,
-            size,
-          });
-        }
+    const sw = Math.round(baseW * dpr);
+    const sh = Math.round(H * dpr);
+    const img = ctx.getImageData(0, 0, sw, sh);
+    const grains: Grain[] = [];
+    const stride = Math.max(1, Math.round(dpr));
+    for (let py = 0; py < sh; py += stride) {
+      for (let px = 0; px < sw; px += stride) {
+        if (img.data[(py * sw + px) * 4 + 3] < 110) continue;
+        const lx = px / dpr;
+        const fromEnd = chars.length - 1 - letterOf(lx);
+        const a = (Math.random() - 0.6) * Math.PI * 0.7;
+        const sp = 0.25 + Math.random() * 0.7;
+        const roll = Math.random();
+        grains.push({
+          ox: lx,
+          oy: py / dpr,
+          vx: Math.cos(a) * sp + 0.18,
+          vy: Math.sin(a) * sp * 0.7 - 0.08,
+          delay: fromEnd * LETTER_MS + Math.random() * 24,
+          life: 520 + Math.random() * 380,
+          size: roll < 0.65 ? 1 : roll < 0.92 ? 1.4 : 1.9,
+        });
       }
     }
-
     ctx.clearRect(0, 0, W, H);
 
-    let rafId = 0;
-    let start = 0;
-    let cancelled = false;
-
+    let raf = 0;
+    let t0 = 0;
     const frame = (now: number) => {
-      if (cancelled) return;
-      if (!start) start = now;
-      const elapsed = now - start;
+      if (!t0) t0 = now;
+      const el = now - t0;
       ctx.clearRect(0, 0, W, H);
-
-      let aliveCount = 0;
-
-      for (const p of particles) {
-        if (elapsed < p.delay) {
-          // Brief tension shimmer in the final 80ms before this particle snaps.
-          const ttd = p.delay - elapsed;
-          if (ttd < 80) {
-            const tension = 1 - ttd / 80;
-            const jx = (Math.random() - 0.5) * 0.5 * tension;
-            const jy = (Math.random() - 0.5) * 0.5 * tension;
-            ctx.fillStyle = `rgb(${PARTICLE_RGB})`;
-            ctx.fillRect(p.ox + jx, p.oy + jy, p.size, p.size);
-          } else {
-            ctx.fillStyle = `rgb(${PARTICLE_RGB})`;
-            ctx.fillRect(p.ox, p.oy, p.size, p.size);
-          }
-          aliveCount++;
+      let alive = 0;
+      for (const g of grains) {
+        if (el < g.delay) {
+          // A quick shiver in the last 80ms before a letter goes.
+          const k = g.delay - el < 80 ? 1 - (g.delay - el) / 80 : 0;
+          ctx.fillStyle = `rgb(${rgb})`;
+          ctx.fillRect(g.ox + (Math.random() - 0.5) * 0.6 * k, g.oy + (Math.random() - 0.5) * 0.6 * k, g.size, g.size);
+          alive++;
           continue;
         }
-        const t = elapsed - p.delay;
-        if (t > p.life) continue;
-        aliveCount++;
-
-        const norm = t / p.life;
-        const motionT = t / 16;
-        // Small wobble only — keeps the dispersion clean instead of swirly.
-        const wobble = Math.sin((p.ox + motionT) * 0.22) * 0.4;
-        const x = p.ox + p.vx * motionT + wobble * norm;
-        const y = p.oy + p.vy * motionT;
-        // Cosine ease-out fade.
-        const opacity = Math.cos((norm * Math.PI) / 2);
-        ctx.fillStyle = `rgba(${PARTICLE_RGB},${opacity.toFixed(3)})`;
-        ctx.fillRect(x, y, p.size, p.size);
+        const t = el - g.delay;
+        if (t > g.life) continue;
+        alive++;
+        const n = t / g.life;
+        const m = t / 16;
+        // Ease-out drift with a little lift, like ash catching a breeze.
+        const px = g.ox + g.vx * m * (1 - n * 0.35) + Math.sin((g.oy + m) * 0.3) * 0.5 * n;
+        const py = g.oy + g.vy * m - n * n * 4;
+        ctx.fillStyle = `rgba(${rgb},${Math.cos((n * Math.PI) / 2).toFixed(3)})`;
+        ctx.fillRect(px, py, g.size, g.size);
       }
-
-      if (aliveCount === 0) {
-        onCompleteRef.current();
+      if (alive === 0) {
+        doneRef.current();
         return;
       }
-      rafId = requestAnimationFrame(frame);
+      raf = requestAnimationFrame(frame);
     };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [text, font, rgb]);
 
-    rafId = requestAnimationFrame(frame);
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafId);
-    };
-  }, [text]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="pointer-events-none absolute left-0 top-0"
-      aria-hidden
-    />
-  );
+  return <canvas ref={ref} className="pointer-events-none absolute left-0 top-0" aria-hidden="true" />;
 }

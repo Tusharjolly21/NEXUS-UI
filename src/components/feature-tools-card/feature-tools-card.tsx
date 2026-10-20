@@ -1,361 +1,317 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
 
 export interface FeatureToolsCardProps {
   title?: string;
   description?: string;
-  /** CSS background value for the card surface. Defaults to a dark glass style. */
+  /** CSS background for the card. Defaults to white (dark grey in dark mode). */
   cardBg?: string;
-  /** Custom icon for slot 1 (smallest). Defaults to GitHub SVG. */
-  icon1?: React.ReactNode;
-  /** Custom icon for slot 2 (medium). Defaults to Notion SVG. */
-  icon2?: React.ReactNode;
-  /** Custom icon for slot 3 (largest, centre). Defaults to Gmail SVG. */
-  icon3?: React.ReactNode;
-  /** Custom icon for slot 4 (medium). Defaults to Slack SVG. */
-  icon4?: React.ReactNode;
-  /** Custom icon for slot 5 (smallest). Defaults to Google Drive SVG. */
-  icon5?: React.ReactNode;
-  /** Enable 3-D tilt on mouse move. */
+  /** Icon for slot 1 (top). Defaults to a mail glyph. */
+  icon1?: ReactNode;
+  /** Icon for slot 2. Defaults to a chat glyph. */
+  icon2?: ReactNode;
+  /** Icon for slot 3. Defaults to a calendar glyph. */
+  icon3?: ReactNode;
+  /** Icon for slot 4. Defaults to a docs glyph. */
+  icon4?: ReactNode;
+  /** Icon for slot 5. Defaults to a cloud glyph. */
+  icon5?: ReactNode;
+  /** Logo in the hub the tools connect to. */
+  hubIcon?: ReactNode;
+  /** 3D tilt toward the pointer. */
   enableTilt?: boolean;
-  /** Tilt rotation degrees. */
+  /** Maximum tilt in degrees. */
   tiltStrength?: number;
-  /** Enable magnetic icon attraction toward cursor. */
+  /** Icons lean toward the pointer. */
   enableMagnetic?: boolean;
-  /** Magnetic pull multiplier (0 – 1). */
+  /** Share of the distance an icon travels toward the pointer, 0-1. */
   magneticStrength?: number;
-  /** Cursor distance at which magnetic effect starts (px). */
+  /** Distance at which an icon starts to feel the pointer, in px. */
   magneticRadius?: number;
-  /** Show conic-gradient orbit ring. */
+  /** Icons ride slowly round the ring. */
   enableOrbit?: boolean;
-  /** Full rotation duration in seconds. */
+  /** Seconds per full turn of the ring. */
   orbitSpeed?: number;
-  /** CSS color for the orbit ring sweep. */
+  /** Colour of the dashed ring. */
   orbitColor?: string;
+  /** Sweeps a virtual pointer round the ring until someone touches the card. */
+  autoplay?: boolean;
   className?: string;
 }
 
-const ORBIT_KEYFRAMES = `@keyframes ftc-orbit-spin { to { transform: rotate(360deg); } }`;
+const R = 84;
+const COLORS = ["#0a84ff", "#30b65a", "#ff375f", "#ff9f0a", "#bf5af2"];
 
-function GithubIcon() {
+const G = (d: ReactNode) => (
+  <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {d}
+  </svg>
+);
+const GLYPHS = [
+  G(<><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M4 7l8 6 8-6" /></>),
+  G(<path d="M5 18l-1 3 4-1.5A8.5 8.5 0 1 0 5 18z" />),
+  G(<><rect x="4" y="5" width="16" height="15" rx="3" /><path d="M4 10h16M9 3v4M15 3v4" /></>),
+  G(<><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></>),
+  G(<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5z" />),
+];
+const LABELS = ["Mail", "Chat", "Calendar", "Docs", "Cloud"];
+
+type Frame = (t: number, px: number, py: number, live: boolean) => { x: number; y: number; near: number };
+
+function Tool({
+  index,
+  icon,
+  register,
+  orbit,
+  period,
+  magnetic,
+  strength,
+  radius,
+}: {
+  index: number;
+  icon?: ReactNode;
+  register: (i: number, f: Frame | null) => void;
+  orbit: boolean;
+  period: number;
+  magnetic: boolean;
+  strength: number;
+  radius: number;
+}) {
+  const start = -90 + index * 72;
+  const a0 = (start * Math.PI) / 180;
+  // Resting spot on the ring, so the server render already has it laid out.
+  const bx = useMotionValue(Math.round(Math.cos(a0) * R * 100) / 100);
+  const by = useMotionValue(Math.round(Math.sin(a0) * R * 100) / 100);
+  const tx = useMotionValue(0);
+  const ty = useMotionValue(0);
+  const ox = useSpring(tx, { stiffness: 260, damping: 13 });
+  const oy = useSpring(ty, { stiffness: 260, damping: 13 });
+  const pull = useMotionValue(0);
+  const sp = useSpring(pull, { stiffness: 300, damping: 18 });
+  const x = useTransform([bx, ox], ([a, b]) => Math.round(((a as number) + (b as number)) * 100) / 100);
+  const y = useTransform([by, oy], ([a, b]) => Math.round(((a as number) + (b as number)) * 100) / 100);
+  const scale = useTransform(sp, (p) => 1 + p * 0.14);
+  const lift = useTransform(sp, (p) => `0 ${8 + p * 10}px ${18 + p * 14}px -10px rgba(0,0,0,${0.35 + p * 0.15})`);
+
+  useEffect(() => {
+    register(index, (t, px, py, live) => {
+      const a = ((start + (orbit ? (t * 360) / Math.max(1, period) : 0)) * Math.PI) / 180;
+      const cx = Math.cos(a) * R;
+      const cy = Math.sin(a) * R;
+      bx.set(cx);
+      by.set(cy);
+      const dx = px - cx;
+      const dy = py - cy;
+      const near = live && magnetic ? Math.max(0, 1 - Math.hypot(dx, dy) / Math.max(1, radius)) : 0;
+      tx.set(dx * near * strength);
+      ty.set(dy * near * strength);
+      pull.set(near);
+      return { x: cx + ox.get(), y: cy + oy.get(), near };
+    });
+    return () => register(index, null);
+  }, [index, register, orbit, period, magnetic, strength, radius, start, bx, by, tx, ty, ox, oy, pull]);
+
   return (
-    // <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#FFFFFF" className="w-full h-full">
-    //   <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
-    // </svg>
-    <svg
-      width="w-full"
-      height="w-full"
-      viewBox="-3 0 262 262"
-      xmlns="http://www.w3.org/2000/svg"
-      preserveAspectRatio="xMidYMid"
-    >
-      <path
-        d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
-        fill="#4285F4"
-      />
-      <path
-        d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
-        fill="#34A853"
-      />
-      <path
-        d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
-        fill="#FBBC05"
-      />
-      <path
-        d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
-        fill="#EB4335"
-      />
-    </svg>
+    <motion.div className="absolute left-1/2 top-1/2 z-10" style={{ x, y, marginLeft: -23, marginTop: -23 }}>
+      <motion.div
+        className="grid size-[46px] place-items-center rounded-[13px]"
+        style={{ scale, boxShadow: lift, background: icon ? "#ffffff" : `linear-gradient(160deg, ${COLORS[index]}cc, ${COLORS[index]})` }}
+        title={icon ? undefined : LABELS[index]}
+      >
+        {icon ? <span className="grid h-[24px] w-[24px] place-items-center [&>svg]:h-full [&>svg]:w-full">{icon}</span> : GLYPHS[index]}
+      </motion.div>
+    </motion.div>
   );
 }
 
-function NotionIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="#FFFFFF"
-      className="w-full h-full"
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 1.968c-.42-.326-.981-.7-2.055-.607L3.01 2.295c-.466.046-.56.28-.374.466l1.823 1.447zm.793 3.08v13.904c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.747.327-.747.933zm14.337.745c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952L12.21 19s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.854L7.822 9.76c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.139c-.093-.514.28-.887.747-.933l3.222-.187z"
-      />
-    </svg>
-  );
-}
-
-function GmailIcon() {
-  return (
-    // <svg
-    //   xmlns="http://www.w3.org/2000/svg"
-    //   viewBox="0 0 24 24"
-    //   className="w-full h-full"
-    // >
-    //   <path
-    //     d="M3.5 5.5h17A1.5 1.5 0 0 1 22 7v10a1.5 1.5 0 0 1-1.5 1.5h-17A1.5 1.5 0 0 1 2 17V7a1.5 1.5 0 0 1 1.5-1.5z"
-    //     fill="#FFFFFF"
-    //   />
-    //   <path d="M22 7v10a1.5 1.5 0 0 1-1.5 1.5h-2V10.66L22 7z" fill="#4285F4" />
-    //   <path d="M2 7v10a1.5 1.5 0 0 0 1.5 1.5h2V10.66L2 7z" fill="#34A853" />
-    //   <path d="M5.5 18.5V10.66L12 14.5l6.5-3.84v7.84h-13z" fill="#EA4335" />
-    //   <path d="M22 7L12 13.5 2 7l1-1.5h18L22 7z" fill="#FBBC04" />
-    // </svg>
-    <svg
-      className="w-full h-full"
-      viewBox="0 -3 240 240"
-      id="ps_x5F_cc_x5F_app_x5F_RGB.svg"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <style>{".st0{fill:#2e001e}.st1{fill:#ff2bc2}"}</style>
-      <path className="st0" d="M10 10h220v214H10z" />
-      <path className="st1" d="M0 0v234h240V0H0zm10 10h220v214H10V10z" />
-      <path
-        className="st1"
-        d="M174.3 98.3c-1.5-.7-3.4-1-5.8-1-12.6 0-21 9.7-21 25.8 0 18.4 8.6 25.8 19.8 25.8 2.4 0 5-.3 6.9-1.1V98.3h.1zm-44.8 25.6c0-23.3 15-41.5 39.6-41.5 2.1 0 3.2 0 5.2.2v-26c0-.6.5-1 1-1h16.1c.8 0 1 .3 1 .8v91.4c0 2.7 0 6.1.5 9.8 0 .7 0 .8-.6 1.1-8.4 4-17.2 5.8-25.6 5.8-21.7 0-37.2-13.4-37.2-40.6zm-34.1-16.2l28 54.3c.5.8.2 1.6-.6 1.6h-17.4c-1.1 0-1.6-.3-2.1-1.3-6.4-13.2-12.9-26.9-19.6-41.1h-.2c-6 13.4-12.6 28-19 41.2-.5.8-1 1.1-1.8 1.1H46.1c-1 0-1.1-.8-.6-1.4l27.4-52.7L46.4 57c-.6-.8 0-1.5.7-1.5h17.2c1 0 1.5.2 1.8 1.1C72.4 69.9 78.8 83 84.8 96.4h.2c5.8-13.2 12.2-26.5 18.3-39.6.5-.8.8-1.3 1.8-1.3h16.1c.8 0 1.1.6.6 1.5l-26.4 50.7z"
-      />
-    </svg>
-  );
-}
-
-function SlackIcon() {
-  return (
-    // <svg
-    //   xmlns="http://www.w3.org/2000/svg"
-    //   viewBox="0 0 24 24"
-    //   className="w-full h-full"
-    // >
-    //   <path
-    //     d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313z"
-    //     fill="#E01E5A"
-    //   />
-    //   <path
-    //     d="M8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312z"
-    //     fill="#36C5F0"
-    //   />
-    //   <path
-    //     d="M18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312z"
-    //     fill="#2EB67D"
-    //   />
-    //   <path
-    //     d="M15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"
-    //     fill="#ECB22E"
-    //   />
-    // </svg>
-    <svg
-      fill="#000000"
-      width="w-full"
-      height="h-full"
-      viewBox="-52.01 0 560.035 560.035"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M380.844 297.529c.787 84.752 74.349 112.955 75.164 113.314-.622 1.988-11.754 40.191-38.756 79.652-23.343 34.117-47.568 68.107-85.731 68.811-37.499.691-49.557-22.236-92.429-22.236-42.859 0-56.256 21.533-91.753 22.928-36.837 1.395-64.889-36.891-88.424-70.883-48.093-69.53-84.846-196.475-35.496-282.165 24.516-42.554 68.328-69.501 115.882-70.192 36.173-.69 70.315 24.336 92.429 24.336 22.1 0 63.59-30.096 107.208-25.676 18.26.76 69.517 7.376 102.429 55.552-2.652 1.644-61.159 35.704-60.523 106.559M310.369 89.418C329.926 65.745 343.089 32.79 339.498 0 311.308 1.133 277.22 18.785 257 42.445c-18.121 20.952-33.991 54.487-29.709 86.628 31.421 2.431 63.52-15.967 83.078-39.655" />
-    </svg>
-  );
-}
-
-function DriveIcon() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      className="w-full h-full"
-    >
-      <path d="M7.71 3.5L1.15 15l3.42 6 6.55-11.5z" fill="#0066DA" />
-      <path d="M16.29 3.5H7.71l6.55 11.5h8.59z" fill="#FFC107" />
-      <path d="M22.85 15h-8.59l-3.16 5.5h8.31z" fill="#1B872B" />
-      <path
-        d="M14.26 15l-3.14-5.5L7.71 3.5l3.42 6h.01l3.12 5.5z"
-        fill="#EA4335"
-      />
-      <path d="M22.85 15l-3.14-5.5h-5.45l3.14 5.5z" fill="#188038" />
-    </svg>
-  );
-}
-
-const CIRCLE_BASE =
-  "rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer transition-all duration-350 ease-spring hover:z-10";
-
-const CIRCLE_SHADOW =
-  "shadow-[inset_0px_0px_8px_0px_rgba(248,248,248,0.25),0px_32px_24px_-16px_rgba(0,0,0,0.40)] hover:shadow-[inset_0px_0px_12px_0px_rgba(248,248,248,0.4),0px_32px_32px_-16px_rgba(0,0,0,0.5)]";
-
+/**
+ * An integrations card: five tools ride a slow ring round your app's hub,
+ * each wired to it with a line that carries little packets inward. Bring the
+ * pointer near and the tools lean toward it like magnets, their line lights
+ * up and they snap back with a wobble when you move away; the card tilts
+ * toward the pointer too.
+ */
 export function FeatureToolsCard({
-  title = "Feature Block Animated Card",
-  description = "A card that showcases a set of tools your platform connects with.",
-  cardBg = "rgba(40,40,40,0.70)",
+  title = "Connects with your stack",
+  description = "Mail, chat, calendar, docs and storage, synced the moment they change.",
+  cardBg,
   icon1,
   icon2,
   icon3,
   icon4,
   icon5,
+  hubIcon,
   enableTilt = true,
   tiltStrength = 8,
   enableMagnetic = true,
   magneticStrength = 0.4,
   magneticRadius = 120,
   enableOrbit = true,
-  orbitSpeed = 18,
-  orbitColor = "rgba(255,255,255,0.18)",
-  className,
+  orbitSpeed = 36,
+  orbitColor,
+  autoplay = false,
+  className = "",
 }: FeatureToolsCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const magnetRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const still = useReducedMotion() === true;
+  const stage = useRef<HTMLDivElement>(null);
+  const frames = useRef<(Frame | null)[]>([]);
+  const lines = useRef<(SVGLineElement | null)[]>([]);
+  const dots = useRef<(SVGCircleElement | null)[]>([]);
+  const pointer = useRef({ x: 0, y: 0, live: false });
+  const touched = useRef(false);
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const rotateX: MotionValue<number> = useSpring(rx, { stiffness: 160, damping: 16 });
+  const rotateY: MotionValue<number> = useSpring(ry, { stiffness: 160, damping: 16 });
+  const icons = [icon1, icon2, icon3, icon4, icon5];
+
+  const register = useCallback((i: number, f: Frame | null) => {
+    frames.current[i] = f;
+  }, []);
 
   useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return;
-
-    function onMove(e: MouseEvent) {
-      const rect = card!.getBoundingClientRect();
-      const mx = e.clientX - rect.left;
-      const my = e.clientY - rect.top;
-
-      if (enableTilt) {
-        const rx = ((my - rect.height / 2) / (rect.height / 2)) * -tiltStrength;
-        const ry = ((mx - rect.width / 2) / (rect.width / 2)) * tiltStrength;
-        card!.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    let raf = 0;
+    const t0 = performance.now();
+    const loop = (now: number) => {
+      const t = still ? 0 : (now - t0) / 1000;
+      if (autoplay && !touched.current) {
+        const a = t * 0.9;
+        pointer.current = { x: Math.cos(a) * R * 1.05, y: Math.sin(a * 1.3) * R * 0.9, live: true };
       }
-
-      if (enableMagnetic) {
-        magnetRefs.current.forEach((m) => {
-          if (!m) return;
-          const r = m.getBoundingClientRect();
-          const cx = r.left + r.width / 2 - rect.left;
-          const cy = r.top + r.height / 2 - rect.top;
-          const dx = mx - cx;
-          const dy = my - cy;
-          const dist = Math.hypot(dx, dy);
-          if (dist < magneticRadius) {
-            const pull = (1 - dist / magneticRadius) * magneticStrength;
-            m.style.transform = `translate(${dx * pull}px, ${dy * pull}px)`;
-          } else {
-            m.style.transform = "translate(0,0)";
-          }
-        });
-      }
-    }
-
-    function onLeave() {
-      if (enableTilt)
-        card!.style.transform = "perspective(900px) rotateX(0) rotateY(0)";
-      if (enableMagnetic) {
-        magnetRefs.current.forEach((m) => {
-          if (m) m.style.transform = "translate(0,0)";
-        });
-      }
-    }
-
-    card.addEventListener("mousemove", onMove);
-    card.addEventListener("mouseleave", onLeave);
-    return () => {
-      card.removeEventListener("mousemove", onMove);
-      card.removeEventListener("mouseleave", onLeave);
+      const p = pointer.current;
+      frames.current.forEach((f, i) => {
+        if (!f) return;
+        const at = f(t, p.x, p.y, p.live);
+        const line = lines.current[i];
+        const dot = dots.current[i];
+        if (line) {
+          line.setAttribute("x2", at.x.toFixed(2));
+          line.setAttribute("y2", at.y.toFixed(2));
+          line.style.strokeOpacity = String(0.22 + at.near * 0.78);
+        }
+        if (dot) {
+          const k = (t * (0.45 + at.near * 0.9) + i * 0.21) % 1;
+          dot.setAttribute("cx", (at.x * (1 - k)).toFixed(2));
+          dot.setAttribute("cy", (at.y * (1 - k)).toFixed(2));
+          dot.style.opacity = still ? "0" : String(Math.sin(k * Math.PI) * (0.55 + at.near * 0.45));
+        }
+      });
+      raf = requestAnimationFrame(loop);
     };
-  }, [
-    enableTilt,
-    tiltStrength,
-    enableMagnetic,
-    magneticStrength,
-    magneticRadius,
-  ]);
-
-  const setMagnet = (i: number) => (el: HTMLDivElement | null) => {
-    magnetRefs.current[i] = el;
-  };
-
-  const icons = [
-    { node: icon1 ?? <GithubIcon />, size: "w-8 h-8", iconSize: "w-4 h-4" },
-    { node: icon2 ?? <NotionIcon />, size: "w-12 h-12", iconSize: "w-6 h-6" },
-    { node: icon3 ?? <GmailIcon />, size: "w-16 h-16", iconSize: "w-8 h-8" },
-    { node: icon4 ?? <SlackIcon />, size: "w-12 h-12", iconSize: "w-6 h-6" },
-    { node: icon5 ?? <DriveIcon />, size: "w-8 h-8", iconSize: "w-4 h-4" },
-  ];
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [still, autoplay]);
 
   return (
-    <div
-      ref={cardRef}
-      className={cn("w-full max-w-sm rounded-xl p-8 box-border", className)}
-      style={{
-        background: cardBg,
-        border: "1px solid rgba(255,255,255,0.10)",
-        boxShadow: "inset 2px 4px 16px 0px rgba(248,248,248,0.06)",
-        transformStyle: "preserve-3d",
-        transition: "transform 0.2s ease-out",
-        willChange: "transform",
+    <motion.div
+      className={`w-[340px] max-w-full rounded-[24px] p-4 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] ${cardBg ? "" : "bg-white dark:bg-[#1c1c1e]"} ${className}`}
+      style={{ background: cardBg, rotateX, rotateY, transformPerspective: 900 }}
+      onPointerMove={(e) => {
+        touched.current = true;
+        const c = e.currentTarget.getBoundingClientRect();
+        if (enableTilt && !still) {
+          ry.set(((e.clientX - c.left) / c.width - 0.5) * 2 * tiltStrength);
+          rx.set(-((e.clientY - c.top) / c.height - 0.5) * 2 * tiltStrength);
+        }
+        const s = stage.current?.getBoundingClientRect();
+        if (s) pointer.current = { x: e.clientX - (s.left + s.width / 2), y: e.clientY - (s.top + s.height / 2), live: true };
+      }}
+      onPointerLeave={() => {
+        rx.set(0);
+        ry.set(0);
+        pointer.current = { ...pointer.current, live: false };
+      }}
+      onPointerDown={() => {
+        touched.current = true;
       }}
     >
-      <style>{ORBIT_KEYFRAMES}</style>
-
-      {/* Stage with orbit ring */}
       <div
-        className="relative h-80 rounded-xl overflow-hidden"
-        style={{
-          background: cardBg,
-          WebkitMaskImage:
-            "radial-gradient(50% 50% at 50% 50%, white 0%, transparent 100%)",
-          maskImage:
-            "radial-gradient(50% 50% at 50% 50%, white 0%, transparent 100%)",
-        }}
+        ref={stage}
+        className="relative h-[228px] overflow-hidden rounded-[18px] bg-[#f5f5f7] dark:bg-[#2c2c2e]"
+        style={{ backgroundImage: "radial-gradient(circle, rgba(0,0,0,.07) 1px, transparent 1.2px)", backgroundSize: "14px 14px" }}
+        role="img"
+        aria-label={`Connected tools: ${LABELS.join(", ")}`}
       >
-        {/* Orbit ring */}
-        {enableOrbit && (
-          <div
-            className="pointer-events-none absolute top-1/2 left-1/2 rounded-full"
-            style={{
-              width: 280,
-              height: 280,
-              marginTop: -140,
-              marginLeft: -140,
-              background: `conic-gradient(from 0deg, transparent 0%, ${orbitColor} 25%, transparent 50%, ${orbitColor} 75%, transparent 100%)`,
-              WebkitMask:
-                "radial-gradient(circle, transparent 56%, black 58%, black 80%, transparent 82%)",
-              mask: "radial-gradient(circle, transparent 56%, black 58%, black 80%, transparent 82%)",
-              animation: `ftc-orbit-spin ${orbitSpeed}s linear infinite`,
-              zIndex: 1,
-            }}
+        <svg className="pointer-events-none absolute left-1/2 top-1/2 overflow-visible" width="1" height="1" aria-hidden="true">
+          <motion.circle
+            r={R}
+            fill="none"
+            strokeWidth="1.5"
+            strokeDasharray="3 7"
+            strokeLinecap="round"
+            className={orbitColor ? undefined : "stroke-[#c7c7cc] dark:stroke-[#48484a]"}
+            style={{ stroke: orbitColor }}
+            animate={enableOrbit && !still ? { rotate: 360 } : undefined}
+            transition={{ duration: Math.max(1, orbitSpeed), repeat: Infinity, ease: "linear" }}
           />
-        )}
+          {COLORS.map((c, i) => (
+            <line
+              key={`l${i}`}
+              ref={(el) => {
+                lines.current[i] = el;
+              }}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="0"
+              stroke={c}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              style={{ strokeOpacity: 0.22 }}
+            />
+          ))}
+          {COLORS.map((c, i) => (
+            <circle
+              key={`d${i}`}
+              ref={(el) => {
+                dots.current[i] = el;
+              }}
+              r="2.6"
+              fill={c}
+              style={{ opacity: 0 }}
+            />
+          ))}
+        </svg>
 
-        {/* Icon row */}
-        <div className="relative z-10 flex h-full items-center justify-center">
-          <div className="flex flex-row items-center justify-center gap-2">
-            {icons.map(({ node, size, iconSize }, i) => (
-              <div
-                key={i}
-                ref={setMagnet(i)}
-                className="inline-flex"
-                style={{
-                  transition: "transform 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-                  willChange: "transform",
-                }}
-              >
-                <div
-                  className={cn(
-                    CIRCLE_BASE,
-                    CIRCLE_SHADOW,
-                    size,
-                    "bg-white/[0.01] hover:scale-110",
-                  )}
-                >
-                  <span className={cn("pointer-events-none", iconSize)}>
-                    {node}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="absolute left-1/2 top-1/2 z-20 -ml-8 -mt-8">
+          {!still ? (
+            <motion.span
+              className="absolute inset-0 rounded-[20px] bg-[#0071e3]/25 dark:bg-[#0a84ff]/30"
+              animate={{ scale: [1, 1.55], opacity: [0.6, 0] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+              aria-hidden="true"
+            />
+          ) : null}
+          <span className="relative grid size-16 place-items-center rounded-[20px] bg-[#1d1d1f] text-white shadow-[0_12px_24px_-12px_rgba(0,0,0,.6)] dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+            {hubIcon ?? (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3.2" />
+                <path d="M12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21" />
+              </svg>
+            )}
+          </span>
         </div>
-      </div>
 
-      <h3 className="mt-2 pt-2 text-[18px] font-semibold leading-snug tracking-tight text-white">
-        {title}
-      </h3>
-      <p className="mt-1 text-sm leading-relaxed text-white/50">
-        {description}
-      </p>
-    </div>
+        {icons.map((ic, i) => (
+          <Tool
+            key={i}
+            index={i}
+            icon={ic}
+            register={register}
+            orbit={enableOrbit && !still}
+            period={orbitSpeed}
+            magnetic={enableMagnetic && !still}
+            strength={Math.max(0, Math.min(1, magneticStrength))}
+            radius={magneticRadius}
+          />
+        ))}
+      </div>
+      <h3 className="mt-4 px-1 text-[17px] font-semibold leading-tight tracking-[-0.02em]">{title}</h3>
+      <p className="mt-1 px-1 pb-1 text-[13px] leading-[1.45] text-[#6e6e73] dark:text-[#a1a1a6]">{description}</p>
+    </motion.div>
   );
 }
+
+export default FeatureToolsCard;

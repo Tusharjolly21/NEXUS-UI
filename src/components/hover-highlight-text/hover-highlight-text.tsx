@@ -3,10 +3,11 @@
 import * as React from "react";
 import {
   motion,
-  useMotionTemplate,
   useMotionValue,
   useReducedMotion,
   useSpring,
+  useTransform,
+  type MotionValue,
   type SpringOptions,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -14,155 +15,247 @@ import { cn } from "@/lib/utils";
 type HoverHighlightTextElement = "h1" | "h2" | "p" | "span";
 
 export type HoverHighlightTextProps = {
+  /** The sentence to highlight. */
   text: string;
+  /** Element used for the text. */
   as?: HoverHighlightTextElement;
+  /** Classes for the text element (size, weight, width). */
   baseClassName?: string;
+  /** Classes for every marker stroke, e.g. a custom background colour. */
   highlightClassName?: string;
+  /** Classes for the outer wrapper that listens to the pointer. */
   containerClassName?: string;
+  /** How far from the pointer, in px, a word still gets highlighted. */
+  reach?: number;
+  /** @deprecated Use `reach`. When given without `reach`, reach is 35% of it. */
   spotlightRadius?: number;
-  spotlightSoftness?: number;
+  /** Colour of words that are not highlighted. Defaults to a mid grey. */
   baseColor?: string;
+  /** Colour of highlighted words. Defaults to the ink colour. */
   highlightColor?: string;
-  strokeColor?: string;
-  strokeWidth?: number;
-  enableGlow?: boolean;
+  /** Marker colour (any CSS colour). Defaults to a highlighter yellow. */
+  markerColor?: string;
+  /** Seconds a word stays highlighted after the pointer moves on. */
+  linger?: number;
+  /** Spring for the marker stroke. The default overshoots a little. */
   springConfig?: SpringOptions;
+  /** Turns the effect off and shows plain text. */
   disabled?: boolean;
+  /** Sweeps a highlighter across the words, line by line, until a real pointer arrives. */
+  autoplay?: boolean;
+  /** @deprecated No longer used; the marker replaced the spotlight mask. */
+  spotlightSoftness?: number;
+  /** @deprecated No longer used. */
+  strokeColor?: string;
+  /** @deprecated No longer used. */
+  strokeWidth?: number;
+  /** @deprecated No longer used. */
+  enableGlow?: boolean;
 };
 
-const DEFAULT_SPRING: SpringOptions = {
-  stiffness: 150,
-  damping: 24,
-  mass: 0.6,
-};
+function subscribeTheme(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+/** Follows the site's class-based dark mode; false on the server and during hydration. */
+function useIsDark() {
+  return React.useSyncExternalStore(subscribeTheme, () => document.documentElement.classList.contains("dark"), () => false);
+}
 
+/** tailwind-merge drops a default `leading-*` whenever a later `text-*` size arrives, so the default goes last unless the caller set one. */
+const withLeading = (cls: string | undefined, fallback: string) => (/(^|\s)([\w-]+:)*leading-/.test(cls ?? "") ? undefined : fallback);
+
+const SPRING: SpringOptions = { stiffness: 320, damping: 17, mass: 0.7 };
+
+type Slot = { el: HTMLSpanElement | null; heat: MotionValue<number> };
+
+function Word({
+  word,
+  index,
+  register,
+  spring,
+  base,
+  ink,
+  marker,
+  markerClassName,
+}: {
+  word: string;
+  index: number;
+  register: (i: number, slot: Slot) => () => void;
+  spring: SpringOptions;
+  base: string;
+  ink: string;
+  marker: string;
+  markerClassName?: string;
+}) {
+  const heat = useMotionValue(0);
+  const s = useSpring(heat, spring);
+  const color = useTransform(s, [0, 1], [base, ink], { clamp: true });
+  const scaleX = useTransform(s, (v) => Math.max(0, v));
+  const opacity = useTransform(s, (v) => Math.min(1, Math.max(0, v * 3)));
+  const el = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => register(index, { el: el.current, heat }), [register, index, heat]);
+  return (
+    <span ref={el} className="relative inline-block">
+      <motion.span
+        aria-hidden="true"
+        className={cn("pointer-events-none absolute inset-x-[-0.08em] bottom-[0.04em] top-[0.32em] rounded-[0.16em]", markerClassName)}
+        style={{ scaleX, opacity, originX: 0, skewX: -8, backgroundColor: markerClassName && /\bbg-/.test(markerClassName) ? undefined : marker }}
+      />
+      <motion.span className="relative" style={{ color }}>
+        {word}
+      </motion.span>
+    </span>
+  );
+}
+
+/**
+ * A headline you read with a highlighter. Words near the pointer get inked and a marker stroke
+ * swipes in under each one with a small overshoot; as the pointer moves on, the strokes linger
+ * and retract one after another like a comet tail. One rAF loop writes every word's heat into
+ * motion values, so React never re-renders while you move.
+ */
 export function HoverHighlightText({
   text,
   as = "h2",
   baseClassName,
   highlightClassName,
   containerClassName,
-  spotlightRadius = 118,
-  spotlightSoftness = 0.82,
+  reach,
+  spotlightRadius,
   baseColor,
   highlightColor,
-  strokeColor,
-  strokeWidth = 1,
-  enableGlow = false,
+  markerColor,
+  linger = 0.9,
   springConfig,
   disabled = false,
+  autoplay = false,
 }: HoverHighlightTextProps) {
-  const reduceMotion = useReducedMotion() === true;
-  const [active, setActive] = React.useState(false);
-  const [touched, setTouched] = React.useState(false);
-  const ref = React.useRef<HTMLDivElement | null>(null);
-
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const smoothX = useSpring(x, springConfig ?? DEFAULT_SPRING);
-  const smoothY = useSpring(y, springConfig ?? DEFAULT_SPRING);
-
-  const safeRadius = Math.max(48, spotlightRadius);
-  const safeSoftness = Math.min(0.95, Math.max(0.45, spotlightSoftness));
-  const solidStop = Math.round(safeSoftness * 48);
-  const fadeStop = Math.round(safeSoftness * 100);
-  const maskImage = useMotionTemplate`radial-gradient(${safeRadius}px circle at ${smoothX}px ${smoothY}px, black 0%, black ${solidStop}%, transparent ${fadeStop}%)`;
-  const glow = useMotionTemplate`radial-gradient(${safeRadius * 1.15}px circle at ${smoothX}px ${smoothY}px, rgba(255,255,255,0.075), transparent 72%)`;
-
+  const still = useReducedMotion() === true;
+  const dark = useIsDark();
   const Tag = as;
-  const showReveal = !disabled && (active || touched);
-  const staticReveal = reduceMotion && !disabled;
+  const words = React.useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
+  const root = React.useRef<HTMLDivElement>(null);
+  const slots = React.useRef<Slot[]>([]);
+  const pointer = React.useRef<{ x: number; y: number } | null>(null);
+  const touched = React.useRef(false);
+  const wake = React.useRef<() => void>(() => {});
+  const span = Math.max(4, reach ?? (spotlightRadius !== undefined ? spotlightRadius * 0.35 : 40));
+  const cfg = React.useRef({ reach: span, linger });
+  React.useEffect(() => {
+    cfg.current = { reach: span, linger: Math.max(0.05, linger) };
+  }, [span, linger]);
 
-  function updatePointer(clientX: number, clientY: number) {
-    const node = ref.current;
-    if (!node) return;
-    const rect = node.getBoundingClientRect();
-    x.set(clientX - rect.left);
-    y.set(clientY - rect.top);
-  }
+  const off = disabled || still;
+  const register = React.useCallback((i: number, slot: Slot) => {
+    slots.current[i] = slot;
+    return () => {
+      if (slots.current[i] === slot) delete slots.current[i];
+    };
+  }, []);
 
-  function onPointerEnter(event: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || reduceMotion) return;
-    setActive(true);
-    setTouched(false);
-    updatePointer(event.clientX, event.clientY);
-  }
+  // The heat loop. It sleeps when nothing is lit and no pointer (real or demo) is around.
+  React.useEffect(() => {
+    if (off) return;
+    let raf = 0;
+    let last = 0;
+    let ghost: { x: number; y: number } | null = null;
+    let demoWord = 0;
+    let demoAt = 0;
+    const tick = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now;
+      const { reach: near, linger: hold } = cfg.current;
+      const list = slots.current;
+      // Autoplay: a highlighter glides from word to word, line by line, then starts over.
+      if (autoplay && !touched.current) {
+        const target = list[demoWord]?.el;
+        if (target) {
+          const tx = target.offsetLeft + target.offsetWidth * 0.9;
+          const ty = target.offsetTop + target.offsetHeight * 0.55;
+          ghost = ghost ? { x: ghost.x + (tx - ghost.x) * Math.min(1, dt * 12), y: ghost.y + (ty - ghost.y) * Math.min(1, dt * 12) } : { x: target.offsetLeft, y: ty };
+        }
+        if (now - demoAt > (demoWord >= list.length - 1 ? 1600 : 170)) {
+          demoAt = now;
+          demoWord = demoWord >= list.length - 1 ? 0 : demoWord + 1;
+          if (demoWord === 0) ghost = null;
+        }
+      } else ghost = null;
+      const p = pointer.current ?? ghost;
+      let busy = !!p;
+      list.forEach((slot) => {
+        if (!slot?.el) return;
+        const el = slot.el;
+        let target = 0;
+        if (p) {
+          const dx = Math.max(el.offsetLeft - p.x, 0, p.x - (el.offsetLeft + el.offsetWidth));
+          const dy = Math.max(el.offsetTop - p.y, 0, p.y - (el.offsetTop + el.offsetHeight));
+          const d = Math.hypot(dx, dy * 1.6);
+          target = d < near ? 1 : 0;
+        }
+        const cur = slot.heat.get();
+        const next = target >= cur ? target : Math.max(0, cur - dt / hold);
+        if (next !== cur) slot.heat.set(next);
+        if (next > 0) busy = true;
+      });
+      raf = busy ? requestAnimationFrame(tick) : 0;
+      if (!busy) last = 0;
+    };
+    wake.current = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    if (autoplay) wake.current();
+    return () => {
+      cancelAnimationFrame(raf);
+      wake.current = () => {};
+    };
+  }, [off, autoplay, words]);
 
-  function onPointerMove(event: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || reduceMotion) return;
-    updatePointer(event.clientX, event.clientY);
-  }
+  const base = baseColor ?? (dark ? "#6e6e73" : "#86868b");
+  const ink = highlightColor ?? (dark ? "#f5f5f7" : "#1d1d1f");
+  const marker = markerColor ?? (dark ? "rgba(255,214,10,0.34)" : "rgba(255,214,10,0.62)");
 
-  function onPointerLeave() {
-    setActive(false);
-  }
-
-  function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
-    if (disabled || reduceMotion) return;
-    setTouched(true);
-    updatePointer(event.clientX, event.clientY);
-  }
+  const locate = (e: React.PointerEvent) => {
+    const r = root.current?.getBoundingClientRect();
+    const tag = root.current?.firstElementChild as HTMLElement | null;
+    if (!r || !tag) return;
+    // Word offsets are measured from the text element, so measure the pointer from it too.
+    const t = tag.getBoundingClientRect();
+    pointer.current = { x: e.clientX - t.left, y: e.clientY - t.top };
+    wake.current();
+  };
 
   return (
     <div
-      ref={ref}
-      onPointerEnter={onPointerEnter}
-      onPointerMove={onPointerMove}
-      onPointerLeave={onPointerLeave}
-      onPointerDown={onPointerDown}
-      className={cn("relative inline-block max-w-full overflow-visible", containerClassName)}
+      ref={root}
+      className={cn("relative inline-block max-w-full", containerClassName)}
+      onPointerEnter={(e) => {
+        touched.current = true;
+        locate(e);
+      }}
+      onPointerMove={locate}
+      onPointerLeave={() => {
+        pointer.current = null;
+      }}
     >
-      <Tag
-        className={cn(
-          "select-none text-balance text-center text-4xl font-semibold tracking-tight text-zinc-300/35 sm:text-5xl md:text-6xl dark:text-white/15",
-          baseClassName,
+      <Tag className={cn("relative m-0 text-balance text-center text-[40px] font-semibold tracking-[-0.035em] sm:text-[52px]", baseClassName, withLeading(baseClassName, "leading-[1.12]"))}>
+        {off ? (
+          <span style={{ color: ink }}>{text}</span>
+        ) : (
+          <>
+            <span className="sr-only">{text}</span>
+            <span aria-hidden="true" key={dark ? "d" : "l"}>
+              {words.map((w, i) => (
+                <React.Fragment key={`${w}-${i}`}>
+                  <Word word={w} index={i} register={register} spring={springConfig ?? SPRING} base={base} ink={ink} marker={marker} markerClassName={highlightClassName} />
+                  {i < words.length - 1 ? " " : null}
+                </React.Fragment>
+              ))}
+            </span>
+          </>
         )}
-        style={{ color: baseColor }}
-      >
-        {text}
       </Tag>
-
-      {enableGlow && !disabled ? (
-        <motion.div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-[-1.5rem] -z-10 rounded-[2rem]"
-          style={{ backgroundImage: glow }}
-          animate={{ opacity: showReveal && !reduceMotion ? 1 : 0 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-        />
-      ) : null}
-
-      <motion.div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={
-          staticReveal
-            ? undefined
-            : {
-                WebkitMaskImage: maskImage,
-                maskImage,
-              }
-        }
-        animate={{
-          opacity: staticReveal ? 0.32 : showReveal ? 1 : 0,
-          scale: staticReveal || showReveal ? 1 : 0.98,
-        }}
-        transition={{ duration: reduceMotion ? 0.08 : 0.28, ease: "easeOut" }}
-      >
-        <Tag
-          className={cn(
-            "select-none text-balance text-center text-4xl font-semibold tracking-tight text-transparent sm:text-5xl md:text-6xl",
-            highlightClassName,
-          )}
-          style={{
-            color: highlightColor,
-            WebkitTextStroke: `${strokeWidth}px ${strokeColor ?? "rgba(255,255,255,0.64)"}`,
-            textShadow: "0 0 1px rgba(255,255,255,0.36)",
-          }}
-        >
-          {text}
-        </Tag>
-      </motion.div>
     </div>
   );
 }

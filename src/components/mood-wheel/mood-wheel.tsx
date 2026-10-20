@@ -78,7 +78,7 @@ export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false }: MoodWheel
   useMotionValueEvent(pos, "change", (p) => setIdx(Math.max(0, Math.min(last, Math.round(p)))));
 
   const settle = (velocity = 0) =>
-    animate(pos, pos.get(), {
+    animate(pos, [pos.get()], {
       type: "inertia",
       velocity,
       power: 0.4,

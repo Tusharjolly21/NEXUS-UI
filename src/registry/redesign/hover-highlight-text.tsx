@@ -1,0 +1,18 @@
+"use client";
+
+import { HoverHighlightText } from "@/components/hover-highlight-text";
+
+export function PreviewHoverHighlightTextRedesign({ compact = false }: { compact?: boolean } = {}) {
+  return (
+    <div className="relative flex h-full min-h-[360px] w-full items-center justify-center p-8 text-[#1d1d1f] dark:text-[#f5f5f7]">
+      <div className="flex w-full max-w-[520px] flex-col items-center gap-6">
+        <HoverHighlightText
+          autoplay
+          text="Build interfaces people remember long after they close the tab."
+          baseClassName={compact ? "max-w-[15ch] text-[32px] sm:text-[36px]" : "max-w-[15ch] text-[36px] sm:text-[44px]"}
+        />
+        <span className="text-[13px] text-[#86868b] dark:text-[#a1a1a6]">Run the pointer along a line, like a highlighter.</span>
+      </div>
+    </div>
+  );
+}

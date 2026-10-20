@@ -90,7 +90,10 @@ export function useKeyboardSound(opts: {
 }) {
   const ctxRef    = React.useRef<AudioContext | null>(null);
   const optsRef   = React.useRef(opts);
-  optsRef.current = opts;
+  // Synced after render so the latest volume / timbre is used on the next key.
+  React.useEffect(() => {
+    optsRef.current = opts;
+  });
 
   const getCtx = React.useCallback((): AudioContext | null => {
     if (!optsRef.current.enabled) return null;

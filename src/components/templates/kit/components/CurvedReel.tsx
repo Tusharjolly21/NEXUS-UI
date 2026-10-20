@@ -93,7 +93,7 @@ export default function CurvedReel({ posters = POSTERS, autoplay = true }: { pos
           const d = drag.current;
           drag.current = null;
           idleUntil.current = performance.now() + 2500;
-          if (d) ctl.current = animate(offset, offset.get(), { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 });
+          if (d) ctl.current = animate(offset, [offset.get()], { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 });
         }}
         role="region"
         aria-label="Poster reel. Drag to scroll."

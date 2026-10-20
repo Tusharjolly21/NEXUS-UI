@@ -1,21 +1,13 @@
 "use client";
 
-import {
-  BookOpen,
-  DollarSign,
-  Home,
-  LayoutGrid,
-  Layers,
-  Search,
-  User,
-} from "lucide-react";
+import { BookOpen, DollarSign, Home, LayoutGrid, Layers, Search, User } from "lucide-react";
 import { FloatingDock } from "./floating-dock";
 
 const demoItems = [
-  { title: "Home", icon: <Home />, href: "/" },
-  { title: "Components", icon: <LayoutGrid />, href: "/components" },
-  { title: "Templates", icon: <Layers />, href: "/templates" },
-  { title: "Pricing", icon: <DollarSign />, href: "/pricing" },
+  { title: "Home", icon: <Home />, href: "/", tint: "linear-gradient(160deg,#5ac8fa,#0071e3)" },
+  { title: "Components", icon: <LayoutGrid />, href: "/components", tint: "linear-gradient(160deg,#bf5af2,#5e5ce6)" },
+  { title: "Templates", icon: <Layers />, href: "/templates", tint: "linear-gradient(160deg,#ffd60a,#ff9f0a)" },
+  { title: "Pricing", icon: <DollarSign />, href: "/pricing", tint: "linear-gradient(160deg,#30d158,#0b8f6a)" },
   { title: "Docs", icon: <BookOpen />, href: "/docs/installation" },
   { title: "Search", icon: <Search />, href: "/search" },
   { title: "Profile", icon: <User />, href: "/login" },
@@ -23,38 +15,14 @@ const demoItems = [
 
 export function FloatingDockDemo() {
   return (
-    <div className="relative min-h-[calc(100dvh-4rem)] bg-gradient-to-b from-background via-muted/20 to-background pb-36">
-      <div className="mx-auto max-w-3xl space-y-8 px-4 py-14 sm:py-16">
-        <header className="space-y-3 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">Navigation</p>
-          <h2 className="text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-            Floating dock
-          </h2>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            macOS-style magnification on desktop; compact menu on small screens. Resize the viewport or move the
-            pointer across the dock to feel the springy neighbor scaling.
-          </p>
-        </header>
-
-        <section className="rounded-2xl border border-border bg-card/60 p-6 text-left shadow-sm dark:bg-white/[0.03]">
-          <h2 className="text-sm font-semibold text-foreground">Behavior</h2>
-          <ul className="mt-3 list-inside list-disc space-y-2 text-sm text-muted-foreground">
-            <li>Desktop: pointer X drives per-icon scale with smooth springs; tooltips above the hovered target.</li>
-            <li>Mobile: floating action opens a vertical sheet; backdrop tap or Escape closes.</li>
-            <li>Reduced motion: magnification and tooltip motion are toned down.</li>
-          </ul>
-        </section>
-
-        <section className="rounded-2xl border border-border/70 bg-gradient-to-b from-card to-muted/20 p-6 shadow-sm dark:from-zinc-950/80 dark:to-zinc-950/35">
-          <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Preview Surface</p>
-          <div className="mt-4 rounded-xl border border-border/70 bg-background/70 p-6 dark:bg-zinc-950/70">
-            <p className="text-center text-sm text-muted-foreground">
-              More spacing between dock items for cleaner readability and premium feel.
-            </p>
-          </div>
-        </section>
+    <div className="relative min-h-[calc(100dvh-4rem)] bg-[#f5f5f7] pb-40 text-[#1d1d1f] dark:bg-black dark:text-[#f5f5f7]">
+      <div className="mx-auto max-w-2xl space-y-6 px-4 py-16 text-center">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#0071e3] dark:text-[#0a84ff]">Navigation</p>
+        <h2 className="text-balance text-[40px] font-semibold leading-[1.05] tracking-[-0.04em]">Floating dock</h2>
+        <p className="mx-auto max-w-md text-[15px] leading-relaxed text-[#6e6e73] dark:text-[#a1a1a6]">
+          Move the pointer along the dock at the bottom of the page. Tiles swell and make room for each other; click one and it bounces like a launching app. On a phone it becomes a single button that springs the tiles up as a stack.
+        </p>
       </div>
-
       <FloatingDock items={demoItems} />
     </div>
   );

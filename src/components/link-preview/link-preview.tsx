@@ -3,43 +3,39 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import {
-  motion,
-  AnimatePresence,
-  useSpring,
-  useMotionValue,
-  useTransform,
-} from "framer-motion";
+import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform, useVelocity } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type LinkPreviewProps = {
-  /** Destination URL — internal paths (/about) or external (https://...) */
+  /** Destination: an internal path (/about) or a full URL. */
   href: string;
-  /** Image URL to display in the preview card */
-  image: string;
-  /** Optional title shown below the card */
+  /** Picture for the card. Without one the card draws a cover from the title and site name. */
+  image?: string;
+  /** Card heading. */
   title?: string;
-  /** The link's visible text */
+  /** One line under the heading. */
+  description?: string;
+  /** The link text. */
   children: React.ReactNode;
-  /** Preview card width in px. Default 320. */
+  /** Card width in px. */
   width?: number;
-  /** Preview card height in px. Default 200. */
+  /** Height of the picture area in px. */
   height?: number;
-  /** Entrance animation delay in seconds. Default 0.08. */
+  /** Wait before the card rises, in seconds. */
   delay?: number;
-  /** Extra className for the anchor element */
+  /** Extra classes for the link. */
   className?: string;
-  /** Extra className for the preview tooltip wrapper */
+  /** Extra classes for the floating card. */
   previewClassName?: string;
-  /** Opens link in a new tab. Default true. */
+  /** Opens the link in a new tab. */
   openInNewTab?: boolean;
+  /** Controls the card from outside. Leave unset to open on hover and focus. */
+  open?: boolean;
+  /** Opens and closes the card on its own until someone hovers or focuses the link. */
+  autoplay?: boolean;
 };
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function getHostname(href: string): string {
+function hostOf(href: string) {
   try {
     return new URL(href).hostname.replace(/^www\./, "");
   } catch {
@@ -47,193 +43,164 @@ function getHostname(href: string): string {
   }
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+/** Stable hue from a string so a generated cover always looks the same for the same link. */
+function hueOf(s: string) {
+  let h = 7;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360;
+  return h;
+}
 
+const noop = () => () => {};
+const useMounted = () => React.useSyncExternalStore(noop, () => true, () => false);
+
+/** Rise: the card grows up out of the link, stretched, and settles with an overshoot. */
+const RISE = { type: "spring" as const, stiffness: 380, damping: 17, mass: 0.7 };
+
+/**
+ * An inline link that lifts a preview card out of the text when you hover or
+ * focus it. The card rises with a stretch and settles, then leans and slides
+ * as the pointer moves along the link and swings back when it stops. Without
+ * an image it draws its own cover.
+ */
 export function LinkPreview({
   href,
   image,
   title,
+  description,
   children,
-  width = 320,
-  height = 200,
+  width = 300,
+  height = 168,
   delay = 0.08,
-  className,
-  previewClassName,
+  className = "",
+  previewClassName = "",
   openInNewTab = true,
+  open,
+  autoplay = false,
 }: LinkPreviewProps) {
-  const [isVisible, setIsVisible] = React.useState(false);
-  const [isTouchDevice, setIsTouchDevice] = React.useState(false);
-  const [imageLoaded, setImageLoaded] = React.useState(false);
-  const [imageError, setImageError] = React.useState(false);
-  const [mounted, setMounted] = React.useState(false);
+  const still = useReducedMotion() === true;
+  const mounted = useMounted();
+  const anchor = React.useRef<HTMLAnchorElement>(null);
+  const touched = React.useRef(false);
+  const [hover, setHover] = React.useState(false);
+  const [demo, setDemo] = React.useState(false);
+  const [below, setBelow] = React.useState(false);
+  const [loaded, setLoaded] = React.useState(false);
+  const [failed, setFailed] = React.useState(false);
+  const shown = open ?? (hover || demo);
 
-  // Viewport-relative position of the anchor element — used for portal positioning
-  const [anchorPos, setAnchorPos] = React.useState({ top: 0, left: 0 });
+  const ax = useMotionValue(0);
+  const ay = useMotionValue(0);
+  const px = useMotionValue(0);
+  const pv = useVelocity(px);
+  const shift = useSpring(useTransform(px, [-1, 1], [-14, 14]), { stiffness: 160, damping: 18 });
+  const lean = useSpring(useTransform(pv, [-6, 0, 6], [-7, 0, 7]), { stiffness: 220, damping: 11 });
 
-  const anchorRef = React.useRef<HTMLAnchorElement>(null);
+  const host = hostOf(href);
+  const hue = hueOf(host || title || href);
+  const art = !image || failed;
 
-  // Normalised mouse position (-1 … 1) within the link element
-  const mouseXRaw = useMotionValue(0);
-  const springX = useSpring(mouseXRaw, { stiffness: 90, damping: 16, mass: 0.6 });
-  const rotateZ = useTransform(springX, [-1, 1], [-5, 5]);
-  const shiftX = useTransform(springX, [-1, 1], [-12, 12]);
-
+  // Track the link while the card is up so it stays put on scroll and resize.
   React.useEffect(() => {
-    setMounted(true);
-    setIsTouchDevice(window.matchMedia("(hover: none)").matches);
-  }, []);
+    if (!shown) return;
+    let raf = 0;
+    const tick = () => {
+      const el = anchor.current;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        ax.set(r.left + r.width / 2);
+        ay.set(below ? r.bottom + 12 : r.top - 12);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(raf);
+  }, [shown, below, ax, ay]);
 
+  // Autoplay: lift the card, sweep the lean across, drop it, repeat.
   React.useEffect(() => {
-    setImageLoaded(false);
-    setImageError(false);
-  }, [image]);
+    if (!autoplay || open !== undefined) return;
+    let on = false;
+    let sweep = 0;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      on = !on;
+      if (on) {
+        const r = anchor.current?.getBoundingClientRect();
+        setBelow(!!r && r.top < height + 96);
+      }
+      setDemo(on);
+      sweep++;
+      px.set(on ? (sweep % 4 === 1 ? 0.8 : -0.8) : 0);
+    }, 2200);
+    return () => window.clearInterval(t);
+  }, [autoplay, open, px, height]);
 
-  function captureAnchorPos() {
-    const el = anchorRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setAnchorPos({
-      top: rect.top,
-      left: rect.left + rect.width / 2,
-    });
-  }
+  const show = () => {
+    touched.current = true;
+    setDemo(false);
+    const r = anchor.current?.getBoundingClientRect();
+    setBelow(!!r && r.top < height + 96);
+    setHover(true);
+  };
+  const hide = () => {
+    setHover(false);
+    px.set(0);
+  };
 
-  function handleMouseMove(e: React.MouseEvent<HTMLAnchorElement>) {
-    const el = anchorRef.current;
-    if (!el) return;
-    const { left, width: w } = el.getBoundingClientRect();
-    mouseXRaw.set(((e.clientX - left) / w) * 2 - 1);
-  }
-
-  function handleMouseEnter() {
-    captureAnchorPos();
-    setIsVisible(true);
-  }
-
-  function handleMouseLeave() {
-    setIsVisible(false);
-    mouseXRaw.set(0);
-  }
-
-  function handleTouchStart(e: React.TouchEvent) {
-    e.preventDefault();
-    captureAnchorPos();
-    setIsVisible((v) => !v);
-  }
-
-  const hostname = getHostname(href);
-
-  // Tooltip top = anchor top − card height − gap − title row − caret
-  const tooltipTop = anchorPos.top - height - 56;
-
-  const tooltip = (
+  const card = (
     <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          key={`link-preview-${href}`}
-          initial={{ opacity: 0, y: 14, scale: 0.92, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          exit={{
-            opacity: 0,
-            y: 10,
-            scale: 0.94,
-            filter: "blur(6px)",
-            transition: { duration: 0.15, ease: "easeIn" },
-          }}
-          transition={{
-            type: "spring",
-            stiffness: 250,
-            damping: 22,
-            mass: 0.65,
-            delay,
-            filter: { type: "tween", duration: 0.2, ease: "easeOut", delay },
-            opacity: { type: "tween", duration: 0.18, ease: "easeOut", delay },
-          }}
-          style={{
-            position: "fixed",
-            top: tooltipTop,
-            left: anchorPos.left,
-            marginLeft: -(width / 2),
-            x: shiftX,
-            rotateZ,
-            width,
-            transformOrigin: "bottom center",
-            zIndex: 9999,
-          }}
-          className={cn("pointer-events-none", previewClassName)}
-        >
-          {/* Floating glide wrapper */}
-          <motion.div
-            animate={{ y: [0, -4, 0] }}
-            transition={{ repeat: Infinity, duration: 3.2, ease: "easeInOut" }}
-          >
-            {/* Card */}
-            <div
-              className={cn(
-                "relative overflow-hidden rounded-2xl border bg-white",
-                "border-neutral-200/80 shadow-[0_8px_30px_rgba(0,0,0,0.12),0_2px_8px_rgba(0,0,0,0.06)]",
-                "dark:border-white/[0.10] dark:bg-neutral-900",
-                "dark:shadow-[0_8px_30px_rgba(0,0,0,0.5),0_2px_8px_rgba(0,0,0,0.3)]",
-              )}
-              style={{ width, height }}
+      {shown && (
+        <motion.div key="lp" className="pointer-events-none fixed left-0 top-0 z-[9999]" style={{ x: ax, y: ay }} aria-hidden="true">
+          <div style={{ width, transform: `translate(-50%, ${below ? "0" : "-100%"})` }}>
+            <motion.div
+              style={{ x: shift, rotate: lean, originX: 0.5, originY: below ? 0 : 1 }}
+              initial={still ? { opacity: 0 } : { opacity: 0, scaleY: 0.4, scaleX: 0.8, y: below ? -10 : 10 }}
+              animate={{ opacity: 1, scaleY: 1, scaleX: 1, y: 0, transition: { ...RISE, delay, opacity: { duration: 0.12, delay } } }}
+              exit={{ opacity: 0, scaleY: 0.7, scaleX: 0.9, y: below ? -6 : 6, transition: { duration: 0.14 } }}
+              className={cn(`overflow-hidden rounded-[20px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_48px_-24px_rgba(0,0,0,.45)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_48px_-20px_rgba(0,0,0,.9)]`, previewClassName)}
             >
-              {!imageError ? (
-                <>
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 animate-pulse bg-neutral-100 dark:bg-neutral-800" />
-                  )}
-                  <img
-                    src={image}
-                    alt={title ?? "Link preview"}
-                    width={width}
-                    height={height}
-                    draggable={false}
-                    className={cn(
-                      "h-full w-full object-cover transition-opacity duration-300",
-                      imageLoaded ? "opacity-100" : "opacity-0",
-                    )}
-                    onLoad={() => setImageLoaded(true)}
-                    onError={() => setImageError(true)}
-                  />
-                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/[0.07] dark:ring-white/[0.07]" />
-                </>
-              ) : (
-                // Fallback gradient when image fails
-                <div className="flex h-full flex-col items-center justify-center gap-4 bg-gradient-to-br from-violet-50 via-indigo-50 to-purple-100 px-6 dark:from-violet-950/40 dark:via-indigo-950/30 dark:to-purple-950/40">
-                  <div className="size-12 rounded-2xl bg-gradient-to-br from-violet-400 to-indigo-500 shadow-lg shadow-violet-400/30" />
-                  <div className="space-y-2.5 text-center">
-                    <div className="mx-auto h-3 w-32 rounded-full bg-violet-200/80 dark:bg-violet-700/50" />
-                    <div className="mx-auto h-2 w-24 rounded-full bg-indigo-200/60 dark:bg-indigo-800/40" />
-                    <div className="mx-auto h-2 w-16 rounded-full bg-purple-100/80 dark:bg-purple-800/30" />
-                  </div>
-                  {hostname && (
-                    <span className="font-mono text-[11px] text-violet-400/80 dark:text-violet-500/70">
-                      {hostname}
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Title + hostname row */}
-            {(title || hostname) && (
-              <div className="mt-2.5 flex items-center gap-2 px-0.5">
-                {title && (
-                  <span className="flex-1 truncate text-[11px] font-semibold leading-none text-neutral-700 dark:text-neutral-300">
-                    {title}
-                  </span>
-                )}
-                {hostname && (
-                  <span className="shrink-0 font-mono text-[10px] text-neutral-400 dark:text-neutral-600">
-                    {hostname}
-                  </span>
+              <div className="relative overflow-hidden" style={{ height }}>
+                {art ? (
+                  <motion.div
+                    className="absolute inset-0"
+                    style={{ background: `linear-gradient(135deg, hsl(${hue} 92% 66%), hsl(${(hue + 48) % 360} 84% 48%))` }}
+                    initial={still ? false : { scale: 1.18 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 120, damping: 20, delay }}
+                  >
+                    <span className="absolute -right-6 -top-10 h-36 w-36 rounded-full bg-white/20" />
+                    <span className="absolute -bottom-14 left-6 h-28 w-28 rounded-full bg-black/10" />
+                    <span className="absolute bottom-4 left-4 right-4 truncate text-[22px] font-semibold leading-none tracking-[-0.03em] text-white">{title ?? host}</span>
+                  </motion.div>
+                ) : (
+                  <>
+                    {!loaded && <div className="absolute inset-0 animate-pulse bg-[#f0f0f3] dark:bg-[#2c2c2e]" />}
+                    <motion.img
+                      src={image}
+                      alt=""
+                      draggable={false}
+                      onLoad={() => setLoaded(true)}
+                      onError={() => setFailed(true)}
+                      className="h-full w-full object-cover"
+                      initial={still ? false : { scale: 1.15, filter: "blur(8px)" }}
+                      animate={{ scale: 1, filter: loaded ? "blur(0px)" : "blur(8px)" }}
+                      transition={{ type: "spring", stiffness: 120, damping: 20 }}
+                    />
+                  </>
                 )}
               </div>
-            )}
-
-            {/* Downward-pointing caret */}
-            <div className="absolute -bottom-[7px] left-1/2 size-3.5 -translate-x-1/2 rotate-45 rounded-sm border-b border-r border-neutral-200/80 bg-white dark:border-white/[0.10] dark:bg-neutral-900" />
-          </motion.div>
+              {(title || description || host) && (
+                <div className="px-4 pb-3.5 pt-3">
+                  {title && <p className="truncate text-[14px] font-semibold tracking-[-0.01em] text-[#1d1d1f] dark:text-[#f5f5f7]">{title}</p>}
+                  {description && <p className="mt-0.5 line-clamp-2 text-[12.5px] leading-snug text-[#6e6e73] dark:text-[#a1a1a6]">{description}</p>}
+                  {host && <p className="mt-1.5 text-[11px] text-[#86868b] dark:text-[#98989d]">{host}</p>}
+                </div>
+              )}
+            </motion.div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
@@ -242,28 +209,33 @@ export function LinkPreview({
   return (
     <>
       <Link
-        ref={anchorRef}
+        ref={anchor}
         href={href}
         {...(openInNewTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-        onMouseEnter={isTouchDevice ? undefined : handleMouseEnter}
-        onMouseLeave={isTouchDevice ? undefined : handleMouseLeave}
-        onMouseMove={isTouchDevice ? undefined : handleMouseMove}
-        onTouchStart={isTouchDevice ? handleTouchStart : undefined}
-        className={cn(
-          "relative inline font-semibold",
-          "text-neutral-800 dark:text-neutral-100",
-          "underline decoration-violet-400/60 decoration-[1.5px] underline-offset-[3px]",
-          "transition-colors duration-150",
-          "hover:text-violet-600 hover:decoration-violet-500",
-          "dark:hover:text-violet-400 dark:hover:decoration-violet-400",
-          className,
-        )}
+        aria-description={title ? `Preview: ${title}${description ? `. ${description}` : ""}` : undefined}
+        onPointerEnter={(e) => e.pointerType !== "touch" && show()}
+        onPointerLeave={(e) => e.pointerType !== "touch" && hide()}
+        onPointerMove={(e) => {
+          const el = anchor.current;
+          if (!el || e.pointerType === "touch") return;
+          const r = el.getBoundingClientRect();
+          px.set(((e.clientX - r.left) / Math.max(1, r.width)) * 2 - 1);
+        }}
+        onClick={(e) => {
+          // First tap on touch screens shows the card; the second follows the link.
+          if (window.matchMedia("(hover: none)").matches && !hover) {
+            e.preventDefault();
+            show();
+          }
+        }}
+        onFocus={show}
+        onBlur={hide}
+        onKeyDown={(e) => e.key === "Escape" && hide()}
+        className={cn(`rounded-[4px] font-medium text-[#0071e3] underline decoration-[#0071e3]/35 decoration-[1.5px] underline-offset-[3px] outline-none transition-colors hover:decoration-[#0071e3] focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:text-[#2997ff] dark:decoration-[#2997ff]/40 dark:hover:decoration-[#2997ff] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black`, className)}
       >
         {children}
       </Link>
-
-      {/* Portal to body — keeps tooltip outside any <p> or inline ancestor */}
-      {mounted && createPortal(tooltip, document.body)}
+      {mounted && createPortal(card, document.body)}
     </>
   );
 }

@@ -1,103 +1,91 @@
 "use client";
 
 import * as React from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import type { KeyDef } from "./keyboard-layout";
+import { cn } from "@/lib/utils";
 
 export interface KeyboardKeyProps {
   keyDef: KeyDef;
+  /** Held down: by the visitor, the physical keyboard or the demo. */
   isActive: boolean;
+  /** Function row keys are shorter. */
   isFnRow?: boolean;
-  theme: "dark" | "light";
+  /** Classes for the cap face (colours for the chosen theme). */
+  capClassName: string;
+  /** Classes for the legend while the key is held. */
+  activeClassName: string;
+  /** Extra classes from the `keyClassName` prop. */
   keyClassName?: string;
-  onPress: (key: KeyDef) => void;
+  /** Turns off the press spring. */
+  still?: boolean;
+  onPress: (key: KeyDef, el: HTMLElement) => void;
+  /** Registers the element so ripples can start from its centre. */
+  register: (code: string, el: HTMLElement | null) => void;
 }
+
+const NAMES: Record<string, string> = {
+  Backspace: "Delete",
+  Tab: "Tab",
+  ShiftLeft: "Shift",
+  ShiftRight: "Shift",
+  MetaLeft: "Command",
+  MetaRight: "Command",
+  ArrowLeft: "Left arrow",
+  ArrowRight: "Right arrow",
+  Space: "Space",
+  Enter: "Return",
+  CapsLock: "Caps Lock",
+  Escape: "Escape",
+};
+
+/** Press: the cap sinks and squashes a touch, then springs back up. */
+const PRESS = { type: "spring" as const, stiffness: 700, damping: 26, mass: 0.5 };
 
 export const KeyboardKey = React.memo(function KeyboardKey({
   keyDef,
   isActive,
   isFnRow = false,
-  theme,
-  keyClassName,
+  capClassName,
+  activeClassName,
+  keyClassName = "",
+  still = false,
   onPress,
+  register,
 }: KeyboardKeyProps) {
-  const reduce = useReducedMotion();
-  const isDark = theme === "dark";
-
-  const isSpace    = keyDef.kind === "space";
-  const isModifier = keyDef.kind === "modifier" || keyDef.kind === "fn" || keyDef.kind === "nav";
-  const isEnter    = keyDef.kind === "enter";
-  const isDelete   = keyDef.kind === "delete";
-
-  // ── Visual classes ────────────────────────────────────────────
-  const baseKey = cn(
-    // layout
-    "relative select-none cursor-pointer outline-none",
-    "flex items-end justify-center pb-1.5",
-    isFnRow ? "h-7 rounded-[4px]" : "h-10 rounded-[6px]",
-    // typography
-    "font-[-apple-system,BlinkMacSystemFont,'SF_Pro_Display',system-ui]",
-    isSpace ? "text-[0px]"
-    : isFnRow ? "text-[9px] font-medium tracking-tight"
-    : isModifier ? "text-[10px] font-medium tracking-tight leading-none"
-    : "text-[13px] font-medium tracking-tight",
-    // base colors — overridden by active/pressed variants below
-    isDark
-      ? "text-neutral-200 bg-gradient-to-b from-[#3e3e42] to-[#2c2c30]"
-      : "text-neutral-700 bg-gradient-to-b from-[#f5f5f7] to-[#e2e2e5]",
-    // border / depth shadow that creates the 3-D "key face" look
-    isDark
-      ? "shadow-[0_1px_0_0_#000,0_2px_4px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.07)]"
-      : "shadow-[0_1px_0_0_#9e9e9e,0_2px_4px_rgba(0,0,0,0.14),inset_0_1px_0_rgba(255,255,255,0.9)]",
-    // active highlight
-    isActive && (
-      isDark
-        ? "from-[#0ea5e9] to-[#0284c7] text-white shadow-[0_1px_0_0_#0369a1,0_2px_8px_rgba(14,165,233,0.45),inset_0_1px_0_rgba(255,255,255,0.2)]"
-        : "from-[#0ea5e9] to-[#0284c7] text-white shadow-[0_1px_0_0_#0369a1,0_2px_8px_rgba(14,165,233,0.35),inset_0_1px_0_rgba(255,255,255,0.3)]"
-    ),
-    // hover (not applied when active)
-    !isActive && (isDark ? "hover:from-[#48484d] hover:to-[#363638]" : "hover:from-[#fafafa] hover:to-[#e8e8eb]"),
-    keyClassName,
-  );
-
-  const pressVariants: Variants = reduce
-    ? {}
-    : {
-        initial: { y: 0, scale: 1 },
-        press:   { y: 1,  scale: 0.97 },
-      };
-
-  const handleClick = React.useCallback(() => onPress(keyDef), [onPress, keyDef]);
-
+  const mod = keyDef.kind === "modifier" || keyDef.kind === "nav" || keyDef.kind === "enter" || keyDef.kind === "delete";
+  const fn = isFnRow || keyDef.kind === "fn";
+  const wordy = keyDef.label.length > 1 && !/^F\d+$/.test(keyDef.label);
   return (
     <motion.button
       type="button"
-      aria-label={keyDef.label === "⌫" ? "Backspace" : keyDef.label || keyDef.id}
+      ref={(el) => register(keyDef.code, el)}
+      aria-label={NAMES[keyDef.code] ?? (keyDef.label || keyDef.id)}
       aria-pressed={isActive}
-      style={{ flex: keyDef.width }}
-      animate={isActive && !reduce ? "press" : "initial"}
-      variants={pressVariants}
-      transition={{ type: "spring", stiffness: 500, damping: 30, mass: 0.6 }}
-      whileTap={reduce ? undefined : "press"}
-      className={baseKey}
-      onClick={handleClick}
+      onClick={(e) => onPress(keyDef, e.currentTarget)}
+      initial={false}
+      animate={still ? undefined : isActive ? { y: 1.5, scaleY: 0.94, scaleX: 0.985 } : { y: 0, scaleY: 1, scaleX: 1 }}
+      whileTap={still ? undefined : { y: 1.5, scaleY: 0.94, scaleX: 0.985 }}
+      transition={PRESS}
+      style={{ flex: keyDef.width, originY: 1 }}
+      className={cn(`relative z-10 flex min-w-0 select-none rounded-[0.32em] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff] ${
+        fn ? "h-[max(16px,3.6cqw)]" : "h-[max(24px,5.6cqw)]"
+      } ${capClassName}`, keyClassName)}
     >
-      {isSpace ? null : (
-        <span className="relative flex flex-col items-center justify-end gap-0">
-          {/* shift-layer label */}
-          {keyDef.sub && !isModifier && !isFnRow && (
-            <span
-              className={cn(
-                "absolute -top-2 left-0 text-[8px] leading-none",
-                isDark ? "text-neutral-400" : "text-neutral-400",
-                isActive && "text-sky-100",
-              )}
-            >
-              {keyDef.sub}
+      {keyDef.kind !== "space" && (
+        <span
+          className={`pointer-events-none absolute inset-0 flex px-[0.45em] leading-none transition-colors duration-150 ${
+            mod ? (keyDef.code.endsWith("Right") || keyDef.kind === "enter" || keyDef.kind === "delete" ? "items-end justify-end pb-[0.45em]" : "items-end justify-start pb-[0.45em]") : "items-center justify-center"
+          } ${fn || wordy ? "text-[max(7px,1.15cqw)] font-medium" : "text-[max(9px,1.9cqw)]"} ${isActive ? activeClassName : ""}`}
+        >
+          {keyDef.sub && !mod && !fn ? (
+            <span className="flex flex-col items-center gap-[0.15em]">
+              <span className="text-[0.72em] opacity-60">{keyDef.sub}</span>
+              <span>{keyDef.label}</span>
             </span>
+          ) : (
+            keyDef.label
           )}
-          <span>{keyDef.label}</span>
         </span>
       )}
     </motion.button>
