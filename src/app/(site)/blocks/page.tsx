@@ -28,6 +28,9 @@ const ORDER = [
   "block-navigation",
   "block-faq-folder-card",
   "block-newsletter",
+  "block-signup",
+  "block-cta",
+  "block-footer",
   "block-404",
   "block-sidebar",
   "block-contact-page",
@@ -56,6 +59,9 @@ const CHIP_NAME: Record<string, string> = {
   "block-gallery": "Gallery",
   "block-changelog": "Changelog",
   "block-404": "404 pages",
+  "block-cta": "CTA",
+  "block-footer": "Footers",
+  "block-signup": "Sign-up",
 };
 
 const TINTS: TileTint[] = ["violet", "sky", "peach", "mint", "butter", "pink"];

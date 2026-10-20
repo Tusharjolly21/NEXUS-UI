@@ -49,56 +49,6 @@
       ]
     },
     {
-      "name": "cinematic-logo-cloud",
-      "type": "registry:component",
-      "title": "Cinematic Logo Cloud",
-      "description": "Social proof with a cinematic entrance: each logo blurs into view in turn, then a soft spotlight follows the pointer and the logos it passes resolve from grey into crisp ink and lift. The marquee variants drift on their own, ease off under the pointer, and can be dragged and flung.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/cinematic-logo-cloud/cinematic-logo-cloud.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/cinematic-logo-cloud/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/cinematic-logo-cloud.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "step-flow",
-      "type": "registry:component",
-      "title": "Step Flow",
-      "description": "A process section with numbered steps beside a deck of cards. Picking a step by hover, click or arrow keys slides the highlight to it on a spring and deals its card to the front while the old card tucks under the back of the deck; with autoplay a progress bar fills under the active step.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/step-flow/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/step-flow/step-flow.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "phone-input",
       "type": "registry:component",
       "title": "Phone Input",
@@ -146,52 +96,6 @@
       ]
     },
     {
-      "name": "float-glass-navbar",
-      "type": "registry:component",
-      "title": "Float Glass Navbar",
-      "description": "A floating glass navigation bar: a soft lens slides under the link you point at, thinning as it travels and stretching as it lands, then glides back to the active link. Once the page scrolls it tucks itself into a compact pill, and when the links no longer fit they fold into a springy menu.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/float-glass-navbar/float-glass-navbar.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/float-glass-navbar/index.ts",
-          "type": "registry:lib"
-        }
-      ]
-    },
-    {
-      "name": "orbit-footer",
-      "type": "registry:component",
-      "title": "Orbit Footer",
-      "description": "A complete site footer with brand, a newsletter signup, link columns with badges, a live status pill and social links. Under it a giant ghost wordmark rises from behind the legal bar, and its letters lift and ink in like a wave following the pointer.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/orbit-footer/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/orbit-footer/orbit-footer.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "depth-testimonials",
       "type": "registry:component",
       "title": "Depth Testimonials",
@@ -211,29 +115,6 @@
         {
           "path": "next-ui/depth-testimonials/index.ts",
           "type": "registry:lib"
-        }
-      ]
-    },
-    {
-      "name": "toggle-pricing-pro",
-      "type": "registry:component",
-      "title": "Toggle Pricing",
-      "description": "Pricing cards with a monthly and yearly switch. The knob squashes and stretches with its own speed as it slides, the saving badge pops in, and every price rolls digit by digit to its new figure with a small overshoot.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/toggle-pricing-pro/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/toggle-pricing-pro/toggle-pricing-pro.tsx",
-          "type": "registry:component"
         }
       ]
     },
@@ -285,29 +166,6 @@
       ]
     },
     {
-      "name": "split-signup-convert",
-      "type": "registry:component",
-      "title": "Split Signup Convert",
-      "description": "A two-panel signup: a lit value panel with the pitch and benefits, and a short form with Google and GitHub buttons, an email that confirms itself, and a password whose four-segment strength meter pops each segment in. As the form fills, the benefits on the left tick themselves off and a progress line grows under them.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/split-signup-convert/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/split-signup-convert/split-signup-convert.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "signup-form",
       "type": "registry:component",
       "title": "Signup Form",
@@ -342,30 +200,6 @@
         },
         {
           "path": "next-ui/signup-form.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "workbench-sidebar",
-      "type": "registry:component",
-      "title": "Workbench Sidebar",
-      "description": "A product sidebar with a workspace switcher, a search that filters the list as you type, a highlight that springs between rows, projects, a usage meter and the signed-in user. Collapsing springs it down to an icon rail while the labels trail after the width one row at a time.",
-      "dependencies": [
-        "framer-motion",
-        "lucide-react",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/workbench-sidebar/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/workbench-sidebar/workbench-sidebar.tsx",
           "type": "registry:component"
         }
       ]
@@ -417,52 +251,6 @@
       ]
     },
     {
-      "name": "lattice-feature-grid",
-      "type": "registry:component",
-      "title": "Lattice Feature Grid",
-      "description": "A feature grid drawn on a hairline lattice. The hairlines catch a soft blue light that follows the pointer, and the tile under it plays its small illustration: colour swatches fan out, a spring ball lands and settles, a focus ring hops between buttons and a search result climbs to first place.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/lattice-feature-grid/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/lattice-feature-grid/lattice-feature-grid.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "motion-faq-disclosure",
-      "type": "registry:component",
-      "title": "Motion FAQ Disclosure",
-      "description": "A two-column FAQ with a heading and support card on one side and an accessible accordion on the other. Opening a question lifts it out of the list into a raised card with a slight overshoot, spins its plus into a minus and unfolds the answer a sentence at a time.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/motion-faq-disclosure/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/motion-faq-disclosure/motion-faq-disclosure.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
       "name": "glow-button",
       "type": "registry:component",
       "title": "Glow Button",
@@ -506,52 +294,6 @@
         },
         {
           "path": "next-ui/three-d-folder/three-d-folder.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "editorial-blog-rail",
-      "type": "registry:component",
-      "title": "Editorial Blog Rail",
-      "description": "A magazine-style blog rail: a featured story with generated cover art beside a numbered list of recent posts. Pointing at or focusing a post turns the featured slot into its preview: the cover blooms into that post's colours, the title and excerpt slide in, and the lines on the cover drift with the pointer.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/editorial-blog-rail/editorial-blog-rail.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/editorial-blog-rail/index.ts",
-          "type": "registry:lib"
-        }
-      ]
-    },
-    {
-      "name": "split-contact-glass",
-      "type": "registry:component",
-      "title": "Split Contact Glass",
-      "description": "A contact section in two panes: a glass panel with the team's local time on a springy analog clock, a one-tap copyable email and the reply time, and a form with name, email, topic chips and a message whose count ring fills as you type. Sending launches the paper plane off the button and swaps the form for a thank-you.",
-      "dependencies": [
-        "framer-motion",
-        "react"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/split-contact-glass/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/split-contact-glass/split-contact-glass.tsx",
           "type": "registry:component"
         }
       ]
@@ -1124,6 +866,264 @@
       ]
     },
     {
+      "name": "cinematic-logo-cloud",
+      "type": "registry:component",
+      "title": "Cinematic Logo Cloud",
+      "description": "Social proof with a cinematic entrance: each logo blurs into view in turn, then a soft spotlight follows the pointer and the logos it passes resolve from grey into crisp ink and lift. The marquee variants drift on their own, ease off under the pointer, and can be dragged and flung.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cinematic-logo-cloud/cinematic-logo-cloud.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cinematic-logo-cloud/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/cinematic-logo-cloud.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "step-flow",
+      "type": "registry:component",
+      "title": "Step Flow",
+      "description": "A process section with numbered steps beside a deck of cards. Picking a step by hover, click or arrow keys slides the highlight to it on a spring and deals its card to the front while the old card tucks under the back of the deck; with autoplay a progress bar fills under the active step.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/step-flow/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/step-flow/step-flow.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "float-glass-navbar",
+      "type": "registry:component",
+      "title": "Float Glass Navbar",
+      "description": "A floating glass navigation bar: a soft lens slides under the link you point at, thinning as it travels and stretching as it lands, then glides back to the active link. Once the page scrolls it tucks itself into a compact pill, and when the links no longer fit they fold into a springy menu.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/float-glass-navbar/float-glass-navbar.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/float-glass-navbar/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "orbit-footer",
+      "type": "registry:component",
+      "title": "Orbit Footer",
+      "description": "A complete site footer with brand, a newsletter signup, link columns with badges, a live status pill and social links. Under it a giant ghost wordmark rises from behind the legal bar, and its letters lift and ink in like a wave following the pointer.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/orbit-footer/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/orbit-footer/orbit-footer.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "toggle-pricing-pro",
+      "type": "registry:component",
+      "title": "Toggle Pricing",
+      "description": "Pricing cards with a monthly and yearly switch. The knob squashes and stretches with its own speed as it slides, the saving badge pops in, and every price rolls digit by digit to its new figure with a small overshoot.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/toggle-pricing-pro/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/toggle-pricing-pro/toggle-pricing-pro.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "split-signup-convert",
+      "type": "registry:component",
+      "title": "Split Signup Convert",
+      "description": "A two-panel signup: a lit value panel with the pitch and benefits, and a short form with Google and GitHub buttons, an email that confirms itself, and a password whose four-segment strength meter pops each segment in. As the form fills, the benefits on the left tick themselves off and a progress line grows under them.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/split-signup-convert/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/split-signup-convert/split-signup-convert.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "workbench-sidebar",
+      "type": "registry:component",
+      "title": "Workbench Sidebar",
+      "description": "A product sidebar with a workspace switcher, a search that filters the list as you type, a highlight that springs between rows, projects, a usage meter and the signed-in user. Collapsing springs it down to an icon rail while the labels trail after the width one row at a time.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/workbench-sidebar/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/workbench-sidebar/workbench-sidebar.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "lattice-feature-grid",
+      "type": "registry:component",
+      "title": "Lattice Feature Grid",
+      "description": "A feature grid drawn on a hairline lattice. The hairlines catch a soft blue light that follows the pointer, and the tile under it plays its small illustration: colour swatches fan out, a spring ball lands and settles, a focus ring hops between buttons and a search result climbs to first place.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/lattice-feature-grid/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/lattice-feature-grid/lattice-feature-grid.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "motion-faq-disclosure",
+      "type": "registry:component",
+      "title": "Motion FAQ Disclosure",
+      "description": "A two-column FAQ with a heading and support card on one side and an accessible accordion on the other. Opening a question lifts it out of the list into a raised card with a slight overshoot, spins its plus into a minus and unfolds the answer a sentence at a time.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/motion-faq-disclosure/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/motion-faq-disclosure/motion-faq-disclosure.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "editorial-blog-rail",
+      "type": "registry:component",
+      "title": "Editorial Blog Rail",
+      "description": "A magazine-style blog rail: a featured story with generated cover art beside a numbered list of recent posts. Pointing at or focusing a post turns the featured slot into its preview: the cover blooms into that post's colours, the title and excerpt slide in, and the lines on the cover drift with the pointer.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/editorial-blog-rail/editorial-blog-rail.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/editorial-blog-rail/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "split-contact-glass",
+      "type": "registry:component",
+      "title": "Split Contact Glass",
+      "description": "A contact section in two panes: a glass panel with the team's local time on a springy analog clock, a one-tap copyable email and the reply time, and a form with name, email, topic chips and a message whose count ring fills as you type. Sending launches the paper plane off the button and swaps the form for a thank-you.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/split-contact-glass/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/split-contact-glass/split-contact-glass.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "pricing-section",
       "type": "registry:component",
       "title": "Pricing Section",
@@ -1285,6 +1285,52 @@
         },
         {
           "path": "next-ui/blocks/blog-content-sections/index.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "footer-blocks",
+      "type": "registry:component",
+      "title": "Footer Blocks",
+      "description": "A site footer with link columns, newsletter, status and a lit wordmark.",
+      "dependencies": [
+        "react",
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/orbit-footer/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/orbit-footer/orbit-footer.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "signup-blocks",
+      "type": "registry:component",
+      "title": "Sign-up Blocks",
+      "description": "A split sign-up page with a self-ticking checklist and a strength meter.",
+      "dependencies": [
+        "react",
+        "framer-motion"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/split-signup-convert/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/split-signup-convert/split-signup-convert.tsx",
           "type": "registry:component"
         }
       ]

@@ -55,7 +55,9 @@ export function FitPreview({ minHeight = 460, children }: { minHeight?: number; 
     <div ref={outer} className="relative w-full min-w-0 [contain:inline-size]" style={{ minHeight, height: fit ? Math.max(minHeight, fit.height) : undefined }}>
       <div
         ref={inner}
-        className="flex [&>*]:w-full"
+        // A grid (not a flex row) so a preview's `h-full` resolves against the frame's height and
+        // short components sit centred in the frame instead of at its top.
+        className="grid [&>*]:w-full"
         style={{
           minHeight: fit ? minHeight / fit.scale : minHeight,
           width: fit ? fit.width : "100%",

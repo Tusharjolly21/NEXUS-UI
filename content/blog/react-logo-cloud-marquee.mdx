@@ -8,7 +8,7 @@ A logo cloud is the row of customer or partner logos that sits under most SaaS h
 
 ## Should a logo cloud scroll at all?
 
-Not always. If every logo fits on one row at desktop width, a static row or grid is easier to scan and has no accessibility cost. A marquee earns its place when you have more logos than space, or when the movement itself is part of the page's tone. If you want motion without a loop, a one-time entrance animation works well: the [cinematic logo cloud](/components/cinematic-logo-cloud) staggers a blur-fade across a static layout instead.
+Not always. If every logo fits on one row at desktop width, a static row or grid is easier to scan and has no accessibility cost. A marquee earns its place when you have more logos than space, or when the movement itself is part of the page's tone. If you want motion without a loop, a one-time entrance animation works well: the [cinematic logo cloud](/blocks/block-logo-clouds#cinematic-logo-cloud) staggers a blur-fade across a static layout instead.
 
 ## How does an infinite marquee work?
 
@@ -213,4 +213,4 @@ The duplicate copy exists only for the visual loop, so hide it from assistive te
 
 Most logo clouds look messy because the marks have different visual weight, not because of the animation. Size by height (`h-7 w-auto`) rather than width, trim padding from the source SVGs, and tone everything to one colour with `grayscale` and reduced opacity, or use single-colour SVGs that inherit `currentColor`. Wide wordmarks often need a slightly smaller height than square marks to look the same size.
 
-For vertical scrolling social proof, the same duplicated-track technique runs top to bottom in the [scrolling testimonials](/components/scrolling-testimonials) component, which uses pure CSS keyframes. For where the logo row belongs on a landing page, see [how we structure landing pages](/blog/landing-page-structure).
+For vertical scrolling social proof, the same duplicated-track technique runs top to bottom in the [scrolling testimonials](/blocks/block-social-proof#scrolling-testimonials) component, which uses pure CSS keyframes. For where the logo row belongs on a landing page, see [how we structure landing pages](/blog/landing-page-structure).

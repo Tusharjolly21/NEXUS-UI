@@ -6,6 +6,8 @@
  * Plain data only: the live previews are exported from `@/registry/component-previews` under
  * `exportName` and loaded lazily on the client.
  */
+import { movedSections, type MovedSection } from "./moved-sections";
+
 export type BlockVariant = {
   /** Unique id; also the key in the tile-fit measurements. */
   id: string;
@@ -25,6 +27,8 @@ export type BlockVariant = {
   source?: string;
   /** Component export name, for the usage snippet. */
   component?: string;
+  /** Usage snippet shown with the code (sections moved over from the components library). */
+  usage?: string;
 };
 
 function v(id: string, block: string, title: string): BlockVariant {
@@ -46,7 +50,22 @@ function mk(slug: string, block: string, title: string, component: string): Bloc
   };
 }
 
-export const blockVariants: BlockVariant[] = [
+/** A section that used to be a library component: keeps its own install name, files and tier. */
+function moved(m: MovedSection): BlockVariant {
+  return {
+    id: `mk-${m.slug}`,
+    block: m.block,
+    title: m.name,
+    exportName: m.preview,
+    premium: m.premium,
+    registryCliName: m.registryCliName,
+    source: m.source,
+    component: m.component,
+    usage: m.reactSource,
+  };
+}
+
+const baseVariants: BlockVariant[] = [
   v("pricing-radio-plan", "block-pricing-section", "Radio Plan Selector"),
   v("pricing-four-tier", "block-pricing-section", "Four Tier Billing Switch"),
   v("pricing-advanced-columns", "block-pricing-section", "Advanced Pricing Columns"),
@@ -127,6 +146,24 @@ export const blockVariants: BlockVariant[] = [
   mk("changelog-pile", "block-changelog", "Changelog Pile", "ChangelogPile"),
   mk("gravity-404", "block-404", "Gravity 404", "Gravity404"),
 ];
+
+/** Every section, each block's moved-in sections following its own. */
+export const blockVariants: BlockVariant[] = (() => {
+  const rest = movedSections.map(moved);
+  const out: BlockVariant[] = [];
+  const seen = new Set<string>();
+  for (const v of baseVariants) {
+    out.push(v);
+    const next = baseVariants[baseVariants.indexOf(v) + 1];
+    if (!next || next.block !== v.block) {
+      if (!seen.has(v.block)) out.push(...rest.filter((r) => r.block === v.block));
+      seen.add(v.block);
+    }
+  }
+  // Blocks made only of moved sections.
+  out.push(...rest.filter((r) => !seen.has(r.block)));
+  return out;
+})();
 
 /** Motion Kit sections, in page order, for one block. */
 export function motionKitSectionsOf(blockSlug: string) {

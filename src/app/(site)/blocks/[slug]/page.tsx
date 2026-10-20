@@ -112,13 +112,16 @@ export default async function BlockDetailPage({ params }: Props) {
   // Decided on the server: locked sections get no source or usage code at all (see PreviewCodeSection).
   const isPremium = await sessionHasPro();
   const locked = block.premium && !isPremium;
-  // Motion Kit sections are Pro on their own, even inside a free block.
+  // Motion Kit sections carry their own tier (most are Pro, even inside a free block; a few that
+  // came over from the components library are free). Locked ones get no source at all.
   const mkSections = motionKitSectionsOf(block.slug);
-  const mkLocked = !isPremium;
+  const sectionLocked = (v: { premium?: boolean }) => v.premium !== false && !isPremium;
   const mkCode = new Map(
-    mkLocked
-      ? []
-      : await Promise.all(mkSections.map(async (v) => [v.id, await readSourceFile(v.source ?? "", "")] as const)),
+    await Promise.all(
+      mkSections
+        .filter((v) => !sectionLocked(v))
+        .map(async (v) => [v.id, await readSourceFile(v.source ?? "", "")] as const),
+    ),
   );
   const installDetails = getBlockInstallDetails(block.slug, block.registryCliName ?? block.slug);
 
@@ -285,8 +288,8 @@ export default async function BlockDetailPage({ params }: Props) {
               {locked
                 ? "One command adds every section. Pro blocks need your API key in the registry settings."
                 : "One command adds every section and its dependencies."}
-              {!block.premium && mkSections.length
-                ? " The Pro sections install on their own, with the command shown in each one's code."
+              {mkSections.length
+                ? " Some sections install on their own, with the command shown in each one's code."
                 : ""}
             </p>
             <InstallCard wrap command={installCommand} className="mt-4" />
@@ -697,9 +700,9 @@ export default async function BlockDetailPage({ params }: Props) {
             block={block.slug}
             title={v.title}
             code={mkCode.get(v.id) ?? ""}
-            usageCode={motionKitUsage(v.registryCliName ?? "", v.component ?? "Section")}
-            locked={mkLocked}
-            pro
+            usageCode={v.usage ? movedUsage(v.registryCliName ?? "", v.usage) : motionKitUsage(v.registryCliName ?? "", v.component ?? "Section")}
+            locked={sectionLocked(v)}
+            pro={v.premium !== false}
           >
             <Section autoplay />
           </PreviewCodeSection>
@@ -1113,6 +1116,11 @@ function PreviewCodeSection({
       </PreviewShield>
     </BlockSection>
   );
+}
+
+function movedUsage(registryName: string, usage: string) {
+  return `// npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}
+${usage}`;
 }
 
 function motionKitUsage(registryName: string, component: string) {
