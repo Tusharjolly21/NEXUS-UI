@@ -1,377 +1,519 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type KeyboardEvent,
-} from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronDown, Search, AlertCircle } from "lucide-react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export interface Country {
+  /** ISO 3166-1 alpha-2 code, shown on the country chip. */
   iso: string;
   name: string;
+  /** Dialling code including the plus, e.g. "+44". */
   code: string;
   /** Maximum number of digits accepted for the local number. */
   max: number;
+  /** Display mask, `#` for a digit, e.g. "(###) ###-####". Defaults to groups of three. */
+  pattern?: string;
 }
 
 export const COUNTRIES: Country[] = [
-  { iso: "US", name: "United States", code: "+1", max: 10 },
-  { iso: "CA", name: "Canada", code: "+1", max: 10 },
-  { iso: "MX", name: "Mexico", code: "+52", max: 10 },
-  { iso: "GB", name: "United Kingdom", code: "+44", max: 10 },
-  { iso: "FR", name: "France", code: "+33", max: 9 },
-  { iso: "DE", name: "Germany", code: "+49", max: 11 },
-  { iso: "IT", name: "Italy", code: "+39", max: 10 },
-  { iso: "ES", name: "Spain", code: "+34", max: 9 },
-  { iso: "NL", name: "Netherlands", code: "+31", max: 9 },
-  { iso: "SE", name: "Sweden", code: "+46", max: 9 },
-  { iso: "IE", name: "Ireland", code: "+353", max: 9 },
-  { iso: "PT", name: "Portugal", code: "+351", max: 9 },
-  { iso: "IN", name: "India", code: "+91", max: 10 },
-  { iso: "CN", name: "China", code: "+86", max: 11 },
-  { iso: "JP", name: "Japan", code: "+81", max: 10 },
-  { iso: "KR", name: "South Korea", code: "+82", max: 10 },
-  { iso: "SG", name: "Singapore", code: "+65", max: 8 },
-  { iso: "HK", name: "Hong Kong", code: "+852", max: 8 },
-  { iso: "AU", name: "Australia", code: "+61", max: 9 },
-  { iso: "NZ", name: "New Zealand", code: "+64", max: 9 },
-  { iso: "BR", name: "Brazil", code: "+55", max: 11 },
-  { iso: "AR", name: "Argentina", code: "+54", max: 10 },
-  { iso: "AE", name: "United Arab Emirates", code: "+971", max: 9 },
-  { iso: "SA", name: "Saudi Arabia", code: "+966", max: 9 },
-  { iso: "IL", name: "Israel", code: "+972", max: 9 },
-  { iso: "EG", name: "Egypt", code: "+20", max: 10 },
-  { iso: "ZA", name: "South Africa", code: "+27", max: 9 },
-  { iso: "TR", name: "Turkey", code: "+90", max: 10 },
-  { iso: "RU", name: "Russia", code: "+7", max: 10 },
+  { iso: "US", name: "United States", code: "+1", max: 10, pattern: "(###) ###-####" },
+  { iso: "CA", name: "Canada", code: "+1", max: 10, pattern: "(###) ###-####" },
+  { iso: "MX", name: "Mexico", code: "+52", max: 10, pattern: "## #### ####" },
+  { iso: "GB", name: "United Kingdom", code: "+44", max: 10, pattern: "#### ######" },
+  { iso: "FR", name: "France", code: "+33", max: 9, pattern: "# ## ## ## ##" },
+  { iso: "DE", name: "Germany", code: "+49", max: 11, pattern: "#### #######" },
+  { iso: "IT", name: "Italy", code: "+39", max: 10, pattern: "### ### ####" },
+  { iso: "ES", name: "Spain", code: "+34", max: 9, pattern: "### ## ## ##" },
+  { iso: "NL", name: "Netherlands", code: "+31", max: 9, pattern: "# ########" },
+  { iso: "SE", name: "Sweden", code: "+46", max: 9, pattern: "##-### ## ##" },
+  { iso: "IE", name: "Ireland", code: "+353", max: 9, pattern: "## ### ####" },
+  { iso: "PT", name: "Portugal", code: "+351", max: 9, pattern: "### ### ###" },
+  { iso: "IN", name: "India", code: "+91", max: 10, pattern: "##### #####" },
+  { iso: "CN", name: "China", code: "+86", max: 11, pattern: "### #### ####" },
+  { iso: "JP", name: "Japan", code: "+81", max: 10, pattern: "##-####-####" },
+  { iso: "KR", name: "South Korea", code: "+82", max: 10, pattern: "##-####-####" },
+  { iso: "SG", name: "Singapore", code: "+65", max: 8, pattern: "#### ####" },
+  { iso: "HK", name: "Hong Kong", code: "+852", max: 8, pattern: "#### ####" },
+  { iso: "AU", name: "Australia", code: "+61", max: 9, pattern: "### ### ###" },
+  { iso: "NZ", name: "New Zealand", code: "+64", max: 9, pattern: "## ### ####" },
+  { iso: "BR", name: "Brazil", code: "+55", max: 11, pattern: "## #####-####" },
+  { iso: "AR", name: "Argentina", code: "+54", max: 10, pattern: "## ####-####" },
+  { iso: "AE", name: "United Arab Emirates", code: "+971", max: 9, pattern: "## ### ####" },
+  { iso: "SA", name: "Saudi Arabia", code: "+966", max: 9, pattern: "## ### ####" },
+  { iso: "IL", name: "Israel", code: "+972", max: 9, pattern: "##-###-####" },
+  { iso: "EG", name: "Egypt", code: "+20", max: 10, pattern: "### ### ####" },
+  { iso: "ZA", name: "South Africa", code: "+27", max: 9, pattern: "## ### ####" },
+  { iso: "TR", name: "Turkey", code: "+90", max: 10, pattern: "### ### ## ##" },
+  { iso: "RU", name: "Russia", code: "+7", max: 10, pattern: "### ###-##-##" },
 ];
-
-/** ISO 3166-1 alpha-2 → flag emoji via regional indicator symbols. */
-function flagFromIso(iso: string): string {
-  return iso
-    .toUpperCase()
-    .split("")
-    .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
-    .join("");
-}
-
-/** Insert a space every 3 digits. Lightweight visual grouping that works for most locales. */
-function formatDigits(digits: string): string {
-  if (!digits) return "";
-  const groups: string[] = [];
-  for (let i = 0; i < digits.length; i += 3) {
-    groups.push(digits.slice(i, i + 3));
-  }
-  return groups.join(" ");
-}
 
 export interface PhoneInputValue {
   iso: string;
   code: string;
+  /** Digits only, without the dialling code. */
   number: string;
   isValid: boolean;
 }
 
 export interface PhoneInputProps {
-  /** ISO 3166-1 alpha-2 for the initially selected country. */
+  /** ISO 3166-1 alpha-2 code of the country selected at first. */
   defaultCountry?: string;
+  /** Placeholder for the number. Defaults to an example in the country's format. */
   placeholder?: string;
+  /** Visible label above the field (also its accessible name). */
   label?: string;
-  /** Minimum digits required for a number to be considered valid. */
+  /** Digits needed before the number counts as valid. Defaults to the country's full length. */
   minDigits?: number;
+  /** The countries to offer. */
+  countries?: Country[];
+  /** Called with the country and digits whenever the user types or picks a country. */
   onChange?: (value: PhoneInputValue) => void;
+  /** Types a few example numbers, switching country between them, until someone touches it. */
+  autoplay?: boolean;
   className?: string;
 }
 
+/** Chip tints, picked by a stable hash of the ISO code. */
+const TINTS = [
+  ["#e8f1fe", "#0059b3", "#0a2b4d", "#7cb8ff"],
+  ["#e9f8ee", "#1b7a35", "#0f2e19", "#6fe08f"],
+  ["#fff3e0", "#a35a00", "#3a2405", "#ffc266"],
+  ["#f6edfc", "#8a3fb5", "#2c1638", "#d9a6f5"],
+  ["#ffecea", "#b3261e", "#3d1210", "#ff9e97"],
+] as const;
+const tintOf = (iso: string) => TINTS[(iso.charCodeAt(0) * 7 + (iso.charCodeAt(1) || 0)) % TINTS.length];
+
+const SAMPLE = "2015550123456";
+const DEMO: { iso: string; digits: string }[] = [
+  { iso: "US", digits: "4155550132" },
+  { iso: "GB", digits: "7700900461" },
+  { iso: "JP", digits: "9012345678" },
+  { iso: "DE", digits: "15112345678" },
+];
+
+function patternFor(c: Country) {
+  if (c.pattern) return c.pattern;
+  const groups: string[] = [];
+  let left = c.max;
+  while (left > 4) {
+    groups.push("###");
+    left -= 3;
+  }
+  groups.push("#".repeat(left));
+  return groups.join(" ");
+}
+
+/** Fills the mask with as many digits as there are, so separators only appear once they're needed. */
+function format(digits: string, pattern: string) {
+  let out = "";
+  let i = 0;
+  for (const ch of pattern) {
+    if (i >= digits.length) break;
+    if (ch === "#") out += digits[i++];
+    else out += ch;
+  }
+  return out + digits.slice(i);
+}
+
+function Chip({ iso }: { iso: string }) {
+  const [bg, fg, dbg, dfg] = tintOf(iso);
+  return (
+    <span
+      className="inline-grid h-[22px] w-[30px] place-items-center rounded-[6px] bg-[var(--chip-bg)] text-[10.5px] font-bold tracking-[0.04em] text-[var(--chip-fg)] dark:bg-[var(--chip-dbg)] dark:text-[var(--chip-dfg)]"
+      style={{ "--chip-bg": bg, "--chip-fg": fg, "--chip-dbg": dbg, "--chip-dfg": dfg } as CSSProperties}
+      aria-hidden="true"
+    >
+      {iso}
+    </span>
+  );
+}
+
+/**
+ * A phone field with a country picker. Digits drop into place with a small
+ * overshoot as they're typed, the mask fills in its own separators, a
+ * hairline under the field fills toward a complete number, and the country
+ * chip flips over when you pick another country.
+ */
 export function PhoneInput({
   defaultCountry = "US",
-  placeholder = "Phone number",
+  placeholder,
   label,
-  minDigits = 7,
+  minDigits,
+  countries = COUNTRIES,
   onChange,
+  autoplay = false,
   className,
 }: PhoneInputProps) {
-  const [selectedIso, setSelectedIso] = useState(defaultCountry);
-  const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const uid = useId().replace(/:/g, "");
+  const still = useReducedMotion() === true;
+  const list = countries.length ? countries : COUNTRIES;
+  const [iso, setIso] = useState(() => (list.some((c) => c.iso === defaultCountry) ? defaultCountry : list[0].iso));
   const [digits, setDigits] = useState("");
-  const [touched, setTouched] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [active, setActive] = useState(0);
   const [focused, setFocused] = useState(false);
+  const [blurred, setBlurred] = useState(false);
 
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const phoneInputRef = useRef<HTMLInputElement | null>(null);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const input = useRef<HTMLInputElement>(null);
+  const search = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const touched = useRef(false);
+  const shakeX = useMotionValue(0);
 
-  const selected = useMemo(
-    () => COUNTRIES.find((c) => c.iso === selectedIso) ?? COUNTRIES[0],
-    [selectedIso],
-  );
+  const country = list.find((c) => c.iso === iso) ?? list[0];
+  const pattern = patternFor(country);
+  const need = Math.max(1, Math.min(country.max, minDigits ?? country.max));
+  const valid = digits.length >= need;
+  const showError = blurred && !focused && digits.length > 0 && !valid;
+  const shown = format(digits, pattern);
+  const example = placeholder ?? format(SAMPLE.slice(0, country.max), pattern);
 
-  const isValid = digits.length >= minDigits;
-  const hasError = touched && !focused && digits.length > 0 && !isValid;
+  const fill = useSpring(0, { stiffness: 260, damping: 24 });
+  const fillWidth = useTransform(fill, (f) => `${Math.max(0, Math.min(1, f)) * 100}%`);
+  useEffect(() => {
+    fill.set(digits.length / country.max);
+  }, [digits.length, country.max, fill]);
 
   const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return COUNTRIES;
-    return COUNTRIES.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        c.code.includes(q) ||
-        c.iso.toLowerCase().includes(q),
-    );
-  }, [search]);
+    const q = query.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((c) => c.name.toLowerCase().includes(q) || c.code.includes(q) || c.iso.toLowerCase() === q);
+  }, [list, query]);
 
-  // Emit changes
-  useEffect(() => {
-    onChange?.({
-      iso: selected.iso,
-      code: selected.code,
-      number: digits,
-      isValid,
-    });
-  }, [selected.iso, selected.code, digits, isValid, onChange]);
+  const emit = (nextIso: string, nextDigits: string) => {
+    const c = list.find((x) => x.iso === nextIso) ?? list[0];
+    const n = Math.max(1, Math.min(c.max, minDigits ?? c.max));
+    onChange?.({ iso: c.iso, code: c.code, number: nextDigits, isValid: nextDigits.length >= n });
+  };
 
-  // Outside click closes dropdown
+  const touch = () => {
+    touched.current = true;
+  };
+
+  // Close the picker on an outside press.
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (!containerRef.current?.contains(e.target as Node)) {
-        setOpen(false);
-        setSearch("");
-      }
+    const away = (e: PointerEvent) => {
+      if (!root.current?.contains(e.target as Node)) setOpen(false);
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("pointerdown", away);
+    return () => document.removeEventListener("pointerdown", away);
   }, [open]);
 
-  // Escape closes dropdown
   useEffect(() => {
     if (!open) return;
-    const handler = (e: globalThis.KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setOpen(false);
-        setSearch("");
-      }
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
+    const id = requestAnimationFrame(() => search.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(id);
   }, [open]);
 
-  // Autofocus search when dropdown opens
+  // Keep the highlighted option in view while arrowing through the list.
   useEffect(() => {
-    if (open) {
-      const id = requestAnimationFrame(() => searchInputRef.current?.focus());
-      return () => cancelAnimationFrame(id);
-    }
-  }, [open]);
+    if (!open) return;
+    listRef.current?.querySelector<HTMLElement>(`[data-index="${active}"]`)?.scrollIntoView({ block: "nearest" });
+  }, [active, open]);
 
-  const handleDigitsChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const raw = e.target.value.replace(/\D/g, "");
-      setDigits(raw.slice(0, selected.max));
-    },
-    [selected.max],
-  );
+  useEffect(() => {
+    if (!autoplay) return;
+    let k = 0;
+    let typed = 0;
+    let hold = 0;
+    let phase: "type" | "hold" | "clear" = "type";
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      const demo = DEMO[k % DEMO.length];
+      if (phase === "type") {
+        typed += 1;
+        setDigits(demo.digits.slice(0, typed));
+        if (typed >= demo.digits.length) phase = "hold";
+      } else if (phase === "hold") {
+        hold += 1;
+        if (hold > 14) {
+          phase = "clear";
+          hold = 0;
+        }
+      } else {
+        typed = Math.max(0, typed - 3);
+        setDigits(demo.digits.slice(0, typed));
+        if (typed === 0) {
+          k += 1;
+          setIso(DEMO[k % DEMO.length].iso);
+          phase = "type";
+        }
+      }
+    }, 120);
+    return () => clearInterval(t);
+  }, [autoplay]);
 
-  const handleSelect = useCallback((iso: string) => {
-    setSelectedIso(iso);
+  const choose = (c: Country) => {
+    const next = digits.slice(0, c.max);
+    setIso(c.iso);
+    setDigits(next);
     setOpen(false);
-    setSearch("");
-    requestAnimationFrame(() => phoneInputRef.current?.focus());
-  }, []);
+    setQuery("");
+    emit(c.iso, next);
+    requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
+  };
 
-  const handleTriggerKey = (e: KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+  const openPicker = () => {
+    touch();
+    setQuery("");
+    setActive(Math.max(0, list.findIndex((c) => c.iso === iso)));
+    setOpen(true);
+  };
+
+  const onSearchKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
-      setOpen(true);
+      const d = e.key === "ArrowDown" ? 1 : -1;
+      setActive((a) => (filtered.length ? (a + d + filtered.length) % filtered.length : 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const c = filtered[active];
+      if (c) choose(c);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+      requestAnimationFrame(() => input.current?.focus({ preventScroll: true }));
     }
   };
 
-  // Border / glow color reflects state (focus → primary, error → red, idle → gray)
-  const ringColor = focused
-    ? "rgb(99,102,241)"
-    : hasError
-      ? "rgb(239,68,68)"
-      : "rgb(229,231,235)";
-  const ringShadow = focused
-    ? "0 0 0 4px rgba(99,102,241,0.14), 0 1px 2px rgba(0,0,0,0.03)"
-    : hasError
-      ? "0 0 0 4px rgba(239,68,68,0.10)"
-      : "0 1px 2px rgba(0,0,0,0.03)";
-  const surfaceBg = focused ? "rgb(255,255,255)" : "rgb(250,250,250)";
+  const onBlur = () => {
+    setFocused(false);
+    setBlurred(true);
+    if (digits.length > 0 && digits.length < need && !still) {
+      animate(shakeX, [0, -7, 6, -4, 3, 0], { duration: 0.42 });
+    }
+  };
+
+  const helpId = `${uid}-help`;
+  const labelId = `${uid}-label`;
+  let help = "Type a number, or pick a country.";
+  if (showError) help = `Add ${need - digits.length} more digit${need - digits.length === 1 ? "" : "s"}.`;
+  else if (valid) help = `${country.code} ${shown}`;
+
+  let d = 0;
+  const glyphs = shown.split("").map((ch, i) => {
+    if (/\d/.test(ch)) {
+      const n = d++;
+      return (
+        <motion.span
+          key={`d${n}`}
+          className="inline-block"
+          initial={still ? false : { y: -9, scale: 1.35, opacity: 0 }}
+          animate={{ y: 0, scale: 1, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 640, damping: 17, mass: 0.6 }}
+        >
+          {ch}
+        </motion.span>
+      );
+    }
+    return (
+      <span key={`s${i}`} className="text-[#86868b] dark:text-[#98989d]">
+        {ch}
+      </span>
+    );
+  });
 
   return (
-    <div ref={containerRef} className={cn("relative w-full max-w-md", className)}>
-      {label && (
-        <label className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>
-      )}
-
+    <div ref={root} className={cn("relative w-full max-w-[340px]", className)} onPointerDown={touch} onKeyDown={touch}>
+      {label ? (
+        <span id={labelId} className="mb-1.5 block text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">
+          {label}
+        </span>
+      ) : null}
       <motion.div
-        animate={{
-          borderColor: ringColor,
-          boxShadow: ringShadow,
-          backgroundColor: surfaceBg,
-        }}
-        transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-stretch overflow-hidden rounded-xl border"
+        style={{ x: shakeX }}
+        className={cn(
+          "relative flex h-[54px] items-stretch overflow-hidden rounded-[16px] bg-white transition-shadow duration-200 dark:bg-[#1c1c1e]",
+          focused
+            ? "shadow-[0_0_0_1.5px_#0071e3,0_0_0_5px_rgba(0,113,227,.16)] dark:shadow-[0_0_0_1.5px_#0a84ff,0_0_0_5px_rgba(10,132,255,.22)]"
+            : showError
+              ? "shadow-[0_0_0_1.5px_#ff3b30,0_0_0_5px_rgba(255,59,48,.12)]"
+              : "shadow-[0_0_0_1px_rgba(0,0,0,.08),0_14px_30px_-22px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_14px_30px_-22px_rgba(0,0,0,.9)]",
+        )}
       >
-        {/* Country selector trigger */}
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
-          onKeyDown={handleTriggerKey}
+          onClick={() => (open ? setOpen(false) : openPicker())}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              openPicker();
+            }
+          }}
           aria-haspopup="listbox"
           aria-expanded={open}
-          aria-label={`Country: ${selected.name}`}
-          className="flex shrink-0 items-center gap-2 border-r border-gray-200 px-3 transition-colors hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none"
+          aria-controls={`${uid}-list`}
+          aria-label={`Country: ${country.name} ${country.code}. Change country`}
+          className="flex shrink-0 items-center gap-2 pl-3 pr-2.5 outline-none transition-colors hover:bg-[#f5f5f7] focus-visible:bg-[#f0f0f3] dark:hover:bg-[#2c2c2e] dark:focus-visible:bg-[#2c2c2e]"
         >
-          <span className="text-lg leading-none" aria-hidden>
-            {flagFromIso(selected.iso)}
-          </span>
-          <span className="text-sm font-medium text-gray-900">{selected.code}</span>
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="text-gray-400"
-          >
-            <ChevronDown className="size-4" />
-          </motion.span>
-        </button>
-
-        {/* Phone number input */}
-        <div className="relative flex-1">
-          <input
-            ref={phoneInputRef}
-            type="tel"
-            inputMode="numeric"
-            autoComplete="tel-national"
-            value={formatDigits(digits)}
-            onChange={handleDigitsChange}
-            onFocus={() => setFocused(true)}
-            onBlur={() => {
-              setFocused(false);
-              setTouched(true);
-            }}
-            placeholder={placeholder}
-            aria-label={label ?? "Phone number"}
-            aria-invalid={hasError || undefined}
-            aria-describedby={hasError ? "phone-input-error" : undefined}
-            className="h-12 w-full bg-transparent px-3 pr-10 text-sm text-gray-900 outline-none placeholder:text-gray-400"
-          />
-
-          {/* Validity check icon — only shown when valid and not focused */}
-          <AnimatePresence>
-            {isValid && !focused && (
+          <span className="relative inline-grid" style={{ perspective: 300 }}>
+            <AnimatePresence mode="popLayout" initial={false}>
               <motion.span
-                initial={{ opacity: 0, scale: 0.6 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.6 }}
-                transition={{ duration: 0.22, ease: "easeOut" }}
-                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500"
-                aria-hidden
+                key={iso}
+                className="inline-grid"
+                initial={still ? { opacity: 0 } : { rotateX: -100, opacity: 0 }}
+                animate={{ rotateX: 0, opacity: 1 }}
+                exit={still ? { opacity: 0 } : { rotateX: 100, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 420, damping: 22 }}
               >
-                <Check className="size-4" strokeWidth={2.5} />
+                <Chip iso={iso} />
               </motion.span>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
+          </span>
+          <span className="min-w-[2.6em] text-left text-[15px] font-medium tabular-nums text-[#1d1d1f] dark:text-[#f5f5f7]">{country.code}</span>
+          <motion.svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            aria-hidden="true"
+            animate={{ rotate: open ? 180 : 0 }}
+            transition={{ type: "spring", stiffness: 500, damping: 28 }}
+            className="text-[#86868b] dark:text-[#98989d]"
+          >
+            <path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </motion.svg>
+        </button>
+        <span className="my-3 w-px bg-[#e5e5ea] dark:bg-[#3a3a3c]" aria-hidden="true" />
+        <div className="relative min-w-0 flex-1">
+          <input
+            ref={input}
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel-national"
+            value={shown}
+            placeholder={example}
+            onChange={(e) => {
+              touch();
+              const next = e.target.value.replace(/\D/g, "").slice(0, country.max);
+              setDigits(next);
+              emit(iso, next);
+            }}
+            onFocus={() => setFocused(true)}
+            onBlur={onBlur}
+            aria-labelledby={label ? labelId : undefined}
+            aria-label={label ? undefined : "Phone number"}
+            aria-invalid={showError || undefined}
+            aria-describedby={helpId}
+            className="h-full w-full bg-transparent pl-3 pr-10 text-[17px] tracking-[0.01em] text-transparent tabular-nums caret-[#0071e3] outline-none [font-kerning:none] placeholder:text-[#a1a1a6] dark:caret-[#0a84ff] dark:placeholder:text-[#636366]"
+          />
+          <div
+            className="pointer-events-none absolute inset-y-0 left-0 flex items-center whitespace-pre pl-3 text-[17px] tracking-[0.01em] text-[#1d1d1f] tabular-nums [font-kerning:none] dark:text-[#f5f5f7]"
+            aria-hidden="true"
+          >
+            {glyphs}
+          </div>
+          <svg className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2" width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+            <motion.circle cx="10" cy="10" r="9" fill="#30d158" initial={false} animate={{ scale: valid ? 1 : 0 }} transition={{ type: "spring", stiffness: 520, damping: 18 }} style={{ originX: "50%", originY: "50%" }} />
+            <motion.path
+              d="M6 10.2 8.6 12.8 14 7.4"
+              fill="none"
+              stroke="#fff"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={false}
+              animate={{ pathLength: valid ? 1 : 0, opacity: valid ? 1 : 0 }}
+              transition={{ type: "spring", stiffness: 260, damping: 24, delay: valid ? 0.08 : 0 }}
+            />
+          </svg>
         </div>
+        <motion.span
+          className={cn("absolute bottom-0 left-0 h-[2px] rounded-full", valid ? "bg-[#30d158]" : "bg-[#0071e3] dark:bg-[#0a84ff]")}
+          style={{ width: fillWidth }}
+          aria-hidden="true"
+        />
       </motion.div>
-
-      {/* Error message */}
-      <AnimatePresence>
-        {hasError && (
-          <motion.p
-            id="phone-input-error"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="mt-1.5 flex items-center gap-1.5 text-xs text-red-500"
-          >
-            <AlertCircle className="size-3.5" />
-            That number looks too short — please add the remaining digits.
-          </motion.p>
+      <p
+        id={helpId}
+        aria-live="polite"
+        className={cn(
+          "mt-2 px-1 text-[12px] tabular-nums",
+          showError ? "text-[#d70015] dark:text-[#ff6961]" : valid ? "text-[#1b7a35] dark:text-[#30d158]" : "text-[#6e6e73] dark:text-[#a1a1a6]",
         )}
-      </AnimatePresence>
+      >
+        {help}
+      </p>
 
-      {/* Country dropdown */}
       <AnimatePresence>
-        {open && (
+        {open ? (
           <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            initial={still ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            style={{ transformOrigin: "top center" }}
-            className="absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_12px_32px_-12px_rgba(15,23,42,0.18),0_4px_8px_-2px_rgba(15,23,42,0.06)]"
-            role="listbox"
-            aria-label="Country list"
+            exit={still ? { opacity: 0 } : { opacity: 0, y: -6, scale: 0.97, transition: { duration: 0.14 } }}
+            transition={{ type: "spring", stiffness: 520, damping: 34 }}
+            style={{ transformOrigin: "24px 0px", top: label ? 84 : 62 }}
+            className="absolute left-0 right-0 z-50 overflow-hidden rounded-[18px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_24px_48px_-20px_rgba(0,0,0,.35)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_48px_-20px_rgba(0,0,0,.9)]"
           >
-            <div className="border-b border-gray-100 p-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
-                <input
-                  ref={searchInputRef}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search country or code"
-                  aria-label="Search countries"
-                  className="h-9 w-full rounded-md bg-gray-50 pl-8 pr-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:bg-gray-100"
-                />
-              </div>
+            <div className="p-2">
+              <input
+                ref={search}
+                value={query}
+                onChange={(e) => {
+                  setQuery(e.target.value);
+                  setActive(0);
+                }}
+                onKeyDown={onSearchKey}
+                role="combobox"
+                aria-expanded="true"
+                aria-controls={`${uid}-list`}
+                aria-activedescendant={filtered[active] ? `${uid}-opt-${filtered[active].iso}` : undefined}
+                aria-label="Search countries"
+                placeholder="Search country or code"
+                className="h-9 w-full rounded-[10px] bg-[#f0f0f3] px-3 text-[14px] text-[#1d1d1f] outline-none placeholder:text-[#86868b] focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#3a3a3c] dark:text-[#f5f5f7] dark:placeholder:text-[#98989d] dark:focus-visible:ring-[#0a84ff]"
+              />
             </div>
-
-            <div className="max-h-56 overflow-y-auto py-1">
+            <div ref={listRef} id={`${uid}-list`} role="listbox" aria-label="Countries" className="max-h-[188px] overflow-y-auto px-1.5 pb-1.5">
               {filtered.length === 0 ? (
-                <div className="px-3 py-6 text-center text-xs text-gray-400">
-                  No countries match &ldquo;{search}&rdquo;
-                </div>
+                <p className="px-3 py-5 text-center text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">No country matches.</p>
               ) : (
-                filtered.map((c) => {
-                  const isSelected = c.iso === selected.iso;
+                filtered.map((c, i) => {
+                  const selected = c.iso === iso;
                   return (
-                    <button
+                    <div
                       key={c.iso}
-                      type="button"
+                      id={`${uid}-opt-${c.iso}`}
+                      data-index={i}
                       role="option"
-                      aria-selected={isSelected}
-                      onClick={() => handleSelect(c.iso)}
+                      aria-selected={selected}
+                      onPointerMove={() => setActive(i)}
+                      onClick={() => choose(c)}
                       className={cn(
-                        "flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors",
-                        isSelected
-                          ? "bg-indigo-50 text-indigo-900"
-                          : "text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none",
+                        "relative flex h-10 cursor-pointer items-center gap-3 rounded-[10px] px-2.5 text-[14px] text-[#1d1d1f] dark:text-[#f5f5f7]",
                       )}
                     >
-                      <span className="text-base leading-none" aria-hidden>
-                        {flagFromIso(c.iso)}
+                      {i === active ? (
+                        <motion.span
+                          layoutId={`${uid}-hl`}
+                          className="absolute inset-0 rounded-[10px] bg-[#f0f0f3] dark:bg-[#3a3a3c]"
+                          transition={{ type: "spring", stiffness: 600, damping: 40 }}
+                        />
+                      ) : null}
+                      <span className="relative">
+                        <Chip iso={c.iso} />
                       </span>
-                      <span className="flex-1 truncate">{c.name}</span>
-                      <span
-                        className={cn(
-                          "text-xs tabular-nums",
-                          isSelected ? "text-indigo-500" : "text-gray-400",
-                        )}
-                      >
-                        {c.code}
+                      <span className="relative flex-1 truncate">{c.name}</span>
+                      <span className="relative text-[13px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">{c.code}</span>
+                      <span className="relative w-3.5">
+                        {selected ? (
+                          <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" className="text-[#0071e3] dark:text-[#0a84ff]">
+                            <path d="M3 7.2 5.8 10 11 4.4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        ) : null}
                       </span>
-                      {isSelected && (
-                        <Check className="size-4 text-indigo-500" strokeWidth={2.5} />
-                      )}
-                    </button>
+                    </div>
                   );
                 })
               )}
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </div>
   );

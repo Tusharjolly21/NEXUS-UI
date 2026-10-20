@@ -1,22 +1,29 @@
 "use client";
 
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, Check, Eye, EyeOff, Sparkles } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 
 export type SplitSignupValues = { email: string; password: string };
 
 export type SplitSignupProps = {
   headline?: string;
   subhead?: string;
+  /** Benefits on the value panel. They tick themselves off as the form fills in. */
   benefits?: string[];
+  /** Small pill above the headline. Empty string hides it. */
+  badge?: string;
+  /** Social proof line under the benefits. Empty string hides it. */
+  proof?: string;
   submitLabel?: string;
-  /** Called with the form values; return a promise to show the pending state. */
+  /** Called with the values after local validation; return a promise to show the pending state, throw to return to the form with an error. Without it the form simulates success. */
   onSubmit?: (values: SplitSignupValues) => Promise<void> | void;
   /** Show the Google / GitHub buttons. */
   showSso?: boolean;
   onSso?: (provider: "google" | "github") => void;
+  /** Called by "Sign in" under the form. Hidden when not given. */
+  onSignIn?: () => void;
+  /** Types a demo signup and plays it through until someone touches the form. */
+  autoplay?: boolean;
   className?: string;
 };
 
@@ -39,7 +46,9 @@ function GithubMark(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-function strength(pw: string) {
+/** 0–4: length, mixed case, a digit, a symbol (or a long passphrase). */
+export function passwordStrength(pw: string) {
+  if (!pw) return 0;
   let s = 0;
   if (pw.length >= 8) s++;
   if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) s++;
@@ -48,216 +57,368 @@ function strength(pw: string) {
   return s;
 }
 
-const STRENGTH = ["Too short", "Weak", "Fair", "Good", "Strong"];
-const STRENGTH_COLOR = ["bg-zinc-300", "bg-rose-500", "bg-amber-500", "bg-sky-500", "bg-emerald-500"];
+const LEVEL = ["Too short", "Weak", "Fair", "Good", "Strong"];
+const LEVEL_COLOR = ["#d2d2d7", "#ff3b30", "#ff9f0a", "#0a84ff", "#30d158"];
+const LEVEL_TEXT = ["text-[#6e6e73] dark:text-[#a1a1a6]", "text-[#d70015] dark:text-[#ff6961]", "text-[#b25000] dark:text-[#ffb340]", "text-[#0066cc] dark:text-[#64b5ff]", "text-[#248a3d] dark:text-[#30d158]"];
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DEMO = { email: "mei@northwind.co", password: "Orbit-2026!" };
+
+/** One meter segment. It pops in with an overshoot when it lights, and takes the level's colour. */
+function Segment({ on, color, still }: { on: boolean; color: string; still: boolean }) {
+  return (
+    <span className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-[#e8e8ed] dark:bg-[#3a3a3c]">
+      <motion.span
+        className="absolute inset-0 origin-left rounded-full"
+        initial={false}
+        animate={{ scaleX: on ? 1 : 0, backgroundColor: color }}
+        transition={still ? { duration: 0 } : { scaleX: { type: "spring", stiffness: 520, damping: 17 }, backgroundColor: { duration: 0.2 } }}
+      />
+    </span>
+  );
+}
+
+/** Benefit row on the value panel; its check draws itself when `done` flips. */
+function Benefit({ text, done, still }: { text: string; done: boolean; still: boolean }) {
+  return (
+    <li className="flex items-start gap-2.5">
+      <motion.span
+        className="mt-px flex size-5 shrink-0 items-center justify-center rounded-full"
+        initial={false}
+        animate={{ backgroundColor: done ? "#30d158" : "rgba(255,255,255,.5)", scale: done && !still ? [1, 1.25, 1] : 1 }}
+        transition={{ duration: 0.4, ease: [0.3, 1.6, 0.5, 1] }}
+      >
+        <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke={done ? "#fff" : "#86868b"} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <motion.path d="M3.5 8.5 6.5 11.5 12.5 4.5" initial={false} animate={{ pathLength: done ? 1 : 0.001, opacity: done ? 1 : 0.5 }} transition={{ duration: still ? 0 : 0.35 }} />
+        </svg>
+      </motion.span>
+      <span className="text-[13.5px] leading-snug text-[#1d1d1f] dark:text-[#f5f5f7]">
+        {text}
+        <span className="sr-only">{done ? " (ready)" : ""}</span>
+      </span>
+    </li>
+  );
+}
 
 /**
- * A two-panel signup: the value of the product on a lit panel, and a short form with a live
- * password-strength meter, SSO and a button that walks through pending to done.
+ * A two-panel signup. The value panel makes the pitch; the form is short:
+ * SSO, an email, and a password with a four-segment strength meter that pops
+ * each segment in. As the form fills, the benefits on the left tick
+ * themselves off, so the page shows what you are about to get.
  */
 export function SplitSignup({
   headline = "Ship interfaces your team is proud of",
-  subhead = "Start free. No card, no sales call — invite your team when you're ready.",
+  subhead = "Start free. No card, no sales call. Invite your team when you're ready.",
   benefits = ["Every component, live and editable", "One-line installs with the CLI", "Light and dark out of the box"],
+  badge = "Free forever plan",
+  proof = "Joined by 12,000 teams this year",
   submitLabel = "Create workspace",
   onSubmit,
   showSso = true,
   onSso,
-  className,
+  onSignIn,
+  autoplay = false,
+  className = "",
 }: SplitSignupProps) {
-  const reduce = useReducedMotion();
+  const still = useReducedMotion() === true;
   const id = React.useId();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [show, setShow] = React.useState(false);
   const [state, setState] = React.useState<"idle" | "pending" | "done">("idle");
-  const score = strength(password);
+  const [error, setError] = React.useState<string | null>(null);
+  const touched = React.useRef(false);
+  const alive = React.useRef(true);
+  React.useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+
+  const score = passwordStrength(password);
+  const emailOk = EMAIL.test(email.trim());
+  // Completeness drives the ticks: a valid email is worth 40%, each strength level 15%.
+  const progress = state === "done" ? 1 : (emailOk ? 0.4 : 0) + score * 0.15;
+  const ticks = benefits.map((_, i) => progress >= (i + 1) / benefits.length - 0.001);
+  const fill = useSpring(progress, { stiffness: 140, damping: 20 });
+  React.useEffect(() => {
+    fill.set(progress);
+  }, [progress, fill]);
+  const fillWidth = useTransform(fill, (v) => `${Math.max(0, Math.min(1, v)) * 100}%`);
+
+  const touch = () => {
+    touched.current = true;
+  };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    touch();
     if (state !== "idle") return;
+    if (!emailOk) return setError("Enter a valid work email.");
+    if (score < 2) return setError("Pick a stronger password: 8+ characters with a mix.");
+    setError(null);
     setState("pending");
     try {
-      if (onSubmit) await onSubmit({ email, password });
-      else await new Promise((r) => setTimeout(r, 900));
-      setState("done");
-    } catch {
+      if (onSubmit) await onSubmit({ email: email.trim(), password });
+      else await new Promise((r) => setTimeout(r, 1000));
+      if (alive.current) setState("done");
+    } catch (err) {
+      if (!alive.current) return;
       setState("idle");
+      setError(err instanceof Error && err.message ? err.message : "Something went wrong. Try again.");
     }
   }
 
+  React.useEffect(() => {
+    if (!autoplay) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const at = (ms: number, f: () => void) =>
+      timers.push(
+        setTimeout(() => {
+          if (!touched.current) f();
+        }, ms),
+      );
+    const play = () => {
+      let t = 700;
+      for (let i = 1; i <= DEMO.email.length; i++) {
+        const s = DEMO.email.slice(0, i);
+        at((t += 50), () => setEmail(s));
+      }
+      t += 300;
+      for (let i = 1; i <= DEMO.password.length; i++) {
+        const s = DEMO.password.slice(0, i);
+        at((t += 110), () => setPassword(s));
+      }
+      at((t += 500), () => setState("pending"));
+      at((t += 1000), () => setState("done"));
+      at((t += 2600), () => {
+        setState("idle");
+        setEmail("");
+        setPassword("");
+      });
+      at((t += 600), play);
+    };
+    play();
+    return () => timers.forEach(clearTimeout);
+  }, [autoplay]);
+
+  const focus = "outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]";
+  const ink = "text-[#1d1d1f] dark:text-[#f5f5f7]";
+  const soft = "text-[#6e6e73] dark:text-[#a1a1a6]";
   const field =
-    "h-11 w-full rounded-xl border border-zinc-200 bg-white px-3.5 text-[14px] text-zinc-950 outline-none transition-[border-color,box-shadow] placeholder:text-zinc-400 focus:border-zinc-950 focus:shadow-[0_0_0_4px_rgba(23,23,28,0.06)] dark:border-white/10 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-zinc-500 dark:focus:border-white/40 dark:focus:shadow-[0_0_0_4px_rgba(255,255,255,0.06)]";
+    "flex h-11 w-full items-center rounded-[12px] bg-[#f5f5f7] px-3.5 ring-1 ring-black/[.04] transition-shadow focus-within:bg-white focus-within:ring-2 focus-within:ring-[#0071e3] dark:bg-[#2c2c2e] dark:ring-white/[.06] dark:focus-within:bg-[#2c2c2e] dark:focus-within:ring-[#0a84ff]";
+  const input = `min-w-0 flex-1 bg-transparent text-[14.5px] outline-none placeholder:text-[#86868b] disabled:opacity-60 dark:placeholder:text-[#8e8e93] ${ink}`;
+  const sso = `flex h-10 flex-1 items-center justify-center gap-2 rounded-[12px] bg-white text-[13.5px] font-medium ring-1 ring-black/[.08] transition-colors hover:bg-[#f5f5f7] dark:bg-[#2c2c2e] dark:ring-white/10 dark:hover:bg-[#3a3a3c] ${ink} ${focus}`;
+  const busy = state !== "idle";
 
   return (
     <div
-      className={cn(
-        "grid w-full overflow-hidden rounded-[28px] border border-zinc-200/80 bg-white md:grid-cols-[1fr_1.05fr]",
-        "dark:border-white/10 dark:bg-zinc-950",
-        className,
-      )}
+      className={`@container w-full overflow-hidden rounded-[28px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] ${className}`}
+      onPointerDown={touch}
+      onKeyDown={touch}
     >
-      {/* value panel */}
-      <div className="relative isolate flex flex-col justify-between overflow-hidden bg-[#0d0d14] p-8 text-white">
-        <div aria-hidden className="absolute inset-0 -z-10">
-          <motion.div
-            className="absolute -left-24 -top-24 size-80 rounded-full bg-indigo-500/40 blur-3xl"
-            animate={reduce ? undefined : { x: [0, 30, 0], y: [0, 20, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+      <div className="grid @[540px]:grid-cols-[1fr_1.1fr]">
+        {/* Value panel */}
+        <div className="relative isolate overflow-hidden p-6 @[540px]:p-7">
+          <div
+            aria-hidden
+            className="absolute inset-0 -z-10 [background:var(--l)] dark:[background:var(--d)]"
+            style={
+              {
+                "--l": "radial-gradient(80% 60% at 0% 0%, rgba(90,200,250,.45), transparent 70%), radial-gradient(70% 60% at 100% 100%, rgba(191,90,242,.35), transparent 70%), linear-gradient(180deg,#f5f5f7,#ececf1)",
+                "--d": "radial-gradient(80% 60% at 0% 0%, rgba(10,132,255,.35), transparent 70%), radial-gradient(70% 60% at 100% 100%, rgba(191,90,242,.28), transparent 70%), linear-gradient(180deg,#232326,#18181a)",
+              } as React.CSSProperties
+            }
           />
-          <motion.div
-            className="absolute -bottom-28 right-[-20%] size-80 rounded-full bg-fuchsia-500/30 blur-3xl"
-            animate={reduce ? undefined : { x: [0, -24, 0], y: [0, -16, 0] }}
-            transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:28px_28px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
+          {badge && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-[12px] font-medium text-[#1d1d1f] ring-1 ring-black/[.05] backdrop-blur dark:bg-white/10 dark:text-[#f5f5f7] dark:ring-white/10">
+              <span className="size-1.5 rounded-full bg-[#30d158]" aria-hidden />
+              {badge}
+            </span>
+          )}
+          <h2 className={`mt-4 text-[24px] font-semibold leading-[1.08] tracking-[-0.04em] [text-wrap:balance] @[760px]:text-[30px] ${ink}`}>{headline}</h2>
+          {subhead && <p className={`mt-2.5 text-[14px] leading-relaxed @[540px]:hidden @[720px]:block ${soft}`}>{subhead}</p>}
+          <ul className="mt-5 space-y-2.5" aria-label="What you get">
+            {benefits.map((b, i) => (
+              <Benefit key={b} text={b} done={ticks[i]} still={still} />
+            ))}
+          </ul>
+          <div className="mt-5 h-1 overflow-hidden rounded-full bg-black/[.06] dark:bg-white/10" aria-hidden>
+            <motion.div className="h-full rounded-full bg-[#30d158]" style={{ width: fillWidth }} />
+          </div>
+          {proof && (
+            <div className="mt-5 flex items-center gap-2.5">
+              <span className="flex -space-x-2" aria-hidden>
+                {["#ffb38a,#ff375f", "#5ac8fa,#0071e3", "#b7f7c5,#0b8f6a", "#d0b3ff,#7d3cff"].map((g) => (
+                  <span key={g} className="size-6 rounded-full ring-2 ring-white dark:ring-[#1c1c1e]" style={{ background: `linear-gradient(135deg,${g})` }} />
+                ))}
+              </span>
+              <span className={`text-[12.5px] ${soft}`}>{proof}</span>
+            </div>
+          )}
         </div>
 
-        <div>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1 text-[12px] font-medium text-white/80 backdrop-blur">
-            <Sparkles className="size-3.5 text-amber-300" /> Free forever plan
-          </span>
-          <h2 className="mt-5 text-[28px] font-semibold leading-[1.1] tracking-[-0.03em] [text-wrap:balance]">{headline}</h2>
-          <p className="mt-3 max-w-sm text-[14.5px] leading-relaxed text-white/60">{subhead}</p>
-        </div>
-
-        <ul className="mt-8 space-y-3">
-          {benefits.map((b, i) => (
-            <motion.li
-              key={b}
-              initial={reduce ? false : { opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 + i * 0.08 }}
-              className="flex items-center gap-3 text-[14px] text-white/85"
-            >
-              <span className="grid size-5 place-items-center rounded-full bg-white/10 ring-1 ring-inset ring-white/15">
-                <Check className="size-3 text-emerald-300" strokeWidth={3} />
-              </span>
-              {b}
-            </motion.li>
-          ))}
-        </ul>
-      </div>
-
-      {/* form panel */}
-      <div className="flex flex-col justify-center p-8">
-        <AnimatePresence mode="wait" initial={false}>
-          {state === "done" ? (
-            <motion.div
-              key="done"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center py-10 text-center"
-              role="status"
-            >
-              <span className="grid size-14 place-items-center rounded-full bg-emerald-500 text-white shadow-[0_10px_30px_-8px_rgba(16,185,129,0.6)]">
-                <Check className="size-7" strokeWidth={3} />
-              </span>
-              <p className="mt-5 text-[19px] font-semibold tracking-[-0.02em] text-zinc-950 dark:text-white">Your workspace is ready</p>
-              <p className="mt-1.5 text-[14px] text-zinc-500 dark:text-zinc-400">We sent a sign-in link to {email || "your inbox"}.</p>
-              <button
-                type="button"
-                onClick={() => setState("idle")}
-                className="mt-6 text-[13px] font-medium text-zinc-500 underline-offset-4 hover:text-zinc-950 hover:underline dark:text-zinc-400 dark:hover:text-white"
+        {/* Form */}
+        <div className="relative p-6 @[540px]:p-7">
+          <AnimatePresence mode="popLayout" initial={false}>
+            {state === "done" ? (
+              <motion.div
+                key="done"
+                role="status"
+                initial={{ opacity: 0, y: 12, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={still ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 24 }}
+                className="flex min-h-[330px] flex-col items-center justify-center text-center"
               >
-                Start over
-              </button>
-            </motion.div>
-          ) : (
-            <motion.form key="form" onSubmit={submit} initial={false} exit={{ opacity: 0, y: -6 }} className="space-y-4">
-              <div>
-                <p className="text-[19px] font-semibold tracking-[-0.02em] text-zinc-950 dark:text-white">Create your account</p>
-                <p className="mt-1 text-[13.5px] text-zinc-500 dark:text-zinc-400">
-                  Already have one? <a href="#" className="font-medium text-zinc-950 underline-offset-4 hover:underline dark:text-white">Sign in</a>
+                <span className="flex size-14 items-center justify-center rounded-full bg-[#30d158] text-white shadow-[0_12px_30px_-10px_rgba(48,209,88,.8)]">
+                  <svg viewBox="0 0 24 24" className="size-7" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <motion.path d="M5 12.5 10 17.5 19 7" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.45, delay: 0.1 }} />
+                  </svg>
+                </span>
+                <p className={`mt-4 text-[20px] font-semibold tracking-[-0.03em] ${ink}`}>Your workspace is ready</p>
+                <p className={`mt-1 max-w-[260px] text-[14px] ${soft}`}>
+                  We sent a link to <span className={`font-medium ${ink}`}>{email.trim()}</span> to confirm it&apos;s you.
                 </p>
-              </div>
-
-              {showSso ? (
-                <>
-                  <div className="grid grid-cols-2 gap-2">
-                    {(["google", "github"] as const).map((p) => (
-                      <button
-                        key={p}
-                        type="button"
-                        onClick={() => onSso?.(p)}
-                        className="flex h-11 items-center justify-center gap-2 rounded-xl border border-zinc-200 text-[13.5px] font-medium text-zinc-950 transition-colors hover:bg-zinc-50 dark:border-white/10 dark:text-white dark:hover:bg-white/5"
-                      >
-                        {p === "google" ? <GoogleMark className="size-4" /> : <GithubMark className="size-4" />}
-                        {p === "google" ? "Google" : "GitHub"}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-3 text-[12px] text-zinc-400">
-                    <span className="h-px flex-1 bg-zinc-200 dark:bg-white/10" /> or with email <span className="h-px flex-1 bg-zinc-200 dark:bg-white/10" />
-                  </div>
-                </>
-              ) : null}
-
-              <div className="space-y-1.5">
-                <label htmlFor={`${id}-email`} className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">Work email</label>
-                <input id={`${id}-email`} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ada@studio.com" className={field} />
-              </div>
-
-              <div className="space-y-1.5">
-                <label htmlFor={`${id}-pw`} className="text-[12.5px] font-medium text-zinc-700 dark:text-zinc-300">Password</label>
-                <div className="relative">
-                  <input
-                    id={`${id}-pw`}
-                    type={show ? "text" : "password"}
-                    required
-                    minLength={8}
-                    autoComplete="new-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 8 characters"
-                    className={cn(field, "pr-11")}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShow((s) => !s)}
-                    aria-label={show ? "Hide password" : "Show password"}
-                    className="absolute right-1.5 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-lg text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
-                  >
-                    {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                  </button>
-                </div>
-                <div className="flex items-center gap-2 pt-1" aria-live="polite">
-                  <div className="flex flex-1 gap-1">
-                    {[1, 2, 3, 4].map((n) => (
-                      <span key={n} className="h-1 flex-1 overflow-hidden rounded-full bg-zinc-100 dark:bg-white/10">
-                        <motion.span
-                          className={cn("block h-full rounded-full", STRENGTH_COLOR[score])}
-                          initial={false}
-                          animate={{ width: password && score >= n ? "100%" : "0%" }}
-                          transition={{ duration: reduce ? 0 : 0.3 }}
-                        />
-                      </span>
-                    ))}
-                  </div>
-                  <span className="w-16 text-right text-[11.5px] text-zinc-500 dark:text-zinc-400">{password ? STRENGTH[score] : ""}</span>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={state === "pending"}
-                className="group flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-zinc-950 text-[14px] font-semibold text-white transition-colors hover:bg-zinc-800 disabled:opacity-80 dark:bg-white dark:text-zinc-950 dark:hover:bg-zinc-200"
+              </motion.div>
+            ) : (
+              <motion.form
+                key="form"
+                noValidate
+                onSubmit={submit}
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={still ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 26 }}
               >
-                {state === "pending" ? (
-                  <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                ) : (
+                <h3 className={`text-[19px] font-semibold tracking-[-0.03em] ${ink}`}>Create your workspace</h3>
+                <p className={`mt-1 text-[13.5px] ${soft}`}>Takes about a minute.</p>
+                {showSso && (
                   <>
-                    {submitLabel}
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                    <div className="mt-4 flex gap-2">
+                      <button type="button" disabled={busy} onClick={() => onSso?.("google")} className={sso}>
+                        <GoogleMark className="size-4" /> Google
+                      </button>
+                      <button type="button" disabled={busy} onClick={() => onSso?.("github")} className={sso}>
+                        <GithubMark className="size-4" /> GitHub
+                      </button>
+                    </div>
+                    <div className={`my-3.5 flex items-center gap-3 text-[12px] ${soft}`} aria-hidden>
+                      <span className="h-px flex-1 bg-black/[.08] dark:bg-white/10" />
+                      or
+                      <span className="h-px flex-1 bg-black/[.08] dark:bg-white/10" />
+                    </div>
                   </>
                 )}
-              </button>
-              <p className="text-center text-[11.5px] text-zinc-400">
-                By continuing you agree to the <a href="#" className="underline underline-offset-2">Terms</a> and <a href="#" className="underline underline-offset-2">Privacy Policy</a>.
-              </p>
-            </motion.form>
-          )}
-        </AnimatePresence>
+                <div className={showSso ? "space-y-2.5" : "mt-4 space-y-2.5"}>
+                  <label className={field}>
+                    <span className="sr-only">Work email</span>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      placeholder="Work email"
+                      value={email}
+                      disabled={busy}
+                      onChange={(e) => {
+                        touch();
+                        setEmail(e.target.value);
+                        setError(null);
+                      }}
+                      className={input}
+                    />
+                    <AnimatePresence>
+                      {emailOk && (
+                        <motion.span
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          exit={{ scale: 0 }}
+                          transition={{ type: "spring", stiffness: 600, damping: 16 }}
+                          className="flex size-5 items-center justify-center rounded-full bg-[#30d158] text-white"
+                          aria-hidden
+                        >
+                          <svg viewBox="0 0 16 16" className="size-3" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M3.5 8.5 6.5 11.5 12.5 4.5" />
+                          </svg>
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </label>
+                  <div>
+                    <label className={field}>
+                      <span className="sr-only">Password</span>
+                      <input
+                        type={show ? "text" : "password"}
+                        autoComplete="new-password"
+                        placeholder="Password"
+                        value={password}
+                        disabled={busy}
+                        aria-describedby={`${id}-strength`}
+                        onChange={(e) => {
+                          touch();
+                          setPassword(e.target.value);
+                          setError(null);
+                        }}
+                        className={input}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShow((s) => !s)}
+                        aria-pressed={show}
+                        className={`-mr-1 rounded-md px-1.5 py-0.5 text-[12.5px] font-medium text-[#0066cc] dark:text-[#64b5ff] ${focus}`}
+                      >
+                        {show ? "Hide" : "Show"}
+                      </button>
+                    </label>
+                    <div className="mt-2 flex items-center gap-3">
+                      <div className="flex flex-1 gap-1" aria-hidden>
+                        {[1, 2, 3, 4].map((n) => (
+                          <Segment key={n} on={score >= n} color={LEVEL_COLOR[score]} still={still} />
+                        ))}
+                      </div>
+                      <span id={`${id}-strength`} className={`w-[64px] text-right text-[12px] font-medium tabular-nums ${LEVEL_TEXT[password ? score : 0]}`} aria-live="polite">
+                        {password ? LEVEL[score] : "Strength"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <motion.button
+                  type="submit"
+                  disabled={busy}
+                  whileTap={still ? undefined : { scale: 0.98 }}
+                  className={`mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-[12px] bg-[#0071e3] text-[15px] font-semibold text-white shadow-[0_10px_24px_-12px_rgba(0,113,227,.9)] transition-colors hover:bg-[#0077ed] dark:bg-[#0a84ff] ${focus} focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#1c1c1e]`}
+                >
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    {state === "pending" ? (
+                      <motion.span key="p" className="flex gap-1" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} aria-label="Creating workspace">
+                        {[0, 1, 2].map((i) => (
+                          <motion.span key={i} className="size-1.5 rounded-full bg-white" animate={still ? undefined : { y: [0, -4, 0] }} transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.12 }} />
+                        ))}
+                      </motion.span>
+                    ) : (
+                      <motion.span key="s" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}>
+                        {submitLabel}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+                <p className={`mt-2.5 min-h-[18px] text-center text-[12.5px] ${error ? "text-[#d70015] dark:text-[#ff6961]" : soft}`} role={error ? "alert" : undefined}>
+                  {error ??
+                    (onSignIn ? (
+                      <>
+                        Already have an account?{" "}
+                        <button type="button" onClick={onSignIn} className={`rounded font-medium text-[#0066cc] hover:underline dark:text-[#64b5ff] ${focus}`}>
+                          Sign in
+                        </button>
+                      </>
+                    ) : (
+                      "By continuing you agree to the Terms and Privacy Policy."
+                    ))}
+                </p>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
     </div>
   );

@@ -1,319 +1,312 @@
 "use client";
 
 import * as React from "react";
-import { motion, useMotionTemplate, useMotionValue, useReducedMotion } from "framer-motion";
+import {
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  useVelocity,
+  type AnimationPlaybackControls,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export type TextRevealCardProps = {
-  title: string;
-  description: string;
-  icon?: React.ReactNode;
-  image?: string;
-  children?: React.ReactNode;
+  /** Small heading above the reveal area. */
+  title?: string;
+  /** One-line hint under the reveal area. */
+  description?: string;
+  /** The sentence you see before scrubbing. */
+  text?: string;
+  /** What the scrub reveals. A string gets the gradient treatment; any node works. */
   revealContent?: React.ReactNode;
+  /** Icon shown next to the title. */
+  icon?: React.ReactNode;
+  /** Optional image URL shown above the card body (you supply it; nothing is fetched by default). */
+  image?: string;
+  /** Extra content rendered at the bottom of the card. */
+  children?: React.ReactNode;
+  /** Classes for the card. */
   className?: string;
+  /** Classes for the reveal area. */
   revealClassName?: string;
+  /** Spark amount, 0.5 to 2.2. */
   intensity?: number;
+  /** Shows the revealed sentence and turns the interaction off. */
   disabled?: boolean;
+  /** Sweeps the divider across and back every few seconds until someone touches the card. */
+  autoplay?: boolean;
 };
 
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+type Spark = { x: number; y: number; vx: number; vy: number; life: number; hue: number };
+const HUES = ["#0071e3", "#bf5af2", "#64d2ff"];
+const HUES_DARK = ["#0a84ff", "#bf5af2", "#64d2ff"];
 
+function subscribeTheme(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+/** Follows the site's class-based dark mode; false on the server and during hydration. */
+function useIsDark() {
+  return React.useSyncExternalStore(subscribeTheme, () => document.documentElement.classList.contains("dark"), () => false);
+}
+
+/**
+ * Scrub a glass divider across a sentence to swap it for another one. The divider follows the
+ * pointer on a spring, leans into the direction you move and swings upright when you stop, and
+ * sheds a few sparks from the seam. Leaving the card snaps the divider home with a bounce.
+ */
 export function TextRevealCard({
   title,
-  description,
+  description = "Drag across the line, or use the arrow keys.",
+  text = "Most teams ship on a hunch.",
+  revealContent = "Yours will ship on proof.",
   icon,
   image,
   children,
-  revealContent,
   className,
   revealClassName,
   intensity = 1,
   disabled = false,
+  autoplay = false,
 }: TextRevealCardProps) {
-  const reduceMotion = useReducedMotion() === true;
-  const ref = React.useRef<HTMLDivElement | null>(null);
-  const [isActive, setIsActive] = React.useState(false);
-  const [isTouchRevealed, setIsTouchRevealed] = React.useState(false);
-  const [revealProgress, setRevealProgress] = React.useState(0);
-  const [pointerRatio, setPointerRatio] = React.useState(0);
-  const [isCoarsePointer, setIsCoarsePointer] = React.useState(false);
+  const still = useReducedMotion() === true;
+  const dark = useIsDark();
+  const stage = React.useRef<HTMLDivElement>(null);
+  const canvas = React.useRef<HTMLCanvasElement>(null);
+  const touched = React.useRef(false);
+  const run = React.useRef<AnimationPlaybackControls | undefined>(undefined);
+  const sparks = React.useRef<Spark[]>([]);
+  const kick = React.useRef<() => void>(() => {});
+  const amount = Math.max(0.5, Math.min(2.2, intensity));
 
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const safeIntensity = clamp(intensity, 0.5, 2.2);
+  const target = useMotionValue(disabled ? 100 : 0);
+  const pct = useSpring(target, still ? { stiffness: 2000, damping: 100 } : { stiffness: 260, damping: 24, mass: 0.7 });
+  const vel = useVelocity(pct);
+  const lean = useSpring(useTransform(vel, (v) => Math.max(-16, Math.min(16, v * 0.05))), { stiffness: 320, damping: 16 });
+  const initial = disabled ? 100 : 0;
+  // The slider value is written to the DOM as it springs, so screen readers stay in sync without re-renders.
+  useMotionValueEvent(pct, "change", (v) => {
+    const n = Math.round(Math.max(0, Math.min(100, v)));
+    stage.current?.setAttribute("aria-valuenow", String(n));
+    stage.current?.setAttribute("aria-valuetext", `${n}% revealed`);
+  });
 
-  const radialGlow = useMotionTemplate`radial-gradient(${280 * safeIntensity}px circle at ${x}px ${y}px, hsl(var(--primary) / 0.35), transparent 70%)`;
-  const revealMask = useMotionTemplate`linear-gradient(90deg, rgba(255,255,255,1) 0%, rgba(255,255,255,1) calc(${x}px - 14px), rgba(255,255,255,0.95) calc(${x}px - 2px), rgba(255,255,255,0.28) calc(${x}px + 16px), rgba(255,255,255,0) calc(${x}px + 56px), rgba(255,255,255,0) 100%)`;
-  const revealWidth = useMotionTemplate`calc(${x}px + 18px)`;
-  const swarmField = useMotionTemplate`radial-gradient(1.3px 1.3px at calc(${x}px + 10px) calc(100% - 68px), rgba(255,255,255,0.9), transparent 74%),
-    radial-gradient(1.1px 1.1px at calc(${x}px + 18px) calc(100% - 60px), rgba(255,255,255,0.78), transparent 74%),
-    radial-gradient(1.5px 1.5px at calc(${x}px + 26px) calc(100% - 72px), rgba(191,219,254,0.88), transparent 74%),
-    radial-gradient(1px 1px at calc(${x}px + 34px) calc(100% - 52px), rgba(255,255,255,0.72), transparent 74%),
-    radial-gradient(1.2px 1.2px at calc(${x}px + 46px) calc(100% - 66px), rgba(191,219,254,0.84), transparent 74%),
-    radial-gradient(1.4px 1.4px at calc(${x}px + 58px) calc(100% - 58px), rgba(255,255,255,0.8), transparent 74%),
-    radial-gradient(1.1px 1.1px at calc(${x}px + 70px) calc(100% - 70px), rgba(191,219,254,0.78), transparent 74%),
-    radial-gradient(1px 1px at calc(${x}px + 82px) calc(100% - 48px), rgba(255,255,255,0.68), transparent 74%),
-    radial-gradient(1.2px 1.2px at calc(${x}px + 96px) calc(100% - 64px), rgba(191,219,254,0.72), transparent 74%)`;
-  const swarmFieldSoft = useMotionTemplate`radial-gradient(2.5px 2.5px at calc(${x}px + 18px) calc(100% - 62px), rgba(255,255,255,0.32), transparent 70%),
-    radial-gradient(2.2px 2.2px at calc(${x}px + 44px) calc(100% - 72px), rgba(191,219,254,0.3), transparent 72%),
-    radial-gradient(2.4px 2.4px at calc(${x}px + 74px) calc(100% - 56px), rgba(255,255,255,0.28), transparent 72%)`;
+  const revealClip = useMotionTemplate`inset(0 calc(100% - ${pct}%) 0 0)`;
+  const baseClip = useMotionTemplate`inset(0 0 0 ${pct}%)`;
+  const left = useMotionTemplate`${pct}%`;
+  const knob = useTransform(pct, (v) => (v <= 0.5 || v >= 99.5 ? 0 : 1));
+
+  const to = React.useCallback(
+    (v: number) => {
+      run.current?.stop();
+      target.set(Math.max(0, Math.min(100, v)));
+    },
+    [target],
+  );
+
+  // Sparks: spawned from the seam as it moves, drawn on one canvas, and the loop sleeps when none are left.
+  React.useEffect(() => {
+    const el = canvas.current;
+    const host = stage.current;
+    if (!el || !host || still) return;
+    const ctx = el.getContext("2d");
+    if (!ctx) return;
+    let raf = 0;
+    let last = 0;
+    let prev = pct.get();
+    let seed = 7;
+    const rnd = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const size = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      el.width = Math.round(host.clientWidth * dpr);
+      el.height = Math.round(host.clientHeight * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+    const ro = new ResizeObserver(size);
+    ro.observe(host);
+    const palette = dark ? HUES_DARK : HUES;
+    const frame = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now;
+      const w = host.clientWidth;
+      const h = host.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+      const list = sparks.current;
+      for (let i = list.length - 1; i >= 0; i--) {
+        const s = list[i]!;
+        s.life -= dt * 1.6;
+        if (s.life <= 0) {
+          list.splice(i, 1);
+          continue;
+        }
+        s.vy += 60 * dt;
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        ctx.globalAlpha = s.life;
+        ctx.fillStyle = palette[s.hue] ?? palette[0]!;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 1.2 + s.life * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      raf = list.length ? requestAnimationFrame(frame) : 0;
+      if (!raf) last = 0;
+    };
+    kick.current = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    const off = pct.on("change", (v) => {
+      const d = v - prev;
+      prev = v;
+      if (v <= 0.5 || v >= 99.5) return;
+      const n = Math.min(4, Math.floor(Math.abs(d) * 0.9 * amount + (rnd() < 0.35 * amount ? 1 : 0)));
+      if (!n) return;
+      const w = host.clientWidth;
+      const h = host.clientHeight;
+      for (let k = 0; k < n; k++) {
+        sparks.current.push({
+          x: (v / 100) * w,
+          y: h * (0.2 + rnd() * 0.6),
+          vx: -Math.sign(d) * (20 + rnd() * 60),
+          vy: -20 - rnd() * 50,
+          life: 0.6 + rnd() * 0.4,
+          hue: Math.floor(rnd() * 3),
+        });
+      }
+      if (sparks.current.length > 120) sparks.current.splice(0, sparks.current.length - 120);
+      kick.current();
+    });
+    return () => {
+      off();
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+      kick.current = () => {};
+    };
+  }, [pct, still, dark, amount]);
 
   React.useEffect(() => {
-    const media = window.matchMedia("(pointer: coarse)");
-    const sync = () => setIsCoarsePointer(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
+    if (!autoplay || disabled || still) return;
+    const sweep = () => {
+      if (touched.current) return;
+      run.current?.stop();
+      run.current = animate(target, [0, 100, 100, 0], { duration: 3, times: [0, 0.45, 0.7, 1], ease: "easeInOut" });
+    };
+    const first = setTimeout(sweep, 700);
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      sweep();
+    }, 4200);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+      run.current?.stop();
+    };
+  }, [autoplay, disabled, still, target]);
 
-  function updatePointer(clientX: number, clientY: number) {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const localX = clientX - rect.left;
-    const localY = clientY - rect.top;
-    const progress = clamp((localY - rect.height * 0.5) / (rect.height * 0.5), 0, 1);
-    const ratio = clamp(localX / rect.width, 0, 1);
-    x.set(localX);
-    y.set(localY);
-    setRevealProgress(progress);
-    setPointerRatio(ratio);
-  }
+  const fromPointer = (e: React.PointerEvent) => {
+    const r = stage.current?.getBoundingClientRect();
+    if (!r || disabled) return;
+    touched.current = true;
+    to(((e.clientX - r.left) / r.width) * 100);
+  };
 
-  function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
-    if (disabled) return;
-    setIsActive(true);
-    setIsTouchRevealed(false);
-    updatePointer(e.clientX, e.clientY);
-  }
-
-  function onPointerLeave() {
-    setIsActive(false);
-    setRevealProgress(0);
-    setPointerRatio(0);
-  }
-
-  function onTapToggle() {
-    if (disabled || !isCoarsePointer) return;
-    setIsTouchRevealed((v) => !v);
-    setIsActive(false);
-    setRevealProgress((v) => (v > 0 ? 0 : 1));
-    setPointerRatio((v) => (v > 0 ? 0 : 1));
-  }
-
-  const showReveal = !disabled && (isTouchRevealed || isActive);
-  const revealOpacity = reduceMotion
-    ? showReveal
-      ? 1
-      : 0
-    : showReveal
-      ? clamp(0.68 + revealProgress * 0.32, 0, 1)
-      : 0;
-  const revealY = reduceMotion ? 0 : showReveal ? 0 : 18;
-  const edgeFade = clamp(1 - (pointerRatio - 0.76) / 0.24, 0, 1);
+  const revealNode =
+    typeof revealContent === "string" ? (
+      <span className="bg-gradient-to-r from-[#0071e3] via-[#5e5ce6] to-[#bf5af2] bg-clip-text text-transparent dark:from-[#0a84ff] dark:via-[#7d7aff] dark:to-[#da8fff]">
+        {revealContent}
+      </span>
+    ) : (
+      revealContent
+    );
+  const line = "m-0 text-balance text-[28px] font-semibold leading-[1.12] tracking-[-0.03em] sm:text-[32px]";
 
   return (
-    <motion.article
-      ref={ref}
-      tabIndex={0}
-      role="button"
-      aria-label={title}
-      onPointerMove={onPointerMove}
-      onPointerLeave={onPointerLeave}
-      onClick={onTapToggle}
-      onFocus={() => {
-        if (!disabled) {
-          setIsTouchRevealed(true);
-          setRevealProgress(1);
-        }
-      }}
-      onBlur={() => {
-        setIsTouchRevealed(false);
-        setIsActive(false);
-        setRevealProgress(0);
-      }}
+    <article
       className={cn(
-        "group relative isolate overflow-hidden rounded-3xl border border-border/70 bg-card text-card-foreground shadow-[0_18px_45px_-30px_rgba(15,23,42,0.5)] outline-none transition focus-visible:ring-2 focus-visible:ring-primary/45",
-        disabled ? "cursor-default opacity-80" : "cursor-pointer hover:-translate-y-0.5",
+        "w-full max-w-[460px] overflow-hidden rounded-[24px] bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
         className,
       )}
-      animate={{
-        y: disabled ? 0 : showReveal ? -2 : 0,
-        boxShadow: showReveal
-          ? "0 26px 65px -35px rgba(2,132,199,0.45)"
-          : "0 18px 45px -30px rgba(15,23,42,0.5)",
+      onPointerDown={() => {
+        touched.current = true;
       }}
-      transition={{ duration: reduceMotion ? 0.1 : 0.22, ease: "easeOut" }}
     >
-      <div className="pointer-events-none absolute inset-0 rounded-[inherit] bg-gradient-to-b from-primary/[0.08] via-transparent to-transparent" />
-      {!disabled && !reduceMotion ? (
-        <motion.div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-[inherit]"
-          style={{ backgroundImage: radialGlow, opacity: isActive ? 1 : 0 }}
-          transition={{ duration: 0.2 }}
-        />
+      {image ? (
+        // A plain img keeps the component free of next/image config; the URL is yours.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt="" className="aspect-[16/9] w-full object-cover" />
       ) : null}
-
-      <div className="relative z-10">
-        {(image || children) && (
-          <div className="relative aspect-[16/10] w-full overflow-hidden border-b border-border/60">
-            {image ? (
-              <img
-                src={image}
-                alt={title}
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
-                loading="lazy"
-              />
-            ) : null}
-            {children ? <div className="absolute inset-0">{children}</div> : null}
-          </div>
-        )}
-
-        <div className="space-y-2 p-5">
+      <div className="flex flex-col gap-4 p-5 sm:p-6">
+        {title || icon ? (
           <div className="flex items-center gap-2.5">
-            {icon ? (
-              <span className="inline-flex size-8 items-center justify-center rounded-xl border border-border/70 bg-muted/50">
-                {icon}
-              </span>
-            ) : null}
-            <h3 className="text-lg font-semibold tracking-tight">{title}</h3>
+            {icon ? <span className="grid size-7 place-items-center rounded-full bg-[#f0f0f3] dark:bg-[#2c2c2e]">{icon}</span> : null}
+            {title ? <h3 className="m-0 text-[15px] font-semibold tracking-[-0.01em]">{title}</h3> : null}
           </div>
-          {revealContent ? (
-            <p className="text-sm leading-relaxed text-muted-foreground/85">{description}</p>
-          ) : null}
-        </div>
-
-        <motion.div
+        ) : null}
+        <div
+          ref={stage}
+          role="slider"
+          tabIndex={disabled ? -1 : 0}
+          aria-label={typeof revealContent === "string" ? `Reveal: ${revealContent}` : "Reveal"}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={initial}
+          aria-valuetext={`${initial}% revealed`}
+          onPointerEnter={fromPointer}
+          onPointerMove={fromPointer}
+          onPointerDown={fromPointer}
+          onPointerLeave={() => {
+            if (!disabled) to(0);
+          }}
+          onKeyDown={(e) => {
+            if (disabled) return;
+            const now = target.get();
+            let next: number | null = null;
+            if (e.key === "ArrowRight" || e.key === "ArrowUp") next = now + 10;
+            if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = now - 10;
+            if (e.key === "Home") next = 0;
+            if (e.key === "End") next = 100;
+            if (next === null) return;
+            e.preventDefault();
+            touched.current = true;
+            to(next);
+          }}
           className={cn(
-            "relative overflow-hidden border-t border-border/60 bg-gradient-to-t from-primary/[0.12] via-background/80 to-background/30 px-5 pb-5 pt-4",
+            "relative cursor-ew-resize touch-pan-y select-none overflow-hidden rounded-[18px] bg-[#f5f5f7] px-5 py-7 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:focus-visible:ring-[#0a84ff]",
             revealClassName,
           )}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{ duration: reduceMotion ? 0.1 : 0.26, ease: [0.22, 1, 0.36, 1] }}
         >
-          {!reduceMotion && showReveal ? (
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 z-[11]"
-              style={{ backgroundImage: swarmField }}
-              animate={{
-                opacity: clamp(revealOpacity * edgeFade * 1.1, 0, 1),
-                x: [0, 14, -8, 22, 0],
-                y: [0, -4, 5, -3, 0],
-                scale: [1, 1.06, 0.98, 1.04, 1],
-              }}
-              transition={{ duration: 1.45, ease: "easeInOut", repeat: Infinity }}
-            />
-          ) : null}
-
-          {!reduceMotion && showReveal ? (
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute inset-0 z-[10] blur-[0.5px]"
-              style={{ backgroundImage: swarmFieldSoft }}
-              animate={{
-                opacity: clamp(revealOpacity * edgeFade * 0.85, 0, 1),
-                x: [0, -10, 12, -6, 0],
-                y: [0, 3, -5, 4, 0],
-                scale: [1.02, 0.98, 1.08, 1, 1.02],
-              }}
-              transition={{ duration: 1.9, ease: "easeInOut", repeat: Infinity }}
-            />
-          ) : null}
-
-          {!reduceMotion && showReveal ? (
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute top-2 bottom-2 z-20 w-[2px] rounded-full bg-gradient-to-b from-white/25 via-white to-sky-200/30"
-              style={{
-                left: x,
-                boxShadow:
-                  "0 0 0.45rem rgba(255,255,255,0.8), 0 0 1rem rgba(147,197,253,0.65), 0 0 1.8rem rgba(56,189,248,0.4)",
-              }}
-              animate={{ opacity: showReveal ? revealOpacity * edgeFade : 0 }}
-              transition={{ duration: 0.16 }}
-            />
-          ) : null}
-
-          {!reduceMotion && showReveal ? (
-            <motion.span
-              aria-hidden
-              className="pointer-events-none absolute top-2 bottom-2 z-[19] w-5 -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(125,211,252,0.35),transparent_72%)] blur-sm"
-              style={{ left: x }}
-              animate={{ opacity: showReveal ? clamp(revealOpacity * edgeFade * 0.9, 0, 1) : 0 }}
-              transition={{ duration: 0.16 }}
-            />
-          ) : null}
-
-          {typeof revealContent === "string" ? (
-            <div className="relative">
-              <p className="leading-[1.05] text-white/35">{revealContent}</p>
-              <motion.p
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 left-0 z-10 overflow-hidden whitespace-nowrap leading-[1.05] text-white"
-                style={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        width: revealWidth,
-                        WebkitMaskImage:
-                          "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) calc(100% - 24px), rgba(0,0,0,0) 100%)",
-                        maskImage:
-                          "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) calc(100% - 24px), rgba(0,0,0,0) 100%)",
-                      }
-                }
-                animate={{ opacity: showReveal ? 1 : 0 }}
-                transition={{ duration: reduceMotion ? 0.1 : 0.2 }}
-              >
-                {revealContent}
-              </motion.p>
-            </div>
-          ) : revealContent ? (
-            <motion.div
-              className="relative"
-              style={
-                reduceMotion
-                  ? undefined
-                  : {
-                      WebkitMaskImage: revealMask,
-                      maskImage: revealMask,
-                    }
-              }
-              animate={{ opacity: showReveal ? revealOpacity : 0.2 }}
-              transition={{ duration: reduceMotion ? 0.1 : 0.2 }}
-            >
-              {revealContent}
-            </motion.div>
-          ) : (
-            <div className="relative">
-              <p className="text-sm leading-relaxed text-muted-foreground/75">{description}</p>
-              <motion.p
-                aria-hidden
-                className="pointer-events-none absolute inset-y-0 left-0 z-10 overflow-hidden whitespace-nowrap text-sm leading-relaxed text-foreground dark:text-white"
-                style={
-                  reduceMotion
-                    ? undefined
-                    : {
-                        width: revealWidth,
-                        WebkitMaskImage:
-                          "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) calc(100% - 24px), rgba(0,0,0,0) 100%)",
-                        maskImage:
-                          "linear-gradient(90deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) calc(100% - 24px), rgba(0,0,0,0) 100%)",
-                      }
-                }
-                animate={{ opacity: showReveal ? 1 : 0 }}
-                transition={{ duration: reduceMotion ? 0.1 : 0.2 }}
-              >
-                {description}
-              </motion.p>
-            </div>
-          )}
-        </motion.div>
+          <motion.p className={cn(line, "text-[#86868b] dark:text-[#98989d]")} style={{ clipPath: baseClip }}>
+            {text}
+          </motion.p>
+          <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0 px-5 py-7" style={{ clipPath: revealClip }}>
+            <p className={line}>{revealNode}</p>
+          </motion.div>
+          <canvas ref={canvas} aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" />
+          <motion.span aria-hidden="true" className="pointer-events-none absolute inset-y-3 w-0" style={{ left, opacity: knob }}>
+            <motion.span className="absolute inset-y-0 left-[-1px] block w-[2px]" style={{ rotate: lean }}>
+              <span className="absolute inset-0 rounded-full bg-gradient-to-b from-transparent via-[#0071e3] to-transparent dark:via-[#0a84ff]" />
+              <span className="absolute left-1/2 top-1/2 block size-[22px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_6px_14px_-4px_rgba(0,0,0,.35)] dark:bg-[#f5f5f7]">
+                <span className="absolute inset-[7px] rounded-full bg-[#0071e3] dark:bg-[#0a84ff]" />
+              </span>
+            </motion.span>
+          </motion.span>
+        </div>
+        {description ? <p className="m-0 text-[13px] text-[#86868b] dark:text-[#a1a1a6]">{description}</p> : null}
+        {children}
       </div>
-    </motion.article>
+    </article>
   );
 }

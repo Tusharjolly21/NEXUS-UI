@@ -80,7 +80,7 @@ export function ThrowWheel({ cards = CARDS, autoplay = false }: ThrowWheelProps)
 
   const settle = (velocity: number) => {
     ctl.current?.stop();
-    ctl.current = animate(rot, rot.get(), {
+    ctl.current = animate(rot, [rot.get()], {
       type: "inertia",
       velocity,
       power: 0.55,

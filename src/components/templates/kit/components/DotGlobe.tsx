@@ -236,7 +236,7 @@ export default function DotGlobe({ size = 340, accent = "#0071e3", cities = CITI
         onPointerUp={() => {
           const d = drag.current;
           drag.current = null;
-          if (d) ctl.current = [animate(yaw, yaw.get(), { type: "inertia", velocity: d.vx, power: 0.6, timeConstant: 700 })];
+          if (d) ctl.current = [animate(yaw, [yaw.get()], { type: "inertia", velocity: d.vx, power: 0.6, timeConstant: 700 })];
         }}
       />
       <div className="flex max-w-[420px] flex-wrap justify-center gap-1.5">

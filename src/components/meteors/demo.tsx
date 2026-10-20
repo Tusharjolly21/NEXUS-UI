@@ -1,64 +1,21 @@
 "use client";
 
-import * as React from "react";
 import { Meteors } from "./meteors";
 
+/** Standalone demo page: a night-sky card with meteors behind the copy. */
 export function MeteorsDemo() {
   return (
-    <section className="mx-auto max-w-6xl space-y-10 px-4 py-14">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Backgrounds</p>
-        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Meteor Effect
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Animated diagonal beams with glowing heads and trails, crafted for hero sections, cards, and pricing containers.
-        </p>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="relative min-h-[340px] overflow-hidden rounded-2xl border border-white/10 bg-[#050911] p-8 text-white">
-          <Meteors
-            number={24}
-            minDuration={2.8}
-            maxDuration={5.8}
-            angle={214}
-            color="#93c5fd"
-            intensity="high"
-            className="absolute inset-0"
-          />
-          <div className="relative z-10 min-h-[300px]">
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-200/80">Card example</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight">Conversion-focused pricing card</h2>
-            <p className="mt-3 max-w-md text-sm text-slate-300/85">
-              Keep foreground copy crisp while meteors animate softly in the background.
-            </p>
-          </div>
+    <section className="mx-auto max-w-3xl px-4 py-16">
+      <Meteors
+        number={22}
+        stars={70}
+        className="flex min-h-[420px] items-center justify-center rounded-[24px] bg-[radial-gradient(120%_90%_at_50%_0%,#13204a_0%,#060a18_55%,#03050c_100%)] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
+      >
+        <div className="px-6 text-center text-white">
+          <h2 className="text-[40px] font-semibold leading-none tracking-[-0.045em]">Make a wish.</h2>
+          <p className="mt-3 text-[13px] text-white/60">Click the sky to call one down.</p>
         </div>
-
-        <Meteors
-          number={30}
-          minDelay={0.05}
-          maxDelay={1.8}
-          minDuration={2.8}
-          maxDuration={5.8}
-          angle={212}
-          color="#93c5fd"
-          intensity="high"
-          glow
-          className="relative min-h-[340px] overflow-hidden rounded-2xl border border-white/10 bg-[#030712] p-8 text-white"
-        >
-          <div className="relative z-10 mx-auto max-w-xl text-center">
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-200/80">Hero background example</p>
-            <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
-              Launch pages with cinematic motion depth
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-slate-300/85">
-              Use this effect as a reusable layer behind any section while preserving readability and interaction.
-            </p>
-          </div>
-        </Meteors>
-      </div>
+      </Meteors>
     </section>
   );
 }

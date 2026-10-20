@@ -1,4 +1,4 @@
-export { AnimatedBentoGrid } from "./animated-bento-grid";
+export { AnimatedBentoGrid, DEFAULT_BENTO_ITEMS } from "./animated-bento-grid";
 export type {
   AnimatedBentoGridProps,
   BentoGridPreset,

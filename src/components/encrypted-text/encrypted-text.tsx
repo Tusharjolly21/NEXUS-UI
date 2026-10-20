@@ -1,57 +1,52 @@
 "use client";
 
 import * as React from "react";
-import { useInView, useReducedMotion } from "framer-motion";
+import { animate, useInView, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_CHARSET =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%^&*!<>/|[]{}~=-_+:.";
-
-function pickRandom(chars: string): string {
-  return chars[Math.floor(Math.random() * chars.length)] ?? chars[0]!;
-}
-
-function isPreserved(c: string): boolean {
-  return c === " " || c === "\n" || c === "\t";
-}
-
-type CharState = { char: string; locked: boolean };
-
-function initStates(text: string, charset: string): CharState[] {
-  return Array.from(text).map((c) =>
-    isPreserved(c) ? { char: c, locked: true } : { char: pickRandom(charset), locked: false },
-  );
-}
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*<>/[]{}=+";
 
 export type EncryptedTextTrigger = "load" | "hover" | "viewport" | "click";
 
 export interface EncryptedTextProps {
+  /** The string that ends up on screen. */
   text: string;
   className?: string;
-  /** ms between each character locking in. Default: 50 */
+  /** Milliseconds between one character locking in and the next. */
   speed?: number;
-  /** ms between gibberish shuffle ticks. Default: 35 */
+  /** Milliseconds between scramble ticks. */
   shuffleSpeed?: number;
-  /** ms delay before animation starts. Default: 0 */
+  /** Milliseconds before the decode starts. */
   revealDelay?: number;
-  /** Charset for the gibberish phase. */
+  /** Characters used while scrambling. */
   characters?: string;
-  /** Shuffle cycles before first character locks in. Default: 8 */
+  /** Scramble ticks before the first character locks. */
   iterations?: number;
-  /** What triggers the reveal. Default: "load" */
+  /** What starts the decode. */
   trigger?: EncryptedTextTrigger;
-  /** Loop the animation after completion. Default: false */
+  /** Scrambles and decodes again after a pause. */
   loop?: boolean;
-  /** ms to wait before replaying when loop=true. Default: 2000 */
+  /** Milliseconds between loops. */
   loopDelay?: number;
-  /** Polymorphic element. Default: "span" */
+  /** Element used as the root. */
   as?: "span" | "p" | "h1" | "h2" | "h3" | "div";
-  /** Called once every character has locked in. */
+  /** Called each time every character has locked in. */
   onComplete?: () => void;
-  /**ClassName applied to scrambling (unlocked) characters. Defaults to primary/cyan glow. */
+  /** Classes for the scrambling glyphs. Defaults to the accent blue. */
   scrambleClassName?: string;
+  /** Replays the decode every `loopDelay` ms until someone hovers, focuses or clicks it. */
+  autoplay?: boolean;
 }
 
+const isGap = (c: string) => c === " " || c === "\n" || c === "\t";
+
+/**
+ * Text that decodes itself. Every unlocked character shuffles through a charset in a fixed-width
+ * cell (so the line never jitters), then a lock wave runs left to right and each character drops
+ * into place with a spring pop. Glyphs are written straight to the DOM, so the scramble costs no
+ * React renders.
+ */
 export function EncryptedText({
   text,
   className,
@@ -66,154 +61,262 @@ export function EncryptedText({
   as: Tag = "span",
   onComplete,
   scrambleClassName,
+  autoplay = false,
 }: EncryptedTextProps) {
-  const reduceMotion = useReducedMotion();
-  const rootRef = React.useRef<HTMLElement>(null);
-  const isInView = useInView(rootRef as React.RefObject<Element>, {
-    once: !loop,
-    amount: 0.3,
+  const still = useReducedMotion() === true;
+  const root = React.useRef<HTMLElement>(null);
+  const finals = React.useRef<(HTMLSpanElement | null)[]>([]);
+  const glyphs = React.useRef<(HTMLSpanElement | null)[]>([]);
+  const touched = React.useRef(false);
+  const stopRun = React.useRef<() => void>(() => {});
+  const cfg = React.useRef({
+    speed,
+    shuffleSpeed,
+    iterations,
+    characters,
+    loop,
+    loopDelay,
+    onComplete,
+    autoplay,
   });
+  React.useEffect(() => {
+    cfg.current = {
+      speed,
+      shuffleSpeed,
+      iterations,
+      characters,
+      loop,
+      loopDelay,
+      onComplete,
+      autoplay,
+    };
+  });
+  const inView = useInView(root, { once: !(loop || autoplay), amount: 0.3 });
+  const chars = React.useMemo(() => Array.from(text), [text]);
+  const scrambledAtRest = trigger === "load" || trigger === "viewport";
 
-  const [states, setStates] = React.useState<CharState[]>(() =>
-    Array.from(text).map((c) => ({ char: c, locked: true }))
+  const showFinal = React.useCallback(() => {
+    finals.current.forEach((el) => {
+      if (el) el.style.opacity = "1";
+    });
+    glyphs.current.forEach((el) => {
+      if (el) el.style.opacity = "0";
+    });
+  }, []);
+
+  const play = React.useCallback(() => {
+    const start = () => {
+      stopRun.current();
+      const {
+        speed: sp,
+        shuffleSpeed: ss,
+        iterations: it,
+        characters: cs,
+      } = cfg.current;
+      const set = cs.length ? cs : DEFAULT_CHARSET;
+      const pick = () => set[Math.floor(Math.random() * set.length)] ?? "#";
+      const open = chars
+        .map((c, i) => (isGap(c) ? -1 : i))
+        .filter((i) => i >= 0);
+      let dead = false;
+      const timers: ReturnType<typeof setTimeout>[] = [];
+      const pops: { stop: () => void }[] = [];
+      open.forEach((i) => {
+        const f = finals.current[i];
+        const g = glyphs.current[i];
+        if (f) f.style.opacity = "0";
+        if (g) {
+          g.style.opacity = "0.85";
+          g.textContent = pick();
+        }
+      });
+      const locked = new Set<number>();
+      const shuffle = setInterval(
+        () => {
+          open.forEach((i) => {
+            if (locked.has(i)) return;
+            const g = glyphs.current[i];
+            if (g) g.textContent = pick();
+          });
+        },
+        Math.max(16, ss),
+      );
+      let k = 0;
+      let lockTimer: ReturnType<typeof setInterval> | undefined;
+      timers.push(
+        setTimeout(
+          () => {
+            lockTimer = setInterval(
+              () => {
+                if (dead) return;
+                const i = open[k++];
+                if (i === undefined) {
+                  clearInterval(lockTimer);
+                  clearInterval(shuffle);
+                  cfg.current.onComplete?.();
+                  const { loop: lp, loopDelay: ld, autoplay: ap } = cfg.current;
+                  if (lp || (ap && !touched.current))
+                    timers.push(
+                      setTimeout(() => !dead && start(), Math.max(0, ld)),
+                    );
+                  return;
+                }
+                locked.add(i);
+                const f = finals.current[i];
+                const g = glyphs.current[i];
+                if (g) g.style.opacity = "0";
+                if (f) {
+                  f.style.opacity = "1";
+                  pops.push(
+                    animate(
+                      f,
+                      { y: ["-0.28em", "0em"], scale: [1.32, 1] },
+                      { type: "spring", stiffness: 620, damping: 17 },
+                    ),
+                  );
+                }
+              },
+              Math.max(8, sp),
+            );
+          },
+          Math.max(0, it) * Math.max(16, ss),
+        ),
+      );
+      stopRun.current = () => {
+        dead = true;
+        clearInterval(shuffle);
+        if (lockTimer) clearInterval(lockTimer);
+        timers.forEach(clearTimeout);
+        pops.forEach((p) => p.stop());
+      };
+    };
+    start();
+  }, [chars]);
+
+  // Clean everything up when the text changes or the component goes away.
+  const pending = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  React.useEffect(
+    () => () => {
+      clearTimeout(pending.current);
+      stopRun.current();
+    },
+    [chars],
   );
 
-  // Always-current config refs — read inside effects without stale closure risk
-  const cfg = React.useRef({ text, characters, speed, shuffleSpeed, iterations, loop, loopDelay, onComplete });
-  cfg.current = { text, characters, speed, shuffleSpeed, iterations, loop, loopDelay, onComplete };
-
-  // Incrementing this triggers one animation run
-  const [cycle, setCycle] = React.useState(0);
-
-  // play() is the single entry point for all trigger modes
-  const play = React.useCallback(() => setCycle((n) => n + 1), []);
-
-  // Core animation — isolated per cycle so cleanup fully cancels the previous run
   React.useEffect(() => {
-    if (cycle === 0) return;
-
-    const { text: t, characters: ch, speed: sp, shuffleSpeed: ss,
-            iterations: it, loop: lp, loopDelay: ld, onComplete: cb } = cfg.current;
-
-    if (reduceMotion) {
-      setStates(Array.from(t).map((c) => ({ char: c, locked: true })));
-      cb?.();
+    if (still) {
+      showFinal();
       return;
     }
+    if (trigger === "load" || (trigger === "viewport" && inView)) {
+      const t = setTimeout(play, Math.max(0, revealDelay));
+      return () => clearTimeout(t);
+    }
+    if ((trigger === "hover" || trigger === "click") && autoplay) {
+      const t = setTimeout(play, Math.max(0, revealDelay) + 600);
+      return () => clearTimeout(t);
+    }
+  }, [still, trigger, inView, revealDelay, play, showFinal, autoplay]);
 
-    let dead = false;
-    let revealIdx = 0;
+  const interact = () => {
+    touched.current = true;
+    if (still) return;
+    clearTimeout(pending.current);
+    pending.current = setTimeout(play, Math.max(0, revealDelay));
+  };
 
-    setStates(initStates(t, ch));
+  const groups = React.useMemo(() => {
+    const out: { start: number; chars: string[]; gap: boolean }[] = [];
+    chars.forEach((c, i) => {
+      const gap = isGap(c);
+      const last = out[out.length - 1];
+      if (last && last.gap === gap && !gap) last.chars.push(c);
+      else out.push({ start: i, chars: [c], gap });
+    });
+    return out;
+  }, [chars]);
 
-    // Phase 1 — fast shuffle of all unrevealed characters
-    const shuffleTimer = setInterval(() => {
-      if (dead) return;
-      setStates((prev) =>
-        prev.map((s) => (s.locked ? s : { char: pickRandom(ch), locked: false })),
-      );
-    }, ss);
-
-    // Phase 2 — after warmup, lock one character per tick
-    let revealTimer: ReturnType<typeof setInterval> | null = null;
-    let loopTimer: ReturnType<typeof setTimeout> | null = null;
-
-    const warmupTimer = setTimeout(() => {
-      if (dead) return;
-
-      revealTimer = setInterval(() => {
-        if (dead) return;
-
-        if (revealIdx >= t.length) {
-          clearInterval(revealTimer!);
-          clearInterval(shuffleTimer);
-          if (!dead) {
-            setStates(Array.from(t).map((c) => ({ char: c, locked: true })));
-            cb?.();
-            if (lp) {
-              loopTimer = setTimeout(() => { if (!dead) setCycle((n) => n + 1); }, ld);
-            }
-          }
-          return;
-        }
-
-        const idx = revealIdx++;
-        setStates((prev) => {
-          const next = [...prev];
-          next[idx] = { char: t[idx]!, locked: true };
-          return next;
-        });
-      }, sp);
-    }, it * ss);
-
-    return () => {
-      dead = true;
-      clearInterval(shuffleTimer);
-      clearTimeout(warmupTimer);
-      if (revealTimer) clearInterval(revealTimer);
-      if (loopTimer) clearTimeout(loopTimer);
-    };
-  }, [cycle, reduceMotion]);
-
-  // Trigger: load — schedule play() after revealDelay
-  React.useEffect(() => {
-    if (trigger !== "load") return;
-    const t = setTimeout(play, revealDelay);
-    return () => clearTimeout(t);
-  }, [trigger, revealDelay, play]);
-
-  // Trigger: viewport — play() once the element enters the viewport
-  React.useEffect(() => {
-    if (trigger !== "viewport" || !isInView) return;
-    const t = setTimeout(play, revealDelay);
-    return () => clearTimeout(t);
-  }, [trigger, isInView, revealDelay, play]);
-
-  // Trigger: hover / click
-  const handleInteraction = React.useCallback(() => {
-    setTimeout(play, revealDelay);
-  }, [play, revealDelay]);
-
-  const interactionProps: React.HTMLAttributes<HTMLElement> = {};
-  if (trigger === "hover") {
-    interactionProps.onMouseEnter = handleInteraction;
-  } else if (trigger === "click") {
-    interactionProps.onClick = handleInteraction;
-    interactionProps.onKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") handleInteraction();
-    };
-  }
+  const interactive = trigger === "hover" || trigger === "click";
 
   return (
     <Tag
-      ref={rootRef as React.RefObject<never>}
-      aria-label={text}
+      ref={root as React.Ref<never>}
+      aria-label={trigger === "click" ? text : undefined}
       role={trigger === "click" ? "button" : undefined}
       tabIndex={trigger === "click" ? 0 : undefined}
+      onPointerEnter={
+        trigger === "hover"
+          ? interact
+          : () => {
+              touched.current = true;
+            }
+      }
+      onFocus={trigger === "hover" ? interact : undefined}
+      onClick={trigger === "click" ? interact : undefined}
+      onKeyDown={
+        trigger === "click"
+          ? (e: React.KeyboardEvent) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                interact();
+              }
+            }
+          : undefined
+      }
       className={cn(
         "font-mono whitespace-pre-wrap",
-        trigger === "click" && "cursor-pointer select-none",
+        interactive &&
+          "cursor-pointer rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]",
         className,
       )}
-      {...interactionProps}
     >
-      {states.map((s, i) => (
-        <span
-          key={i}
-          aria-hidden="true"
-          className={cn(
-            "inline-block transition-colors duration-75",
-            s.locked ? "text-current" : (scrambleClassName ?? "text-primary dark:text-cyan-400"),
-          )}
-          style={
-            !s.locked
-              ? { filter: "drop-shadow(0 0 5px currentColor)", opacity: 0.85 }
-              : undefined
-          }
-        >
-          {s.char}
-        </span>
-      ))}
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true">
+        {groups.map((g) =>
+          g.gap ? (
+            <React.Fragment key={`${text}-g${g.start}`}>
+              {g.chars.join("")}
+            </React.Fragment>
+          ) : (
+            <span
+              key={`${text}-w${g.start}`}
+              className="inline-block whitespace-nowrap"
+            >
+              {g.chars.map((c, k) => {
+                const i = g.start + k;
+                return (
+                  <span key={i} className="relative inline-block">
+                    <span
+                      ref={(el) => {
+                        finals.current[i] = el;
+                      }}
+                      className="inline-block"
+                      style={{ opacity: scrambledAtRest ? 0 : 1 }}
+                    >
+                      {c}
+                    </span>
+                    <span
+                      ref={(el) => {
+                        glyphs.current[i] = el;
+                      }}
+                      className={cn(
+                        "pointer-events-none absolute inset-0 flex select-none justify-center font-mono [text-shadow:0_0_8px_currentColor]",
+                        scrambleClassName ??
+                          "text-[#0071e3] dark:text-[#0a84ff]",
+                      )}
+                      style={{ opacity: scrambledAtRest ? 0.85 : 0 }}
+                    >
+                      {scrambledAtRest
+                        ? DEFAULT_CHARSET[(i * 7 + 3) % DEFAULT_CHARSET.length]
+                        : ""}
+                    </span>
+                  </span>
+                );
+              })}
+            </span>
+          ),
+        )}
+      </span>
     </Tag>
   );
 }

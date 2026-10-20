@@ -91,7 +91,7 @@ export function CurvedReel({ posters = POSTERS, autoplay = true }: CurvedReelPro
     const d = drag.current;
     drag.current = null;
     idleUntil.current = performance.now() + 2500;
-    if (d) ctl.current = animate(offset, offset.get(), { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 });
+    if (d) ctl.current = animate(offset, [offset.get()], { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 });
   };
 
   return (

@@ -1,422 +1,317 @@
 "use client";
-
-import * as React from "react";
-import { motion } from "framer-motion";
-import { Code2, MessageSquareText, Users } from "lucide-react";
+import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  useVelocity,
+  type MotionValue,
+} from "framer-motion";
 import { cn } from "@/lib/utils";
-import { CodeBlock } from "@/components/code-block/code-block";
-import { ChatMessages } from "@/components/chat-messages";
-import { CardStackRotator } from "@/components/card-stack-rotator/card-stack-rotator";
-import type { CardData } from "@/components/card-stack-rotator/card-stack-rotator";
-import { EncryptedText } from "@/components/encrypted-text";
-import { TypewriterEffect } from "@/components/typewriter-effect";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 export type LiveCursor = {
+  /** Name on the label and the avatar. */
   name: string;
+  /** Cursor and label colour. */
   color: string;
+  /** Label text colour. Defaults to white. */
   textColor?: string;
+  /** Points the cursor visits in a loop, in % of the board (x 0–100 left to right, y 0–100 top to bottom). */
   path: Array<{ x: number; y: number }>;
+  /** Seconds per hop between points. Defaults to 1.1. */
   duration?: number;
+  /** Seconds before this cursor starts moving. */
   delay?: number;
+  /** A comment this person drops now and then, shown in a bubble by the label. */
   note?: string;
 };
 
 export type RealTimeCursorsProps = {
+  /** Teammates on the board. */
   cursors?: LiveCursor[];
+  /** Board name in the header. */
+  title?: string;
+  /** Shows a "You" label that follows the visitor's pointer over the board. */
+  showYou?: boolean;
+  /** Colour of the visitor's label. */
+  youColor?: string;
+  /** Moves a demo "You" cursor round the board until the visitor's pointer comes over it. */
+  autoplay?: boolean;
+  /** @deprecated The board is always drawn now. Kept so older code compiles. */
+  showCodePanel?: boolean;
   className?: string;
 };
 
-// ── Cursor data ───────────────────────────────────────────────────────────────
-
-const defaultCursors: LiveCursor[] = [
-  {
-    name: "Ava",
-    color: "#2563eb",
-    path: [
-      { x: 10, y: 15 },
-      { x: 48, y: 8 },
-      { x: 68, y: 35 },
-      { x: 28, y: 52 },
-      { x: 14, y: 32 },
-    ],
-    duration: 11,
-  },
-  {
-    name: "Noah",
-    color: "#7c3aed",
-    path: [
-      { x: 82, y: 68 },
-      { x: 58, y: 42 },
-      { x: 38, y: 60 },
-      { x: 90, y: 28 },
-      { x: 72, y: 80 },
-    ],
-    duration: 12,
-    delay: 0.9,
-  },
-  {
-    name: "Mira",
-    color: "#059669",
-    path: [
-      { x: 22, y: 78 },
-      { x: 52, y: 55 },
-      { x: 78, y: 72 },
-      { x: 36, y: 20 },
-      { x: 60, y: 12 },
-    ],
-    duration: 10,
-    delay: 1.8,
-  },
-  {
-    name: "Kai",
-    color: "#e11d48",
-    path: [
-      { x: 88, y: 12 },
-      { x: 64, y: 28 },
-      { x: 42, y: 6 },
-      { x: 18, y: 28 },
-      { x: 50, y: 46 },
-    ],
-    duration: 13,
-    delay: 2.6,
-  },
+const DEFAULT_CURSORS: LiveCursor[] = [
+  { name: "Ava", color: "#0071e3", note: "Bigger headline?", path: [{ x: 18, y: 30 }, { x: 40, y: 22 }, { x: 34, y: 52 }, { x: 14, y: 62 }], duration: 1.2 },
+  { name: "Noah", color: "#bf5af2", note: "Ship it", path: [{ x: 78, y: 70 }, { x: 62, y: 44 }, { x: 86, y: 30 }, { x: 70, y: 82 }], duration: 1.05, delay: 0.6 },
+  { name: "Mira", color: "#ff9f0a", textColor: "#1d1d1f", path: [{ x: 52, y: 78 }, { x: 64, y: 22 }, { x: 44, y: 66 }, { x: 88, y: 56 }], duration: 1.35, delay: 1.2 },
 ];
 
-// ── Static demo data ──────────────────────────────────────────────────────────
-
-const CARDS: CardData[] = [
-  {
-    id: "1",
-    content: "**Real-time collaboration** changes how teams build products together.",
-    name: "Jordan Lee",
-    designation: "Head of Product",
-    initials: "JL",
-    company: "Nexus",
-  },
-  {
-    id: "2",
-    content: "Design systems need **consistency and flexibility** in equal measure.",
-    name: "Alex Chen",
-    designation: "Lead Designer",
-    initials: "AC",
-    company: "Studio",
-  },
-  {
-    id: "3",
-    content: "The best **developer experience** feels invisible — it just works.",
-    name: "Maya Patel",
-    designation: "Engineering Lead",
-    initials: "MP",
-    company: "Nexus",
-  },
+const YOU_DEMO = [
+  { x: 30, y: 74 },
+  { x: 56, y: 34 },
+  { x: 74, y: 58 },
+  { x: 46, y: 50 },
 ];
 
-// Defined at module level — inline array literals create a new ref each render,
-// which resets the TypewriterEffect animation before it can progress.
-const TYPEWRITER_TEXTS = [
-  "A stunning landing page.",
-  "A real-time dashboard.",
-  "A collaborative workspace.",
-  "The next big thing.",
-];
+const r3 = (n: number) => Math.round(n * 1000) / 1000;
 
-const SNIPPET = `import { RealTimeCursors } from "@nexus/ui";
-
-export default function Canvas() {
+function Arrow({ color }: { color: string }) {
   return (
-    <RealTimeCursors
-      cursors={[
-        { name: "Ava",  color: "#2563eb",
-          path: [{ x: 10, y: 15 }, ...] },
-        { name: "Noah", color: "#7c3aed",
-          path: [{ x: 82, y: 68 }, ...] },
-      ]}
-    />
-  );
-}`;
-
-// ── Cursor SVG ────────────────────────────────────────────────────────────────
-
-function CursorIcon({ color, size = 22 }: { color: string; size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-      className="drop-shadow-[0_8px_14px_rgba(0,0,0,.3)]"
-    >
-      <path
-        d="M5.4 3.1v16.2c0 .52.64.77.99.39l4.2-4.52c.14-.15.34-.24.55-.24h6.76c.6 0 .9-.73.48-1.15L6.55 2.63c-.43-.4-1.15-.1-1.15.47Z"
-        fill={color}
-        stroke="rgba(255,255,255,.86)"
-        strokeWidth="1.4"
-      />
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" className="drop-shadow-[0_2px_4px_rgba(0,0,0,.25)]">
+      <path d="M3 2.2v14.1c0 .5.6.7.9.4l3.6-3.8c.2-.2.4-.3.6-.3h5.6c.5 0 .8-.6.4-1L4.1 1.8C3.7 1.4 3 1.7 3 2.2z" fill={color} stroke="#fff" strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function LiveCursorMarker({ cursor }: { cursor: LiveCursor }) {
-  const xs = cursor.path.map((p) => `${p.x}%`);
-  const ys = cursor.path.map((p) => `${p.y}%`);
-
-  return (
-    <motion.div
-      className="absolute left-0 top-0 z-30 pointer-events-none"
-      style={{ x: "-50%", y: "-50%" }}
-      initial={{ left: xs[0], top: ys[0], opacity: 0 }}
-      animate={{ left: xs, top: ys, opacity: [0, 1, 1, 1, 0] }}
-      transition={{
-        duration: cursor.duration ?? 11,
-        repeat: Infinity,
-        repeatType: "mirror",
-        ease: "easeInOut",
-        delay: cursor.delay ?? 0,
-      }}
-    >
-      <div className="relative">
-        <CursorIcon color={cursor.color} />
-        <motion.div
-          className="absolute left-6 top-5 flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold shadow-lg"
-          style={{ backgroundColor: cursor.color, color: cursor.textColor ?? "#ffffff" }}
-          animate={{ y: [0, -2, 0] }}
-          transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut", delay: cursor.delay ?? 0 }}
-        >
-          {cursor.name}
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-}
-
-// ── Grid Cell ─────────────────────────────────────────────────────────────────
-
-function GridCell({
-  children,
-  className,
-  label,
-  accentColor = "rgba(255,255,255,0.05)",
+/**
+ * One cursor. The arrow leans with its speed, the name tag trails a beat
+ * behind on a looser spring and swings when the arrow stops (the follow-through
+ * move), and each stop is a little click.
+ */
+function Pointer({
+  x,
+  y,
+  name,
+  color,
+  textColor = "#ffffff",
+  click,
+  note,
 }: {
-  children: React.ReactNode;
-  className?: string;
-  label?: string;
-  accentColor?: string;
+  x: MotionValue<number>;
+  y: MotionValue<number>;
+  name: string;
+  color: string;
+  textColor?: string;
+  click: number;
+  note?: string | null;
 }) {
+  const vx = useVelocity(x);
+  const tilt = useSpring(useTransform(vx, [-60, 0, 60], [-16, 0, 16]), { stiffness: 260, damping: 18 });
+  const lx = useSpring(x, { stiffness: 170, damping: 15 });
+  const ly = useSpring(y, { stiffness: 170, damping: 15 });
+  const left = useMotionTemplate`${x}%`;
+  const top = useMotionTemplate`${y}%`;
+  const tagLeft = useMotionTemplate`${lx}%`;
+  const tagTop = useMotionTemplate`${ly}%`;
+  const swing = useSpring(useTransform(vx, [-60, 0, 60], [10, 0, -10]), { stiffness: 120, damping: 8 });
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-2xl border border-white/10 bg-[#080e22]/90 backdrop-blur",
-        className,
-      )}
-      style={{ boxShadow: `inset 0 0 50px ${accentColor}` }}
-    >
-      {label && (
-        <div className="absolute top-3 left-3 z-10 rounded-full border border-white/10 bg-black/50 px-2.5 py-0.5 text-[10px] font-medium text-white/35 backdrop-blur pointer-events-none">
-          {label}
-        </div>
-      )}
-      {children}
-    </div>
+    <>
+      <motion.div className="pointer-events-none absolute z-30" style={{ left, top }}>
+        <motion.div key={click} initial={click ? { scale: 0.78 } : false} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 600, damping: 14 }} style={{ rotate: tilt, originX: 0.15, originY: 0.1 }}>
+          <Arrow color={color} />
+        </motion.div>
+        <AnimatePresence>
+          {click > 0 && (
+            <motion.span
+              key={click}
+              className="absolute -left-3 -top-3 h-7 w-7 rounded-full border-2"
+              style={{ borderColor: color }}
+              initial={{ scale: 0.2, opacity: 0.9 }}
+              animate={{ scale: 1.5, opacity: 0 }}
+              transition={{ duration: 0.55, ease: "easeOut" }}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+      <motion.div className="pointer-events-none absolute z-30" style={{ left: tagLeft, top: tagTop }}>
+        <motion.div className="ml-4 mt-5 flex flex-col items-start gap-1" style={{ rotate: swing, originX: 0, originY: 0 }}>
+          <span className="whitespace-nowrap rounded-full px-2 py-[3px] text-[11px] font-semibold leading-none shadow-[0_4px_10px_-4px_rgba(0,0,0,.35)]" style={{ background: color, color: textColor }}>
+            {name}
+          </span>
+          <AnimatePresence>
+            {note && (
+              <motion.span
+                key={note}
+                className="max-w-[150px] rounded-[12px] rounded-tl-[4px] bg-white px-2.5 py-1.5 text-[12px] leading-snug text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_10px_20px_-10px_rgba(0,0,0,.35)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_10px_20px_-10px_rgba(0,0,0,.9)]"
+                style={{ originX: 0, originY: 0 }}
+                initial={{ scale: 0.4, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.6, opacity: 0, transition: { duration: 0.15 } }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              >
+                {note}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      </motion.div>
+    </>
   );
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+/** Loops the motion values through the points with a spring per hop, calling `onStop` at each point. */
+function useTour(points: Array<{ x: number; y: number }>, hop: number, delay: number, run: boolean, onStop?: (i: number) => void) {
+  const first = points[0] ?? { x: 50, y: 50 };
+  const x = useMotionValue(first.x);
+  const y = useMotionValue(first.y);
+  const stopRef = useRef(onStop);
+  useEffect(() => {
+    stopRef.current = onStop;
+  });
+  const key = points.map((p) => `${p.x},${p.y}`).join(";");
+  useEffect(() => {
+    const pts = key ? key.split(";").map((s) => s.split(",").map(Number)) : [];
+    if (!run || pts.length < 2) return;
+    let alive = true;
+    let timer = 0;
+    let ctl: Array<{ stop: () => void }> = [];
+    let i = 1;
+    const next = () => {
+      if (!alive) return;
+      const [px, py] = pts[i % pts.length];
+      const t = { type: "spring" as const, visualDuration: hop, bounce: 0.18 };
+      const a = animate(x, px, t);
+      const b = animate(y, py, t);
+      ctl = [a, b];
+      Promise.all([a, b]).then(() => {
+        if (!alive) return;
+        stopRef.current?.(i);
+        i++;
+        timer = window.setTimeout(next, 420);
+      });
+    };
+    timer = window.setTimeout(next, delay * 1000 + 300);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+      ctl.forEach((c) => c.stop());
+    };
+  }, [key, hop, delay, run, x, y]);
+  return { x, y };
+}
 
-export function RealTimeCursors({ cursors = defaultCursors, className }: RealTimeCursorsProps) {
+function Teammate({ cursor, still }: { cursor: LiveCursor; still: boolean }) {
+  const [click, setClick] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
+  const noteTimer = useRef(0);
+  useEffect(() => () => window.clearTimeout(noteTimer.current), []);
+  const { x, y } = useTour(cursor.path, cursor.duration ?? 1.1, cursor.delay ?? 0, !still, (i) => {
+    setClick((c) => c + 1);
+    if (cursor.note && i % 3 === 2) {
+      setNote(cursor.note);
+      window.clearTimeout(noteTimer.current);
+      noteTimer.current = window.setTimeout(() => setNote(null), 1900);
+    }
+  });
+  return <Pointer x={x} y={y} name={cursor.name} color={cursor.color} textColor={cursor.textColor} click={click} note={note} />;
+}
+
+/** The visitor's own label: a demo tour until their pointer arrives, then it follows them. */
+function You({ color, demo, live, px, py }: { color: string; demo: boolean; live: boolean; px: MotionValue<number>; py: MotionValue<number> }) {
+  const [click, setClick] = useState(0);
+  const tour = useTour(YOU_DEMO, 1.25, 1.8, demo, () => setClick((c) => c + 1));
+  if (live) return <Pointer x={px} y={py} name="You" color={color} click={0} />;
+  if (!demo) return null;
+  return <Pointer x={tour.x} y={tour.y} name="You" color={color} click={click} />;
+}
+
+/**
+ * A shared design board with teammates' cursors moving over it in real
+ * time: arrows glide between spots, name tags trail behind and swing, stops
+ * land as clicks and now and then someone drops a comment. Your own pointer
+ * gets a "You" tag too.
+ */
+export function RealTimeCursors({
+  cursors = DEFAULT_CURSORS,
+  title = "Launch board",
+  showYou = true,
+  youColor = "#30d158",
+  autoplay = false,
+  className = "",
+}: RealTimeCursorsProps) {
+  const still = useReducedMotion() === true;
+  const board = useRef<HTMLDivElement>(null);
+  const px = useMotionValue(50);
+  const py = useMotionValue(50);
+  const [live, setLive] = useState(false);
+  const [touched, setTouched] = useState(false);
+
+  const move = (e: RPointerEvent) => {
+    const r = board.current?.getBoundingClientRect();
+    if (!r || e.pointerType === "touch") return;
+    px.set(r3(((e.clientX - r.left) / r.width) * 100));
+    py.set(r3(((e.clientY - r.top) / r.height) * 100));
+    if (!live) setLive(true);
+    if (!touched) setTouched(true);
+  };
+
+  const people = cursors.length + (showYou ? 1 : 0);
+
   return (
     <div
-      className={cn(
-        "relative isolate w-full overflow-hidden rounded-3xl border border-white/10 bg-[#030610] p-5 text-white",
-        className,
-      )}
+      className={cn(`w-full max-w-[620px] overflow-hidden rounded-[24px] bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)]`, className)}
     >
-      {/* Ambient blobs */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_8%_8%,rgba(59,130,246,.14),transparent_38%),radial-gradient(ellipse_at_92%_85%,rgba(124,58,237,.12),transparent_38%),radial-gradient(ellipse_at_50%_50%,rgba(16,185,129,.06),transparent_55%)]" />
-      {/* Fine grid */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.025)_1px,transparent_1px)] bg-[size:44px_44px]" />
-
-      {/* ── Header ── */}
-      <div className="relative z-10 mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/55">
-            <MessageSquareText className="size-3.5" />
-            Multiplayer workspace
-          </div>
-          <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
-            Live collaboration canvas
-          </h3>
+      <div className="flex items-center justify-between gap-3 border-b border-black/[0.06] px-4 py-3 dark:border-white/[0.08]">
+        <div className="min-w-0">
+          <p className="truncate text-[15px] font-semibold tracking-[-0.01em]">{title}</p>
+          <p className="flex items-center gap-1.5 text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">
+            <span className="relative flex h-1.5 w-1.5">
+              {!still && <motion.span className="absolute inset-0 rounded-full bg-[#30d158]" animate={{ scale: [1, 2.4], opacity: [0.7, 0] }} transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }} />}
+              <span className="relative h-1.5 w-1.5 rounded-full bg-[#30d158]" />
+            </span>
+            <span className="tabular-nums">{people}</span> here now
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            {cursors.map((c) => (
-              <div
-                key={c.name}
-                className="grid size-8 place-items-center rounded-full border-2 border-[#030610] text-[11px] font-bold"
-                style={{ backgroundColor: c.color }}
-              >
-                {c.name[0]}
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-1.5 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
-            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <Users className="size-3" />
-            {cursors.length} online
-          </div>
-        </div>
-      </div>
-
-      {/* ── Bento grid — cursors float over everything ── */}
-      <div className="relative">
-        <div className="pointer-events-none absolute inset-0 z-20">
-          {cursors.map((c) => (
-            <LiveCursorMarker key={c.name} cursor={c} />
+        <div className="flex -space-x-2" role="list" aria-label="People on this board">
+          {cursors.map((c, i) => (
+            <motion.span
+              key={c.name}
+              role="listitem"
+              aria-label={c.name}
+              title={c.name}
+              initial={still ? false : { scale: 0, y: 6 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 18, delay: 0.15 + i * 0.08 }}
+              className="grid h-8 w-8 place-items-center rounded-full text-[12px] font-semibold ring-2 ring-white dark:ring-[#1c1c1e]"
+              style={{ background: c.color, color: c.textColor ?? "#fff" }}
+            >
+              {c.name.slice(0, 1)}
+            </motion.span>
           ))}
         </div>
+      </div>
 
-        {/*
-          4-column grid, 4 rows — each cell a different size:
-
-          Row 1 (380px):  [CodeBlock — 2col]  [ChatMessages — 2col]
-          Row 2 (320px):  [CardStack — 1col]  [EncryptedText — 1col]  [Typewriter — 2col]
-          Row 3 (240px):  [ShootingStars — 3col]  [LiveCursors spotlight — 1col]
-        */}
-        <div className="grid grid-cols-4 gap-3">
-
-          {/* ── Row 1 ── */}
-
-          {/* CodeBlock — col span 2, tall */}
-          <GridCell className="col-span-2 h-[380px]" label="code-block" accentColor="rgba(250,204,21,0.05)">
-            <div className="h-full overflow-hidden p-3 pt-8">
-              <CodeBlock
-                code={SNIPPET}
-                language="tsx"
-                theme="dark"
-                header={{
-                  enabled: true,
-                  showDots: true,
-                  title: "canvas.tsx",
-                  copy: { enabled: true },
-                }}
-                codeArea={{
-                  showLineNumbers: true,
-                  background: "transparent",
-                }}
-                border={{ color: "rgba(255,255,255,0.07)", radius: "12px" }}
-                className="h-full"
-              />
-            </div>
-          </GridCell>
-
-          {/* ChatMessages — col span 2, tall */}
-          <GridCell className="col-span-2 h-[380px]" label="chat-messages" accentColor="rgba(99,102,241,0.07)">
-            <div className="h-full pt-8">
-              <ChatMessages
-                autoPlay
-                autoPlayDelay={900}
-                typingDuration={1200}
-                showReplay
-                interactive={false}
-                className="h-full"
-              />
-            </div>
-          </GridCell>
-
-          {/* ── Row 2 ── */}
-
-          {/* CardStackRotator — col span 1 */}
-          {/* overflow-visible so back-card y-offset isn't clipped by the cell border */}
-          <GridCell className="col-span-1 h-[320px] !overflow-visible" label="card-stack-rotator" accentColor="rgba(139,92,246,0.07)">
-            <div className="flex h-full items-start justify-center px-4 pb-4 pt-10">
-              {/* wrapper height = cardHeight + stackOffset so the back card fits exactly */}
-              <div className="relative w-full" style={{ height: "calc(180px + 16px)" }}>
-                <CardStackRotator
-                  cards={CARDS}
-                  rotationInterval={3500}
-                  maxVisible={2}
-                  stackOffset={16}
-                  scaleStep={0.04}
-                  cardBackground="#ffffff"
-                  cardBorderColor="rgba(0,0,0,0.08)"
-                  textColor="#0f172a"
-                  mutedColor="rgba(0,0,0,0.45)"
-                  highlightBackground="rgba(139,92,246,0.12)"
-                  highlightTextColor="#7c3aed"
-                  cardWidth="100%"
-                  cardHeight="180px"
-                  className="w-full"
-                />
-              </div>
-            </div>
-          </GridCell>
-
-          {/* EncryptedText — col span 1 */}
-          <GridCell className="col-span-1 h-[320px]" label="encrypted-text" accentColor="rgba(16,185,129,0.07)">
-            <div className="flex h-full flex-col items-center justify-center gap-6 p-6 pt-8 text-center">
-              <EncryptedText
-                text="NEXUS UI"
-                trigger="viewport"
-                loop
-                loopDelay={2500}
-                speed={60}
-                shuffleSpeed={30}
-                className="text-3xl font-black tracking-widest text-emerald-400"
-              />
-              <EncryptedText
-                text="Build the future"
-                trigger="viewport"
-                loop
-                loopDelay={3000}
-                speed={45}
-                revealDelay={400}
-                className="text-base font-medium text-white/50"
-              />
-              <EncryptedText
-                text="component by component"
-                trigger="viewport"
-                loop
-                loopDelay={3500}
-                speed={40}
-                revealDelay={800}
-                className="text-sm text-white/30"
-              />
-            </div>
-          </GridCell>
-
-          {/* TypewriterEffect — col span 2 */}
-          <GridCell className="col-span-2 h-[320px]" label="typewriter-effect" accentColor="rgba(251,113,133,0.07)">
-            <div className="flex h-full flex-col items-center justify-center gap-4 p-8 pt-10 text-center">
-              <p className="text-[10px] font-medium uppercase tracking-widest text-white/30">What will you build?</p>
-              <TypewriterEffect
-                text={TYPEWRITER_TEXTS}
-                typingSpeed={55}
-                deletingSpeed={35}
-                pauseDuration={1800}
-                loop
-                showCursor
-                as="h2"
-                className="text-3xl font-bold text-white sm:text-4xl"
-              />
-              <p className="mt-2 max-w-xs text-sm text-white/40 leading-relaxed">
-                Nexus UI ships production-ready components so you can focus on what matters.
-              </p>
-            </div>
-          </GridCell>
-
-
+      <div
+        ref={board}
+        onPointerMove={move}
+        onPointerLeave={() => setLive(false)}
+        className="relative h-[260px] overflow-hidden bg-[#f5f5f7] [background-image:radial-gradient(#d2d2d7_1px,transparent_1px)] [background-size:18px_18px] dark:bg-[#141416] dark:[background-image:radial-gradient(#3a3a3c_1px,transparent_1px)]"
+        aria-label="Shared board. Teammates' cursors move across it."
+        role="img"
+      >
+        {/* The board itself: a hero frame and some sticky notes. */}
+        <div className="absolute left-[7%] top-[12%] w-[46%] rounded-[16px] bg-white p-3 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_14px_28px_-20px_rgba(0,0,0,.4)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.06),0_14px_28px_-20px_rgba(0,0,0,.9)]">
+          <span className="mb-2 block text-[10px] font-medium text-[#86868b] dark:text-[#98989d]">Hero / Desktop</span>
+          <div className="h-[72px] rounded-[10px] bg-[linear-gradient(135deg,#5ac8fa,#0071e3_55%,#bf5af2)]" />
+          <div className="mt-2.5 h-2.5 w-[70%] rounded-full bg-[#1d1d1f] dark:bg-[#f5f5f7]" />
+          <div className="mt-1.5 h-2 w-[52%] rounded-full bg-[#d2d2d7] dark:bg-[#48484a]" />
+          <div className="mt-3 h-6 w-[38%] rounded-full bg-[#0071e3] dark:bg-[#0a84ff]" />
         </div>
-      </div>
+        <div className="absolute left-[60%] top-[14%] w-[30%] rotate-[3deg] rounded-[6px] bg-[#fff1a8] p-3 text-[12px] font-medium leading-snug text-[#5c4a00] shadow-[0_10px_18px_-12px_rgba(0,0,0,.4)]">
+          Ship on Friday?
+          <span className="mt-1 block text-[10px] font-normal opacity-70">Ava</span>
+        </div>
+        <div className="absolute left-[58%] top-[56%] w-[26%] -rotate-[4deg] rounded-[6px] bg-[#c8f5d2] p-3 text-[12px] font-medium leading-snug text-[#0d4a1f] shadow-[0_10px_18px_-12px_rgba(0,0,0,.4)]">
+          Pricing looks right
+          <span className="mt-1 block text-[10px] font-normal opacity-70">Noah</span>
+        </div>
+        <div className="absolute bottom-[10%] left-[12%] flex items-center gap-2 rounded-full bg-white px-3 py-1.5 text-[11px] font-medium text-[#6e6e73] shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#2c2c2e] dark:text-[#a1a1a6]">
+          <span className="h-2 w-2 rounded-full bg-[#ff9f0a]" />3 comments
+        </div>
 
-      {/* Footer */}
-      <div className="pointer-events-none mt-4 flex items-center justify-end gap-2 text-[11px] text-white/25">
-        <Code2 className="size-3" />
-        Cursor paths are simulated locally
+        {cursors.map((c) => (
+          <Teammate key={c.name} cursor={c} still={still} />
+        ))}
+        {showYou && <You color={youColor} demo={autoplay && !touched && !still} live={live} px={px} py={py} />}
       </div>
+      <p className="px-4 py-2.5 text-center text-[12px] text-[#86868b] dark:text-[#a1a1a6]">Move your pointer over the board to join in.</p>
     </div>
   );
 }
-
-export default RealTimeCursors;

@@ -1,50 +1,31 @@
 "use client";
 
-import * as React from "react";
 import { TypewriterEffect } from "./typewriter-effect";
 
+const card =
+  "rounded-[24px] bg-white p-8 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]";
+
+/** Full-page demo used by /demos/typewriter-effect. */
 export function TypewriterEffectDemo() {
-  const prefixText = "Ship delightful interfaces with ";
-  const baseSpeed = 44;
-  const accentDelay = prefixText.length * baseSpeed;
-
   return (
-    <section className="mx-auto max-w-5xl space-y-10 px-4 py-14">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Text animation</p>
-        <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Typewriter Effect
+    <section className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-14 text-[#1d1d1f] dark:text-[#f5f5f7]">
+      <div className={card}>
+        <h2 className="m-0 text-[40px] font-semibold leading-[1.1] tracking-[-0.035em]">
+          Made for{" "}
+          <TypewriterEffect
+            text={["designers.", "engineers.", "founders.", "everyone."]}
+            loop
+            className="text-[#0071e3] dark:text-[#0a84ff]"
+          />
         </h2>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Character-by-character typing animation with cursor, optional deleting, looping, and semantic typography.
-        </p>
       </div>
-
-      <div className="flex min-h-[280px] items-center justify-center rounded-xl border border-border bg-gradient-to-b from-background to-muted/30 px-5 py-10">
-        <div className="flex w-full justify-center text-center">
-          <h2 className="text-balance text-5xl font-semibold tracking-tight text-foreground lg:text-6xl">
-            <TypewriterEffect
-              as="span"
-              text={prefixText}
-              typingSpeed={baseSpeed}
-              deletingSpeed={0}
-              pauseDuration={1200}
-              loop={false}
-              showCursor={false}
-            />
-            <TypewriterEffect
-              as="span"
-              text="Nexus-UI"
-              typingSpeed={54}
-              deletingSpeed={0}
-              delay={accentDelay}
-              pauseDuration={1200}
-              loop={false}
-              className="text-primary"
-              cursorClassName="bg-primary"
-            />
-          </h2>
-        </div>
+      <div className={card}>
+        <TypewriterEffect
+          as="p"
+          text="One phrase, typed once, with a caret that keeps blinking when it is done."
+          typingSpeed={38}
+          className="m-0 text-[20px] leading-[1.45] text-[#6e6e73] dark:text-[#a1a1a6]"
+        />
       </div>
     </section>
   );

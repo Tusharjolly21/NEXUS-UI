@@ -1,65 +1,23 @@
 "use client";
 
-import * as React from "react";
 import { Sparkles } from "./sparkles";
 
+/** Standalone demo page: a sparkle band under a headline, and a clickable sparkle card. */
 export function SparklesPreview() {
   return (
-    <section className="mx-auto max-w-5xl space-y-8 px-4 py-14">
-      <div className="mx-auto max-w-2xl text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary/80">Effects</p>
-        <h1 className="mt-3 text-balance text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Sparkles
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Configurable particle field for hero banners, cards, and decorative surfaces.
-        </p>
-      </div>
-
-      {/* Hero text highlight example */}
-      <div className="relative mx-auto aspect-[10/9] w-full max-w-3xl overflow-hidden rounded-xl border border-white/10 bg-transparent p-10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
-        <div className="pointer-events-none absolute inset-0 bg-black" />
-        <div className="relative z-[2] mx-auto max-w-2xl space-y-6 py-20 text-center">
-          <h2 className="text-6xl font-semibold tracking-tight text-white sm:text-8xl">NEXUS-UI</h2>
-          <div className="relative mx-auto w-fit">
-            <div className="h-px w-72 bg-gradient-to-r from-transparent via-cyan-300 to-transparent shadow-[0_0_26px_2px_rgba(59,130,246,0.65)]" />
-            {/* Swarm band is anchored to line edge: starts exactly at top-full */}
-            <div className="pointer-events-none absolute left-1/2 top-full z-[1] h-28 w-[19rem] -translate-x-1/2 -mt-px overflow-hidden">
-              <Sparkles
-                className="h-full w-full"
-                count={200}
-                density="high"
-                color="#a8d7ff"
-                minSize={0.7}
-                maxSize={1.8}
-                speed={1.15}
-                opacity={0.95}
-                direction="down"
-                enableGlow
-              />
-            </div>
-          </div>
+    <section className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-16 text-[#1d1d1f] dark:text-[#f5f5f7]">
+      <div className="relative overflow-hidden rounded-[24px] bg-white px-6 py-16 text-center shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+        <h2 className="text-[56px] font-semibold leading-none tracking-[-0.05em]">Sparkles</h2>
+        <div className="relative mx-auto mt-4 h-28 w-full max-w-[22rem]">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#0a84ff] to-transparent" />
+          <Sparkles background count={120} density="high" maxSize={1.8} direction="down" className="[mask-image:radial-gradient(60%_90%_at_50%_0%,#000,transparent)]" />
         </div>
       </div>
-
-      {/* Card / standalone decoration example */}
-      <div className="relative mx-auto aspect-[10/9] w-full max-w-3xl overflow-hidden rounded-xl border border-white/10 bg-transparent p-10 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
-        <div className="pointer-events-none absolute inset-0 bg-black" />
-        <Sparkles
-          background
-          count={150}
-          density="high"
-          color="#f8fafc"
-          minSize={0.9}
-          maxSize={2.5}
-          speed={0.85}
-          opacity={1}
-          direction="random"
-          enableGlow
-          interactive
-        />
-        <div className="relative mx-auto flex h-full min-h-[320px] items-center justify-center">
-          <h3 className="text-5xl font-semibold tracking-tight text-white sm:text-6xl">Build great products</h3>
+      <div className="relative min-h-[320px] overflow-hidden rounded-[24px] bg-[#0b0b12] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+        <Sparkles background interactive count={110} color="#f5f5f7" />
+        <div className="pointer-events-none relative flex min-h-[320px] flex-col items-center justify-center text-center text-white">
+          <h3 className="text-[40px] font-semibold leading-none tracking-[-0.045em]">Make it shine.</h3>
+          <p className="mt-3 text-[13px] text-white/65">Move to leave a trail. Click to throw a burst.</p>
         </div>
       </div>
     </section>

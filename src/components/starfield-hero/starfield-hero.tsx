@@ -1,11 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { Fragment, useEffect, useRef, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ── Public types ──────────────────────────────────────────────────────────────
 export interface CTAConfig {
   label: string;
   href?: string;
@@ -13,437 +11,354 @@ export interface CTAConfig {
 }
 
 export interface InteractiveStarfieldHeroProps {
-  /** Number of particles. @default 300 */
+  /** Number of stars. */
   particleCount?: number;
-  /** Cursor influence radius in px. @default 140 */
+  /** Stars within this many px of the pointer brighten toward `activeColor`. */
   interactionRadius?: number;
-  /** Base particle colour (hex). @default "#60a5fa" */
+  /** Resting star colour (any CSS colour). */
   particleColor?: string;
-  /** Particle colour at full activation (hex). @default "#ffffff" */
+  /** Star colour near the pointer and at full warp. */
   activeColor?: string;
-  /** Return speed: 0.1 (dreamlike) → 1.0 (snappy). @default 0.5 */
+  /** How snappy the warp and the steering feel: 0.1 (dreamlike) to 1 (snappy). */
   speed?: number;
   className?: string;
-  /** Override default hero content. */
-  children?: React.ReactNode;
+  /** Replaces the default hero content. */
+  children?: ReactNode;
+  /** Heading. Use \n for a line break; the second line is dimmed. */
   title?: string;
   subtitle?: string;
   primaryCTA?: CTAConfig;
   secondaryCTA?: CTAConfig;
+  /** Label of the hold-to-warp button. Pass an empty string to hide it. */
+  warpLabel?: string;
+  /** Jumps to warp every few seconds until someone touches the hero. */
+  autoplay?: boolean;
 }
 
-// ── Internal particle ─────────────────────────────────────────────────────────
-type Star = {
-  ox: number; oy: number;   // resting origin
-  x:  number; y:  number;   // physics position (starts = origin)
-  vx: number; vy: number;
-  r:  number;               // base radius (0.8 – 2.2 px)
-  alpha: number;            // base opacity (0.15 – 0.7)
-  phase: number;            // twinkle phase
-  rot:  number;             // fixed rest rotation for very-dim stars
-};
+type Star = { x: number; y: number; z: number; tw: number };
 
-// ── Colour helpers ────────────────────────────────────────────────────────────
-type RGB = [number, number, number];
+const BASE = 0.045;
+const WARP = 1.7;
 
-function hexToRgb(hex: string): RGB {
-  const ctx = document.createElement("canvas").getContext("2d")!;
-  ctx.fillStyle = hex;
-  const h = ctx.fillStyle.replace("#", "");
-  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+function rng(seed: number) {
+  let t = seed >>> 0;
+  return () => {
+    t += 0x6d2b79f5;
+    let n = Math.imul(t ^ (t >>> 15), 1 | t);
+    n ^= n + Math.imul(n ^ (n >>> 7), 61 | n);
+    return ((n ^ (n >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
-function lerpRgb(a: RGB, b: RGB, t: number): string {
-  return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`;
+/** Resolves any CSS colour (names, hsl, variables) to rgb channels through the DOM. */
+function resolveRgb(host: HTMLElement, css: string, fallback: number[]) {
+  const s = document.createElement("span");
+  s.style.color = css;
+  s.style.display = "none";
+  host.appendChild(s);
+  const v = getComputedStyle(s).color.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+  s.remove();
+  return v && v.length === 3 ? v : fallback;
 }
 
-// ── Canvas starfield ──────────────────────────────────────────────────────────
-interface CanvasProps {
-  particleCount: number;
-  interactionRadius: number;
-  baseRgb: RGB;
-  activeRgb: RGB;
-  springK: number;
-  damping: number;
-  reduceMotion: boolean;
-}
-
-function StarfieldCanvas({
-  particleCount,
-  interactionRadius,
-  baseRgb,
-  activeRgb,
-  springK,
-  damping,
-  reduceMotion,
-}: CanvasProps) {
-  const canvasRef    = React.useRef<HTMLCanvasElement>(null);
-  const mouseRef     = React.useRef({ x: -9999, y: -9999, active: false });
-  const starsRef     = React.useRef<Star[]>([]);
-  const rafRef       = React.useRef<number>(0);
-  // Global influence fades in on enter, out on leave
-  const influenceRef = React.useRef(0);
-
-  // ── Seed stars ────────────────────────────────────────────────────────────
-  function seedStars(W: number, H: number): Star[] {
-    return Array.from({ length: particleCount }, () => {
-      const ox = Math.random() * W;
-      const oy = Math.random() * H;
-      return {
-        ox, oy,
-        x: ox, y: oy,
-        vx: 0, vy: 0,
-        r:     0.8 + Math.random() * 1.4,
-        alpha: 0.12 + Math.random() * 0.55,
-        phase: Math.random() * Math.PI * 2,
-        rot:   Math.random() * Math.PI * 2,
-      };
-    });
-  }
-
-  // ── Mouse / touch ─────────────────────────────────────────────────────────
-  React.useEffect(() => {
-    const update = (cx: number, cy: number) => {
-      const cvs = canvasRef.current;
-      if (!cvs) return;
-      const r = cvs.getBoundingClientRect();
-      mouseRef.current = { x: cx - r.left, y: cy - r.top, active: true };
-    };
-    const onMove  = (e: MouseEvent)  => update(e.clientX, e.clientY);
-    const onTouch = (e: TouchEvent)  => { if (e.touches[0]) update(e.touches[0].clientX, e.touches[0].clientY); };
-    const onLeave = () => { mouseRef.current.active = false; };
-
-    window.addEventListener("mousemove",  onMove,  { passive: true });
-    window.addEventListener("touchmove",  onTouch, { passive: true });
-    window.addEventListener("mouseleave", onLeave);
-    window.addEventListener("touchend",   onLeave);
-    return () => {
-      window.removeEventListener("mousemove",  onMove);
-      window.removeEventListener("touchmove",  onTouch);
-      window.removeEventListener("mouseleave", onLeave);
-      window.removeEventListener("touchend",   onLeave);
-    };
-  }, []);
-
-  // ── Render loop ───────────────────────────────────────────────────────────
-  React.useEffect(() => {
-    const cvs = canvasRef.current;
-    if (!cvs) return;
-    const ctx = cvs.getContext("2d");
-    if (!ctx) return;
-
-    const c   = ctx;
-    const el  = cvs;
-    let W = 0, H = 0, dpr = 1;
-    const MAX_STRETCH = 18;
-    const REPULSE_STR = 1.8;
-
-    function resize() {
-      dpr      = Math.min(window.devicePixelRatio ?? 1, 2);
-      W        = el.offsetWidth;
-      H        = el.offsetHeight;
-      el.width  = W * dpr;
-      el.height = H * dpr;
-      c.setTransform(dpr, 0, 0, dpr, 0, 0);
-      starsRef.current = seedStars(W, H);
-    }
-
-    let t0 = performance.now();
-
-    const isVisibleRef = { current: true };
-
-    const io = new IntersectionObserver(
-      ([e]) => {
-        isVisibleRef.current = e?.isIntersecting ?? true;
-        if (isVisibleRef.current && !document.hidden && !rafRef.current) {
-          t0 = performance.now();
-          rafRef.current = requestAnimationFrame(draw);
-        }
-      },
-      { threshold: 0.01 },
-    );
-    io.observe(el);
-
-    function onVisibilityChange() {
-      if (!document.hidden && isVisibleRef.current && !rafRef.current) {
-        t0 = performance.now();
-        rafRef.current = requestAnimationFrame(draw);
-      }
-    }
-    document.addEventListener("visibilitychange", onVisibilityChange);
-
-    function draw(now: number) {
-      if (document.hidden || !isVisibleRef.current) {
-        rafRef.current = 0;
-        return;
-      }
-      const elapsed = (now - t0) / 1000;
-      c.clearRect(0, 0, W, H);
-
-      const mx     = mouseRef.current.x;
-      const my     = mouseRef.current.y;
-      const active = mouseRef.current.active && !reduceMotion;
-
-      // Fade global influence in/out smoothly
-      if (active) {
-        influenceRef.current = Math.min(1, influenceRef.current + 0.06);
-      } else {
-        influenceRef.current = Math.max(0, influenceRef.current - 0.03);
-      }
-      const inf = influenceRef.current;
-      const ir2 = interactionRadius * interactionRadius;
-
-      for (const s of starsRef.current) {
-        // ── Physics ──────────────────────────────────────────────────────
-        const dx    = s.x - mx;
-        const dy    = s.y - my;
-        const dist2 = dx * dx + dy * dy;
-        const dist  = Math.sqrt(dist2);
-
-        let t = 0; // activation 0-1
-        if (inf > 0.01 && dist2 < ir2) {
-          t = (1 - dist / interactionRadius) ** 2 * inf;
-        }
-
-        if (t > 0.01 && dist > 0.1) {
-          s.vx += (dx / dist) * REPULSE_STR * t;
-          s.vy += (dy / dist) * REPULSE_STR * t;
-        }
-        s.vx += (s.ox - s.x) * springK;
-        s.vy += (s.oy - s.y) * springK;
-        s.vx *= damping;
-        s.vy *= damping;
-        s.x  += s.vx;
-        s.y  += s.vy;
-
-        // ── Visual ───────────────────────────────────────────────────────
-        const twinkle  = reduceMotion ? 0 : Math.sin(elapsed * 1.4 + s.phase) * 0.5 + 0.5;
-        const baseA    = s.alpha * (0.55 + twinkle * 0.45);
-        const drawAlpha = Math.min(1, baseA + t * (1 - baseA));
-
-        // Stretch away from cursor
-        const stretchH = s.r * 2 + t * MAX_STRETCH;
-        const stretchW = s.r * 2; // constant width — keeps it as a dash
-
-        // Rotation: at rest uses s.rot; active aligns to repulsion direction
-        const velMag = Math.sqrt(s.vx * s.vx + s.vy * s.vy);
-        const drawRot = velMag > 0.3
-          ? Math.atan2(s.vy, s.vx) + Math.PI / 2 // align long axis with velocity
-          : s.rot;
-
-        const color = t > 0.01
-          ? lerpRgb(baseRgb, activeRgb, t)
-          : lerpRgb(baseRgb, activeRgb, 0);
-
-        c.save();
-        c.translate(s.x, s.y);
-        c.rotate(drawRot);
-        c.globalAlpha = drawAlpha;
-        c.fillStyle   = color;
-
-        // Glow halo for bright active stars
-        if (t > 0.4) {
-          c.shadowBlur  = 6 + t * 10;
-          c.shadowColor = color;
-        } else {
-          c.shadowBlur = 0;
-        }
-
-        // Rounded-pill shape
-        const hw  = stretchW / 2;
-        const hh  = stretchH / 2;
-        const cr  = Math.min(hw, hh);
-        c.beginPath();
-        c.moveTo(-hw + cr, -hh);
-        c.lineTo( hw - cr, -hh);
-        c.quadraticCurveTo( hw, -hh,  hw, -hh + cr);
-        c.lineTo( hw,  hh - cr);
-        c.quadraticCurveTo( hw,  hh,  hw - cr,  hh);
-        c.lineTo(-hw + cr,  hh);
-        c.quadraticCurveTo(-hw,  hh, -hw,  hh - cr);
-        c.lineTo(-hw, -hh + cr);
-        c.quadraticCurveTo(-hw, -hh, -hw + cr, -hh);
-        c.closePath();
-        c.fill();
-        c.restore();
-      }
-
-      c.globalAlpha = 1;
-      c.shadowBlur  = 0;
-      rafRef.current = requestAnimationFrame(draw);
-    }
-
-    const ro = new ResizeObserver(resize);
-    ro.observe(el);
-    resize();
-    t0 = performance.now();
-    rafRef.current = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      ro.disconnect();
-      io.disconnect();
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [particleCount, interactionRadius, baseRgb, activeRgb, springK, damping, reduceMotion]);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden
-      className="absolute inset-0 h-full w-full"
-      style={{ pointerEvents: "none" }}
-    />
-  );
-}
-
-// ── Motion presets ────────────────────────────────────────────────────────────
-const UP = {
-  hidden: { opacity: 0, y: 22 },
-  show:   { opacity: 1, y: 0  },
-};
-const EASE = [0.22, 1, 0.36, 1] as const;
-
-// ── Hero component ─────────────────────────────────────────────────────────────
+/**
+ * A hero in a deep starfield drawn on canvas. Stars drift toward you in 3D,
+ * the vanishing point leans toward the pointer and stars near it brighten.
+ * Press and hold anywhere (or the Warp button) to jump: stars stretch into
+ * streaks, then on release the field brakes past a standstill, recoils a
+ * touch and settles.
+ */
 export function InteractiveStarfieldHero({
-  particleCount      = 300,
-  interactionRadius  = 140,
-  particleColor      = "#60a5fa",
-  activeColor        = "#ffffff",
-  speed              = 0.5,
+  particleCount = 300,
+  interactionRadius = 140,
+  particleColor = "#9fc6ff",
+  activeColor = "#ffffff",
+  speed = 0.5,
   className,
   children,
-  title              = "Ship faster.\nBuild better.",
-  subtitle           = "A motion-native component library for React — animated, accessible, and production-ready.",
-  primaryCTA         = { label: "Get started",        href: "#" },
-  secondaryCTA       = { label: "View components",    href: "#" },
+  title = "Ship faster.\nBuild better.",
+  subtitle = "A motion-native component library for React. Animated, accessible and production-ready.",
+  primaryCTA = { label: "Get started", href: "#" },
+  secondaryCTA = { label: "View components", href: "#" },
+  warpLabel = "Hold to warp",
+  autoplay = false,
 }: InteractiveStarfieldHeroProps) {
-  const reduceMotion = useReducedMotion() === true;
+  const still = useReducedMotion() === true;
+  const root = useRef<HTMLElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const pointer = useRef({ x: 0.5, y: 0.5, px: 0, py: 0, inside: false });
+  const warping = useRef(false);
+  const touched = useRef(false);
+  const [held, setHeld] = useState(false);
+  const count = Math.max(20, Math.min(1200, Math.round(particleCount)));
+  const snap = Math.max(0.1, Math.min(1, speed));
 
-  // Parse colours once on mount / when props change
-  const [baseRgb,   setBaseRgb]   = React.useState<[number,number,number]>([96,165,250]);
-  const [activeRgb, setActiveRgb] = React.useState<[number,number,number]>([255,255,255]);
+  const hold = (on: boolean) => {
+    warping.current = on;
+    setHeld(on);
+  };
 
-  React.useEffect(() => {
-    setBaseRgb(hexToRgb(particleColor));
-    setActiveRgb(hexToRgb(activeColor));
-  }, [particleColor, activeColor]);
+  useEffect(() => {
+    const el = root.current;
+    const cv = canvas.current;
+    const ctx = cv?.getContext("2d");
+    if (!el || !cv || !ctx) return;
+    const base = resolveRgb(el, particleColor, [159, 198, 255]);
+    const hot = resolveRgb(el, activeColor, [255, 255, 255]);
+    const mix = (k: number) =>
+      `rgb(${Math.round(base[0] + (hot[0] - base[0]) * k)},${Math.round(base[1] + (hot[1] - base[1]) * k)},${Math.round(base[2] + (hot[2] - base[2]) * k)})`;
 
-  // Derive spring / damping from speed prop
-  const springK = 0.022 + speed * 0.068;
-  const damping = 0.90  - speed * 0.13;
+    const rand = rng(count * 13 + 5);
+    const stars: Star[] = Array.from({ length: count }, () => ({ x: rand() * 2 - 1, y: rand() * 2 - 1, z: 0.05 + rand() * 0.95, tw: rand() * 6.28 }));
+    let w = 0;
+    let h = 0;
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = cv.clientWidth;
+      h = cv.clientHeight;
+      cv.width = Math.max(1, Math.round(w * dpr));
+      cv.height = Math.max(1, Math.round(h * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resize();
 
-  const titleLines = (title ?? "").split("\n");
+    let vx = 0.5;
+    let vy = 0.5;
+    let v = BASE;
+    const draw = (time: number, dt: number) => {
+      ctx.clearRect(0, 0, w, h);
+      const cx = w * vx;
+      const cy = h * vy;
+      const f = Math.max(w, h) * 0.55;
+      const warpK = Math.max(0, Math.min(1, (v - BASE) / (WARP - BASE)));
+      const ir = Math.max(10, interactionRadius);
+      const p = pointer.current;
+      ctx.lineCap = "round";
+      for (const s of stars) {
+        const sx = cx + (s.x / s.z) * f;
+        const sy = cy + (s.y / s.z) * f;
+        if (sx < -40 || sy < -40 || sx > w + 40 || sy > h + 40) continue;
+        const near = 1 - s.z;
+        let glow = 0;
+        if (p.inside) {
+          const d = Math.hypot(sx - p.px, sy - p.py);
+          if (d < ir) glow = (1 - d / ir) ** 2;
+        }
+        const twinkle = still ? 1 : 0.75 + 0.25 * Math.sin(time * 2 + s.tw);
+        const alpha = Math.min(1, (0.4 + near * 0.75) * twinkle + glow * 0.6);
+        const r = 0.55 + near * 1.9 + glow * 1.2;
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = ctx.fillStyle = mix(Math.max(warpK, glow));
+        // Streak from where the star was a moment ago; long only when moving fast.
+        const z0 = Math.min(1.2, s.z + Math.abs(v) * Math.max(dt, 0.016) * 4.5);
+        const tx = cx + (s.x / z0) * f;
+        const ty = cy + (s.y / z0) * f;
+        if (Math.hypot(sx - tx, sy - ty) > r * 1.5) {
+          ctx.lineWidth = r * 1.4;
+          ctx.beginPath();
+          ctx.moveTo(tx, ty);
+          ctx.lineTo(sx, sy);
+          ctx.stroke();
+        } else {
+          ctx.beginPath();
+          ctx.arc(sx, sy, r, 0, 6.283);
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+    };
+
+    const ro = new ResizeObserver(() => {
+      resize();
+      if (still) draw(0, 0);
+    });
+    ro.observe(cv);
+    if (still) {
+      draw(0, 0);
+      return () => ro.disconnect();
+    }
+
+    let raf = 0;
+    let last = performance.now();
+    let time = 0;
+    let vel = 0;
+    let demo = 0;
+    let visible = true;
+    const io = new IntersectionObserver(([e]) => {
+      visible = e?.isIntersecting ?? true;
+    });
+    io.observe(cv);
+    // Warp spring: stiffer with `speed`, always underdamped so release brakes past zero.
+    const k = 5 + snap * 22;
+    const c = 2 * Math.sqrt(k) * 0.42;
+
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (!visible) return;
+      time += dt;
+      let on = warping.current;
+      const p = pointer.current;
+      let gx = 0.5;
+      let gy = 0.5;
+      if (p.inside) {
+        gx = 0.5 + (p.x - 0.5) * 0.45;
+        gy = 0.5 + (p.y - 0.5) * 0.45;
+      } else if (autoplay && !touched.current) {
+        demo += dt;
+        const phase = demo % 4.6;
+        on = phase > 2.6 && phase < 4;
+        gx = 0.5 + Math.sin(demo * 0.4) * 0.12;
+        gy = 0.5 + Math.cos(demo * 0.3) * 0.08;
+      }
+      const lean = 1 - Math.exp(-dt * (1.5 + snap * 4));
+      vx += (gx - vx) * lean;
+      vy += (gy - vy) * lean;
+      vel += (k * ((on ? WARP : BASE) - v) - c * vel) * dt;
+      v = Math.max(-0.35, v + vel * dt);
+      for (const s of stars) {
+        s.z -= v * dt;
+        if (s.z <= 0.03) {
+          s.z += 0.97;
+          s.x = rand() * 2 - 1;
+          s.y = rand() * 2 - 1;
+        } else if (s.z > 1) s.z -= 0.95;
+      }
+      draw(time, dt);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      io.disconnect();
+    };
+  }, [still, count, particleColor, activeColor, interactionRadius, snap, autoplay]);
+
+  const lines = (title ?? "").split("\n");
 
   return (
     <section
+      ref={root}
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        touched.current = true;
+        pointer.current = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height, px: e.clientX - r.left, py: e.clientY - r.top, inside: true };
+      }}
+      onPointerLeave={() => {
+        pointer.current.inside = false;
+        if (warping.current) hold(false);
+      }}
+      onPointerDown={(e) => {
+        if ((e.target as HTMLElement).closest("a,button")) return;
+        touched.current = true;
+        hold(true);
+      }}
+      onPointerUp={() => {
+        if (warping.current) hold(false);
+      }}
       className={cn(
-        "relative isolate flex min-h-[calc(100svh-4rem)] items-center overflow-hidden rounded-3xl",
-        "bg-zinc-950",
+        "relative isolate flex min-h-[calc(100svh-4rem)] select-none items-center overflow-hidden rounded-[24px] bg-[#030409] text-white",
+        "shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
         className,
       )}
     >
-      {/* ── Particle canvas ── */}
-      <StarfieldCanvas
-        particleCount={particleCount}
-        interactionRadius={interactionRadius}
-        baseRgb={baseRgb}
-        activeRgb={activeRgb}
-        springK={springK}
-        damping={damping}
-        reduceMotion={reduceMotion}
-      />
+      <canvas ref={canvas} aria-hidden className="pointer-events-none absolute inset-0 -z-10 h-full w-full" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_90%_80%_at_50%_50%,transparent_40%,rgba(3,4,9,.9)_100%)]" />
+      <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 -z-10 w-2/3 bg-[linear-gradient(90deg,rgba(3,4,9,.7),transparent)]" />
 
-      {/* ── Radial edge vignette ── */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 rounded-3xl"
-        style={{
-          background:
-            "radial-gradient(ellipse 90% 80% at 50% 50%, transparent 40%, rgba(9,9,11,0.92) 100%)",
-        }}
-      />
-
-      {/* ── Content ── */}
-      <div className="relative z-10 w-full px-8 py-20 sm:px-14 lg:px-20">
-        {children ? (
-          children
-        ) : (
+      <div className="relative z-10 w-full px-6 py-16 sm:px-12 lg:px-16">
+        {children ?? (
           <motion.div
-            className="max-w-2xl"
-            initial="hidden"
+            className="max-w-xl"
+            initial={still ? false : "hidden"}
             animate="show"
-            variants={{ show: { transition: { staggerChildren: 0.11 } } }}
+            variants={{ show: { transition: { staggerChildren: 0.08 } } }}
           >
-            {/* Eyebrow */}
-            <motion.div
-              variants={UP}
-              transition={{ duration: 0.55, ease: EASE }}
-              className="mb-7 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 backdrop-blur-sm"
-            >
-              <span className="size-1.5 animate-pulse rounded-full bg-blue-400" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/55">
-                Interactive component
-              </span>
-            </motion.div>
-
-            {/* Title */}
             <motion.h1
-              variants={UP}
-              transition={{ duration: 0.7, ease: EASE }}
-              className="text-balance text-5xl font-bold tracking-[-0.025em] text-white sm:text-6xl lg:text-7xl"
+              variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
+              transition={{ type: "spring", stiffness: 220, damping: 22 }}
+              className="text-[40px] font-semibold leading-[1.02] tracking-[-0.05em] sm:text-[60px]"
             >
-              {titleLines.map((line, i) => (
-                <React.Fragment key={i}>
-                  {i === 0
-                    ? line
-                    : <span className="text-white/45">{line}</span>
-                  }
-                  {i < titleLines.length - 1 && <br />}
-                </React.Fragment>
+              {lines.map((line, i) => (
+                <Fragment key={i}>
+                  {i === 0 ? line : <span className="text-white/50">{line}</span>}
+                  {i < lines.length - 1 && <br />}
+                </Fragment>
               ))}
             </motion.h1>
-
-            {/* Subtitle */}
-            {subtitle && (
+            {subtitle ? (
               <motion.p
-                variants={UP}
-                transition={{ duration: 0.6, ease: EASE }}
-                className="mt-6 max-w-lg text-[15px] leading-relaxed text-white/40"
+                variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
+                transition={{ type: "spring", stiffness: 220, damping: 22 }}
+                className="mt-5 max-w-md text-[15px] leading-relaxed text-white/65"
               >
                 {subtitle}
               </motion.p>
-            )}
-
-            {/* CTAs */}
+            ) : null}
             <motion.div
-              variants={UP}
-              transition={{ duration: 0.55, ease: EASE }}
-              className="mt-10 flex flex-wrap gap-3"
+              variants={{ hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0 } }}
+              transition={{ type: "spring", stiffness: 220, damping: 22 }}
+              className="mt-8 flex flex-wrap items-center gap-3"
             >
-              {primaryCTA && (
-                <a
+              {primaryCTA ? (
+                <motion.a
                   href={primaryCTA.href ?? "#"}
                   onClick={primaryCTA.onClick}
-                  className="group inline-flex items-center gap-2 rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-zinc-900 shadow-[0_0_20px_rgba(255,255,255,.12)] transition-all duration-200 hover:gap-3 hover:bg-white/90 hover:shadow-[0_0_28px_rgba(255,255,255,.22)]"
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex h-11 items-center rounded-full bg-white px-5 text-[14px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff] focus-visible:ring-offset-2 focus-visible:ring-offset-[#030409]"
                 >
                   {primaryCTA.label}
-                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-                </a>
-              )}
-              {secondaryCTA && (
-                <a
+                </motion.a>
+              ) : null}
+              {secondaryCTA ? (
+                <motion.a
                   href={secondaryCTA.href ?? "#"}
                   onClick={secondaryCTA.onClick}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-6 py-2.5 text-sm font-medium text-white/65 backdrop-blur-sm transition-all duration-200 hover:border-white/20 hover:bg-white/[0.09] hover:text-white"
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex h-11 items-center rounded-full border border-white/15 bg-white/[0.06] px-5 text-[14px] font-medium text-white/85 outline-none hover:bg-white/[0.1] focus-visible:ring-2 focus-visible:ring-[#0a84ff]"
                 >
                   {secondaryCTA.label}
-                </a>
-              )}
+                </motion.a>
+              ) : null}
             </motion.div>
           </motion.div>
         )}
       </div>
+
+      {warpLabel ? (
+        <motion.button
+          type="button"
+          aria-label={warpLabel}
+          aria-pressed={held}
+          animate={{ scale: held ? 0.94 : 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 15 }}
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            touched.current = true;
+            hold(true);
+          }}
+          onPointerUp={() => hold(false)}
+          onPointerCancel={() => hold(false)}
+          onKeyDown={(e) => {
+            if ((e.key === " " || e.key === "Enter") && !e.repeat) {
+              e.preventDefault();
+              touched.current = true;
+              hold(true);
+            }
+          }}
+          onKeyUp={(e) => {
+            if (e.key === " " || e.key === "Enter") hold(false);
+          }}
+          onBlur={() => hold(false)}
+          className="absolute bottom-4 right-4 z-20 inline-flex h-9 touch-none items-center gap-2 rounded-full border border-white/15 bg-white/[0.08] px-3.5 text-[12px] font-medium text-white/85 backdrop-blur outline-none focus-visible:ring-2 focus-visible:ring-[#0a84ff]"
+        >
+          <svg aria-hidden viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+            <path d="M2 8h3M11 8h3M8 2v3M8 11v3M3.8 3.8l2 2M10.2 10.2l2 2M12.2 3.8l-2 2M5.8 10.2l-2 2" />
+          </svg>
+          {held ? "Warping" : warpLabel}
+        </motion.button>
+      ) : null}
     </section>
   );
 }

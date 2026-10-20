@@ -3,13 +3,6 @@
 import * as React from "react";
 import { ImageTrail } from "./image-trail";
 
-const DEMO_IMAGES = [
-  { src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=300&q=80", alt: "Mountains" },
-  { src: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&q=80", alt: "Forest" },
-  { src: "https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&q=80", alt: "Valley" },
-  { src: "https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=300&q=80", alt: "Autumn" },
-  { src: "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=300&q=80", alt: "Lake" },
-];
 
 export function ImageTrailDemo() {
   return (
@@ -32,8 +25,7 @@ export function ImageTrailDemo() {
         <div className="space-y-3">
           <p className="text-xs font-medium text-muted-foreground">Default — move your cursor inside</p>
           <ImageTrail
-            images={DEMO_IMAGES}
-            trailSettings={{ spacing: 36, duration: 900, smoothness: 0.7 }}
+                        trailSettings={{ spacing: 36, duration: 900, smoothness: 0.7 }}
             appearance={{ imageSize: 120, cornerRadius: 10, objectFit: "cover" }}
             animation={{ fadeOutBlur: 6 }}
             className="h-80 rounded-2xl border border-border bg-muted/30"
@@ -48,8 +40,7 @@ export function ImageTrailDemo() {
         <div className="space-y-3">
           <p className="text-xs font-medium text-muted-foreground">Magnetic effect enabled</p>
           <ImageTrail
-            images={DEMO_IMAGES}
-            trailSettings={{ spacing: 28, duration: 1100, smoothness: 0.65 }}
+                        trailSettings={{ spacing: 28, duration: 1100, smoothness: 0.65 }}
             appearance={{ imageSize: 100, cornerRadius: 50, objectFit: "cover" }}
             animation={{ fadeOutBlur: 8 }}
             magneticEffect

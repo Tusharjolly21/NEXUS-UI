@@ -2,150 +2,211 @@
 
 import * as React from "react";
 import Link from "next/link";
-import type { MotionValue } from "framer-motion";
 import {
   AnimatePresence,
   motion,
-  useMotionValueEvent,
+  useMotionValue,
   useReducedMotion,
   useSpring,
+  useTransform,
+  type MotionValue,
 } from "framer-motion";
-import { cn } from "@/lib/utils";
 
-/** Hit target (px); visual grows around bottom origin like macOS dock. */
-const BASE = 46;
-/** Peak scale at pointer over icon center (1 + MAX_EXTRA). */
-const MAX_EXTRA = 0.62;
-/** Horizontal distance (px) at which magnification falls to baseline (wider = stronger neighbor lift). */
-const INFLUENCE_PX = 104;
-
-/** Standalone spring MV: call `.set()` so every pointer update animates (follower-on-MV can feel inert in some trees). */
-const DOCK_SPRING = { stiffness: 520, damping: 30, mass: 0.08 } as const;
-const LIFT_SPRING = { stiffness: 420, damping: 32, mass: 0.15 } as const;
-
-function scaleFromPointer(clientX: number, el: HTMLElement | null): number {
-  if (el == null || !Number.isFinite(clientX)) return 1;
-  const { left, width } = el.getBoundingClientRect();
-  const center = left + width / 2;
-  const dist = Math.abs(clientX - center);
-  const u = Math.min(1, dist / INFLUENCE_PX);
-  // Softer shoulder than pure quadratic so neighbors lift more like the reference dock.
-  const falloff = (1 - u) ** 1.35;
-  return 1 + MAX_EXTRA * falloff;
-}
+/** Resting tile size, px. */
+export const DOCK_BASE = 44;
+/** Tile size right under the pointer, px. */
+export const DOCK_PEAK = 70;
+/** Distance from a tile's centre at which magnification has faded out, px. */
+const REACH = 150;
 
 export type IconContainerProps = {
+  /** Pointer x in client coordinates; Infinity when the pointer is away. */
   mouseX: MotionValue<number>;
   title: string;
   icon: React.ReactNode;
   href: string;
+  tint?: string;
+  badge?: number | string;
   active?: boolean;
+  /** Render a button instead of a link (for previews and in-app actions). */
   disableLink?: boolean;
+  /** Increment to make the tile bounce, as if the app were launching. */
+  bounce?: number;
+  /** Called when the tile is clicked or activated with the keyboard. */
+  onActivate?: () => void;
 };
 
-export function IconContainer({ mouseX, title, icon, href, active, disableLink = false }: IconContainerProps) {
-  const reduceMotion = useReducedMotion() === true;
+/**
+ * One dock tile. It grows with the pointer's distance (its real width, so the
+ * neighbours make room), shows a tooltip, and on click bounces like a
+ * launching app: a little gravity sim with a squash every time it lands.
+ */
+export function IconContainer({
+  mouseX,
+  title,
+  icon,
+  href,
+  tint,
+  badge,
+  active = false,
+  disableLink = false,
+  bounce = 0,
+  onActivate,
+}: IconContainerProps) {
+  const still = useReducedMotion() === true;
   const ref = React.useRef<HTMLDivElement>(null);
-  const [hovered, setHovered] = React.useState(false);
-  const scale = useSpring(1, DOCK_SPRING);
-  const y = useSpring(0, LIFT_SPRING);
+  const [tip, setTip] = React.useState(false);
 
-  useMotionValueEvent(mouseX, "change", (latest) => {
-    if (reduceMotion) {
-      scale.set(1);
-      y.set(0);
-      return;
-    }
-    if (latest === Number.POSITIVE_INFINITY || latest === Number.NEGATIVE_INFINITY) {
-      scale.set(1);
-      y.set(0);
-      return;
-    }
-    const nextScale = scaleFromPointer(latest, ref.current);
-    scale.set(nextScale);
-    y.set(-(nextScale - 1) * 18);
+  const target = useTransform(mouseX, (x) => {
+    const el = ref.current;
+    if (still || !el || !Number.isFinite(x)) return DOCK_BASE;
+    const r = el.getBoundingClientRect();
+    const d = Math.abs(x - (r.left + r.width / 2));
+    const t = Math.max(0, 1 - d / REACH);
+    // Cosine falloff: a rounded hill, like the real dock.
+    return DOCK_BASE + (DOCK_PEAK - DOCK_BASE) * (0.5 - 0.5 * Math.cos(Math.PI * t));
   });
+  const size = useSpring(target, { stiffness: 420, damping: 30, mass: 0.12 });
+  const radius = useTransform(size, (s) => s * 0.27);
+  const glyph = useTransform(size, (s) => s * 0.5);
 
+  // Launch bounce: y is integrated by hand; the squash springs back with a wobble.
+  const hop = useMotionValue(0);
+  const squash = useSpring(0, { stiffness: 700, damping: 11 });
+  const sy = useTransform(squash, (q) => 1 - q * 0.22);
+  const sx = useTransform(squash, (q) => 1 + q * 0.16);
+
+  const launch = React.useCallback(() => {
+    if (still) return () => {};
+    let raf = 0;
+    let y = 0;
+    let v = -620;
+    let last = performance.now();
+    let landings = 0;
+    const step = (now: number) => {
+      const dt = Math.min(0.032, (now - last) / 1000);
+      last = now;
+      v += 2900 * dt;
+      y += v * dt;
+      if (y >= 0) {
+        y = 0;
+        squash.jump(Math.min(1, Math.abs(v) / 650));
+        squash.set(0);
+        v = -v * 0.42;
+        landings++;
+        if (Math.abs(v) < 140 || landings > 3) {
+          hop.set(0);
+          return;
+        }
+      }
+      hop.set(y);
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [still, hop, squash]);
+
+  const stopRef = React.useRef<() => void>(() => {});
   React.useEffect(() => {
-    if (reduceMotion) {
-      scale.set(1);
-      y.set(0);
-    }
-  }, [reduceMotion, scale, y]);
+    if (bounce === 0) return;
+    stopRef.current();
+    stopRef.current = launch();
+  }, [bounce, launch]);
+  React.useEffect(() => () => stopRef.current(), []);
+
+  const activate = () => {
+    stopRef.current();
+    stopRef.current = launch();
+    onActivate?.();
+  };
+
+  const tileClass = `relative flex items-center justify-center overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e] ${
+    tint
+      ? "text-white shadow-[inset_0_1px_0_rgba(255,255,255,.35),0_6px_14px_-8px_rgba(0,0,0,.45)]"
+      : "bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_6px_14px_-8px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_6px_14px_-8px_rgba(0,0,0,.8)]"
+  }`;
+  const inner = (
+    <>
+      {tint && <span aria-hidden className="absolute inset-0" style={{ background: tint }} />}
+      {tint && <span aria-hidden className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent" />}
+      <motion.span aria-hidden className="relative flex items-center justify-center [&_svg]:size-full [&_svg]:stroke-[1.75]" style={{ width: glyph, height: glyph }}>
+        {icon}
+      </motion.span>
+    </>
+  );
+  const handlers = {
+    onPointerEnter: () => setTip(true),
+    onPointerLeave: () => setTip(false),
+    onFocus: () => setTip(true),
+    onBlur: () => setTip(false),
+  };
 
   return (
-    <div className="relative mx-1 flex flex-col items-center pt-2.5 pb-1">
+    <motion.div ref={ref} className="relative flex shrink-0 flex-col items-center justify-end" style={{ width: size }}>
       <AnimatePresence>
-        {hovered && !reduceMotion ? (
+        {tip && (
           <motion.span
-            initial={{ opacity: 0, y: 8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 6, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 360, damping: 28, mass: 0.2 }}
-            className="pointer-events-none absolute bottom-full z-10 mb-2 whitespace-nowrap rounded-lg border border-border/80 bg-background/95 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-lg backdrop-blur-md dark:bg-zinc-900/95 dark:text-zinc-100"
+            key="tip"
             role="tooltip"
+            initial={{ opacity: 0, y: 6, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 4, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-3 whitespace-nowrap rounded-[8px] bg-[#1d1d1f]/90 px-2.5 py-1 text-[12px] font-medium text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,.5)] backdrop-blur-md dark:bg-[#f5f5f7]/95 dark:text-[#1d1d1f]"
+            style={{ x: "-50%" }}
           >
             {title}
           </motion.span>
-        ) : null}
-      </AnimatePresence>
-
-      <motion.div
-        ref={ref}
-        className="flex flex-col items-center will-change-[transform]"
-        style={
-          reduceMotion
-            ? undefined
-            : {
-                scale,
-                y,
-                transformOrigin: "50% 100%",
-              }
-        }
-      >
-        {disableLink ? (
-          <div
-            title={title}
-            aria-label={title}
-            role="img"
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            className={cn(
-              "relative grid place-items-center rounded-full border border-border/70 bg-background/85 text-muted-foreground shadow-sm",
-              active && "border-primary/40 bg-primary/12 text-primary shadow-[0_8px_22px_-12px_rgba(14,165,233,0.55)]",
-            )}
-            style={{
-              width: BASE,
-              height: BASE,
-            }}
-          >
-            <span className="grid size-[2.15rem] place-items-center [&_svg]:size-[1.15rem] [&_svg]:shrink-0">{icon}</span>
-          </div>
-        ) : (
-          <Link
-            href={href}
-            title={title}
-            aria-label={title}
-            aria-current={active ? "page" : undefined}
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            onFocus={() => setHovered(true)}
-            onBlur={() => setHovered(false)}
-            onPointerDown={() => setHovered(true)}
-            className={cn(
-              "relative grid place-items-center rounded-full border border-border/70 bg-background/85 text-muted-foreground shadow-sm outline-none ring-offset-2 ring-offset-background transition-[color,background-color,border-color,box-shadow]",
-              "hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary/60",
-              active && "border-primary/40 bg-primary/12 text-primary shadow-[0_8px_22px_-12px_rgba(14,165,233,0.55)]",
-            )}
-            style={{
-              width: BASE,
-              height: BASE,
-            }}
-          >
-            <span className="grid size-[2.15rem] place-items-center [&_svg]:size-[1.15rem] [&_svg]:shrink-0">{icon}</span>
-          </Link>
         )}
+      </AnimatePresence>
+      <motion.div className="origin-bottom" style={{ y: hop }}>
+        <motion.div className="origin-bottom" style={{ scaleX: sx, scaleY: sy }}>
+          {disableLink ? (
+            <motion.button
+              type="button"
+              aria-label={title}
+              aria-pressed={active}
+              onClick={activate}
+              className={tileClass}
+              style={{ width: size, height: size, borderRadius: radius }}
+              {...handlers}
+            >
+              {inner}
+            </motion.button>
+          ) : (
+            <motion.div style={{ width: size, height: size, borderRadius: radius }} className="relative">
+              <Link
+                href={href}
+                aria-label={title}
+                aria-current={active ? "page" : undefined}
+                onClick={activate}
+                className={`${tileClass} size-full rounded-[inherit]`}
+                {...handlers}
+              >
+                {inner}
+              </Link>
+            </motion.div>
+          )}
+        </motion.div>
       </motion.div>
-    </div>
+      {badge !== undefined && badge !== "" && (
+        <motion.span
+          aria-label={`${badge} new`}
+          className="absolute right-0 top-0 z-[1] flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[#ff3b30] px-1 text-[11px] font-semibold tabular-nums text-white shadow-[0_0_0_2px_rgba(255,255,255,.9)] dark:shadow-[0_0_0_2px_#1c1c1e]"
+          style={{ y: hop, x: "25%" }}
+        >
+          {badge}
+        </motion.span>
+      )}
+      <span className="mt-1 flex h-1 items-center justify-center" aria-hidden>
+        {active && (
+          <motion.span
+            layoutId="floating-dock-running"
+            className="block size-1 rounded-full bg-[#1d1d1f] dark:bg-[#f5f5f7]"
+            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+          />
+        )}
+      </span>
+    </motion.div>
   );
 }
