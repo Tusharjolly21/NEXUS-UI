@@ -48,6 +48,22 @@ import { MagnifyDock } from "@/components/magnify-dock";
 import { UploadChips } from "@/components/upload-chips";
 import { NotificationStack } from "@/components/notification-stack";
 import { IslandMorph } from "@/components/island-morph";
+import { GlassBubbles } from "@/components/glass-bubbles";
+import { BoxSpill } from "@/components/box-spill";
+import { CurvedReel } from "@/components/curved-reel";
+import { SqueezeProgress } from "@/components/squeeze-progress";
+import { BoltingSliders } from "@/components/bolting-sliders";
+import { CrumpleToTrash } from "@/components/crumple-to-trash";
+import { TapeShelf } from "@/components/tape-shelf";
+import { PacketRouter, type RouterStrategy } from "@/components/packet-router";
+import { StampSwirl } from "@/components/stamp-swirl";
+import { BubbleCluster } from "@/components/bubble-cluster";
+import { StickerToss } from "@/components/sticker-toss";
+import { ContextMeter } from "@/components/context-meter";
+import { MoodWheel } from "@/components/mood-wheel";
+import { SwipeStack } from "@/components/swipe-stack";
+import { FlightTracker } from "@/components/flight-tracker";
+import { MatrixLoaders } from "@/components/matrix-loaders";
 import { LanyardBadge } from "@/components/lanyard-badge";
 import { GlassLens } from "@/components/glass-lens";
 import { AsciiWake } from "@/components/ascii-wake";
@@ -1206,6 +1222,154 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false },
     ],
     render: (v) => <CapsuleToggles key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
+  },
+  "glass-bubbles": {
+    componentName: "GlassBubbles",
+    importPath: "@/components/glass-bubbles",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false }],
+    render: (v) => <GlassBubbles key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "box-spill": {
+    componentName: "BoxSpill",
+    importPath: "@/components/box-spill",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "count", label: "Pieces", min: 10, max: 60, step: 1, defaultValue: 30 },
+      { kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false },
+    ],
+    render: (v) => <BoxSpill key={String(v.autoplay)} count={v.count as number} autoplay={v.autoplay as boolean} />,
+  },
+  "curved-reel": {
+    componentName: "CurvedReel",
+    importPath: "@/components/curved-reel",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Drift by itself", defaultValue: true }],
+    render: (v) => <CurvedReel autoplay={v.autoplay as boolean} />,
+  },
+  "squeeze-progress": {
+    componentName: "SqueezeProgress",
+    importPath: "@/components/squeeze-progress",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Running", options: ["#0071e3", "#1d1d1f", "#5e5ce6", "#0b8f6a", "#ff375f"], defaultValue: "#0071e3" },
+      { kind: "color", prop: "paused", label: "Paused", options: ["#c2410c", "#ff375f", "#ff9f0a", "#8e8e93", "#bf5af2"], defaultValue: "#c2410c" },
+      { kind: "toggle", prop: "autoplay", label: "Pause by itself", defaultValue: false },
+    ],
+    render: (v) => <SqueezeProgress key={String(v.autoplay)} accent={v.accent as string} paused={v.paused as string} autoplay={v.autoplay as boolean} />,
+  },
+  "bolting-sliders": {
+    componentName: "BoltingSliders",
+    importPath: "@/components/bolting-sliders",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff375f", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Jump by itself", defaultValue: false },
+    ],
+    render: (v) => <BoltingSliders key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
+  },
+  "crumple-to-trash": {
+    componentName: "CrumpleToTrash",
+    importPath: "@/components/crumple-to-trash",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Page title", options: ["Draft · Q4 notes", "Launch checklist", "Old invoice"], defaultValue: "Draft · Q4 notes" },
+      { kind: "toggle", prop: "autoplay", label: "Toss by itself", defaultValue: false },
+    ],
+    render: (v) => <CrumpleToTrash key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
+  },
+  "tape-shelf": {
+    componentName: "TapeShelf",
+    importPath: "@/components/tape-shelf",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
+    render: (v) => <TapeShelf key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "packet-router": {
+    componentName: "PacketRouter",
+    importPath: "@/components/packet-router",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "defaultStrategy", label: "Start on", options: ["Cost", "Balanced", "Quality"], defaultValue: "Balanced" },
+      { kind: "toggle", prop: "autoplay", label: "Cycle strategies", defaultValue: false },
+    ],
+    render: (v) => (
+      <PacketRouter
+        key={`${v.defaultStrategy}-${v.autoplay}`}
+        defaultStrategy={v.defaultStrategy as RouterStrategy}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "stamp-swirl": {
+    componentName: "StampSwirl",
+    importPath: "@/components/stamp-swirl",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Lift by itself", defaultValue: false }],
+    render: (v) => <StampSwirl key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "bubble-cluster": {
+    componentName: "BubbleCluster",
+    importPath: "@/components/bubble-cluster",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle groups", defaultValue: false }],
+    render: (v) => <BubbleCluster key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "sticker-toss": {
+    componentName: "StickerToss",
+    importPath: "@/components/sticker-toss",
+    defaultFill: "light",
+    controls: [
+      { kind: "color", prop: "accent", label: "Centre", options: ["#c8f560", "#ff375f", "#0a84ff", "#ff9f0a", "#bf5af2"], defaultValue: "#c8f560" },
+      { kind: "select", prop: "text", label: "Ring text", options: ["NEXUS UI · MADE TO MOVE · ", "STUDIO · EST. 2026 · ", "THROW ME · CATCH ME · "], defaultValue: "NEXUS UI · MADE TO MOVE · " },
+      { kind: "toggle", prop: "autoplay", label: "Toss by itself", defaultValue: false },
+    ],
+    render: (v) => <StickerToss key={String(v.autoplay)} accent={v.accent as string} text={v.text as string} autoplay={v.autoplay as boolean} />,
+  },
+  "context-meter": {
+    componentName: "ContextMeter",
+    importPath: "@/components/context-meter",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "limit", label: "Window", min: 120, max: 400, step: 20, unit: "K", defaultValue: 200 },
+      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false },
+    ],
+    render: (v) => <ContextMeter key={`${v.limit}-${v.autoplay}`} limit={v.limit as number} autoplay={v.autoplay as boolean} />,
+  },
+  "mood-wheel": {
+    componentName: "MoodWheel",
+    importPath: "@/components/mood-wheel",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Spin by itself", defaultValue: false }],
+    render: (v) => <MoodWheel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "swipe-stack": {
+    componentName: "SwipeStack",
+    importPath: "@/components/swipe-stack",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Swipe by itself", defaultValue: false }],
+    render: (v) => <SwipeStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "flight-tracker": {
+    componentName: "FlightTracker",
+    importPath: "@/components/flight-tracker",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "from", label: "From", options: ["NYC", "SFO", "DEL"], defaultValue: "NYC" },
+      { kind: "select", prop: "to", label: "To", options: ["LON", "NRT", "DXB"], defaultValue: "LON" },
+      { kind: "toggle", prop: "autoplay", label: "Fly", defaultValue: true },
+    ],
+    render: (v) => <FlightTracker from={v.from as string} to={v.to as string} autoplay={v.autoplay as boolean} />,
+  },
+  "matrix-loaders": {
+    componentName: "MatrixLoaders",
+    importPath: "@/components/matrix-loaders",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "size", label: "Size", min: 40, max: 80, step: 4, unit: "px", defaultValue: 64 },
+      { kind: "toggle", prop: "showLabels", label: "Labels", defaultValue: true },
+    ],
+    render: (v) => <MatrixLoaders size={v.size as number} showLabels={v.showLabels as boolean} />,
   },
 };
 

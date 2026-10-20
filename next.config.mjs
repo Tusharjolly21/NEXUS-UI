@@ -58,6 +58,8 @@ const nextConfig = {
     ],
     "/api/registry/[name]": ["./.generated/registry/**/*.json"],
     "/components/[slug]": ["./.generated/registry/**/*.json"],
+    // Pro build prompts live outside public/ and are only read by this gated route.
+    "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
   },
   images: {
     formats: ["image/avif", "image/webp"],

@@ -9,8 +9,11 @@ import { cn } from "@/lib/utils";
 type ProAccess = {
   /** The visitor has Pro (an active plan or All-Access). */
   isPro: boolean;
-  /** Opens the upgrade dialog, naming the component the visitor tried to use. */
-  requestUpgrade: (name?: string) => void;
+  /**
+   * Opens the upgrade dialog, naming the component the visitor tried to use and, when the thing
+   * that's Pro is a feature of an otherwise free component, that feature ("build prompt").
+   */
+  requestUpgrade: (name?: string, feature?: string) => void;
 };
 
 const ProAccessContext = React.createContext<ProAccess>({
@@ -35,20 +38,87 @@ export function useLocked(premium: boolean | undefined) {
  * Mounted once by the site shell.
  */
 export function ProAccessProvider({ isPro, proCount, children }: { isPro: boolean; proCount: number; children: React.ReactNode }) {
-  const [target, setTarget] = React.useState<{ name?: string } | null>(null);
-  const value = React.useMemo<ProAccess>(() => ({ isPro, requestUpgrade: (name) => setTarget({ name }) }), [isPro]);
+  const [target, setTarget] = React.useState<{ name?: string; feature?: string } | null>(null);
+  const value = React.useMemo<ProAccess>(() => ({ isPro, requestUpgrade: (name, feature) => setTarget({ name, feature }) }), [isPro]);
 
   return (
     <ProAccessContext.Provider value={value}>
       {children}
-      <UpgradeDialog open={!!target} name={target?.name} proCount={proCount} onClose={() => setTarget(null)} />
+      <UpgradeDialog open={!!target} name={target?.name} feature={target?.feature} proCount={proCount} onClose={() => setTarget(null)} />
     </ProAccessContext.Provider>
   );
 }
 
-const PERKS = ["The full source, yours to edit", "One-line install with the shadcn CLI", "The live playground and copy-ready code"];
+type CopyState = "idle" | "loading" | "copied" | "error";
 
-function UpgradeDialog({ open, name, proCount, onClose }: { open: boolean; name?: string; proCount: number; onClose: () => void }) {
+/**
+ * Copies a component's build prompt (a Pro feature). Visitors without Pro get the upgrade dialog;
+ * the server checks again and answers 403 if the session has no access, which also opens the
+ * dialog. The clipboard write starts inside the click (a ClipboardItem holding the pending
+ * fetch), so Safari keeps the user activation it needs.
+ */
+export function useCopyBuildPrompt(slug: string, name: string): [CopyState, () => void] {
+  const { isPro, requestUpgrade } = useProAccess();
+  const [state, setState] = React.useState<CopyState>("idle");
+
+  React.useEffect(() => {
+    if (state !== "copied" && state !== "error") return;
+    const t = setTimeout(() => setState("idle"), 2200);
+    return () => clearTimeout(t);
+  }, [state]);
+
+  const copy = React.useCallback(() => {
+    if (!isPro) return requestUpgrade(name, "build prompt");
+    setState("loading");
+    let denied = false;
+    const text = fetch(`/api/prompt/${encodeURIComponent(slug)}`, { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
+      if (r.status === 401 || r.status === 403) {
+        denied = true;
+        throw new Error("denied");
+      }
+      if (!r.ok) throw new Error("failed");
+      const json = (await r.json()) as { prompt?: string };
+      if (!json.prompt) throw new Error("empty");
+      return json.prompt;
+    });
+    const write =
+      typeof ClipboardItem !== "undefined" && navigator.clipboard?.write
+        ? navigator.clipboard.write([new ClipboardItem({ "text/plain": text.then((t) => new Blob([t], { type: "text/plain" })) })])
+        : text.then((t) => navigator.clipboard.writeText(t));
+    write
+      .then(() => setState("copied"))
+      .catch(() => {
+        if (denied) {
+          setState("idle");
+          requestUpgrade(name, "build prompt");
+        } else setState("error");
+      });
+  }, [isPro, requestUpgrade, name, slug]);
+
+  return [state, copy];
+}
+
+const PERKS = [
+  "The full source, yours to edit",
+  "One-line install with the shadcn CLI",
+  "The live playground and copy-ready code",
+  "Build prompts to recreate them with your AI agent",
+];
+
+function UpgradeDialog({
+  open,
+  name,
+  feature,
+  proCount,
+  onClose,
+}: {
+  open: boolean;
+  name?: string;
+  feature?: string;
+  proCount: number;
+  onClose: () => void;
+}) {
+  const title = feature ? `The ${name ? `${name} ` : ""}${feature} comes with Pro` : name ? `${name} comes with Pro` : "This comes with Pro";
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogPrimitive.Portal>
@@ -63,7 +133,7 @@ function UpgradeDialog({ open, name, proCount, onClose }: { open: boolean; name?
             </span>
           </span>
           <DialogPrimitive.Title className="mt-5 text-[24px] font-semibold leading-tight tracking-[-0.025em] text-foreground">
-            {name ? `${name} comes with Pro` : "This comes with Pro"}
+            {title}
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="mx-auto mt-2.5 max-w-[320px] text-[15px] leading-[1.5] text-muted-foreground">
             You can preview every component. Pro unlocks {proCount ? `all ${proCount} Pro components` : "every Pro component"}, every

@@ -9801,6 +9801,587 @@ export function NotificationsSetting() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "glass-bubbles",
+    name: "Glass Bubbles",
+    registryCliName: "glass-bubbles",
+    description:
+      "Four glass orbs hang on threads from the top of a panel. Sweep the pointer through them and they swing, knock into each other and spin their icons before settling back under their anchors.",
+    categorySlug: "motion-effects",
+    tags: ["bubbles", "glass", "pendulum", "physics", "verlet", "collisions", "pointer", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Nudges a random bubble every 2.6 seconds until someone moves the pointer through them (skipped with reduced motion)." },
+    ],
+    Preview: Previews.PreviewGlassBubbles,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { GlassBubbles } from "@/components/glass-bubbles";
+
+export function PlayfulEmptyState() {
+  return (
+    <section className="flex flex-col items-center gap-6 py-16 text-center">
+      <GlassBubbles autoplay />
+      <p className="text-[15px] text-neutral-500">Nothing here yet. Give the bubbles a push.</p>
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "box-spill",
+    name: "Box Spill",
+    registryCliName: "box-spill",
+    description:
+      "A cardboard box on a canvas. Open it and the flaps spring back as its contents burst out, bounce off each other and pile up on the floor; pack it up and they all fly home.",
+    categorySlug: "motion-effects",
+    tags: ["box", "unboxing", "canvas", "physics", "particles", "confetti", "celebration", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "count", type: "number", defaultValue: "30", description: "How many pieces burst out of the box; every third one is a round face with eyes." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens and packs the box every 3.6 seconds until someone presses the button." },
+    ],
+    Preview: Previews.PreviewBoxSpill,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BoxSpill } from "@/components/box-spill";
+
+export function OrderDelivered() {
+  return (
+    <div className="flex flex-col items-center gap-6 py-12">
+      <h2 className="text-2xl font-semibold tracking-tight">Your order has arrived</h2>
+      <BoxSpill count={40} />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "curved-reel",
+    name: "Curved Reel",
+    registryCliName: "curved-reel",
+    description:
+      "An endless reel of posters bent around the inside of a curve: the centre cards sit back and pinch in while the edge cards swing round and come forward. It drifts on its own, and you can drag it or fling it to coast.",
+    categorySlug: "three-d-components",
+    tags: ["carousel", "reel", "posters", "3d", "curve", "infinite", "drag", "inertia", "gallery", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "posters", type: "ReelPoster[]", description: "Each poster has bg, fg, big (the large glyph), small (caption) and an optional serif flag. Defaults to ten type posters." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Drifts the reel at 38px per second; it pauses for 2.5 seconds after a drag or key press." },
+    ],
+    Preview: Previews.PreviewCurvedReel,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CurvedReel, type ReelPoster } from "@/components/curved-reel";
+
+const issues: ReelPoster[] = [
+  { bg: "#0040ff", fg: "#fff", big: "01", small: "Launch issue" },
+  { bg: "#f2efe6", fg: "#1d1d1f", big: "Type", small: "Specimens", serif: true },
+  { bg: "#ff4f00", fg: "#1d1d1f", big: "02", small: "Motion" },
+  { bg: "#1d1d1f", fg: "#f5f5f7", big: "Ω", small: "Studio notes", serif: true },
+  { bg: "#c8f560", fg: "#1d1d1f", big: "03", small: "Growth" },
+  { bg: "#5e5ce6", fg: "#fff", big: "Iso", small: "Grids" },
+  { bg: "#ffd60a", fg: "#1d1d1f", big: "04", small: "Colour" },
+  { bg: "#0b8f6a", fg: "#e9fff6", big: "Fern", small: "Field notes", serif: true },
+];
+
+export function MagazineArchive() {
+  return <CurvedReel posters={issues} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "squeeze-progress",
+    name: "Squeeze Progress",
+    registryCliName: "squeeze-progress",
+    description:
+      "A full-panel progress line with a big percentage. Pause it and the tip bunches into a springy squiggle while the panel warms from blue to orange; resume and it stretches back out and carries on.",
+    categorySlug: "loaders",
+    tags: ["progress", "loader", "pause", "resume", "export", "squiggle", "spring", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 146,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Panel colour while running." },
+      { name: "paused", type: "string", defaultValue: '"#c2410c"', description: "Panel colour while paused; the panel blends between the two on the same spring as the squiggle." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Toggles pause and resume every 2.2 seconds until someone presses the button." },
+    ],
+    Preview: Previews.PreviewSqueezeProgress,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SqueezeProgress } from "@/components/squeeze-progress";
+
+export function ExportPanel() {
+  return (
+    <div className="flex justify-center py-12">
+      <SqueezeProgress accent="#1d1d1f" paused="#ff375f" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bolting-sliders",
+    name: "Bolting Sliders",
+    registryCliName: "bolting-sliders",
+    description:
+      "A panel of settings sliders where clicking a track makes the knob leap there in an arc, leaving a fading dotted trail and reading out its value mid-air, then landing with a squash. Dragging and arrow keys work as usual.",
+    categorySlug: "inputs-controls",
+    tags: ["slider", "range", "settings", "knob", "arc", "trail", "squash", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "settings", type: "BoltSetting[]", defaultValue: "DEFAULT_BOLT_SETTINGS", description: "The sliders: each has id, label, min, max, unit (appended to the read-out) and a starting value." },
+      { name: "title", type: "string", defaultValue: '"Render settings"', description: "Small caps heading above the sliders." },
+      { name: "hint", type: "string", defaultValue: '"Click a track and watch the knob jump."', description: "Hint line under the sliders." },
+      { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the filled track, the trail dots and the focus ring." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws one knob after another to random values every 1.1s until someone touches the panel." },
+    ],
+    Preview: Previews.PreviewBoltingSliders,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BoltingSliders } from "@/components/bolting-sliders";
+
+export function AudioPanel() {
+  return (
+    <BoltingSliders
+      title="Mixer"
+      accent="#ff375f"
+      settings={[
+        { id: "gain", label: "Gain", min: -12, max: 12, unit: " dB", value: 0 },
+        { id: "reverb", label: "Reverb", min: 0, max: 100, unit: "%", value: 20 },
+        { id: "pan", label: "Pan", min: -50, max: 50, unit: "", value: 0 },
+      ]}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "crumple-to-trash",
+    name: "Crumple to Trash",
+    registryCliName: "crumple-to-trash",
+    description:
+      "A literal Move to trash: the page scrunches into a paper ball, arcs into a bin whose lid flips open and snaps shut, and Undo throws it back out and smooths it flat.",
+    categorySlug: "motion-effects",
+    tags: ["delete", "trash", "undo", "crumple", "paper", "svg filter", "bin", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "title", type: "string", defaultValue: '"Draft · Q4 notes"', description: "Heading printed on the page." },
+      { name: "onTrash", type: "() => void", description: "Called once the ball has landed in the bin." },
+      { name: "onRestore", type: "() => void", description: "Called once Undo has smoothed the page flat again." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws the page away and brings it back every 3s until someone clicks the button." },
+    ],
+    Preview: Previews.PreviewCrumpleToTrash,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CrumpleToTrash } from "@/components/crumple-to-trash";
+
+export function DeleteDraft({ onDelete, onRestore }: { onDelete: () => void; onRestore: () => void }) {
+  return <CrumpleToTrash title="Launch checklist" onTrash={onDelete} onRestore={onRestore} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "tape-shelf",
+    name: "Tape Shelf",
+    registryCliName: "tape-shelf",
+    description:
+      "Cassette cases stand spine-out on a tilted 3D shelf. Hovering slides one up; picking one swings it round to show its cover with the reels turning, while the rest of the shelf steps aside and dims.",
+    categorySlug: "three-d-components",
+    tags: ["cassette", "tape", "shelf", "music", "3d", "picker", "album", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "press", "3d", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tapes", type: "ShelfTape[]", defaultValue: "DEFAULT_TAPES", description: "Cases on the shelf, left to right: title, artist, color (spine and label) and ink (text colour on them)." },
+      { name: "onPick", type: "(index: number | null) => void", description: "Called with the picked index when someone picks a tape, or null when it goes back." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Pulls out the 3rd, 6th and 1st tapes in turn, putting each back, every 1.8s until someone touches the shelf." },
+    ],
+    Preview: Previews.PreviewTapeShelf,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TapeShelf } from "@/components/tape-shelf";
+
+const mixtapes = [
+  { title: "Summer '98", artist: "Side A", color: "#ff9f0a", ink: "#1d1d1f" },
+  { title: "Road Trip", artist: "Dad's picks", color: "#0a84ff", ink: "#fff" },
+  { title: "Late Shift", artist: "Lo-fi", color: "#5e5ce6", ink: "#fff" },
+  { title: "Gym", artist: "Fast ones", color: "#ff375f", ink: "#fff" },
+  { title: "Rainy Day", artist: "Acoustic", color: "#30d158", ink: "#0b2814" },
+];
+
+export function Mixtapes() {
+  return <TapeShelf tapes={mixtapes} onPick={(i) => console.log("playing", i)} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "packet-router",
+    name: "Packet Router",
+    registryCliName: "packet-router",
+    description:
+      "A live diagram of requests flowing from a router to four AI models along curved paths. Switch between Cost, Balanced and Quality and the traffic re-balances while each model's share and the blended price roll to their new values.",
+    categorySlug: "ai-components",
+    tags: ["ai", "llm", "router", "model routing", "traffic", "canvas", "pricing", "diagram", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-20",
+    animationKinds: ["press", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "defaultStrategy", type: '"Cost" | "Balanced" | "Quality"', defaultValue: '"Balanced"', description: "Strategy selected on mount." },
+      { name: "onStrategyChange", type: "(strategy: RouterStrategy) => void", description: "Called when someone picks a strategy." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles Cost, Quality, Balanced every 2.8s until someone touches it." },
+    ],
+    Preview: Previews.PreviewPacketRouter,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PacketRouter } from "@/components/packet-router";
+
+export function RoutingSettings() {
+  return (
+    <section className="mx-auto max-w-[800px]">
+      <PacketRouter defaultStrategy="Cost" onStrategyChange={(s) => console.log("strategy", s)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "stamp-swirl",
+    name: "Stamp Swirl",
+    registryCliName: "stamp-swirl",
+    description:
+      "A row of perforated postage stamps whose artwork slowly swirls like wet ink. Hover or focus one and it lifts out of the row, swirls harder, and its name and year slide in underneath.",
+    categorySlug: "cards",
+    tags: ["stamps", "postage", "svg filter", "turbulence", "hover", "gallery", "collectible", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-20",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "stamps", type: "SwirlStamp[]", defaultValue: "Tidepool, Ember Fields, Night Bloom, Moss & Stone", description: "Stamps as { name, date, value, art }; art is any CSS background (layered gradients work best)." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Lifts the stamps one after another until the pointer enters." },
+    ],
+    Preview: Previews.PreviewStampSwirl,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StampSwirl, type SwirlStamp } from "@/components/stamp-swirl";
+
+const stamps: SwirlStamp[] = [
+  { name: "Harbour Light", date: "1972", value: "15c", art: "radial-gradient(50% 50% at 30% 30%, #fff4d6, rgba(255,244,214,0) 60%), linear-gradient(160deg, #7fb7ff, #1c3f94)" },
+  { name: "Desert Rose", date: "1985", value: "22c", art: "radial-gradient(55% 50% at 70% 30%, #ffe0e6, rgba(255,224,230,0) 60%), linear-gradient(170deg, #ffb199, #a83279)" },
+  { name: "Pine Ridge", date: "1993", value: "29c", art: "radial-gradient(50% 50% at 40% 35%, #e6f7d9, rgba(230,247,217,0) 60%), linear-gradient(160deg, #8fc490, #1f4d3a)" },
+];
+
+export function StampCollection() {
+  return <StampSwirl stamps={stamps} />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "bubble-cluster",
+    name: "Bubble Cluster",
+    registryCliName: "bubble-cluster",
+    description:
+      "Contacts packed into one cluster of avatar bubbles sized by how close they are, sitting on a liquid backdrop. Switch groups and everyone springs to new places and sizes while people outside the group shrink away.",
+    categorySlug: "motion-effects",
+    tags: ["contacts", "avatars", "circle packing", "gooey", "segmented control", "groups", "people", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "people", type: "ClusterPerson[]", defaultValue: "12 sample contacts", description: "Everyone who can appear, as { id, name, hue }; hue (0-360) tints the avatar gradient." },
+      { name: "groups", type: "Record<string, Record<string, number>>", defaultValue: "Family, Close friends, Work", description: "Group name to { person id: closeness 1-5 }. Closeness sets bubble size; people left out of a group hide in it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps through the groups every 2.4s until someone presses the cluster or the switcher." },
+    ],
+    Preview: Previews.PreviewBubbleCluster,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BubbleCluster, type ClusterPerson } from "@/components/bubble-cluster";
+
+const team: ClusterPerson[] = [
+  { id: "an", name: "Ana", hue: 200 },
+  { id: "ben", name: "Ben", hue: 20 },
+  { id: "cy", name: "Cy", hue: 140 },
+  { id: "dee", name: "Dee", hue: 300 },
+  { id: "eli", name: "Eli", hue: 50 },
+];
+
+export function TeamCircles() {
+  return (
+    <BubbleCluster
+      people={team}
+      groups={{
+        Design: { an: 5, dee: 4, eli: 2 },
+        Engineering: { ben: 5, cy: 4, an: 2 },
+        Launch: { eli: 5, ben: 3, cy: 3, dee: 2 },
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "sticker-toss",
+    name: "Sticker Toss",
+    registryCliName: "sticker-toss",
+    description:
+      "A round logo sticker you can peel off a page header and throw. In flight it stretches along its direction of travel and its ring of text spins faster, then it springs back into its spot with a wobble.",
+    categorySlug: "motion-effects",
+    tags: ["sticker", "logo", "drag", "throw", "squash and stretch", "velocity", "playful", "header", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 155,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: '"NEXUS UI · MADE TO MOVE · "', description: "Text that runs around the ring; end it with a separator so the loop reads cleanly." },
+      { name: "color", type: "string", defaultValue: "theme ink", description: "Sticker colour. Unset, it is #1d1d1f with white text (#f5f5f7 with dark text in dark mode); set, the ring text is white." },
+      { name: "accent", type: "string", defaultValue: '"#c8f560"', description: "Colour of the dot in the middle." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tosses the sticker every 3.2s until someone grabs it." },
+    ],
+    Preview: Previews.PreviewStickerToss,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StickerToss } from "@/components/sticker-toss";
+
+export function StudioHeader() {
+  return <StickerToss text="NORTHWIND · EST. 2026 · " color="#ff375f" accent="#ffd60a" />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "context-meter",
+    name: "Context Meter",
+    registryCliName: "context-meter",
+    description:
+      "A context-window token meter drawn as a 40 by 5 dot grid. Hover a category to light only its dots; the conversation keeps growing, and Compact chat drops its dots out of the grid while everything after them reflows to close the gap.",
+    categorySlug: "ai-components",
+    tags: ["tokens", "context window", "llm", "usage meter", "dot grid", "ai chat", "layout", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 153,
+    createdAt: "2026-10-20",
+    animationKinds: ["layout", "hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "categories", type: "ContextCategory[]", defaultValue: "System prompt, Tools, Files, Conversation, Memory", description: "Starting categories as { id, label, color, tokens } with tokens in thousands; read once on mount." },
+      { name: "limit", type: "number", defaultValue: "200", description: "Window size in thousands of tokens; the grid always has 200 dots." },
+      { name: "growId", type: "string", defaultValue: '"conv"', description: "Category that grows by 2.2K every 380ms and is cut back to 6.2K by Compact chat." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles the highlight and compacts when the window passes 90%, until someone touches the card." },
+    ],
+    Preview: Previews.PreviewContextMeter,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ContextMeter, type ContextCategory } from "@/components/context-meter";
+
+const usage: ContextCategory[] = [
+  { id: "sys", label: "Instructions", color: "#8e8e93", tokens: 6 },
+  { id: "docs", label: "Attached docs", color: "#ff9f0a", tokens: 31.5 },
+  { id: "chat", label: "Chat history", color: "#0071e3", tokens: 22 },
+];
+
+export function ChatSidebarUsage() {
+  return <ContextMeter categories={usage} limit={128} growId="chat" />;
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "mood-wheel",
+    name: "Mood Wheel",
+    registryCliName: "mood-wheel",
+    description:
+      "Feelings laid along the rim of a wheel that you drag, scroll or arrow through. The word at the centre gets bracketed, fills the sentence below and the orb beside it melts into that mood's colours.",
+    categorySlug: "inputs-controls",
+    tags: ["mood", "picker", "wheel", "slider", "inertia", "snap", "journal", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 151,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "moods", type: "Mood[]", defaultValue: "DEFAULT_MOODS", description: "Words on the wheel, each as { word, a, b } where a is the main orb colour and b the light one. Ten moods from Calm to Grateful by default." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Spins to a random mood every 2 s until someone drags, scrolls or uses the keys." },
+    ],
+    Preview: Previews.PreviewMoodWheel,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MoodWheel, type Mood } from "@/components/mood-wheel";
+
+const moods: Mood[] = [
+  { word: "Calm", a: "#8ec5ff", b: "#d7f0ff" },
+  { word: "Hopeful", a: "#ffd36e", b: "#fff4d1" },
+  { word: "Restless", a: "#ff7a6b", b: "#ffe0db" },
+  { word: "Tired", a: "#a7a3d9", b: "#ebe9ff" },
+  { word: "Grateful", a: "#9fd36b", b: "#eefcd9" },
+];
+
+export function DailyCheckIn() {
+  return (
+    <section className="flex flex-col items-center gap-6 py-12">
+      <h2 className="text-[22px] font-semibold tracking-[-0.02em]">How are you today?</h2>
+      <MoodWheel moods={moods} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "swipe-stack",
+    name: "Swipe Stack",
+    registryCliName: "swipe-stack",
+    description:
+      "Payments to review as a deck of cards. Drag the top card right to approve or left to flag: it tilts as you pull, a stamp fades in, and once thrown the next card rises from the deck.",
+    categorySlug: "cards",
+    tags: ["swipe", "tinder", "deck", "cards", "approve", "review", "payments", "drag", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-20",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "payments", type: "SwipePayment[]", defaultValue: "DEFAULT_PAYMENTS", description: "Cards to review, top first: { amount, from, to, note, when, hue }. \"Load more\" deals the same list again." },
+      { name: "onDecide", type: "(payment: SwipePayment, approved: boolean) => void", defaultValue: "undefined", description: "Called after a card is thrown; approved is true for right / approve and false for left / flag." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Throws a card every 1.7 s (mostly approvals) and reloads when empty, until someone touches it." },
+    ],
+    Preview: Previews.PreviewSwipeStack,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SwipeStack, type SwipePayment } from "@/components/swipe-stack";
+
+const queue: SwipePayment[] = [
+  { amount: "$1,240", from: "Acme Inc", to: "you", note: "March retainer", when: "2h", hue: 200 },
+  { amount: "$86.10", from: "you", to: "Lena", note: "dinner split", when: "6h", hue: 20 },
+  { amount: "$540", from: "Orbit Labs", to: "you", note: "invoice #204", when: "1d", hue: 140 },
+];
+
+export function ReviewQueue() {
+  return (
+    <SwipeStack
+      payments={queue}
+      onDecide={(payment, approved) => console.log(approved ? "approved" : "flagged", payment.amount)}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "flight-tracker",
+    name: "Flight Tracker",
+    registryCliName: "flight-tracker",
+    description:
+      "A live flight card: a plane banks along a dotted arc while the flown part fills in behind it, and the status line counts down to landing. Expand it for altitude, speed and distance left.",
+    categorySlug: "cards",
+    tags: ["flight", "travel", "tracker", "status", "svg path", "progress", "expand", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-20",
+    animationKinds: ["layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "from", type: "string", defaultValue: '"NYC"', description: "Departure airport code." },
+      { name: "to", type: "string", defaultValue: '"LON"', description: "Arrival airport code." },
+      { name: "flight", type: "string", defaultValue: '"MK 214"', description: "Flight number in the top-right corner." },
+      { name: "departs", type: "string", defaultValue: '"8:30 PM"', description: "Departure time under the origin code." },
+      { name: "arrives", type: "string", defaultValue: '"8:40 AM"', description: "Arrival time under the destination code." },
+      { name: "minutes", type: "number", defaultValue: "410", description: "Total flight time; drives the \"Landing in N min\" countdown." },
+      { name: "miles", type: "number", defaultValue: "3459", description: "Route length; drives the remaining distance in the details." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "Flies the plane along the arc on a loop (about 22 s per flight). When false it stays at 35% of the route." },
+    ],
+    Preview: Previews.PreviewFlightTracker,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FlightTracker } from "@/components/flight-tracker";
+
+export function TripSidebar() {
+  return (
+    <aside className="flex flex-col gap-4">
+      <FlightTracker from="SFO" to="NRT" flight="NH 7" departs="11:25 AM" arrives="3:10 PM" minutes={665} miles={5130} />
+    </aside>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "matrix-loaders",
+    name: "Matrix Loaders",
+    registryCliName: "matrix-loaders",
+    description:
+      "Six 5×5 dot-matrix loaders driven by one shared pulse. Only the phase offset per dot changes, which turns the same grid into a wave, ripple, spiral, rain, sweep or checkerboard.",
+    categorySlug: "loaders",
+    tags: ["loader", "spinner", "dot matrix", "grid", "pulse", "status", "loading", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 145,
+    createdAt: "2026-10-20",
+    animationKinds: ["layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "size", type: "number", defaultValue: "64", description: "Grid size of each loader in px; tiles are size + 68 px square." },
+      { name: "color", type: "string", defaultValue: "undefined", description: "One dot colour for every loader. Defaults to each pattern's own colour." },
+      { name: "showLabels", type: "boolean", defaultValue: "true", description: "Show the pulsing label (\"Indexing…\", \"Thinking…\") under each loader." },
+      { name: "MatrixLoader.pattern", type: '"wave" | "ripple" | "spiral" | "rain" | "halogen" | "checker" | number', defaultValue: "0", description: "Standalone MatrixLoader: which pattern to play, by name or index." },
+      { name: "MatrixLoader.size", type: "number", defaultValue: "64", description: "Standalone MatrixLoader: grid size in px." },
+      { name: "MatrixLoader.color", type: "string", defaultValue: "undefined", description: "Standalone MatrixLoader: dot colour; defaults to the pattern's colour." },
+      { name: "MatrixLoader.label", type: "string", defaultValue: "undefined", description: "Standalone MatrixLoader: accessible label; defaults to the pattern's label." },
+    ],
+    Preview: Previews.PreviewMatrixLoaders,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MatrixLoader } from "@/components/matrix-loaders";
+
+export function GeneratingState() {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-[#1c1c1e]">
+      <MatrixLoader pattern="ripple" size={28} label="Generating answer" />
+      <span className="text-[14px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">Thinking…</span>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 export function getLibraryComponent(slugOrRegistryName: string) {

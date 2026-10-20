@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, RotateCcw } from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import {
@@ -17,7 +17,7 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
-import { ProBadge, ProLock, useProAccess } from "@/components/pro/pro-access";
+import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
 
@@ -346,6 +346,43 @@ function Stage({
   );
 }
 
+// ── build prompt (Pro) ──────────────────────────────────────────────
+
+function BuildPromptCard({ slug, name }: { slug: string; name: string }) {
+  const { isPro } = useProAccess();
+  const [state, copy] = useCopyBuildPrompt(slug, name);
+  return (
+    <div className="mt-6 rounded-[18px] bg-foreground/[0.04] p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[14px] font-semibold text-foreground">Build prompt</p>
+        {isPro ? null : <ProBadge />}
+      </div>
+      <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+        The exact brief to rebuild {name} from scratch with Claude, Cursor or v0: layout, colours, motion values and states.
+      </p>
+      <button
+        type="button"
+        onClick={copy}
+        disabled={state === "loading"}
+        className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-foreground text-[14px] font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        {state === "copied" ? <Check className="size-4" aria-hidden /> : isPro ? <Sparkles className="size-4" aria-hidden /> : <Lock className="size-4" aria-hidden />}
+        <span aria-live="polite">
+          {state === "loading"
+            ? "Copying…"
+            : state === "copied"
+              ? "Copied — paste it into your agent"
+              : state === "error"
+                ? "Couldn't copy, try again"
+                : isPro
+                  ? "Copy build prompt"
+                  : "Copy build prompt with Pro"}
+        </span>
+      </button>
+    </div>
+  );
+}
+
 // ── install panel ───────────────────────────────────────────────────
 
 function InstallPanel({
@@ -355,6 +392,7 @@ function InstallPanel({
   interactions,
   locked,
   name,
+  hasPrompt,
 }: {
   slug: string;
   registryCliName?: string;
@@ -362,6 +400,7 @@ function InstallPanel({
   interactions: string[];
   locked: boolean;
   name: string;
+  hasPrompt: boolean;
 }) {
   const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryCliName ?? slug}`;
   const extra = getExtraLibraries(dependencies);
@@ -389,6 +428,7 @@ function InstallPanel({
         >
           See what Pro includes
         </Link>
+        {hasPrompt ? <BuildPromptCard slug={slug} name={name} /> : null}
         {interactions.length ? (
           <div className="mt-6">
             <p className="text-[13px] font-medium text-foreground">How it moves</p>
@@ -417,6 +457,8 @@ function InstallPanel({
           <InstallCard wrap command={`npm install ${extra.join(" ")}`} className="mt-2 shadow-none ring-1 ring-border" />
         </div>
       ) : null}
+
+      {hasPrompt ? <BuildPromptCard slug={slug} name={name} /> : null}
 
       {interactions.length ? (
         <div className="mt-6">
@@ -805,6 +847,8 @@ type ComponentDetailProps = {
   related?: GalleryItem[];
   /** Pro component and this visitor has no access: the server sent no code, the UI offers Pro. */
   locked?: boolean;
+  /** Has a build prompt (Pro feature, fetched from the gated API on copy). */
+  hasPrompt?: boolean;
 };
 
 export function ComponentDetailPageClient({
@@ -825,6 +869,7 @@ export function ComponentDetailPageClient({
   related = [],
   premium,
   locked = false,
+  hasPrompt = false,
 }: ComponentDetailProps) {
   const usageSource = serializedPreviewSections?.[0]?.reactSource ?? reactSource;
   const categoryLabel = getComponentCategoryLabel(categorySlug as ComponentCategorySlug);
@@ -901,6 +946,7 @@ export function ComponentDetailPageClient({
               interactions={interactions}
               locked={locked}
               name={name}
+              hasPrompt={hasPrompt}
             />
           </div>
 

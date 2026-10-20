@@ -114,6 +114,22 @@ const SELF_DEMO = new Set([
   "sign-and-seal",
   "streak-counter",
   "capsule-toggles",
+  "glass-bubbles",
+  "box-spill",
+  "curved-reel",
+  "squeeze-progress",
+  "bolting-sliders",
+  "crumple-to-trash",
+  "tape-shelf",
+  "packet-router",
+  "stamp-swirl",
+  "bubble-cluster",
+  "sticker-toss",
+  "context-meter",
+  "mood-wheel",
+  "swipe-stack",
+  "flight-tracker",
+  "matrix-loaders",
 ]);
 
 /** Hover effects that look like nothing until a pointer passes over them. */
@@ -212,6 +228,22 @@ const TINT_OF: Record<string, TileTint> = {
   "sign-and-seal": "violet",
   "streak-counter": "peach",
   "capsule-toggles": "mint",
+  "glass-bubbles": "sky",
+  "box-spill": "peach",
+  "curved-reel": "violet",
+  "squeeze-progress": "butter",
+  "bolting-sliders": "sky",
+  "crumple-to-trash": "peach",
+  "tape-shelf": "butter",
+  "packet-router": "violet",
+  "stamp-swirl": "peach",
+  "bubble-cluster": "sky",
+  "sticker-toss": "butter",
+  "context-meter": "violet",
+  "mood-wheel": "sky",
+  "swipe-stack": "mint",
+  "flight-tracker": "sky",
+  "matrix-loaders": "violet",
   "avatar-group": "sky",
   "stateful-button": "mint",
   "gooey-search-input": "mint",
@@ -223,6 +255,23 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // fifth batch
+  "glass-bubbles",
+  "box-spill",
+  "curved-reel",
+  "squeeze-progress",
+  "bolting-sliders",
+  "crumple-to-trash",
+  "tape-shelf",
+  "packet-router",
+  "stamp-swirl",
+  "bubble-cluster",
+  "sticker-toss",
+  "context-meter",
+  "mood-wheel",
+  "swipe-stack",
+  "flight-tracker",
+  "matrix-loaders",
   // fourth batch
   "lanyard-badge",
   "glass-lens",
@@ -281,6 +330,10 @@ export const MOTION_KIT_ORDER: string[] = [
 
 /** The homepage set, in order: newest interactions first, then the best of the rest. */
 export const HOME_PICKS: string[] = [
+  "glass-bubbles",
+  "curved-reel",
+  "swipe-stack",
+  "packet-router",
   "stretch-nav",
   "magnify-dock",
   "animated-icons",
@@ -361,11 +414,17 @@ function toItem(c: LibraryComponent): GalleryItem | null {
     install: c.registryCliName ?? c.slug,
     isNew: NEWEST - (Date.parse(c.createdAt) || 0) < NEW_WINDOW_MS,
     premium: c.premium,
+    hasPrompt: KIT_RANK.has(c.slug),
     demo: SELF_DEMO.has(c.slug) ? null : DRAG.has(c.slug) ? "drag" : WANDER.has(c.slug) ? "wander" : null,
   };
 }
 
 const KIT_RANK = new Map(MOTION_KIT_ORDER.map((slug, i) => [slug, i] as const));
+
+/** Every Motion Kit component ships a build prompt (content/build-prompts/<slug>.md), a Pro feature. */
+export function hasBuildPrompt(slug: string) {
+  return KIT_RANK.has(slug);
+}
 
 /** Every component as a gallery item: the Motion Kit first (newest batch first), then other new additions, then most popular. */
 export function allGalleryItems(): GalleryItem[] {
