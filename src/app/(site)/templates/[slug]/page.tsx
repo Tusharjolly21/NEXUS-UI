@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return createMetadata({
     title: `${t.title} — Next.js Landing Page Template`,
     description: t.description,
-    openGraph: { title: `${t.title} · ${siteConfig.name}` },
+    openGraph: { title: `${t.title} · ${siteConfig.siteName}` },
     alternates: { canonical: `/templates/${slug}` },
   });
 }

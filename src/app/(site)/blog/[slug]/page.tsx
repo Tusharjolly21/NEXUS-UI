@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.frontmatter.title,
     description: post.frontmatter.description,
     openGraph: {
-      title: `${post.frontmatter.title} · ${siteConfig.name}`,
+      title: `${post.frontmatter.title} · ${siteConfig.siteName}`,
       type: "article",
       ...(post.frontmatter.date ? { publishedTime: new Date(post.frontmatter.date).toISOString() } : {}),
     },
@@ -58,12 +58,12 @@ export default async function BlogPostPage({ params }: Props) {
     },
     author: {
       "@type": "Organization",
-      name: siteConfig.name,
+      name: siteConfig.siteName,
       url: siteConfig.url,
     },
     publisher: {
       "@type": "Organization",
-      name: siteConfig.name,
+      name: siteConfig.siteName,
       url: siteConfig.url,
       logo: {
         "@type": "ImageObject",

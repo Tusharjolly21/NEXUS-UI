@@ -78,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return createMetadata({
     title: `${block.name} — Next.js UI Block`,
     description: block.description,
-    openGraph: { title: `${block.name} · ${siteConfig.name}` },
+    openGraph: { title: `${block.name} · ${siteConfig.siteName}` },
     alternates: { canonical: `/blocks/${slug}` },
   });
 }
