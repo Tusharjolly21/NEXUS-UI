@@ -72,7 +72,7 @@ function Marker({
   track?: string;
   still: boolean;
 }) {
-  const on = useTransform(progress, (v) => (v + 0.004 >= at ? 1 : 0));
+  const on = useTransform(progress, (v): number => (v + 0.004 >= at ? 1 : 0));
   const pop = useSpring(on, still ? { stiffness: 2000, damping: 100 } : { stiffness: 520, damping: 13 });
   const dot = useTransform(pop, (v) => Math.max(0, v));
   const ring = useTransform(pop, [0, 1], [1, 1.12]);
@@ -313,7 +313,7 @@ function Label({
   progress: MotionValue<number>;
   onSeek: () => void;
 }) {
-  const current = useTransform(progress, (v) => (v + 0.004 >= at && v + 0.004 < next ? 1 : 0));
+  const current = useTransform(progress, (v): number => (v + 0.004 >= at && v + 0.004 < next ? 1 : 0));
   const lit = useSpring(current, { stiffness: 400, damping: 30 });
   const opacity = useTransform(lit, [0, 1], [0.55, 1]);
   const nudge = useTransform(lit, [0, 1], [0, 4]);
