@@ -15,8 +15,7 @@ import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
 import GooeyDial from "@/components/templates/kit/components/GooeyDial";
 import StandingCalendar from "@/components/templates/kit/components/StandingCalendar";
 import PriceOdometer from "@/components/templates/kit/components/PriceOdometer";
-import { StickyStory } from "@/components/templates/orbit-ai/sticky-story";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const A = "#2563eb"; // blue: fills, graphics and text (5.2:1 on white)
 const INK = "#1d1d1f";
@@ -65,13 +64,14 @@ const Icon = ({ d, size = 20, color = "currentColor" }: { d: string; size?: numb
 /* Hero: the agent ring                                                 */
 /* ------------------------------------------------------------------ */
 
-function AgentNode({ i, rot, geo, selected, onPick }: { i: number; rot: MotionValue<number>; geo: { cx: number; cy: number; rx: number; ry: number }; selected: boolean; onPick: (i: number) => void }) {
+function AgentNode({ i, rot, geo, selected, onPick, compact = false }: { i: number; rot: MotionValue<number>; geo: { cx: number; cy: number; rx: number; ry: number }; selected: boolean; onPick: (i: number) => void; compact?: boolean }) {
   const a = AGENTS[i];
   const theta = useTransform(rot, (r) => r + i * STEP);
   const x = useTransform(theta, (t) => geo.cx + geo.rx * Math.cos(t) - 36);
   const y = useTransform(theta, (t) => geo.cy + geo.ry * Math.sin(t) - 36);
   const depth = useTransform(theta, (t) => Math.sin(t));
-  const scale = useTransform(depth, [-1, 1], [0.7, 1.08]);
+  const k = compact ? 0.74 : 1;
+  const scale = useTransform(depth, [-1, 1], [0.7 * k, 1.08 * k]);
   const opacity = useTransform(depth, [-1, 0, 1], [0.55, 0.85, 1]);
   const zIndex = useTransform(depth, (d) => (d > 0.05 ? 30 : 5));
   const s = STATUS[a.status];
@@ -92,7 +92,7 @@ function AgentNode({ i, rot, geo, selected, onPick }: { i: number; rot: MotionVa
         />
         <span className="relative" style={{ color: selected ? "#fff" : INK }}><Icon d={a.d} size={24} /></span>
         <span className="absolute -right-0.5 top-0.5 h-3.5 w-3.5 rounded-full ring-[3px] ring-white" style={{ background: s.c }} />
-        <span className="absolute top-[78px] whitespace-nowrap rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)] backdrop-blur">{a.name}</span>
+        {(!compact || selected) && <span className="absolute top-[78px] whitespace-nowrap rounded-full bg-white/90 px-2.5 py-0.5 text-[12px] font-semibold text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06)] backdrop-blur" style={compact ? { fontSize: 15 } : undefined}>{a.name}</span>}
       </button>
     </motion.div>
   );
@@ -165,8 +165,8 @@ function AgentRing() {
   }, []);
 
   const wide = w >= 760;
-  const H = wide ? 620 : 230;
-  const geo = wide ? { cx: w / 2, cy: 285, rx: Math.min(w / 2 - 60, 500), ry: 240 } : { cx: w / 2, cy: 104, rx: w / 2 - 44, ry: 58 };
+  const H = wide ? 620 : 262;
+  const geo = wide ? { cx: w / 2, cy: 285, rx: Math.min(w / 2 - 60, 500), ry: 240 } : { cx: w / 2, cy: 112, rx: w / 2 - 40, ry: 74 };
 
   const frontIndex = (r: number) => {
     let best = 0, bv = -2;
@@ -268,7 +268,7 @@ function AgentRing() {
           </motion.div>
         )}
         {AGENTS.map((_, i) => (
-          <AgentNode key={`${AGENTS[i].id}-${w}`} i={i} rot={rot} geo={geo} selected={sel === i} onPick={pick} />
+          <AgentNode key={`${AGENTS[i].id}-${w}`} i={i} rot={rot} geo={geo} selected={sel === i} onPick={pick} compact={!wide} />
         ))}
       </div>
       {!wide && <Fit><PrCard sel={sel} onPick={pick} /></Fit>}

@@ -45,7 +45,7 @@ function Chrome({ children, tone = "#fff" }: { children: ReactNode; tone?: strin
     <div className="isolate flex h-full w-full flex-col" style={{ background: tone }}>
       {/* Tall bar with a centred address, so the Before / After chips can sit on its ends. */}
       <div className="flex h-[52px] flex-none items-center justify-center border-b border-black/[.06] bg-[#f5f5f7] px-3">
-        <span className="truncate rounded-full bg-white px-3 py-1 text-[10px] text-[#6e6e73] shadow-[0_0_0_1px_rgba(0,0,0,.05)]">fernway.shop/checkout</span>
+        <span className="hidden truncate rounded-full bg-white px-3 py-1 text-[10px] sm:inline text-[#6e6e73] shadow-[0_0_0_1px_rgba(0,0,0,.05)]">fernway.shop/checkout</span>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
     </div>
@@ -161,6 +161,12 @@ function Hero() {
             <span className="text-[#6e6e73]">Shipped March 2026</span>
           </div>
           <BeforeAfter before={<CheckoutBefore />} after={<CheckoutAfter />} beforeLabel="Before · 3 steps" afterLabel="After · 1 page" value={pos} autoplay aspect="aspect-[4/5] sm:aspect-[16/10]" accent={OD} />
+          <div className="mt-6 flex flex-wrap justify-center gap-2">
+            {["7 fields removed", "Guest checkout by default", "Address lookup", "One obvious button"].map((t) => (
+              <span key={t} className="rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#424245] shadow-[0_0_0_1px_rgba(0,0,0,.07)]">{t}</span>
+            ))}
+          </div>
+          <p className="m-0 mt-4 text-center text-[13px] text-[#6e6e73]">Numbers between the ends are blended as you drag; the ends are the measured before and after.</p>
         </motion.div>
         <div className="order-1 flex flex-col gap-5 lg:order-2">
           <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[14px] font-semibold" style={{ color: OD }}>
@@ -187,7 +193,6 @@ function Hero() {
           </Reveal>
         </div>
       </div>
-      <p className="relative m-0 mt-6 px-5 text-center text-[13px] text-[#6e6e73]">Numbers between the ends are blended as you drag; the ends are the measured before and after.</p>
     </section>
   );
 }

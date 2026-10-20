@@ -62,7 +62,7 @@ export function Stagger({ children, className = "", gap = 0.08 }: { children: Re
   return (
     <motion.div className={className} initial="hide" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={{ show: { transition: { staggerChildren: gap } } }}>
       {Children.map(children, (c) => (
-        <motion.div className="min-w-0" variants={{ hide: { opacity: 0, y: 26, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 160, damping: 22 } } }}>
+        <motion.div className="min-w-0" variants={{ hide: { opacity: 0, y: 20, scale: 0.98 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 160, damping: 22 } } }}>
           {c}
         </motion.div>
       ))}

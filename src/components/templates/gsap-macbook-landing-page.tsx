@@ -165,6 +165,7 @@ function Hero() {
   const spin = useMotionValue(0);
   const spinS = useSpring(spin, { stiffness: 80, damping: 14 });
   const rotY = useTransform([turnScroll, spinS], ([a, b]: number[]) => a + b);
+  const lift = useTransform(p, [0, 0.4], [-110, 0]);
   const bar = useTransform(p, [0, 1], [0, 1]);
   const [hint, setHint] = useState(true);
 
@@ -207,7 +208,7 @@ function Hero() {
         >
           <div className="origin-center scale-[0.5] sm:scale-[0.8] lg:scale-100" style={{ perspective: 1900 }}>
             <div className="relative h-[520px] w-[760px]">
-              <motion.div className="absolute left-1/2 top-[72%] h-0 w-0" style={{ transformStyle: "preserve-3d", rotateX: tilt, rotateY: rotY, scale }}>
+              <motion.div className="absolute left-1/2 top-[72%] h-0 w-0" style={{ transformStyle: "preserve-3d", rotateX: tilt, rotateY: rotY, scale, y: lift }}>
                 <Machine lid={lid} screenOn={screenOn} finish={FINISHES[0]} />
               </motion.div>
             </div>

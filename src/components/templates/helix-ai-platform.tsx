@@ -8,7 +8,7 @@
  */
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
-import TodoList from "@/components/templates/kit/components/TodoList";
+import TodoList from "@/components/templates/helix/plan-checklist";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import StaggerMenu from "@/components/templates/kit/components/StaggerMenu";
 import SignBadge from "@/components/templates/kit/components/SignBadge";
@@ -16,8 +16,7 @@ import StretchNav from "@/components/templates/kit/components/StretchNav";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import { Switch } from "@/components/templates/kit/components/AnimatedTabs";
 import HoldToPause from "@/components/templates/helix/hold-to-pause";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Words, ease, scrollToId } from "@/components/templates/kit/parts";
-import { StickyStory } from "@/components/templates/kit-ports/sticky-story";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const A = "#4f46e5";

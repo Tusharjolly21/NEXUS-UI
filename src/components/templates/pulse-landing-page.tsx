@@ -15,8 +15,7 @@ import { CopyChip } from "@/components/templates/kit/components/CopyButton";
 import StretchNav from "@/components/templates/kit/components/StretchNav";
 import RadioCards from "@/components/templates/kit/components/RadioCards";
 import TriageStack from "@/components/templates/pulse-landing/triage-stack";
-import { StickyStory } from "@/components/templates/pulse-landing/sticky-story";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const A = "#dc2626"; // red: fills, graphics, buttons (white text 4.8:1)
 const AD = "#b91c1c"; // red text on white and grey (6:1)

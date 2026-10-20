@@ -334,8 +334,8 @@ function WakeVisual() {
       <div className="relative h-[150px] w-[260px]" style={{ perspective: 900 }}>
         <motion.div
           className="absolute bottom-[12px] left-[10px] h-[150px] w-[240px] origin-bottom overflow-hidden rounded-t-[12px] bg-[#16161a] p-[6px]"
-          initial={{ rotateX: -86 }}
-          animate={{ rotateX: [-86, -86, 0, 0, -86] }}
+          initial={{ rotateX: -72 }}
+          animate={{ rotateX: [-72, -72, 0, 0, -72] }}
           transition={{ duration: 4.4, times: [0, 0.12, 0.42, 0.85, 1], repeat: Infinity, ease: [0.16, 1, 0.3, 1] }}
         >
           <motion.div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-[6px] bg-[#f4f1ec]" animate={{ opacity: [0, 0, 1, 1, 0] }} transition={{ duration: 4.4, times: [0, 0.3, 0.38, 0.85, 0.9], repeat: Infinity }}>

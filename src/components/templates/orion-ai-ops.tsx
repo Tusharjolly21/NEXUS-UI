@@ -15,8 +15,7 @@ import PageCurl from "@/components/templates/kit/components/PageCurl";
 import RadioCards from "@/components/templates/kit/components/RadioCards";
 import { MatrixLoader } from "@/components/templates/kit/components/MatrixLoaders";
 import IncidentCalendar from "@/components/templates/orion/incident-calendar";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Words, ease, scrollToId } from "@/components/templates/kit/parts";
-import { StickyStory } from "@/components/templates/kit-ports/sticky-story";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, StickyStory, Words, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", "Segoe UI", system-ui, sans-serif';
 const MONO = "ui-monospace, 'SF Mono', Menlo, monospace";

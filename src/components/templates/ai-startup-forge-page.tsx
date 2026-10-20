@@ -17,8 +17,7 @@ import { CopyCommand } from "@/components/templates/kit/components/CopyButton";
 import { CapsuleToggle } from "@/components/templates/kit/components/CapsuleToggle";
 import ElasticStepper from "@/components/templates/kit/components/ElasticStepper";
 import { RollingNumber } from "@/components/templates/kit/components/PriceOdometer";
-import { StickyStory } from "@/components/templates/ai-startup-forge/sticky-story";
-import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
+import { Counter, CtaBand, Faq, Fit, Footer, Magnetic, Nav, Reveal, SectionHead, Stagger, StickyStory, Words, card, ease, scrollToId } from "@/components/templates/kit/parts";
 
 const A = "#d97706"; // amber, for fills and graphics
 const AD = "#b45309"; // darker amber for text and buttons on white (5:1)
