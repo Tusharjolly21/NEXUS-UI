@@ -29,14 +29,13 @@
       "name": "scroll-progress-bar",
       "type": "registry:component",
       "title": "Scroll Progress Bar",
-      "description": "A minimal vertical progress rail that fills smoothly as a target section moves through the viewport or a scrollable container.",
+      "description": "A progress rail for long reads: the fill springs after your scroll, a bead rides its tip and stretches with your speed, and each milestone dot pops in as you pass it. It tracks the page, a section or a scrollable panel, runs vertical or horizontal, and optional chapter labels jump to their part of the page.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -53,15 +52,13 @@
       "name": "wheel-selector",
       "type": "registry:component",
       "title": "Wheel Selector",
-      "description": "An interactive radial navigation dial for services, features, or portfolio items with drag, wheel, and click input plus a responsive mobile arch.",
+      "description": "A radial selector: a ring of icon nodes you drag round, fling, scroll or step with the arrow keys. It coasts, snaps to the nearest stop with a little overshoot, and the node at the top swells and fills with its colour while the hub counter rolls and the side panel swaps to that item.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -78,14 +75,13 @@
       "name": "cinematic-card-deck",
       "type": "registry:component",
       "title": "Cinematic Card Deck",
-      "description": "A scroll-linked 3D card stack with depth, ambient glow, progress dots, cursor parallax, and optional image-backed cards.",
+      "description": "A deck of poster cards in 3D: the front card peels away on its bottom edge while the cards behind rise to take its place, leaning back as the deck moves and springing upright when it stops. Swipe or fling it, scroll the wheel over it, use the arrow keys or the progress pills, or set scrollLinked to deal it from page scroll.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -102,7 +98,7 @@
       "name": "cursor-text-reveal",
       "type": "registry:component",
       "title": "Cursor Text Reveal",
-      "description": "An immersive cursor-following spotlight that reveals alternate text, gradients, or imagery beneath perfectly aligned headline layers.",
+      "description": "An ink lens follows the pointer across a card and shows a second sentence through it, dragging a tail of droplets on looser and looser springs so fast moves stretch into a drip. Press and hold (or Space) to flood the whole card with the reveal; it lets go with an overshoot.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -126,23 +122,26 @@
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
-      "description": "A staggered blur-fade entrance animation for brand logos. Uses framer-motion and fully semantic responsive layouts.",
+      "description": "Social proof with a cinematic entrance: each logo blurs into view in turn, then a soft spotlight follows the pointer and the logos it passes resolve from grey into crisp ink and lift. The marquee variants drift on their own, ease off under the pointer, and can be dragged and flung.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
-          "path": "next-ui/cinematic-logo-cloud.tsx",
+          "path": "next-ui/cinematic-logo-cloud/cinematic-logo-cloud.tsx",
           "type": "registry:component"
         },
         {
-          "path": "next-ui/ui/marquee.tsx",
-          "type": "registry:ui"
+          "path": "next-ui/cinematic-logo-cloud/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/cinematic-logo-cloud.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -150,14 +149,13 @@
       "name": "step-flow",
       "type": "registry:component",
       "title": "Step Flow",
-      "description": "A responsive four-step process section with a sliding highlight, animated image swaps, and hover or click step selection.",
+      "description": "A process section with numbered steps beside a deck of cards. Picking a step by hover, click or arrow keys slides the highlight to it on a spring and deals its card to the front while the old card tucks under the back of the deck; with autoplay a progress bar fills under the active step.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -174,10 +172,9 @@
       "name": "phone-input",
       "type": "registry:component",
       "title": "Phone Input",
-      "description": "A modern animated phone number input with country selector and validation.",
+      "description": "A phone number field with a searchable country picker that formats the number in each country's own pattern. Digits drop into place with a small overshoot, a hairline fills toward a complete number, a check draws itself when it's valid and the country chip flips over when you change country.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -199,10 +196,9 @@
       "name": "hero-aurora-spotlight",
       "type": "registry:component",
       "title": "Aurora Hero Spotlight",
-      "description": "A launch hero on a slow aurora: a soft spotlight follows the pointer, the headline catches the light, and a glass product card rises underneath.",
+      "description": "A launch hero on a slow aurora with a spotlight that trails the pointer and ribbons of light drifting against it. The glass product card underneath rises in with an overshoot, counts up its numbers and tilts toward the pointer while a glare slides across it.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -224,15 +220,13 @@
       "name": "bento-signal-grid",
       "type": "registry:component",
       "title": "Signal Bento Grid",
-      "description": "A monitoring bento: a live latency chart, 30 days of uptime bars, a request counter that counts up in view, and edge-region health.",
+      "description": "A service health bento: a latency line that scrolls live, 30 days of uptime bars, a request counter and edge-region health. Point at the chart and a sprung cursor rides the line reading the value under it; the uptime bars spring up in view and explain any day on hover or with the arrow keys.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -249,16 +243,21 @@
       "name": "nebula-glass-card",
       "type": "registry:component",
       "title": "Nebula Glass Card",
-      "description": "3D tilt card with spring physics and luminous edge lighting.",
+      "description": "A frosted glass card floating over a slowly drifting nebula. It tilts toward the pointer on springs with its layers at different depths, a rim light runs round the edge on the pointer's side, and a press dips the card in and flashes the rim before it springs back.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
-          "path": "next-ui/nebula-glass-card.tsx",
+          "path": "next-ui/nebula-glass-card/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/nebula-glass-card/nebula-glass-card.tsx",
           "type": "registry:component"
         }
       ]
@@ -267,17 +266,22 @@
       "name": "float-glass-navbar",
       "type": "registry:component",
       "title": "Float Glass Navbar",
-      "description": "Glass navigation rail with spring entrance and CTA emphasis.",
+      "description": "A floating glass navigation bar: a soft lens slides under the link you point at, thinning as it travels and stretching as it lands, then glides back to the active link. Once the page scrolls it tucks itself into a compact pill, and when the links no longer fit they fold into a springy menu.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
-          "path": "next-ui/float-glass-navbar.tsx",
+          "path": "next-ui/float-glass-navbar/float-glass-navbar.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/float-glass-navbar/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -285,15 +289,13 @@
       "name": "orbit-footer",
       "type": "registry:component",
       "title": "Orbit Footer",
-      "description": "A complete site footer: brand and newsletter signup, link columns with badges, a live status pill and a giant ghost wordmark that rises into view.",
+      "description": "A complete site footer with brand, a newsletter signup, link columns with badges, a live status pill and social links. Under it a giant ghost wordmark rises from behind the legal bar, and its letters lift and ink in like a wave following the pointer.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -310,15 +312,13 @@
       "name": "depth-testimonials",
       "type": "registry:component",
       "title": "Depth Testimonials",
-      "description": "Testimonials stacked in depth: the front card reads clearly, the next wait behind it, and cycling sends the front card to the back. Auto-advances and pauses on hover.",
+      "description": "Testimonials stacked down a corridor: the front card reads clearly and the rest wait behind it, softer and further away. Next flies the front card past you while the deck surges forward and overshoots, and you can drag the deck to pull it through by hand.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -335,7 +335,7 @@
       "name": "toggle-pricing-pro",
       "type": "registry:component",
       "title": "Toggle Pricing",
-      "description": "Annual/monthly toggle with spring knob and contextual savings callout.",
+      "description": "Pricing cards with a monthly and yearly switch. The knob squashes and stretches with its own speed as it slides, the saving badge pops in, and every price rolls digit by digit to its new figure with a small overshoot.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -345,7 +345,11 @@
       ],
       "files": [
         {
-          "path": "next-ui/toggle-pricing-pro.tsx",
+          "path": "next-ui/toggle-pricing-pro/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/toggle-pricing-pro/toggle-pricing-pro.tsx",
           "type": "registry:component"
         }
       ]
@@ -354,10 +358,9 @@
       "name": "beam-sweep-field",
       "type": "registry:component",
       "title": "Beam Sweep Field",
-      "description": "A cinematic dark backdrop where light columns sweep across a fine grid over a horizon glow, with a ready-made hero you can replace with any content.",
+      "description": "A dark hero backdrop where columns of light sweep across a fine grid and light up the lines they pass. Move over it and the nearest beam swings onto the pointer, leans into the move and overshoots before drifting back into its sweep.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -379,16 +382,21 @@
       "name": "vector-tilt-scene",
       "type": "registry:component",
       "title": "Vector Tilt Scene",
-      "description": "High depth glass panel for hero cards and feature highlights.",
+      "description": "A card that is really a little diorama: point at it and it tilts toward you while its paper-cut layers spring apart in depth, overshoot and settle. The layers then drift against the pointer for real parallax, and a sheen follows the pointer across the glass label.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
-          "path": "next-ui/vector-tilt-scene.tsx",
+          "path": "next-ui/vector-tilt-scene/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/vector-tilt-scene/vector-tilt-scene.tsx",
           "type": "registry:component"
         }
       ]
@@ -397,15 +405,13 @@
       "name": "glass-login-stack",
       "type": "registry:component",
       "title": "Glass Login Stack",
-      "description": "A frosted login card on a slow aurora with ghost cards stacked behind for depth: passkey first, then email and password, with a remember switch and a pending-to-welcome button.",
+      "description": "A frosted login card stacked on two ghost cards over a slow aurora: the stack tilts toward the pointer and the ghosts follow a beat late, so the layers peel apart in depth. Passkey first, then email and password with a remember switch; bad input shakes the card, and success swaps it for a drawn-check welcome.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -422,15 +428,13 @@
       "name": "split-signup-convert",
       "type": "registry:component",
       "title": "Split Signup Convert",
-      "description": "A two-panel signup: the product's value on a lit aurora panel, and a short form with SSO, a live password-strength meter and a pending-to-done button.",
+      "description": "A two-panel signup: a lit value panel with the pitch and benefits, and a short form with Google and GitHub buttons, an email that confirms itself, and a password whose four-segment strength meter pops each segment in. As the form fills, the benefits on the left tick themselves off and a progress line grows under them.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -447,22 +451,21 @@
       "name": "signup-form",
       "type": "registry:component",
       "title": "Signup Form",
-      "description": "Customizable signup form built on shadcn input + label with subtle framer-motion transitions and async submit states.",
+      "description": "A signup card with floating labels that spring up as you type, password rules that tick green as they are met, and inline errors that shake the field that needs fixing. Submitting squeezes the button into a spinner and swells it back out in green; a matching LoginForm ships alongside it.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils",
-        "input",
-        "label",
-        "button"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
           "path": "next-ui/signup-form/brand-icons.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/signup-form/form-parts.tsx",
           "type": "registry:component"
         },
         {
@@ -487,15 +490,14 @@
       "name": "workbench-sidebar",
       "type": "registry:component",
       "title": "Workbench Sidebar",
-      "description": "A product sidebar with a workspace switcher, search, a spring-sliding active highlight, projects, a usage meter and the signed-in user — collapses to an icon rail.",
+      "description": "A product sidebar with a workspace switcher, a search that filters the list as you type, a highlight that springs between rows, projects, a usage meter and the signed-in user. Collapsing springs it down to an icon rail while the labels trail after the width one row at a time.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -512,15 +514,13 @@
       "name": "pulse-dashboard-kpis",
       "type": "registry:component",
       "title": "Pulse Dashboard KPIs",
-      "description": "A KPI strip with a 7d/30d/90d switcher: each metric gets a delta chip that knows when lower is better, and a sparkline that redraws as you change period.",
+      "description": "A row of KPI cards with a period switcher. Switching period morphs every sparkline into its new shape on a spring, rolls each figure to its new value and flips the delta chips, which know when a drop is good news.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -537,14 +537,13 @@
       "name": "orbital-loader",
       "type": "registry:component",
       "title": "Orbital Loader",
-      "description": "A loader with presence: counter-rotating orbits, a glowing dot circling the ring, an arc that sweeps or fills to progress, and rotating status lines.",
+      "description": "A loader with a comet that laps the ring, speeding up and easing off each lap, its tail stretching with the speed and shrinking as it slows. Give it progress and the arc fills behind the comet; at 100% the ring pops, turns green and draws a tick.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -561,15 +560,13 @@
       "name": "milestone-timeline",
       "type": "registry:component",
       "title": "Milestone Timeline",
-      "description": "A roadmap timeline: dates on the left, a rail that fills to the milestone in progress, and nodes that read done, current (pulsing) or upcoming at a glance.",
+      "description": "A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -586,15 +583,13 @@
       "name": "lattice-feature-grid",
       "type": "registry:component",
       "title": "Lattice Feature Grid",
-      "description": "A four-up feature grid on a hairline lattice, where each tile carries a small live illustration of the feature it describes.",
+      "description": "A feature grid drawn on a hairline lattice. The hairlines catch a soft blue light that follows the pointer, and the tile under it plays its small illustration: colour swatches fan out, a spring ball lands and settles, a focus ring hops between buttons and a search result climbs to first place.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -611,15 +606,13 @@
       "name": "motion-faq-disclosure",
       "type": "registry:component",
       "title": "Motion FAQ Disclosure",
-      "description": "A two-column FAQ: heading and a support card on the left, a spring-animated accessible accordion on the right.",
+      "description": "A two-column FAQ with a heading and support card on one side and an accessible accordion on the other. Opening a question lifts it out of the list into a raised card with a slight overshoot, spins its plus into a minus and unfolds the answer a sentence at a time.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -636,16 +629,21 @@
       "name": "nebula-cta-glow",
       "type": "registry:component",
       "title": "Nebula CTA Glow",
-      "description": "Pulsing dual nebula glow behind a high-contrast CTA.",
+      "description": "A call-to-action on a twinkling night sky. Two nebulae drift after the pointer on lazy springs, gather around the button and brighten as you near it while the button leans toward you, and pressing it blooms a ring of light outward.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
-          "path": "next-ui/nebula-cta-glow.tsx",
+          "path": "next-ui/nebula-cta-glow/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/nebula-cta-glow/nebula-cta-glow.tsx",
           "type": "registry:component"
         }
       ]
@@ -654,10 +652,9 @@
       "name": "glow-button",
       "type": "registry:component",
       "title": "Glow Button",
-      "description": "Framer-style glowing CTA button with expanding shadow, radial border sweep, glass edge, and animated arrow.",
+      "description": "A call-to-action link with a coloured light that lives on its rim. The brightest arc turns to face the pointer and the glow behind the button leans the same way, the button drifts a few pixels toward the cursor and the arrow springs ahead on hover.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -679,7 +676,7 @@
       "name": "word-magnet",
       "type": "registry:component",
       "title": "Word Magnet",
-      "description": "Cursor-reactive text where whole words gently repel from the pointer and spring back without splitting letters.",
+      "description": "A headline whose words behave like fridge magnets: the pointer pushes nearby words away, each one tilts in the direction it was shoved, holds for a beat, then springs home with a wobble. Whole words move, letters never split, and it works with touch as well as a mouse.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -703,15 +700,14 @@
       "name": "three-d-folder",
       "type": "registry:component",
       "title": "3D Folder Card",
-      "description": "Interactive folder card that opens on hover, fans project cards upward, and includes a lightbox gallery for visual collections.",
+      "description": "A folder card that swings open when you hover, focus or tap it: the front flap falls forward on a spring and up to three papers fan up out of it, each settling with a wobble. Picking a paper grows its cover into a preview dialog you can page through with the arrow keys and close with Escape.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
-        "react"
+        "react",
+        "react-dom"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -728,14 +724,13 @@
       "name": "draggable-card-stack",
       "type": "registry:component",
       "title": "Draggable Card Stack",
-      "description": "Shuffled deck of portrait cards on a dark surface. Drag or fling the top card to send it to the back; press ← to pull the bottom card to the front. Supports images and videos, hover overlay, auto-play, and fully configurable stack geometry.",
+      "description": "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -752,14 +747,13 @@
       "name": "card-carousel-3d",
       "type": "registry:component",
       "title": "3D Card Carousel",
-      "description": "Cylindrical 3D card carousel — cards arranged in a circle on the Z axis, rotating continuously or on scroll. Radius, perspective, item size, speed, and direction are all configurable.",
+      "description": "Product cards standing round a 3D cylinder. Drag or fling it and it coasts, then clicks into place with the nearest card facing you; spin it fast and the cards swing outward and settle back in as it slows, with wheel, arrow keys, dots and a tap on any card also working.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -776,10 +770,9 @@
       "name": "real-time-cursors",
       "type": "registry:component",
       "title": "Real-Time Cursors",
-      "description": "Collaborative workspace preview with animated teammate cursors, code review cards, and simulated live presence trails.",
+      "description": "A shared design board with teammates' cursors moving over it live: arrows glide between spots and lean with their speed, name tags trail behind and swing when they stop, stops land as clicks and now and then someone drops a comment. Your own pointer gets a You tag when it comes over the board.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -794,38 +787,6 @@
         {
           "path": "next-ui/real-time-cursors/real-time-cursors.tsx",
           "type": "registry:component"
-        },
-        {
-          "path": "next-ui/code-block/code-block.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/chat-messages/chat-messages.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/chat-messages/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/card-stack-rotator/card-stack-rotator.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/encrypted-text/encrypted-text.tsx",
-          "type": "registry:component"
-        },
-        {
-          "path": "next-ui/encrypted-text/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/typewriter-effect/index.ts",
-          "type": "registry:lib"
-        },
-        {
-          "path": "next-ui/typewriter-effect/typewriter-effect.tsx",
-          "type": "registry:component"
         }
       ]
     },
@@ -833,15 +794,13 @@
       "name": "editorial-blog-rail",
       "type": "registry:component",
       "title": "Editorial Blog Rail",
-      "description": "A magazine-style blog rail: one featured story with generated cover art beside a numbered list of recent posts.",
+      "description": "A magazine-style blog rail: a featured story with generated cover art beside a numbered list of recent posts. Pointing at or focusing a post turns the featured slot into its preview: the cover blooms into that post's colours, the title and excerpt slide in, and the lines on the cover drift with the pointer.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -858,15 +817,13 @@
       "name": "split-contact-glass",
       "type": "registry:component",
       "title": "Split Contact Glass",
-      "description": "A contact section in two panes: a lit glass panel with how to reach the team and their live local time, and a form with topic chips, a counted message and a send button that confirms.",
+      "description": "A contact section in two panes: a glass panel with the team's local time on a springy analog clock, a one-tap copyable email and the reply time, and a form with name, email, topic chips and a message whose count ring fills as you type. Sending launches the paper plane off the button and swaps the form for a thank-you.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -883,16 +840,22 @@
       "name": "svg-noise-shader",
       "type": "registry:component",
       "title": "SVG Noise Shader",
-      "description": "FeTurbulence-driven noise field for textured sci-fi surfaces.",
+      "description": "A grainy gradient surface built from SVG feTurbulence: film grain that flickers over soft pools of colour leaning toward the pointer. Press and hold (or hold Space) and the surface melts through a displacement map; let go and it snaps back like jelly, overshooting before it settles.",
       "dependencies": [
-        "framer-motion"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
-          "path": "next-ui/svg-noise-shader.tsx",
+          "path": "next-ui/svg-noise-shader/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/svg-noise-shader/svg-noise-shader.tsx",
           "type": "registry:component"
         }
       ]
@@ -901,25 +864,7 @@
       "name": "tracing-spotlight-panel",
       "type": "registry:component",
       "title": "Tracing Spotlight Panel",
-      "description": "Cursor-traced highlight for feature callouts and pricing tiers.",
-      "dependencies": [
-        "framer-motion"
-      ],
-      "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
-      ],
-      "files": [
-        {
-          "path": "next-ui/tracing-spotlight-panel.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "forge-ai-command-bar",
-      "type": "registry:component",
-      "title": "Forge AI Command Bar",
-      "description": "Command surface for AI copilots with motion layout container.",
+      "description": "A panel with a light in it: point inside and a soft spotlight trails the pointer on a spring while the border glows wherever the light is closest. Leave and the light slides out to the edge and keeps running laps around the border, tracing the outline until you come back.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -929,8 +874,36 @@
       ],
       "files": [
         {
-          "path": "next-ui/forge-ai-command-bar.tsx",
+          "path": "next-ui/tracing-spotlight-panel/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/tracing-spotlight-panel/tracing-spotlight-panel.tsx",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "forge-ai-command-bar",
+      "type": "registry:component",
+      "title": "Forge AI Command Bar",
+      "description": "A command bar for an AI copilot: pick Ask, Edit or Build, type a prompt or tap a suggestion and send it. The bar grows a panel where the prompt lands as a heading and each step ticks off while a light runs round the edge; Cmd/Ctrl+K focuses it and Esc stops a run.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/forge-ai-command-bar/forge-ai-command-bar.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/forge-ai-command-bar/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -938,10 +911,9 @@
       "name": "gooey-input",
       "type": "registry:component",
       "title": "Gooey Search Input",
-      "description": "Expandable pill search with a detached icon bubble merged through an SVG goo filter and spring layout.",
+      "description": "A search pill whose icon pinches off into its own bubble through an SVG goo filter when you open it, while the field grows with a springy overshoot. Pass suggestions and the matches drip out of the underside of the field through the same goo, with arrow-key navigation.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -967,7 +939,7 @@
       "name": "terminal",
       "type": "registry:component",
       "title": "Interactive Terminal",
-      "description": "macOS-style terminal window with typewriter commands, cursor blink, output sequencing, and optional sound.",
+      "description": "A macOS-style terminal window that types a script of commands with human timing, shows a spinner while each runs and prints its output. Then the prompt is yours: click in and type help, ls, echo or any scripted command, with history, Tab completion and Ctrl+C.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -999,7 +971,7 @@
       "name": "squiggly-text",
       "type": "registry:component",
       "title": "RippleLine squiggly text",
-      "description": "A hero headline that wobbles like hand-drawn ink: an SVG turbulence and displacement filter steps through frames, with a still fallback when reduced motion is on.",
+      "description": "Text that boils like a stop-motion pencil drawing: an SVG turbulence filter re-rolls its noise every few frames, and an optional hand-drawn underline draws itself in. Sweeping the pointer across it stirs the ink, which jumps with pointer speed and settles back on a spring.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1027,7 +999,7 @@
       "name": "floating-dock",
       "type": "registry:component",
       "title": "Nexus floating dock",
-      "description": "Bottom-centered macOS-style dock with pointer-driven magnification, neighbor scaling, glass pill chrome, tooltips, and a touch-friendly expandable mobile menu.",
+      "description": "A macOS-style dock: tiles swell under the pointer and push their neighbours aside on springs, a tooltip names each one, and a click bounces the tile like a launching app before a running dot slides under it. Below md it turns into one glass button that springs the tiles up as a stack.",
       "dependencies": [
         "framer-motion",
         "lucide-react",
@@ -1035,8 +1007,7 @@
         "next"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1073,10 +1044,9 @@
       "name": "stateful-button",
       "type": "registry:component",
       "title": "Stateful message button",
-      "description": "Animated async button with idle → loading → success transitions, built-in click guarding, and smooth icon/text motion.",
+      "description": "A button that shows its own async work: idle, loading, success and error. Pressed it squashes, a light sweeps across while the promise runs and the label rolls with the width springing to fit; success turns it green with a small overshoot pop and a drawn check, failure turns it red and shakes.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -1102,7 +1072,7 @@
       "name": "sparkles",
       "type": "registry:component",
       "title": "Sparkles field",
-      "description": "Configurable animated particle field for hero highlights, card backgrounds, and decorative UI layers with optional pointer interaction.",
+      "description": "A canvas layer of sparkles that pop in with a small overshoot, turn as they shine, drift and fade, then reappear elsewhere. With interactive on, the pointer leaves a sparkling trail and a click throws a burst that arcs down under gravity.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1130,7 +1100,7 @@
       "name": "text-generate-effect",
       "type": "registry:component",
       "title": "Text Generate Effect",
-      "description": "Animated text reveal that fades words, characters, or lines into view with optional blur and upward motion.",
+      "description": "Text that streams in like a model writing it: each word, character or line springs up out of a blur on its own beat and overshoots a hair before settling. A glowing caret rides on the newest token while it generates.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1158,7 +1128,7 @@
       "name": "background-gradient",
       "type": "registry:component",
       "title": "Background Gradient",
-      "description": "Animated gradient wrapper with soft glow and blur for cards, buttons, and hero sections.",
+      "description": "Wraps a card or button in a slowly turning conic-gradient ring with a soft glow underneath. Hover and the ring spins up while its centre leans toward the pointer; press and the card squashes, springs back past its size and the glow flashes.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1186,7 +1156,7 @@
       "name": "typewriter-effect",
       "type": "registry:component",
       "title": "Typewriter Effect",
-      "description": "Character-by-character typewriter text animation with blinking cursor, optional deleting, looping, and semantic heading support.",
+      "description": "A typewriter with a physical caret: each new character drops in and settles on a spring, the caret stretches on every keystroke and squashes on every delete, and it only blinks while it waits. Type one phrase, rotate through a list, or loop forever.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1210,7 +1180,7 @@
       "name": "text-reveal-card",
       "type": "registry:component",
       "title": "Text Reveal Card",
-      "description": "Interactive spotlight card with mouse-follow glow and bottom reveal content for features, case studies, and portfolio sections.",
+      "description": "A card where you scrub a divider across one sentence to swap it for another. The divider follows the pointer on a spring, leans into the direction you move and swings upright when you stop, sheds sparks from the seam, and bounces home when you leave.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1234,15 +1204,13 @@
       "name": "glowing-effect-cards",
       "type": "registry:component",
       "title": "Glowing Effect Cards",
-      "description": "Cursor-reactive glowing border cards with a responsive 2-1-2 layout for refined SaaS sections and dashboards.",
+      "description": "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width).",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1267,14 +1235,13 @@
       "name": "infinite-moving-cards",
       "type": "registry:component",
       "title": "Infinite Moving Cards",
-      "description": "Customizable infinite marquee of cards with seamless looping, direction controls, hover pause, and optional custom rendering.",
+      "description": "A belt of cards that cruises sideways forever and fades out at the edges. Hover and it eases to a stop; grab it and fling, and it coasts on your throw, leaning into the speed, before it settles back to cruising.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1291,7 +1258,7 @@
       "name": "meteors",
       "type": "registry:component",
       "title": "Meteor Effect",
-      "description": "Animated diagonal meteor beams with glow heads and trailing streaks, designed as a reusable background layer for cards and hero sections.",
+      "description": "A canvas layer of meteors that burn in, pick up speed and leave tapering trails across whatever sits behind it. The pointer bends passing meteors toward it, and a click calls one down to strike that spot in a ring of sparks.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1315,13 +1282,14 @@
       "name": "background-boxes",
       "type": "registry:component",
       "title": "Background Boxes",
-      "description": "Animated isometric grid background with hover color effects and cross markers. Fully configurable skew, scale, box dimensions, and colors.",
+      "description": "An isometric grid drawn on canvas, set at any skew, scale and rotation. The cell under the pointer pops up like a key in one of the hover colours, overshoots and settles, while a ripple nudges the cells around it.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
@@ -1338,7 +1306,7 @@
       "name": "encrypted-text",
       "type": "registry:component",
       "title": "Encrypted Text",
-      "description": "Characters shuffle through gibberish before locking into the final string — a futuristic cyber decoding reveal for hero headings, buttons, badges, and nav links.",
+      "description": "Text that decodes itself: every character shuffles through a charset in a fixed-width cell so the line never jitters, then a lock wave runs left to right and each character drops into place with a spring pop. Start it on load, on hover, on click or when it scrolls into view, and loop it if you like.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1362,7 +1330,7 @@
       "name": "mac-keyboard",
       "type": "registry:component",
       "title": "Mac Keyboard",
-      "description": "Fully interactive Mac-style keyboard with Web Audio synthesised click sounds, Framer Motion keycap animations, and real-time physical keyboard highlighting.",
+      "description": "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, click with synthesised sound and show what you type in a strip above.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1402,7 +1370,7 @@
       "name": "images-badge",
       "type": "registry:component",
       "title": "Images Badge",
-      "description": "Stacked avatar/image pill that fans open on hover — ideal for team badges, social proof, avatar groups, and template galleries.",
+      "description": "A pill of overlapping avatars that fans open along a gentle arc on hover or focus, each face springing into place a beat after the last while the +N count rolls down. A name tag glides from face to face under the pointer or the arrow keys, and faces without a picture show initials.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1426,10 +1394,9 @@
       "name": "dot-grid-hero",
       "type": "registry:component",
       "title": "Interactive Dot Grid Hero",
-      "description": "Cinematic hero section with a Canvas-rendered dot grid that reacts to cursor proximity — dots scale, brighten, and return to rest with a smooth radial glow spotlight.",
+      "description": "A hero over a field of coloured dashes that behave like iron filings round a magnet: near the pointer they swing to point at it, grow and get pushed aside, then wobble back to their own heading. Click anywhere and a ripple rolls out, kicking and spinning the dashes it passes.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -1451,10 +1418,9 @@
       "name": "starfield-hero",
       "type": "registry:component",
       "title": "Interactive Starfield Hero",
-      "description": "Dark hero section with a cursor-reactive starfield. Hundreds of glowing particles stretch, brighten, and rotate toward the cursor — built on Canvas + requestAnimationFrame at 60 fps.",
+      "description": "A hero set in a deep 3D starfield drawn on canvas: stars drift toward you, the vanishing point leans toward the pointer and stars near it brighten. Press and hold anywhere, or the Warp button, to jump to warp; on release the field brakes past a standstill, recoils a touch and settles.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -1476,9 +1442,9 @@
       "name": "compare",
       "type": "registry:component",
       "title": "Before / After Compare",
-      "description": "Compare two images side by side: the divider follows the mouse on desktop and drags on touch screens. Optional labels, custom start position, and any aspect ratio.",
+      "description": "A before and after comparison for images or any two pieces of content. Press or drag anywhere and the divider springs to your finger with a little follow-through, the handle stretches in the direction it travels and each label fades as the divider reaches it; arrow keys move it too.",
       "dependencies": [
-        "lucide-react",
+        "framer-motion",
         "react"
       ],
       "registryDependencies": [
@@ -1500,15 +1466,14 @@
       "name": "expandable-cards",
       "type": "registry:component",
       "title": "Expandable Cards",
-      "description": "Responsive card grid where clicking a card smoothly expands it into a full-detail overlay with image, description, and a CTA button.",
+      "description": "A grid of story cards where picking one grows it, in one continuous spring, into a full card with the long description and a call to action while the rest of the grid sinks back; closing shrinks it home into its slot. It can open over the grid itself or in a centred dialog over the page, and the columns follow the container's width.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
-        "react"
+        "react",
+        "react-dom"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1525,7 +1490,7 @@
       "name": "animated-select-headline",
       "type": "registry:component",
       "title": "Animated Select Headline",
-      "description": "A cycling word headline where each active word is highlighted with a Figma-style selection rectangle — thin border with corner handles — using blur-fade transitions.",
+      "description": "A headline where one word sits inside a design-tool selection box, and every few seconds a different collaborator selects the next word. The box springs to the new width with an elastic overshoot, the size badge counts the pixels live, and the collaborator's cursor trails the corner on a softer spring.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1549,7 +1514,7 @@
       "name": "warp-speed-card",
       "type": "registry:component",
       "title": "Warp Speed Card",
-      "description": "A focused warp-speed effect — hover a single phrase to reveal a dark space scene with streaking beams confined to the text's bounding box. The text itself stays static; the effect lives entirely behind it.",
+      "description": "Wrap a phrase in a headline to give it a hyperdrive: hover, focus or tap it and a starfield inside its box spools up on a spring, stretching stars into streaks as speed builds. The phrase squashes and stretches on the kick and drops out of warp with a jolt when you let go.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1573,15 +1538,13 @@
       "name": "circular-carousel",
       "type": "registry:component",
       "title": "Circular Carousel",
-      "description": "An animated orbital carousel with smooth active-card transitions.",
+      "description": "Cards hung round the rim of a wheel, with the active card at the top and its neighbours tipping away down each side. Drag or fling the wheel and it coasts to the nearest card while the cards swing on their pins and settle, and the counter in the middle rolls to the new number; arrows, dots and keys work too.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1598,10 +1561,9 @@
       "name": "chat-messages",
       "type": "registry:component",
       "title": "Chat Messages",
-      "description": "Animated chat message bubbles with typing indicators and sequential reveal.",
+      "description": "A chat thread styled like a messaging app, with blue user bubbles, grey replies and a composer. With autoplay the conversation plays itself: user lines type into the composer and pop out, and the assistant's typing dots grow into each reply; visitors can then send their own messages.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -1623,7 +1585,7 @@
       "name": "shader-flow",
       "type": "registry:component",
       "title": "Shader Flow",
-      "description": "A soft, shader-style background: blurred gradient blobs drifting with Framer Motion, no WebGL needed.",
+      "description": "A real WebGL fragment shader of domain-warped noise that drifts like ink in water, with a static gradient fallback where WebGL is missing. Move the pointer and the flow swirls behind it on a lagging spring; stop and the swirl swings into a small counter-twist before it calms.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1647,10 +1609,9 @@
       "name": "ask-nexus-input",
       "type": "registry:component",
       "title": "Ask Nexus Input",
-      "description": "A bold \\",
+      "description": "A headline over a pill-shaped question field whose placeholder questions roll past while it is empty. Send a question and the words break into dust that blows off to the right, letter by letter from the end, before the field resets.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -1672,18 +1633,14 @@
       "name": "interactive-globe-explorer",
       "type": "registry:component",
       "title": "Interactive Globe Explorer",
-      "description": "Scrollable office/location explorer with a live React Globe, synchronized city list, clickable map pins, responsive details popover, and one-click address/email copy actions.",
+      "description": "An office finder: a dotted globe drawn on canvas beside a list of cities, with the address and email of the selected one ready to copy. Pick a city or its pin and the globe swings round on a spring, overshoots a touch and settles with the city in the middle, where its pin drops in with a bounce and sends out a ripple.",
       "dependencies": [
-        "react-globe.gl",
-        "three",
-        "lucide-react",
-        "react",
-        "next"
+        "framer-motion",
+        "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils",
-        "button"
+        "utils"
       ],
       "files": [
         {
@@ -1700,7 +1657,7 @@
       "name": "code-block",
       "type": "registry:component",
       "title": "Code Block",
-      "description": "A syntax-highlighted code block with header, line numbers, copy button, and fade gradient. Supports dark/light themes and multiple languages.",
+      "description": "A syntax-highlighted code block with a title bar, language badge, line numbers and a copy button. A soft bar glides between lines as the pointer moves, highlightLines marks lines with an accent bar, and copying turns the icon into a tick that draws itself.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1712,6 +1669,10 @@
         {
           "path": "next-ui/code-block/code-block.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/code-block/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -1719,19 +1680,22 @@
       "name": "card-stack-rotator",
       "type": "registry:component",
       "title": "Card Stack Rotator",
-      "description": "A polished stacked card carousel with smooth spring animations, auto-rotation, and inline **highlight** text support.",
+      "description": "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
           "path": "next-ui/card-stack-rotator/card-stack-rotator.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/card-stack-rotator/index.ts",
+          "type": "registry:lib"
         }
       ]
     },
@@ -1739,7 +1703,7 @@
       "name": "scroll-reveal-text",
       "type": "registry:component",
       "title": "Scroll Reveal Text",
-      "description": "Scroll-linked text reveal where words, characters, or lines emerge from muted gray to bright white with optional blur dissolve and staggered cascade.",
+      "description": "A paragraph that reads itself as you scroll: each word, character or line rises out of a blur and passes through the accent colour on its way from grey to ink, so a bright reading wave travels through the text. Scroll progress is smoothed by a spring, and it can track the page or any scrollable container.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1750,11 +1714,11 @@
       ],
       "files": [
         {
-          "path": "next-ui/scroll-reveal-text.tsx",
-          "type": "registry:component"
+          "path": "next-ui/scroll-reveal-text/index.ts",
+          "type": "registry:lib"
         },
         {
-          "path": "next-ui/blocks/scroll-reveal-text.tsx",
+          "path": "next-ui/scroll-reveal-text/scroll-reveal-text.tsx",
           "type": "registry:component"
         }
       ]
@@ -1795,12 +1759,10 @@
       "name": "shooting-stars-grid",
       "type": "registry:component",
       "title": "Shooting Stars Grid",
-      "description": "Animated dot grid with diagonal shooting star streaks and glowing nodes. A dramatic yet subtle background for hero sections and feature blocks.",
+      "description": "A hero grid where shooting stars run along the lines, sometimes turning a corner at a node and lighting each node they cross. Move over it and a spotlight follows the pointer while the stars turn toward you at every node; it adapts to light and dark mode.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
-        "react",
-        "next"
+        "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
@@ -1825,7 +1787,7 @@
       "name": "hover-highlight-text",
       "type": "registry:component",
       "title": "Hover Highlight Text",
-      "description": "Cursor-tracked SVG spotlight that reveals outlined text beneath a base layer. Smooth spring physics follow the mouse for a cinematic hover effect.",
+      "description": "A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1853,14 +1815,13 @@
       "name": "motion-layer-scroller",
       "type": "registry:component",
       "title": "Motion Layer Scroller",
-      "description": "Scroll-driven parallax depth engine — each layer moves at an independent speed and axis as the user scrolls. Compose scenes with overlapping planes.",
+      "description": "A landscape built from paper-cut layers inside its own scroll frame: scroll through it and each ridge rises at its own speed while the sun sinks behind them. When you stop, the layers settle on a soft spring with a small overshoot; pass your own layers to build any parallax scene.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1877,14 +1838,13 @@
       "name": "animated-bento-grid",
       "type": "registry:component",
       "title": "Animated Bento Grid",
-      "description": "Feature showcase bento grid with entrance animations and configurable column spans. Each tile supports custom content, tags, and motion entrance delays.",
+      "description": "A grid of stat tiles whose digits roll in like odometers when the grid scrolls into view. Hovering or focusing a tile lifts it and spins its digits a full turn before they land with a small overshoot; tiles come plain, frosted glass, with a border that lights under the pointer, or with a spotlight.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1901,14 +1861,13 @@
       "name": "bento-grid-skeleton",
       "type": "registry:component",
       "title": "Bento Grid Skeleton",
-      "description": "Bento grid with animated skeleton placeholder tiles — chat, dashboard, avatar, workflow, calendar, and code variants. Perfect for loading states.",
+      "description": "A bento of loading cards, each with a small placeholder scene: a chat thread, a bar chart, a team, a workflow, a calendar or code. One band of light sweeps the whole grid at once instead of each card separately, and pointing at a card plays its scene: bubbles pop in, bars regrow, faces fan out, steps connect, the free slot hops and lines type out.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -1925,15 +1884,19 @@
       "name": "scrolling-testimonials",
       "type": "registry:component",
       "title": "Scrolling Testimonials",
-      "description": "Infinite vertical scroll testimonial wall with multi-column layout, independent column speeds, reverse direction support, gradient fade masks, and avatar initials fallback.",
+      "description": "A wall of testimonials scrolling in columns at different speeds, faded at the top and bottom. Hover and the wall glides to a stop while the card under the pointer stays lit; wheel or drag over it and the columns take the push, lean with the speed and coast back to cruising.",
       "dependencies": [
+        "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
+        {
+          "path": "next-ui/scrolling-testimonials/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/scrolling-testimonials/scrolling-testimonials.tsx",
           "type": "registry:component"
@@ -1944,14 +1907,19 @@
       "name": "spectra-frame",
       "type": "registry:component",
       "title": "Spectra Frame",
-      "description": "Zero-dependency interactive image grid — photos start in black & white and burst into full color on hover with adaptive scale. Built-in responsive columns, scoped CSS injection, and picsum placeholder defaults.",
+      "description": "A photo grid that rests in black and white. Pointing at a photo blooms colour out from where the pointer came in while the photo widens, its row grows and the rest dim; moving off drains the colour back to where the pointer left.",
       "dependencies": [
+        "framer-motion",
         "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
+        {
+          "path": "next-ui/spectra-frame/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/spectra-frame/spectra-frame.tsx",
           "type": "registry:component"
@@ -1962,14 +1930,19 @@
       "name": "profile-orbit",
       "type": "registry:component",
       "title": "Profile Orbit",
-      "description": "An interactive profile carousel where five floating avatars orbit a central card. Clicking any avatar, the nav arrows, or the keyboard cycles through people with a smooth fade + spring animation.",
+      "description": "A profile card with the whole team orbiting it on a tilted ring. Dragging the ring, using the arrows or tapping a face spins that person round to the front, the card slides over to them and their avatar drops in with a bounce, while people at the back of the ring pass under the card.",
       "dependencies": [
+        "framer-motion",
         "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
+        {
+          "path": "next-ui/profile-orbit/index.ts",
+          "type": "registry:lib"
+        },
         {
           "path": "next-ui/profile-orbit/profile-orbit.tsx",
           "type": "registry:component"
@@ -2012,7 +1985,7 @@
       "name": "image-trail",
       "type": "registry:component",
       "title": "Image Trail",
-      "description": "A cursor trail that cycles through a configurable image array as you move, with fade-blur transitions and an optional magnetic repulsion effect.",
+      "description": "Move across the area and it deals out photos along your path: each lands with a small overshoot, tilted the way you were heading, carries a bit of your speed, then drops away under gravity, blurring as it fades. Turn on the magnetic effect and the pointer shoves the photos that are still lying there.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -2036,7 +2009,7 @@
       "name": "avatar-group",
       "type": "registry:component",
       "title": "Avatar Group",
-      "description": "Overlapping avatar stack with per-avatar entrance animations (flip, slide, scale, bounce), four hover styles, name tooltips, and automatic color-coded fallback initials when no image is supplied.",
+      "description": "An overlapping stack of avatars that behaves like a dock: the face under the pointer swells and rises, its neighbours lean out of the way and a single name pill glides from face to face. Past a maximum a +N chip opens the rest, and every avatar is focusable from the keyboard.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -2060,13 +2033,13 @@
       "name": "feature-tools-card",
       "type": "registry:component",
       "title": "Feature Tools Card",
-      "description": "A dark glass card with five magnetic icon slots, a rotating conic-gradient orbit ring, and 3-D tilt physics. Swap the default integration icons for any SVG or image.",
+      "description": "An integrations card: five tool icons ride a slow ring round your app's hub, each wired to it by a line that carries small packets inward. Bring the pointer near and the tools lean toward it like magnets, their line lights up and they snap back with a wobble when it moves away, while the whole card tilts toward the pointer.",
       "dependencies": [
+        "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -2083,7 +2056,7 @@
       "name": "link-preview",
       "type": "registry:component",
       "title": "Link Preview",
-      "description": "Hover-triggered image tooltip that transforms inline text links into cinematic visual previews. Spring-animated entrance with blur, scale, mouse-tracking tilt, and a soft floating glide — perfect for blogs, portfolios, and product pages.",
+      "description": "An inline link that lifts a preview card out of the text on hover or keyboard focus. The card rises with a stretch and settles, leans and slides as the pointer moves along the link, and draws its own cover from the title and site when no image is given.",
       "dependencies": [
         "framer-motion",
         "react",
@@ -2096,6 +2069,10 @@
       ],
       "files": [
         {
+          "path": "next-ui/link-preview/index.ts",
+          "type": "registry:lib"
+        },
+        {
           "path": "next-ui/link-preview/link-preview.tsx",
           "type": "registry:component"
         }
@@ -2105,7 +2082,7 @@
       "name": "tick-slider",
       "type": "registry:component",
       "title": "Tick Slider",
-      "description": "A value slider drawn as a row of fine tick marks that fill as you drag, swell into a soft wave under the pointer and read out a rolling number.",
+      "description": "A slider drawn as a row of ticks that fill with colour up to the value. Ticks swell in a wave around the pointer and the needle, the needle leans into the direction it moves and swings upright when it stops, and the number above rolls digit by digit.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -2129,7 +2106,7 @@
       "name": "time-scrubber",
       "type": "registry:component",
       "title": "Time Scrubber",
-      "description": "A time picker card where you drag, flick or scroll a ruler of minute ticks under a fixed needle, with momentum, snapping and a rolling clock readout.",
+      "description": "A time picker drawn as a ruler you drag or fling under a fixed needle. The ruler coasts and lands exactly on a snap point, the needle ticks at every interval it crosses and bounces when the ruler lands, the digits roll and a small sky chip shifts from night to dawn to day.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -2153,10 +2130,9 @@
       "name": "slide-to-confirm",
       "type": "registry:component",
       "title": "Slide to Confirm",
-      "description": "A swipe-to-confirm pill: drag the knob across with rubber-band resistance, and it snaps home early or locks in, waits on your async action and morphs into a success state.",
+      "description": "A slide-to-confirm track for payments and other deliberate actions. The knob stretches along the track in proportion to how fast you drag it and squashes back when it stops, the label shimmers and fades as you pull, and past the threshold the track floods with the success colour while a check draws itself.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -2236,15 +2212,13 @@
       "name": "toast-stack",
       "type": "registry:component",
       "title": "Toast Stack",
-      "description": "Notifications that rest in a tidy stack, fan out into a list on hover or focus, and can be swiped away, with optional action buttons.",
+      "description": "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -2261,10 +2235,9 @@
       "name": "upload-dropzone",
       "type": "registry:component",
       "title": "Upload Dropzone",
-      "description": "A drag-and-drop upload card that lifts and marches its dashed edge while a file hovers, then lists each file with a type badge and a progress ring.",
+      "description": "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -2286,10 +2259,9 @@
       "name": "hold-to-record",
       "type": "registry:component",
       "title": "Hold to Record",
-      "description": "A press-and-hold voice button that grows into a live waveform with a timer, cancels when you slide away, and settles into a playable voice note.",
+      "description": "Press and hold to record a voice note, release to keep it. A soft halo behind the record dot swells with your voice, the live waveform scrolls in from the right, and sliding left morphs the dot into a bin whose lid opens; let go there to throw the note away. Kept notes become a small player.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
@@ -2311,7 +2283,7 @@
       "name": "cursor-buddy",
       "type": "registry:component",
       "title": "Cursor Buddy",
-      "description": "A soft little character whose eyes follow the pointer across the page, sliding round its curved face, blinking now and then, flinching when you come close and dozing off when left alone.",
+      "description": "A soft little character whose eyes follow the pointer anywhere on the page, sliding round its curved face and narrowing near the edge. It blinks, flinches when you come close, dozes off when left alone, and hops with a squash and stretch when you click it or press Enter.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -2335,14 +2307,13 @@
       "name": "dot-sphere",
       "type": "registry:component",
       "title": "Dot Sphere",
-      "description": "A slowly turning sphere of dots drawn on canvas: move the pointer across it and the dots part and spring back, drag it to spin and let go to watch it coast.",
+      "description": "A turning sphere of dots drawn on canvas: the pointer parts the dots as it passes, and dragging spins it in any direction before it coasts back to its idle turn. Tap it and a ripple rolls out from that spot, swelling the dots and lighting them in the accent colour as it wraps round the far side.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
@@ -2359,15 +2330,13 @@
       "name": "dynamic-island",
       "type": "registry:component",
       "title": "Dynamic Island",
-      "description": "A black pill that morphs on a spring into whatever is happening, a running timer, the track that is playing or an incoming call, and opens into live controls when tapped.",
+      "description": "A black pill that grows into whatever is happening: a running timer, the song that is playing or an incoming call. Each change stretches it, the width shooting out first and the height catching up on a looser spring, and tapping it opens live controls.",
       "dependencies": [
         "framer-motion",
-        "lucide-react",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "http://127.0.0.1:3000/api/registry/nexus-font"
       ],
       "files": [
         {
