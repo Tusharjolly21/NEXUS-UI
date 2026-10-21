@@ -9,8 +9,8 @@ import { createMetadata } from "@/lib/seo";
 import { BlocksGallery, type BlockFilter, type BlockTileItem } from "./_catalog";
 
 export const metadata: Metadata = createMetadata({
-  title: "Tailwind CSS Blocks for React & Next.js",
-  description: `${blocks.length} Tailwind CSS section blocks for React and Next.js: heroes, navigation, pricing, testimonials, FAQ, footers and more. Animated with Framer Motion.`,
+  title: "Animated React Blocks for Next.js",
+  description: `${blocks.length} animated section blocks for React and Next.js: heroes, navigation, pricing, testimonials, FAQ, footers and more. Built with Tailwind CSS and Framer Motion.`,
   alternates: { canonical: "/blocks" },
 });
 

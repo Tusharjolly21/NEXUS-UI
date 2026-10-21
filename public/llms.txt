@@ -1,5 +1,5 @@
 # Nexus UI
-> Tailwind CSS React Components & Next.js Templates
+> Animated React Components & Next.js Templates
 
 Nexus UI is a premium UI component library offering 100+ animated React components, production-ready Next.js templates, and copy-paste UI blocks built with Tailwind CSS, Framer Motion, and TypeScript. Designed for developers shipping SaaS products, landing pages, and marketing sites faster.
 
@@ -17,6 +17,7 @@ Nexus UI is a premium UI component library offering 100+ animated React componen
 - [Install Tailwind CSS](/docs/install-tailwindcss): Tailwind CSS configuration guide
 - [Add Utilities](/docs/add-utilities): Adding utility functions and helpers
 - [CLI Usage](/docs/cli): Using the Nexus UI CLI to add components via shadcn
+- [Compare libraries](/alternatives): Nexus UI next to Magic UI, React Bits and Aceternity UI
 - [Claude Code](/claude-code): Install Nexus UI items with the shadcn CLI and use Pro build prompts with AI coding tools
 
 ## Blog
