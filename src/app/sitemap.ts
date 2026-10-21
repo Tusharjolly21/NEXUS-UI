@@ -4,6 +4,7 @@ import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
 import { getAllPosts } from "@/lib/blog";
+import { alternatives } from "@/lib/alternatives";
 import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
 import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 
@@ -44,6 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/docs/add-utilities`,      lastModified: since("2026-10-20") },
     { url: `${base}/docs/cli`,                lastModified: since("2026-10-21") },
     { url: `${base}/claude-code`,             lastModified: since("2026-10-21") },
+    { url: `${base}/alternatives`,            lastModified: since("2026-10-21") },
+    ...alternatives.map((a) => ({ url: `${base}/alternatives/${a.slug}`, lastModified: since("2026-10-21") })),
   ];
 
   const componentRoutes: MetadataRoute.Sitemap = libraryComponents.map((c) => ({
