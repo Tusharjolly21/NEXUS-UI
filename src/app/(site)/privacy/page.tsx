@@ -141,6 +141,13 @@ export default function PrivacyPage() {
           You can block or delete cookies in your browser settings. Blocking essential cookies will sign you
           out.
         </p>
+        <p>
+          To turn off Google Analytics, Cloudflare Web Analytics, Vercel Web Analytics and Speed Insights in
+          one step, open any page of this site with <code className="text-foreground">?notrack=1</code> at the
+          end of the address. Your browser then remembers the choice and loads none of them. Use{" "}
+          <code className="text-foreground">?notrack=0</code> to turn them back on. The choice is stored only
+          in your browser.
+        </p>
       </LegalSection>
 
       <LegalSection id="sharing" title="4. Who we share information with">
