@@ -97,3 +97,36 @@ export function verifyWebhook(
   }
   return false;
 }
+
+async function dodoFetch(path: string, init?: RequestInit) {
+  const res = await fetch(`${dodoBaseUrl()}${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${process.env.DODO_PAYMENTS_API_KEY}`,
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Dodo ${init?.method ?? "GET"} ${path} failed ${res.status}: ${text.slice(0, 200)}`);
+  }
+  return res;
+}
+
+/** The subscription IDs a payment belongs to (empty for a one-time payment). */
+export async function subscriptionIdsForPayment(paymentId: string): Promise<string[]> {
+  const res = await dodoFetch(`/payments/${encodeURIComponent(paymentId)}`);
+  const data = (await res.json()) as { subscription_id?: string | null; subscription_ids?: string[] | null };
+  const ids = new Set<string>(data.subscription_ids ?? []);
+  if (data.subscription_id) ids.add(data.subscription_id);
+  return [...ids];
+}
+
+/** Cancels a subscription in Dodo immediately so it can't bill again. */
+export async function cancelSubscription(subscriptionId: string): Promise<void> {
+  await dodoFetch(`/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+    method: "PATCH",
+    body: JSON.stringify({ status: "cancelled", cancel_reason: "cancelled_by_merchant" }),
+  });
+}
