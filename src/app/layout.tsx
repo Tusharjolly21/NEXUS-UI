@@ -4,11 +4,8 @@ import Script from "next/script";
 import { AppProviders } from "@/components/providers/app-providers";
 import { createMetadata } from "@/lib/seo";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SiteAnalytics } from "@/components/providers/analytics";
 import "./globals.css";
-
-const GOOGLE_TAG_ID = "G-LNN2CTHENQ";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -59,26 +56,8 @@ export default function RootLayout({
         className="min-h-dvh bg-background text-foreground antialiased selection:bg-primary/25 selection:text-foreground"
       >
         <AppProviders>{children}</AppProviders>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="google-tag" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GOOGLE_TAG_ID}');
-          `}
-        </Script>
-        {/* Cloudflare Web Analytics */}
-        <Script
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          strategy="afterInteractive"
-          data-cf-beacon='{"token": "27b8689ab43848efa888f93f6c6e6b02"}'
-        />
-        <Analytics />
-        <SpeedInsights />
+        {/* Google Analytics, Cloudflare, Vercel Analytics, Speed Insights: skipped in browsers that opted out (?notrack=1). */}
+        <SiteAnalytics />
       </body>
     </html>
   );
