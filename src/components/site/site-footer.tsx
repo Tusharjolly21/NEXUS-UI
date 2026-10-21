@@ -39,6 +39,7 @@ const COLUMNS = [
 const LEGAL = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
+  { href: "/refund-policy", label: "Refunds" },
 ] as const;
 
 /** Quiet Apple-style footer with the ghost "Nexus UI" wordmark bleeding off the bottom edge. */

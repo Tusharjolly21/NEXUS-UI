@@ -54,9 +54,9 @@ export default function PrivacyPage() {
           , including the Limited Use requirements.
         </p>
         <p>
-          <Strong>Purchase information.</Strong> Payments are processed by Lemon Squeezy, which acts as the
-          merchant of record for every sale. Lemon Squeezy collects your payment details and billing address
-          directly; we never see or store your full card number. From Lemon Squeezy we receive an order or
+          <Strong>Purchase information.</Strong> Payments are processed by Dodo Payments, which acts as the
+          merchant of record for every sale. Dodo Payments collects your payment details and billing address
+          directly; we never see or store your full card number. From Dodo Payments we receive an order or
           subscription ID, the product you bought, the amount and currency, the order status (for example
           paid or refunded), and, for subscriptions, renewal and end dates.
         </p>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             "To create and secure your account and keep you signed in.",
             "To deliver what you buy: unlocking premium components and templates, enabling downloads and registry access, and keeping your order history.",
             "To reply to support requests and messages you send us.",
-            "To send service emails such as sign-in links, receipts (sent by Lemon Squeezy), and important account notices. We do not send marketing email without your consent.",
+            "To send service emails such as sign-in links, receipts (sent by Dodo Payments), and important account notices. We do not send marketing email without your consent.",
             "To measure traffic and performance, fix bugs, and decide what to build next.",
             "To show advertising on some pages (see section 3).",
             "To prevent fraud, spam, and abuse, and to meet legal, tax, and accounting obligations.",
@@ -165,7 +165,7 @@ export default function PrivacyPage() {
               <Strong>Vercel</Strong> — website hosting, Web Analytics, and Speed Insights.
             </>,
             <>
-              <Strong>Lemon Squeezy</Strong> — checkout, payment processing, tax, receipts, and refunds, as
+              <Strong>Dodo Payments</Strong> — checkout, payment processing, tax, receipts, and refunds, as
               merchant of record.
             </>,
             <>
