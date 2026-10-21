@@ -54,6 +54,8 @@ import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotl
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
 import { createMetadata, siteConfig } from "@/lib/seo";
+import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
+import { getMovedSection } from "@/lib/catalog/moved-sections";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
 import { InstallCard, RainbowWord } from "@/components/site";
 import { motionKitSectionsOf, variantAnchor, variantsOf } from "@/lib/catalog/block-variants";
@@ -1132,6 +1134,7 @@ function PreviewCodeSection({
       index={at === -1 ? 1 : at + 1}
       total={Math.max(1, sections.length)}
       title={title}
+      description={variant ? movedDescription(variant.id) : undefined}
       code={locked ? "" : code}
       usageCode={locked ? "" : (usageCode ?? defaultUsageForTitle(title))}
       locked={locked}
@@ -1145,6 +1148,18 @@ function PreviewCodeSection({
       </PreviewShield>
     </BlockSection>
   );
+}
+
+/**
+ * For a section moved over from the components library, the text its old page used in search results
+ * (falling back to its catalogue description), so the block page keeps the wording that page ranked for.
+ * Other sections return nothing, whatever their id.
+ */
+function movedDescription(id: string): string | undefined {
+  const slug = id.replace(/^mk-/, "");
+  const moved = getMovedSection(slug);
+  if (!moved) return undefined;
+  return COMPONENT_SEO[slug]?.description ?? moved.description;
 }
 
 function movedUsage(registryName: string, usage: string) {

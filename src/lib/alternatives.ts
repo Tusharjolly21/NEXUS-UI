@@ -21,6 +21,9 @@ export type Alternative = {
   chooseThem: string[];
 };
 
+/** The longer blog guide that covers every library compared. */
+export const GUIDE = { href: "/blog/aceternity-magic-ui-alternatives", label: "Aceternity UI and Magic UI alternatives for React: the full guide" };
+
 export const CHECKED_ON = "October 2026";
 
 export const alternatives: Alternative[] = [
