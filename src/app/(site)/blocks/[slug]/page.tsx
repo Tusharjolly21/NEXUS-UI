@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { readFile } from "node:fs/promises";
 import { MOTION_KIT_SECTIONS } from "@/components/blocks/motion-kit/sections";
+import { GuideClose, GuideCode, GuideToggle, InstallRow } from "./_install";
 import { sessionHasPro } from "@/lib/component-access";
 import path from "node:path";
 import { ArrowUpRight, ChevronRight, File, Folder } from "lucide-react";
@@ -260,50 +261,53 @@ export default async function BlockDetailPage({ params }: Props) {
       </section>
 
       <main className="mx-auto w-full max-w-[1184px] px-4 pb-24">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)]">
-          <nav aria-label="Sections in this block" className="rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
-            <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">In this block</h2>
-            <p className="mt-1 text-[14px] text-muted-foreground">Jump to a section. Each one has its own preview and code.</p>
-            <ol className="mt-4 grid gap-1 sm:grid-cols-2">
-              {sections.map((v, i) => (
-                <li key={v.id}>
-                  <a
-                    href={`#${variantAnchor(v.title)}`}
-                    className="group flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                  >
-                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-foreground/[0.07] text-[12px] font-semibold tabular-nums text-muted-foreground">
-                      {i + 1}
-                    </span>
-                    <span className="min-w-0 flex-1 truncate">{v.title}</span>
-                    <ArrowUpRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
-
-          <aside id="install" aria-label="Install" className="scroll-mt-28 rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
-            <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">Install</h2>
-            <p className="mt-1 text-[14px] text-muted-foreground">
-              {locked
-                ? "One command adds every section. Pro blocks need your API key in the registry settings."
-                : "One command adds every section and its dependencies."}
-              {mkSections.length
-                ? " Some sections install on their own, with the command shown in each one's code."
-                : ""}
-            </p>
-            <InstallCard wrap command={installCommand} className="mt-4" />
-            <details className="group mt-4">
-              <summary className="flex cursor-pointer list-none items-center justify-between rounded-[12px] px-1 py-2 text-[14px] font-medium text-link [&::-webkit-details-marker]:hidden">
-                Full setup guide
-                <ChevronRight className="size-4 transition-transform duration-200 group-open:rotate-90" aria-hidden />
-              </summary>
-              <div className="mt-2 text-[14px] text-muted-foreground">
-                <BlockInstallation block={block} details={installDetails} />
-              </div>
-            </details>
-          </aside>
-        </div>
+        <InstallRow
+          nav={
+            <nav aria-label="Sections in this block" className="flex flex-col rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
+              <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">In this block</h2>
+              <p className="mt-1 text-[14px] text-muted-foreground">Jump to a section. Each one has its own preview and code.</p>
+              <ol className="mb-6 mt-4 grid gap-1 sm:grid-cols-2">
+                {sections.map((v, i) => (
+                  <li key={v.id}>
+                    <a
+                      href={`#${variantAnchor(v.title)}`}
+                      className="group flex items-center gap-3 rounded-[12px] px-3 py-2.5 text-[15px] text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      <span className="grid size-6 shrink-0 place-items-center rounded-full bg-foreground/[0.07] text-[12px] font-semibold tabular-nums text-muted-foreground">
+                        {i + 1}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">{v.title}</span>
+                      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" aria-hidden />
+                    </a>
+                  </li>
+                ))}
+              </ol>
+              <ul className="mt-auto flex flex-wrap gap-2 border-t border-border pt-5 text-[13px] text-muted-foreground" aria-label="Every section comes with">
+                {["Live preview", "Customize", "Code", "Build prompt"].map((t) => (
+                  <li key={t} className="rounded-full bg-foreground/[0.05] px-3 py-1">
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          }
+          install={
+            <aside id="install" aria-label="Install" className="scroll-mt-28 rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)]">
+              <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">Install</h2>
+              <p className="mt-1 text-[14px] text-muted-foreground">
+                {locked
+                  ? "One command adds every section. Pro blocks need your API key in the registry settings."
+                  : "One command adds every section and its dependencies."}
+                {installDetails.standalone.length || (!block.premium && mkSections.some((v) => v.premium !== false))
+                  ? " Some sections install on their own, with the command shown in each one's code."
+                  : ""}
+              </p>
+              <InstallCard wrap command={installCommand} className="mt-4" />
+              <GuideToggle />
+            </aside>
+          }
+          guide={<BlockInstallation block={block} details={installDetails} />}
+        />
 
         <div className="mt-20 space-y-24">
       {isInteractiveBackgroundCard ? (
@@ -752,6 +756,8 @@ type BlockInstallDetails = {
   registryName: string;
   files: string[];
   notes: string[];
+  /** Sections on this block that aren't in its package (they install on their own). */
+  standalone: string[];
 };
 
 const BLOCK_INSTALL_FILES: Record<string, string[]> = {
@@ -838,13 +844,21 @@ const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
 };
 
 function getBlockInstallDetails(slug: string, registryName: string): BlockInstallDetails {
+  const mk = motionKitSectionsOf(slug);
+  // Sections that came over from the components library install on their own, so they aren't in the
+  // block's package (unless the block is made only of them, like Footers).
+  const own = mk.filter((v) => !v.usage);
+  const packaged = own.length ? own : mk;
   return {
     registryName,
-    files:
-      BLOCK_INSTALL_FILES[slug] ??
-      motionKitSectionsOf(slug).map((v) => (v.source ?? "").replace(/^src\//, "")),
+    files: BLOCK_INSTALL_FILES[slug] ?? packaged.map((v) => (v.source ?? "").replace(/^src\//, "")),
     notes: BLOCK_INSTALL_NOTES[slug] ?? [],
+    standalone: own.length || BLOCK_INSTALL_FILES[slug] ? mk.filter((v) => v.usage).map((v) => v.title) : [],
   };
+}
+
+function listTitles(titles: string[]) {
+  return titles.length < 2 ? titles.join("") : `${titles.slice(0, -1).join(", ")} and ${titles.at(-1)}`;
 }
 
 function BlockInstallation({
@@ -906,66 +920,87 @@ function BlockInstallation({
 }`;
   const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${details.registryName}`;
 
-  return (
-    <div className="space-y-6">
-      <p className="max-w-3xl leading-6">
-        Install the complete <span className="font-medium text-foreground">{block.name}</span> family
-        with its {block.variants.length} {block.variants.length === 1 ? "variant" : "variants"}.
-        The registry command adds the source files, required utility imports, and npm packages used by this block.
-      </p>
+  const stepCount = details.files.length > 0 ? 5 : 4;
 
-      <ol className="space-y-5">
+  return (
+    <div className="rounded-[28px] bg-card p-6 shadow-[0_0_0_0.5px_var(--border)] sm:p-8">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h2 className="text-[24px] font-semibold tracking-[-0.025em] text-foreground">Full setup guide</h2>
+          <p className="mt-2 max-w-[640px] text-[15px] leading-6 text-muted-foreground">
+            Add the whole <span className="font-medium text-foreground">{block.name}</span> block
+            ({block.variants.length} {block.variants.length === 1 ? "section" : "sections"}) to a Next.js project in{" "}
+            {stepCount} steps. The registry command brings the source files, the utilities they import and the npm
+            packages they use.
+          </p>
+        </div>
+        <GuideClose />
+      </div>
+
+      <ol className="mt-8 gap-4 lg:columns-2 [&>li]:mb-4 [&>li]:break-inside-avoid">
         <InstallationStep number="1" title="Prepare a shadcn project">
           <p>
             Use a Next.js project with Tailwind CSS and the <span className="font-mono text-foreground">@/</span> alias.
-            If shadcn is not configured yet, run:
+            If shadcn is not set up yet, run:
           </p>
-          <InstallCode value="npx shadcn@latest init" />
+          <GuideCode value="npx shadcn@latest init" />
         </InstallationStep>
 
-        <InstallationStep number="2" title={block.premium ? "Connect the registry with your API key" : "Connect the Nexus UI registry"}>
+        <InstallationStep
+          number="2"
+          title={block.premium ? "Connect the registry with your API key" : "Connect the Nexus UI registry"}
+        >
           <p>
-            Replace your <span className="font-mono text-foreground">components.json</span> with this,
-            or add the <span className="font-mono text-foreground">registries</span> key to your existing one.
-            {block.premium && <> Replace <span className="font-mono text-foreground">YOUR_NEXUS_API_KEY</span> with the key from your Nexus UI dashboard.</>}
+            Replace your <span className="font-mono text-foreground">components.json</span> with this, or add the{" "}
+            <span className="font-mono text-foreground">registries</span> key to the one you have.
+            {block.premium && (
+              <>
+                {" "}Swap <span className="font-mono text-foreground">YOUR_NEXUS_API_KEY</span> for the key in your Nexus UI
+                dashboard.
+              </>
+            )}
           </p>
-          <InstallCode value={config} />
+          <GuideCode value={config} label="components.json" tall />
         </InstallationStep>
 
-        <InstallationStep number="3" title="Install the full block family">
+        <InstallationStep number="3" title="Install the block">
           <p>
-            Run this command from your project root. It installs every variant shown on this page.
+            Run this from your project root.{" "}
+            {details.standalone.length
+              ? `It adds the block's own sections. ${listTitles(details.standalone)} ${details.standalone.length === 1 ? "installs on its own, with the command in its" : "install on their own, with the command in each one's"} Code tab.`
+              : "It adds every section shown on this page."}
           </p>
-          <InstallCode value={command} />
+          <GuideCode value={command} />
         </InstallationStep>
 
         {details.files.length > 0 && (
           <InstallationStep number="4" title="Files added to your project">
-            <p>The component package installs these block source files:</p>
+            <p>The package writes these source files:</p>
             <BlockFileTree files={details.files} />
           </InstallationStep>
         )}
 
-        <InstallationStep number={details.files.length > 0 ? "5" : "4"} title="Copy the example into your page">
+        <InstallationStep number={String(stepCount)} title="Use it in a page">
           <p>
-            Switch to the <span className="font-medium text-foreground">Code</span> tab on the variant you want.
-            On the left you&apos;ll see a ready-to-use snippet — copy it and paste it into{" "}
+            Open the <span className="font-medium text-foreground">Code</span> tab on the section you want, copy its
+            usage snippet and paste it into a page such as{" "}
             <span className="font-mono text-foreground">app/page.tsx</span>:
           </p>
-          <InstallCode value={`// app/page.tsx\nimport YourBlock from "@/components/...";\n\nexport default function Page() {\n  return (\n    <main>\n      <YourBlock />\n    </main>\n  );\n}`} />
-          <p className="mt-2 text-xs leading-5">
-            The exact import path is shown in the Code tab sidebar for each variant.
-          </p>
+          <GuideCode
+            label="app/page.tsx"
+            value={`import YourBlock from "@/components/...";\n\nexport default function Page() {\n  return (\n    <main>\n      <YourBlock />\n    </main>\n  );\n}`}
+          />
+          <p className="text-[13px]">Each section&apos;s Code tab shows its exact import path.</p>
         </InstallationStep>
       </ol>
 
       {details.notes.length > 0 && (
-        <div className="rounded-[16px] bg-[#ff9500]/10 p-4">
-          <p className="font-medium text-foreground">Required setup for this block</p>
-          <ul className="mt-3 space-y-2 leading-6">
+        <div className="mt-4 rounded-[20px] bg-[#ff9500]/10 p-5 text-[14px]">
+          <p className="font-semibold text-foreground">Required setup for this block</p>
+          <ul className="mt-3 space-y-2 leading-6 text-muted-foreground">
             {details.notes.map((note) => (
               <li key={note} className="flex gap-2">
-                <span className="text-[#ff9500]" aria-hidden>•</span>
+                <span className="text-[#c76d00] dark:text-[#ff9f0a]" aria-hidden>•</span>
                 <span>{note}</span>
               </li>
             ))}
@@ -979,30 +1014,24 @@ function BlockInstallation({
 function InstallationStep({
   number,
   title,
+  className,
   children,
 }: {
   number: string;
   title: string;
+  className?: string;
   children: React.ReactNode;
 }) {
   return (
-    <li className="grid gap-3 sm:grid-cols-[2rem_minmax(0,1fr)]">
-      <span className="grid size-7 place-items-center rounded-full bg-foreground text-xs font-semibold text-background">
-        {number}
-      </span>
-      <div className="space-y-1.5 leading-6">
-        <h3 className="font-semibold text-foreground">{title}</h3>
-        {children}
+    <li className={`min-w-0 rounded-[22px] bg-foreground/[0.025] p-5 text-[14px] text-muted-foreground ring-1 ring-foreground/[0.05] dark:bg-white/[0.03] ${className ?? ""}`}>
+      <div className="flex items-center gap-3">
+        <span className="grid size-7 shrink-0 place-items-center rounded-full bg-foreground text-[12px] font-semibold tabular-nums text-background">
+          {number}
+        </span>
+        <h3 className="text-[16px] font-semibold tracking-[-0.01em] text-foreground">{title}</h3>
       </div>
+      <div className="mt-3 space-y-2 leading-6">{children}</div>
     </li>
-  );
-}
-
-function InstallCode({ value }: { value: string }) {
-  return (
-    <pre className="mt-3 overflow-x-auto rounded-[14px] bg-foreground/[0.04] p-4 font-mono text-xs leading-6 text-foreground">
-      {value}
-    </pre>
   );
 }
 
