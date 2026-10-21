@@ -116,6 +116,10 @@ const FAQ = [
     a: "Yes, any time. Buy All-Access, then cancel Pro from Billing or email us and we'll stop the renewal for you.",
   },
   {
+    q: "Are taxes included in the price?",
+    a: `No. ${PRO_PRICE} a year and ${ALL_ACCESS_PRICE} once are the prices before tax. Checkout adds GST, VAT or sales tax where your country requires it and shows the full total before you pay. Payments are handled by Dodo Payments, our merchant of record, who collect and remit the tax. In some countries you can pay in your local currency.`,
+  },
+  {
     q: "Can I get a refund?",
     a: "All-Access: a full refund if you ask within 7 days. Pro: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
   },
@@ -212,11 +216,17 @@ export default function PricingPage() {
                       Get All-Access
                     </CheckoutButton>
                   )}
+                  {p.name !== "Starter" ? (
+                    <p className="mt-3 text-center text-[13px] text-muted-foreground">Plus tax where it applies, shown at checkout.</p>
+                  ) : null}
                 </div>
               </article>
             ))}
           </div>
-          <p className="mt-6 text-center text-[15px] text-muted-foreground">
+          <p className="mx-auto mt-6 max-w-[640px] text-center text-[14px] leading-[1.55] text-muted-foreground">
+            Prices are in US dollars and don&apos;t include tax. GST, VAT or sales tax is added at checkout based on your country, so the total can be higher than the price shown. In some countries you can pay in your local currency.
+          </p>
+          <p className="mt-4 text-center text-[15px] text-muted-foreground">
             Need something we don&apos;t have yet? Both plans include requests.{" "}
             <Link href="/contact" className="text-link hover:underline hover:underline-offset-4">
               Request a component ›
