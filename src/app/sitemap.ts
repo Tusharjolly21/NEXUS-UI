@@ -36,6 +36,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/contact`,                 lastModified: since("2026-01-01") },
     { url: `${base}/privacy`,                 lastModified: since("2026-10-19") },
     { url: `${base}/terms`,                   lastModified: since("2026-10-19") },
+    { url: `${base}/refund-policy`,           lastModified: since("2026-10-21") },
     { url: `${base}/blog`,                    lastModified: since(allPosts[0]?.date ?? "2026-01-01") },
     { url: `${base}/docs/introduction`,        lastModified: since("2026-03-01") },
     { url: `${base}/docs/installation`,       lastModified: since("2026-03-01") },

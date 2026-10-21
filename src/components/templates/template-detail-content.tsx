@@ -56,7 +56,7 @@ const FEATURE_COPY: Record<string, string> = {
 
 // ─── Checkout ────────────────────────────────────────────────────────────────
 
-/** Shown after Lemon Squeezy sends people back, until the webhook grants access; reloads every 3s. */
+/** Shown after Dodo Payments sends people back, until the webhook grants access; reloads every 3s. */
 function CheckoutPending() {
   React.useEffect(() => {
     const id = setInterval(() => window.location.reload(), 3000);

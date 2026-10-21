@@ -7,6 +7,8 @@ import { hasPremiumAccess } from "@/lib/entitlements";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { PillLink } from "@/components/site/pill-link";
+import { PlanActivating } from "@/components/dashboard/plan-activating";
+import { legalConfig } from "@/lib/legal";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -14,7 +16,8 @@ export const metadata: Metadata = {
   description: "Your Nexus UI dashboard.",
 };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
+  const { checkout } = await searchParams;
   if (!isSupabaseConfigured()) {
     redirect("/login");
   }
@@ -63,6 +66,8 @@ export default async function DashboardPage() {
             </PillLink>
           )}
         </div>
+
+        {checkout === "success" && !isPremium && <PlanActivating contact={legalConfig.contactEmail} />}
 
         <ul className="mt-8 grid gap-4 sm:grid-cols-3">
           {stats.map((s) => (

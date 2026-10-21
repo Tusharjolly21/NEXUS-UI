@@ -136,7 +136,7 @@ export interface Database {
           ls_subscription_id: string;
           ls_product_id: string;
           ls_variant_id: string;
-          status: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid";
+          status: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid" | "pending" | "on_hold" | "failed";
           renews_at: string | null;
           ends_at: string | null;
           created_at: string;
@@ -148,7 +148,7 @@ export interface Database {
           ls_subscription_id: string;
           ls_product_id: string;
           ls_variant_id: string;
-          status: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid";
+          status: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid" | "pending" | "on_hold" | "failed";
           renews_at?: string | null;
           ends_at?: string | null;
           created_at?: string;
@@ -160,7 +160,7 @@ export interface Database {
           ls_subscription_id?: string;
           ls_product_id?: string;
           ls_variant_id?: string;
-          status?: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid";
+          status?: "active" | "paused" | "cancelled" | "expired" | "past_due" | "unpaid" | "pending" | "on_hold" | "failed";
           renews_at?: string | null;
           ends_at?: string | null;
           created_at?: string;

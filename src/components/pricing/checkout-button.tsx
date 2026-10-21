@@ -1,20 +1,12 @@
 "use client";
 
 import * as React from "react";
-import Script from "next/script";
 import { toast } from "sonner";
 import { pillClassName, type PillVariant } from "@/components/site/pill-link";
 
-declare global {
-  interface Window {
-    createLemonSqueezy?: () => void;
-    LemonSqueezy?: { Url: { Open: (url: string) => void } };
-  }
-}
-
 /**
- * Starts a Lemon Squeezy checkout for a plan and opens it in the overlay (falls back to a full
- * redirect if lemon.js hasn't loaded). Signed-out visitors are sent to log in first.
+ * Starts a Dodo Payments checkout for a plan and sends the buyer to the hosted checkout page.
+ * Signed-out visitors are sent to log in first.
  */
 export function CheckoutButton({
   plan,
@@ -35,7 +27,7 @@ export function CheckoutButton({
   async function checkout() {
     setLoading(true);
     try {
-      const res = await fetch("/api/lemonsqueezy/checkout", {
+      const res = await fetch("/api/dodo/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan }),
@@ -49,12 +41,7 @@ export function CheckoutButton({
         toast.error(data.error ?? "Checkout didn't open. Try again in a moment.");
         return;
       }
-      if (window.LemonSqueezy) {
-        window.createLemonSqueezy?.();
-        window.LemonSqueezy.Url.Open(data.url);
-      } else {
-        window.location.href = data.url;
-      }
+      window.location.href = data.url;
     } catch {
       toast.error("Couldn't reach checkout. Check your connection and try again.");
     } finally {
@@ -64,7 +51,6 @@ export function CheckoutButton({
 
   return (
     <>
-      <Script src="https://app.lemonsqueezy.com/js/lemon.js" strategy="lazyOnload" />
       <button
         type="button"
         onClick={checkout}

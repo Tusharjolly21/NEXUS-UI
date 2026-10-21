@@ -74,17 +74,16 @@ export default function TermsPage() {
 
       <LegalSection id="payments" title="3. Payments">
         <p>
-          Checkout is handled by Lemon Squeezy, our reseller and merchant of record. Lemon Squeezy processes
+          Checkout is handled by Dodo Payments, our merchant of record. Dodo Payments processes
           your payment, charges any applicable sales tax or VAT, and issues your receipt, and its{" "}
-          <LegalLink href="https://www.lemonsqueezy.com/buyer-terms">buyer terms</LegalLink> apply to the
+          <LegalLink href="https://dodopayments.com/buyer-terms">buyer terms</LegalLink> apply to the
           transaction itself. Access is granted to the Nexus UI account you were signed in with at checkout,
           usually within a few minutes of payment.
         </p>
-        {/* REVIEW: confirm whether the annual plan is a renewing subscription in Lemon Squeezy, and edit this paragraph to match. */}
         <p>
           If the annual plan is billed as a subscription, it renews automatically at the end of each 12-month
           term at the then-current price unless you cancel before the renewal date. You can cancel at any time
-          from the link in your Lemon Squeezy receipt or by emailing us; you keep access until the end of the
+          from the link in your Dodo Payments receipt email or by emailing us; you keep access until the end of the
           term you have paid for.
         </p>
       </LegalSection>
@@ -102,7 +101,7 @@ export default function TermsPage() {
           work as described, contact us within 7 days of purchase and we will fix it or refund you.
         </p>
         <p>
-          Refunds are issued through Lemon Squeezy to your original payment method. When a purchase is
+          Refunds are issued through Dodo Payments to your original payment method. When a purchase is
           refunded, the access and license it granted end. Nothing in these terms limits refund or withdrawal
           rights you have under the consumer law of your country.
         </p>

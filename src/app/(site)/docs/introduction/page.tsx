@@ -71,7 +71,7 @@ export default function IntroductionPage() {
               ["Framer Motion", "Spring physics, scroll-linked animations, and AnimatePresence transitions"],
               ["shadcn/ui", "Radix-powered primitives — button, dialog, tabs, and more"],
               ["Supabase (optional)", "Auth, user profiles, and bookmarks for gated content"],
-              ["Lemon Squeezy (optional)", "Template and plan checkout with webhook handling"],
+              ["Dodo Payments (optional)", "Plan checkout with webhook handling"],
             ].map(([name, desc]) => (
               <li key={name} className="flex gap-2">
                 <span className="mt-0.5 shrink-0 text-primary">—</span>

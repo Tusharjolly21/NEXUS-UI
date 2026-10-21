@@ -40,9 +40,9 @@ function formatAmount(cents: number, currency: string) {
 function statusColors(status: string) {
   if (status === "paid" || status === "active")
     return "border-emerald-500/30 bg-emerald-500/10 text-emerald-500";
-  if (status === "past_due")
+  if (status === "past_due" || status === "on_hold")
     return "border-amber-500/30 bg-amber-500/10 text-amber-500";
-  if (status === "refunded" || status === "cancelled" || status === "expired")
+  if (status === "refunded" || status === "cancelled" || status === "expired" || status === "failed")
     return "border-red-500/30 bg-red-500/10 text-red-500";
   return "border-border bg-muted/40 text-muted-foreground";
 }
@@ -121,12 +121,10 @@ export default async function DashboardOrdersPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold capitalize", statusColors(subscription.status))}>
-                    {subscription.status.replace("_", " ")}
+                    {subscription.status.replace(/_/g, " ")}
                   </span>
                   <Link
-                    href="https://app.lemonsqueezy.com/my-orders"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="mailto:contact@nexus-ui.com?subject=Manage%20my%20Nexus%20UI%20subscription"
                     className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5 rounded-lg text-xs")}
                   >
                     <ExternalLink className="size-3" />
@@ -174,15 +172,6 @@ export default async function DashboardOrdersPage() {
                       <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-semibold capitalize", statusColors(order.status))}>
                         {order.status}
                       </span>
-                      <Link
-                        href={`https://app.lemonsqueezy.com/my-orders`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5 rounded-lg text-xs")}
-                      >
-                        <Receipt className="size-3" />
-                        Receipt
-                      </Link>
                     </div>
                   </div>
                 ))}
@@ -194,16 +183,6 @@ export default async function DashboardOrdersPage() {
             Questions about a charge?{" "}
             <Link href="mailto:contact@nexus-ui.com" className="underline underline-offset-2 hover:text-foreground">
               Contact support
-            </Link>
-            {" · "}
-            <Link
-              href="https://app.lemonsqueezy.com/my-orders"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 underline underline-offset-2 hover:text-foreground"
-            >
-              View on Lemon Squeezy
-              <ExternalLink className="size-3" />
             </Link>
           </p>
         </div>

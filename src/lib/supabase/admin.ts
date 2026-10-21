@@ -5,7 +5,7 @@
  * This bypasses Row Level Security (RLS) and should only be used
  * for server-side operations that need to query by arbitrary user_id
  * without an active auth session (e.g. API-token-based registry access,
- * webhook handlers called by Lemon Squeezy with no user session).
+ * webhook handlers called by Dodo Payments with no user session).
  *
  * Never expose this key to the browser (no NEXT_PUBLIC_ prefix).
  */
