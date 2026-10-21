@@ -161,7 +161,7 @@ export default async function DashboardOrdersPage() {
                             : "Component Pack"}
                         </p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          {formatDate(order.created_at)} · Order #{order.ls_order_id}
+                          {formatDate(order.created_at)} · Order #{order.provider_order_id}
                         </p>
                       </div>
                     </div>

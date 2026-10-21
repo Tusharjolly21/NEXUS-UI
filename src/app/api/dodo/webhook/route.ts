@@ -11,9 +11,9 @@ export const dynamic = "force-dynamic";
  *  - subscription.* for the yearly product      -> a `subscriptions` row kept in step with Dodo
  *  - refund.succeeded (full refund)             -> the order is marked refunded
  *
- * The `ls_*` columns are a legacy name from the previous payment provider; they now hold Dodo IDs
- * (ls_order_id = payment_id, ls_subscription_id = subscription_id, ls_product_id/ls_variant_id =
- * product_id).
+ * Column mapping (provider-neutral schema): provider_order_id = payment_id, provider_subscription_id =
+ * subscription_id, provider_product_id = product_id, customer_id = Dodo customer, provider = "dodo".
+ * Rows are looked up first and then inserted or updated, so this doesn't rely on a unique index.
  */
 
 type Metadata = Record<string, string> | null | undefined;
@@ -22,6 +22,7 @@ type DodoPayment = {
   payment_id: string;
   total_amount: number;
   currency: string;
+  customer?: { customer_id?: string | null } | null;
   metadata?: Metadata;
   product_cart?: { product_id: string }[] | null;
 };
@@ -32,6 +33,8 @@ type DodoSubscription = {
   status: "pending" | "active" | "on_hold" | "paused" | "cancelled" | "failed" | "expired" | "past_due";
   next_billing_date?: string | null;
   expires_at?: string | null;
+  cancel_at_next_billing_date?: boolean | null;
+  customer?: { customer_id?: string | null } | null;
   metadata?: Metadata;
 };
 
@@ -94,20 +97,26 @@ export async function POST(req: Request) {
 
       // Yearly payments are handled by the subscription events. Only the one-time product makes an order.
       if (userId && lifetimeItem) {
-        const { error } = await supabase.from("orders").upsert(
-          {
-            user_id: userId,
-            ls_order_id: payment.payment_id,
-            ls_product_id: lifetimeItem.product_id,
-            ls_variant_id: lifetimeItem.product_id,
-            product_type: "lifetime",
-            product_slug: null,
-            status: "paid",
-            amount_cents: payment.total_amount,
-            currency: payment.currency ?? "USD",
-          },
-          { onConflict: "ls_order_id" },
-        );
+        const { data: found } = await supabase
+          .from("orders")
+          .select("id")
+          .eq("provider_order_id", payment.payment_id)
+          .maybeSingle();
+        const { error } = found
+          ? { error: null }
+          : await supabase.from("orders").insert({
+              user_id: userId,
+              provider: "dodo",
+              provider_order_id: payment.payment_id,
+              provider_product_id: lifetimeItem.product_id,
+              provider_variant_id: null,
+              customer_id: payment.customer?.customer_id ?? null,
+              product_type: "lifetime",
+              product_slug: null,
+              status: "paid",
+              amount_cents: payment.total_amount,
+              currency: payment.currency ?? "USD",
+            });
         if (error) throw error;
         console.log(`[dodo-webhook] lifetime order user=${userId} payment=${payment.payment_id}`);
       }
@@ -115,7 +124,7 @@ export async function POST(req: Request) {
       const refund = event.data as DodoRefund;
       // A partial refund keeps access. A full refund ends it, as the terms say.
       if (!refund.is_partial) {
-        const { error } = await supabase.from("orders").update({ status: "refunded" }).eq("ls_order_id", refund.payment_id);
+        const { error } = await supabase.from("orders").update({ status: "refunded" }).eq("provider_order_id", refund.payment_id);
         if (error) throw error;
       }
     } else if (SUBSCRIPTION_EVENTS.has(event.type)) {
@@ -124,21 +133,30 @@ export async function POST(req: Request) {
         const userId = sub.metadata?.user_id;
         const live = sub.status === "active" || sub.status === "past_due";
         const fields = {
-          ls_product_id: sub.product_id,
-          ls_variant_id: sub.product_id,
+          provider: "dodo",
+          provider_product_id: sub.product_id,
+          provider_variant_id: null,
+          customer_id: sub.customer?.customer_id ?? null,
+          cancel_at_period_end: sub.cancel_at_next_billing_date === true,
           status: sub.status,
           renews_at: live ? sub.next_billing_date ?? null : null,
           ends_at: sub.expires_at ?? null,
           updated_at: new Date().toISOString(),
         };
 
-        if (userId) {
+        const { data: found } = await supabase
+          .from("subscriptions")
+          .select("id")
+          .eq("provider_subscription_id", sub.subscription_id)
+          .maybeSingle();
+
+        if (found) {
+          const { error } = await supabase.from("subscriptions").update(fields).eq("id", found.id);
+          if (error) throw error;
+        } else if (userId) {
           const { error } = await supabase
             .from("subscriptions")
-            .upsert({ user_id: userId, ls_subscription_id: sub.subscription_id, ...fields }, { onConflict: "ls_subscription_id" });
-          if (error) throw error;
-        } else {
-          const { error } = await supabase.from("subscriptions").update(fields).eq("ls_subscription_id", sub.subscription_id);
+            .insert({ user_id: userId, provider_subscription_id: sub.subscription_id, ...fields });
           if (error) throw error;
         }
         console.log(`[dodo-webhook] ${event.type} sub=${sub.subscription_id} status=${sub.status}`);
