@@ -42,7 +42,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/docs/install-nextjs`,     lastModified: since("2026-03-01") },
     { url: `${base}/docs/install-tailwindcss`,lastModified: since("2026-03-01") },
     { url: `${base}/docs/add-utilities`,      lastModified: since("2026-10-20") },
-    { url: `${base}/docs/cli`,                lastModified: since("2026-03-01") },
+    { url: `${base}/docs/cli`,                lastModified: since("2026-10-21") },
+    { url: `${base}/claude-code`,             lastModified: since("2026-10-21") },
   ];
 
   const componentRoutes: MetadataRoute.Sitemap = libraryComponents.map((c) => ({

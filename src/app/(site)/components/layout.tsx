@@ -3,9 +3,9 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { libraryComponents } from "@/lib/catalog/library-components";
 
 export const metadata: Metadata = createMetadata({
-  title: "Free React UI Components",
+  title: "Tailwind CSS Components for React",
   description:
-    "Free animated React components for Next.js — text effects, backgrounds, sidebars, inputs, and more. Copy-paste TypeScript components.",
+    "Free animated Tailwind CSS components for React and Next.js: text effects, backgrounds, sidebars, inputs and more. Copy-paste TypeScript.",
   alternates: { canonical: "/components" },
 });
 

@@ -13,9 +13,9 @@ import { createMetadata } from "@/lib/seo";
 import { CliSimulator } from "@/components/docs/interactive/cli-simulator";
 
 export const metadata: Metadata = createMetadata({
-  title: "CLI",
+  title: "Install with the shadcn CLI (@nexus-labs registry)",
   description:
-    "Use the shadcn/ui CLI for primitives, install catalog pieces via the @nexus-labs registry, or paste snippets from component pages.",
+    "Add the @nexus-labs registry to components.json, then install Nexus UI Tailwind components and blocks with npx shadcn add. Premium items use an API key.",
   alternates: { canonical: "/docs/cli" },
 });
 
