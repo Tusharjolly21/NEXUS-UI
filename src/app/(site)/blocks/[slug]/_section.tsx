@@ -23,6 +23,7 @@ export function BlockSection({
   index,
   total,
   title,
+  description,
   code,
   usageCode,
   locked = false,
@@ -36,6 +37,8 @@ export function BlockSection({
   index: number;
   total: number;
   title: string;
+  /** One or two sentences on what the section is, shown under the title (also read by search engines). */
+  description?: string;
   code: string;
   usageCode: string;
   locked?: boolean;
@@ -98,6 +101,7 @@ export function BlockSection({
               {title}
             </a>
           </h2>
+          {description ? <p className="mt-2 max-w-[640px] text-[15px] leading-relaxed text-muted-foreground">{description}</p> : null}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">

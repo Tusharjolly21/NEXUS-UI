@@ -49,6 +49,76 @@
       ]
     },
     {
+      "name": "wheel-selector",
+      "type": "registry:component",
+      "title": "Wheel Selector",
+      "description": "A radial selector: a ring of icon nodes you drag round, fling, scroll or step with the arrow keys. It coasts, snaps to the nearest stop with a little overshoot, and the node at the top swells and fills with its colour while the hub counter rolls and the side panel swaps to that item.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/wheel-selector/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/wheel-selector/wheel-selector.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "cinematic-card-deck",
+      "type": "registry:component",
+      "title": "Cinematic Card Deck",
+      "description": "A deck of poster cards in 3D: the front card peels away on its bottom edge while the cards behind rise to take its place, leaning back as the deck moves and springing upright when it stops. Swipe or fling it, scroll the wheel over it, use the arrow keys or the progress pills, or set scrollLinked to deal it from page scroll.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cinematic-card-deck/cinematic-card-deck.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cinematic-card-deck/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "cursor-text-reveal",
+      "type": "registry:component",
+      "title": "Cursor Text Reveal",
+      "description": "An ink lens follows the pointer across a card and shows a second sentence through it, dragging a tail of droplets on looser and looser springs so fast moves stretch into a drip. Press and hold (or Space) to flood the whole card with the reveal; it lets go with an overshoot.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/cursor-text-reveal/cursor-text-reveal.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/cursor-text-reveal/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "phone-input",
       "type": "registry:component",
       "title": "Phone Input",
@@ -143,6 +213,29 @@
       ]
     },
     {
+      "name": "vector-tilt-scene",
+      "type": "registry:component",
+      "title": "Vector Tilt Scene",
+      "description": "A card that is really a little diorama: point at it and it tilts toward you while its paper-cut layers spring apart in depth, overshoot and settle. The layers then drift against the pointer for real parallax, and a sheen follows the pointer across the glass label.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/vector-tilt-scene/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/vector-tilt-scene/vector-tilt-scene.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "glass-login-stack",
       "type": "registry:component",
       "title": "Glass Login Stack",
@@ -200,6 +293,29 @@
         },
         {
           "path": "next-ui/signup-form.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "pulse-dashboard-kpis",
+      "type": "registry:component",
+      "title": "Pulse Dashboard KPIs",
+      "description": "A row of KPI cards with a period switcher. Switching period morphs every sparkline into its new shape on a spring, rolls each figure to its new value and flips the delta chips, which know when a drop is good news.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/pulse-dashboard-kpis/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/pulse-dashboard-kpis/pulse-dashboard-kpis.tsx",
           "type": "registry:component"
         }
       ]
@@ -294,6 +410,256 @@
         },
         {
           "path": "next-ui/three-d-folder/three-d-folder.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "draggable-card-stack",
+      "type": "registry:component",
+      "title": "Draggable Card Stack",
+      "description": "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/draggable-card-stack/draggable-card-stack.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/draggable-card-stack/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "card-carousel-3d",
+      "type": "registry:component",
+      "title": "3D Card Carousel",
+      "description": "Product cards standing round a 3D cylinder. Drag or fling it and it coasts, then clicks into place with the nearest card facing you; spin it fast and the cards swing outward and settle back in as it slows, with wheel, arrow keys, dots and a tap on any card also working.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/card-carousel-3d/card-carousel-3d.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/card-carousel-3d/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "real-time-cursors",
+      "type": "registry:component",
+      "title": "Real-Time Cursors",
+      "description": "A shared design board with teammates' cursors moving over it live: arrows glide between spots and lean with their speed, name tags trail behind and swing when they stop, stops land as clicks and now and then someone drops a comment. Your own pointer gets a You tag when it comes over the board.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/real-time-cursors/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/real-time-cursors/real-time-cursors.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "svg-noise-shader",
+      "type": "registry:component",
+      "title": "SVG Noise Shader",
+      "description": "A grainy gradient surface built from SVG feTurbulence: film grain that flickers over soft pools of colour leaning toward the pointer. Press and hold (or hold Space) and the surface melts through a displacement map; let go and it snaps back like jelly, overshooting before it settles.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/svg-noise-shader/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/svg-noise-shader/svg-noise-shader.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "tracing-spotlight-panel",
+      "type": "registry:component",
+      "title": "Tracing Spotlight Panel",
+      "description": "A panel with a light in it: point inside and a soft spotlight trails the pointer on a spring while the border glows wherever the light is closest. Leave and the light slides out to the edge and keeps running laps around the border, tracing the outline until you come back.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/tracing-spotlight-panel/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/tracing-spotlight-panel/tracing-spotlight-panel.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "gooey-input",
+      "type": "registry:component",
+      "title": "Gooey Search Input",
+      "description": "A search pill whose icon pinches off into its own bubble through an SVG goo filter when you open it, while the field grows with a springy overshoot. Pass suggestions and the matches drip out of the underside of the field through the same goo, with arrow-key navigation.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/gooey-input/gooey-input.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/gooey-input/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/gooey-input.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "terminal",
+      "type": "registry:component",
+      "title": "Interactive Terminal",
+      "description": "A macOS-style terminal window that types a script of commands with human timing, shows a spinner while each runs and prints its output. Then the prompt is yours: click in and type help, ls, echo or any scripted command, with history, Tab completion and Ctrl+C.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/terminal/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/terminal/sprite-audio.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/terminal/terminal.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/terminal.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "squiggly-text",
+      "type": "registry:component",
+      "title": "RippleLine squiggly text",
+      "description": "Text that boils like a stop-motion pencil drawing: an SVG turbulence filter re-rolls its noise every few frames, and an optional hand-drawn underline draws itself in. Sweeping the pointer across it stirs the ink, which jumps with pointer speed and settles back on a spring.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/squiggly-text/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/squiggly-text/squiggly-text.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/squiggly-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "floating-dock",
+      "type": "registry:component",
+      "title": "Nexus floating dock",
+      "description": "A macOS-style dock: tiles swell under the pointer and push their neighbours aside on springs, a tooltip names each one, and a click bounces the tile like a launching app before a running dot slides under it. Below md it turns into one glass button that springs the tiles up as a stack.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "react",
+        "next"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/floating-dock/floating-dock-desktop.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/floating-dock-mobile.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/floating-dock.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/icon-container.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/floating-dock/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/floating-dock/types.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/floating-dock.tsx",
           "type": "registry:component"
         }
       ]
@@ -459,6 +825,60 @@
       ]
     },
     {
+      "name": "glowing-effect-cards",
+      "type": "registry:component",
+      "title": "Glowing Effect Cards",
+      "description": "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width).",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/glowing-effect-cards/GlowingCard.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/GlowingCardsLayout.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/GlowingEffect.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "infinite-moving-cards",
+      "type": "registry:component",
+      "title": "Infinite Moving Cards",
+      "description": "A belt of cards that cruises sideways forever and fades out at the edges. Hover and it eases to a stop; grab it and fling, and it coasts on your throw, leaning into the speed, before it settles back to cruising.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/infinite-moving-cards/InfiniteMovingCards.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/infinite-moving-cards/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "meteors",
       "type": "registry:component",
       "title": "Meteor Effect",
@@ -483,6 +903,30 @@
       ]
     },
     {
+      "name": "background-boxes",
+      "type": "registry:component",
+      "title": "Background Boxes",
+      "description": "An isometric grid drawn on canvas, set at any skew, scale and rotation. The cell under the pointer pops up like a key in one of the hover colours, overshoots and settles, while a ripple nudges the cells around it.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/background-boxes/background-boxes.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/background-boxes/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "encrypted-text",
       "type": "registry:component",
       "title": "Encrypted Text",
@@ -502,6 +946,70 @@
         },
         {
           "path": "next-ui/encrypted-text/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "mac-keyboard",
+      "type": "registry:component",
+      "title": "Mac Keyboard",
+      "description": "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, click with synthesised sound and show what you type in a strip above.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/keyboard/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/keyboard/keyboard-key.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/keyboard/keyboard-layout.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/keyboard/keyboard.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/keyboard/use-keyboard-sound.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/mac-keyboard.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "images-badge",
+      "type": "registry:component",
+      "title": "Images Badge",
+      "description": "A pill of overlapping avatars that fans open along a gentle arc on hover or focus, each face springing into place a beat after the last while the +N count rolls down. A name tag glides from face to face under the pointer or the arrow keys, and faces without a picture show initials.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/images-badge/images-badge.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/images-badge/index.ts",
           "type": "registry:lib"
         }
       ]
@@ -579,6 +1087,29 @@
       ]
     },
     {
+      "name": "circular-carousel",
+      "type": "registry:component",
+      "title": "Circular Carousel",
+      "description": "Cards hung round the rim of a wheel, with the active card at the top and its neighbours tipping away down each side. Drag or fling the wheel and it coasts to the nearest card while the cards swing on their pins and settle, and the counter in the middle rolls to the new number; arrows, dots and keys work too.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/circular-carousel/circular-carousel.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/circular-carousel/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "chat-messages",
       "type": "registry:component",
       "title": "Chat Messages",
@@ -626,6 +1157,29 @@
       ]
     },
     {
+      "name": "card-stack-rotator",
+      "type": "registry:component",
+      "title": "Card Stack Rotator",
+      "description": "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/card-stack-rotator/card-stack-rotator.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/card-stack-rotator/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "scroll-reveal-text",
       "type": "registry:component",
       "title": "Scroll Reveal Text",
@@ -645,6 +1199,38 @@
         },
         {
           "path": "next-ui/scroll-reveal-text/scroll-reveal-text.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "animated-countdown",
+      "type": "registry:component",
+      "title": "Animated Countdown",
+      "description": "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/animated-countdown/animated-countdown.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-countdown/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/animated-countdown/split-flap-board.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-countdown.tsx",
           "type": "registry:component"
         }
       ]
@@ -678,6 +1264,131 @@
       ]
     },
     {
+      "name": "motion-layer-scroller",
+      "type": "registry:component",
+      "title": "Motion Layer Scroller",
+      "description": "A landscape built from paper-cut layers inside its own scroll frame: scroll through it and each ridge rises at its own speed while the sun sinks behind them. When you stop, the layers settle on a soft spring with a small overshoot; pass your own layers to build any parallax scene.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/motion-layer-scroller/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/motion-layer-scroller/motion-layer-scroller.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "spectra-frame",
+      "type": "registry:component",
+      "title": "Spectra Frame",
+      "description": "A photo grid that rests in black and white. Pointing at a photo blooms colour out from where the pointer came in while the photo widens, its row grows and the rest dim; moving off drains the colour back to where the pointer left.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/spectra-frame/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/spectra-frame/spectra-frame.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "profile-orbit",
+      "type": "registry:component",
+      "title": "Profile Orbit",
+      "description": "A profile card with the whole team orbiting it on a tilted ring. Dragging the ring, using the arrows or tapping a face spins that person round to the front, the card slides over to them and their avatar drops in with a bounce, while people at the back of the ring pass under the card.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/profile-orbit/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/profile-orbit/profile-orbit.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "command-palette",
+      "type": "registry:component",
+      "title": "Command Palette",
+      "description": "Animated command palette that opens with ⌘K: a dimmed overlay, a search field that filters a list of commands, and Framer Motion enter and exit transitions. Also includes the Motion Kit Command Morph variant.",
+      "dependencies": [
+        "framer-motion",
+        "lucide-react",
+        "cmdk",
+        "@radix-ui/react-dialog",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils",
+        "command"
+      ],
+      "files": [
+        {
+          "path": "next-ui/command-palette/command-morph.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/command-palette/command-palette.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/command-palette/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "image-trail",
+      "type": "registry:component",
+      "title": "Image Trail",
+      "description": "Move across the area and it deals out photos along your path: each lands with a small overshoot, tilted the way you were heading, carries a bit of your speed, then drops away under gravity, blurring as it fades. Turn on the magnetic effect and the pointer shoves the photos that are still lying there.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/image-trail/image-trail.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/image-trail/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "avatar-group",
       "type": "registry:component",
       "title": "Avatar Group",
@@ -697,6 +1408,29 @@
         },
         {
           "path": "next-ui/avatar-group/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "feature-tools-card",
+      "type": "registry:component",
+      "title": "Feature Tools Card",
+      "description": "An integrations card: five tool icons ride a slow ring round your app's hub, each wired to it by a line that carries small packets inward. Bring the pointer near and the tools lean toward it like magnets, their line lights up and they snap back with a wobble when it moves away, while the whole card tilts toward the pointer.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/feature-tools-card/feature-tools-card.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/feature-tools-card/index.ts",
           "type": "registry:lib"
         }
       ]
@@ -862,6 +1596,144 @@
         {
           "path": "next-ui/rotating-headline/rotating-headline.tsx",
           "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "feedback-pill",
+      "type": "registry:component",
+      "title": "Feedback Pill",
+      "description": "A small Feedback pill that morphs into a note form, shows a spinner in the Send button while it posts, then shrinks into a thank-you before folding back into the pill.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/feedback-pill/feedback-pill.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/feedback-pill/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "stagger-menu",
+      "type": "registry:component",
+      "title": "Stagger Menu",
+      "description": "A share menu that unfolds from its button with the items arriving one after another, a highlight that glides between rows, arrow-key navigation, and a button label that rolls to confirm what you picked.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/stagger-menu/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/stagger-menu/stagger-menu.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "elastic-stepper",
+      "type": "registry:component",
+      "title": "Elastic Stepper",
+      "description": "A plus / minus stepper whose number rolls up or down, with a dot track that stretches to the current value and a rubber-band bounce when you push past either limit.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/elastic-stepper/elastic-stepper.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/elastic-stepper/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "progress-button",
+      "type": "registry:component",
+      "title": "Progress Button",
+      "description": "A button that becomes its own progress bar: it stretches, fills as the work runs with a live percentage, then turns green with a drawn check and a new label.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/progress-button/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/progress-button/progress-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "copy-button",
+      "type": "registry:component",
+      "title": "Copy Button",
+      "description": "Two copy controls: an ID chip whose icon morphs into a check under a ripple and a Copied tooltip, and a command line whose button rolls from Copy to Copied.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/copy-button/copy-button.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/copy-button/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "capsule-toggles",
+      "type": "registry:component",
+      "title": "Capsule Toggles",
+      "description": "Switches built as a ball sealed in a glass capsule. Flip one and the ball stretches into a pill mid-flight, then takes on the row's colour and glows as it lands.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/capsule-toggles/capsule-toggles.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/capsule-toggles/index.ts",
+          "type": "registry:lib"
         }
       ]
     },

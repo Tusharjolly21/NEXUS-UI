@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RainbowWord } from "@/components/site";
-import { CHECKED_ON, alternatives, getAlternative } from "@/lib/alternatives";
+import { CHECKED_ON, GUIDE, alternatives, getAlternative } from "@/lib/alternatives";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { PRICES, formatPrice } from "@/lib/pricing";
 import { createMetadata } from "@/lib/seo";
@@ -147,6 +147,13 @@ export default async function AlternativePage({ params }: { params: Promise<{ sl
             </a>{" "}
             as we read it in {CHECKED_ON}, and it may have changed since. Anything its homepage did not state is left
             out. Nexus UI is independent and not affiliated with {alt.name}.
+          </p>
+          <p className="mt-2">
+            For a longer read that covers more libraries, see{" "}
+            <Link href={GUIDE.href} className="underline underline-offset-4">
+              {GUIDE.label}
+            </Link>
+            .
           </p>
           <p className="mt-2">
             Also compared:{" "}
