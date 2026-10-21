@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { getAdminClient } from "@/lib/supabase/admin";
-import { planForProductId, verifyWebhook } from "@/lib/dodo";
+import { cancelSubscription, planForProductId, subscriptionIdsForPayment, verifyWebhook } from "@/lib/dodo";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +9,9 @@ export const dynamic = "force-dynamic";
  * Dodo Payments webhook. This is the only place that grants access:
  *  - payment.succeeded for the lifetime product -> an `orders` row (product_type "lifetime")
  *  - subscription.* for the yearly product      -> a `subscriptions` row kept in step with Dodo
- *  - refund.succeeded (full refund)             -> the order is marked refunded
+ *  - refund.succeeded (full refund)             -> the order is marked refunded, or the yearly
+ *                                                 subscription it paid for is cancelled right away
+ *  - a cancelled subscription keeps access until the end of the period already paid for
  *
  * Column mapping (provider-neutral schema): provider_order_id = payment_id, provider_subscription_id =
  * subscription_id, provider_product_id = product_id, customer_id = Dodo customer, provider = "dodo".
@@ -124,8 +126,33 @@ export async function POST(req: Request) {
       const refund = event.data as DodoRefund;
       // A partial refund keeps access. A full refund ends it, as the terms say.
       if (!refund.is_partial) {
-        const { error } = await supabase.from("orders").update({ status: "refunded" }).eq("provider_order_id", refund.payment_id);
-        if (error) throw error;
+        const { data: order } = await supabase
+          .from("orders")
+          .select("id")
+          .eq("provider_order_id", refund.payment_id)
+          .maybeSingle();
+        if (order) {
+          const { error } = await supabase.from("orders").update({ status: "refunded" }).eq("id", order.id);
+          if (error) throw error;
+        } else {
+          // Not a lifetime order, so this may be the yearly payment: end that subscription now.
+          for (const subId of await subscriptionIdsForPayment(refund.payment_id)) {
+            const { data: row } = await supabase
+              .from("subscriptions")
+              .select("id")
+              .eq("provider_subscription_id", subId)
+              .maybeSingle();
+            if (!row) continue;
+            const { error } = await supabase
+              .from("subscriptions")
+              .update({ status: "cancelled", ends_at: new Date().toISOString(), renews_at: null, updated_at: new Date().toISOString() })
+              .eq("id", row.id);
+            if (error) throw error;
+            // Best effort: access is already ended above, this stops any further billing.
+            await cancelSubscription(subId).catch((err) => console.error("[dodo-webhook] could not cancel in Dodo:", err));
+            console.log(`[dodo-webhook] refund ended subscription ${subId}`);
+          }
+        }
       }
     } else if (SUBSCRIPTION_EVENTS.has(event.type)) {
       const sub = event.data as DodoSubscription;
@@ -140,15 +167,23 @@ export async function POST(req: Request) {
           cancel_at_period_end: sub.cancel_at_next_billing_date === true,
           status: sub.status,
           renews_at: live ? sub.next_billing_date ?? null : null,
-          ends_at: sub.expires_at ?? null,
+          ends_at: null as string | null,
           updated_at: new Date().toISOString(),
         };
 
         const { data: found } = await supabase
           .from("subscriptions")
-          .select("id")
+          .select("id, renews_at, ends_at")
           .eq("provider_subscription_id", sub.subscription_id)
           .maybeSingle();
+
+        // A cancelled subscription keeps access until the end of the period already paid for. Dodo's
+        // expires_at is the plan's far-off expiry, not that date, so use the stored renewal date.
+        if (sub.status === "cancelled") {
+          fields.ends_at = found?.ends_at ?? found?.renews_at ?? sub.next_billing_date ?? new Date().toISOString();
+        } else if (sub.status === "expired") {
+          fields.ends_at = new Date().toISOString();
+        }
 
         if (found) {
           const { error } = await supabase.from("subscriptions").update(fields).eq("id", found.id);

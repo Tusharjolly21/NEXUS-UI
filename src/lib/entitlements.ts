@@ -109,6 +109,21 @@ export async function resolveApiToken(token: string): Promise<ApiTokenResolution
 // ── Entitlement checks ────────────────────────────────────────────────────────
 
 /**
+ * PostgREST filter for a subscription that still grants access: active or past due, or cancelled
+ * but still inside the period that was paid for (ends_at in the future). The Terms promise access
+ * to the end of the term after a cancellation.
+ */
+function liveSubscriptionFilter(): string {
+  return `status.in.(active,past_due),and(status.eq.cancelled,ends_at.gt.${new Date().toISOString()})`;
+}
+
+/** Same rule for a row already loaded. */
+function subscriptionGrantsAccess(sub: { status: string; ends_at: string | null }): boolean {
+  if (sub.status === "active" || sub.status === "past_due") return true;
+  return sub.status === "cancelled" && !!sub.ends_at && new Date(sub.ends_at).getTime() > Date.now();
+}
+
+/**
  * Returns true if the user has an active subscription (annual plan).
  * Uses admin client to bypass RLS — safe because userId comes from verified session.
  */
@@ -118,7 +133,7 @@ async function hasActiveSubscription(userId: string): Promise<boolean> {
     .from("subscriptions")
     .select("id")
     .eq("user_id", userId)
-    .in("status", ["active", "past_due"])
+    .or(liveSubscriptionFilter())
     .limit(1)
     .maybeSingle();
   return data !== null;
@@ -213,7 +228,7 @@ async function adminHasActiveSubscription(userId: string): Promise<boolean> {
     .from("subscriptions")
     .select("id")
     .eq("user_id", userId)
-    .in("status", ["active", "past_due"])
+    .or(liveSubscriptionFilter())
     .limit(1)
     .maybeSingle();
   return data !== null;
@@ -276,6 +291,6 @@ export async function getUserEntitlements(userId: string) {
     lifetime,
     orders,
     hasAccess: lifetime !== null ||
-      (subscription !== null && ["active", "past_due"].includes(subscription.status)),
+      (subscription !== null && subscriptionGrantsAccess(subscription)),
   };
 }
