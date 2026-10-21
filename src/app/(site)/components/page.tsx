@@ -8,9 +8,9 @@ import { getComponentCategoryHref } from "@/lib/catalog/taxonomy";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Free React UI Components — Tailwind CSS & Framer Motion",
+  title: "Tailwind CSS Components for React",
   description:
-    "Free React UI components built with Tailwind CSS and Framer Motion. Text animations, backgrounds, sidebars, and more for Next.js. Copy-paste and use freely.",
+    "Free Tailwind CSS components for React and Next.js, animated with Framer Motion: text effects, backgrounds, sidebars, cards and more. Copy-paste or install with the shadcn CLI.",
   alternates: { canonical: "/components" },
 });
 

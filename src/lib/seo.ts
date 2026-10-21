@@ -14,10 +14,10 @@ export const siteConfig = {
   siteName: "Nexus UI Labs",
   alternateNames: ["Nexus Labs", "Nexus UI"],
   // Shown in the browser tab and Google title link — keep under 60 chars
-  tagline: "Free React UI Components & Next.js Templates",
+  tagline: "Free Tailwind React Components & Templates",
   // Shown as Google snippet — keep under 155 chars
   description:
-    "Free React components and Next.js templates built with Tailwind CSS and Framer Motion. Copy-paste animated UI blocks and ship faster.",
+    "Free Tailwind CSS React components and Next.js templates with Framer Motion. Copy-paste animated blocks or install with the shadcn CLI. Ship faster.",
   url: site,
   // Official accounts only. Left empty until Nexus UI has its own profiles — a handle owned
   // by someone else would tie the brand to their account in Google and AI answers.

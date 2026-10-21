@@ -21,6 +21,7 @@ const COLUMNS = [
       { href: "/docs/introduction", label: "Docs" },
       { href: "/docs/installation", label: "Installation" },
       { href: "/docs/cli", label: "shadcn CLI" },
+      { href: "/claude-code", label: "Claude Code" },
       { href: "/blog", label: "Blog" },
     ],
   },
