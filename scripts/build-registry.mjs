@@ -17,6 +17,7 @@ const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
 const UI_SOUNDS_REGISTRY_NAME = "ui-sounds";
 const UI_SOUNDS_PRO_REGISTRY_NAME = "ui-sounds-pro";
 const UI_SOUNDS_MAC_REGISTRY_NAME = "ui-sounds-mac";
+const UI_SOUNDS_RECORDED_REGISTRY_NAME = "ui-sounds-recorded";
 const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
@@ -210,6 +211,45 @@ function buildUiSoundsMacItem() {
     dependencies: [],
     registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
     files: [{ path: "next-ui/lib/ui-sounds-mac.ts", type: "registry:lib", target: "lib/ui-sounds-mac.ts", content }],
+  };
+}
+
+/**
+ * The recorded Pro sounds: a player (src/lib/ui-sounds-recorded.ts) and the recordings themselves as
+ * data URIs, read from assets-pro/sounds. Server registry only, never in public/r, and the audio data
+ * is written only into this item, never into src/ or the site's own bundle.
+ */
+function buildUiSoundsRecordedItem() {
+  const player = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds-recorded.ts"), "utf8");
+  const names = [...player.matchAll(/^  (typing|camera|message|notification|screenshot): define\(/gm)].map((m) => m[1]);
+  if (names.length !== 5) throw new Error("ui-sounds-recorded.ts must define the five recorded sounds.");
+  const dir = path.join(root, "assets-pro", "sounds");
+  const rows = names.map((n) => {
+    const data = fs.readFileSync(path.join(dir, `${n}.mp3`));
+    if (data.length < 1000) throw new Error(`assets-pro/sounds/${n}.mp3 is missing or empty.`);
+    return `  ${n}: "data:audio/mpeg;base64,${data.toString("base64")}",`;
+  });
+  const audio = [
+    'import type { RecordedSoundName } from "@/lib/ui-sounds-recorded";',
+    "",
+    "/** The recordings as data URIs, so there is no file to host. Generated; do not edit. */",
+    "export const RECORDED_AUDIO: Record<RecordedSoundName, string> = {",
+    ...rows,
+    "};",
+    "",
+  ].join("\n");
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: UI_SOUNDS_RECORDED_REGISTRY_NAME,
+    type: "registry:lib",
+    title: "UI Sounds Recorded",
+    description: "Five recorded interface sounds (typing, camera, message, notification, screenshot) with playRecordedSound and useRecordedSound. The audio ships inside the package. Builds on ui-sounds.",
+    dependencies: [],
+    registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
+    files: [
+      { path: "next-ui/lib/ui-sounds-recorded.ts", type: "registry:lib", target: "lib/ui-sounds-recorded.ts", content: player },
+      { path: "next-ui/lib/ui-sounds-recorded-audio.ts", type: "registry:lib", target: "lib/ui-sounds-recorded-audio.ts", content: audio },
+    ],
   };
 }
 
@@ -1200,7 +1240,7 @@ const movedPath = path.join(root, "src", "lib", "catalog", "moved-sections.ts");
 const catalogTs = fs.readFileSync(catalogPath, "utf8") + "\n" + fs.readFileSync(movedPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
-const items = [buildNexusFontItem(), buildUiSoundsItem(), buildUiSoundsProItem(), buildUiSoundsMacItem()];
+const items = [buildNexusFontItem(), buildUiSoundsItem(), buildUiSoundsProItem(), buildUiSoundsMacItem(), buildUiSoundsRecordedItem()];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {

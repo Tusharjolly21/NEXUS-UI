@@ -12,21 +12,24 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { SOUNDS } from "@/lib/ui-sounds";
 import { COMPONENT_SOUNDS } from "@/lib/catalog/component-sounds";
 import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
+import { RECORDED_SOUND_META } from "@/lib/ui-sounds-recorded-meta";
 import usage from "@/lib/catalog/sound-usage.generated.json";
 
+const COUNT = Object.keys(SOUNDS).length;
+const SYNTH_PRO_COUNT = PRO_SOUND_META.length;
+const RECORDED_COUNT = RECORDED_SOUND_META.length;
+const PRO_COUNT = SYNTH_PRO_COUNT + RECORDED_COUNT;
+
 export const metadata: Metadata = createMetadata({
-  title: "UI Sound Effects for React — Web Audio, No Files",
-  description:
-    "48 UI sound effects for React and Next.js, 24 free and 24 Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade and studio sounds synthesised with the Web Audio API. Nothing to download.",
+  title: "UI Sound Effects for React — Web Audio and Recorded",
+  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade and studio sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications and screenshots.`,
   alternates: { canonical: "/sounds" },
 });
-
-const COUNT = Object.keys(SOUNDS).length;
-const PRO_COUNT = PRO_SOUND_META.length;
 const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;
 const INSTALL = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds`;
 const INSTALL_PRO = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds-pro`;
 const INSTALL_MAC = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds-mac`;
+const INSTALL_RECORDED = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds-recorded`;
 
 const USAGE = `"use client";
 
@@ -83,6 +86,20 @@ import { playProSound, useProSound } from "@/lib/ui-sounds-pro";
 const play = useProSound(enableSound);
 <button onClick={() => play("coin")}>Collect</button>`;
 
+const RECORDED_USAGE = `"use client";
+
+import { playRecordedSound, useRecordedSound } from "@/lib/ui-sounds-recorded";
+
+// One-off, from any click or key press
+<button onClick={() => playRecordedSound("message")}>Send</button>
+
+// Inside a component with an enableSound prop: follows the visitor's on/off choice
+const play = useRecordedSound(enableSound);
+<button onClick={() => play("camera")}>Take photo</button>
+
+// Optional: decode the recordings ahead of time so the first play is on time
+preloadRecordedSounds();`;
+
 const MAC_USAGE = `"use client";
 
 import { useMacSounds } from "@/lib/ui-sounds-mac";
@@ -100,7 +117,7 @@ setSoundStyle("mac"); // or "nexus"`;
 const FAQ = [
   {
     q: "Do the sounds need audio files?",
-    a: `No. All ${COUNT} sounds are synthesised in the browser with the Web Audio API from oscillators, filtered noise and volume envelopes, so the library is one TypeScript file of about 8 KB and nothing is downloaded.`,
+    a: `No. The ${COUNT} free sounds and the ${SYNTH_PRO_COUNT} synthesised Pro sounds are made in the browser with the Web Audio API from oscillators, filtered noise and volume envelopes, so the free library is one TypeScript file of about 8 KB and nothing is downloaded. The ${RECORDED_COUNT} recorded Pro sounds are the one exception: they are short audio recordings, but they ship inside the package as code, so you still have no file to host.`,
   },
   {
     q: "Why does nothing play until I click?",
@@ -120,15 +137,19 @@ const FAQ = [
   },
   {
     q: "Which sounds are free and which are Pro?",
-    a: `The ${COUNT} sounds the components use are free, with their full source on this page. The Pro pack adds ${PRO_COUNT} more in four sets: glass, paper and wood, arcade, and studio. Every Pro sound plays on this page for everyone, so you can hear it before you decide. Its code, install command and file come with the Pro plan.`,
+    a: `The ${COUNT} sounds the components use are free, with their full source on this page. The Pro plan adds ${SYNTH_PRO_COUNT} synthesised sounds in four sets (glass, paper and wood, arcade, and studio) and ${RECORDED_COUNT} recorded ones. Every Pro sound plays on this page for everyone, so you can hear it before you decide. Its code, install command and full-quality file come with the Pro plan.`,
   },
   {
     q: "What is the Mac style? Are these Apple's sounds?",
     a: `A second voice for the ${COUNT} free sounds: the same names, re-voiced to feel at home on a Mac or an iPhone, with glassy bells, soft key tocks, bubbles and airy swooshes instead of buzzier synth tones. Switch it on with the Style control above and every component on this site plays it. They are not Apple's sounds: Apple's system sounds are copyrighted recordings that can't be redistributed, so every Mac-style sound is an original recipe made with the Web Audio API, with no audio files. The file comes with the Pro plan.`,
   },
   {
+    q: "What are the recorded sounds?",
+    a: `Five short recordings for moments a synthesiser does not do well: typing, camera, message, notification and screenshot. On this page they play from small, compressed previews so you can judge them. The install carries the full-quality recordings, levelled to sit with the other sounds, inside a TypeScript file, so there is nothing to host. They follow the same on/off switch, volume and autoplay rules as every other sound, and they are Pro only.`,
+  },
+  {
     q: "How do I add the Pro sounds to my app?",
-    a: "On a Pro plan, add your Nexus API key to components.json as in the CLI guide, run the install command for ui-sounds-pro (it also installs ui-sounds), then call playProSound or the useProSound hook. The Pro sounds follow the same on/off switch and volume as the free ones.",
+    a: "On a Pro plan, add your Nexus API key to components.json as in the CLI guide, run the install command for ui-sounds-pro (it also installs ui-sounds), then call playProSound or the useProSound hook. For the recorded sounds, install ui-sounds-recorded and call playRecordedSound or useRecordedSound. All of them follow the same on/off switch and volume as the free ones.",
   },
   {
     q: "Is it free?",
@@ -145,7 +166,7 @@ export default async function SoundsPage() {
       "@context": "https://schema.org",
       "@type": "SoftwareSourceCode",
       name: "UI Sounds",
-      description: `${COUNT + PRO_COUNT} interface sound effects for React (${COUNT} free, ${PRO_COUNT} Pro), synthesised with the Web Audio API.`,
+      description: `${COUNT + PRO_COUNT} interface sound effects for React (${COUNT} free, ${PRO_COUNT} Pro), synthesised with the Web Audio API apart from ${RECORDED_COUNT} recorded Pro sounds.`,
       programmingLanguage: "TypeScript",
       runtimePlatform: "Web browser",
       url: `${siteConfig.url}/sounds`,
@@ -169,7 +190,7 @@ export default async function SoundsPage() {
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Sounds</h1>
           <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
             {COUNT + PRO_COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the
-            Web Audio API. {COUNT} are free and {PRO_COUNT} are Pro, and every one plays here. Switch to the Mac style to
+            Web Audio API, apart from {RECORDED_COUNT} recorded ones. {COUNT} are free and {PRO_COUNT} are Pro, and every one plays here. Switch to the Mac style to
             hear the free ones re-voiced for a Mac or iPhone, across every component on the site. Tap an orb, then copy
             the line that does the same in your app.
           </p>
@@ -184,6 +205,7 @@ export default async function SoundsPage() {
             installFree={INSTALL}
             installPro={INSTALL_PRO}
             installMac={INSTALL_MAC}
+            installRecorded={INSTALL_RECORDED}
           />
         </div>
       </section>
@@ -201,11 +223,17 @@ export default async function SoundsPage() {
             <InstallCard wrap command={INSTALL} className="mt-6" />
             <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Pro pack</h3>
             <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-              {PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
+              {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
               command needs your Nexus API key, set up once as described in the{" "}
               <Link href="/docs/cli" className="font-medium text-foreground underline underline-offset-4">CLI guide</Link>.
             </p>
             <InstallCard wrap command={INSTALL_PRO} className="mt-4" />
+            <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The recorded sounds</h3>
+            <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
+              {RECORDED_COUNT} recordings: typing, camera, message, notification and screenshot. The audio ships inside the
+              package, so there is no file to host. Included in the Pro plan.
+            </p>
+            <InstallCard wrap command={INSTALL_RECORDED} className="mt-4" />
             <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Mac style</h3>
             <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
               All {COUNT} free sounds re-voiced to feel at home on a Mac or iPhone. Install it, call{" "}
@@ -236,6 +264,14 @@ export default async function SoundsPage() {
               language="tsx"
               theme="dark"
               header={{ enabled: true, showDots: true, title: "pro-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+              border={{ radius: "20px" }}
+            />
+            <CodeBlock
+              code={RECORDED_USAGE}
+              language="tsx"
+              theme="dark"
+              header={{ enabled: true, showDots: true, title: "recorded-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
               codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
               border={{ radius: "20px" }}
             />

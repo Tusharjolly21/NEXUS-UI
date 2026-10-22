@@ -66,6 +66,19 @@ function soundNamesIn(text) {
   }
 }
 
+// The recorded Pro sounds on the page must match the player, and each needs its recording.
+{
+  const rec = fs.readFileSync(path.join(root, "src/lib/ui-sounds-recorded.ts"), "utf8");
+  const meta = fs.readFileSync(path.join(root, "src/lib/ui-sounds-recorded-meta.ts"), "utf8");
+  const defined = [...rec.matchAll(/^  ([a-z]+): define\("\1", "([^"]+)"\),/gm)].map((m) => `${m[1]}|${m[2]}`).sort();
+  const listed = [...meta.matchAll(/\{ name: "([a-z]+)", label: "([^"]+)", category: "Recorded"/g)].map((m) => `${m[1]}|${m[2]}`).sort();
+  const missing = defined.map((d) => d.split("|")[0]).filter((n) => !fs.existsSync(path.join(root, "assets-pro/sounds", `${n}.mp3`)) || !fs.existsSync(path.join(root, "public/sounds/preview", `${n}.mp3`)));
+  if (defined.length === 0 || defined.join("\n") !== listed.join("\n") || missing.length) {
+    console.error("ui-sounds-recorded-meta.ts must match ui-sounds-recorded.ts, and every sound needs assets-pro/sounds/<name>.mp3 and public/sounds/preview/<name>.mp3." + (missing.length ? ` Missing: ${missing.join(", ")}.` : ""));
+    process.exit(1);
+  }
+}
+
 // The Mac style must voice every free sound, and the page's labels must match its recipes.
 {
   const mac = fs.readFileSync(path.join(root, "src/lib/ui-sounds-mac.ts"), "utf8");
