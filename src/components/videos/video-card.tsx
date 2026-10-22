@@ -10,7 +10,7 @@ import { videoFormat, videoPosterSrc, videoPreviewSrc, type VideoEntry } from "@
  * One video in the grid: its still, and a silent pre-rendered loop that plays on hover or focus
  * (and by itself while on screen on touch devices). No animation code loads until the page opens.
  */
-export function VideoCard({ video, className, priority = false }: { video: VideoEntry; className?: string; priority?: boolean }) {
+export function VideoCard({ video, className }: { video: VideoEntry; className?: string }) {
   const ref = React.useRef<HTMLVideoElement>(null);
   const [on, setOn] = React.useState(false);
   const shape = videoFormat(video);
@@ -55,7 +55,7 @@ export function VideoCard({ video, className, priority = false }: { video: Video
           muted
           loop
           playsInline
-          preload={priority ? "metadata" : "none"}
+          preload="none"
           aria-hidden
           className="absolute inset-0 size-full object-cover"
         />

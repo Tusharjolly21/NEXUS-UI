@@ -38,9 +38,9 @@ export default function VideosPage() {
 
       <section aria-label="Videos" className="px-4 pb-24 pt-8">
         <ul className="mx-auto max-w-[1152px] columns-2 gap-4 sm:gap-5 lg:columns-4">
-          {videos.map((v, i) => (
+          {videos.map((v) => (
             <li key={v.slug} className="mb-4 break-inside-avoid sm:mb-5">
-              <VideoCard video={v} priority={i < 4} />
+              <VideoCard video={v} />
             </li>
           ))}
         </ul>
