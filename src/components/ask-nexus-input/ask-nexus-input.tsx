@@ -19,7 +19,7 @@ export interface AskNexusInputProps {
   autoplay?: boolean;
   /** Extra classes for the root. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -74,6 +74,10 @@ export function AskNexusInput({
   const input = useRef<HTMLInputElement>(null);
   const touched = useRef(false);
   const ready = useRef<(() => void) | null>(null);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   const current = placeholders.length ? placeholders[ph % placeholders.length] : "";
 
@@ -124,6 +128,7 @@ export function AskNexusInput({
       for (let c = 1; c <= q.length; c++) later(() => setValue(q.slice(0, c)), c * 42);
       later(() => {
         ready.current = () => later(cycle, 1500);
+        playRef.current.auto("whoosh");
         setFont(input.current ? getComputedStyle(input.current).font : "");
         setSnapshot(q);
         kick.jump(0.965);

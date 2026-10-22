@@ -2411,7 +2411,7 @@ export function DecodeButton() {
 import { MacKeyboard } from "@/components/keyboard";
 
 export function DemoKeyboard() {
-  return <MacKeyboard autoplay autoplayText="hello, nexus" enableSound={false} />;
+  return <MacKeyboard autoplay autoplayText="hello, nexus" />;
 }`,
       },
       {
