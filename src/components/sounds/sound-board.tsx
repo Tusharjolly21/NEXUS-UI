@@ -6,12 +6,12 @@ import Link from "next/link";
 import { Check, Copy, Lock, Volume1, Volume2, VolumeX } from "lucide-react";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
-import { SOUNDS, playSound, setSoundVolume, useSoundStyle, type SoundCategory, type SoundDef, type SoundName } from "@/lib/ui-sounds";
+import { SOUNDS, playSound, setSoundVolume, useSoundStyle, type SoundCategory, type SoundName } from "@/lib/ui-sounds";
 import { MAC_SOUND_LABELS } from "@/lib/ui-sounds-mac-meta";
 import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
 import type { ProSoundCategory, ProSoundName } from "@/lib/ui-sounds-pro";
 import { cn } from "@/lib/utils";
-import { SoundWave, measureSound, type SoundShape } from "@/components/sounds/sound-wave";
+import { SoundBlob } from "@/components/sounds/sound-blob";
 
 type Category = SoundCategory | ProSoundCategory;
 type Access = "all" | "free" | "pro";
@@ -67,38 +67,6 @@ export function SoundBoard({
   const proModule = React.useRef<Promise<typeof import("@/lib/ui-sounds-pro")> | null>(null);
   const loadPro = () => (proModule.current ??= import("@/lib/ui-sounds-pro"));
 
-  // Every tile draws its sound's real waveform, measured once per style by rendering the recipe offline.
-  const [shapes, setShapes] = React.useState<Record<string, SoundShape>>({});
-  const shapeKey = (i: Item) => (i.pro ? i.key : `${soundStyle === "mac" ? "mac" : "nexus"}:${i.name}`);
-  React.useEffect(() => {
-    let live = true;
-    const idle = (cb: () => void) => {
-      const ric = (window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
-      if (ric) ric(cb, { timeout: 1500 });
-      else window.setTimeout(cb, 200);
-    };
-    idle(async () => {
-      const prefix = soundStyle === "mac" ? "mac" : "nexus";
-      const defs: Record<string, SoundDef> = soundStyle === "mac" ? (await loadMac()).MAC_SOUNDS : SOUNDS;
-      const next: Record<string, SoundShape> = {};
-      for (const n of Object.keys(SOUNDS)) {
-        const sh = await measureSound(defs[n]);
-        if (sh) next[`${prefix}:${n}`] = sh;
-      }
-      if (live) setShapes((s) => ({ ...s, ...next }));
-      // The Pro recipes are a small chunk of their own: measure them after the free ones.
-      const pro = (await loadPro()).PRO_SOUNDS as Record<string, SoundDef>;
-      const proNext: Record<string, SoundShape> = {};
-      for (const m of PRO_SOUND_META) {
-        const sh = await measureSound(pro[m.name]);
-        if (sh) proNext[`pro:${m.name}`] = sh;
-      }
-      if (live) setShapes((s) => ({ ...s, ...proNext }));
-    });
-    return () => {
-      live = false;
-    };
-  }, [soundStyle]);
 
 
   const categories = access === "pro" ? PRO_CATEGORIES : access === "free" ? FREE_CATEGORIES : [...FREE_CATEGORIES, ...PRO_CATEGORIES];
@@ -275,7 +243,7 @@ export function SoundBoard({
                       : "shadow-[0_0_0_1px_var(--border)] hover:shadow-[0_0_0_1px_var(--border),0_14px_30px_-18px_rgba(0,0,0,0.35)]",
                   )}
                 >
-                  <SoundWave shape={shapes[shapeKey(item)] ?? null} category={item.category} hit={hits[item.key] ?? 0} active={active} reduce={!!reduce} />
+                  <SoundBlob category={item.category} hit={hits[item.key] ?? 0} className="block h-24 w-full" />
                   <span>
                     <span className="block text-[15px] font-semibold tracking-[-0.2px] text-foreground">{labelOf(item)}</span>
                     <span className="mt-0.5 block text-[12.5px] text-muted-foreground">{item.category}</span>
@@ -289,18 +257,6 @@ export function SoundBoard({
       </motion.ul>
 
       <div className="mt-5 rounded-[20px] bg-card p-4 shadow-[0_0_0_1px_var(--border)] sm:p-5 dark:bg-white/[0.04] dark:shadow-none">
-        <button
-          type="button"
-          onClick={() => play(current)}
-          aria-label={`Play ${labelOf(current)} again`}
-          className="mb-4 block w-full rounded-2xl bg-foreground/[0.03] px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-white/[0.03]"
-        >
-          <SoundWave shape={shapes[shapeKey(current)] ?? null} category={current.category} hit={hits[current.key] ?? 0} active size="wide" reduce={!!reduce} />
-          <span className="mt-1.5 flex justify-between text-[11.5px] tabular-nums text-muted-foreground">
-            <span>0 s</span>
-            <span>{shapes[shapeKey(current)] ? `${shapes[shapeKey(current)].dur.toFixed(2)} s` : ""}</span>
-          </span>
-        </button>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <p className="text-[17px] font-semibold tracking-[-0.3px] text-foreground">{labelOf(current)}</p>
           <span className="text-[13px] text-muted-foreground">{current.category}{!current.pro && mac ? ", Mac style" : ""}</span>

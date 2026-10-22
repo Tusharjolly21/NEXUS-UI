@@ -25,6 +25,8 @@ export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notificatio
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
 let noiseBuf: AudioBuffer | null = null;
 
 function audio() {
@@ -37,9 +39,26 @@ function audio() {
     master.gain.value = 0.5;
     const comp = ctx.createDynamicsCompressor();
     master.connect(comp).connect(ctx.destination);
+    out = comp;
   }
   if (ctx.state === "suspended") void ctx.resume();
   return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
 }
 
 function noise(c: AudioContext) {
