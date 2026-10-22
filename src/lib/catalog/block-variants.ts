@@ -134,6 +134,10 @@ const baseVariants: BlockVariant[] = [
   mk("spotlight-hero", "block-hero", "Spotlight Hero", "SpotlightHero"),
   mk("parallax-stack-hero", "block-hero", "Parallax Stack Hero", "ParallaxStackHero"),
   mk("kinetic-hero", "block-hero", "Kinetic Hero", "KineticHero"),
+  mk("cursor-crowd-hero", "block-hero", "Cursor Crowd Hero", "CursorCrowdHero"),
+  mk("xray-hero", "block-hero", "X-ray Hero", "XrayHero"),
+  mk("circuit-hero", "block-hero", "Circuit Hero", "CircuitHero"),
+  mk("flip-dot-hero", "block-hero", "Flip-dot Hero", "FlipDotHero"),
 
   mk("auto-advancing-tabs", "block-features", "Auto-advancing Tabs", "AutoAdvancingTabs"),
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),

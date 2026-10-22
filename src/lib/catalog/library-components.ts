@@ -1146,9 +1146,9 @@ export function WorkFolder() {
     slug: "draggable-card-stack",
     name: "Draggable Card Stack",
     registryCliName: "draggable-card-stack",
-    description: "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work.",
+    description: "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work. Also includes Spread Deck, a photo pile that deals itself into a grid, then flies one photo to the front while the rest gather in the corner. Also includes Riffle Stack, a feature deck you shuffle like real cards: riffle bows two halves apart and falls them back in clumps, cut slides the top half under.",
     categorySlug: "cards",
-    tags: ["cards", "stack", "deck", "drag", "swipe", "fling", "gallery", "gesture", "motion kit", "framer-motion"],
+    tags: ["cards", "stack", "deck", "drag", "swipe", "fling", "gallery", "gesture", "motion kit", "framer-motion", "spread deck", "photo grid", "layout morph", "riffle stack", "card shuffle"],
     premium: false,
     trendingScore: 115,
     createdAt: "2026-05-19",
@@ -1170,8 +1170,63 @@ export function WorkFolder() {
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flings the top card left and right in turn until someone touches the stack." },
       { name: "autoInterval", type: "number", defaultValue: "2400", description: "Time between autoplay flings, in ms." },
       { name: "className", type: "string", description: "Extra classes for the root." },
+      { name: "SpreadDeck.photos", type: "SpreadDeckPhoto[]", defaultValue: "six demo places", description: "The photos, drawn as gradient landscapes so nothing is downloaded. Each has a title, a sub line and sky, sun and hill colours." },
+      { name: "SpreadDeck.autoplay", type: "boolean", defaultValue: "false", description: "Walks through pile, grid and focus by itself every 2.2 seconds until someone touches the deck. Pauses off screen and never runs under reduced motion." },
+      { name: "SpreadDeck.className", type: "string", defaultValue: "undefined", description: "Extra classes for the root, which fills its container up to 600px." },
+      { name: "RiffleStack.cards", type: "RiffleCard[]", defaultValue: "eight feature cards", description: "The deck, with an even number of cards. Each has a title, a line, two gradient colours and an SVG icon path." },
+      { name: "RiffleStack.autoplay", type: "boolean", defaultValue: "false", description: "Riffles and cuts the deck by itself every 2.8 seconds until someone presses a button. Pauses off screen and never runs under reduced motion." },
+      { name: "RiffleStack.onShuffle", type: "(top: string) => void", defaultValue: "undefined", description: "Called with the title of the card that lands on top after each riffle or cut." },
+      { name: "RiffleStack.className", type: "string", defaultValue: "undefined", description: "Extra classes for the root, which is 440px wide at most and scales down to fit narrow containers." },
     ],
     Preview: Previews.PreviewDraggableCardStackRedesign,
+    previewSections: [
+      {
+        title: "Draggable Card Stack",
+        Preview: Previews.PreviewDraggableCardStackRedesign,
+        reactSource: `"use client";
+
+import { DraggableCardStack } from "@/components/draggable-card-stack";
+
+const cards = [
+  { id: "sur", title: "Big Sur", subtitle: "Coast road at dusk", media: "/photos/big-sur.jpg" },
+  { id: "lofoten", title: "Lofoten", subtitle: "Blue hour over the bay", media: "/photos/lofoten.jpg" },
+  { id: "kyoto", title: "Kyoto", subtitle: "Lanterns after rain", media: "/clips/kyoto.mp4", type: "video" as const },
+  { id: "rum", title: "Wadi Rum", subtitle: "Sand at first light", bg: "linear-gradient(180deg,#fddb92,#f6a04d)" },
+];
+
+export function TripStack() {
+  return <DraggableCardStack cards={cards} cardWidth={240} cardHeight={320} onChange={(id) => console.log("top card", id)} />;
+}`,
+      },
+      {
+        title: "Spread Deck",
+        Preview: Previews.PreviewSpreadDeck,
+        reactSource: `"use client";
+
+import { SpreadDeck } from "@/components/draggable-card-stack";
+
+export function Gallery() {
+  return (
+    <div className="mx-auto w-full max-w-[600px]">
+      <SpreadDeck />
+    </div>
+  );
+}
+`,
+      },
+      {
+        title: "Riffle Stack",
+        Preview: Previews.PreviewRiffleStack,
+        reactSource: `"use client";
+
+import { RiffleStack } from "@/components/draggable-card-stack";
+
+export function Features() {
+  return <RiffleStack onShuffle={(top) => console.log("on top:", top)} />;
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -2713,9 +2768,9 @@ export function ProcessWheel() {
   {
     slug: "chat-messages",
     name: "Chat Messages",
-    description: "A chat thread styled like a messaging app, with blue user bubbles, grey replies and a composer. With autoplay the conversation plays itself: user lines type into the composer and pop out, and the assistant's typing dots grow into each reply; visitors can then send their own messages.",
+    description: "A chat thread styled like a messaging app, with blue user bubbles, grey replies and a composer. With autoplay the conversation plays itself: user lines type into the composer and pop out, and the assistant's typing dots grow into each reply; visitors can then send their own messages. Also includes Composer Morph Chat, where the text in the composer lifts out of the field and morphs into the sent bubble, then the reply shimmers and streams in word by word. Also includes Chat Head, a chat that lives in a draggable floating head that flings to the nearest edge, peeks new messages, opens into a panel and can be dismissed on a target or with the keyboard.",
     categorySlug: "ai-components",
-    tags: ["chat", "messages", "ai", "assistant", "bubbles", "typing indicator", "conversation", "motion kit", "framer-motion"],
+    tags: ["chat", "messages", "ai", "assistant", "bubbles", "typing indicator", "conversation", "motion kit", "framer-motion", "composer morph chat", "ai chat", "message morph", "streaming reply", "chat head", "floating chat", "draggable bubble", "support widget"],
     premium: false,
     trendingScore: 92,
     createdAt: "2026-05-16T00:00:00.000Z",
@@ -2732,8 +2787,80 @@ export function ProcessWheel() {
       { name: "onSend", type: "(text: string) => void", description: "Called with the text whenever the visitor sends a message." },
       { name: "title", type: "string", defaultValue: "\"Nexus AI\"", description: "Name in the header." },
       { name: "className", type: "string", description: "Extra classes for the root. Give it a height to change the default 440px." },
+      { name: "ComposerMorphChat.autoplay", type: "boolean", defaultValue: "false", description: "Types two scripted questions into the composer and sends them, once, until someone touches the chat. Waits until the chat is on screen and never runs under reduced motion." },
+      { name: "ComposerMorphChat.onSend", type: "(text: string) => void", defaultValue: "undefined", description: "Called with the text of every message the visitor sends. Replies are canned demo text and nothing is sent over the network." },
+      { name: "ComposerMorphChat.className", type: "string", defaultValue: "undefined", description: "Extra classes for the chat card, which is 380px wide at most and 520px tall." },
+      { name: "ChatHead.autoplay", type: "boolean", defaultValue: "false", description: "Bounces the head, peeks new messages and drifts it between the edges until someone touches the stage. Pauses off screen and never runs under reduced motion." },
+      { name: "ChatHead.name", type: "string", defaultValue: "\"Maya\"", description: "Name shown on the head, in the message peek and in the panel header." },
+      { name: "ChatHead.onReply", type: "(text: string) => void", defaultValue: "undefined", description: "Called with the text of a quick reply when the visitor taps one." },
+      { name: "ChatHead.onDismiss", type: "() => void", defaultValue: "undefined", description: "Called when the head is dropped on the target or dismissed with the Delete key." },
+      { name: "ChatHead.className", type: "string", defaultValue: "undefined", description: "Extra classes for the stage. The stage is its own bounded box, 360px wide at most and 540px tall, and the head never leaves it." },
     ],
     Preview: Previews.PreviewChatMessagesRedesign,
+    previewSections: [
+      {
+        title: "Chat Messages",
+        Preview: Previews.PreviewChatMessagesRedesign,
+        reactSource: `"use client";
+
+import { ChatMessages } from "@/components/chat-messages";
+
+export function SupportChat() {
+  return (
+    <ChatMessages
+      title="Support"
+      className="h-[480px]"
+      messages={[
+        { id: "1", sender: "assistant", content: "Hi! How can I help?" },
+        { id: "2", sender: "user", content: "Where is my order?" },
+        { id: "3", sender: "assistant", content: "It left the warehouse this morning.", timestamp: "9:41" },
+      ]}
+      reply={async (text) => {
+        const res = await fetch("/api/chat", { method: "POST", body: JSON.stringify({ text }) });
+        return (await res.json()).answer;
+      }}
+    />
+  );
+}`,
+      },
+      {
+        title: "Composer Morph Chat",
+        Preview: Previews.PreviewComposerMorphChat,
+        reactSource: `"use client";
+
+import { ComposerMorphChat } from "@/components/chat-messages";
+
+export function AssistantPanel() {
+  return (
+    <ComposerMorphChat
+      onSend={(text) => console.log("sent", text)}
+      className="mx-auto"
+    />
+  );
+}
+`,
+      },
+      {
+        title: "Chat Head",
+        Preview: Previews.PreviewChatHead,
+        reactSource: `"use client";
+
+import { ChatHead } from "@/components/chat-messages";
+
+export function SupportBubble() {
+  return (
+    <div className="relative mx-auto w-full max-w-[360px]">
+      <ChatHead
+        name="Maya"
+        onReply={(text) => console.log("quick reply", text)}
+        onDismiss={() => console.log("dismissed")}
+      />
+    </div>
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -2960,9 +3087,9 @@ export function Snippet() {
   {
     slug: "card-stack-rotator",
     name: "Card Stack Rotator",
-    description: "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke.",
+    description: "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke. Also includes Rolodex Testimonials, quotes on a 3D rolodex drum that clicks to the next one, spins when dragged, coasts when flicked and always lands square on a card.",
     categorySlug: "testimonials",
-    tags: ["testimonials", "card stack", "swipe", "carousel", "highlight", "quotes", "motion kit", "framer-motion"],
+    tags: ["testimonials", "card stack", "swipe", "carousel", "highlight", "quotes", "motion kit", "framer-motion", "rolodex testimonials", "3d drum", "testimonial carousel"],
     premium: false,
     trendingScore: 0,
     createdAt: "2026-05-17",
@@ -2984,8 +3111,49 @@ export function Snippet() {
       { name: "highlightBackground / highlightTextColor", type: "string", description: "Optional colours for the highlighter stroke and highlighted words." },
       { name: "pauseOnHover", type: "boolean", defaultValue: "true", description: "Pause rotationInterval while the pointer is over the stack." },
       { name: "className", type: "string", description: "Extra classes for the root." },
+      { name: "RolodexTestimonials.cards", type: "RolodexCard[]", defaultValue: "ten demo quotes", description: "The testimonials in drum order. Each has a quote, a name, a role and a two-colour hue for the avatar." },
+      { name: "RolodexTestimonials.autoplay", type: "boolean", defaultValue: "false", description: "Clicks the drum round to the next quote every 2.6 seconds until someone touches it. Pauses off screen and never runs under reduced motion." },
+      { name: "RolodexTestimonials.onChange", type: "(index: number) => void", defaultValue: "undefined", description: "Called with the index of the card that comes square to the front." },
+      { name: "RolodexTestimonials.className", type: "string", defaultValue: "undefined", description: "Extra classes for the root, which is 380px wide at most." },
     ],
     Preview: Previews.PreviewCardStackRotatorRedesign,
+    previewSections: [
+      {
+        title: "Card Stack Rotator",
+        Preview: Previews.PreviewCardStackRotatorRedesign,
+        reactSource: `"use client";
+
+import { CardStackRotator } from "@/components/card-stack-rotator";
+
+const cards = [
+  { id: "1", content: "We shipped onboarding in **three days**.", name: "Sana Whitfield", designation: "Head of Design", company: "Pebblework" },
+  { id: "2", content: "The motion is **tuned, not decorated**.", name: "Diego Marchetti", designation: "Staff Engineer", company: "Northwake" },
+  { id: "3", content: "Swapped our carousel and **time on page doubled**.", name: "Hana Ito", designation: "Growth Lead", company: "Tidepool" },
+];
+
+export function CustomerQuotes() {
+  return <CardStackRotator cards={cards} cardWidth="400px" rotationInterval={6000} />;
+}`,
+      },
+      {
+        title: "Rolodex Testimonials",
+        Preview: Previews.PreviewRolodexTestimonials,
+        reactSource: `"use client";
+
+import { RolodexTestimonials } from "@/components/card-stack-rotator";
+
+const quotes = [
+  { quote: "We rebuilt onboarding in a weekend.", name: "Maya Chen", role: "Design lead, Loop", hue: ["#ff9f0a", "#ff375f"] as [string, string] },
+  { quote: "Copy, paste, ship.", name: "Tom Becker", role: "Engineer, Relay", hue: ["#64d2ff", "#30d158"] as [string, string] },
+  { quote: "It feels expensive. It wasn't.", name: "Dev Patel", role: "Indie maker", hue: ["#ffd60a", "#ff9f0a"] as [string, string] },
+];
+
+export function Wall() {
+  return <RolodexTestimonials cards={quotes} onChange={(i) => console.log("front", i)} />;
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 

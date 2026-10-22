@@ -4336,3 +4336,4 @@ export * from "./signature/motion-kit-x";
 export * from "./signature/motion-kit-y";
 export * from "./blocks/motion-kit-blocks-h";
 export * from "./blocks/motion-kit-blocks-i";
+export * from "./signature/motion-kit-ab";

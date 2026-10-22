@@ -48,6 +48,10 @@ import { TypoCatchingSignup } from "./typo-catching-signup";
 import { VelocityMarquee } from "./velocity-marquee";
 import { LogoStories } from "./logo-stories";
 import { FilterableLogoWall } from "./filterable-logo-wall";
+import { CursorCrowdHero } from "./cursor-crowd-hero";
+import { XrayHero } from "./xray-hero";
+import { CircuitHero } from "./circuit-hero";
+import { FlipDotHero } from "./flip-dot-hero";
 
 /** Gallery stages take `compact`, not `autoplay` (they always play); the block page passes autoplay. */
 const asSection = (c: ComponentType<{ compact?: boolean }>) => c as unknown as ComponentType<{ autoplay?: boolean }>;
@@ -105,4 +109,8 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-velocity-marquee": VelocityMarquee as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-logo-stories": LogoStories,
   "mk-filterable-logo-wall": FilterableLogoWall,
+  "mk-cursor-crowd-hero": CursorCrowdHero,
+  "mk-xray-hero": XrayHero,
+  "mk-circuit-hero": CircuitHero,
+  "mk-flip-dot-hero": FlipDotHero,
 };

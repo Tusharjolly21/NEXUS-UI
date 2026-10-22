@@ -323,7 +323,7 @@ export default function Header() {
     category: "Hero blocks",
     tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid"],
+    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid", "Cursor Crowd Hero", "X-ray Hero", "Circuit Hero", "Flip-dot Hero"],
     reactSource: `import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
 
 export default function Home() {
