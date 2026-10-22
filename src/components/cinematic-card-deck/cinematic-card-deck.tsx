@@ -81,7 +81,7 @@ export type CinematicCardDeckProps = {
   hint?: string;
   /** Deals through the deck every 2.4s until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -364,8 +364,9 @@ export function CinematicCardDeck({
   className = "",
 }: CinematicCardDeckProps) {
   const play = useSound(enableSound);
-  // When the visitor last moved the deck. Autoplay and page scroll never set it, so they stay silent.
+  // When the visitor last moved the deck, and when autoplay last did. Page scroll sets neither, so it stays silent.
   const userAt = useRef(-Infinity);
+  const autoAt = useRef(-Infinity);
   const lastTick = useRef(0);
   const data = cards && cards.length > 0 ? cards : DEFAULT_CARDS;
   const total = data.length;
@@ -408,9 +409,14 @@ export function CinematicCardDeck({
       lastReported.current = i;
       onChange?.(i);
       const now = performance.now();
-      if (now - userAt.current < 1600 && now - lastTick.current > 40) {
-        lastTick.current = now;
-        play("tick", 0.4);
+      if (now - lastTick.current > 40) {
+        if (now - userAt.current < 1600) {
+          lastTick.current = now;
+          play("tick", 0.4);
+        } else if (now - autoAt.current < 1600) {
+          lastTick.current = now;
+          play.auto("tick", 0.4);
+        }
       }
     }
   });
@@ -467,6 +473,7 @@ export function CinematicCardDeck({
         return;
       }
       const v = Math.round(target.get());
+      autoAt.current = clock();
       target.set(v >= last ? 0 : v + 1);
     }, 2400);
     return () => clearInterval(t);

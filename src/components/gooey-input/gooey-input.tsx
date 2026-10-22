@@ -34,7 +34,7 @@ export type GooeyInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "siz
   /** Opens, types a query and closes again on a loop until someone touches it. */
   autoplay?: boolean;
   disabled?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -104,6 +104,10 @@ export function GooeyInput({
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const touched = React.useRef(false);
+  const playRef = React.useRef(play);
+  React.useEffect(() => {
+    playRef.current = play;
+  });
   const [isExpanded, setIsExpanded] = React.useState(false);
   const [uncontrolledValue, setUncontrolledValue] = React.useState(() => defaultValue ?? "");
   const [active, setActive] = React.useState(0);
@@ -164,7 +168,7 @@ export function GooeyInput({
     requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   };
 
-  // Closing that the visitor caused (Escape, clicking away from an empty field) says "off"; autoplay calls setExpanded directly and stays silent.
+  // Closing that the visitor caused (Escape, clicking away from an empty field) says "off"; autoplay calls setExpanded directly and answers through `play.auto`.
   const closeByUser = () => {
     if (isExpanded) play("off");
     setExpanded(false);
@@ -182,11 +186,17 @@ export function GooeyInput({
     const timers: ReturnType<typeof setTimeout>[] = [];
     const at = (ms: number, fn: () => void) => timers.push(setTimeout(() => !touched.current && fn(), ms));
     const loop = () => {
-      at(700, () => setExpanded(true, false));
+      at(700, () => {
+        playRef.current.auto("pop");
+        setExpanded(true, false);
+      });
       for (let i = 1; i <= word.length; i++) at(1300 + i * 120, () => setSearchText(word.slice(0, i), false));
       at(2700, () => setActive(1));
       at(3200, () => setActive(2));
-      at(4600, () => setExpanded(false, false));
+      at(4600, () => {
+        playRef.current.auto("off");
+        setExpanded(false, false);
+      });
       at(6200, loop);
     };
     loop();

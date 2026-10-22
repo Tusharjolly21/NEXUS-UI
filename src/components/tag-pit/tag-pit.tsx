@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import Matter from "matter-js";
-import { useSound } from "@/lib/ui-sounds";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 const TAGS = ["Design", "Motion", "Typography", "3D", "Photography", "AI", "Music", "Startups", "Travel", "Coffee", "Gaming", "Writing", "Code", "Film", "Architecture", "Fitness"];
 const STEP = 1000 / 60;
@@ -22,7 +22,7 @@ export interface TagPitProps {
   accent?: string;
   /** Picks a few tags and shakes the tray by itself until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -148,8 +148,12 @@ export function TagPit({ tags = TAGS, min = 3, accent = "#0071e3", autoplay = fa
     pickedRef.current = on ? p.filter((x) => x !== i) : [...p, i];
     setPicked(pickedRef.current);
   };
-  // Picking a pill pops; putting it back ticks. Only called for the visitor's own picks.
-  const cue = (i: number) => (pickedRef.current.includes(i) ? play("tick", 0.5) : play("pop", 0.6));
+  // Picking a pill pops; putting it back ticks. `say` is play for the visitor's own picks, play.auto for autoplay.
+  const cue = (i: number, say: (name: SoundName, volume?: number) => void = play) => (pickedRef.current.includes(i) ? say("tick", 0.5) : say("pop", 0.6));
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
   const shake = () => {
     if (!reduce) void tray.start({ x: [0, -10, 9, -7, 5, -2, 0], rotate: [0, -1.2, 1, -0.6, 0.4, 0], transition: { duration: 0.6 } });
     bodies.current.forEach((b) => {
@@ -205,7 +209,10 @@ export function TagPit({ tags = TAGS, min = 3, accent = "#0071e3", autoplay = fa
       // Reduced motion: still demo the picking, but nothing gets thrown or shaken.
       if (s === "shake") {
         if (!reduce) shake();
-      } else toggle(s, !reduce);
+      } else {
+        cue(s, playRef.current.auto);
+        toggle(s, !reduce);
+      }
     }, 1500);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -50,7 +50,7 @@ export type CardCarousel3DProps = {
   hint?: string;
   /** Steps to the next card every 2.4s until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -175,8 +175,9 @@ export function CardCarousel3D({
   className = "",
 }: CardCarousel3DProps) {
   const play = useSound(enableSound);
-  // When the visitor last moved the carousel. Autoplay and the drift never set it, so they stay silent.
+  // When the visitor last moved the carousel, and when autoplay last stepped it. The `autoRotate` drift sets neither, so it stays silent.
   const userAt = useRef(-Infinity);
+  const autoAt = useRef(-Infinity);
   const lastTick = useRef(0);
   const lastIdx = useRef(0);
   const n = Math.max(1, cards.length);
@@ -216,9 +217,14 @@ export function CardCarousel3D({
     if (i !== lastIdx.current) {
       lastIdx.current = i;
       const now = performance.now();
-      if ((dragging.current || now - userAt.current < 1600) && now - lastTick.current > 40) {
-        lastTick.current = now;
-        play("tick", 0.4);
+      if (now - lastTick.current > 40) {
+        if (dragging.current || now - userAt.current < 1600) {
+          lastTick.current = now;
+          play("tick", 0.4);
+        } else if (now - autoAt.current < 1600) {
+          lastTick.current = now;
+          play.auto("tick", 0.4);
+        }
       }
     }
   });
@@ -270,6 +276,7 @@ export function CardCarousel3D({
         return;
       }
       run.current?.stop();
+      autoAt.current = clock();
       run.current = animate(rot, (Math.round(rot.get() / step) - sign) * step, { type: "spring", stiffness: 120, damping: 16 });
     }, 2400);
     return () => clearInterval(t);
