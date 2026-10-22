@@ -1,4 +1,4 @@
-export const DEFAULT_AUTH_REDIRECT = "/dashboard/orders";
+export const DEFAULT_AUTH_REDIRECT = "/dashboard";
 
 /**
  * Only allow same-origin relative paths for post-login redirects.

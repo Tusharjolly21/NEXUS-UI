@@ -130,3 +130,14 @@ export async function cancelSubscription(subscriptionId: string): Promise<void> 
     body: JSON.stringify({ status: "cancelled", cancel_reason: "cancelled_by_merchant" }),
   });
 }
+
+/** A one-off link to Dodo's customer portal: update the card, cancel, download invoices. */
+export async function createPortalLink(customerId: string, returnUrl: string): Promise<string> {
+  const res = await dodoFetch(`/customers/${encodeURIComponent(customerId)}/customer-portal/session`, {
+    method: "POST",
+    body: JSON.stringify({ return_url: returnUrl }),
+  });
+  const data = (await res.json()) as { link?: string };
+  if (!data.link) throw new Error("Dodo returned no portal link");
+  return data.link;
+}

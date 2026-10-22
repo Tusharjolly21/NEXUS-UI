@@ -4,6 +4,7 @@ import * as React from "react";
 import { Eye, EyeOff, Copy, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { pillClassName } from "@/components/site/pill-link";
 import { regenerateApiToken } from "./actions";
 
 const STEP_BADGE =
@@ -36,6 +37,7 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
   const [copied, setCopied] = React.useState(false);
   const [codeCopied, setCodeCopied] = React.useState(false);
   const [isPending, startTransition] = React.useTransition();
+  const [confirming, setConfirming] = React.useState(false);
 
   const configKey = apiKey ?? TOKEN_PLACEHOLDER;
   const displayKey = apiKey
@@ -68,28 +70,36 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
 
   async function copyKey() {
     if (!apiKey) return;
-    await navigator.clipboard.writeText(apiKey);
+    try {
+      await navigator.clipboard.writeText(apiKey);
+    } catch {
+      toast.error("Couldn't copy. Select the key and copy it by hand.");
+      return;
+    }
     setCopied(true);
     toast.success("API key copied to clipboard");
     setTimeout(() => setCopied(false), 2000);
   }
 
   async function copyCode() {
-    await navigator.clipboard.writeText(componentsJson);
+    try {
+      await navigator.clipboard.writeText(componentsJson);
+    } catch {
+      toast.error("Couldn't copy. Select the config and copy it by hand.");
+      return;
+    }
     setCodeCopied(true);
     toast.success("Config copied to clipboard");
     setTimeout(() => setCodeCopied(false), 2000);
   }
 
   function handleRegenerate() {
-    if (
-      tokenInfo &&
-      !window.confirm(
-        "Regenerate your API token? The current token stops working immediately, so update components.json everywhere you use it.",
-      )
-    ) {
+    // Replacing a token breaks every project using it, so ask once, inline, before doing it.
+    if (tokenInfo && !confirming) {
+      setConfirming(true);
       return;
     }
+    setConfirming(false);
 
     startTransition(async () => {
       const result = await regenerateApiToken();
@@ -119,7 +129,7 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
         </p>
 
         {/* Key row */}
-        <div className="flex items-center gap-3 rounded-xl border border-border bg-background px-4 py-3">
+        <div className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3">
           <code
             className={cn(
               "flex-1 truncate font-mono text-sm",
@@ -135,7 +145,11 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
           )}
         </div>
 
-        {apiKey ? (
+        {confirming ? (
+          <p role="alert" className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+            The current token stops working immediately. Update components.json everywhere you use it.
+          </p>
+        ) : apiKey ? (
           <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">
             Copy this key now. For your security it won&apos;t be shown again.
           </p>
@@ -153,11 +167,16 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
             type="button"
             onClick={handleRegenerate}
             disabled={isPending}
-            className="flex items-center gap-2 rounded-lg bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/90 disabled:opacity-60"
+            className={pillClassName(confirming ? "ink" : tokenInfo ? "white" : "ink", "sm", "disabled:opacity-60")}
           >
-            <RefreshCw className={cn("size-3.5", isPending && "animate-spin")} />
-            {tokenInfo ? "Regenerate key" : "Generate key"}
+            <RefreshCw className={cn("size-3.5", isPending && "animate-spin")} aria-hidden />
+            {confirming ? "Yes, replace it" : tokenInfo ? "Regenerate key" : "Generate key"}
           </button>
+          {confirming ? (
+            <button type="button" onClick={() => setConfirming(false)} className={pillClassName("white", "sm")}>
+              Cancel
+            </button>
+          ) : null}
 
           {apiKey && (
             <>
@@ -165,9 +184,9 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
                 type="button"
                 onClick={() => setVisible((v) => !v)}
                 aria-label={visible ? "Hide API key" : "Show API key"}
-                className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className={pillClassName("white", "sm")}
               >
-                {visible ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                {visible ? <EyeOff className="size-3.5" aria-hidden /> : <Eye className="size-3.5" aria-hidden />}
                 {visible ? "Hide" : "Reveal"}
               </button>
 
@@ -175,9 +194,9 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
                 type="button"
                 onClick={copyKey}
                 aria-label="Copy API key"
-                className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className={pillClassName("white", "sm")}
               >
-                {copied ? <Check className="size-3.5 text-emerald-500" /> : <Copy className="size-3.5" />}
+                {copied ? <Check className="size-3.5 text-emerald-500" aria-hidden /> : <Copy className="size-3.5" aria-hidden />}
                 {copied ? "Copied" : "Copy"}
               </button>
             </>
