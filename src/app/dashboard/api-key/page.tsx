@@ -3,10 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
 import { getApiTokenInfo } from "@/lib/entitlements";
 import { ApiKeyClient } from "./api-key-client";
+import { DashboardPage, PageHeader } from "@/components/dashboard/ui";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "API Token – Nexus UI",
+  title: "API token — Nexus UI",
   description: "Generate your API key and configure your project to install Nexus UI components.",
 };
 
@@ -21,13 +22,11 @@ export default async function DashboardApiKeyPage() {
   const tokenInfo = await getApiTokenInfo(user.id);
 
   return (
-    <div className="px-4 py-6 sm:px-8 sm:py-10">
-      <div className="mb-8">
-        <h1 className="pg-display text-[clamp(36px,5vw,52px)] text-foreground">API Token</h1>
-        <p className="mt-1 text-muted-foreground">
-          Generate your API key and configure your project to install Nexus UI components.
-        </p>
-      </div>
+    <DashboardPage>
+      <PageHeader
+        title="API token"
+        description="Create a token so the shadcn CLI can install Pro components and premium blocks into your project."
+      />
       <ApiKeyClient
         existingToken={
           tokenInfo
@@ -39,6 +38,6 @@ export default async function DashboardApiKeyPage() {
             : null
         }
       />
-    </div>
+    </DashboardPage>
   );
 }

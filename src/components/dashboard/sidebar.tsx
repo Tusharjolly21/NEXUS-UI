@@ -10,19 +10,21 @@ import {
   User,
   Key,
   Home,
-  LogOut,
   Menu,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NexusMark } from "@/components/brand";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { createClient } from "@/lib/supabase/client";
+import { SignOutButton } from "@/components/dashboard/sign-out-button";
 
 interface SidebarUser {
   email: string;
   name: string;
   avatarLetter: string;
+  /** Plan label: Free, Pro or All-Access. */
+  plan: string;
+  paid: boolean;
 }
 
 interface SidebarProps {
@@ -30,23 +32,26 @@ interface SidebarProps {
 }
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
-  { href: "/dashboard/api-key", label: "API Tokens", icon: Key },
+  { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/dashboard/api-key", label: "API token", icon: Key },
+  { href: "/dashboard/profile", label: "Account", icon: User },
 ] as const;
 
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
-
-  async function signOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    window.location.href = "/";
-  }
+  // Escape closes the mobile drawer.
+  React.useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen]);
 
   const navContent = (
     <>
@@ -77,7 +82,7 @@ export function Sidebar({ user }: SidebarProps) {
                 onClick={() => setMobileOpen(false)}
                 className={cn(
                   "flex items-center gap-3 rounded-full px-3.5 py-2.5 text-[14.5px] font-medium transition-colors",
-                  active ? "bg-foreground text-background" : "text-body hover:bg-muted hover:text-foreground",
+                  active ? "bg-muted font-semibold text-foreground" : "text-body hover:bg-muted/60 hover:text-foreground",
                 )}
               >
                 <Icon className="size-4 shrink-0" />
@@ -103,24 +108,29 @@ export function Sidebar({ user }: SidebarProps) {
 
         {/* User info */}
         <div className="flex items-center gap-3">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground">
+          <div
+            aria-hidden
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-foreground"
+          >
             {user.avatarLetter}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+            <p className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <span className="truncate">{user.name}</span>
+              <span
+                className={cn(
+                  "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-none",
+                  user.paid ? "bg-action/10 text-link" : "bg-muted text-muted-foreground",
+                )}
+              >
+                {user.plan}
+              </span>
+            </p>
             <p className="truncate text-xs text-muted-foreground">{user.email}</p>
           </div>
         </div>
 
-        {/* Sign out */}
-        <button
-          type="button"
-          onClick={() => void signOut()}
-          className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <LogOut className="size-4 shrink-0" />
-          Sign out
-        </button>
+        <SignOutButton className="flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground" />
       </div>
     </>
   );
