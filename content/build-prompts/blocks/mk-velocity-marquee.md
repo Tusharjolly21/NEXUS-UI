@@ -19,7 +19,7 @@ Build a social proof section with two belts of short customer reviews running in
 
 There is no `autoplay` prop: the belts drift on their own by design, can be paused with a button, and stop under reduced motion.
 
-Demo top row: "Shipped our pricing page in an afternoon" (Arjun, Tally), "The motion is the good kind" (Lena, Wayfare), "Visitors play with the hero" (Sara, Orbitly), "Feels expensive. Wasn't." (Dev, indie), "Respects reduced motion out of the box" (Noor, Quadrant). Bottom row: "Copy, paste, ship" (Tom, Relay), "Our onboarding finally feels like us" (Maya, Loop), "Clients ask who built it" (Kai, studio), "Designers and devs stopped arguing" (Eli, Parallel), "The small details win" (Ana, Vela). These are invented; swap in real, attributed quotes.
+Demo top row: "Shipped our pricing page in an afternoon" (Arjun, Tally), "The motion is the good kind" (Lena, Wayfare), "Visitors play with the hero" (Sara, Orbitly), "Feels expensive. Wasn't." (Dev, indie), "Respects reduced motion out of the box" (Noor, Quadrel). Bottom row: "Copy, paste, ship" (Tom, Relay), "Our onboarding finally feels like us" (Maya, Loop), "Clients ask who built it" (Kai, studio), "Designers and devs stopped arguing" (Eli, Paraleon), "The small details win" (Ana, Velara). These are invented; swap in real, attributed quotes.
 
 ## Layout and look
 

@@ -11,7 +11,7 @@ import { VelocityMarquee } from "@/components/blocks/motion-kit/velocity-marquee
 
 export function PreviewBlockVariantMkVelocityMarquee() {
   return (
-    <div className="flex min-h-[320px] w-full items-center bg-white dark:bg-black">
+    <div className="flex min-h-[560px] w-full items-center bg-white dark:bg-black">
       <VelocityMarquee />
     </div>
   );

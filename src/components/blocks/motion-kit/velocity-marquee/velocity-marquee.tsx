@@ -40,14 +40,14 @@ export const DEFAULT_VELOCITY_TOP_ROW: VelocityMarqueeReview[] = [
   { quote: "The motion is the good kind", name: "Lena, Wayfare" },
   { quote: "Visitors play with the hero", name: "Sara, Orbitly" },
   { quote: "Feels expensive. Wasn't.", name: "Dev, indie" },
-  { quote: "Respects reduced motion out of the box", name: "Noor, Quadrant" },
+  { quote: "Respects reduced motion out of the box", name: "Noor, Quadrel" },
 ];
 export const DEFAULT_VELOCITY_BOTTOM_ROW: VelocityMarqueeReview[] = [
   { quote: "Copy, paste, ship", name: "Tom, Relay" },
   { quote: "Our onboarding finally feels like us", name: "Maya, Loop" },
   { quote: "Clients ask who built it", name: "Kai, studio" },
-  { quote: "Designers and devs stopped arguing", name: "Eli, Parallel" },
-  { quote: "The small details win", name: "Ana, Vela" },
+  { quote: "Designers and devs stopped arguing", name: "Eli, Paraleon" },
+  { quote: "The small details win", name: "Ana, Velara" },
 ];
 
 const MASK = "linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent)";
