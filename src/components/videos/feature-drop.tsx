@@ -28,6 +28,7 @@ export interface FeatureDropProps {
 export const meta: VideoMeta<FeatureDropProps> = {
   id: "feature-drop",
   title: "Feature Drop",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Feature announcement",
   motion: "3D carousel re-skins in a wave",
   app: "MockFrame",

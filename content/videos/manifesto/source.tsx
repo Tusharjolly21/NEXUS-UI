@@ -15,6 +15,7 @@ export interface ManifestoProps {
 export const meta: VideoMeta<ManifestoProps> = {
   id: "manifesto",
   title: "Kinetic Manifesto",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Brand hook",
   motion: "Kinetic type with live UI inside the words",
   app: "Nexus UI",

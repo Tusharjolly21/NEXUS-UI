@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { AccessTag } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
-import { videoPosterSrc, videoPreviewSrc, type VideoEntry } from "@/lib/catalog/videos";
+import { videoFormat, videoPosterSrc, videoPreviewSrc, type VideoEntry } from "@/lib/catalog/videos";
 
 /**
  * One video in the grid: its still, and a silent pre-rendered loop that plays on hover or focus
@@ -13,6 +13,7 @@ import { videoPosterSrc, videoPreviewSrc, type VideoEntry } from "@/lib/catalog/
 export function VideoCard({ video, className, priority = false }: { video: VideoEntry; className?: string; priority?: boolean }) {
   const ref = React.useRef<HTMLVideoElement>(null);
   const [on, setOn] = React.useState(false);
+  const shape = videoFormat(video);
 
   const play = React.useCallback(() => {
     const v = ref.current;
@@ -46,7 +47,7 @@ export function VideoCard({ video, className, priority = false }: { video: Video
       onBlur={stop}
       className={cn("pg-float group block overflow-hidden rounded-[24px] bg-card transition-transform duration-150 hover:-translate-y-1 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring", className)}
     >
-      <div className="relative aspect-[9/16] overflow-hidden bg-muted">
+      <div className="relative overflow-hidden bg-muted" style={{ aspectRatio: `${shape.w} / ${shape.h}` }}>
         <video
           ref={ref}
           src={videoPreviewSrc(video.slug)}
@@ -62,7 +63,7 @@ export function VideoCard({ video, className, priority = false }: { video: Video
           <AccessTag premium={video.premium} />
         </span>
         <span className={cn("absolute bottom-3 right-3 rounded-full bg-black/55 px-2.5 py-1 text-[11.5px] font-medium tabular-nums text-white backdrop-blur transition-opacity", on ? "opacity-0" : "opacity-100")}>
-          {video.duration}s
+          {video.duration}s{video.loop ? " loop" : ""}
         </span>
       </div>
       <div className="px-4 py-3.5">

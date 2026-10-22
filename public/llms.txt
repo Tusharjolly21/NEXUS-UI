@@ -8,7 +8,7 @@ Nexus UI is a premium UI component library offering 100+ animated React componen
 - [Components](/components): 100+ animated React components including motion effects, 3D, backgrounds, cards, forms, and navigation
 - [Blocks](/blocks): Production-ready UI blocks for Next.js landing pages — hero sections, pricing grids, testimonials, CTAs
 - [Templates](/templates): Full-page Next.js templates for SaaS — animated landing pages, pricing flows, and dashboards
-- [Videos](/videos): Vertical product videos (launch, pricing, changelog, walkthrough, teaser) as React components with their own soundtracks; edit the copy live, then take the prompt, source and a script that renders MP4
+- [Videos](/videos): Product videos in 9:16, 1:1, 16:9 and more (launch, pricing, changelog, walkthrough, app store preview, logo bumper, hero loop, teaser) as React components with their own soundtracks; edit the copy live, then take the prompt, source and a script that renders MP4
 - [Pricing](/pricing): Free tier available; Pro plan unlocks premium components and templates
 
 ## Documentation

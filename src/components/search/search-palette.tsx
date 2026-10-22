@@ -105,7 +105,7 @@ const VIDEOS: Entry[] = videos.map((v, i) => ({
   premium: v.premium,
   score: 60 - i,
   tags: [v.app, v.purpose],
-  haystack: `${v.title} ${v.blurb} ${v.purpose} ${v.motion} ${v.app} video reel vertical`.toLowerCase(),
+  haystack: `${v.title} ${v.blurb} ${v.purpose} ${v.motion} ${v.app} ${v.platforms.join(" ")} ${v.formats.join(" ")} video reel`.toLowerCase(),
 }));
 
 const DOCS: Entry[] = DOCS_PAGES.map((d, i) => ({

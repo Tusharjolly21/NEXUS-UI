@@ -3,9 +3,9 @@
 import * as React from "react";
 
 /** A video component: draws one frame for time `t` (seconds) plus its editable props. */
-export type VideoComponent = React.ComponentType<{ t: number } & Record<string, unknown>>;
+export type VideoComponent = React.ComponentType<{ t: number; w?: number; h?: number } & Record<string, unknown>>;
 
-// Each video loads on demand, so a page that shows one never pays for the other seven.
+// Each video loads on demand, so a page that shows one never pays for the others.
 const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   "launch-reel": () => import("./launch-reel"),
   "feature-drop": () => import("./feature-drop"),
@@ -15,6 +15,13 @@ const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   "route-story": () => import("./route-story"),
   teaser: () => import("./teaser"),
   manifesto: () => import("./manifesto"),
+  "install-seconds": () => import("./install-seconds"),
+  "bento-tour": () => import("./bento-tour"),
+  "before-after": () => import("./before-after"),
+  "app-store-preview": () => import("./app-store-preview"),
+  "launch-day": () => import("./launch-day"),
+  "logo-bumper": () => import("./logo-bumper"),
+  "hero-loop": () => import("./hero-loop"),
 };
 
 /** One lazy component per video, created once at module level. */

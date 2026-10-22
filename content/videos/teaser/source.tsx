@@ -15,6 +15,7 @@ export interface TeaserProps {
 export const meta: VideoMeta<TeaserProps> = {
   id: "teaser",
   title: "Coming Soon Teaser",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Waitlist & teasers",
   motion: "Live multiplayer canvas folds into a logo",
   app: "DrawDocs",

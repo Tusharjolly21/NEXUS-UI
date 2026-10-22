@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Copy, Lock, RotateCcw } from "lucide-react";
 import { useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
-import type { VideoEntry, VideoPart } from "@/lib/catalog/videos";
+import { FORMATS, type FormatId, type VideoEntry, type VideoPart } from "@/lib/catalog/videos";
 import { VideoPlayer } from "./video-player";
 import { useVideoFile } from "./use-video-file";
 
@@ -17,13 +17,17 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "source", label: "Source" },
 ];
 
-const PERKS = [
+const perksOf = (video: VideoEntry) => [
   "The full prompt that builds this video",
   "The React source: one file plus a small shared kit",
   "Live editing of every word and colour, right here",
-  "Its original soundtrack, cut to the picture",
+  ...(video.formats.length > 1 ? [`Every shape from one file: ${video.formats.map((f) => FORMATS[f].label).join(", ")}`] : []),
+  ...(video.silent ? ["A seamless loop, so frame 0 matches the last frame"] : ["Its original soundtrack, cut to the picture"]),
   "A render script that exports your edit as MP4",
 ];
+
+/** How wide the player may grow for a shape: tall shapes stay phone-sized, wide ones get the page. */
+const maxWidthFor = (w: number, h: number) => (h > w * 1.2 ? 380 : w / h > 1.5 ? 880 : w === h ? 520 : 440);
 
 /**
  * A video's page: the live player on the left, and on the right what comes with it: an overview,
@@ -36,15 +40,49 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
   const [tab, setTab] = React.useState<Tab>("overview");
   const [values, setValues] = React.useState<Record<string, string>>(defaults);
   const edited = video.fields.some((f) => values[f.key] !== defaults[f.key]);
+  const [format, setFormat] = React.useState<FormatId>(video.formats[0]);
+  const shape = FORMATS[format];
+  // Tall shapes keep the player beside the details; wide and square ones put it above them.
+  const tall = shape.h > shape.w * 1.2;
 
   return (
-    <div className="grid items-start gap-10 lg:grid-cols-[minmax(300px,380px)_1fr] lg:gap-14">
-      <div className="mx-auto w-full max-w-[380px] lg:sticky lg:top-24">
-        <div className="rounded-[40px] bg-foreground/[0.06] p-2.5 shadow-[0_0_0_0.5px_var(--border),0_40px_80px_-40px_rgba(0,0,0,0.45)]">
-          <VideoPlayer slug={video.slug} duration={video.duration} posterAt={video.posterAt} values={values} autoPlay className="rounded-[32px]" />
+    <div className={cn("grid items-start gap-10", tall && "lg:grid-cols-[minmax(300px,380px)_1fr] lg:gap-14")}>
+      <div className={cn("w-full", tall ? "mx-auto lg:sticky lg:top-24" : "mx-auto lg:mx-0")} style={{ maxWidth: maxWidthFor(shape.w, shape.h) }}>
+        {video.formats.length > 1 ? (
+          <div role="radiogroup" aria-label="Video shape" className="mb-3 flex flex-wrap justify-center gap-1 lg:justify-start">
+            {video.formats.map((id) => (
+              <button
+                key={id}
+                type="button"
+                role="radio"
+                aria-checked={id === format}
+                onClick={() => setFormat(id)}
+                className={cn(
+                  "h-8 rounded-full px-3.5 text-[13px] font-medium tabular-nums transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                  id === format ? "bg-foreground text-background" : "bg-foreground/[0.07] text-foreground/70 hover:text-foreground",
+                )}
+              >
+                {FORMATS[id].label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        <div className={cn("bg-foreground/[0.06] shadow-[0_0_0_0.5px_var(--border),0_40px_80px_-40px_rgba(0,0,0,0.45)]", tall ? "rounded-[40px] p-2.5" : "rounded-[28px] p-2")}>
+          <VideoPlayer
+            slug={video.slug}
+            duration={video.duration}
+            posterAt={video.posterAt}
+            format={format}
+            posterFormat={video.formats[0]}
+            silent={video.silent}
+            values={values}
+            autoPlay
+            className={tall ? "rounded-[32px]" : "rounded-[20px]"}
+          />
         </div>
-        <p className="mt-4 text-center text-[13px] text-muted-foreground">
-          {video.duration} seconds · {video.bpm} BPM · press the speaker for sound
+        <p className="mt-4 text-center text-[13px] text-muted-foreground lg:text-left">
+          {video.duration} seconds · {video.bpm} BPM · {video.silent ? "no sound, loops seamlessly" : "press the speaker for sound"}
+          {video.formats.length > 1 ? ` · ${shape.where}` : ""}
         </p>
       </div>
 
@@ -91,6 +129,7 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
               files={[
                 { part: "source", label: `${video.slug}.tsx` },
                 { part: "kit", label: "kit.ts" },
+                ...(video.parts ? [{ part: "parts" as const, label: "parts.tsx" }] : []),
                 { part: "frame", label: "frame.tsx" },
                 { part: "render", label: "render.mjs" },
               ]}
@@ -111,7 +150,7 @@ function Overview({ video, unlocked, onTab }: { video: VideoEntry; unlocked: boo
           ["For", video.purpose],
           ["Motion", video.motion],
           ["Made for", video.app],
-          ["Length", `${video.duration}s, 9:16`],
+          ["Length", `${video.duration}s${video.loop ? " loop" : ""}, ${video.formats.map((f) => FORMATS[f].label).join(" / ")}`],
         ].map(([k, v]) => (
           <div key={k} className="rounded-2xl bg-foreground/[0.05] px-3.5 py-3">
             <dt className="text-[11.5px] font-semibold text-muted-foreground">{k}</dt>
@@ -122,7 +161,7 @@ function Overview({ video, unlocked, onTab }: { video: VideoEntry; unlocked: boo
       <div className="rounded-[20px] bg-foreground/[0.05] p-5">
         <p className="text-[14px] font-semibold text-foreground">{unlocked ? "Yours to use" : "With Pro you get"}</p>
         <ul className="mt-3 grid gap-2 text-[14px] text-foreground/80">
-          {PERKS.map((p) => (
+          {perksOf(video).map((p) => (
             <li key={p} className="flex gap-2.5">
               <Check className={cn("mt-0.5 size-4 shrink-0", unlocked ? "text-[#248a3d] dark:text-[#30d158]" : "text-action")} strokeWidth={2.6} aria-hidden />
               {p}

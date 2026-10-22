@@ -18,6 +18,7 @@ export interface PriceRevealProps {
 export const meta: VideoMeta<PriceRevealProps> = {
   id: "price-reveal",
   title: "Price Reveal",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Pricing & offers",
   motion: "Odometer counts into a ledger",
   app: "Nexus UI",

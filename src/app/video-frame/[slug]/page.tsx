@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { VideoFrame } from "@/components/videos/video-frame";
-import { getVideo, videos } from "@/lib/catalog/videos";
+import { getVideo, videoFormat, videos } from "@/lib/catalog/videos";
 import { videoDefaults } from "@/lib/catalog/video-defaults";
 
-type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ p?: string }> };
+type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ p?: string; f?: string }> };
 
 export const metadata: Metadata = { title: "Video frame", robots: { index: false, follow: false } };
 
@@ -14,11 +14,11 @@ export function generateStaticParams() {
 
 /**
  * One video drawn full-window, with its clock set by `window.__setT`. Used to render the grid
- * previews and as the reference page for `render.mjs`. `?p=` takes JSON with edited copy.
+ * previews and as the reference page for `render.mjs`. `?f=` picks the shape (9:16, 1:1, 16:9, …) and `?p=` takes JSON with edited copy.
  */
 export default async function VideoFramePage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const { p } = await searchParams;
+  const { p, f } = await searchParams;
   const video = getVideo(slug);
   if (!video) notFound();
 
@@ -31,5 +31,5 @@ export default async function VideoFramePage({ params, searchParams }: Props) {
       // ignore bad input, keep the defaults
     }
   }
-  return <VideoFrame slug={slug} values={values} />;
+  return <VideoFrame slug={slug} format={videoFormat(video, f).id} values={values} />;
 }

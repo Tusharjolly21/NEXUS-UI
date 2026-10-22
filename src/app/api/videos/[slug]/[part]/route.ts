@@ -24,6 +24,7 @@ const FILES: Record<VideoPart, (slug: string) => string> = {
   prompt: (s) => `content/videos/${s}/prompt.md`,
   source: (s) => `content/videos/${s}/source.tsx`,
   kit: () => "content/videos/kit.ts",
+  parts: () => "content/videos/parts.tsx",
   frame: () => "content/videos/frame.tsx",
   render: () => "content/videos/render.mjs",
 };
@@ -38,6 +39,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
   }
   const kind = part as VideoPart;
+  if (kind === "parts" && !video.parts) return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
 
   const user = await getSessionUser();
   if (video.premium && !(await sessionHasPro())) {
