@@ -777,9 +777,9 @@ export function Overview() {
   {
     slug: "orbital-loader",
     name: "Orbital Loader",
-    description: "A loader with a comet that laps the ring, speeding up and easing off each lap, its tail stretching with the speed and shrinking as it slows. Give it progress and the arc fills behind the comet; at 100% the ring pops, turns green and draws a tick.",
+    description: "A loader with a comet that laps the ring, speeding up and easing off each lap, its tail stretching with the speed and shrinking as it slows. Give it progress and the arc fills behind the comet; at 100% the ring pops, turns green and draws a tick. Also includes Step Loader: For long jobs: the current step sits centred, finished ones roll up with a tick, a ring shows progress, Cancel is always there, and it ends on the result.",
     categorySlug: "loaders",
-    tags: ["loader", "spinner", "progress", "ring", "upload", "status", "motion kit", "framer-motion"],
+    tags: ["loader", "spinner", "progress", "ring", "upload", "status", "motion kit", "framer-motion", "step loader"],
     premium: false,
     trendingScore: 80,
     createdAt: "2026-01-30",
@@ -794,6 +794,20 @@ export function Overview() {
       { name: "onComplete", type: "() => void", description: "Called once when progress reaches 1." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs a pretend upload from 0 to 100%, ticks, and starts again, until someone clicks the loader." },
       { name: "className", type: "string", description: "Classes for the root." },
+      { name: "StepLoader.steps", type: "string[]", defaultValue: "STEP_LOADER_STEPS", description: "The steps of the job, in order. The last one shows briefly as done before the result appears." },
+      { name: "StepLoader.stepMs", type: "number", defaultValue: "1050", description: "How long each step stays current, in ms. Under 800 the finish tick plays on every second step instead of every step." },
+      { name: "StepLoader.title", type: "string", defaultValue: "\"Set up your workspace\"", description: "Heading shown before the job starts." },
+      { name: "StepLoader.idleText", type: "string", defaultValue: "\"This takes about six seconds.\"", description: "Line under the heading before the job starts." },
+      { name: "StepLoader.startLabel", type: "string", defaultValue: "\"Start setup\"", description: "Label of the button that starts the job." },
+      { name: "StepLoader.doneTitle", type: "string", defaultValue: "\"Your workspace is ready\"", description: "Heading of the result once every step has finished." },
+      { name: "StepLoader.doneText", type: "string", defaultValue: "\"248 customers imported, dashboard built, 3 invites sent.\"", description: "Line under the result heading." },
+      { name: "StepLoader.actionLabel", type: "string", defaultValue: "\"Open workspace\"", description: "Label of the button on the result." },
+      { name: "StepLoader.onComplete", type: "() => void", description: "Called once when every step has finished." },
+      { name: "StepLoader.onCancel", type: "() => void", description: "Called when Cancel is pressed." },
+      { name: "StepLoader.onAction", type: "() => void", description: "Called when the button on the result is pressed." },
+      { name: "StepLoader.autoplay", type: "boolean", defaultValue: "false", description: "Starts the job by itself, shows the result, and starts again, until someone touches the card. Pauses off screen and never runs under reduced motion." },
+      { name: "StepLoader.enableSound", type: "boolean", defaultValue: "true", description: "Ticks as steps finish, plays a done sound at the end and a soft off on Cancel. Follows the site-wide sound switch; autoplay makes the same sounds once the visitor has used the page." },
+      { name: "StepLoader.className", type: "string", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewOrbitalLoaderRedesign,
     previewShell: "plain",
@@ -818,6 +832,24 @@ import { OrbitalLoader } from "@/components/orbital-loader";
 
 export function Booting() {
   return <OrbitalLoader size={120} />;
+}`,
+      },
+      {
+        title: "Step Loader",
+        Preview: Previews.PreviewStepLoader,
+        reactSource: `"use client";
+
+import { StepLoader } from "@/components/orbital-loader";
+
+export function WorkspaceSetup() {
+  return (
+    <StepLoader
+      steps={["Creating your workspace", "Importing customers", "Building your dashboard", "Ready"]}
+      stepMs={1200}
+      onComplete={() => console.log("workspace ready")}
+      onAction={() => console.log("open workspace")}
+    />
+  );
 }`,
       },
     ],
@@ -958,9 +990,9 @@ export function Roadmap() {
     slug: "glow-button",
     name: "Glow Button",
     registryCliName: "glow-button",
-    description: "A call-to-action link with a coloured light that lives on its rim. The brightest arc turns to face the pointer and the glow behind the button leans the same way, the button drifts a few pixels toward the cursor and the arrow springs ahead on hover.",
+    description: "A call-to-action link with a coloured light that lives on its rim. The brightest arc turns to face the pointer and the glow behind the button leans the same way, the button drifts a few pixels toward the cursor and the arrow springs ahead on hover. Also includes Magnetic Button: Leans toward your pointer with the label leaning further, ink floods in from where you enter and drains toward where you leave, and it squashes on press.",
     categorySlug: "cta-sections",
-    tags: ["button", "cta", "glow", "gradient", "magnetic", "link", "hero", "motion kit", "framer-motion"],
+    tags: ["button", "cta", "glow", "gradient", "magnetic", "link", "hero", "motion kit", "framer-motion", "magnetic button"],
     premium: false,
     trendingScore: 96,
     createdAt: "2026-05-18",
@@ -979,8 +1011,60 @@ export function Roadmap() {
       { name: "openInNewTab", type: "boolean", defaultValue: "false", description: "Open the link in a new tab." },
       { name: "innerClassName", type: "string", description: "Extra classes for the inner pill (padding, font size)." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Orbits the light round the rim until someone points at the button." },
+      { name: "MagneticButton.children", type: "React.ReactNode", defaultValue: "\"Get started\" with an arrow", description: "Magnetic Button: the label. It leans further toward the pointer than the button itself." },
+      { name: "MagneticButton.variant", type: "\"solid\" | \"outline\"", defaultValue: "\"solid\"", description: "Magnetic Button: a solid ink pill that floods blue, or a white outlined pill that floods ink. Both have a dark mode twin." },
+      { name: "MagneticButton.strength", type: "number", defaultValue: "0.35", description: "Magnetic Button: how far the button leans toward the pointer, as a fraction of the distance from its centre." },
+      { name: "MagneticButton.onClick", type: "() => void", description: "Magnetic Button: called when the button is pressed." },
+      { name: "MagneticButton.aria-label", type: "string", description: "Magnetic Button: accessible name, when the label alone is not enough." },
+      { name: "MagneticButton.autoplay", type: "boolean", defaultValue: "false", description: "Magnetic Button: a ghost pointer leans in, floods ink, presses and drains out on a loop until someone touches the button." },
+      { name: "MagneticButton.enableSound", type: "boolean", defaultValue: "true", description: "Magnetic Button: plays a soft tap on press. Follows the site-wide sound switch." },
+      { name: "MagneticButton.className", type: "string", description: "Magnetic Button: extra classes for the button." },
     ],
     Preview: Previews.PreviewGlowButtonRedesign,
+    previewSections: [
+      {
+        title: "Glow Button",
+        Preview: Previews.PreviewGlowButtonRedesign,
+        reactSource: `"use client";
+
+import { GlowButton } from "@/components/glow-button";
+
+export function HeroCta() {
+  return (
+    <div className="flex items-center gap-4">
+      <GlowButton href="/signup">Start free trial</GlowButton>
+      <GlowButton href="/pricing" colors={["#30d158", "#64d2ff"]} radius={14}>
+        See pricing
+      </GlowButton>
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Magnetic Button",
+        Preview: Previews.PreviewMagneticButton,
+        reactSource: `"use client";
+
+import { useState } from "react";
+import { MagneticButton } from "@/components/glow-button";
+
+export function HeroActions() {
+  const [pressed, setPressed] = useState(0);
+
+  return (
+    <div className="flex flex-wrap items-center justify-center">
+      <MagneticButton onClick={() => setPressed((n) => n + 1)}>Start building</MagneticButton>
+      <MagneticButton variant="outline" strength={0.25}>
+        Talk to sales
+      </MagneticButton>
+      <span className="sr-only" role="status">
+        {pressed ? \`Pressed \${pressed} times\` : ""}
+      </span>
+    </div>
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -2063,9 +2147,9 @@ export function PitchCard() {
     slug: "glowing-effect-cards",
     name: "Glowing Effect Cards",
     registryCliName: "glowing-effect-cards",
-    description: "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width).",
+    description: "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width). Also includes Lit Border: A wrapper for any element: <LitBorder> draws a thin border whose light band turns to face the pointer and brightens as it gets closer. Put several inside <LightGroup> and they share one light, shown here on pricing cards and a search field.",
     categorySlug: "cards",
-    tags: ["glow", "cards", "cursor", "border", "bento", "feature grid", "hover", "container queries", "motion kit", "framer-motion"],
+    tags: ["glow", "cards", "cursor", "border", "bento", "feature grid", "hover", "container queries", "motion kit", "framer-motion", "lit border"],
     premium: false,
     trendingScore: 111,
     createdAt: "2026-05-14",
@@ -2087,6 +2171,14 @@ export function PitchCard() {
       { name: "blur", type: "number", defaultValue: "18", description: "GlowingEffect: blur of the bloom outside the rim, in px." },
       { name: "borderRadius", type: "string", defaultValue: "\"22px\"", description: "GlowingEffect: corner radius." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "GlowingEffect: turns the light off." },
+      { name: "LitBorder.children", type: "React.ReactNode", description: "Lit Border: the element to wrap. A card, an input, a button, anything." },
+      { name: "LitBorder.radius", type: "number", defaultValue: "24", description: "Lit Border: outer corner radius in px. Use 999 for pills." },
+      { name: "LitBorder.width", type: "number", defaultValue: "1.5", description: "Lit Border: border thickness in px." },
+      { name: "LitBorder.colors", type: "[string, string, string]", defaultValue: "[\"0,113,227\", \"94,92,230\", \"48,209,88\"]", description: "Lit Border: three RGB triplets for the lit arc, head, middle and tail." },
+      { name: "LitBorder.className", type: "string", description: "Lit Border: extra classes for the outer frame, for example h-full in a grid." },
+      { name: "LightGroup.children", type: "React.ReactNode", description: "Light Group: the elements that share one light, usually several LitBorders." },
+      { name: "LightGroup.autoplay", type: "boolean", defaultValue: "false", description: "Light Group: the light circles the group on its own until the first real pointer arrives. Never runs under reduced motion." },
+      { name: "LightGroup.className", type: "string", description: "Light Group: extra classes for the wrapper." },
     ],
     Preview: Previews.PreviewGlowingEffectCardsRedesign,
     previewShell: "plain",
@@ -2136,6 +2228,39 @@ export function GlowExamples() {
         </div>
       </GlowingEffect>
     </div>
+  );
+}`,
+      },
+      {
+        title: "Lit Border",
+        Preview: Previews.PreviewLitBorder,
+        reactSource: `"use client";
+
+import { LightGroup, LitBorder } from "@/components/glowing-effect-cards";
+
+const plans = [
+  { name: "Starter", price: "$0" },
+  { name: "Studio", price: "$19" },
+  { name: "Scale", price: "$49" },
+];
+
+export function Pricing() {
+  return (
+    <LightGroup autoplay className="flex w-full max-w-[720px] flex-col gap-3">
+      <div className="grid gap-3 sm:grid-cols-3">
+        {plans.map((plan) => (
+          <LitBorder key={plan.name} className="h-full">
+            <div className="p-5">
+              <h3 className="m-0 text-[15px] font-semibold">{plan.name}</h3>
+              <p className="m-0 mt-2 text-[32px] font-semibold">{plan.price}</p>
+            </div>
+          </LitBorder>
+        ))}
+      </div>
+      <LitBorder radius={999}>
+        <input aria-label="Search plans" placeholder="Search plans" className="h-12 w-full rounded-full bg-transparent px-5 outline-none" />
+      </LitBorder>
+    </LightGroup>
   );
 }`,
       },
@@ -3376,9 +3501,9 @@ export function LaunchCountdown() {
   {
     slug: "hover-highlight-text",
     name: "Hover Highlight Text",
-    description: "A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail.",
+    description: "A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail. Also includes Marker Annotations: Hand-drawn marks play over your copy in reading order as it scrolls in: a highlighter pass across line breaks, a scribbled underline, a loose circle and a strike-through.",
     categorySlug: "motion-effects",
-    tags: ["hover", "text", "highlight", "marker", "cursor", "headline", "spring", "motion kit", "framer-motion"],
+    tags: ["hover", "text", "highlight", "marker", "cursor", "headline", "spring", "motion kit", "framer-motion", "marker annotations"],
     premium: false,
     trendingScore: 90,
     createdAt: "2026-04-18",
@@ -3398,8 +3523,69 @@ export function LaunchCountdown() {
       { name: "containerClassName", type: "string", description: "Classes for the wrapper that listens to the pointer." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Shows plain text with no effect." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps a highlighter across the words, line by line, until a real pointer arrives." },
+      { name: "MarkerAnnotations.segments", type: "MarkerSegment[]", defaultValue: "MARKER_SEGMENTS", description: "Marker Annotations: the paragraph as plain strings with { text, kind, color?, darkColor?, delay? } objects between them. kind is highlight, underline, circle or strike." },
+      { name: "MarkerAnnotations.showReplay", type: "boolean", defaultValue: "true", description: "Marker Annotations: shows the Draw again button under the paragraph." },
+      { name: "MarkerAnnotations.replayLabel", type: "string", defaultValue: "\"Draw again\"", description: "Marker Annotations: label of the replay button." },
+      { name: "MarkerAnnotations.autoplay", type: "boolean", defaultValue: "false", description: "Marker Annotations: replays the marks every few seconds while on screen, until someone presses a button or touches the text. Never runs under reduced motion." },
+      { name: "MarkerAnnotations.className", type: "string", description: "Marker Annotations: extra classes for the paragraph (size, weight, colour)." },
     ],
     Preview: Previews.PreviewHoverHighlightTextRedesign,
+    previewSections: [
+      {
+        title: "Hover Highlight Text",
+        Preview: Previews.PreviewHoverHighlightTextRedesign,
+        reactSource: `"use client";
+
+import { HoverHighlightText } from "@/components/hover-highlight-text";
+
+export function Hero() {
+  return (
+    <section className="flex min-h-[60vh] items-center justify-center px-6">
+      <HoverHighlightText
+        as="h1"
+        text="Build interfaces people remember long after they close the tab."
+        reach={44}
+        linger={1.1}
+        baseClassName="max-w-[15ch] text-6xl"
+      />
+    </section>
+  );
+}
+
+export function BlueMarker() {
+  return (
+    <HoverHighlightText
+      text="Highlight what matters."
+      markerColor="rgba(0,113,227,0.18)"
+      baseClassName="text-4xl"
+    />
+  );
+}`,
+      },
+      {
+        title: "Marker Annotations",
+        Preview: Previews.PreviewMarkerAnnotations,
+        reactSource: `"use client";
+
+import { MarkerAnnotations, type MarkerSegment } from "@/components/hover-highlight-text";
+
+const segments: MarkerSegment[] = [
+  "Ship ",
+  { text: "faster", kind: "highlight", delay: 0.3 },
+  " with fewer ",
+  { text: "meetings", kind: "strike", delay: 0.9 },
+  ", and keep the ",
+  { text: "good parts", kind: "circle", delay: 1.4 },
+  " of ",
+  { text: "slow software", kind: "underline", delay: 2 },
+  ".",
+];
+
+export function Pitch() {
+  return <MarkerAnnotations segments={segments} showReplay={false} />;
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -3895,9 +4081,9 @@ export function IntegrationsCard() {
   {
     slug: "link-preview",
     name: "Link Preview",
-    description: "An inline link that lifts a preview card out of the text on hover or keyboard focus. The card rises with a stretch and settles, leans and slides as the pointer moves along the link, and draws its own cover from the title and site when no image is given.",
+    description: "An inline link that lifts a preview card out of the text on hover or keyboard focus. The card rises with a stretch and settles, leans and slides as the pointer moves along the link, and draws its own cover from the title and site when no image is given. Also includes Cursor Card: A preview card trails your cursor through a project list, leans into your movement and swaps content row to row without disappearing.",
     categorySlug: "motion-effects",
-    tags: ["link", "tooltip", "hover card", "preview", "blog", "inline", "motion kit", "framer-motion"],
+    tags: ["link", "tooltip", "hover card", "preview", "blog", "inline", "motion kit", "framer-motion", "cursor card"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-05-21T00:00:00.000Z",
@@ -3917,8 +4103,54 @@ export function IntegrationsCard() {
       { name: "openInNewTab", type: "boolean", defaultValue: "true", description: "Opens the link in a new tab." },
       { name: "className", type: "string", description: "Extra classes for the link." },
       { name: "previewClassName", type: "string", description: "Extra classes for the floating card." },
+      { name: "CursorCard.items", type: "CursorCardItem[]", defaultValue: "CURSOR_CARD_ITEMS", description: "Cursor Card: the rows of the list, each { title, kind, year, colors: [from, to], href? }. Rows without an href only drive the card." },
+      { name: "CursorCard.ctaLabel", type: "string", defaultValue: "\"View case study\"", description: "Cursor Card: text of the call to action at the foot of the card." },
+      { name: "CursorCard.autoplay", type: "boolean", defaultValue: "false", description: "Cursor Card: the card visits each row in turn until someone points at the list or focuses a row. Never runs under reduced motion." },
+      { name: "CursorCard.className", type: "string", description: "Cursor Card: extra classes for the wrapper." },
     ],
     Preview: Previews.PreviewLinkPreviewRedesign,
+    previewSections: [
+      {
+        title: "Link Preview",
+        Preview: Previews.PreviewLinkPreviewRedesign,
+        reactSource: `"use client";
+
+import { LinkPreview } from "@/components/link-preview";
+
+export function ArticleIntro() {
+  return (
+    <p className="max-w-prose text-lg leading-relaxed">
+      We rebuilt the editor on top of{" "}
+      <LinkPreview href="https://react.dev" title="React" description="The library for web and native user interfaces." image="/og/react.png">
+        React
+      </LinkPreview>{" "}
+      and wrote up{" "}
+      <LinkPreview href="/blog/migration" title="How we migrated" description="Six weeks, zero downtime." openInNewTab={false}>
+        how the migration went
+      </LinkPreview>
+      .
+    </p>
+  );
+}`,
+      },
+      {
+        title: "Cursor Card",
+        Preview: Previews.PreviewCursorCard,
+        reactSource: `"use client";
+
+import { CursorCard, type CursorCardItem } from "@/components/link-preview";
+
+const work: CursorCardItem[] = [
+  { title: "Harbor Lights", kind: "Brand and site", year: "2026", colors: ["#0a84ff", "#5e5ce6"], href: "/work/harbor-lights" },
+  { title: "Fernwick", kind: "Booking app", year: "2025", colors: ["#ff9f0a", "#ff375f"], href: "/work/fernwick" },
+  { title: "Moorgate", kind: "Dashboard", year: "2024", colors: ["#64d2ff", "#30d158"], href: "/work/moorgate" },
+];
+
+export function SelectedWork() {
+  return <CursorCard items={work} ctaLabel="Read the story" />;
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -4433,9 +4665,9 @@ export function CheckoutNotifications() {
     slug: "upload-dropzone",
     name: "Upload Dropzone",
     registryCliName: "upload-dropzone",
-    description: "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone. Also includes Avatar Upload, a profile photo picker where you drag and zoom inside a circle and a ring draws itself around the avatar as it saves. Also includes Upload Queue, a list where each row is its own progress bar with pause, cancel and a whole-card drop target that counts the files.",
+    description: "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone. Also includes Avatar Upload, a profile photo picker where you drag and zoom inside a circle and a ring draws itself around the avatar as it saves. Also includes Upload Queue, a list where each row is its own progress bar with pause, cancel and a whole-card drop target that counts the files. Also includes Empty Table: Ghost columns show the shape of the data. Drop a CSV or take the sample and a scan line reads down the table as cells fill in order, columns label their types and the count rolls up.",
     categorySlug: "inputs-controls",
-    tags: ["upload", "dropzone", "file", "drag and drop", "progress", "form", "motion kit", "framer-motion", "avatar upload", "profile photo", "image crop", "upload queue", "upload progress", "file list"],
+    tags: ["upload", "dropzone", "file", "drag and drop", "progress", "form", "motion kit", "framer-motion", "avatar upload", "profile photo", "image crop", "upload queue", "upload progress", "file list", "empty table"],
     premium: true,
     trendingScore: 158,
     createdAt: "2026-10-19",
@@ -4463,6 +4695,11 @@ export function CheckoutNotifications() {
       { name: "UploadQueue.onCancel", type: "(name: string) => void", defaultValue: "undefined", description: "Called when a row is cancelled." },
       { name: "UploadQueue.autoplay", type: "boolean", defaultValue: "false", description: "Drops in three sample files, pauses one and resumes it, in a loop, until someone touches the card." },
       { name: "UploadQueue.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
+      { name: "EmptyTable.title", type: "string", defaultValue: "\"Customers\"", description: "Heading of the table card." },
+      { name: "EmptyTable.sample", type: "EmptyTableData", defaultValue: "a small customers file", description: "The table Use sample data loads and the columns the ghost header shows: file, cols, kinds, rows and total." },
+      { name: "EmptyTable.onImport", type: "(table: EmptyTableData) => void", defaultValue: "undefined", description: "Called with the parsed table after a CSV is dropped or chosen, or the sample is loaded by hand. The file is read in the browser and never sent anywhere." },
+      { name: "EmptyTable.autoplay", type: "boolean", defaultValue: "false", description: "Drops the sample file in, shows the import, clears it and repeats until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "EmptyTable.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewUploadDropzoneRedesign,
     previewSections: [
@@ -4531,6 +4768,23 @@ export function Assets() {
 }
 `,
       },
+      {
+        title: "Empty Table",
+        Preview: Previews.PreviewEmptyTable,
+        reactSource: `"use client";
+
+import { EmptyTable } from "@/components/upload-dropzone";
+
+export function CustomersImport() {
+  return (
+    <EmptyTable
+      title="Customers"
+      onImport={(table) => console.log("imported", table.total, "rows from", table.file)}
+    />
+  );
+}
+`,
+      },
     ],
     previewShell: "plain",
     reactSource: `"use client";
@@ -4566,9 +4820,9 @@ export function Attachments() {
     slug: "hold-to-record",
     name: "Hold to Record",
     registryCliName: "hold-to-record",
-    description: "Press and hold to record a voice note, release to keep it. A soft halo behind the record dot swells with your voice, the live waveform scrolls in from the right, and sliding left morphs the dot into a bin whose lid opens; let go there to throw the note away. Kept notes become a small player.",
+    description: "Press and hold to record a voice note, release to keep it. A soft halo behind the record dot swells with your voice, the live waveform scrolls in from the right, and sliding left morphs the dot into a bin whose lid opens; let go there to throw the note away. Kept notes become a small player. Also includes Voice Dictation: Bars move with your voice, words arrive faint while they're guesses and firm up when sure, and corrections like “for” to “4” visibly swap in place.",
     categorySlug: "inputs-controls",
-    tags: ["voice note", "record", "audio", "microphone", "hold", "waveform", "chat", "motion kit", "framer-motion"],
+    tags: ["voice note", "record", "audio", "microphone", "hold", "waveform", "chat", "motion kit", "framer-motion", "voice dictation"],
     premium: true,
     trendingScore: 162,
     createdAt: "2026-10-19",
@@ -4586,8 +4840,50 @@ export function Attachments() {
       { name: "accent", type: "string", defaultValue: "\"#ff3b30\"", description: "Colour of the record button, the halo and the live waveform." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Records, plays and deletes a demo note on a loop (no callbacks fire) until someone touches it." },
       { name: "className", type: "string", description: "Extra classes for the wrapper." },
+      { name: "VoiceDictation.script", type: "VoiceDictationWord[]", defaultValue: "a short reminder", description: "The words the demo hears, in order. Each has w, an optional fix (the word it becomes once there is more context) and an optional pause in ms before it arrives." },
+      { name: "VoiceDictation.title", type: "string", defaultValue: "\"New reminder\"", description: "Label at the top left of the card." },
+      { name: "VoiceDictation.onSave", type: "(text: string) => void", defaultValue: "undefined", description: "Called with the finished text when Save is pressed. The card then goes back to its start. No microphone is used." },
+      { name: "VoiceDictation.autoplay", type: "boolean", defaultValue: "false", description: "Starts a dictation, lets it finish and repeats until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "VoiceDictation.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewHoldToRecordRedesign,
+    previewSections: [
+      {
+        title: "Hold to Record",
+        Preview: Previews.PreviewHoldToRecordRedesign,
+        reactSource: `"use client";
+
+import { HoldToRecord } from "@/components/hold-to-record";
+
+export function ChatComposerMic() {
+  return (
+    <HoldToRecord
+      useMicrophone
+      maxDuration={30_000}
+      onRecorded={({ durationMs, levels }) => console.log("note", durationMs, levels.length)}
+      onCancel={() => console.log("discarded")}
+    />
+  );
+}`,
+      },
+      {
+        title: "Voice Dictation",
+        Preview: Previews.PreviewVoiceDictation,
+        reactSource: `"use client";
+
+import { VoiceDictation } from "@/components/hold-to-record";
+
+export function NewReminder() {
+  return (
+    <VoiceDictation
+      title="New reminder"
+      onSave={(text) => console.log("saved:", text)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -5530,9 +5826,9 @@ export function TableBooking() {
     name: "Todo List",
     registryCliName: "todo-list",
     description:
-      "A task list where ticking a task draws a check, strikes the text through and drops it out of the list into a Completed drawer with a counter that pops, plus quick add and undo.",
+      "A task list where ticking a task draws a check, strikes the text through and drops it out of the list into a Completed drawer with a counter that pops, plus quick add and undo. Also includes All Caught Up: Tick tasks and they strike through and fold away while the header ring fills. Finish the last and that ring travels to the middle, closes into a check and tomorrow lines up below.",
     categorySlug: "cards",
-    tags: ["todo", "tasks", "checklist", "checkbox", "list", "productivity", "motion kit", "framer-motion"],
+    tags: ["todo", "tasks", "checklist", "checkbox", "list", "productivity", "motion kit", "framer-motion", "all caught up"],
     premium: true,
     trendingScore: 149,
     createdAt: "2026-10-19",
@@ -5542,8 +5838,46 @@ export function TableBooking() {
       { name: "initial", type: "string[]", description: "Tasks shown at first." },
       { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Check and counter colour." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks tasks off by itself until someone interacts." },
+      { name: "AllCaughtUp.tasks", type: "AllCaughtUpTask[]", defaultValue: "four demo tasks", description: "The tasks to tick off: id, title and a small tag shown on the right of the row." },
+      { name: "AllCaughtUp.tomorrow", type: "string[]", defaultValue: "three demo items", description: "What comes next, shown as chips once everything is done." },
+      { name: "AllCaughtUp.heading", type: "string", defaultValue: "\"Today\"", description: "Heading of the list." },
+      { name: "AllCaughtUp.onTick", type: "(task: AllCaughtUpTask) => void", defaultValue: "undefined", description: "Called with the task each time one is ticked by hand." },
+      { name: "AllCaughtUp.onComplete", type: "() => void", defaultValue: "undefined", description: "Called once the last task is ticked by hand." },
+      { name: "AllCaughtUp.autoplay", type: "boolean", defaultValue: "false", description: "Ticks the tasks off one by one and starts over until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "AllCaughtUp.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewTodoList,
+    previewSections: [
+      {
+        title: "Todo List",
+        Preview: Previews.PreviewTodoList,
+        reactSource: `"use client";
+
+import { TodoList } from "@/components/todo-list";
+
+export function LaunchChecklist() {
+  return <TodoList initial={["Write release notes", "Record the demo", "Update pricing page", "Email beta users"]} accent="#34c759" />;
+}`,
+      },
+      {
+        title: "All Caught Up",
+        Preview: Previews.PreviewAllCaughtUp,
+        reactSource: `"use client";
+
+import { AllCaughtUp } from "@/components/todo-list";
+
+export function TodayView() {
+  return (
+    <AllCaughtUp
+      heading="Today"
+      tomorrow={["Q4 planning", "1:1 with Leo", "Invoice run"]}
+      onComplete={() => console.log("inbox zero")}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -5951,9 +6285,9 @@ export function SpeakerBadge() {
     name: "Glass Lens",
     registryCliName: "glass-lens",
     description:
-      "A glass puck you drag over content. It magnifies the centre and splits colour toward the rim, built from three offset copies of the content instead of a shader.",
+      "A glass puck you drag over content. It magnifies the centre and splits colour toward the rim, built from three offset copies of the content instead of a shader. Also includes Zoom Lens: A magnifier that springs after your pointer and shows full detail, so tiny map labels become readable. Scroll or use the slider to zoom.",
     categorySlug: "motion-effects",
-    tags: ["magnifier", "lens", "glass", "chromatic aberration", "zoom", "drag", "motion kit", "framer-motion"],
+    tags: ["magnifier", "lens", "glass", "chromatic aberration", "zoom", "drag", "motion kit", "framer-motion", "zoom lens"],
     premium: true,
     trendingScore: 151,
     createdAt: "2026-10-19",
@@ -5966,8 +6300,61 @@ export function SpeakerBadge() {
       { name: "height", type: "number", defaultValue: "300", description: "Height of the content surface in px." },
       { name: "children", type: "ReactNode", defaultValue: "Field notes text", description: "Content under the glass. It is rendered four times (page plus three lens layers), so keep it static." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drifts across the content by itself until the user drags it." },
+      { name: "ZoomLens.image", type: "string", description: "Zoom Lens: picture to magnify, as a URL or data URI. Defaults to a drawn map of an invented harbour district with tiny street names." },
+      { name: "ZoomLens.darkImage", type: "string", description: "Zoom Lens: picture to use in dark mode. Defaults to a dark version of the demo map, or to image when you pass your own." },
+      { name: "ZoomLens.aspectRatio", type: "number", defaultValue: "1800 / 1100", description: "Zoom Lens: width divided by height of the picture." },
+      { name: "ZoomLens.label", type: "string", defaultValue: "\"Map of the harbour district. Use the lens to read street names.\"", description: "Zoom Lens: accessible description of the picture." },
+      { name: "ZoomLens.defaultZoom", type: "number", defaultValue: "2.6", description: "Zoom Lens: starting magnification." },
+      { name: "ZoomLens.minZoom", type: "number", defaultValue: "1.5", description: "Zoom Lens: smallest magnification." },
+      { name: "ZoomLens.maxZoom", type: "number", defaultValue: "4", description: "Zoom Lens: largest magnification." },
+      { name: "ZoomLens.lensSize", type: "number", defaultValue: "164", description: "Zoom Lens: lens diameter in px." },
+      { name: "ZoomLens.showControl", type: "boolean", defaultValue: "true", description: "Zoom Lens: shows the zoom slider under the picture. The wheel and the plus and minus keys still work without it." },
+      { name: "ZoomLens.autoplay", type: "boolean", defaultValue: "false", description: "Zoom Lens: the lens wanders over the picture until someone points at it or presses a key. Never runs under reduced motion." },
+      { name: "ZoomLens.className", type: "string", description: "Zoom Lens: extra classes for the wrapper." },
     ],
     Preview: Previews.PreviewGlassLens,
+    previewSections: [
+      {
+        title: "Glass Lens",
+        Preview: Previews.PreviewGlassLens,
+        reactSource: `"use client";
+
+import { GlassLens } from "@/components/glass-lens";
+
+export function FinePrint() {
+  return (
+    <GlassLens size={140} zoom={1.6} width={480} height={280}>
+      <div className="flex h-full flex-col justify-center gap-2 px-8">
+        <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.14em] text-[#86868b]">Terms</p>
+        <p className="m-0 text-[14px] leading-[1.5] text-[#1d1d1f] dark:text-[#f5f5f7]">
+          Cancel any time before the trial ends and you will not be charged. Plans renew monthly.
+        </p>
+      </div>
+    </GlassLens>
+  );
+}`,
+      },
+      {
+        title: "Zoom Lens",
+        Preview: Previews.PreviewZoomLens,
+        reactSource: `"use client";
+
+import { ZoomLens } from "@/components/glass-lens";
+
+export function FloorPlan() {
+  return (
+    <ZoomLens
+      image="/plans/level-2.png"
+      darkImage="/plans/level-2-dark.png"
+      aspectRatio={16 / 10}
+      label="Floor plan of level two. Use the lens to read the room numbers."
+      defaultZoom={2.4}
+      maxZoom={5}
+    />
+  );
+}`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -7694,9 +8081,9 @@ export function BrandIntro() {
     name: "Generate Image",
     registryCliName: "generate-image",
     description:
-      "An image-generation card: press Generate and the picture arrives coarse to fine with the noise easing off, under a sheet of glass with light sweeping across it and a denoising counter.",
+      "An image-generation card: press Generate and the picture arrives coarse to fine with the noise easing off, under a sheet of glass with light sweeping across it and a denoising counter. Also includes Image Generating: The image actually forms: static, then a blurry blocky guess, then sharper steps as the noise fades, with the step count under the prompt and actions once it lands.",
     categorySlug: "ai-components",
-    tags: ["ai", "image generation", "prompt", "progressive", "loading", "canvas", "glass", "motion kit", "framer-motion"],
+    tags: ["ai", "image generation", "prompt", "progressive", "loading", "canvas", "glass", "motion kit", "framer-motion", "image generating"],
     premium: true,
     trendingScore: 156,
     createdAt: "2026-10-20",
@@ -7706,8 +8093,50 @@ export function BrandIntro() {
       { name: "prompt", type: "string", defaultValue: '"Pink dusk over soft hills"', description: "Prompt the field starts with." },
       { name: "onGenerate", type: "(prompt: string) => void", description: "Called with the prompt each time Generate is pressed." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Generates a new scene every few seconds, cycling the sample prompts, until someone interacts." },
+      { name: "ImageGenerating.prompts", type: "string[]", defaultValue: "two demo prompts", description: "Prompts shown in turn, one per run." },
+      { name: "ImageGenerating.steps", type: "number", defaultValue: "30", description: "How many denoising steps a run takes, about one every 105ms." },
+      { name: "ImageGenerating.onAction", type: "(action: \"Variations\" | \"Upscale\" | \"Download\", prompt: string) => void", defaultValue: "undefined", description: "Called when one of the actions under the picture is pressed. Variations also starts the next run." },
+      { name: "ImageGenerating.autoplay", type: "boolean", defaultValue: "false", description: "Starts a new run every few seconds until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "ImageGenerating.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewGenerateImage,
+    previewSections: [
+      {
+        title: "Generate Image",
+        Preview: Previews.PreviewGenerateImage,
+        reactSource: `"use client";
+
+import { GenerateImage } from "@/components/generate-image";
+
+export function PromptPlayground() {
+  return (
+    <div className="flex justify-center py-12">
+      <GenerateImage
+        prompt="Moonlit ridge, deep teal"
+        onGenerate={(prompt) => console.log("generate:", prompt)}
+      />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Image Generating",
+        Preview: Previews.PreviewImageGenerating,
+        reactSource: `"use client";
+
+import { ImageGenerating } from "@/components/generate-image";
+
+export function ConceptStudio() {
+  return (
+    <ImageGenerating
+      prompts={["A quiet harbour at dusk, soft film grain", "Desert dunes under a pale morning moon"]}
+      onAction={(action, prompt) => console.log(action, "for", prompt)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -9188,6 +9617,499 @@ export function ProPlan() {
         onCtaClick={() => console.log("open the checkout flow")}
       />
     </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "empty-projects",
+    name: "Empty Projects",
+    registryCliName: "empty-projects",
+    description:
+      "An empty projects screen with three starter templates in a loose stack that fans out when you point at it. Picking a template flies that exact card into the grid as your first project.",
+    categorySlug: "cards",
+    tags: ["empty state", "projects", "templates", "onboarding", "shared layout", "fan", "dashboard", "cards", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-22",
+    animationKinds: ["hover", "layout", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "templates", type: "EmptyProjectsTemplate[]", defaultValue: "EMPTY_PROJECTS_TEMPLATES", description: "The starter templates in the stack, each { id, name, tint: [background, accent] }. The ids landing, dashboard and docs draw their own little page; three works best." },
+      { name: "title", type: "string", defaultValue: '"Projects"', description: "Heading above the grid." },
+      { name: "emptyTitle", type: "string", defaultValue: '"No projects yet"', description: "Headline of the empty state." },
+      { name: "emptyDescription", type: "string", defaultValue: '"Pick a starting point. You can change everything later."', description: "Line under the headline." },
+      { name: "onCreate", type: "(template: EmptyProjectsTemplate) => void", defaultValue: "undefined", description: "Called when a template, or the blank project, is picked. The autoplay demo never calls it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fans the stack, picks a template and starts over on a loop until someone touches it. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewEmptyProjects,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { EmptyProjects } from "@/components/empty-projects";
+
+export function ProjectsPage() {
+  return (
+    <main className="mx-auto flex w-full max-w-[560px] flex-col gap-6 px-4 py-16">
+      <EmptyProjects
+        title="Workspaces"
+        emptyTitle="No workspaces yet"
+        onCreate={(template) => console.log("create", template.id)}
+        autoplay
+      />
+    </main>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "no-results",
+    name: "No Results",
+    registryCliName: "no-results",
+    description:
+      "A no-results state that says why nothing matched and fixes it in one tap. The missing letter slides into the search box, the filter chips peel away one by one and the matching rows drop back in.",
+    categorySlug: "cards",
+    tags: ["empty state", "search", "no results", "filters", "typo", "keyed letters", "layout", "list", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 155,
+    createdAt: "2026-10-22",
+    animationKinds: ["layout", "type", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "rows", type: "NoResultsRow[]", defaultValue: "NO_RESULTS_ROWS", description: "The rows the list shows once nothing hides them, each { id, who, amount, status, age }. Defaults to four demo invoices." },
+      { name: "filters", type: "NoResultsFilter[]", defaultValue: "NO_RESULTS_FILTERS", description: "The filter chips applied at the start, each { label, test(row) }. A row stays only if every filter keeps it." },
+      { name: "query", type: "string", defaultValue: '"invoce march"', description: "The text in the search box at the start." },
+      { name: "typo", type: "{ wrong: string[]; right: string }", defaultValue: "NO_RESULTS_TYPO", description: "The misspellings the empty state looks for and the word the fix button puts in their place." },
+      { name: "noun", type: "string", defaultValue: '"invoices"', description: "What the rows are called, used in the headline and the input label." },
+      { name: "maxRows", type: "number", defaultValue: "6", description: "Most rows the list shows once nothing is hiding them." },
+      { name: "onFixTypo", type: "(query: string) => void", defaultValue: "undefined", description: "Called with the corrected query when the fix button is pressed. The autoplay demo never calls it." },
+      { name: "onClearFilters", type: "() => void", defaultValue: "undefined", description: "Called when Clear filters is pressed. The autoplay demo never calls it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fixes the typo, clears the filters and starts over on a loop until someone touches it. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewNoResults,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { NoResults } from "@/components/no-results";
+
+export function InvoiceSearch() {
+  return (
+    <section className="mx-auto w-full max-w-[560px] px-4 py-16">
+      <NoResults
+        noun="invoices"
+        query="invoce march"
+        onFixTypo={(query) => console.log("search again for", query)}
+        autoplay
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "empty-chart",
+    name: "Empty Chart",
+    registryCliName: "empty-chart",
+    description:
+      "A chart with no data yet, drawn as a dashed placeholder line that breathes on the grid. Connect a source and the same line bends into the real numbers while the area fills in and the total counts up.",
+    categorySlug: "dashboards",
+    tags: ["empty state", "chart", "line chart", "path morph", "connect", "integration", "dashboard", "analytics", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 160,
+    createdAt: "2026-10-22",
+    animationKinds: ["hover", "spring", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "data", type: "number[]", defaultValue: "EMPTY_CHART_DATA", description: "One value per point, oldest first, at least two. The total counts these up. Defaults to twelve months of revenue in thousands." },
+      { name: "labels", type: "string[]", defaultValue: "EMPTY_CHART_MONTHS", description: "A label per point, used for the axis (every second one) and the hover readout." },
+      { name: "sources", type: "string[]", defaultValue: '["Payments", "Spreadsheet", "Database"]', description: "The sources offered while the chart is empty." },
+      { name: "title", type: "string", defaultValue: '"Revenue, last 12 months"', description: "Caption above the total." },
+      { name: "prefix", type: "string", defaultValue: '"$"', description: "Put before the total and the hover values." },
+      { name: "suffix", type: "string", defaultValue: '"k"', description: "Put after the total and the hover values." },
+      { name: "onConnect", type: "(source: string) => void", defaultValue: "undefined", description: "Called with the source name when one is connected. The autoplay demo never calls it." },
+      { name: "onDisconnect", type: "() => void", defaultValue: "undefined", description: "Called when Disconnect is pressed." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Connects a source, reads a month and disconnects on a loop until someone touches it. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewEmptyChart,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { EmptyChart } from "@/components/empty-chart";
+
+export function RevenueCard() {
+  return (
+    <section className="mx-auto w-full max-w-[560px] px-4 py-16">
+      <EmptyChart
+        title="Revenue, last 12 months"
+        sources={["Payments", "Spreadsheet"]}
+        onConnect={(source) => console.log("connect", source)}
+        autoplay
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "empty-team",
+    name: "Empty Team",
+    registryCliName: "empty-team",
+    description:
+      "An empty team page with dotted seats beside yours and an invite field below. Type an email or tap a suggested teammate and the avatar lifts out of the field and lands in the next free seat, marked pending.",
+    categorySlug: "cards",
+    tags: ["empty state", "team", "invite", "avatars", "seats", "onboarding", "measured flight", "form", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-22",
+    animationKinds: ["spring", "layout", "type"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "seats", type: "number", defaultValue: "6", description: "Total seats, including yours." },
+      { name: "suggestions", type: "string[]", defaultValue: "3 people on domain", description: "Teammates offered as one-tap chips under the field. Defaults to three people on domain." },
+      { name: "domain", type: "string", defaultValue: '"orbitly.com"', description: "The domain shown in the From line above the chips, also used for the default suggestions." },
+      { name: "placeholder", type: "string", defaultValue: '"name@company.com"', description: "Placeholder of the email field." },
+      { name: "onAdd", type: "(email: string) => void", defaultValue: "undefined", description: "Called with the email when an avatar lands in a seat. The autoplay demo never calls it." },
+      { name: "onSend", type: "(emails: string[]) => void", defaultValue: "undefined", description: "Called with every pending email when Send invites is pressed. The autoplay demo never calls it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types an email, adds three people, sends the invites and starts over on a loop until someone touches it. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewEmptyTeam,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { EmptyTeam } from "@/components/empty-team";
+
+export function InviteStep() {
+  return (
+    <section className="mx-auto w-full max-w-[520px] px-4 py-16">
+      <EmptyTeam
+        seats={5}
+        domain="fernhill.io"
+        suggestions={["jo.reyes@fernhill.io", "sam@fernhill.io"]}
+        onSend={(emails) => console.log("invite", emails)}
+        autoplay
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "streaming-answer",
+    name: "Streaming Answer",
+    registryCliName: "streaming-answer",
+    description:
+      "An AI answer card that shows its thinking steps ticking off, folds them into a one-line summary, slides in sources and streams the answer word by word. Citation chips pop in where they belong and light up the source they came from when you point at them.",
+    categorySlug: "ai-components",
+    tags: ["ai", "chat", "streaming", "answer", "citations", "sources", "thinking", "reasoning", "loading state", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 162,
+    createdAt: "2026-10-22",
+    animationKinds: ["type", "spring", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "question", type: "string", defaultValue: "STREAMING_ANSWER_QUESTION", description: "The user's message, shown in the bubble above the answer." },
+      { name: "steps", type: "string[]", defaultValue: "STREAMING_ANSWER_STEPS", description: "Thinking steps, ticked off one by one before the answer streams." },
+      { name: "sources", type: "StreamingAnswerSource[]", defaultValue: "STREAMING_ANSWER_SOURCES", description: "Source cards that slide in once thinking is done: { n, title, where, c, ink?, href? }. Up to three fit the grid." },
+      { name: "answer", type: "string", defaultValue: "STREAMING_ANSWER_TEXT", description: "The answer text. Write {1}, {2} straight after a word to drop a citation chip for that source number." },
+      { name: "thoughtSeconds", type: "number", defaultValue: "4", description: "The number in the folded summary line, \"Thought for 4s\"." },
+      { name: "width", type: "number", defaultValue: "520", description: "Width of the card in px. It never grows past its container." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays the whole run again every 13 seconds until someone touches the card. Only runs while the card is on screen and never under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewStreamingAnswer,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { StreamingAnswer } from "@/components/streaming-answer";
+
+export function AskPanel() {
+  return (
+    <section className="mx-auto w-full max-w-[560px] py-12">
+      <StreamingAnswer
+        question="Which plan do most teams pick?"
+        steps={["Searching 2 sources", "Reading Plan usage, Q3"]}
+        sources={[
+          { n: 1, title: "Plan usage, Q3", where: "Analytics", c: "#0a84ff" },
+          { n: 2, title: "Sales calls, Oct", where: "Docs", c: "#30d158", ink: "#1d1d1f" },
+        ]}
+        answer="Teams of five to fifteen choose the middle plan {1}, mostly for shared dashboards {2}."
+        autoplay
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "diff-review",
+    name: "Diff Review",
+    registryCliName: "diff-review",
+    description:
+      "An inline review of AI edits to a paragraph, with removals struck through in red and additions typed in green. Accept all folds the old words away, Reject folds the new ones away, and clicking a single change takes just that one.",
+    categorySlug: "ai-components",
+    tags: ["ai", "diff", "review", "accept", "reject", "suggestions", "rewrite", "editor", "inline edits", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-22",
+    animationKinds: ["layout", "press", "type"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "parts", type: "DiffPart[]", defaultValue: "DIFF_REVIEW_PARTS", description: "The paragraph as [kind, text] runs, where kind is \"same\", \"del\" or \"ins\". A del followed by an ins is one replacement; a lone del is a removal." },
+      { name: "title", type: "string", defaultValue: '"Homepage · Hero copy"', description: "Small label above the text box." },
+      { name: "width", type: "number", defaultValue: "520", description: "Width of the card in px. It never grows past its container." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Improves the writing, accepts every edit and returns to the draft on a loop until someone touches the card. Only runs while the card is on screen and never under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewDiffReview,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { DiffReview, type DiffPart } from "@/components/diff-review";
+
+const PARTS: DiffPart[] = [
+  ["same", "We "],
+  ["del", "are happy to announce"],
+  ["ins", "just shipped"],
+  ["same", " a new export tool. "],
+  ["del", "It is really quick."],
+  ["ins", "Exports finish in seconds."],
+];
+
+export function ReleaseNote() {
+  return (
+    <section className="mx-auto w-full max-w-[560px] py-12">
+      <DiffReview title="Changelog · Export" parts={PARTS} autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "agent-run",
+    name: "Agent Run",
+    registryCliName: "agent-run",
+    description:
+      "A live view of an AI agent working through a task, where each step shows what it is doing and folds into a ticked line when it moves on. A clock runs in the corner, Stop is always there, and the run ends on a short report with the change to review.",
+    categorySlug: "ai-components",
+    tags: ["ai", "agent", "steps", "progress", "tool use", "terminal output", "run log", "stop button", "timeline", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 158,
+    createdAt: "2026-10-22",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "task", type: "string", defaultValue: '"Fix the failing checkout test"', description: "The task the agent was given, shown at the top." },
+      { name: "steps", type: "AgentRunStep[]", defaultValue: "AGENT_RUN_STEPS", description: "The steps of the run: { label, ms, body(t) }. body gets the ms elapsed inside the step so it can reveal lines or files as it goes." },
+      { name: "report", type: "AgentRunReport", defaultValue: "AGENT_RUN_REPORT", description: "The report card shown at the end: { title, body, files, added, removed }." },
+      { name: "onReview", type: "() => void", defaultValue: "undefined", description: "Called when Review change is pressed." },
+      { name: "width", type: "number", defaultValue: "520", description: "Width of the card in px. It never grows past its container." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs the whole task again 4.5 seconds after it finishes until someone touches the card. Only runs while the card is on screen and never under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewAgentRun,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { AgentRun, type AgentRunStep } from "@/components/agent-run";
+
+const STEPS: AgentRunStep[] = [
+  { label: "Reading the config", ms: 1200, body: (t) => <p className="m-0 text-xs">{t > 600 ? "app.config.ts, env.ts" : "app.config.ts"}</p> },
+  { label: "Updating the timeout", ms: 1400, body: () => <p className="m-0 font-mono text-xs">+ timeoutMs: 8000</p> },
+];
+
+export function RunPanel() {
+  return (
+    <section className="mx-auto w-full max-w-[560px] py-12">
+      <AgentRun
+        task="Raise the request timeout"
+        steps={STEPS}
+        report={{ title: "Done: timeout raised", body: "Requests now wait up to 8 seconds.", files: 1, added: 1, removed: 0 }}
+        onReview={() => console.log("review")}
+        autoplay
+      />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ghost-autocomplete",
+    name: "Ghost Autocomplete",
+    registryCliName: "ghost-autocomplete",
+    description:
+      "Inline AI autocomplete for a text box, where a grey suggestion fades in after your cursor when you pause. Tab inks it in from left to right, typing the same words makes it follow you, and typing something else drops the ghost letters away.",
+    categorySlug: "ai-components",
+    tags: ["ai", "autocomplete", "suggestion", "ghost text", "textarea", "inline", "email", "writing assistant", "tab to accept", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 160,
+    createdAt: "2026-10-22",
+    animationKinds: ["type", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "rules", type: "GhostRule[]", defaultValue: "GHOST_AUTOCOMPLETE_RULES", description: "Pairs of [pattern, suggestion]. When the text ends with the pattern (use a $-anchored regex), the suggestion is offered after a short pause." },
+      { name: "defaultValue", type: "string", defaultValue: "GHOST_AUTOCOMPLETE_START", description: "What the box starts with." },
+      { name: "to", type: "string", defaultValue: '"leo@fieldnotes.example"', description: "The recipient line above the box." },
+      { name: "onAccept", type: "(suggestion: string) => void", defaultValue: "undefined", description: "Called with the suggestion text when Tab accepts it." },
+      { name: "width", type: "number", defaultValue: "480", description: "Width of the card in px. It never grows past its container." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a short script by itself, accepting one suggestion, following another and dropping a third, until someone touches the box. The script is written for the default rules and text. Only runs while on screen and never under reduced motion." },
+      { name: "className", type: "string", defaultValue: '""', description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewGhostAutocomplete,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { GhostAutocomplete, type GhostRule } from "@/components/ghost-autocomplete";
+
+const RULES: GhostRule[] = [
+  [/Hope you're $/i, "doing well."],
+  [/Looking forward to $/i, "hearing from you."],
+];
+
+export function ComposeMail() {
+  return (
+    <section className="mx-auto w-full max-w-[520px] py-12">
+      <GhostAutocomplete to="nina@fieldnotes.example" defaultValue={"Hi Nina,\\n\\nHope you're "} rules={RULES} onAccept={(text) => console.log(text)} />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "skeleton-morph",
+    name: "Skeleton Morph",
+    registryCliName: "skeleton-morph",
+    description:
+      "A card whose loading skeletons are cut to the exact shape of the content that replaces them, with one light sweeping across every block. When the data arrives each block dissolves into its real content in reading order, and nothing shifts.",
+    categorySlug: "loaders",
+    tags: ["skeleton", "loading", "placeholder", "shimmer", "crossfade", "card", "content loading", "perceived performance", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 152,
+    createdAt: "2026-10-22",
+    animationKinds: ["layout", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "ready", type: "boolean", description: "Controlled: true shows the content, false the skeletons. Leave it out to use the built-in toggle button and defaultReady." },
+      { name: "defaultReady", type: "boolean", defaultValue: "false", description: "Starting state when ready is not controlled." },
+      { name: "onReadyChange", type: "(ready: boolean) => void", description: "Called when the toggle button, or autoplay, changes the state." },
+      { name: "author", type: "string", defaultValue: "\"Maya Chen\"", description: "Author name shown beside the avatar." },
+      { name: "initials", type: "string", defaultValue: "\"MC\"", description: "Initials in the avatar." },
+      { name: "avatarColor", type: "string", defaultValue: "\"#ff9f0a\"", description: "Avatar colour." },
+      { name: "meta", type: "string", defaultValue: "\"4 min read\"", description: "Reading time line under the author." },
+      { name: "title", type: "string", defaultValue: "\"Designing for the empty state\"", description: "Headline of the card." },
+      { name: "lines", type: "string[]", defaultValue: "SKELETON_MORPH_LINES", description: "Lines of body copy, one skeleton each." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips between skeleton and content on a loop until someone touches the card. Pauses off screen, never runs under reduced motion, and works when ready is not controlled." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewSkeletonMorph,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useEffect, useState } from "react";
+import { SkeletonMorph } from "@/components/skeleton-morph";
+
+export function ArticleCard({ articleId }: { articleId: string }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(false);
+    const id = window.setTimeout(() => setReady(true), 1200); // swap for your own fetch
+    return () => window.clearTimeout(id);
+  }, [articleId]);
+
+  return (
+    <SkeletonMorph
+      ready={ready}
+      author="Leo Park"
+      initials="LP"
+      avatarColor="#0a84ff"
+      title="Notes on calm interfaces"
+      meta="6 min read"
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "morphing-dialog",
+    name: "Morphing Dialog",
+    registryCliName: "morphing-dialog",
+    description:
+      "Dialogs that grow out of the button that opened them and shrink back into it on close, so you always see where they came from. Share opens a link panel, and Delete asks for the project name to be typed before the red button wakes up.",
+    categorySlug: "cards",
+    tags: ["dialog", "modal", "morph", "shared element", "confirm", "delete", "share", "layout animation", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 160,
+    createdAt: "2026-10-22",
+    animationKinds: ["layout", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "projectName", type: "string", defaultValue: "\"orbitly-site\"", description: "Name of the demo project. The delete dialog asks for it to be typed before the red button wakes up." },
+      { name: "pageCount", type: "number", defaultValue: "14", description: "Number of pages the delete dialog says will be removed." },
+      { name: "shareBase", type: "string", defaultValue: "\"nexus.app/p\"", description: "Host and path the share link is built from, followed by the project name." },
+      { name: "onDelete", type: "() => void", description: "Called when the delete is confirmed." },
+      { name: "onRestore", type: "() => void", description: "Called when a deleted project is restored." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens Share and closes it, then opens Delete, types the name, confirms and restores, on a loop until someone touches the component. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the frame." },
+    ],
+    Preview: Previews.PreviewMorphingDialog,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MorphingDialog } from "@/components/morphing-dialog";
+
+export function ProjectHeader() {
+  return (
+    <MorphingDialog
+      projectName="launch-notes"
+      pageCount={9}
+      onDelete={() => console.log("project deleted")}
+      onRestore={() => console.log("project restored")}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "travelling-tooltip",
+    name: "Travelling Tooltip",
+    registryCliName: "travelling-tooltip",
+    description:
+      "One tooltip for a whole toolbar. The first hover waits a beat, then it glides from button to button with no delay, resizing to each label and showing the shortcut.",
+    categorySlug: "motion-effects",
+    tags: ["tooltip", "toolbar", "hover", "shortcut", "keyboard", "glide", "shared tooltip", "editor", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-22",
+    animationKinds: ["hover", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tools", type: "TravellingTooltipTool[]", defaultValue: "TRAVELLING_TOOLTIP_TOOLS", description: "The toolbar buttons: id, label, keys (the shortcut shown as a keycap) and d (SVG path data for a 24 x 24 stroke icon). Defaults to a six-button text formatting bar." },
+      { name: "label", type: "string", defaultValue: "\"Formatting\"", description: "Accessible name of the toolbar." },
+      { name: "openDelay", type: "number", defaultValue: "450", description: "How long the first hover waits before the tooltip appears, in ms. After that it travels with no delay." },
+      { name: "warmMs", type: "number", defaultValue: "600", description: "How long the tooltip stays warm after the pointer leaves the bar, in ms. Re-enter within this time and it appears at once." },
+      { name: "hint", type: "string", defaultValue: "\"Hover one button, then slide along the bar\"", description: "Caption under the toolbar. Pass an empty string to hide it." },
+      { name: "onSelect", type: "(tool: TravellingTooltipTool) => void", description: "Called when a button is pressed." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Walks the tooltip along the bar by itself until someone points at or focuses the bar. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewTravellingTooltip,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TravellingTooltip, TRAVELLING_TOOLTIP_TOOLS } from "@/components/travelling-tooltip";
+
+export function EditorToolbar() {
+  return (
+    <TravellingTooltip
+      tools={TRAVELLING_TOOLTIP_TOOLS.slice(0, 4)}
+      label="Text formatting"
+      openDelay={300}
+      onSelect={(tool) => console.log("pressed", tool.id)}
+    />
   );
 }`,
     tailwindSource: tw,

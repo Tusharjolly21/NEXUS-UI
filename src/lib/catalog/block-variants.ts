@@ -115,6 +115,7 @@ const baseVariants: BlockVariant[] = [
   v("contact-gradient-proof", "block-contact-page", "Gradient Proof Contact"),
   v("contact-image-story", "block-contact-page", "Image Story Contact"),
   mk("voice-note-contact", "block-contact-page", "Voice Note Contact", "VoiceNoteContact"),
+  mk("team-clock", "block-contact-page", "Team Clock", "TeamClock"),
 
   v("text-typewriter-heading", "block-text-animations", "Typewriter Heading"),
   v("text-typewriter-effect", "block-text-animations", "Text Animation Typewriter Effect"),
@@ -128,8 +129,12 @@ const baseVariants: BlockVariant[] = [
   v("blog-editorial", "block-blog-content-sections", "Blog Content Editorial"),
   v("blog-featured-posts", "block-blog-content-sections", "Blog Header Featured Posts"),
   v("blog-hover-card", "block-blog-content-sections", "Blog Hover Image Card"),
+  mk("blog-with-contents", "block-blog-content-sections", "Blog With Contents", "BlogWithContents"),
 
   mk("morphing-nav", "block-navigation", "Morphing Nav", "MorphingNav"),
+  mk("announce-bar", "block-navigation", "Announcement Bar", "AnnounceBar"),
+  mk("morph-menu", "block-navigation", "Morphing Mega Menu", "MorphMenu"),
+  mk("scroll-navbar", "block-navigation", "Scroll-aware Navbar", "ScrollNavbar"),
 
   mk("spotlight-hero", "block-hero", "Spotlight Hero", "SpotlightHero"),
   mk("parallax-stack-hero", "block-hero", "Parallax Stack Hero", "ParallaxStackHero"),
@@ -142,15 +147,21 @@ const baseVariants: BlockVariant[] = [
   mk("auto-advancing-tabs", "block-features", "Auto-advancing Tabs", "AutoAdvancingTabs"),
   mk("drawn-timeline", "block-features", "Drawn Timeline", "DrawnTimeline"),
   mk("integrations-orbit", "block-features", "Integrations Orbit", "IntegrationsOrbit"),
+  mk("stacking-cards", "block-features", "Stacking Cards", "StackingCards"),
+  mk("beam-timeline", "block-features", "Beam Timeline", "BeamTimeline"),
+  mk("sticky-scroll-story", "block-features", "Sticky Scroll Story", "StickyScrollStory"),
 
   mk("counting-stats", "block-social-proof", "Counting Stats", "CountingStats"),
   mk("wall-of-love", "block-social-proof", "Wall of Love", "WallOfLove"),
   mk("clothesline", "block-social-proof", "Clothesline", "Clothesline"),
   mk("velocity-marquee", "block-social-proof", "Velocity Marquee", "VelocityMarquee"),
+  mk("stats-odometer", "block-social-proof", "Stats Odometer", "StatsOdometer"),
 
   mk("typo-catching-signup", "block-newsletter", "Typo-catching Signup", "TypoCatchingSignup"),
 
   mk("drift-gallery", "block-gallery", "Drift Gallery", "DriftGallery"),
+  mk("card-rail", "block-gallery", "Card Rail", "CardRail"),
+  mk("parallax-slider", "block-gallery", "Parallax Slider", "ParallaxSlider"),
   mk("changelog-pile", "block-changelog", "Changelog Pile", "ChangelogPile"),
   mk("gravity-404", "block-404", "Gravity 404", "Gravity404"),
 ];
@@ -170,6 +181,15 @@ export const blockVariants: BlockVariant[] = (() => {
   }
   // Blocks made only of moved sections.
   out.push(...rest.filter((r) => !seen.has(r.block)));
+  // Motion Kit sections on blocks that are otherwise made of moved sections go after them.
+  for (const extra of [
+    mk("waitlist-cta", "block-cta", "Waitlist CTA", "WaitlistCta"),
+    mk("auth-morph", "block-signup", "Sign In / Sign Up", "AuthMorph"),
+  ]) {
+    let at = -1;
+    out.forEach((x, i) => { if (x.block === extra.block) at = i; });
+    out.splice(at + 1, 0, extra);
+  }
   return out;
 })();
 

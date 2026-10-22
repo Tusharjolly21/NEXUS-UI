@@ -188,6 +188,17 @@ import { TracingSpotlightPanel } from "@/components/tracing-spotlight-panel";
 import { VectorTiltScene } from "@/components/vector-tilt-scene";
 import { WarpSpeedCard, WarpTextTrigger } from "@/components/warp-speed-card";
 import { WheelSelector } from "@/components/wheel-selector";
+import { EmptyProjects } from "@/components/empty-projects";
+import { NoResults } from "@/components/no-results";
+import { EmptyChart } from "@/components/empty-chart";
+import { EmptyTeam } from "@/components/empty-team";
+import { StreamingAnswer } from "@/components/streaming-answer";
+import { DiffReview } from "@/components/diff-review";
+import { AgentRun } from "@/components/agent-run";
+import { GhostAutocomplete } from "@/components/ghost-autocomplete";
+import { SkeletonMorph } from "@/components/skeleton-morph";
+import { MorphingDialog } from "@/components/morphing-dialog";
+import { TravellingTooltip } from "@/components/travelling-tooltip";
 
 // matter-js stays out of the shared playground bundle: these load lazily.
 const TagPit = React.lazy(() => import("@/components/tag-pit").then((m) => ({ default: m.TagPit })));
@@ -3115,6 +3126,199 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <OrigamiPricing key={String(v.autoplay)} planName={v.planName as string} price={v.price as string} autoplay={v.autoplay as boolean} />,
+  },
+  "empty-projects": {
+    componentName: "EmptyProjects",
+    importPath: "@/components/empty-projects",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Heading", options: ["Projects", "Workspaces", "Sites"], defaultValue: "Projects" },
+      { kind: "select", prop: "emptyTitle", label: "Headline", options: ["No projects yet", "Nothing here yet", "Start your first project"], defaultValue: "No projects yet" },
+      { kind: "select", prop: "emptyDescription", label: "Subline", options: ["Pick a starting point. You can change everything later.", "Choose a template to get going.", "It takes about a minute."], defaultValue: "Pick a starting point. You can change everything later." },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <EmptyProjects key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        title={v.title as string}
+        emptyTitle={v.emptyTitle as string}
+        emptyDescription={v.emptyDescription as string}
+      />
+    ),
+  },
+  "no-results": {
+    componentName: "NoResults",
+    importPath: "@/components/no-results",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "query", label: "Search", options: ["invoce march", "invioce q3", "invoice march"], defaultValue: "invoce march" },
+      { kind: "range", prop: "maxRows", label: "Max rows", min: 1, max: 6, step: 1, defaultValue: 6 },
+      { kind: "select", prop: "noun", label: "Noun", options: ["invoices", "bills", "payments"], defaultValue: "invoices" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <NoResults key={`${String(v.autoplay)}-${String(v.query)}`} autoplay={v.autoplay as boolean}
+        query={v.query as string}
+        noun={v.noun as string}
+        maxRows={v.maxRows as number}
+      />
+    ),
+  },
+  "empty-chart": {
+    componentName: "EmptyChart",
+    importPath: "@/components/empty-chart",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Caption", options: ["Revenue, last 12 months", "Sales, last 12 months", "Sign-ups, last 12 months"], defaultValue: "Revenue, last 12 months" },
+      { kind: "select", prop: "prefix", label: "Prefix", options: ["$", "€", "£"], defaultValue: "$" },
+      { kind: "select", prop: "suffix", label: "Suffix", options: ["k", "m", ""], defaultValue: "k" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <EmptyChart key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        title={v.title as string}
+        prefix={v.prefix as string}
+        suffix={v.suffix as string}
+      />
+    ),
+  },
+  "empty-team": {
+    componentName: "EmptyTeam",
+    importPath: "@/components/empty-team",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "seats", label: "Seats", min: 3, max: 8, step: 1, defaultValue: 6 },
+      { kind: "select", prop: "domain", label: "Domain", options: ["orbitly.com", "fernhill.io", "vela.app"], defaultValue: "orbitly.com" },
+      { kind: "select", prop: "placeholder", label: "Placeholder", options: ["name@company.com", "teammate@company.com", "Invite by email"], defaultValue: "name@company.com" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <EmptyTeam key={`${String(v.autoplay)}-${String(v.domain)}-${String(v.placeholder)}-${String(v.seats)}`} autoplay={v.autoplay as boolean}
+        seats={v.seats as number}
+        domain={v.domain as string}
+        placeholder={v.placeholder as string}
+      />
+    ),
+  },
+  "streaming-answer": {
+    componentName: "StreamingAnswer",
+    importPath: "@/components/streaming-answer",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "thoughtSeconds", label: "Thought for", min: 1, max: 30, step: 1, unit: "s", defaultValue: 4 },
+      { kind: "range", prop: "width", label: "Width", min: 320, max: 640, step: 10, unit: "px", defaultValue: 520 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <StreamingAnswer key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        thoughtSeconds={v.thoughtSeconds as number}
+        width={v.width as number}
+      />
+    ),
+  },
+  "diff-review": {
+    componentName: "DiffReview",
+    importPath: "@/components/diff-review",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "title", label: "Label", options: ["Homepage · Hero copy", "Pricing · Plan blurb", "Docs · Intro"], defaultValue: "Homepage · Hero copy" },
+      { kind: "range", prop: "width", label: "Width", min: 320, max: 640, step: 10, unit: "px", defaultValue: 520 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <DiffReview key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        title={v.title as string}
+        width={v.width as number}
+      />
+    ),
+  },
+  "agent-run": {
+    componentName: "AgentRun",
+    importPath: "@/components/agent-run",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "task", label: "Task", options: ["Fix the failing checkout test", "Repair the flaky cart test", "Unbreak the discount tests"], defaultValue: "Fix the failing checkout test" },
+      { kind: "range", prop: "width", label: "Width", min: 320, max: 640, step: 10, unit: "px", defaultValue: 520 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <AgentRun key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        task={v.task as string}
+        width={v.width as number}
+      />
+    ),
+  },
+  "ghost-autocomplete": {
+    componentName: "GhostAutocomplete",
+    importPath: "@/components/ghost-autocomplete",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "to", label: "Recipient", options: ["leo@fieldnotes.example", "nina@fieldnotes.example", "team@fieldnotes.example"], defaultValue: "leo@fieldnotes.example" },
+      { kind: "range", prop: "width", label: "Width", min: 320, max: 640, step: 10, unit: "px", defaultValue: 480 },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <GhostAutocomplete key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        to={v.to as string}
+        width={v.width as number}
+      />
+    ),
+  },
+  "skeleton-morph": {
+    componentName: "SkeletonMorph",
+    importPath: "@/components/skeleton-morph",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "author", label: "Author", options: ["Maya Chen", "Leo Park", "Ines Duarte"], defaultValue: "Maya Chen" },
+      { kind: "select", prop: "title", label: "Headline", options: ["Designing for the empty state", "Notes on calm interfaces", "Why loading screens lie"], defaultValue: "Designing for the empty state" },
+      { kind: "color", prop: "avatarColor", label: "Avatar", options: ["#ff9f0a", "#0a84ff", "#30d158", "#bf5af2", "#ff453a"], defaultValue: "#ff9f0a" },
+      { kind: "toggle", prop: "defaultReady", label: "Start loaded", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <SkeletonMorph key={`${String(v.autoplay)}${String(v.defaultReady)}`} autoplay={v.autoplay as boolean}
+        author={v.author as string}
+        initials={(v.author as string).split(" ").map((w) => w[0]).join("")}
+        title={v.title as string}
+        avatarColor={v.avatarColor as string}
+        defaultReady={v.defaultReady as boolean}
+      />
+    ),
+  },
+  "morphing-dialog": {
+    componentName: "MorphingDialog",
+    importPath: "@/components/morphing-dialog",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "projectName", label: "Project", options: ["orbitly-site", "launch-notes", "docs-v2"], defaultValue: "orbitly-site" },
+      { kind: "range", prop: "pageCount", label: "Pages", min: 1, max: 60, step: 1, defaultValue: 14 },
+      { kind: "select", prop: "shareBase", label: "Share host", options: ["nexus.app/p", "share.example.com", "go.example.dev/s"], defaultValue: "nexus.app/p" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <MorphingDialog key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        projectName={v.projectName as string}
+        pageCount={v.pageCount as number}
+        shareBase={v.shareBase as string}
+      />
+    ),
+  },
+  "travelling-tooltip": {
+    componentName: "TravellingTooltip",
+    importPath: "@/components/travelling-tooltip",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "openDelay", label: "First hover delay", min: 0, max: 1000, step: 50, unit: "ms", defaultValue: 450 },
+      { kind: "range", prop: "warmMs", label: "Stays warm", min: 0, max: 2000, step: 100, unit: "ms", defaultValue: 600 },
+      { kind: "select", prop: "label", label: "Toolbar name", options: ["Formatting", "Text tools", "Editor"], defaultValue: "Formatting" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <TravellingTooltip key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        openDelay={v.openDelay as number}
+        warmMs={v.warmMs as number}
+        label={v.label as string}
+      />
+    ),
   },
 };
 

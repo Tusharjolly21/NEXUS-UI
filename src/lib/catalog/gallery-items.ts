@@ -49,6 +49,17 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "empty-projects",
+  "no-results",
+  "empty-chart",
+  "empty-team",
+  "streaming-answer",
+  "diff-review",
+  "agent-run",
+  "ghost-autocomplete",
+  "skeleton-morph",
+  "morphing-dialog",
+  "travelling-tooltip",
   "tick-slider",
   "time-scrubber",
   "slide-to-confirm",
@@ -332,6 +343,18 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // eleventh batch (States and Essentials)
+  "empty-projects",
+  "no-results",
+  "empty-chart",
+  "empty-team",
+  "streaming-answer",
+  "diff-review",
+  "agent-run",
+  "ghost-autocomplete",
+  "skeleton-morph",
+  "morphing-dialog",
+  "travelling-tooltip",
   // tenth batch (Rare)
   "vinyl-player",
   "ferrofluid-record",
@@ -569,6 +592,11 @@ const PROMPT_PARENTS = new Set([
   "three-d-folder",
   "compare",
   "code-block",
+  "glow-button",
+  "glowing-effect-cards",
+  "hold-to-record",
+  "hover-highlight-text",
+  "link-preview",
 ]);
 
 const KIT_RANK = new Map(MOTION_KIT_ORDER.map((slug, i) => [slug, i] as const));
