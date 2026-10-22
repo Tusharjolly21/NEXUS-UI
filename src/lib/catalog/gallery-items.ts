@@ -543,16 +543,30 @@ function toItem(c: LibraryComponent): GalleryItem | null {
     install: c.registryCliName ?? c.slug,
     isNew: NEWEST - (Date.parse(c.createdAt) || 0) < NEW_WINDOW_MS,
     premium: c.premium,
-    hasPrompt: KIT_RANK.has(c.slug),
+    hasPrompt: hasBuildPrompt(c.slug),
+    variants: c.previewSections && c.previewSections.length > 1 ? c.previewSections.length : undefined,
     demo: SELF_DEMO.has(c.slug) ? null : DRAG.has(c.slug) ? "drag" : WANDER.has(c.slug) ? "wander" : null,
   };
 }
+
+/**
+ * Components that are not themselves in the Motion Kit order but carry Motion Kit variants, so their
+ * page has a build prompt. Kept out of MOTION_KIT_ORDER so they do not jump to the front of the wall.
+ */
+const PROMPT_PARENTS = new Set([
+  "toast-stack",
+  "upload-dropzone",
+  "milestone-timeline",
+  "chat-messages",
+  "card-stack-rotator",
+  "draggable-card-stack",
+]);
 
 const KIT_RANK = new Map(MOTION_KIT_ORDER.map((slug, i) => [slug, i] as const));
 
 /** Every Motion Kit component ships a build prompt (content/build-prompts/<slug>.md), a Pro feature. */
 export function hasBuildPrompt(slug: string) {
-  return KIT_RANK.has(slug);
+  return KIT_RANK.has(slug) || PROMPT_PARENTS.has(slug);
 }
 
 /** Every component as a gallery item: the Motion Kit first (newest batch first), then other new additions, then most popular. */

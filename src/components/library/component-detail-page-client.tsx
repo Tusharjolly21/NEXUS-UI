@@ -749,6 +749,11 @@ type ComponentDetailProps = {
   guides?: { slug: string; title: string }[];
 };
 
+/** Anchor id for one variant section, so the jump bar and shared links can land on it. */
+function variantId(title: string) {
+  return `variant-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+}
+
 export function ComponentDetailPageClient({
   slug,
   name,
@@ -832,8 +837,22 @@ export function ComponentDetailPageClient({
         <div className="mx-auto max-w-[1152px]">
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="grid min-w-0 gap-10">
+              {sections.length > 1 ? (
+                <nav aria-label="Variants of this component" className="-mb-4 flex flex-wrap items-center gap-2">
+                  <span className="mr-1 text-[13px] font-semibold text-muted-foreground">{sections.length} variants</span>
+                  {sections.map((s) => (
+                    <a
+                      key={s.title}
+                      href={`#${variantId(s.title)}`}
+                      className="pg-glass rounded-full bg-card px-3 py-1 text-[13px] font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                    >
+                      {s.title}
+                    </a>
+                  ))}
+                </nav>
+              ) : null}
               {sections.map((s) => (
-                <div key={s.title}>
+                <div key={s.title} id={variantId(s.title)} className="scroll-mt-24">
                   {sections.length > 1 ? <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h2> : null}
                   <Stage title={s.title} code={s.code} exportName={s.exportName} slug={slug} tint={tint} locked={locked} name={name} />
                 </div>
