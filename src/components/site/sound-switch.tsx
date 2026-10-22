@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Volume2, VolumeOff } from "lucide-react";
-import { AutoplaySound, configureSounds, playSound, useSoundsEnabled } from "@/lib/ui-sounds";
+import { AutoplaySound, configureSounds, playSound, useSoundStyle, useSoundsEnabled } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
 
 // Nexus UI is a wall of live previews, so it stays quiet until a visitor asks for sound. In your own
@@ -16,6 +16,12 @@ configureSounds({ defaultEnabled: false });
  */
 export function SoundSwitch({ variant = "icon", className }: { variant?: "icon" | "pill"; className?: string }) {
   const [enabled, setEnabled] = useSoundsEnabled();
+  // The Mac style (picked on the sounds page) lives in its own chunk; load it whenever it is the choice,
+  // so every component on the site plays it.
+  const [style] = useSoundStyle();
+  React.useEffect(() => {
+    if (style === "mac") void import("@/lib/ui-sounds-mac");
+  }, [style]);
   const toggle = () => {
     const next = !enabled;
     setEnabled(next);

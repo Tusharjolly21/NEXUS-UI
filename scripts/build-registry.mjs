@@ -16,6 +16,7 @@ const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencie
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
 const UI_SOUNDS_REGISTRY_NAME = "ui-sounds";
 const UI_SOUNDS_PRO_REGISTRY_NAME = "ui-sounds-pro";
+const UI_SOUNDS_MAC_REGISTRY_NAME = "ui-sounds-mac";
 const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
@@ -194,6 +195,21 @@ function buildUiSoundsProItem() {
     dependencies: [],
     registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
     files: [{ path: "next-ui/lib/ui-sounds-pro.ts", type: "registry:lib", target: "lib/ui-sounds-pro.ts", content }],
+  };
+}
+
+/** The Mac style: the free sounds re-voiced to feel at home on a Mac. Pro, server registry only. */
+function buildUiSoundsMacItem() {
+  const content = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds-mac.ts"), "utf8");
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: UI_SOUNDS_MAC_REGISTRY_NAME,
+    type: "registry:lib",
+    title: "UI Sounds Mac style",
+    description: "The 24 interface sounds re-voiced to feel at home on a Mac or iPhone: glassy, rounded and short. Original Web Audio recipes, no audio files. Switch with setSoundStyle(\"mac\") or useMacSounds(). Builds on ui-sounds.",
+    dependencies: [],
+    registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
+    files: [{ path: "next-ui/lib/ui-sounds-mac.ts", type: "registry:lib", target: "lib/ui-sounds-mac.ts", content }],
   };
 }
 
@@ -1080,7 +1096,7 @@ const movedPath = path.join(root, "src", "lib", "catalog", "moved-sections.ts");
 const catalogTs = fs.readFileSync(catalogPath, "utf8") + "\n" + fs.readFileSync(movedPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
-const items = [buildNexusFontItem(), buildUiSoundsItem(), buildUiSoundsProItem()];
+const items = [buildNexusFontItem(), buildUiSoundsItem(), buildUiSoundsProItem(), buildUiSoundsMacItem()];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {

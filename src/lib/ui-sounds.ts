@@ -129,6 +129,65 @@ export const SOUNDS = {
 
 export type SoundName = keyof typeof SOUNDS;
 
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
 // ── Preference ──────────────────────────────────────────────────────
 //
 // One switch for every sound on the page. A visitor's choice is kept in
@@ -224,7 +283,8 @@ const lastPlayed = new Map<string, number>();
  */
 export function playSound(name: SoundName, volume = 1, force = false) {
   if (!(name in SOUNDS)) return;
-  playDef(name, SOUNDS[name], volume, force);
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
 }
 
 /**
