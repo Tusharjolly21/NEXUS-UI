@@ -114,6 +114,8 @@ export default function Page() {
       "Single Row Lift",
       "Loupe Logo Cloud",
       "Cinematic Logo Cloud",
+      "Logo Stories",
+      "Filterable Logo Wall",
     ],
     reactSource: `import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
 import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
@@ -321,7 +323,7 @@ export default function Header() {
     category: "Hero blocks",
     tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid"],
+    variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid", "Cursor Crowd Hero", "X-ray Hero", "Circuit Hero", "Flip-dot Hero"],
     reactSource: `import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
 
 export default function Home() {
@@ -353,7 +355,7 @@ export default function Features() {
     category: "Testimonials",
     tags: ["social proof", "testimonials", "stats", "reviews", "wall of love", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Counting Stats", "Wall of Love", "Scrolling Testimonials", "Clothesline"],
+    variants: ["Counting Stats", "Wall of Love", "Scrolling Testimonials", "Clothesline", "Velocity Marquee"],
     reactSource: `import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
 
 export default function Testimonials() {

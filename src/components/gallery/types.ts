@@ -27,6 +27,8 @@ export type GalleryItem = {
   premium: boolean;
   /** Has a build prompt (the brief to recreate it with an AI agent), a Pro feature. */
   hasPrompt?: boolean;
+  /** How many designs live on this component's page (the original plus its variants). Only set above 1. */
+  variants?: number;
   /**
    * Ghost-cursor demo the tile plays on its own: `wander` glides over hover effects, `drag` pulls a
    * handle across. Null when the preview already demonstrates itself or needs no pointer.

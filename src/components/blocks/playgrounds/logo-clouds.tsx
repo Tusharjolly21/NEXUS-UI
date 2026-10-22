@@ -6,6 +6,8 @@ import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee
 import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
+import { FilterableLogoWall } from "@/components/blocks/motion-kit/filterable-logo-wall";
+import { LogoStories } from "@/components/blocks/motion-kit/logo-stories";
 import { LoupeLogoCloud } from "@/components/blocks/motion-kit/loupe-logo-cloud";
 import type { PropDoc } from "@/components/library/prop-controls";
 import type { BlockPlaygrounds } from "./types";
@@ -246,6 +248,78 @@ const playgrounds: BlockPlaygrounds = {
     ],
     jsxName: "LoupeLogoCloud",
     importLine: 'import { LoupeLogoCloud } from "@/components/blocks/motion-kit/loupe-logo-cloud";',
+  },
+  "mk-logo-stories": {
+    Component: LogoStories,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description:
+          "Glides the highlight from logo to logo on a timer until the visitor hovers, focuses or clicks a logo. Pauses while the card is hovered, off screen or in a hidden tab. Never runs under reduced motion.",
+        defaultValue: "false",
+      },
+      {
+        name: "heading",
+        type: "string",
+        description: "Small caps line above the logos.",
+        defaultValue: '"Teams shipping with Nexus"',
+      },
+      {
+        name: "stories",
+        type: "LogoStory[]",
+        description:
+          "One per logo: { name, mark (inline SVG, drawn in a 20 x 20 box), metric, what, quote, who }. Eight fit well. Use a stable array.",
+        defaultValue: "DEFAULT_LOGO_STORIES",
+      },
+      {
+        name: "dwell",
+        type: "number",
+        description: "Milliseconds each story stays up while autoplaying.",
+        defaultValue: "4500",
+        min: 1500,
+        max: 10000,
+        step: 500,
+      },
+      { name: "readLabel", type: "string", description: "Label of the link under each quote.", defaultValue: '"Read the story \u2192"' },
+      {
+        name: "onReadStory",
+        type: "(story: LogoStory) => void",
+        description: "Called when the visitor presses the read-the-story link. Nothing navigates.",
+      },
+      CLASS_NAME,
+    ],
+    jsxName: "LogoStories",
+    importLine: 'import { LogoStories } from "@/components/blocks/motion-kit/logo-stories";',
+  },
+  "mk-filterable-logo-wall": {
+    Component: FilterableLogoWall,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description:
+          "Steps through the filters every 2.6 s until the visitor picks one. Pauses off screen and in a hidden tab. Never runs under reduced motion.",
+        defaultValue: "false",
+      },
+      { name: "heading", type: "string", description: "Small line above the count.", defaultValue: '"Customers"' },
+      { name: "allLabel", type: "string", description: "Label of the pill that shows everything.", defaultValue: '"All"' },
+      {
+        name: "logos",
+        type: "FilterableLogo[]",
+        description:
+          "Customers: { name, industry, mark (inline SVG, drawn in a 20 x 20 box) }. The filter pills are built from the distinct industries. Use a stable array.",
+        defaultValue: "DEFAULT_FILTERABLE_LOGOS",
+      },
+      {
+        name: "onFilterChange",
+        type: "(filter: string) => void",
+        description: "Called when the visitor picks a filter pill.",
+      },
+      CLASS_NAME,
+    ],
+    jsxName: "FilterableLogoWall",
+    importLine: 'import { FilterableLogoWall } from "@/components/blocks/motion-kit/filterable-logo-wall";',
   },
 };
 

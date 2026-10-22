@@ -76,3 +76,73 @@ With 2+ cards, bump the pulse every 2600ms; any pointer down or key press stops 
 - `onChange` reports the new front id each time.
 - `rotationInterval` pauses on hover; autoplay stops for good on touch.
 - Dark mode recolours cards, text and highlights; overrides win when given.
+
+---
+
+<!-- Card Stack Rotator: Motion Kit variant brief -->
+
+> The Card Stack Rotator page has 2 variants. The brief above rebuilds the original Card Stack Rotator; the brief below rebuilds the Motion Kit Rolodex Testimonials variant.
+
+---
+
+<!-- variant: rolodex-testimonials -->
+
+# Rolodex Testimonials
+
+Build testimonials on a rolodex. The quote cards ride round a 3D drum that clicks to the next quote every few seconds; the cards above and below tip away, fade and darken. Drag it to spin, flick it and it keeps going, and it always comes to rest square on a card. Under the drum a row of dots shows which quote is in front.
+
+## Stack
+
+- React client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useMotionValueEvent`, `useTransform`, `useReducedMotion`), the `cn` class helper.
+- File: `components/card-stack-rotator/rolodex-testimonials.tsx`. Named export `RolodexTestimonials`, exported types `RolodexTestimonialsProps` and `RolodexCard`.
+
+## API
+
+`RolodexCard = { quote: string; name: string; role: string; hue: [string, string] }`. `hue` is the two colours of the avatar gradient.
+
+- `cards?: RolodexCard[]`: defaults to ten demo quotes (Maya Chen, Arjun Rao, Lena Ortiz, Tom Becker, Sara Kim, Dev Patel, Noor Haddad, Eli Novak, Ana Lima, Kai Ito, each with a short one-line quote and a role such as "Design lead, Loop").
+- `autoplay?: boolean`, default `false`: clicks to the next quote every 2600ms until touched.
+- `onChange?: (index: number) => void`: index of the card that is front.
+- `className?: string`.
+
+## Layout and look
+
+- Root: column, centred, 16px gap, `w-[380px] max-w-full`, ink `#1d1d1f` (dark `#f5f5f7`).
+- Viewport: `relative h-[380px] w-full`, radius 24px (for the focus outline), `cursor: grab` (grabbing while pressed), `touch-action: none`, no text selection. Inside it a layer that fills it with `perspective: 900px` and a vertical mask `linear-gradient(to bottom, transparent, #000 21%, #000 79%, transparent)` so the ends fade into whatever is behind. The mask replaces a colour overlay, so no page colour is needed in light or dark.
+- Drum: absolute, `inset-x-4`, full height, `transform-style: preserve-3d`.
+- Card: `figure`, absolute, `inset-x-0`, top 50%, height 150px, margin top -75px, flex column with space between, `p-5`, radius 20px, white (dark `#1c1c1e`), shadow `0 0 0 1px rgba(0,0,0,.05)` plus `0 14px 30px -18px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.1)`), `backface-visibility: hidden`. Quote: 16px, line height 1.4, tracking -0.01em, wrapped in curly quotes. Caption row: 32px avatar circle (135 degree gradient of `hue`), name 13px semibold, role 12px `#6e6e73` (dark `#a1a1a6`), both truncating.
+- Shade layer: absolute, covers the card, radius 20px, `#1d1d1f` (dark `#000`).
+- Dots: row, 6px gap, one 6px high pill per card in ink (dark `#f5f5f7`).
+
+## Motion
+
+- One motion value `rot` (degrees) drives everything. With `N` cards the step is `360 / N` and the drum radius is `round(150 / 2 / tan(pi / N)) + 10`.
+- Card `i` has relative angle `a = ((i * step + rot) mod 360)` wrapped into -180..180. Its transform is `translateZ(-radius) rotateX(a deg) translateZ(radius)`; opacity `max(0, 1 - |a| / 95)`; shade opacity `min(0.5, |a| / 180)`.
+- The active index is `(round(-rot / step) mod N + N) mod N`. The dots animate width 6 to 18 and opacity .2 to 1 for the active one.
+- Drag: pointer down stops any animation, captures the pointer and remembers the start; moving by `dy` sets `rot = start - dy * 0.45` and tracks velocity in degrees per second. Release projects `rot + velocity * 0.25`, rounds to the nearest multiple of `step` and springs there with `{ stiffness: 140, damping: 20, velocity }`.
+- Step: `goBy(k)` springs to `round(rot / step) * step - k * step` with `{ stiffness: 160, damping: 18 }`.
+- Reduced motion: stepping and settling are instant, no autoplay.
+
+## Interaction and states
+
+- Pointer drag on the viewport spins the drum. Arrow Down goes to the next quote, Arrow Up to the previous one. The viewport is focusable (`tabindex 0`) with a visible 2px offset outline `#0071e3` (dark `#0a84ff`).
+- Any pointer down, key or focus marks the carousel touched and ends autoplay for good.
+- `onChange` fires only when the front card changes.
+
+## Autoplay demo
+
+Every 2600ms call `goBy(1)` while the drum is on screen and the tab is visible. Stops for good on touch. Never runs under reduced motion.
+
+## Accessibility
+
+- The viewport is a `group` with `aria-roledescription="carousel"`, a label that explains the arrow keys and `aria-keyshortcuts`. The 3D drum and dots are `aria-hidden`. A screen reader only paragraph reads "Testimonial X of N: quote, name, role" and is announced politely only after the visitor has interacted, so autoplay does not chatter.
+
+## Acceptance checklist
+
+- [ ] The front card is flat and fully opaque; the ones above and below tip away, fade and darken.
+- [ ] A drag spins the drum, a flick coasts, and it always stops square on a card.
+- [ ] Arrow keys step through the quotes.
+- [ ] Autoplay clicks forward every 2.6s, pauses off screen, stops on touch.
+- [ ] The fade at the top and bottom works on any background in light and dark.
+- [ ] Dark mode recolours cards, text, shade and dots.
+- [ ] Fits at 320px wide.

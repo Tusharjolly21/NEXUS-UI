@@ -74,3 +74,133 @@ Every `max(900, autoInterval)` ms throw the top card, alternating right (1, −0
 - Counter and `onChange` follow the top card.
 - Video cards play only on top.
 - Reduced motion removes lean and overshoot.
+
+---
+
+<!-- Draggable Card Stack: Motion Kit variant brief -->
+
+> The Draggable Card Stack page has 3 variants. The brief above rebuilds the original Draggable Card Stack; the briefs below rebuild the Motion Kit Spread Deck and Riffle Stack variants.
+
+---
+
+<!-- variant: spread-deck -->
+
+# Spread Deck
+
+Build a photo deck with three states: a messy pile, a grid and a focused photo. Tap the pile and it deals itself out into a grid; tap a photo and it flies to the middle and grows while the rest gather into a little pile in the corner; tap it again to go back, or press Stack to pile it all up. Every move is the same six cards travelling, never a swap. The photos are drawn from CSS gradients and inline SVG, so nothing is fetched.
+
+## Stack
+
+- React client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useReducedMotion`), the `cn` class helper.
+- File: `components/draggable-card-stack/spread-deck.tsx`. Named export `SpreadDeck`, exported types `SpreadDeckProps` and `SpreadDeckPhoto`.
+
+## API
+
+`SpreadDeckPhoto = { title: string; sub: string; sky: [string, string]; sun: string; land: [string, string] }`.
+
+- `photos?: SpreadDeckPhoto[]`: defaults to six places: Lofoten (Norway), Big Sur (California), Atacama (Chile), Kyoto (Japan), Patagonia (Argentina), Sahara (Morocco), each with its own sky, sun and hill colours.
+- `autoplay?: boolean`, default `false`: walks the states by itself every 2200ms until touched.
+- `className?: string`.
+
+## Layout and look
+
+- Root: column, centred, 12px gap, `w-full max-w-[600px]`, ink `#1d1d1f` (dark `#f5f5f7`).
+- Stage: `relative`, full width, fixed height 440px, radius 28px, `overflow: hidden`, `#f5f5f7` (dark `#1c1c1e`). The cards are only rendered once the stage width is measured (ResizeObserver), so they never travel from a guessed size.
+- Card (a button): 150px by 200px, absolute at top left and positioned with transforms, radius 16px, white (dark `#2c2c2e`), `p-1.5`, shadow `0 2px 4px rgba(0,0,0,.08)` plus `0 18px 30px -18px rgba(0,0,0,.5)` (dark ring `rgba(255,255,255,.08)`). Picture area is the card height minus a 34px caption strip, radius 11px, clipped. Caption: title 12px semibold, sub line 10px `#6e6e73` (dark `#a1a1a6`).
+- Picture: a vertical gradient from `sky[0]` to `sky[1]`, a 40px round sun at 58% left and 22% top with a 30px glow in the sun colour, and an SVG (viewBox 150 by 110, stretched to the bottom 55%) with two hills: `M0 50 C 30 30, 60 60, 90 40 S 140 30, 150 45 V110 H0Z` filled `land[0]`, and `M0 75 C 40 55, 70 85, 110 65 S 145 70, 150 72 V110 H0Z` filled `land[1]`.
+- Hint text bottom right of the stage, 12px muted: "Tap the pile", "Tap a photo" or "Tap it again to go back".
+- Below the stage two pill buttons, 36px high, "Stack" and "Spread": the active one is `#1d1d1f` with white text (dark `#f5f5f7` with ink), the other white with a hairline ring (dark `#2c2c2e`).
+
+## Motion
+
+Let `W` be the stage width and `H = 440`. Every card animates `x, y, rotate, scale` with the spring `{ stiffness: 210, damping: 24 }` (transform origin is the centre, so positions are corrected by `(150 - 150 * scale) / 2` horizontally and `(200 - 200 * scale) / 2` vertically).
+
+- Stack: card `i` of `n` with `k = n - 1 - i`: `x = W/2 - 75 + (i odd ? 4 : -4) * k * 0.5`, `y = H/2 - 100 - k * 3`, rotation from `[-7, 5, -3, 8, -5, 2]`, scale 1 (0.78 under 480px), z index `i`. Cards settle one after another, delay `(n - i) * 0.03` s.
+- Grid: 3 columns when `W >= 520`, otherwise 2. Gap 16px. Scale is `min(1, (W - 32 - gaps) / (cols * 150), (440 - 48 - rowGaps) / (rows * 200))`, so the grid always fits. The grid is centred. Cards deal out with delay `i * 0.035` s. Hovering a card in the grid lifts it 6px.
+- Focus: the chosen card goes to the centre (`x = W/2 - 75`, `y = H/2 - 110`), scale `min(1.7, (H - 60) / 200)`, z index 50, rotation 0. The others shrink to scale .42 and gather in the bottom left as a fanned pile: for the `k`-th of them `x = 18 - (150 - 63) / 2 + k * 6`, `y = H - 84 - 18 - (200 - 84) / 2 - k * 4`, rotation `-12 + k * 5`. The other cards' sub lines fade out.
+- Reduced motion: transitions are instant and hover lift is off.
+
+## Interaction and states
+
+- Mode is `stack`, `grid` or `focus(i)`. Tapping a card: stack goes to grid, grid goes to focus on that card, focus on the same card goes back to grid, focus on another card switches to it. Stack and Spread buttons set the mode directly (and report `aria-pressed`). Escape in focus returns to the grid.
+- Any press or key marks the deck touched and ends autoplay for good.
+
+## Autoplay demo
+
+Every 2200ms, while on screen and the tab is visible, step through `grid, focus(1), grid, focus(4), stack` and repeat. Stops for good on touch. Never runs under reduced motion.
+
+## Accessibility
+
+- Cards are real buttons with labels: "Spread the photos" in the pile, "Open Kyoto" in the grid, "Kyoto, Japan. Back to the grid" when focused. In the pile only the top card is in the tab order; the buried ones are `aria-hidden` with `tabindex -1`.
+- A screen reader only live region announces the state ("Spread. Tap a photo.") once the visitor has interacted. The hint is `aria-hidden`.
+- Focus rings: 2px offset outline `#0071e3` (dark `#0a84ff`).
+
+## Acceptance checklist
+
+- [ ] The same cards move between pile, grid and focus; nothing swaps or remounts.
+- [ ] The grid never clips at any width from 320px up.
+- [ ] A focused photo grows large while the others gather bottom left.
+- [ ] Escape, Stack and Spread work from the keyboard.
+- [ ] Autoplay pauses off screen and stops on touch.
+- [ ] Dark mode recolours the stage, polaroid frames, captions and buttons.
+- [ ] No network requests; the pictures are gradients and SVG.
+
+---
+
+<!-- variant: riffle-stack -->
+
+# Riffle Stack
+
+Build a feature deck you shuffle like real cards. Riffle splits the deck into two halves that bow apart, then cards fall back in alternately from each side in little clumps and the deck squares itself up. Cut lifts the top half off and slides it under. Whatever lands on top is the feature you see.
+
+## Stack
+
+- React client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useAnimationControls`, `useReducedMotion`), the `cn` class helper.
+- File: `components/draggable-card-stack/riffle-stack.tsx`. Named export `RiffleStack`, exported types `RiffleStackProps` and `RiffleCard`.
+
+## API
+
+`RiffleCard = { t: string; d: string; c: [string, string]; icon: string }` (title, one line, two gradient colours, SVG path data on a 24 by 24 grid).
+
+- `cards?: RiffleCard[]`: needs an even count. Defaults to eight: Spring physics, Layout morphs, Gestures, Scroll scenes, Accessible, Copy & own, Dark mode, Tiny bundle, each with its own gradient and icon.
+- `autoplay?: boolean`, default `false`: shuffles every 2800ms until a button is pressed.
+- `onShuffle?: (top: string) => void`: title of the card on top after each riffle or cut.
+- `className?: string`.
+
+## Layout and look
+
+- Root: column, centred, 20px gap, `w-full max-w-[440px]`. The deck is 420px by 340px (card 220 by 300 plus room for the split); a ResizeObserver scales it down with `min(1, rootWidth / 440)` and trims the vertical margins to match, so the whole spread fits at 320px.
+- Card: absolute, centred horizontally, 20px from the top, 220 by 300, radius 20px, z index equal to its depth in the deck, shadow `inset 0 1px 0 rgba(255,255,255,.4)`, `0 1px 2px rgba(0,0,0,.12)`, `0 16px 30px -18px rgba(0,0,0,.45)` (dark adds a 1px `rgba(255,255,255,.1)` ring). Face: a 150 degree gradient of the card colours, `p-5`, white text. A 44px rounded icon tile (`rgba(255,255,255,.2)`, backdrop blur) with the icon stroked white, 2px; title 22px semibold, tracking -0.02em; description 13px, white at 80%.
+- Controls: row, centred, wrapping, 8px gap: "Riffle" (40px high pill, `#1d1d1f`, white text; dark `#f5f5f7` with ink), "Cut" (white with a hairline ring; dark `#2c2c2e`) and the text "On top: <title>" (13px muted, `#6e6e73`, dark `#a1a1a6`) which swaps with a 6px slide.
+
+## Motion
+
+Card order is an array whose first entry is the top. A phase machine drives positions: `idle`, `split`, `fall`, `cut`. In `idle` card at depth `d` (0 at the bottom) sits at `y = -d * 2`, with no rotation. Cards use `initial={false}` and a spring `{ stiffness: 300, damping: 26 }` unless noted.
+
+- Riffle: set `split` and wait 520ms. In `split` the top half goes to `x = -105`, the bottom half to `x = +105`, `y = -(position within its half * 2) - 6`, `rotate = half * 7`, `rotateY = half * -18` (half is -1 or 1), with delay `position within half * 0.02`. Then interleave the halves: pick a random side, pop 1 card (or 2 with 35% chance) from it, put them on top of the output, switch side, repeat until both are empty. Set `fall`: each card tweens (0.32s, ease `[0.3, 0, 0.3, 1]`) `x` to 0, `y` through -30 to its idle height, rotation to 0, delayed `(n - 1 - position) * 0.07` s. After `70 * n + 350` ms squash the whole deck, `scaleY [1, .94, 1.02, 1]` over .35s, and go back to `idle`.
+- Cut: set `cut` and wait 420ms. In `cut` the top half goes to `x = 120`, `y = -60 - depth * 2`, `rotate = 6`. Then move the top half under the bottom half and return to `idle`; wait another 450ms before another action is accepted.
+- Only one shuffle runs at a time. Reduced motion: the order changes at once with no travel.
+
+## Interaction and states
+
+- State: order, phase. Buttons are ignored while a shuffle runs. All waits are tracked timers cleared on unmount, and nothing runs after unmount.
+- Any button press marks the deck touched and ends autoplay for good.
+
+## Autoplay demo
+
+Every 2800ms, while on screen and the tab is visible: riffle, riffle, cut, repeat. Stops for good on a button press. Never runs under reduced motion.
+
+## Accessibility
+
+- The deck is `role="img"` labelled "Top card: <title>. <description>"; the individual cards are `aria-hidden`. Riffle and Cut are real buttons with 2px offset focus outlines (`#0071e3`, dark `#0a84ff`). The visible "On top" text is `aria-hidden`; a screen reader only live region repeats it, announced only after the visitor has interacted.
+
+## Acceptance checklist
+
+- [ ] The deck bows apart into two halves, then cards fall back alternately in clumps of one or two.
+- [ ] Cut slides the top half off to the right and under the rest.
+- [ ] The "On top" label always matches the top card.
+- [ ] Rapid presses never overlap two shuffles.
+- [ ] Autoplay runs riffle, riffle, cut; pauses off screen; stops on press.
+- [ ] Fits at 320px wide without horizontal scroll.
+- [ ] Dark mode recolours buttons and card edges.
+- [ ] No timers left running after unmount.

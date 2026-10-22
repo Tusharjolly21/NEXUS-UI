@@ -3,6 +3,10 @@
 import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
 import { ParallaxStackHero } from "@/components/blocks/motion-kit/parallax-stack-hero";
 import { KineticHero } from "@/components/blocks/motion-kit/kinetic-hero";
+import { CursorCrowdHero } from "@/components/blocks/motion-kit/cursor-crowd-hero";
+import { XrayHero } from "@/components/blocks/motion-kit/xray-hero";
+import { CircuitHero } from "@/components/blocks/motion-kit/circuit-hero";
+import { FlipDotHero } from "@/components/blocks/motion-kit/flip-dot-hero";
 import type { BlockPlaygrounds } from "./types";
 
 const playgrounds: BlockPlaygrounds = {
@@ -136,6 +140,94 @@ const playgrounds: BlockPlaygrounds = {
     ],
     jsxName: "ParallaxStackHero",
     importLine: 'import { ParallaxStackHero } from "@/components/blocks/motion-kit/parallax-stack-hero";',
+  },
+  "mk-cursor-crowd-hero": {
+    Component: CursorCrowdHero,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description:
+          "Runs the teammates: one selects and retypes the last word, one tugs the button, one drops a comment. Stops once the visitor presses or types in the section, and never runs under reduced motion.",
+        defaultValue: "false",
+      },
+      {
+        name: "words",
+        type: "string[]",
+        description: "Words the last word of the headline is retyped through. The first is shown at rest. Use a stable array.",
+        defaultValue: '["faster", "together", "tonight", "better"]',
+      },
+      {
+        name: "onAction",
+        type: '(label: "primary" | "secondary") => void',
+        description: "Called with the button that was pressed. Buttons never navigate on their own.",
+      },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    jsxName: "CursorCrowdHero",
+    importLine: 'import { CursorCrowdHero } from "@/components/blocks/motion-kit/cursor-crowd-hero";',
+  },
+  "mk-xray-hero": {
+    Component: XrayHero,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description:
+          "Sweeps the lens across the page every 2 s until the visitor first moves a pointer over it. Never runs under reduced motion.",
+        defaultValue: "false",
+      },
+      {
+        name: "onAction",
+        type: '(label: "primary" | "secondary") => void',
+        description: "Called with the button that was pressed. Buttons never navigate on their own.",
+      },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    jsxName: "XrayHero",
+    importLine: 'import { XrayHero } from "@/components/blocks/motion-kit/xray-hero";',
+  },
+  "mk-circuit-hero": {
+    Component: CircuitHero,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description:
+          "Lets a ghost pointer wander over the board, warming and firing traces, until the visitor first moves a pointer over it. Ambient signals run either way and pause off screen.",
+        defaultValue: "false",
+      },
+      {
+        name: "onAction",
+        type: '(label: "primary" | "secondary") => void',
+        description: "Called with the button that was pressed. Buttons never navigate on their own.",
+      },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    jsxName: "CircuitHero",
+    importLine: 'import { CircuitHero } from "@/components/blocks/motion-kit/circuit-hero";',
+  },
+  "mk-flip-dot-hero": {
+    Component: FlipDotHero,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description:
+          "Cycles the sign through the words every 2.8 s until the visitor presses the board, types or presses a key. Never runs under reduced motion.",
+        defaultValue: "false",
+      },
+      {
+        name: "words",
+        type: "string[]",
+        description:
+          "Words the sign cycles through. Each is upper-cased, cut to the characters the dot font has (A to Z, 0 to 9, space, ! and ?) and capped at 7 characters. Use a stable array.",
+        defaultValue: '["HELLO", "BUILD", "SHIP IT", "NEXUS"]',
+      },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    jsxName: "FlipDotHero",
+    importLine: 'import { FlipDotHero } from "@/components/blocks/motion-kit/flip-dot-hero";',
   },
   "mk-kinetic-hero": {
     Component: KineticHero,

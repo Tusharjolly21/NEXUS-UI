@@ -347,7 +347,7 @@
       "name": "milestone-timeline",
       "type": "registry:component",
       "title": "Milestone Timeline",
-      "description": "A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes.",
+      "description": "A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes. Also includes Roadmap Scrubber, an edit-style timeline where you drag a playhead and every bar fills to that day. Also includes Commit Graph Roadmap, a roadmap drawn as git log --graph with release tags, branch lanes and a pulsing HEAD.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -357,11 +357,19 @@
       ],
       "files": [
         {
+          "path": "next-ui/milestone-timeline/commit-graph-roadmap.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/milestone-timeline/index.ts",
           "type": "registry:lib"
         },
         {
           "path": "next-ui/milestone-timeline/milestone-timeline.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/milestone-timeline/roadmap-scrubber.tsx",
           "type": "registry:component"
         }
       ]
@@ -418,13 +426,14 @@
       "name": "draggable-card-stack",
       "type": "registry:component",
       "title": "Draggable Card Stack",
-      "description": "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work.",
+      "description": "A pile of photo cards you can fling: grab the top card and throw it any direction and it leans into the throw, flies off, then tucks back under the pile while the next card pops up with a little overshoot. The right arrow sends the top card away and the left arrow pulls the bottom card back; images, videos or drawn scenes all work. Also includes Spread Deck, a photo pile that deals itself into a grid, then flies one photo to the front while the rest gather in the corner. Also includes Riffle Stack, a feature deck you shuffle like real cards: riffle bows two halves apart and falls them back in clumps, cut slides the top half under.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
@@ -434,6 +443,14 @@
         {
           "path": "next-ui/draggable-card-stack/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/draggable-card-stack/riffle-stack.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/draggable-card-stack/spread-deck.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -1113,7 +1130,7 @@
       "name": "chat-messages",
       "type": "registry:component",
       "title": "Chat Messages",
-      "description": "A chat thread styled like a messaging app, with blue user bubbles, grey replies and a composer. With autoplay the conversation plays itself: user lines type into the composer and pop out, and the assistant's typing dots grow into each reply; visitors can then send their own messages.",
+      "description": "A chat thread styled like a messaging app, with blue user bubbles, grey replies and a composer. With autoplay the conversation plays itself: user lines type into the composer and pop out, and the assistant's typing dots grow into each reply; visitors can then send their own messages. Also includes Composer Morph Chat, where the text in the composer lifts out of the field and morphs into the sent bubble, then the reply shimmers and streams in word by word. Also includes Chat Head, a chat that lives in a draggable floating head that flings to the nearest edge, peeks new messages, opens into a panel and can be dismissed on a target or with the keyboard.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1124,7 +1141,15 @@
       ],
       "files": [
         {
+          "path": "next-ui/chat-messages/chat-head.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/chat-messages/chat-messages.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/chat-messages/composer-morph-chat.tsx",
           "type": "registry:component"
         },
         {
@@ -1160,13 +1185,14 @@
       "name": "card-stack-rotator",
       "type": "registry:component",
       "title": "Card Stack Rotator",
-      "description": "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke.",
+      "description": "A stack of testimonial cards: flick the top card away and it flies out, drops behind the pile and slides home into the back slot with a wobble. The next card rises and its **highlighted** words get a fresh highlighter stroke. Also includes Rolodex Testimonials, quotes on a 3D rolodex drum that clicks to the next one, spins when dragged, coasts when flicked and always lands square on a card.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
@@ -1176,6 +1202,10 @@
         {
           "path": "next-ui/card-stack-rotator/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/card-stack-rotator/rolodex-testimonials.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -1207,7 +1237,7 @@
       "name": "animated-countdown",
       "type": "registry:component",
       "title": "Animated Countdown",
-      "description": "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant.",
+      "description": "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant. Also includes Watch Countdown, where days, hours, minutes and seconds empty around four concentric rings with glowing heads and rolling digits. Also includes Fuse Countdown, where a spark burns along a rope fuse at the pace of the clock and sets off a rocket and fireworks at zero.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1222,11 +1252,19 @@
           "type": "registry:component"
         },
         {
+          "path": "next-ui/animated-countdown/fuse-countdown.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/animated-countdown/index.ts",
           "type": "registry:lib"
         },
         {
           "path": "next-ui/animated-countdown/split-flap-board.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-countdown/watch-countdown.tsx",
           "type": "registry:component"
         },
         {
@@ -1465,7 +1503,7 @@
       "name": "toast-stack",
       "type": "registry:component",
       "title": "Toast Stack",
-      "description": "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open.",
+      "description": "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open. Also includes Undo Toast, where an archived row shrinks into the toast, a ring counts down around Undo, and undo drops the row back in place. Also includes Promise Toast, a pill that follows a deploy step by step with progress filling behind the words and lands on a live link or an error with a way to the logs.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1479,7 +1517,15 @@
           "type": "registry:lib"
         },
         {
+          "path": "next-ui/toast-stack/promise-toast.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/toast-stack/toast-stack.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/toast-stack/undo-toast.tsx",
           "type": "registry:component"
         }
       ]
@@ -1502,7 +1548,15 @@
           "type": "registry:lib"
         },
         {
+          "path": "next-ui/otp-input/otp-autofill.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/otp-input/otp-input.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/otp-input/otp-line.tsx",
           "type": "registry:component"
         }
       ]
@@ -1544,11 +1598,19 @@
       ],
       "files": [
         {
+          "path": "next-ui/password-strength/crack-time-password.tsx",
+          "type": "registry:component"
+        },
+        {
           "path": "next-ui/password-strength/index.ts",
           "type": "registry:lib"
         },
         {
           "path": "next-ui/password-strength/password-strength.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/password-strength/suggest-password.tsx",
           "type": "registry:component"
         }
       ]
@@ -1568,6 +1630,14 @@
       "files": [
         {
           "path": "next-ui/animated-tabs/animated-tabs.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-tabs/document-tabs.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/animated-tabs/elastic-tabs.tsx",
           "type": "registry:component"
         },
         {
@@ -1701,9 +1771,14 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
+        {
+          "path": "next-ui/copy-button/api-key-field.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/copy-button/copy-button.tsx",
           "type": "registry:component"
@@ -1711,6 +1786,10 @@
         {
           "path": "next-ui/copy-button/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/copy-button/select-copy.tsx",
+          "type": "registry:component"
         }
       ]
     },

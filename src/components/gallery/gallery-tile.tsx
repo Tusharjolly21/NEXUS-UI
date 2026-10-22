@@ -114,15 +114,29 @@ export function GalleryTile({
 
       {item.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute right-4 top-4" /> : null}
 
-      {item.isNew ? (
-        <span
-          className={cn(
-            "pointer-events-none absolute left-4 top-4 rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
-            dark ? "bg-white/12 text-[#ff9f0a] backdrop-blur-md" : "bg-white/90 text-[#bf4800] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md",
-          )}
-        >
-          New
-        </span>
+      {item.isNew || item.variants ? (
+        <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-1.5">
+          {item.isNew ? (
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
+                dark ? "bg-white/12 text-[#ff9f0a] backdrop-blur-md" : "bg-white/90 text-[#bf4800] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md",
+              )}
+            >
+              New
+            </span>
+          ) : null}
+          {item.variants ? (
+            <span
+              className={cn(
+                "rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
+                dark ? "bg-white/12 text-white backdrop-blur-md" : "bg-white/90 text-[#1d1d1f] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md",
+              )}
+            >
+              {item.variants} variants
+            </span>
+          ) : null}
+        </div>
       ) : null}
 
       <div
