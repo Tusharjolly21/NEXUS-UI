@@ -32,7 +32,7 @@ export type SignupFormProps = {
   onSignIn?: () => void;
   /** Types a demo signup and plays it through until someone touches the form. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -81,6 +81,10 @@ export function SignupForm({
   const [formError, setFormError] = React.useState<string | null>(null);
   const [state, setState] = React.useState<SubmitState>("idle");
   const touched = React.useRef(false);
+  const playRef = React.useRef(play);
+  React.useEffect(() => {
+    playRef.current = play;
+  });
   const alive = React.useRef(true);
   const min = Math.max(6, minPasswordLength);
 
@@ -153,23 +157,38 @@ export function SignupForm({
   React.useEffect(() => {
     if (!autoplay) return;
     const put = (k: keyof SignupFormValues) => (v: string) => setValues((p) => ({ ...p, [k]: v }));
+    // the same very quiet tick as typing it: when a password rule turns green
+    const met = (p: string) => Number(p.length >= min) + Number(/[A-Za-z]/.test(p) && /\d/.test(p));
+    let typedPw = "";
+    const putPassword = (v: string) => {
+      if (met(v) > met(typedPw)) playRef.current.auto("tick", 0.25);
+      typedPw = v;
+      put("password")(v);
+    };
     const steps: [number, () => void][] = [
       [600, () => {}],
       ...(showNameField ? [...typeSteps(DEMO.firstName, put("firstName"), 70), [200, () => {}] as [number, () => void], ...typeSteps(DEMO.lastName, put("lastName"), 60)] : []),
       [250, () => {}],
       ...typeSteps(DEMO.email, put("email"), 45),
       [250, () => {}],
-      ...typeSteps(DEMO.password, put("password"), 65),
+      ...typeSteps(DEMO.password, putPassword, 65),
       ...(showConfirmPasswordField ? [[250, () => {}] as [number, () => void], ...typeSteps(DEMO.confirmPassword, put("confirmPassword"), 30)] : []),
-      [450, () => setState("loading")],
-      [1200, () => setState("success")],
+      [450, () => {
+        playRef.current.auto("tap");
+        setState("loading");
+      }],
+      [1200, () => {
+        playRef.current.auto("success");
+        setState("success");
+      }],
       [2400, () => {
+        typedPw = "";
         setState("idle");
         setValues({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "" });
       }],
     ];
     return playScript(steps, () => touched.current);
-  }, [autoplay, showNameField, showConfirmPasswordField]);
+  }, [autoplay, showNameField, showConfirmPasswordField, min]);
 
   const busy = state !== "idle";
   const ink = "text-[#1d1d1f] dark:text-[#f5f5f7]";

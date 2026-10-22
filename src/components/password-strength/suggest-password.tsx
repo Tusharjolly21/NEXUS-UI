@@ -56,7 +56,7 @@ export interface SuggestPasswordProps {
   onSubmit?: (password: string) => void;
   /** Extra classes for the card. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -107,6 +107,10 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
   const suggestedRef = useRef("");
   const running = useAutoplayGate(card, autoplay);
   const callbacks = useRef({ onChange, onUse });
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   useEffect(() => {
     callbacks.current = { onChange, onUse };
@@ -186,7 +190,10 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
         clearField();
       }, 0);
       at(openOffer, 700);
-      at(use, 2000);
+      at(() => {
+        playRef.current.auto("success", 0.5);
+        use();
+      }, 2000);
       at(clearField, 5200);
       "Sunny7".split("").forEach((_, i) => at(() => setPw("Sunny7".slice(0, i + 1)), 5800 + i * 130));
       at(() => setPw(""), 8600);

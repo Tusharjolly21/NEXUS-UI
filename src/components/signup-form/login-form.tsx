@@ -27,7 +27,7 @@ export type LoginFormProps = {
   onSignUp?: () => void;
   /** Types a demo sign-in and plays it through until someone touches the form. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -62,6 +62,10 @@ export function LoginForm({
   const [formError, setFormError] = React.useState<string | null>(null);
   const [state, setState] = React.useState<SubmitState>("idle");
   const touched = React.useRef(false);
+  const playRef = React.useRef(play);
+  React.useEffect(() => {
+    playRef.current = play;
+  });
   const alive = React.useRef(true);
   React.useEffect(() => {
     alive.current = true;
@@ -119,8 +123,14 @@ export function LoginForm({
         ...typeSteps("ada@northwind.co", put("email"), 50),
         [250, () => {}],
         ...typeSteps("orbit-2026", put("password"), 70),
-        [450, () => setState("loading")],
-        [1100, () => setState("success")],
+        [450, () => {
+          playRef.current.auto("tap");
+          setState("loading");
+        }],
+        [1100, () => {
+          playRef.current.auto("success");
+          setState("success");
+        }],
         [2200, () => {
           setState("idle");
           setValues({ email: "", password: "" });
