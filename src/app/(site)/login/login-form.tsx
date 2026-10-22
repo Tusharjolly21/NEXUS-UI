@@ -32,15 +32,26 @@ export function LoginForm() {
   const [oauthPending, setOauthPending] = React.useState<Provider | null>(null);
   const [cooldown, setCooldown] = React.useState(0);
 
-  /* /auth/callback redirects back here with ?error= when the OAuth exchange fails.
-     Never echo the raw param — anyone can craft a /login?error=... link. */
+  /* /auth/callback redirects back here with ?error= when the exchange fails. Supabase reports an
+     expired/used link in the URL #fragment, which survives that redirect, so check it too.
+     Never echo a raw param — anyone can craft a /login?error=... link; map known codes only. */
   React.useEffect(() => {
-    if (!authError) return;
-    toast.error(
-      authError === "missing_code"
-        ? "Sign-in was cancelled or expired. Please try again."
-        : "Sign-in failed. Please try again.",
-    );
+    const fragment = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const code = fragment.get("error_code") ?? authError;
+    if (!code) return;
+    const messages: Record<string, string> = {
+      otp_expired:
+        "This sign-in link has expired or was already used (email security scanners can use it up). Request a new one.",
+      pkce_missing:
+        "Open the link in the same browser you requested it from, or request a new one.",
+      missing_code: "Sign-in was cancelled or the link was incomplete. Please request a new link.",
+    };
+    /* This effect runs before <Toaster> (a later sibling in AppProviders) subscribes, and sonner
+       drops toasts published with no subscriber — defer one tick so the message is shown. */
+    const timer = window.setTimeout(() => {
+      toast.error(messages[code] ?? "Sign-in failed. Please try again.");
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [authError]);
 
   React.useEffect(() => {
