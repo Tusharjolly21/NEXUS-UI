@@ -28,7 +28,7 @@ export function FitPreview({
   exportName: string;
   canvas: readonly [w: number, h: number];
   focus: Rect;
-  /** Mount immediately instead of waiting for the tile to approach the viewport. */
+  /** Mount on the first render (no wait for the observer), for tiles that start on screen. */
   eager?: boolean;
   /** Ghost-cursor script (fractions of the canvas) that demonstrates the component. */
   demo?: DemoStep[];
@@ -52,19 +52,13 @@ export function FitPreview({
 
   React.useEffect(() => {
     const node = ref.current;
-    if (!node || eager) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setNear(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: "400px" },
-    );
+    if (!node) return;
+    // Mount near the viewport and unmount once well away from it, so scrolling a long wall never
+    // leaves hundreds of animated previews running at the same time.
+    const io = new IntersectionObserver(([entry]) => setNear(entry.isIntersecting), { rootMargin: "500px" });
     io.observe(node);
     return () => io.disconnect();
-  }, [eager]);
+  }, []);
 
   const [cw, ch] = canvas;
   const [fx, fy, fw, fh] = focus;

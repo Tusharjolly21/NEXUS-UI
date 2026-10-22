@@ -81,6 +81,8 @@ const nextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    // Optimised copies are kept for a month instead of a minute, so repeat visits skip the work.
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "i.pravatar.cc" },
@@ -141,6 +143,13 @@ const nextConfig = {
       {
         source: "/(.*)",
         headers: securityHeaders,
+      },
+      // Static media from /public (images, fonts, 3D models, videos, sounds): a day in the browser and
+      // CDN, then a week of serving the old copy while a fresh one loads. Not immutable, because
+      // some of these files are replaced in place under the same name.
+      {
+        source: "/:file*.(svg|png|jpg|jpeg|webp|avif|gif|ico|otf|woff2|glb|mp4|webm|ogg|mp3)",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
       },
       // Prevent indexing of URL-parameter pages that duplicate catalog content
       {

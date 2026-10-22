@@ -9,7 +9,7 @@ import { ComponentModal } from "./component-modal";
 import { GalleryTile, TileCell, TileGrid } from "./gallery-tile";
 import { INTERACTION_FILTERS, type GalleryItem, type Interaction } from "./types";
 import { useUrlParam } from "./use-url-param";
-import { Pagination, scrollToTop, usePage } from "./pagination";
+import { InfiniteSentinel, useInfiniteCount } from "./infinite-scroll";
 
 export type CategoryFilter = { id: string; label: string };
 
@@ -79,7 +79,7 @@ export function ComponentGallery({
   mobileLimit?: number;
   /** Shown at the right of the filter row (e.g. a "Browse all" link). */
   aside?: React.ReactNode;
-  /** Tiles per page when there is no `limit`. */
+  /** Tiles revealed at a time when there is no `limit`. */
   pageSize?: number;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
@@ -103,14 +103,12 @@ export function ComponentGallery({
       (!needle || `${i.name} ${i.description} ${i.categoryLabel}`.toLowerCase().includes(needle)),
   );
   const paged = !(limit && !filtering);
-  const pageCount = paged ? Math.max(1, Math.ceil(matches.length / pageSize)) : 1;
-  const [page, setPage] = usePage(pageCount);
-  const gridTop = React.useRef<HTMLDivElement>(null);
-  const shown = !paged ? matches.slice(0, limit) : matches.slice((page - 1) * pageSize, page * pageSize);
-  const goTo = (next: number) => {
-    setPage(next);
-    scrollToTop(gridTop.current);
-  };
+  const infinite = useInfiniteCount({
+    total: matches.length,
+    batch: pageSize,
+    storeKey: `gallery|${limit ?? 0}|${access}|${interaction}|${category}|${needle}`,
+  });
+  const shown = !paged ? matches.slice(0, limit) : matches.slice(0, infinite.count);
   const openItem = openSlug ? (items.find((i) => i.slug === openSlug) ?? null) : null;
   const counts = React.useMemo(() => {
     const c = new Map<string, number>();
@@ -123,12 +121,11 @@ export function ComponentGallery({
     setCategory("all");
     setQuery("");
     setAccessParam(null);
-    setPage(1);
   };
 
   return (
     <>
-      <div ref={gridTop} className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         {searchable ? (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <label className="pg-float flex h-[52px] w-full max-w-[560px] items-center gap-3 rounded-full bg-card px-5">
@@ -138,7 +135,6 @@ export function ComponentGallery({
               value={query}
               onChange={(e) => {
                 setQuery(e.target.value);
-                setPage(1);
               }}
               placeholder={`Search ${items.length} components`}
               className="h-full min-w-0 flex-1 bg-transparent text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
@@ -154,7 +150,6 @@ export function ComponentGallery({
             counts={accessCounts}
             onChange={(a) => {
               setAccessParam(a === "all" ? null : a);
-              setPage(1);
             }}
           />
           </div>
@@ -168,8 +163,7 @@ export function ComponentGallery({
                 active={interaction === f.value}
                 onClick={() => {
                   setInteraction(f.value);
-                  setPage(1);
-                }}
+                  }}
               >
                 {f.label}
                 {f.value !== "all" ? (
@@ -196,7 +190,6 @@ export function ComponentGallery({
               active={category === "all"}
               onClick={() => {
                 setCategory("all");
-                setPage(1);
               }}
               className="py-1.5 text-[13px]"
             >
@@ -208,8 +201,7 @@ export function ComponentGallery({
                 active={category === c.id}
                 onClick={() => {
                   setCategory(c.id);
-                  setPage(1);
-                }}
+                  }}
                 className="py-1.5 text-[13px]"
               >
                 {c.label}
@@ -228,7 +220,9 @@ export function ComponentGallery({
           ))}
         </TileGrid>
       ) : null}
-      {shown.length && paged ? <Pagination page={page} pageCount={pageCount} onChange={goTo} label="Component pages" className="mt-12" /> : null}
+      {shown.length && paged && !infinite.done ? (
+        <InfiniteSentinel onMore={infinite.more} shown={shown.length} total={matches.length} noun="components" className="mt-12" />
+      ) : null}
       {shown.length ? null : (
         <div className="mt-6 rounded-tile bg-card px-6 py-16 text-center">
           <p className="text-[17px] font-semibold text-foreground">No components match.</p>

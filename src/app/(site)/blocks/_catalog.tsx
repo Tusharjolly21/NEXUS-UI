@@ -7,7 +7,7 @@ import { TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import type { GalleryItem } from "@/components/gallery/types";
 import * as React from "react";
 import { useUrlParam } from "@/components/gallery/use-url-param";
-import { Pagination, scrollToTop, usePage } from "@/components/gallery/pagination";
+import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ export type BlockTileItem = GalleryItem & {
   blockName: string;
 };
 
-/** Sections per page: block tiles are large, so a page is a dozen. */
+/** Sections revealed at a time: block tiles are large, so a batch is a dozen. */
 const PAGE_SIZE = 12;
 
 export type BlockFilter = { slug: string; name: string; count: number };
@@ -90,28 +90,18 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
   const [param, setParam] = useUrlParam("block");
   const active = filters.find((f) => f.slug === param) ?? null;
   const matches = active ? items.filter((i) => i.block === active.slug) : items;
-  const pageCount = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
-  const [page, setPage] = usePage(pageCount);
-  const top = React.useRef<HTMLDivElement>(null);
-  const shown = matches.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const pick = (slug: string | null) => {
-    setParam(slug);
-    setPage(1);
-  };
-  const goTo = (next: number) => {
-    setPage(next);
-    scrollToTop(top.current);
-  };
+  const infinite = useInfiniteCount({ total: matches.length, batch: PAGE_SIZE, storeKey: `blocks|${active?.slug ?? ""}` });
+  const shown = matches.slice(0, infinite.count);
 
   return (
-    <div ref={top} className="scroll-mt-28">
+    <div className="scroll-mt-28">
       <ChipRail>
-        <Chip active={!active} onClick={() => pick(null)}>
+        <Chip active={!active} onClick={() => setParam(null)}>
           All
           <span className="text-[12px] opacity-60">{items.length}</span>
         </Chip>
         {filters.map((f) => (
-          <Chip key={f.slug} active={active?.slug === f.slug} onClick={() => pick(f.slug)}>
+          <Chip key={f.slug} active={active?.slug === f.slug} onClick={() => setParam(f.slug)}>
             {f.name}
             <span className="text-[12px] opacity-60">{f.count}</span>
           </Chip>
@@ -130,7 +120,9 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
         ))}
       </TileGrid>
 
-      <Pagination page={page} pageCount={pageCount} onChange={goTo} label="Block pages" className="mt-12" />
+      {infinite.done ? null : (
+        <InfiniteSentinel onMore={infinite.more} shown={shown.length} total={matches.length} noun="sections" className="mt-12" />
+      )}
     </div>
   );
 }

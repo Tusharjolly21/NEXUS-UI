@@ -55,13 +55,14 @@ export function AsciiWake({ height = 300, accent = "#0071e3", autoplay = false }
 
   useEffect(() => {
     const cv = canvas.current!;
+    const box = wrap.current!;
     const ctx = cv.getContext("2d")!;
     let raf = 0;
     let w = 0, h = 0;
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const CW = 10, CH = 15;
     const resize = () => {
-      w = wrap.current!.clientWidth;
+      w = box.clientWidth;
       h = height;
       cv.width = w * dpr;
       cv.height = h * dpr;
@@ -70,7 +71,7 @@ export function AsciiWake({ height = 300, accent = "#0071e3", autoplay = false }
     };
     resize();
     const ro = new ResizeObserver(resize);
-    ro.observe(wrap.current!);
+    ro.observe(box);
 
     const LIFE = 1400;
     const draw = (now: number) => {
