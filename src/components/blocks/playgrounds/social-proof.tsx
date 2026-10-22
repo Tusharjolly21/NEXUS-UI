@@ -1,10 +1,44 @@
 "use client";
 
+import { Clothesline } from "@/components/blocks/motion-kit/clothesline";
 import { CountingStats } from "@/components/blocks/motion-kit/counting-stats";
 import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
 import type { BlockPlaygrounds } from "./types";
 
 const playgrounds: BlockPlaygrounds = {
+  "mk-clothesline": {
+    Component: Clothesline,
+    props: [
+      {
+        name: "autoplay",
+        type: "boolean",
+        description: "Plucks the line and sends a gust every 1.8 s until the visitor touches it. Never runs under reduced motion.",
+        defaultValue: "false",
+      },
+      {
+        name: "hint",
+        type: "string",
+        description: "Small line under the washing line.",
+        defaultValue: '"Pluck the line, tug a card, or click one to read it."',
+      },
+      { name: "closeLabel", type: "string", description: "Label of the button inside an opened testimonial.", defaultValue: '"Close"' },
+      {
+        name: "people",
+        type: "ClotheslineTestimonial[]",
+        description:
+          "Testimonials: name, role, quote, a two-colour gradient hue and the rope point (1 to 28) the peg clips onto. Four fit well; use a stable array.",
+        defaultValue: "DEFAULT_CLOTHESLINE_PEOPLE",
+      },
+      {
+        name: "onAction",
+        type: '(action: "open" | "close", person: ClotheslineTestimonial) => void',
+        description: "Called when a testimonial is opened or closed. Nothing navigates.",
+      },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    jsxName: "Clothesline",
+    importLine: 'import { Clothesline } from "@/components/blocks/motion-kit/clothesline";',
+  },
   "mk-counting-stats": {
     Component: CountingStats,
     props: [

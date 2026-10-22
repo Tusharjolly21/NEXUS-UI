@@ -8202,6 +8202,289 @@ export function LaunchAnnouncement() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "vinyl-player",
+    name: "Vinyl Player",
+    registryCliName: "vinyl-player",
+    description:
+      "A music player you play like a turntable: press play and the tonearm swings on while the platter spins up, grab the record to scrub exactly as far as you turn it, or fling it to coast. Skipping slides a new record onto the platter.",
+    categorySlug: "cards",
+    tags: ["music player", "vinyl", "turntable", "record", "scrub", "audio ui", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 155,
+    createdAt: "2026-10-22",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "tracks", type: "VinylTrack[]", description: "Records on the shelf. Each has title, artist, length (seconds) and label, two CSS colours for the centre label. Defaults to three sample tracks." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Starts the record, scratches now and then and changes records until someone touches the player." },
+    ],
+    Preview: Previews.PreviewVinylPlayer,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { VinylPlayer } from "@/components/vinyl-player";
+
+export function NowPlaying() {
+  return (
+    <VinylPlayer
+      tracks={[
+        { title: "Slow Hours", artist: "Mira Lune", length: 214, label: ["#ff9f0a", "#ff375f"] },
+        { title: "Paper Boats", artist: "The Quiet Fleet", length: 187, label: ["#64d2ff", "#0071e3"] },
+      ]}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ferrofluid-record",
+    name: "Ferrofluid Record",
+    registryCliName: "ferrofluid-record",
+    description:
+      "A record button drawn as a drop of ferrofluid on a canvas. It grows spikes towards your cursor like a magnet, bristles in time with a simulated voice while recording, and melts back to a smooth bead when you stop.",
+    categorySlug: "inputs-controls",
+    tags: ["record button", "ferrofluid", "canvas", "voice note", "magnet", "audio ui", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-22",
+    animationKinds: ["hover", "press", "magnetic", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Moves a pretend magnet around the drop and records a few short notes until someone touches it. Skipped when the user prefers reduced motion." },
+    ],
+    Preview: Previews.PreviewFerrofluidRecord,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FerrofluidRecord } from "@/components/ferrofluid-record";
+
+export function VoiceNoteComposer() {
+  return (
+    <div className="flex justify-center py-10">
+      <FerrofluidRecord />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "sand-timer",
+    name: "Sand Timer",
+    registryCliName: "sand-timer",
+    description:
+      "A session timer drawn as a real hourglass: every grain is simulated on a canvas, piling, sliding and funneling through the neck at exactly the rate the time runs out. Pressing the button turns the glass over.",
+    categorySlug: "loaders",
+    tags: ["hourglass", "timer", "countdown", "sand", "canvas", "simulation", "session", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 147,
+    createdAt: "2026-10-22",
+    animationKinds: ["spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "seconds", type: "number", defaultValue: "30", description: "How long a full glass takes to run out, in seconds. The readout counts down from the same value." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Turns the glass over by itself when the top is nearly empty, until someone presses the button." },
+    ],
+    Preview: Previews.PreviewSandTimer,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SandTimer } from "@/components/sand-timer";
+
+export function SessionExpiry() {
+  return (
+    <div className="grid place-items-center py-16">
+      <SandTimer seconds={120} />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "zipper-reveal",
+    name: "Zipper Reveal",
+    registryCliName: "zipper-reveal",
+    description:
+      "A fabric pouch you unzip to reveal an invite code. The teeth part into a V above the slider, the fabric pulls back with a shadow beneath it, and the pull tab swings as you drag.",
+    categorySlug: "cards",
+    tags: ["zipper", "reveal", "invite", "drag", "svg", "pouch", "unlock", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 149,
+    createdAt: "2026-10-22",
+    animationKinds: ["drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "code", type: "string", defaultValue: '"NXS-8F2Q-PRO"', description: "Invite code shown inside the pouch and copied by the button." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Zips itself open and shut until someone grabs the pull." },
+    ],
+    Preview: Previews.PreviewZipperReveal,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ZipperReveal } from "@/components/zipper-reveal";
+
+export function InviteGift() {
+  return (
+    <div className="grid place-items-center py-12">
+      <ZipperReveal code="LAUNCH-7K4M" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "slingshot-send",
+    name: "Slingshot Send",
+    registryCliName: "slingshot-send",
+    description:
+      "A chat composer whose send button is a slingshot: pull the stone back to stretch the bands and let go, and your message flies along an arc and lands in the thread with a squash. Enter in the field, or Enter or Space on the focused stone, still sends it.",
+    categorySlug: "inputs-controls",
+    tags: ["send button", "chat", "composer", "slingshot", "drag", "messaging", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 156,
+    createdAt: "2026-10-22",
+    animationKinds: ["drag", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "name", type: "string", defaultValue: '"Maya"', description: "Name in the thread header; its first letter is the avatar." },
+      { name: "onSend", type: "(text: string) => void", description: "Called with the trimmed text when a message is fired. Nothing is ever sent over the network by the component." },
+      { name: "autoReply", type: "boolean", defaultValue: "true", description: "Adds a canned reply from the other person about a second after each message lands." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types, pulls back and fires messages by itself until someone touches the component." },
+    ],
+    Preview: Previews.PreviewSlingshotSend,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SlingshotSend } from "@/components/slingshot-send";
+
+export function ChatComposer() {
+  return (
+    <SlingshotSend
+      name="Maya"
+      onSend={(text) => {
+        // hand the message to your own API, store or socket here
+        console.log("fired:", text);
+      }}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "domino-select",
+    name: "Domino Select",
+    registryCliName: "domino-select",
+    description:
+      "A mail list with a select-all box that topples the rows like dominoes: each row tips onto the next in a chain, then springs back up ticked. Unticking runs the chain from the bottom, and single rows toggle with a small nod.",
+    categorySlug: "inputs-controls",
+    tags: ["select all", "checkbox", "list", "email", "dominoes", "3d", "bulk actions", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-22",
+    animationKinds: ["3d", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "messages", type: "DominoMessage[]", description: "Rows to list; each has from, subject, time and color (avatar colour). Defaults to seven sample emails. Changing the row count resets the selection." },
+      { name: "onSelectionChange", type: "(selected: number[]) => void", description: "Called with the indexes of the ticked rows whenever the selection changes; during a chain it fires once per row." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Ticks and unticks the master box by itself until someone interacts." },
+    ],
+    Preview: Previews.PreviewDominoSelect,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { useState } from "react";
+import { DominoSelect } from "@/components/domino-select";
+
+export function Inbox() {
+  const [selected, setSelected] = useState<number[]>([]);
+
+  return (
+    <div className="grid gap-3">
+      <DominoSelect onSelectionChange={setSelected} />
+      <p className="text-sm text-neutral-500">{selected.length} rows ticked</p>
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "lenticular-pass",
+    name: "Lenticular Pass",
+    registryCliName: "lenticular-pass",
+    description:
+      "An event pass printed lenticular. Tilt it with the pointer, or drag it on a touch screen, and the day pass turns into the night pass strip by strip while light runs along the ridges.",
+    categorySlug: "cards",
+    tags: ["lenticular", "ticket", "event pass", "tilt", "3d", "hover", "holographic", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 148,
+    createdAt: "2026-10-22",
+    animationKinds: ["hover", "3d", "spring", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Rocks the card back and forth by itself until someone touches it. Skipped when the visitor prefers reduced motion." },
+    ],
+    Preview: Previews.PreviewLenticularPass,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { LenticularPass } from "@/components/lenticular-pass";
+
+export function SummitTicket() {
+  return (
+    <div className="flex justify-center py-12">
+      <LenticularPass />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "origami-pricing",
+    name: "Origami Pricing",
+    registryCliName: "origami-pricing",
+    description:
+      "A pricing card folded like a paper map. Tap it and it opens in two folds: the features panel swings out, then the quote and call-to-action drop down, with creases darkening mid-turn.",
+    categorySlug: "pricing-sections",
+    tags: ["pricing", "origami", "fold", "paper", "3d", "card", "plan", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 144,
+    createdAt: "2026-10-22",
+    animationKinds: ["3d", "spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "planName", type: "string", defaultValue: '"Nexus Pro"', description: "Plan name on the cover; its first letter becomes the logo tile." },
+      { name: "price", type: "string", defaultValue: '"$9"', description: "Price on the cover, including the currency symbol." },
+      { name: "period", type: "string", defaultValue: '"/mo"', description: "Small unit after the price." },
+      { name: "features", type: "string[]", defaultValue: '["All components", "All templates", "Source + Figma", "Requests first"]', description: "Lines in the features panel." },
+      { name: "quote", type: "string", defaultValue: '"Paid for itself in the first week."', description: "Customer quote on the lower-left panel." },
+      { name: "author", type: "string", defaultValue: '"Maya, Loop"', description: "Who said it." },
+      { name: "ctaLabel", type: "string", defaultValue: '"Start free trial"', description: "Label of the button on the last panel." },
+      { name: "note", type: "string", defaultValue: '"14 days · cancel anytime"', description: "Small line under the button." },
+      { name: "onCtaClick", type: "() => void", description: "Called when the button is pressed. The card never navigates or takes payment on its own." },
+      { name: "caption", type: "string", defaultValue: '"Two folds: out, then down."', description: "Line under the card; pass an empty string to hide it." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Folds and unfolds by itself until someone taps the card. Skipped when the visitor prefers reduced motion." },
+    ],
+    Preview: Previews.PreviewOrigamiPricing,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { OrigamiPricing } from "@/components/origami-pricing";
+
+export function ProPlan() {
+  return (
+    <div className="flex justify-center py-12">
+      <OrigamiPricing
+        planName="Studio"
+        price="$19"
+        features={["Unlimited projects", "Custom domains", "Team seats", "Priority support"]}
+        ctaLabel="Start free trial"
+        onCtaClick={() => console.log("open the checkout flow")}
+      />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 export function getLibraryComponent(slugOrRegistryName: string) {
