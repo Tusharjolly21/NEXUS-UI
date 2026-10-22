@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
-import { AnimatePresence, animate, motion, useMotionTemplate, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
+import { AnimatePresence, animate, motion, useMotionTemplate, useMotionValue, useReducedMotion, useTransform, type ValueAnimationTransition } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 export interface ChatHeadProps {
@@ -23,7 +23,7 @@ const M = 14;
 const INCOMING = ["Lunch at 1?", "Sent you the deck", "Did the build go out?", "Look at this animation", "Free for a quick call?"];
 const QUICK = ["On it", "Give me 5", "Yes!"];
 const FOCUS = "outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]";
-const INSTANT = { duration: 0 } as const;
+const INSTANT: ValueAnimationTransition = { duration: 0 };
 
 /** A ref that reads true while the element is on screen and the tab is visible. Read it inside timers. */
 function useOnScreen(ref: RefObject<HTMLElement | null>) {
@@ -117,7 +117,7 @@ export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, 
     return () => ro.disconnect();
   }, [x]);
 
-  const spring = useCallback(<T extends object>(cfg: T): T | typeof INSTANT => (still ? INSTANT : cfg), [still]);
+  const spring = useCallback((cfg: ValueAnimationTransition): ValueAnimationTransition => (still ? INSTANT : cfg), [still]);
 
   const snap = (vx = 0) => {
     const w = wRef.current;

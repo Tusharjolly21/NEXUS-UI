@@ -189,7 +189,7 @@ function Layout({ mode, clock, onAction }: { mode: Mode; clock: MotionValue<numb
       <div className="relative">
         <span className={`relative inline-flex rounded-full px-3 py-1 text-[13px] font-medium ${box("bg-[#eef5ff] text-[#0071e3] dark:bg-[#0a84ff]/15 dark:text-[#0a84ff]")}`}>
           New · Variables 2.0
-          <Note mode={mode} className="-top-4 left-0">&lt;Badge tone="blue" /&gt;</Note>
+          <Note mode={mode} className="-top-4 left-0">&lt;Badge tone=&quot;blue&quot; /&gt;</Note>
         </span>
         <h1
           className={`relative m-0 mt-5 text-[clamp(38px,5.4vw,64px)] font-semibold leading-[1.02] tracking-[-0.045em] ${
@@ -213,7 +213,7 @@ function Layout({ mode, clock, onAction }: { mode: Mode; clock: MotionValue<numb
         <div className="relative mt-8 flex flex-wrap gap-3">
           <Pill mode={mode} onPress={() => onAction?.("primary")} className={box("bg-[#0071e3] text-white dark:bg-[#0a84ff]")}>
             Start building
-            <Note mode={mode} className="-bottom-4 left-0">&lt;Button size="lg" /&gt;</Note>
+            <Note mode={mode} className="-bottom-4 left-0">&lt;Button size=&quot;lg&quot; /&gt;</Note>
           </Pill>
           <Pill
             mode={mode}

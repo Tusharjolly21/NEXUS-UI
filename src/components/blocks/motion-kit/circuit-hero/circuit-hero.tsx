@@ -376,7 +376,7 @@ export function CircuitHero({ autoplay = false, onAction, className }: CircuitHe
     const r = wrap.current?.getBoundingClientRect();
     return r ? { x: e.clientX - r.left, y: e.clientY - r.top } : { x: 0, y: 0 };
   };
-  const press = (label: "primary" | "secondary") => (e: ReactMouseEvent<HTMLButtonElement>) => {
+  const press = (e: ReactMouseEvent<HTMLButtonElement>, label: "primary" | "secondary") => {
     // keyboard activation has no pointer, so the signal leaves from the button itself
     if (e.detail === 0) {
       const b = e.currentTarget.getBoundingClientRect();
@@ -458,7 +458,7 @@ export function CircuitHero({ autoplay = false, onAction, className }: CircuitHe
         >
           <button
             type="button"
-            onClick={press("primary")}
+            onClick={(e) => press(e, "primary")}
             className={cn(
               "rounded-full bg-[#0071e3] px-6 py-3 text-[15px] font-medium text-white transition-colors hover:bg-[#0077ed] dark:bg-[#0a84ff] dark:hover:bg-[#409cff]",
               ring,
@@ -468,7 +468,7 @@ export function CircuitHero({ autoplay = false, onAction, className }: CircuitHe
           </button>
           <button
             type="button"
-            onClick={press("secondary")}
+            onClick={(e) => press(e, "secondary")}
             className={cn(
               "rounded-full bg-white px-6 py-3 text-[15px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.1)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_#3a3a3c]",
               ring,

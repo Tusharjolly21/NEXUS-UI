@@ -207,7 +207,6 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
     const el = listEl.querySelector<HTMLElement>(`[data-id="${p.id}"]`);
     if (!el) {
       inFlight.current = false;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- the bubble must be measured after layout
       setMsgs((m) => m.map((x) => (x.id === p.id ? { ...x, hidden: false } : x)));
       return;
     }
