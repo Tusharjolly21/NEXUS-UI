@@ -839,9 +839,9 @@ export function UploadStatus({ progress }: { progress: number }) {
   {
     slug: "milestone-timeline",
     name: "Milestone Timeline",
-    description: "A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes.",
+    description: "A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes. Also includes Roadmap Scrubber, an edit-style timeline where you drag a playhead and every bar fills to that day. Also includes Commit Graph Roadmap, a roadmap drawn as git log --graph with release tags, branch lanes and a pulsing HEAD.",
     categorySlug: "timelines",
-    tags: ["timeline", "roadmap", "milestones", "progress", "changelog", "motion kit", "framer-motion"],
+    tags: ["timeline", "roadmap", "milestones", "progress", "changelog", "motion kit", "framer-motion", "roadmap scrubber", "gantt timeline", "commit graph roadmap", "git graph timeline"],
     premium: false,
     trendingScore: 71,
     createdAt: "2026-02-18",
@@ -854,8 +854,85 @@ export function UploadStatus({ progress }: { progress: number }) {
       { name: "defaultOpen", type: "number", description: "Milestone opened first; defaults to the current one." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Opens each milestone in turn until someone touches the timeline." },
       { name: "className", type: "string", description: "Extra classes on the section." },
+      { name: "RoadmapScrubber.tracks", type: "RoadmapScrubberTrack[]", defaultValue: "Design, Engineering and Launch sample for 2026", description: "Tracks to draw. Each has a name, bars with start and end dates, and milestone marks with a date. Dates are YYYY-MM-DD." },
+      { name: "RoadmapScrubber.year", type: "number", defaultValue: "2026", description: "The calendar year the chart spans, January to December. Dates outside it clamp to the edges." },
+      { name: "RoadmapScrubber.today", type: "string", defaultValue: "\"2026-06-15\"", description: "The date marked as today and the end point of the opening sweep. The component never reads the real clock, so it renders the same everywhere." },
+      { name: "RoadmapScrubber.title", type: "string", defaultValue: "\"Roadmap <year>\"", description: "Heading of the card." },
+      { name: "RoadmapScrubber.autoplay", type: "boolean", defaultValue: "false", description: "After the opening sweep, glides the playhead through the year and back to today until someone touches the chart." },
+      { name: "RoadmapScrubber.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "CommitGraphRoadmap.commits", type: "RoadmapCommit[]", defaultValue: "8-commit sample roadmap", description: "Commits, newest first. Each has a lane (0 main, 1 feature, 2 lab), a title, a meta line, a body, a state (done, head or next) and an optional release tag." },
+      { name: "CommitGraphRoadmap.branches", type: "RoadmapBranch[]", defaultValue: "feature and lab lanes of the sample", description: "Branch lanes that fork from main at row from and merge back at row to. Row 0 is the top." },
+      { name: "CommitGraphRoadmap.defaultOpen", type: "number", defaultValue: "the HEAD row", description: "Row whose commit message is open first." },
+      { name: "CommitGraphRoadmap.autoplay", type: "boolean", defaultValue: "false", description: "Opens each commit in turn once the graph is on screen, until someone touches it." },
+      { name: "CommitGraphRoadmap.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewMilestoneTimelineRedesign,
+    previewSections: [
+      {
+        title: "Milestone Timeline",
+        Preview: Previews.PreviewMilestoneTimelineRedesign,
+        reactSource: `"use client";
+
+import { MilestoneTimeline } from "@/components/milestone-timeline";
+
+export function Roadmap() {
+  return (
+    <MilestoneTimeline
+      heading="Roadmap"
+      milestones={[
+        { title: "Research", date: "Jan 2026", description: "Twenty customer interviews.", status: "done" },
+        { title: "Design system v1", date: "Mar 2026", description: "Tokens, type and 40 components.", status: "done" },
+        { title: "Private beta", date: "Jun 2026", description: "312 teams onboarded.", status: "current", tag: "In progress" },
+        { title: "Public launch", date: "Sep 2026", description: "Pricing, docs and the launch film.", status: "upcoming" },
+      ]}
+    />
+  );
+}`,
+      },
+      {
+        title: "Roadmap Scrubber",
+        Preview: Previews.PreviewRoadmapScrubber,
+        reactSource: `"use client";
+
+import { RoadmapScrubber, type RoadmapScrubberTrack } from "@/components/milestone-timeline";
+
+const TRACKS: RoadmapScrubberTrack[] = [
+  {
+    name: "Design",
+    bars: [{ label: "Design system", start: "2026-01-01", end: "2026-03-26" }],
+  },
+  {
+    name: "Launch",
+    bars: [{ label: "Private beta", start: "2026-05-17", end: "2026-08-17" }],
+    marks: [{ label: "Public launch", date: "2026-09-16" }],
+  },
+];
+
+export function ProductRoadmap() {
+  return <RoadmapScrubber tracks={TRACKS} year={2026} today="2026-06-15" title="Roadmap 2026" />;
+}
+`,
+      },
+      {
+        title: "Commit Graph Roadmap",
+        Preview: Previews.PreviewCommitGraphRoadmap,
+        reactSource: `"use client";
+
+import { CommitGraphRoadmap, type RoadmapBranch, type RoadmapCommit } from "@/components/milestone-timeline";
+
+const COMMITS: RoadmapCommit[] = [
+  { lane: 0, tag: "v2.0", title: "Public launch", meta: "Planned · Q3", body: "Pricing, docs and the launch film.", state: "next" },
+  { lane: 1, title: "Charts", meta: "In progress", body: "Animated charts that build as they enter.", state: "head" },
+  { lane: 0, tag: "v1.0", title: "Core library", meta: "Shipped · Jan", body: "The first forty components.", state: "done" },
+];
+const BRANCHES: RoadmapBranch[] = [{ lane: 1, from: 2, to: 0, color: "#bf5af2" }];
+
+export function ProductGraph() {
+  return <CommitGraphRoadmap commits={COMMITS} branches={BRANCHES} />;
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -3004,9 +3081,9 @@ export function LineByLine() {
   {
     slug: "animated-countdown",
     name: "Animated Countdown",
-    description: "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant.",
+    description: "Flip-style countdown timer with four variants — modern, digital, minimal, and classic. Smooth number transitions powered by Framer Motion. Also includes the Motion Kit Split-Flap Board variant. Also includes Watch Countdown, where days, hours, minutes and seconds empty around four concentric rings with glowing heads and rolling digits. Also includes Fuse Countdown, where a spark burns along a rope fuse at the pace of the clock and sets off a rocket and fireworks at zero.",
     categorySlug: "motion-effects",
-    tags: ["motion kit", "countdown", "timer", "flip", "launch", "framer-motion"],
+    tags: ["motion kit", "countdown", "timer", "flip", "launch", "framer-motion", "watch countdown", "ring countdown", "fuse countdown", "rocket launch countdown"],
     premium: false,
     trendingScore: 88,
     createdAt: "2026-04-10",
@@ -3023,6 +3100,15 @@ export function LineByLine() {
       { name: "SplitFlapBoard.onComplete", type: "() => void", description: "Called once when the countdown reaches zero." },
       { name: "SplitFlapBoard.autoplay", type: "boolean", defaultValue: "false", description: "Rotates the status line every 4.2s until someone presses the board. The countdown always runs." },
       { name: "SplitFlapBoard.className", type: "string", description: "Extra classes for the board." },
+      { name: "WatchCountdown.to", type: "Date | number", defaultValue: "12 days 7:43:21 after the clock starts", description: "Moment to count down to, as a Date or epoch milliseconds. Without it the card counts down from a fixed offset taken at the first client clock reading." },
+      { name: "WatchCountdown.title", type: "string", defaultValue: "\"Nexus 3.0 ships in\"", description: "Small caption above the rings." },
+      { name: "WatchCountdown.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "FuseCountdown.seconds", type: "number", defaultValue: "24", description: "How long the fuse burns, in seconds." },
+      { name: "FuseCountdown.title", type: "string", defaultValue: "\"Doors open in\"", description: "Caption shown while the fuse burns." },
+      { name: "FuseCountdown.launchMessage", type: "string", defaultValue: "\"Nexus 3.0 is out. Go look.\"", description: "Message shown once the rocket has gone up." },
+      { name: "FuseCountdown.onLaunch", type: "() => void", defaultValue: "undefined", description: "Called once each time the fuse reaches the rocket." },
+      { name: "FuseCountdown.autoplay", type: "boolean", defaultValue: "false", description: "After each launch, relights the fuse by itself until someone presses the card or the button." },
+      { name: "FuseCountdown.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
     ],
     previewSections: [
       {
@@ -3062,6 +3148,39 @@ export function LaunchBoard() {
     />
   );
 }`,
+      },
+      {
+        title: "Watch Countdown",
+        Preview: Previews.PreviewWatchCountdown,
+        reactSource: `"use client";
+
+import { WatchCountdown } from "@/components/animated-countdown";
+
+const LAUNCH = new Date("2026-12-01T09:00:00Z");
+
+export function LaunchRings() {
+  return <WatchCountdown to={LAUNCH} title="Nexus 3.0 ships in" />;
+}
+`,
+      },
+      {
+        title: "Fuse Countdown",
+        Preview: Previews.PreviewFuseCountdown,
+        reactSource: `"use client";
+
+import { FuseCountdown } from "@/components/animated-countdown";
+
+export function DoorsOpen() {
+  return (
+    <FuseCountdown
+      seconds={30}
+      title="Doors open in"
+      launchMessage="We are live."
+      onLaunch={() => console.log("launched")}
+    />
+  );
+}
+`,
       },
     ],
     detailPreviews: [
@@ -4000,9 +4119,9 @@ export function PostActions({ postId, likes, likedByMe }: { postId: string; like
     slug: "toast-stack",
     name: "Toast Stack",
     registryCliName: "toast-stack",
-    description: "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open.",
+    description: "Notifications that rest in a tidy stack: a new toast drops onto the pile squashed and springs into shape, and hover or focus fans the stack into a list. Fling a toast sideways and it tilts and skids off; with a duration set, the front toast counts down along its bottom edge and waits while the stack is open. Also includes Undo Toast, where an archived row shrinks into the toast, a ring counts down around Undo, and undo drops the row back in place. Also includes Promise Toast, a pill that follows a deploy step by step with progress filling behind the words and lands on a live link or an error with a way to the logs.",
     categorySlug: "cards",
-    tags: ["toast", "notification", "snackbar", "stack", "swipe", "dismiss", "feedback", "motion kit", "framer-motion"],
+    tags: ["toast", "notification", "snackbar", "stack", "swipe", "dismiss", "feedback", "motion kit", "framer-motion", "undo toast", "archive undo", "countdown ring", "promise toast", "progress toast", "deploy"],
     premium: false,
     trendingScore: 171,
     createdAt: "2026-10-19",
@@ -4019,8 +4138,91 @@ export function PostActions({ postId, likes, likedByMe }: { postId: string; like
       { name: "duration", type: "number", defaultValue: "0", description: "Dismiss the front toast after this many ms, paused while the stack is open. 0 keeps toasts until closed." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Fans the stack open and swipes the front toast away every few seconds until someone touches it." },
       { name: "className", type: "string", description: "Extra classes on the stack." },
+      { name: "UndoToast.mails", type: "UndoToastMail[]", defaultValue: "four demo messages", description: "The rows in the list: id, from, subject, time and an avatar colour (hue)." },
+      { name: "UndoToast.holdMs", type: "number", defaultValue: "5000", description: "How long the toast waits for an Undo. Hovering or focusing the toast pauses the countdown." },
+      { name: "UndoToast.onArchive", type: "(mail: UndoToastMail) => void", defaultValue: "undefined", description: "Called when a row is archived." },
+      { name: "UndoToast.onUndo", type: "(mails: UndoToastMail[]) => void", defaultValue: "undefined", description: "Called with the archived rows when Undo is pressed." },
+      { name: "UndoToast.autoplay", type: "boolean", defaultValue: "false", description: "Archives a row and undoes it on a loop until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "UndoToast.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "PromiseToast.onVisit", type: "() => void", defaultValue: "undefined", description: "Called when Visit is pressed on the success toast. Nothing navigates by itself." },
+      { name: "PromiseToast.onViewLogs", type: "() => void", defaultValue: "undefined", description: "Called when View logs is pressed on the failure toast." },
+      { name: "PromiseToast.autoplay", type: "boolean", defaultValue: "false", description: "Runs a good deploy and then a failing one on a loop until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "PromiseToast.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the wrapper." },
     ],
     Preview: Previews.PreviewToastStackRedesign,
+    previewSections: [
+      {
+        title: "Toast Stack",
+        Preview: Previews.PreviewToastStackRedesign,
+        reactSource: `"use client";
+
+import { ToastStack, useToastStack } from "@/components/toast-stack";
+
+export function CheckoutNotifications() {
+  const { toasts, push, dismiss } = useToastStack();
+
+  async function pay() {
+    const ok = await fetch("/api/pay", { method: "POST" }).then((r) => r.ok);
+    push(
+      ok
+        ? { type: "success", title: "Payment received", description: "Receipt sent to your inbox." }
+        : { type: "error", title: "Payment declined", description: "Try another card.", action: { label: "Retry" } },
+    );
+  }
+
+  return (
+    <>
+      <button onClick={pay}>Pay now</button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <ToastStack
+          toasts={toasts}
+          onDismiss={dismiss}
+          duration={5000}
+          onAction={(toast) => {
+            dismiss(toast.id);
+            void pay();
+          }}
+        />
+      </div>
+    </>
+  );
+}`,
+      },
+      {
+        title: "Undo Toast",
+        Preview: Previews.PreviewUndoToast,
+        reactSource: `"use client";
+
+import { UndoToast } from "@/components/toast-stack";
+
+export function InboxExample() {
+  return (
+    <UndoToast
+      onArchive={(mail) => console.log("archived", mail.subject)}
+      onUndo={(mails) => console.log("restored", mails.length)}
+    />
+  );
+}
+`,
+      },
+      {
+        title: "Promise Toast",
+        Preview: Previews.PreviewPromiseToast,
+        reactSource: `"use client";
+
+import { PromiseToast } from "@/components/toast-stack";
+
+export function DeployExample() {
+  return (
+    <PromiseToast
+      onVisit={() => console.log("visit pressed")}
+      onViewLogs={() => console.log("view logs pressed")}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -4061,9 +4263,9 @@ export function CheckoutNotifications() {
     slug: "upload-dropzone",
     name: "Upload Dropzone",
     registryCliName: "upload-dropzone",
-    description: "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone.",
+    description: "A file drop target with a list of uploads. While a file hovers, a little stack of sheets fans out over a tray and the dashed edge marches; when files land the tray squashes as it swallows them, each row fills a progress ring that turns into a drawn check, and rejected files shake the zone. Also includes Avatar Upload, a profile photo picker where you drag and zoom inside a circle and a ring draws itself around the avatar as it saves. Also includes Upload Queue, a list where each row is its own progress bar with pause, cancel and a whole-card drop target that counts the files.",
     categorySlug: "inputs-controls",
-    tags: ["upload", "dropzone", "file", "drag and drop", "progress", "form", "motion kit", "framer-motion"],
+    tags: ["upload", "dropzone", "file", "drag and drop", "progress", "form", "motion kit", "framer-motion", "avatar upload", "profile photo", "image crop", "upload queue", "upload progress", "file list"],
     premium: true,
     trendingScore: 158,
     createdAt: "2026-10-19",
@@ -4082,8 +4284,84 @@ export function CheckoutNotifications() {
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drops a few example files in by itself until someone touches it." },
       { name: "disabled", type: "boolean", defaultValue: "false", description: "Dims the zone and ignores drops and clicks." },
       { name: "className", type: "string", description: "Extra classes for the 340px-wide wrapper." },
+      { name: "AvatarUpload.onUpload", type: "(result: { file: File | null; src: string; zoom: number; x: number; y: number }) => void", defaultValue: "undefined", description: "Called when the simulated upload finishes, with the chosen file and framing. Nothing is sent anywhere, and src is an object URL revoked on unmount." },
+      { name: "AvatarUpload.onRemove", type: "() => void", defaultValue: "undefined", description: "Called after the photo is removed or the crop is cancelled." },
+      { name: "AvatarUpload.autoplay", type: "boolean", defaultValue: "false", description: "Runs a demo with a drawn photo (reach, frame, zoom, save) until someone touches the card." },
+      { name: "AvatarUpload.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
+      { name: "UploadQueue.onFiles", type: "(files: File[]) => void", defaultValue: "undefined", description: "Called with the files that were dropped or chosen. They are listed only; contents are never read or sent." },
+      { name: "UploadQueue.onComplete", type: "(name: string) => void", defaultValue: "undefined", description: "Called once per row when its simulated transfer ends." },
+      { name: "UploadQueue.onCancel", type: "(name: string) => void", defaultValue: "undefined", description: "Called when a row is cancelled." },
+      { name: "UploadQueue.autoplay", type: "boolean", defaultValue: "false", description: "Drops in three sample files, pauses one and resumes it, in a loop, until someone touches the card." },
+      { name: "UploadQueue.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewUploadDropzoneRedesign,
+    previewSections: [
+      {
+        title: "Upload Dropzone",
+        Preview: Previews.PreviewUploadDropzoneRedesign,
+        reactSource: `"use client";
+
+import { UploadDropzone } from "@/components/upload-dropzone";
+
+function upload(file: File, setProgress: (p: number) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/upload");
+    xhr.upload.onprogress = (e) => setProgress(e.loaded / e.total);
+    xhr.onload = () => (xhr.status < 300 ? resolve() : reject(new Error(xhr.statusText)));
+    xhr.onerror = () => reject(new Error("Network error"));
+    const body = new FormData();
+    body.append("file", file);
+    xhr.send(body);
+  });
+}
+
+export function Attachments() {
+  return (
+    <UploadDropzone
+      title="Drop your files"
+      accept="image/*,.pdf"
+      maxSize={10 * 1024 * 1024}
+      onUpload={upload}
+    />
+  );
+}`,
+      },
+      {
+        title: "Avatar Upload",
+        Preview: Previews.PreviewAvatarUpload,
+        reactSource: `"use client";
+
+import { AvatarUpload } from "@/components/upload-dropzone";
+
+export function ProfilePhoto() {
+  return (
+    <AvatarUpload
+      onUpload={({ file, zoom, x, y }) => console.log("framed", file?.name, zoom, x, y)}
+      onRemove={() => console.log("removed")}
+    />
+  );
+}
+`,
+      },
+      {
+        title: "Upload Queue",
+        Preview: Previews.PreviewUploadQueue,
+        reactSource: `"use client";
+
+import { UploadQueue } from "@/components/upload-dropzone";
+
+export function Assets() {
+  return (
+    <UploadQueue
+      onFiles={(files) => console.log("added", files.length)}
+      onComplete={(name) => console.log("done", name)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -4303,7 +4581,7 @@ export function AppTopBar() {
     description:
       "A six-box one-time-code field: digits spring in as you type, the boxes ripple while the code is checked, shake on a wrong code, and fold into a Verified pill on success.",
     categorySlug: "inputs-controls",
-    tags: ["otp", "one-time code", "verification", "2fa", "pin", "input", "motion kit", "framer-motion"],
+    tags: ["otp", "one-time code", "verification", "2fa", "pin", "input", "motion kit", "framer-motion", "otp autofill", "sms code", "one-time code autofill", "underline otp", "authenticator code", "boxless otp"],
     premium: false,
     trendingScore: 168,
     createdAt: "2026-10-19",
@@ -4316,8 +4594,68 @@ export function AppTopBar() {
       { name: "onResend", type: "() => void", description: "Called when “Resend code” is pressed." },
       { name: "autoplay", type: "string", description: "Types this code by itself, on a loop, until someone clicks in." },
       { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Focus ring, caret and success colour." },
+      { name: "OtpAutofill.code", type: "string", defaultValue: "\"482913\"", description: "The six digit code carried by the pretend text message and the only code that verifies. Anything that is not six digits falls back to the default." },
+      { name: "OtpAutofill.autoplay", type: "boolean", defaultValue: "false", description: "Plays the message, Fill, verify and start over on a loop until someone interacts. Stays off under reduced motion and pauses off screen or in a hidden tab." },
+      { name: "OtpAutofill.onVerified", type: "(code: string) => void", defaultValue: "undefined", description: "Called once the code verifies." },
+      { name: "OtpAutofill.onResend", type: "() => void", defaultValue: "undefined", description: "Called when Resend code is pressed." },
+      { name: "OtpAutofill.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "OtpLine.code", type: "string", defaultValue: "\"905172\"", description: "The six digit code that verifies. Anything that is not six digits falls back to the default." },
+      { name: "OtpLine.autoplay", type: "boolean", defaultValue: "false", description: "Types a wrong code and then the right one on a loop until someone interacts. Stays off under reduced motion and pauses off screen or in a hidden tab." },
+      { name: "OtpLine.onVerified", type: "(code: string) => void", defaultValue: "undefined", description: "Called once the right code is entered." },
+      { name: "OtpLine.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewOtpInput,
+    previewSections: [
+      {
+        title: "OTP Input",
+        Preview: Previews.PreviewOtpInput,
+        reactSource: `"use client";
+
+import { OtpInput } from "@/components/otp-input";
+
+export function VerifyPhone() {
+  return (
+    <OtpInput
+      verify={async (code) => {
+        const res = await fetch("/api/verify", { method: "POST", body: JSON.stringify({ code }) });
+        return res.ok;
+      }}
+      onVerified={() => (window.location.href = "/welcome")}
+      onResend={() => fetch("/api/verify/resend", { method: "POST" })}
+    />
+  );
+}`,
+      },
+      {
+        title: "OTP Autofill",
+        Preview: Previews.PreviewOtpAutofill,
+        reactSource: `"use client";
+
+import { OtpAutofill } from "@/components/otp-input";
+
+export function VerifyScreen() {
+  return (
+    <OtpAutofill
+      onVerified={(code) => console.log("verified", code)}
+      onResend={() => console.log("resend requested")}
+    />
+  );
+}
+`,
+      },
+      {
+        title: "Underline OTP",
+        Preview: Previews.PreviewOtpLine,
+        reactSource: `"use client";
+
+import { OtpLine } from "@/components/otp-input";
+
+export function TwoStepScreen() {
+  return <OtpLine code="905172" onVerified={(code) => console.log("verified", code)} />;
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -4506,7 +4844,7 @@ export function LiveCount({ value }: { value: number }) {
     description:
       "A password field with a four-segment meter that fills and recolours as you type, a rolling strength label, rules that tick themselves off, and an eye toggle that draws its own slash.",
     categorySlug: "signup-forms",
-    tags: ["password", "strength meter", "validation", "signup", "form", "input", "motion kit", "framer-motion"],
+    tags: ["password", "strength meter", "validation", "signup", "form", "input", "motion kit", "framer-motion", "crack time", "password meter", "log scale", "crack-time meter", "suggested password", "password generator", "sign up"],
     premium: false,
     trendingScore: 157,
     createdAt: "2026-10-19",
@@ -4516,8 +4854,72 @@ export function LiveCount({ value }: { value: number }) {
       { name: "onChange", type: "(value: string, score: number) => void", description: "Called on every keystroke with the password and its score from 0 to 4." },
       { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "Colour of the ticked rules and the focus ring." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample password until someone clicks in." },
+      { name: "CrackTimePassword.autoplay", type: "boolean", defaultValue: "false", description: "Types a few sample passwords by itself, on a loop, until the field is focused. Stays off under reduced motion and pauses off screen or in a hidden tab." },
+      { name: "CrackTimePassword.onChange", type: "(value: string, crackSeconds: number) => void", defaultValue: "undefined", description: "Called on every keystroke with the password and the estimated seconds a fast guessing rig needs to crack it." },
+      { name: "CrackTimePassword.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "SuggestPassword.email", type: "string", defaultValue: "\"maya@orbitly.com\"", description: "Email shown in the read-only field above the password." },
+      { name: "SuggestPassword.autoplay", type: "boolean", defaultValue: "false", description: "Plays the offer, taking it, choosing your own and typing on a loop until the field is focused. Stays off under reduced motion and pauses off screen or in a hidden tab." },
+      { name: "SuggestPassword.onChange", type: "(password: string) => void", defaultValue: "undefined", description: "Called with the new password when the visitor types or takes the suggestion." },
+      { name: "SuggestPassword.onUse", type: "(password: string) => void", defaultValue: "undefined", description: "Called when the suggested password is taken." },
+      { name: "SuggestPassword.onSubmit", type: "(password: string) => void", defaultValue: "undefined", description: "Called with the current password when Create account is pressed. The component sends nothing anywhere." },
+      { name: "SuggestPassword.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewPasswordStrength,
+    previewSections: [
+      {
+        title: "Password Strength",
+        Preview: Previews.PreviewPasswordStrength,
+        reactSource: `"use client";
+
+import { useState } from "react";
+import { PasswordStrength } from "@/components/password-strength";
+
+export function CreatePassword() {
+  const [ok, setOk] = useState(false);
+  return (
+    <form className="flex flex-col gap-6">
+      <PasswordStrength onChange={(_, score) => setOk(score >= 3)} />
+      <button disabled={!ok} className="h-12 rounded-full bg-black text-white disabled:opacity-40">
+        Create account
+      </button>
+    </form>
+  );
+}`,
+      },
+      {
+        title: "Crack-time Meter",
+        Preview: Previews.PreviewCrackTimePassword,
+        reactSource: `"use client";
+
+import { CrackTimePassword } from "@/components/password-strength";
+
+export function ChoosePassword() {
+  return (
+    <CrackTimePassword
+      onChange={(value, crackSeconds) => console.log(value.length, crackSeconds)}
+    />
+  );
+}
+`,
+      },
+      {
+        title: "Suggested Password",
+        Preview: Previews.PreviewSuggestPassword,
+        reactSource: `"use client";
+
+import { SuggestPassword } from "@/components/password-strength";
+
+export function SignUpPassword() {
+  return (
+    <SuggestPassword
+      email="maya@orbitly.com"
+      onSubmit={(password) => console.log("create account", password.length)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -4578,7 +4980,7 @@ export function MemberWelcome() {
     description:
       "A settings panel with a sliding segmented control: rows slide in from the side you moved towards, the panel resizes to fit, and each row has an iOS-style switch whose knob stretches while pressed.",
     categorySlug: "inputs-controls",
-    tags: ["tabs", "segmented control", "switch", "toggle", "settings", "ios", "motion kit", "framer-motion"],
+    tags: ["tabs", "segmented control", "switch", "toggle", "settings", "ios", "motion kit", "framer-motion", "elastic tabs", "stretchy pill", "tab bar", "document tabs", "reorder tabs", "editor tabs"],
     premium: false,
     trendingScore: 156,
     createdAt: "2026-10-19",
@@ -4587,8 +4989,77 @@ export function MemberWelcome() {
     props: [
       { name: "accent", type: "string", defaultValue: '"#34c759"', description: "Colour of a switch that is on." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Flips switches and changes tabs until someone interacts." },
+      { name: "ElasticTabs.tabs", type: "ElasticTabItem[]", defaultValue: "four dashboard tabs", description: "The tabs: an id, a label and the content shown in the panel." },
+      { name: "ElasticTabs.label", type: "string", defaultValue: "\"Dashboard\"", description: "Accessible name for the tab list." },
+      { name: "ElasticTabs.onChange", type: "(id: string) => void", defaultValue: "undefined", description: "Called with the tab id whenever the selected tab changes." },
+      { name: "ElasticTabs.autoplay", type: "boolean", defaultValue: "false", description: "Steps through the tabs every 2.4s until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "ElasticTabs.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the card." },
+      { name: "DocumentTabs.initialTabs", type: "DocumentTab[]", defaultValue: "three demo tabs", description: "The tabs it starts with (id, title, url, color, letter). Closing the last tab brings these back." },
+      { name: "DocumentTabs.onActiveChange", type: "(id: number) => void", defaultValue: "undefined", description: "Called with the tab id when the active tab changes." },
+      { name: "DocumentTabs.autoplay", type: "boolean", defaultValue: "false", description: "Opens, switches, reorders and closes tabs on a loop until someone touches the component. Never runs under reduced motion and pauses when off screen." },
+      { name: "DocumentTabs.className", type: "string", defaultValue: "\"\"", description: "Extra classes for the window." },
     ],
     Preview: Previews.PreviewAnimatedTabs,
+    previewSections: [
+      {
+        title: "Animated Tabs",
+        Preview: Previews.PreviewAnimatedTabs,
+        reactSource: `"use client";
+
+import { useState } from "react";
+import { AnimatedTabs, Switch } from "@/components/animated-tabs";
+
+export function SettingsPage() {
+  return <AnimatedTabs />;
+}
+
+// The switch is exported on its own as well:
+export function WifiRow() {
+  const [on, setOn] = useState(true);
+  return (
+    <div className="flex items-center justify-between">
+      <span>Wi-Fi</span>
+      <Switch label="Wi-Fi" checked={on} onChange={setOn} />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Elastic Tabs",
+        Preview: Previews.PreviewElasticTabs,
+        reactSource: `"use client";
+
+import { ElasticTabs } from "@/components/animated-tabs";
+
+const tabs = [
+  { id: "one", label: "Overview", content: <p>Overview content</p> },
+  { id: "two", label: "Traffic", content: <p>Traffic content</p> },
+  { id: "three", label: "Reports", content: <p>Reports content</p> },
+];
+
+export function TabsExample() {
+  return <ElasticTabs tabs={tabs} label="Dashboard" onChange={(id) => console.log(id)} />;
+}
+`,
+      },
+      {
+        title: "Document Tabs",
+        Preview: Previews.PreviewDocumentTabs,
+        reactSource: `"use client";
+
+import { DocumentTabs } from "@/components/animated-tabs";
+
+const tabs = [
+  { id: 1, title: "Roadmap", url: "example.app/roadmap", color: "#0a84ff", letter: "R" },
+  { id: 2, title: "Notes", url: "example.app/notes", color: "#30d158", letter: "N" },
+];
+
+export function EditorExample() {
+  return <DocumentTabs initialTabs={tabs} onActiveChange={(id) => console.log(id)} />;
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 
@@ -4964,7 +5435,7 @@ export function ExportButton() {
     description:
       "Two copy controls: an ID chip whose icon morphs into a check under a ripple and a Copied tooltip, and a command line whose button rolls from Copy to Copied.",
     categorySlug: "inputs-controls",
-    tags: ["copy", "clipboard", "copy to clipboard", "api key", "command", "chip", "motion kit", "framer-motion"],
+    tags: ["copy", "clipboard", "copy to clipboard", "api key", "command", "chip", "motion kit", "framer-motion", "selection copy", "select and copy", "copy field", "secret key", "reveal key", "rotate key", "api key field"],
     premium: false,
     trendingScore: 156,
     createdAt: "2026-10-19",
@@ -4977,8 +5448,71 @@ export function ExportButton() {
       { name: "accent", type: "string", defaultValue: '"#0071e3"', description: "CopyChip: ripple and check colour." },
       { name: "command", type: "string", description: "CopyCommand: the shell command shown and copied." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Both: copy by themselves every few seconds until someone interacts." },
+      { name: "SelectCopy.fields", type: "{ label: string; value: string; mono?: boolean; prefix?: string }[]", defaultValue: "share link and install command", description: "The fields to render, one row each. The prefix is shown but never copied." },
+      { name: "SelectCopy.onCopy", type: "(value: string) => void", defaultValue: "undefined", description: "Called with the copied text after a real press. The autoplay demo never calls it." },
+      { name: "SelectCopy.autoplay", type: "boolean", defaultValue: "false", description: "Plays a visual-only copy on each field in turn until someone touches the card. Pauses off screen and in hidden tabs, and is off under reduced motion." },
+      { name: "SelectCopy.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
+      { name: "ApiKeyField.onCopy", type: "(key: string) => void", defaultValue: "undefined", description: "Called with the demo key after a real press of the copy button." },
+      { name: "ApiKeyField.onRotate", type: "(key: string) => void", defaultValue: "undefined", description: "Called with the new demo key after the user confirms a rotation." },
+      { name: "ApiKeyField.autoplay", type: "boolean", defaultValue: "false", description: "Reveals, copies and rotates by itself in a loop until someone touches the card. Never touches the clipboard." },
+      { name: "ApiKeyField.className", type: "string", defaultValue: "undefined", description: "Extra classes for the card." },
     ],
     Preview: Previews.PreviewCopyButton,
+    previewSections: [
+      {
+        title: "Copy Button",
+        Preview: Previews.PreviewCopyButton,
+        reactSource: `"use client";
+
+import { CopyChip, CopyCommand } from "@/components/copy-button";
+
+export function ApiKeyRow({ keyId }: { keyId: string }) {
+  return (
+    <div className="flex flex-col items-start gap-4">
+      <CopyChip value={keyId} display={\`\${keyId.slice(0, 7)}…\${keyId.slice(-4)}\`} />
+      <CopyCommand command="npx shadcn@latest add @nexus-labs/copy-button" />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Selection Copy",
+        Preview: Previews.PreviewSelectCopy,
+        reactSource: `"use client";
+
+import { SelectCopy } from "@/components/copy-button";
+
+export function ShareCard() {
+  return (
+    <SelectCopy
+      fields={[
+        { label: "Share link", value: "nexus-ui.com/s/8fK2-motion-kit", mono: false },
+        { label: "Install", value: "npm i @nexus/motion", prefix: "$" },
+      ]}
+      onCopy={(value) => console.log("copied", value)}
+    />
+  );
+}
+`,
+      },
+      {
+        title: "API Key Field",
+        Preview: Previews.PreviewApiKeyField,
+        reactSource: `"use client";
+
+import { ApiKeyField } from "@/components/copy-button";
+
+export function KeySettings() {
+  return (
+    <ApiKeyField
+      onCopy={() => console.log("demo key copied")}
+      onRotate={(next) => console.log("new demo key", next)}
+    />
+  );
+}
+`,
+      },
+    ],
     previewShell: "plain",
     reactSource: `"use client";
 

@@ -86,6 +86,8 @@ const baseVariants: BlockVariant[] = [
   v("logos-swap", "block-logo-clouds", "Swap Animation"),
   v("logos-single-row", "block-logo-clouds", "Single Row Lift"),
   mk("loupe-logo-cloud", "block-logo-clouds", "Loupe Logo Cloud", "LoupeLogoCloud"),
+  mk("logo-stories", "block-logo-clouds", "Logo Stories", "LogoStories"),
+  mk("filterable-logo-wall", "block-logo-clouds", "Filterable Logo Wall", "FilterableLogoWall"),
 
   v("checkout-pay", "block-checkout-moments", "Pay & Confirm"),
   v("checkout-verify", "block-checkout-moments", "Verify Payment"),
@@ -140,6 +142,7 @@ const baseVariants: BlockVariant[] = [
   mk("counting-stats", "block-social-proof", "Counting Stats", "CountingStats"),
   mk("wall-of-love", "block-social-proof", "Wall of Love", "WallOfLove"),
   mk("clothesline", "block-social-proof", "Clothesline", "Clothesline"),
+  mk("velocity-marquee", "block-social-proof", "Velocity Marquee", "VelocityMarquee"),
 
   mk("typo-catching-signup", "block-newsletter", "Typo-catching Signup", "TypoCatchingSignup"),
 

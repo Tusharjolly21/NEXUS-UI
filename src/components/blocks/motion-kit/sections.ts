@@ -45,6 +45,9 @@ import { InstantSearchFaq } from "./instant-search-faq";
 import { CollapsingRail } from "./collapsing-rail";
 import { VoiceNoteContact } from "./voice-note-contact";
 import { TypoCatchingSignup } from "./typo-catching-signup";
+import { VelocityMarquee } from "./velocity-marquee";
+import { LogoStories } from "./logo-stories";
+import { FilterableLogoWall } from "./filterable-logo-wall";
 
 /** Gallery stages take `compact`, not `autoplay` (they always play); the block page passes autoplay. */
 const asSection = (c: ComponentType<{ compact?: boolean }>) => c as unknown as ComponentType<{ autoplay?: boolean }>;
@@ -98,4 +101,8 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-animated-bento-grid": asSection(PreviewAnimatedBentoGridRedesign),
   "mk-bento-grid-skeleton": asSection(PreviewBentoGridSkeletonRedesign),
   "mk-scrolling-testimonials": asSection(PreviewScrollingTestimonialsRedesign),
+  // The marquee drifts on its own, so it has no autoplay prop to receive.
+  "mk-velocity-marquee": VelocityMarquee as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-logo-stories": LogoStories,
+  "mk-filterable-logo-wall": FilterableLogoWall,
 };
