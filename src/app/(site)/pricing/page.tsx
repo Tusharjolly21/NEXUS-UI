@@ -9,7 +9,7 @@ import { createMetadata, siteConfig } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
-const { components, freeComponents, proComponents, templates, freeTemplates, blocks } = CATALOG_COUNTS;
+const { components, freeComponents, proComponents, templates, freeTemplates, blocks, videos, freeVideos } = CATALOG_COUNTS;
 const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
 
 const PRO_PRICE = formatPrice(PRICES.pro);
@@ -42,6 +42,7 @@ const PLANS: Plan[] = [
       `${freeComponents} components with full source`,
       `${freeBlocks} of the ${blocks} section blocks`,
       `${freeTemplates} full templates, plus a first look at all ${templates}`,
+      `${freeVideos} of the ${videos} videos with their prompt and source`,
       "Commercial and client projects",
       "Install with the shadcn CLI",
     ],
@@ -57,6 +58,7 @@ const PLANS: Plan[] = [
       `All ${components} components, including ${proComponents} Pro`,
       `Full source of all ${templates} templates`,
       `All ${blocks} section blocks`,
+      `All ${videos} videos: prompt, source, live editing and render script`,
       "Every new template, block and component as it ships",
       "Request components, blocks and templates",
       "Priority support, 24 to 48 hours",
@@ -82,6 +84,7 @@ const COMPARE: [string, Cell, Cell, Cell][] = [
   ["Animated components", `${freeComponents} free`, `All ${components}`, `All ${components}`],
   ["Section blocks", `${freeBlocks} free`, `All ${blocks}`, `All ${blocks}`],
   ["Template source", "Preview only", true, true],
+  ["Videos", `${freeVideos} free`, `All ${videos}`, `All ${videos}`],
   ["Commercial and client use", true, true, true],
   ["New templates, blocks and components", "Free items", true, true],
   ["Requests", false, true, true],
@@ -122,6 +125,10 @@ const FAQ = [
   {
     q: "Can I get a refund?",
     a: "All-Access: a full refund if you ask within 7 days. Pro: if something doesn't work as described, write within 7 days and we'll fix it or refund you.",
+  },
+  {
+    q: "What comes with a video?",
+    a: `Every video plays in your browser with its own soundtrack. ${freeVideos} of the ${videos} come with everything: the build prompt, the React source, live editing of every word and colour, and a script that renders your edit to MP4. Pro unlocks the same for the rest.`,
   },
   {
     q: "How do I get the code after paying?",

@@ -1,6 +1,7 @@
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
+import { videos } from "@/lib/catalog/videos";
 
 /**
  * Real catalogue sizes. Marketing copy reads these instead of hard-coding numbers,
@@ -14,4 +15,6 @@ export const CATALOG_COUNTS = {
   templates: templates.length,
   freeTemplates: templates.filter((t) => !t.premium).length,
   blocks: blocksManifest.length,
+  videos: videos.length,
+  freeVideos: videos.filter((v) => !v.premium).length,
 } as const;

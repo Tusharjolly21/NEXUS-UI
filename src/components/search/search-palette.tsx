@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Blocks,
   BookOpen,
+  Clapperboard,
   Component,
   CornerDownLeft,
   LayoutTemplate,
@@ -18,6 +19,7 @@ import {
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
+import { videos } from "@/lib/catalog/videos";
 import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { DOCS_PAGES } from "@/components/docs/docs-nav";
 import { cn } from "@/lib/utils";
@@ -25,7 +27,7 @@ import { useProAccess } from "@/components/pro/pro-access";
 
 /* ── Index ─────────────────────────────────────────────────────────────────── */
 
-type Kind = "component" | "template" | "block" | "doc";
+type Kind = "component" | "template" | "block" | "video" | "doc";
 
 type Entry = {
   id: string;
@@ -45,6 +47,7 @@ const KIND_ICON: Record<Kind, LucideIcon> = {
   component: Component,
   template: LayoutTemplate,
   block: Blocks,
+  video: Clapperboard,
   doc: BookOpen,
 };
 
@@ -92,6 +95,19 @@ const BLOCKS: Entry[] = blocks.map((b) => ({
   Preview: b.Preview,
 }));
 
+const VIDEOS: Entry[] = videos.map((v, i) => ({
+  id: `video:${v.slug}`,
+  kind: "video",
+  title: v.title,
+  subtitle: v.purpose,
+  description: v.blurb,
+  href: `/videos/${v.slug}`,
+  premium: v.premium,
+  score: 60 - i,
+  tags: [v.app, v.purpose],
+  haystack: `${v.title} ${v.blurb} ${v.purpose} ${v.motion} ${v.app} video reel vertical`.toLowerCase(),
+}));
+
 const DOCS: Entry[] = DOCS_PAGES.map((d, i) => ({
   id: `doc:${d.href}`,
   kind: "doc",
@@ -111,6 +127,7 @@ const GROUPS: { kind: Kind; label: string; source: Entry[]; limit: number }[] = 
   { kind: "component", label: "Components", source: COMPONENTS, limit: 8 },
   { kind: "template", label: "Templates", source: TEMPLATES, limit: 4 },
   { kind: "block", label: "Blocks", source: BLOCKS, limit: 4 },
+  { kind: "video", label: "Videos", source: VIDEOS, limit: 3 },
   { kind: "doc", label: "Docs", source: DOCS, limit: 4 },
 ];
 
@@ -332,7 +349,7 @@ export function SearchPalette({
             <div className="flex h-[62px] shrink-0 items-center gap-3 px-5">
               <Search className="size-[22px] shrink-0 text-foreground/45" strokeWidth={1.9} aria-hidden />
               <label htmlFor={`${uid}-input`} className="sr-only">
-                Search components, templates, blocks and docs
+                Search components, templates, blocks, videos and docs
               </label>
               <input
                 id={`${uid}-input`}
@@ -622,7 +639,7 @@ export function SearchPalette({
                 </button>
               ) : (
                 <span className="ml-auto tabular-nums">
-                  {COMPONENTS.length} components · {TEMPLATES.length} templates · {BLOCKS.length} blocks
+                  {COMPONENTS.length} components · {TEMPLATES.length} templates · {BLOCKS.length} blocks · {VIDEOS.length} videos
                 </span>
               )}
             </div>

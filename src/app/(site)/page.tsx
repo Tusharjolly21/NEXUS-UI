@@ -12,6 +12,8 @@ import { IfPro } from "@/components/pro/pro-access";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
+import { VideoCard } from "@/components/videos/video-card";
+import { getVideo, videos } from "@/lib/catalog/videos";
 import { Band, PillLink } from "@/components/site";
 import { LibraryIndex, type LibraryIndexData } from "@/components/site/library-index";
 import { blockVariants } from "@/lib/catalog/block-variants";
@@ -28,6 +30,8 @@ export const metadata: Metadata = {
   ...createMetadata({ alternates: { canonical: "/" } }),
   title: { absolute: `${siteConfig.siteName} — ${siteConfig.tagline}` },
 };
+
+const HOME_VIDEOS = ["launch-reel", "manifesto", "price-reveal", "route-story"];
 
 const WALL_SLUGS = ["noir-studio", "helix-ai-platform", "launchfolio-portfolio", "ocean-flow", "aether-portfolio", "nexus-ai-launch"];
 
@@ -103,8 +107,13 @@ export default function Home() {
         .slice(0, 3)
         .map((t) => ({ slug: t.slug, title: t.title.split(" — ")[0], image: t.previewImages!.hero })),
     },
+    videos: {
+      total: CATALOG_COUNTS.videos,
+      items: HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v).map((v) => ({ slug: v.slug, title: v.title, purpose: v.purpose })),
+    },
     sounds: { total: Object.keys(SOUNDS).length },
   };
+  const homeVideos = HOME_VIDEOS.map((slug) => getVideo(slug)).filter((v): v is NonNullable<typeof v> => !!v);
 
   const jsonLd = [
     {
@@ -254,6 +263,29 @@ export default function Home() {
                   <p className="shrink-0 text-[13px] text-muted-foreground">{t.category}</p>
                 </div>
               </Link>
+            </li>
+          ))}
+        </ul>
+      </Band>
+
+      {/* Videos */}
+      <Band tint="violet" id="videos">
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div>
+            <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Videos that move like the site</h2>
+            <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
+              {videos.length} vertical product videos for launches, pricing and updates, each with its own soundtrack. Change the
+              words, then render it for Reels and Shorts.
+            </p>
+          </div>
+          <PillLink href="/videos" variant="white" className="shrink-0 self-start md:self-auto">
+            See all {videos.length} videos
+          </PillLink>
+        </div>
+        <ul className="mt-12 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+          {homeVideos.map((v) => (
+            <li key={v.slug}>
+              <VideoCard video={v} />
             </li>
           ))}
         </ul>

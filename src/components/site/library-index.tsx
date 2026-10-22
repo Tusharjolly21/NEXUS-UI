@@ -6,16 +6,18 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Check, ChevronRight, Copy, ExternalLink } from "lucide-react";
 import { playSound, type SoundName } from "@/lib/ui-sounds";
+import { videoPosterSrc, videoPreviewSrc } from "@/lib/catalog/videos";
 import { cn } from "@/lib/utils";
 
 export type LibraryIndexData = {
   components: { total: number; free: number; categories: { slug: string; label: string; count: number; href: string }[] };
   blocks: { total: number; sections: number; items: { slug: string; label: string }[] };
   templates: { total: number; items: { slug: string; title: string; image: string }[] };
+  videos: { total: number; items: { slug: string; title: string; purpose: string }[] };
   sounds: { total: number };
 };
 
-type ShelfId = "components" | "blocks" | "templates" | "sounds";
+type ShelfId = "components" | "blocks" | "templates" | "videos" | "sounds";
 
 const CYCLE_MS = 6500;
 
@@ -33,7 +35,7 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
   const [cycle, setCycle] = React.useState(0);
   const auto = !touched && !reduce && !hovering;
 
-  const shelves: { id: ShelfId; name: string; line: string; count: string; note: string; href: string; cta: string; command?: string }[] = [
+  const shelves: { id: ShelfId; name: string; line: string; count: string; note: string; href: string; cta: string; command?: string; noInstall?: string }[] = [
     {
       id: "components",
       name: "Components",
@@ -62,6 +64,17 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
       note: "landing pages",
       href: "/templates",
       cta: "See templates",
+      noInstall: "No install: open any template live in your browser",
+    },
+    {
+      id: "videos",
+      name: "Videos",
+      line: "Vertical product videos with their own soundtracks. Edit the words, then render.",
+      count: String(data.videos.total),
+      note: "with sound",
+      href: "/videos",
+      cta: "Watch the videos",
+      noInstall: "No install: watch and edit any video in your browser",
     },
     {
       id: "sounds",
@@ -114,10 +127,10 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
       <div className="flex min-w-0 flex-col">
         <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">What&apos;s on the shelves</h2>
         <p className="mt-4 max-w-[440px] text-[18px] text-muted-foreground">
-          Four kinds of thing, one way to install them. Pick a shelf to look inside.
+          Five kinds of thing, most with one command to install. Pick a shelf to look inside.
         </p>
 
-        <div role="tablist" aria-orientation="vertical" aria-label="Library" className="mt-8 grid grid-cols-2 gap-2 lg:grid-cols-1 lg:gap-1">
+        <div role="tablist" aria-orientation="vertical" aria-label="Library" className="mt-8 grid grid-cols-2 gap-2 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2 lg:grid-cols-1 lg:gap-1">
           {shelves.map((s, i) => {
             const on = s.id === active;
             return (
@@ -172,10 +185,10 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
             <CommandLine command={current.command} />
           ) : (
             <Link
-              href="/templates"
+              href={current.href}
               className="flex min-h-12 items-center justify-between gap-3 rounded-[24px] bg-[#1d1d1f] py-1.5 pl-5 pr-2 text-[14px] text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-white/[0.08]"
             >
-              <span>No install: open any template live in your browser</span>
+              <span>{current.noInstall}</span>
               <span className="grid size-8 place-items-center rounded-full bg-white/15" aria-hidden>
                 <ExternalLink className="size-3.5" />
               </span>
@@ -203,6 +216,7 @@ export function LibraryIndex({ data }: { data: LibraryIndexData }) {
               {active === "components" ? <ComponentsShelf data={data.components} /> : null}
               {active === "blocks" ? <BlocksShelf data={data.blocks} /> : null}
               {active === "templates" ? <TemplatesShelf data={data.templates} /> : null}
+              {active === "videos" ? <VideosShelf data={data.videos} /> : null}
               {active === "sounds" ? <SoundsShelf onPlay={() => setTouched(true)} /> : null}
             </motion.div>
           </AnimatePresence>
@@ -374,6 +388,46 @@ function TemplatesShelf({ data }: { data: LibraryIndexData["templates"] }) {
                 <Image src={t.image} alt={`${t.title} template`} fill sizes="330px" className="object-cover object-top" />
               </span>
               <span className="block truncate px-3 py-2 text-[13px] font-semibold text-foreground">{t.title}</span>
+            </Link>
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Three vertical videos playing silently side by side; each opens its page. */
+function VideosShelf({ data }: { data: LibraryIndexData["videos"] }) {
+  const reduce = useReducedMotion();
+  return (
+    <div className="flex h-full items-center justify-center bg-gradient-to-b from-[#f5f5f7] to-card px-4 py-6 dark:from-black/40">
+      <ul className="grid w-full max-w-[520px] grid-cols-3 gap-3 sm:gap-4">
+        {data.items.slice(0, 3).map((v, i) => (
+          <motion.li
+            key={v.slug}
+            className={i === 1 ? "sm:-translate-y-3" : "sm:translate-y-3"}
+            initial={reduce ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduce ? 0 : 0.07 * i, type: "spring", stiffness: 300, damping: 26 }}
+          >
+            <Link
+              href={`/videos/${v.slug}`}
+              className="group block overflow-hidden rounded-[18px] bg-black shadow-[0_0_0_0.5px_var(--border),0_24px_44px_-22px_rgba(0,0,0,0.5)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
+            >
+              <span className="relative block aspect-[9/16]">
+                <video
+                  src={videoPreviewSrc(v.slug)}
+                  poster={videoPosterSrc(v.slug)}
+                  autoPlay={!reduce}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-hidden
+                  className="absolute inset-0 size-full object-cover"
+                />
+              </span>
+              <span className="sr-only">{v.title}: {v.purpose}</span>
             </Link>
           </motion.li>
         ))}

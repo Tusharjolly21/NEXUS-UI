@@ -13,6 +13,7 @@ export const DOCS_PAGES = [
   { href: "/docs/install-tailwindcss", label: "Install Tailwind CSS" },
   { href: "/docs/add-utilities", label: "Add utilities" },
   { href: "/docs/cli", label: "CLI" },
+  { href: "/docs/videos", label: "Videos" },
 ] as const;
 
 const BROWSE = [

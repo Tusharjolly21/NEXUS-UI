@@ -275,13 +275,13 @@ export default async function SoundsPage() {
           <div>
             <h2 className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">Give them something to press.</h2>
             <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-              The sounds pair with the components: a pop for a like, a latch for a toggle, a chime for a toast.
+              The sounds pair with the components: a pop for a like, a latch for a toggle, a chime for a toast. The videos come with soundtracks of their own.
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
             <PillLink href="/components">Browse components</PillLink>
-            <PillLink href="/blocks" variant="white">
-              See blocks
+            <PillLink href="/videos" variant="white">
+              Watch the videos
             </PillLink>
           </div>
         </div>

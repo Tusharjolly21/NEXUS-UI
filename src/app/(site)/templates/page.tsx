@@ -79,6 +79,9 @@ export default async function TemplatesPage() {
             <PillLink href="/components" variant={isPremium ? "ink" : "white"}>
               Browse components
             </PillLink>
+            <PillLink href="/videos" variant="white">
+              Product videos
+            </PillLink>
           </div>
         </div>
       </Band>
