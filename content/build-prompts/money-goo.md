@@ -65,7 +65,7 @@ Layers, back to front:
 
 ## Sound
 
-A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor's drag lands on the friend (or Enter or Space sends it) and the money goes across, `paid` plays (three soft triangle notes climbing 1318 Hz, 1568 Hz, 2093 Hz, 65ms apart, the last ringing about 0.3s). Stretching the goo, letting go short of the friend and the autoplay sends make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor's drag lands on the friend (or Enter or Space sends it) and the money goes across, `paid` plays (three soft triangle notes climbing 1318 Hz, 1568 Hz, 2093 Hz, 65ms apart, the last ringing about 0.3s). Stretching the goo and letting go short of the friend make no sound. Each autoplay send plays the same `paid` when the money goes across. Autoplay uses the same play function's `auto` variant, which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. It is still silent on hover, and it follows `enableSound` and the site-wide switch. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

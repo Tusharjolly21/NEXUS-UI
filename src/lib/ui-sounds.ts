@@ -259,7 +259,8 @@ export function audioAwake() {
  * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
  * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
  */
-const AutoplayCtx = React.createContext(true);
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
 export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
   return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
 }
