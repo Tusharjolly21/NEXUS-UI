@@ -17,7 +17,7 @@ Build a Mac keyboard drawn entirely in HTML, in silver or space grey. Press a ke
 | `autoplay` | `boolean` | `false` | Types `autoplayText` on the keys in a loop until a key is pressed. |
 | `autoplayText` | `string` | `"hello, nexus"` | What the demo types. |
 | `accent` | `string` | `"#0a84ff"` | Backlight ripple colour. |
-| `enableSound` | `boolean` | `true` | Synthesised click per press (never during autoplay). |
+| `enableSound` | `boolean` | `true` | Synthesised click per press. Autoplay clicks too, once the visitor has used the page. |
 | `soundType` | `"mechanical" \| "soft" \| "clicky"` | `"mechanical"` | Click timbre. |
 | `volume` | `number` | `0.6` | 0 to 1. |
 | `showFunctionRow` | `boolean` | `true` | Esc/F-key row (mac layout). |
@@ -62,7 +62,7 @@ Each press layers three Web Audio voices straight to the destination. Two noise 
 
 Type multipliers (click gain, thud gain, body gain, click Q): mechanical 1/1/1/1, soft 0.28/0.75/0.6/0.5, clicky 1.55/0.85/0.55/1.9. Create the AudioContext lazily on first press, resume if suspended, swallow errors, close it on unmount.
 
-`MacKeyboard` plays this only while `enableSound` (default `true`) is on and the site-wide sound switch is on: the hook checks `getSoundsEnabled()` from `@/lib/ui-sounds` (default on in installed apps, `setSoundsEnabled` turns it off) before it creates or resumes the audio context. Only real presses (a tap on a cap, or the physical keyboard when `listen` is set) make sound; the autoplay typing and hover are silent. This is the one component that keeps its own synthesis; `@/lib/ui-sounds` is imported only for the switch.
+`MacKeyboard` plays this only while `enableSound` (default `true`) is on and the site-wide sound switch is on: the hook checks `getSoundsEnabled()` from `@/lib/ui-sounds` (default on in installed apps, `setSoundsEnabled` turns it off) before it creates or resumes the audio context. A tap on a cap, or the physical keyboard when `listen` is set, makes the sound, and so does the autoplay typing, with the same clicks. The autoplay click is gated like the `auto` variant of `useSound` in `@/lib/ui-sounds` (`useAutoplaySoundAllowed()` and `audioAwake()`, plus a hidden-tab check): it stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then, and wherever the site mutes autoplay demos. The autoplay types about seven keys a second, so it clicks only on the first letter and the space of each word and on Return, not on every key. Hover is silent. This is the one component that keeps its own synthesis; `@/lib/ui-sounds` is imported only for the switch and those two checks.
 
 ## Interaction and states
 
@@ -74,7 +74,7 @@ Type multipliers (click gain, thud gain, body gain, click Q): mechanical 1/1/1/1
 
 ## Autoplay demo
 
-Map each lowercase character of `autoplayText` to its key, then Return. Start after 700ms; each step taps the key silently. Gap after a key: 1700ms after Return, 210ms after space, otherwise `120 + (i·37 mod 90)` ms. Stop as soon as the user presses any key.
+Map each lowercase character of `autoplayText` to its key, then Return. Start after 700ms; each step taps the key, and clicks (through the autoplay gate above) only on the first letter and space of each word and on Return. Gap after a key: 1700ms after Return, 210ms after space, otherwise `120 + (i·37 mod 90)` ms. Stop as soon as the user presses any key.
 
 ## Accessibility
 
@@ -86,6 +86,6 @@ Map each lowercase character of `autoplayText` to its key, then Return. Start af
 - Clicking a key sinks it and a ring of accent light spreads out through the gaps.
 - Characters pop into the strip; Return lifts the line away; Backspace deletes.
 - With `listen`, physical keys hold and release in sync; Cmd shortcuts are ignored.
-- Each sound type is audibly different; no sound in autoplay.
+- Each sound type is audibly different; autoplay clicks on word starts, spaces and Return once the visitor has used the page.
 - Autoplay types the phrase repeatedly and stops on first press.
 - Silver, space grey and auto themes render correctly; compact hides the fn row.

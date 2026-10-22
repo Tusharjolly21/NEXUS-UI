@@ -6,11 +6,12 @@ import { KeyboardKey } from "./keyboard-key";
 import { useKeyboardSound, type SoundType } from "./use-keyboard-sound";
 import { MAC_ROWS, COMPACT_ROWS, CODE_ALIASES, type KeyDef } from "./keyboard-layout";
 import { cn } from "@/lib/utils";
+import { audioAwake, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
 
 export interface KeyboardProps {
   /** Full layout with the Esc and F-key row, or compact without it. */
   layout?: "mac" | "compact";
-  /** Plays a synthesised key click when a key is pressed. */
+  /** Plays a synthesised key click when a key is pressed. Autoplay clicks too once the visitor has used the page. */
   enableSound?: boolean;
   /** Click volume, 0 to 1. */
   volume?: number;
@@ -103,6 +104,8 @@ export function MacKeyboard({
   const still = useReducedMotion() === true;
   const skin = SKIN[theme] ?? SKIN.auto;
   const { play } = useKeyboardSound({ enabled: enableSound, volume, soundType });
+  // Autoplay clicks follow the same rules as `play.auto` in `@/lib/ui-sounds`: the site must allow demo sound here.
+  const autoAllowed = useAutoplaySoundAllowed();
   const body = React.useRef<HTMLDivElement>(null);
   const timers = React.useRef(new Set<number>());
   const els = React.useRef(new Map<string, HTMLElement>());
@@ -125,7 +128,7 @@ export function MacKeyboard({
 
   /** Light ring from the key's centre, plus the text and sound. */
   const strike = React.useCallback(
-    (key: KeyDef, sound: boolean) => {
+    (key: KeyDef, sound: boolean | "auto") => {
       const el = els.current.get(key.code);
       const host = body.current;
       if (el && host && !still) {
@@ -134,7 +137,10 @@ export function MacKeyboard({
         const id = ++seq.current;
         setRipples((r) => [...r.slice(-5), { id, x: Math.round(a.left - b.left + a.width / 2), y: Math.round(a.top - b.top + a.height / 2) }]);
       }
-      if (sound) play(key.sound);
+      if (sound === "auto") {
+        // Silent until the browser lets audio start (the visitor has used the page) and while the tab is hidden.
+        if (autoAllowed && !document.hidden && audioAwake()) play(key.sound);
+      } else if (sound) play(key.sound);
       if (key.code === "Enter") {
         setText("");
         setSent((n) => n + 1);
@@ -146,7 +152,7 @@ export function MacKeyboard({
         return t;
       });
     },
-    [play, still],
+    [play, still, autoAllowed],
   );
 
   const tap = React.useCallback((key: KeyDef) => {
@@ -218,7 +224,10 @@ export function MacKeyboard({
       const k = keys[i % keys.length];
       i++;
       tap(k);
-      strike(k, false);
+      // About seven keys a second is too busy to click on every one: click the first letter and the space of each word, and Return.
+      const at = (i - 1) % keys.length;
+      const beat = at === 0 || k.code === "Space" || k.code === "Enter" || keys[at - 1]?.code === "Space";
+      strike(k, beat ? "auto" : false);
       const pause = k.code === "Enter" ? 1700 : k.char === " " ? 210 : 120 + ((i * 37) % 90);
       t = window.setTimeout(step, pause);
     };

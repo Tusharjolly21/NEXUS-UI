@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -21,7 +21,7 @@ export interface DominoSelectProps {
   onSelectionChange?: (selected: number[]) => void;
   /** Ticks and unticks the master box by itself until someone interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -171,6 +171,7 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
   const chain = async (select: boolean, byUser = false) => {
     if (busy.current) return;
     if (byUser) play("knock", 0.8);
+    else play.auto("knock", 0.8);
     if (reducedRef.current) {
       setOn(messages.map(() => select));
       return;
@@ -188,6 +189,7 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
           window.setTimeout(() => {
             setOn((o) => o.map((v, j) => (j === idx ? select : v)));
             if (byUser) play("tick", 0.4);
+            else play.auto("tick", 0.4);
           }, (delay + 0.55 + (n - k) * 0.03) * 1000),
         );
         const c = ctrls.current[idx];
@@ -210,6 +212,8 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
     if (!reducedRef.current) void ctrls.current[i]?.start({ rotateX: [0, -14, 0], originY: "100%", transition: { duration: 0.35 } });
   };
 
+  const autoChain = useEffectEvent((select: boolean) => void chain(select));
+
   useEffect(() => {
     if (!autoplay || reduced) return;
     let s = false;
@@ -217,10 +221,9 @@ function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Requ
       if (touched.current) return clearInterval(id);
       if (!visible.current || document.hidden || !alive.current) return;
       s = !s;
-      void chain(s);
+      autoChain(s);
     }, 2600);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoplay, reduced]);
 
   return (
