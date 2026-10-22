@@ -50,8 +50,8 @@ function noise(c: AudioContext) {
   return s;
 }
 
-type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
-function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   const t0 = c.currentTime + (o.at ?? 0);
   const osc = c.createOscillator();
   const g = c.createGain();
@@ -67,8 +67,8 @@ function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   osc.stop(t0 + a + d + 0.05);
 }
 
-type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
-function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   const t0 = c.currentTime + (o.at ?? 0);
   const n = noise(c);
   const f = c.createBiquadFilter();
@@ -86,7 +86,9 @@ function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   n.stop(t0 + a + d + 0.05);
 }
 
-type Def = { category: SoundCategory; label: string; play: (c: AudioContext, out: AudioNode) => void };
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = { category: string; label: string; play: (c: AudioContext, out: AudioNode) => void };
+type Def = SoundDef & { category: SoundCategory };
 
 export const SOUNDS = {
   tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
@@ -218,18 +220,27 @@ const lastPlayed = new Map<string, number>();
  * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
  */
 export function playSound(name: SoundName, volume = 1, force = false) {
-  if ((!force && !getSoundsEnabled()) || !(name in SOUNDS)) return;
+  if (!(name in SOUNDS)) return;
+  playDef(name, SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
   if (typeof document !== "undefined" && document.hidden) return;
   // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
   const now = typeof performance !== "undefined" ? performance.now() : Date.now();
-  if (now - (lastPlayed.get(name) ?? -1e9) < 30) return;
-  lastPlayed.set(name, now);
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
   const c = audio();
   if (!c || !master) return;
   const g = c.createGain();
   g.gain.value = Math.max(0, Math.min(1, volume));
   g.connect(master);
-  (SOUNDS[name] as Def).play(c, g);
+  def.play(c, g);
   setTimeout(() => g.disconnect(), 2000);
 }
 

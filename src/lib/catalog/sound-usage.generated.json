@@ -1,0 +1,664 @@
+{
+  "charge": [
+    {
+      "slug": "hold-to-confirm",
+      "name": "Hold to Confirm"
+    }
+  ],
+  "done": [
+    {
+      "slug": "hold-to-confirm",
+      "name": "Hold to Confirm"
+    },
+    {
+      "slug": "marble-progress",
+      "name": "Marble Progress"
+    },
+    {
+      "slug": "progress-button",
+      "name": "Progress Button"
+    },
+    {
+      "slug": "pull-to-refresh",
+      "name": "Pull to Refresh"
+    },
+    {
+      "slug": "sand-timer",
+      "name": "Sand Timer"
+    },
+    {
+      "slug": "upload-chips",
+      "name": "Upload Chips"
+    },
+    {
+      "slug": "upload-dropzone",
+      "name": "Upload Dropzone"
+    }
+  ],
+  "drop": [
+    {
+      "slug": "animated-tabs",
+      "name": "Animated Tabs"
+    },
+    {
+      "slug": "bolting-sliders",
+      "name": "Bolting Sliders"
+    },
+    {
+      "slug": "crumple-to-trash",
+      "name": "Crumple to Trash"
+    },
+    {
+      "slug": "draggable-card-stack",
+      "name": "Draggable Card Stack"
+    },
+    {
+      "slug": "goo-reorder",
+      "name": "Goo Reorder"
+    },
+    {
+      "slug": "throw-wheel",
+      "name": "Throw Wheel"
+    },
+    {
+      "slug": "time-scrubber",
+      "name": "Time Scrubber"
+    },
+    {
+      "slug": "toast-stack",
+      "name": "Toast Stack"
+    },
+    {
+      "slug": "todo-tower",
+      "name": "Todo Tower"
+    },
+    {
+      "slug": "upload-dropzone",
+      "name": "Upload Dropzone"
+    },
+    {
+      "slug": "wheel-selector",
+      "name": "Wheel Selector"
+    }
+  ],
+  "error": [
+    {
+      "slug": "feedback-pill",
+      "name": "Feedback Pill"
+    },
+    {
+      "slug": "otp-input",
+      "name": "OTP Input"
+    },
+    {
+      "slug": "signup-form",
+      "name": "Signup Form"
+    },
+    {
+      "slug": "slide-to-confirm",
+      "name": "Slide to Confirm"
+    },
+    {
+      "slug": "stateful-button",
+      "name": "Stateful message button"
+    },
+    {
+      "slug": "toast-stack",
+      "name": "Toast Stack"
+    },
+    {
+      "slug": "upload-dropzone",
+      "name": "Upload Dropzone"
+    }
+  ],
+  "hush": [
+    {
+      "slug": "hold-to-confirm",
+      "name": "Hold to Confirm"
+    }
+  ],
+  "knock": [
+    {
+      "slug": "crumple-to-trash",
+      "name": "Crumple to Trash"
+    },
+    {
+      "slug": "domino-select",
+      "name": "Domino Select"
+    },
+    {
+      "slug": "sign-and-seal",
+      "name": "Sign & Seal"
+    }
+  ],
+  "lift": [
+    {
+      "slug": "bolting-sliders",
+      "name": "Bolting Sliders"
+    },
+    {
+      "slug": "draggable-card-stack",
+      "name": "Draggable Card Stack"
+    },
+    {
+      "slug": "goo-reorder",
+      "name": "Goo Reorder"
+    },
+    {
+      "slug": "slingshot-send",
+      "name": "Slingshot Send"
+    }
+  ],
+  "off": [
+    {
+      "slug": "animated-tabs",
+      "name": "Animated Tabs"
+    },
+    {
+      "slug": "capsule-toggles",
+      "name": "Capsule Toggles"
+    },
+    {
+      "slug": "copy-button",
+      "name": "Copy Button"
+    },
+    {
+      "slug": "emoji-reactions",
+      "name": "Emoji Reactions"
+    },
+    {
+      "slug": "gooey-search-input",
+      "name": "Gooey Search Input"
+    },
+    {
+      "slug": "ink-theme-switch",
+      "name": "Ink Theme Switch"
+    },
+    {
+      "slug": "like-burst",
+      "name": "Like Burst"
+    },
+    {
+      "slug": "marble-progress",
+      "name": "Marble Progress"
+    },
+    {
+      "slug": "pull-cord",
+      "name": "Pull Cord"
+    },
+    {
+      "slug": "swipe-stack",
+      "name": "Swipe Stack"
+    },
+    {
+      "slug": "todo-list",
+      "name": "Todo List"
+    }
+  ],
+  "on": [
+    {
+      "slug": "animated-tabs",
+      "name": "Animated Tabs"
+    },
+    {
+      "slug": "bending-rail",
+      "name": "Bending Rail"
+    },
+    {
+      "slug": "capsule-toggles",
+      "name": "Capsule Toggles"
+    },
+    {
+      "slug": "copy-button",
+      "name": "Copy Button"
+    },
+    {
+      "slug": "ink-theme-switch",
+      "name": "Ink Theme Switch"
+    },
+    {
+      "slug": "pull-cord",
+      "name": "Pull Cord"
+    },
+    {
+      "slug": "zipper-reveal",
+      "name": "Zipper Reveal"
+    }
+  ],
+  "paid": [
+    {
+      "slug": "money-goo",
+      "name": "Money Goo"
+    }
+  ],
+  "ping": [
+    {
+      "slug": "notification-stack",
+      "name": "Notification Stack"
+    },
+    {
+      "slug": "toast-stack",
+      "name": "Toast Stack"
+    }
+  ],
+  "pop": [
+    {
+      "slug": "animated-tabs",
+      "name": "Animated Tabs"
+    },
+    {
+      "slug": "assign-picker",
+      "name": "Assign Picker"
+    },
+    {
+      "slug": "box-spill",
+      "name": "Box Spill"
+    },
+    {
+      "slug": "command-palette",
+      "name": "Command Palette"
+    },
+    {
+      "slug": "dynamic-island",
+      "name": "Dynamic Island"
+    },
+    {
+      "slug": "emoji-reactions",
+      "name": "Emoji Reactions"
+    },
+    {
+      "slug": "feedback-pill",
+      "name": "Feedback Pill"
+    },
+    {
+      "slug": "gooey-search-input",
+      "name": "Gooey Search Input"
+    },
+    {
+      "slug": "like-burst",
+      "name": "Like Burst"
+    },
+    {
+      "slug": "pixel-select",
+      "name": "Pixel Select"
+    },
+    {
+      "slug": "stagger-menu",
+      "name": "Stagger Menu"
+    },
+    {
+      "slug": "swipe-stack",
+      "name": "Swipe Stack"
+    },
+    {
+      "slug": "tag-pit",
+      "name": "Tag Pit"
+    },
+    {
+      "slug": "todo-list",
+      "name": "Todo List"
+    }
+  ],
+  "success": [
+    {
+      "slug": "code-block",
+      "name": "Code Block"
+    },
+    {
+      "slug": "copy-button",
+      "name": "Copy Button"
+    },
+    {
+      "slug": "feedback-pill",
+      "name": "Feedback Pill"
+    },
+    {
+      "slug": "generate-image",
+      "name": "Generate Image"
+    },
+    {
+      "slug": "otp-input",
+      "name": "OTP Input"
+    },
+    {
+      "slug": "password-strength",
+      "name": "Password Strength"
+    },
+    {
+      "slug": "scratch-reveal",
+      "name": "Scratch Reveal"
+    },
+    {
+      "slug": "sign-and-seal",
+      "name": "Sign & Seal"
+    },
+    {
+      "slug": "signup-form",
+      "name": "Signup Form"
+    },
+    {
+      "slug": "slide-to-confirm",
+      "name": "Slide to Confirm"
+    },
+    {
+      "slug": "stagger-menu",
+      "name": "Stagger Menu"
+    },
+    {
+      "slug": "stateful-button",
+      "name": "Stateful message button"
+    },
+    {
+      "slug": "streak-counter",
+      "name": "Streak Counter"
+    },
+    {
+      "slug": "swipe-stack",
+      "name": "Swipe Stack"
+    },
+    {
+      "slug": "toast-stack",
+      "name": "Toast Stack"
+    }
+  ],
+  "swipe": [
+    {
+      "slug": "animated-tabs",
+      "name": "Animated Tabs"
+    },
+    {
+      "slug": "card-stack-rotator",
+      "name": "Card Stack Rotator"
+    },
+    {
+      "slug": "crumple-to-trash",
+      "name": "Crumple to Trash"
+    },
+    {
+      "slug": "draggable-card-stack",
+      "name": "Draggable Card Stack"
+    },
+    {
+      "slug": "scratch-reveal",
+      "name": "Scratch Reveal"
+    },
+    {
+      "slug": "swipe-stack",
+      "name": "Swipe Stack"
+    },
+    {
+      "slug": "tear-off-ticket",
+      "name": "Tear-off Ticket"
+    },
+    {
+      "slug": "toast-stack",
+      "name": "Toast Stack"
+    },
+    {
+      "slug": "todo-tower",
+      "name": "Todo Tower"
+    }
+  ],
+  "tap": [
+    {
+      "slug": "command-palette",
+      "name": "Command Palette"
+    },
+    {
+      "slug": "elastic-stepper",
+      "name": "Elastic Stepper"
+    },
+    {
+      "slug": "feedback-pill",
+      "name": "Feedback Pill"
+    },
+    {
+      "slug": "forge-ai-command-bar",
+      "name": "Forge AI Command Bar"
+    },
+    {
+      "slug": "generate-image",
+      "name": "Generate Image"
+    },
+    {
+      "slug": "gooey-search-input",
+      "name": "Gooey Search Input"
+    },
+    {
+      "slug": "hold-to-confirm",
+      "name": "Hold to Confirm"
+    },
+    {
+      "slug": "layout-switch",
+      "name": "Layout Switch"
+    },
+    {
+      "slug": "liquid-dial",
+      "name": "Liquid Dial"
+    },
+    {
+      "slug": "otp-input",
+      "name": "OTP Input"
+    },
+    {
+      "slug": "pixel-select",
+      "name": "Pixel Select"
+    },
+    {
+      "slug": "progress-button",
+      "name": "Progress Button"
+    },
+    {
+      "slug": "ruler-picker",
+      "name": "Ruler Picker"
+    },
+    {
+      "slug": "sand-timer",
+      "name": "Sand Timer"
+    },
+    {
+      "slug": "scratch-reveal",
+      "name": "Scratch Reveal"
+    },
+    {
+      "slug": "seek-search",
+      "name": "Seek Search"
+    },
+    {
+      "slug": "signup-form",
+      "name": "Signup Form"
+    },
+    {
+      "slug": "stateful-button",
+      "name": "Stateful message button"
+    },
+    {
+      "slug": "swipe-stack",
+      "name": "Swipe Stack"
+    },
+    {
+      "slug": "tear-off-ticket",
+      "name": "Tear-off Ticket"
+    },
+    {
+      "slug": "toast-stack",
+      "name": "Toast Stack"
+    },
+    {
+      "slug": "upload-chips",
+      "name": "Upload Chips"
+    },
+    {
+      "slug": "zipper-reveal",
+      "name": "Zipper Reveal"
+    }
+  ],
+  "tick": [
+    {
+      "slug": "card-carousel-3d",
+      "name": "3D Card Carousel"
+    },
+    {
+      "slug": "animated-tabs",
+      "name": "Animated Tabs"
+    },
+    {
+      "slug": "assign-picker",
+      "name": "Assign Picker"
+    },
+    {
+      "slug": "bending-rail",
+      "name": "Bending Rail"
+    },
+    {
+      "slug": "card-stack-rotator",
+      "name": "Card Stack Rotator"
+    },
+    {
+      "slug": "cinematic-card-deck",
+      "name": "Cinematic Card Deck"
+    },
+    {
+      "slug": "circular-carousel",
+      "name": "Circular Carousel"
+    },
+    {
+      "slug": "command-palette",
+      "name": "Command Palette"
+    },
+    {
+      "slug": "domino-select",
+      "name": "Domino Select"
+    },
+    {
+      "slug": "elastic-stepper",
+      "name": "Elastic Stepper"
+    },
+    {
+      "slug": "fan-deck",
+      "name": "Fan Deck"
+    },
+    {
+      "slug": "forge-ai-command-bar",
+      "name": "Forge AI Command Bar"
+    },
+    {
+      "slug": "goo-reorder",
+      "name": "Goo Reorder"
+    },
+    {
+      "slug": "magnet-select",
+      "name": "Magnet Select"
+    },
+    {
+      "slug": "marble-progress",
+      "name": "Marble Progress"
+    },
+    {
+      "slug": "otp-input",
+      "name": "OTP Input"
+    },
+    {
+      "slug": "pull-to-refresh",
+      "name": "Pull to Refresh"
+    },
+    {
+      "slug": "radio-cards",
+      "name": "Radio Cards"
+    },
+    {
+      "slug": "ruler-picker",
+      "name": "Ruler Picker"
+    },
+    {
+      "slug": "scrub-inputs",
+      "name": "Scrub Inputs"
+    },
+    {
+      "slug": "signup-form",
+      "name": "Signup Form"
+    },
+    {
+      "slug": "slide-to-confirm",
+      "name": "Slide to Confirm"
+    },
+    {
+      "slug": "slosh-slider",
+      "name": "Slosh Slider"
+    },
+    {
+      "slug": "stagger-menu",
+      "name": "Stagger Menu"
+    },
+    {
+      "slug": "stretch-nav",
+      "name": "Stretch Nav"
+    },
+    {
+      "slug": "tag-pit",
+      "name": "Tag Pit"
+    },
+    {
+      "slug": "thermo-dial",
+      "name": "Thermo Dial"
+    },
+    {
+      "slug": "throw-wheel",
+      "name": "Throw Wheel"
+    },
+    {
+      "slug": "tick-slider",
+      "name": "Tick Slider"
+    },
+    {
+      "slug": "time-scrubber",
+      "name": "Time Scrubber"
+    },
+    {
+      "slug": "todo-list",
+      "name": "Todo List"
+    },
+    {
+      "slug": "todo-tower",
+      "name": "Todo Tower"
+    },
+    {
+      "slug": "wake-slider",
+      "name": "Wake Slider"
+    },
+    {
+      "slug": "wheel-selector",
+      "name": "Wheel Selector"
+    },
+    {
+      "slug": "zipper-reveal",
+      "name": "Zipper Reveal"
+    }
+  ],
+  "whoosh": [
+    {
+      "slug": "ask-nexus-input",
+      "name": "Ask Nexus Input"
+    },
+    {
+      "slug": "copy-button",
+      "name": "Copy Button"
+    },
+    {
+      "slug": "dynamic-island",
+      "name": "Dynamic Island"
+    },
+    {
+      "slug": "forge-ai-command-bar",
+      "name": "Forge AI Command Bar"
+    },
+    {
+      "slug": "island-morph",
+      "name": "Island Morph"
+    },
+    {
+      "slug": "slingshot-send",
+      "name": "Slingshot Send"
+    }
+  ]
+}
