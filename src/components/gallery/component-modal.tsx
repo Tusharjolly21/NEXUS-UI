@@ -171,11 +171,11 @@ function Inspector({ item }: { item: GalleryItem }) {
   const [openSection, setOpenSection] = React.useState<"install" | "usage" | "source">("usage");
   const [shared, share] = useCopied();
   const [prompted, copyPrompt] = useCopied(2200);
-  const { isPro, requestUpgrade } = useProAccess();
+  const { requestUpgrade } = useProAccess();
   // The UI lock follows the visitor's plan; the server's answer (usage.locked) wins when it says no.
   const locked = useLocked(item.premium) || !!usage?.locked;
-  // Components with a build prompt copy that (Pro); the rest copy the install brief for an agent.
-  const [buildState, copyBuild] = useCopyBuildPrompt(item.slug, item.name);
+  // Components with a build prompt copy that (free unless the component is Pro); the rest copy the install brief for an agent.
+  const [buildState, copyBuild] = useCopyBuildPrompt(item.slug, item.name, { hasAccess: !locked });
   const prompt = (text: string) => (item.hasPrompt ? copyBuild() : locked ? requestUpgrade(item.name) : copyPrompt(text));
   const promptDone = item.hasPrompt ? buildState === "copied" : prompted;
   const promptLabel = item.hasPrompt
@@ -185,7 +185,7 @@ function Inspector({ item }: { item: GalleryItem }) {
         ? "Copied — paste it into your agent"
         : buildState === "error"
           ? "Couldn't copy, try again"
-          : isPro
+          : !locked
             ? "Copy build prompt"
             : "Copy build prompt with Pro"
     : prompted

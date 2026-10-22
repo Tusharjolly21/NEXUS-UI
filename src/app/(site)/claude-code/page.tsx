@@ -6,7 +6,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Nexus UI with Claude Code and AI coding tools",
   description:
-    "Install Nexus UI Tailwind components with one shadcn command from Claude Code, Cursor or any agent that runs a shell, and use Pro build prompts to recreate a component from a written brief.",
+    "Install Nexus UI Tailwind components with one shadcn command from Claude Code, Cursor or any agent that runs a shell, and use build prompts to recreate a component from a written brief.",
   alternates: { canonical: "/claude-code" },
 });
 
@@ -42,8 +42,8 @@ export default function ClaudeCodePage() {
           </h1>
           <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
             Nexus UI is a shadcn registry, so Claude Code, Cursor or any agent that can run a shell adds a component with
-            one command. Pro members also get a build prompt for each component: the written brief an agent needs to
-            recreate it.
+            one command. Components also come with a build prompt: the written brief an agent needs to
+            recreate it. It is free on free components and part of Pro on Pro ones.
           </p>
         </div>
       </section>
@@ -82,11 +82,11 @@ export default function ClaudeCodePage() {
           </div>
 
           <div className="rounded-tile bg-tint-sky p-7">
-            <h2 className="text-[19px] font-semibold text-foreground">Build prompts, a Pro feature</h2>
+            <h2 className="text-[19px] font-semibold text-foreground">Build prompts</h2>
             <p className="mt-2 text-[15px] leading-relaxed text-body">
               Many components and sections have a build prompt: the stack, file layout, props, motion and edge cases written
               out so an agent can build the same thing from scratch in your project. Look for Build prompt on a
-              component or block page. It needs a Pro plan.
+              component or block page. On free components it is free; on Pro components, blocks and templates it needs a Pro plan.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               {[

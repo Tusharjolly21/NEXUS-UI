@@ -25,7 +25,7 @@ export type GalleryItem = {
   isNew: boolean;
   /** Pro component: previews for everyone, code and controls only with Pro. */
   premium: boolean;
-  /** Has a build prompt (the brief to recreate it with an AI agent), a Pro feature. */
+  /** Has a build prompt (the brief to recreate it with an AI agent), free on free components, Pro on Pro ones. */
   hasPrompt?: boolean;
   /** How many designs live on this component's page (the original plus its variants). Only set above 1. */
   variants?: number;
