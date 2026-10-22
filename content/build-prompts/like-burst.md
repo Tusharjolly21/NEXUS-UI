@@ -63,6 +63,13 @@ A toggle computes `nextCount = max(0, count + 1)` when liking and `max(0, count 
 - [ ] Passing `liked` and `count` makes the button follow the props while `onChange` still fires.
 - [ ] Dark mode swaps surface, border, text and shadow; the focus ring uses `color`.
 
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Liking plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) as the heart squashes and the burst fires. Unliking plays `off` (a soft latch click that falls slightly in pitch) at about half volume.
+- It plays on the press only, never on hover, focus or when a controlled `liked` prop changes from outside.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 > The Like Burst page has 2 variants. The brief above rebuilds the original Like Burst; the section below rebuilds the Motion Kit Confetti Like variant.
 
 ---
@@ -134,3 +141,10 @@ With `autoplay`, every 1500ms toggle `liked` and bump `burst` (harmless on unlik
 - [ ] `accent` recolours the heart and ring; `colors` recolours the confetti.
 - [ ] Autoplay toggles every 1.5s and stops for good on the first press.
 - [ ] Dark mode swaps the button surface, text, shadow and the unliked heart outline.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Liking plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) as the confetti fires. Unliking plays `off` (a soft latch click that falls slightly in pitch) at about half volume.
+- The autoplay loop is silent, and nothing plays on hover.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

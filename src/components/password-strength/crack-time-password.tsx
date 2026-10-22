@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const COMMON = ["password", "123456", "qwerty", "letmein", "admin", "welcome", "iloveyou", "monkey", "dragon", "abc123"];
 const GUESSES_PER_SECOND = 1e10; // an offline attack on a fast GPU rig
@@ -55,6 +56,8 @@ export interface CrackTimePasswordProps {
   onChange?: (value: string, crackSeconds: number) => void;
   /** Extra classes for the card. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const subscribeVisibility = (cb: () => void) => {
@@ -85,12 +88,14 @@ function useAutoplayGate(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * you type, and a marker slides along a log scale from instant to forever,
  * shifting from red through amber to green.
  */
-export function CrackTimePassword({ autoplay = false, onChange, className = "" }: CrackTimePasswordProps) {
+export function CrackTimePassword({ autoplay = false, onChange, className = "", enableSound = true }: CrackTimePasswordProps) {
   const id = useId();
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const touched = useRef(false);
+  const reachedTop = useRef(false);
   const card = useRef<HTMLDivElement>(null);
   const running = useAutoplayGate(card, autoplay);
 
@@ -149,8 +154,15 @@ export function CrackTimePassword({ autoplay = false, onChange, className = "" }
           value={pw}
           onChange={(e) => {
             touched.current = true;
-            setPw(e.target.value);
-            onChange?.(e.target.value, crackSeconds(e.target.value));
+            const next = e.target.value;
+            // one soft chime the first time typing reaches the top ("Strong") tier; clearing the field re-arms it
+            if (!next) reachedTop.current = false;
+            else if (pos(crackSeconds(next)) >= 0.68 && !reachedTop.current) {
+              reachedTop.current = true;
+              play("success", 0.5);
+            }
+            setPw(next);
+            onChange?.(next, crackSeconds(next));
           }}
           onFocus={() => {
             if (!touched.current) {

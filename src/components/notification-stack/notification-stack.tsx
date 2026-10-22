@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 type Kind = "success" | "error" | "loading" | "info";
 interface Toast { id: number; kind: Kind; title: string; body?: string }
@@ -8,6 +9,8 @@ interface Toast { id: number; kind: Kind; title: string; body?: string }
 export interface NotificationStackProps {
   /** Pushes sample toasts by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const SAMPLES: Omit<Toast, "id">[] = [
@@ -27,7 +30,8 @@ const ICON: Record<Kind, { color: string; path: string }> = {
 const GAP = 10;
 const HEIGHT = 68;
 
-export function NotificationStack({ autoplay = false }: NotificationStackProps) {
+export function NotificationStack({ autoplay = false, enableSound = true }: NotificationStackProps) {
+  const play = useSound(enableSound);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [expanded, setExpanded] = useState(false);
   const nextId = useRef(1);
@@ -140,7 +144,10 @@ export function NotificationStack({ autoplay = false }: NotificationStackProps) 
             key={s.kind}
             type="button"
             whileTap={{ scale: 0.94 }}
-            onClick={() => push(s)}
+            onClick={() => {
+              play("ping");
+              push(s);
+            }}
             className="h-9 rounded-full bg-white px-4 text-[13px] font-medium capitalize text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] hover:shadow-[0_0_0_1px_rgba(0,0,0,.16)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]"
           >
             {s.kind === "loading" ? "Promise" : s.kind}

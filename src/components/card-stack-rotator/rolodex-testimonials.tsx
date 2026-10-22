@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent, type RefObject } from "react";
 import { animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface RolodexCard {
   /** The quote, without quotation marks. */
@@ -19,6 +20,8 @@ export interface RolodexTestimonialsProps {
   cards?: RolodexCard[];
   /** Clicks the drum round to the next quote every 2.6s until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Called with the index of the card that is square at the front. */
   onChange?: (index: number) => void;
   /** Extra classes for the root. */
@@ -101,7 +104,9 @@ function Card({ card, i, step, radius, rot }: { card: RolodexCard; i: number; st
  * Drag it to spin, flick it hard and it keeps going, and it always
  * comes to rest square on a card. Arrow up and down turn it from the keyboard.
  */
-export function RolodexTestimonials({ cards = DEFAULT_CARDS, autoplay = false, onChange, className }: RolodexTestimonialsProps) {
+export function RolodexTestimonials({ cards = DEFAULT_CARDS, autoplay = false, enableSound = true, onChange, className }: RolodexTestimonialsProps) {
+  const play = useSound(enableSound);
+  const lastTick = useRef(0);
   const still = useReducedMotion() === true;
   const n = cards.length;
   const step = n > 0 ? 360 / n : 360;
@@ -126,6 +131,14 @@ export function RolodexTestimonials({ cards = DEFAULT_CARDS, autoplay = false, o
     if (i !== last.current) {
       last.current = i;
       onChangeRef.current?.(i);
+      // Autoplay stops for good on the first touch, so once touched every card change is the visitor's own.
+      if (touched.current) {
+        const now = performance.now();
+        if (now - lastTick.current > 40) {
+          lastTick.current = now;
+          play("tick", 0.4);
+        }
+      }
     }
   });
 
@@ -176,7 +189,10 @@ export function RolodexTestimonials({ cards = DEFAULT_CARDS, autoplay = false, o
   const up = () => {
     const d = drag.current;
     drag.current = null;
-    if (d) settle(d.v);
+    if (d) {
+      if (Math.abs(d.v) > 200) play("swipe", 0.5);
+      settle(d.v);
+    }
   };
   const key = (e: KeyboardEvent) => {
     if (e.key === "ArrowDown") {

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { getSoundsEnabled } from "@/lib/ui-sounds";
 import type { SoundVariant } from "./keyboard-layout";
 
 export type SoundType = "mechanical" | "soft" | "clicky";
@@ -96,7 +97,8 @@ export function useKeyboardSound(opts: {
   });
 
   const getCtx = React.useCallback((): AudioContext | null => {
-    if (!optsRef.current.enabled) return null;
+    // The prop and the site-wide sound switch must both be on.
+    if (!optsRef.current.enabled || !getSoundsEnabled()) return null;
     try {
       if (!ctxRef.current || ctxRef.current.state === "closed")
         ctxRef.current = new AudioContext();

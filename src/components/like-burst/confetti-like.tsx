@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export const DEFAULT_CONFETTI_COLORS = ["#ff375f", "#ff9f0a", "#bf5af2", "#0a84ff", "#30d158", "#ffd60a"];
 
@@ -17,6 +18,8 @@ export interface ConfettiLikeProps {
   onChange?: (liked: boolean, count: number) => void;
   /** Likes and unlikes itself every 1.5s until someone presses it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the button. */
   className?: string;
 }
@@ -80,8 +83,10 @@ export function ConfettiLike({
   colors = DEFAULT_CONFETTI_COLORS,
   onChange,
   autoplay = false,
+  enableSound = true,
   className = "",
 }: ConfettiLikeProps) {
+  const play = useSound(enableSound);
   const [liked, setLiked] = useState(defaultLiked);
   const [burst, setBurst] = useState(0);
   const touched = useRef(false);
@@ -106,6 +111,8 @@ export function ConfettiLike({
   const press = () => {
     touched.current = true;
     const next = !liked;
+    if (next) play("pop");
+    else play("off", 0.5);
     setLiked(next);
     if (next) setBurst((b) => b + 1);
     onChange?.(next, count + (next ? 1 : 0));

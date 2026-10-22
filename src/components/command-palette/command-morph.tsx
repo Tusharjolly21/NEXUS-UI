@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface CommandItem {
   /** Unique within its page. */
@@ -58,6 +59,8 @@ export interface CommandMorphProps {
   autoplay?: boolean;
   /** Extra classes for the outer box. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const crumbOf = (c: CommandItem) => c.crumb ?? c.label;
@@ -75,7 +78,10 @@ export function CommandMorph({
   hotkey = false,
   autoplay = false,
   className = "",
+  enableSound = true,
 }: CommandMorphProps) {
+  const play = useSound(enableSound);
+  const lastTick = useRef(0);
   const [stack, setStack] = useState<CommandItem[]>([]);
   const [q, setQ] = useState("");
   const [i, setI] = useState(0);
@@ -106,6 +112,7 @@ export function CommandMorph({
 
   const run = (c?: CommandItem) => {
     if (!c) return;
+    play("tap");
     if (c.children) {
       setDir(1);
       setStack((s) => [...s, c]);
@@ -119,6 +126,7 @@ export function CommandMorph({
 
   const back = () => {
     if (!stack.length) return;
+    play("tick", 0.4);
     setDir(-1);
     setStack((s) => s.slice(0, -1));
     setI(0);
@@ -126,11 +134,18 @@ export function CommandMorph({
 
   const key = (e: KeyboardEvent<HTMLInputElement>) => {
     touched.current = true;
+    const tick = () => {
+      if (e.timeStamp - lastTick.current < 40) return;
+      lastTick.current = e.timeStamp;
+      play("tick", 0.4);
+    };
     if (e.key === "ArrowDown") {
       e.preventDefault();
+      if (active < list.length - 1) tick();
       setI(Math.min(list.length - 1, active + 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
+      if (active > 0) tick();
       setI(Math.max(0, active - 1));
     } else if (e.key === "Enter") {
       e.preventDefault();
@@ -152,13 +167,14 @@ export function CommandMorph({
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         touched.current = true;
+        play("pop", 0.7);
         input.current?.focus();
         input.current?.select();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [hotkey]);
+  }, [hotkey, play]);
 
   useEffect(() => {
     if (!autoplay) return;

@@ -13,7 +13,7 @@ Build a small QWERTY keyboard, tilted back in perspective, that lights up under 
 | --- | --- | --- | --- |
 | `glow` | `string` | `"#ff9f0a"` | Colour a key flashes to when pressed. A hex colour; the glow shadow appends alpha `88` to it. Also colours the text caret. |
 | `autoplay` | `boolean` | `false` | Plays a sample phrase by itself every few seconds until the user types or uses a button. The demo is silent. |
-| `sound` | `boolean` | `true` | Key click with every press, click and replayed key. |
+| `enableSound` | `boolean` | `true` | Key click with every press, click and replayed key. Follows the site-wide sound switch (`getSoundsEnabled()` from `@/lib/ui-sounds`). |
 | `soundSrc` | `string` | `"/sounds/keys.ogg"` | Recorded clicks; until loaded (or if missing) a short synthesised tick plays. |
 | `volume` | `number` | `0.6` | Click volume, 0 to 1. |
 
@@ -76,6 +76,10 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
 
 - Typing area: `role="textbox"`, `aria-label="Type here to light up the keyboard"`, with the 2px focus ring on the pill. Keys are `aria-hidden`.
 - Both controls are `<button type="button">` with a 2px focus-visible outline `#0071e3` (dark `#0a84ff`; Replay adds a 2px offset); Replay is truly `disabled` when unavailable.
+
+## Sound
+
+`LitKeyboard` takes `enableSound?: boolean` (default `true`; `false` silences it), `soundSrc` (default `"/sounds/keys.ogg"`) and `volume` (default `0.6`). Each letter, space or Backspace the visitor types or clicks plays that key's recorded Cherry MX click from `/sounds/keys.ogg` through `useKeySound` (`components/key-sound`), in the same event as the press. Held-key repeats are silent. A replay the visitor starts with the Replay button clicks each recorded key with the original timing; the autoplay phrase is silent. Silent in autoplay and on hover. The clicks follow the site-wide switch: check `getSoundsEnabled()` from `@/lib/ui-sounds` before playing (on by default in installed apps; `setSoundsEnabled(false)` turns everything off). Until the recording has loaded, or if `keys.ogg` is missing, play `playKeyTick(volume)` instead, a short synthesised tick.
 
 ## Acceptance checklist
 

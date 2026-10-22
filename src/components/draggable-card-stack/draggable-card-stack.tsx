@@ -12,6 +12,7 @@ import {
   type MotionValue,
   type PanInfo,
 } from "framer-motion";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 export type StackCard = {
   id: string;
@@ -58,6 +59,8 @@ export type DraggableCardStackProps = {
   autoPlay?: boolean;
   /** Time between autoplay flings, in ms. */
   autoInterval?: number;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 type Scene = { sky: [string, string]; sun: string; hills: [string, string] };
@@ -123,6 +126,7 @@ function Item({
   register,
   onThrow,
   onVideo,
+  play,
 }: {
   card: StackCard;
   index: number;
@@ -143,6 +147,7 @@ function Item({
   register: (id: string, fn: ((dir: number) => void) | null) => void;
   onThrow: (id: string) => void;
   onVideo: (id: string, el: HTMLVideoElement | null) => void;
+  play: (name: SoundName, volume?: number) => void;
 }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -202,11 +207,13 @@ function Item({
     const far = Math.hypot(info.offset.x, info.offset.y) > 110 || Math.hypot(info.velocity.x, info.velocity.y) > 650;
     animate(lift, 0, { type: "spring", stiffness: 300, damping: 26 });
     if (far) {
+      play("swipe");
       const ux = Math.abs(info.velocity.x) > 200 || Math.abs(info.velocity.y) > 200 ? info.velocity.x : info.offset.x;
       const uy = Math.abs(info.velocity.x) > 200 || Math.abs(info.velocity.y) > 200 ? info.velocity.y : info.offset.y;
       fling(ux, uy, info.velocity);
       return;
     }
+    play("drop", 0.6);
     animate(x, 0, { type: "spring", stiffness: 420, damping: 26 });
     animate(y, 0, { type: "spring", stiffness: 420, damping: 26 });
   };
@@ -229,6 +236,7 @@ function Item({
         drag={top}
         dragMomentum={false}
         dragElastic={1}
+        onDragStart={() => play("lift", 0.7)}
         onDrag={(_, info) => lift.set(Math.min(1, Math.hypot(info.offset.x, info.offset.y) / 160))}
         onDragEnd={end}
         onHoverStart={() => setHover(true)}
@@ -282,7 +290,9 @@ export function DraggableCardStack({
   autoplay,
   autoPlay,
   autoInterval = 2400,
+  enableSound = true,
 }: DraggableCardStackProps) {
+  const play = useSound(enableSound);
   const still = useReducedMotion() === true;
   const ids = cards.map((c) => c.id).join("\u0000");
   const [order, setOrder] = useState<string[]>(() => cards.map((c) => c.id));
@@ -370,10 +380,12 @@ export function DraggableCardStack({
     if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") {
       e.preventDefault();
       touched.current = true;
+      if (!busy.current) play("swipe");
       sendAway(1);
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
       touched.current = true;
+      if (!busy.current && live.length > 1) play("swipe", 0.7);
       bringBack();
     }
   };
@@ -420,6 +432,7 @@ export function DraggableCardStack({
               still={still}
               incoming={incoming?.id === id ? incoming.n : 0}
               register={register}
+              play={play}
               onThrow={onThrow}
               onVideo={(cid, el) => {
                 if (el) videos.current.set(cid, el);

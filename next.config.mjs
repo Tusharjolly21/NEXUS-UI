@@ -105,6 +105,9 @@ const nextConfig = {
         destination: "https://www.nexus-ui.com/:path*",
         permanent: true,
       },
+      // `/%2Fdashboard` (an encoded slash straight after the host) makes Vercel's runtime look for a
+      // pages-router file that doesn't exist and answer 500. Send it to the page it was meant to be.
+      { source: "/%2F:path(.*)", destination: "/:path", permanent: false },
       { source: "/docs", destination: "/docs/introduction", permanent: true },
       { source: "/demos", destination: "/components", permanent: true },
       { source: "/Nexus", destination: "/", permanent: true },

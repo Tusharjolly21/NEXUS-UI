@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 /** Rounds SVG coordinates so server and browser maths print the same attribute (no hydration mismatch). */
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
@@ -20,6 +21,8 @@ export interface ThermoDialProps {
   onChange?: (value: number) => void;
   /** Turns the dial to a few set points every 2.4s until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Dial size in px, and its centre. */
@@ -49,7 +52,8 @@ const rgb = (k: number) => {
  * number rolls, and the label says whether it's heating or cooling toward
  * the room's current temperature.
  */
-export function ThermoDial({ room = 19.5, defaultValue = 21, min = 10, max = 30, step = 0.5, onChange, autoplay = false }: ThermoDialProps) {
+export function ThermoDial({ room = 19.5, defaultValue = 21, min = 10, max = 30, step = 0.5, onChange, autoplay = false, enableSound = true }: ThermoDialProps) {
+  const play = useSound(enableSound);
   const lo = Math.min(min, max);
   const hi = Math.max(min, max, lo + step);
   const span = hi - lo;
@@ -71,10 +75,17 @@ export function ThermoDial({ room = 19.5, defaultValue = 21, min = 10, max = 30,
   const ring = useRef<HTMLDivElement>(null);
   const drag = useRef(false);
   const touched = useRef(false);
+  const lastTick = useRef(0);
 
+  // commit only runs from pointer and key handlers, so each step the user takes gets one quiet tick.
   const commit = (v: number) => {
     const next = snap(v);
     if (next === set.get()) return;
+    const now = performance.now();
+    if (now - lastTick.current >= 40) {
+      lastTick.current = now;
+      play("tick", 0.3);
+    }
     set.set(next);
     onChange?.(next);
   };

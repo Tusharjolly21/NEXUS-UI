@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { animate, motion, type AnimationPlaybackControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const W = 440;
 const H = 300;
@@ -12,6 +13,8 @@ export interface BoxSpillProps {
   count?: number;
   /** Opens and packs the box every 3.6s until someone presses the button. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 interface Ball { x: number; y: number; vx: number; vy: number; r: number; c: string; face: boolean; a: number; va: number }
@@ -21,7 +24,8 @@ interface Ball { x: number; y: number; vx: number; vy: number; r: number; c: str
  * as everything bursts out, tumbles, bounces off each other and piles up on
  * the floor. Pack it up and they all fly home.
  */
-export function BoxSpill({ count = 30, autoplay = false }: BoxSpillProps) {
+export function BoxSpill({ count = 30, autoplay = false, enableSound = true }: BoxSpillProps) {
+  const play = useSound(enableSound);
   const canvas = useRef<HTMLCanvasElement>(null);
   const balls = useRef<Ball[]>([]);
   const flap = useRef(0); // 0 closed .. 1 open
@@ -232,7 +236,7 @@ export function BoxSpill({ count = 30, autoplay = false }: BoxSpillProps) {
       <motion.button
         type="button"
         whileTap={{ scale: 0.94 }}
-        onClick={() => { touched.current = true; if (open) pack(); else spill(); }}
+        onClick={() => { touched.current = true; if (open) pack(); else { play("pop"); spill(); } }}
         className="h-10 rounded-full bg-[#1d1d1f] px-5 text-[14px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#2997ff]"
       >
         {open ? "Pack it up" : "Open the box"}

@@ -54,6 +54,10 @@ The player is its own demo: with the default `autoplay={true}` it plays through 
 - The dot pill is `role="tablist"` with `aria-label="Steps"`; each dot is a `type="button"` with `role="tab"`, `aria-selected` for the current one and `aria-label` set to the step title.
 - The play button's `aria-label` is "Pause" while playing and "Play" while paused; the icon is `aria-hidden`.
 
+## Sound
+
+`StepPlayer` takes `enableSound?: boolean` (default `true`; `false` silences it). Tapping a step dot plays `step` (two short rising sine blips, 520 then 700 Hz, about 60ms apart), or `done` when the dot is the last step (a bright four-note triangle arpeggio, C5 E5 G5 C6, 40ms apart, with a soft tail). The play button plays `on` when it starts playback (a faint noise click plus a short rising blip, 600 to 900 Hz) and `off` when it pauses (the same click with a falling blip, 760 to 480 Hz). After the visitor has pressed play, the automatic advances to the next step play `step` and the finish of the run plays `done` once; the self-starting autoplay demo, before anyone presses play, is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] The first dot is a 52px bar that fills with the accent over 3.2s.

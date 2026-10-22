@@ -66,3 +66,7 @@ When `autoplay` is true, every 2200ms glide to the next value in 60, 5, 45, 15, 
 - [ ] Major ticks every 5, labels every 15, ends fade out.
 - [ ] Presets glide the ruler smoothly and turn orange when selected.
 - [ ] Arrow keys step by one; with `autoplay`, it glides between values every 2.2s until touched.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags or flings the ruler, or steps it with the arrow keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time the needle passes a new unit, at most once every 40 ms. Tapping a preset plays one `tap` (a short 900 to 620 Hz blip with a faint click, volume 0.6) and the glide that follows is silent. Autoplay glides and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

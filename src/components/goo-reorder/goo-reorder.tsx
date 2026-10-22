@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { Reorder } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface GooReorderItem {
   id: string;
@@ -24,6 +25,8 @@ export interface GooReorderProps {
   onReorder?: (items: GooReorderItem[]) => void;
   /** Swaps two random rows every 1.6s until someone touches the list. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
@@ -32,7 +35,8 @@ export interface GooReorderProps {
  * it lands. The goo comes from one SVG filter; the text is composited back on
  * top so it stays sharp.
  */
-export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, autoplay = false }: GooReorderProps) {
+export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, autoplay = false, enableSound = true }: GooReorderProps) {
+  const play = useSound(enableSound);
   const [items, setItems] = useState(initial);
   const id = useId().replace(/:/g, "");
   const touched = useRef(false);
@@ -71,6 +75,7 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
     e.preventDefault();
     touched.current = true;
     if (to < 0 || to >= items.length) return;
+    play("drop", 0.6);
     const n = [...items];
     const [it] = n.splice(i, 1);
     n.splice(to, 0, it);
@@ -94,7 +99,11 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
       <Reorder.Group
         axis="y"
         values={items}
-        onReorder={commit}
+        onReorder={(next) => {
+          // Fires once per row the dragged item passes, so each swap gets one soft tick.
+          play("tick", 0.4);
+          commit(next);
+        }}
         aria-label="Reorderable list"
         className="m-0 flex w-[280px] list-none flex-col gap-[10px] p-0"
         style={{ filter: `url(#goo-${id})` }}
@@ -106,6 +115,8 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
             tabIndex={0}
             aria-label={`${it.label}, position ${i + 1} of ${items.length}. Use the up and down arrow keys to move.`}
             onKeyDown={(e: KeyboardEvent) => move(e, i)}
+            onDragStart={() => play("lift", 0.7)}
+            onDragEnd={() => play("drop", 0.7)}
             whileDrag={{ scale: 1.06 }}
             transition={{ type: "spring", stiffness: 420, damping: 30 }}
             className="flex h-[48px] cursor-grab select-none items-center gap-3 rounded-[24px] bg-[#1d1d1f] px-4 text-[14px] font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0a84ff] active:cursor-grabbing dark:bg-[#3a3a3c]"

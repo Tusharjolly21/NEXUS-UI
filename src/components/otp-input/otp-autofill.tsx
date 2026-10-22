@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const DEFAULT_CODE = "482913";
 const LEN = 6;
@@ -20,6 +21,8 @@ export interface OtpAutofillProps {
   onResend?: () => void;
   /** Extra classes for the card. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const subscribeVisibility = (cb: () => void) => {
@@ -51,7 +54,8 @@ function useAutoplayGate(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * together into a single Verified pill. Typing or pasting works as normal, and
  * a wrong code shakes and clears.
  */
-export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, onVerified, onResend, className = "" }: OtpAutofillProps) {
+export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, onVerified, onResend, className = "", enableSound = true }: OtpAutofillProps) {
+  const play = useSound(enableSound);
   const CODE = /^\d{6}$/.test(codeProp) ? codeProp : DEFAULT_CODE;
   const reduce = useReducedMotion() ?? false;
   const [value, setValue] = useState("");
@@ -66,6 +70,8 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
   const boxRefs = useRef<(HTMLDivElement | null)[]>([]);
   const row = useAnimationControls();
   const touched = useRef(false);
+  // true while the current run was started by the visitor (typing or pressing Fill); the autoplay demo keeps it false
+  const loud = useRef(false);
   const timers = useRef<number[]>([]);
   const onVerifiedRef = useRef(onVerified);
   const running = useAutoplayGate(card, autoplay);
@@ -107,12 +113,14 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
               }),
             );
           }
+          if (loud.current) play("success");
           setPhase("merge");
           later(() => {
             setPhase("done");
             onVerifiedRef.current?.(entered);
           }, 380);
         } else {
+          if (loud.current) play("error");
           setPhase("error");
           if (!reduce) void row.start({ x: [0, -10, 9, -7, 5, -2, 0], transition: { duration: 0.45 } });
           later(() => {
@@ -122,7 +130,7 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
         }
       }, 900);
     },
-    [CODE, later, reduce, row],
+    [CODE, later, play, reduce, row],
   );
 
   // the message arrives a moment after the screen opens
@@ -132,7 +140,8 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
     return () => clearTimeout(t);
   }, [phase, value]);
 
-  const fill = useCallback(() => {
+  const fill = useCallback((byUser = false) => {
+    loud.current = byUser;
     if (reduce) {
       // no flight under reduced motion: the digits simply arrive
       setValue(CODE);
@@ -152,6 +161,7 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
   }, [CODE, check, reduce]);
 
   const landed = (i: number) => {
+    if (loud.current) play("tick", 0.4);
     setValue(CODE.slice(0, i + 1));
     if (i === CODE.length - 1) {
       setFlies([]);
@@ -164,7 +174,7 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
     if (!running || touched.current) return;
     if (phase === "banner") {
       const t = window.setTimeout(() => {
-        if (!touched.current) fill();
+        if (!touched.current) fill(false);
       }, 1300);
       return () => clearTimeout(t);
     }
@@ -180,6 +190,8 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
     touched.current = true;
     if (phase === "checking" || phase === "done" || phase === "flying" || phase === "merge") return;
     const clean = v.replace(/\D/g, "").slice(0, LEN);
+    loud.current = true;
+    if (clean.length > value.length) play("tick", 0.45);
     setValue(clean);
     if (phase === "error") setPhase("idle");
     if (clean.length === LEN) check(clean);
@@ -240,7 +252,8 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
               whileTap={{ scale: 0.94 }}
               onClick={() => {
                 touched.current = true;
-                fill();
+                play("tap");
+                fill(true);
               }}
               disabled={phase === "flying"}
               className={`mt-1 h-8 flex-none rounded-full bg-[#0071e3] px-3.5 text-[13px] font-semibold text-white dark:bg-[#0a84ff] ${FOCUS}`}

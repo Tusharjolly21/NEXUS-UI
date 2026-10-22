@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type DragEvent, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface UploadQueueProps {
   /** Called with the real files the user dropped or chose. The files are only listed; their contents are never read or sent. */
@@ -12,12 +13,14 @@ export interface UploadQueueProps {
   onCancel?: (name: string) => void;
   /** Drops three sample files in, pauses one and resumes it, in a loop, until someone presses or drops on the card. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
 }
 
 type ItemState = "up" | "paused" | "ok";
-type Item = { id: number; name: string; size: number; done: number; state: ItemState; speed: number };
+type Item = { id: number; name: string; size: number; done: number; state: ItemState; speed: number; audible: boolean };
 
 const TYPES: Record<string, string> = { pdf: "#ff3b30", fig: "#bf5af2", mp4: "#ff9f0a", zip: "#8e8e93", png: "#0a84ff", jpg: "#0a84ff", csv: "#30d158" };
 const FALLBACK_COLOR = "#8e8e93";
@@ -80,7 +83,8 @@ const hasFiles = (e: DragEvent) => Array.from(e.dataTransfer.types).includes("Fi
  * the card and it tells you how many it is about to take. Progress is
  * simulated: nothing is read or sent.
  */
-export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, className }: UploadQueueProps) {
+export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, enableSound = true, className }: UploadQueueProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -97,7 +101,8 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, c
   const gate = useAutoplayGate(cardRef, autoplay, reduce);
   const playing = gate && !touched;
 
-  const add = useCallback((files: { name: string; size: number }[]) => {
+  // `audible` marks rows the user added; the autoplay demo rows stay silent.
+  const add = useCallback((files: { name: string; size: number }[], audible = false) => {
     const made: Item[] = files.map((f) => ({
       id: nextId.current++,
       name: f.name,
@@ -105,6 +110,7 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, c
       done: 0,
       state: "up",
       speed: 2.2e6 + rng.current() * 3.5e6,
+      audible,
     }));
     setItems((xs) => [...xs, ...made]);
   }, []);
@@ -132,10 +138,11 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, c
     for (const x of items) {
       if (x.state === "ok" && !finished.current.has(x.id)) {
         finished.current.add(x.id);
+        if (x.audible) play("done");
         onComplete?.(x.name);
       }
     }
-  }, [items, onComplete]);
+  }, [items, onComplete, play]);
 
   // Demo loop: drag three files over, drop them, pause one, resume it, clear.
   useEffect(() => {
@@ -167,7 +174,8 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, c
 
   const take = (list: File[]) => {
     if (!list.length) return;
-    add(list.map((f) => ({ name: f.name, size: Math.max(f.size, 2e5) })));
+    play("drop");
+    add(list.map((f) => ({ name: f.name, size: Math.max(f.size, 2e5) })), true);
     setStatus(`${list.length} ${list.length === 1 ? "file" : "files"} added to the queue.`);
     onFiles?.(list);
   };

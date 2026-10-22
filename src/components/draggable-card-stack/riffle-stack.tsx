@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface RiffleCard {
   /** Card title. */
@@ -19,6 +20,8 @@ export interface RiffleStackProps {
   cards?: RiffleCard[];
   /** Riffles and cuts the deck by itself every 2.8s until someone presses a button. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Called with the title of the card that lands on top after each shuffle. */
   onShuffle?: (top: string) => void;
   /** Extra classes for the root. */
@@ -107,7 +110,8 @@ function Face({ c }: { c: RiffleCard }) {
  * in little clumps and the deck squares itself up. Cut lifts the top half off
  * and slides it under. Whatever lands on top is the feature you see.
  */
-export function RiffleStack({ cards = DEFAULT_CARDS, autoplay = false, onShuffle, className }: RiffleStackProps) {
+export function RiffleStack({ cards = DEFAULT_CARDS, autoplay = false, onShuffle, enableSound = true, className }: RiffleStackProps) {
+  const play = useSound(enableSound);
   const still = useReducedMotion() === true;
   const n = cards.length;
   const [order, setOrder] = useState(() => cards.map((_, i) => i)); // order[0] is the top card
@@ -163,49 +167,56 @@ export function RiffleStack({ cards = DEFAULT_CARDS, autoplay = false, onShuffle
     if (top) onShuffleRef.current?.(top.t);
   }, [cards]);
 
-  const riffle = useCallback(async () => {
+  const riffle = useCallback(async (byUser = false) => {
     if (busy.current || n < 2) return;
     busy.current = true;
     if (still) {
+      if (byUser) play("drop", 0.7);
       const out = interleave(orderRef.current);
       setOrder(out);
       report(out);
       busy.current = false;
       return;
     }
+    if (byUser) play("lift", 0.7);
     setPhase("split");
     if (!(await wait(520))) return;
     const out = interleave(orderRef.current);
     setOrder(out);
     setPhase("fall");
+    if (byUser) play("swipe", 0.7);
     if (!(await wait(70 * n + 350))) return;
+    if (byUser) play("drop", 0.7);
     await deck.start({ scaleY: [1, 0.94, 1.02, 1], transition: { duration: 0.35 } });
     if (!alive.current) return;
     setPhase("idle");
     busy.current = false;
     report(out);
-  }, [n, still, wait, deck, report]);
+  }, [n, still, wait, deck, report, play]);
 
-  const cut = useCallback(async () => {
+  const cut = useCallback(async (byUser = false) => {
     if (busy.current || n < 2) return;
     busy.current = true;
     const cutOrder = (o: number[]) => [...o.slice(n / 2), ...o.slice(0, n / 2)];
     if (still) {
+      if (byUser) play("drop", 0.7);
       const out = cutOrder(orderRef.current);
       setOrder(out);
       report(out);
       busy.current = false;
       return;
     }
+    if (byUser) play("lift", 0.7);
     setPhase("cut");
     if (!(await wait(420))) return;
+    if (byUser) play("drop", 0.7);
     const out = cutOrder(orderRef.current);
     setOrder(out);
     setPhase("idle");
     report(out);
     if (!(await wait(450))) return;
     busy.current = false;
-  }, [n, still, wait, report]);
+  }, [n, still, wait, report, play]);
 
   // Autoplay shuffles while the deck is on screen and the tab is visible: riffle, riffle, cut.
   useEffect(() => {
@@ -217,15 +228,15 @@ export function RiffleStack({ cards = DEFAULT_CARDS, autoplay = false, onShuffle
         return;
       }
       if (!onScreen.current) return;
-      void (k++ % 3 === 2 ? cut() : riffle());
+      void (k++ % 3 === 2 ? cut(false) : riffle(false));
     }, 2800);
     return () => window.clearInterval(id);
   }, [autoplay, still, riffle, cut, onScreen]);
 
-  const press = (action: () => Promise<void>) => {
+  const press = (action: (byUser: boolean) => Promise<void>) => {
     touched.current = true;
     setLive(true);
-    void action();
+    void action(true);
   };
 
   const top = cards[order[0]];

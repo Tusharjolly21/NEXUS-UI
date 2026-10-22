@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { SmilePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type Reaction = {
   emoji: string;
@@ -23,6 +24,8 @@ export type EmojiReactionsProps = {
   onChange?: (reactions: Reaction[]) => void;
   /** Ring and tint colour for reactions you have added. */
   accent?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -183,8 +186,10 @@ export function EmojiReactions({
   emojis = DEFAULT_EMOJIS,
   onChange,
   accent = "#5b8def",
+  enableSound = true,
   className,
 }: EmojiReactionsProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion();
   const [list, setList] = React.useState<Reaction[]>(initial);
   const [pops, setPops] = React.useState<Record<string, number>>({});
@@ -216,6 +221,8 @@ export function EmojiReactions({
       added = true;
     }
     if (added) setPops((p) => ({ ...p, [emoji]: (p[emoji] ?? 0) + 1 }));
+    if (added) play("pop");
+    else play("off", 0.5);
     commit(next);
   };
 

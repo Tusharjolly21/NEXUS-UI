@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface MoneyGooPerson {
   name: string;
@@ -15,6 +16,8 @@ export interface MoneyGooProps {
   accent?: string;
   /** Sends money by itself on a loop until the user drags. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const W = 420;
@@ -39,7 +42,8 @@ function useBead(x: MotionValue<number>, y: MotionValue<number>, dist: MotionVal
  * between the blob and your avatar, thins as you pull, and breaks free; drop it
  * on the friend and it pours in and both balances update.
  */
-export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, accent = "#0071e3", autoplay = false }: MoneyGooProps) {
+export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, accent = "#0071e3", autoplay = false, enableSound = true }: MoneyGooProps) {
+  const play = useSound(enableSound);
   const fid = "g" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const x = useMotionValue(A.x);
   const y = useMotionValue(A.y);
@@ -56,7 +60,8 @@ export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, ac
   const b3 = useBead(x, y, dist, 0.75);
   const blobScale = useTransform(dist, [0, 30, 200], [0.6, 1, 0.92]);
 
-  const send = () => {
+  const send = (byUser = false) => {
+    if (byUser) play("paid");
     setBalances(([a, b]) => [a - amount, b + amount]);
     setSent((s) => s + 1);
   };
@@ -69,7 +74,7 @@ export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, ac
     if (near) {
       animate(x, B.x, { type: "spring", stiffness: 300, damping: 22 });
       animate(y, B.y, { type: "spring", stiffness: 300, damping: 22 }).then(() => {
-        send();
+        send(true);
         x.set(A.x);
         y.set(A.y);
       });
@@ -178,7 +183,7 @@ export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, ac
             e.preventDefault();
             touched.current = true;
             animate(x, B.x, { type: "spring", stiffness: 200, damping: 20 }).then(() => {
-              send();
+              send(true);
               x.set(A.x);
             });
           }}

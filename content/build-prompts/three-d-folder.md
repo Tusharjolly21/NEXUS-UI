@@ -55,6 +55,10 @@ Every 2200ms toggle `open`. A mouse enter, pointer down, click or focus sets a `
 - Flap labelled "<title>, N projects" with `aria-expanded`; papers "Preview <title>"; dialog `role="dialog"`, `aria-modal`, labelled by the project title; buttons Previous project, Next project, Close preview.
 - Focus rings 2px `#0071e3` (dark `#0a84ff`); close uses white.
 
+## Sound
+
+`ThreeDFolder` takes `enableSound?: boolean` (default `true`; `false` silences it), and every folder on the page (the single one and the compact `size="sm"` ones) uses it the same way. Clicking the flap plays `whoosh` from `@/lib/ui-sounds` when it opens the folder (a short airy noise sweep rising from low to high, about 0.25s) and `hush` at 60% when it closes it (a soft sine gliding from 520 down to 180 Hz over about 0.35s under a faint low-passed breath of noise). Opening a preview from a paper plays `whoosh` at 70%, closing it (button, backdrop or Escape) plays `hush` at 50%, and paging between projects plays `tick` at 50% (a very short, dry high-passed noise click). Mouse hover and focus open the folder without sound, and so does the autoplay. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Hover, focus or tap swings the flap and fans the papers with overshoot; leaving closes.

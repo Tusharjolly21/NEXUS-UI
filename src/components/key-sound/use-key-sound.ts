@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { getSoundsEnabled } from "@/lib/ui-sounds";
 import { DEFAULT_KEY_SOUND_SRC, fetchKeySound, playKeySound, primeKeySound, unlockKeySound } from "./key-sound";
 
 export interface UseKeySoundOptions {
@@ -39,10 +40,14 @@ export function useKeySound({ enabled = true, src = DEFAULT_KEY_SOUND_SRC, volum
     if (o.enabled && o.src) void primeKeySound(o.src);
   }, []);
 
-  /** Plays the click for a KeyboardEvent.code. False means nothing recorded played. */
+  /**
+   * Plays the click for a KeyboardEvent.code. False means nothing recorded played (so the caller
+   * may synthesise one). While the site-wide sound switch is off it plays nothing and returns true.
+   */
   const play = React.useCallback((code: string) => {
     const o = opts.current;
     if (!o.enabled || !o.src) return false;
+    if (!getSoundsEnabled()) return true;
     return playKeySound(code, { src: o.src, volume: o.volume });
   }, []);
 

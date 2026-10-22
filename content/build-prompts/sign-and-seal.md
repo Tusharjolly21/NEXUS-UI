@@ -71,6 +71,10 @@ a looping cursive scribble with a flick down at the end. Stop the demo (and canc
 - Clear is a `<button type="button">` with a 2px focus-visible outline `#0071e3` (dark `#0a84ff`).
 - The status message is plain text next to the button.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Drawing and Clear are silent. When the visitor pauses and the sleeve slides down, `knock` plays as it lands, about 0.35s after the pause is detected (two low thuds 0.11s apart: a sine falling from 160 to 90 Hz with a short band-passed noise burst each), then `success` plays about 0.45s later as the glint runs across (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart). Clearing before they play cancels them. The autoplay signature and seal make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Drawing leaves smooth, round-capped 2.4px ink with no visible corners.

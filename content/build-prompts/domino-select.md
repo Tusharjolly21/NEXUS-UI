@@ -48,6 +48,10 @@ Every 2.6 s alternate between select-all and deselect-all, until the first point
 
 - The master button and each row are `button`s with `role="checkbox"`; rows are named "{sender}: {subject}". The list has a label "Messages". The count is `aria-live="polite"`. Focus rings: 2px `#0071e3` (dark `#2997ff`). Space and Enter toggle (native button).
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing the Select all box plays `knock` at 80% volume as the chain starts (two low thuds 0.11s apart: a sine falling from 160 to 90 Hz with a short band-passed noise burst each), then a quiet `tick` at 40% volume as each row's box gets ticked or unticked (a very short high-passed noise click, about 12ms), so the chain is heard running down the list. Toggling a single row plays `knock` at 50% volume. The autoplay chains make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Select all tips rows one after another from the top, each hinged at its bottom edge, and they all end ticked.

@@ -2,12 +2,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ComposerMorphChatProps {
   /** Types two scripted questions into the composer and sends them, once, until someone touches the chat. */
   autoplay?: boolean;
   /** Called with the text whenever a message is sent. */
   onSend?: (text: string) => void;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the root. */
   className?: string;
 }
@@ -116,8 +119,10 @@ function CodeCard({ delay, still }: { delay: number; still: boolean }) {
  * word by word, sharpening out of a blur, sometimes with a card attached.
  * The replies are canned demo text; nothing leaves the page.
  */
-export function ComposerMorphChat({ autoplay = false, onSend, className }: ComposerMorphChatProps) {
+export function ComposerMorphChat({ autoplay = false, onSend, enableSound = true, className }: ComposerMorphChatProps) {
   const still = useReducedMotion() === true;
+  const play = useSound(enableSound);
+  const playRef = useRef(play);
   const [msgs, setMsgs] = useState<Msg[]>(() => [{ id: 1, me: false, text: "Hi, I'm Nexus. Ask me anything about your interface." }]);
   const [draft, setDraft] = useState("");
   const [thinking, setThinking] = useState(false);
@@ -131,6 +136,8 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
   const turn = useRef(0);
   const touched = useRef(false);
   const inFlight = useRef(false);
+  /** Whether the message now in flight was sent by the visitor (the autoplay demo stays silent). */
+  const flightByUser = useRef(false);
   const timers = useRef<number[]>([]);
   const demoTimers = useRef<number[]>([]);
   const onSendRef = useRef(onSend);
@@ -138,7 +145,8 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
 
   useEffect(() => {
     onSendRef.current = onSend;
-  }, [onSend]);
+    playRef.current = play;
+  }, [onSend, play]);
 
   const later = useCallback((fn: () => void, ms: number, demo = false) => {
     (demo ? demoTimers : timers).current.push(window.setTimeout(fn, ms));
@@ -161,7 +169,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
     demoTimers.current = [];
   };
 
-  const startReply = useCallback(() => {
+  const startReply = useCallback((byUser: boolean) => {
     setThinking(true);
     const k = turn.current++;
     const s = SCRIPT[k % SCRIPT.length];
@@ -170,27 +178,30 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
       const id = nextId.current++;
       setThinking(false);
       setMsgs((m) => [...m, { id, me: false, text: scripted ? s.reply : REPLIES[k % REPLIES.length], card: scripted && s.card }]);
+      if (byUser) playRef.current("ping", 0.7);
     }, 1400);
   }, [later]);
 
   const send = useCallback(
-    (raw: string) => {
+    (raw: string, byUser = false) => {
       const text = raw.trim();
       const rootEl = root.current;
       const fieldEl = field.current;
       if (!text || !rootEl || !fieldEl || inFlight.current) return;
       onSendRef.current?.(text);
+      if (byUser) playRef.current("whoosh");
       const id = nextId.current++;
       setDraft("");
       if (still) {
         setMsgs((m) => [...m, { id, me: true, text }]);
-        startReply();
+        startReply(byUser);
         return;
       }
       const rr = rootEl.getBoundingClientRect();
       const fr = fieldEl.getBoundingClientRect();
       pending.current = { id, text, from: new DOMRect(fr.left - rr.left, fr.top - rr.top, fr.width, fr.height) };
       inFlight.current = true;
+      flightByUser.current = byUser;
       setMsgs((m) => [...m, { id, me: true, text, hidden: true }]);
     },
     [still, startReply],
@@ -220,7 +231,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
     inFlight.current = false;
     setMsgs((m) => m.map((x) => (x.id === id ? { ...x, hidden: false } : x)));
     setFlight(null);
-    startReply();
+    startReply(flightByUser.current);
   };
 
   useEffect(() => {
@@ -265,7 +276,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, className }: Compo
   const submit = (e: FormEvent) => {
     e.preventDefault();
     touch();
-    send(draft);
+    send(draft, true);
   };
   const filled = draft.trim().length > 0;
 

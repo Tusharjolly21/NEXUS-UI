@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export type LayoutSwitchLayout = "grid" | "row" | "feature" | "pile";
 interface Rect {
@@ -55,6 +56,8 @@ function rects(layout: LayoutSwitchLayout, n: number): Rect[] {
 export interface LayoutSwitchProps {
   /** Changes layouts by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
@@ -62,7 +65,8 @@ export interface LayoutSwitchProps {
  * one springs from its old box to its new one, and clicking a photo grows it to
  * fill the frame.
  */
-export function LayoutSwitch({ autoplay = false }: LayoutSwitchProps) {
+export function LayoutSwitch({ autoplay = false, enableSound = true }: LayoutSwitchProps) {
+  const play = useSound(enableSound);
   const [layout, setLayout] = useState<LayoutSwitchLayout>("grid");
   const [open, setOpen] = useState<string | null>(null);
   const touched = useRef(false);
@@ -104,6 +108,7 @@ export function LayoutSwitch({ autoplay = false }: LayoutSwitchProps) {
             aria-pressed={layout === l}
             onClick={() => {
               touched.current = true;
+              if (l !== layout) play("tap", 0.8);
               setOpen(null);
               setLayout(l);
             }}

@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface AskNexusInputProps {
   /** Headline above the field. */
@@ -18,6 +19,8 @@ export interface AskNexusInputProps {
   autoplay?: boolean;
   /** Extra classes for the root. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const DEFAULT_PLACEHOLDERS = [
@@ -56,7 +59,9 @@ export function AskNexusInput({
   onSubmit,
   autoplay = false,
   className = "",
+  enableSound = true,
 }: AskNexusInputProps) {
+  const play = useSound(enableSound);
   const id = useId().replace(/:/g, "");
   const dark = useDark();
   const still = useReducedMotion() === true;
@@ -81,6 +86,7 @@ export function AskNexusInput({
   const ask = (text: string) => {
     const q = text.trim();
     if (!q || phase !== "idle") return;
+    play("whoosh");
     onSubmit?.(q);
     setFont(input.current ? getComputedStyle(input.current).font : "");
     setSnapshot(q);

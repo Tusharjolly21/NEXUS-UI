@@ -13,6 +13,7 @@ import {
   type AnimationPlaybackControls,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type SlideToConfirmSize = "sm" | "md" | "lg";
 export type SlideToConfirmStatus = "idle" | "confirming" | "success";
@@ -41,6 +42,8 @@ export type SlideToConfirmProps = {
   autoplay?: boolean;
   disabled?: boolean;
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 const SIZES: Record<SlideToConfirmSize, { h: number; knob: number; w: number; icon: number; text: string }> = {
@@ -105,7 +108,9 @@ export function SlideToConfirm({
   autoplay = false,
   disabled = false,
   className,
+  enableSound = true,
 }: SlideToConfirmProps) {
+  const play = useSound(enableSound);
   const reduced = useReducedMotion() ?? false;
   const dims = SIZES[size];
   const trackW = width ?? dims.w;
@@ -202,14 +207,17 @@ export function SlideToConfirm({
       setStatus("confirming");
       try {
         await result;
+        play("success");
         succeed();
       } catch {
+        play("error");
         bounceBack();
       }
       return;
     }
+    play("success");
     succeed();
-  }, [onConfirm, succeed, bounceBack]);
+  }, [onConfirm, succeed, bounceBack, play]);
 
   const finish = React.useCallback(() => {
     springTo(max, 0, () => void confirm());
@@ -258,6 +266,10 @@ export function SlideToConfirm({
     let lastX = e.clientX;
     let lastT = performance.now();
     let vel = 0;
+    // A quiet tick each time the knob crosses a quarter of the track.
+    const detentAt = (v: number) => Math.floor(Math.max(0, Math.min(1, v / max)) * 4);
+    let detent = detentAt(startV);
+    let lastTick = 0;
 
     const move = (ev: PointerEvent) => {
       const now = performance.now();
@@ -269,6 +281,14 @@ export function SlideToConfirm({
       if (next < 0) next *= 0.2;
       if (next > max) next = max + (next - max) * 0.15;
       x.set(next);
+      const d = detentAt(next);
+      if (d !== detent) {
+        detent = d;
+        if (now - lastTick > 40) {
+          lastTick = now;
+          play("tick", 0.4);
+        }
+      }
     };
     const up = () => {
       setDragging(false);
@@ -310,6 +330,7 @@ export function SlideToConfirm({
     if (!(e.key in stepMap)) return;
     e.preventDefault();
     const target = Math.max(0, Math.min(max, x.get() + stepMap[e.key] * max));
+    if (target < max - 0.5 && Math.abs(target - x.get()) > 0.5) play("tick", 0.4);
     if (target >= max - 0.5) finish();
     else springTo(target);
   };

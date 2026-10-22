@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform, type PanInfo } from "framer-motion";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 /** Width of the inbox; swipe thresholds are fractions of it. */
 const W = 320;
@@ -45,6 +46,8 @@ export interface SwipeRowsProps {
   onUndo?: (item: SwipeRowItem, action: SwipeAction) => void;
   /** Swipes rows away by itself (archive, then delete, refilling the list) until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 function Row({
@@ -52,11 +55,13 @@ function Row({
   onDone,
   onFlag,
   demo,
+  play,
 }: {
   m: SwipeRowItem;
   onDone: (id: SwipeRowItem["id"], how: SwipeAction, byUser: boolean) => void;
   onFlag: (m: SwipeRowItem) => void;
   demo?: SwipeAction;
+  play: (name: SoundName, volume?: number) => void;
 }) {
   const x = useMotionValue(0);
   const right = useTransform(x, (v) => Math.max(0, v));
@@ -76,6 +81,10 @@ function Row({
   useEffect(() => () => anim.current?.stop(), []);
 
   const finish = (how: SwipeAction, byUser: boolean) => {
+    if (byUser) {
+      play("swipe");
+      play(how === "archive" ? "success" : "off", 0.5);
+    }
     anim.current = animate(x, how === "archive" ? W : -W, { duration: 0.22, ease: "easeIn", onComplete: () => onDone(m.id, how, byUser) });
   };
 
@@ -132,6 +141,7 @@ function Row({
           tabIndex={open && !del ? 0 : -1}
           aria-hidden={!open || del}
           onClick={() => {
+            play("tap");
             onFlag(m);
             anim.current = animate(x, 0, SNAP);
           }}
@@ -192,7 +202,8 @@ const short = (s: string) => (s.length > 18 ? `${s.slice(0, 18)}…` : s);
  * to reveal Flag and Delete; keep going and Delete swallows Flag and takes
  * the row. Rows close up and an undo slips in.
  */
-export function SwipeRows({ items = DEFAULT_SWIPE_MAIL, title = "Inbox", onArchive, onDelete, onFlag, onUndo, autoplay = false }: SwipeRowsProps) {
+export function SwipeRows({ items = DEFAULT_SWIPE_MAIL, title = "Inbox", onArchive, onDelete, onFlag, onUndo, autoplay = false, enableSound = true }: SwipeRowsProps) {
+  const play = useSound(enableSound);
   const [list, setList] = useState(items);
   const [last, setLast] = useState<{ m: SwipeRowItem; how: SwipeAction; at: number } | null>(null);
   const [demo, setDemo] = useState<Record<string, SwipeAction>>({});
@@ -227,6 +238,7 @@ export function SwipeRows({ items = DEFAULT_SWIPE_MAIL, title = "Inbox", onArchi
   const undo = () => {
     if (!last) return;
     touched.current = true;
+    play("pop");
     setList((l) => {
       const n = [...l];
       n.splice(Math.min(last.at, n.length), 0, last.m);
@@ -279,7 +291,7 @@ export function SwipeRows({ items = DEFAULT_SWIPE_MAIL, title = "Inbox", onArchi
         <ul className="m-0 list-none p-0" aria-label={title}>
           <AnimatePresence initial={false}>
             {list.map((m) => (
-              <Row key={m.id} m={m} onDone={done} onFlag={flag} demo={demo[String(m.id)]} />
+              <Row key={m.id} m={m} onDone={done} onFlag={flag} demo={demo[String(m.id)]} play={play} />
             ))}
           </AnimatePresence>
         </ul>

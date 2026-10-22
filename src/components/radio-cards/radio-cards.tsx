@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface RadioOption {
   id: string;
@@ -17,6 +18,8 @@ export interface RadioCardsProps {
   /** Cycles through options until the user interacts. */
   autoplay?: boolean;
   accent?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const DEFAULT_OPTIONS: RadioOption[] = [
@@ -33,7 +36,9 @@ export function RadioCards({
   onChange,
   autoplay = false,
   accent = "#0071e3",
+  enableSound = true,
 }: RadioCardsProps) {
+  const play = useSound(enableSound);
   const [value, setValue] = useState(defaultValue ?? options[1]?.id ?? options[0].id);
   const name = useId();
   const touched = useRef(false);
@@ -51,6 +56,7 @@ export function RadioCards({
 
   const choose = (id: string) => {
     touched.current = true;
+    play("tick");
     setValue(id);
     onChange?.(id);
   };

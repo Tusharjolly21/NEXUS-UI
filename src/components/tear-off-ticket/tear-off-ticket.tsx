@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface TearOffTicketProps {
   title?: string;
@@ -9,6 +10,8 @@ export interface TearOffTicketProps {
   seat?: string;
   /** Tears itself and resets on a loop until the user grabs the stub. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const PULL = 150; // px of drag needed to tear through
@@ -18,7 +21,8 @@ const PULL = 150; // px of drag needed to tear through
  * down (the stub pivots on its last tooth); release early and it snaps back,
  * pull far enough and it hangs for a beat, then drops.
  */
-export function TearOffTicket({ title = "Light & Matter", venue = "Hall 3 · North Gallery", date = "Sat 14 Nov · 11:00", seat = "Row C · Seat 12", autoplay = false }: TearOffTicketProps) {
+export function TearOffTicket({ title = "Light & Matter", venue = "Hall 3 · North Gallery", date = "Sat 14 Nov · 11:00", seat = "Row C · Seat 12", autoplay = false, enableSound = true }: TearOffTicketProps) {
+  const play = useSound(enableSound);
   const p = useMotionValue(0); // 0..1 tear progress
   const rotate = useTransform(p, [0, 1], [0, 26]);
   const teethOpacity = useTransform(p, [0, 1], [1, 0.4]);
@@ -112,7 +116,7 @@ export function TearOffTicket({ title = "Light & Matter", venue = "Hall 3 · Nor
               role="button"
               tabIndex={0}
               aria-label={torn ? "Stub torn off" : "Tear off the stub. Drag it right or press Enter."}
-              onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !torn) { e.preventDefault(); touched.current = true; tear(); } }}
+              onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !torn) { e.preventDefault(); touched.current = true; play("swipe"); tear(); } }}
               onPointerDown={(e) => {
                 if (torn) return;
                 touched.current = true;
@@ -124,7 +128,7 @@ export function TearOffTicket({ title = "Light & Matter", venue = "Hall 3 · Nor
                 const pull = Math.max(0, e.clientX - start.current.x) + Math.max(0, e.clientY - start.current.y) * 0.6;
                 const v = Math.min(1, pull / PULL);
                 p.set(v);
-                if (v >= 1) { start.current = null; tear(); }
+                if (v >= 1) { start.current = null; play("swipe"); tear(); }
               }}
               onPointerUp={() => {
                 if (!start.current) return;
@@ -158,7 +162,7 @@ export function TearOffTicket({ title = "Light & Matter", venue = "Hall 3 · Nor
       <div className="flex h-9 items-center">
         <AnimatePresence mode="wait">
           {gone ? (
-            <motion.button key="reset" type="button" onClick={() => { touched.current = true; reset(); }} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#0a84ff]">
+            <motion.button key="reset" type="button" onClick={() => { touched.current = true; play("tap"); reset(); }} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#0a84ff]">
               New ticket
             </motion.button>
           ) : (

@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { AnimationKind, ComponentCategorySlug } from "@/lib/catalog/taxonomy";
 import * as Previews from "@/registry/component-previews";
+import { COMPONENT_SOUNDS, ENABLE_SOUND_PROP } from "@/lib/catalog/component-sounds";
 
 export type LibraryComponent = {
   slug: string;
@@ -43,7 +44,7 @@ export type LibraryComponent = {
 
 const tw = `Use Tailwind utility composition with rounded-3xl, border-white/10, bg-zinc-950, backdrop-blur-xl, and gradient overlays. Prefer oklch-based neutrals and cyan/fuchsia accents for luminous contrast.`;
 
-export const libraryComponents: LibraryComponent[] = [
+const baseLibraryComponents: LibraryComponent[] = [
   {
     slug: "scroll-progress-bar",
     name: "Scroll Progress Bar",
@@ -6293,7 +6294,7 @@ export function LayerInspector() {
     props: [
       { name: "glow", type: "string", defaultValue: '"#ff9f0a"', description: "Colour a key flashes to when pressed. Use a hex colour; the glow adds alpha to it." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample phrase by itself every few seconds until someone types. The demo stays silent." },
-      { name: "sound", type: "boolean", defaultValue: "true", description: "Plays a key click with every press, click and replayed key." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays a key click with every press, click and replayed key. Follows the site-wide sound switch and stays silent in autoplay." },
       { name: "soundSrc", type: "string", defaultValue: '"/sounds/keys.ogg"', description: "Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds; until it loads, or if it is missing, a short synthesised tick plays." },
       { name: "volume", type: "number", defaultValue: "0.6", description: "Click volume, 0 to 1." },
     ],
@@ -9192,6 +9193,13 @@ export function ProPlan() {
     tailwindSource: tw,
   },
 ];
+
+/** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
+export const libraryComponents: LibraryComponent[] = baseLibraryComponents.map((c) =>
+  COMPONENT_SOUNDS[c.slug] && !c.props?.some((p) => p.name === ENABLE_SOUND_PROP.name)
+    ? { ...c, props: [...(c.props ?? []), { ...ENABLE_SOUND_PROP }] }
+    : c,
+);
 
 export function getLibraryComponent(slugOrRegistryName: string) {
   return (

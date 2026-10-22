@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 const S = { fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 const spring = { type: "spring", stiffness: 420, damping: 24 } as const;
@@ -157,7 +158,24 @@ const LIST: { key: Key; label: [string, string] }[] = [
   { key: "lock", label: ["Locked", "Unlocked"] },
 ];
 
-export function AnimatedIcons({ autoplay = false }: { autoplay?: boolean }) {
+/** Which sound each icon plays when it turns on and when it turns off. */
+const CUES: Record<Key, [on: [SoundName, number], off: [SoundName, number]]> = {
+  menu: [["on", 1], ["off", 1]],
+  play: [["tap", 1], ["tap", 0.8]],
+  like: [["pop", 1], ["tick", 0.5]],
+  bell: [["ping", 0.8], ["off", 0.8]],
+  theme: [["off", 1], ["on", 1]],
+  save: [["tick", 0.8], ["tick", 0.4]],
+  mute: [["tick", 0.6], ["tick", 0.6]],
+  lock: [["off", 1], ["on", 1]],
+};
+
+export function AnimatedIcons({ autoplay = false, enableSound = true }: {
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
+}) {
+  const play = useSound(enableSound);
   const [state, setState] = useState<Record<Key, boolean>>({ menu: false, play: false, like: false, bell: false, theme: false, save: false, mute: false, lock: false });
   const [burst, setBurst] = useState(0);
   const touched = useRef(false);
@@ -201,7 +219,11 @@ export function AnimatedIcons({ autoplay = false }: { autoplay?: boolean }) {
             type="button"
             aria-pressed={state[key]}
             aria-label={label[0]}
-            onClick={() => toggle(key)}
+            onClick={() => {
+              const [name, volume] = CUES[key][state[key] ? 1 : 0];
+              play(name, volume);
+              toggle(key);
+            }}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.88 }}
             className="flex h-[72px] w-[72px] items-center justify-center rounded-[20px] bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_8px_20px_-12px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"

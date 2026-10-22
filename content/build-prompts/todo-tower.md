@@ -59,6 +59,10 @@ Every 1900ms, with a counter `k`: if 2 or fewer bricks remain or `k % 4 === 3`, 
 
 - Checkbox: `button` with `aria-label="Complete {text}"` and `aria-pressed`; 2px focus ring `#0071e3` (dark `#0a84ff`), also on the Add button (2px offset). Shelf is `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing "Add a task" plays `drop` at 80% volume about 0.28s later, when the new brick lands on the pile (a sine falling from 380 to 120 Hz over 80ms with a small noise thud); nothing plays if the pile is full. Ticking a brick off plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at the moment of the click. Dragging a brick out sideways far enough to remove it plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s). Bricks that tip off the pile afterwards, and the autoplay adds and ticks, make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Six offset bricks sit on a grey shelf; nothing animates on mount.

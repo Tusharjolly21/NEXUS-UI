@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface GenerateImageProps {
   /** Prompt the field starts with. */
@@ -9,6 +10,8 @@ export interface GenerateImageProps {
   onGenerate?: (prompt: string) => void;
   /** Generates a new scene every few seconds, cycling the sample prompts, until someone interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const S = 300;
@@ -49,7 +52,8 @@ function paint(ctx: CanvasRenderingContext2D, k: number) {
  * glass with light running across it. The progress line counts the steps.
  * Everything is painted on a canvas in the browser; nothing is fetched.
  */
-export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0], onGenerate, autoplay = false }: GenerateImageProps) {
+export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0], onGenerate, autoplay = false, enableSound = true }: GenerateImageProps) {
+  const play = useSound(enableSound);
   const view = useRef<HTMLCanvasElement>(null);
   const [k, setK] = useState(0);
   const [prompt, setPrompt] = useState(initialPrompt);
@@ -61,7 +65,8 @@ export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  const run = (seed: number) => {
+  // `audible` is true only for a run the visitor started; the autoplay loop stays silent.
+  const run = (seed: number, audible = false) => {
     const v = view.current;
     const ctx = v?.getContext("2d", { willReadFrequently: true });
     const src = document.createElement("canvas");
@@ -90,7 +95,10 @@ export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0
       setStep(i + 1);
       i++;
       if (i < STEPS.length) timer.current = window.setTimeout(tick, 170 + i * 25);
-      else setBusy(false);
+      else {
+        setBusy(false);
+        if (audible) play("success");
+      }
     };
     tick();
   };
@@ -152,10 +160,11 @@ export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0
         onSubmit={(e) => {
           e.preventDefault();
           if (busy) return;
+          play("tap");
           const s = k + 1;
           setK(s);
           onGenerate?.(prompt);
-          run(s);
+          run(s, true);
         }}
       >
         <label htmlFor={inputId} className="sr-only">Prompt</label>

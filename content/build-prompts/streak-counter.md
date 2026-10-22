@@ -70,3 +70,10 @@ Every 2200ms, log a day, unless the user has pressed the button. Once touched, t
 - After eight presses, the flame, today's dot and the button are clearly redder than at the start, and stop changing after that.
 - The inner flame flickers continuously.
 - With `autoplay`, a day is logged every 2.2s until the button is pressed.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Pressing Log today plays `success` from `@/lib/ui-sounds` (two soft rising triangle-wave notes, a major third apart, the second ringing slightly longer) as the number rolls and the embers fly.
+- The autoplay loop that logs a day by itself is silent, and nothing plays on hover.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

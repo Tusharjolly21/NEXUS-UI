@@ -61,6 +61,10 @@ Build an image-generation card: a square picture well above a pill-shaped prompt
 
 - The canvas is `role="img"` with `aria-label` "No image yet", "Generating image" while busy, then the prompt. The button is disabled while busy.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing Generate (or Enter in the prompt field) plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss), and when the picture finishes resolving from a run the visitor started, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays. The autoplay scenes are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] At rest a grey well says "Your image appears here".

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface FanDeckChip {
   name: string;
@@ -12,6 +13,8 @@ export interface FanDeckProps {
   chips?: FanDeckChip[];
   /** Fans out and closes by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const CHIPS: FanDeckChip[] = [
@@ -38,7 +41,8 @@ const PIVOT = 22; // distance of the rivet from the bottom of each chip
  * deck tips onto its side, then the chips fan out one by one around the rivet
  * into a colour-graded half circle. Hover lifts a chip; click copies its hex.
  */
-export function FanDeck({ chips = CHIPS, autoplay = false }: FanDeckProps) {
+export function FanDeck({ chips = CHIPS, autoplay = false, enableSound = true }: FanDeckProps) {
+  const play = useSound(enableSound);
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState<number | null>(null);
   const [copied, setCopied] = useState<FanDeckChip | null>(null);
@@ -60,6 +64,7 @@ export function FanDeck({ chips = CHIPS, autoplay = false }: FanDeckProps) {
   }, [autoplay]);
 
   const copy = async (c: FanDeckChip) => {
+    play("tick", 0.6);
     try {
       await navigator.clipboard.writeText(c.hex);
     } catch {

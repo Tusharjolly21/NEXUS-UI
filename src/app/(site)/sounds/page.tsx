@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import Link from "next/link";
 import { Plus } from "lucide-react";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { InstallCard } from "@/components/site/install-card";
@@ -9,16 +10,22 @@ import { SoundBoard } from "@/components/sounds/sound-board";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { SOUNDS } from "@/lib/ui-sounds";
+import { COMPONENT_SOUNDS } from "@/lib/catalog/component-sounds";
+import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
+import usage from "@/lib/catalog/sound-usage.generated.json";
 
 export const metadata: Metadata = createMetadata({
   title: "UI Sound Effects for React — Web Audio, No Files",
   description:
-    "24 free UI sound effects for React and Next.js: taps, pops, chimes, toggles and success sounds synthesised with the Web Audio API. One file, nothing to download.",
+    "48 UI sound effects for React and Next.js, 24 free and 24 Pro: taps, chimes, glass, paper, arcade and studio sounds synthesised with the Web Audio API. Hear every one, then add it to your app. Nothing to download.",
   alternates: { canonical: "/sounds" },
 });
 
 const COUNT = Object.keys(SOUNDS).length;
+const PRO_COUNT = PRO_SOUND_META.length;
+const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;
 const INSTALL = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds`;
+const INSTALL_PRO = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds-pro`;
 
 const USAGE = `"use client";
 
@@ -32,7 +39,11 @@ export function LikeButton() {
   );
 }`;
 
-const PATTERNS = `import { playSound, setSoundVolume, setSoundsMuted } from "@/lib/ui-sounds";
+const PATTERNS = `import { playSound, setSoundVolume, setSoundsEnabled, useSound, useSoundsEnabled } from "@/lib/ui-sounds";
+
+// In a component: silent when the prop is false or the visitor has sounds off
+const play = useSound(enableSound);
+<button onClick={() => play("tap")}>Save</button>
 
 // A toggle: one sound for each direction
 onCheckedChange={(on) => playSound(on ? "on" : "off")}
@@ -45,9 +56,24 @@ playSound(ok ? "success" : "error");
 // A notification arriving, quieter than the rest
 playSound("chime", 0.6);
 
-// Respect a "Sounds" preference in your settings
-setSoundsMuted(!settings.sounds);
+// A sound switch for your settings: remembered in this browser
+const [on, setOn] = useSoundsEnabled();
+<button onClick={() => setOn(!on)}>{on ? "Sound on" : "Sound off"}</button>
+
+// Or switch everything off from code, and set the level
+setSoundsEnabled(false);
 setSoundVolume(0.7);`;
+
+const PRO_USAGE = `"use client";
+
+import { playProSound, useProSound } from "@/lib/ui-sounds-pro";
+
+// One-off, from any click or key press
+<button onClick={() => playProSound("glass-tap")}>Open</button>
+
+// Inside a component with an enableSound prop: follows the visitor's on/off choice
+const play = useProSound(enableSound);
+<button onClick={() => play("coin")}>Collect</button>`;
 
 const FAQ = [
   {
@@ -64,15 +90,28 @@ const FAQ = [
   },
   {
     q: "How do I let people turn sounds off?",
-    a: "Call setSoundsMuted(true) when someone switches sounds off, and setSoundVolume(0 to 1) for a volume setting. Interface sounds should be optional and quiet; the defaults are already soft.",
+    a: "Use the useSoundsEnabled hook for a speaker button, or call setSoundsEnabled(false) from anywhere. The choice is remembered in this browser (localStorage key ui-sounds) and every sound follows it. setSoundVolume(0 to 1) sets the level, and a component that makes sound also takes enableSound={false} to be silent on its own. Interface sounds should be optional and quiet; the defaults are already soft.",
+  },
+  {
+    q: "Which Nexus UI components make sound?",
+    a: `${SOUND_COMPONENTS} components play these sounds on press, toggle, snap, send, drop and success, never on hover and never in their self-playing demos. Filter the component gallery by Sound to see them. On this site sound is off until you switch it on with the speaker in the menu; in your own app it is on by default.`,
+  },
+  {
+    q: "Which sounds are free and which are Pro?",
+    a: `The ${COUNT} sounds the components use are free, with their full source on this page. The Pro pack adds ${PRO_COUNT} more in four sets: glass, paper and wood, arcade, and studio. Every Pro sound plays on this page for everyone, so you can hear it before you decide. Its code, install command and file come with the Pro plan.`,
+  },
+  {
+    q: "How do I add the Pro sounds to my app?",
+    a: "On a Pro plan, add your Nexus API key to components.json as in the CLI guide, run the install command for ui-sounds-pro (it also installs ui-sounds), then call playProSound or the useProSound hook. The Pro sounds follow the same on/off switch and volume as the free ones.",
   },
   {
     q: "Is it free?",
-    a: "Yes. The sounds library is free to use in personal and commercial projects, installed with the shadcn CLI or copied from this page.",
+    a: "The core library is free to use in personal and commercial projects, installed with the shadcn CLI or copied from this page. The Pro pack is included in the Pro plan.",
   },
 ];
 
 export default async function SoundsPage() {
+  // Only the free file is read here. The Pro file is served by the gated registry route.
   const source = await readFile(path.join(process.cwd(), "src/lib/ui-sounds.ts"), "utf8");
 
   const jsonLd = [
@@ -80,11 +119,12 @@ export default async function SoundsPage() {
       "@context": "https://schema.org",
       "@type": "SoftwareSourceCode",
       name: "UI Sounds",
-      description: `${COUNT} interface sound effects for React, synthesised with the Web Audio API.`,
+      description: `${COUNT + PRO_COUNT} interface sound effects for React (${COUNT} free, ${PRO_COUNT} Pro), synthesised with the Web Audio API.`,
       programmingLanguage: "TypeScript",
       runtimePlatform: "Web browser",
       url: `${siteConfig.url}/sounds`,
       isAccessibleForFree: true,
+      offers: { "@type": "Offer", description: `${COUNT} sounds free; ${PRO_COUNT} more with the Pro plan` },
     },
     {
       "@context": "https://schema.org",
@@ -102,15 +142,21 @@ export default async function SoundsPage() {
         <div className="relative mx-auto max-w-[1152px]">
           <h1 className="pg-display text-[clamp(52px,9vw,88px)] text-foreground">Sounds</h1>
           <p className="mt-5 max-w-[640px] text-[19px] leading-[1.55] text-muted-foreground">
-            {COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the Web Audio API.
-            Tap an orb to play it, then copy the one line that does the same in your app. Free, and nothing to download.
+            {COUNT + PRO_COUNT} interface sounds you can <RainbowWord>hear</RainbowWord>, made entirely in code with the
+            Web Audio API. {COUNT} are free and {PRO_COUNT} are Pro, and every one plays here. Tap an orb, then copy the
+            line that does the same in your app.
           </p>
         </div>
       </section>
 
       <section aria-label="Sound board" className="px-4 pb-20">
         <div className="mx-auto max-w-[1152px]">
-          <SoundBoard source={source} />
+          <SoundBoard
+            source={source}
+            usedBy={usage as Record<string, { slug: string; name: string }[]>}
+            installFree={INSTALL}
+            installPro={INSTALL_PRO}
+          />
         </div>
       </section>
 
@@ -125,6 +171,13 @@ export default async function SoundsPage() {
               project. Then any click, toggle or toast can make a sound.
             </p>
             <InstallCard wrap command={INSTALL} className="mt-6" />
+            <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Pro pack</h3>
+            <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
+              {PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
+              command needs your Nexus API key, set up once as described in the{" "}
+              <Link href="/docs/cli" className="font-medium text-foreground underline underline-offset-4">CLI guide</Link>.
+            </p>
+            <InstallCard wrap command={INSTALL_PRO} className="mt-4" />
           </div>
           <div className="grid min-w-0 gap-4">
             <CodeBlock
@@ -140,6 +193,14 @@ export default async function SoundsPage() {
               language="tsx"
               theme="dark"
               header={{ enabled: true, showDots: true, title: "patterns.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+              border={{ radius: "20px" }}
+            />
+            <CodeBlock
+              code={PRO_USAGE}
+              language="tsx"
+              theme="dark"
+              header={{ enabled: true, showDots: true, title: "pro-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
               codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
               border={{ radius: "20px" }}
             />

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 async function writeClipboard(text: string) {
   try {
@@ -22,17 +23,23 @@ export interface CopyChipProps {
   accent?: string;
   /** Clicks itself every few seconds until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** An ID chip: the icon morphs to a check, a tooltip pops above, the text flashes. */
-export function CopyChip({ value, display, label = "Copy", accent = "#0071e3", autoplay = false }: CopyChipProps) {
+export function CopyChip({ value, display, label = "Copy", accent = "#0071e3", autoplay = false, enableSound = true }: CopyChipProps) {
+  const play = useSound(enableSound);
   const [copied, setCopied] = useState(false);
   const [burst, setBurst] = useState(0);
   const timer = useRef<number | undefined>(undefined);
   const touched = useRef(false);
 
   const copy = async (real = true) => {
-    if (real) await writeClipboard(value);
+    if (real) {
+      await writeClipboard(value);
+      play("success", 0.6);
+    }
     setCopied(true);
     setBurst((b) => b + 1);
     clearTimeout(timer.current);
@@ -99,11 +106,15 @@ export function CopyChip({ value, display, label = "Copy", accent = "#0071e3", a
 }
 
 /** A command line with a label that rolls from "Copy" to "Copied". */
-export function CopyCommand({ command, autoplay = false }: { command: string; autoplay?: boolean }) {
+export function CopyCommand({ command, autoplay = false, enableSound = true }: { command: string; autoplay?: boolean; enableSound?: boolean }) {
+  const play = useSound(enableSound);
   const [copied, setCopied] = useState(false);
   const touched = useRef(false);
   const go = async (real = true) => {
-    if (real) await writeClipboard(command);
+    if (real) {
+      await writeClipboard(command);
+      play("success", 0.6);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 1600);
   };
@@ -136,11 +147,11 @@ export function CopyCommand({ command, autoplay = false }: { command: string; au
   );
 }
 
-export function CopyDemo({ autoplay = false }: { autoplay?: boolean }) {
+export function CopyDemo({ autoplay = false, enableSound = true }: { autoplay?: boolean; enableSound?: boolean }) {
   return (
     <div className="flex w-full flex-col items-center gap-8">
-      <CopyChip value="inv_3fK9xQ2Lq7" display="inv_3fK9…2Lq7" autoplay={autoplay} />
-      <CopyCommand command="npm i framer-motion" autoplay={autoplay} />
+      <CopyChip value="inv_3fK9xQ2Lq7" display="inv_3fK9…2Lq7" autoplay={autoplay} enableSound={enableSound} />
+      <CopyCommand command="npm i framer-motion" autoplay={autoplay} enableSound={enableSound} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface DockApp {
   id: string;
@@ -82,9 +83,12 @@ export interface MagnifyDockProps {
   apps?: DockApp[];
   /** Sweeps an invisible pointer across the dock until someone hovers it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
-export function MagnifyDock({ apps = APPS, autoplay = false }: MagnifyDockProps) {
+export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true }: MagnifyDockProps) {
+  const play = useSound(enableSound);
   const mouseX = useMotionValue(Infinity);
   const [running, setRunning] = useState<string[]>(["home"]);
   const bar = useRef<HTMLDivElement>(null);
@@ -114,7 +118,10 @@ export function MagnifyDock({ apps = APPS, autoplay = false }: MagnifyDockProps)
         aria-label="Dock"
       >
         {apps.map((app) => (
-          <Icon key={app.id} app={app} mouseX={mouseX} running={running.includes(app.id)} onLaunch={() => setRunning((r) => (r.includes(app.id) ? r : [...r, app.id]))} />
+          <Icon key={app.id} app={app} mouseX={mouseX} running={running.includes(app.id)} onLaunch={() => {
+            play("pop");
+            setRunning((r) => (r.includes(app.id) ? r : [...r, app.id]));
+          }} />
         ))}
       </div>
     </div>

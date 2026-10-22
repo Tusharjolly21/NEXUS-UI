@@ -10,6 +10,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface Mood {
   /** The word on the wheel. */
@@ -25,6 +26,8 @@ export interface MoodWheelProps {
   moods?: Mood[];
   /** Spins to a random mood every 2 s until someone drags, scrolls or uses the keys. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 export const DEFAULT_MOODS: Mood[] = [
@@ -66,16 +69,30 @@ function Word({ i, pos, text }: { i: number; pos: MotionValue<number>; text: str
  * past; the one at the centre gets bracketed, fills the sentence, and the orb
  * beside it melts into that mood's colours.
  */
-export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false }: MoodWheelProps) {
+export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, enableSound = true }: MoodWheelProps) {
   const reduce = useReducedMotion();
+  const play = useSound(enableSound);
   const pos = useMotionValue(2);
   const [idx, setIdx] = useState(2);
   const drag = useRef<{ y: number; p: number; v: number; ly: number; lt: number } | null>(null);
   const touched = useRef(false);
   const wheelT = useRef<number | undefined>(undefined);
   const last = moods.length - 1;
+  const lastWord = useRef(2);
+  const lastTick = useRef(0);
 
-  useMotionValueEvent(pos, "change", (p) => setIdx(Math.max(0, Math.min(last, Math.round(p)))));
+  useMotionValueEvent(pos, "change", (p) => {
+    const n = Math.max(0, Math.min(last, Math.round(p)));
+    setIdx(n);
+    // One quiet tick each time a new word reaches the centre, only once the visitor has taken hold (never in the autoplay demo).
+    if (n === lastWord.current) return;
+    lastWord.current = n;
+    const now = performance.now();
+    if (touched.current && now - lastTick.current > 40) {
+      lastTick.current = now;
+      play("tick", 0.5);
+    }
+  });
 
   const settle = (velocity = 0) =>
     animate(pos, [pos.get()], {

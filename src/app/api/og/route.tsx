@@ -204,6 +204,12 @@ export async function GET(request: Request) {
         </div>
       </div>
     </div>,
-    { width: 1200, height: 630 },
+    {
+      width: 1200,
+      height: 630,
+      /* The image depends only on the query string, so let the CDN keep it. Without this every
+         link preview re-rendered the PNG (1-3 s), which social scrapers can time out on. */
+      headers: { "Cache-Control": "public, max-age=3600, s-maxage=31536000, stale-while-revalidate=86400" },
+    },
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useAnimationControls, useMotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface CrumpleToTrashProps {
   /** Heading printed on the page. */
@@ -11,6 +12,8 @@ export interface CrumpleToTrashProps {
   onRestore?: () => void;
   /** Throws the page away and brings it back every 3s until someone clicks. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const LINES = [92, 80, 86, 60, 88, 74, 66, 82];
@@ -24,7 +27,8 @@ const DY = 34;
  * then arcs into the bin, which tips its lid and wobbles. Undo throws it back
  * out and smooths it flat.
  */
-export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore, autoplay = false }: CrumpleToTrashProps) {
+export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore, autoplay = false, enableSound = true }: CrumpleToTrashProps) {
+  const play = useSound(enableSound);
   const fid = "c" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const [crumple, setCrumple] = useState(0);
   const [gone, setGone] = useState(false);
@@ -42,9 +46,10 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
     setGone(v);
   };
 
-  const toss = async () => {
+  const toss = async (user = false) => {
     if (busy.current || goneRef.current) return;
     busy.current = true;
+    if (user) play("swipe");
     await animate(0, 1, { duration: 0.55, ease: [0.4, 0, 0.2, 1], onUpdate: setCrumple });
     lid.start({ rotate: -70, transition: { type: "spring", stiffness: 300, damping: 14 } });
     await Promise.all([
@@ -53,13 +58,14 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
       animate(rot, 540, { duration: 0.6 }),
     ]);
     markGone(true);
+    if (user) play("drop");
     lid.start({ rotate: 0, transition: { type: "spring", stiffness: 500, damping: 12 } });
     bin.start({ rotate: [0, -6, 5, -3, 0], transition: { duration: 0.5 } });
     busy.current = false;
     onTrash?.();
   };
 
-  const undo = async () => {
+  const undo = async (user = false) => {
     if (busy.current || !goneRef.current) return;
     busy.current = true;
     lid.start({ rotate: -70, transition: { type: "spring", stiffness: 300, damping: 14 } });
@@ -70,6 +76,7 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
       animate(rot, 0, { duration: 0.6 }),
     ]);
     lid.start({ rotate: 0, transition: { type: "spring", stiffness: 500, damping: 12 } });
+    if (user) play("swipe", 0.7);
     await animate(1, 0, { type: "spring", stiffness: 140, damping: 16, onUpdate: setCrumple });
     busy.current = false;
     onRestore?.();
@@ -159,8 +166,8 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
           whileTap={{ scale: 0.94 }}
           onClick={() => {
             touched.current = true;
-            if (gone) undo();
-            else toss();
+            if (gone) undo(true);
+            else toss(true);
           }}
           className="h-10 rounded-full bg-[#1d1d1f] px-5 text-[14px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#0a84ff]"
         >

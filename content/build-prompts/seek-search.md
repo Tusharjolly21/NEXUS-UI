@@ -56,6 +56,10 @@ A cycle runs immediately and then every 5s: open at 300ms; type "design" one let
 - Input `aria-label` = placeholder. The results header can be `aria-live="polite"`.
 - Suggestions are real buttons, reachable with Tab.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Clicking a suggestion plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). Opening and closing the field, typing and the autoplay loop are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Closed: a 48px white circle with a magnifier, right-aligned in a 300px row.

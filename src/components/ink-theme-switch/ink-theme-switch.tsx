@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { animate, motion, useMotionTemplate, useMotionValue, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const W = 320;
 const H = 300;
@@ -78,6 +79,8 @@ export interface InkThemeSwitchProps {
   onChange?: (dark: boolean) => void;
   /** Flips between light and dark every 2.2s until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the panel. */
   className?: string;
 }
@@ -89,7 +92,8 @@ export interface InkThemeSwitchProps {
  * pulls in its rays and becomes a moon on the way. It themes only its own
  * panel and never changes the site theme or the document's classes.
  */
-export function InkThemeSwitch({ defaultDark = false, onChange, autoplay = false, className = "" }: InkThemeSwitchProps) {
+export function InkThemeSwitch({ defaultDark = false, onChange, autoplay = false, enableSound = true, className = "" }: InkThemeSwitchProps) {
+  const play = useSound(enableSound);
   const [dark, setDark] = useState(defaultDark);
   const r = useMotionValue(defaultDark ? MAX_R : 0);
   const id = useId().replace(/:/g, "");
@@ -118,6 +122,7 @@ export function InkThemeSwitch({ defaultDark = false, onChange, autoplay = false
     touched.current = true;
     const to = !dark;
     setDark(to);
+    play(to ? "on" : "off");
     anim.current = pour(r, to);
     onChange?.(to);
   };

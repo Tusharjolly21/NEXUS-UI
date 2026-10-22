@@ -8,7 +8,15 @@
  *
  * Browsers only allow audio after a user gesture, so call it from a click,
  * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
  */
+
+import * as React from "react";
 
 export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
 
@@ -42,8 +50,8 @@ function noise(c: AudioContext) {
   return s;
 }
 
-type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
-function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   const t0 = c.currentTime + (o.at ?? 0);
   const osc = c.createOscillator();
   const g = c.createGain();
@@ -59,8 +67,8 @@ function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
   osc.stop(t0 + a + d + 0.05);
 }
 
-type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
-function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   const t0 = c.currentTime + (o.at ?? 0);
   const n = noise(c);
   const f = c.createBiquadFilter();
@@ -78,7 +86,9 @@ function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
   n.stop(t0 + a + d + 0.05);
 }
 
-type Def = { category: SoundCategory; label: string; play: (c: AudioContext, out: AudioNode) => void };
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = { category: string; label: string; play: (c: AudioContext, out: AudioNode) => void };
+type Def = SoundDef & { category: SoundCategory };
 
 export const SOUNDS = {
   tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
@@ -116,23 +126,137 @@ export const SOUNDS = {
 
 export type SoundName = keyof typeof SOUNDS;
 
-let muted = false;
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
 
-/** Mute or unmute every sound (for a "Sounds off" preference). */
-export function setSoundsMuted(value: boolean) {
-  muted = value;
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
 }
 
-/** Play a sound by name. volume is 0..1 on top of the master level. */
-export function playSound(name: SoundName, volume = 1) {
-  if (muted || !(name in SOUNDS)) return;
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  playDef(name, SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
   const c = audio();
   if (!c || !master) return;
   const g = c.createGain();
   g.gain.value = Math.max(0, Math.min(1, volume));
   g.connect(master);
-  (SOUNDS[name] as Def).play(c, g);
+  def.play(c, g);
   setTimeout(() => g.disconnect(), 2000);
+}
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true) {
+  return React.useCallback(
+    (name: SoundName, volume = 1) => {
+      if (enabled) playSound(name, volume);
+    },
+    [enabled],
+  );
 }
 
 /** Set the overall level for every sound, 0..1. */

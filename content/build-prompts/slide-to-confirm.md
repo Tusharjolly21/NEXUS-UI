@@ -61,6 +61,10 @@ Every 3.6s while untouched and idle, animate `x` to `max` with a slow spring (st
 
 - Track `role="slider"`, `aria-roledescription="slide to confirm"`, `aria-label={label}`, `aria-valuemin 0`, `aria-valuemax 100`, `aria-valuenow` = rounded percent, `aria-valuetext` = success label, pending label or "N%". `aria-disabled` when disabled; `tabIndex −1` then. Knob and decorative layers are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Dragging the knob plays `tick` (a very short high-passed noise click, about 12ms) at 40% volume each time it crosses a quarter of the track, at most once every 40ms; an arrow-key step plays one tick too. When the confirm goes through (immediately, or after the returned promise resolves) `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays; if the promise rejects and the knob bounces back, `error` (two short low square-wave bumps, about 220 Hz then 185 Hz, 110ms apart) plays. Letting go short of the threshold and the autoplay slide are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Dragging fast visibly stretches the knob along the track; it squashes back when you stop.

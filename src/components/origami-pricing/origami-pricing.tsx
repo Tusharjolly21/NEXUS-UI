@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useTransform, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface OrigamiPricingProps {
   /** Plan name on the cover. Its first letter becomes the logo tile. */
@@ -25,6 +26,8 @@ export interface OrigamiPricingProps {
   caption?: string;
   /** Folds and unfolds by itself until someone taps the card. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const P = 170;
@@ -60,7 +63,9 @@ export function OrigamiPricing({
   onCtaClick,
   caption = "Two folds: out, then down.",
   autoplay = false,
+  enableSound = true,
 }: OrigamiPricingProps) {
+  const play = useSound(enableSound);
   const a = useMotionValue(0), b = useMotionValue(0);
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -79,10 +84,11 @@ export function OrigamiPricing({
   const shadowW = useTransform(a, (v) => P * 0.9 + v * P);
   const shadowY = useTransform(b, (v) => P * 1.5 + v * (P / 2) + 8);
 
-  const toggle = useCallback(async () => {
+  const toggle = useCallback(async (byUser = false) => {
     if (busy.current) return;
     busy.current = true;
     const next = !open;
+    if (byUser) play(next ? "whoosh" : "swipe", next ? 1 : 0.7);
     setOpen(next);
     if (next) {
       await animate(a, 1, { type: "spring", stiffness: 120, damping: 15 });
@@ -92,7 +98,7 @@ export function OrigamiPricing({
       await animate(a, 0, { type: "spring", stiffness: 160, damping: 22 });
     }
     busy.current = false;
-  }, [open, a, b]);
+  }, [open, a, b, play]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -116,7 +122,7 @@ export function OrigamiPricing({
           {/* top-left: the cover, always facing you */}
           <button
             type="button"
-            onClick={() => { touched.current = true; void toggle(); }}
+            onClick={() => { touched.current = true; void toggle(true); }}
             aria-expanded={open}
             aria-label={open ? `Fold the ${planName} plan card` : `Unfold the ${planName} plan card`}
             className={`absolute inset-0 flex flex-col justify-between rounded-tl-[18px] bg-white p-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#1c1c1e] dark:focus-visible:ring-[#2997ff] ${edge}`}
@@ -145,7 +151,7 @@ export function OrigamiPricing({
                 <button
                   type="button"
                   disabled={!open}
-                  onClick={() => onCtaClick?.()}
+                  onClick={() => { play("tap"); onCtaClick?.(); }}
                   className="h-10 w-full rounded-full bg-white text-[14px] font-semibold text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#1d1d1f] dark:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff]"
                 >
                   {ctaLabel}

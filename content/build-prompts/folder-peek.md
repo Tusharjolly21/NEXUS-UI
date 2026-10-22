@@ -61,6 +61,10 @@ With `autoplay`, every 1800ms toggle `open`, skipping ticks while the pointer is
 - Focus-visible: 2px `#0071e3` outline with 4px offset.
 - File previews are decorative content inside the button.
 
+## Sound
+
+`FolderPeek` takes `enableSound?: boolean` (default `true`; `false` silences it). Clicking or pressing the folder plays `whoosh` from `@/lib/ui-sounds` when that opens it (a short airy noise sweep rising from low to high, about 0.25s) and a quieter `hush` (60%) when it closes (a soft sine gliding from 520 down to 180 Hz over about 0.35s under a faint low-passed breath of noise). Hovering and focusing open the folder without any sound, and the autoplay opening and closing is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] At rest the folder shows a darker back panel and tab with three file tops peeking over the front.

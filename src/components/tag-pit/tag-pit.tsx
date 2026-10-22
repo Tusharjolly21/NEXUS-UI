@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import Matter from "matter-js";
+import { useSound } from "@/lib/ui-sounds";
 
 const TAGS = ["Design", "Motion", "Typography", "3D", "Photography", "AI", "Music", "Startups", "Travel", "Coffee", "Gaming", "Writing", "Code", "Film", "Architecture", "Fitness"];
 const STEP = 1000 / 60;
@@ -21,6 +22,8 @@ export interface TagPitProps {
   accent?: string;
   /** Picks a few tags and shakes the tray by itself until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
@@ -29,7 +32,8 @@ export interface TagPitProps {
  * pick it and it hops up and lights. Every pill is still a real button, so
  * keyboard and screen readers get a plain toggle list.
  */
-export function TagPit({ tags = TAGS, min = 3, accent = "#0071e3", autoplay = false }: TagPitProps) {
+export function TagPit({ tags = TAGS, min = 3, accent = "#0071e3", autoplay = false, enableSound = true }: TagPitProps) {
+  const play = useSound(enableSound);
   const pit = useRef<HTMLDivElement>(null);
   const els = useRef<(HTMLButtonElement | null)[]>([]);
   const bodies = useRef<Matter.Body[]>([]);
@@ -144,6 +148,8 @@ export function TagPit({ tags = TAGS, min = 3, accent = "#0071e3", autoplay = fa
     pickedRef.current = on ? p.filter((x) => x !== i) : [...p, i];
     setPicked(pickedRef.current);
   };
+  // Picking a pill pops; putting it back ticks. Only called for the visitor's own picks.
+  const cue = (i: number) => (pickedRef.current.includes(i) ? play("tick", 0.5) : play("pop", 0.6));
   const shake = () => {
     if (!reduce) void tray.start({ x: [0, -10, 9, -7, 5, -2, 0], rotate: [0, -1.2, 1, -0.6, 0.4, 0], transition: { duration: 0.6 } });
     bodies.current.forEach((b) => {
@@ -175,12 +181,16 @@ export function TagPit({ tags = TAGS, min = 3, accent = "#0071e3", autoplay = fa
     if (!g || !engine.current) return;
     Matter.Composite.remove(engine.current.world, g.c);
     grab.current = null;
-    if (!g.moved) toggle(g.i);
+    if (!g.moved) {
+      cue(g.i);
+      toggle(g.i);
+    }
   };
   // Pointer taps are handled in up(); this catches keyboard and assistive-tech clicks.
   const click = (i: number, e: MouseEvent) => {
     if (e.detail === 0) {
       touched.current = true;
+      cue(i);
       toggle(i);
     }
   };

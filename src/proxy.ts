@@ -9,6 +9,17 @@ function isLinkPrefetch(request: NextRequest): boolean {
   return request.headers.get("Purpose") === "prefetch";
 }
 
+/**
+ * A redirect is a brand-new response, so it drops the cookies Supabase just set while checking the
+ * session: a refreshed token pair, or the expiry of a dead one. Losing them makes the next request
+ * retry (and log) the same failed refresh. Carry them across.
+ */
+function redirectKeepingSession(url: URL, session: NextResponse) {
+  const redirect = NextResponse.redirect(url);
+  for (const cookie of session.cookies.getAll()) redirect.cookies.set(cookie);
+  return redirect;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -74,7 +85,7 @@ export async function proxy(request: NextRequest) {
     if (!user) {
       const login = new URL("/login", request.url);
       login.searchParams.set("next", pathname);
-      return NextResponse.redirect(login);
+      return redirectKeepingSession(login, supabaseResponse);
     }
 
     if (pathname.startsWith("/admin")) {
@@ -84,7 +95,7 @@ export async function proxy(request: NextRequest) {
         admins.includes(email) ||
         (user.user_metadata as { role?: string } | undefined)?.role === "admin";
       if (!isAdmin) {
-        return NextResponse.redirect(new URL("/", request.url));
+        return redirectKeepingSession(new URL("/", request.url), supabaseResponse);
       }
     }
   } catch (err) {

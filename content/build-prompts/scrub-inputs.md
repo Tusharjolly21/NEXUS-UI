@@ -86,3 +86,7 @@ On pointer up/cancel: if delta ≠ 0, show the result badge with that delta; end
 - [ ] Clicking the number lets you type; Enter or blur commits; garbage reverts.
 - [ ] The demo shape's corner radius, rotation and scale follow the fields on a spring.
 - [ ] Autoplay walks through the sequence every 1.1s and stops at the first pointer down.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it; it is passed to each field). While the user scrubs a label or number sideways, or presses the up and down arrows in a field, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) for each step the value actually takes (nothing when it is pinned at the min or max), at most once every 40 ms. Typing, the badges and autoplay are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

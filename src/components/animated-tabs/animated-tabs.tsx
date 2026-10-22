@@ -1,16 +1,20 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SwitchProps {
   checked: boolean;
   onChange: (v: boolean) => void;
   label: string;
   accent?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** iOS-style switch: the knob stretches while pressed and springs across. */
-export function Switch({ checked, onChange, label, accent = "#34c759" }: SwitchProps) {
+export function Switch({ checked, onChange, label, accent = "#34c759", enableSound = true }: SwitchProps) {
+  const play = useSound(enableSound);
   const [pressed, setPressed] = useState(false);
   return (
     <motion.button
@@ -18,7 +22,10 @@ export function Switch({ checked, onChange, label, accent = "#34c759" }: SwitchP
       role="switch"
       aria-checked={checked}
       aria-label={label}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        play(checked ? "off" : "on");
+        onChange(!checked);
+      }}
       onPointerDown={() => setPressed(true)}
       onPointerUp={() => setPressed(false)}
       onPointerLeave={() => setPressed(false)}
@@ -58,9 +65,12 @@ export interface AnimatedTabsProps {
   accent?: string;
   /** Switches tabs by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
-export function AnimatedTabs({ accent = "#34c759", autoplay = false }: AnimatedTabsProps) {
+export function AnimatedTabs({ accent = "#34c759", autoplay = false, enableSound = true }: AnimatedTabsProps) {
+  const play = useSound(enableSound);
   const group = useId();
   const [index, setIndex] = useState(0);
   const [dir, setDir] = useState(1);
@@ -68,6 +78,7 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false }: AnimatedT
   const touched = useRef(false);
 
   const go = (i: number) => {
+    if (i !== index) play("tick", 0.6);
     setDir(i > index ? 1 : -1);
     setIndex(i);
   };
@@ -135,6 +146,7 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false }: AnimatedT
                 <Switch
                   label={r.label}
                   accent={accent}
+                  enableSound={enableSound}
                   checked={values[index][ri]}
                   onChange={(v) => setValues((all) => all.map((rows, ti) => (ti === index ? rows.map((x, xi) => (xi === ri ? v : x)) : rows)))}
                 />

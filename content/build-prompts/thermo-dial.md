@@ -69,3 +69,7 @@ With `autoplay`, every 2400ms animate `set` to the next of the fractions `[0.725
 - [ ] Autoplay turns to 24.5, 17, 27, 21 every 2.4s and stops for good on first touch.
 - [ ] Passing `min={50} max={86} step={1}` works for Fahrenheit.
 - [ ] Dark mode swaps the off ticks, room tick, hint and focus colour; the dial body stays dark.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags round the ring or uses the arrow, Home or End keys, play a very quiet `tick` (a ~12 ms high-passed noise click at volume 0.3) each time the target moves by one step (0.5 degrees by default), at most once every 40 ms. Autoplay turns and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

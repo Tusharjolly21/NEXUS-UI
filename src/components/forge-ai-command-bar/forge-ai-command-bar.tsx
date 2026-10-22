@@ -10,6 +10,7 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type AiCommandMode = "ask" | "edit" | "build";
 
@@ -30,6 +31,8 @@ export interface AiCommandBarProps {
   autoplay?: boolean;
   /** Extra classes for the root. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const MODES: { id: AiCommandMode; label: string }[] = [
@@ -79,7 +82,9 @@ export function AiCommandBar({
   hotkey = "k",
   autoplay = false,
   className = "",
+  enableSound = true,
 }: AiCommandBarProps) {
+  const play = useSound(enableSound);
   const id = useId().replace(/:/g, "");
   const still = useReducedMotion() === true;
   const [mode, setMode] = useState<AiCommandMode>(defaultMode);
@@ -162,6 +167,7 @@ export function AiCommandBar({
       return;
     }
     if (!value.trim()) return;
+    play("whoosh");
     onSubmit?.(value.trim(), mode);
     run(value, mode);
   };
@@ -380,6 +386,7 @@ export function AiCommandBar({
                       aria-checked={on}
                       onClick={() => {
                         touched.current = true;
+                        if (m.id !== mode) play("tick", 0.5);
                         setMode(m.id);
                       }}
                       className="relative rounded-full px-3 py-1 text-[12px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
@@ -411,6 +418,7 @@ export function AiCommandBar({
                       whileTap={{ scale: 0.94 }}
                       onClick={() => {
                         touched.current = true;
+                        play("tap");
                         onSubmit?.(s, mode);
                         run(s, mode);
                       }}

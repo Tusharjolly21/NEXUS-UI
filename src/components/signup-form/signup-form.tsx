@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 import { Divider, FloatField, Rule, SocialRow, SubmitMorph, cardClass, focusRing, playScript, typeSteps, type SubmitState } from "./form-parts";
 
 export type SignupFormValues = {
@@ -31,6 +32,8 @@ export type SignupFormProps = {
   onSignIn?: () => void;
   /** Types a demo signup and plays it through until someone touches the form. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 type Errors = Partial<Record<keyof SignupFormValues, string>>;
@@ -60,8 +63,10 @@ export function SignupForm({
   onSocialLogin,
   onSignIn,
   autoplay = false,
+  enableSound = true,
 }: SignupFormProps) {
   const still = useReducedMotion() === true;
+  const play = useSound(enableSound);
   const id = React.useId().replace(/:/g, "");
   const empty: SignupFormValues = {
     firstName: defaultValues?.firstName ?? "",
@@ -88,6 +93,11 @@ export function SignupForm({
 
   const set = (key: keyof SignupFormValues) => (next: string) => {
     touched.current = true;
+    if (key === "password") {
+      // a very quiet tick when typing turns another password rule green
+      const met = (p: string) => Number(p.length >= min) + Number(/[A-Za-z]/.test(p) && /\d/.test(p));
+      if (met(next) > met(values.password)) play("tick", 0.25);
+    }
     setValues((prev) => ({ ...prev, [key]: next }));
     setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
     setFormError(null);
@@ -107,6 +117,7 @@ export function SignupForm({
     e.preventDefault();
     touched.current = true;
     if (state !== "idle") return;
+    play("tap");
     const next: SignupFormValues = {
       firstName: values.firstName.trim(),
       lastName: values.lastName.trim(),
@@ -118,6 +129,7 @@ export function SignupForm({
     setErrors(found);
     const bad = Object.keys(found) as (keyof SignupFormValues)[];
     if (bad.length) {
+      setTimeout(() => play("error"), 110);
       setShakes((s) => Object.fromEntries([...Object.entries(s), ...bad.map((k) => [k, (s[k] ?? 0) + 1])]));
       document.getElementById(`${id}-${bad[0]}`)?.focus();
       return;
@@ -126,9 +138,13 @@ export function SignupForm({
       setState("loading");
       if (onSubmit) await onSubmit(next);
       else await new Promise<void>((r) => setTimeout(r, 1100));
-      if (alive.current) setState("success");
+      if (alive.current) {
+        play("success");
+        setState("success");
+      }
     } catch (err) {
       if (!alive.current) return;
+      play("error");
       setState("idle");
       setFormError(err instanceof Error && err.message ? err.message : "Unable to create account. Please try again.");
     }

@@ -51,6 +51,10 @@ Every 1.5s step through: pick #1, #3, #0, shake, #5, unpick #1, shake, repeating
 - Tray `role="group"` labelled "Interests". Every pill is a native button with `aria-pressed`; focus ring 2px with 2px offset.
 - Shake and Continue are native buttons with visible focus rings (`#0071e3`, dark `#0a84ff`); Continue is `disabled` until `min` picks.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Picking a pill (by tap, or Enter or Space on it) plays `pop` at 60% volume (a sine rising from 320 to 980 Hz in 70ms); putting a picked pill back plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 50% volume. Dragging and throwing pills, the Shake button and the autoplay picks make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Pills fall in and settle without overlap when the card scrolls into view.

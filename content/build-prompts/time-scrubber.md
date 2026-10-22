@@ -70,3 +70,7 @@ Every 2.6s settle (without callbacks) to the next of 13:15, 7:45, 19:30, 22:45, 
 - The sky chip moves through night navy, dawn violet, orange, blue day and sunset; the glyph swaps at 6:00 and 18:00.
 - Wheel, arrows, Page keys, Home and End all land on snap points.
 - Autoplay cycles demo times and stops on first touch; dark mode recolours card, ruler and needle ring.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags, flings, scrolls or uses the keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time the ruler crosses a snap interval, at most once every 40 ms. When the ruler comes to rest after the user's action, play one soft `drop` (a low sine thump falling 380 to 120 Hz with a brief noise tap, volume 0.4), together with the needle bounce. Autoplay landings, controlled-value changes and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

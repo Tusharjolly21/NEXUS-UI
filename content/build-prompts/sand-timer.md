@@ -53,6 +53,10 @@ With `autoplay`, check every 1500ms: if the top holds less than 45% of the origi
 
 Native buttons with visible focus rings; canvas and SVG are `aria-hidden`; the readout is a polite live region.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing "Stay signed in" plays `tap` as the glass turns (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). When the sand runs out, `done` plays (four soft triangle notes rising as an arpeggio, about C5, E5, G5 and C6, 40ms apart, ringing for about 0.6s), but only if the visitor has pressed the button at least once; a glass that was never touched runs out silently, and so do the autoplay flips. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Sand visibly falls through a thin neck as a single thread, and piles into a cone below.

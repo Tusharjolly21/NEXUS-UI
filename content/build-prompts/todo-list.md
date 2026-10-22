@@ -62,6 +62,10 @@ Every 1500ms complete the first task that is not done (read from a ref mirroring
 - The add input has a visually hidden label "New task" tied with `useId`. The "+" glyph and SVGs are `aria-hidden`; the strike line is `aria-hidden`.
 - The Completed button carries `aria-expanded`. All buttons are `type="button"` and show a 2px focus outline in `accent`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Ticking a task plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz); putting a finished task back with Undo plays `off` (a small noise click with a sine falling from 760 to 480 Hz over 70ms); adding a task with Enter plays `pop` (a sine rising from 320 to 980 Hz in 70ms). An empty add, opening the Completed list and the autoplay ticking make no sound. Tasks are never deleted in this component, so there is no remove sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Clicking a task fills the circle, draws the check and strikes the text before the row moves.

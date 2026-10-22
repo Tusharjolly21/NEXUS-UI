@@ -14,6 +14,7 @@ import {
   type AnimationPlaybackControls,
   type MotionValue,
 } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface CarouselItem {
   id: string;
@@ -38,6 +39,8 @@ export interface CircularCarouselProps {
   autoPlayInterval?: number;
   /** Hint under the controls. Empty string hides it. */
   hint?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 }
 
@@ -50,6 +53,8 @@ const DEFAULT_ITEMS: CarouselItem[] = [
   { id: "learn", tag: "Learn", title: "Loop back", description: "Feed what you saw into the next brief." },
 ];
 
+/** Read the clock from event handlers only. */
+const clock = () => performance.now();
 const ACCENTS = ["#0071e3", "#bf5af2", "#ff9f0a", "#30b65a", "#ff375f", "#5e5ce6"];
 const CW = 164;
 const CH = 104;
@@ -139,8 +144,13 @@ export function CircularCarousel({
   autoPlay,
   autoPlayInterval = 2600,
   hint = "Drag the wheel, or use the arrow keys.",
+  enableSound = true,
   className = "",
 }: CircularCarouselProps) {
+  const play = useSound(enableSound);
+  // When the visitor last moved the wheel. Autoplay and a controlled `activeIndex` never set it, so they stay silent.
+  const userAt = useRef(-Infinity);
+  const lastTick = useRef(0);
   const n = Math.max(1, items.length);
   const still = useReducedMotion() === true;
   const pos = useMotionValue(controlled ?? 0);
@@ -163,9 +173,15 @@ export function CircularCarousel({
     setDir(wrap(i - shown.current, n) >= 0 ? 1 : -1);
     shown.current = i;
     setActive(i);
+    const now = performance.now();
+    if (now - userAt.current < 1600 && now - lastTick.current > 40) {
+      lastTick.current = now;
+      play("tick", 0.4);
+    }
   });
 
   const settle = (target: number, velocity = 0) => {
+    userAt.current = clock();
     run.current?.stop();
     run.current = animate(pos, target, still ? { duration: 0 } : { type: "spring", stiffness: 150, damping: 18, velocity });
     const i = ((Math.round(target) % n) + n) % n;
@@ -234,11 +250,16 @@ export function CircularCarousel({
         tabIndex={0}
         onKeyDown={onKey}
         onPanStart={() => {
+          userAt.current = clock();
           run.current?.stop();
           from.current = pos.get();
         }}
-        onPan={(_, info) => pos.set(from.current - info.offset.x / 120)}
+        onPan={(_, info) => {
+          userAt.current = clock();
+          pos.set(from.current - info.offset.x / 120);
+        }}
         onPanEnd={(_, info) => {
+          userAt.current = clock();
           const at = Math.round(pos.get());
           const land = (v: number) => Math.round(Math.max(at - 3, Math.min(at + 3, v)));
           run.current = animate(pos, [pos.get()], {

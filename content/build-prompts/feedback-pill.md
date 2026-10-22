@@ -56,6 +56,10 @@ When `autoplay` is true: 900ms after mount, and then every 7600ms, open the form
 - Close has `aria-label="Close"`. The thank-you view is `role="status"`. Icons are `aria-hidden`.
 - Keyboard: Enter/Space on the pill opens it, ⌘/Ctrl+Enter sends, Escape closes.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Opening the pill plays `pop` at 60% (a quick sine glide from about 320 Hz up to 980 Hz in 70ms). Closing it with the close button or Escape plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss) at 50%. When a message the visitor sent finishes sending and the thanks state appears, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays; if `onSend` rejects, `error` (two short low square-wave bumps, about 220 Hz then 185 Hz, 110ms apart) plays. The autoplay sample message is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] A 44px pill reading "Feedback" with a bubble icon.

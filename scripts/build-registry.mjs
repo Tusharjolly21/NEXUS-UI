@@ -15,6 +15,7 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), 
 const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencies ?? {}));
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
 const UI_SOUNDS_REGISTRY_NAME = "ui-sounds";
+const UI_SOUNDS_PRO_REGISTRY_NAME = "ui-sounds-pro";
 const homepage = process.env.NEXT_PUBLIC_SITE_URL ?? "http://127.0.0.1:3000";
 
 /** Catalog slug → CLI / JSON filename (e.g. gooey-search-input → gooey-input). */
@@ -127,6 +128,8 @@ function registryDepsForReactSource(src) {
   const deps = new Set();
   deps.add(`${homepage}/api/registry/nexus-font`);
   if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
+  // Components that make sound import the shared synthesiser; the CLI installs it alongside them.
+  if (src.includes("@/lib/ui-sounds")) deps.add(`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`);
 
   for (const match of src.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
     const dependency = match[1];
@@ -164,7 +167,7 @@ function buildNexusFontItem() {
   };
 }
 
-/** The free UI sounds library: one lib file, no dependencies. */
+/** The free UI sounds library: one lib file (plus the on/off switch and the useSound hook), no dependencies. */
 function buildUiSoundsItem() {
   const content = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds.ts"), "utf8");
   return {
@@ -172,10 +175,25 @@ function buildUiSoundsItem() {
     name: UI_SOUNDS_REGISTRY_NAME,
     type: "registry:lib",
     title: "UI Sounds",
-    description: "24 interface sound effects synthesised with the Web Audio API. One file, no audio assets.",
+    description: "24 interface sound effects synthesised with the Web Audio API, a useSound hook and a remembered on/off switch. One file, no audio assets.",
     dependencies: [],
     registryDependencies: [],
     files: [{ path: "next-ui/lib/ui-sounds.ts", type: "registry:lib", target: "lib/ui-sounds.ts", content }],
+  };
+}
+
+/** The Pro sound pack: one lib file that builds on ui-sounds. Server registry only, never in public/r. */
+function buildUiSoundsProItem() {
+  const content = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds-pro.ts"), "utf8");
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: UI_SOUNDS_PRO_REGISTRY_NAME,
+    type: "registry:lib",
+    title: "UI Sounds Pro",
+    description: "24 more interface sounds in four sets (Glass, Paper and wood, Arcade, Studio), plus playProSound and useProSound. Builds on ui-sounds.",
+    dependencies: [],
+    registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
+    files: [{ path: "next-ui/lib/ui-sounds-pro.ts", type: "registry:lib", target: "lib/ui-sounds-pro.ts", content }],
   };
 }
 
@@ -1062,7 +1080,7 @@ const movedPath = path.join(root, "src", "lib", "catalog", "moved-sections.ts");
 const catalogTs = fs.readFileSync(catalogPath, "utf8") + "\n" + fs.readFileSync(movedPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
-const items = [buildNexusFontItem(), buildUiSoundsItem()];
+const items = [buildNexusFontItem(), buildUiSoundsItem(), buildUiSoundsProItem()];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {

@@ -1,12 +1,15 @@
 "use client";
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SandTimerProps {
   /** How long the full glass takes to run out, in seconds. */
   seconds?: number;
   /** Turns the glass over by itself when it is nearly empty, until someone presses the button. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const COLS = 70, ROWS = 120, CELL = 2;
@@ -56,7 +59,8 @@ function glassPath(inset = 0) {
  * that empties the top as the time runs out. "Stay signed in" turns the glass
  * over, and whatever had already fallen becomes the new top.
  */
-export function SandTimer({ seconds = 30, autoplay = false }: SandTimerProps) {
+export function SandTimer({ seconds = 30, autoplay = false, enableSound = true }: SandTimerProps) {
+  const play = useSound(enableSound);
   const canvas = useRef<HTMLCanvasElement>(null);
   const grid = useRef(new Uint32Array(COLS * ROWS)); // 0 = empty, else colour
   const total = useRef(0);
@@ -67,7 +71,11 @@ export function SandTimer({ seconds = 30, autoplay = false }: SandTimerProps) {
   const [flips, setFlips] = useState(0);
   const turn = useAnimationControls();
   const touched = useRef(false);
+  const started = useRef(false); // the visitor has turned the glass at least once
   const reduce = useReducedMotion();
+  const ranOut = useEffectEvent(() => {
+    if (started.current) play("done");
+  });
 
   useEffect(() => {
     alive.current = true;
@@ -91,7 +99,7 @@ export function SandTimer({ seconds = 30, autoplay = false }: SandTimerProps) {
     const ctx = c.getContext("2d")!;
     const img = ctx.createImageData(COLS, ROWS);
     const px = new Uint32Array(img.data.buffer);
-    let raf = 0, last = performance.now(), lastLeft = last, tokens = 0, tick = 0, flowing = 0;
+    let raf = 0, last = performance.now(), lastLeft = last, tokens = 0, tick = 0, flowing = 0, empty = false;
     let onScreen = true;
 
     const frame = (now: number, simulate: boolean) => {
@@ -156,7 +164,10 @@ export function SandTimer({ seconds = 30, autoplay = false }: SandTimerProps) {
       // keep the readout in step with the sand, five times a second
       if (now - lastLeft >= 200) {
         lastLeft = now;
-        setLeft(Math.ceil((top.current / Math.max(1, total.current)) * seconds));
+        const l = Math.ceil((top.current / Math.max(1, total.current)) * seconds);
+        setLeft(l);
+        if (l <= 0 && !empty) ranOut();
+        empty = l <= 0;
       }
     };
     const start = () => {
@@ -235,7 +246,7 @@ export function SandTimer({ seconds = 30, autoplay = false }: SandTimerProps) {
         </svg>
       </motion.div>
       <div className="flex w-full gap-2">
-        <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => { touched.current = true; void flip(); }} className="h-11 flex-1 rounded-full bg-[#0071e3] text-[15px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#0a84ff] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]">
+        <motion.button type="button" whileTap={{ scale: 0.96 }} onClick={() => { touched.current = true; started.current = true; play("tap"); void flip(); }} className="h-11 flex-1 rounded-full bg-[#0071e3] text-[15px] font-semibold text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#0a84ff] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]">
           Stay signed in
         </motion.button>
         <button type="button" className="h-11 rounded-full bg-[#f0f0f3] px-4 text-[15px] font-medium text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff]">Sign out</button>

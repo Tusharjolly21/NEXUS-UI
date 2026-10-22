@@ -55,6 +55,10 @@ After 600ms, for suggestion k: set mode to Ask, Edit, Build in turn, type one ch
 
 - Field has a visually hidden label "Prompt" linked by id. The panel is `aria-live="polite"`. Mode switch is `role="radiogroup"` labelled "Mode" with `role="radio"` and `aria-checked`. The send button is labelled "Send" or "Stop". Focus rings 2px `#0071e3` (dark `#0a84ff`).
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Sending a prompt plays `whoosh` (a short airy noise sweep rising from about 400 to 3200 Hz over roughly 0.25s). Switching the mode (Ask, Edit or Build) to a different one plays `tick` (a tiny burst of high-passed noise above about 5 kHz, roughly 12ms) at 50% volume. Tapping a suggestion chip plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). Stopping a run, the progress steps, and the autoplay cycle are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Sending grows a panel above the field with a slight overshoot; the prompt is the heading.

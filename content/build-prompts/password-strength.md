@@ -60,6 +60,10 @@ When `autoplay` is true: after 900ms, type "Sunset-Drive9" one character at a ti
 - Each rule includes sr-only text "(met)" or "(not met)".
 - Eye button: `aria-label` "Show password" / "Hide password", `type="button"`, 2px accent focus-visible outline. SVGs are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. There is no sound per keystroke. The first time typing takes the score to the top level (Strong), `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays once at 50% volume; it plays again only after the field has been emptied and the visitor reaches the top level again. The autoplay sample password, the eye toggle and the rules ticking are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Empty field: grey border, empty meter, "Enter a password" in grey.
@@ -134,6 +138,10 @@ With `autoplay`, while the card is on screen, the tab is visible and motion is a
 
 - `<label htmlFor>` on the input (id from `useId`). The result block is `aria-live="polite"`; the track, marker and tick labels are `aria-hidden` because the same information is in the text.
 - Eye button is a real button with a visible focus outline and a changing label. SVGs are `aria-hidden`.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. There is no sound per keystroke. The first time typing takes the crack-time estimate into the top tier (Strong), `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays once at 50% volume; it plays again only after the field has been emptied. The autoplay passwords and the eye toggle are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 
@@ -213,6 +221,10 @@ With `autoplay`, while on screen, the tab is visible and motion is allowed, a lo
 
 - A visually hidden `aria-live="polite"` line carries the current advice, or "Suggested password filled in. Strong password." while in use. The input has `aria-describedby` pointing at the advice line.
 - Every control is a real button with a visible focus outline; SVGs are `aria-hidden`.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. There is no sound per keystroke. The first time typing reaches the "Strong password" advice, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays once at 50% volume, and pressing the suggested password's Use button plays the same sound at 50% as the characters decode into place. Choosing your own again re-arms it. The autoplay story, the eye toggle and Create account are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

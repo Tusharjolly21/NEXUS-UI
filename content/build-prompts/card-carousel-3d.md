@@ -66,6 +66,10 @@ Every 2400ms spring (stiffness 120, damping 16) one step in `direction`. Stop pe
 
 - Stage: `role="region"`, `aria-roledescription="carousel"`, `aria-label="Products"`, focusable. Cards are hidden from assistive tech; the dots are the accessible controls (`aria-label="Show {name}"`, `aria-current` on the active one) in a group labelled "Choose product". The caption announces the front product.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor turns the cylinder by dragging, the wheel, the arrow, Home or End keys, a tap on a card or a dot, `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 40% volume plays each time a new card comes to the front, never more often than every 40ms, so a fast spin gives a quick run of clicks. The autoplay steps and the continuous `autoRotate` drift make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Six cards stand evenly on a ring; the front one is undimmed, the side ones dim, the far ones show grey backs.

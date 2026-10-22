@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 interface Upload { id: number; name: string; size: number; progress: number }
 
@@ -10,6 +11,8 @@ export interface UploadChipsProps {
   upload?: (file: File | { name: string; size: number }, onProgress: (p: number) => void) => Promise<void>;
   /** Drops sample files in by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const fakeUpload = (_f: unknown, onProgress: (p: number) => void) =>
@@ -30,18 +33,23 @@ const SAMPLES = [
   { name: "q3-numbers.csv", size: 42_000 },
 ];
 
-export function UploadChips({ accent = "#0071e3", upload = fakeUpload, autoplay = false }: UploadChipsProps) {
+export function UploadChips({ accent = "#0071e3", upload = fakeUpload, autoplay = false, enableSound = true }: UploadChipsProps) {
+  const play = useSound(enableSound);
   const id = useId();
   const [items, setItems] = useState<Upload[]>([]);
   const [over, setOver] = useState(false);
   const nextId = useRef(1);
   const touched = useRef(false);
 
-  const start = (files: (File | { name: string; size: number })[]) => {
+  // `audible` is true for files the user dropped or chose; the autoplay samples stay silent.
+  const start = (files: (File | { name: string; size: number })[], audible = false) => {
+    if (audible && files.length) play("tap");
     files.forEach((f) => {
       const uid = nextId.current++;
       setItems((list) => [...list, { id: uid, name: f.name, size: f.size, progress: 0 }]);
-      upload(f, (p) => setItems((list) => list.map((u) => (u.id === uid ? { ...u, progress: p } : u))));
+      upload(f, (p) => setItems((list) => list.map((u) => (u.id === uid ? { ...u, progress: p } : u)))).then(() => {
+        if (audible) play("done");
+      });
     });
   };
 
@@ -68,7 +76,7 @@ export function UploadChips({ accent = "#0071e3", upload = fakeUpload, autoplay 
           e.preventDefault();
           setOver(false);
           touched.current = true;
-          start(Array.from(e.dataTransfer.files));
+          start(Array.from(e.dataTransfer.files), true);
         }}
         animate={{ scale: over ? 1.03 : 1 }}
         transition={{ type: "spring", stiffness: 400, damping: 26 }}
@@ -80,7 +88,7 @@ export function UploadChips({ accent = "#0071e3", upload = fakeUpload, autoplay 
         </motion.span>
         <span className="text-[15px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">Drop files or <span style={{ color: accent }}>browse</span></span>
         <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Anything up to 25 MB</span>
-        <input id={id} type="file" multiple className="sr-only" onChange={(e) => { touched.current = true; start(Array.from(e.target.files ?? [])); e.target.value = ""; }} />
+        <input id={id} type="file" multiple className="sr-only" onChange={(e) => { touched.current = true; start(Array.from(e.target.files ?? []), true); e.target.value = ""; }} />
       </motion.label>
 
       <ul className="m-0 flex list-none flex-col gap-2 p-0">

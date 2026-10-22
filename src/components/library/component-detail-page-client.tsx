@@ -19,6 +19,7 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
+import { SoundSwitch } from "@/components/site/sound-switch";
 import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
@@ -392,6 +393,7 @@ function InstallPanel({
   premium,
   name,
   hasPrompt,
+  hasSound,
 }: {
   slug: string;
   registryCliName?: string;
@@ -402,6 +404,7 @@ function InstallPanel({
   premium: boolean;
   name: string;
   hasPrompt: boolean;
+  hasSound: boolean;
 }) {
   const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryCliName ?? slug}`;
   const extra = getExtraLibraries(dependencies);
@@ -462,6 +465,13 @@ function InstallPanel({
             </Link>
           </p>
         </div>
+      ) : null}
+
+      {hasSound ? (
+        <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
+          Makes sound. The sound engine (<code className="font-mono text-[12px]">lib/ui-sounds.ts</code>) installs with it, there are no audio files, and{" "}
+          <code className="font-mono text-[12px]">enableSound={"{false}"}</code> silences it.
+        </p>
       ) : null}
 
       {extra.length ? (
@@ -801,6 +811,8 @@ type ComponentDetailProps = {
   hasPrompt?: boolean;
   /** For each variant, the id of its own build prompt or null (ids only, never the text). */
   variantPrompts?: (string | null)[];
+  /** What you hear, when the component makes interface sound. */
+  sound?: string;
   /** Questions and answers about this component (also sent as FAQPage structured data). */
   faq?: { q: string; a: string }[];
   /** Blog guides that use this component. */
@@ -831,6 +843,7 @@ export function ComponentDetailPageClient({
   premium,
   locked = false,
   hasPrompt = false,
+  sound,
   variantPrompts = [],
   faq = [],
   guides = [],
@@ -889,6 +902,14 @@ export function ComponentDetailPageClient({
               </li>
             ))}
           </ul>
+          {sound ? (
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <SoundSwitch variant="pill" />
+              <p className="max-w-[560px] text-[13.5px] leading-snug text-muted-foreground">
+                {sound} Sound is off on this site until you switch it on.
+              </p>
+            </div>
+          ) : null}
           <nav aria-label="On this page" className="mt-5 flex flex-wrap items-center gap-2 text-[13.5px]">
             <span className="mr-1 text-muted-foreground">On this page</span>
             {[
@@ -958,6 +979,7 @@ export function ComponentDetailPageClient({
               premium={premium}
               name={name}
               hasPrompt={hasPrompt}
+              hasSound={!!sound}
             />
           </div>
 

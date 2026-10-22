@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SelectCopyField {
   /** Small heading above the field. */
@@ -21,6 +22,8 @@ export interface SelectCopyProps {
   onCopy?: (value: string) => void;
   /** Runs a visual-only copy on each field in turn until someone presses or types in the card. Never touches the clipboard. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
 }
@@ -82,13 +85,16 @@ function CopyField({
   playing,
   autoDelay,
   onReal,
+  enableSound,
 }: {
   field: SelectCopyField;
   reduce: boolean;
   playing: boolean;
   autoDelay: number;
   onReal: (value: string) => void;
+  enableSound: boolean;
 }) {
+  const sfx = useSound(enableSound);
   const { label, value, mono = true, prefix } = field;
   const [state, setState] = useState<CopyState>("idle");
   // Only real presses are announced to screen readers, never the demo loop.
@@ -110,6 +116,7 @@ function CopyField({
 
   const press = () => {
     void writeClipboard(value);
+    sfx("success", 0.6);
     onReal(value);
     setAnnounce(true);
     play();
@@ -230,7 +237,7 @@ function CopyField({
  * away toward the clipboard, and the button flips to a drawn check. Works for
  * share links, install commands, anything in a field.
  */
-export function SelectCopy({ fields = DEFAULT_FIELDS, onCopy, autoplay = false, className }: SelectCopyProps) {
+export function SelectCopy({ fields = DEFAULT_FIELDS, onCopy, autoplay = false, enableSound = true, className }: SelectCopyProps) {
   const reduce = useReducedMotion() ?? false;
   const ref = useRef<HTMLDivElement>(null);
   const [touched, setTouched] = useState(false);
@@ -254,6 +261,7 @@ export function SelectCopy({ fields = DEFAULT_FIELDS, onCopy, autoplay = false, 
           playing={playing}
           autoDelay={AUTO_DELAYS[i] ?? AUTO_DELAYS[AUTO_DELAYS.length - 1] + (i - AUTO_DELAYS.length + 1) * 2600}
           onReal={(v) => onCopy?.(v)}
+          enableSound={enableSound}
         />
       ))}
     </div>

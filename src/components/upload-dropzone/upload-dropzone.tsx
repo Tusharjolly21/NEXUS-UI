@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type DropzoneItemStatus = "uploading" | "done" | "error";
 
@@ -40,6 +41,8 @@ export type UploadDropzoneProps = {
   accent?: string;
   /** Drops a few example files in by itself until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   disabled?: boolean;
   className?: string;
 };
@@ -215,9 +218,11 @@ export function UploadDropzone({
   hint,
   accent,
   autoplay = false,
+  enableSound = true,
   disabled = false,
   className,
 }: UploadDropzoneProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() === true;
   const uid = React.useId().replace(/:/g, "");
   const inputRef = React.useRef<HTMLInputElement | null>(null);
@@ -258,21 +263,23 @@ export function UploadDropzone({
   }, []);
 
   const start = React.useCallback(
-    (item: DropzoneItem) => {
+    (item: DropzoneItem, audible = false) => {
       const setProgress = (p: number) => patch(item.id, { progress: Math.max(0, Math.min(1, p)) });
       const job = item.file && onUploadRef.current ? onUploadRef.current(item.file, setProgress) : simulate(setProgress, item.size);
       job.then(
         () => {
           patch(item.id, { progress: 1, status: "done" });
           if (alive.current) setAnnounce(`${item.name} uploaded`);
+          if (audible && alive.current) play("done");
         },
         () => {
           patch(item.id, { status: "error", error: "Upload failed" });
           if (alive.current) setAnnounce(`${item.name} failed to upload`);
+          if (audible && alive.current) play("error");
         },
       );
     },
-    [patch],
+    [patch, play],
   );
 
   // Files handed in through `initialFiles` that still need to finish.
@@ -280,7 +287,7 @@ export function UploadDropzone({
   React.useEffect(() => {
     if (started.current) return;
     started.current = true;
-    items.filter((i) => i.status === "uploading").forEach(start);
+    items.filter((i) => i.status === "uploading").forEach((i) => start(i));
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once for the initial list
   }, []);
 
@@ -315,7 +322,9 @@ export function UploadDropzone({
       next.push(item);
     }
     setItems((prev) => (multiple ? [...prev, ...next] : next));
-    next.filter((i) => i.status === "uploading").forEach(start);
+    next.filter((i) => i.status === "uploading").forEach((i) => start(i, true));
+    // Rejected files get the error bump; otherwise the files landing in the tray get the drop.
+    play(rejected ? "error" : "drop");
     if (accepted.length) {
       onFiles?.(accepted);
       swallow();

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform, type PanInfo } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SwipePayment {
   /** Display amount, already formatted. */
@@ -22,6 +23,8 @@ export interface SwipeStackProps {
   onDecide?: (payment: SwipePayment, approved: boolean) => void;
   /** Throws a card every 1.7 s (mostly approvals) and reloads when empty, until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 type Card = SwipePayment & { id: number };
@@ -39,7 +42,8 @@ export const DEFAULT_PAYMENTS: SwipePayment[] = [
  * or left to flag; it tilts as you pull, a stamp fades in, and once thrown the
  * next card rises from the deck.
  */
-export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = false }: SwipeStackProps) {
+export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = false, enableSound = true }: SwipeStackProps) {
+  const play = useSound(enableSound);
   const [cards, setCards] = useState<Card[]>(() => payments.map((d, i) => ({ ...d, id: i })));
   const [log, setLog] = useState<{ ok: boolean; amount: string } | null>(null);
   const nextId = useRef(payments.length);
@@ -62,10 +66,14 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
   }, [payments, onDecide]);
 
   const fling = useCallback(
-    async (dir: 1 | -1) => {
+    async (dir: 1 | -1, byUser = true) => {
       const top = cardsRef.current[0];
       if (!top || busy.current) return;
       busy.current = true;
+      if (byUser) {
+        play("swipe");
+        play(dir > 0 ? "success" : "off", 0.6);
+      }
       await animate(x, dir * 520, { type: "spring", stiffness: 180, damping: 24, velocity: dir * 800 });
       setLog({ ok: dir > 0, amount: top.amount });
       setCards((c) => c.slice(1));
@@ -75,7 +83,7 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
       void id;
       onDecideRef.current?.(payment, dir > 0);
     },
-    [x],
+    [x, play],
   );
 
   const reset = useCallback(() => {
@@ -87,7 +95,7 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
       if (cardsRef.current.length === 0) reset();
-      else void fling(Math.random() > 0.35 ? 1 : -1);
+      else void fling(Math.random() > 0.35 ? 1 : -1, false);
     }, 1700);
     return () => clearInterval(t);
   }, [autoplay, fling, reset]);

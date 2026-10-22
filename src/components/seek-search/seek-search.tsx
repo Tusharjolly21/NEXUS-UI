@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const RECENT = ["Quarterly report", "Design review notes", "Onboarding checklist", "Brand colours", "Hiring plan"];
 const MAX_QUERY = 64;
@@ -16,6 +17,8 @@ export interface SeekSearchProps {
   onSelect?: (suggestion: string) => void;
   /** Opens, types "design", clears and folds back on a loop until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Splits `text` around the first case-insensitive match of `term`. */
@@ -37,7 +40,8 @@ function Highlight({ text, term }: { text: string; term: string }) {
  * suggestions drop in underneath and filter as you type. Escape, or clicking
  * away when it's empty, folds it back.
  */
-export function SeekSearch({ suggestions = RECENT, placeholder = "Search files", maxLength = MAX_QUERY, onSelect, autoplay = false }: SeekSearchProps) {
+export function SeekSearch({ suggestions = RECENT, placeholder = "Search files", maxLength = MAX_QUERY, onSelect, autoplay = false, enableSound = true }: SeekSearchProps) {
+  const play = useSound(enableSound);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const input = useRef<HTMLInputElement>(null);
@@ -178,7 +182,10 @@ export function SeekSearch({ suggestions = RECENT, placeholder = "Search files",
                 >
                   <button
                     type="button"
-                    onClick={() => onSelect?.(r)}
+                    onClick={() => {
+                      play("tap");
+                      onSelect?.(r);
+                    }}
                     className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[14px] text-[#1d1d1f] outline-none hover:bg-[#f5f5f7] focus-visible:bg-[#f5f5f7] dark:text-[#f5f5f7] dark:hover:bg-[#2c2c2e] dark:focus-visible:bg-[#2c2c2e]"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="flex-none text-[#86868b] dark:text-[#8e8e93]" aria-hidden="true">

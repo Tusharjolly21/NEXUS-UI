@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type Transition } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export type IslandState = "idle" | "timer" | "music" | "call";
 
@@ -25,6 +26,8 @@ export type DynamicIslandProps = {
   caller?: string;
   /** Morphs through the activities and opens each one, until someone touches it. Uncontrolled only. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -171,8 +174,10 @@ export function DynamicIsland({
   track = { title: "Midnight Drive", artist: "Harbor Lights" },
   caller = "Ava Lin",
   autoplay = false,
+  enableSound = true,
   className = "",
 }: DynamicIslandProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() === true;
   const [inner, setInner] = useState<IslandState>(defaultState);
   const state = controlled ?? inner;
@@ -244,10 +249,16 @@ export function DynamicIsland({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: PointerEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+        play("pop", 0.4);
+        setOpen(false);
+      }
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        play("pop", 0.4);
+        setOpen(false);
+      }
     };
     window.addEventListener("pointerdown", onDown);
     window.addEventListener("keydown", onKey);
@@ -255,7 +266,7 @@ export function DynamicIsland({
       window.removeEventListener("pointerdown", onDown);
       window.removeEventListener("keydown", onKey);
     };
-  }, [open]);
+  }, [open, play]);
 
   const [w, h] = isOpen ? SIZE[state].open : SIZE[state].compact;
   const fade = {
@@ -299,7 +310,11 @@ export function DynamicIsland({
         transition={reduce ? { duration: 0 } : { width: W_SPRING, height: H_SPRING, borderRadius: H_SPRING }}
         style={{ scaleY: squash, originY: 0 }}
         whileHover={state !== "idle" && !isOpen && !reduce ? { scale: 1.04 } : undefined}
-        onClick={() => isOpen && setOpen(false)}
+        onClick={() => {
+          if (!isOpen) return;
+          play("pop", 0.4);
+          setOpen(false);
+        }}
       >
         <AnimatePresence mode="popLayout" initial={false}>
           {!isOpen && state !== "idle" ? (
@@ -310,6 +325,7 @@ export function DynamicIsland({
               aria-label={`${label}. Open controls`}
               onClick={(e) => {
                 e.stopPropagation();
+                play("pop", 0.7);
                 setOpen(true);
               }}
               className="absolute inset-0 flex items-center justify-between rounded-[inherit] px-3.5 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-white/70"
@@ -350,6 +366,7 @@ export function DynamicIsland({
                 <RoundButton
                   label="Stop timer"
                   onClick={() => {
+                    play("whoosh", 0.6);
                     timer.reset();
                     setOpen(false);
                     setState("idle");
@@ -416,7 +433,10 @@ export function DynamicIsland({
                 </div>
               </div>
               <div className="flex items-center gap-2.5">
-                <RoundButton label="Decline" onClick={() => setState("idle")} className="bg-[#ff3b30] text-white [&_svg]:rotate-[135deg]">
+                <RoundButton label="Decline" onClick={() => {
+                    play("whoosh", 0.6);
+                    setState("idle");
+                  }} className="bg-[#ff3b30] text-white [&_svg]:rotate-[135deg]">
                   {I.phone}
                 </RoundButton>
                 <RoundButton label="Accept" onClick={() => setOpen(false)} className="bg-[#30d158] text-white">

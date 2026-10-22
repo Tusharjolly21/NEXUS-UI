@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { DEFAULT_KEY_SOUND_SRC, playKeyTick, useKeySound } from "@/components/key-sound";
+import { getSoundsEnabled } from "@/lib/ui-sounds";
 
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
@@ -10,8 +11,11 @@ export interface LitKeyboardProps {
   glow?: string;
   /** Plays a recorded phrase by itself until the user types. The demo stays silent. */
   autoplay?: boolean;
-  /** Plays a key click with every press, click and replayed key. */
-  sound?: boolean;
+  /**
+   * Plays a key click with every press, click and replayed key. Follows the site-wide sound
+   * switch (`ui-sounds`) and stays silent in autoplay.
+   */
+  enableSound?: boolean;
   /**
    * Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds or point this at
    * your own copy. Until it loads, or if it is missing, keys play a short synthesised tick.
@@ -62,7 +66,7 @@ function Key({ k, lit, glow, wide, onDown }: { k: string; lit: number; glow: str
  * A tilted keyboard that lights up under your typing, with a soft afterglow.
  * Record a run and replay it with the original timing.
  */
-export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, sound = true, soundSrc = DEFAULT_KEY_SOUND_SRC, volume = 0.6 }: LitKeyboardProps) {
+export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = true, soundSrc = DEFAULT_KEY_SOUND_SRC, volume = 0.6 }: LitKeyboardProps) {
   const [lit, setLit] = useState<Record<string, number>>({});
   const [text, setText] = useState("");
   const [rec, setRec] = useState<"idle" | "recording" | "playing">("idle");
@@ -71,11 +75,11 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, sound = true, 
   const touched = useRef(false);
   const timers = useRef<number[]>([]);
   const area = useRef<HTMLDivElement>(null);
-  const keySound = useKeySound({ enabled: sound, src: soundSrc, volume });
+  const keySound = useKeySound({ enabled: enableSound, src: soundSrc, volume });
 
   /** The click for a key, played in the same event as the press so it lands with the light. */
   const click = (key: string) => {
-    if (!sound) return;
+    if (!enableSound || !getSoundsEnabled()) return;
     const code = key === "space" ? "Space" : key === "backspace" ? "Backspace" : `Key${key.toUpperCase()}`;
     if (!keySound.play(code)) playKeyTick(volume);
   };

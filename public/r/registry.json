@@ -15,8 +15,10 @@
       "name": "ui-sounds",
       "type": "registry:lib",
       "title": "UI Sounds",
-      "description": "24 interface sound effects synthesised with the Web Audio API. One file, no audio assets.",
-      "dependencies": [],
+      "description": "24 interface sound effects synthesised with the Web Audio API, a useSound hook and a remembered on/off switch. One file, no audio assets.",
+      "dependencies": [
+        "react"
+      ],
       "registryDependencies": [],
       "files": [
         {
@@ -58,7 +60,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -81,7 +84,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -268,7 +272,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -409,7 +414,8 @@
         "react-dom"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -433,7 +439,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -464,7 +471,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -559,7 +567,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -648,7 +657,8 @@
         "next"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -692,7 +702,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -978,7 +989,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1082,7 +1094,8 @@
         "react-dom"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1129,7 +1142,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1153,7 +1167,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1184,7 +1199,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1208,7 +1224,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1401,6 +1418,7 @@
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
         "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds",
         "command"
       ],
       "files": [
@@ -1525,7 +1543,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1556,7 +1575,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1587,7 +1607,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1610,7 +1631,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1641,7 +1663,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1695,7 +1718,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1718,7 +1742,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1741,7 +1766,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1764,7 +1790,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1788,7 +1815,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -1819,7 +1847,8 @@
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
