@@ -4,9 +4,11 @@ import * as React from "react";
 import Script from "next/script";
 import { Analytics as VercelAnalytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { getConsentSnapshot, getServerConsentSnapshot, subscribeConsent } from "@/lib/consent";
 
 const GOOGLE_TAG_ID = "G-LNN2CTHENQ";
 const CLOUDFLARE_TOKEN = "27b8689ab43848efa888f93f6c6e6b02";
+const ADSENSE_CLIENT = "ca-pub-6537827972143266";
 
 /** localStorage key that switches every analytics tool off in this browser. */
 const OPT_OUT_KEY = "nexus-no-track";
@@ -48,13 +50,28 @@ function applyOptOutParam(): boolean {
   return readOptOut();
 }
 
+/** Google's ad script. It sets advertising cookies, so it only loads once the visitor has accepted. */
+export function AdSenseScript() {
+  const consent = React.useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsentSnapshot);
+  if (consent !== "granted") return null;
+  return (
+    <Script
+      id="adsense"
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+      strategy="afterInteractive"
+      crossOrigin="anonymous"
+    />
+  );
+}
+
 /**
- * Loads Google Analytics, Cloudflare Web Analytics, Vercel Web Analytics and Speed Insights, unless this
- * browser has opted out. Nothing loads until the check has run, so an opted-out visit never reaches any
- * of them (not even for the first page view).
+ * Loads Cloudflare Web Analytics, Vercel Web Analytics and Speed Insights (none of them sets cookies)
+ * and, once the visitor has accepted cookies, Google Analytics. Nothing loads until the opt-out check
+ * has run, so an opted-out visit never reaches any of them (not even for the first page view).
  */
 export function SiteAnalytics() {
   const [mode, setMode] = React.useState<"pending" | "on" | "off">("pending");
+  const consent = React.useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsentSnapshot);
 
   React.useEffect(() => {
     const off = applyOptOutParam();
@@ -69,15 +86,19 @@ export function SiteAnalytics() {
 
   return (
     <>
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`} strategy="afterInteractive" />
-      <Script id="google-tag" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GOOGLE_TAG_ID}');
-        `}
-      </Script>
+      {consent === "granted" ? (
+        <>
+          <Script src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_TAG_ID}`} strategy="afterInteractive" />
+          <Script id="google-tag" strategy="afterInteractive">
+            {`
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', '${GOOGLE_TAG_ID}');
+            `}
+          </Script>
+        </>
+      ) : null}
       <Script
         src="https://static.cloudflareinsights.com/beacon.min.js"
         strategy="afterInteractive"

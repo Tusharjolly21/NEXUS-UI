@@ -110,12 +110,20 @@ export default function PrivacyPage() {
               catalog view preferences locally. This data stays on your device.
             </>,
             <>
-              <Strong>Vercel Web Analytics and Speed Insights.</Strong> These measure page views and page
-              performance in aggregate. They do not use cookies and do not identify individual visitors.
+              <Strong>Your cookie choice.</Strong> When you first visit, a banner asks whether Google
+              Analytics and Google advertising cookies may be used. A small cookie on our own domain (
+              <code className="text-foreground">nx-consent</code>) remembers your answer for six months, and
+              the banner then stays away until it expires. You can change your answer at any time with
+              &ldquo;Cookie settings&rdquo; in the footer of any page.
             </>,
             <>
-              <Strong>Google Analytics.</Strong> We use Google Analytics to understand which pages are visited
-              and how people find us. It sets cookies (such as <code className="text-foreground">_ga</code>)
+              <Strong>Vercel Web Analytics, Speed Insights and Cloudflare Web Analytics.</Strong> These measure
+              page views and page performance in aggregate. They do not use cookies and do not identify
+              individual visitors, so they run without asking.
+            </>,
+            <>
+              <Strong>Google Analytics.</Strong> Only if you accept cookies in the banner. We use it to
+              understand which pages are visited and how people find us. It sets cookies (such as <code className="text-foreground">_ga</code>)
               and sends Google information including your IP address, device and browser details, and the pages
               you view. See{" "}
               <LegalLink href="https://policies.google.com/technologies/partner-sites">
@@ -128,8 +136,8 @@ export default function PrivacyPage() {
               .
             </>,
             <>
-              <Strong>Google AdSense.</Strong> Some pages may show ads served by Google. Google and its
-              partners use cookies to serve ads based on your visits to this and other websites. You can turn
+              <Strong>Google AdSense.</Strong> Only if you accept cookies in the banner. Some pages may show
+              ads served by Google. Google and its partners use cookies to serve ads based on your visits to this and other websites. You can turn
               off personalised ads in{" "}
               <LegalLink href="https://adssettings.google.com">Google Ads Settings</LegalLink> or visit{" "}
               <LegalLink href="https://www.aboutads.info/choices">aboutads.info</LegalLink> to opt out of

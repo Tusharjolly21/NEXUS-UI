@@ -4,7 +4,8 @@ import Script from "next/script";
 import { AppProviders } from "@/components/providers/app-providers";
 import { createMetadata } from "@/lib/seo";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
-import { SiteAnalytics } from "@/components/providers/analytics";
+import { AdSenseScript, SiteAnalytics } from "@/components/providers/analytics";
+import { ConsentBanner } from "@/components/providers/consent-banner";
 import "./globals.css";
 
 const inter = Inter({
@@ -37,8 +38,6 @@ export default function RootLayout({
   return (
     <html lang="en" className={`light ${inter.variable} ${geistMono.variable}`} suppressHydrationWarning>
       <head>
-        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6537827972143266"
-     crossOrigin="anonymous"></script>
         <Script
           id="nexus-ui-theme-init"
           strategy="beforeInteractive"
@@ -56,8 +55,10 @@ export default function RootLayout({
         className="min-h-dvh bg-background text-foreground antialiased selection:bg-primary/25 selection:text-foreground"
       >
         <AppProviders>{children}</AppProviders>
-        {/* Google Analytics, Cloudflare, Vercel Analytics, Speed Insights: skipped in browsers that opted out (?notrack=1). */}
+        {/* Google Analytics and AdSense wait for the cookie banner. Cloudflare, Vercel Analytics, Speed Insights (no cookies): skipped in browsers that opted out (?notrack=1). */}
         <SiteAnalytics />
+        <AdSenseScript />
+        <ConsentBanner />
       </body>
     </html>
   );

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { openCookieSettings } from "@/lib/consent";
 import { siteConfig } from "@/lib/seo";
 
 const COLUMNS = [
@@ -82,6 +83,9 @@ export function SiteFooter() {
                 {l.label}
               </Link>
             ))}
+            <button type="button" onClick={openCookieSettings} className="transition-colors hover:text-foreground">
+              Cookie settings
+            </button>
             {xHandle && (
               <a href={`https://x.com/${xHandle}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
                 X
