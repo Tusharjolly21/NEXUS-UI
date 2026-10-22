@@ -66,6 +66,19 @@ function soundNamesIn(text) {
   }
 }
 
+// The Mac style must voice every free sound, and the page's labels must match its recipes.
+{
+  const mac = fs.readFileSync(path.join(root, "src/lib/ui-sounds-mac.ts"), "utf8");
+  const meta = fs.readFileSync(path.join(root, "src/lib/ui-sounds-mac-meta.ts"), "utf8");
+  const defined = [...mac.matchAll(/^  ([a-z]+): \{ category: "[^"]+", label: "([^"]+)"/gm)].map((m) => `${m[1]}|${m[2]}`).sort();
+  const listed = [...meta.matchAll(/^  ([a-z]+): "([^"]+)",/gm)].map((m) => `${m[1]}|${m[2]}`).sort();
+  const names = defined.map((d) => d.split("|")[0]).join(",");
+  if (defined.length === 0 || defined.join("\n") !== listed.join("\n") || names !== [...SOUND_NAMES].sort().join(",")) {
+    console.error("ui-sounds-mac.ts must voice every sound in ui-sounds.ts, and ui-sounds-mac-meta.ts must match it.");
+    process.exit(1);
+  }
+}
+
 const usage = {};
 for (const c of comps) {
   const found = new Set();

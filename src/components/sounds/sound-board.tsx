@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Check, Copy, Lock, Volume1, Volume2, VolumeX } from "lucide-react";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
-import { SOUNDS, playSound, setSoundVolume, type SoundCategory, type SoundName } from "@/lib/ui-sounds";
+import { SOUNDS, playSound, setSoundVolume, useSoundStyle, type SoundCategory, type SoundName } from "@/lib/ui-sounds";
+import { MAC_SOUND_LABELS } from "@/lib/ui-sounds-mac-meta";
 import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
 import type { ProSoundCategory, ProSoundName } from "@/lib/ui-sounds-pro";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ export function SoundBoard({
   usedBy,
   installFree,
   installPro,
+  installMac,
 }: {
   /** The free ui-sounds.ts file, shown in full. */
   source: string;
@@ -58,6 +60,7 @@ export function SoundBoard({
   usedBy: Record<string, Used>;
   installFree: string;
   installPro: string;
+  installMac: string;
 }) {
   const reduce = useReducedMotion();
   const { isPro, requestUpgrade } = useProAccess();
@@ -67,7 +70,12 @@ export function SoundBoard({
   const [hits, setHits] = React.useState<Record<string, number>>({});
   const [volume, setVolume] = React.useState(0.8);
   const [showFile, setShowFile] = React.useState(false);
-  const [proFile, setProFile] = React.useState<{ state: "idle" | "loading" | "ready" | "error"; text: string }>({ state: "idle", text: "" });
+  const [proFile, setProFile] = React.useState<{ name: string; state: "idle" | "loading" | "ready" | "error"; text: string }>({ name: "", state: "idle", text: "" });
+  // The style every free sound plays in, here and in every component on the site.
+  const [soundStyle, setSoundStyle] = useSoundStyle();
+  const mac = soundStyle === "mac";
+  const macModule = React.useRef<Promise<typeof import("@/lib/ui-sounds-mac")> | null>(null);
+  const loadMac = () => (macModule.current ??= import("@/lib/ui-sounds-mac"));
 
   // The Pro recipes ship as their own chunk and load the first time one is played or approached.
   const proModule = React.useRef<Promise<typeof import("@/lib/ui-sounds-pro")> | null>(null);
@@ -79,12 +87,22 @@ export function SoundBoard({
   const freeCount = ITEMS.filter((i) => !i.pro).length;
   const proCount = ITEMS.length - freeCount;
   const current = ITEMS.find((i) => i.key === selected) ?? ITEMS[0];
+  /** Free sounds take the Mac style's names while it is on. */
+  const labelOf = (i: Item) => (mac && !i.pro ? MAC_SOUND_LABELS[i.name as SoundName] : i.label);
+  // A free sound in the Mac style is part of the Pro Mac file; the default style is free.
+  const currentLocked = current.pro || mac;
 
   const play = (item: Item) => {
     setSelected(item.key);
     setHits((h) => ({ ...h, [item.key]: (h[item.key] ?? 0) + 1 }));
     if (!item.pro) {
-      playSound(item.name as SoundName, 1, true);
+      if (!mac) {
+        playSound(item.name as SoundName, 1, true);
+        return;
+      }
+      // Start the audio context inside the tap, then play once the Mac recipes are in.
+      setSoundVolume(volume);
+      void loadMac().then(() => playSound(item.name as SoundName, 1, true));
       return;
     }
     // Start the audio context inside the tap (Safari needs that), then play once the chunk is in.
@@ -102,23 +120,32 @@ export function SoundBoard({
     setFilter("All");
   };
 
+  const pickStyle = (s: "nexus" | "mac") => {
+    if (s === "nexus") {
+      setSoundStyle("nexus");
+      return;
+    }
+    void loadMac().then(() => setSoundStyle("mac"));
+  };
+
+  const lockedFile = current.pro ? "ui-sounds-pro" : "ui-sounds-mac";
   const showProFile = () => {
-    if (proFile.state === "idle" || proFile.state === "error") {
-      setProFile({ state: "loading", text: "" });
-      fetch("/api/registry/ui-sounds-pro", { credentials: "same-origin", cache: "no-store" })
+    if (proFile.name !== lockedFile || proFile.state === "idle" || proFile.state === "error") {
+      setProFile({ name: lockedFile, state: "loading", text: "" });
+      fetch(`/api/registry/${lockedFile}`, { credentials: "same-origin", cache: "no-store" })
         .then(async (r) => {
           if (!r.ok) throw new Error("denied");
           const json = (await r.json()) as { files?: { content?: string }[] };
           const text = json.files?.[0]?.content;
           if (!text) throw new Error("empty");
-          setProFile({ state: "ready", text });
+          setProFile({ name: lockedFile, state: "ready", text });
         })
-        .catch(() => setProFile({ state: "error", text: "" }));
+        .catch(() => setProFile({ name: lockedFile, state: "error", text: "" }));
     }
     setShowFile((v) => !v);
   };
 
-  const snippet = current.pro ? `playProSound("${current.name}")` : `playSound("${current.name}")`;
+  const snippet = current.pro ? `playProSound("${current.name}")` : mac ? `setSoundStyle("mac")` : `playSound("${current.name}")`;
   const VolumeIcon = volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
   const used = !current.pro ? (usedBy[current.name] ?? []) : [];
   const ACCESS: { id: Access; label: string; n: number }[] = [
@@ -146,6 +173,25 @@ export function SoundBoard({
               {a.id === "pro" && !isPro ? <Lock className="size-3" strokeWidth={2.4} aria-hidden /> : null}
               {a.label}
               <span className={cn("tabular-nums text-[12px]", access === a.id ? "text-background/60" : "text-muted-foreground")}>{a.n}</span>
+            </button>
+          ))}
+        </div>
+        <div role="radiogroup" aria-label="Sound style" className="inline-flex h-10 items-center gap-0.5 rounded-full bg-card p-1 shadow-[0_0_0_1px_var(--border)] dark:bg-white/[0.06] dark:shadow-none">
+          {(["nexus", "mac"] as const).map((s) => (
+            <button
+              key={s}
+              type="button"
+              role="radio"
+              aria-checked={soundStyle === s}
+              onClick={() => pickStyle(s)}
+              onPointerEnter={s === "mac" ? () => void loadMac() : undefined}
+              className={cn(
+                "inline-flex h-8 items-center gap-1.5 rounded-full px-3.5 text-[13.5px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                soundStyle === s ? "bg-foreground text-background" : "text-foreground hover:bg-foreground/[0.06]",
+              )}
+            >
+              {s === "mac" && !isPro ? <Lock className="size-3" strokeWidth={2.4} aria-hidden /> : null}
+              {s === "nexus" ? "Nexus style" : "Mac style"}
             </button>
           ))}
         </div>
@@ -200,7 +246,7 @@ export function SoundBoard({
                   type="button"
                   onClick={() => play(item)}
                   onPointerEnter={item.pro ? () => void loadPro() : undefined}
-                  aria-label={`Play ${item.label}, ${item.category}${item.pro ? ", Pro" : ""}`}
+                  aria-label={`Play ${labelOf(item)}, ${item.category}${item.pro ? ", Pro" : mac ? ", Mac style" : ""}`}
                   aria-pressed={active}
                   className={cn(
                     "group flex w-full flex-col items-center gap-3 rounded-[22px] bg-card px-3 pb-4 pt-5 text-center transition-shadow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
@@ -236,7 +282,7 @@ export function SoundBoard({
                     />
                   </span>
                   <span>
-                    <span className="block text-[15px] font-semibold tracking-[-0.2px] text-foreground">{item.label}</span>
+                    <span className="block text-[15px] font-semibold tracking-[-0.2px] text-foreground">{labelOf(item)}</span>
                     <span className="mt-0.5 block text-[12.5px] text-muted-foreground">{item.category}</span>
                   </span>
                 </button>
@@ -249,9 +295,9 @@ export function SoundBoard({
 
       <div className="mt-5 rounded-[20px] bg-card p-4 shadow-[0_0_0_1px_var(--border)] sm:p-5 dark:bg-white/[0.04] dark:shadow-none">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className="text-[17px] font-semibold tracking-[-0.3px] text-foreground">{current.label}</p>
-          <span className="text-[13px] text-muted-foreground">{current.category}</span>
-          {current.pro ? <ProBadge /> : <span className="rounded-full bg-[#34c759]/12 px-2.5 py-0.5 text-[12px] font-semibold text-[#248a3d] dark:text-[#30d158]">Free</span>}
+          <p className="text-[17px] font-semibold tracking-[-0.3px] text-foreground">{labelOf(current)}</p>
+          <span className="text-[13px] text-muted-foreground">{current.category}{!current.pro && mac ? ", Mac style" : ""}</span>
+          {currentLocked ? <ProBadge /> : <span className="rounded-full bg-[#34c759]/12 px-2.5 py-0.5 text-[12px] font-semibold text-[#248a3d] dark:text-[#30d158]">Free</span>}
         </div>
 
         {!current.pro && used.length ? (
@@ -271,18 +317,20 @@ export function SoundBoard({
           <p className="mt-2 text-[13.5px] text-muted-foreground">No component plays this one yet. It is there for your own app.</p>
         ) : null}
 
-        {current.pro && !isPro ? (
+        {currentLocked && !isPro ? (
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <p className="max-w-[560px] text-[13.5px] leading-relaxed text-muted-foreground">
-              Every Pro sound plays here. The code, the install command and the file come with Pro, together with every Pro component, block and template.
+              {current.pro
+                ? "Every Pro sound plays here. The code, the install command and the file come with Pro, together with every Pro component, block and template."
+                : "Every Mac-style sound plays here and in every component on this site while the style is on. The file and its install command come with Pro."}
             </p>
             <button
               type="button"
-              onClick={() => requestUpgrade("The Pro sound pack")}
+              onClick={() => requestUpgrade(current.pro ? "The Pro sound pack" : "The Mac sound style")}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-action px-4 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               <Lock className="size-4" aria-hidden />
-              Unlock the Pro pack
+              {current.pro ? "Unlock the Pro pack" : "Unlock the Mac style"}
             </button>
           </div>
         ) : (
@@ -291,11 +339,11 @@ export function SoundBoard({
             <button
               type="button"
               aria-expanded={showFile}
-              onClick={current.pro ? showProFile : () => setShowFile((v) => !v)}
+              onClick={currentLocked ? showProFile : () => setShowFile((v) => !v)}
               className="h-10 rounded-full bg-card px-4 text-[13.5px] font-medium text-link shadow-[0_0_0_1px_var(--border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-white/[0.06] dark:shadow-none"
             >
               {showFile ? "Hide " : ""}
-              {current.pro ? "ui-sounds-pro.ts" : "ui-sounds.ts"}
+              {current.pro ? "ui-sounds-pro.ts" : mac ? "ui-sounds-mac.ts" : "ui-sounds.ts"}
             </button>
           </div>
         )}
@@ -308,6 +356,14 @@ export function SoundBoard({
             ) : (
               "Part of the Pro sound pack: 24 more sounds in four sets."
             )
+          ) : mac ? (
+            isPro ? (
+              <>
+                Install with <code className="font-mono text-foreground">{installMac}</code>, then call <code className="font-mono text-foreground">useMacSounds()</code> once. Every component that makes sound switches to it.
+              </>
+            ) : (
+              "The Mac style re-voices all 24 free sounds. Original recipes, no Apple recordings."
+            )
           ) : (
             <>
               Install with <code className="font-mono text-foreground">{installFree}</code>.
@@ -318,32 +374,33 @@ export function SoundBoard({
 
       <p className="mt-3 text-[13px] text-muted-foreground">
         {freeCount} free and {proCount} Pro sounds, synthesised in the browser. No audio files.
+        {mac ? " Mac style is on: every component on this site plays it until you switch back." : ""}
       </p>
 
       <AnimatePresence initial={false}>
-        {showFile && (!current.pro || isPro) ? (
+        {showFile && (!currentLocked || isPro) ? (
           <motion.div
-            key={current.pro ? "pro-file" : "file"}
+            key={currentLocked ? lockedFile : "file"}
             initial={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
             animate={reduce ? { opacity: 1 } : { height: "auto", opacity: 1 }}
             exit={reduce ? { opacity: 0 } : { height: 0, opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="overflow-hidden"
           >
-            {current.pro && proFile.state !== "ready" ? (
+            {currentLocked && (proFile.name !== lockedFile || proFile.state !== "ready") ? (
               <p className="mt-4 rounded-[20px] bg-card px-5 py-4 text-[14px] text-muted-foreground shadow-[0_0_0_1px_var(--border)]">
                 {proFile.state === "error" ? "Could not load the file. Sign in again and retry, or install it with the command above." : "Loading the file…"}
               </p>
             ) : (
               <div className="mt-4 max-h-[560px] overflow-auto rounded-[20px]">
                 <CodeBlock
-                  code={current.pro ? proFile.text : source}
+                  code={currentLocked ? proFile.text : source}
                   language="ts"
                   theme="dark"
                   header={{
                     enabled: true,
                     showDots: true,
-                    title: current.pro ? "lib/ui-sounds-pro.ts" : "lib/ui-sounds.ts",
+                    title: currentLocked ? `lib/${lockedFile}.ts` : "lib/ui-sounds.ts",
                     copy: { enabled: true, label: "Copy file", copiedLabel: "Copied", copiedDurationMs: 1400 },
                   }}
                   codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
