@@ -7,11 +7,12 @@ import { PRICES, formatPrice } from "@/lib/pricing";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
 
 /**
- * The thin strip above the nav: the full site is on its way, and what Pro costs today. Closing it
- * stores a cookie for 60 days; the site shell reads that cookie on the server so the strip never
- * flashes back in on the next page.
+ * The thin strip above the nav: what Pro unlocks and what it costs, with one link to the plans.
+ * Closing it stores a cookie for 60 days; the site shell reads that cookie on the server so the
+ * strip never flashes back in on the next page. It is one line, never animates and never returns
+ * for someone who closed it.
  */
-export function LaunchBanner() {
+export function LaunchBanner({ components, templates, blocks }: { components: number; templates: number; blocks: number }) {
   const [open, setOpen] = React.useState(true);
   if (!open) return null;
 
@@ -28,13 +29,15 @@ export function LaunchBanner() {
     >
       <p>
         <span className="mr-1.5 inline-flex rounded-full bg-[conic-gradient(from_210deg,#0a84ff,#bf5af2,#ff375f,#ff9f0a,#0a84ff)] px-2 py-px text-[11px] font-semibold text-white">
-          Early access
+          Pro
         </span>
-        <span className="hidden sm:inline">The full Nexus UI website is coming soon. Pro unlocks every component, template and block for </span>
-        <span className="sm:hidden">Full site coming soon. Pro is </span>
-        {formatPrice(PRICES.pro)} a year.{" "}
+        <span className="hidden sm:inline">
+          Unlock all {components} components, {templates} templates and {blocks} blocks for{" "}
+        </span>
+        <span className="sm:hidden">Unlock everything for </span>
+        {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once.{" "}
         <Link href="/pricing" className="whitespace-nowrap font-medium text-[#2997ff] hover:underline hover:underline-offset-4">
-          See pricing ›
+          See plans ›
         </Link>
       </p>
       <button

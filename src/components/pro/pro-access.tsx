@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 type ProAccess = {
   /** The visitor has Pro (an active plan or All-Access). */
   isPro: boolean;
+  /** How many components are Pro (for "N more" copy). */
+  proCount: number;
   /**
    * Opens the upgrade dialog, naming the component the visitor tried to use and, when the thing
    * that's Pro is a feature of an otherwise free component, that feature ("build prompt").
@@ -18,6 +20,7 @@ type ProAccess = {
 
 const ProAccessContext = React.createContext<ProAccess>({
   isPro: false,
+  proCount: 0,
   requestUpgrade: () => {
     window.location.assign("/pricing");
   },
@@ -39,7 +42,7 @@ export function useLocked(premium: boolean | undefined) {
  */
 export function ProAccessProvider({ isPro, proCount, children }: { isPro: boolean; proCount: number; children: React.ReactNode }) {
   const [target, setTarget] = React.useState<{ name?: string; feature?: string } | null>(null);
-  const value = React.useMemo<ProAccess>(() => ({ isPro, requestUpgrade: (name, feature) => setTarget({ name, feature }) }), [isPro]);
+  const value = React.useMemo<ProAccess>(() => ({ isPro, proCount, requestUpgrade: (name, feature) => setTarget({ name, feature }) }), [isPro, proCount]);
 
   return (
     <ProAccessContext.Provider value={value}>

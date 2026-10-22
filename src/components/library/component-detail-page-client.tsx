@@ -391,7 +391,7 @@ function InstallPanel({
     <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
       <h2 className="text-[19px] font-semibold tracking-[-0.4px] text-foreground">Install</h2>
       <p className="mt-1 text-[14px] text-muted-foreground">One command adds the component and its dependencies.</p>
-      <InstallCard wrap command={command} className="mt-4" />
+      <InstallCard wrap command={command} className="mt-4" upsell />
 
       {extra.length ? (
         <div className="mt-6">

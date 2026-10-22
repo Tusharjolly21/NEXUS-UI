@@ -3,6 +3,9 @@
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { Lock, Search, X } from "lucide-react";
+import { ProBadge, useProAccess } from "@/components/pro/pro-access";
+import { PillLink } from "@/components/site/pill-link";
+import { PRICES, formatPrice } from "@/lib/pricing";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { cn } from "@/lib/utils";
 import { ComponentModal } from "./component-modal";
@@ -12,6 +15,41 @@ import { useUrlParam } from "./use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "./infinite-scroll";
 
 export type CategoryFilter = { id: string; label: string };
+
+/** Where the plans card sits in the wall: after this many tiles, once, so it is passed rather than chased. */
+const PLANS_CARD_AFTER = 11;
+
+/**
+ * One quiet card inside the wall, for visitors without Pro: what the Pro tiles are and what they
+ * cost. It scrolls away like any tile. It never pops up, never comes back after you pass it, and
+ * everything on the wall stays previewable.
+ */
+function PlansCard({ proCount }: { proCount: number }) {
+  return (
+    <li className="[grid-row-end:span_3] sm:[grid-column-end:span_2] sm:[grid-row-end:span_2]">
+      <div className="pg-float flex h-full flex-col justify-between gap-4 rounded-tile bg-card p-6">
+        <div>
+          <ProBadge />
+          <h3 className="mt-3 text-[20px] font-semibold leading-tight tracking-[-0.02em] text-foreground">
+            {proCount ? `${proCount} of these are Pro` : "Some of these are Pro"}
+          </h3>
+          <p className="mt-2 max-w-[420px] text-[14.5px] leading-[1.5] text-muted-foreground">
+            You can preview every one of them here. Pro unlocks the source, the install command and the build prompt, plus every
+            template and block.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <PillLink href="/pricing" size="sm">
+            See plans
+          </PillLink>
+          <span className="text-[13px] text-muted-foreground">
+            From {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once
+          </span>
+        </div>
+      </div>
+    </li>
+  );
+}
 
 type Access = "all" | "free" | "pro";
 const ACCESS: Access[] = ["all", "free", "pro"];
@@ -93,6 +131,7 @@ export function ComponentGallery({
     return { all: items.length, free: items.length - pro, pro };
   }, [items]);
 
+  const { isPro, proCount } = useProAccess();
   const needle = query.trim().toLowerCase();
   const filtering = interaction !== "all" || category !== "all" || needle !== "" || access !== "all";
   const matches = items.filter(
@@ -214,9 +253,12 @@ export function ComponentGallery({
       {shown.length ? (
         <TileGrid className="mt-6">
           {shown.map((item, i) => (
-            <TileCell key={item.slug} item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
-              <GalleryTile item={item} onOpen={setOpenSlug} />
-            </TileCell>
+            <React.Fragment key={item.slug}>
+              <TileCell item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
+                <GalleryTile item={item} onOpen={setOpenSlug} />
+              </TileCell>
+              {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
+            </React.Fragment>
           ))}
         </TileGrid>
       ) : null}

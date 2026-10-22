@@ -137,6 +137,9 @@ export default async function BlogPostPage({ params }: Props) {
             <PillLink href="/blog" variant="white" size="sm">
               More guides
             </PillLink>
+            <PillLink href="/pricing" variant="white" size="sm">
+              See plans
+            </PillLink>
           </div>
         </div>
       </section>

@@ -105,7 +105,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
     router.push("/");
   }
 
-  const primaryAction = user ? (isPremium ? null : { href: "/pricing", label: "Get Pro" }) : { href: "/components", label: "Browse free" };
+  const primaryAction = user ? (isPremium ? null : { href: "/pricing", label: "Get Pro" }) : { href: "/pricing", label: "Get Pro" };
 
   return (
     <div className="sticky top-0 z-50 px-3 pt-3 sm:px-4">
@@ -248,8 +248,8 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                 <Link href="/login" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-foreground/[0.06] text-center text-[14px] font-medium text-foreground">
                   Sign in
                 </Link>
-                <Link href="/components" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
-                  Browse free
+                <Link href="/pricing" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
+                  Get Pro
                 </Link>
               </>
             )}

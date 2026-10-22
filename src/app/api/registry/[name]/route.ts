@@ -91,7 +91,7 @@ export async function GET(_req: Request, { params }: Params) {
     return new NextResponse(
       JSON.stringify({
         error: "Unauthorized",
-        message: "Add your API token to components.json. Get it at nexus-ui.com/dashboard/api-key",
+        message: "This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key",
       }),
       { status: 401, headers: PRIVATE_JSON_HEADERS },
     );

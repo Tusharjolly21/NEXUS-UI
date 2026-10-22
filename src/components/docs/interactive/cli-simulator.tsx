@@ -106,7 +106,7 @@ const ITEMS: readonly CliItem[] = [
 const ITEM_BY_ID = Object.fromEntries(ITEMS.map((item) => [item.id, item])) as Record<CliItemId, CliItem>;
 
 const UNAUTHORIZED_MESSAGE =
-  "Unauthorized — Add your API token to components.json. Get it at nexus-ui.com/dashboard/api-key";
+  "Unauthorized. This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key";
 
 /** A fresh Next.js app after `shadcn init`. */
 const BASE_FILES: readonly string[] = [
