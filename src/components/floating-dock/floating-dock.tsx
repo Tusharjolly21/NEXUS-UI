@@ -18,6 +18,8 @@ export type FloatingDockProps = {
   position?: "fixed" | "inline";
   /** Sweeps an invisible pointer across the dock and bounces a tile until someone points at it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 /**
@@ -26,7 +28,7 @@ export type FloatingDockProps = {
  * like a launching app before a running dot slides under it. Below md it
  * becomes one glass button that springs the tiles up as a stack.
  */
-export function FloatingDock({ items, desktopClassName = "", mobileClassName = "", disableLinks, activeHref, onSelect, position = "fixed", autoplay }: FloatingDockProps) {
+export function FloatingDock({ items, desktopClassName = "", mobileClassName = "", disableLinks, activeHref, onSelect, position = "fixed", autoplay, enableSound }: FloatingDockProps) {
   const desktop = (
     <FloatingDockDesktop
       items={items}
@@ -36,6 +38,7 @@ export function FloatingDock({ items, desktopClassName = "", mobileClassName = "
       onSelect={onSelect}
       position={position}
       autoplay={autoplay}
+      enableSound={enableSound}
     />
   );
   const mobile = (
@@ -46,6 +49,7 @@ export function FloatingDock({ items, desktopClassName = "", mobileClassName = "
       activeHref={activeHref}
       onSelect={onSelect}
       position={position}
+      enableSound={enableSound}
     />
   );
   if (position === "fixed") {

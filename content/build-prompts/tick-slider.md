@@ -73,3 +73,7 @@ Uncontrolled with `autoplay`: every 1.9s set the value to the next fraction of t
 - Arrow, Page, Home and End keys work and fire `onCommit`.
 - `unit="%"` shows a small grey suffix; `step={0.5}` shows one decimal.
 - Autoplay sweeps five values and stops on first touch; dark mode recolours ticks and knob ring.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags or uses the arrow, Page, Home or End keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time the value moves onto a different tick mark (keys tick on every change), at most once every 40 ms so a fast drag does not buzz. Nothing plays on hover, on release, or while autoplay sweeps. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

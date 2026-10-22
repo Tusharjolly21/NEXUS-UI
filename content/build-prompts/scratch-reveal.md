@@ -63,6 +63,10 @@ With `autoplay`, run a frame counter `t`. For `t < 220`, scratch at `x = 30 + ((
 - Code button: native `<button>`, `aria-label` "Copy code MOTION20" (or "Code MOTION20 copied"), same focus ring.
 - A visually hidden `role="status"` announces "Revealed: MOTION20". Dust canvas and confetti are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. While the visitor scratches the foil, `swipe` plays at 25% volume, at most once every 120ms, so it reads as a quiet repeated rasp (a short filtered-noise sweep falling from about 3200 Hz to 500 Hz, 0.14s each). When the foil comes off, by scratching or by Enter or Space, `success` plays (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart). Pressing the Copy button plays `tap` (a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). The autoplay scratching and reveal make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] The foil is brushed silver with fine grain and "SCRATCH HERE" in the middle.

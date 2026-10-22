@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform, useVelocity, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface WheelCard {
   title: string;
@@ -13,6 +14,8 @@ export interface ThrowWheelProps {
   cards?: WheelCard[];
   /** Throws the wheel by itself every few seconds until the user grabs it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const CARDS: WheelCard[] = [
@@ -63,7 +66,8 @@ function Card({ card, i, n, rot, tilt, blur, radius }: { card: WheelCard; i: num
  * direction of travel and blurs with speed; as it slows they straighten one by
  * one and the wheel snaps a card to the front.
  */
-export function ThrowWheel({ cards = CARDS, autoplay = false }: ThrowWheelProps) {
+export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true }: ThrowWheelProps) {
+  const play = useSound(enableSound);
   const n = cards.length;
   const step = 360 / n;
   const radius = Math.round(CW / 2 / Math.tan(Math.PI / n)) + 40;
@@ -75,28 +79,48 @@ export function ThrowWheel({ cards = CARDS, autoplay = false }: ThrowWheelProps)
   const drag = useRef<{ x: number; r: number; lastX: number; lastT: number; v: number } | null>(null);
   const ctl = useRef<{ stop: () => void } | null>(null);
   const touched = useRef(false);
+  // True while the wheel is moving because of the user (drag, fling, Previous/Next); false for autoplay throws.
+  const audible = useRef(false);
+  const lastFront = useRef(0);
+  const lastTick = useRef(0);
 
-  useMotionValueEvent(rot, "change", (r) => setFront(((Math.round(-r / step) % n) + n) % n));
+  useMotionValueEvent(rot, "change", (r) => {
+    const f = ((Math.round(-r / step) % n) + n) % n;
+    setFront(f);
+    if (f !== lastFront.current) {
+      lastFront.current = f;
+      const now = performance.now();
+      if (audible.current && now - lastTick.current >= 40) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      }
+    }
+  });
 
   const settle = (velocity: number) => {
     ctl.current?.stop();
-    ctl.current = animate(rot, [rot.get()], {
+    const from = rot.get();
+    ctl.current = animate(rot, [from], {
       type: "inertia",
       velocity,
       power: 0.55,
       timeConstant: 420,
       modifyTarget: (t) => Math.round(t / step) * step,
+      onComplete: () => { if (audible.current && Math.abs(rot.get() - from) > 0.5) play("drop", 0.5); },
     });
   };
 
   const spinBy = (cardsToMove: number) => {
     ctl.current?.stop();
     const target = Math.round(rot.get() / step) * step - cardsToMove * step;
-    ctl.current = animate(rot, target, { type: "spring", stiffness: 60, damping: 14 });
+    ctl.current = animate(rot, target, { type: "spring", stiffness: 60, damping: 14, onComplete: () => { if (audible.current) play("drop", 0.5); } });
   };
 
   const throwIt = useEffectEvent(() => {
-    if (!touched.current) settle((Math.random() > 0.3 ? -1 : 1) * (500 + Math.random() * 900));
+    if (!touched.current) {
+      audible.current = false;
+      settle((Math.random() > 0.3 ? -1 : 1) * (500 + Math.random() * 900));
+    }
   });
 
   useEffect(() => {
@@ -117,6 +141,7 @@ export function ThrowWheel({ cards = CARDS, autoplay = false }: ThrowWheelProps)
         style={{ perspective: 1100, maskImage: "linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)" }}
         onPointerDown={(e) => {
           touched.current = true;
+          audible.current = true;
           ctl.current?.stop();
           (e.currentTarget as Element).setPointerCapture(e.pointerId);
           drag.current = { x: e.clientX, r: rot.get(), lastX: e.clientX, lastT: performance.now(), v: 0 };
@@ -143,11 +168,11 @@ export function ThrowWheel({ cards = CARDS, autoplay = false }: ThrowWheelProps)
         </motion.div>
       </div>
       <div className="flex items-center gap-3">
-        <motion.button whileTap={{ scale: 0.9 }} type="button" aria-label="Previous" onClick={() => { touched.current = true; spinBy(-1); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] dark:focus-visible:outline-[#0a84ff]">
+        <motion.button whileTap={{ scale: 0.9 }} type="button" aria-label="Previous" onClick={() => { touched.current = true; audible.current = true; spinBy(-1); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] dark:focus-visible:outline-[#0a84ff]">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
         </motion.button>
         <span className="min-w-[120px] text-center text-[14px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7]" aria-live="polite">{current?.title}</span>
-        <motion.button whileTap={{ scale: 0.9 }} type="button" aria-label="Next" onClick={() => { touched.current = true; spinBy(1); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] dark:focus-visible:outline-[#0a84ff]">
+        <motion.button whileTap={{ scale: 0.9 }} type="button" aria-label="Next" onClick={() => { touched.current = true; audible.current = true; spinBy(1); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] dark:focus-visible:outline-[#0a84ff]">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
         </motion.button>
       </div>

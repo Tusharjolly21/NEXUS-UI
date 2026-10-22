@@ -10,6 +10,7 @@ import {
   type AnimationPlaybackControls,
   type PanInfo,
 } from "framer-motion";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 export type ToastType = "success" | "error" | "info" | "warning";
 
@@ -41,6 +42,8 @@ export type ToastStackProps = {
   duration?: number;
   /** Fans the stack open and swipes the front toast away every few seconds until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -76,16 +79,27 @@ function Icon({ type }: { type: ToastType }) {
   );
 }
 
-/** Small state helper: `push` adds a toast at the front and returns its id. */
-export function useToastStack(initial: ToastItem[] = []) {
+const ARRIVAL: Record<ToastType, SoundName> = { success: "success", error: "error", info: "ping", warning: "ping" };
+
+/**
+ * Small state helper: `push` adds a toast at the front and returns its id. Pass `{ sound: true }` as the
+ * second argument when the toast answers something the user did; it then plays a ping (a rising tone for
+ * success, a bump for error). Toasts pushed without it stay silent.
+ */
+export function useToastStack(initial: ToastItem[] = [], options: { enableSound?: boolean } = {}) {
   const [toasts, setToasts] = useState<ToastItem[]>(initial);
   const counter = useRef(0);
-  const push = useCallback((toast: Omit<ToastItem, "id"> & { id?: string }) => {
-    counter.current += 1;
-    const id = toast.id ?? `toast-${counter.current}-${Math.random().toString(36).slice(2, 7)}`;
-    setToasts((list) => [...list.filter((t) => t.id !== id), { ...toast, id }]);
-    return id;
-  }, []);
+  const play = useSound(options.enableSound ?? true);
+  const push = useCallback(
+    (toast: Omit<ToastItem, "id"> & { id?: string }, opts?: { sound?: boolean }) => {
+      counter.current += 1;
+      const id = toast.id ?? `toast-${counter.current}-${Math.random().toString(36).slice(2, 7)}`;
+      setToasts((list) => [...list.filter((t) => t.id !== id), { ...toast, id }]);
+      if (opts?.sound) play(ARRIVAL[toast.type ?? "info"]);
+      return id;
+    },
+    [play],
+  );
   const dismiss = useCallback((id: string) => setToasts((list) => list.filter((t) => t.id !== id)), []);
   const clear = useCallback(() => setToasts([]), []);
   return { toasts, push, dismiss, clear };
@@ -102,6 +116,7 @@ function Toast({
   bottom,
   duration,
   autoSwipe,
+  enableSound,
   onDismiss,
   onAction,
 }: {
@@ -115,10 +130,12 @@ function Toast({
   bottom: boolean;
   duration: number;
   autoSwipe: number;
+  enableSound: boolean;
   onDismiss: (dir: number) => void;
   onAction?: (toast: ToastItem) => void;
 }) {
   const type = toast.type ?? "info";
+  const play = useSound(enableSound);
   const front = i === 0;
   const x = useMotionValue(0);
   const tilt = useTransform(x, [-220, 0, 220], [-7, 0, 7]);
@@ -158,6 +175,7 @@ function Toast({
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > SWIPE_DISTANCE || Math.abs(info.velocity.x) > SWIPE_VELOCITY) {
+      play("swipe");
       onDismiss(Math.sign(info.offset.x || info.velocity.x) || 1);
     } else {
       animate(x, 0, { type: "spring", stiffness: 500, damping: 30 });
@@ -173,6 +191,7 @@ function Toast({
       onKeyDown={(e) => {
         if (e.key === "Escape" || e.key === "Delete" || e.key === "Backspace") {
           e.preventDefault();
+          play("swipe", 0.6);
           onDismiss(0);
         }
       }}
@@ -217,7 +236,10 @@ function Toast({
             <button
               type="button"
               onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => onAction?.(toast)}
+              onClick={() => {
+                play("tap");
+                onAction?.(toast);
+              }}
               className="h-7 shrink-0 rounded-full bg-[#f0f0f3] px-3 text-[13px] font-medium text-[#1d1d1f] outline-none transition-colors hover:bg-[#e6e6ea] focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#3a3a3c] dark:text-[#f5f5f7] dark:hover:bg-[#48484a] dark:focus-visible:ring-[#0a84ff]"
             >
               {toast.action.label}
@@ -227,7 +249,10 @@ function Toast({
             type="button"
             aria-label={`Dismiss ${toast.title}`}
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => onDismiss(0)}
+            onClick={() => {
+              play("swipe", 0.6);
+              onDismiss(0);
+            }}
             className="grid size-6 shrink-0 place-items-center rounded-full text-[#86868b] outline-none transition-colors hover:bg-[#f0f0f3] hover:text-[#1d1d1f] focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:text-[#a1a1a6] dark:hover:bg-[#3a3a3c] dark:hover:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff]"
           >
             <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
@@ -263,6 +288,7 @@ export function ToastStack({
   width = 340,
   duration = 0,
   autoplay = false,
+  enableSound = true,
   className = "",
 }: ToastStackProps) {
   const reduce = useReducedMotion() === true;
@@ -344,6 +370,7 @@ export function ToastStack({
               bottom={position === "bottom"}
               duration={duration}
               autoSwipe={swipe}
+              enableSound={enableSound}
               onDismiss={(dir) => dismiss(toast.id, dir)}
               onAction={onAction}
             />

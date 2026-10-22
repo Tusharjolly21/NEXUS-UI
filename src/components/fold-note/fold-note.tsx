@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useTransform, type AnimationPlaybackControls, type PanInfo } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const NW = 300;
 const NH = 150;
@@ -22,6 +23,8 @@ export interface FoldNoteProps {
   onFoldChange?: (folded: boolean) => void;
   /** Folds and unfolds every two seconds until the user grabs or taps it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 function Half({ side, children, bg }: { side: "left" | "right"; children?: ReactNode; bg: string }) {
@@ -64,7 +67,10 @@ export function FoldNote({
   backLabel = "Thanks",
   onFoldChange,
   autoplay = false,
+  enableSound = true,
 }: FoldNoteProps) {
+  const play = useSound(enableSound);
+  const playRef = useRef(play);
   const angle = useMotionValue(0);
   const shade = useTransform(angle, [0, -90, -180], [0, 0.35, 0.1]);
   const lift = useTransform(angle, [0, -90, -180], [0, -14, -4]);
@@ -83,15 +89,18 @@ export function FoldNote({
 
   useEffect(() => {
     onFoldRef.current = onFoldChange;
-  }, [onFoldChange]);
+    playRef.current = play;
+  }, [onFoldChange, play]);
 
   const settle = useCallback(
-    (to: number) => {
+    (to: number, byUser = false) => {
       ctl.current?.stop();
       ctl.current = animate(angle, to, { type: "spring", stiffness: 220, damping: 15 });
       const next = to <= -90;
       if (next !== folded.current) {
         folded.current = next;
+        // The note only makes a sound when the visitor folds or opens it, never in the autoplay demo.
+        if (byUser) playRef.current(next ? "off" : "whoosh");
         onFoldRef.current?.(next);
       }
     },
@@ -111,7 +120,7 @@ export function FoldNote({
     return () => clearInterval(t);
   }, [autoplay, settle]);
 
-  const toggle = () => settle(angle.get() < -90 ? 0 : -180);
+  const toggle = () => settle(angle.get() < -90 ? 0 : -180, true);
 
   return (
     <div className="flex flex-col items-center gap-4">
@@ -139,7 +148,7 @@ export function FoldNote({
             moved.current = true;
             angle.set(Math.max(-180, Math.min(0, start.current + (info.offset.x / (NW / 2)) * 180 * 0.9)));
           }}
-          onPanEnd={(_, info: PanInfo) => settle(angle.get() < -90 || info.velocity.x < -400 ? -180 : 0)}
+          onPanEnd={(_, info: PanInfo) => settle(angle.get() < -90 || info.velocity.x < -400 ? -180 : 0, true)}
           // framer's tap gesture also fires on Enter for a focused element
           onTap={() => {
             touched.current = true;

@@ -2,6 +2,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ChatMessage {
   /** Stable key for the message. */
@@ -35,6 +36,8 @@ export interface ChatMessagesProps {
   onSend?: (text: string) => void;
   /** Name in the header. */
   title?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the root. Give it a height (e.g. `h-[480px]`) to change the default 440px. */
   className?: string;
 }
@@ -92,8 +95,10 @@ export function ChatMessages({
   reply,
   onSend,
   title = "Nexus AI",
+  enableSound = true,
   className = "",
 }: ChatMessagesProps) {
+  const play = useSound(enableSound);
   const uid = useId().replace(/:/g, "");
   const still = useReducedMotion() === true;
   const playing = autoplay ?? autoPlay ?? false;
@@ -198,6 +203,7 @@ export function ChatMessages({
     takeOver();
     const text = draft.trim();
     if (!text || !interactive) return;
+    play("whoosh");
     const n = ++seq.current;
     const answerId = `${uid}-a${n}`;
     setDraft("");
@@ -212,6 +218,7 @@ export function ChatMessages({
         later(() => {
           setTyping((t) => (t === answerId ? null : t));
           setItems((p) => [...p, { id: answerId, sender: "assistant", content, via: "typed" }]);
+          play("ping", 0.7);
         }, wait);
       })
       .catch(() => setTyping(null));

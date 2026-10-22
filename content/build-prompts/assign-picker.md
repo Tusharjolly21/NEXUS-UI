@@ -67,3 +67,10 @@ Every 900ms run the next step of: open → tick people[1] → people[3] → peop
 - Escape closes the menu.
 - Autoplay loops and stops after the first click.
 - Dark mode uses `#1c1c1e` surfaces and borders, `#f5f5f7` text.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Ticking a person plays `pop` from `@/lib/ui-sounds` at 50% volume (a short blip that rises quickly in pitch) as their face flies into the pill. Unticking plays `tick` at 40% (a tiny dry high click).
+- Opening and closing the menu, hovering rows and the autoplay loop are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

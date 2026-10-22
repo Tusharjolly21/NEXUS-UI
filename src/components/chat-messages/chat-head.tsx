@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { AnimatePresence, animate, motion, useMotionTemplate, useMotionValue, useReducedMotion, useTransform, type ValueAnimationTransition } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ChatHeadProps {
   /** Bounces the head, peeks new messages and drifts it between the edges until someone touches the stage. */
@@ -12,6 +13,8 @@ export interface ChatHeadProps {
   onReply?: (text: string) => void;
   /** Called when the head is dropped on the target or dismissed with the Delete key. */
   onDismiss?: () => void;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the stage. It is 360px wide at most and 540px tall. */
   className?: string;
 }
@@ -58,8 +61,9 @@ function useOnScreen(ref: RefObject<HTMLElement | null>) {
  * container. Keyboard: Enter or Space opens and closes, Escape closes, arrow
  * keys move the head, Delete dismisses it.
  */
-export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, className }: ChatHeadProps) {
+export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, enableSound = true, className }: ChatHeadProps) {
   const still = useReducedMotion() === true;
+  const play = useSound(enableSound);
   const uid = useId();
   const stage = useRef<HTMLDivElement>(null);
   const headRef = useRef<HTMLButtonElement>(null);
@@ -181,6 +185,7 @@ export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, 
     // A click that ends a drag is not a tap.
     if (moved.current) return;
     const willOpen = !open;
+    play(willOpen ? "pop" : "tap", willOpen ? 1 : 0.6);
     setOpen(willOpen);
     setUnread(0);
     setPeek(null);
@@ -192,6 +197,7 @@ export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, 
   };
 
   const dismiss = () => {
+    play("drop");
     onDismiss?.();
     animate(x, wRef.current / 2 - HEAD / 2, { duration: still ? 0 : 0.2 });
     animate(y, H - 70 - HEAD / 2, { duration: still ? 0 : 0.2 });
@@ -229,6 +235,7 @@ export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, 
   const stageKey = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Escape" && open) {
       e.stopPropagation();
+      play("tap", 0.6);
       setOpen(false);
       headRef.current?.focus();
     }
@@ -390,6 +397,7 @@ export function ChatHead({ autoplay = false, name = "Maya", onReply, onDismiss, 
                   key={q}
                   type="button"
                   onClick={() => {
+                    play("whoosh");
                     setMsgs((m) => [...m, { me: true, t: q }]);
                     onReply?.(q);
                   }}

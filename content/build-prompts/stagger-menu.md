@@ -70,3 +70,10 @@ When `autoplay` is true: 800ms after mount, and every 5200ms after, open the men
 - [ ] Picking "Embed" closes the menu, rolls the button to a green tick + "Embed copied", and rolls back after 1.5s.
 - [ ] With `autoplay`, it opens, browses four rows and picks Copy link on a loop until you click.
 - [ ] Dark mode inverts the trigger and uses the dark menu colours.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Opening the menu with the trigger plays `pop` from `@/lib/ui-sounds` at 70% volume (a short blip that rises quickly in pitch). Choosing an item, by click or Enter, plays `tick` at 50% (a tiny dry high click) and then `success` at 70% (two bright, short notes, a rising third) as the button rolls to its green confirmation.
+- Closing the menu, hovering rows, moving focus with the arrow keys and the whole autoplay loop (including its confirmation) are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

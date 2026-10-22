@@ -56,6 +56,10 @@ Starts 450ms after mount. For each message: assistant lines show typing dots for
 - Send is a real submit button; Enter sends. Visible focus rings (2px `#0071e3`, dark `#0a84ff`).
 - Reduced motion removes the pop-in, bounce and smooth scrolling.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Sending a message plays `whoosh` (a short airy sweep rising from low to high, about 0.25s, noise only). When the assistant's reply lands as a result of that send, `ping` plays at 70% volume (a single soft high sine, about 1760 Hz, with a long decay). Replay, the typing dots and the autoplay conversation make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] The typing bubble grows into the reply instead of disappearing.
@@ -125,6 +129,10 @@ When the chat is on screen, 900ms later type "Make the hero feel less static" in
 - The input has a label; send is a real submit button (`aria-disabled` while empty). The thread is `role="log"` with a label and is announced politely once the visitor has interacted. The thinking pill has `role="status"`. The flight overlay is `aria-hidden`.
 - Focus rings: ring on the input, 2px offset outline on buttons, `#0071e3` (dark `#0a84ff`).
 - Reduced motion respected as above.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor sends a message (the moment the text lifts out of the field) `whoosh` plays (a short airy sweep rising from low to high, about 0.25s, noise only). When the reply to that message replaces the Thinking pill, `ping` plays at 70% volume (a single soft high sine, about 1760 Hz, with a long decay). The two scripted autoplay questions and their replies are silent, and so is the Copy button. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 
@@ -199,6 +207,10 @@ Every 1900ms, while the stage is on screen and the tab is visible: tick 1 of eac
 
 - Head label: "Open chat with Maya, 2 unread" or "Close chat with Maya", with `aria-expanded` and `aria-controls`. The panel is a labelled region, its thread a polite log. Incoming previews are mirrored into a polite screen-reader-only live region once the visitor has interacted.
 - The target, badge, peek and stand-in page are `aria-hidden`. Focus rings: 2px offset outline `#0071e3` (dark `#0a84ff`).
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Opening the panel plays `pop` (a quick sine glide from about 320 Hz up to 980 Hz in 70ms), closing it with a tap, Enter, Space or Escape plays `tap` at 60% (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). Tapping a quick reply plays `whoosh` (a short airy rising sweep). Dismissing the head on the target or with Delete plays `drop` (a sine falling from 380 to 120 Hz with a soft thud). Dragging, snapping to an edge, and the autoplay bounces and peeks are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

@@ -1,7 +1,7 @@
 import type { TileFit } from "@/lib/catalog/tile-fit";
 
 /** How you interact with a component — the verbs people filter by. */
-export type Interaction = "hover" | "press" | "drag" | "scroll" | "type" | "3d" | "loop";
+export type Interaction = "hover" | "press" | "drag" | "scroll" | "type" | "3d" | "loop" | "sound";
 
 export type TileTint = "violet" | "sky" | "peach" | "mint" | "butter" | "pink";
 
@@ -27,6 +27,8 @@ export type GalleryItem = {
   premium: boolean;
   /** Has a build prompt (the brief to recreate it with an AI agent), free on free components, Pro on Pro ones. */
   hasPrompt?: boolean;
+  /** What you hear, in one sentence, for components that make interface sound. */
+  sound?: string;
   /** How many designs live on this component's page (the original plus its variants). Only set above 1. */
   variants?: number;
   /**
@@ -43,6 +45,7 @@ export const INTERACTION_FILTERS: { value: Interaction | "all"; label: string }[
   { value: "drag", label: "Drag" },
   { value: "scroll", label: "Scroll" },
   { value: "type", label: "Type" },
+  { value: "sound", label: "Sound" },
   { value: "3d", label: "3D" },
   { value: "loop", label: "Ambient" },
 ];

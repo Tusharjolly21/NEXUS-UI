@@ -42,6 +42,10 @@ With `prefers-reduced-motion`, autoplay does not run. Otherwise every 2200ms, an
 
 The slider group has `role="slider"`, `tabIndex 0`, `aria-label="Zip"`, min 0, max 100, `aria-valuenow` equal to the percent open, and `aria-valuetext` of "Open: invite code showing" once the code is visible, otherwise "N% open". Focus shows a 3px blue stroke (`#0071e3`, dark `#2997ff`) on the slider body. The Copy button is not focusable and is `aria-hidden` until the code is visible.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. While the visitor drags the pull or uses the arrow keys, `tick` plays at 40% volume roughly every 18 units of travel along the zip and never more often than every 50ms (a very short high-passed noise click, about 12ms), so a pull gives a few quiet zip ticks. When the pull reaches the bottom end and the pouch is fully open, `on` plays once (a tiny noise click with a sine rising from 600 to 900 Hz over 70ms); it plays again only after the pull has left the end and come back. The Copy code button plays `tap`. The autoplay zipping makes no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Dragging the pull down opens the pouch in a V that is widest at the top and closes to a point at the slider.

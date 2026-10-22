@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 import { Divider, FloatField, SocialRow, SubmitMorph, cardClass, focusRing, playScript, typeSteps, type SubmitState } from "./form-parts";
 
 export type LoginFormValues = {
@@ -26,6 +27,8 @@ export type LoginFormProps = {
   onSignUp?: () => void;
   /** Types a demo sign-in and plays it through until someone touches the form. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -48,8 +51,10 @@ export function LoginForm({
   onSocialLogin,
   onSignUp,
   autoplay = false,
+  enableSound = true,
 }: LoginFormProps) {
   const still = useReducedMotion() === true;
+  const play = useSound(enableSound);
   const id = React.useId().replace(/:/g, "");
   const [values, setValues] = React.useState<LoginFormValues>({ email: defaultValues?.email ?? "", password: defaultValues?.password ?? "" });
   const [errors, setErrors] = React.useState<Partial<Record<keyof LoginFormValues, string>>>({});
@@ -76,12 +81,14 @@ export function LoginForm({
     e.preventDefault();
     touched.current = true;
     if (state !== "idle") return;
+    play("tap");
     const found: Partial<Record<keyof LoginFormValues, string>> = {};
     if (!EMAIL.test(values.email.trim())) found.email = "Enter a valid email address.";
     if (values.password.length < 6) found.password = "Password must be at least 6 characters.";
     setErrors(found);
     const bad = Object.keys(found) as (keyof LoginFormValues)[];
     if (bad.length) {
+      setTimeout(() => play("error"), 110);
       setShakes((s) => Object.fromEntries([...Object.entries(s), ...bad.map((k) => [k, (s[k] ?? 0) + 1])]));
       document.getElementById(`${id}-${bad[0]}`)?.focus();
       return;
@@ -90,9 +97,13 @@ export function LoginForm({
       setState("loading");
       if (onSubmit) await onSubmit({ email: values.email.trim(), password: values.password });
       else await new Promise<void>((r) => setTimeout(r, 1000));
-      if (alive.current) setState("success");
+      if (alive.current) {
+        play("success");
+        setState("success");
+      }
     } catch (err) {
       if (!alive.current) return;
+      play("error");
       setState("idle");
       setFormError(err instanceof Error && err.message ? err.message : "Unable to sign in. Please check your details.");
       setShakes((s) => ({ ...s, password: (s.password ?? 0) + 1 }));

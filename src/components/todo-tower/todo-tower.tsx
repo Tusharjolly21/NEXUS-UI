@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 /** A starting task: its label and how far (px) it sits off-centre. */
 export interface TodoTowerTask {
@@ -21,6 +22,8 @@ export interface TodoTowerProps {
   onComplete?: (text: string) => void;
   /** Ticks tasks off and adds new ones by itself until someone touches the pile. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 interface Brick {
@@ -65,7 +68,9 @@ export function TodoTower({
   maxBricks = 8,
   onComplete,
   autoplay = false,
+  enableSound = true,
 }: TodoTowerProps) {
+  const play = useSound(enableSound);
   const [bricks, setBricks] = useState<Brick[]>(() => tasks.map((b, i) => ({ ...b, id: i, spin: ((i * 37) % 10) - 5 })));
   const [exits, setExits] = useState<Record<number, Exit>>({});
   const list = useRef(bricks);
@@ -133,6 +138,13 @@ export function TodoTower({
     setBricks((l) => (l.length >= maxBricks ? l : [brick, ...l]));
   };
 
+  // The "Add a task" button: the brick lands on the pile a moment after it is dropped in.
+  const addByUser = () => {
+    const room = moreTasks.length > 0 && list.current.length < maxBricks;
+    add();
+    if (room) later(() => play("drop", 0.8), 280);
+  };
+
   // Keep the latest handlers for the autoplay timer without restarting it.
   const actions = useRef({ add, check });
   useEffect(() => {
@@ -177,7 +189,10 @@ export function TodoTower({
                 dragSnapToOrigin
                 dragElastic={0.6}
                 onDragEnd={(_, info: PanInfo) => {
-                  if (Math.abs(info.offset.x) > 110 || Math.abs(info.velocity.x) > 700) remove(b.id, info.offset.x > 0 ? "pulled-right" : "pulled-left");
+                  if (Math.abs(info.offset.x) > 110 || Math.abs(info.velocity.x) > 700) {
+                    play("swipe");
+                    remove(b.id, info.offset.x > 0 ? "pulled-right" : "pulled-left");
+                  }
                 }}
                 whileDrag={{ scale: 1.04, zIndex: 10, boxShadow: "0 18px 30px -14px rgba(0,0,0,.35)" }}
                 className="relative flex h-[42px] w-[190px] cursor-grab items-center gap-2.5 rounded-[12px] bg-white px-3 shadow-[0_0_0_1px_rgba(0,0,0,.07),0_2px_4px_rgba(0,0,0,.04)] active:cursor-grabbing dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_2px_4px_rgba(0,0,0,.4)]"
@@ -186,7 +201,10 @@ export function TodoTower({
                   type="button"
                   aria-label={`Complete ${b.text}`}
                   aria-pressed={!!b.done}
-                  onClick={() => check(b.id)}
+                  onClick={() => {
+                    if (!b.done) play("tick");
+                    check(b.id);
+                  }}
                   onPointerDown={(e) => e.stopPropagation()}
                   className="flex h-[18px] w-[18px] flex-none items-center justify-center rounded-[5px] border-[1.5px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
                   style={{ borderColor: b.done ? "#30d158" : "var(--tt-box-line)", background: b.done ? "#30d158" : "var(--tt-box)" }}
@@ -216,7 +234,7 @@ export function TodoTower({
         <motion.button
           type="button"
           whileTap={{ scale: 0.94 }}
-          onClick={add}
+          onClick={addByUser}
           className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
         >
           Add a task

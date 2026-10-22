@@ -62,6 +62,10 @@ With `autoplay`: 900ms after mount start a run (unless touched). An interval eve
 - Focus-visible: 2px outline in `accent` with 4px offset.
 - Icons `aria-hidden`; visible text is the accessible name.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing the button to start the download plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss); pressing it again on the finished state to reset plays the same tap. When the task completes and the button turns into the green "Open file" state, `done` (a soft four-note rising triangle arpeggio, C5 E5 G5 C6, 40ms apart, ringing out for about 0.6s) plays (only for a run the visitor started). The progress itself is silent, so is the autoplay loop. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Idle pill is 152×52 in the accent colour with icon and label.

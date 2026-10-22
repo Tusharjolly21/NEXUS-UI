@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface BendingRailProps {
   label?: string;
@@ -12,6 +13,8 @@ export interface BendingRailProps {
   onChange?: (v: number) => void;
   /** Tugs the knob around by itself until the user grabs it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const W = 360;
@@ -24,7 +27,8 @@ const PAD = 16;
  * rail bends into a V toward it; a ghost knob on the groove keeps the real
  * value. Let go and the rail twangs straight on a spring.
  */
-export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue = 40, unit = "%", accent = "#0071e3", onChange, autoplay = false }: BendingRailProps) {
+export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue = 40, unit = "%", accent = "#0071e3", onChange, autoplay = false, enableSound = true }: BendingRailProps) {
+  const play = useSound(enableSound);
   const toX = (v: number) => PAD + ((v - min) / (max - min)) * (W - PAD * 2);
   const kx = useMotionValue(toX(defaultValue));
   const ky = useMotionValue(Y0);
@@ -33,6 +37,17 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
   const stage = useRef<HTMLDivElement>(null);
   const touched = useRef(false);
   const lastValue = useRef(defaultValue);
+  // Last value a tick was played for, and when; only the user's own drags and key presses tick.
+  const tickedValue = useRef(defaultValue);
+  const lastTick = useRef(0);
+  const tick = (v: number) => {
+    if (v === tickedValue.current) return;
+    tickedValue.current = v;
+    const now = performance.now();
+    if (now - lastTick.current < 40) return;
+    lastTick.current = now;
+    play("tick", 0.4);
+  };
 
   const clampX = (x: number) => Math.max(PAD, Math.min(W - PAD, x));
   const gx = useTransform(kx, clampX);
@@ -113,6 +128,7 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
           if (!dragging) return;
           const p = local(e);
           kx.set(p.x);
+          tick(Math.round(min + ((clampX(p.x) - PAD) / (W - PAD * 2)) * (max - min)));
           // Resist the further it is pulled.
           const dy = p.y - Y0;
           ky.set(Y0 + Math.sign(dy) * Math.min(70, Math.abs(dy) * 0.75));
@@ -135,6 +151,8 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
           aria-valuenow={value}
           onPointerDown={(e) => {
             touched.current = true;
+            tickedValue.current = value;
+            play("on", 0.4);
             setDragging(true);
             (e.currentTarget.parentElement as Element).setPointerCapture?.(e.pointerId);
           }}
@@ -143,11 +161,13 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
             if (e.key === "ArrowRight" || e.key === "ArrowUp") {
               e.preventDefault();
               touched.current = true;
+              tick(Math.min(max, value + step));
               animate(kx, toX(Math.min(max, value + step)), { type: "spring", stiffness: 500, damping: 34 });
             }
             if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
               e.preventDefault();
               touched.current = true;
+              tick(Math.max(min, value - step));
               animate(kx, toX(Math.max(min, value - step)), { type: "spring", stiffness: 500, damping: 34 });
             }
           }}

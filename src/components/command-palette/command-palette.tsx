@@ -15,10 +15,15 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type CommandPaletteProps = { className?: string };
+export type CommandPaletteProps = {
+  className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
+};
 
 type CommandEntry = {
   label: string;
@@ -49,21 +54,24 @@ const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function CommandPalette({ className }: CommandPaletteProps) {
+export function CommandPalette({ className, enableSound = true }: CommandPaletteProps) {
   const [open, setOpen] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const play = useSound(enableSound);
+  const lastTick = React.useRef(0);
 
   // ⌘K / Ctrl+K
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
+        if (!open) play("pop", 0.7);
         setOpen((v) => !v);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, []);
+  }, [open, play]);
 
   // Focus input on open
   React.useEffect(() => {
@@ -76,7 +84,10 @@ export function CommandPalette({ className }: CommandPaletteProps) {
       {/* ── Trigger pill ── */}
       <motion.button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          play("pop", 0.7);
+          setOpen(true);
+        }}
         className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center gap-2.5 rounded-full bg-[#1e1e1e] px-4 py-2.5 shadow-lg ring-1 ring-white/10 transition-colors hover:bg-[#272727]"
         style={{ width: 220 }}
         initial={{ opacity: 0, y: 8 }}
@@ -129,6 +140,18 @@ export function CommandPalette({ className }: CommandPaletteProps) {
                     className="flex flex-col"
                     onKeyDown={(e) => {
                       if (e.key === "Escape") setOpen(false);
+                      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End") {
+                        // cmdk moves the highlight after this handler; tick only if it really moved
+                        const root = e.currentTarget;
+                        const sel = () => root.querySelector("[cmdk-item][data-selected='true']");
+                        const before = sel();
+                        requestAnimationFrame(() => {
+                          const now = performance.now();
+                          if (sel() === before || now - lastTick.current < 40) return;
+                          lastTick.current = now;
+                          play("tick", 0.4);
+                        });
+                      }
                     }}
                   >
                     {/* ── Search row ── */}
@@ -160,7 +183,10 @@ export function CommandPalette({ className }: CommandPaletteProps) {
                           <CommandItem
                             key={cmd.value}
                             value={cmd.value}
-                            onSelect={() => setOpen(false)}
+                            onSelect={() => {
+                              play("tap");
+                              setOpen(false);
+                            }}
                             className={cn(
                               "group mx-2 flex cursor-default items-center gap-3.5 rounded-lg px-3 py-2.5",
                               "border border-transparent",

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 interface Task { id: number; text: string; done: boolean; leaving?: boolean }
 
@@ -9,11 +10,14 @@ export interface TodoListProps {
   accent?: string;
   /** Ticks tasks off by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const spring = { type: "spring", stiffness: 420, damping: 34 } as const;
 
-export function TodoList({ initial = ["Reply to design review", "Ship the pricing page", "Book flights for March", "Renew domain"], accent = "#0071e3", autoplay = false }: TodoListProps) {
+export function TodoList({ initial = ["Reply to design review", "Ship the pricing page", "Book flights for March", "Renew domain"], accent = "#0071e3", autoplay = false, enableSound = true }: TodoListProps) {
+  const play = useSound(enableSound);
   const uid = useId();
   const nextId = useRef(initial.length + 1);
   const [tasks, setTasks] = useState<Task[]>(() => initial.map((text, i) => ({ id: i + 1, text, done: false })));
@@ -38,11 +42,15 @@ export function TodoList({ initial = ["Reply to design review", "Ship the pricin
     }, 750);
   };
 
-  const restore = (id: number) => setTasks((ts) => [...ts.filter((t) => t.id !== id), { ...ts.find((t) => t.id === id)!, done: false, leaving: false }]);
+  const restore = (id: number) => {
+    play("off");
+    setTasks((ts) => [...ts.filter((t) => t.id !== id), { ...ts.find((t) => t.id === id)!, done: false, leaving: false }]);
+  };
 
   const add = () => {
     const text = draft.trim();
     if (!text) return;
+    play("pop");
     setTasks((ts) => [...ts, { id: nextId.current++, text, done: false }]);
     setDraft("");
   };
@@ -75,7 +83,11 @@ export function TodoList({ initial = ["Reply to design review", "Ship the pricin
                 className="overflow-hidden"
               >
                 <label className="flex cursor-pointer items-center gap-3 rounded-xl px-2.5 py-2.5 hover:bg-[#f5f5f7] dark:hover:bg-[#3a3a3c]">
-                  <input type="checkbox" className="peer sr-only" checked={t.done} onChange={() => !t.done && complete(t.id)} />
+                  <input type="checkbox" className="peer sr-only" checked={t.done} onChange={() => {
+                    if (t.done) return;
+                    play("tick");
+                    complete(t.id);
+                  }} />
                   <motion.span
                     className={`flex h-[22px] w-[22px] flex-none items-center justify-center rounded-full peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 ${t.done ? "" : "shadow-[inset_0_0_0_1.5px_#c7c7cc] dark:shadow-[inset_0_0_0_1.5px_#636366]"}`}
                     initial={false}

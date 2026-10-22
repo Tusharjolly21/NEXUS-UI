@@ -9,6 +9,7 @@
 import * as React from "react";
 import { motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type GooeyInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "size" | "value" | "defaultValue" | "width" | "onSelect"> & {
   placeholder?: string;
@@ -33,6 +34,8 @@ export type GooeyInputProps = Omit<React.ComponentPropsWithoutRef<"input">, "siz
   /** Opens, types a query and closes again on a loop until someone touches it. */
   autoplay?: boolean;
   disabled?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 const H = 44;
@@ -84,6 +87,7 @@ export function GooeyInput({
   collapsedLabel = "Search",
   autoplay = false,
   disabled = false,
+  enableSound = true,
   id,
   onChange: onChangeProp,
   onKeyDown: onKeyDownProp,
@@ -96,6 +100,7 @@ export function GooeyInput({
   const inputId = id ?? `gooey-input-${safeId}`;
   const listId = `gooey-list-${safeId}`;
   const still = useReducedMotion() === true;
+  const play = useSound(enableSound);
 
   const inputRef = React.useRef<HTMLInputElement>(null);
   const touched = React.useRef(false);
@@ -154,11 +159,19 @@ export function GooeyInput({
   const expand = () => {
     touched.current = true;
     if (disabled) return;
+    play("pop");
     setExpanded(true);
     requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
   };
 
+  // Closing that the visitor caused (Escape, clicking away from an empty field) says "off"; autoplay calls setExpanded directly and stays silent.
+  const closeByUser = () => {
+    if (isExpanded) play("off");
+    setExpanded(false);
+  };
+
   const pick = (s: string) => {
+    play("tap");
     setSearchText(s);
     onSelect?.(s);
   };
@@ -247,12 +260,12 @@ export function GooeyInput({
             }}
             onFocus={onFocusProp}
             onBlur={(e) => {
-              if (!searchText) setExpanded(false);
+              if (!searchText) closeByUser();
               onBlurProp?.(e);
             }}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
-                setExpanded(false);
+                closeByUser();
                 e.currentTarget.blur();
               } else if (showList && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
                 e.preventDefault();

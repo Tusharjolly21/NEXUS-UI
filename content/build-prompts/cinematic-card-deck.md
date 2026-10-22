@@ -72,6 +72,10 @@ Every 2400ms advance one card, wrapping to the first. Any pointer down, pill pre
 
 - Deck `role="region"`, `aria-roledescription="card deck"`, `aria-label="Card deck"`, focus ring 2px `#0071e3` (dark `#0a84ff`) with 4px offset. Non-front cards `aria-hidden`. Polite live region "Card {n} of {total}: {title}". Pills in a group "Choose card", each "Show {title}".
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor moves the deck by dragging, using the mouse wheel over it, pressing the arrow, Page, Home or End keys, or picking a progress pill, `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 40% volume plays each time a new card comes to the front, never more often than every 40ms, so a fast flick gives a quick run of clicks. The autoplay deal and scroll-linked mode (page scroll) make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Back cards recede smaller, lower and darker; the front card tilts and glints under the mouse.

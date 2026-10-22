@@ -61,6 +61,10 @@ After 1400ms, start a cycle with placeholder index `k` (starting at 1, increment
 - Send is a native submit button with `aria-label="Ask"`, focus ring 2px `#0071e3` (dark `#0a84ff`) with 2px offset (dark offset colour `#1c1c1e`), disabled while dissolving.
 - The rolling placeholder and the canvas are `aria-hidden`. A visually hidden `aria-live="polite"` span announces "Asked: {question}".
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Sending a question, with Enter or the button, plays `whoosh` (a short airy noise sweep rising from about 400 to 3200 Hz over roughly 0.25s) as the words start to break into dust. Typing, the rolling placeholders and the autoplay questions are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Placeholders slide up out of a blur every 2.8s while the field is empty and stop rolling once you type.

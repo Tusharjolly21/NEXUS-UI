@@ -4,6 +4,7 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type LikeBurstSize = "sm" | "md" | "lg";
 
@@ -25,6 +26,8 @@ export type LikeBurstProps = {
   burst?: number;
   /** Accessible label; the count is appended automatically. */
   label?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -150,8 +153,10 @@ export function LikeBurst({
   size = "md",
   burst = 10,
   label = "Like",
+  enableSound = true,
   className,
 }: LikeBurstProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion();
   const [innerLiked, setInnerLiked] = React.useState(defaultLiked);
   const [innerCount, setInnerCount] = React.useState(defaultCount);
@@ -163,6 +168,8 @@ export function LikeBurst({
   const toggle = () => {
     const nextLiked = !isLiked;
     const nextCount = Math.max(0, value + (nextLiked ? 1 : -1));
+    if (nextLiked) play("pop");
+    else play("off", 0.5);
     if (liked === undefined) setInnerLiked(nextLiked);
     if (count === undefined) setInnerCount(nextCount);
     if (nextLiked) setBurstKey((k) => k + 1);

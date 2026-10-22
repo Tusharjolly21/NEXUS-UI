@@ -73,6 +73,10 @@ With `autoplay`, run a toggle 900ms after mount and then every 3000ms: undo if t
 - "Deleted." has `role="status"` so the change is announced.
 - The bin and the filter SVG are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing "Move to trash" plays `swipe` as the page starts to scrunch (a short paper-like hiss: filtered noise sweeping down from about 3200 Hz to 500 Hz in 0.14s), then `drop` when the ball lands in the bin (a sine falling from 380 to 120 Hz over 80ms with a soft noise thud). Pressing Undo plays `swipe` at 70% volume as the page smooths flat. The autoplay tosses and restores make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Clicking "Move to trash" scrunches the page into a lumpy, rounded ball about a quarter of its size in about half a second.
@@ -145,6 +149,10 @@ With `autoplay`, every 2300ms: if whole, break from a random point (x 60–90%, 
 
 - Delete and Undo are native buttons; Delete is labelled "Delete {fileName}". Focus rings 2px `#0071e3` (dark `#0a84ff`) on Delete, white on Undo.
 - Shards, crack lines and the badge are `aria-hidden`. A persistent visually hidden `role="status"` announces "{fileName} deleted".
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing Delete plays `knock` as the card cracks (two low thuds 0.11s apart: a sine falling from 160 to 90 Hz with a short band-passed noise burst each). Pressing Undo plays `swipe` at 80% volume as the shards fly back (filtered noise sweeping down from about 3200 Hz to 500 Hz in 0.14s). The autoplay breaks and mends make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

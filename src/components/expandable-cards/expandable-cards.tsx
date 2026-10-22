@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode, type Ref } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface CardItem {
   id: string;
@@ -29,6 +30,8 @@ export interface ExpandableCardsProps {
   onOpenChange?: (id: string | null) => void;
   /** Opens each card in turn until someone touches the grid. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 }
 
@@ -96,7 +99,8 @@ function Close({ onClick, btnRef }: { onClick: () => void; btnRef: Ref<HTMLButto
  * a full card with the long description and a call to action, while the rest
  * of the grid sinks back. Close it and it shrinks home into its slot.
  */
-export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", onOpenChange, autoplay = false, className = "" }: ExpandableCardsProps) {
+export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", onOpenChange, autoplay = false, enableSound = true, className = "" }: ExpandableCardsProps) {
+  const play = useSound(enableSound);
   const uid = useId().replace(/:/g, "");
   const still = useReducedMotion() === true;
   const mounted = useMounted();
@@ -112,6 +116,7 @@ export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", on
   const lid = (part: string, id: string) => `ec-${uid}-${part}-${id}`;
 
   const setOpen = (id: string | null) => {
+    play(id ? "whoosh" : "swipe");
     setActiveId(id);
     onOpenChange?.(id);
   };
@@ -122,6 +127,7 @@ export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", on
       if (touched.current) closeRef.current?.focus({ preventScroll: true });
       const onKey = (e: KeyboardEvent) => {
         if (e.key === "Escape") {
+          play("swipe");
           setActiveId(null);
           onOpenChange?.(null);
         }
@@ -130,7 +136,7 @@ export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", on
       return () => window.removeEventListener("keydown", onKey);
     }
     if (lastOpen.current && touched.current) triggers.current.get(lastOpen.current)?.focus({ preventScroll: true });
-  }, [activeId, onOpenChange]);
+  }, [activeId, onOpenChange, play]);
 
   useEffect(() => {
     if (expandInto !== "viewport" || !activeId) return;

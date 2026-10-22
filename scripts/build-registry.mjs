@@ -127,6 +127,8 @@ function registryDepsForReactSource(src) {
   const deps = new Set();
   deps.add(`${homepage}/api/registry/nexus-font`);
   if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
+  // Components that make sound import the shared synthesiser; the CLI installs it alongside them.
+  if (src.includes("@/lib/ui-sounds")) deps.add(`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`);
 
   for (const match of src.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
     const dependency = match[1];
@@ -164,7 +166,7 @@ function buildNexusFontItem() {
   };
 }
 
-/** The free UI sounds library: one lib file, no dependencies. */
+/** The free UI sounds library: one lib file (plus the on/off switch and the useSound hook), no dependencies. */
 function buildUiSoundsItem() {
   const content = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds.ts"), "utf8");
   return {
@@ -172,7 +174,7 @@ function buildUiSoundsItem() {
     name: UI_SOUNDS_REGISTRY_NAME,
     type: "registry:lib",
     title: "UI Sounds",
-    description: "24 interface sound effects synthesised with the Web Audio API. One file, no audio assets.",
+    description: "24 interface sound effects synthesised with the Web Audio API, a useSound hook and a remembered on/off switch. One file, no audio assets.",
     dependencies: [],
     registryDependencies: [],
     files: [{ path: "next-ui/lib/ui-sounds.ts", type: "registry:lib", target: "lib/ui-sounds.ts", content }],

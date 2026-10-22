@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
@@ -9,6 +10,8 @@ export interface LitKeyboardProps {
   glow?: string;
   /** Plays a recorded phrase by itself until the user types. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** One recorded key press: the key and when it happened (performance.now()). */
@@ -49,7 +52,8 @@ function Key({ k, lit, glow, wide }: { k: string; lit: number; glow: string; wid
  * A tilted keyboard that lights up under your typing, with a soft afterglow.
  * Record a run and replay it with the original timing.
  */
-export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardProps) {
+export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = true }: LitKeyboardProps) {
+  const sfx = useSound(enableSound);
   const [lit, setLit] = useState<Record<string, number>>({});
   const [text, setText] = useState("");
   const [rec, setRec] = useState<"idle" | "recording" | "playing">("idle");
@@ -65,21 +69,23 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
     timers.current.push(window.setTimeout(() => setLit((l) => (l[key] === id ? { ...l, [key]: 0 } : l)), 140));
   };
 
-  const press = (raw: string, record = true) => {
+  const press = (raw: string, record = true, sound = false) => {
     const key = raw === " " ? "space" : raw.toLowerCase();
     if (key !== "space" && !/^[a-z]$/.test(key)) return false;
+    if (sound) sfx("tap", 0.5);
     flash(key);
     setText((t) => (t + (key === "space" ? " " : key)).slice(-34));
     if (record && rec === "recording") tape.current.push({ key: raw, t: performance.now() });
     return true;
   };
 
-  const play = (hits: LitKeyboardHit[]) => {
+  // `sound` is true only for a replay the visitor asked for; the autoplay demo stays silent.
+  const play = (hits: LitKeyboardHit[], sound = false) => {
     if (!hits.length) return;
     setRec("playing");
     setText("");
     const t0 = hits[0].t;
-    hits.forEach((h) => timers.current.push(window.setTimeout(() => press(h.key, false), h.t - t0)));
+    hits.forEach((h) => timers.current.push(window.setTimeout(() => press(h.key, false, sound), h.t - t0)));
     timers.current.push(window.setTimeout(() => setRec("idle"), hits[hits.length - 1].t - t0 + 400));
   };
 
@@ -113,8 +119,8 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
         onKeyDown={(e) => {
           if (e.metaKey || e.ctrlKey) return;
           if (!touched.current) { touched.current = true; timers.current.forEach(clearTimeout); setText(""); }
-          if (e.key === "Backspace") { setText((t) => t.slice(0, -1)); return; }
-          if (press(e.key)) e.preventDefault();
+          if (e.key === "Backspace") { if (!e.repeat) sfx("tap", 0.4); setText((t) => t.slice(0, -1)); return; }
+          if (press(e.key, true, !e.repeat)) e.preventDefault();
         }}
         className="group flex w-full max-w-[480px] flex-col items-center gap-5 rounded-[24px] outline-none"
       >
@@ -165,7 +171,7 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
           type="button"
           whileTap={{ scale: 0.94 }}
           disabled={!hasTape || rec !== "idle"}
-          onClick={() => { touched.current = true; play(tape.current); }}
+          onClick={() => { touched.current = true; play(tape.current, true); }}
           className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#0a84ff]"
         >
           Replay

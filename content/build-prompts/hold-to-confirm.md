@@ -61,6 +61,10 @@ When `autoplay` is true: after 1200ms, and then every 4200ms, run a tease — an
 - Native `<button type="button">` with `aria-label={label}`, 2px focus-visible outline in `color`, offset 4px.
 - Toast has `role="status"`; Undo has a white focus-visible outline. Icons and particles are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Starting a real hold plays `charge` at 70% volume (one soft triangle sweep rising from 220 to 880 Hz over about half a second). Completing the hold plays `done` (a soft four-note rising triangle arpeggio, C5 E5 G5 C6, 40ms apart, ringing out for about 0.6s). Letting go early, after the fill has passed about 10%, plays `hush` at 70% (a sine sliding down from 520 to 180 Hz over about 0.35s with a faint low-passed hiss); a release before that is silent. Pressing Undo or Replay plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). The autoplay tease is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Holding for 1.5s fills the pill left to right at constant speed, revealing white "Keep holding…".

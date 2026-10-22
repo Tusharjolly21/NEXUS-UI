@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 type Stage = "closed" | "open" | "sending" | "sent";
 
@@ -11,11 +12,14 @@ export interface FeedbackPillProps {
   accent?: string;
   /** Opens, types and sends a sample message until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const morph = { type: "spring", stiffness: 380, damping: 32 } as const;
 
-export function FeedbackPill({ label = "Feedback", placeholder = "What would make this better?", onSend, accent = "#0071e3", autoplay = false }: FeedbackPillProps) {
+export function FeedbackPill({ label = "Feedback", placeholder = "What would make this better?", onSend, accent = "#0071e3", autoplay = false, enableSound = true }: FeedbackPillProps) {
+  const play = useSound(enableSound);
   const id = useId();
   const [stage, setStage] = useState<Stage>("closed");
   const [text, setText] = useState("");
@@ -24,10 +28,16 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
   const timers = useRef<number[]>([]);
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
-  const send = async (msg = text) => {
+  const send = async (msg = text, audible = false) => {
     if (!msg.trim()) return;
     setStage("sending");
-    await Promise.all([onSend?.(msg), new Promise((r) => setTimeout(r, 900))]);
+    try {
+      await Promise.all([onSend?.(msg), new Promise((r) => setTimeout(r, 900))]);
+    } catch (err) {
+      if (audible) play("error");
+      throw err;
+    }
+    if (audible) play("success");
     setStage("sent");
     later(() => {
       setStage("closed");
@@ -89,7 +99,10 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
             <motion.button
               key="pill"
               type="button"
-              onClick={() => setStage("open")}
+              onClick={() => {
+                play("pop", 0.6);
+                setStage("open");
+              }}
               initial={{ opacity: 0, filter: "blur(6px)" }}
               animate={{ opacity: 1, filter: "blur(0px)", transition: { delay: 0.1 } }}
               exit={{ opacity: 0, filter: "blur(6px)", transition: { duration: 0.12 } }}
@@ -108,7 +121,7 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
               key="form"
               onSubmit={(e) => {
                 e.preventDefault();
-                send();
+                send(undefined, true);
               }}
               initial={{ opacity: 0, filter: "blur(6px)" }}
               animate={{ opacity: 1, filter: "blur(0px)", transition: { delay: 0.12 } }}
@@ -119,7 +132,10 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
                 <label htmlFor={id} className="text-[15px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
                   {label}
                 </label>
-                <button type="button" onClick={() => setStage("closed")} aria-label="Close" className="flex h-7 w-7 items-center justify-center rounded-full bg-[#f0f0f3] text-[#6e6e73] hover:text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2" style={{ outlineColor: accent }}>
+                <button type="button" onClick={() => {
+                  play("tap", 0.5);
+                  setStage("closed");
+                }} aria-label="Close" className="flex h-7 w-7 items-center justify-center rounded-full bg-[#f0f0f3] text-[#6e6e73] hover:text-[#1d1d1f] dark:bg-[#3a3a3c] dark:text-[#a1a1a6] dark:hover:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2" style={{ outlineColor: accent }}>
                   <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
                 </button>
               </div>
@@ -129,8 +145,11 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send();
-                  if (e.key === "Escape") setStage("closed");
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) send(undefined, true);
+                  if (e.key === "Escape") {
+                    play("tap", 0.5);
+                    setStage("closed");
+                  }
                 }}
                 placeholder={placeholder}
                 rows={3}

@@ -11,6 +11,7 @@ import {
   type AnimationPlaybackControls,
   type MotionValue,
 } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 /** Kept for compatibility. The dial now follows the site's light or dark mode, so this is ignored. */
 export type WheelTheme = "obsidian" | "midnight" | "arctic" | "ember" | "custom";
@@ -84,6 +85,8 @@ export type WheelSelectorProps = {
   animationSpeed?: WheelAnimationSpeed;
   /** Accent for items without their own accentColor. */
   accentColor?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -204,8 +207,10 @@ export function WheelSelector({
   autoRotateInterval = 3000,
   animationSpeed = "medium",
   accentColor = "#0071e3",
+  enableSound = true,
   className = "",
 }: WheelSelectorProps) {
+  const play = useSound(enableSound);
   const list = items.length ? items : DEFAULT_WHEEL_ITEMS;
   const n = list.length;
   const step = 360 / n;
@@ -225,6 +230,10 @@ export function WheelSelector({
   const drag = useRef<{ last: number; t: number; v: number; moved: number; node: number | null } | null>(null);
   const touched = useRef(false);
   const lastWheel = useRef(0);
+  // True while the dial is turning because of the user (drag, fling, node click, wheel, keys); false for autoplay.
+  const audible = useRef(false);
+  const lastStop = useRef(start);
+  const lastTick = useRef(0);
   const report = useRef(onActiveChange);
   useEffect(() => {
     report.current = onActiveChange;
@@ -233,6 +242,14 @@ export function WheelSelector({
   useMotionValueEvent(rot, "change", (r) => {
     const i = wrap(Math.round(-r / step), n);
     setActive((a) => (a === i ? a : i));
+    if (i !== lastStop.current) {
+      lastStop.current = i;
+      const now = performance.now();
+      if (audible.current && now - lastTick.current >= 40) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      }
+    }
   });
 
   // Tell the parent once the wheel has settled on a new stop.
@@ -247,12 +264,26 @@ export function WheelSelector({
   const snapTo = (target: number, velocity = 0) => {
     anim.current?.stop();
     const i = wrap(Math.round(-target / step), n);
+    const from = rot.get();
+    // Only a real landing makes a sound: a press that never moved the dial stays quiet.
+    const land = () => {
+      if (audible.current && Math.abs(rot.get() - from) > 0.5) play("drop", 0.5);
+    };
     if (reduce) {
       rot.set(target);
       settle(i);
+      land();
       return;
     }
-    anim.current = animate(rot, target, { type: "spring", ...spring, velocity, onComplete: () => settle(i) });
+    anim.current = animate(rot, target, {
+      type: "spring",
+      ...spring,
+      velocity,
+      onComplete: () => {
+        settle(i);
+        land();
+      },
+    });
   };
 
   const goIndex = (i: number) => {
@@ -276,6 +307,7 @@ export function WheelSelector({
     if (i === cur) return;
     const diff = wrap(-i * step - rot.get() + 180, 360) - 180;
     anim.current?.stop();
+    audible.current = false;
     anim.current = animate(rot, Math.round((rot.get() + diff) / step) * step, reduce ? { duration: 0 } : { type: "spring", ...spring });
     settled.current = i;
   }, [controlled, n, step, rot, reduce, spring]);
@@ -289,6 +321,7 @@ export function WheelSelector({
         return;
       }
       anim.current?.stop();
+      audible.current = false;
       const target = Math.round(rot.get() / step) * step - step;
       anim.current = animate(rot, target, reduce ? { duration: 0 } : { type: "spring", ...spring });
     }, Math.max(1200, Math.min(autoRotateInterval, 15000)));
@@ -305,6 +338,7 @@ export function WheelSelector({
   const down = (e: RPointerEvent<HTMLDivElement>) => {
     if (e.button !== 0) return;
     touched.current = true;
+    audible.current = true;
     anim.current?.stop();
     e.currentTarget.setPointerCapture(e.pointerId);
     const hit = (e.target as HTMLElement).closest("[data-node]");
@@ -344,6 +378,7 @@ export function WheelSelector({
       if (Math.abs(e.deltaY) + Math.abs(e.deltaX) < 4) return;
       e.preventDefault();
       touched.current = true;
+      audible.current = true;
       const now = Date.now();
       if (now - lastWheel.current < 260) return;
       lastWheel.current = now;
@@ -351,13 +386,14 @@ export function WheelSelector({
       anim.current?.stop();
       const target = Math.round(rot.get() / step) * step - dir * step;
       const i = wrap(Math.round(-target / step), n);
-      anim.current = animate(rot, target, reduce ? { duration: 0 } : { type: "spring", ...spring, onComplete: () => report.current?.(i) });
+      anim.current = animate(rot, target, reduce ? { duration: 0 } : { type: "spring", ...spring, onComplete: () => { report.current?.(i); play("drop", 0.5); } });
     };
     el.addEventListener("wheel", wheel, { passive: false });
     return () => el.removeEventListener("wheel", wheel);
-  }, [rot, step, n, reduce, spring]);
+  }, [rot, step, n, reduce, spring, play]);
 
   const key = (e: KeyboardEvent) => {
+    audible.current = true;
     if (e.key === "ArrowRight" || e.key === "ArrowDown") nudge(1);
     else if (e.key === "ArrowLeft" || e.key === "ArrowUp") nudge(-1);
     else if (e.key === "Home") goIndex(0);

@@ -58,6 +58,10 @@ Desktop only, after 700ms: animate a virtual x across the shelf (18px inset each
 
 - Each tile is a link (`aria-current="page"` when active) or button (`aria-pressed`) labelled with its title; tooltips have `role="tooltip"`; the badge reads "{n} new". Focus rings 2px `#0071e3` (dark `#0a84ff`) with 2px offset. Mobile nav labelled "Site navigation"; button "Open navigation" / "Close navigation".
 
+## Sound
+
+`FloatingDock` (and `FloatingDockDesktop` / `FloatingDockMobile`) take `enableSound?: boolean` (default `true`; `false` silences it). Pressing a dock tile, by click or keyboard, plays `pop` from `@/lib/ui-sounds` (a short sine glide from about 320 Hz up to 980 Hz in 70ms, soft and round). On the mobile stack the same `pop` plays when a row is chosen, and the round menu button plus its backdrop and Escape play a quiet `tap` (60% volume; a dry click, a sine dropping from 900 to 620 Hz in 60ms). Pointer magnification, tooltips and the autoplay sweep and bounce are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Gliding over the dock swells tiles in a smooth hill up to 70px while neighbours shift aside.

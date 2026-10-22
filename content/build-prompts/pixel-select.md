@@ -71,3 +71,10 @@ With `autoplay`: run at 700ms, then every 3600ms, only while not touched and clo
 - [ ] Clicks during a transition do nothing.
 - [ ] Keyboard: Tab to options, Enter/Space picks, Escape closes.
 - [ ] Autoplay opens, highlights, picks and repeats every 3.6s, and stops on the first pointer down.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Opening the menu plays `pop` from `@/lib/ui-sounds` at 70% volume (a short blip that rises quickly in pitch) as the pixels start to build. Choosing an option plays `tap` at 80% (a short soft thump that falls in pitch, with a hint of click) as the pixels scatter.
+- Closing without a choice, hovering rows and the autoplay loop are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

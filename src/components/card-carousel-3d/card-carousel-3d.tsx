@@ -14,6 +14,7 @@ import {
   type AnimationPlaybackControls,
   type MotionValue,
 } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export type CarouselCard = {
   id: string;
@@ -49,6 +50,8 @@ export type CardCarousel3DProps = {
   hint?: string;
   /** Steps to the next card every 2.4s until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -61,6 +64,8 @@ export const DEFAULT_CARDS: CarouselCard[] = [
   { id: "se", name: "Lumen SE", price: "From $429", color: "#f5f5f7" },
 ];
 
+/** Read the clock from event handlers only. */
+const clock = () => performance.now();
 const mod = (a: number, n: number) => ((a % n) + n) % n;
 
 function Phone({ color, gid }: { color: string; gid: string }) {
@@ -166,8 +171,14 @@ export function CardCarousel3D({
   onChange,
   hint = "Drag, scroll or use the arrow keys.",
   autoplay = false,
+  enableSound = true,
   className = "",
 }: CardCarousel3DProps) {
+  const play = useSound(enableSound);
+  // When the visitor last moved the carousel. Autoplay and the drift never set it, so they stay silent.
+  const userAt = useRef(-Infinity);
+  const lastTick = useRef(0);
+  const lastIdx = useRef(0);
   const n = Math.max(1, cards.length);
   const step = 360 / n;
   const still = useReducedMotion() === true;
@@ -202,9 +213,18 @@ export function CardCarousel3D({
   useMotionValueEvent(rot, "change", (v) => {
     const i = mod(Math.round(-v / step), n);
     setActive(i);
+    if (i !== lastIdx.current) {
+      lastIdx.current = i;
+      const now = performance.now();
+      if ((dragging.current || now - userAt.current < 1600) && now - lastTick.current > 40) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      }
+    }
   });
 
   const snapTo = (target: number, velocity = 0) => {
+    userAt.current = clock();
     run.current?.stop();
     quiet.current = 100;
     run.current = animate(rot, target, { type: "spring", stiffness: still ? 600 : 170, damping: still ? 60 : 19, velocity });
@@ -263,6 +283,7 @@ export function CardCarousel3D({
       if (!d) return;
       e.preventDefault();
       touched.current = true;
+      userAt.current = clock();
       run.current?.stop();
       quiet.current = 100;
       rot.set(rot.get() - d * 0.18 * scrollSpeed);
@@ -308,15 +329,20 @@ export function CardCarousel3D({
         }}
         onPointerDown={() => {
           touched.current = true;
+          userAt.current = clock();
           run.current?.stop();
         }}
         onPanStart={() => {
           dragging.current = true;
           from.current = rot.get();
         }}
-        onPan={(_, info) => rot.set(from.current + info.offset.x * k)}
+        onPan={(_, info) => {
+          userAt.current = clock();
+          rot.set(from.current + info.offset.x * k);
+        }}
         onPanEnd={(_, info) => {
           dragging.current = false;
+          userAt.current = clock();
           quiet.current = 120;
           run.current = animate(rot, [rot.get()], {
             type: "inertia",

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface AssignPerson {
   id: string;
@@ -19,6 +20,8 @@ export interface AssignPickerProps {
   onChange?: (ids: string[]) => void;
   /** Opens the menu, ticks four people, closes and clears, on a loop until the user clicks. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const PEOPLE: AssignPerson[] = [
@@ -58,7 +61,8 @@ export function AssignFace({ person, size = 28 }: { person: AssignPerson; size?:
  * a stack with a count. The label reads naturally: one name, two names, or
  * a number.
  */
-export function AssignPicker({ people = PEOPLE, defaultValue, onChange, autoplay = false }: AssignPickerProps) {
+export function AssignPicker({ people = PEOPLE, defaultValue, onChange, autoplay = false, enableSound = true }: AssignPickerProps) {
+  const play = useSound(enableSound);
   const [open, setOpen] = useState(false);
   const [sel, setSel] = useState<string[]>(() => defaultValue ?? []);
   const [flights, setFlights] = useState<Record<string, { x: number; y: number }>>({});
@@ -234,7 +238,11 @@ export function AssignPicker({ people = PEOPLE, defaultValue, onChange, autoplay
                     type="button"
                     role="option"
                     aria-selected={on}
-                    onClick={() => toggle(p.id)}
+                    onClick={() => {
+                      if (on) play("tick", 0.4);
+                      else play("pop", 0.5);
+                      toggle(p.id);
+                    }}
                     className="flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left outline-none hover:bg-[#f5f5f7] focus-visible:bg-[#f5f5f7] dark:hover:bg-[#2c2c2e] dark:focus-visible:bg-[#2c2c2e]"
                   >
                     <span

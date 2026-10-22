@@ -12,6 +12,7 @@ import {
   type AnimationPlaybackControls,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type TimeScrubberProps = {
   /** Controlled value, in minutes since midnight (0-1439). */
@@ -36,6 +37,8 @@ export type TimeScrubberProps = {
   /** Flings the ruler to a few times of day until someone touches it. */
   autoplay?: boolean;
   disabled?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -161,9 +164,12 @@ export function TimeScrubber({
   hint = "Drag the ruler, or fling it.",
   autoplay = false,
   disabled = false,
+  enableSound = true,
   className,
 }: TimeScrubberProps) {
   const reduced = useReducedMotion() ?? false;
+  const play = useSound(enableSound);
+  const lastTick = React.useRef(0);
   const maxMinute = DAY - interval;
   const snap = React.useCallback((m: number) => clamp(Math.round(m / interval) * interval, 0, maxMinute), [interval, maxMinute]);
 
@@ -222,7 +228,14 @@ export function TimeScrubber({
     setShown(m);
     if (dragging.current || anim.current) {
       kick(1.14);
-      if (touched.current) emit(m);
+      if (touched.current) {
+        emit(m);
+        const now = performance.now();
+        if (now - lastTick.current >= 40) {
+          lastTick.current = now;
+          play("tick", 0.4);
+        }
+      }
     }
   });
 
@@ -231,9 +244,12 @@ export function TimeScrubber({
       anim.current = null;
       kick(1.4);
       emit(target, notify);
-      if (notify) onCommit?.(target);
+      if (notify) {
+        play("drop", 0.4);
+        onCommit?.(target);
+      }
     },
-    [emit, kick, onCommit],
+    [emit, kick, onCommit, play],
   );
 
   const settleTo = React.useCallback(

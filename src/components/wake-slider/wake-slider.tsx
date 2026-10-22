@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { useSound } from "@/lib/ui-sounds";
 
 const N = 56;
 const W = 300;
@@ -15,6 +16,8 @@ export interface WakeSliderProps {
   onValueChange?: (value: number) => void;
   /** Sweeps back and forth by itself until the user drags or uses the keyboard. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
@@ -22,7 +25,8 @@ export interface WakeSliderProps {
  * sweep past spring up in a wake behind your hand, taller the faster you go,
  * then ripple back down. The value is wherever the colour ends.
  */
-export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "#ff9f0a", onValueChange, autoplay = false }: WakeSliderProps) {
+export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "#ff9f0a", onValueChange, autoplay = false, enableSound = true }: WakeSliderProps) {
+  const play = useSound(enableSound);
   const bars = useRef<(HTMLSpanElement | null)[]>([]);
   const st = useRef(Array.from({ length: N }, () => ({ h: 0, v: 0 })));
   const value = useRef(Math.max(0, Math.min(100, defaultValue)) / 100);
@@ -33,6 +37,8 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
   const touched = useRef(false);
   const onChangeRef = useRef(onValueChange);
   const emitted = useRef(Math.round(Math.max(0, Math.min(100, defaultValue))));
+  const lastBar = useRef(Math.round((Math.max(0, Math.min(100, defaultValue)) / 100) * (N - 1)));
+  const lastTick = useRef(0);
 
   useEffect(() => {
     onChangeRef.current = onValueChange;
@@ -96,6 +102,17 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
     return () => cancelAnimationFrame(raf);
   }, [autoplay, kick, setFrom]);
 
+  // One quiet tick each time the colour edge moves onto a different bar. Called from input handlers only.
+  const tickBar = () => {
+    const bar = Math.round(value.current * (N - 1));
+    if (bar === lastBar.current) return;
+    lastBar.current = bar;
+    const now = performance.now();
+    if (now - lastTick.current < 40) return;
+    lastTick.current = now;
+    play("tick", 0.4);
+  };
+
   const pos = (e: RPointerEvent) => {
     const r = e.currentTarget.getBoundingClientRect();
     return ((e.clientX - r.left) / r.width) * W;
@@ -108,6 +125,7 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
       const speed = l ? (Math.abs(x - l.x) / Math.max(1, now - l.t)) * 1000 : 0;
       kick(x, speed);
       setFrom(x);
+      tickBar();
     }
     last.current = { x, t: now };
   };
@@ -122,6 +140,7 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
     touched.current = true;
     setFrom(target * W);
     kick(value.current * W, 500);
+    tickBar();
   };
 
   return (
@@ -147,6 +166,7 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
           const x = pos(e);
           setFrom(x);
           kick(x, 400);
+          tickBar();
         }}
         onPointerMove={move}
         onPointerUp={() => {

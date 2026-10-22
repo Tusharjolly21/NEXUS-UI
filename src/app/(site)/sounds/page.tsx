@@ -9,6 +9,7 @@ import { SoundBoard } from "@/components/sounds/sound-board";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { SOUNDS } from "@/lib/ui-sounds";
+import { COMPONENT_SOUNDS } from "@/lib/catalog/component-sounds";
 
 export const metadata: Metadata = createMetadata({
   title: "UI Sound Effects for React — Web Audio, No Files",
@@ -18,6 +19,7 @@ export const metadata: Metadata = createMetadata({
 });
 
 const COUNT = Object.keys(SOUNDS).length;
+const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;
 const INSTALL = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/ui-sounds`;
 
 const USAGE = `"use client";
@@ -32,7 +34,11 @@ export function LikeButton() {
   );
 }`;
 
-const PATTERNS = `import { playSound, setSoundVolume, setSoundsMuted } from "@/lib/ui-sounds";
+const PATTERNS = `import { playSound, setSoundVolume, setSoundsEnabled, useSound, useSoundsEnabled } from "@/lib/ui-sounds";
+
+// In a component: silent when the prop is false or the visitor has sounds off
+const play = useSound(enableSound);
+<button onClick={() => play("tap")}>Save</button>
 
 // A toggle: one sound for each direction
 onCheckedChange={(on) => playSound(on ? "on" : "off")}
@@ -45,8 +51,12 @@ playSound(ok ? "success" : "error");
 // A notification arriving, quieter than the rest
 playSound("chime", 0.6);
 
-// Respect a "Sounds" preference in your settings
-setSoundsMuted(!settings.sounds);
+// A sound switch for your settings: remembered in this browser
+const [on, setOn] = useSoundsEnabled();
+<button onClick={() => setOn(!on)}>{on ? "Sound on" : "Sound off"}</button>
+
+// Or switch everything off from code, and set the level
+setSoundsEnabled(false);
 setSoundVolume(0.7);`;
 
 const FAQ = [
@@ -64,7 +74,11 @@ const FAQ = [
   },
   {
     q: "How do I let people turn sounds off?",
-    a: "Call setSoundsMuted(true) when someone switches sounds off, and setSoundVolume(0 to 1) for a volume setting. Interface sounds should be optional and quiet; the defaults are already soft.",
+    a: "Use the useSoundsEnabled hook for a speaker button, or call setSoundsEnabled(false) from anywhere. The choice is remembered in this browser (localStorage key ui-sounds) and every sound follows it. setSoundVolume(0 to 1) sets the level, and a component that makes sound also takes enableSound={false} to be silent on its own. Interface sounds should be optional and quiet; the defaults are already soft.",
+  },
+  {
+    q: "Which Nexus UI components make sound?",
+    a: `${SOUND_COMPONENTS} components play these sounds on press, toggle, snap, send, drop and success, never on hover and never in their self-playing demos. Filter the component gallery by Sound to see them. On this site sound is off until you switch it on with the speaker in the menu; in your own app it is on by default.`,
   },
   {
     q: "Is it free?",

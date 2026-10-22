@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { CreditCard, Key, LayoutDashboard, LogOut, Menu, ShoppingBag, User, X } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { SoundSwitch } from "@/components/site/sound-switch";
 import { SearchCommand } from "@/components/search/search-command";
 import {
   DropdownMenu,
@@ -139,6 +140,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
         <div className="ml-auto flex items-center gap-1.5">
           <SearchCommand variant="capsule" />
           <ThemeTrio className={cn("hidden md:flex", compact && "md:hidden")} />
+          <SoundSwitch className={cn("hidden md:grid", compact && "md:hidden")} />
 
           {primaryAction ? (
             <Link
@@ -234,6 +236,7 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
           </nav>
           <div className="mt-2 flex items-center gap-2 border-t border-border px-1 pt-3">
             <ThemeTrio />
+            <SoundSwitch />
             {user ? (
               <>
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-foreground/[0.06] text-center text-[14px] font-medium text-foreground">

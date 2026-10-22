@@ -66,6 +66,10 @@ With `autoplay` set: 900ms after mount, type the string one character at a time 
 - The Verified pill has `role="status"`; the check SVG is `aria-hidden`.
 - Resend and Replay are real `type="button"` buttons; Replay shows a visible focus outline.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Each digit typed or pasted plays `tick` (a tiny burst of high-passed noise above about 5 kHz, roughly 12ms) at 45% volume (one tick for a paste). When a code the visitor entered verifies, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays; when it does not match, `error` (two short low square-wave notes, about 220 Hz then 185 Hz, 110ms apart) plays as the row shakes. The autoplay typing, its verification, the Resend code and Replay buttons make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Six 54×66 boxes with a wider gap (22px) between the third and fourth.
@@ -146,6 +150,10 @@ With `autoplay` and motion allowed, a loop runs while the card is on screen and 
 - A visually hidden `role="status"` `aria-live="polite"` line announces "Checking the code", the error message and "Code verified".
 - Fill, Resend and Start over are real buttons with a visible focus outline (`outline-2 outline-offset-2` in `#0071e3`). SVGs and flying digits are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Each digit typed or pasted plays `tick` (a tiny burst of high-passed noise above about 5 kHz, roughly 12ms) at 45% volume (one tick for a paste). Pressing Fill plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss) and each digit that lands in its box plays the same tick at 40%. When a code the visitor typed, pasted or filled verifies, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays as the boxes slide together; when it does not match, `error` (two short low square-wave notes, about 220 Hz then 185 Hz, 110ms apart) plays as the row shakes. The autoplay story (message, Fill, verify, start over), Resend code and Start over make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] About a second after mount a message banner drops in with "Your Nexus code is 482913".
@@ -223,6 +231,10 @@ With `autoplay` and motion allowed, while on screen and the tab visible: 600ms a
 
 - The status line is a `role="status"` `aria-live="polite"` region.
 - Dots, caret, success line and badge are `aria-hidden`. "Try again" is a real button with a visible focus outline.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Each digit typed or pasted plays `tick` (a tiny burst of high-passed noise above about 5 kHz, roughly 12ms) at 45% volume (one tick for a paste). When a code the visitor entered is right, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays as the green line draws; when it is wrong, `error` (two short low square-wave notes, about 220 Hz then 185 Hz, 110ms apart) plays as the digits drop. The autoplay demo, which tries a wrong code and then the right one, and the Try again button make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

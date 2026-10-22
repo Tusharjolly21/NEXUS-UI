@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface MenuItem {
   id: string;
@@ -30,9 +31,12 @@ export interface StaggerMenuProps {
   onSelect?: (id: string) => void;
   /** Opens and browses the menu by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
-export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay = false }: StaggerMenuProps) {
+export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay = false, enableSound = true }: StaggerMenuProps) {
+  const play = useSound(enableSound);
   const uid = useId();
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState<string | null>(null);
@@ -41,7 +45,11 @@ export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const wrap = useRef<HTMLDivElement>(null);
 
-  const pick = (it: MenuItem) => {
+  const pick = (it: MenuItem, byUser = false) => {
+    if (byUser) {
+      play("tick", 0.5);
+      play("success", 0.7);
+    }
     setOpen(false);
     setFlash(it.done ?? it.label);
     onSelect?.(it.id);
@@ -86,7 +94,7 @@ export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={`${uid}-menu`}
-        onClick={() => { touched.current = true; setOpen((o) => !o); }}
+        onClick={() => { touched.current = true; if (!open) play("pop", 0.7); setOpen((o) => !o); }}
         whileTap={{ scale: 0.95 }}
         className="relative flex h-10 items-center gap-2 overflow-hidden rounded-full bg-[#1d1d1f] pl-4 pr-3 text-[14px] font-medium text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
       >
@@ -133,7 +141,7 @@ export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay
                   type="button"
                   onPointerEnter={() => setHover(it.id)}
                   onFocus={() => setHover(it.id)}
-                  onClick={() => pick(it)}
+                  onClick={() => pick(it, true)}
                   initial={{ opacity: 0, x: -10, filter: "blur(4px)" }}
                   animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
                   transition={{ type: "spring", stiffness: 500, damping: 32, delay: 0.04 + i * 0.04 }}

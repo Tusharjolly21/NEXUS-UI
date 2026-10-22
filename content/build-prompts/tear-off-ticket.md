@@ -60,6 +60,10 @@ With `autoplay`, run immediately and then every 5200ms while not touched: reset,
 - Focus-visible: 2px ring `#0071e3` (dark `#0a84ff`), no default outline. The reset button has a 2px outline in the same colours with 2px offset.
 - Notches and the code grid are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Tearing the stub off plays `swipe` (a paper-rip hiss: filtered noise sweeping down from about 3200 Hz to 500 Hz in 0.14s). It plays at the moment the pull passes the perforation, or when Enter or Space tears the focused stub. A short pull that snaps back is silent. "New ticket" plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Dragging the stub right rotates it open from the top around its bottom-left corner, up to 26°.

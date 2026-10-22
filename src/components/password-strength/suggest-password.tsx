@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 // no look-alike characters (0 O o 1 l I i)
 const ALPHA = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -55,6 +56,8 @@ export interface SuggestPasswordProps {
   onSubmit?: (password: string) => void;
   /** Extra classes for the card. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const subscribeVisibility = (cb: () => void) => {
@@ -86,8 +89,9 @@ function useAutoplayGate(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * own instead and a single line of advice rewrites itself as you go, with a
  * bar that fills underneath.
  */
-export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, onChange, onUse, onSubmit, className = "" }: SuggestPasswordProps) {
+export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, onChange, onUse, onSubmit, className = "", enableSound = true }: SuggestPasswordProps) {
   const id = useId();
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [pw, setPw] = useState("");
   const [shown, setShown] = useState("");
@@ -99,6 +103,7 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
   const input = useRef<HTMLInputElement>(null);
   const raf = useRef(0);
   const touched = useRef(false);
+  const reachedTop = useRef(false);
   const suggestedRef = useRef("");
   const running = useAutoplayGate(card, autoplay);
   const callbacks = useRef({ onChange, onUse });
@@ -223,6 +228,12 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
             onChange={(e) => {
               touched.current = true;
               cancelAnimationFrame(raf.current);
+              // one soft chime the first time typing reaches "Strong password"; clearing the field re-arms it
+              if (!e.target.value) reachedTop.current = false;
+              else if (hint(e.target.value).score === 4 && !reachedTop.current) {
+                reachedTop.current = true;
+                play("success", 0.5);
+              }
               setUsing(false);
               setPw(e.target.value);
               callbacks.current.onChange?.(e.target.value);
@@ -290,6 +301,8 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
                 onPointerDown={(e) => e.preventDefault()}
                 onClick={(e) => {
                   touched.current = true;
+                  reachedTop.current = true;
+                  play("success", 0.5);
                   use();
                   // a keyboard press leaves focus on a button that is about to unmount, so hand it back to the field
                   if (e.detail === 0) input.current?.focus();
@@ -326,6 +339,7 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
                 type="button"
                 onClick={() => {
                   touched.current = true;
+                  reachedTop.current = false;
                   clearField();
                   input.current?.focus();
                 }}

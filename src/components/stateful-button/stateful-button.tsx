@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 type Phase = "idle" | "loading" | "success" | "error";
 
@@ -54,6 +55,8 @@ export type StatefulButtonProps = Omit<
   errorIcon?: React.ReactNode;
   /** Runs through loading and success on a loop (without calling `onClick`) until someone presses it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 function Spinner({ size }: { size: number }) {
@@ -115,12 +118,14 @@ export function StatefulButton({
   successIcon,
   errorIcon,
   autoplay = false,
+  enableSound = true,
   type = "button",
   onPointerDown,
   onKeyDown,
   ...buttonProps
 }: StatefulButtonProps) {
   const reduceMotion = useReducedMotion() === true;
+  const play = useSound(enableSound);
   const [phase, setPhase] = React.useState<Phase>("idle");
   const resetRef = React.useRef<number | null>(null);
   const touched = React.useRef(false);
@@ -171,16 +176,19 @@ export function StatefulButton({
     touched.current = true;
     if (isDisabled) return;
     clearResetTimer();
+    play("tap");
     setPhase("loading");
     try {
       await onClick?.();
       if (showSuccess) {
+        play("success");
         setPhase("success");
         scheduleReset();
       } else {
         setPhase("idle");
       }
     } catch {
+      play("error");
       setPhase("error");
       scheduleReset(Math.max(1400, resetDelay));
     }

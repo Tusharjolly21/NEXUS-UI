@@ -46,6 +46,10 @@ Every 900ms glide the bar to the next stop, looping through `highlightLines` or,
 
 - The `pre` is labelled "Code block (<language>)". Dots, gutter numbers and the glide bar are `aria-hidden`; the copy button is labelled with its current text, with a 2px `#0a84ff` focus ring.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Only the Copy button makes sound: when the code has been copied, `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) plays at 60% volume. The glide bar, hover and the autoplay walk are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Dark by default with badge, title, line numbers and a Copy button.

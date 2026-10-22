@@ -55,6 +55,10 @@ Every 1100ms: if touched, stop for good. If tries have reached 4, send the butto
 - A click with `event.detail === 0` came from the keyboard. Then move focus to "Start over" when the end screen mounts, and back to "Keep my plan" after starting over (use ref callbacks that focus the target once).
 - The end message has `role="status"`.
 
+## Sound
+
+`RunawayButton` takes `enableSound?: boolean` (default `true`; `false` silences it). A mouse or pen press that lands on the cancel button while it is still dodging plays `knock` from `@/lib/ui-sounds` at 70% (two dull low thuds about 0.11s apart, a sine near 160 Hz falling to 90 Hz with a short bandpassed noise knock). The final click that actually cancels plays `success` (two soft triangle notes, C6 then E6, the second 90ms later and ringing longer). "Keep my plan" plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz in 60ms plus a faint high hiss) and "Start over" a quieter `tap` (60%). The dodging itself, which is triggered by the pointer coming near, and the autoplay hops are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Moving the mouse toward "Yes, cancel" makes it spring away with a wobble and change to "Are you sure?".

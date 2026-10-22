@@ -21,6 +21,7 @@ import {
   type AnimationPlaybackControls,
   type MotionValue,
 } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export type CinematicDeckCard = {
   title: string;
@@ -80,6 +81,8 @@ export type CinematicCardDeckProps = {
   hint?: string;
   /** Deals through the deck every 2.4s until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -120,6 +123,8 @@ const PRESETS = {
   cinematic: { scaleBack: 0.85, zBack: -260, rotExit: -72, yBack: 20 },
 };
 
+/** Read the clock from event handlers only. */
+const clock = () => performance.now();
 const r3 = (n: number) => Math.round(n * 1000) / 1000;
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
@@ -355,8 +360,13 @@ export function CinematicCardDeck({
   onChange,
   hint = "Swipe, scroll or use the arrow keys.",
   autoplay = false,
+  enableSound = true,
   className = "",
 }: CinematicCardDeckProps) {
+  const play = useSound(enableSound);
+  // When the visitor last moved the deck. Autoplay and page scroll never set it, so they stay silent.
+  const userAt = useRef(-Infinity);
+  const lastTick = useRef(0);
   const data = cards && cards.length > 0 ? cards : DEFAULT_CARDS;
   const total = data.length;
   const last = Math.max(0, total - 1);
@@ -397,6 +407,11 @@ export function CinematicCardDeck({
     if (i !== lastReported.current) {
       lastReported.current = i;
       onChange?.(i);
+      const now = performance.now();
+      if (now - userAt.current < 1600 && now - lastTick.current > 40) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      }
     }
   });
 
@@ -410,11 +425,13 @@ export function CinematicCardDeck({
   });
 
   const goTo = (i: number) => {
+    userAt.current = clock();
     run.current?.stop();
     target.set(clamp(Math.round(i), 0, last));
   };
   const touch = () => {
     touched.current = true;
+    userAt.current = clock();
   };
 
   // Wheel scrubs the deck, then snaps to the nearest card. Lets the page scroll past either end.
@@ -427,6 +444,7 @@ export function CinematicCardDeck({
       if ((d < 0 && v <= 0) || (d > 0 && v >= last)) return;
       e.preventDefault();
       touched.current = true;
+      userAt.current = clock();
       run.current?.stop();
       target.set(clamp(v + d / 320, 0, last));
       clearTimeout(settle.current);
@@ -530,10 +548,12 @@ export function CinematicCardDeck({
           }}
           onPan={(_, info) => {
             if (scrollLinked) return;
+            userAt.current = clock();
             target.set(clamp(panFrom.current + info.offset.y / step, -0.3, last + 0.3));
           }}
           onPanEnd={(_, info) => {
             if (scrollLinked) return;
+            userAt.current = clock();
             const from = Math.round(target.get());
             run.current = animate(target, [target.get()], {
               type: "inertia",

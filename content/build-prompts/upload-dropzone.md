@@ -73,6 +73,13 @@ Every 2.9s until touched: set dragging on and fly a file glyph into the zone (fr
 - Dark mode recolours zone, sheets, rows and glyphs.
 
 
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Dropping or choosing files that are accepted plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss) as the tray squashes. If any file is rejected for size or type, `error` plays instead (two low square-wave bumps) as the zone shakes. When a file you added finishes uploading, `done` plays (four soft triangle notes in a rising major chord, ringing together); a rejected upload promise plays `error`.
+- The autoplay example files, files passed in through `initialFiles`, hovering and dragging over the zone are all silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ---
 
 <!-- Upload Dropzone: Motion Kit variant brief -->
@@ -156,6 +163,13 @@ Loop of 8600ms while running: reset at 0, show the drag-over state at 700ms, loa
 - [ ] Autoplay runs the whole story with a drawn demo photo, pauses off screen and in hidden tabs, stops for good on the first touch.
 - [ ] Fits at 320px wide; dark mode recolours card, ring, badge and buttons.
 
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Dropping or choosing an image plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss) as the photo appears in the circle. Choosing something that is not an image plays `error` (two low square-wave bumps). When the Save ring finishes and the check pops in, `done` plays (four soft triangle notes in a rising major chord, ringing together).
+- The autoplay demo (including its save), dragging over the circle, repositioning and zooming are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ---
 
 <!-- variant: upload-queue -->
@@ -227,3 +241,10 @@ Loop of 14000ms while running: clear at 0, show the overlay with "3 files" at 50
 - [ ] The simulation stops its interval when nothing is uploading; nothing is read or sent.
 - [ ] Autoplay pauses off screen and in hidden tabs and stops for good on the first touch.
 - [ ] Fits at 320px wide with truncating names; dark mode recolours card, rows, stripes and overlay.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Dropping files on the card or choosing them with Upload plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss). Each row you added that finishes its transfer plays `done` when its check appears (four soft triangle notes in a rising major chord, ringing together).
+- The autoplay sample rows, pausing, resuming, cancelling and dragging over the card are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

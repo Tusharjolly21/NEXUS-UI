@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useTransform, type AnimationPlaybackControls, type MotionValue } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type HoldToRecordResult = {
   durationMs: number;
@@ -30,6 +31,8 @@ export type HoldToRecordProps = {
   accent?: string;
   /** Records, plays back and deletes a demo note on a loop (no callbacks fire) until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -106,8 +109,10 @@ export function HoldToRecord({
   label = "Hold to record",
   accent = "#ff3b30",
   autoplay = false,
+  enableSound = true,
   className,
 }: HoldToRecordProps) {
+  const sfx = useSound(enableSound);
   const reduce = useReducedMotion() === true;
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [sec, setSec] = React.useState(0);
@@ -141,6 +146,7 @@ export function HoldToRecord({
   const begin = React.useCallback(
     (clientX: number, demo = false) => {
       if (session.current) return;
+      if (!demo) sfx("on");
       setHint("");
       dragRaw.set(0);
       setCancelling(false);
@@ -247,6 +253,7 @@ export function HoldToRecord({
         dragRaw.set(0);
         setCancelling(false);
         if (!keep) {
+          if (!s.demo) sfx("hush", 0.7);
           setPhase("idle");
           if (!s.demo) {
             setHint("Recording discarded");
@@ -254,6 +261,7 @@ export function HoldToRecord({
           }
           return;
         }
+        if (!s.demo) sfx("off");
         if (durationMs < minDuration) {
           setPhase("idle");
           setHint("Hold a little longer");
@@ -270,7 +278,7 @@ export function HoldToRecord({
 
       session.current = { start, x: clientX, levels, demo, stop, finish };
     },
-    [cancelDistance, maxDuration, minDuration, onCancel, onRecorded, useMicrophone, dragRaw, level, progress],
+    [cancelDistance, maxDuration, minDuration, onCancel, onRecorded, useMicrophone, dragRaw, level, progress, sfx],
   );
 
   React.useEffect(
@@ -454,7 +462,11 @@ export function HoldToRecord({
               <motion.button
                 type="button"
                 whileTap={reduce ? undefined : { scale: 0.9 }}
-                onClick={() => (playing ? pause() : play())}
+                onClick={() => {
+                  sfx("tap", 0.6);
+                  if (playing) pause();
+                  else play();
+                }}
                 aria-label={playing ? "Pause voice note" : "Play voice note"}
                 className="grid size-10 shrink-0 place-items-center rounded-full bg-[#1d1d1f] text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"
               >
@@ -482,7 +494,10 @@ export function HoldToRecord({
               <span className="w-9 shrink-0 text-right text-[13px] font-medium tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">{formatTime(playing || playSec > 0 ? playSec : total)}</span>
               <button
                 type="button"
-                onClick={() => remove()}
+                onClick={() => {
+                  sfx("tap", 0.6);
+                  remove();
+                }}
                 aria-label="Delete voice note"
                 className="grid size-8 shrink-0 place-items-center rounded-full text-[#6e6e73] transition-colors hover:bg-[#f0f0f3] hover:text-[#1d1d1f] focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#a1a1a6] dark:hover:bg-[#2c2c2e] dark:hover:text-[#f5f5f7] dark:focus-visible:outline-[#0a84ff]"
               >

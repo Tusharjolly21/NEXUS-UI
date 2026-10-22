@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SpreadDeckPhoto {
   /** Caption under the picture. */
@@ -21,6 +22,8 @@ export interface SpreadDeckProps {
   photos?: SpreadDeckPhoto[];
   /** Walks through pile, grid and focus by itself every 2.2s until someone touches the deck. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the root. */
   className?: string;
 }
@@ -86,7 +89,8 @@ function Scene({ p }: { p: SpreadDeckPhoto }) {
  * all up. Every move is the same cards travelling, never a swap. The photos
  * are drawn from gradients, so nothing is fetched.
  */
-export function SpreadDeck({ photos = DEFAULT_PHOTOS, autoplay = false, className }: SpreadDeckProps) {
+export function SpreadDeck({ photos = DEFAULT_PHOTOS, autoplay = false, enableSound = true, className }: SpreadDeckProps) {
+  const play = useSound(enableSound);
   const still = useReducedMotion() === true;
   const n = photos.length;
   const [mode, setMode] = useState<Mode>({ kind: "stack" });
@@ -125,6 +129,10 @@ export function SpreadDeck({ photos = DEFAULT_PHOTOS, autoplay = false, classNam
   };
   const go = (m: Mode) => {
     touch();
+    // Dealing out swipes, picking one up lifts, gathering the pile back up drops.
+    if (m.kind === "grid") play("swipe", 0.7);
+    else if (m.kind === "focus") play("lift", 0.7);
+    else play("drop", 0.7);
     setMode(m);
   };
 

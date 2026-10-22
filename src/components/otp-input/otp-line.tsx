@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type RefObject } from "react";
 import { AnimatePresence, LayoutGroup, motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const LEN = 6;
 const DEFAULT_CODE = "905172";
@@ -17,6 +18,8 @@ export interface OtpLineProps {
   onVerified?: (code: string) => void;
   /** Extra classes for the card. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const subscribeVisibility = (cb: () => void) => {
@@ -48,7 +51,8 @@ function useAutoplayGate(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * the line one by one; the right one pulls the digits together, joins the
  * underlines into one green line and checks itself.
  */
-export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVerified, className = "" }: OtpLineProps) {
+export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVerified, className = "", enableSound = true }: OtpLineProps) {
+  const play = useSound(enableSound);
   const code = /^\d{6}$/.test(codeProp) ? codeProp : DEFAULT_CODE;
   const uid = useId();
   const reduce = useReducedMotion() ?? false;
@@ -82,13 +86,16 @@ export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVer
   }, []);
 
   const submit = useCallback(
-    (val: string) => {
+    // `audible` is true only for codes the visitor typed; the autoplay demo stays silent.
+    (val: string, audible = false) => {
       setState("checking");
       later(() => {
         if (val === code) {
+          if (audible) play("success");
           setState("done");
           onVerifiedRef.current?.(val);
         } else {
+          if (audible) play("error");
           setState("error");
           if (!reduce) void shake.start({ x: [0, -8, 7, -5, 3, 0], transition: { duration: 0.4 } });
           later(() => {
@@ -98,7 +105,7 @@ export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVer
         }
       }, 700);
     },
-    [code, later, reduce, shake],
+    [code, later, play, reduce, shake],
   );
 
   const interact = () => {
@@ -111,8 +118,9 @@ export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVer
   const change = (raw: string) => {
     if (state !== "typing") return;
     const val = raw.replace(/\D/g, "").slice(0, LEN);
+    if (val.length > v.length) play("tick", 0.45);
     setV(val);
-    if (val.length === LEN) submit(val);
+    if (val.length === LEN) submit(val, true);
   };
 
   // demo: a wrong code first, then the right one

@@ -57,6 +57,10 @@ With `autoplay`, every 2600ms do a tug (same as the keyboard one, without `onCha
 - The bead is a native `<button>` with `role="switch"`, `aria-checked`, `aria-label="Light"`. Focus ring `focus-visible` 2px `#0071e3` (dark `#0a84ff`), no default outline.
 - The cord SVG is `aria-hidden`; the headline is `aria-live="polite"`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Each pull the visitor makes (dragging the bead past the slack and letting go, or Enter or Space) plays one click like a light switch: `on` when the light comes on (a tiny noise click with a sine rising from 600 to 900 Hz over 70ms) and `off` when it goes out (a noise click with a sine falling from 760 to 480 Hz over 70ms). A pull that does not reach the switch is silent. The autoplay tugs make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] At rest the cord hangs straight with the bead at about y 108.

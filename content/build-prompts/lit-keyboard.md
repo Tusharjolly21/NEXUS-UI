@@ -72,6 +72,10 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
 - Typing area: `role="textbox"`, `aria-label="Type here to light up the keyboard"`, with the 2px focus ring on the pill. Keys are `aria-hidden`.
 - Both controls are `<button type="button">` with a 2px focus-visible outline `#0071e3` (dark `#0a84ff`; Replay adds a 2px offset); Replay is truly `disabled` when unavailable.
 
+## Sound
+
+`LitKeyboard` takes `enableSound?: boolean` (default `true`; `false` silences it). Each letter or space the visitor types plays `tap` from `@/lib/ui-sounds` at 50% volume (a short dry click: a sine dropping from 900 to 620 Hz in 60ms plus a faint high hiss), and Backspace plays the same at 40%. Held-key repeats are silent. A replay the visitor starts with the Replay button taps each recorded key with the original timing; the autoplay phrase is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - A letter press lights its key in `glow` within ~50ms, drops it 3px, and fades back over ~0.9s starting 140ms after the last press.

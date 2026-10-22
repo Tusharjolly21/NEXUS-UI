@@ -58,6 +58,10 @@ Every `autoPlayInterval` (min 1000ms) spring `pos` to the next integer with stif
 - Stage: `role="region"`, `aria-roledescription="carousel"`, `aria-label="Cards"`, `tabIndex 0`. Cards are hidden from assistive tech; the counter region is `aria-live="polite"` and includes a visually hidden "{title}. {description}".
 - Prev/next buttons labelled "Previous card" / "Next card"; dots in a group "Choose card", each "Go to {title}" with `aria-current`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor turns the wheel by dragging, the arrow, Home or End keys, the previous and next buttons, a dot or a tap on a card, `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 40% volume plays each time a new card comes to the front, never more often than every 40ms, so a fast flick gives a quick run of clicks. The autoplay steps and a change driven from outside through `activeIndex` make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Six cards sit on an arc: active at the top with an accent ring, neighbours rotated and lower, far ones faded out.

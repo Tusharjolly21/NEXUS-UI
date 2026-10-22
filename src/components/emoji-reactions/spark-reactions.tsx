@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SparkReactionOption {
   /** Stable key. */
@@ -49,6 +50,8 @@ export interface SparkReactionsProps {
   onChange?: (reactions: SparkReaction[]) => void;
   /** Reacts, opens the picker and un-reacts on a loop until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the root. */
   className?: string;
 }
@@ -126,8 +129,10 @@ export function SparkReactions({
   options = DEFAULT_SPARK_OPTIONS,
   onChange,
   autoplay = false,
+  enableSound = true,
   className = "",
 }: SparkReactionsProps) {
+  const play = useSound(enableSound);
   const [list, setList] = useState<SparkReaction[]>(reactions);
   const [picker, setPicker] = useState(false);
   const [pop, setPop] = useState<{ id: string; n: number } | null>(null);
@@ -140,6 +145,8 @@ export function SparkReactions({
 
   const toggle = (id: string) => {
     touched.current = true;
+    if (list.find((r) => r.id === id)?.mine) play("off", 0.5);
+    else play("pop");
     const next = applyToggle(list, id);
     setList(next);
     sparkle(id);

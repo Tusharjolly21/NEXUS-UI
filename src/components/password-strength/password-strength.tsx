@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface PasswordStrengthProps {
   accent?: string;
   onChange?: (value: string, score: number) => void;
   /** Types a sample password by itself until the user clicks in. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const LEVELS = [
@@ -30,11 +33,13 @@ export function scorePassword(pw: string) {
   return { rules, score };
 }
 
-export function PasswordStrength({ accent = "#0071e3", onChange, autoplay = false }: PasswordStrengthProps) {
+export function PasswordStrength({ accent = "#0071e3", onChange, autoplay = false, enableSound = true }: PasswordStrengthProps) {
   const id = useId();
+  const play = useSound(enableSound);
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const touched = useRef(false);
+  const reachedTop = useRef(false);
   const { rules, score } = scorePassword(pw);
   const level = LEVELS[score];
 
@@ -74,7 +79,19 @@ export function PasswordStrength({ accent = "#0071e3", onChange, autoplay = fals
           placeholder="At least 8 characters"
           autoComplete="new-password"
           onFocus={() => { if (!touched.current) { touched.current = true; setPw(""); } }}
-          onChange={(e) => { touched.current = true; setPw(e.target.value); onChange?.(e.target.value, scorePassword(e.target.value).score); }}
+          onChange={(e) => {
+            touched.current = true;
+            const next = e.target.value;
+            const nextScore = scorePassword(next).score;
+            // one soft chime the first time typing reaches the top level; clearing the field re-arms it
+            if (!next) reachedTop.current = false;
+            else if (nextScore === 4 && !reachedTop.current) {
+              reachedTop.current = true;
+              play("success", 0.5);
+            }
+            setPw(next);
+            onChange?.(next, nextScore);
+          }}
           className="h-full min-w-0 flex-1 bg-transparent px-[18px] text-[17px] font-medium tracking-wide text-[#1d1d1f] outline-none dark:text-[#f5f5f7] placeholder:font-normal placeholder:tracking-normal placeholder:text-[#a1a1a6]"
           aria-describedby={`${id}-rules`}
         />

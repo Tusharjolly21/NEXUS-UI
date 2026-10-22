@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform } from "framer-motion";
 import type { AnimationPlaybackControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface HoldToConfirmProps {
   label?: string;
@@ -14,6 +15,8 @@ export interface HoldToConfirmProps {
   onUndo?: () => void;
   /** Shows a short hold-and-release tease until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const PARTICLES = Array.from({ length: 14 }, (_, i) => {
@@ -31,7 +34,9 @@ export function HoldToConfirm({
   onConfirm,
   onUndo,
   autoplay = false,
+  enableSound = true,
 }: HoldToConfirmProps) {
+  const play = useSound(enableSound);
   const progress = useMotionValue(0);
   const clip = useTransform(progress, (v) => `inset(0 ${(1 - Math.max(0, Math.min(1, v))) * 100}% 0 0)`);
   const restOpacity = useTransform(progress, [0, 0.03], [1, 0]);
@@ -55,12 +60,14 @@ export function HoldToConfirm({
     demoHolding.current = demo;
     stop();
     const target = demo ? 0.6 : 1;
+    if (!demo) play("charge", 0.7);
     ctl.current = animate(progress, target, {
       duration: ((target - progress.get()) * holdMs) / 1000,
       ease: "linear",
       onComplete: () => {
         if (demo || !holding.current) return;
         holding.current = false;
+        play("done");
         setDone(true);
         setLeft(5);
         onConfirm?.();
@@ -70,6 +77,7 @@ export function HoldToConfirm({
 
   const release = () => {
     if (!holding.current) return;
+    if (!demoHolding.current && progress.get() > 0.1) play("hush", 0.7);
     holding.current = false;
     demoHolding.current = false;
     stop();
@@ -77,6 +85,7 @@ export function HoldToConfirm({
   };
 
   const undo = () => {
+    play("tap");
     if (left > 0) onUndo?.();
     setDone(false);
     progress.set(0);

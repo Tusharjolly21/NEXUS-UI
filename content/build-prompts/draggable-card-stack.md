@@ -64,6 +64,10 @@ Every `max(900, autoInterval)` ms throw the top card, alternating right (1, −0
 
 - Stage `role="group"`, `aria-roledescription="card stack"`, `tabIndex 0`, `aria-label="Card stack, {title} on top. Right arrow sends it to the back, left arrow brings the last card back."`. Drawn scenes are `aria-hidden`; images have empty alt.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Grabbing the top card (the moment the drag starts) plays `lift` at 70% volume (a short airy rise: noise sweeping 800 to 2400 Hz over 80ms with a faint sine rising from 300 to 520 Hz). Flinging it away plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s). Letting go short of a fling, so the card settles back onto the pile, plays `drop` at 60% (a sine falling from 380 to 120 Hz over 80ms with a small noise thud). The arrow keys play the whisk. Autoplay flings make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Cards underneath are smaller and tilted alternately; the top is flat.
@@ -135,6 +139,10 @@ Every 2200ms, while on screen and the tab is visible, step through `grid, focus(
 - A screen reader only live region announces the state ("Spread. Tap a photo.") once the visitor has interacted. The hint is `aria-hidden`.
 - Focus rings: 2px offset outline `#0071e3` (dark `#0a84ff`).
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Each move the visitor makes with the pile, grid or focus controls plays one sound: dealing the pile out into the grid (or going from a focused photo back to the grid) plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s) at 70% volume, opening a photo plays `lift` at 70% (a short airy rise: noise sweeping 800 to 2400 Hz over 80ms with a faint sine rising from 300 to 520 Hz), and gathering everything back into the pile plays `drop` at 70% (a sine falling from 380 to 120 Hz over 80ms with a small noise thud). Escape follows the same rule. The autoplay walk through the states makes no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] The same cards move between pile, grid and focus; nothing swaps or remounts.
@@ -193,6 +201,10 @@ Every 2800ms, while on screen and the tab is visible: riffle, riffle, cut, repea
 ## Accessibility
 
 - The deck is `role="img"` labelled "Top card: <title>. <description>"; the individual cards are `aria-hidden`. Riffle and Cut are real buttons with 2px offset focus outlines (`#0071e3`, dark `#0a84ff`). The visible "On top" text is `aria-hidden`; a screen reader only live region repeats it, announced only after the visitor has interacted.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing Riffle plays `lift` at 70% volume as the halves split (a short airy rise: noise sweeping 800 to 2400 Hz over 80ms with a faint sine rising from 300 to 520 Hz), `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s) at 70% as the cards fall back in, and `drop` at 70% when the deck squares up (a sine falling from 380 to 120 Hz over 80ms with a small noise thud). Pressing Cut plays `lift` as the top half slides off and `drop` when it lands underneath. With reduced motion each press plays just the `drop`. The autoplay shuffles make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

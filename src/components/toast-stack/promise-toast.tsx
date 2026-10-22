@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface PromiseToastProps {
   /** Called when "Visit" is pressed on the success toast. Nothing navigates on its own. */
@@ -9,6 +10,8 @@ export interface PromiseToastProps {
   onViewLogs?: () => void;
   /** Runs a good deploy, then one with a bug, on a loop until someone touches the component. Never runs under reduced motion. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the wrapper. */
   className?: string;
 }
@@ -86,7 +89,8 @@ function Icon({ state }: { state: Run["state"] }) {
  * on success with the live link and actions, or on failure with the error
  * count and a way to the logs.
  */
-export function PromiseToast({ onVisit, onViewLogs, autoplay = false, className = "" }: PromiseToastProps) {
+export function PromiseToast({ onVisit, onViewLogs, autoplay = false, enableSound = true, className = "" }: PromiseToastProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [run, setRun] = useState<Run | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -102,7 +106,8 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, className 
   };
   useEffect(() => clear, []);
 
-  const start = (fail: boolean) => {
+  // `audible` is true only for runs the user started; the autoplay loop stays silent.
+  const start = (fail: boolean, audible = false) => {
     clear();
     runId.current += 1;
     const id = runId.current;
@@ -113,7 +118,12 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, className 
       timers.current.push(window.setTimeout(() => setRun((r) => (r && r.id === id ? { ...r, step: i, progress: s.to } : r)), t));
       t += s.ms;
     });
-    timers.current.push(window.setTimeout(() => setRun((r) => (r && r.id === id ? { ...r, progress: fail ? r.progress : 1, state: fail ? "fail" : "ok" } : r)), t));
+    timers.current.push(
+      window.setTimeout(() => {
+        setRun((r) => (r && r.id === id ? { ...r, progress: fail ? r.progress : 1, state: fail ? "fail" : "ok" } : r));
+        if (audible) play(fail ? "error" : "success");
+      }, t),
+    );
     timers.current.push(window.setTimeout(() => setRun((r) => (r && r.id === id ? null : r)), t + 4200));
   };
 
@@ -230,7 +240,8 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, className 
           whileTap={reduce ? undefined : { scale: 0.95 }}
           onClick={() => {
             touched.current = true;
-            start(false);
+            play("ping");
+            start(false, true);
           }}
           className={`h-10 rounded-full bg-[#1d1d1f] px-5 text-[14px] font-medium text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f] ${FOCUS}`}
         >
@@ -241,7 +252,8 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, className 
           whileTap={reduce ? undefined : { scale: 0.95 }}
           onClick={() => {
             touched.current = true;
-            start(true);
+            play("ping");
+            start(true, true);
           }}
           className={`h-10 rounded-full bg-white px-5 text-[14px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] ${FOCUS}`}
         >

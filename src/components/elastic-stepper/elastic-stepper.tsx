@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ElasticStepperProps {
   label?: string;
@@ -11,9 +12,12 @@ export interface ElasticStepperProps {
   accent?: string;
   /** Counts up and down by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
-export function ElasticStepper({ label = "Guests", min = 1, max = 8, defaultValue = 2, onChange, accent = "#0071e3", autoplay = false }: ElasticStepperProps) {
+export function ElasticStepper({ label = "Guests", min = 1, max = 8, defaultValue = 2, onChange, accent = "#0071e3", autoplay = false, enableSound = true }: ElasticStepperProps) {
+  const play = useSound(enableSound);
   const [value, setValue] = useState(defaultValue);
   const [dir, setDir] = useState(1);
   const body = useAnimationControls();
@@ -23,13 +27,14 @@ export function ElasticStepper({ label = "Guests", min = 1, max = 8, defaultValu
     valueRef.current = value;
   }, [value]);
 
-  const step = (d: 1 | -1) => {
+  const step = (d: 1 | -1, byUser = false) => {
     const next = valueRef.current + d;
     if (next < min || next > max) {
       // Rubber-band against the limit.
       body.start({ x: [0, d * 9, d * -3, 0], scaleX: [1, 1.04, 0.99, 1], transition: { duration: 0.45, ease: "easeOut" } });
       return;
     }
+    if (byUser) play(d > 0 ? "tap" : "tick", d > 0 ? 0.6 : 0.5);
     valueRef.current = next;
     setDir(d);
     setValue(next);
@@ -52,7 +57,7 @@ export function ElasticStepper({ label = "Guests", min = 1, max = 8, defaultValu
     <motion.button
       type="button"
       aria-label={d > 0 ? `Add one ${label.toLowerCase()}` : `Remove one ${label.toLowerCase()}`}
-      onClick={() => { touched.current = true; step(d); }}
+      onClick={() => { touched.current = true; step(d, true); }}
       whileTap={{ scale: 0.85 }}
       animate={{ opacity: disabled ? 0.35 : 1 }}
       className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f0f0f3] text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-[#3a3a3c] dark:text-[#f5f5f7] dark:hover:bg-[#48484a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"

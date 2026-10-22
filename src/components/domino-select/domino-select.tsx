@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useAnimationControls, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 type AnimationControls = ReturnType<typeof useAnimationControls>;
 
@@ -20,6 +21,8 @@ export interface DominoSelectProps {
   onSelectionChange?: (selected: number[]) => void;
   /** Ticks and unticks the master box by itself until someone interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const MAIL: DominoMessage[] = [
@@ -106,11 +109,12 @@ function Row({
  * with every box ticked. Untick and the chain runs the other way, from the
  * bottom up. Single rows still toggle on their own with a small nod.
  */
-export function DominoSelect({ messages = MAIL, onSelectionChange, autoplay = false }: DominoSelectProps) {
-  return <DominoList key={messages.length} messages={messages} onSelectionChange={onSelectionChange} autoplay={autoplay} />;
+export function DominoSelect({ messages = MAIL, onSelectionChange, autoplay = false, enableSound = true }: DominoSelectProps) {
+  return <DominoList key={messages.length} messages={messages} onSelectionChange={onSelectionChange} autoplay={autoplay} enableSound={enableSound} />;
 }
 
-function DominoList({ messages, onSelectionChange, autoplay }: Required<Pick<DominoSelectProps, "messages" | "autoplay">> & Pick<DominoSelectProps, "onSelectionChange">) {
+function DominoList({ messages, onSelectionChange, autoplay, enableSound }: Required<Pick<DominoSelectProps, "messages" | "autoplay" | "enableSound">> & Pick<DominoSelectProps, "onSelectionChange">) {
+  const play = useSound(enableSound);
   const n = messages.length;
   const [on, setOn] = useState<boolean[]>(() => messages.map(() => false));
   const reduced = useReducedMotion();
@@ -164,8 +168,9 @@ function DominoList({ messages, onSelectionChange, autoplay }: Required<Pick<Dom
     return () => io.disconnect();
   }, []);
 
-  const chain = async (select: boolean) => {
+  const chain = async (select: boolean, byUser = false) => {
     if (busy.current) return;
+    if (byUser) play("knock", 0.8);
     if (reducedRef.current) {
       setOn(messages.map(() => select));
       return;
@@ -179,7 +184,12 @@ function DominoList({ messages, onSelectionChange, autoplay }: Required<Pick<Dom
         const fall = select ? (last ? -84 : -58) : last ? 84 : 58;
         const delay = k * GAP;
         // flip each box at the moment its row stands back up
-        timers.current.push(window.setTimeout(() => setOn((o) => o.map((v, j) => (j === idx ? select : v))), (delay + 0.55 + (n - k) * 0.03) * 1000));
+        timers.current.push(
+          window.setTimeout(() => {
+            setOn((o) => o.map((v, j) => (j === idx ? select : v)));
+            if (byUser) play("tick", 0.4);
+          }, (delay + 0.55 + (n - k) * 0.03) * 1000),
+        );
         const c = ctrls.current[idx];
         if (!c) return Promise.resolve();
         return c.start({
@@ -195,6 +205,7 @@ function DominoList({ messages, onSelectionChange, autoplay }: Required<Pick<Dom
   const one = (i: number) => {
     touched.current = true;
     if (busy.current) return;
+    play("knock", 0.5);
     setOn((o) => o.map((v, j) => (j === i ? !v : v)));
     if (!reducedRef.current) void ctrls.current[i]?.start({ rotateX: [0, -14, 0], originY: "100%", transition: { duration: 0.35 } });
   };
@@ -227,7 +238,7 @@ function DominoList({ messages, onSelectionChange, autoplay }: Required<Pick<Dom
           aria-checked={all ? true : some ? "mixed" : false}
           onClick={() => {
             touched.current = true;
-            void chain(!all);
+            void chain(!all, true);
           }}
           className={`flex items-center gap-2.5 rounded-[10px] px-1 py-1 text-[14px] font-semibold text-[#1d1d1f] outline-none dark:text-[#f5f5f7] ${FOCUS}`}
         >

@@ -53,6 +53,10 @@ With `autoplay`, every 2200ms flip the panel (starting from `defaultDark`) with 
 - Focus ring: `focus-visible` 2px, `#0071e3` while the panel is light and `#0a84ff` while it is dark; no default outline.
 - The covered copy of the screen is `aria-hidden` (light copy hidden while dark, dark copy hidden while light). The icon SVG is `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Flipping the switch plays `on` when the panel goes dark (a tiny noise click with a sine rising from 600 to 900 Hz over 70ms) and `off` when it goes back to light (a noise click with a sine falling from 760 to 480 Hz over 70ms). The autoplay flips make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Turning dark mode on grows a dark circle from the toggle's centre that covers the whole panel in 0.9s with an ease-in-out; turning it off shrinks it back into the toggle in 0.7s.

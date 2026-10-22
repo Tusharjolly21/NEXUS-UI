@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useSound } from "@/lib/ui-sounds";
 import type { FloatingDockItem } from "./types";
 
 function routeActive(pathname: string | null, href: string): boolean {
@@ -21,13 +22,16 @@ export type FloatingDockMobileProps = {
   onSelect?: (item: FloatingDockItem) => void;
   /** "fixed" pins it bottom-centre (hidden from md up); "inline" renders it where you put it. */
   position?: "fixed" | "inline";
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 /**
  * The small-screen dock: one glass button that springs a stack of tiles up
  * out of itself, each row following the one below it.
  */
-export function FloatingDockMobile({ items, className = "", disableLinks = false, activeHref, onSelect, position = "fixed" }: FloatingDockMobileProps) {
+export function FloatingDockMobile({ items, className = "", disableLinks = false, activeHref, onSelect, position = "fixed", enableSound = true }: FloatingDockMobileProps) {
+  const play = useSound(enableSound);
   const pathname = usePathname();
   const still = useReducedMotion() === true;
   const panelId = React.useId();
@@ -41,13 +45,14 @@ export function FloatingDockMobile({ items, className = "", disableLinks = false
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        play("tap", 0.6);
         setOpen(false);
         button.current?.focus();
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, play]);
 
   const wrap = position === "fixed" ? "fixed inset-x-0 bottom-5 z-[100] flex justify-center md:hidden" : "relative flex justify-center";
   const row =
@@ -65,7 +70,10 @@ export function FloatingDockMobile({ items, className = "", disableLinks = false
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/25 backdrop-blur-[2px]"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              play("tap", 0.6);
+              setOpen(false);
+            }}
           />
         )}
       </AnimatePresence>
@@ -92,6 +100,7 @@ export function FloatingDockMobile({ items, className = "", disableLinks = false
                   </>
                 );
                 const pick = () => {
+                  play("pop");
                   setPicked(item.href);
                   setOpen(false);
                   onSelect?.(item);
@@ -126,7 +135,10 @@ export function FloatingDockMobile({ items, className = "", disableLinks = false
           aria-expanded={open}
           aria-controls={open ? panelId : undefined}
           aria-label={open ? "Close navigation" : "Open navigation"}
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => {
+            play("tap", 0.6);
+            setOpen((v) => !v);
+          }}
           whileTap={still ? undefined : { scale: 0.9 }}
           transition={{ type: "spring", stiffness: 600, damping: 20 }}
           className="relative flex size-14 items-center justify-center rounded-full border border-white/60 bg-white/75 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_16px_32px_-14px_rgba(0,0,0,.45)] backdrop-blur-xl outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:border-white/10 dark:bg-[#1c1c1e]/80 dark:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"

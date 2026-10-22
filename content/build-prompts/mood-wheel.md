@@ -56,6 +56,10 @@ When `autoplay` is true, every 2000ms (if not touched) spring `pos` to a random 
 - Wheel words, brackets and the orb are decorative (`aria-hidden`). The caption is `aria-live="polite"`.
 - With `prefers-reduced-motion`, the sheen layer stays still.
 
+## Sound
+
+`MoodWheel` takes `enableSound?: boolean` (default `true`; `false` silences it). Each time a new word reaches the centre slot while the visitor drags, scrolls, flicks or uses the arrow keys (including while the wheel coasts to rest), `tick` plays from `@/lib/ui-sounds` at 50% volume: a very short, dry high-passed noise click (about 12ms, centred above 5 kHz). Ticks are throttled to one per 40ms. The autoplay spinning is silent until the visitor first touches the wheel. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Ten words curve along an arc to the right of the brackets; the centre word is largest and fully opaque, words fade out about four slots away.

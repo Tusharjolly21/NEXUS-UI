@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface RulerPickerProps {
   min?: number;
@@ -12,19 +13,34 @@ export interface RulerPickerProps {
   onChange?: (v: number) => void;
   /** Glides between presets by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const STEP = 12; // px per unit
 const VIEW = 380;
 
-export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min", presets = [5, 15, 30, 60], accent = "#ff9f0a", onChange, autoplay = false }: RulerPickerProps) {
+export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min", presets = [5, 15, 30, 60], accent = "#ff9f0a", onChange, autoplay = false, enableSound = true }: RulerPickerProps) {
+  const play = useSound(enableSound);
   const x = useMotionValue(-(defaultValue - min) * STEP);
   const [value, setValue] = useState(defaultValue);
   const [dir, setDir] = useState(1);
   const touched = useRef(false);
+  // True while the ruler is moving because of the user (drag, fling, arrow keys); false for autoplay and preset glides.
+  const audible = useRef(false);
+  const lastStep = useRef(defaultValue);
+  const lastTick = useRef(0);
 
   useMotionValueEvent(x, "change", (v) => {
     const next = Math.max(min, Math.min(max, Math.round(-v / STEP) + min));
+    if (next !== lastStep.current) {
+      lastStep.current = next;
+      const now = performance.now();
+      if (audible.current && now - lastTick.current >= 40) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      }
+    }
     setValue((prev) => {
       if (prev !== next) {
         setDir(next > prev ? 1 : -1);
@@ -42,6 +58,7 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
     const seq = [60, 5, 45, 15, 30];
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
+      audible.current = false;
       goTo(seq[k++ % seq.length]);
     }, 2200);
     return () => clearInterval(t);
@@ -81,14 +98,15 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
         aria-valuemax={max}
         aria-valuenow={value}
         onKeyDown={(e) => {
-          if (e.key === "ArrowRight") { touched.current = true; goTo(Math.min(max, value + 1)); }
-          if (e.key === "ArrowLeft") { touched.current = true; goTo(Math.max(min, value - 1)); }
+          if (e.key === "ArrowRight") { touched.current = true; audible.current = true; goTo(Math.min(max, value + 1)); }
+          if (e.key === "ArrowLeft") { touched.current = true; audible.current = true; goTo(Math.max(min, value - 1)); }
         }}
       >
         <motion.div
           drag="x"
           dragConstraints={{ left: -(max - min) * STEP, right: 0 }}
           dragElastic={0.12}
+          onDragStart={() => { audible.current = true; }}
           dragTransition={{ power: 0.25, timeConstant: 260, modifyTarget: (t) => Math.round(t / STEP) * STEP, bounceStiffness: 300, bounceDamping: 30 }}
           style={{ x, paddingLeft: VIEW / 2, paddingRight: VIEW / 2 }}
           className="absolute left-0 top-0 flex h-full cursor-grab items-end active:cursor-grabbing"
@@ -112,7 +130,7 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
             key={p}
             type="button"
             whileTap={{ scale: 0.92 }}
-            onClick={() => { touched.current = true; goTo(p); }}
+            onClick={() => { touched.current = true; audible.current = false; play("tap", 0.6); goTo(p); }}
             style={value === p ? { backgroundColor: accent } : undefined}
             className={`h-9 rounded-full px-4 text-[13px] font-medium shadow-[0_0_0_1px_rgba(0,0,0,.08)] transition-colors ${value === p ? "text-white" : "bg-white text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]`}
           >

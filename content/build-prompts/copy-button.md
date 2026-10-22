@@ -74,6 +74,10 @@ Monospace stack used for the value and command: `ui-monospace, 'SF Mono', Menlo,
 - Chip: `aria-label="{label} {value}"` (full value, not the shortened display). The tooltip carries `role="status"` so "Copied" is announced. Focus: 2px `accent` outline, 2px offset.
 - Command button: visible label is its name; focus outline 2px white. `$` is `aria-hidden`; all SVGs `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. A real press on the chip or the command's Copy button plays `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) at 60% volume once the text is on the clipboard. The autoplay copies are visual only and silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Clicking the chip copies the full `value` to the clipboard, even when `display` is shortened.
@@ -150,6 +154,10 @@ Build a card of copy fields that show what was copied. Pressing the button sweep
 - A polite `role="status"` live region per field says "{label} copied" after a real press only, never for the demo.
 - Decorative SVGs, ghost, selection and the prefix are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. A real press on Copy plays `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) at 60% volume. The autoplay copies are visual only and silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Pressing Copy sweeps a blue selection across the value left to right in about 340ms.
@@ -222,6 +230,10 @@ Loop of 9400ms while running: reveal at 900ms; flash copied at 2600ms (no clipbo
 - Reveal: `aria-label` "Reveal key" or "Hide key", `aria-pressed`. Copy: `aria-label="Copy key"`. The confirm panel is `role="group"` labelled "Confirm key rotation".
 - A polite `role="status"` region announces "Key revealed.", "Key hidden.", "Key copied to clipboard." and "Key rotated. A new demo key was created.".
 - Focus ring: 2px outline `#0071e3` (dark `#0a84ff`), offset 2px; the rotate confirm button uses red.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Copy plays `success` (two soft triangle notes, about 1046 Hz then 1318 Hz, 90ms apart, the second ringing out for about 0.3s) at 60% volume. Revealing the key plays `on` and hiding it plays `off` (each a tiny noise click followed by a short sine glide, rising 600 to 900 Hz for on, falling 760 to 480 Hz for off). Confirming the rotation plays `whoosh` at 60% (a short airy noise sweep rising from about 400 to 3200 Hz over roughly 0.25s). Opening and cancelling the rotate prompt are silent, and so is the whole autoplay loop. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

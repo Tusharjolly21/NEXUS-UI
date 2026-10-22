@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface FolderPeekProps {
   title?: string;
@@ -8,6 +9,8 @@ export interface FolderPeekProps {
   color?: string;
   /** Opens and closes by itself until the user hovers it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const Doc = () => (
@@ -33,7 +36,8 @@ const FILES: { node: ReactNode; open: { x: number; y: number; rotate: number }; 
   { node: <Chart />, rest: { x: 14, y: 18, rotate: 4 }, open: { x: 74, y: -66, rotate: 15 } },
 ];
 
-export function FolderPeek({ title = "Brand assets", meta = "24 files · Updated today", color = "#0071e3", autoplay = false }: FolderPeekProps) {
+export function FolderPeek({ title = "Brand assets", meta = "24 files · Updated today", color = "#0071e3", autoplay = false, enableSound = true }: FolderPeekProps) {
+  const play = useSound(enableSound);
   const [open, setOpen] = useState(false);
   const hovering = useRef(false);
   const touched = useRef(false);
@@ -57,7 +61,7 @@ export function FolderPeek({ title = "Brand assets", meta = "24 files · Updated
         onPointerLeave={() => { hovering.current = false; setOpen(false); }}
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
-        onClick={() => { touched.current = true; setOpen((o) => !o); }}
+        onClick={() => { touched.current = true; play(open ? "hush" : "whoosh", open ? 0.6 : 1); setOpen((o) => !o); }}
         whileTap={{ scale: 0.97 }}
         className="relative h-[150px] w-[210px] rounded-[18px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3]"
         style={{ perspective: 800 }}
