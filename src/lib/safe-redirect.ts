@@ -1,4 +1,5 @@
-export const DEFAULT_AUTH_REDIRECT = "/dashboard";
+/** Where a plain sign-in lands. Protected pages pass their own ?next=, so those still return there. */
+export const DEFAULT_AUTH_REDIRECT = "/";
 
 /**
  * Only allow same-origin relative paths for post-login redirects.

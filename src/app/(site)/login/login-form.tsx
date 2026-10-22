@@ -107,7 +107,7 @@ export function LoginForm() {
 
       if (status === "signed_in") {
         setSignedIn(true);
-        window.location.assign(next);
+        window.location.replace(next);
         return;
       }
       if (status === "expired" || status === "error") {
@@ -191,7 +191,7 @@ export function LoginForm() {
           </h1>
           <p className="mt-3 max-w-[360px] text-[17px] leading-relaxed text-muted-foreground">
             {signedIn
-              ? "Taking you to your account…"
+              ? "Taking you to the site…"
               : sentTo
                 ? handoff
                   ? "We sent a sign-in link. Open it on any device and this page signs in by itself."

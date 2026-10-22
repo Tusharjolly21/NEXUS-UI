@@ -13,6 +13,7 @@ const field = (form: FormData, name: string) => {
  * "Approve sign-in" form target. Redeems the emailed token (signing in the
  * device that approved), then — if the link came from a pending cross-device
  * request — mints a fresh one-time token for the requesting device to claim.
+ * The approving device ends up on the site, signed in.
  */
 export async function POST(request: Request) {
   const { origin } = new URL(request.url);
@@ -31,11 +32,15 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
   if (error || !data.user) {
+    /* A second tap (or Back, then Approve) finds the token already redeemed. If this device
+       is signed in from the first tap, that is a success, not a failure. */
+    const { data: existing } = await supabase.auth.getUser();
+    if (existing.user) return NextResponse.redirect(`${origin}${next}`, 303);
+
     console.error("[auth/approve] sign-in failed:", error?.code ?? "", error?.message);
     return toLogin(error ? authErrorCode(error) : "exchange_failed");
   }
 
-  let handedOff = false;
   if (isHandoffId(rid) && data.user.email) {
     try {
       const admin = getAdminClient();
@@ -46,23 +51,18 @@ export async function POST(request: Request) {
       const hashedToken = link?.properties?.hashed_token;
       if (linkError || !hashedToken) throw new Error(linkError?.message ?? "no hashed_token");
 
-      const { data: updated, error: updateError } = await admin
+      const { error: updateError } = await admin
         .from("login_handoffs")
         .update({ status: "approved", hashed_token: hashedToken, user_id: data.user.id })
         .eq("id", rid)
         .eq("status", "pending")
-        .gt("expires_at", new Date().toISOString())
-        .select("id");
+        .gt("expires_at", new Date().toISOString());
       if (updateError) throw new Error(updateError.message);
-      handedOff = Boolean(updated?.length);
     } catch (err) {
       /* This device is already signed in; only the other device misses out. */
       console.error("[auth/approve] handoff failed:", err);
     }
   }
 
-  const done = new URL(`${origin}/login/approved`);
-  done.searchParams.set("next", next);
-  if (handedOff) done.searchParams.set("handoff", "1");
-  return NextResponse.redirect(done, 303);
+  return NextResponse.redirect(`${origin}${next}`, 303);
 }

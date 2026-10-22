@@ -5,6 +5,7 @@ import { pillClassName } from "@/components/site/pill-link";
 import { getPendingHandoff, isHandoffId, isOtpType } from "@/lib/login-handoff";
 import { safeNextPath } from "@/lib/safe-redirect";
 import { AuthShell } from "../auth-shell";
+import { ApproveForm } from "./approve-form";
 
 export const metadata: Metadata = {
   title: "Approve sign-in · Nexus-UI",
@@ -63,21 +64,14 @@ export default async function ApprovePage({
         Only approve if that was you. Approving signs you in here, and signs in the device that asked.
       </p>
 
-      <form action="/api/auth/approve" method="post" className="mt-6 grid gap-2">
-        <input type="hidden" name="rid" value={rid} />
-        <input type="hidden" name="token_hash" value={tokenHash} />
-        <input type="hidden" name="type" value={type} />
-        <input type="hidden" name="next" value={next} />
-        <button type="submit" className={pillClassName("ink", "md", "w-full")}>
-          Approve sign-in
-        </button>
+      <ApproveForm fields={{ rid, token_hash: tokenHash, type, next }}>
         <Link
           href="/"
           className="grid h-11 place-items-center rounded-full text-[14.5px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           That wasn&apos;t me
         </Link>
-      </form>
+      </ApproveForm>
     </AuthShell>
   );
 }
