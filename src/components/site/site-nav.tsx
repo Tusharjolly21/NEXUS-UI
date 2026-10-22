@@ -25,8 +25,8 @@ const NAV_LINKS = [
   { href: "/templates", label: "Templates" },
   { href: "/blocks", label: "Blocks" },
   { href: "/sounds", label: "Sounds" },
+  { href: "/videos", label: "Videos" },
   { href: "/docs/introduction", label: "Docs", match: "/docs" },
-  { href: "/pricing", label: "Pricing" },
 ] as const;
 
 const ACCOUNT_LINKS = [
@@ -242,6 +242,11 @@ export function SiteNav({ isPremium = false }: { isPremium?: boolean }) {
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-foreground/[0.06] text-center text-[14px] font-medium text-foreground">
                   Dashboard
                 </Link>
+                {isPremium ? null : (
+                  <Link href="/pricing" onClick={() => setMenuOpen(false)} className="h-10 flex-1 content-center rounded-full bg-action text-center text-[14px] font-medium text-white">
+                    Get Pro
+                  </Link>
+                )}
                 <button type="button" onClick={() => void signOut()} className="h-10 rounded-full px-4 text-[14px] text-foreground/70 hover:text-foreground">
                   Sign out
                 </button>

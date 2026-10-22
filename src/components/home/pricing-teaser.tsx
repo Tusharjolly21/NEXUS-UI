@@ -37,6 +37,7 @@ const INCLUDED = [
   `All ${CATALOG_COUNTS.components} components`,
   `Source of all ${CATALOG_COUNTS.templates} templates`,
   `All ${CATALOG_COUNTS.blocks} section blocks`,
+  `All ${CATALOG_COUNTS.videos} videos, with prompt and source`,
   "Every future release",
   "Component requests",
   "Priority support",

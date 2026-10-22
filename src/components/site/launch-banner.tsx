@@ -12,7 +12,7 @@ import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
  * strip never flashes back in on the next page. It is one line, never animates and never returns
  * for someone who closed it.
  */
-export function LaunchBanner({ components, templates, blocks }: { components: number; templates: number; blocks: number }) {
+export function LaunchBanner({ components, templates, blocks, videos }: { components: number; templates: number; blocks: number; videos: number }) {
   const [open, setOpen] = React.useState(true);
   if (!open) return null;
 
@@ -32,7 +32,7 @@ export function LaunchBanner({ components, templates, blocks }: { components: nu
           Pro
         </span>
         <span className="hidden sm:inline">
-          Unlock all {components} components, {templates} templates and {blocks} blocks for{" "}
+          Unlock all {components} components, {templates} templates, {blocks} blocks and {videos} videos for{" "}
         </span>
         <span className="sm:hidden">Unlock everything for </span>
         {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once.{" "}

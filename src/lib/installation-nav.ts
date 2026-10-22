@@ -21,6 +21,11 @@ export const INSTALLATION_NAV = [
     label: "CLI",
     external: false as const,
   },
+  {
+    href: "/docs/videos",
+    label: "Videos",
+    external: false as const,
+  },
 ] as const;
 
 export type InstallationNavItem = (typeof INSTALLATION_NAV)[number];

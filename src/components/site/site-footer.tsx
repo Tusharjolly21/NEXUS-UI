@@ -13,6 +13,7 @@ const COLUMNS = [
       { href: "/templates", label: "Templates" },
       { href: "/blocks", label: "Blocks" },
       { href: "/sounds", label: "Sounds" },
+      { href: "/videos", label: "Videos" },
       { href: "/pricing", label: "Pricing" },
     ],
   },

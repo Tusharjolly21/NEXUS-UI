@@ -78,6 +78,8 @@ const nextConfig = {
     "/components/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md"],
     // Pro build prompts live outside public/ and are only read by this gated route.
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
+    // Video prompts, source, kit and render script: same idea, read only by the gated route.
+    "/api/videos/[slug]/[part]": ["./content/videos/**/*"],
   },
   images: {
     formats: ["image/avif", "image/webp"],

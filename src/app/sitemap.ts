@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/seo";
 import { libraryComponents } from "@/lib/catalog/library-components";
 import { templates } from "@/lib/catalog/templates";
 import { blocks } from "@/lib/catalog/blocks";
+import { videos } from "@/lib/catalog/videos";
 import { getAllPosts } from "@/lib/blog";
 import { alternatives } from "@/lib/alternatives";
 import { getCategoryComponents, getPopulatedCategories, isIndexableCategory } from "@/lib/catalog/category-seo";
@@ -32,6 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/components`,              lastModified: since(latestComponent.createdAt) },
     { url: `${base}/blocks`,                  lastModified: since("2026-10-20") },
     { url: `${base}/sounds`,                  lastModified: since("2026-10-20") },
+    { url: `${base}/videos`,                  lastModified: since("2026-10-22") },
     { url: `${base}/templates`,               lastModified: since(latestTemplate.createdAt) },
     { url: `${base}/pricing`,                 lastModified: since("2026-04-01") },
     { url: `${base}/contact`,                 lastModified: since("2026-01-01") },
@@ -45,6 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/docs/install-tailwindcss`,lastModified: since("2026-03-01") },
     { url: `${base}/docs/add-utilities`,      lastModified: since("2026-10-20") },
     { url: `${base}/docs/cli`,                lastModified: since("2026-10-21") },
+    { url: `${base}/docs/videos`,             lastModified: since("2026-10-22") },
     { url: `${base}/claude-code`,             lastModified: since("2026-10-21") },
     { url: `${base}/alternatives`,            lastModified: since("2026-10-21") },
     ...alternatives.map((a) => ({ url: `${base}/alternatives/${a.slug}`, lastModified: since("2026-10-21") })),
@@ -73,10 +76,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: since("2026-10-20"),
   }));
 
+  const videoRoutes: MetadataRoute.Sitemap = videos.map((v) => ({
+    url: `${base}/videos/${v.slug}`,
+    lastModified: since(v.createdAt),
+  }));
+
   const blogRoutes: MetadataRoute.Sitemap = allPosts.map((post) => ({
     url: `${base}/blog/${post.slug}`,
     lastModified: since(post.date ?? "2026-01-01"),
   }));
 
-  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...blogRoutes];
+  return [...staticRoutes, ...categoryRoutes, ...componentRoutes, ...templateRoutes, ...blockRoutes, ...videoRoutes, ...blogRoutes];
 }

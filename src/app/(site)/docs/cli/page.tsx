@@ -173,6 +173,7 @@ npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
 
       <DocFooterNav
         prev={{ href: "/docs/add-utilities", label: "Add utilities" }}
+        next={{ href: "/docs/videos", label: "Videos" }}
       />
 
       <p className="text-sm text-muted-foreground">

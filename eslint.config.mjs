@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Video files that are served as text (prompt, source, kit, render script), not compiled.
+    "content/videos/**",
   ]),
 ]);
 
