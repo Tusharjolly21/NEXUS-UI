@@ -394,7 +394,7 @@ function InstallPanel({
     <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
       <h2 className="text-[19px] font-semibold tracking-[-0.4px] text-foreground">Install</h2>
       <p className="mt-1 text-[14px] text-muted-foreground">One command adds the component and its dependencies.</p>
-      <InstallCard wrap command={command} className="mt-4" />
+      <InstallCard wrap command={command} className="mt-4" upsell />
 
       {premium ? (
         <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-[#34c759]/12 p-3.5 text-[13.5px] leading-relaxed text-foreground">

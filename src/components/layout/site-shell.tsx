@@ -17,7 +17,9 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <ProAccessProvider isPro={isPremium} plan={plan} proCount={CATALOG_COUNTS.proComponents}>
       <div className="flex min-h-dvh flex-col">
-        {bannerClosed || isPremium ? null : <LaunchBanner />}
+        {bannerClosed || isPremium ? null : (
+          <LaunchBanner components={CATALOG_COUNTS.components} templates={CATALOG_COUNTS.templates} blocks={CATALOG_COUNTS.blocks} />
+        )}
         <SiteNav isPremium={isPremium} />
         <main className="flex-1">{children}</main>
         <SiteFooter />

@@ -11,6 +11,8 @@ type ProAccess = {
   isPro: boolean;
   /** Which plan: "yearly" is Pro, "lifetime" is All-Access, "free" is neither. */
   plan: "free" | "yearly" | "lifetime";
+  /** How many components are Pro (for "N more" copy). */
+  proCount: number;
   /**
    * Opens the upgrade dialog, naming the component the visitor tried to use and, when the thing
    * that's Pro is a feature of an otherwise free component, that feature ("build prompt").
@@ -21,6 +23,7 @@ type ProAccess = {
 const ProAccessContext = React.createContext<ProAccess>({
   isPro: false,
   plan: "free",
+  proCount: 0,
   requestUpgrade: () => {
     window.location.assign("/pricing");
   },
@@ -53,8 +56,8 @@ export function ProAccessProvider({
 }) {
   const [target, setTarget] = React.useState<{ name?: string; feature?: string } | null>(null);
   const value = React.useMemo<ProAccess>(
-    () => ({ isPro, plan, requestUpgrade: (name, feature) => setTarget({ name, feature }) }),
-    [isPro, plan],
+    () => ({ isPro, plan, proCount, requestUpgrade: (name, feature) => setTarget({ name, feature }) }),
+    [isPro, plan, proCount],
   );
 
   return (
