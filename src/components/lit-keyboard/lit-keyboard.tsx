@@ -10,7 +10,7 @@ export interface LitKeyboardProps {
   glow?: string;
   /** Plays a recorded phrase by itself until the user types. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -54,6 +54,7 @@ function Key({ k, lit, glow, wide }: { k: string; lit: number; glow: string; wid
  */
 export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = true }: LitKeyboardProps) {
   const sfx = useSound(enableSound);
+  const sfxRef = useRef(sfx);
   const [lit, setLit] = useState<Record<string, number>>({});
   const [text, setText] = useState("");
   const [rec, setRec] = useState<"idle" | "recording" | "playing">("idle");
@@ -69,25 +70,34 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
     timers.current.push(window.setTimeout(() => setLit((l) => (l[key] === id ? { ...l, [key]: 0 } : l)), 140));
   };
 
-  const press = (raw: string, record = true, sound = false) => {
+  const press = (raw: string, record = true, sound: boolean | "auto" = false) => {
     const key = raw === " " ? "space" : raw.toLowerCase();
     if (key !== "space" && !/^[a-z]$/.test(key)) return false;
-    if (sound) sfx("tap", 0.5);
+    if (sound === "auto") sfxRef.current.auto("tap", 0.5);
+    else if (sound) sfxRef.current("tap", 0.5);
     flash(key);
     setText((t) => (t + (key === "space" ? " " : key)).slice(-34));
     if (record && rec === "recording") tape.current.push({ key: raw, t: performance.now() });
     return true;
   };
 
-  // `sound` is true only for a replay the visitor asked for; the autoplay demo stays silent.
-  const play = (hits: LitKeyboardHit[], sound = false) => {
+  // `sound` is true for a replay the visitor asked for and "auto" for the autoplay demo. The demo types about
+  // seven keys a second, so it taps only on the first letter and the space of each word, not on every key.
+  const play = (hits: LitKeyboardHit[], sound: boolean | "auto" = false) => {
     if (!hits.length) return;
     setRec("playing");
     setText("");
     const t0 = hits[0].t;
-    hits.forEach((h) => timers.current.push(window.setTimeout(() => press(h.key, false, sound), h.t - t0)));
+    hits.forEach((h, i) => {
+      const beat = sound !== "auto" || i === 0 || h.key === " " || hits[i - 1].key === " ";
+      timers.current.push(window.setTimeout(() => press(h.key, false, beat && sound), h.t - t0));
+    });
     timers.current.push(window.setTimeout(() => setRec("idle"), hits[hits.length - 1].t - t0 + 400));
   };
+
+  useEffect(() => {
+    sfxRef.current = sfx;
+  }, [sfx]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -95,7 +105,7 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
     const demo = () => {
       if (touched.current) return;
       let t = 0;
-      play(phrase.split("").map((key) => ({ key, t: (t += 90 + Math.random() * 120) })));
+      play(phrase.split("").map((key) => ({ key, t: (t += 90 + Math.random() * 120) })), "auto");
     };
     const a = window.setTimeout(demo, 700);
     const b = window.setInterval(demo, 5200);

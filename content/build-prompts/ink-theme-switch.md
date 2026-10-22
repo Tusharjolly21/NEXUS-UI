@@ -55,7 +55,7 @@ With `autoplay`, every 2200ms flip the panel (starting from `defaultDark`) with 
 
 ## Sound
 
-A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Flipping the switch plays `on` when the panel goes dark (a tiny noise click with a sine rising from 600 to 900 Hz over 70ms) and `off` when it goes back to light (a noise click with a sine falling from 760 to 480 Hz over 70ms). The autoplay flips make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Flipping the switch plays `on` when the panel goes dark (a tiny noise click with a sine rising from 600 to 900 Hz over 70ms) and `off` when it goes back to light (a noise click with a sine falling from 760 to 480 Hz over 70ms). The autoplay flips play the same `on` and `off` through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Silent on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

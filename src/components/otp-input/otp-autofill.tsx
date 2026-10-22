@@ -21,7 +21,7 @@ export interface OtpAutofillProps {
   onResend?: () => void;
   /** Extra classes for the card. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -114,6 +114,7 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
             );
           }
           if (loud.current) play("success");
+          else play.auto("success");
           setPhase("merge");
           later(() => {
             setPhase("done");
@@ -121,6 +122,7 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
           }, 380);
         } else {
           if (loud.current) play("error");
+          else play.auto("error");
           setPhase("error");
           if (!reduce) void row.start({ x: [0, -10, 9, -7, 5, -2, 0], transition: { duration: 0.45 } });
           later(() => {
@@ -174,7 +176,9 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
     if (!running || touched.current) return;
     if (phase === "banner") {
       const t = window.setTimeout(() => {
-        if (!touched.current) fill(false);
+        if (touched.current) return;
+        play.auto("tap");
+        fill(false);
       }, 1300);
       return () => clearTimeout(t);
     }
@@ -184,7 +188,7 @@ export function OtpAutofill({ code: codeProp = DEFAULT_CODE, autoplay = false, o
       }, 2600);
       return () => clearTimeout(t);
     }
-  }, [phase, running, fill, reset]);
+  }, [phase, running, fill, reset, play]);
 
   const onType = (v: string) => {
     touched.current = true;

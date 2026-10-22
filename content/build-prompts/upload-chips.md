@@ -80,5 +80,5 @@ Every 1600ms, with counter `k`: if `k % 4 === 3` clear all chips, else start sam
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Dropping or choosing files plays `tap` from `@/lib/ui-sounds` (a soft, short click with a tiny falling pitch) once for the batch as the chips appear. When each upload's promise resolves, `done` plays (four soft triangle notes in a rising major chord, ringing together) as its check appears.
-- The autoplay sample files, removing a chip and dragging over the zone are silent.
+- The autoplay sample files play the same sounds: `tap` as a chip appears and `done` when it finishes, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Removing a chip and dragging over the zone are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

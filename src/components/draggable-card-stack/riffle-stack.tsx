@@ -20,7 +20,7 @@ export interface RiffleStackProps {
   cards?: RiffleCard[];
   /** Riffles and cuts the deck by itself every 2.8s until someone presses a button. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Called with the title of the card that lands on top after each shuffle. */
   onShuffle?: (top: string) => void;
@@ -170,23 +170,24 @@ export function RiffleStack({ cards = DEFAULT_CARDS, autoplay = false, onShuffle
   const riffle = useCallback(async (byUser = false) => {
     if (busy.current || n < 2) return;
     busy.current = true;
+    const say = byUser ? play : play.auto;
     if (still) {
-      if (byUser) play("drop", 0.7);
+      say("drop", 0.7);
       const out = interleave(orderRef.current);
       setOrder(out);
       report(out);
       busy.current = false;
       return;
     }
-    if (byUser) play("lift", 0.7);
+    say("lift", 0.7);
     setPhase("split");
     if (!(await wait(520))) return;
     const out = interleave(orderRef.current);
     setOrder(out);
     setPhase("fall");
-    if (byUser) play("swipe", 0.7);
+    say("swipe", 0.7);
     if (!(await wait(70 * n + 350))) return;
-    if (byUser) play("drop", 0.7);
+    say("drop", 0.7);
     await deck.start({ scaleY: [1, 0.94, 1.02, 1], transition: { duration: 0.35 } });
     if (!alive.current) return;
     setPhase("idle");
@@ -197,19 +198,20 @@ export function RiffleStack({ cards = DEFAULT_CARDS, autoplay = false, onShuffle
   const cut = useCallback(async (byUser = false) => {
     if (busy.current || n < 2) return;
     busy.current = true;
+    const say = byUser ? play : play.auto;
     const cutOrder = (o: number[]) => [...o.slice(n / 2), ...o.slice(0, n / 2)];
     if (still) {
-      if (byUser) play("drop", 0.7);
+      say("drop", 0.7);
       const out = cutOrder(orderRef.current);
       setOrder(out);
       report(out);
       busy.current = false;
       return;
     }
-    if (byUser) play("lift", 0.7);
+    say("lift", 0.7);
     setPhase("cut");
     if (!(await wait(420))) return;
-    if (byUser) play("drop", 0.7);
+    say("drop", 0.7);
     const out = cutOrder(orderRef.current);
     setOrder(out);
     setPhase("idle");

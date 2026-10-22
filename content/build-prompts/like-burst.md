@@ -146,5 +146,5 @@ With `autoplay`, every 1500ms toggle `liked` and bump `burst` (harmless on unlik
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Liking plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) as the confetti fires. Unliking plays `off` (a soft latch click that falls slightly in pitch) at about half volume.
-- The autoplay loop is silent, and nothing plays on hover.
+- The autoplay loop plays the same `pop` when it likes and the quieter `off` when it unlikes, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Nothing plays on hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

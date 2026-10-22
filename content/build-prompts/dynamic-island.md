@@ -76,5 +76,5 @@ Uncontrolled only. Every 1700ms run a three-beat loop: open, close, then advance
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Tapping the compact pill to open its controls plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) at reduced volume; tucking it away again (tap on the island, Escape or a tap outside) plays the same `pop` at a quieter level. Stopping the timer or declining the call, which sends the island back to idle, plays `whoosh` (a soft band of filtered noise sweeping from low to high) at reduced volume.
-- Automatic changes (`cycle` and `autoplay`) are silent, and so are play/pause, accept and hover.
+- Autoplay plays the same `pop` sounds when it opens the pill (the louder one) and tucks it away (the quieter one), through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. The automatic morph to the next activity (`cycle` and autoplay) is silent, as are play/pause, accept and hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

@@ -18,7 +18,7 @@ export interface OtpLineProps {
   onVerified?: (code: string) => void;
   /** Extra classes for the card. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -86,16 +86,18 @@ export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVer
   }, []);
 
   const submit = useCallback(
-    // `audible` is true only for codes the visitor typed; the autoplay demo stays silent.
+    // `audible` is true for codes the visitor typed; the autoplay demo answers through `play.auto`.
     (val: string, audible = false) => {
       setState("checking");
       later(() => {
         if (val === code) {
           if (audible) play("success");
+          else play.auto("success");
           setState("done");
           onVerifiedRef.current?.(val);
         } else {
           if (audible) play("error");
+          else play.auto("error");
           setState("error");
           if (!reduce) void shake.start({ x: [0, -8, 7, -5, 3, 0], transition: { duration: 0.4 } });
           later(() => {
