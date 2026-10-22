@@ -2,6 +2,7 @@
 
 import { Clothesline } from "@/components/blocks/motion-kit/clothesline";
 import { CountingStats } from "@/components/blocks/motion-kit/counting-stats";
+import { VelocityMarquee } from "@/components/blocks/motion-kit/velocity-marquee";
 import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
 import type { BlockPlaygrounds } from "./types";
 
@@ -65,6 +66,38 @@ const playgrounds: BlockPlaygrounds = {
     ],
     jsxName: "CountingStats",
     importLine: 'import { CountingStats } from "@/components/blocks/motion-kit/counting-stats";',
+  },
+  "mk-velocity-marquee": {
+    Component: VelocityMarquee,
+    props: [
+      {
+        name: "heading",
+        type: "string",
+        description: "Small line above the belts.",
+        defaultValue: '"Scroll the page and watch them go."',
+      },
+      {
+        name: "staticHeading",
+        type: "string",
+        description: "Replaces the heading when the visitor prefers reduced motion and the rows hold still.",
+        defaultValue: '"What teams are saying."',
+      },
+      {
+        name: "topRow",
+        type: "VelocityMarqueeReview[]",
+        description: "Reviews on the top belt, which runs left: { quote, name }. Five or more fill a wide screen. Use a stable array.",
+        defaultValue: "DEFAULT_VELOCITY_TOP_ROW",
+      },
+      {
+        name: "bottomRow",
+        type: "VelocityMarqueeReview[]",
+        description: "Reviews on the bottom belt, which runs right: { quote, name }. Use a stable array.",
+        defaultValue: "DEFAULT_VELOCITY_BOTTOM_ROW",
+      },
+      { name: "className", type: "string", description: "Extra classes on the section." },
+    ],
+    jsxName: "VelocityMarquee",
+    importLine: 'import { VelocityMarquee } from "@/components/blocks/motion-kit/velocity-marquee";',
   },
   "mk-wall-of-love": {
     Component: WallOfLove,
