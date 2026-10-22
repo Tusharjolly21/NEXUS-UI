@@ -180,7 +180,7 @@ function FolderTree({ files }: { files: string[] }) {
 
 function SectionTitle({ id, children }: { id?: string; children: React.ReactNode }) {
   return (
-    <h2 id={id} className="pg-display text-[clamp(32px,4.5vw,44px)] leading-[1.02] text-foreground">
+    <h2 id={id} className="pg-display scroll-mt-28 text-[clamp(32px,4.5vw,44px)] leading-[1.02] text-foreground">
       {children}
     </h2>
   );
@@ -830,12 +830,31 @@ export function ComponentDetailPageClient({
               </li>
             ))}
           </ul>
+          <nav aria-label="On this page" className="mt-5 flex flex-wrap items-center gap-2 text-[13.5px]">
+            <span className="mr-1 text-muted-foreground">On this page</span>
+            {[
+              { href: "#preview", label: "Preview and install", show: true },
+              { href: livePlayground ? "#playground-heading" : "#props-heading", label: livePlayground ? "Play with it" : "Props", show: !!livePlayground || !!props?.length },
+              { href: "#setup-heading", label: "Add to your project", show: true },
+              { href: "#faq-heading", label: "Questions", show: faq.length > 0 },
+            ]
+              .filter((l) => l.show)
+              .map((l) => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  className="pg-glass rounded-full bg-card px-3 py-1 font-medium text-foreground transition-colors hover:bg-card/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  {l.label}
+                </a>
+              ))}
+          </nav>
         </div>
       </section>
 
       <div className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div id="preview" className="grid scroll-mt-28 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="grid min-w-0 gap-10">
               {sections.length > 1 ? (
                 <nav aria-label="Variants of this component" className="-mb-4 flex flex-wrap items-center gap-2">

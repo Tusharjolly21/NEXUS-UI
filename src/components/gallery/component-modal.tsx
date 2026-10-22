@@ -515,19 +515,14 @@ function Inspector({ item }: { item: GalleryItem }) {
         </div>
 
         <div className="grid gap-2 border-t border-border/70 p-4">
-          <button
-            type="button"
-            onClick={() => share(window.location.href)}
-            className={cn(
-              "inline-flex h-11 items-center justify-center gap-2 rounded-full text-[14px] font-semibold transition-colors",
-              shared
-                ? "bg-tint-mint text-[#126b3a] dark:text-[#7be3a6]"
-                : "bg-card text-foreground shadow-[0_0_0_1px_rgba(23,23,28,0.12)] hover:bg-muted",
-            )}
+          <Link
+            href={`/components/${item.slug}`}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-action text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
-            {shared ? <Check className="size-4" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
-            <span aria-live="polite">{shared ? "Link copied" : dirty ? "Share these settings" : "Share"}</span>
-          </button>
+            Open full page
+            <ArrowUpRight className="size-4" aria-hidden />
+          </Link>
+          <p className="-mt-0.5 px-2 text-center text-[12.5px] text-muted-foreground">Props, usage, install and docs for {item.name}</p>
           <button
             type="button"
             onClick={() => prompt(promptText)}
@@ -536,13 +531,19 @@ function Inspector({ item }: { item: GalleryItem }) {
             {promptDone ? <Check className="size-4" aria-hidden /> : <Sparkles className="size-4" aria-hidden />}
             <span aria-live="polite">{promptLabel}</span>
           </button>
-          <Link
-            href={`/components/${item.slug}`}
-            className="inline-flex h-8 items-center justify-center gap-1 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground"
+          <button
+            type="button"
+            onClick={() => share(window.location.href)}
+            className={cn(
+              "inline-flex h-10 items-center justify-center gap-2 rounded-full text-[13.5px] font-semibold transition-colors",
+              shared
+                ? "bg-tint-mint text-[#126b3a] dark:text-[#7be3a6]"
+                : "bg-card text-foreground shadow-[0_0_0_1px_rgba(23,23,28,0.12)] hover:bg-muted",
+            )}
           >
-            Full page with props and docs
-            <ArrowUpRight className="size-3.5" aria-hidden />
-          </Link>
+            {shared ? <Check className="size-4" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
+            <span aria-live="polite">{shared ? "Link copied" : dirty ? "Share these settings" : "Share"}</span>
+          </button>
         </div>
       </aside>
     </>

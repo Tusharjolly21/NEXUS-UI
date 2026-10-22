@@ -78,8 +78,9 @@ export function GalleryTile({
     [item.demo, fit.canvas, fit.focus],
   );
 
-  // The name always leads to the page (preview is free to see); the inspector is for tweaking
-  // and copying, so on a locked tile it opens the upgrade dialog instead.
+  // The name is a plain link to the component's page (props, usage, docs), the same for free and
+  // Pro tiles. The blue button beside it is the quick inspector, for tweaking and copying; on a
+  // locked tile that button opens the upgrade dialog instead.
   const openName = (e: React.MouseEvent) => {
     if (locked || !onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
@@ -148,13 +149,13 @@ export function GalleryTile({
       >
         <Link
           href={href}
-          onClick={openName}
           className={cn(
             "pointer-events-auto max-w-[70%] truncate rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
             chip,
           )}
         >
           {item.name}
+          <ArrowUpRight className="ml-1 inline size-3 -translate-y-px opacity-60" aria-hidden />
         </Link>
         <div className="pointer-events-auto flex items-center gap-1.5">
           {badge}
