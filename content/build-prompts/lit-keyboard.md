@@ -1,10 +1,10 @@
 # Lit Keyboard
 
-Build a small QWERTY keyboard, tilted back in perspective, that lights up under the user's real typing: each key snaps on in a glow colour and fades back over almost a second, leaving a soft trail. A text pill above shows what was typed, and a run can be recorded and replayed with its original timing. Calm, tactile, Apple-like.
+Build a small QWERTY keyboard, tilted back in perspective, that lights up under the user's real typing or clicks, with a recorded mechanical click on every key: each key snaps on in a glow colour and fades back over almost a second, leaving a soft trail. A text pill above shows what was typed, and a run can be recorded and replayed with its original timing. Calm, tactile, Apple-like.
 
 ## Stack
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`).
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`), Web Audio for the key clicks via the shared `components/key-sound` module (`useKeySound`, `playKeyTick`, `DEFAULT_KEY_SOUND_SRC`), which plays one recorded Cherry MX slice per key from `/sounds/keys.ogg`.
 - File: `components/lit-keyboard/lit-keyboard.tsx`, named export `LitKeyboard`. Also export the types `LitKeyboardProps` and `LitKeyboardHit` (`{ key: string; t: number }`, where `t` is a `performance.now()` timestamp).
 
 ## API
@@ -12,7 +12,10 @@ Build a small QWERTY keyboard, tilted back in perspective, that lights up under 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `glow` | `string` | `"#ff9f0a"` | Colour a key flashes to when pressed. A hex colour; the glow shadow appends alpha `88` to it. Also colours the text caret. |
-| `autoplay` | `boolean` | `false` | Plays a sample phrase by itself every few seconds until the user types or uses a button. |
+| `autoplay` | `boolean` | `false` | Plays a sample phrase by itself every few seconds until the user types or uses a button. The demo is silent. |
+| `sound` | `boolean` | `true` | Key click with every press, click and replayed key. |
+| `soundSrc` | `string` | `"/sounds/keys.ogg"` | Recorded clicks; until loaded (or if missing) a short synthesised tick plays. |
+| `volume` | `number` | `0.6` | Click volume, 0 to 1. |
 
 ## Layout and look
 
@@ -61,6 +64,8 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
   - Record: mark touched, empty the tape, clear the text, enter `recording`, focus the typing area. Each accepted press then pushes `{ key, t: performance.now() }`.
   - Stop: back to `idle`; Replay is available only if the tape has hits.
   - Replay (enabled only with a tape and in `idle`): mark touched, clear the text, enter `playing`, schedule each hit at `hit.t − firstHit.t` ms without recording, and return to `idle` 400ms after the last hit.
+- Keys are also clickable: `pointerdown` (primary button) on a key or the space bar ends the demo like a keystroke and types that key; the pointer-down bubbles to the typing area, which takes focus, so typing can continue.
+- Sound: play the click inside the same event as the press (keydown, key pointerdown, or the replay timer), before the flash, so sound and light land together. Map `a`-`z` to `KeyA`-`KeyZ`, space to `Space`, Backspace to `Backspace` (Backspace clicks but does not flash). Skip the click on auto-repeat (`e.repeat`). Replays click; the autoplay demo does not (no user gesture, and it would be noise). Prime the sound (download and decode) on the typing area's `pointerenter` and `focus`, and unlock audio on its `pointerup` for touch screens. If `useKeySound().play(code)` returns false (not loaded yet), call `playKeyTick(volume)`.
 - Clear all timers on unmount.
 
 ## Autoplay demo
@@ -78,5 +83,6 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
 - Space lights the 230px bar; digits, punctuation and Cmd/Ctrl shortcuts do nothing.
 - The pill never holds more than 34 characters; Backspace deletes one.
 - The plate tilts back 24° around its bottom edge.
+- Every typed, clicked or replayed key plays its own click in step with its light; the autoplay demo is silent.
 - Record, type, Stop, then Replay reproduces the run with the same rhythm, and Replay is disabled during playback.
 - With `autoplay`, "motion is a material" types itself after 0.7s and every 5.2s, and stops forever after the first keystroke.

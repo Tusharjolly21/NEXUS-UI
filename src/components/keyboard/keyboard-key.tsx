@@ -62,7 +62,16 @@ export const KeyboardKey = React.memo(function KeyboardKey({
       ref={(el) => register(keyDef.code, el)}
       aria-label={NAMES[keyDef.code] ?? (keyDef.label || keyDef.id)}
       aria-pressed={isActive}
-      onClick={(e) => onPress(keyDef, e.currentTarget)}
+      // Press on the way down, like a real key: the cap, the letter and the click all start together.
+      // Only real pointers: framer-motion dispatches a synthetic pointerdown for Enter on a
+      // focused key, and that press already arrives below as a click.
+      onPointerDown={(e) => {
+        if (e.button === 0 && e.isTrusted) onPress(keyDef, e.currentTarget);
+      }}
+      // Keyboard activation (Enter or Space on a focused key) has no pointer, so it arrives as a click.
+      onClick={(e) => {
+        if (e.detail === 0) onPress(keyDef, e.currentTarget);
+      }}
       initial={false}
       animate={still ? undefined : isActive ? { y: 1.5, scaleY: 0.94, scaleX: 0.985 } : { y: 0, scaleY: 1, scaleX: 1 }}
       whileTap={still ? undefined : { y: 1.5, scaleY: 0.94, scaleX: 0.985 }}

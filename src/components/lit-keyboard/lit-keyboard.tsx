@@ -1,14 +1,24 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { DEFAULT_KEY_SOUND_SRC, playKeyTick, useKeySound } from "@/components/key-sound";
 
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
 export interface LitKeyboardProps {
   /** Colour a key flashes to when it is pressed. Use a hex colour; the glow adds alpha to it. */
   glow?: string;
-  /** Plays a recorded phrase by itself until the user types. */
+  /** Plays a recorded phrase by itself until the user types. The demo stays silent. */
   autoplay?: boolean;
+  /** Plays a key click with every press, click and replayed key. */
+  sound?: boolean;
+  /**
+   * Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds or point this at
+   * your own copy. Until it loads, or if it is missing, keys play a short synthesised tick.
+   */
+  soundSrc?: string;
+  /** Click volume, 0 to 1. */
+  volume?: number;
 }
 
 /** One recorded key press: the key and when it happened (performance.now()). */
@@ -19,12 +29,15 @@ export interface LitKeyboardHit {
 
 const OFF_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-function Key({ k, lit, glow, wide }: { k: string; lit: number; glow: string; wide?: boolean }) {
+function Key({ k, lit, glow, wide, onDown }: { k: string; lit: number; glow: string; wide?: boolean; onDown: (k: string) => void }) {
   const on = lit > 0;
   return (
     <motion.span
       aria-hidden="true"
-      className="relative flex h-10 items-center justify-center rounded-[9px] text-[13px] font-medium uppercase"
+      onPointerDown={(e) => {
+        if (e.button === 0 && e.isTrusted) onDown(k);
+      }}
+      className="relative flex h-10 cursor-pointer select-none items-center justify-center rounded-[9px] text-[13px] font-medium uppercase"
       style={{
         width: wide ? 230 : 40,
         backgroundColor: on ? glow : "var(--lk-key)",
@@ -49,7 +62,7 @@ function Key({ k, lit, glow, wide }: { k: string; lit: number; glow: string; wid
  * A tilted keyboard that lights up under your typing, with a soft afterglow.
  * Record a run and replay it with the original timing.
  */
-export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardProps) {
+export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, sound = true, soundSrc = DEFAULT_KEY_SOUND_SRC, volume = 0.6 }: LitKeyboardProps) {
   const [lit, setLit] = useState<Record<string, number>>({});
   const [text, setText] = useState("");
   const [rec, setRec] = useState<"idle" | "recording" | "playing">("idle");
@@ -58,6 +71,22 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
   const touched = useRef(false);
   const timers = useRef<number[]>([]);
   const area = useRef<HTMLDivElement>(null);
+  const keySound = useKeySound({ enabled: sound, src: soundSrc, volume });
+
+  /** The click for a key, played in the same event as the press so it lands with the light. */
+  const click = (key: string) => {
+    if (!sound) return;
+    const code = key === "space" ? "Space" : key === "backspace" ? "Backspace" : `Key${key.toUpperCase()}`;
+    if (!keySound.play(code)) playKeyTick(volume);
+  };
+
+  /** First real input ends the demo. */
+  const begin = () => {
+    if (touched.current) return;
+    touched.current = true;
+    timers.current.forEach(clearTimeout);
+    setText("");
+  };
 
   const flash = (key: string) => {
     const id = Date.now() + Math.random();
@@ -65,21 +94,22 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
     timers.current.push(window.setTimeout(() => setLit((l) => (l[key] === id ? { ...l, [key]: 0 } : l)), 140));
   };
 
-  const press = (raw: string, record = true) => {
+  const press = (raw: string, record = true, audible = true) => {
     const key = raw === " " ? "space" : raw.toLowerCase();
     if (key !== "space" && !/^[a-z]$/.test(key)) return false;
+    if (audible) click(key);
     flash(key);
     setText((t) => (t + (key === "space" ? " " : key)).slice(-34));
     if (record && rec === "recording") tape.current.push({ key: raw, t: performance.now() });
     return true;
   };
 
-  const play = (hits: LitKeyboardHit[]) => {
+  const play = (hits: LitKeyboardHit[], audible = true) => {
     if (!hits.length) return;
     setRec("playing");
     setText("");
     const t0 = hits[0].t;
-    hits.forEach((h) => timers.current.push(window.setTimeout(() => press(h.key, false), h.t - t0)));
+    hits.forEach((h) => timers.current.push(window.setTimeout(() => press(h.key, false, audible), h.t - t0)));
     timers.current.push(window.setTimeout(() => setRec("idle"), hits[hits.length - 1].t - t0 + 400));
   };
 
@@ -89,13 +119,19 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
     const demo = () => {
       if (touched.current) return;
       let t = 0;
-      play(phrase.split("").map((key) => ({ key, t: (t += 90 + Math.random() * 120) })));
+      play(phrase.split("").map((key) => ({ key, t: (t += 90 + Math.random() * 120) })), false);
     };
     const a = window.setTimeout(demo, 700);
     const b = window.setInterval(demo, 5200);
     return () => { clearTimeout(a); clearInterval(b); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoplay]);
+
+  /** Clicking a key on screen types it, like pressing it. */
+  const tapKey = (k: string) => {
+    begin();
+    press(k === "space" ? " " : k);
+  };
 
   useEffect(() => {
     const list = timers.current;
@@ -110,11 +146,14 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
         role="textbox"
         aria-label="Type here to light up the keyboard"
         onPointerDown={() => area.current?.focus()}
+        onPointerEnter={keySound.prime}
+        onFocus={keySound.prime}
+        onPointerUp={keySound.unlock}
         onKeyDown={(e) => {
           if (e.metaKey || e.ctrlKey) return;
-          if (!touched.current) { touched.current = true; timers.current.forEach(clearTimeout); setText(""); }
-          if (e.key === "Backspace") { setText((t) => t.slice(0, -1)); return; }
-          if (press(e.key)) e.preventDefault();
+          begin();
+          if (e.key === "Backspace") { if (!e.repeat) click("backspace"); setText((t) => t.slice(0, -1)); return; }
+          if (press(e.key, true, !e.repeat)) e.preventDefault();
         }}
         className="group flex w-full max-w-[480px] flex-col items-center gap-5 rounded-[24px] outline-none"
       >
@@ -136,10 +175,10 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false }: LitKeyboardP
           <div className="flex flex-col items-center gap-1.5">
             {ROWS.map((row, r) => (
               <div key={row} className="flex gap-1.5" style={{ paddingLeft: r * 14 }}>
-                {row.split("").map((k) => <Key key={k} k={k} lit={lit[k] || 0} glow={glow} />)}
+                {row.split("").map((k) => <Key key={k} k={k} lit={lit[k] || 0} glow={glow} onDown={tapKey} />)}
               </div>
             ))}
-            <Key k="space" lit={lit.space || 0} glow={glow} wide />
+            <Key k="space" lit={lit.space || 0} glow={glow} wide onDown={tapKey} />
           </div>
         </div>
       </div>
