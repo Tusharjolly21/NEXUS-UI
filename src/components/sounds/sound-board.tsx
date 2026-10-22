@@ -6,11 +6,12 @@ import Link from "next/link";
 import { Check, Copy, Lock, Volume1, Volume2, VolumeX } from "lucide-react";
 import { CodeBlock } from "@/components/code-block/code-block";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
-import { SOUNDS, playSound, setSoundVolume, useSoundStyle, type SoundCategory, type SoundName } from "@/lib/ui-sounds";
+import { SOUNDS, playSound, setSoundVolume, useSoundStyle, type SoundCategory, type SoundDef, type SoundName } from "@/lib/ui-sounds";
 import { MAC_SOUND_LABELS } from "@/lib/ui-sounds-mac-meta";
 import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
 import type { ProSoundCategory, ProSoundName } from "@/lib/ui-sounds-pro";
 import { cn } from "@/lib/utils";
+import { SoundWave, measureSound, type SoundShape } from "@/components/sounds/sound-wave";
 
 type Category = SoundCategory | ProSoundCategory;
 type Access = "all" | "free" | "pro";
@@ -26,21 +27,6 @@ const ITEMS: Item[] = [
   ...PRO_SOUND_META.map((m) => ({ key: `pro:${m.name}`, name: m.name, label: m.label, category: m.category as Category, pro: true })),
 ];
 
-/** Each category gets its own orb colour, so the board reads by kind at a glance. */
-const ORB: Record<Category, string> = {
-  Actions: "radial-gradient(circle at 32% 28%, #e9d5ff 0%, #c084fc 28%, #7c3aed 70%, #4c1d95 100%)",
-  Feedback: "radial-gradient(circle at 32% 28%, #d1fae5 0%, #34d399 30%, #14b8a6 68%, #0f766e 100%)",
-  Navigation: "radial-gradient(circle at 32% 28%, #dbeafe 0%, #60a5fa 30%, #1d4ed8 72%, #1e3a8a 100%)",
-  Notifications: "radial-gradient(circle at 32% 28%, #fef9c3 0%, #fde047 30%, #f59e0b 70%, #b45309 100%)",
-  Selection: "radial-gradient(circle at 32% 28%, #fce7f3 0%, #f472b6 30%, #a855f7 70%, #6b21a8 100%)",
-  Movement: "radial-gradient(circle at 32% 28%, #ccfbf1 0%, #5eead4 30%, #22c55e 70%, #15803d 100%)",
-  Progress: "radial-gradient(circle at 32% 28%, #ffedd5 0%, #fb923c 30%, #ef4444 70%, #b91c1c 100%)",
-  System: "radial-gradient(circle at 32% 28%, #f3f4f6 0%, #9ca3af 30%, #4b5563 70%, #1f2937 100%)",
-  Glass: "radial-gradient(circle at 32% 28%, #ecfeff 0%, #a5f3fc 30%, #38bdf8 70%, #0369a1 100%)",
-  "Paper and wood": "radial-gradient(circle at 32% 28%, #fef3c7 0%, #fcd34d 28%, #b45309 70%, #78350f 100%)",
-  Arcade: "radial-gradient(circle at 32% 28%, #fae8ff 0%, #e879f9 28%, #16a34a 72%, #14532d 100%)",
-  Studio: "radial-gradient(circle at 32% 28%, #fef9c3 0%, #facc15 26%, #92400e 70%, #1c1917 100%)",
-};
 
 /**
  * The sounds library as a board of orbs: tap one to hear it, filter by free or Pro and by kind, set
@@ -80,6 +66,40 @@ export function SoundBoard({
   // The Pro recipes ship as their own chunk and load the first time one is played or approached.
   const proModule = React.useRef<Promise<typeof import("@/lib/ui-sounds-pro")> | null>(null);
   const loadPro = () => (proModule.current ??= import("@/lib/ui-sounds-pro"));
+
+  // Every tile draws its sound's real waveform, measured once per style by rendering the recipe offline.
+  const [shapes, setShapes] = React.useState<Record<string, SoundShape>>({});
+  const shapeKey = (i: Item) => (i.pro ? i.key : `${soundStyle === "mac" ? "mac" : "nexus"}:${i.name}`);
+  React.useEffect(() => {
+    let live = true;
+    const idle = (cb: () => void) => {
+      const ric = (window as unknown as { requestIdleCallback?: (f: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+      if (ric) ric(cb, { timeout: 1500 });
+      else window.setTimeout(cb, 200);
+    };
+    idle(async () => {
+      const prefix = soundStyle === "mac" ? "mac" : "nexus";
+      const defs: Record<string, SoundDef> = soundStyle === "mac" ? (await loadMac()).MAC_SOUNDS : SOUNDS;
+      const next: Record<string, SoundShape> = {};
+      for (const n of Object.keys(SOUNDS)) {
+        const sh = await measureSound(defs[n]);
+        if (sh) next[`${prefix}:${n}`] = sh;
+      }
+      if (live) setShapes((s) => ({ ...s, ...next }));
+      // The Pro recipes are a small chunk of their own: measure them after the free ones.
+      const pro = (await loadPro()).PRO_SOUNDS as Record<string, SoundDef>;
+      const proNext: Record<string, SoundShape> = {};
+      for (const m of PRO_SOUND_META) {
+        const sh = await measureSound(pro[m.name]);
+        if (sh) proNext[`pro:${m.name}`] = sh;
+      }
+      if (live) setShapes((s) => ({ ...s, ...proNext }));
+    });
+    return () => {
+      live = false;
+    };
+  }, [soundStyle]);
+
 
   const categories = access === "pro" ? PRO_CATEGORIES : access === "free" ? FREE_CATEGORIES : [...FREE_CATEGORIES, ...PRO_CATEGORIES];
   const inAccess = ITEMS.filter((i) => access === "all" || (access === "pro") === i.pro);
@@ -255,32 +275,7 @@ export function SoundBoard({
                       : "shadow-[0_0_0_1px_var(--border)] hover:shadow-[0_0_0_1px_var(--border),0_14px_30px_-18px_rgba(0,0,0,0.35)]",
                   )}
                 >
-                  <span className="relative grid size-14 place-items-center">
-                    {/* one ring per press, keyed so a quick double tap shows two */}
-                    <AnimatePresence>
-                      {hits[item.key] && !reduce ? (
-                        <motion.span
-                          key={hits[item.key]}
-                          aria-hidden
-                          className="absolute inset-0 rounded-full"
-                          style={{ background: ORB[item.category] }}
-                          initial={{ scale: 1, opacity: 0.45 }}
-                          animate={{ scale: 1.9, opacity: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        />
-                      ) : null}
-                    </AnimatePresence>
-                    <motion.span
-                      key={`orb-${hits[item.key] ?? 0}`}
-                      aria-hidden
-                      className="relative size-14 rounded-full shadow-[inset_0_-6px_12px_rgba(0,0,0,0.18),0_10px_22px_-12px_rgba(0,0,0,0.45)]"
-                      style={{ background: ORB[item.category] }}
-                      initial={hits[item.key] && !reduce ? { scale: 0.82 } : false}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 520, damping: 14 }}
-                    />
-                  </span>
+                  <SoundWave shape={shapes[shapeKey(item)] ?? null} category={item.category} hit={hits[item.key] ?? 0} active={active} reduce={!!reduce} />
                   <span>
                     <span className="block text-[15px] font-semibold tracking-[-0.2px] text-foreground">{labelOf(item)}</span>
                     <span className="mt-0.5 block text-[12.5px] text-muted-foreground">{item.category}</span>
@@ -294,6 +289,18 @@ export function SoundBoard({
       </motion.ul>
 
       <div className="mt-5 rounded-[20px] bg-card p-4 shadow-[0_0_0_1px_var(--border)] sm:p-5 dark:bg-white/[0.04] dark:shadow-none">
+        <button
+          type="button"
+          onClick={() => play(current)}
+          aria-label={`Play ${labelOf(current)} again`}
+          className="mb-4 block w-full rounded-2xl bg-foreground/[0.03] px-3 py-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-white/[0.03]"
+        >
+          <SoundWave shape={shapes[shapeKey(current)] ?? null} category={current.category} hit={hits[current.key] ?? 0} active size="wide" reduce={!!reduce} />
+          <span className="mt-1.5 flex justify-between text-[11.5px] tabular-nums text-muted-foreground">
+            <span>0 s</span>
+            <span>{shapes[shapeKey(current)] ? `${shapes[shapeKey(current)].dur.toFixed(2)} s` : ""}</span>
+          </span>
+        </button>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <p className="text-[17px] font-semibold tracking-[-0.3px] text-foreground">{labelOf(current)}</p>
           <span className="text-[13px] text-muted-foreground">{current.category}{!current.pro && mac ? ", Mac style" : ""}</span>
