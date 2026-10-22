@@ -1,6 +1,65 @@
-<!-- Command Palette: Motion Kit variant brief -->
+Build a dark command palette that opens as a modal. A pill in the middle of a dark stage says "Quick Actions" with a keyboard hint; clicking it or pressing Cmd/Ctrl+K fades in a dimmed backdrop and scales a search panel in from slightly above. The panel has a search field, a filterable list of ten commands with icon boxes, descriptions and action hints, and a footer of key hints. Choosing a command, pressing Escape, clicking the backdrop or clicking the ESC chip closes it. The feel is a quick, restrained launcher.
 
-> The Command Palette page has 2 variants. The original Command Palette source is on the page; this brief rebuilds the Motion Kit Command Morph variant.
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS (v4 spacing scale), framer-motion (`motion`, `AnimatePresence`), `cmdk` (root and input), `@radix-ui/react-dialog` (`Root`, `Portal`, `Overlay`, `Content`, `Title`), `lucide-react`, the `cn` helper.
+- List parts come from the shadcn command wrappers: `CommandList`, `CommandItem`, `CommandEmpty` in `@/components/ui/command`. Plain cmdk `Command.List`, `Command.Item` and `Command.Empty` work too.
+- File: `components/command-palette/command-palette.tsx`. Named and default export `CommandPalette`, type `CommandPaletteProps`.
+
+## API
+
+- `className?: string` on the root. Nothing else is configurable; the commands are a constant list in the file.
+- The root is `relative h-full w-full bg-[#111111]`, so the parent must give it a height.
+- Commands (label, description, action hint, lucide icon, value): Home "Go to homepage" Open Home `home`; Dashboard "View your dashboard" Open LayoutDashboard `dashboard`; Features "Scroll to features" Open Sparkles `features`; Settings "Manage preferences" Open Settings `settings`; Profile "View your profile" Open User `profile`; New Document "Create a new file" Create FilePlus `new-doc`; New Project "Start from scratch" Create FolderPlus `new-project`; Invite Member "Add to your team" Invite UserPlus `invite`; Copy Email "support@nexus-ui.com" Copy Copy `copy-email`; Toggle Dark Mode "Switch appearance" Toggle Moon `dark-mode`.
+
+## Layout and look
+
+- Everything is dark regardless of theme.
+- Trigger pill: centred absolutely in the root, inline width 220px, `flex items-center gap-2.5 rounded-full bg-[#1e1e1e] px-4 py-2.5 shadow-lg ring-1 ring-white/10`, hover `bg-[#272727]`. A 15px search icon (`text-gray-500`), "Quick Actions" (`flex-1 text-left text-sm font-medium text-gray-300`), and a `kbd` reading "⌘ K" (`rounded border border-white/10 bg-white/8 px-1.5 py-0.5 font-mono text-[11px] text-gray-400`).
+- Backdrop: `fixed inset-0 z-50 bg-black/55`.
+- Panel wrapper: fixed, centred both ways, `z-50 w-full max-w-135 px-4 sm:px-0` (`max-w-135` is 33.75rem on Tailwind 4; use `max-w-[540px]` otherwise).
+- Panel: `overflow-hidden rounded-xl bg-[#1c1c1c] shadow-[0_24px_80px_rgba(0,0,0,0.6)] ring-1 ring-white/[0.07]`.
+- Search row: `flex items-center gap-3 border-b border-white/[0.07] px-4 py-3.5`. A 16px search icon, a transparent input (`flex-1 text-sm text-white placeholder:text-gray-600`, no outline, placeholder "Search commands..."), and an "ESC" button (`rounded border border-white/10 bg-white/5 px-1.5 py-0.5 font-mono text-[11px] text-gray-500`, hover `bg-white/10`).
+- List: `max-h-[400px] overflow-y-auto py-1`. Empty state "No results found." (`py-10 text-center text-sm text-gray-600`).
+- Row: `mx-2 flex items-center gap-3.5 rounded-lg border border-transparent px-3 py-2.5`, 1px gap between rows. Selected: `border-white/[0.08] bg-white/[0.06]`. If you use the shadcn `CommandItem`, make sure its own `data-selected:bg-muted` does not win.
+  - Icon box: `size-9 rounded-lg bg-white/[0.06] ring-1 ring-white/[0.08]` (selected `bg-white/[0.1]`), 16px icon `text-gray-400` (selected white).
+  - Text: label `truncate text-sm font-medium text-gray-200` (selected white), description `truncate text-xs text-gray-600` (selected `text-gray-400`).
+  - Action hint at the right: `text-xs text-gray-700` (selected `text-gray-400`); selected rows add a "↵" after it with `ml-1`.
+- Footer: `flex items-center justify-between border-t border-white/[0.07] px-4 py-2.5`. Left, 11px `text-gray-600` hints at `gap-4`: "↑↓ Navigate", "↵ Select", "Esc Close", each key in a mono `kbd`. Right, "Command Center" at 11px `text-gray-700`.
+
+## Motion
+
+- Easing `[0.16, 1, 0.3, 1]`.
+- Trigger pill: mounts from `opacity 0, y 8` over 0.4s; hover `scale 1.03`, tap `scale 0.97`.
+- Backdrop: opacity 0 to 1, exit back, 0.15s.
+- Panel: from `opacity 0, scale .96, y -8` to rest, 0.18s; exit reverses. Radix parts use `forceMount` inside `AnimatePresence` so the exit plays.
+- Selection has no animation: highlight, icon and text colours switch immediately.
+- There is no reduced-motion handling.
+
+## Interaction and states
+
+- Cmd/Ctrl+K on `window` toggles the palette (and prevents default). Clicking the pill opens it. 50ms after opening, the input is focused.
+- Typing filters with cmdk's default fuzzy filter, which matches the item `value` slug (for example `new-doc`), not the label or description. No match shows the empty state.
+- Arrow keys move the selection and Enter or a click runs it; the first row starts selected. Running any command only closes the palette.
+- Escape (also handled on the cmdk root), a backdrop click and the ESC button close it. Radix traps focus while open and restores it afterwards.
+
+## Accessibility
+
+- Radix gives `role="dialog"`, a focus trap and Escape handling; an `sr-only` title "Command Palette"; `aria-describedby` is set to undefined.
+- cmdk supplies the listbox and option roles and `aria-selected`.
+- The pill is a native button named by its text.
+
+## Acceptance checklist
+
+- [ ] Pill centred on a near-black stage; Cmd/Ctrl+K opens and closes the palette.
+- [ ] Panel scales in from 0.96 with a small upward offset and the backdrop fades.
+- [ ] Input is focused on open; typing "new" leaves New Document and New Project.
+- [ ] Arrows move a subtle highlight; the selected row shows white text and the Enter glyph.
+- [ ] "No results found." appears for nonsense input.
+- [ ] Enter, Escape, ESC chip and backdrop click all close it, with an exit animation.
+- [ ] Panel fits at 320px with 16px side padding.
+
+> The Command Palette page has 2 variants. The brief above rebuilds the original Command Palette; the sections below rebuild the Motion Kit Command Morph variant.
 
 ---
 
