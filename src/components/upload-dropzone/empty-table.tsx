@@ -38,7 +38,7 @@ export const EMPTY_TABLE_SAMPLE: EmptyTableData = {
   kinds: ["Text", "Email", "Option", "Currency"],
   rows: [
     ["Maya Chen", "maya@orbitly.example", "Pro", "$480"],
-    ["Leo Park", "leo@northwind.example", "Team", "$1,200"],
+    ["Leo Park", "leo@meridian.example", "Team", "$1,200"],
     ["Ana Lima", "ana@vela.example", "Pro", "$480"],
     ["Kai Ito", "kai@quadrant.example", "Starter", "$90"],
     ["Noor Haddad", "noor@meridian.example", "Team", "$1,200"],

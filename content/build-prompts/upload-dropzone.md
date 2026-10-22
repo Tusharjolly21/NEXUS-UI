@@ -84,7 +84,7 @@ Every 2.9s until touched: set dragging on and fly a file glyph into the zone (fr
 
 <!-- Upload Dropzone: Motion Kit variant brief -->
 
-> The Upload Dropzone page now has 3 parts: the original Upload Dropzone (above) plus 2 Motion Kit variants, Avatar Upload and Upload Queue. The original source is on the page; the briefs below rebuild the two variants. Neither variant uploads anywhere: progress is simulated and every callback is optional.
+> The Upload Dropzone page now has 4 parts: the original Upload Dropzone (above) plus 3 Motion Kit variants, Avatar Upload, Upload Queue and Empty Table. The original source is on the page; the briefs below rebuild the variants. None of the variants uploads anywhere: progress is simulated and every callback is optional.
 
 ---
 
@@ -275,7 +275,7 @@ Build an empty table that shows exactly what goes where. A card titled "Customer
 | `enableSound` | `boolean` | `true` | Interface sounds. |
 | `className` | `string` | none | Extra classes on the card. |
 
-Sample: file `customers.csv`, columns Name / Email / Plan / MRR with types Text / Email / Option / Currency, total 248, rows Maya Chen (maya@orbitly.example, Pro, $480), Leo Park (leo@northwind.example, Team, $1,200), Ana Lima (ana@vela.example, Pro, $480), Kai Ito (kai@quadrant.example, Starter, $90), Noor Haddad (noor@meridian.example, Team, $1,200).
+Sample: file `customers.csv`, columns Name / Email / Plan / MRR with types Text / Email / Option / Currency, total 248, rows Maya Chen (maya@orbitly.example, Pro, $480), Leo Park (leo@meridian.example, Team, $1,200), Ana Lima (ana@vela.example, Pro, $480), Kai Ito (kai@quadrant.example, Starter, $90), Noor Haddad (noor@meridian.example, Team, $1,200).
 
 ## Layout and look
 
