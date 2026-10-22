@@ -550,8 +550,8 @@ function toItem(c: LibraryComponent): GalleryItem | null {
 }
 
 /**
- * Components that are not themselves in the Motion Kit order but carry Motion Kit variants, so their
- * page has a build prompt. Kept out of MOTION_KIT_ORDER so they do not jump to the front of the wall.
+ * Components that are not themselves in the Motion Kit order but have a build prompt: the ones that
+ * carry Motion Kit variants, and pages whose variants are examples of one component. Kept out of MOTION_KIT_ORDER so they do not jump to the front of the wall.
  */
 const PROMPT_PARENTS = new Set([
   "toast-stack",
@@ -560,6 +560,12 @@ const PROMPT_PARENTS = new Set([
   "chat-messages",
   "card-stack-rotator",
   "draggable-card-stack",
+  // pages with several usage examples of one component: one brief for the component
+  "signup-form",
+  "orbital-loader",
+  "three-d-folder",
+  "compare",
+  "code-block",
 ]);
 
 const KIT_RANK = new Map(MOTION_KIT_ORDER.map((slug, i) => [slug, i] as const));

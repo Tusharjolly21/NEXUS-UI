@@ -1,6 +1,74 @@
-<!-- Animated Countdown: Motion Kit variant brief -->
+Build a countdown card made of unit tiles (days, hours, minutes, seconds). Each tile holds a two-digit number over a small uppercase label, and the number rolls: the old value drifts up and blurs out while the new one rises in from below. It has four looks and three sizes, counts down to a real date and shows a message at zero. With no date it shows a frozen sample time.
 
-> The Animated Countdown page has 4 variants. The original Animated Countdown source is on the page; this brief rebuilds the three Motion Kit variants: Split-Flap Board, Watch Countdown and Fuse Countdown.
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS with shadcn theme tokens (`border`, `background`, `card`, `muted`, `primary`, `foreground`, `muted-foreground`), framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`), the `cn` class helper.
+- File: `components/animated-countdown/animated-countdown.tsx`. Named export `AnimatedCountdown` and type `AnimatedCountdownProps`.
+
+## API
+
+| Prop | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `targetDate` | `Date \| string \| number` | none | Moment to count down to. Without it the card is static. |
+| `variant` | `"modern" \| "digital" \| "minimal" \| "classic"` | `"modern"` | Visual style. |
+| `size` | `"sm" \| "md" \| "lg"` | `"md"`, or `"sm"` when `compact` | Tile and type scale. |
+| `compact` | `boolean` | `false` | Defaults size to `sm`; card becomes `rounded-2xl`. |
+| `showDays`, `showHours`, `showMinutes`, `showSeconds` | `boolean` | `true` | Show or hide a unit. |
+| `unitOrder` | unit key array | days, hours, minutes, seconds | Tile order; units missing here are not shown. |
+| `showSeparators` | `boolean` | `true` for `digital` | Separator between tiles. |
+| `separator` | `ReactNode` | `":"` | Separator content. |
+| `completionMessage` | `string` | `"We're live!"` | Shown under the tiles at zero; an empty string hides it. |
+| `onComplete` | `() => void` | none | Called once at zero. |
+| `staticMode` | `boolean` | `true` when no `targetDate` | Freeze on a fixed time. |
+| `initialStaticTime` | partial unit record | 7d 12h 45m 30s | Overrides merged over the sample time. |
+| `backgroundColor` | `string` | none | Inline `backgroundColor` on the card. |
+| `accentColor` | `string` | none | Sets the CSS variable `--countdown-accent` on the card; nothing in the component reads it. |
+| `ariaLabel` | `string` | `"Countdown timer"` | Card `aria-label`. |
+| `className`, `containerClassName`, `unitClassName`, `accentClassName`, `labelClassName`, `numberClassName` | `string` | none | Extra classes: two for the card, then each tile, the modern top line, the labels, the numbers. |
+
+## Layout and look
+
+- Card: `inline-flex max-w-full flex-col items-center rounded-[1.75rem] border` plus size padding. Inside, a two-column grid with `gap-2`, which becomes a centred wrapping flex row from `sm` up (`gap-0` with separators).
+- Tile: `relative flex flex-col items-center justify-center overflow-hidden border text-center`, with a hover transition.
+- Sizes (card padding and gap, tile, number, label): `sm` `gap-2 p-2`, `min-w-[4.25rem] rounded-xl px-3 py-3`, `text-2xl`, `text-[10px]`. `md` `gap-2.5 p-2.5 sm:gap-3 sm:p-3`, `min-w-[4.8rem] rounded-2xl px-3.5 py-4 sm:min-w-[5.6rem] sm:px-4`, `text-3xl sm:text-4xl`, `text-[10px] sm:text-[11px]`. `lg` `gap-3 p-3 sm:gap-4 sm:p-4`, `min-w-[5.2rem] rounded-2xl px-4 py-4 sm:min-w-[6.5rem] sm:px-5 sm:py-5`, `text-4xl sm:text-5xl`, `text-[11px] sm:text-xs`.
+- Card by variant: `modern` `border-border/70 bg-background/75 shadow-2xl shadow-primary/5 backdrop-blur-xl` (dark `bg-white/[0.035]`); `digital` `border-cyan-400/20 bg-zinc-950 text-white shadow-2xl shadow-cyan-500/10`; `minimal` transparent, no shadow; `classic` `border-border bg-card shadow-sm` (dark `bg-zinc-900/80`).
+- Tile by variant: `modern` `border-border/70 bg-muted/45 shadow-sm`, hover `border-primary/35 bg-muted/65`; `digital` `font-mono border-cyan-400/20 bg-cyan-400/[0.055]`, shadow `0_0_28px_-18px_rgba(34,211,238,0.9)`, hover `border-cyan-300/40 bg-cyan-400/[0.09]`; `minimal` transparent, hover `bg-muted/35`; `classic` `border-border bg-background shadow-sm`, hover `border-primary/30 bg-muted/35`.
+- Modern tiles also get a 1px line across the top: `absolute inset-x-4 top-0 h-px` with a gradient `from-transparent via-primary/55 to-transparent`.
+- Number: `font-bold leading-none tracking-tight text-foreground`, tabular numerals, `min-w-[2ch]`, zero-padded to two digits. Digital numbers are `font-mono text-cyan-100` with a `drop-shadow-[0_0_18px_rgba(34,211,238,0.45)]`; minimal numbers are `font-semibold`.
+- Label: "Days", "Hours", "Minutes", "Seconds"; `mt-2 font-semibold uppercase tracking-[0.18em] text-muted-foreground` (digital `text-cyan-200/55`).
+- Separator: hidden below `sm`, `px-2 text-2xl font-semibold text-muted-foreground/50` (digital `font-mono text-cyan-200/45`). Completion message: `mt-3 text-sm font-medium text-primary`.
+
+## Motion
+
+- Card entrance: from `opacity 0, y 20, scale .98`, 0.5s ease-out.
+- Tile entrance: from `opacity 0, y 12, scale .98`, 0.35s ease-out, delayed `index * 0.055s`. Hover: `y: -3`.
+- Number roll: the whole two-digit string is keyed by its value inside `AnimatePresence initial={false} mode="popLayout"`. Enter from `y 12, opacity 0, blur(4px)`, exit to `y -12, opacity 0, blur(4px)`, 0.25s ease-out. It does not animate on mount.
+- Completion message: enters from `opacity 0, y 8`, exits to `opacity 0, y -4`, 0.25s.
+- Reduced motion: no entrance, no hover lift, numbers cross-fade in 0.05s, the message does not slide.
+
+## Interaction and states
+
+- Time left is floored to whole seconds, split into units, recomputed from `Date.now()` every second and clamped at zero.
+- Before mount the tiles show the sample time; the real time appears after mount.
+- Static mode (no `targetDate`, or `staticMode`) never ticks and shows `initialStaticTime` over the defaults.
+- Zero (not static, after mount): the message fades in, tiles stay at 00, `onComplete` fires once.
+- A past `targetDate` completes immediately; an invalid one shows the sample time.
+
+## Accessibility
+
+- The card carries `aria-label` (no role, no live region, so ticks are not announced). Separators are `aria-hidden`. Reduced motion as above.
+
+## Acceptance checklist
+
+- [ ] With a date a week away: four tiles, numbers tick every second with an up-and-blur roll, tiles enter left to right.
+- [ ] `digital` shows mono cyan numbers, glow and colons from `sm` up; `minimal` has no card surface.
+- [ ] `sm`, `md`, `lg` and `compact` change padding, tile width and type size as listed.
+- [ ] `showDays={false}` and `unitOrder` hide and reorder tiles.
+- [ ] At zero the message appears once and `onComplete` fires once.
+- [ ] Without `targetDate` the card shows 07, 12, 45, 30 and does not tick.
+- [ ] Reduced motion removes slides, blur and hover lift; 320px shows two columns without overflow.
+
+> The Animated Countdown page has 4 variants. The brief above rebuilds the original Animated Countdown; the sections below rebuild the Motion Kit Split-Flap Board, Watch Countdown and Fuse Countdown variants.
 
 ---
 

@@ -12,6 +12,7 @@ import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
 import { getGuidesForComponent } from "@/lib/blog";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
+import { promptIdsFor } from "@/lib/build-prompts";
 import { ComponentDetailPageClient } from "@/components/library/component-detail-page-client";
 import { allGalleryItems, hasBuildPrompt } from "@/lib/catalog/gallery-items";
 import { sessionCanAccessComponent, sessionHasPro } from "@/lib/component-access";
@@ -176,6 +177,11 @@ export default async function ComponentDetailPage({ params }: Props) {
   const self = galleryItems.find((g) => g.slug === slug);
   const related = self ? galleryItems.filter((g) => g.group === self.group && g.slug !== slug).slice(0, 4) : [];
 
+  const variantPrompts =
+    item.previewSections && item.previewSections.length > 1
+      ? await promptIdsFor(item.slug, item.previewSections.map((s, i) => s.title ?? `${item.name}, variant ${i + 1}`))
+      : [];
+
   const serializedPreviewSections = item.previewSections?.map((s) => ({
     title: s.title,
     reactSource: locked ? "" : s.reactSource,
@@ -211,6 +217,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         reactSource={locked ? undefined : item.reactSource}
         locked={locked}
         hasPrompt={hasBuildPrompt(item.slug)}
+        variantPrompts={variantPrompts}
         props={item.props}
         previewExportName={getPreviewExportName(item.Preview)}
         serializedPreviewSections={serializedPreviewSections}

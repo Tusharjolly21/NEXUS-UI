@@ -7,6 +7,7 @@ import { getLibraryComponent } from "@/lib/catalog/library-components";
 import { hasBuildPrompt } from "@/lib/catalog/gallery-items";
 import { sessionCanAccessComponent } from "@/lib/component-access";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
+import { variantPrompt } from "@/lib/build-prompts";
 
 /**
  * GET /api/prompt/[slug] — the build prompt for one component: the exact brief an AI coding agent
@@ -17,6 +18,8 @@ import { getClientIp, rateLimit } from "@/lib/rate-limit";
  * - The slug is checked against the catalog before any file is touched, so it can't be used to
  *   read other files.
  * - The prompts live in content/build-prompts, outside public/, so nothing serves them statically.
+ * - `?variant=<id>` returns just that variant's brief (pages with several variants keep one brief
+ *   per variant in the same file). The id must match `[a-z0-9-]` and a marker in the file.
  * - Responses are private and never stored by shared caches. Rate limited per IP.
  */
 export const dynamic = "force-dynamic";
@@ -39,6 +42,14 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
       { error: "Pro required", message: "Build prompts come with Pro. Upgrade at nexus-ui.com/pricing" },
       { status: 403, headers: PRIVATE },
     );
+  }
+
+  const variant = new URL(req.url).searchParams.get("variant");
+  if (variant !== null) {
+    const text = /^[a-z0-9-]{1,80}$/.test(variant) ? await variantPrompt(component.slug, variant) : null;
+    if (!text) return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
+    const prompt = withLicense(text, (await getSessionUser())?.id, component.slug);
+    return NextResponse.json({ name: component.name, prompt }, { headers: PRIVATE });
   }
 
   try {

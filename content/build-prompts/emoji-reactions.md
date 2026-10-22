@@ -1,6 +1,68 @@
-<!-- Emoji Reactions: Motion Kit variant brief -->
+Build a message bubble with a row of emoji reaction chips under it. Tapping a chip adds or removes your reaction: it tints with an accent colour, the emoji pops with sparks, and the count rolls its digits. A smiley-plus button ends the row and opens a pill picker of emojis; choosing one adds a chip (or joins an existing one) and the others make room. A chip whose count reaches zero shrinks away. The feel is snappy.
 
-> The Emoji Reactions page has 2 variants. The original Emoji Reactions source is on the page; this brief rebuilds the Motion Kit Spark Reactions variant.
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `LayoutGroup`, `useReducedMotion`), `lucide-react` (`SmilePlus`), `cn`.
+- File: `components/emoji-reactions/emoji-reactions.tsx`. Named export `EmojiReactions` and types `EmojiReactionsProps`, `Reaction`.
+
+## API
+
+`Reaction = { emoji: string; count: number; reacted?: boolean }`.
+
+| Prop | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `message` | `ReactNode` | "Shipped the new onboarding flow" | Bubble content; `null` hides it. |
+| `reactions` | `Reaction[]` | rocket 3, fire 2 | Starting reactions (state is internal). |
+| `emojis` | `string[]` | thumbs up, red heart, face with tears of joy, party popper, fire, rocket, eyes, folded hands | Emojis in the picker. |
+| `onChange` | `(reactions: Reaction[]) => void` | none | Called with the new list after every change (tap or pick). |
+| `accent` | `string` | `"#5b8def"` | Tint, ring and spark colour. |
+| `className` | `string` | none | Extra classes on the root. |
+
+## Layout and look
+
+- Root: `inline-flex flex-col items-start gap-2.5`. Bubble: `rounded-[20px] rounded-bl-md border border-black/[0.06] bg-white px-4 py-2.5 text-[15px] leading-snug text-[#17181a]`, shadow `0 1px 2px rgba(16,17,20,.05), 0 8px 24px -12px rgba(16,17,20,.18)`. Dark: `border-white/10 bg-zinc-900 text-zinc-50`.
+- Row: `relative flex flex-wrap items-center gap-1.5`, `role="group"` labelled "Reactions".
+- Chip: `h-8 rounded-full border pl-2 pr-2.5 text-[13px] font-medium gap-1.5`, colours transition 200ms. An 18px slot holds the 16px emoji, then the count.
+  - Off: `border-black/[0.07] bg-white text-[#3c3b37]`, shadow `0 1px 2px rgba(16,17,20,.05)`, hover `bg-neutral-50`. Dark: `border-white/10 bg-zinc-900 text-zinc-300`, hover `bg-zinc-800`.
+  - On: text `#17181a` (dark `zinc-50`), border `color-mix(in srgb, accent 55%, transparent)`, background `color-mix(... 12% ...)`, extra shadow `0 0 0 1px color-mix(... 30% ...)`.
+  - Focus: 2px ring in `accent` (`--tw-ring-color`) with 2px offset (white, dark `zinc-950`).
+- Add button: `size-8 rounded-full border`, `SmilePlus` 17px stroke 1.8, `text-[#73726d]`, hover `text-[#17181a] bg-neutral-50`, open `bg-neutral-100 text-[#17181a]`. Dark: `border-white/10 bg-zinc-900 text-zinc-400`, hover and open `bg-zinc-800 text-zinc-100`. Same focus ring as chips.
+- Picker: absolute under the button, `right-0 top-[calc(100%+8px)] z-20`, `flex items-center gap-0.5 rounded-full border border-black/[0.07] bg-white p-1`, shadow `0 2px 6px rgba(16,17,20,.06), 0 16px 36px -12px rgba(16,17,20,.28)` (dark `border-white/10 bg-zinc-900`). Options are `size-9 rounded-full` with a 20px emoji, hover and focus `bg-neutral-100` (dark `bg-zinc-800`).
+
+## Motion
+
+- Chip and layout spring: `{ stiffness: 520, damping: 32 }`.
+- Chips use `layout` inside `AnimatePresence initial={false} mode="popLayout"`: enter from and exit to `opacity 0, scale .6`, tap `scale .92`. The row and the add-button wrapper also have `layout`, so the button slides as chips come and go.
+- Emoji pop: on each add the emoji remounts from `scale .4, rotate -12` on spring `{ stiffness: 600, damping: 14 }`; not on first render.
+- Sparks: six 4px dots at angles `i/6 * 2pi - pi/2`, moving 15px out while fading to 0 and shrinking to `scale .4`, 0.5s ease-out. Odd dots use `accent`, even dots `#ffc94d`. Only when adding.
+- Count: each digit is its own slot (`h-[1.25em] w-[1ch]`, overflow hidden), keyed by position from the right so a new leading digit does not shift others. A changed digit rolls: going up, the new one enters from `y 100%` and the old exits to `y -100%`; going down, the reverse. Spring `{ stiffness: 460, damping: 34 }`, opacity 0 at the edges. A digit returning to an earlier value still rolls.
+- Picker: from `opacity 0, scale .6, y -8` on spring `{ stiffness: 520, damping: 30 }`, exit to `opacity 0, scale .7, y -6`, origin `calc(100% - 16px) 0%`. Options drop in from `opacity 0, y -6` with a `0.02s * index` delay on spring `{ stiffness: 600, damping: 30 }`; hover `scale 1.35, y -4`, tap `scale .9`.
+- Reduced motion: chips and picker only fade; no pop, sparks, digit travel, stagger, hover or tap scale.
+
+## Interaction and states
+
+- Tapping a chip: not yours, count +1 and `reacted` true; yours, count -1 and `reacted` false, and a chip at 0 is removed.
+- Picking a new emoji appends a chip (count 1, reacted); picking an existing one that is not yours adds your reaction; picking one already yours only closes the picker.
+- The picker closes on a pick, an outside pointer press or Escape (focus returns to the button).
+
+## Accessibility
+
+- Chips are buttons with `aria-pressed` and a label of emoji, count and "reaction(s)", plus ", including yours" when on; the rolling digits are `aria-hidden`.
+- The add button has `aria-label="Add reaction"`, `aria-haspopup`, `aria-expanded` and `aria-controls`. Enter, Space or ArrowDown (which also opens it) set keyboard mode: the first option is focused on open and focus returns to the button after a pick.
+- The picker is `role="menu"` ("Pick a reaction"); options are `role="menuitem"` labelled "React with <emoji>"; Tab moves between them.
+
+## Acceptance checklist
+
+- [ ] Tapping an unreacted chip tints it, pops the emoji with six sparks and rolls the count up.
+- [ ] Tapping again rolls down and clears the tint.
+- [ ] A count at 0 shrinks the chip away while the others slide.
+- [ ] The picker springs open from the button's right; options drop in one by one and swell on hover.
+- [ ] A new emoji appends a chip and the add button slides over.
+- [ ] Outside press and Escape close the picker.
+- [ ] `accent` recolours tint, ring and sparks; `message={null}` shows only the row.
+- [ ] Dark mode swaps bubble, chip and picker surfaces.
+
+> The Emoji Reactions page has 2 variants. The brief above rebuilds the original Emoji Reactions; the sections below rebuild the Motion Kit Spark Reactions variant.
 
 ---
 

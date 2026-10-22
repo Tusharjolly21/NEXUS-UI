@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Link2, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { FitPreview } from "@/components/library/fit-preview";
@@ -186,6 +186,56 @@ function SectionTitle({ id, children }: { id?: string; children: React.ReactNode
   );
 }
 
+// ── per-variant actions ─────────────────────────────────────────────
+
+/** Copies this variant's own build prompt (Pro), the same way the page-level button copies the whole brief. */
+function VariantPromptButton({ slug, title, promptId }: { slug: string; title: string; promptId: string }) {
+  const { isPro } = useProAccess();
+  const [state, copy] = useCopyBuildPrompt(slug, title, `/api/prompt/${encodeURIComponent(slug)}?variant=${encodeURIComponent(promptId)}`);
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      disabled={state === "loading"}
+      aria-label={`Copy the build prompt for ${title}`}
+      className="pg-glass inline-flex h-9 items-center gap-1.5 rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
+      {state === "copied" ? <Check className="size-3.5" aria-hidden /> : isPro ? <Sparkles className="size-3.5" aria-hidden /> : <Lock className="size-3.5" aria-hidden />}
+      <span aria-live="polite">
+        {state === "loading" ? "Copying…" : state === "copied" ? "Copied" : state === "error" ? "Try again" : "Prompt"}
+      </span>
+    </button>
+  );
+}
+
+/** Copies a link that opens the page at this variant. */
+function VariantLinkButton({ anchor, title }: { anchor: string; title: string }) {
+  const [copied, setCopied] = React.useState(false);
+  React.useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 1500);
+    return () => clearTimeout(t);
+  }, [copied]);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#${anchor}`);
+          setCopied(true);
+        } catch {
+          // clipboard blocked: the address bar link still works
+        }
+      }}
+      aria-label={`Copy a link to ${title}`}
+      className="pg-glass inline-flex h-9 items-center gap-1.5 rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
+      {copied ? <Check className="size-3.5" aria-hidden /> : <Link2 className="size-3.5" aria-hidden />}
+      <span aria-live="polite">{copied ? "Copied" : "Link"}</span>
+    </button>
+  );
+}
+
 // ── stage: live preview / code, with replay and full screen ─────────
 
 function Stage({
@@ -196,6 +246,7 @@ function Stage({
   tint,
   locked,
   name,
+  variant,
 }: {
   title: string;
   code: string;
@@ -204,6 +255,8 @@ function Stage({
   tint: TileTint;
   locked: boolean;
   name: string;
+  /** Set on pages with several variants: this variant's place on the page and whether it has its own brief. */
+  variant?: { index: number; anchor: string; promptId: string | null };
 }) {
   const [view, setView] = React.useState<"preview" | "code">("preview");
   const { requestUpgrade } = useProAccess();
@@ -236,7 +289,9 @@ function Stage({
             </button>
           ))}
         </div>
-        <div className="flex gap-1.5">
+        <div className="flex flex-wrap gap-1.5">
+          {variant?.promptId ? <VariantPromptButton slug={slug} title={title} promptId={variant.promptId} /> : null}
+          {variant ? <VariantLinkButton anchor={variant.anchor} title={title} /> : null}
           {view === "preview" ? (
             <button
               type="button"
@@ -248,7 +303,7 @@ function Stage({
             </button>
           ) : null}
           <Link
-            href={`/live-preview/${slug}`}
+            href={`/live-preview/${slug}${variant ? `?v=${variant.index}` : ""}`}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Open full-screen preview in a new tab"
@@ -743,6 +798,8 @@ type ComponentDetailProps = {
   locked?: boolean;
   /** Has a build prompt (Pro feature, fetched from the gated API on copy). */
   hasPrompt?: boolean;
+  /** For each variant, the id of its own build prompt or null (ids only, never the text). */
+  variantPrompts?: (string | null)[];
   /** Questions and answers about this component (also sent as FAQPage structured data). */
   faq?: { q: string; a: string }[];
   /** Blog guides that use this component. */
@@ -773,6 +830,7 @@ export function ComponentDetailPageClient({
   premium,
   locked = false,
   hasPrompt = false,
+  variantPrompts = [],
   faq = [],
   guides = [],
 }: ComponentDetailProps) {
@@ -870,10 +928,23 @@ export function ComponentDetailPageClient({
                   ))}
                 </nav>
               ) : null}
-              {sections.map((s) => (
+              {sections.map((s, i) => (
                 <div key={s.title} id={variantId(s.title)} className="scroll-mt-24">
                   {sections.length > 1 ? <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h2> : null}
-                  <Stage title={s.title} code={s.code} exportName={s.exportName} slug={slug} tint={tint} locked={locked} name={name} />
+                  <Stage
+                    title={s.title}
+                    code={s.code}
+                    exportName={s.exportName}
+                    slug={slug}
+                    tint={tint}
+                    locked={locked}
+                    name={name}
+                    variant={
+                      sections.length > 1
+                        ? { index: i, anchor: variantId(s.title), promptId: variantPrompts[i] ?? null }
+                        : undefined
+                    }
+                  />
                 </div>
               ))}
             </div>
