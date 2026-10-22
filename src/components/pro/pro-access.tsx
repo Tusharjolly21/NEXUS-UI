@@ -71,7 +71,7 @@ export function ProAccessProvider({
 type CopyState = "idle" | "loading" | "copied" | "error";
 
 /**
- * Copies a component's build prompt (a Pro feature). Visitors without Pro get the upgrade dialog;
+ * Copies a component's build prompt (free on free components, Pro on Pro ones). Visitors without Pro get the upgrade dialog;
  * the server checks again and answers 403 if the session has no access, which also opens the
  * dialog. The clipboard write starts inside the click (a ClipboardItem holding the pending
  * fetch), so Safari keeps the user activation it needs.

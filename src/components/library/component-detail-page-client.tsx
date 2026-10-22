@@ -188,10 +188,12 @@ function SectionTitle({ id, children }: { id?: string; children: React.ReactNode
 
 // ── per-variant actions ─────────────────────────────────────────────
 
-/** Copies this variant's own build prompt (Pro), the same way the page-level button copies the whole brief. */
-function VariantPromptButton({ slug, title, promptId }: { slug: string; title: string; promptId: string }) {
-  const { isPro } = useProAccess();
-  const [state, copy] = useCopyBuildPrompt(slug, title, `/api/prompt/${encodeURIComponent(slug)}?variant=${encodeURIComponent(promptId)}`);
+/** Copies this variant's own build prompt (free on free components, Pro on Pro ones), the same way the page-level button copies the whole brief. */
+function VariantPromptButton({ slug, title, promptId, locked }: { slug: string; title: string; promptId: string; locked: boolean }) {
+  const [state, copy] = useCopyBuildPrompt(slug, title, {
+    endpoint: `/api/prompt/${encodeURIComponent(slug)}?variant=${encodeURIComponent(promptId)}`,
+    hasAccess: !locked,
+  });
   return (
     <button
       type="button"
@@ -200,7 +202,7 @@ function VariantPromptButton({ slug, title, promptId }: { slug: string; title: s
       aria-label={`Copy the build prompt for ${title}`}
       className="pg-glass inline-flex h-9 items-center gap-1.5 rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
-      {state === "copied" ? <Check className="size-3.5" aria-hidden /> : isPro ? <Sparkles className="size-3.5" aria-hidden /> : <Lock className="size-3.5" aria-hidden />}
+      {state === "copied" ? <Check className="size-3.5" aria-hidden /> : !locked ? <Sparkles className="size-3.5" aria-hidden /> : <Lock className="size-3.5" aria-hidden />}
       <span aria-live="polite">
         {state === "loading" ? "Copying…" : state === "copied" ? "Copied" : state === "error" ? "Try again" : "Prompt"}
       </span>
@@ -290,7 +292,7 @@ function Stage({
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {variant?.promptId ? <VariantPromptButton slug={slug} title={title} promptId={variant.promptId} /> : null}
+          {variant?.promptId ? <VariantPromptButton slug={slug} title={title} promptId={variant.promptId} locked={locked} /> : null}
           {variant ? <VariantLinkButton anchor={variant.anchor} title={title} /> : null}
           {view === "preview" ? (
             <button
@@ -343,16 +345,15 @@ function Stage({
   );
 }
 
-// ── build prompt (Pro) ──────────────────────────────────────────────
+// ── build prompt (free on free components, Pro on Pro ones) ──────────────────────────────────────────────
 
-function BuildPromptCard({ slug, name }: { slug: string; name: string }) {
-  const { isPro } = useProAccess();
-  const [state, copy] = useCopyBuildPrompt(slug, name);
+function BuildPromptCard({ slug, name, locked }: { slug: string; name: string; locked: boolean }) {
+  const [state, copy] = useCopyBuildPrompt(slug, name, { hasAccess: !locked });
   return (
     <div className="mt-6 rounded-[18px] bg-foreground/[0.04] p-4">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[14px] font-semibold text-foreground">Build prompt</p>
-        <ProBadge />
+        {locked ? <ProBadge /> : null}
       </div>
       <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
         The exact brief to rebuild {name} from scratch with Claude, Cursor or v0: layout, colours, motion values and states.
@@ -363,7 +364,7 @@ function BuildPromptCard({ slug, name }: { slug: string; name: string }) {
         disabled={state === "loading"}
         className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-foreground text-[14px] font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
       >
-        {state === "copied" ? <Check className="size-4" aria-hidden /> : isPro ? <Sparkles className="size-4" aria-hidden /> : <Lock className="size-4" aria-hidden />}
+        {state === "copied" ? <Check className="size-4" aria-hidden /> : !locked ? <Sparkles className="size-4" aria-hidden /> : <Lock className="size-4" aria-hidden />}
         <span aria-live="polite">
           {state === "loading"
             ? "Copying…"
@@ -371,7 +372,7 @@ function BuildPromptCard({ slug, name }: { slug: string; name: string }) {
               ? "Copied — paste it into your agent"
               : state === "error"
                 ? "Couldn't copy, try again"
-                : isPro
+                : !locked
                   ? "Copy build prompt"
                   : "Copy build prompt with Pro"}
         </span>
@@ -428,7 +429,7 @@ function InstallPanel({
         >
           See what Pro includes
         </Link>
-        {hasPrompt ? <BuildPromptCard slug={slug} name={name} /> : null}
+        {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} /> : null}
         {interactions.length ? (
           <div className="mt-6">
             <p className="text-[13px] font-medium text-foreground">How it moves</p>
@@ -470,7 +471,7 @@ function InstallPanel({
         </div>
       ) : null}
 
-      {hasPrompt ? <BuildPromptCard slug={slug} name={name} /> : null}
+      {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} /> : null}
 
       {interactions.length ? (
         <div className="mt-6">

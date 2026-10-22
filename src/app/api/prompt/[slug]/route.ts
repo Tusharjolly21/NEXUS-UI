@@ -11,10 +11,10 @@ import { variantPrompt } from "@/lib/build-prompts";
 
 /**
  * GET /api/prompt/[slug] — the build prompt for one component: the exact brief an AI coding agent
- * needs to recreate it from scratch. A Pro feature for every component that has one, free or not.
+ * needs to recreate it from scratch. Free for free components; Pro components' prompts need Pro.
  *
- * - Only a signed-in session with Pro (or a purchase of this component) gets the text; everyone
- *   else gets 401/403 and no content.
+ * - Free components: anyone gets the text. Pro components: only a signed-in session with Pro (or a
+ *   purchase of this component); everyone else gets 403 and no content.
  * - The slug is checked against the catalog before any file is touched, so it can't be used to
  *   read other files.
  * - The prompts live in content/build-prompts, outside public/, so nothing serves them statically.
@@ -36,10 +36,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
   }
 
-  // `true`: the prompt is Pro even when the component itself is free.
-  if (!(await sessionCanAccessComponent(component.slug, true))) {
+  // A free component's prompt is free; a Pro component's prompt needs Pro (or a purchase of it).
+  if (!(await sessionCanAccessComponent(component.slug, component.premium))) {
     return NextResponse.json(
-      { error: "Pro required", message: "Build prompts come with Pro. Upgrade at nexus-ui.com/pricing" },
+      { error: "Pro required", message: "This build prompt is part of Nexus UI Pro. See plans at nexus-ui.com/pricing" },
       { status: 403, headers: PRIVATE },
     );
   }
