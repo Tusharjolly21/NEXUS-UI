@@ -35,6 +35,8 @@ export interface AgentRunProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** Width of the card in px. It never grows past its container. Default 520. */
+  width?: number;
   /** Extra classes for the card. */
   className?: string;
 }
@@ -183,6 +185,7 @@ export function AgentRun({
   onReview,
   autoplay = false,
   enableSound = true,
+  width = 520,
   className = "",
 }: AgentRunProps) {
   const play = useSound(enableSound);
@@ -277,7 +280,8 @@ export function AgentRun({
     <MotionConfig reducedMotion="user">
       <div
         ref={box}
-        className={`w-[520px] max-w-full rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-30px_rgba(0,0,0,.35)] sm:p-6 dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-30px_rgba(0,0,0,.9)] ${className}`}
+        style={{ maxWidth: width }}
+        className={`w-full rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-30px_rgba(0,0,0,.35)] sm:p-6 dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-30px_rgba(0,0,0,.9)] ${className}`}
         onPointerDown={() => {
           touched.current = true;
         }}

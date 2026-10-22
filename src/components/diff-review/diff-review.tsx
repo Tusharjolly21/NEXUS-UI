@@ -18,6 +18,8 @@ export interface DiffReviewProps {
   autoplay?: boolean;
   /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
+  /** Width of the card in px. It never grows past its container. Default 520. */
+  width?: number;
   /** Extra classes for the card. */
   className?: string;
 }
@@ -81,7 +83,7 @@ function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * Reject and the additions fold away instead. Click a single change to take
  * just that one.
  */
-export function DiffReview({ parts = DIFF_REVIEW_PARTS, title = "Homepage · Hero copy", autoplay = false, enableSound = true, className = "" }: DiffReviewProps) {
+export function DiffReview({ parts = DIFF_REVIEW_PARTS, title = "Homepage · Hero copy", autoplay = false, enableSound = true, width = 520, className = "" }: DiffReviewProps) {
   const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [phase, setPhase] = useState<Phase>("draft");
@@ -178,7 +180,8 @@ export function DiffReview({ parts = DIFF_REVIEW_PARTS, title = "Homepage · Her
   return (
     <div
       ref={box}
-      className={`w-[520px] max-w-full rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-30px_rgba(0,0,0,.35)] sm:p-6 dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-30px_rgba(0,0,0,.9)] ${className}`}
+      style={{ maxWidth: width }}
+      className={`w-full rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-30px_rgba(0,0,0,.35)] sm:p-6 dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-30px_rgba(0,0,0,.9)] ${className}`}
       onPointerDown={() => {
         touched.current = true;
       }}
