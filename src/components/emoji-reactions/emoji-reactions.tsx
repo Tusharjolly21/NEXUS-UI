@@ -24,7 +24,7 @@ export type EmojiReactionsProps = {
   onChange?: (reactions: Reaction[]) => void;
   /** Ring and tint colour for reactions you have added. */
   accent?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };

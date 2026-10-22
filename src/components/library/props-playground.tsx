@@ -7,13 +7,15 @@ import type {
   PlaygroundControl,
   PlaygroundValues,
 } from "@/lib/catalog/playgrounds";
+import { AutoplaySound } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
 import { ProLock, useProAccess } from "@/components/pro/pro-access";
 
 type Fill = "light" | "dark";
 
 export function initialValues(controls: PlaygroundControl[]): PlaygroundValues {
-  return Object.fromEntries(controls.map((c) => [c.prop, c.defaultValue]));
+  // A toggle can start on (autoplay) while the component's own default stays off: the snippet only lists what differs from the default.
+  return Object.fromEntries(controls.map((c) => [c.prop, c.kind === "toggle" && c.startOn !== undefined ? c.startOn : c.defaultValue]));
 }
 
 function formatNumber(value: number, step: number) {
@@ -206,7 +208,8 @@ export function LivePropsPlayground({
   const [copied, setCopied] = React.useState(false);
 
   const snippet = React.useMemo(() => buildSnippet(playground, values), [playground, values]);
-  const isDirty = playground.controls.some((c) => values[c.prop] !== c.defaultValue);
+  const start = React.useMemo(() => initialValues(playground.controls), [playground]);
+  const isDirty = playground.controls.some((c) => values[c.prop] !== start[c.prop]);
 
   const copy = async () => {
     if (locked) return requestUpgrade(name);
@@ -230,7 +233,7 @@ export function LivePropsPlayground({
       >
         {view === "preview" ? (
           <div key={replayKey} className="absolute inset-0 flex items-center justify-center p-6">
-            {playground.render(values, fill)}
+            <AutoplaySound allow>{playground.render(values, fill)}</AutoplaySound>
           </div>
         ) : (
           <pre className="absolute inset-0 overflow-auto p-6 pt-16 font-mono text-[13px] leading-relaxed">

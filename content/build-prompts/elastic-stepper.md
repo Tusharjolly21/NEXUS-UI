@@ -70,5 +70,5 @@ With `autoplay`, every 520ms step through the sequence `+1 ×7, −1 ×8` and re
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Pressing plus plays `tap` from `@/lib/ui-sounds` at 60% volume (a short soft thump that falls in pitch, with a hint of click). Pressing minus plays `tick` at 50% (a tiny dry high click), so up and down sound a little different. Only a press that changes the number plays: pushing past the min or max, where the stepper rubber-bands, is silent.
-- The autoplay count and hover are silent.
+- The autoplay count plays the same sounds for each step it takes (`tap` going up, `tick` going down, same volumes; the rubber-band at the limits stays silent), through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

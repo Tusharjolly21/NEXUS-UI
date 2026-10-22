@@ -14,7 +14,7 @@
  */
 
 import * as React from "react";
-import { hiss, playDef, tone, type SoundDef } from "@/lib/ui-sounds";
+import { audioAwake, hiss, playDef, tone, useAutoplaySoundAllowed, type SoundDef } from "@/lib/ui-sounds";
 
 export type ProSoundCategory = "Glass" | "Paper and wood" | "Arcade" | "Studio";
 type ProDef = SoundDef & { category: ProSoundCategory };
@@ -61,12 +61,29 @@ export function playProSound(name: ProSoundName, volume = 1, force = false) {
   playDef(name, PRO_SOUNDS[name], volume, force);
 }
 
-/** Like useSound in `@/lib/ui-sounds`, for the Pro sounds: silent when `enabled` is false. */
-export function useProSound(enabled = true) {
-  return React.useCallback(
-    (name: ProSoundName, volume = 1) => {
-      if (enabled) playProSound(name, volume);
-    },
-    [enabled],
+/**
+ * Like useSound in `@/lib/ui-sounds`, for the Pro sounds: silent when `enabled` is false.
+ * `play.auto(...)` is for a component that plays itself (autoplay).
+ */
+export type ProSoundPlayer = {
+  (name: ProSoundName, volume?: number): void;
+  auto: (name: ProSoundName, volume?: number) => void;
+};
+
+export function useProSound(enabled = true): ProSoundPlayer {
+  const auto = useAutoplaySoundAllowed();
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: ProSoundName, volume = 1) => {
+          if (enabled) playProSound(name, volume);
+        },
+        {
+          auto: (name: ProSoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playProSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
   );
 }

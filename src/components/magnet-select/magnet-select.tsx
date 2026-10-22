@@ -31,7 +31,7 @@ export interface MagnetSelectProps {
   label?: string;
   /** Points at and picks options by itself until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -144,6 +144,10 @@ export function MagnetSelect({ options = DEFAULT_MAGNET_OPTIONS, defaultValue, o
   const probeX = useSpring(start.x, { stiffness: 220, damping: 20 });
   const probeY = useSpring(start.y, { stiffness: 220, damping: 20 });
   const touched = useRef(false);
+  const selRef = useRef(sel);
+  useEffect(() => {
+    selRef.current = sel;
+  }, [sel]);
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
@@ -184,6 +188,7 @@ export function MagnetSelect({ options = DEFAULT_MAGNET_OPTIONS, defaultValue, o
       setHover(i);
       pending = setTimeout(() => {
         if (!touched.current) {
+          if (i !== selRef.current) play.auto("tick", 0.6);
           setSel(i);
           setHover(null);
         }
@@ -193,7 +198,7 @@ export function MagnetSelect({ options = DEFAULT_MAGNET_OPTIONS, defaultValue, o
       clearInterval(t);
       clearTimeout(pending);
     };
-  }, [autoplay, options.length]);
+  }, [autoplay, options.length, play]);
 
   const onKey = (e: KeyboardEvent) => {
     const n = options.length;

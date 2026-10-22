@@ -11,7 +11,7 @@ export interface UploadChipsProps {
   upload?: (file: File | { name: string; size: number }, onProgress: (p: number) => void) => Promise<void>;
   /** Drops sample files in by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -41,14 +41,15 @@ export function UploadChips({ accent = "#0071e3", upload = fakeUpload, autoplay 
   const nextId = useRef(1);
   const touched = useRef(false);
 
-  // `audible` is true for files the user dropped or chose; the autoplay samples stay silent.
-  const start = (files: (File | { name: string; size: number })[], audible = false) => {
-    if (audible && files.length) play("tap");
+  // `audible` is true for files the user dropped or chose, "auto" for the autoplay samples (they sound through `play.auto`).
+  const start = (files: (File | { name: string; size: number })[], audible: boolean | "auto" = false) => {
+    const say = audible === "auto" ? play.auto : audible ? play : undefined;
+    if (files.length) say?.("tap");
     files.forEach((f) => {
       const uid = nextId.current++;
       setItems((list) => [...list, { id: uid, name: f.name, size: f.size, progress: 0 }]);
       upload(f, (p) => setItems((list) => list.map((u) => (u.id === uid ? { ...u, progress: p } : u)))).then(() => {
-        if (audible) play("done");
+        say?.("done");
       });
     });
   };
@@ -59,7 +60,7 @@ export function UploadChips({ accent = "#0071e3", upload = fakeUpload, autoplay 
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
       if (k % 4 === 3) setItems([]);
-      else start([SAMPLES[k % 4]]);
+      else start([SAMPLES[k % 4]], "auto");
       k++;
     }, 1600);
     return () => clearInterval(t);

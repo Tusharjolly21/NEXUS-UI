@@ -75,5 +75,5 @@ When `autoplay` is true: 800ms after mount, and every 5200ms after, open the men
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Opening the menu with the trigger plays `pop` from `@/lib/ui-sounds` at 70% volume (a short blip that rises quickly in pitch). Choosing an item, by click or Enter, plays `tick` at 50% (a tiny dry high click) and then `success` at 70% (two bright, short notes, a rising third) as the button rolls to its green confirmation.
-- Closing the menu, hovering rows, moving focus with the arrow keys and the whole autoplay loop (including its confirmation) are silent.
+- The autoplay loop plays the same sounds for its beats: `pop` when it opens the menu, then `tick` and `success` when it picks the first item, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Its ghost hover over the rows is silent. Closing the menu, hovering rows and moving focus with the arrow keys are silent too.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

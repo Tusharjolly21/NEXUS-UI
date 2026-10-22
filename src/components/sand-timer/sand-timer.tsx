@@ -8,7 +8,7 @@ export interface SandTimerProps {
   seconds?: number;
   /** Turns the glass over by itself when it is nearly empty, until someone presses the button. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -217,11 +217,16 @@ export function SandTimer({ seconds = 30, autoplay = false, enableSound = true }
     setFlips((n) => n + 1);
   }, [turn, reduce]);
 
+  const autoTap = useEffectEvent(() => play.auto("tap"));
+
   useEffect(() => {
     if (!autoplay || reduce) return;
     const id = setInterval(() => {
       if (touched.current) { clearInterval(id); return; }
-      if (top.current < total.current * 0.45) void flip();
+      if (top.current < total.current * 0.45) {
+        if (!paused.current) autoTap();
+        void flip();
+      }
     }, 1500);
     return () => clearInterval(id);
   }, [autoplay, reduce, flip]);

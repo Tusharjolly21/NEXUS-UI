@@ -10,7 +10,7 @@ export interface PullToRefreshProps {
   onRefresh?: (balance: number, delta: number) => void;
   /** Pulls the card down and refreshes every 4.2 s, until someone drags it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -67,6 +67,8 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
   const loading = useRef(false);
   // True while the user is the one moving the card (a drag or a key press); the autoplay pull never sets it.
   const userDriven = useRef(false);
+  // True while the autoplay pull is moving the card; its sounds go through `play.auto`.
+  const autoDriven = useRef(false);
   const pastLine = useRef(false);
   const timer = useRef(0);
   const onRefreshRef = useRef(onRefresh);
@@ -81,8 +83,11 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
     const past = v >= LINE;
     if (past !== pastLine.current) {
       pastLine.current = past;
-      // One tick as the card crosses the release line, only while the user is pulling.
-      if (userDriven.current && !loading.current) play("tick", past ? 0.6 : 0.35);
+      // One tick as the card crosses the release line, only while the user (or the autoplay pull) is pulling.
+      if (!loading.current) {
+        if (userDriven.current) play("tick", past ? 0.6 : 0.35);
+        else if (autoDriven.current) play.auto("tick", past ? 0.6 : 0.35);
+      }
     }
     if (phase !== "loading") setPhase(v >= LINE ? "ready" : "idle");
   });
@@ -94,7 +99,9 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
     animate(y, 62, { type: "spring", stiffness: 400, damping: 30 });
     timer.current = window.setTimeout(() => {
       const audible = userDriven.current;
+      const auto = autoDriven.current;
       userDriven.current = false;
+      autoDriven.current = false;
       const ch = +(Math.random() * 2400 - 600).toFixed(2);
       setDelta(ch);
       const next = +(balRef.current + ch).toFixed(2);
@@ -106,6 +113,7 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
       setPhase("idle");
       loading.current = false;
       if (audible) play("done");
+      else if (auto) play.auto("done");
     }, 1300);
   }, [y, play]);
 
@@ -119,6 +127,7 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
     if (!autoplay) return;
     const t = window.setInterval(() => {
       if (touched.current) return window.clearInterval(t);
+      if (!loading.current) autoDriven.current = true;
       pull();
     }, 4200);
     return () => window.clearInterval(t);

@@ -21,7 +21,7 @@ export interface ThermoDialProps {
   onChange?: (value: number) => void;
   /** Turns the dial to a few set points every 2.4s until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -118,6 +118,18 @@ export function ThermoDial({ room = 19.5, defaultValue = 21, min = 10, max = 30,
     if (!autoplay) return;
     let k = 0;
     let run: ReturnType<typeof animate> | undefined;
+    // The same quiet tick a drag plays at each step, a little sparser while the dial turns by itself.
+    let ticked = set.get();
+    let tickAt = 0;
+    const off = set.on("change", (v) => {
+      const q = quantise(v);
+      if (touched.current || q === ticked) return;
+      ticked = q;
+      const now = performance.now();
+      if (now - tickAt < 150) return;
+      tickAt = now;
+      play.auto("tick", 0.3);
+    });
     const t = setInterval(() => {
       if (touched.current) {
         clearInterval(t);
@@ -128,9 +140,12 @@ export function ThermoDial({ room = 19.5, defaultValue = 21, min = 10, max = 30,
     }, 2400);
     return () => {
       clearInterval(t);
+      off();
       run?.stop();
     };
-  }, [autoplay, set, lo, span, step]);
+    // quantise is derived from step; play only changes with the sound props.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay, set, lo, span, step, play]);
 
   const mode = temp > room + 0.4 ? "Heating" : temp < room - 0.4 ? "Cooling" : "Holding";
   const [whole, half] = temp.toFixed(1).split(".");

@@ -67,7 +67,7 @@ Every 2s, alternate settling to −180 and 0, starting with fold. When touched, 
 
 ## Sound
 
-`FoldNote` takes `enableSound?: boolean` (default `true`; `false` silences it). When the visitor opens the note (by drag or tap) `whoosh` plays from `@/lib/ui-sounds` (a short airy noise sweep rising from low to high, about 0.25s). When they fold it shut, `off` plays (a tiny noise click with a falling blip, 760 to 480 Hz over about 70ms, like a latch). It plays once per state change, at release, not while dragging. The autoplay folding is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+`FoldNote` takes `enableSound?: boolean` (default `true`; `false` silences it). When the visitor opens the note (by drag or tap) `whoosh` plays from `@/lib/ui-sounds` (a short airy noise sweep rising from low to high, about 0.25s). When they fold it shut, `off` plays (a tiny noise click with a falling blip, 760 to 480 Hz over about 70ms, like a latch). It plays once per state change, at release, not while dragging. The autoplay folding plays the same `off` and `whoosh` (once per state change, as the fold starts), through the same play function's `auto` variant, which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Still silent on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

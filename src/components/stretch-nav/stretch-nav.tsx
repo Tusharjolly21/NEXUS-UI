@@ -9,7 +9,7 @@ export interface StretchNavProps {
   onChange?: (index: number) => void;
   /** Moves between items by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -30,6 +30,10 @@ export function StretchNav({ items = ["Home", "Work", "Writing", "About", "Conta
   const hOpacity = useMotionValue(0);
   const touched = useRef(false);
   const first = useRef(true);
+  const activeRef = useRef(active);
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
 
   const edges = (i: number) => {
     const el = refs.current[i];
@@ -76,10 +80,12 @@ export function StretchNav({ items = ["Home", "Work", "Writing", "About", "Conta
     let k = 0;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
-      setActive(order[k++ % order.length] % items.length);
+      const next = order[k++ % order.length] % items.length;
+      if (next !== activeRef.current) play.auto("tick", 0.6);
+      setActive(next);
     }, 1500);
     return () => clearInterval(t);
-  }, [autoplay, items.length]);
+  }, [autoplay, items.length, play]);
 
   return (
     <nav aria-label="Main" className="relative inline-flex items-center rounded-full bg-white p-1 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_10px_30px_-14px_rgba(0,0,0,.25)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_10px_30px_-14px_rgba(0,0,0,.6)]" onPointerLeave={() => setHover(null)}>

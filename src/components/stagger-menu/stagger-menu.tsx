@@ -31,7 +31,7 @@ export interface StaggerMenuProps {
   onSelect?: (id: string) => void;
   /** Opens and browses the menu by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -42,6 +42,10 @@ export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay
   const [hover, setHover] = useState<string | null>(null);
   const [flash, setFlash] = useState<string | null>(null);
   const touched = useRef(false);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const wrap = useRef<HTMLDivElement>(null);
 
@@ -49,6 +53,9 @@ export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay
     if (byUser) {
       play("tick", 0.5);
       play("success", 0.7);
+    } else {
+      playRef.current.auto("tick", 0.5);
+      playRef.current.auto("success", 0.7);
     }
     setOpen(false);
     setFlash(it.done ?? it.label);
@@ -70,6 +77,7 @@ export function StaggerMenu({ label = "Share", items = ITEMS, onSelect, autoplay
     const ts: number[] = [];
     const cycle = () => {
       if (touched.current) return;
+      playRef.current.auto("pop", 0.7);
       setOpen(true);
       [0, 1, 2, 3].forEach((k) => ts.push(window.setTimeout(() => !touched.current && setHover(items[k].id), 700 + k * 380)));
       ts.push(window.setTimeout(() => !touched.current && pick(items[0]), 2500));

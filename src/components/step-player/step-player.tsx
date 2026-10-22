@@ -19,7 +19,7 @@ export interface StepPlayerProps {
   stepDuration?: number;
   /** Starts playing on mount. Set to false to start paused (the play button still works). */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -38,7 +38,7 @@ export const DEFAULT_STEPS: StepPlayerStep[] = [
 export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDuration = 3.2, autoplay = true, enableSound = true }: StepPlayerProps) {
   const play = useSound(enableSound);
   const soundRef = useRef(play);
-  // True from the moment the visitor presses play until the run reaches the end: only then do the automatic advances make sound.
+  // True from the moment the visitor presses play until the run reaches the end: those advances answer the visitor; the rest are the demo playing itself.
   const heard = useRef(false);
   const [rawI, setI] = useState(0);
   const [playing, setPlaying] = useState(autoplay);
@@ -66,10 +66,12 @@ export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDura
       last = now;
       if (playRef.current) prog.set(Math.min(1, prog.get() + dt / stepDuration));
       if (prog.get() >= 1) {
+        const atEnd = i >= count - 1;
         if (heard.current) {
-          const atEnd = i >= count - 1;
           soundRef.current(atEnd ? "done" : "step");
           if (atEnd) heard.current = false;
+        } else {
+          soundRef.current.auto(atEnd ? "done" : "step");
         }
         setI((n) => (n + 1) % count);
         setWave((w) => w + 1);

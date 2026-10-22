@@ -36,7 +36,7 @@ export interface ChatMessagesProps {
   onSend?: (text: string) => void;
   /** Name in the header. */
   title?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the root. Give it a height (e.g. `h-[480px]`) to change the default 440px. */
   className?: string;
@@ -99,6 +99,7 @@ export function ChatMessages({
   className = "",
 }: ChatMessagesProps) {
   const play = useSound(enableSound);
+  const playRef = useRef(play);
   const uid = useId().replace(/:/g, "");
   const still = useReducedMotion() === true;
   const playing = autoplay ?? autoPlay ?? false;
@@ -120,6 +121,10 @@ export function ChatMessages({
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
   };
+
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
 
   useEffect(() => {
     const pending = timers;
@@ -150,6 +155,7 @@ export function ChatMessages({
       later(() => {
         setTyping(null);
         setItems((p) => [...p, { ...m, via: "typed" }]);
+        playRef.current.auto("ping", 0.7);
         later(() => playFrom(list, i + 1), autoPlayDelay);
       }, typingDuration);
       return;
@@ -159,6 +165,7 @@ export function ChatMessages({
     later(() => {
       setDemoDraft("");
       setItems((p) => [...p, { ...m, via: "sent" }]);
+      playRef.current.auto("whoosh");
       later(() => playFrom(list, i + 1), autoPlayDelay);
     }, m.content.length * step + 260);
   };

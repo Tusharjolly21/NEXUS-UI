@@ -20,7 +20,7 @@ export interface RolodexTestimonialsProps {
   cards?: RolodexCard[];
   /** Clicks the drum round to the next quote every 2.6s until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Called with the index of the card that is square at the front. */
   onChange?: (index: number) => void;
@@ -132,12 +132,10 @@ export function RolodexTestimonials({ cards = DEFAULT_CARDS, autoplay = false, e
       last.current = i;
       onChangeRef.current?.(i);
       // Autoplay stops for good on the first touch, so once touched every card change is the visitor's own.
-      if (touched.current) {
-        const now = performance.now();
-        if (now - lastTick.current > 40) {
-          lastTick.current = now;
-          play("tick", 0.4);
-        }
+      const now = performance.now();
+      if (now - lastTick.current > 40) {
+        lastTick.current = now;
+        (touched.current ? play : play.auto)("tick", 0.4);
       }
     }
   });

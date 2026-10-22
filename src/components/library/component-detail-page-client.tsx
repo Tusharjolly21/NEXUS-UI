@@ -1,5 +1,6 @@
 "use client";
 
+import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
@@ -241,6 +242,27 @@ function VariantLinkButton({ anchor, title }: { anchor: string; title: string })
 
 // ── stage: live preview / code, with replay and full screen ─────────
 
+/**
+ * A page can hold several previews that play themselves. Only one that is mostly on screen may be
+ * heard, so scrolling past a variant does not leave its sound running under the next one.
+ */
+function HeardWhenVisible({ children }: { children: React.ReactNode }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting && entry.intersectionRatio >= 0.5), { threshold: [0, 0.5, 1] });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+  return (
+    <div ref={ref} className="flex w-full">
+      <AutoplaySound allow={visible}>{children}</AutoplaySound>
+    </div>
+  );
+}
+
 function Stage({
   title,
   code,
@@ -320,9 +342,11 @@ function Stage({
       {view === "preview" ? (
         <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card">
           <PreviewShield active={locked} className="flex w-full">
-            <FitPreview key={run}>
-              <DynamicPreview exportName={exportName} compact={false} />
-            </FitPreview>
+            <HeardWhenVisible>
+              <FitPreview key={run}>
+                <DynamicPreview exportName={exportName} compact={false} />
+              </FitPreview>
+            </HeardWhenVisible>
           </PreviewShield>
         </div>
       ) : (

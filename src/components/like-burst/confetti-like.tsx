@@ -18,7 +18,7 @@ export interface ConfettiLikeProps {
   onChange?: (liked: boolean, count: number) => void;
   /** Likes and unlikes itself every 1.5s until someone presses it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the button. */
   className?: string;
@@ -90,6 +90,10 @@ export function ConfettiLike({
   const [liked, setLiked] = useState(defaultLiked);
   const [burst, setBurst] = useState(0);
   const touched = useRef(false);
+  const likedNow = useRef(liked);
+  useEffect(() => {
+    likedNow.current = liked;
+  });
   const dark = useIsDark();
   const shown = count + (liked ? 1 : 0);
   const palette = colors.length ? colors : DEFAULT_CONFETTI_COLORS;
@@ -102,11 +106,13 @@ export function ConfettiLike({
         return;
       }
       // The burst only renders while liked, so bumping it on unlike is harmless.
+      if (likedNow.current) play.auto("off", 0.5);
+      else play.auto("pop");
       setLiked((l) => !l);
       setBurst((b) => b + 1);
     }, 1500);
     return () => window.clearInterval(t);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   const press = () => {
     touched.current = true;

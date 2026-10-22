@@ -8,7 +8,7 @@ export type IslandMode = "idle" | "timer" | "call" | "music";
 export interface IslandMorphProps {
   /** Cycles through the states by itself until a control is pressed. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -40,10 +40,11 @@ export function IslandMorph({ autoplay = false, enableSound = true }: IslandMorp
     let k = 0;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
+      play.auto("whoosh", 0.5);
       setMode(order[k++ % order.length]);
     }, 2600);
     return () => clearInterval(t);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   const pick = (m: IslandMode) => {
     touched.current = true;

@@ -63,7 +63,7 @@ Every 700ms toggle the next icon in order, wrapping. A `pointerdown` on the grid
 - Save: `tick` (0.8) when saved, `tick` (0.4) when removed (a very short high-passed noise click).
 - Sound: `tick` (0.6) both ways.
 - Lock: `off` when it unlocks, `on` when it locks again.
-The standalone icons are silent; only the grid plays sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+The standalone icons are silent; only the grid plays sound. The autoplay cycle plays the same sound for each tile it turns (through the same play function's `auto` variant, which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then), and stops when a pointer touches the grid. Silent on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

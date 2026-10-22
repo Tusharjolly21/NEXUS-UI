@@ -86,5 +86,5 @@ Every 900ms, flip the next row in order (wrapping around), reading the latest `r
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it) on both `CapsuleToggles` and `CapsuleToggle`; the panel passes it down to every switch.
 - Turning a switch on by clicking or pressing Space plays `on` from `@/lib/ui-sounds` (a short latch click followed by a quick blip that rises slightly in pitch). Turning it off plays `off` (a slightly softer click and a blip that falls in pitch).
-- Only the switch's own click plays a sound. The autoplay flips, and a parent changing `checked`, are silent, and so is hover.
+- The switch's own click plays a sound. The autoplay flips play the same `on` / `off` sounds through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. A parent changing `checked` is silent, and so is hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

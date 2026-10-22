@@ -32,7 +32,7 @@ export interface BoltingSlidersProps {
   accent?: string;
   /** Throws a random knob every 1.1s until someone touches the panel. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -86,8 +86,9 @@ function BoltSlider({
     [],
   );
 
-  // `audible` is true only when the user caused the leap (a click on the track or a key press), never for autoplay.
-  const leap = (tx: number, audible = false) => {
+  // `by` says who caused the leap: the user (a click on the track or a key press) or autoplay.
+  const leap = (tx: number, by: "user" | "auto") => {
+    const sfx = (name: "lift" | "drop", vol: number) => (by === "user" ? play(name, vol) : play.auto(name, vol));
     flight.current?.stop();
     const x0 = x.get();
     const y0 = y.get();
@@ -95,10 +96,10 @@ function BoltSlider({
       x.set(tx);
       y.set(0);
       setValue(fromX(tx));
-      if (audible) play("drop", 0.4);
+      sfx("drop", 0.4);
       return;
     }
-    if (audible) play("lift", 0.5);
+    sfx("lift", 0.5);
     const dist = Math.abs(tx - x0);
     const peak = -Math.min(90, 30 + dist * 0.45);
     const dur = 0.35 + Math.min(0.45, dist / 600);
@@ -120,7 +121,7 @@ function BoltSlider({
         }
       },
       onComplete: () => {
-        if (audible) play("drop", 0.5);
+        sfx("drop", 0.5);
         animate(sq, [0.6, 1.15, 1], { duration: 0.35 });
         clearTimeout(clearTrail.current);
         clearTrail.current = setTimeout(() => setTrail([]), 500);
@@ -129,7 +130,7 @@ function BoltSlider({
   };
 
   useEffect(() => {
-    register((v) => leap(toX(v)));
+    register((v) => leap(toX(v), "auto"));
   });
 
   const fromEvent = (e: RPointerEvent) => {
@@ -148,7 +149,7 @@ function BoltSlider({
         className="relative h-6 cursor-pointer touch-none"
         onPointerDown={(e) => {
           if ((e.target as HTMLElement).dataset.knob) return;
-          leap(fromEvent(e), true);
+          leap(fromEvent(e), "user");
         }}
         onPointerMove={(e) => {
           if (!dragging.current) return;
@@ -199,7 +200,7 @@ function BoltSlider({
             if (e.key === "End") next = s.max;
             if (next === null) return;
             e.preventDefault();
-            leap(toX(next), true);
+            leap(toX(next), "user");
           }}
           className="absolute left-0 top-1/2 h-[18px] w-[18px] cursor-grab rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,.25),0_0_0_.5px_rgba(0,0,0,.1)] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:cursor-grabbing dark:shadow-[0_2px_8px_rgba(0,0,0,.6),0_0_0_.5px_rgba(0,0,0,.4)] dark:focus-visible:ring-offset-[#1c1c1e]"
           style={{ x, y, scaleY: sq, marginLeft: -9, marginTop: -9, originY: 1, ["--tw-ring-color" as string]: accent }}

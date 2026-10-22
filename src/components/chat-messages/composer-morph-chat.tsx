@@ -9,7 +9,7 @@ export interface ComposerMorphChatProps {
   autoplay?: boolean;
   /** Called with the text whenever a message is sent. */
   onSend?: (text: string) => void;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the root. */
   className?: string;
@@ -136,7 +136,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, enableSound = true
   const turn = useRef(0);
   const touched = useRef(false);
   const inFlight = useRef(false);
-  /** Whether the message now in flight was sent by the visitor (the autoplay demo stays silent). */
+  /** Whether the message now in flight was sent by the visitor (the autoplay demo uses `play.auto`). */
   const flightByUser = useRef(false);
   const timers = useRef<number[]>([]);
   const demoTimers = useRef<number[]>([]);
@@ -179,6 +179,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, enableSound = true
       setThinking(false);
       setMsgs((m) => [...m, { id, me: false, text: scripted ? s.reply : REPLIES[k % REPLIES.length], card: scripted && s.card }]);
       if (byUser) playRef.current("ping", 0.7);
+      else playRef.current.auto("ping", 0.7);
     }, 1400);
   }, [later]);
 
@@ -190,6 +191,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, enableSound = true
       if (!text || !rootEl || !fieldEl || inFlight.current) return;
       onSendRef.current?.(text);
       if (byUser) playRef.current("whoosh");
+      else playRef.current.auto("whoosh");
       const id = nextId.current++;
       setDraft("");
       if (still) {

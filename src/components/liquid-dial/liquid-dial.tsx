@@ -39,7 +39,7 @@ export interface LiquidDialProps {
   onSelect?: (id: string) => void;
   /** Opens and browses by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -105,14 +105,16 @@ export function LiquidDial({ actions = ACTIONS, color, accent, onSelect, autopla
       ts.push(
         window.setTimeout(() => {
           const { choose: pick, actions: list } = latest.current;
-          if (!touched.current && list[1]) pick(list[1]);
+          if (touched.current || !list[1]) return;
+          play.auto("tap", 0.8);
+          pick(list[1]);
         }, 3000),
       );
     };
     ts.push(window.setTimeout(run, 700));
     const loop = setInterval(run, 5200);
     return () => { clearInterval(loop); ts.forEach(clearTimeout); };
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   return (
     <div

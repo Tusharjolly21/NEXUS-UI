@@ -79,7 +79,7 @@ When `autoplay` is true, run a 1600ms interval that restarts every time the tab 
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it) on `AnimatedTabs` and on `Switch`; the tabs pass it down to every switch.
 - Choosing a different tab plays `tick` from `@/lib/ui-sounds` at about 60% volume (a tiny dry high click). Each switch plays `on` when it turns on (a short latch click with a blip that rises slightly in pitch) and `off` when it turns off (the same click with a blip that falls).
-- Clicking the tab that is already selected is silent. The autoplay loop (tab changes and switch flips) is silent, and so is hover.
+- Clicking the tab that is already selected is silent. The autoplay loop plays the same sounds for its beats (a `tick` when it changes tab, `on` / `off` when it flips a switch), through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ---
@@ -159,7 +159,7 @@ Only while the card is on screen, the tab is visible and motion is not reduced: 
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Choosing a different tab, by click, arrow keys, Home or End, plays `tick` from `@/lib/ui-sounds` at about 60% volume (a tiny dry high click).
-- Choosing the tab that is already selected is silent, and so are the autoplay steps and hover.
+- Choosing the tab that is already selected is silent, and so is hover. Each autoplay step to the next tab plays the same `tick` at the same volume, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ---
@@ -236,5 +236,5 @@ Only while the window is on screen, the tab is visible and motion is not reduced
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Switching to another tab, by pointer press or by keyboard (arrows, Home, End, Enter, Space), plays `tick` from `@/lib/ui-sounds` at about 60% volume (a tiny dry high click). The `+` button plays `pop` at 60% (a short blip that rises quickly in pitch) as the new tab grows in. Closing a tab, with its close button or Delete, plays `swipe` at 40% (a short breath of filtered noise that sweeps from bright to dull). Letting go of a tab after dragging it plays `drop` at 50% (a soft low thud that falls in pitch with a brief landing noise).
-- Pressing the tab that is already active, moving a tab with Alt+Arrow, the autoplay loop and hover are silent.
+- Pressing the tab that is already active, moving a tab with Alt+Arrow and hover are silent. The autoplay loop plays the same sounds for its beats (`pop` when it adds a tab, `tick` when it switches tab, `drop` when it reorders, `swipe` when it closes the new tab), through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

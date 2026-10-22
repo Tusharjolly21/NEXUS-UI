@@ -88,5 +88,5 @@ With `autoplay`, the order is `[0, 2, 4, 1, 6, 3, 5]` (indices beyond the option
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Choosing a different option, by click or by arrow keys, plays `tick` from `@/lib/ui-sounds` at 60% volume (a tiny dry high click) as the orb sets off toward it.
-- Pointing at an option (the reach of the liquid), clicking the option that is already selected and the autoplay loop are silent.
+- The autoplay loop plays the same `tick` at the same volume each time it picks a different option, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Pointing at an option (the reach of the liquid, including the loop's ghost reach) and clicking the option that is already selected are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

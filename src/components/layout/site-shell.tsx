@@ -3,6 +3,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { LaunchBanner } from "@/components/site/launch-banner";
 import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
 import { SiteNav } from "@/components/site/site-nav";
+import { SiteAutoplayQuiet } from "@/components/site/sound-switch";
 import { ScrollToTop } from "@/components/site/scroll-to-top";
 import { ProAccessProvider } from "@/components/pro/pro-access";
 import { sessionHasPro, sessionPlanKind } from "@/lib/component-access";
@@ -21,7 +22,9 @@ export async function SiteShell({ children }: { children: React.ReactNode }) {
           <LaunchBanner components={CATALOG_COUNTS.components} templates={CATALOG_COUNTS.templates} blocks={CATALOG_COUNTS.blocks} />
         )}
         <SiteNav isPremium={isPremium} />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <SiteAutoplayQuiet>{children}</SiteAutoplayQuiet>
+        </main>
         <SiteFooter />
         <ScrollToTop />
       </div>

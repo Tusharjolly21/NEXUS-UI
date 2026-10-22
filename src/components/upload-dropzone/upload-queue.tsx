@@ -13,14 +13,14 @@ export interface UploadQueueProps {
   onCancel?: (name: string) => void;
   /** Drops three sample files in, pauses one and resumes it, in a loop, until someone presses or drops on the card. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
 }
 
 type ItemState = "up" | "paused" | "ok";
-type Item = { id: number; name: string; size: number; done: number; state: ItemState; speed: number; audible: boolean };
+type Item = { id: number; name: string; size: number; done: number; state: ItemState; speed: number; audible: boolean | "auto" };
 
 const TYPES: Record<string, string> = { pdf: "#ff3b30", fig: "#bf5af2", mp4: "#ff9f0a", zip: "#8e8e93", png: "#0a84ff", jpg: "#0a84ff", csv: "#30d158" };
 const FALLBACK_COLOR = "#8e8e93";
@@ -101,8 +101,8 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, e
   const gate = useAutoplayGate(cardRef, autoplay, reduce);
   const playing = gate && !touched;
 
-  // `audible` marks rows the user added; the autoplay demo rows stay silent.
-  const add = useCallback((files: { name: string; size: number }[], audible = false) => {
+  // `audible` marks rows the user added; "auto" marks the autoplay demo rows, which sound through `play.auto`.
+  const add = useCallback((files: { name: string; size: number }[], audible: boolean | "auto" = false) => {
     const made: Item[] = files.map((f) => ({
       id: nextId.current++,
       name: f.name,
@@ -138,7 +138,8 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, e
     for (const x of items) {
       if (x.state === "ok" && !finished.current.has(x.id)) {
         finished.current.add(x.id);
-        if (x.audible) play("done");
+        if (x.audible === "auto") play.auto("done");
+        else if (x.audible) play("done");
         onComplete?.(x.name);
       }
     }
@@ -158,7 +159,8 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, e
       at(() => {
         setOver(0);
         setItems([]);
-        add(SAMPLES);
+        play.auto("drop");
+        add(SAMPLES, "auto");
       }, 1500);
       at(() => setItems((xs) => xs.map((x, i) => (i === 2 && x.state === "up" ? { ...x, state: "paused" } : x))), 3800);
       at(() => setItems((xs) => xs.map((x, i) => (i === 2 && x.state === "paused" ? { ...x, state: "up", speed: 9e6 } : x))), 6200);
@@ -170,7 +172,7 @@ export function UploadQueue({ onFiles, onComplete, onCancel, autoplay = false, e
       ids.forEach(clearTimeout);
       setOver(0);
     };
-  }, [playing, add]);
+  }, [playing, add, play]);
 
   const take = (list: File[]) => {
     if (!list.length) return;

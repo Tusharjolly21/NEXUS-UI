@@ -12,7 +12,7 @@ export interface ScrubInputProps {
   step?: number;
   unit?: string;
   accent?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -132,12 +132,13 @@ export interface ScrubInputsProps {
   accent?: string;
   /** Scrubs the three fields by itself until the user touches them. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
 /** A small inspector: radius, rotate and scale fields driving a sample shape. */
 export function ScrubInputs({ accent = "#0071e3", autoplay = false, enableSound = true }: ScrubInputsProps) {
+  const play = useSound(enableSound);
   const [radius, setRadius] = useState(28);
   const [rotate, setRotate] = useState(0);
   const [scale, setScale] = useState(100);
@@ -153,9 +154,11 @@ export function ScrubInputs({ accent = "#0071e3", autoplay = false, enableSound 
       if (key === "r") setRadius(v);
       if (key === "t") setRotate(v);
       if (key === "s") setScale(v);
+      // The same quiet tick a field plays when it is scrubbed.
+      play.auto("tick", 0.4);
     }, 1100);
     return () => clearInterval(tm);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   return (
     <div className="flex w-full max-w-[460px] flex-wrap items-center justify-center gap-8" onPointerDown={() => { touched.current = true; }}>

@@ -37,7 +37,7 @@ export type TimeScrubberProps = {
   /** Flings the ruler to a few times of day until someone touches it. */
   autoplay?: boolean;
   disabled?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -184,6 +184,8 @@ export function TimeScrubber({
   const anim = React.useRef<AnimationPlaybackControls | null>(null);
   const dragging = React.useRef(false);
   const touched = React.useRef(false);
+  // True while the ruler is moving because autoplay sent it there.
+  const autoMove = React.useRef(false);
   const lastEmitted = React.useRef(value);
   const lastShown = React.useRef(value);
 
@@ -235,6 +237,12 @@ export function TimeScrubber({
           lastTick.current = now;
           play("tick", 0.4);
         }
+      } else if (autoMove.current) {
+        const now = performance.now();
+        if (now - lastTick.current >= 150) {
+          lastTick.current = now;
+          play.auto("tick", 0.3);
+        }
       }
     }
   });
@@ -247,14 +255,18 @@ export function TimeScrubber({
       if (notify) {
         play("drop", 0.4);
         onCommit?.(target);
+      } else if (autoMove.current) {
+        play.auto("drop", 0.4);
       }
+      autoMove.current = false;
     },
     [emit, kick, onCommit, play],
   );
 
   const settleTo = React.useCallback(
-    (target: number, notify = true) => {
+    (target: number, notify = true, auto = false) => {
       anim.current?.stop();
+      autoMove.current = auto;
       if (reduced) {
         x.set(pxFor(target));
         land(target, notify);
@@ -293,7 +305,7 @@ export function TimeScrubber({
         clearInterval(t);
         return;
       }
-      settleTo(snap(DEMO[k++ % DEMO.length]), false);
+      settleTo(snap(DEMO[k++ % DEMO.length]), false, true);
     }, 2600);
     return () => clearInterval(t);
   }, [autoplay, settleTo, snap]);
@@ -304,6 +316,7 @@ export function TimeScrubber({
     if (disabled || e.button > 0) return;
     e.preventDefault();
     touched.current = true;
+    autoMove.current = false;
     if (e.isTrusted) viewportRef.current?.focus({ preventScroll: true });
     anim.current?.stop();
     anim.current = null;

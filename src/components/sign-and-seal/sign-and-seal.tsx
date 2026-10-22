@@ -10,7 +10,7 @@ export interface SignAndSealProps {
   ink?: string;
   /** Signs itself on a loop until the user draws. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -100,10 +100,9 @@ export function SignAndSeal({ name = "Alex Rivera", title = "Founding member", i
     idle.current = window.setTimeout(() => {
       if (strokes.current.some((s) => s.length > 6)) {
         setSealed(true);
-        // Only the visitor's own signature is heard, never the autoplay demo.
-        if (touched.current) {
-          sounds.current.push(window.setTimeout(() => play("knock"), 350), window.setTimeout(() => play("success"), 800));
-        }
+        // The visitor's own signature is heard as input, the autoplay demo's through play.auto.
+        const say = touched.current ? play : play.auto;
+        sounds.current.push(window.setTimeout(() => say("knock"), 350), window.setTimeout(() => say("success"), 800));
       }
     }, 900);
   }, [play]);

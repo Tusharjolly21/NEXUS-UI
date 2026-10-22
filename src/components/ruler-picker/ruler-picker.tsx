@@ -13,7 +13,7 @@ export interface RulerPickerProps {
   onChange?: (v: number) => void;
   /** Glides between presets by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -28,6 +28,8 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
   const touched = useRef(false);
   // True while the ruler is moving because of the user (drag, fling, arrow keys); false for autoplay and preset glides.
   const audible = useRef(false);
+  // True while an autoplay glide is moving the ruler; it ticks a little more sparsely than the user does.
+  const autoGlide = useRef(false);
   const lastStep = useRef(defaultValue);
   const lastTick = useRef(0);
 
@@ -39,6 +41,9 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
       if (audible.current && now - lastTick.current >= 40) {
         lastTick.current = now;
         play("tick", 0.4);
+      } else if (autoGlide.current && now - lastTick.current >= 150) {
+        lastTick.current = now;
+        play.auto("tick", 0.3);
       }
     }
     setValue((prev) => {
@@ -59,6 +64,7 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
       audible.current = false;
+      autoGlide.current = true;
       goTo(seq[k++ % seq.length]);
     }, 2200);
     return () => clearInterval(t);
@@ -70,7 +76,7 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
   const m = value % 60;
 
   return (
-    <div className="flex w-full flex-col items-center gap-6" onPointerDown={() => (touched.current = true)}>
+    <div className="flex w-full flex-col items-center gap-6" onPointerDown={() => { touched.current = true; autoGlide.current = false; }}>
       <div className="flex h-[64px] items-baseline gap-1 text-[56px] font-semibold leading-none tracking-[-0.04em] text-[#1d1d1f] tabular-nums dark:text-[#f5f5f7]" aria-live="polite">
         <AnimatePresence mode="popLayout" initial={false} custom={dir}>
           <motion.span
@@ -130,7 +136,7 @@ export function RulerPicker({ min = 0, max = 90, defaultValue = 25, unit = "min"
             key={p}
             type="button"
             whileTap={{ scale: 0.92 }}
-            onClick={() => { touched.current = true; audible.current = false; play("tap", 0.6); goTo(p); }}
+            onClick={() => { touched.current = true; audible.current = false; autoGlide.current = false; play("tap", 0.6); goTo(p); }}
             style={value === p ? { backgroundColor: accent } : undefined}
             className={`h-9 rounded-full px-4 text-[13px] font-medium shadow-[0_0_0_1px_rgba(0,0,0,.08)] transition-colors ${value === p ? "text-white" : "bg-white text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"} focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]`}
           >

@@ -71,5 +71,5 @@ When `autoplay` is true, every 1500ms set the active item to the next index in t
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Selecting a different item plays `tick` from `@/lib/ui-sounds` at 60% volume (a tiny dry high click) as the capsule starts to stretch toward it.
-- Pressing the item that is already active, hovering and the autoplay loop are silent.
+- The autoplay loop plays the same `tick` at the same volume each time it moves to a different item, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Pressing the item that is already active and hovering are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

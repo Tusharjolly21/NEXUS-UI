@@ -79,5 +79,5 @@ When `autoplay` is true, every 2400ms the selection steps through option indices
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Choosing a different card, by click or by arrow keys in the group, plays `tick` from `@/lib/ui-sounds` (a tiny dry high click) as the ring moves.
-- The autoplay cycle is silent, and so is hover and pressing the card that is already selected.
+- The autoplay cycle plays the same `tick` each time it moves to another card, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

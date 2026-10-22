@@ -22,7 +22,7 @@ export interface SelectCopyProps {
   onCopy?: (value: string) => void;
   /** Runs a visual-only copy on each field in turn until someone presses or types in the card. Never touches the clipboard. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
@@ -95,6 +95,10 @@ function CopyField({
   enableSound: boolean;
 }) {
   const sfx = useSound(enableSound);
+  const sfxRef = useRef(sfx);
+  useEffect(() => {
+    sfxRef.current = sfx;
+  });
   const { label, value, mono = true, prefix } = field;
   const [state, setState] = useState<CopyState>("idle");
   // Only real presses are announced to screen readers, never the demo loop.
@@ -127,6 +131,7 @@ function CopyField({
     if (!playing) return;
     const demo = () => {
       setAnnounce(false);
+      sfxRef.current.auto("success", 0.6);
       play();
     };
     const first = window.setTimeout(demo, autoDelay);

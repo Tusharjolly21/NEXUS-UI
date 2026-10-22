@@ -26,7 +26,7 @@ export type FloatingDockDesktopProps = {
   position?: "fixed" | "inline";
   /** Sweeps an invisible pointer across the dock and bounces a tile until someone points at it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -45,6 +45,7 @@ export function FloatingDockDesktop({
   enableSound = true,
 }: FloatingDockDesktopProps) {
   const play = useSound(enableSound);
+  const playRef = React.useRef(play);
   const pathname = usePathname();
   const still = useReducedMotion() === true;
   const group = React.useId();
@@ -56,6 +57,10 @@ export function FloatingDockDesktop({
   const routed = items.find((i) => routeActive(pathname, i.href))?.href;
   // Real links follow the route; button tiles (previews, in-app actions) follow the last pick.
   const active = activeHref ?? (disableLinks ? (picked ?? routed) : (routed ?? picked)) ?? null;
+
+  React.useEffect(() => {
+    playRef.current = play;
+  }, [play]);
 
   const hrefs = items.map((i) => i.href).join("\u0000");
   React.useEffect(() => {
@@ -80,6 +85,7 @@ export function FloatingDockDesktop({
           if (touched.current) return;
           mouseX.set(Number.POSITIVE_INFINITY);
           const href = order[(k * 3 + 1) % order.length];
+          playRef.current.auto("pop");
           setPicked(href);
           setBounces((b) => ({ ...b, [href]: (b[href] ?? 0) + 1 }));
           k++;
