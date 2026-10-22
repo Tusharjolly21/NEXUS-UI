@@ -2374,9 +2374,9 @@ export function DecodeButton() {
     slug: "mac-keyboard",
     name: "Mac Keyboard",
     registryCliName: "mac-keyboard",
-    description: "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, click with synthesised sound and show what you type in a strip above.",
+    description: "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, plays a recorded mechanical click for each key the instant it goes down, and shows what you type in a strip above.",
     categorySlug: "motion-effects",
-    tags: ["keyboard", "mac", "keys", "typing", "sound", "web audio", "interactive", "motion kit", "framer-motion"],
+    tags: ["keyboard", "mac", "keys", "typing", "sound", "key click", "mechanical keyboard", "web audio", "interactive", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 95,
     createdAt: "2026-05-14",
@@ -2391,8 +2391,9 @@ export function DecodeButton() {
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types autoplayText on the keys again and again until someone presses a key." },
       { name: "autoplayText", type: "string", defaultValue: "\"hello, nexus\"", description: "What the demo types." },
       { name: "accent", type: "string", defaultValue: "\"#0a84ff\"", description: "Colour of the backlight ripple." },
-      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays a synthesised click on each press (not during autoplay)." },
-      { name: "soundType", type: "\"mechanical\" | \"soft\" | \"clicky\"", defaultValue: "\"mechanical\"", description: "Timbre of the click." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays a key click the moment a key goes down (not during autoplay)." },
+      { name: "soundSrc", type: "string", defaultValue: "\"/sounds/keys.ogg\"", description: "Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds; until it loads, or if it is missing, the synthesised click plays. Pass \"\" to always synthesise." },
+      { name: "soundType", type: "\"mechanical\" | \"soft\" | \"clicky\"", defaultValue: "\"mechanical\"", description: "Timbre of the synthesised click (used when there is no recording)." },
       { name: "volume", type: "number", defaultValue: "0.6", description: "Click volume, 0 to 1." },
       { name: "showFunctionRow", type: "boolean", defaultValue: "true", description: "Shows the Esc and F-key row (mac layout)." },
       { name: "activeKeys", type: "string[]", defaultValue: "[]", description: "KeyboardEvent.code values to show as held, e.g. from usePhysicalKeyboard()." },
@@ -2411,7 +2412,7 @@ export function DecodeButton() {
 import { MacKeyboard } from "@/components/keyboard";
 
 export function DemoKeyboard() {
-  return <MacKeyboard autoplay autoplayText="hello, nexus" enableSound={false} />;
+  return <MacKeyboard autoplay autoplayText="hello, nexus" />;
 }`,
       },
       {
@@ -6282,9 +6283,9 @@ export function LayerInspector() {
     name: "Lit Keyboard",
     registryCliName: "lit-keyboard",
     description:
-      "A tilted keyboard that lights up under your typing and fades with a slow afterglow. Record a run and replay it with the original timing.",
+      "A tilted keyboard that lights up under your typing or clicks and fades with a slow afterglow, with a recorded mechanical click on every key. Record a run and replay it with the original timing and sound.",
     categorySlug: "motion-effects",
-    tags: ["keyboard", "typing", "keys", "glow", "record", "replay", "motion kit", "framer-motion"],
+    tags: ["keyboard", "typing", "keys", "glow", "record", "replay", "sound", "key click", "motion kit", "framer-motion"],
     premium: true,
     trendingScore: 154,
     createdAt: "2026-10-19",
@@ -6292,7 +6293,10 @@ export function LayerInspector() {
     dependencies: ["framer-motion"],
     props: [
       { name: "glow", type: "string", defaultValue: '"#ff9f0a"', description: "Colour a key flashes to when pressed. Use a hex colour; the glow adds alpha to it." },
-      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample phrase by itself every few seconds until someone types." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types a sample phrase by itself every few seconds until someone types. The demo stays silent." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays a key click with every press, click and replayed key. Follows the site-wide sound switch and stays silent in autoplay." },
+      { name: "soundSrc", type: "string", defaultValue: '"/sounds/keys.ogg"', description: "Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds; until it loads, or if it is missing, a short synthesised tick plays." },
+      { name: "volume", type: "number", defaultValue: "0.6", description: "Click volume, 0 to 1." },
     ],
     Preview: Previews.PreviewLitKeyboard,
     previewShell: "plain",

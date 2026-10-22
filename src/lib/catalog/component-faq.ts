@@ -150,7 +150,7 @@ export const COMPONENT_FAQ: Record<string, ComponentFaqItem[]> = {
     { q: "Where does the earth texture come from?", a: "The `globeTextureUrl` prop sets it, defaulting to `/images/earth-blue-marble.jpg`. Put an earth texture at that path in your public folder or point the prop at your own image." },
   ],
   "mac-keyboard": [
-    { q: "How do I install the Mac keyboard?", a: "Run `npx shadcn@latest add @nexus-labs/mac-keyboard`. It installs framer-motion. No audio files are needed because the click sounds are generated with the Web Audio API." },
+    { q: "How do I install the Mac keyboard?", a: "Run `npx shadcn@latest add @nexus-labs/mac-keyboard`. It installs framer-motion. For the recorded key clicks, copy `keys.ogg` (about 200 KB) into `public/sounds/`; without it the keys use a click synthesised with the Web Audio API, so nothing breaks." },
     { q: "How do I highlight keys as the user types?", a: "Call the exported `usePhysicalKeyboard()` hook and pass its result to `activeKeys`. Keys matching the pressed `KeyboardEvent.code` values show as held down." },
     { q: "Which sound options are there?", a: "`enableSound` turns sound on or off, `soundType` picks \"mechanical\", \"soft\" or \"clicky\", and `volume` goes from 0 to 1. Sounds play when virtual keys are clicked, and `onKeyPress` gives you the key that was pressed." },
     { q: "Can I change the layout and theme?", a: "`layout` is \"mac\" or \"compact\", `showFunctionRow` hides the Esc and F-key row, and `theme` is \"dark\", \"light\" or \"auto\", which follows the `dark` class on the html element." },

@@ -29,3 +29,7 @@ If you copy the Terminal module into another app, include **`terminal.tsx`** and
 ## Attribution
 
 Audio asset and timing originate from Aceternity UI; use according to their license and terms when redistributing.
+
+## Key clicks for the keyboards (`keys.ogg`)
+
+`MacKeyboard` and `LitKeyboard` play `keys.ogg`: a compact sprite (about 200 KB, 18 s) cut from `sound.ogg`, one Cherry MX Black slice per key, each trimmed so it starts on the click's attack. The slice table lives in code (`src/components/key-sound/key-sound-slices.ts`), so no JSON is fetched. If you install the keyboards into another app, copy `keys.ogg` to `public/sounds/` (or pass `soundSrc`); without it they fall back to a synthesised click. Same origin and attribution as `sound.ogg` above.

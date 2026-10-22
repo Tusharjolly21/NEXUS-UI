@@ -4,17 +4,24 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { KeyboardKey } from "./keyboard-key";
 import { useKeyboardSound, type SoundType } from "./use-keyboard-sound";
+import { useKeySound, DEFAULT_KEY_SOUND_SRC } from "@/components/key-sound";
 import { MAC_ROWS, COMPACT_ROWS, CODE_ALIASES, type KeyDef } from "./keyboard-layout";
 import { cn } from "@/lib/utils";
 
 export interface KeyboardProps {
   /** Full layout with the Esc and F-key row, or compact without it. */
   layout?: "mac" | "compact";
-  /** Plays a synthesised key click when a key is pressed. */
+  /** Plays a key click the moment a key is pressed (not during autoplay). */
   enableSound?: boolean;
+  /**
+   * Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds or point this at
+   * your own copy. Until it loads, or if it is missing, keys use the synthesised click.
+   * Pass "" to always synthesise.
+   */
+  soundSrc?: string;
   /** Click volume, 0 to 1. */
   volume?: number;
-  /** Timbre of the click. */
+  /** Timbre of the synthesised click (used when there is no recording). */
   soundType?: SoundType;
   /** KeyboardEvent.code values to show as held, e.g. from `usePhysicalKeyboard()`. */
   activeKeys?: string[];
@@ -85,6 +92,7 @@ const MAX_CHARS = 32;
 export function MacKeyboard({
   layout = "mac",
   enableSound = true,
+  soundSrc = DEFAULT_KEY_SOUND_SRC,
   volume = 0.6,
   soundType = "mechanical",
   activeKeys = [],
@@ -102,7 +110,8 @@ export function MacKeyboard({
 }: KeyboardProps) {
   const still = useReducedMotion() === true;
   const skin = SKIN[theme] ?? SKIN.auto;
-  const { play } = useKeyboardSound({ enabled: enableSound, volume, soundType });
+  const { play: synth } = useKeyboardSound({ enabled: enableSound, volume, soundType });
+  const { play: playRecorded, prime: primeSound, unlock: unlockSound } = useKeySound({ enabled: enableSound, src: soundSrc, volume });
   const body = React.useRef<HTMLDivElement>(null);
   const timers = React.useRef(new Set<number>());
   const els = React.useRef(new Map<string, HTMLElement>());
@@ -134,7 +143,8 @@ export function MacKeyboard({
         const id = ++seq.current;
         setRipples((r) => [...r.slice(-5), { id, x: Math.round(a.left - b.left + a.width / 2), y: Math.round(a.top - b.top + a.height / 2) }]);
       }
-      if (sound) play(key.sound);
+      // Sound first, in the same event as the press, so it lands with the key going down.
+      if (sound && !playRecorded(key.code)) synth(key.sound);
       if (key.code === "Enter") {
         setText("");
         setSent((n) => n + 1);
@@ -146,7 +156,7 @@ export function MacKeyboard({
         return t;
       });
     },
-    [play, still],
+    [playRecorded, synth, still],
   );
 
   const tap = React.useCallback((key: KeyDef) => {
@@ -174,6 +184,10 @@ export function MacKeyboard({
   );
 
   // Real keyboard.
+  React.useEffect(() => {
+    if (listen) primeSound();
+  }, [listen, primeSound]);
+
   React.useEffect(() => {
     if (!listen) return;
     const down = (e: KeyboardEvent) => {
@@ -275,6 +289,9 @@ export function MacKeyboard({
         ref={body}
         role="group"
         aria-label="Mac keyboard"
+        onPointerEnter={primeSound}
+        onFocus={primeSound}
+        onPointerUp={unlockSound}
         className={cn(`relative w-full select-none overflow-hidden rounded-[min(22px,3cqw)] p-[min(14px,1.8cqw)] ${skin.body}`, className)}
       >
         {/* Backlight: rings drawn under the caps, so the light shows through the gaps. */}
