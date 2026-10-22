@@ -75,7 +75,7 @@ const nextConfig = {
       "./src/components/{interactive-dots,layered-wave-background,particle-noise,wavy-lines}/**/*.{ts,tsx}",
       "./src/app/globals.css",
     ],
-    "/components/[slug]": ["./.generated/registry/**/*.json"],
+    "/components/[slug]": ["./.generated/registry/**/*.json", "./content/build-prompts/*.md"],
     // Pro build prompts live outside public/ and are only read by this gated route.
     "/api/prompt/[slug]": ["./content/build-prompts/*.md"],
   },
