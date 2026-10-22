@@ -1,5 +1,6 @@
 import { Check } from "lucide-react";
 import { PillLink } from "@/components/site";
+import { PlanLink } from "@/components/pricing/plan-action";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { PRICES, formatPrice } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
@@ -76,13 +77,20 @@ export function PricingTeaser() {
               <span className="text-[15px] text-muted-foreground">{p.term}</span>
             </p>
             <p className="mt-3 flex-1 text-[15px] text-muted-foreground">{p.line}</p>
-            <PillLink
-              href={p.href}
-              variant={"featured" in p && p.featured ? "ink" : "white"}
-              className="mt-7 w-full"
-            >
-              {p.cta}
-            </PillLink>
+            {p.name === "Free" ? (
+              <PillLink href={p.href} variant="white" className="mt-7 w-full">
+                {p.cta}
+              </PillLink>
+            ) : (
+              <PlanLink
+                tier={p.name === "Pro" ? "pro" : "all-access"}
+                href={p.href}
+                variant={"featured" in p && p.featured ? "ink" : "white"}
+                className="mt-7 w-full"
+              >
+                {p.cta}
+              </PlanLink>
+            )}
           </article>
         ))}
       </div>

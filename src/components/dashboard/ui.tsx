@@ -82,13 +82,15 @@ export function StatusPill({ status, label, tone }: { status: string; label?: st
   );
 }
 
-export function Notice({ tone, children }: { tone: "warn" | "info"; children: React.ReactNode }) {
+export function Notice({ tone, children }: { tone: "warn" | "info" | "success"; children: React.ReactNode }) {
   return (
     <p
       role={tone === "warn" ? "alert" : "status"}
       className={cn(
         "rounded-2xl px-4 py-3 text-[14.5px] leading-relaxed",
-        tone === "warn" ? "bg-amber-500/12 text-amber-800 dark:text-amber-300" : "bg-muted text-body",
+        tone === "warn" && "bg-amber-500/12 text-amber-800 dark:text-amber-300",
+        tone === "info" && "bg-muted text-body",
+        tone === "success" && "bg-[#34c759]/14 text-[#1d6b30] dark:text-[#7ee2a8]",
       )}
     >
       {children}

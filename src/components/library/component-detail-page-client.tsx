@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
-import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { FitPreview } from "@/components/library/fit-preview";
@@ -297,7 +297,7 @@ function BuildPromptCard({ slug, name }: { slug: string; name: string }) {
     <div className="mt-6 rounded-[18px] bg-foreground/[0.04] p-4">
       <div className="flex items-center justify-between gap-2">
         <p className="text-[14px] font-semibold text-foreground">Build prompt</p>
-        {isPro ? null : <ProBadge />}
+        <ProBadge />
       </div>
       <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
         The exact brief to rebuild {name} from scratch with Claude, Cursor or v0: layout, colours, motion values and states.
@@ -333,6 +333,7 @@ function InstallPanel({
   dependencies,
   interactions,
   locked,
+  premium,
   name,
   hasPrompt,
 }: {
@@ -341,6 +342,8 @@ function InstallPanel({
   dependencies: string[];
   interactions: string[];
   locked: boolean;
+  /** This component is Pro (and, past the locked branch, the visitor has it). */
+  premium: boolean;
   name: string;
   hasPrompt: boolean;
 }) {
@@ -392,6 +395,18 @@ function InstallPanel({
       <h2 className="text-[19px] font-semibold tracking-[-0.4px] text-foreground">Install</h2>
       <p className="mt-1 text-[14px] text-muted-foreground">One command adds the component and its dependencies.</p>
       <InstallCard wrap command={command} className="mt-4" upsell />
+
+      {premium ? (
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-[#34c759]/12 p-3.5 text-[13.5px] leading-relaxed text-foreground">
+          <LockOpen className="mt-0.5 size-4 shrink-0 text-[#248a3d] dark:text-[#30d158]" aria-hidden />
+          <p>
+            <span className="font-semibold">{name} is unlocked.</span> Premium installs ask for your API token the first time.{" "}
+            <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
+              Set it up
+            </Link>
+          </p>
+        </div>
+      ) : null}
 
       {extra.length ? (
         <div className="mt-6">
@@ -830,6 +845,7 @@ export function ComponentDetailPageClient({
               dependencies={dependencies}
               interactions={interactions}
               locked={locked}
+              premium={premium}
               name={name}
               hasPrompt={hasPrompt}
             />

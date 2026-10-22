@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { Lock, Search, X } from "lucide-react";
+import { Lock, LockOpen, Search, X } from "lucide-react";
 import { ProBadge, useProAccess } from "@/components/pro/pro-access";
 import { PillLink } from "@/components/site/pill-link";
 import { PRICES, formatPrice } from "@/lib/pricing";
@@ -59,6 +59,7 @@ function AccessSwitch({ value, onChange, counts }: { value: Access; onChange: (v
   const id = React.useId();
   const reduce = useReducedMotion();
   const label: Record<Access, string> = { all: "All", free: "Free", pro: "Pro" };
+  const { isPro } = useProAccess();
   return (
     <div role="radiogroup" aria-label="Show free or Pro components" className="pg-float inline-flex h-[52px] shrink-0 items-center gap-0.5 rounded-full bg-card p-1.5">
       {ACCESS.map((a) => {
@@ -83,7 +84,9 @@ function AccessSwitch({ value, onChange, counts }: { value: Access; onChange: (v
               />
             ) : null}
             <span className="relative inline-flex items-center gap-1.5">
-              {a === "pro" ? <Lock className="size-3.5" strokeWidth={2.4} aria-hidden /> : null}
+              {a === "pro" ? (
+                isPro ? <LockOpen className={cn("size-3.5", !on && "text-[#248a3d] dark:text-[#30d158]")} strokeWidth={2.4} aria-hidden /> : <Lock className="size-3.5" strokeWidth={2.4} aria-hidden />
+              ) : null}
               {label[a]}
               <span className={cn("tabular-nums text-[12px]", on ? "text-background/60" : "text-muted-foreground")}>{counts[a]}</span>
             </span>

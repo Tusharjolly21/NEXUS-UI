@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createCheckoutSession, productIdForPlan, type Plan } from "@/lib/dodo";
+import { getUserEntitlements } from "@/lib/entitlements";
+import { summarisePlan } from "@/lib/plan";
 
 export async function POST(req: Request) {
   const supabase = await createClient();
@@ -15,6 +17,23 @@ export async function POST(req: Request) {
   const plan = (body.plan ?? "lifetime") as Plan;
   if (plan !== "annual" && plan !== "lifetime") {
     return NextResponse.json({ error: "Unknown plan." }, { status: 400 });
+  }
+
+  // Don't take a second payment for something the buyer already has. Checked here, not just in the
+  // UI, so a stale tab or a direct request can't double-charge.
+  try {
+    const { subscription, orders } = await getUserEntitlements(user.id);
+    const current = summarisePlan(subscription, orders);
+    if (current.kind === "lifetime") {
+      return NextResponse.json({ error: "You already have All-Access, which includes everything." }, { status: 409 });
+    }
+    // A Pro plan that is renewing (or whose payment needs fixing) blocks another Pro purchase. One that is
+    // set to end can be bought again once it has.
+    if (plan === "annual" && current.kind === "yearly" && current.badge.label !== "Ending") {
+      return NextResponse.json({ error: "You already have Pro. Manage it from Billing in your dashboard." }, { status: 409 });
+    }
+  } catch {
+    // If the check itself fails, let checkout continue: the payment provider and webhook are the source of truth.
   }
 
   if (!process.env.DODO_PAYMENTS_API_KEY || !productIdForPlan(plan)) {

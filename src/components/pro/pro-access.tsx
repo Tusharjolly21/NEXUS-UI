@@ -3,12 +3,14 @@
 import * as React from "react";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
-import { Check, Lock } from "lucide-react";
+import { Check, Lock, LockOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ProAccess = {
   /** The visitor has Pro (an active plan or All-Access). */
   isPro: boolean;
+  /** Which plan: "yearly" is Pro, "lifetime" is All-Access, "free" is neither. */
+  plan: "free" | "yearly" | "lifetime";
   /** How many components are Pro (for "N more" copy). */
   proCount: number;
   /**
@@ -20,6 +22,7 @@ type ProAccess = {
 
 const ProAccessContext = React.createContext<ProAccess>({
   isPro: false,
+  plan: "free",
   proCount: 0,
   requestUpgrade: () => {
     window.location.assign("/pricing");
@@ -40,9 +43,22 @@ export function useLocked(premium: boolean | undefined) {
  * Knows whether the visitor has Pro and owns the one upgrade dialog every locked action opens.
  * Mounted once by the site shell.
  */
-export function ProAccessProvider({ isPro, proCount, children }: { isPro: boolean; proCount: number; children: React.ReactNode }) {
+export function ProAccessProvider({
+  isPro,
+  plan = isPro ? "yearly" : "free",
+  proCount,
+  children,
+}: {
+  isPro: boolean;
+  plan?: ProAccess["plan"];
+  proCount: number;
+  children: React.ReactNode;
+}) {
   const [target, setTarget] = React.useState<{ name?: string; feature?: string } | null>(null);
-  const value = React.useMemo<ProAccess>(() => ({ isPro, proCount, requestUpgrade: (name, feature) => setTarget({ name, feature }) }), [isPro, proCount]);
+  const value = React.useMemo<ProAccess>(
+    () => ({ isPro, plan, proCount, requestUpgrade: (name, feature) => setTarget({ name, feature }) }),
+    [isPro, plan, proCount],
+  );
 
   return (
     <ProAccessContext.Provider value={value}>
@@ -187,8 +203,60 @@ function UpgradeDialog({
   );
 }
 
-/** The small Pro tag shown on locked tiles and pages. */
+/** Shows `pro` to members and `otherwise` to everyone else, for copy that should change with the plan. */
+export function IfPro({ pro, otherwise = null }: { pro: React.ReactNode; otherwise?: React.ReactNode }) {
+  const { isPro } = useProAccess();
+  return <>{isPro ? pro : otherwise}</>;
+}
+
+/** A green note for members only, such as "you have Pro, here's your next step". */
+export function ProNote({ className, children }: { className?: string; children: React.ReactNode }) {
+  const { isPro } = useProAccess();
+  if (!isPro) return null;
+  return (
+    <div
+      className={cn(
+        "flex items-start gap-2.5 rounded-2xl bg-[#34c759]/12 p-3.5 text-[14px] leading-relaxed text-foreground",
+        className,
+      )}
+    >
+      <LockOpen className="mt-0.5 size-4 shrink-0 text-[#248a3d] dark:text-[#30d158]" aria-hidden />
+      <div>{children}</div>
+    </div>
+  );
+}
+
+/** The small green tag that replaces the Pro lock once the visitor has Pro. */
+export function UnlockedBadge({
+  className,
+  onDark = false,
+  label = "Unlocked",
+}: {
+  className?: string;
+  onDark?: boolean;
+  label?: string;
+}) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
+        onDark ? "bg-[#30d158]/25 text-[#7ee2a8] backdrop-blur-md" : "bg-[#248a3d] text-white dark:bg-[#30d158] dark:text-[#04230f]",
+        className,
+      )}
+    >
+      <LockOpen className="size-3" strokeWidth={2.4} aria-hidden />
+      {label}
+    </span>
+  );
+}
+
+/**
+ * The small Pro tag shown on Pro tiles and pages. Visitors without Pro see the locked tag; once
+ * they have Pro the same spot turns into a green "Unlocked", so every Pro item reads as theirs.
+ */
 export function ProBadge({ className, onDark = false }: { className?: string; onDark?: boolean }) {
+  const { isPro } = useProAccess();
+  if (isPro) return <UnlockedBadge className={className} onDark={onDark} />;
   return (
     <span
       className={cn(
@@ -199,6 +267,23 @@ export function ProBadge({ className, onDark = false }: { className?: string; on
     >
       <Lock className="size-3" strokeWidth={2.4} aria-hidden />
       Pro
+    </span>
+  );
+}
+
+/** Free, Pro or Unlocked, for list rows where the tag sits beside a title. */
+export function AccessTag({ premium, className }: { premium: boolean; className?: string }) {
+  const { isPro } = useProAccess();
+  if (premium && isPro) return <UnlockedBadge className={cn("px-2.5 py-0.5 text-[12px]", className)} />;
+  return (
+    <span
+      className={cn(
+        "rounded-full px-2.5 py-0.5 text-[12px] font-semibold",
+        premium ? "bg-[#1d1d1f] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]" : "bg-[#34c759]/12 text-[#248a3d] dark:text-[#30d158]",
+        className,
+      )}
+    >
+      {premium ? "Pro" : "Free"}
     </span>
   );
 }

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Github, Loader2, MailCheck } from "lucide-react";
+import { CircleCheck, Github, Loader2, MailCheck } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "sonner";
 import { isSupabaseConfigured } from "@/lib/env";
@@ -15,9 +15,31 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 const RESEND_SECONDS = 60;
+const POLL_MS = 2000;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Provider = "google" | "github";
+
+/** Proof that this browser asked for the link, so it can be signed in from another device. */
+type Handoff = { id: string; secret: string };
+
+async function createHandoff(): Promise<Handoff | null> {
+  try {
+    const secret = Array.from(crypto.getRandomValues(new Uint8Array(32)), (byte) =>
+      byte.toString(16).padStart(2, "0"),
+    ).join("");
+    const res = await fetch("/api/auth/handoff", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ secret }),
+    });
+    if (!res.ok) return null;
+    const { id } = (await res.json()) as { id?: unknown };
+    return typeof id === "string" ? { id, secret } : null;
+  } catch {
+    return null; // sign-in still works; this device just won't auto-complete
+  }
+}
 
 export function LoginForm() {
   const searchParams = useSearchParams();
@@ -28,6 +50,8 @@ export function LoginForm() {
   const [email, setEmail] = React.useState("");
   const [emailError, setEmailError] = React.useState<string | null>(null);
   const [sentTo, setSentTo] = React.useState<string | null>(null);
+  const [handoff, setHandoff] = React.useState<Handoff | null>(null);
+  const [signedIn, setSignedIn] = React.useState(false);
   const [sending, setSending] = React.useState(false);
   const [oauthPending, setOauthPending] = React.useState<Provider | null>(null);
   const [cooldown, setCooldown] = React.useState(0);
@@ -59,6 +83,47 @@ export function LoginForm() {
     const timer = window.setTimeout(() => setCooldown((value) => Math.max(0, value - 1)), 1000);
     return () => window.clearTimeout(timer);
   }, [cooldown]);
+
+  /* Another device approved the link → the server signs this browser in. Poll until it does. */
+  React.useEffect(() => {
+    if (!sentTo || !handoff) return;
+    let stopped = false;
+    let timer: number | undefined;
+
+    async function poll() {
+      let status = "pending";
+      try {
+        const res = await fetch("/api/auth/handoff/poll", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(handoff),
+        });
+        const body = (await res.json()) as { status?: string };
+        status = body.status ?? "pending";
+      } catch {
+        // offline blip — keep trying
+      }
+      if (stopped) return;
+
+      if (status === "signed_in") {
+        setSignedIn(true);
+        window.location.assign(next);
+        return;
+      }
+      if (status === "expired" || status === "error") {
+        setHandoff(null);
+        if (status === "error") toast.error("Couldn't finish signing in here. Open the link on this device, or send a new one.");
+        return;
+      }
+      timer = window.setTimeout(poll, POLL_MS);
+    }
+
+    timer = window.setTimeout(poll, POLL_MS);
+    return () => {
+      stopped = true;
+      window.clearTimeout(timer);
+    };
+  }, [sentTo, handoff, next]);
 
   const busy = sending || oauthPending !== null;
 
@@ -97,15 +162,18 @@ export function LoginForm() {
       return;
     }
     setSending(true);
+    const pending = await createHandoff();
+    const redirect = `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}${pending ? `&rid=${pending.id}` : ""}`;
     const { error } = await createClient().auth.signInWithOtp({
       email: clean,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: { emailRedirectTo: redirect },
     });
     setSending(false);
     if (error) {
       setEmailError(error.message);
       return;
     }
+    setHandoff(pending);
     setSentTo(clean);
     setCooldown(RESEND_SECONDS);
   }
@@ -118,21 +186,33 @@ export function LoginForm() {
 
       <div className="relative w-full max-w-[440px]">
         <div className="flex flex-col items-center text-center">
-          <h1 className="pg-display text-[clamp(44px,8vw,60px)] text-foreground">{sentTo ? "Check your inbox" : "Sign in"}</h1>
+          <h1 className="pg-display text-[clamp(44px,8vw,60px)] text-foreground">
+            {signedIn ? "You're signed in" : sentTo ? "Check your inbox" : "Sign in"}
+          </h1>
           <p className="mt-3 max-w-[360px] text-[17px] leading-relaxed text-muted-foreground">
-            {sentTo
-              ? "We sent a sign-in link. Open it on this device to finish."
-              : "New here? The same steps create your account. No password needed."}
+            {signedIn
+              ? "Taking you to your account…"
+              : sentTo
+                ? handoff
+                  ? "We sent a sign-in link. Open it on any device and this page signs in by itself."
+                  : "We sent a sign-in link. Open it on this device to finish."
+                : "New here? The same steps create your account. No password needed."}
           </p>
         </div>
 
         {sentTo ? (
           <section className={cn(card, "text-center")} aria-live="polite">
             <span className="mx-auto grid size-12 place-items-center rounded-full bg-muted text-foreground">
-              <MailCheck className="size-6" aria-hidden />
+              {signedIn ? <CircleCheck className="size-6" aria-hidden /> : <MailCheck className="size-6" aria-hidden />}
             </span>
             <p className="mt-4 text-[15px] text-muted-foreground">Link sent to</p>
             <p className="mt-0.5 break-all text-[17px] font-semibold text-foreground">{sentTo}</p>
+            {handoff && !signedIn ? (
+              <p className="mt-4 inline-flex items-center gap-2 text-[14px] font-medium text-foreground">
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                Waiting for you to open the link…
+              </p>
+            ) : null}
             <p className="mt-3 text-[14px] leading-relaxed text-muted-foreground">
               It can take a minute. If you don&apos;t see it, check your spam folder.
             </p>
@@ -149,6 +229,7 @@ export function LoginForm() {
                 type="button"
                 onClick={() => {
                   setSentTo(null);
+                  setHandoff(null);
                   setCooldown(0);
                 }}
                 className="h-11 rounded-full text-[14.5px] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
