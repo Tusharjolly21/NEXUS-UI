@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import { useUrlParam } from "@/components/gallery/use-url-param";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { TemplateTile } from "@/components/templates/template-tile";
@@ -19,7 +20,9 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
   const [param, setParam] = useUrlParam("category");
   const category = CATEGORIES.find((c) => c === param) ?? null;
 
-  const shown = category ? SORTED.filter((t) => t.category === category) : SORTED;
+  const matches = category ? SORTED.filter((t) => t.category === category) : SORTED;
+  const infinite = useInfiniteCount({ total: matches.length, batch: 8, storeKey: `templates|${category ?? ""}` });
+  const shown = matches.slice(0, infinite.count);
 
   return (
     <>
@@ -36,7 +39,7 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
       </ChipRail>
 
       <p className="sr-only" aria-live="polite">
-        {category ? `${shown.length} ${category} templates` : `All ${shown.length} templates`}
+        {category ? `${matches.length} ${category} templates` : `All ${matches.length} templates`}
       </p>
 
       {/* every template shows the same thing (a whole page), so every tile is the same shape */}
@@ -47,6 +50,9 @@ export default function TemplatesGallery({ isPremium = false }: { isPremium?: bo
           </li>
         ))}
       </ul>
+      {infinite.done ? null : (
+        <InfiniteSentinel onMore={infinite.more} shown={shown.length} total={matches.length} noun="templates" className="mt-12" />
+      )}
     </>
   );
 }
