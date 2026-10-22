@@ -212,7 +212,7 @@ export function EmptyTeam({
               ref={(el) => {
                 seatEls.current[i] = el;
               }}
-              className="relative flex h-10 w-10 items-center justify-center sm:h-14 sm:w-14"
+              className="relative flex aspect-square min-w-0 max-w-10 flex-1 items-center justify-center sm:max-w-14"
             >
               <span className="absolute inset-0 rounded-full border-2 border-dashed border-[#d2d2d7] dark:border-[#48484a]" />
               <AnimatePresence>
