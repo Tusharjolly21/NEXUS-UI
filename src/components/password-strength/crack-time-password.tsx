@@ -56,7 +56,7 @@ export interface CrackTimePasswordProps {
   onChange?: (value: string, crackSeconds: number) => void;
   /** Extra classes for the card. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -98,12 +98,17 @@ export function CrackTimePassword({ autoplay = false, onChange, className = "", 
   const reachedTop = useRef(false);
   const card = useRef<HTMLDivElement>(null);
   const running = useAutoplayGate(card, autoplay);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   useEffect(() => {
     if (!running || touched.current) return;
     const seq = ["password1", "", "nexus", "Nexus2026", "Nexus2026!", "Nexus2026!motion"];
     const ids: number[] = [];
     let t = 0;
+    let topped = false;
     const at = (fn: () => void, ms: number) => {
       ids.push(
         window.setTimeout(() => {
@@ -113,13 +118,23 @@ export function CrackTimePassword({ autoplay = false, onChange, className = "", 
     };
     const type = (word: string) => {
       if (!word) {
-        at(() => setPw(""), t);
+        at(() => {
+          topped = false;
+          setPw("");
+        }, t);
         t += 500;
         return;
       }
       for (let i = 1; i <= word.length; i++) {
         const v = word.slice(0, i);
-        at(() => setPw(v), t);
+        at(() => {
+          setPw(v);
+          // the same one soft chime as typing it: once per word, when it first reaches the top tier
+          if (!topped && pos(crackSeconds(v)) >= 0.68) {
+            topped = true;
+            playRef.current.auto("success", 0.5);
+          }
+        }, t);
         t += 90;
       }
       t += 1300;

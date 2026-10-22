@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, type PanInfo } from "framer-motion";
-import { useSound } from "@/lib/ui-sounds";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 /** A starting task: its label and how far (px) it sits off-centre. */
 export interface TodoTowerTask {
@@ -22,7 +22,7 @@ export interface TodoTowerProps {
   onComplete?: (text: string) => void;
   /** Ticks tasks off and adds new ones by itself until someone touches the pile. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -139,16 +139,24 @@ export function TodoTower({
   };
 
   // The "Add a task" button: the brick lands on the pile a moment after it is dropped in.
-  const addByUser = () => {
+  const addSounding = (say: (name: SoundName, volume?: number) => void) => {
     const room = moreTasks.length > 0 && list.current.length < maxBricks;
     add();
-    if (room) later(() => play("drop", 0.8), 280);
+    if (room) later(() => say("drop", 0.8), 280);
   };
+  const addByUser = () => addSounding(play);
 
   // Keep the latest handlers for the autoplay timer without restarting it.
-  const actions = useRef({ add, check });
+  const actions = useRef<{ add: () => void; check: (id: number) => void }>({ add: () => {}, check: () => {} });
   useEffect(() => {
-    actions.current = { add, check };
+    actions.current = {
+      add: () => addSounding(play.auto),
+      check: (id) => {
+        const brick = list.current.find((b) => b.id === id);
+        if (brick && !brick.done) play.auto("tick");
+        check(id);
+      },
+    };
   });
 
   useEffect(() => {

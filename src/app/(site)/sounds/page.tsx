@@ -39,7 +39,7 @@ export function LikeButton() {
   );
 }`;
 
-const PATTERNS = `import { playSound, setSoundVolume, setSoundsEnabled, useSound, useSoundsEnabled } from "@/lib/ui-sounds";
+const PATTERNS = `import { AutoplaySound, playSound, setSoundVolume, setSoundsEnabled, useSound, useSoundsEnabled } from "@/lib/ui-sounds";
 
 // In a component: silent when the prop is false or the visitor has sounds off
 const play = useSound(enableSound);
@@ -55,6 +55,13 @@ playSound(ok ? "success" : "error");
 
 // A notification arriving, quieter than the rest
 playSound("chime", 0.6);
+
+// A component that plays itself (autoplay) uses play.auto: same sounds, silent until the first click
+play.auto("success");
+
+// Keep demos quiet in part of your page, and let one be heard
+<AutoplaySound allow={false}>{gridOfDemos}</AutoplaySound>
+<AutoplaySound allow>{theDemoYouAreShowing}</AutoplaySound>
 
 // A sound switch for your settings: remembered in this browser
 const [on, setOn] = useSoundsEnabled();
@@ -94,7 +101,7 @@ const FAQ = [
   },
   {
     q: "Which Nexus UI components make sound?",
-    a: `${SOUND_COMPONENTS} components play these sounds on press, toggle, snap, send, drop and success, never on hover and never in their self-playing demos. Filter the component gallery by Sound to see them. On this site sound is off until you switch it on with the speaker in the menu; in your own app it is on by default.`,
+    a: `${SOUND_COMPONENTS} components play these sounds on press, toggle, snap, send, drop and success, never on hover. When a component plays itself with autoplay, it makes the same sounds once you have clicked anywhere on the page, because browsers keep audio asleep until then. Filter the component gallery by Sound to see them. On this site sound is off until you switch it on with the speaker in the menu; in your own app it is on by default.`,
   },
   {
     q: "Which sounds are free and which are Pro?",

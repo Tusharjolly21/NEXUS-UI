@@ -11,7 +11,7 @@ export interface ApiKeyFieldProps {
   onRotate?: (key: string) => void;
   /** Reveals, copies and rotates by itself in a loop until someone presses or types in the card. Never touches the clipboard. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
@@ -114,6 +114,10 @@ export function ApiKeyField({ onCopy, onRotate, autoplay = false, enableSound = 
   const rotateBtn = useRef<HTMLButtonElement>(null);
   const cancelBtn = useRef<HTMLButtonElement>(null);
   const focusRotate = useRef(false);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   useEffect(
     () => () => {
@@ -237,11 +241,21 @@ export function ApiKeyField({ onCopy, onRotate, autoplay = false, enableSound = 
       at(() => {
         setConfirm(false);
         setReveal(true);
+        playRef.current.auto("on");
       }, 900);
-      at(flashCopied, 2600);
+      at(() => {
+        flashCopied();
+        playRef.current.auto("success", 0.6);
+      }, 2600);
       at(() => setConfirm(true), 4000);
-      at(() => doRotate(false), 5600);
-      at(() => setReveal(false), 7600);
+      at(() => {
+        playRef.current.auto("whoosh", 0.6);
+        doRotate(false);
+      }, 5600);
+      at(() => {
+        setReveal(false);
+        playRef.current.auto("off");
+      }, 7600);
       at(loop, 9400);
     };
     loop();

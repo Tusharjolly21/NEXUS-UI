@@ -58,7 +58,7 @@ When `autoplay` is true, every 2000ms (if not touched) spring `pos` to a random 
 
 ## Sound
 
-`MoodWheel` takes `enableSound?: boolean` (default `true`; `false` silences it). Each time a new word reaches the centre slot while the visitor drags, scrolls, flicks or uses the arrow keys (including while the wheel coasts to rest), `tick` plays from `@/lib/ui-sounds` at 50% volume: a very short, dry high-passed noise click (about 12ms, centred above 5 kHz). Ticks are throttled to one per 40ms. The autoplay spinning is silent until the visitor first touches the wheel. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+`MoodWheel` takes `enableSound?: boolean` (default `true`; `false` silences it). Each time a new word reaches the centre slot while the visitor drags, scrolls, flicks or uses the arrow keys (including while the wheel coasts to rest), `tick` plays from `@/lib/ui-sounds` at 50% volume: a very short, dry high-passed noise click (about 12ms, centred above 5 kHz). Ticks are throttled to one per 40ms. The autoplay spin ticks the same way as the visitor's hand (same volume, same 40ms throttle) through the same play function's `auto` variant, which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Still silent on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

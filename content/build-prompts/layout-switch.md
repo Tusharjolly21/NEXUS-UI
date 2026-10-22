@@ -83,5 +83,5 @@ Every 2300ms, switch to the next of `feature → pile → row → grid`, repeati
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Choosing a different layout with the segmented control plays `tap` from `@/lib/ui-sounds` at 80% volume (a short soft thump that falls in pitch, with a hint of click) as the photos start to glide.
-- Opening or closing a photo, choosing the layout that is already active, hovering and the autoplay loop are silent.
+- The autoplay loop plays the same `tap` at 80% each time it changes layout, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Opening or closing a photo, choosing the layout that is already active and hovering are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

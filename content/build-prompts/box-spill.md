@@ -48,7 +48,7 @@ With `autoplay`, the first toggle happens after 700 ms, then every 3.6 s, altern
 
 ## Sound
 
-A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing "Open the box" plays `pop` as the flaps burst open (a quick sine glide from about 320 Hz up to 980 Hz in 70ms). Pressing "Pack it up", the bouncing pieces and the autoplay open and pack make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing "Open the box" plays `pop` as the flaps burst open (a quick sine glide from about 320 Hz up to 980 Hz in 70ms). Pressing "Pack it up" and the bouncing pieces make no sound. The autoplay opening plays the same `pop` through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then; the autoplay packing makes no sound, like the button. Silent on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

@@ -9,7 +9,7 @@ export interface FolderPeekProps {
   color?: string;
   /** Opens and closes by itself until the user hovers it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -38,14 +38,22 @@ const FILES: { node: ReactNode; open: { x: number; y: number; rotate: number }; 
 
 export function FolderPeek({ title = "Brand assets", meta = "24 files · Updated today", color = "#0071e3", autoplay = false, enableSound = true }: FolderPeekProps) {
   const play = useSound(enableSound);
+  const playRef = useRef(play);
   const [open, setOpen] = useState(false);
+  const openRef = useRef(false);
   const hovering = useRef(false);
   const touched = useRef(false);
+
+  useEffect(() => {
+    playRef.current = play;
+    openRef.current = open;
+  }, [play, open]);
 
   useEffect(() => {
     if (!autoplay) return;
     const t = setInterval(() => {
       if (touched.current || hovering.current) return;
+      playRef.current.auto(openRef.current ? "hush" : "whoosh", openRef.current ? 0.6 : 1);
       setOpen((o) => !o);
     }, 1800);
     return () => clearInterval(t);

@@ -77,7 +77,7 @@ Every 2.9s until touched: set dragging on and fly a file glyph into the zone (fr
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Dropping or choosing files that are accepted plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss) as the tray squashes. If any file is rejected for size or type, `error` plays instead (two low square-wave bumps) as the zone shakes. When a file you added finishes uploading, `done` plays (four soft triangle notes in a rising major chord, ringing together); a rejected upload promise plays `error`.
-- The autoplay example files, files passed in through `initialFiles`, hovering and dragging over the zone are all silent.
+- The autoplay example files play the same sounds: `drop` as each lands in the tray and `done` when it finishes uploading, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Files passed in through `initialFiles`, hovering and dragging over the zone are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ---
@@ -167,7 +167,7 @@ Loop of 8600ms while running: reset at 0, show the drag-over state at 700ms, loa
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Dropping or choosing an image plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss) as the photo appears in the circle. Choosing something that is not an image plays `error` (two low square-wave bumps). When the Save ring finishes and the check pops in, `done` plays (four soft triangle notes in a rising major chord, ringing together).
-- The autoplay demo (including its save), dragging over the circle, repositioning and zooming are silent.
+- The autoplay demo plays the same sounds: `drop` as its photo appears in the circle and `done` when its save finishes, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Dragging over the circle, repositioning and zooming are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ---
@@ -246,5 +246,5 @@ Loop of 14000ms while running: clear at 0, show the overlay with "3 files" at 50
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Dropping files on the card or choosing them with Upload plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss). Each row you added that finishes its transfer plays `done` when its check appears (four soft triangle notes in a rising major chord, ringing together).
-- The autoplay sample rows, pausing, resuming, cancelling and dragging over the card are silent.
+- The autoplay sample rows play the same sounds: `drop` as they land and `done` as each finishes, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Pausing, resuming, cancelling and dragging over the card are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

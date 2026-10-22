@@ -12,7 +12,7 @@ export interface CapsuleToggleProps {
   offColor?: string;
   /** Ball colour (and glow) when on. */
   onColor?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -95,7 +95,7 @@ export interface CapsuleTogglesProps {
   title?: string;
   /** Flips the rows one after another until the user touches the panel. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -110,11 +110,14 @@ const ROWS: CapsuleToggleRow[] = [
 export function CapsuleToggles({ rows = ROWS, title = "Controls", autoplay = false, enableSound = true }: CapsuleTogglesProps) {
   const id = useId().replace(/:/g, "");
   const [state, setState] = useState(() => Object.fromEntries(rows.map((r) => [r.id, r.on])) as Record<string, boolean>);
+  const play = useSound(enableSound);
   const touched = useRef(false);
   const rowsRef = useRef(rows);
+  const stateRef = useRef(state);
   useEffect(() => {
     rowsRef.current = rows;
-  }, [rows]);
+    stateRef.current = state;
+  }, [rows, state]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -127,10 +130,11 @@ export function CapsuleToggles({ rows = ROWS, title = "Controls", autoplay = fal
       const list = rowsRef.current;
       if (list.length === 0) return;
       const r = list[k++ % list.length];
+      play.auto(stateRef.current[r.id] ? "off" : "on");
       setState((s) => ({ ...s, [r.id]: !s[r.id] }));
     }, 900);
     return () => clearInterval(t);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   return (
     <div

@@ -22,7 +22,7 @@ export type FloatingDockMobileProps = {
   onSelect?: (item: FloatingDockItem) => void;
   /** "fixed" pins it bottom-centre (hidden from md up); "inline" renders it where you put it. */
   position?: "fixed" | "inline";
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 

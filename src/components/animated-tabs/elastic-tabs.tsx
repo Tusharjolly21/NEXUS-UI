@@ -21,7 +21,7 @@ export interface ElasticTabsProps {
   autoplay?: boolean;
   /** Extra classes for the card. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -254,6 +254,7 @@ export function ElasticTabs({ tabs = DEFAULT_TABS, label = "Dashboard", onChange
         window.clearInterval(id);
         return;
       }
+      play.auto("tick", 0.6);
       select((index.current + 1) % count);
     }, 2400);
     return () => window.clearInterval(id);

@@ -235,7 +235,7 @@ export type PlaygroundControl =
       unit?: string;
       defaultValue: number;
     }
-  | { kind: "toggle"; prop: string; label: string; defaultValue: boolean }
+  | { kind: "toggle"; prop: string; label: string; defaultValue: boolean; /** The value it starts at when it differs from the component default (autoplay starts on). */ startOn?: boolean }
   | { kind: "select"; prop: string; label: string; options: readonly string[]; defaultValue: string }
   | { kind: "color"; prop: string; label: string; options: readonly string[]; defaultValue: string };
 
@@ -286,11 +286,12 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "hoverAnimation", label: "Hover", options: ["lift", "scale", "rotate", "up", "none"], defaultValue: "lift" },
       { kind: "select", prop: "entranceAnimation", label: "Entrance", options: ["scale", "fade", "flip", "slide", "bounce", "none"], defaultValue: "scale" },
       { kind: "toggle", prop: "showTooltips", label: "Names", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="pt-12">
-        <AvatarGroup
-          key={`${v.entranceAnimation}-${v.max}`}
+        <AvatarGroup autoplay={v.autoplay as boolean}
+          key={`${v.entranceAnimation}-${v.max}-${String(v.autoplay)}`}
           avatars={DEMO_AVATARS}
           size={v.size as number}
           overlap={v.overlap as number}
@@ -318,10 +319,11 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "direction", label: "Direction", options: ["random", "up", "down"], defaultValue: "random" },
       { kind: "toggle", prop: "enableGlow", label: "Glow", defaultValue: true },
       { kind: "toggle", prop: "interactive", label: "Trail and bursts", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="relative h-full w-full">
-        <Sparkles
+        <Sparkles key={String(v.autoplay)} autoplay={v.autoplay as boolean}
           background
           count={v.count as number}
           maxSize={v.maxSize as number}
@@ -347,7 +349,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "force", label: "Force", min: 0.05, max: 1, step: 0.01, defaultValue: 0.45 },
       { kind: "range", prop: "damping", label: "Damping", min: 6, max: 60, step: 1, defaultValue: 28 },
       { kind: "range", prop: "returnDelay", label: "Hold", min: 0, max: 1200, step: 20, unit: "ms", defaultValue: 360 },
-      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <WordMagnet
@@ -372,9 +374,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "radius", label: "Radius", min: 0, max: 28, step: 1, unit: "px", defaultValue: 28 },
       { kind: "color", prop: "background", label: "Fill", options: ["#1d1d1f", "#0071e3", "#ffffff", "#2c2c2e"], defaultValue: "#1d1d1f" },
       { kind: "toggle", prop: "openInNewTab", label: "New tab", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <GlowButton
+      <GlowButton key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         href="#playground"
         radius={v.radius as number}
         background={v.background === "#1d1d1f" ? undefined : (v.background as string)}
@@ -399,10 +402,11 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "rotation", label: "Rotation", min: -45, max: 45, step: 1, unit: "°", defaultValue: 0 },
       { kind: "color", prop: "borderColor", label: "Lines", options: ["#3a3a3c", "#d2d2d7", "#1e3a8a", "#4c1d95"], defaultValue: "#3a3a3c" },
       { kind: "toggle", prop: "showCrosses", label: "Crosses", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     // Drawn on one canvas, so the full grid stays smooth while sliders move.
     render: (v) => (
-      <BackgroundBoxes
+      <BackgroundBoxes key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         boxWidth={v.boxWidth as number}
         boxHeight={v.boxHeight as number}
         skewX={v.skewX as number}
@@ -430,7 +434,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "enableTilt", label: "Tilt", defaultValue: true },
       { kind: "toggle", prop: "enableMagnetic", label: "Magnetic icons", defaultValue: true },
       { kind: "toggle", prop: "enableOrbit", label: "Orbit", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Autoplay", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Autoplay", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <FeatureToolsCard
@@ -461,7 +465,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "fadeOutBlur", label: "Fade blur", min: 0, max: 20, step: 1, unit: "px", defaultValue: 6 },
       { kind: "range", prop: "smoothness", label: "Smoothness", min: 0, max: 1, step: 0.05, defaultValue: 0.7 },
       { kind: "toggle", prop: "magneticEffect", label: "Magnetic", defaultValue: false },
-      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <ImageTrail
@@ -490,10 +494,11 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "iterations", label: "Warm-up", min: 1, max: 20, step: 1, defaultValue: 8 },
       { kind: "select", prop: "trigger", label: "Trigger", options: ["load", "hover", "click", "viewport"], defaultValue: "load" },
       { kind: "toggle", prop: "loop", label: "Loop", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <EncryptedText
-        key={`${String(v.trigger)}-${String(v.loop)}`}
+      <EncryptedText autoplay={v.autoplay as boolean}
+        key={`${String(v.trigger)}-${String(v.loop)}-${String(v.autoplay)}`}
         text="ACCESS GRANTED"
         speed={v.speed as number}
         shuffleSpeed={v.shuffleSpeed as number}
@@ -516,11 +521,12 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "pauseDuration", label: "Pause", min: 0, max: 4000, step: 100, unit: "ms", defaultValue: 1200 },
       { kind: "toggle", prop: "loop", label: "Loop", defaultValue: true },
       { kind: "toggle", prop: "showCursor", label: "Caret", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <h2 className="m-0 text-center text-4xl font-semibold tracking-[-0.035em] text-[#1d1d1f] sm:text-5xl dark:text-[#f5f5f7]">
-        <TypewriterEffect
-          key={`${String(v.loop)}-${String(v.deletingSpeed)}`}
+        <TypewriterEffect autoplay={v.autoplay as boolean}
+          key={`${String(v.loop)}-${String(v.deletingSpeed)}-${String(v.autoplay)}`}
           text={TYPEWRITER_LINES}
           typingSpeed={v.typingSpeed as number}
           deletingSpeed={v.deletingSpeed as number}
@@ -598,9 +604,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff9f0a", "#bf5af2", "#ff3b30"], defaultValue: "#0071e3" },
       { kind: "toggle", prop: "showValue", label: "Number", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <TickSlider
+      <TickSlider key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         label="Volume"
         unit="%"
         defaultValue={62}
@@ -623,9 +630,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "format", label: "Format", options: ["12h", "24h"], defaultValue: "12h" },
       { kind: "range", prop: "density", label: "Spread", min: 0.8, max: 3, step: 0.1, unit: "px", defaultValue: 1.6 },
       { kind: "color", prop: "accent", label: "Needle", options: ["#0071e3", "#ff3b30", "#ff9f0a", "#30d158", "#bf5af2"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <TimeScrubber
+      <TimeScrubber key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         label="Pickup"
         interval={v.interval as number}
         format={v.format as "12h"}
@@ -644,9 +652,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "resetAfter", label: "Reset after", min: 0, max: 5000, step: 100, unit: "ms", defaultValue: 2200 },
       { kind: "color", prop: "successColor", label: "Success", options: ["#248a3d", "#0071e3", "#1d1d1f", "#8944ab", "#b25000"], defaultValue: "#248a3d" },
       { kind: "select", prop: "label", label: "Label", options: ["Slide to confirm", "Slide to pay", "Slide to unlock"], defaultValue: "Slide to confirm" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <SlideToConfirm
+      <SlideToConfirm key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         size={v.size as "md"}
         threshold={v.threshold as number}
         resetAfter={v.resetAfter as number}
@@ -698,9 +707,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "position", label: "Grow from", options: ["bottom", "top"], defaultValue: "bottom" },
       { kind: "range", prop: "max", label: "Visible", min: 1, max: 3, step: 1, defaultValue: 3 },
       { kind: "range", prop: "width", label: "Width", min: 280, max: 420, step: 4, unit: "px", defaultValue: 340 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <ToastStack
+      <ToastStack key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         toasts={DEMO_TOASTS}
         onDismiss={() => {}}
         expand={v.expand as "hover"}
@@ -720,9 +730,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "title", label: "Title", options: ["Drag a file here", "Drop your files", "Add attachments"], defaultValue: "Drag a file here" },
       { kind: "select", prop: "hint", label: "Hint", options: ["Up to 5 MB", "PNG, JPG or MP4", "Max 10 files"], defaultValue: "Up to 5 MB" },
       { kind: "toggle", prop: "disabled", label: "Disabled", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <UploadDropzone
+      <UploadDropzone key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         multiple={v.multiple as boolean}
         accent={v.accent === "#0071e3" ? undefined : (v.accent as string)}
         title={v.title as string}
@@ -742,9 +753,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "maxDuration", label: "Max length", min: 5000, max: 60000, step: 1000, unit: "ms", defaultValue: 60000 },
       { kind: "range", prop: "minDuration", label: "Min hold", min: 0, max: 1500, step: 50, unit: "ms", defaultValue: 400 },
       { kind: "select", prop: "label", label: "Label", options: ["Hold to record", "Hold to talk", "Record a note"], defaultValue: "Hold to record" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <HoldToRecord
+      <HoldToRecord key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         accent={v.accent as string}
         cancelDistance={v.cancelDistance as number}
         maxDuration={v.maxDuration as number}
@@ -765,7 +777,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "size", label: "Size", min: 60, max: 200, step: 2, unit: "px", defaultValue: 120 },
       { kind: "range", prop: "sleepAfter", label: "Sleep after", min: 0, max: 20000, step: 500, unit: "ms", defaultValue: 9000 },
       { kind: "toggle", prop: "poke", label: "Poke to hop", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Autoplay", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Autoplay", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <CursorBuddy
@@ -793,7 +805,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "speed", label: "Spin", min: 0, max: 100, step: 1, defaultValue: 30 },
       { kind: "range", prop: "dotSize", label: "Dot size", min: 1, max: 8, step: 0.2, unit: "px", defaultValue: 3.4 },
       { kind: "toggle", prop: "interactive", label: "Interactive", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Ripple by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Ripple by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <DotSphere
@@ -818,7 +830,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "timerSeconds", label: "Timer", min: 10, max: 1800, step: 10, unit: "s", defaultValue: 300 },
       { kind: "color", prop: "accent", label: "Accent", options: ["#ff9f0a", "#30d158", "#0a84ff", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
       { kind: "range", prop: "cycle", label: "Auto cycle", min: 0, max: 8000, step: 500, unit: "ms", defaultValue: 0 },
-      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <DynamicIsland
@@ -838,17 +850,20 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "length", label: "Digits", min: 4, max: 8, step: 2, defaultValue: 6 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <OtpInput key={v.length as number} accent={v.accent as string} length={v.length as number} verify={(c) => c.startsWith("4829")} />
+      <OtpInput autoplay={v.autoplay ? "48291357".slice(0, v.length as number) : undefined} key={`${v.length}-${v.autoplay}`} accent={v.accent as string} length={v.length as number} verify={(c) => c.startsWith("4829")} />
     ),
   },
   "radio-cards": {
     componentName: "RadioCards",
     importPath: "@/components/radio-cards",
     defaultFill: "light",
-    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
-    render: (v) => <RadioCards accent={v.accent as string} />,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <RadioCards key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} />,
   },
   "hold-to-confirm": {
     componentName: "HoldToConfirm",
@@ -858,8 +873,9 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "color", label: "Color", options: ["#ff3b30", "#1d1d1f", "#0071e3", "#ff375f", "#30b158"], defaultValue: "#ff3b30" },
       { kind: "range", prop: "holdMs", label: "Hold for", min: 600, max: 4000, step: 100, unit: "ms", defaultValue: 1500 },
       { kind: "select", prop: "label", label: "Label", options: ["Hold to Delete", "Hold to Archive", "Hold to Leave"], defaultValue: "Hold to Delete" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <HoldToConfirm color={v.color as string} holdMs={v.holdMs as number} label={v.label as string} />,
+    render: (v) => <HoldToConfirm key={String(v.autoplay)} autoplay={v.autoplay as boolean} color={v.color as string} holdMs={v.holdMs as number} label={v.label as string} />,
   },
   "before-after": {
     componentName: "BeforeAfter",
@@ -869,10 +885,11 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "beforeLabel", label: "Before label", options: ["Before", "Original", "Raw"], defaultValue: "Before" },
       { kind: "select", prop: "afterLabel", label: "After label", options: ["After", "Edited", "Graded"], defaultValue: "After" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[520px]">
-        <BeforeAfter
+        <BeforeAfter key={String(v.autoplay)} autoplay={v.autoplay as boolean}
           beforeLabel={v.beforeLabel as string}
           afterLabel={v.afterLabel as string}
           before={<div className="h-full w-full bg-[linear-gradient(180deg,#9a9a9a,#d6d6d6_60%,#5c5c5c)]" />}
@@ -890,9 +907,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "monthlyRate", label: "Monthly / seat", min: 5, max: 60, step: 1, defaultValue: 15 },
       { kind: "range", prop: "yearlyRate", label: "Yearly / seat", min: 4, max: 50, step: 1, defaultValue: 12 },
       { kind: "range", prop: "maxSeats", label: "Max seats", min: 10, max: 500, step: 10, defaultValue: 100 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <PriceOdometer
+      <PriceOdometer key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         accent={v.accent as string}
         monthlyRate={v.monthlyRate as number}
         yearlyRate={v.yearlyRate as number}
@@ -904,8 +922,10 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "PasswordStrength",
     importPath: "@/components/password-strength",
     defaultFill: "light",
-    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
-    render: (v) => <PasswordStrength accent={v.accent as string} />,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <PasswordStrength key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} />,
   },
   "tilt-pass": {
     componentName: "TiltPass",
@@ -914,7 +934,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "title", label: "Title", options: ["Founders Pass", "Backstage", "Season Ticket"], defaultValue: "Founders Pass" },
       { kind: "select", prop: "name", label: "Holder", options: ["Alex Rivera", "Sam Okafor", "Mina Park"], defaultValue: "Alex Rivera" },
-      { kind: "toggle", prop: "autoplay", label: "Float on its own", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Float on its own", defaultValue: false, startOn: true },
     ],
     render: (v) => <TiltPass title={v.title as string} name={v.name as string} autoplay={v.autoplay as boolean} />,
   },
@@ -922,14 +942,16 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AnimatedTabs",
     importPath: "@/components/animated-tabs",
     defaultFill: "light",
-    controls: [{ kind: "color", prop: "accent", label: "Switch", options: ["#34c759", "#0071e3", "#ff375f", "#ff9f0a", "#1d1d1f"], defaultValue: "#34c759" }],
-    render: (v) => <AnimatedTabs accent={v.accent as string} />,
+    controls: [{ kind: "color", prop: "accent", label: "Switch", options: ["#34c759", "#0071e3", "#ff375f", "#ff9f0a", "#1d1d1f"], defaultValue: "#34c759" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <AnimatedTabs key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} />,
   },
   "shared-element-cards": {
     componentName: "SharedElementCards",
     importPath: "@/components/shared-element-cards",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true }],
     render: (v) => <SharedElementCards key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "rotating-headline": {
@@ -947,8 +969,10 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "StretchNav",
     importPath: "@/components/stretch-nav",
     defaultFill: "light",
-    controls: [{ kind: "range", prop: "defaultIndex", label: "Start at", min: 0, max: 4, step: 1, defaultValue: 0 }],
-    render: (v) => <StretchNav key={v.defaultIndex as number} defaultIndex={v.defaultIndex as number} />,
+    controls: [{ kind: "range", prop: "defaultIndex", label: "Start at", min: 0, max: 4, step: 1, defaultValue: 0 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <StretchNav autoplay={v.autoplay as boolean} key={`${v.defaultIndex as number}-${String(v.autoplay)}`} defaultIndex={v.defaultIndex as number} />,
   },
   "feedback-pill": {
     componentName: "FeedbackPill",
@@ -957,17 +981,20 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "select", prop: "label", label: "Label", options: ["Feedback", "Report a bug", "Suggest"], defaultValue: "Feedback" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <FeedbackPill accent={v.accent as string} label={v.label as string} />,
+    render: (v) => <FeedbackPill key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} label={v.label as string} />,
   },
   "stagger-menu": {
     componentName: "StaggerMenu",
     importPath: "@/components/stagger-menu",
     defaultFill: "light",
-    controls: [{ kind: "select", prop: "label", label: "Label", options: ["Share", "Export", "More"], defaultValue: "Share" }],
+    controls: [{ kind: "select", prop: "label", label: "Label", options: ["Share", "Export", "More"], defaultValue: "Share" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
     render: (v) => (
       <div className="flex justify-center pt-6">
-        <StaggerMenu label={v.label as string} />
+        <StaggerMenu key={String(v.autoplay)} autoplay={v.autoplay as boolean} label={v.label as string} />
       </div>
     ),
   },
@@ -979,10 +1006,11 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "accent", label: "Needle", options: ["#ff9f0a", "#0071e3", "#ff375f", "#30b158", "#1d1d1f"], defaultValue: "#ff9f0a" },
       { kind: "range", prop: "max", label: "Max", min: 30, max: 180, step: 15, defaultValue: 90 },
       { kind: "range", prop: "defaultValue", label: "Start at", min: 0, max: 60, step: 5, defaultValue: 25 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <RulerPicker
-        key={`${v.max}-${v.defaultValue}`}
+      <RulerPicker autoplay={v.autoplay as boolean}
+        key={`${v.max}-${v.defaultValue}-${String(v.autoplay)}`}
         accent={v.accent as string}
         max={v.max as number}
         defaultValue={v.defaultValue as number}
@@ -997,15 +1025,18 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "max", label: "Max", min: 3, max: 12, step: 1, defaultValue: 8 },
       { kind: "select", prop: "label", label: "Label", options: ["Guests", "Seats", "Tickets"], defaultValue: "Guests" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <ElasticStepper key={v.max as number} accent={v.accent as string} max={v.max as number} label={v.label as string} />,
+    render: (v) => <ElasticStepper autoplay={v.autoplay as boolean} key={`${v.max as number}-${String(v.autoplay)}`} accent={v.accent as string} max={v.max as number} label={v.label as string} />,
   },
   "todo-list": {
     componentName: "TodoList",
     importPath: "@/components/todo-list",
     defaultFill: "light",
-    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
-    render: (v) => <TodoList accent={v.accent as string} />,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <TodoList key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} />,
   },
   "progress-button": {
     componentName: "ProgressButton",
@@ -1014,22 +1045,25 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "select", prop: "label", label: "Label", options: ["Download", "Export", "Install"], defaultValue: "Download" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <ProgressButton accent={v.accent as string} label={v.label as string} />,
+    render: (v) => <ProgressButton key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} label={v.label as string} />,
   },
   "copy-button": {
     componentName: "CopyChip",
     importPath: "@/components/copy-button",
     snippetBaseProps: ['value="inv_3fK9xQ2Lq7"'],
     defaultFill: "light",
-    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
-    render: (v) => <CopyChip value="inv_3fK9xQ2Lq7" display="inv_3fK9…2Lq7" accent={v.accent as string} />,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <CopyChip key={String(v.autoplay)} autoplay={v.autoplay as boolean} value="inv_3fK9xQ2Lq7" display="inv_3fK9…2Lq7" accent={v.accent as string} />,
   },
   "animated-icons": {
     componentName: "AnimatedIcons",
     importPath: "@/components/animated-icons",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
     render: (v) => <AnimatedIcons key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "folder-peek": {
@@ -1039,35 +1073,38 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "color", label: "Folder", options: ["#0071e3", "#34c759", "#ff9f0a", "#ff375f", "#8e8e93"], defaultValue: "#0071e3" },
       { kind: "select", prop: "title", label: "Title", options: ["Brand assets", "Launch kit", "Invoices"], defaultValue: "Brand assets" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <FolderPeek color={v.color as string} title={v.title as string} />,
+    render: (v) => <FolderPeek key={String(v.autoplay)} autoplay={v.autoplay as boolean} color={v.color as string} title={v.title as string} />,
   },
   "magnify-dock": {
     componentName: "MagnifyDock",
     importPath: "@/components/magnify-dock",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false, startOn: true }],
     render: (v) => <MagnifyDock key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "upload-chips": {
     componentName: "UploadChips",
     importPath: "@/components/upload-chips",
     defaultFill: "light",
-    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" }],
-    render: (v) => <UploadChips accent={v.accent as string} />,
+    controls: [{ kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#1d1d1f", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <UploadChips key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} />,
   },
   "notification-stack": {
     componentName: "NotificationStack",
     importPath: "@/components/notification-stack",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Push samples", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Push samples", defaultValue: false, startOn: true }],
     render: (v) => <NotificationStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "island-morph": {
     componentName: "IslandMorph",
     importPath: "@/components/island-morph",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false, startOn: true }],
     render: (v) => <IslandMorph key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "lanyard-badge": {
@@ -1077,7 +1114,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "strap", label: "Strap", options: ["#0071e3", "#ff375f", "#30d158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
       { kind: "select", prop: "tag", label: "Tag", options: ["Speaker", "Attendee", "Staff", "Press"], defaultValue: "Speaker" },
-      { kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <LanyardBadge key={String(v.autoplay)} strap={v.strap as string} tag={v.tag as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1088,7 +1125,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "zoom", label: "Zoom", min: 1.1, max: 2.2, step: 0.05, unit: "×", defaultValue: 1.45 },
       { kind: "range", prop: "size", label: "Lens", min: 100, max: 200, step: 2, unit: "px", defaultValue: 150 },
-      { kind: "toggle", prop: "autoplay", label: "Drift by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Drift by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <GlassLens key={String(v.autoplay)} zoom={v.zoom as number} size={v.size as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1099,7 +1136,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff375f", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
       { kind: "range", prop: "height", label: "Height", min: 200, max: 400, step: 10, unit: "px", defaultValue: 300 },
-      { kind: "toggle", prop: "autoplay", label: "Draw by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Draw by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[560px]">
@@ -1114,7 +1151,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30d158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
       { kind: "color", prop: "color", label: "Blob", options: ["#1d1d1f", "#3a3a3c", "#5e5ce6", "#0071e3"], defaultValue: "#1d1d1f" },
-      { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false, startOn: true },
     ],
     // Defaults are passed as undefined so the component's own light/dark colours apply.
     render: (v) => (
@@ -1132,7 +1169,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#bf5af2", "#ff375f", "#30d158", "#ff9f0a"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Cycle states", defaultValue: false, startOn: true },
     ],
     render: (v) => <VoiceOrb key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1143,8 +1180,9 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
       { kind: "range", prop: "maxChars", label: "Full sag at", min: 12, max: 60, step: 1, unit: " chars", defaultValue: 34 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <SaggingField accent={v.accent as string} maxChars={v.maxChars as number} />,
+    render: (v) => <SaggingField key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} maxChars={v.maxChars as number} />,
   },
   "tear-off-ticket": {
     componentName: "TearOffTicket",
@@ -1152,7 +1190,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "title", label: "Event", options: ["Light & Matter", "Night Market", "Modern Forms"], defaultValue: "Light & Matter" },
-      { kind: "toggle", prop: "autoplay", label: "Tear by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Tear by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <TearOffTicket key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1160,14 +1198,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "ThrowWheel",
     importPath: "@/components/throw-wheel",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Throw by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Throw by itself", defaultValue: false, startOn: true }],
     render: (v) => <ThrowWheel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "pixel-select": {
     componentName: "PixelSelect",
     importPath: "@/components/pixel-select",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true }],
     render: (v) => <PixelSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "scrub-inputs": {
@@ -1176,7 +1214,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Scrub by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Scrub by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ScrubInputs key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1186,7 +1224,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "glow", label: "Glow", options: ["#ff9f0a", "#0a84ff", "#30d158", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
-      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <LitKeyboard key={String(v.autoplay)} glow={v.glow as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1197,7 +1235,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "gap", label: "Dot gap", min: 12, max: 28, step: 2, unit: "px", defaultValue: 18 },
       { kind: "range", prop: "height", label: "Height", min: 200, max: 400, step: 10, unit: "px", defaultValue: 300 },
-      { kind: "toggle", prop: "autoplay", label: "Drop rings by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Drop rings by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[560px]">
@@ -1212,7 +1250,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff9f0a", "#ff375f", "#bf5af2"], defaultValue: "#0071e3" },
       { kind: "range", prop: "size", label: "Size", min: 260, max: 420, step: 10, unit: "px", defaultValue: 340 },
-      { kind: "toggle", prop: "autoplay", label: "Tour cities", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Tour cities", defaultValue: false, startOn: true },
     ],
     render: (v) => <DotGlobe key={String(v.autoplay)} accent={v.accent as string} size={v.size as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1222,7 +1260,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#bf5af2", "#30d158", "#ff375f", "#ff9f0a"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Explode by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Explode by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ComponentLayers key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1232,7 +1270,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "weeks", label: "Weeks", min: 12, max: 36, step: 1, defaultValue: 30 },
-      { kind: "toggle", prop: "autoplay", label: "Stand up by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Stand up by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <StandingCalendar key={String(v.autoplay)} weeks={v.weeks as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1243,7 +1281,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Goo", options: ["#0071e3", "#34c759", "#ff375f", "#af52de", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "amount", label: "Amount", min: 5, max: 100, step: 5, defaultValue: 40 },
-      { kind: "toggle", prop: "autoplay", label: "Send by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Send by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <MoneyGoo key={String(v.autoplay)} accent={v.accent as string} amount={v.amount as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1251,7 +1289,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "WeatherPuck",
     importPath: "@/components/weather-puck",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Sweep by itself", defaultValue: false, startOn: true }],
     render: (v) => <WeatherPuck key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "metal-orbs": {
@@ -1260,7 +1298,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "height", label: "Height", min: 200, max: 340, step: 10, unit: "px", defaultValue: 280 },
-      { kind: "toggle", prop: "autoplay", label: "Cycle modes", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Cycle modes", defaultValue: false, startOn: true },
     ],
     render: (v) => <MetalOrbs key={String(v.autoplay)} height={v.height as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1271,7 +1309,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#34c759", "#ff9f0a", "#ff375f", "#af52de"], defaultValue: "#0071e3" },
       { kind: "select", prop: "label", label: "Label", options: ["Volume", "Brightness", "Opacity"], defaultValue: "Volume" },
-      { kind: "toggle", prop: "autoplay", label: "Tug by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Tug by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <BendingRail key={String(v.autoplay)} accent={v.accent as string} label={v.label as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1279,14 +1317,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "LayoutSwitch",
     importPath: "@/components/layout-switch",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle layouts", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle layouts", defaultValue: false, startOn: true }],
     render: (v) => <LayoutSwitch key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "fan-deck": {
     componentName: "FanDeck",
     importPath: "@/components/fan-deck",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Fan by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Fan by itself", defaultValue: false, startOn: true }],
     render: (v) => <FanDeck key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "receipt-unfold": {
@@ -1295,7 +1333,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "total", label: "Total", options: ["$49.68", "$120.96", "$8.99"], defaultValue: "$49.68" },
-      { kind: "toggle", prop: "autoplay", label: "Unfold by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Unfold by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ReceiptUnfold key={String(v.autoplay)} total={v.total as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1305,7 +1343,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "width", label: "Width", min: 320, max: 440, step: 10, unit: "px", defaultValue: 400 },
-      { kind: "toggle", prop: "autoplay", label: "Peek by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Peek by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <PageCurl key={`${v.width}-${v.autoplay}`} width={v.width as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1316,7 +1354,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "ink", label: "Ink", options: ["#1d1d1f", "#0071e3", "#5e5ce6", "#ff375f", "#30b158"], defaultValue: "#1d1d1f" },
       { kind: "select", prop: "name", label: "Name", options: ["Alex Rivera", "Jordan Lee", "Sam Okafor"], defaultValue: "Alex Rivera" },
-      { kind: "toggle", prop: "autoplay", label: "Sign by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Sign by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SignAndSeal key={String(v.autoplay)} ink={v.ink as string} name={v.name as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1326,7 +1364,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "start", label: "Start at", min: 0, max: 60, step: 1, defaultValue: 11 },
-      { kind: "toggle", prop: "autoplay", label: "Log by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Log by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <StreakCounter key={`${v.start}-${v.autoplay}`} start={v.start as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1336,7 +1374,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "title", label: "Title", options: ["Controls", "Quick settings", "Privacy"], defaultValue: "Controls" },
-      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <CapsuleToggles key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1344,7 +1382,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "GlassBubbles",
     importPath: "@/components/glass-bubbles",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Nudge by itself", defaultValue: false, startOn: true }],
     render: (v) => <GlassBubbles key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "box-spill": {
@@ -1353,7 +1391,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "count", label: "Pieces", min: 10, max: 60, step: 1, defaultValue: 30 },
-      { kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <BoxSpill key={String(v.autoplay)} count={v.count as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1371,7 +1409,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Running", options: ["#0071e3", "#1d1d1f", "#5e5ce6", "#0b8f6a", "#ff375f"], defaultValue: "#0071e3" },
       { kind: "color", prop: "paused", label: "Paused", options: ["#c2410c", "#ff375f", "#ff9f0a", "#8e8e93", "#bf5af2"], defaultValue: "#c2410c" },
-      { kind: "toggle", prop: "autoplay", label: "Pause by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Pause by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SqueezeProgress key={String(v.autoplay)} accent={v.accent as string} paused={v.paused as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1381,7 +1419,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30d158", "#ff375f", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Jump by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Jump by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <BoltingSliders key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1391,7 +1429,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "title", label: "Page title", options: ["Draft · Q4 notes", "Launch checklist", "Old invoice"], defaultValue: "Draft · Q4 notes" },
-      { kind: "toggle", prop: "autoplay", label: "Toss by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Toss by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <CrumpleToTrash key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1399,7 +1437,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "TapeShelf",
     importPath: "@/components/tape-shelf",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true }],
     render: (v) => <TapeShelf key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "packet-router": {
@@ -1408,7 +1446,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "defaultStrategy", label: "Start on", options: ["Cost", "Balanced", "Quality"], defaultValue: "Balanced" },
-      { kind: "toggle", prop: "autoplay", label: "Cycle strategies", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Cycle strategies", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <PacketRouter
@@ -1422,14 +1460,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "StampSwirl",
     importPath: "@/components/stamp-swirl",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Lift by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Lift by itself", defaultValue: false, startOn: true }],
     render: (v) => <StampSwirl key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "bubble-cluster": {
     componentName: "BubbleCluster",
     importPath: "@/components/bubble-cluster",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle groups", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle groups", defaultValue: false, startOn: true }],
     render: (v) => <BubbleCluster key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "sticker-toss": {
@@ -1439,7 +1477,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Centre", options: ["#c8f560", "#ff375f", "#0a84ff", "#ff9f0a", "#bf5af2"], defaultValue: "#c8f560" },
       { kind: "select", prop: "text", label: "Ring text", options: ["NEXUS UI · MADE TO MOVE · ", "STUDIO · EST. 2026 · ", "THROW ME · CATCH ME · "], defaultValue: "NEXUS UI · MADE TO MOVE · " },
-      { kind: "toggle", prop: "autoplay", label: "Toss by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Toss by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <StickerToss key={String(v.autoplay)} accent={v.accent as string} text={v.text as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1449,7 +1487,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "limit", label: "Window", min: 120, max: 400, step: 20, unit: "K", defaultValue: 200 },
-      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ContextMeter key={`${v.limit}-${v.autoplay}`} limit={v.limit as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1457,14 +1495,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MoodWheel",
     importPath: "@/components/mood-wheel",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Spin by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Spin by itself", defaultValue: false, startOn: true }],
     render: (v) => <MoodWheel key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "swipe-stack": {
     componentName: "SwipeStack",
     importPath: "@/components/swipe-stack",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Swipe by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Swipe by itself", defaultValue: false, startOn: true }],
     render: (v) => <SwipeStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "flight-tracker": {
@@ -1494,7 +1532,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "overhang", label: "Tip after", min: 12, max: 48, step: 2, unit: "px", defaultValue: 24 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <TodoTower key={String(v.autoplay)} overhang={v.overhang as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1504,7 +1542,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "accent", label: "Face", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <PeekLogin key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1514,7 +1552,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "radius", label: "Spread", min: 24, max: 80, step: 2, unit: "px", defaultValue: 46 },
-      { kind: "toggle", prop: "autoplay", label: "Wander by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Wander by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <HeatField key={String(v.autoplay)} radius={v.radius as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1525,7 +1563,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "text", label: "Word", options: ["motion", "hello", "nexus", "spring"], defaultValue: "motion" },
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#bf5af2"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ParticleMark key={String(v.autoplay)} text={v.text as string} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1535,7 +1573,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "prompt", label: "Prompt", options: ["Pink dusk over soft hills", "Morning valley, mint and sky", "Moonlit ridge, deep teal", "Desert at golden hour"], defaultValue: "Pink dusk over soft hills" },
-      { kind: "toggle", prop: "autoplay", label: "Generate by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Generate by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <GenerateImage key={`${v.prompt}-${v.autoplay}`} prompt={v.prompt as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1543,7 +1581,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "FalloffAccordion",
     importPath: "@/components/falloff-accordion",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Open by itself", defaultValue: false, startOn: true }],
     render: (v) => <FalloffAccordion key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "magnet-select": {
@@ -1552,7 +1590,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "defaultValue", label: "Start on", options: ["here", "focus", "meet", "lunch", "travel", "sick", "away"], defaultValue: "here" },
-      { kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <MagnetSelect key={`${v.defaultValue}-${v.autoplay}`} defaultValue={v.defaultValue as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1560,7 +1598,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AspectCrop",
     importPath: "@/components/aspect-crop",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false, startOn: true }],
     render: (v) => <AspectCrop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "slosh-slider": {
@@ -1570,7 +1608,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Liquid", options: ["#0071e3", "#30d158", "#ff9f0a", "#ff375f", "#bf5af2"], defaultValue: "#0071e3" },
       { kind: "select", prop: "label", label: "Label", options: ["Volume", "Brightness", "Bass"], defaultValue: "Volume" },
-      { kind: "toggle", prop: "autoplay", label: "Slosh by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Slosh by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SloshSlider key={String(v.autoplay)} accent={v.accent as string} label={v.label as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1578,7 +1616,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "GooReorder",
     importPath: "@/components/goo-reorder",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Shuffle by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Shuffle by itself", defaultValue: false, startOn: true }],
     render: (v) => <GooReorder key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "hop-labels": {
@@ -1587,7 +1625,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Type by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <HopLabels key={String(v.autoplay)} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1598,21 +1636,22 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "stepDuration", label: "Step length", min: 1.5, max: 6, step: 0.1, unit: "s", defaultValue: 3.2 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <StepPlayer accent={v.accent as string} stepDuration={v.stepDuration as number} />,
+    render: (v) => <StepPlayer key={String(v.autoplay)} autoplay={v.autoplay as boolean} accent={v.accent as string} stepDuration={v.stepDuration as number} />,
   },
   "pull-to-refresh": {
     componentName: "PullToRefresh",
     importPath: "@/components/pull-to-refresh",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pull by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pull by itself", defaultValue: false, startOn: true }],
     render: (v) => <PullToRefresh key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "runaway-button": {
     componentName: "RunawayButton",
     importPath: "@/components/runaway-button",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Dodge by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Dodge by itself", defaultValue: false, startOn: true }],
     render: (v) => <RunawayButton key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "wake-slider": {
@@ -1623,8 +1662,9 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "accent", label: "Accent", options: ["#ff9f0a", "#0a84ff", "#30d158", "#ff375f", "#bf5af2"], defaultValue: "#ff9f0a" },
       { kind: "select", prop: "label", label: "Label", options: ["Brightness", "Volume", "Warmth"], defaultValue: "Brightness" },
       { kind: "range", prop: "defaultValue", label: "Start value", min: 0, max: 100, step: 1, defaultValue: 40 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <WakeSlider key={String(v.defaultValue)} accent={v.accent as string} label={v.label as string} defaultValue={v.defaultValue as number} />,
+    render: (v) => <WakeSlider autoplay={v.autoplay as boolean} key={`${String(v.defaultValue)}-${String(v.autoplay)}`} accent={v.accent as string} label={v.label as string} defaultValue={v.defaultValue as number} />,
   },
   "seek-search": {
     componentName: "SeekSearch",
@@ -1632,7 +1672,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "placeholder", label: "Placeholder", options: ["Search files", "Search docs", "Find a teammate"], defaultValue: "Search files" },
-      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Demo by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SeekSearch key={String(v.autoplay)} placeholder={v.placeholder as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1643,7 +1683,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "amount", label: "Amount", options: ["50", "25", "100"], defaultValue: "50" },
       { kind: "select", prop: "backLabel", label: "Back", options: ["Thanks", "Saved", "Enjoy"], defaultValue: "Thanks" },
-      { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <FoldNote key={String(v.autoplay)} amount={v.amount as string} backLabel={v.backLabel as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1651,7 +1691,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "AssignPicker",
     importPath: "@/components/assign-picker",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Pick by itself", defaultValue: false, startOn: true }],
     render: (v) => <AssignPicker key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "bend-text": {
@@ -1661,7 +1701,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "text", label: "Text", options: ["PLUCK THE LINE · MAKE IT SING · ", "NEW SEASON · NEW SOUNDS · ", "HELLO THERE · "], defaultValue: "PLUCK THE LINE · MAKE IT SING · " },
       { kind: "color", prop: "accent", label: "Grab point", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
-      { kind: "toggle", prop: "autoplay", label: "Pluck by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Pluck by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <BendText key={String(v.autoplay)} text={v.text as string} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1672,7 +1712,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "spread", label: "Spread", min: 0.08, max: 0.4, step: 0.02, defaultValue: 0.18 },
-      { kind: "toggle", prop: "autoplay", label: "Breathe by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Breathe by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <PressureText key={String(v.autoplay)} accent={v.accent as string} spread={v.spread as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1683,7 +1723,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Caret", options: ["#0071e3", "#5e5ce6", "#ff375f", "#30b158", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "select", prop: "buttonLabel", label: "Button", options: ["Start a project", "New board", "Invite team"], defaultValue: "Start a project" },
-      { kind: "toggle", prop: "autoplay", label: "Tour by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Tour by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <MorphCursor key={String(v.autoplay)} accent={v.accent as string} buttonLabel={v.buttonLabel as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1693,7 +1733,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "toggle", prop: "defaultDark", label: "Start dark", defaultValue: false },
-      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Flip by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <InkThemeSwitch key={`${String(v.autoplay)}-${String(v.defaultDark)}`} defaultDark={v.defaultDark as boolean} autoplay={v.autoplay as boolean} />
@@ -1706,7 +1746,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Liquid", options: ["#0a84ff", "#30d158", "#5e5ce6", "#ff375f", "#64d2ff"], defaultValue: "#0a84ff" },
       { kind: "range", prop: "defaultUsed", label: "Used", min: 0, max: 200, step: 2, unit: " GB", defaultValue: 136 },
-      { kind: "toggle", prop: "autoplay", label: "Slosh by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Slosh by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <LiquidGauge
@@ -1724,7 +1764,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "room", label: "Room", min: 10, max: 30, step: 0.5, unit: "°", defaultValue: 19.5 },
       { kind: "range", prop: "defaultValue", label: "Start at", min: 10, max: 30, step: 0.5, unit: "°", defaultValue: 21 },
-      { kind: "toggle", prop: "autoplay", label: "Turn by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Turn by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <ThermoDial
@@ -1742,7 +1782,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "toggle", prop: "defaultOn", label: "Start on", defaultValue: false },
       { kind: "select", prop: "hint", label: "Hint", options: ["Pull the cord.", "Give it a tug.", "Pull to toggle."], defaultValue: "Pull the cord." },
-      { kind: "toggle", prop: "autoplay", label: "Tug by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Tug by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <PullCord
@@ -1760,7 +1800,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "headline", label: "Prize", options: ["20% off Pro", "Free month", "Free shipping"], defaultValue: "20% off Pro" },
       { kind: "color", prop: "accent", label: "Eyebrow", options: ["#bf5af2", "#ff375f", "#0a84ff", "#30b158", "#ff9f0a"], defaultValue: "#bf5af2" },
-      { kind: "toggle", prop: "autoplay", label: "Scratch by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Scratch by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ScratchReveal key={String(v.autoplay)} headline={v.headline as string} accent={v.accent as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1768,7 +1808,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "PolaroidDevelop",
     importPath: "@/components/polaroid-develop",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Shake by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Shake by itself", defaultValue: false, startOn: true }],
     render: (v) => <PolaroidDevelop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "wallet-stack": {
@@ -1778,7 +1818,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "label", label: "Label", options: ["Wallet", "Cards", "Pay"], defaultValue: "Wallet" },
       { kind: "select", prop: "hint", label: "Hint", options: ["Pick a card.", "Tap a card to see the back.", ""], defaultValue: "Pick a card." },
-      { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Browse by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <WalletStack key={String(v.autoplay)} label={v.label as string} hint={v.hint as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1790,9 +1830,10 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "palette", label: "Palette", options: ["Ocean", "Sunset", "Forest"], defaultValue: "Ocean" },
       { kind: "range", prop: "stagger", label: "Stagger", min: 0, max: 40, step: 2, unit: "ms", defaultValue: 12 },
       { kind: "range", prop: "radius", label: "Radius", min: 0, max: 6, step: 0.5, defaultValue: 2 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
-      <TrafficBars
+      <TrafficBars key={String(v.autoplay)} autoplay={v.autoplay as boolean}
         colors={
           ({
             Ocean: ["#0071e3", "#64d2ff", "#bf5af2"],
@@ -1813,8 +1854,9 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "smooth", label: "Smooth curve", defaultValue: true },
       { kind: "toggle", prop: "fill", label: "Area fill", defaultValue: true },
       { kind: "color", prop: "up", label: "Up colour", options: ["#30d158", "#0a84ff", "#64d2ff", "#bf5af2"], defaultValue: "#30d158" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <StockLine smooth={v.smooth as boolean} fill={v.fill as boolean} up={v.up as string} />,
+    render: (v) => <StockLine key={String(v.autoplay)} autoplay={v.autoplay as boolean} smooth={v.smooth as boolean} fill={v.fill as boolean} up={v.up as string} />,
   },
   "pulse-monitor": {
     componentName: "PulseMonitor",
@@ -1824,8 +1866,9 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "bpm", label: "Resting BPM", min: 48, max: 100, step: 1, unit: "bpm", defaultValue: 68 },
       { kind: "color", prop: "color", label: "Trace", options: ["#ff375f", "#0a84ff", "#30d158", "#bf5af2", "#64d2ff"], defaultValue: "#ff375f" },
       { kind: "color", prop: "workoutColor", label: "Workout", options: ["#ff9f0a", "#ffd60a", "#ff375f", "#30d158"], defaultValue: "#ff9f0a" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
-    render: (v) => <PulseMonitor bpm={v.bpm as number} color={v.color as string} workoutColor={v.workoutColor as string} />,
+    render: (v) => <PulseMonitor key={String(v.autoplay)} autoplay={v.autoplay as boolean} bpm={v.bpm as number} color={v.color as string} workoutColor={v.workoutColor as string} />,
   },
   "spend-donut": {
     componentName: "SpendDonut",
@@ -1834,7 +1877,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "thickness", label: "Thickness", min: 10, max: 30, step: 1, unit: "px", defaultValue: 18 },
       { kind: "range", prop: "gap", label: "Gap", min: 0, max: 12, step: 1, unit: "px", defaultValue: 4 },
-      { kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Cycle by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SpendDonut key={String(v.autoplay)} thickness={v.thickness as number} gap={v.gap as number} autoplay={v.autoplay as boolean} />,
   },
@@ -1845,7 +1888,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "accent", label: "Accent", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "min", label: "Picks needed", min: 1, max: 6, step: 1, defaultValue: 3 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <React.Suspense fallback={null}>
@@ -1859,7 +1902,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "defaultValue", label: "Start at", options: ["50000", "120000", "300000", "600000"], defaultValue: "120000" },
-      { kind: "toggle", prop: "autoplay", label: "Step by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Step by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <React.Suspense fallback={null}>
@@ -1871,7 +1914,7 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "MarbleProgress",
     importPath: "@/components/marble-progress",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Tick by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Tick by itself", defaultValue: false, startOn: true }],
     render: (v) => (
       <React.Suspense fallback={null}>
         <MarbleProgress key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
@@ -1885,7 +1928,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "from", label: "Cloth", options: ["#0071e3", "#ff375f", "#30b158", "#ff9f0a", "#1d1d1f"], defaultValue: "#0071e3" },
       { kind: "select", prop: "title", label: "Title", options: ["Launch Week", "Now in beta", "50% off"], defaultValue: "Launch Week" },
-      { kind: "toggle", prop: "autoplay", label: "Gusts", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Gusts", defaultValue: false, startOn: true },
     ],
     render: (v) => <ClothBanner key={String(v.autoplay)} from={v.from as string} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
@@ -1917,7 +1960,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "title", label: "Title", options: ["Ask Nexus UI anything", "Ask the docs", "What's on your mind?"], defaultValue: "Ask Nexus UI anything" },
       { kind: "range", prop: "placeholderInterval", label: "Rotate every", min: 1200, max: 5000, step: 100, unit: "ms", defaultValue: 2800 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <AskNexusInput
@@ -1936,7 +1979,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "animationSpeed", label: "Spin", min: 0.2, max: 3, step: 0.1, unit: "×", defaultValue: 1 },
       { kind: "range", prop: "ringWidth", label: "Ring", min: 1, max: 6, step: 0.5, unit: "px", defaultValue: 1.5 },
       { kind: "range", prop: "blur", label: "Glow blur", min: 0, max: 48, step: 2, unit: "px", defaultValue: 24 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[320px] text-[#1d1d1f] dark:text-[#f5f5f7]">
@@ -1969,7 +2012,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "color", label: "Beam", options: ["#67e8f9", "#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#67e8f9" },
       { kind: "range", prop: "beams", label: "Beams", min: 1, max: 5, step: 1, defaultValue: 3 },
       { kind: "range", prop: "speed", label: "Sweep", min: 4, max: 20, step: 1, unit: "s", defaultValue: 11 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <BeamField
@@ -1990,7 +2033,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "itemWidth", label: "Card width", min: 140, max: 220, step: 4, unit: "px", defaultValue: 168 },
       { kind: "range", prop: "perspective", label: "Perspective", min: 600, max: 1800, step: 50, unit: "px", defaultValue: 1100 },
       { kind: "toggle", prop: "autoRotate", label: "Drift", defaultValue: false },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <CardCarousel3D
@@ -2011,7 +2054,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "stackOffset", label: "Peek", min: 0, max: 30, step: 1, unit: "px", defaultValue: 14 },
       { kind: "range", prop: "maxVisible", label: "Visible", min: 1, max: 4, step: 1, defaultValue: 3 },
       { kind: "select", prop: "direction", label: "Throw", options: ["forward", "backward"], defaultValue: "forward" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <CardStackRotator
@@ -2038,7 +2081,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "title", label: "Name", options: ["Nexus AI", "Support", "Maya"], defaultValue: "Nexus AI" },
       { kind: "range", prop: "typingDuration", label: "Typing", min: 400, max: 3000, step: 100, unit: "ms", defaultValue: 1300 },
       { kind: "toggle", prop: "showReplay", label: "Replay button", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <ChatMessages
@@ -2059,7 +2102,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "intensity", label: "Intensity", options: ["subtle", "standard", "cinematic"], defaultValue: "standard" },
       { kind: "select", prop: "exitDirection", label: "Peel", options: ["up", "down"], defaultValue: "up" },
       { kind: "toggle", prop: "showAmbientGlow", label: "Glow", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <CinematicCardDeck
@@ -2077,7 +2120,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "autoPlayInterval", label: "Step every", min: 1000, max: 5000, step: 100, unit: "ms", defaultValue: 2600 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <CircularCarousel key={String(v.autoplay)} autoPlayInterval={v.autoPlayInterval as number} autoplay={v.autoplay as boolean} />
@@ -2090,7 +2133,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "theme", label: "Theme", options: ["dark", "light", "auto"], defaultValue: "dark" },
       { kind: "toggle", prop: "hoverHighlight", label: "Glide bar", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[540px]" style={{ height: 340 }}>
@@ -2111,7 +2154,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "initialPosition", label: "Start at", min: 5, max: 95, step: 1, unit: "%", defaultValue: 50 },
       { kind: "select", prop: "mode", label: "Mode", options: ["drag", "hover"], defaultValue: "drag" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <Compare
@@ -2134,7 +2177,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "mode", label: "Lens", options: ["text", "image"], defaultValue: "text" },
       { kind: "range", prop: "maskSize", label: "Lens size", min: 60, max: 180, step: 2, unit: "px", defaultValue: 120 },
       { kind: "toggle", prop: "enableGlow", label: "Ring", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[520px]">
@@ -2160,7 +2203,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "heading", label: "Heading", options: ["Loved by people who ship", "Wall of love", "What teams say"], defaultValue: "Loved by people who ship" },
       { kind: "select", prop: "eyebrow", label: "Eyebrow", options: ["Testimonials", "Reviews", "Customers"], defaultValue: "Testimonials" },
       { kind: "range", prop: "interval", label: "Auto-advance", min: 0, max: 6000, step: 500, unit: "ms", defaultValue: 0 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <DepthTestimonials
@@ -2180,7 +2223,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "maxRotation", label: "Tilt", min: 0, max: 20, step: 1, unit: "°", defaultValue: 9 },
       { kind: "range", prop: "stackOffset", label: "Offset", min: 0, max: 24, step: 1, unit: "px", defaultValue: 0 },
       { kind: "toggle", prop: "showOverlay", label: "Captions", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <DraggableCardStack
@@ -2198,7 +2241,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "expandInto", label: "Open into", options: ["grid", "viewport"], defaultValue: "grid" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     // Autoplay only runs in grid mode: in viewport mode each step would open a page-wide dialog and lock scrolling.
     render: (v) => (
@@ -2217,7 +2260,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "activeHref", label: "Running", options: ["none", "#finder", "#messages", "#music", "#photos"], defaultValue: "none" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="relative flex h-[300px] w-full max-w-[640px] items-end justify-center overflow-hidden rounded-[24px] bg-white pb-6 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)]">
@@ -2258,7 +2301,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "defaultMode", label: "Start in", options: ["ask", "edit", "build"], defaultValue: "build" },
       { kind: "select", prop: "placeholder", label: "Placeholder", options: ["Describe what you need...", "Ask the copilot...", "What should we build?"], defaultValue: "Describe what you need..." },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     // hotkey="" keeps Cmd/Ctrl+K free for the site's own search on the docs page.
     render: (v) => (
@@ -2281,7 +2324,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "brand", label: "Brand", options: ["Halo", "Orbit", "Nexus"], defaultValue: "Halo" },
       { kind: "select", prop: "title", label: "Title", options: ["Welcome back", "Sign in", "Good to see you"], defaultValue: "Welcome back" },
       { kind: "toggle", prop: "backdrop", label: "Aurora backdrop", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="flex w-full max-w-[720px] justify-center">
@@ -2302,7 +2345,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "hint", label: "Caption", options: ["Move across the cards.", "Hover a card.", ""], defaultValue: "Move across the cards." },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <GlowingCardsLayout key={String(v.autoplay)} hint={v.hint as string} autoplay={v.autoplay as boolean} className="max-w-[560px]" />
@@ -2317,7 +2360,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "markerColor", label: "Marker", options: ["#ffd60a", "#0071e355", "#30b15855", "#ff375f55", "#bf5af255"], defaultValue: "#ffd60a" },
       { kind: "range", prop: "reach", label: "Reach", min: 8, max: 140, step: 2, unit: "px", defaultValue: 40 },
       { kind: "range", prop: "linger", label: "Linger", min: 0.1, max: 3, step: 0.1, unit: "s", defaultValue: 0.9 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="flex w-full max-w-[520px] justify-center">
@@ -2342,7 +2385,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { kind: "select", prop: "shape", label: "Shape", options: ["circle", "rounded", "square"], defaultValue: "circle" },
       { kind: "range", prop: "revealCount", label: "Fan out", min: 0, max: 5, step: 1, defaultValue: 2 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <ImagesBadge
@@ -2365,7 +2408,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "direction", label: "Direction", options: ["left", "right"], defaultValue: "left" },
       { kind: "select", prop: "speed", label: "Speed", options: ["slow", "normal", "fast"], defaultValue: "normal" },
       { kind: "range", prop: "gap", label: "Gap", min: 4, max: 40, step: 2, unit: "px", defaultValue: 16 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[720px]">
@@ -2390,7 +2433,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "title", label: "Heading", options: ["Our offices", "Where we work", "Find us"], defaultValue: "Our offices" },
       // ids from the built-in list: 4 London, 6 Tokyo, 3 New York, 8 Sydney, 11 Mumbai
       { kind: "select", prop: "initialLocationId", label: "First city (id)", options: ["4", "6", "3", "8", "11"], defaultValue: "4" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <InteractiveGlobeExplorer
@@ -2411,7 +2454,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "width", label: "Card width", min: 200, max: 380, step: 10, unit: "px", defaultValue: 300 },
       { kind: "range", prop: "height", label: "Picture height", min: 90, max: 220, step: 2, unit: "px", defaultValue: 168 },
       { kind: "range", prop: "delay", label: "Delay", min: 0, max: 0.8, step: 0.02, unit: "s", defaultValue: 0.08 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="flex h-full min-h-[360px] w-full items-end justify-center pb-16">
@@ -2443,7 +2486,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "accent", label: "Backlight", options: ["#0a84ff", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0a84ff" },
       { kind: "select", prop: "theme", label: "Finish", options: ["auto", "light", "dark"], defaultValue: "auto" },
       { kind: "select", prop: "layout", label: "Layout", options: ["mac", "compact"], defaultValue: "mac" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[600px]">
@@ -2475,7 +2518,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "glow", label: "Glow", defaultValue: true },
       { kind: "toggle", prop: "interactive", label: "Gravity and strikes", defaultValue: true },
       { kind: "toggle", prop: "hoverOnly", label: "Only on hover", defaultValue: false },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <Meteors
@@ -2503,7 +2546,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "heading", label: "Heading", options: ["Roadmap", "Our journey", "What's next"], defaultValue: "Roadmap" },
       // Unset, the current milestone (index 2 in the built-in list) opens first.
       { kind: "range", prop: "defaultOpen", label: "Open first", min: 0, max: 3, step: 1, defaultValue: 2 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <MilestoneTimeline
@@ -2523,7 +2566,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "direction", label: "Direction", options: ["vertical", "horizontal"], defaultValue: "vertical" },
       { kind: "range", prop: "scrollHeight", label: "Height", min: 260, max: 480, step: 10, unit: "px", defaultValue: 420 },
       { kind: "toggle", prop: "showGrid", label: "Grid", defaultValue: false },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[560px]">
@@ -2545,7 +2588,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "tiltStrength", label: "Tilt", min: 0, max: 24, step: 1, unit: "°", defaultValue: 12 },
       { kind: "select", prop: "title", label: "Title", options: ["Render anywhere", "Ship at the edge", "Built for speed"], defaultValue: "Render anywhere" },
       { kind: "select", prop: "cta", label: "Button", options: ["Upgrade", "Start free", "Deploy now"], defaultValue: "Upgrade" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <NebulaGlassCard
@@ -2565,7 +2608,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "color", prop: "color", label: "Accent", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "size", label: "Size", min: 64, max: 180, step: 4, unit: "px", defaultValue: 112 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <OrbitalLoader
@@ -2585,7 +2628,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "defaultCountry", label: "Country", options: ["US", "GB", "IN", "JP", "DE", "BR"], defaultValue: "US" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[340px]">
@@ -2605,7 +2648,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "autoRotateInterval", label: "Step every", min: 1200, max: 6000, step: 100, unit: "ms", defaultValue: 2800 },
       { kind: "select", prop: "hint", label: "Hint", options: ["Drag the ring or tap a face.", "Meet the team.", ""], defaultValue: "Drag the ring or tap a face." },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <ProfileOrbit
@@ -2624,7 +2667,7 @@ export const playgrounds: Record<string, Playground> = {
       // Unset, the first built-in period ("7d") is selected.
       { kind: "select", prop: "defaultPeriod", label: "Period", options: ["7d", "30d", "90d"], defaultValue: "7d" },
       { kind: "select", prop: "title", label: "Title", options: ["This week at a glance", "Growth pulse", "Key metrics"], defaultValue: "This week at a glance" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <KpiStrip
@@ -2644,7 +2687,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "youColor", label: "Your colour", options: ["#30d158", "#0071e3", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#30d158" },
       { kind: "select", prop: "title", label: "Board", options: ["Launch board", "Sprint 42", "Brand refresh"], defaultValue: "Launch board" },
       { kind: "toggle", prop: "showYou", label: "Show you", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <RealTimeCursors
@@ -2664,7 +2707,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "fillColor", label: "Fill", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "select", prop: "orientation", label: "Orientation", options: ["vertical", "horizontal"], defaultValue: "vertical" },
       { kind: "range", prop: "markerCount", label: "Milestones", min: 2, max: 8, step: 1, defaultValue: 4 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className={v.orientation === "horizontal" ? "w-full max-w-[420px]" : undefined}>
@@ -2688,7 +2731,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "accentColor", label: "Accent", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "select", prop: "mode", label: "Reveal by", options: ["word", "character", "line"], defaultValue: "word" },
       { kind: "range", prop: "blurAmount", label: "Blur", min: 0, max: 16, step: 1, unit: "px", defaultValue: 6 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[460px]">
@@ -2712,7 +2755,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "intensity", label: "Intensity", options: ["low", "medium", "high"], defaultValue: "medium" },
       { kind: "range", prop: "speed", label: "Speed", min: 0.2, max: 3, step: 0.1, unit: "×", defaultValue: 1 },
       { kind: "toggle", prop: "cursorReactive", label: "Stir with pointer", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <React.Suspense fallback={null}>
@@ -2736,7 +2779,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "toggle", prop: "showNameField", label: "Name fields", defaultValue: true },
       { kind: "toggle", prop: "showConfirmPasswordField", label: "Confirm password", defaultValue: true },
       { kind: "toggle", prop: "showSocialLogins", label: "Social buttons", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="flex w-full max-w-[420px] justify-center">
@@ -2759,7 +2802,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "columns", label: "Columns", min: 2, max: 4, step: 1, defaultValue: 4 },
       { kind: "range", prop: "borderRadius", label: "Radius", min: 0, max: 28, step: 1, unit: "px", defaultValue: 16 },
       { kind: "range", prop: "grayscaleIntensity", label: "Greyscale", min: 0, max: 100, step: 5, unit: "%", defaultValue: 100 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="w-full max-w-[540px]">
@@ -2782,7 +2825,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "underlineColor", label: "Underline", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "stepDuration", label: "Frame time", min: 30, max: 240, step: 10, unit: "ms", defaultValue: 80 },
       { kind: "range", prop: "baseFrequency", label: "Wiggle", min: 0.005, max: 0.06, step: 0.001, defaultValue: 0.02 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <SquigglyText
@@ -2806,7 +2849,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "variant", label: "Variant", options: ["default", "outline", "ghost", "destructive"], defaultValue: "default" },
       { kind: "select", prop: "size", label: "Size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { kind: "toggle", prop: "showSuccess", label: "Success state", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <StatefulButton
@@ -2831,7 +2874,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "grain", label: "Grain", min: 0, max: 1, step: 0.05, defaultValue: 0.35 },
       { kind: "range", prop: "distortion", label: "Melt", min: 0, max: 200, step: 5, unit: "px", defaultValue: 90 },
       { kind: "range", prop: "speed", label: "Flow speed", min: 0.2, max: 3, step: 0.1, unit: "×", defaultValue: 1 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <SvgNoise
@@ -2851,7 +2894,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "theme", label: "Theme", options: ["carbon", "midnight", "paper"], defaultValue: "carbon" },
       { kind: "range", prop: "typingSpeed", label: "Typing", min: 10, max: 100, step: 2, unit: "ms", defaultValue: 34 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="flex h-[360px] w-full max-w-[560px] flex-col">
@@ -2875,7 +2918,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "range", prop: "intensity", label: "Sparks", min: 0.5, max: 2.2, step: 0.1, unit: "×", defaultValue: 1 },
       { kind: "toggle", prop: "disabled", label: "Show revealed", defaultValue: false },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <TextRevealCard
@@ -2897,7 +2940,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "folderBackColor", label: "Back", options: ["#3d9cf0", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#3d9cf0" },
       { kind: "color", prop: "folderFrontColor", label: "Front", options: ["#6cb8f6", "#5fd47f", "#ff7a93", "#d48cf7", "#ffbf4d"], defaultValue: "#6cb8f6" },
       { kind: "select", prop: "size", label: "Size", options: ["md", "sm"], defaultValue: "md" },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <ThreeDFolder
@@ -2918,7 +2961,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "color", prop: "color", label: "Light", options: ["#0071e3", "#30b158", "#ff375f", "#bf5af2", "#ff9f0a"], defaultValue: "#0071e3" },
       { kind: "range", prop: "size", label: "Spotlight", min: 120, max: 420, step: 10, unit: "px", defaultValue: 260 },
       { kind: "range", prop: "lap", label: "Lap time", min: 2, max: 12, step: 0.5, unit: "s", defaultValue: 5 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <TracingSpotlightPanel
@@ -2939,7 +2982,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "range", prop: "maxTilt", label: "Max tilt", min: 0, max: 30, step: 1, unit: "°", defaultValue: 14 },
       { kind: "range", prop: "depth", label: "Depth", min: 0, max: 60, step: 1, unit: "px", defaultValue: 26 },
       { kind: "toggle", prop: "glare", label: "Glare", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <VectorTiltScene
@@ -2965,7 +3008,7 @@ export const playgrounds: Record<string, Playground> = {
         options: ["255,255,255", "0,113,227", "48,177,88", "255,55,95", "191,90,242", "255,159,10"],
         defaultValue: "255,255,255",
       },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <div className="flex w-full max-w-[480px] flex-col items-center">
@@ -2992,7 +3035,7 @@ export const playgrounds: Record<string, Playground> = {
       { kind: "select", prop: "contentMode", label: "Panel", options: ["detailed", "minimal", "hidden"], defaultValue: "detailed" },
       { kind: "select", prop: "animationSpeed", label: "Snap", options: ["slow", "medium", "fast"], defaultValue: "medium" },
       { kind: "range", prop: "ringRadius", label: "Ring radius", min: 80, max: 180, step: 4, unit: "px", defaultValue: 112 },
-      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => (
       <WheelSelector
@@ -3009,14 +3052,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "VinylPlayer",
     importPath: "@/components/vinyl-player",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
     render: (v) => <VinylPlayer key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "ferrofluid-record": {
     componentName: "FerrofluidRecord",
     importPath: "@/components/ferrofluid-record",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Move the magnet", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Move the magnet", defaultValue: false, startOn: true }],
     render: (v) => <FerrofluidRecord key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "sand-timer": {
@@ -3025,7 +3068,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "range", prop: "seconds", label: "Seconds", min: 10, max: 120, step: 5, defaultValue: 30 },
-      { kind: "toggle", prop: "autoplay", label: "Turn over by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Turn over by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SandTimer key={`${v.seconds}-${v.autoplay}`} seconds={v.seconds as number} autoplay={v.autoplay as boolean} />,
   },
@@ -3035,7 +3078,7 @@ export const playgrounds: Record<string, Playground> = {
     defaultFill: "light",
     controls: [
       { kind: "select", prop: "code", label: "Code", options: ["NXS-8F2Q-PRO", "LAUNCH-7K4M", "WELCOME-2026"], defaultValue: "NXS-8F2Q-PRO" },
-      { kind: "toggle", prop: "autoplay", label: "Zip by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Zip by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <ZipperReveal key={String(v.autoplay)} code={v.code as string} autoplay={v.autoplay as boolean} />,
   },
@@ -3046,7 +3089,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "name", label: "Contact", options: ["Maya", "Jun", "Priya"], defaultValue: "Maya" },
       { kind: "toggle", prop: "autoReply", label: "Canned replies", defaultValue: true },
-      { kind: "toggle", prop: "autoplay", label: "Fire by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Fire by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <SlingshotSend key={String(v.autoplay)} name={v.name as string} autoReply={v.autoReply as boolean} autoplay={v.autoplay as boolean} />,
   },
@@ -3054,14 +3097,14 @@ export const playgrounds: Record<string, Playground> = {
     componentName: "DominoSelect",
     importPath: "@/components/domino-select",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Topple by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Topple by itself", defaultValue: false, startOn: true }],
     render: (v) => <DominoSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "lenticular-pass": {
     componentName: "LenticularPass",
     importPath: "@/components/lenticular-pass",
     defaultFill: "light",
-    controls: [{ kind: "toggle", prop: "autoplay", label: "Rock by itself", defaultValue: false }],
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Rock by itself", defaultValue: false, startOn: true }],
     render: (v) => <LenticularPass key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "origami-pricing": {
@@ -3071,7 +3114,7 @@ export const playgrounds: Record<string, Playground> = {
     controls: [
       { kind: "select", prop: "planName", label: "Plan", options: ["Nexus Pro", "Studio", "Team"], defaultValue: "Nexus Pro" },
       { kind: "select", prop: "price", label: "Price", options: ["$9", "$19", "$49"], defaultValue: "$9" },
-      { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false },
+      { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false, startOn: true },
     ],
     render: (v) => <OrigamiPricing key={String(v.autoplay)} planName={v.planName as string} price={v.price as string} autoplay={v.autoplay as boolean} />,
   },

@@ -158,5 +158,5 @@ With `autoplay`, every 1300ms run the next step, looping: toggle rocket; open th
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Adding a reaction, from the picker or by tapping a pill that is not yours yet, plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) as the icon pops and sparks. Removing yours by tapping your pill plays `off` (a soft latch click that falls slightly in pitch) at about half volume.
-- The autoplay loop is silent, as is opening the picker; nothing plays on hover.
+- The autoplay loop plays the same `pop` and quieter `off` as it adds and removes reactions, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Opening the picker is silent; nothing plays on hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

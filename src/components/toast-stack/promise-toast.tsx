@@ -10,7 +10,7 @@ export interface PromiseToastProps {
   onViewLogs?: () => void;
   /** Runs a good deploy, then one with a bug, on a loop until someone touches the component. Never runs under reduced motion. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the wrapper. */
   className?: string;
@@ -106,7 +106,7 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, enableSoun
   };
   useEffect(() => clear, []);
 
-  // `audible` is true only for runs the user started; the autoplay loop stays silent.
+  // `audible` is true for runs the user started; the autoplay loop answers through `play.auto`.
   const start = (fail: boolean, audible = false) => {
     clear();
     runId.current += 1;
@@ -122,6 +122,7 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, enableSoun
       window.setTimeout(() => {
         setRun((r) => (r && r.id === id ? { ...r, progress: fail ? r.progress : 1, state: fail ? "fail" : "ok" } : r));
         if (audible) play(fail ? "error" : "success");
+        else play.auto(fail ? "error" : "success");
       }, t),
     );
     timers.current.push(window.setTimeout(() => setRun((r) => (r && r.id === id ? null : r)), t + 4200));
@@ -136,6 +137,7 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, enableSoun
     if (!autoplay || reduce || !active) return;
     const go = () => {
       if (touched.current) return;
+      play.auto("ping");
       startRef.current(nextFail.current);
       nextFail.current = !nextFail.current;
     };
@@ -145,7 +147,7 @@ export function PromiseToast({ onVisit, onViewLogs, autoplay = false, enableSoun
       window.clearTimeout(first);
       window.clearInterval(id);
     };
-  }, [autoplay, reduce, active]);
+  }, [autoplay, reduce, active, play]);
 
   const label = !run ? "" : run.state === "ok" ? "Deployed to production" : run.state === "fail" ? "Build failed with 2 errors" : STEPS[run.step].label;
   const fill = run?.state === "fail" ? "rgba(255,69,58,.28)" : run?.state === "ok" ? "rgba(48,209,88,.24)" : "rgba(255,255,255,.12)";

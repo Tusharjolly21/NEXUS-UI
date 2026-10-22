@@ -28,7 +28,7 @@ export interface PixelSelectProps {
   onChange?: (id: string) => void;
   /** Opens and picks moods by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -87,6 +87,7 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
 
   const autoRun = useEffectEvent((ts: number[]) => {
     if (touched.current || phase !== "closed") return;
+    play.auto("pop", 0.7);
     setSeed((s) => s + 1);
     setPhase("opening");
     ts.push(window.setTimeout(() => setPhase("open"), 420));
@@ -95,6 +96,7 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false, enabl
     ts.push(window.setTimeout(() => { if (!touched.current) setHover(pick.id); }, 900));
     ts.push(window.setTimeout(() => {
       if (touched.current) return;
+      play.auto("tap", 0.8);
       setValue(pick.id);
       setSeed((s) => s + 1);
       setPhase("closing");

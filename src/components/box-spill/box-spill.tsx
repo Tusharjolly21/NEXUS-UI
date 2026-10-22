@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { animate, motion, type AnimationPlaybackControls } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -13,7 +13,7 @@ export interface BoxSpillProps {
   count?: number;
   /** Opens and packs the box every 3.6s until someone presses the button. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -210,13 +210,15 @@ export function BoxSpill({ count = 30, autoplay = false, enableSound = true }: B
     actions.current = { spill, pack };
   });
 
+  const autoPop = useEffectEvent(() => play.auto("pop"));
+
   useEffect(() => {
     if (!autoplay) return;
     let o = false;
     const run = () => {
       if (touched.current) return;
       o = !o;
-      if (o) actions.current.spill();
+      if (o) { autoPop(); actions.current.spill(); }
       else actions.current.pack();
     };
     const a = setTimeout(run, 700);

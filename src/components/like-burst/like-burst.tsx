@@ -26,7 +26,7 @@ export type LikeBurstProps = {
   burst?: number;
   /** Accessible label; the count is appended automatically. */
   label?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };

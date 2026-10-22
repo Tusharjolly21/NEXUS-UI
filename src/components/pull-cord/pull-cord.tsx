@@ -18,7 +18,7 @@ export interface PullCordProps {
   className?: string;
   /** Tugs the cord every 2.6s until someone grabs it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -80,6 +80,8 @@ export function PullCord({
     if (byUser) {
       play(next ? "on" : "off");
       changeRef.current?.(next);
+    } else {
+      play.auto(next ? "on" : "off");
     }
   }, [play]);
 

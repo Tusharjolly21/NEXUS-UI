@@ -13,7 +13,7 @@ export interface ProgressButtonProps {
   task?: (onProgress: (p: number) => void) => Promise<void>;
   /** Runs itself on a loop until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -38,14 +38,16 @@ export function ProgressButton({ label = "Download", doneLabel = "Open file", ac
   const touched = useRef(false);
   useMotionValueEvent(progress, "change", (v) => setPct(Math.round(v * 100)));
 
-  const run = async (audible = false) => {
+  const run = async (user = false) => {
     if (stage !== "idle") return;
+    if (!user) play.auto("tap");
     progress.set(0);
     setStage("loading");
     await task((p) => animate(progress, p, { type: "spring", stiffness: 120, damping: 20 }));
     animate(progress, 1, { duration: 0.2 });
     setTimeout(() => {
-      if (audible) play("done");
+      if (user) play("done");
+      else play.auto("done");
       setStage("done");
     }, 350);
   };

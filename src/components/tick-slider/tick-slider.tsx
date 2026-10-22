@@ -47,7 +47,7 @@ export type TickSliderProps = {
   /** Sweeps the needle to a few values until someone touches it. */
   autoplay?: boolean;
   disabled?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -243,9 +243,10 @@ export function TickSlider({
       }
       const f = DEMO[k++ % DEMO.length];
       setInner(Number(clamp(Math.round((min + f * (max - min)) / step) * step, min, max).toFixed(decimals)));
+      play.auto("tick", 0.4);
     }, 1900);
     return () => clearInterval(t);
-  }, [autoplay, controlled, min, max, step, decimals]);
+  }, [autoplay, controlled, min, max, step, decimals, play]);
 
   const valueAt = (clientX: number) => {
     const el = trackRef.current;

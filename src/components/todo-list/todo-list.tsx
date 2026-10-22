@@ -10,7 +10,7 @@ export interface TodoListProps {
   accent?: string;
   /** Ticks tasks off by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -30,6 +30,10 @@ export function TodoList({ initial = ["Reply to design review", "Ship the pricin
   useEffect(() => {
     tasksRef.current = tasks;
   }, [tasks]);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
 
   const open = tasks.filter((t) => !t.done || t.leaving);
   const done = tasks.filter((t) => t.done && !t.leaving);
@@ -60,8 +64,10 @@ export function TodoList({ initial = ["Reply to design review", "Ship the pricin
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
       const next = tasksRef.current.find((x) => !x.done);
-      if (next) complete(next.id);
-      else setTasks((ts) => ts.map((x) => ({ ...x, done: false, leaving: false })));
+      if (next) {
+        playRef.current.auto("tick");
+        complete(next.id);
+      } else setTasks((ts) => ts.map((x) => ({ ...x, done: false, leaving: false })));
     }, 1500);
     return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps

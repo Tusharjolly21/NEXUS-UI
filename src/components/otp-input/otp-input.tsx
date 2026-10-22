@@ -16,7 +16,7 @@ export interface OtpInputProps {
   onResend?: () => void;
   /** Called once a code verifies. */
   onVerified?: (code: string) => void;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -41,6 +41,10 @@ export function OtpInput({
   const touched = useRef(false);
   const shake = useAnimationControls();
   const timers = useRef<number[]>([]);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms));
@@ -50,18 +54,20 @@ export function OtpInput({
     timers.current = [];
   };
 
-  // `audible` is true only for codes the visitor typed; the autoplay demo stays silent.
+  // `audible` is true for codes the visitor typed; the autoplay demo answers through `play.auto`.
   const submit = async (value: string, audible = false) => {
     setStatus("verifying");
     await new Promise<void>((r) => later(r, 900));
     const ok = await verify(value);
     if (ok) {
       if (audible) play("success");
+      else playRef.current.auto("success");
       setStatus("success");
       onVerified?.(value);
       later(() => setStatus("done"), 650);
     } else {
       if (audible) play("error");
+      else playRef.current.auto("error");
       setStatus("error");
       setShowError(true);
       shake.start({ x: [0, -14, 12, -9, 7, -4, 0], transition: { duration: 0.5 } });

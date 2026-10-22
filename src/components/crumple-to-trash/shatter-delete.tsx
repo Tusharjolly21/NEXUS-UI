@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -71,7 +71,7 @@ export interface ShatterDeleteProps {
   onUndo?: () => void;
   /** Shatters and mends the card every 2.3s until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -123,6 +123,8 @@ export function ShatterDelete({
     mendTimer.current = setTimeout(() => setState("whole"), 900);
   };
 
+  const autoSound = useEffectEvent((name: "knock" | "swipe", volume?: number) => play.auto(name, volume));
+
   useEffect(() => {
     if (!autoplay) return;
     const t = setInterval(() => {
@@ -132,10 +134,12 @@ export function ShatterDelete({
       }
       const s = stateRef.current;
       if (s === "whole") {
+        autoSound("knock");
         setHit({ x: 60 + Math.random() * 30, y: 30 + Math.random() * 40 });
         setSeed((n) => n + 13);
         setState("broken");
       } else if (s === "broken") {
+        autoSound("swipe", 0.8);
         setState("mending");
         clearTimeout(mendTimer.current);
         mendTimer.current = setTimeout(() => setState("whole"), 900);

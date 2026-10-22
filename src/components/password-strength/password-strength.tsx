@@ -8,7 +8,7 @@ export interface PasswordStrengthProps {
   onChange?: (value: string, score: number) => void;
   /** Types a sample password by itself until the user clicks in. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -40,6 +40,10 @@ export function PasswordStrength({ accent = "#0071e3", onChange, autoplay = fals
   const [show, setShow] = useState(false);
   const touched = useRef(false);
   const reachedTop = useRef(false);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
   const { rules, score } = scorePassword(pw);
   const level = LEVELS[score];
 
@@ -48,14 +52,20 @@ export function PasswordStrength({ accent = "#0071e3", onChange, autoplay = fals
     const sample = "Sunset-Drive9";
     let i = 0;
     let t: number;
+    let chimed = false;
     const tick = () => {
       if (touched.current) return;
       i += 1;
       if (i <= sample.length) {
         setPw(sample.slice(0, i));
+        // the same one soft chime as typing it: once, when the sample first reaches the top level
+        if (!chimed && scorePassword(sample.slice(0, i)).score === 4) {
+          chimed = true;
+          playRef.current.auto("success", 0.5);
+        }
         t = window.setTimeout(tick, 120 + Math.random() * 80);
       } else {
-        t = window.setTimeout(() => { if (!touched.current) { setPw(""); i = 0; t = window.setTimeout(tick, 900); } }, 2600);
+        t = window.setTimeout(() => { if (!touched.current) { setPw(""); i = 0; chimed = false; t = window.setTimeout(tick, 900); } }, 2600);
       }
     };
     t = window.setTimeout(tick, 900);

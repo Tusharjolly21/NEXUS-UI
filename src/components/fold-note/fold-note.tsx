@@ -23,7 +23,7 @@ export interface FoldNoteProps {
   onFoldChange?: (folded: boolean) => void;
   /** Folds and unfolds every two seconds until the user grabs or taps it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -99,8 +99,9 @@ export function FoldNote({
       const next = to <= -90;
       if (next !== folded.current) {
         folded.current = next;
-        // The note only makes a sound when the visitor folds or opens it, never in the autoplay demo.
+        // Same sound for the visitor and for the autoplay demo; the demo's goes through `auto`.
         if (byUser) playRef.current(next ? "off" : "whoosh");
+        else playRef.current.auto(next ? "off" : "whoosh");
         onFoldRef.current?.(next);
       }
     },

@@ -23,7 +23,7 @@ export interface DocumentTabsProps {
   autoplay?: boolean;
   /** Extra classes for the window. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -188,22 +188,33 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
   useEffect(() => {
     if (!autoplay || reduce || !demoOn) return;
     const script = [
-      () => add(),
+      () => {
+        if (tabsRef.current.length < MAX_TABS) play.auto("pop", 0.6);
+        add();
+      },
       () => {
         const second = tabsRef.current[1];
-        if (second) setActive(second.id);
+        if (second) {
+          if (activeRef.current !== second.id) play.auto("tick", 0.6);
+          setActive(second.id);
+        }
       },
-      () =>
+      () => {
+        if (tabsRef.current.length >= 2) play.auto("drop", 0.5);
         setTabs((x) => {
           if (x.length < 2) return x;
           const a = [...x];
           [a[0], a[1]] = [a[1], a[0]];
           return a;
-        }),
+        });
+      },
       () => {
         const x = tabsRef.current;
         const last = x[x.length - 1];
-        if (last && last.id >= FIRST_NEW_ID) close(last.id);
+        if (last && last.id >= FIRST_NEW_ID) {
+          play.auto("swipe", 0.4);
+          close(last.id);
+        }
       },
     ];
     const id = window.setInterval(() => {
@@ -215,7 +226,7 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
     }, 1600);
     return () => window.clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [autoplay, reduce, demoOn]);
+  }, [autoplay, reduce, demoOn, play]);
 
   const cur = tabs.find((t) => t.id === active) ?? tabs[0];
   // The active tab keeps room for its title; the rest share what's left and drop to just an icon when tight.

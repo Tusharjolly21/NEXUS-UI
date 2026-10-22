@@ -8,7 +8,7 @@ export interface SwitchProps {
   onChange: (v: boolean) => void;
   label: string;
   accent?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -65,7 +65,7 @@ export interface AnimatedTabsProps {
   accent?: string;
   /** Switches tabs by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -76,6 +76,10 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false, enableSound
   const [dir, setDir] = useState(1);
   const [values, setValues] = useState(() => TABS.map((t) => t.rows.map((r) => r.on)));
   const touched = useRef(false);
+  const valuesRef = useRef(values);
+  useEffect(() => {
+    valuesRef.current = values;
+  }, [values]);
 
   const go = (i: number) => {
     if (i !== index) play("tick", 0.6);
@@ -90,15 +94,18 @@ export function AnimatedTabs({ accent = "#34c759", autoplay = false, enableSound
       if (touched.current) return clearInterval(t);
       k++;
       if (k % 2 === 1) {
+        const ri = k % TABS[index].rows.length;
+        play.auto(valuesRef.current[index][ri] ? "off" : "on");
         setValues((v) => v.map((rows, ti) => (ti === index ? rows.map((x, ri) => (ri === k % rows.length ? !x : x)) : rows)));
       } else {
         const next = (index + 1) % TABS.length;
+        play.auto("tick", 0.6);
         setDir(1);
         setIndex(next);
       }
     }, 1600);
     return () => clearInterval(t);
-  }, [autoplay, index]);
+  }, [autoplay, index, play]);
 
   const tab = TABS[index];
 

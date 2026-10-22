@@ -15,7 +15,7 @@ export interface HoldToConfirmProps {
   onUndo?: () => void;
   /** Shows a short hold-and-release tease until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -46,6 +46,10 @@ export function HoldToConfirm({
   const holding = useRef(false);
   const demoHolding = useRef(false);
   const touched = useRef(false);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   const stop = () => ctl.current?.stop();
 
@@ -60,7 +64,8 @@ export function HoldToConfirm({
     demoHolding.current = demo;
     stop();
     const target = demo ? 0.6 : 1;
-    if (!demo) play("charge", 0.7);
+    if (demo) playRef.current.auto("charge", 0.7);
+    else play("charge", 0.7);
     ctl.current = animate(progress, target, {
       duration: ((target - progress.get()) * holdMs) / 1000,
       ease: "linear",
@@ -77,7 +82,10 @@ export function HoldToConfirm({
 
   const release = () => {
     if (!holding.current) return;
-    if (!demoHolding.current && progress.get() > 0.1) play("hush", 0.7);
+    if (progress.get() > 0.1) {
+      if (demoHolding.current) playRef.current.auto("hush", 0.7);
+      else play("hush", 0.7);
+    }
     holding.current = false;
     demoHolding.current = false;
     stop();

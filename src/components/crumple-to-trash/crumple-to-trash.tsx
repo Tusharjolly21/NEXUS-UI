@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useId, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useAnimationControls, useMotionValue } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -12,7 +12,7 @@ export interface CrumpleToTrashProps {
   onRestore?: () => void;
   /** Throws the page away and brings it back every 3s until someone clicks. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -50,6 +50,7 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
     if (busy.current || goneRef.current) return;
     busy.current = true;
     if (user) play("swipe");
+    else play.auto("swipe");
     await animate(0, 1, { duration: 0.55, ease: [0.4, 0, 0.2, 1], onUpdate: setCrumple });
     lid.start({ rotate: -70, transition: { type: "spring", stiffness: 300, damping: 14 } });
     await Promise.all([
@@ -59,6 +60,7 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
     ]);
     markGone(true);
     if (user) play("drop");
+    else play.auto("drop");
     lid.start({ rotate: 0, transition: { type: "spring", stiffness: 500, damping: 12 } });
     bin.start({ rotate: [0, -6, 5, -3, 0], transition: { duration: 0.5 } });
     busy.current = false;
@@ -77,25 +79,26 @@ export function CrumpleToTrash({ title = "Draft · Q4 notes", onTrash, onRestore
     ]);
     lid.start({ rotate: 0, transition: { type: "spring", stiffness: 500, damping: 12 } });
     if (user) play("swipe", 0.7);
+    else play.auto("swipe", 0.7);
     await animate(1, 0, { type: "spring", stiffness: 140, damping: 16, onUpdate: setCrumple });
     busy.current = false;
     onRestore?.();
   };
 
+  const run = useEffectEvent(() => {
+    if (touched.current) return;
+    if (goneRef.current) undo();
+    else toss();
+  });
+
   useEffect(() => {
     if (!autoplay) return;
-    const run = () => {
-      if (touched.current) return;
-      if (goneRef.current) undo();
-      else toss();
-    };
-    const a = setTimeout(run, 900);
-    const t = setInterval(run, 3000);
+    const a = setTimeout(() => run(), 900);
+    const t = setInterval(() => run(), 3000);
     return () => {
       clearTimeout(a);
       clearInterval(t);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoplay]);
 
   const c = crumple;

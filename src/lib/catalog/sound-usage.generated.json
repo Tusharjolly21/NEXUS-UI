@@ -11,10 +11,6 @@
       "name": "Hold to Confirm"
     },
     {
-      "slug": "marble-progress",
-      "name": "Marble Progress"
-    },
-    {
       "slug": "progress-button",
       "name": "Progress Button"
     },
@@ -27,10 +23,6 @@
       "name": "Sand Timer"
     },
     {
-      "slug": "upload-chips",
-      "name": "Upload Chips"
-    },
-    {
       "slug": "upload-dropzone",
       "name": "Upload Dropzone"
     }
@@ -39,10 +31,6 @@
     {
       "slug": "animated-tabs",
       "name": "Animated Tabs"
-    },
-    {
-      "slug": "bolting-sliders",
-      "name": "Bolting Sliders"
     },
     {
       "slug": "crumple-to-trash",
@@ -57,20 +45,12 @@
       "name": "Goo Reorder"
     },
     {
-      "slug": "throw-wheel",
-      "name": "Throw Wheel"
-    },
-    {
       "slug": "time-scrubber",
       "name": "Time Scrubber"
     },
     {
       "slug": "toast-stack",
       "name": "Toast Stack"
-    },
-    {
-      "slug": "todo-tower",
-      "name": "Todo Tower"
     },
     {
       "slug": "upload-dropzone",
@@ -125,17 +105,9 @@
     {
       "slug": "domino-select",
       "name": "Domino Select"
-    },
-    {
-      "slug": "sign-and-seal",
-      "name": "Sign & Seal"
     }
   ],
   "lift": [
-    {
-      "slug": "bolting-sliders",
-      "name": "Bolting Sliders"
-    },
     {
       "slug": "draggable-card-stack",
       "name": "Draggable Card Stack"
@@ -179,10 +151,6 @@
       "name": "Like Burst"
     },
     {
-      "slug": "marble-progress",
-      "name": "Marble Progress"
-    },
-    {
       "slug": "pull-cord",
       "name": "Pull Cord"
     },
@@ -219,10 +187,6 @@
     {
       "slug": "pull-cord",
       "name": "Pull Cord"
-    },
-    {
-      "slug": "zipper-reveal",
-      "name": "Zipper Reveal"
     }
   ],
   "paid": [
@@ -291,10 +255,6 @@
       "name": "Swipe Stack"
     },
     {
-      "slug": "tag-pit",
-      "name": "Tag Pit"
-    },
-    {
       "slug": "todo-list",
       "name": "Todo List"
     }
@@ -327,10 +287,6 @@
     {
       "slug": "scratch-reveal",
       "name": "Scratch Reveal"
-    },
-    {
-      "slug": "sign-and-seal",
-      "name": "Sign & Seal"
     },
     {
       "slug": "signup-form",
@@ -403,10 +359,6 @@
     {
       "slug": "command-palette",
       "name": "Command Palette"
-    },
-    {
-      "slug": "elastic-stepper",
-      "name": "Elastic Stepper"
     },
     {
       "slug": "feedback-pill",
@@ -485,10 +437,6 @@
       "name": "Toast Stack"
     },
     {
-      "slug": "upload-chips",
-      "name": "Upload Chips"
-    },
-    {
       "slug": "zipper-reveal",
       "name": "Zipper Reveal"
     }
@@ -511,10 +459,6 @@
       "name": "Bending Rail"
     },
     {
-      "slug": "card-stack-rotator",
-      "name": "Card Stack Rotator"
-    },
-    {
       "slug": "cinematic-card-deck",
       "name": "Cinematic Card Deck"
     },
@@ -531,10 +475,6 @@
       "name": "Domino Select"
     },
     {
-      "slug": "elastic-stepper",
-      "name": "Elastic Stepper"
-    },
-    {
       "slug": "fan-deck",
       "name": "Fan Deck"
     },
@@ -549,10 +489,6 @@
     {
       "slug": "magnet-select",
       "name": "Magnet Select"
-    },
-    {
-      "slug": "marble-progress",
-      "name": "Marble Progress"
     },
     {
       "slug": "otp-input",
@@ -595,16 +531,8 @@
       "name": "Stretch Nav"
     },
     {
-      "slug": "tag-pit",
-      "name": "Tag Pit"
-    },
-    {
       "slug": "thermo-dial",
       "name": "Thermo Dial"
-    },
-    {
-      "slug": "throw-wheel",
-      "name": "Throw Wheel"
     },
     {
       "slug": "tick-slider",
@@ -629,10 +557,6 @@
     {
       "slug": "wheel-selector",
       "name": "Wheel Selector"
-    },
-    {
-      "slug": "zipper-reveal",
-      "name": "Zipper Reveal"
     }
   ],
   "whoosh": [

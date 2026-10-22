@@ -26,7 +26,7 @@ export interface MoodWheelProps {
   moods?: Mood[];
   /** Spins to a random mood every 2 s until someone drags, scrolls or uses the keys. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -84,13 +84,18 @@ export function MoodWheel({ moods = DEFAULT_MOODS, autoplay = false, enableSound
   useMotionValueEvent(pos, "change", (p) => {
     const n = Math.max(0, Math.min(last, Math.round(p)));
     setIdx(n);
-    // One quiet tick each time a new word reaches the centre, only once the visitor has taken hold (never in the autoplay demo).
+    // One quiet tick each time a new word reaches the centre, for the visitor's hand and for the autoplay spin alike.
     if (n === lastWord.current) return;
     lastWord.current = n;
     const now = performance.now();
-    if (touched.current && now - lastTick.current > 40) {
-      lastTick.current = now;
-      play("tick", 0.5);
+    if (now - lastTick.current > 40) {
+      if (touched.current) {
+        lastTick.current = now;
+        play("tick", 0.5);
+      } else if (autoplay) {
+        lastTick.current = now;
+        play.auto("tick", 0.5);
+      }
     }
   });
 

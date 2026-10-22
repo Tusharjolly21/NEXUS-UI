@@ -23,7 +23,7 @@ export interface SwipeStackProps {
   onDecide?: (payment: SwipePayment, approved: boolean) => void;
   /** Throws a card every 1.7 s (mostly approvals) and reloads when empty, until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -70,10 +70,9 @@ export function SwipeStack({ payments = DEFAULT_PAYMENTS, onDecide, autoplay = f
       const top = cardsRef.current[0];
       if (!top || busy.current) return;
       busy.current = true;
-      if (byUser) {
-        play("swipe");
-        play(dir > 0 ? "success" : "off", 0.6);
-      }
+      const say = byUser ? play : play.auto;
+      say("swipe");
+      say(dir > 0 ? "success" : "off", 0.6);
       await animate(x, dir * 520, { type: "spring", stiffness: 180, damping: 24, velocity: dir * 800 });
       setLog({ ok: dir > 0, amount: top.amount });
       setCards((c) => c.slice(1));

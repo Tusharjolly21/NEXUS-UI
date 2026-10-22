@@ -16,7 +16,7 @@ export interface ReceiptUnfoldProps {
   total?: string;
   /** Opens and folds by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -44,6 +44,7 @@ function Panel({ children, className = "" }: { children: ReactNode; className?: 
  */
 export function ReceiptUnfold({ lines = LINES, total = "$49.68", autoplay = false, enableSound = true }: ReceiptUnfoldProps) {
   const play = useSound(enableSound);
+  const playRef = useRef(play);
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState(0); // 0 closed, 1 risen, 2 first fold, 3 second fold
   const touched = useRef(false);
@@ -65,18 +66,24 @@ export function ReceiptUnfold({ lines = LINES, total = "$49.68", autoplay = fals
   }, []);
 
   useEffect(() => {
+    playRef.current = play;
+  }, [play]);
+
+  useEffect(() => {
     if (!autoplay) return;
     const pending = timers;
     let o = false;
     const a = setTimeout(() => {
       if (!touched.current) {
         o = true;
+        playRef.current.auto("whoosh");
         run(true);
       }
     }, 800);
     const t = setInterval(() => {
       if (!touched.current) {
         o = !o;
+        playRef.current.auto(o ? "whoosh" : "swipe", o ? 1 : 0.6);
         run(o);
       }
     }, 4200);

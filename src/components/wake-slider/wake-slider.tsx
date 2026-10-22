@@ -16,7 +16,7 @@ export interface WakeSliderProps {
   onValueChange?: (value: number) => void;
   /** Sweeps back and forth by itself until the user drags or uses the keyboard. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -84,6 +84,21 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
     onChangeRef.current?.(next);
   }, []);
 
+  // One quiet tick each time the colour edge moves onto a different bar. Autoplay ticks more sparsely.
+  const tickBar = useCallback(
+    (auto = false) => {
+      const bar = Math.round(value.current * (N - 1));
+      if (bar === lastBar.current) return;
+      lastBar.current = bar;
+      const now = performance.now();
+      if (now - lastTick.current < (auto ? 250 : 40)) return;
+      lastTick.current = now;
+      if (auto) play.auto("tick", 0.3);
+      else play("tick", 0.4);
+    },
+    [play],
+  );
+
   useEffect(() => {
     if (!autoplay) return;
     let raf = 0;
@@ -97,21 +112,12 @@ export function WakeSlider({ label = "Brightness", defaultValue = 40, accent = "
       kick(x, Math.abs(x - px) * 60);
       px = x;
       setFrom(x);
+      tickBar(true);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
-  }, [autoplay, kick, setFrom]);
+  }, [autoplay, kick, setFrom, tickBar]);
 
-  // One quiet tick each time the colour edge moves onto a different bar. Called from input handlers only.
-  const tickBar = () => {
-    const bar = Math.round(value.current * (N - 1));
-    if (bar === lastBar.current) return;
-    lastBar.current = bar;
-    const now = performance.now();
-    if (now - lastTick.current < 40) return;
-    lastTick.current = now;
-    play("tick", 0.4);
-  };
 
   const pos = (e: RPointerEvent) => {
     const r = e.currentTarget.getBoundingClientRect();

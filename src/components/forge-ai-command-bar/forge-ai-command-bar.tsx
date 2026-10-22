@@ -31,7 +31,7 @@ export interface AiCommandBarProps {
   autoplay?: boolean;
   /** Extra classes for the root. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -96,6 +96,10 @@ export function AiCommandBar({
   const input = useRef<HTMLInputElement>(null);
   const touched = useRef(false);
   const timers = useRef<number[]>([]);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
   const angle = useMotionValue(0);
   const ring = useMotionTemplate`conic-gradient(from ${angle}deg, #0071e3, #bf5af2, #ff9f0a, #30d158, #0071e3)`;
 
@@ -187,14 +191,18 @@ export function AiCommandBar({
     if (!autoplay || list.length === 0) return;
     const local: number[] = [];
     let k = 0;
+    let lastMode = defaultMode;
     const later = (f: () => void, ms: number) => local.push(window.setTimeout(() => !touched.current && f(), ms));
     const cycle = () => {
       const text = list[k % list.length];
       const m = MODES[k % MODES.length].id;
       k++;
+      if (m !== lastMode) playRef.current.auto("tick", 0.5);
+      lastMode = m;
       setMode(m);
       for (let c = 1; c <= text.length; c++) later(() => setValue(text.slice(0, c)), 500 + c * 38);
       later(() => {
+        playRef.current.auto("whoosh");
         run(text, m, () => {
           later(() => {
             setPhase("idle");

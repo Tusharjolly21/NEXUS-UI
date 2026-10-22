@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { useEffect, useEffectEvent, useId, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import { animate, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useVelocity, type AnimationPlaybackControls } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -8,7 +8,7 @@ export interface ZipperRevealProps {
   code?: string;
   /** Zips itself open and shut until someone grabs the pull. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -65,16 +65,18 @@ export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false, enableSo
     teeth.push({ x: CX + side * (o + (o > 0.5 ? 3 : 1.5)), y, a: (Math.atan(slope) * 180) / Math.PI * side, side });
   }
 
-  /** Called only from the visitor's own input. A quiet tick every few teeth, and one latch at the open end. */
-  const sound = (to: number, y: number, step = 18) => {
+  /** A quiet tick every few teeth, and one latch at the open end. `auto` is the autoplay demo (ticks spaced wider). */
+  const sound = (to: number, y: number, step = 18, auto = false) => {
+    const say = auto ? play.auto : play;
     const now = performance.now();
     if (Math.abs(y - tickAt.current.y) >= step && now - tickAt.current.t >= 50) {
       tickAt.current = { y, t: now };
-      play("tick", 0.4);
+      say("tick", 0.4);
     }
-    if (to >= 1 && !atEnd.current) play("on");
+    if (to >= 1 && !atEnd.current) say("on");
     atEnd.current = to >= 1;
   };
+  const autoSound = useEffectEvent((to: number) => sound(to, Z0 + to * (Z1 - Z0), 100, true));
   const setFromY = (clientY: number) => {
     const r = box.current!.getBoundingClientRect();
     const y = ((clientY - r.top) / r.height) * H;
@@ -118,7 +120,8 @@ export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false, enableSo
     const t = setInterval(() => {
       if (touched.current) { clearInterval(t); return; }
       if (document.hidden || !onScreen) return;
-      run.current = animate(s, seq[k++ % seq.length], { duration: 1.3, ease: [0.45, 0, 0.2, 1] });
+      tickAt.current.y = Z0 + s.get() * (Z1 - Z0);
+      run.current = animate(s, seq[k++ % seq.length], { duration: 1.3, ease: [0.45, 0, 0.2, 1], onUpdate: autoSound });
     }, 2200);
     return () => {
       clearInterval(t);

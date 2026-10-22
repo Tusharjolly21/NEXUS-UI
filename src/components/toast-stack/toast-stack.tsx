@@ -42,7 +42,7 @@ export type ToastStackProps = {
   duration?: number;
   /** Fans the stack open and swipes the front toast away every few seconds until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -169,9 +169,12 @@ function Toast({
     seen.current = autoSwipe;
     if (!front) return;
     animate(x, [0, 26, 0], { duration: 0.35 });
-    const t = window.setTimeout(() => dismissRef.current(1), 380);
+    const t = window.setTimeout(() => {
+      play.auto("swipe");
+      dismissRef.current(1);
+    }, 380);
     return () => window.clearTimeout(t);
-  }, [autoSwipe, front, x]);
+  }, [autoSwipe, front, x, play]);
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > SWIPE_DISTANCE || Math.abs(info.velocity.x) > SWIPE_VELOCITY) {

@@ -58,7 +58,7 @@ export interface CardStackRotatorProps {
   onChange?: (id: string) => void;
   /** Flicks the top card away every 2.6s until someone touches the stack. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 }
@@ -362,16 +362,20 @@ export function CardStackRotator({
         window.clearInterval(t);
         return;
       }
+      play.auto("swipe");
       setPulse((p) => p + 1);
     }, 2600);
     return () => window.clearInterval(t);
-  }, [autoplay, n]);
+  }, [autoplay, n, play]);
 
   useEffect(() => {
     if (!rotationInterval || n < 2 || (pauseOnHover && paused)) return;
-    const t = window.setInterval(() => setPulse((p) => p + 1), rotationInterval);
+    const t = window.setInterval(() => {
+      play.auto("swipe");
+      setPulse((p) => p + 1);
+    }, rotationInterval);
     return () => window.clearInterval(t);
-  }, [rotationInterval, n, pauseOnHover, paused]);
+  }, [rotationInterval, n, pauseOnHover, paused, play]);
 
   if (!n) return null;
 

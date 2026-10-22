@@ -59,7 +59,7 @@ export type DraggableCardStackProps = {
   autoPlay?: boolean;
   /** Time between autoplay flings, in ms. */
   autoInterval?: number;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -371,10 +371,11 @@ export function DraggableCardStack({
         clearInterval(t);
         return;
       }
+      if (!busy.current) play.auto("swipe");
       sendAway(k++ % 2 === 0 ? 1 : -1);
     }, Math.max(900, autoInterval));
     return () => clearInterval(t);
-  }, [demo, autoInterval, sendAway]);
+  }, [demo, autoInterval, sendAway, play]);
 
   const onKey = (e: KeyboardEvent) => {
     if (e.key === "ArrowRight" || e.key === " " || e.key === "Enter") {

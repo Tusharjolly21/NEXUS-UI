@@ -10,7 +10,7 @@ export interface StreakCounterProps {
   start?: number;
   /** Logs a day by itself every couple of seconds until the user presses. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -41,10 +41,12 @@ export function StreakCounter({ start = 11, autoplay = false, enableSound = true
   useEffect(() => {
     if (!autoplay) return;
     const t = setInterval(() => {
-      if (!touched.current) log();
+      if (touched.current) return;
+      play.auto("success");
+      log();
     }, 2200);
     return () => clearInterval(t);
-  }, [autoplay, log]);
+  }, [autoplay, log, play]);
 
   const heat = Math.min(1, (count - start) / 8);
   const outer = `hsl(${30 - heat * 22}, 100%, ${56 - heat * 4}%)`;

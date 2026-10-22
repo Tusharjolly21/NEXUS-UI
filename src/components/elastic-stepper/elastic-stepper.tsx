@@ -12,7 +12,7 @@ export interface ElasticStepperProps {
   accent?: string;
   /** Counts up and down by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -23,9 +23,11 @@ export function ElasticStepper({ label = "Guests", min = 1, max = 8, defaultValu
   const body = useAnimationControls();
   const touched = useRef(false);
   const valueRef = useRef(value);
+  const playRef = useRef(play);
   useEffect(() => {
     valueRef.current = value;
-  }, [value]);
+    playRef.current = play;
+  }, [value, play]);
 
   const step = (d: 1 | -1, byUser = false) => {
     const next = valueRef.current + d;
@@ -34,7 +36,10 @@ export function ElasticStepper({ label = "Guests", min = 1, max = 8, defaultValu
       body.start({ x: [0, d * 9, d * -3, 0], scaleX: [1, 1.04, 0.99, 1], transition: { duration: 0.45, ease: "easeOut" } });
       return;
     }
-    if (byUser) play(d > 0 ? "tap" : "tick", d > 0 ? 0.6 : 0.5);
+    const sound = d > 0 ? "tap" : "tick";
+    const vol = d > 0 ? 0.6 : 0.5;
+    if (byUser) play(sound, vol);
+    else playRef.current.auto(sound, vol);
     valueRef.current = next;
     setDir(d);
     setValue(next);

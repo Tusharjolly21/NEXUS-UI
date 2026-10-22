@@ -37,7 +37,7 @@ export type ThreeDFolderProps = {
   hint?: string;
   /** Opens and closes the folder by itself until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -105,6 +105,8 @@ export function ThreeDFolder({
   className = "",
 }: ThreeDFolderProps) {
   const play = useSound(enableSound);
+  const playRef = useRef(play);
+  const openRef = useRef(false);
   const u = size === "sm" ? 0.62 : 1;
   const still = useReducedMotion() === true;
   const uid = useId().replace(/:/g, "");
@@ -123,12 +125,18 @@ export function ThreeDFolder({
   const PH = 118 * u;
 
   useEffect(() => {
+    playRef.current = play;
+    openRef.current = open;
+  }, [play, open]);
+
+  useEffect(() => {
     if (!autoplay) return;
     const t = setInterval(() => {
       if (touched.current) {
         clearInterval(t);
         return;
       }
+      playRef.current.auto(openRef.current ? "hush" : "whoosh", openRef.current ? 0.6 : 1);
       setOpen((o) => !o);
     }, 2200);
     return () => clearInterval(t);

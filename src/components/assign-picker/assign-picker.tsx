@@ -20,7 +20,7 @@ export interface AssignPickerProps {
   onChange?: (ids: string[]) => void;
   /** Opens the menu, ticks four people, closes and clears, on a loop until the user clicks. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -105,14 +105,18 @@ export function AssignPicker({ people = PEOPLE, defaultValue, onChange, autoplay
   useEffect(() => {
     if (!autoplay) return;
     const pick = [1, 3, 0, 4].map((i) => peopleRef.current[i]?.id).filter((id): id is string => Boolean(id));
-    const seq = [() => setOpen(true), ...pick.map((id) => () => toggle(id)), () => setOpen(false), () => commit([])];
+    const seq = [() => setOpen(true), ...pick.map((id) => () => {
+        if (selRef.current.includes(id)) play.auto("tick", 0.4);
+        else play.auto("pop", 0.5);
+        toggle(id);
+      }), () => setOpen(false), () => commit([])];
     let k = 0;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
       seq[k++ % seq.length]();
     }, 900);
     return () => clearInterval(t);
-  }, [autoplay, toggle, commit]);
+  }, [autoplay, toggle, commit, play]);
 
   const chosen = people.filter((p) => sel.includes(p.id)).sort((a, b) => sel.indexOf(a.id) - sel.indexOf(b.id));
   const label =

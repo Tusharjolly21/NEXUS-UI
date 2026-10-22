@@ -25,7 +25,7 @@ export interface GooReorderProps {
   onReorder?: (items: GooReorderItem[]) => void;
   /** Swaps two random rows every 1.6s until someone touches the list. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -51,6 +51,7 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
       // Draw the random picks outside the state updater so it stays pure.
       const ra = Math.random();
       const rb = Math.random();
+      play.auto("drop", 0.6);
       setItems((l) => {
         if (l.length < 2) return l;
         const a = Math.floor(ra * l.length);
@@ -62,7 +63,7 @@ export function GooReorder({ items: initial = DEFAULT_GOO_ITEMS, onReorder, auto
       });
     }, 1600);
     return () => clearInterval(t);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   const commit = (next: GooReorderItem[]) => {
     setItems(next);
