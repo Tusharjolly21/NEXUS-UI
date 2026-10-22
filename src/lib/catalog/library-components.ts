@@ -2385,7 +2385,7 @@ export function DecodeButton() {
     props: [
       { name: "layout", type: "\"mac\" | \"compact\"", defaultValue: "\"mac\"", description: "Full layout with the Esc and F-key row, or compact without it." },
       { name: "theme", type: "\"dark\" | \"light\" | \"auto\"", defaultValue: "\"auto\"", description: "Space grey, silver, or follow the page's dark class." },
-      { name: "listen", type: "boolean", defaultValue: "false", description: "Reacts to the real keyboard: keys sink, ripple, click and type." },
+      { name: "listen", type: "boolean", defaultValue: "false", description: "Reacts to the real keyboard: keys sink, ripple, click and type. With several listening keyboards on a page, only one answers: the last one pressed or hovered, else the one nearest the middle of the screen." },
       { name: "showOutput", type: "boolean", defaultValue: "true", description: "Shows a strip above the keys with what has been typed. Return clears it." },
       { name: "placeholder", type: "string", defaultValue: "\"Start typing...\"", description: "Text in the strip before anything is typed." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Types autoplayText on the keys again and again until someone presses a key." },
@@ -2412,7 +2412,7 @@ export function DecodeButton() {
 import { MacKeyboard } from "@/components/keyboard";
 
 export function DemoKeyboard() {
-  return <MacKeyboard autoplay autoplayText="hello, nexus" />;
+  return <MacKeyboard autoplay listen autoplayText="hello, nexus" />;
 }`,
       },
       {
