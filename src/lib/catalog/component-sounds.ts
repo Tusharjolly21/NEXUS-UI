@@ -3,7 +3,7 @@ import type { SoundName } from "@/lib/ui-sounds";
 /**
  * The components that make interface sound, with one plain sentence for the page about what you
  * hear. Every one of them takes `enableSound` (default true), follows the site-wide sound switch
- * and stays silent on hover and in autoplay. The sounds are synthesised in `@/lib/ui-sounds`.
+ * stays silent on hover, and makes the same sounds when it plays itself (autoplay) once the visitor has used the page. The sounds are synthesised in `@/lib/ui-sounds`.
  */
 export const COMPONENT_SOUNDS: Record<string, string> = {
   "stateful-button": "Taps on press, chimes on success and bumps on error.",
@@ -90,7 +90,7 @@ export const ENABLE_SOUND_PROP = {
   type: "boolean",
   defaultValue: "true",
   description:
-    "Plays interface sounds on interaction. They follow the sound switch (setSoundsEnabled, on by default) and stay silent on hover and in autoplay. Pass false to silence this component.",
+    "Plays interface sounds on interaction. They follow the sound switch (setSoundsEnabled, on by default) and stay silent on hover. Autoplay makes the same sounds once the visitor has used the page. Pass false to silence this component.",
 } as const;
 
 /** The question every sound component answers, so the page and its search listing both carry it. */

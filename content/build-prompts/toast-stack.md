@@ -77,7 +77,7 @@ With `autoplay`, run the three-beat loop above on a 1.5s interval. A pointer pre
 
 - Prop `enableSound?: boolean` on `ToastStack` (default `true`; `false` silences it). `useToastStack(initial, { enableSound })` takes the same switch.
 - Swiping a toast away, pressing its close button or pressing Escape/Delete/Backspace on it plays `swipe` from `@/lib/ui-sounds` (a short airy sweep falling from high to low; the close button and key use it at a lower volume). Pressing a toast's action button plays `tap` (a soft click).
-- A toast pushed with `push(toast, { sound: true })`, meaning it answers something the user did, plays on arrival: `ping` (one high clear tone with a long tail) for info and warning, `success` (two rising soft tones) for success, `error` (two low square-wave bumps) for error. Toasts pushed without the option, the auto-dismiss countdown and the autoplay loop stay silent.
+- A toast pushed with `push(toast, { sound: true })`, meaning it answers something the user did, plays on arrival: `ping` (one high clear tone with a long tail) for info and warning, `success` (two rising soft tones) for success, `error` (two low square-wave bumps) for error. Toasts pushed without the option and the auto-dismiss countdown stay silent. In autoplay, the toast that flings itself off plays the same `swipe` through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then.
 - Nothing plays on hover, focus, fan-out or drag movement; only on the release that dismisses.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
@@ -162,7 +162,7 @@ Only while the card is on screen, the tab is visible and motion is not reduced: 
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Pressing a row's archive button plays `ping` (one high clear tone with a long tail) as the toast appears. Pressing Undo plays `drop` (a short falling thump with a soft landing) as the row drops back.
-- The autoplay archive/undo loop, the countdown, the timeout and Reset are silent, and nothing plays on hover.
+- The autoplay archive/undo loop plays the same sounds: `ping` as it archives a row and `drop` as it undoes it, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. The countdown, the timeout and Reset are silent, and nothing plays on hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ---
@@ -238,5 +238,5 @@ Only while the component is on screen, the tab is visible and motion is not redu
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Pressing Deploy or Deploy with a bug plays `ping` (one high clear tone with a long tail) as the pill appears. When that run finishes, success plays `success` (two rising soft triangle tones) and failure plays `error` (two low square-wave bumps), timed with the icon change.
-- The autoplay loop is silent, as are the step changes, Visit and View logs; nothing plays on hover.
+- The autoplay loop plays the same sounds: `ping` as each run starts and `success` or `error` when it lands, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. The step changes, Visit and View logs are silent; nothing plays on hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

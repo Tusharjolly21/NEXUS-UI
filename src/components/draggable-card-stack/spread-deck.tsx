@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { useSound } from "@/lib/ui-sounds";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 export interface SpreadDeckPhoto {
   /** Caption under the picture. */
@@ -22,7 +22,7 @@ export interface SpreadDeckProps {
   photos?: SpreadDeckPhoto[];
   /** Walks through pile, grid and focus by itself every 2.2s until someone touches the deck. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the root. */
   className?: string;
@@ -82,6 +82,13 @@ function Scene({ p }: { p: SpreadDeckPhoto }) {
   );
 }
 
+/** Dealing out swipes, picking one up lifts, gathering the pile back up drops. */
+function sound(m: Mode, say: (name: SoundName, volume?: number) => void) {
+  if (m.kind === "grid") say("swipe", 0.7);
+  else if (m.kind === "focus") say("lift", 0.7);
+  else say("drop", 0.7);
+}
+
 /**
  * A photo deck with three states. Tap the pile and it deals itself out into a
  * grid; tap a photo and it flies to the middle and grows while the rest
@@ -118,10 +125,14 @@ export function SpreadDeck({ photos = DEFAULT_PHOTOS, autoplay = false, enableSo
         window.clearInterval(id);
         return;
       }
-      if (onScreen.current) setMode(seq[k++ % seq.length]);
+      if (onScreen.current) {
+        const m = seq[k++ % seq.length];
+        sound(m, play.auto);
+        setMode(m);
+      }
     }, 2200);
     return () => window.clearInterval(id);
-  }, [autoplay, still, n, onScreen]);
+  }, [autoplay, still, n, onScreen, play]);
 
   const touch = () => {
     touched.current = true;
@@ -129,10 +140,7 @@ export function SpreadDeck({ photos = DEFAULT_PHOTOS, autoplay = false, enableSo
   };
   const go = (m: Mode) => {
     touch();
-    // Dealing out swipes, picking one up lifts, gathering the pile back up drops.
-    if (m.kind === "grid") play("swipe", 0.7);
-    else if (m.kind === "focus") play("lift", 0.7);
-    else play("drop", 0.7);
+    sound(m, play);
     setMode(m);
   };
 

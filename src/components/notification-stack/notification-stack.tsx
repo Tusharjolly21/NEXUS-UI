@@ -9,7 +9,7 @@ interface Toast { id: number; kind: Kind; title: string; body?: string }
 export interface NotificationStackProps {
   /** Pushes sample toasts by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -65,6 +65,7 @@ export function NotificationStack({ autoplay = false, enableSound = true }: Noti
     if (!autoplay) return;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
+      play.auto("ping");
       push(SAMPLES[sample.current++ % SAMPLES.length]);
     }, 1500);
     return () => clearInterval(t);

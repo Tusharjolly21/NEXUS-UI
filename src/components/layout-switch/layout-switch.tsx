@@ -56,7 +56,7 @@ function rects(layout: LayoutSwitchLayout, n: number): Rect[] {
 export interface LayoutSwitchProps {
   /** Changes layouts by itself until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -79,10 +79,11 @@ export function LayoutSwitch({ autoplay = false, enableSound = true }: LayoutSwi
     let k = 0;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
+      play.auto("tap", 0.8);
       setLayout(order[k++ % order.length]);
     }, 2300);
     return () => clearInterval(t);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   useEffect(() => {
     if (!open) return;

@@ -2,18 +2,18 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { DEFAULT_KEY_SOUND_SRC, playKeyTick, useKeySound } from "@/components/key-sound";
-import { getSoundsEnabled } from "@/lib/ui-sounds";
+import { audioAwake, getSoundsEnabled, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
 
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
 export interface LitKeyboardProps {
   /** Colour a key flashes to when it is pressed. Use a hex colour; the glow adds alpha to it. */
   glow?: string;
-  /** Plays a recorded phrase by itself until the user types. The demo stays silent. */
+  /** Plays a recorded phrase by itself until the user types. */
   autoplay?: boolean;
   /**
    * Plays a key click with every press, click and replayed key. Follows the site-wide sound
-   * switch (`ui-sounds`) and stays silent in autoplay.
+   * switch (`ui-sounds`). Autoplay clicks too, once the visitor has used the page.
    */
   enableSound?: boolean;
   /**
@@ -76,10 +76,13 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
   const timers = useRef<number[]>([]);
   const area = useRef<HTMLDivElement>(null);
   const keySound = useKeySound({ enabled: enableSound, src: soundSrc, volume });
+  const autoAllowed = useAutoplaySoundAllowed();
 
   /** The click for a key, played in the same event as the press so it lands with the light. */
-  const click = (key: string) => {
+  const click = (key: string, auto = false) => {
     if (!enableSound || !getSoundsEnabled()) return;
+    // Autoplay stays silent until the browser lets audio start, while the tab is hidden, and where the site mutes demos.
+    if (auto && (!autoAllowed || document.hidden || !audioAwake())) return;
     const code = key === "space" ? "Space" : key === "backspace" ? "Backspace" : `Key${key.toUpperCase()}`;
     if (!keySound.play(code)) playKeyTick(volume);
   };
@@ -98,22 +101,27 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
     timers.current.push(window.setTimeout(() => setLit((l) => (l[key] === id ? { ...l, [key]: 0 } : l)), 140));
   };
 
-  const press = (raw: string, record = true, audible = true) => {
+  const press = (raw: string, record = true, sound: boolean | "auto" = false) => {
     const key = raw === " " ? "space" : raw.toLowerCase();
     if (key !== "space" && !/^[a-z]$/.test(key)) return false;
-    if (audible) click(key);
+    if (sound) click(key, sound === "auto");
     flash(key);
     setText((t) => (t + (key === "space" ? " " : key)).slice(-34));
     if (record && rec === "recording") tape.current.push({ key: raw, t: performance.now() });
     return true;
   };
 
-  const play = (hits: LitKeyboardHit[], audible = true) => {
+  // `sound` is true for a replay the visitor asked for and "auto" for the autoplay demo. The demo types about
+  // seven keys a second, so it clicks only on the first letter and the space of each word, not on every key.
+  const play = (hits: LitKeyboardHit[], sound: boolean | "auto" = false) => {
     if (!hits.length) return;
     setRec("playing");
     setText("");
     const t0 = hits[0].t;
-    hits.forEach((h) => timers.current.push(window.setTimeout(() => press(h.key, false, audible), h.t - t0)));
+    hits.forEach((h, i) => {
+      const beat = sound !== "auto" || i === 0 || h.key === " " || hits[i - 1].key === " ";
+      timers.current.push(window.setTimeout(() => press(h.key, false, beat && sound), h.t - t0));
+    });
     timers.current.push(window.setTimeout(() => setRec("idle"), hits[hits.length - 1].t - t0 + 400));
   };
 
@@ -123,7 +131,7 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
     const demo = () => {
       if (touched.current) return;
       let t = 0;
-      play(phrase.split("").map((key) => ({ key, t: (t += 90 + Math.random() * 120) })), false);
+      play(phrase.split("").map((key) => ({ key, t: (t += 90 + Math.random() * 120) })), "auto");
     };
     const a = window.setTimeout(demo, 700);
     const b = window.setInterval(demo, 5200);

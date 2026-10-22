@@ -10,7 +10,7 @@ export interface GenerateImageProps {
   onGenerate?: (prompt: string) => void;
   /** Generates a new scene every few seconds, cycling the sample prompts, until someone interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -65,7 +65,7 @@ export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0
 
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
-  // `audible` is true only for a run the visitor started; the autoplay loop stays silent.
+  // `audible` is true for a run the visitor started; the autoplay loop answers through `play.auto`.
   const run = (seed: number, audible = false) => {
     const v = view.current;
     const ctx = v?.getContext("2d", { willReadFrequently: true });
@@ -76,6 +76,7 @@ export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0
     const smallCtx = small.getContext("2d");
     if (!ctx || !sctx || !smallCtx) return;
     paint(sctx, seed);
+    if (!audible) play.auto("tap");
     window.clearTimeout(timer.current);
     setBusy(true);
     let i = 0;
@@ -98,6 +99,7 @@ export function GenerateImage({ prompt: initialPrompt = GENERATE_IMAGE_PROMPTS[0
       else {
         setBusy(false);
         if (audible) play("success");
+        else play.auto("success");
       }
     };
     tick();

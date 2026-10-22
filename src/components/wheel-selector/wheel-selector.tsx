@@ -85,7 +85,7 @@ export type WheelSelectorProps = {
   animationSpeed?: WheelAnimationSpeed;
   /** Accent for items without their own accentColor. */
   accentColor?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -232,6 +232,8 @@ export function WheelSelector({
   const lastWheel = useRef(0);
   // True while the dial is turning because of the user (drag, fling, node click, wheel, keys); false for autoplay.
   const audible = useRef(false);
+  // True while an autoplay turn is moving the dial; it answers with the same tick and drop through play.auto.
+  const autoTurn = useRef(false);
   const lastStop = useRef(start);
   const lastTick = useRef(0);
   const report = useRef(onActiveChange);
@@ -248,6 +250,9 @@ export function WheelSelector({
       if (audible.current && now - lastTick.current >= 40) {
         lastTick.current = now;
         play("tick", 0.4);
+      } else if (autoTurn.current && !touched.current && now - lastTick.current >= 40) {
+        lastTick.current = now;
+        play.auto("tick", 0.4);
       }
     }
   });
@@ -263,6 +268,7 @@ export function WheelSelector({
 
   const snapTo = (target: number, velocity = 0) => {
     anim.current?.stop();
+    autoTurn.current = false;
     const i = wrap(Math.round(-target / step), n);
     const from = rot.get();
     // Only a real landing makes a sound: a press that never moved the dial stays quiet.
@@ -308,6 +314,7 @@ export function WheelSelector({
     const diff = wrap(-i * step - rot.get() + 180, 360) - 180;
     anim.current?.stop();
     audible.current = false;
+    autoTurn.current = false;
     anim.current = animate(rot, Math.round((rot.get() + diff) / step) * step, reduce ? { duration: 0 } : { type: "spring", ...spring });
     settled.current = i;
   }, [controlled, n, step, rot, reduce, spring]);
@@ -322,11 +329,16 @@ export function WheelSelector({
       }
       anim.current?.stop();
       audible.current = false;
+      autoTurn.current = true;
       const target = Math.round(rot.get() / step) * step - step;
-      anim.current = animate(rot, target, reduce ? { duration: 0 } : { type: "spring", ...spring });
+      const done = () => {
+        if (autoTurn.current && !touched.current) play.auto("drop", 0.5);
+        autoTurn.current = false;
+      };
+      anim.current = animate(rot, target, reduce ? { duration: 0, onComplete: done } : { type: "spring", ...spring, onComplete: done });
     }, Math.max(1200, Math.min(autoRotateInterval, 15000)));
     return () => window.clearInterval(t);
-  }, [playing, n, step, rot, reduce, spring, autoRotateInterval]);
+  }, [playing, n, step, rot, reduce, spring, autoRotateInterval, play]);
 
   const angleOf = (e: RPointerEvent) => {
     const el = dial.current;

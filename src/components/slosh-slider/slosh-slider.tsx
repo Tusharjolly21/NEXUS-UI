@@ -14,7 +14,7 @@ export interface SloshSliderProps {
   onChange?: (value: number) => void;
   /** Throws the handle to a series of values until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -63,10 +63,15 @@ export function SloshSlider({ label = "Volume", defaultValue = 55, accent = "#00
     if (detent !== lastDetent.current) {
       lastDetent.current = detent;
       const now = performance.now();
-      // touched is set by the first pointer or key input, so autoplay stays silent.
-      if (touched.current && now - lastTick.current >= 40) {
+      // touched is set by the first pointer or key input; until then it is autoplay moving the handle.
+      if (touched.current) {
+        if (now - lastTick.current >= 40) {
+          lastTick.current = now;
+          play("tick", 0.4);
+        }
+      } else if (autoplay && now - lastTick.current >= 150) {
         lastTick.current = now;
-        play("tick", 0.4);
+        play.auto("tick", 0.3);
       }
     }
     if (v === last.current) return;

@@ -73,5 +73,5 @@ Every 4200ms, run that same pull and refresh. A drag or a keyboard pull marks it
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - While the user drags the card (or pulls it with the keyboard), crossing the release line plays `tick` from `@/lib/ui-sounds` (a very short, dry high click made of filtered noise) at reduced volume, and crossing back above it plays a quieter tick. When the refresh finishes and the balance rolls, `done` plays (four soft triangle notes in a rising major chord, ringing together).
-- The autoplay pull, the hold while refreshing and the spring back are silent; nothing plays on hover or at any other point of the drag.
+- The autoplay pull plays the same sounds: `tick` as the card crosses the release line and `done` when the balance rolls, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. The hold while refreshing and the spring back are silent; nothing plays on hover or at any other point of the drag.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

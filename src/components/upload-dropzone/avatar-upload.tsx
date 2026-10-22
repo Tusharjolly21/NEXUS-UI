@@ -21,7 +21,7 @@ export interface AvatarUploadProps {
   onRemove?: () => void;
   /** Plays a self-running demo (a demo photo, a drag to frame, zoom, save) until someone presses or drops on the card. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
@@ -200,7 +200,7 @@ export function AvatarUpload({ onUpload, onRemove, autoplay = false, enableSound
             play("done");
             const current = srcRef.current;
             if (current) onUpload?.({ file: fileRef.current, src: current, zoom: zoomRef.current, x: x.get(), y: y.get() });
-          }
+          } else play.auto("done");
         },
       });
     },
@@ -236,7 +236,10 @@ export function AvatarUpload({ onUpload, onRemove, autoplay = false, enableSound
       at(() => {
         setOver(false);
         demoSrc.current ??= demoPhoto();
-        if (demoSrc.current) show(demoSrc.current);
+        if (demoSrc.current) {
+          play.auto("drop");
+          show(demoSrc.current);
+        }
       }, 1600);
       at(() => {
         const spring = { type: "spring", stiffness: 120, damping: 16 } as const;
@@ -252,7 +255,7 @@ export function AvatarUpload({ onUpload, onRemove, autoplay = false, enableSound
       ids.forEach(clearTimeout);
       setOver(false);
     };
-  }, [playing, reset, save, show, x, y]);
+  }, [playing, play, reset, save, show, x, y]);
 
   const touch = () => setTouched(true);
   const drag = {

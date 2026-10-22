@@ -76,5 +76,5 @@ With `autoplay`: run at 700ms, then every 3600ms, only while not touched and clo
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Opening the menu plays `pop` from `@/lib/ui-sounds` at 70% volume (a short blip that rises quickly in pitch) as the pixels start to build. Choosing an option plays `tap` at 80% (a short soft thump that falls in pitch, with a hint of click) as the pixels scatter.
-- Closing without a choice, hovering rows and the autoplay loop are silent.
+- The autoplay loop plays the same sounds for its beats (`pop` at 70% when it opens the menu, `tap` at 80% when it picks a mood and the pixels scatter), through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Its ghost hover over the rows is silent. Closing without a choice and hovering rows are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

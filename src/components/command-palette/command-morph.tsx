@@ -59,7 +59,7 @@ export interface CommandMorphProps {
   autoplay?: boolean;
   /** Extra classes for the outer box. */
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -98,9 +98,11 @@ export function CommandMorph({
   const active = Math.max(0, Math.min(i, list.length - 1));
   const optionId = (c: CommandItem) => `cmd-${uid}-${c.id}`;
 
+  const playRef = useRef(play);
   useEffect(() => {
     commandsRef.current = commands;
-  }, [commands]);
+    playRef.current = play;
+  }, [commands, play]);
 
   useEffect(() => () => clearTimeout(ranTimer.current), []);
 
@@ -181,27 +183,35 @@ export function CommandMorph({
     const groups = commandsRef.current.filter((c) => c.children?.length);
     const a = groups[1] ?? groups[0];
     const b = groups[0];
+    const auto = (name: "tap" | "tick", vol?: number) => playRef.current.auto(name, vol);
     const open = (g: CommandItem) => {
+      auto("tap");
       setQ("");
       setDir(1);
       setStack([g]);
       setI(0);
     };
     const home = () => {
+      auto("tick", 0.4);
       setDir(-1);
       setStack([]);
       setI(0);
     };
-    const steps: (() => void)[] = [() => setI(1), () => setI(2)];
+    const move = (n: number) => () => {
+      auto("tick", 0.4);
+      setI(n);
+    };
+    const steps: (() => void)[] = [move(1), move(2)];
     if (a && b) {
       const kids = a.children ?? [];
       const word = (b.label.split(" ").pop() ?? b.label).toLowerCase();
       steps.push(
         () => open(a),
-        () => setI(1),
+        move(1),
         () => {
           const pick = kids[Math.min(1, kids.length - 1)];
           if (!pick) return;
+          auto("tap");
           setRan(pick.label);
           clearTimeout(ranTimer.current);
           ranTimer.current = setTimeout(() => setRan(null), 1000);
@@ -210,7 +220,7 @@ export function CommandMorph({
         () => setQ(word.slice(0, 2)),
         () => setQ(word.slice(0, 4)),
         () => open(b),
-        () => setI(1),
+        move(1),
         home,
       );
     } else {

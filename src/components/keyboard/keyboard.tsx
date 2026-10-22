@@ -7,11 +7,12 @@ import { useKeyboardSound, type SoundType } from "./use-keyboard-sound";
 import { useKeySound, DEFAULT_KEY_SOUND_SRC } from "@/components/key-sound";
 import { MAC_ROWS, COMPACT_ROWS, CODE_ALIASES, type KeyDef } from "./keyboard-layout";
 import { cn } from "@/lib/utils";
+import { audioAwake, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
 
 export interface KeyboardProps {
   /** Full layout with the Esc and F-key row, or compact without it. */
   layout?: "mac" | "compact";
-  /** Plays a key click the moment a key is pressed (not during autoplay). */
+  /** Plays a key click the moment a key is pressed. Autoplay clicks too, once the visitor has used the page. */
   enableSound?: boolean;
   /**
    * Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds or point this at
@@ -112,6 +113,8 @@ export function MacKeyboard({
   const skin = SKIN[theme] ?? SKIN.auto;
   const { play: synth } = useKeyboardSound({ enabled: enableSound, volume, soundType });
   const { play: playRecorded, prime: primeSound, unlock: unlockSound } = useKeySound({ enabled: enableSound, src: soundSrc, volume });
+  // Autoplay clicks follow the same rules as `play.auto` in `@/lib/ui-sounds`: the site must allow demo sound here.
+  const autoAllowed = useAutoplaySoundAllowed();
   const body = React.useRef<HTMLDivElement>(null);
   const timers = React.useRef(new Set<number>());
   const els = React.useRef(new Map<string, HTMLElement>());
@@ -134,7 +137,7 @@ export function MacKeyboard({
 
   /** Light ring from the key's centre, plus the text and sound. */
   const strike = React.useCallback(
-    (key: KeyDef, sound: boolean) => {
+    (key: KeyDef, sound: boolean | "auto") => {
       const el = els.current.get(key.code);
       const host = body.current;
       if (el && host && !still) {
@@ -144,7 +147,10 @@ export function MacKeyboard({
         setRipples((r) => [...r.slice(-5), { id, x: Math.round(a.left - b.left + a.width / 2), y: Math.round(a.top - b.top + a.height / 2) }]);
       }
       // Sound first, in the same event as the press, so it lands with the key going down.
-      if (sound && !playRecorded(key.code)) synth(key.sound);
+      // Autoplay clicks stay silent until the browser lets audio start (the visitor has used the page) and while the tab is hidden.
+      if (sound === "auto" ? autoAllowed && !document.hidden && audioAwake() : sound) {
+        if (!playRecorded(key.code)) synth(key.sound);
+      }
       if (key.code === "Enter") {
         setText("");
         setSent((n) => n + 1);
@@ -156,7 +162,7 @@ export function MacKeyboard({
         return t;
       });
     },
-    [playRecorded, synth, still],
+    [playRecorded, synth, still, autoAllowed],
   );
 
   const tap = React.useCallback((key: KeyDef) => {
@@ -232,7 +238,10 @@ export function MacKeyboard({
       const k = keys[i % keys.length];
       i++;
       tap(k);
-      strike(k, false);
+      // About seven keys a second is too busy to click on every one: click the first letter and the space of each word, and Return.
+      const at = (i - 1) % keys.length;
+      const beat = at === 0 || k.code === "Space" || k.code === "Enter" || keys[at - 1]?.code === "Space";
+      strike(k, beat ? "auto" : false);
       const pause = k.code === "Enter" ? 1700 : k.char === " " ? 210 : 120 + ((i * 37) % 90);
       t = window.setTimeout(step, pause);
     };

@@ -30,7 +30,7 @@ export interface ExpandableCardsProps {
   onOpenChange?: (id: string | null) => void;
   /** Opens each card in turn until someone touches the grid. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 }
@@ -101,6 +101,7 @@ function Close({ onClick, btnRef }: { onClick: () => void; btnRef: Ref<HTMLButto
  */
 export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", onOpenChange, autoplay = false, enableSound = true, className = "" }: ExpandableCardsProps) {
   const play = useSound(enableSound);
+  const playRef = useRef(play);
   const uid = useId().replace(/:/g, "");
   const still = useReducedMotion() === true;
   const mounted = useMounted();
@@ -147,6 +148,10 @@ export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", on
     };
   }, [expandInto, activeId]);
 
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
+
   const ids = cards.map((c) => c.id).join("\u0000");
   useEffect(() => {
     if (!autoplay) return;
@@ -159,9 +164,11 @@ export function ExpandableCards({ cards = DEFAULT_CARDS, expandInto = "grid", on
         return;
       }
       if (open) {
+        playRef.current.auto("swipe");
         setActiveId(null);
         k++;
       } else {
+        playRef.current.auto("whoosh");
         setActiveId(order[k % order.length] ?? null);
       }
       open = !open;

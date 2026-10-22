@@ -75,5 +75,5 @@ When `autoplay` is true, push the next sample every 1500ms, cycling success → 
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Pressing a trigger button (success, info, error, promise) plays `ping` from `@/lib/ui-sounds` (one high, clear tone with a long tail) as the toast arrives.
-- The sample toasts that autoplay pushes by itself, the loading-to-success change, auto-dismiss, swiping and the close button are silent, and nothing plays on hover.
+- Each sample toast that autoplay pushes by itself plays the same `ping`, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. The loading-to-success change, auto-dismiss, swiping and the close button are silent, and nothing plays on hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

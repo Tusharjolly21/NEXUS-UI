@@ -12,7 +12,7 @@ export interface FeedbackPillProps {
   accent?: string;
   /** Opens, types and sends a sample message until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -26,6 +26,10 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
   const touched = useRef(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const timers = useRef<number[]>([]);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
   const later = (fn: () => void, ms: number) => timers.current.push(window.setTimeout(fn, ms));
 
   const send = async (msg = text, audible = false) => {
@@ -35,9 +39,11 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
       await Promise.all([onSend?.(msg), new Promise((r) => setTimeout(r, 900))]);
     } catch (err) {
       if (audible) play("error");
+      else playRef.current.auto("error");
       throw err;
     }
     if (audible) play("success");
+    else playRef.current.auto("success");
     setStage("sent");
     later(() => {
       setStage("closed");
@@ -54,6 +60,7 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
     const sample = "The dark mode toggle is hard to find.";
     const loop = () => {
       if (touched.current) return;
+      playRef.current.auto("pop", 0.6);
       setStage("open");
       let i = 0;
       const type = () => {

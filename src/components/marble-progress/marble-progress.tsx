@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Matter from "matter-js";
-import { useSound } from "@/lib/ui-sounds";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 export interface MarbleStep {
   /** Checklist text. Also used as the React key, so keep labels unique. */
@@ -16,7 +16,7 @@ export interface MarbleProgressProps {
   steps?: MarbleStep[];
   /** Ticks the steps one by one, then clears them, until someone clicks a step. Off under reduced motion. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -191,6 +191,14 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
     Matter.Composite.remove(e.world, m.body);
     m.pop = 0;
   };
+  // Unticking is a soft off; ticking clicks, and the last open step also rings done.
+  const sound = (i: number, say: (name: SoundName, volume?: number) => void) => {
+    if (doneRef.current[i]) say("off", 0.6);
+    else {
+      say("tick", 0.6);
+      if (doneRef.current.filter(Boolean).length === steps.length - 1) say("done", 0.8);
+    }
+  };
   const toggle = (i: number) => {
     const next = doneRef.current.map((d, k) => (k === i ? !d : d));
     if (next[i]) drop(i);
@@ -199,6 +207,11 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
     setDone(next);
   };
 
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
+
   useEffect(() => {
     if (!autoplay || reduce) return;
     let n = 0;
@@ -206,8 +219,12 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
       if (touched.current) return clearInterval(id);
       const total = steps.length;
       const t = n++ % (total + 3);
-      if (t < total) toggle(t);
-      else if (t === total + 2) {
+      if (t < total) {
+        sound(t, playRef.current.auto);
+        toggle(t);
+      } else if (t === total + 2) {
+        // One soft off for the whole reset, not one per step.
+        if (doneRef.current.some(Boolean)) playRef.current.auto("off", 0.6);
         steps.forEach((_, i) => {
           if (doneRef.current[i]) toggle(i);
         });
@@ -237,11 +254,7 @@ export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = 
                 aria-checked={done[i]}
                 onClick={() => {
                   touched.current = true;
-                  if (doneRef.current[i]) play("off", 0.6);
-                  else {
-                    play("tick", 0.6);
-                    if (doneRef.current.filter(Boolean).length === steps.length - 1) play("done", 0.8);
-                  }
+                  sound(i, play);
                   toggle(i);
                 }}
                 className="flex w-full items-center gap-2.5 rounded-[12px] px-2 py-2 text-left outline-none hover:bg-[#f5f5f7] focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:hover:bg-[#2c2c2e] dark:focus-visible:ring-[#0a84ff]"

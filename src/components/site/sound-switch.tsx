@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Volume2, VolumeOff } from "lucide-react";
-import { configureSounds, playSound, useSoundsEnabled } from "@/lib/ui-sounds";
+import { AutoplaySound, configureSounds, playSound, useSoundsEnabled } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
 
 // Nexus UI is a wall of live previews, so it stays quiet until a visitor asks for sound. In your own
@@ -56,4 +56,13 @@ export function SoundSwitch({ variant = "icon", className }: { variant?: "icon" 
       <Icon className="size-[15px]" aria-hidden />
     </button>
   );
+}
+
+/**
+ * Wraps the whole site: previews that play themselves are silent here, because a page can show dozens
+ * of them. The one you are looking at (a component page, the playground, the full-screen preview and
+ * the gallery pop-up) opts back in with <AutoplaySound allow>.
+ */
+export function SiteAutoplayQuiet({ children }: { children: React.ReactNode }) {
+  return <AutoplaySound allow={false}>{children}</AutoplaySound>;
 }

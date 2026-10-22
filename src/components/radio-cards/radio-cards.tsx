@@ -18,7 +18,7 @@ export interface RadioCardsProps {
   /** Cycles through options until the user interacts. */
   autoplay?: boolean;
   accent?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -42,6 +42,10 @@ export function RadioCards({
   const [value, setValue] = useState(defaultValue ?? options[1]?.id ?? options[0].id);
   const name = useId();
   const touched = useRef(false);
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -49,10 +53,12 @@ export function RadioCards({
     let k = 0;
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
-      setValue(options[order[k++ % order.length] % options.length].id);
+      const nextId = options[order[k++ % order.length] % options.length].id;
+      if (nextId !== valueRef.current) play.auto("tick");
+      setValue(nextId);
     }, 2400);
     return () => clearInterval(t);
-  }, [autoplay, options]);
+  }, [autoplay, options, play]);
 
   const choose = (id: string) => {
     touched.current = true;

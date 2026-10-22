@@ -22,7 +22,7 @@ export interface ScratchRevealProps {
   className?: string;
   /** Scratches the card in a zig-zag, reveals it and starts over, until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -109,6 +109,7 @@ export function ScratchReveal({
       doneRef.current = true;
       setDone(true);
       if (byUser) play("success");
+      else play.auto("success");
       revealRef.current?.();
     },
     [play],
@@ -174,12 +175,12 @@ export function ScratchReveal({
       ctx.lineTo(x, y);
       ctx.stroke();
       last.current = { x, y };
-      if (byUser) {
-        const now = performance.now();
-        if (now - lastSwipe.current >= 120) {
-          lastSwipe.current = now;
-          play("swipe", 0.25);
-        }
+      const now = performance.now();
+      // The demo scratches on a frame loop, so its rasp is spaced wider than a hand's.
+      if (now - lastSwipe.current >= (byUser ? 120 : 350)) {
+        lastSwipe.current = now;
+        if (byUser) play("swipe", 0.25);
+        else play.auto("swipe", 0.25);
       }
       for (let i = 0; i < 3; i++) {
         flecks.current.push({ x: x + (Math.random() - 0.5) * BRUSH, y: y + (Math.random() - 0.5) * 8, vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 1.5, life: 1 });

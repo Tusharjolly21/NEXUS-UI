@@ -26,7 +26,7 @@ export type DynamicIslandProps = {
   caller?: string;
   /** Morphs through the activities and opens each one, until someone touches it. Uncontrolled only. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -234,8 +234,14 @@ export function DynamicIsland({
         return;
       }
       const beat = k++ % 3;
-      if (beat === 0) setOpen(true);
-      if (beat === 1) setOpen(false);
+      if (beat === 0) {
+        play.auto("pop", 0.7);
+        setOpen(true);
+      }
+      if (beat === 1) {
+        play.auto("pop", 0.4);
+        setOpen(false);
+      }
       if (beat === 2)
         setInner((s) => {
           const i = list.indexOf(s);
@@ -243,7 +249,7 @@ export function DynamicIsland({
         });
     }, 1700);
     return () => window.clearInterval(t);
-  }, [autoplay, controlled, statesKey]);
+  }, [autoplay, controlled, statesKey, play]);
 
   // Tap outside or Escape tucks it away.
   useEffect(() => {

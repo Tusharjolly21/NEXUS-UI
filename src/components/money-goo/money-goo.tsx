@@ -16,7 +16,7 @@ export interface MoneyGooProps {
   accent?: string;
   /** Sends money by itself on a loop until the user drags. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -60,6 +60,11 @@ export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, ac
   const b3 = useBead(x, y, dist, 0.75);
   const blobScale = useTransform(dist, [0, 30, 200], [0.6, 1, 0.92]);
 
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  }, [play]);
+
   const send = (byUser = false) => {
     if (byUser) play("paid");
     setBalances(([a, b]) => [a - amount, b + amount]);
@@ -90,6 +95,7 @@ export function MoneyGoo({ amount = 40, from = DEFAULT_FROM, to = DEFAULT_TO, ac
       if (touched.current) return;
       await animate(x, [A.x, A.x + 60, A.x + 150, B.x - 40, B.x], { duration: 1.6, ease: "easeInOut" });
       if (touched.current) return;
+      playRef.current.auto("paid");
       send();
       x.set(A.x);
       y.set(A.y);

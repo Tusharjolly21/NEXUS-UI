@@ -31,7 +31,7 @@ export type HoldToRecordProps = {
   accent?: string;
   /** Records, plays back and deletes a demo note on a loop (no callbacks fire) until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 };
@@ -146,7 +146,8 @@ export function HoldToRecord({
   const begin = React.useCallback(
     (clientX: number, demo = false) => {
       if (session.current) return;
-      if (!demo) sfx("on");
+      if (demo) sfx.auto("on");
+      else sfx("on");
       setHint("");
       dragRaw.set(0);
       setCancelling(false);
@@ -261,7 +262,8 @@ export function HoldToRecord({
           }
           return;
         }
-        if (!s.demo) sfx("off");
+        if (s.demo) sfx.auto("off");
+        else sfx("off");
         if (durationMs < minDuration) {
           setPhase("idle");
           setHint("Hold a little longer");
@@ -323,9 +325,9 @@ export function HoldToRecord({
   );
 
   // The demo loop reads the latest handlers through a ref, so re-renders don't restart it.
-  const demo = React.useRef({ begin, play, remove });
+  const demo = React.useRef({ begin, play, remove, sfx });
   React.useLayoutEffect(() => {
-    demo.current = { begin, play, remove };
+    demo.current = { begin, play, remove, sfx };
   });
 
   React.useEffect(() => {
@@ -335,8 +337,14 @@ export function HoldToRecord({
     const loop = () => {
       at(900, () => demo.current.begin(0, true));
       at(3700, () => session.current?.finish(true));
-      at(4400, () => demo.current.play());
-      at(9200, () => demo.current.remove(true));
+      at(4400, () => {
+        demo.current.sfx.auto("tap", 0.6);
+        demo.current.play();
+      });
+      at(9200, () => {
+        demo.current.sfx.auto("tap", 0.6);
+        demo.current.remove(true);
+      });
       at(10200, loop);
     };
     loop();

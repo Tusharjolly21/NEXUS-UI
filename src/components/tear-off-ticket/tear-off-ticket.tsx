@@ -10,7 +10,7 @@ export interface TearOffTicketProps {
   seat?: string;
   /** Tears itself and resets on a loop until the user grabs the stub. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -46,7 +46,7 @@ export function TearOffTicket({ title = "Light & Matter", venue = "Hall 3 · Nor
   };
 
   const autoReset = useEffectEvent(() => reset());
-  const autoTear = useEffectEvent(() => tear());
+  const autoTear = useEffectEvent(() => { play.auto("swipe"); tear(); });
 
   useEffect(() => {
     if (!autoplay) return;

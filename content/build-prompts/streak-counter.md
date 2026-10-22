@@ -75,5 +75,5 @@ Every 2200ms, log a day, unless the user has pressed the button. Once touched, t
 
 - Prop `enableSound?: boolean` (default `true`; `false` silences it).
 - Pressing Log today plays `success` from `@/lib/ui-sounds` (two soft rising triangle-wave notes, a major third apart, the second ringing slightly longer) as the number rolls and the embers fly.
-- The autoplay loop that logs a day by itself is silent, and nothing plays on hover.
+- The autoplay loop that logs a day by itself plays the same `success`, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Nothing plays on hover.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

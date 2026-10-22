@@ -26,7 +26,7 @@ export interface OrigamiPricingProps {
   caption?: string;
   /** Folds and unfolds by itself until someone taps the card. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -89,6 +89,7 @@ export function OrigamiPricing({
     busy.current = true;
     const next = !open;
     if (byUser) play(next ? "whoosh" : "swipe", next ? 1 : 0.7);
+    else play.auto(next ? "whoosh" : "swipe", next ? 1 : 0.7);
     setOpen(next);
     if (next) {
       await animate(a, 1, { type: "spring", stiffness: 120, damping: 15 });

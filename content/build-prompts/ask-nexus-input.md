@@ -63,7 +63,7 @@ After 1400ms, start a cycle with placeholder index `k` (starting at 1, increment
 
 ## Sound
 
-A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Sending a question, with Enter or the button, plays `whoosh` (a short airy noise sweep rising from about 400 to 3200 Hz over roughly 0.25s) as the words start to break into dust. Typing, the rolling placeholders and the autoplay questions are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Sending a question, with Enter or the button, plays `whoosh` (a short airy noise sweep rising from about 400 to 3200 Hz over roughly 0.25s) as the words start to break into dust. Typing and the rolling placeholders are silent. The autoplay questions play the same `whoosh` as each one is sent, through the same play function's `auto` variant (`play.auto("whoosh")`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Still silent on hover. The sounds follow `enableSound` and the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

@@ -50,7 +50,7 @@ export interface SparkReactionsProps {
   onChange?: (reactions: SparkReaction[]) => void;
   /** Reacts, opens the picker and un-reacts on a loop until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the root. */
   className?: string;
@@ -137,6 +137,10 @@ export function SparkReactions({
   const [picker, setPicker] = useState(false);
   const [pop, setPop] = useState<{ id: string; n: number } | null>(null);
   const touched = useRef(false);
+  const listNow = useRef(list);
+  useEffect(() => {
+    listNow.current = list;
+  });
   const addBtn = useRef<HTMLButtonElement>(null);
   const dark = useIsDark();
   const byId = new Map(options.map((o) => [o.id, o]));
@@ -156,6 +160,8 @@ export function SparkReactions({
   useEffect(() => {
     if (!autoplay) return;
     const bump = (id: string) => {
+      if (listNow.current.find((r) => r.id === id)?.mine) play.auto("off", 0.5);
+      else play.auto("pop");
       setList((l) => applyToggle(l, id));
       setPop((p) => ({ id, n: (p?.n ?? 0) + 1 }));
     };
@@ -180,7 +186,7 @@ export function SparkReactions({
       steps[k++ % steps.length]();
     }, 1300);
     return () => window.clearInterval(t);
-  }, [autoplay]);
+  }, [autoplay, play]);
 
   const closeOnEscape = (e: KeyboardEvent) => {
     if (e.key !== "Escape" || !picker) return;

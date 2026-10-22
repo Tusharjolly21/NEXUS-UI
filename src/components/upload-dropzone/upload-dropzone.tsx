@@ -41,7 +41,7 @@ export type UploadDropzoneProps = {
   accent?: string;
   /** Drops a few example files in by itself until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   disabled?: boolean;
   className?: string;
@@ -263,19 +263,20 @@ export function UploadDropzone({
   }, []);
 
   const start = React.useCallback(
-    (item: DropzoneItem, audible = false) => {
+    (item: DropzoneItem, audible: boolean | "auto" = false) => {
+      const say = audible === "auto" ? play.auto : audible ? play : undefined;
       const setProgress = (p: number) => patch(item.id, { progress: Math.max(0, Math.min(1, p)) });
       const job = item.file && onUploadRef.current ? onUploadRef.current(item.file, setProgress) : simulate(setProgress, item.size);
       job.then(
         () => {
           patch(item.id, { progress: 1, status: "done" });
           if (alive.current) setAnnounce(`${item.name} uploaded`);
-          if (audible && alive.current) play("done");
+          if (alive.current) say?.("done");
         },
         () => {
           patch(item.id, { status: "error", error: "Upload failed" });
           if (alive.current) setAnnounce(`${item.name} failed to upload`);
-          if (audible && alive.current) play("error");
+          if (alive.current) say?.("error");
         },
       );
     },
@@ -358,7 +359,8 @@ export function UploadDropzone({
         if (touched.current) return;
         const item: DropzoneItem = { id: `${uid}-demo${k}`, name: f.name, size: f.size, type: f.type, progress: 0, status: "uploading" };
         setItems((prev) => [...prev, item].slice(-3));
-        start(item);
+        play.auto("drop");
+        start(item, "auto");
         swallow();
       }, 900);
     }, 2900);
@@ -366,7 +368,7 @@ export function UploadDropzone({
       clearInterval(t);
       clearTimeout(land);
     };
-  }, [autoplay, start, swallow, uid]);
+  }, [autoplay, start, swallow, uid, play]);
 
   const remove = (id: string) => setItems((list) => list.filter((i) => i.id !== id));
   const touch = () => {

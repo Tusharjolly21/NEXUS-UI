@@ -39,7 +39,7 @@ export interface CircularCarouselProps {
   autoPlayInterval?: number;
   /** Hint under the controls. Empty string hides it. */
   hint?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   className?: string;
 }
@@ -148,8 +148,9 @@ export function CircularCarousel({
   className = "",
 }: CircularCarouselProps) {
   const play = useSound(enableSound);
-  // When the visitor last moved the wheel. Autoplay and a controlled `activeIndex` never set it, so they stay silent.
+  // When the visitor last moved the wheel, and when autoplay last did. A controlled `activeIndex` sets neither, so it stays silent.
   const userAt = useRef(-Infinity);
+  const autoAt = useRef(-Infinity);
   const lastTick = useRef(0);
   const n = Math.max(1, items.length);
   const still = useReducedMotion() === true;
@@ -174,9 +175,14 @@ export function CircularCarousel({
     shown.current = i;
     setActive(i);
     const now = performance.now();
-    if (now - userAt.current < 1600 && now - lastTick.current > 40) {
-      lastTick.current = now;
-      play("tick", 0.4);
+    if (now - lastTick.current > 40) {
+      if (now - userAt.current < 1600) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      } else if (now - autoAt.current < 1600) {
+        lastTick.current = now;
+        play.auto("tick", 0.4);
+      }
     }
   });
 
@@ -218,6 +224,7 @@ export function CircularCarousel({
         return;
       }
       run.current?.stop();
+      autoAt.current = clock();
       run.current = animate(pos, Math.round(pos.get()) + 1, { type: "spring", stiffness: 110, damping: 14 });
     }, Math.max(1000, autoPlayInterval));
     return () => clearInterval(t);

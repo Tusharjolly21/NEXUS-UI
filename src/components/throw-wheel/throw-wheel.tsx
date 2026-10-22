@@ -14,7 +14,7 @@ export interface ThrowWheelProps {
   cards?: WheelCard[];
   /** Throws the wheel by itself every few seconds until the user grabs it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -83,6 +83,7 @@ export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true
   const audible = useRef(false);
   const lastFront = useRef(0);
   const lastTick = useRef(0);
+  const sound = (name: "tick" | "drop", vol: number) => (audible.current ? play(name, vol) : play.auto(name, vol));
 
   useMotionValueEvent(rot, "change", (r) => {
     const f = ((Math.round(-r / step) % n) + n) % n;
@@ -90,9 +91,9 @@ export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true
     if (f !== lastFront.current) {
       lastFront.current = f;
       const now = performance.now();
-      if (audible.current && now - lastTick.current >= 40) {
+      if (now - lastTick.current >= 40) {
         lastTick.current = now;
-        play("tick", 0.4);
+        sound("tick", 0.4);
       }
     }
   });
@@ -106,14 +107,14 @@ export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true
       power: 0.55,
       timeConstant: 420,
       modifyTarget: (t) => Math.round(t / step) * step,
-      onComplete: () => { if (audible.current && Math.abs(rot.get() - from) > 0.5) play("drop", 0.5); },
+      onComplete: () => { if (Math.abs(rot.get() - from) > 0.5) sound("drop", 0.5); },
     });
   };
 
   const spinBy = (cardsToMove: number) => {
     ctl.current?.stop();
     const target = Math.round(rot.get() / step) * step - cardsToMove * step;
-    ctl.current = animate(rot, target, { type: "spring", stiffness: 60, damping: 14, onComplete: () => { if (audible.current) play("drop", 0.5); } });
+    ctl.current = animate(rot, target, { type: "spring", stiffness: 60, damping: 14, onComplete: () => sound("drop", 0.5) });
   };
 
   const throwIt = useEffectEvent(() => {

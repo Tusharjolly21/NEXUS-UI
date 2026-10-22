@@ -23,7 +23,7 @@ export interface UndoToastProps {
   onUndo?: (mails: UndoToastMail[]) => void;
   /** Archives a row and undoes it on a loop until someone touches the component. Never runs under reduced motion. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
@@ -138,18 +138,26 @@ export function UndoToast({ mails = INBOX, holdMs = HOLD, onArchive, onUndo, aut
     if (!autoplay || reduce || !active) return;
     const ids: number[] = [];
     let alive = true;
+    let archived = false;
     const run = () => {
       if (!alive || touched.current) return;
       ids.push(
         window.setTimeout(() => {
           if (touched.current) return;
           const m = latest.current.list[1];
-          if (m) latest.current.archive(m);
+          if (m) {
+            archived = true;
+            play.auto("ping");
+            latest.current.archive(m);
+          }
         }, 1400),
       );
       ids.push(
         window.setTimeout(() => {
-          if (!touched.current) latest.current.undo();
+          if (touched.current) return;
+          if (archived) play.auto("drop");
+          archived = false;
+          latest.current.undo();
         }, 3600),
       );
       ids.push(window.setTimeout(run, 6200));
@@ -159,7 +167,7 @@ export function UndoToast({ mails = INBOX, holdMs = HOLD, onArchive, onUndo, aut
       alive = false;
       ids.forEach((id) => window.clearTimeout(id));
     };
-  }, [autoplay, reduce, active]);
+  }, [autoplay, reduce, active, play]);
 
   const count = batch.length;
   const last = batch[batch.length - 1];

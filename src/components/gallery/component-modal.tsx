@@ -1,5 +1,6 @@
 "use client";
 
+import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
 import Link from "next/link";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
@@ -289,7 +290,7 @@ function Inspector({ item }: { item: GalleryItem }) {
         {view === "preview" ? (
           playground ? (
             <div key={run} className={cn("absolute inset-0 flex items-center justify-center p-6", playground.lightOnly ? "text-[#1d1d1f]" : "text-foreground")}>
-              {playground.render(values, fill)}
+              <AutoplaySound allow>{playground.render(values, fill)}</AutoplaySound>
             </div>
           ) : (
             <FitPreview

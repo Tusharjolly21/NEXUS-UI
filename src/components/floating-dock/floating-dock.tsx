@@ -18,7 +18,7 @@ export type FloatingDockProps = {
   position?: "fixed" | "inline";
   /** Sweeps an invisible pointer across the dock and bounces a tile until someone points at it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 

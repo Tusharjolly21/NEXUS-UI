@@ -42,7 +42,7 @@ export type SlideToConfirmProps = {
   autoplay?: boolean;
   disabled?: boolean;
   className?: string;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -132,6 +132,10 @@ export function SlideToConfirm({
   React.useLayoutEffect(() => {
     statusRef.current = status;
   }, [status]);
+  const playRef = React.useRef(play);
+  React.useEffect(() => {
+    playRef.current = play;
+  });
 
   const progress = useTransform(x, (v) => Math.max(0, Math.min(1, v / max)));
   const labelOpacity = useTransform(progress, [0, 0.45], [1, 0]);
@@ -226,19 +230,35 @@ export function SlideToConfirm({
   React.useEffect(() => {
     if (!autoplay) return;
     let run: AnimationPlaybackControls | undefined;
+    let detent = 0;
+    let lastTick = 0;
     const t = setInterval(() => {
       if (touched.current) {
         clearInterval(t);
         return;
       }
       if (statusRef.current !== "idle") return;
+      detent = 0;
       run = animate(x, max, {
         type: "spring",
         stiffness: 60,
         damping: 14,
         restDelta: 0.5,
+        onUpdate: (v) => {
+          // Same quarter-track ticks as a real drag.
+          const d = Math.floor(Math.max(0, Math.min(1, v / max)) * 4);
+          if (d === detent) return;
+          detent = d;
+          const now = performance.now();
+          if (!touched.current && now - lastTick > 40) {
+            lastTick = now;
+            playRef.current.auto("tick", 0.4);
+          }
+        },
         onComplete: () => {
-          if (!touched.current) succeed(1500);
+          if (touched.current) return;
+          playRef.current.auto("success");
+          succeed(1500);
         },
       });
     }, 3600);

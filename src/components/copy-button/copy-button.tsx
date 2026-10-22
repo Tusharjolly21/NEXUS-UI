@@ -23,7 +23,7 @@ export interface CopyChipProps {
   accent?: string;
   /** Clicks itself every few seconds until the user interacts. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -34,11 +34,17 @@ export function CopyChip({ value, display, label = "Copy", accent = "#0071e3", a
   const [burst, setBurst] = useState(0);
   const timer = useRef<number | undefined>(undefined);
   const touched = useRef(false);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
 
   const copy = async (real = true) => {
     if (real) {
       await writeClipboard(value);
       play("success", 0.6);
+    } else {
+      playRef.current.auto("success", 0.6);
     }
     setCopied(true);
     setBurst((b) => b + 1);
@@ -110,10 +116,16 @@ export function CopyCommand({ command, autoplay = false, enableSound = true }: {
   const play = useSound(enableSound);
   const [copied, setCopied] = useState(false);
   const touched = useRef(false);
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
   const go = async (real = true) => {
     if (real) {
       await writeClipboard(command);
       play("success", 0.6);
+    } else {
+      playRef.current.auto("success", 0.6);
     }
     setCopied(true);
     setTimeout(() => setCopied(false), 1600);

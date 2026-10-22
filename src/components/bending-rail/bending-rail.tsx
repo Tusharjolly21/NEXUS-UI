@@ -13,7 +13,7 @@ export interface BendingRailProps {
   onChange?: (v: number) => void;
   /** Tugs the knob around by itself until the user grabs it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -37,16 +37,18 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
   const stage = useRef<HTMLDivElement>(null);
   const touched = useRef(false);
   const lastValue = useRef(defaultValue);
-  // Last value a tick was played for, and when; only the user's own drags and key presses tick.
+  // Last value a tick was played for, and when. Drags and key presses tick; so does an autoplay tug (more sparsely).
   const tickedValue = useRef(defaultValue);
   const lastTick = useRef(0);
-  const tick = (v: number) => {
+  const autoTug = useRef(false);
+  const tick = (v: number, auto = false) => {
     if (v === tickedValue.current) return;
     tickedValue.current = v;
     const now = performance.now();
-    if (now - lastTick.current < 40) return;
+    if (now - lastTick.current < (auto ? 150 : 40)) return;
     lastTick.current = now;
-    play("tick", 0.4);
+    if (auto) play.auto("tick", 0.3);
+    else play("tick", 0.4);
   };
 
   const clampX = (x: number) => Math.max(PAD, Math.min(W - PAD, x));
@@ -74,6 +76,7 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
     const v = Math.round(min + ((clampX(x) - PAD) / (W - PAD * 2)) * (max - min));
     if (v === lastValue.current) return;
     lastValue.current = v;
+    if (autoTug.current) tick(v, true);
     setValue(v);
     onChange?.(v);
   });
@@ -87,8 +90,11 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
     const tug = async () => {
       if (touched.current) return;
       const tx = toX(15 + Math.random() * 70);
+      autoTug.current = true;
+      play.auto("on", 0.4);
       animate(kx, tx, { duration: 0.8, ease: "easeInOut" });
       await animate(ky, [Y0, Y0 - 45 - Math.random() * 25, Y0 - 50], { duration: 0.8, ease: "easeInOut" });
+      autoTug.current = false;
       if (!touched.current) twang();
     };
     const a = setTimeout(tug, 700);
@@ -151,6 +157,7 @@ export function BendingRail({ label = "Volume", min = 0, max = 100, defaultValue
           aria-valuenow={value}
           onPointerDown={(e) => {
             touched.current = true;
+            autoTug.current = false;
             tickedValue.current = value;
             play("on", 0.4);
             setDragging(true);

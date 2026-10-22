@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { flushSync } from "react-dom";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
@@ -25,7 +25,7 @@ export interface SlingshotSendProps {
   autoReply?: boolean;
   /** Types, pulls back and fires messages by itself until someone touches the component. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -111,6 +111,7 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
     const listEl = list.current;
     if (!text || !rootEl || !stoneEl || !listEl) return;
     if (byUser) play("whoosh");
+    else play.auto("whoosh");
     const rr = rootEl.getBoundingClientRect();
     const sr = stoneEl.getBoundingClientRect();
     const from = { x: sr.left - rr.left + sr.width / 2, y: sr.top - rr.top + sr.height / 2 };
@@ -164,6 +165,9 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
     return () => io.disconnect();
   }, []);
 
+  const autoLift = useEffectEvent(() => play.auto("lift"));
+  const autoRelease = useEffectEvent(() => release());
+
   useEffect(() => {
     if (!autoplay || reduced) return;
     let k = 0;
@@ -173,9 +177,10 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
       if (!visible.current || document.hidden) return;
       const line = AUTOPLAY_LINES[k++ % AUTOPLAY_LINES.length];
       writeDraft(line);
+      autoLift();
       await pull(-18, 52);
       if (touched.current || cancelled) return;
-      release();
+      autoRelease();
       if (k % 3 === 0) setMsgs(START);
     }, 3200);
     return () => {

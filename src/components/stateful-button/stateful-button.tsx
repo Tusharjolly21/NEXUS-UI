@@ -55,7 +55,7 @@ export type StatefulButtonProps = Omit<
   errorIcon?: React.ReactNode;
   /** Runs through loading and success on a loop (without calling `onClick`) until someone presses it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 };
 
@@ -129,6 +129,10 @@ export function StatefulButton({
   const [phase, setPhase] = React.useState<Phase>("idle");
   const resetRef = React.useRef<number | null>(null);
   const touched = React.useRef(false);
+  const playRef = React.useRef(play);
+  React.useEffect(() => {
+    playRef.current = play;
+  });
   const dims = sizeClasses[size];
 
   const isLoading = phase === "loading";
@@ -159,9 +163,11 @@ export function StatefulButton({
         clearInterval(t);
         return;
       }
+      playRef.current.auto("tap");
       setPhase("loading");
       step = setTimeout(() => {
         if (touched.current) return;
+        playRef.current.auto("success");
         setPhase("success");
         step = setTimeout(() => !touched.current && setPhase("idle"), 1400);
       }, 1400);

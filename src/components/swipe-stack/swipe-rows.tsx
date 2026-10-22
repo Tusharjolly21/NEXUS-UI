@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform, type PanInfo } from "framer-motion";
-import { useSound, type SoundName } from "@/lib/ui-sounds";
+import { useSound, type SoundPlayer } from "@/lib/ui-sounds";
 
 /** Width of the inbox; swipe thresholds are fractions of it. */
 const W = 320;
@@ -46,7 +46,7 @@ export interface SwipeRowsProps {
   onUndo?: (item: SwipeRowItem, action: SwipeAction) => void;
   /** Swipes rows away by itself (archive, then delete, refilling the list) until someone touches it. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }
 
@@ -61,7 +61,7 @@ function Row({
   onDone: (id: SwipeRowItem["id"], how: SwipeAction, byUser: boolean) => void;
   onFlag: (m: SwipeRowItem) => void;
   demo?: SwipeAction;
-  play: (name: SoundName, volume?: number) => void;
+  play: SoundPlayer;
 }) {
   const x = useMotionValue(0);
   const right = useTransform(x, (v) => Math.max(0, v));
@@ -80,6 +80,11 @@ function Row({
 
   useEffect(() => () => anim.current?.stop(), []);
 
+  const playRef = useRef(play);
+  useEffect(() => {
+    playRef.current = play;
+  });
+
   const finish = (how: SwipeAction, byUser: boolean) => {
     if (byUser) {
       play("swipe");
@@ -95,6 +100,8 @@ function Row({
       duration: 0.6,
       ease: [0.3, 0, 0.3, 1],
       onComplete: () => {
+        playRef.current.auto("swipe");
+        playRef.current.auto(demo === "archive" ? "success" : "off", 0.5);
         anim.current = animate(x, demo === "archive" ? W : -W, { duration: 0.22, ease: "easeIn", onComplete: () => onDone(m.id, demo, false) });
       },
     });

@@ -172,10 +172,11 @@ const CUES: Record<Key, [on: [SoundName, number], off: [SoundName, number]]> = {
 
 export function AnimatedIcons({ autoplay = false, enableSound = true }: {
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
   enableSound?: boolean;
 }) {
   const play = useSound(enableSound);
+  const playRef = useRef(play);
   const [state, setState] = useState<Record<Key, boolean>>({ menu: false, play: false, like: false, bell: false, theme: false, save: false, mute: false, lock: false });
   const [burst, setBurst] = useState(0);
   const touched = useRef(false);
@@ -188,11 +189,22 @@ export function AnimatedIcons({ autoplay = false, enableSound = true }: {
   };
 
   useEffect(() => {
+    playRef.current = play;
+  }, [play]);
+
+  useEffect(() => {
     if (!autoplay) return;
     let k = 0;
+    // The demo is the only thing toggling until a visitor touches it, so it can track each icon itself.
+    const was: Partial<Record<Key, boolean>> = {};
     const t = setInterval(() => {
       if (touched.current) return clearInterval(t);
-      toggle(LIST[k++ % LIST.length].key);
+      const key = LIST[k++ % LIST.length].key;
+      const wasOn = was[key] ?? false;
+      was[key] = !wasOn;
+      const [name, volume] = CUES[key][wasOn ? 1 : 0];
+      playRef.current.auto(name, volume);
+      toggle(key);
     }, 700);
     return () => clearInterval(t);
   }, [autoplay]);
