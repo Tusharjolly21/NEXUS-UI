@@ -37,6 +37,8 @@ export async function GET(_req: Request, { params }: Params) {
   const { name } = await params;
   // Free, non-catalog registry items (a font setup, the UI sounds library).
   const isPublicRegistryAsset = name === "nexus-font" || name === "ui-sounds";
+  // The Pro sound pack: not a catalog component, but always Pro (a plan or All-Access).
+  const isProSoundPack = name === "ui-sounds-pro";
 
   // Rate limit: 60 requests per IP per minute (generous for CLI batch installs)
   const ip = getClientIp(_req);
@@ -61,13 +63,13 @@ export async function GET(_req: Request, { params }: Params) {
   const section = component || block ? null : getVariantByRegistryName(name);
 
   // Unknown package → 404
-  if (!component && !block && !section && !isPublicRegistryAsset) {
+  if (!component && !block && !section && !isPublicRegistryAsset && !isProSoundPack) {
     return new NextResponse("Component not found", { status: 404 });
   }
 
   // What the entitlement check is about. Sections use their own id: no one buys a section on its
   // own, so in practice that means a Pro plan or All-Access.
-  const entitlementSlug = component?.slug ?? block?.slug ?? section?.id ?? "";
+  const entitlementSlug = component?.slug ?? block?.slug ?? section?.id ?? (isProSoundPack ? name : "");
   const premium = component?.premium ?? block?.premium ?? (section ? section.premium !== false : true);
 
   // ── 2. Free components — no auth required ────────────────────────
@@ -91,7 +93,9 @@ export async function GET(_req: Request, { params }: Params) {
     return new NextResponse(
       JSON.stringify({
         error: "Unauthorized",
-        message: "This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key",
+        message: isProSoundPack
+          ? "The Pro sound pack is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key"
+          : "This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key",
       }),
       { status: 401, headers: PRIVATE_JSON_HEADERS },
     );
