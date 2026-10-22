@@ -424,7 +424,7 @@ export function Clothesline({
     >
       <div
         ref={wrap}
-        className="relative mx-auto w-full max-w-[640px] touch-none select-none overflow-hidden"
+        className="relative mx-auto w-full max-w-[640px] touch-pan-y select-none overflow-hidden"
         style={{ aspectRatio: `${SW} / ${SH}` }}
         onPointerDown={startRope}
         onPointerMove={move}
@@ -457,7 +457,7 @@ export function Clothesline({
               aria-haspopup="dialog"
               aria-label={`${p.name}, ${p.role}: ${p.quote}`}
               className={cn(
-                "absolute left-0 top-0 flex origin-top cursor-grab flex-col rounded-[6px] bg-[#fdfcf9] p-2 pb-2.5 text-left shadow-[0_2px_3px_rgba(0,0,0,.08),0_14px_24px_-14px_rgba(0,0,0,.45)] active:cursor-grabbing dark:bg-[#2c2c2e] dark:shadow-[0_2px_3px_rgba(0,0,0,.4),0_14px_24px_-14px_rgba(0,0,0,.9)]",
+                "absolute left-0 top-0 flex origin-top cursor-grab touch-none flex-col rounded-[6px] bg-[#fdfcf9] p-2 pb-2.5 text-left shadow-[0_2px_3px_rgba(0,0,0,.08),0_14px_24px_-14px_rgba(0,0,0,.45)] active:cursor-grabbing dark:bg-[#2c2c2e] dark:shadow-[0_2px_3px_rgba(0,0,0,.4),0_14px_24px_-14px_rgba(0,0,0,.9)]",
                 ring,
               )}
               style={{ width: CW, height: CH, transform: "translate(-300px,-300px)" }}

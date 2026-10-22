@@ -139,6 +139,7 @@ const baseVariants: BlockVariant[] = [
 
   mk("counting-stats", "block-social-proof", "Counting Stats", "CountingStats"),
   mk("wall-of-love", "block-social-proof", "Wall of Love", "WallOfLove"),
+  mk("clothesline", "block-social-proof", "Clothesline", "Clothesline"),
 
   mk("typo-catching-signup", "block-newsletter", "Typo-catching Signup", "TypoCatchingSignup"),
 

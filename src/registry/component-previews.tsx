@@ -4325,3 +4325,8 @@ export * from "./redesign/warp-speed-card";
 export * from "./redesign/wheel-selector";
 export * from "./redesign/word-magnet";
 export * from "./redesign/workbench-sidebar";
+export * from "./signature/motion-kit-t";
+export * from "./signature/motion-kit-u";
+export * from "./signature/motion-kit-v";
+export * from "./signature/motion-kit-w";
+export * from "./blocks/motion-kit-blocks-g";

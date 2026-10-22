@@ -843,6 +843,14 @@ const BLOCK_REGISTRY_PACKAGES = [
     components: ["blocks/motion-kit/counting-stats"],
   },
   {
+    name: "clothesline",
+    title: "Clothesline",
+    description: "Testimonials pegged to a washing line: a verlet rope that sags under each card, can be plucked or tugged, and opens a quote in a dialog when a card is clicked.",
+    premium: true,
+    dependencies: ["framer-motion"],
+    components: ["blocks/motion-kit/clothesline"],
+  },
+  {
     name: "wall-of-love",
     title: "Wall of Love",
     description: "Wall of Love, a Motion Kit block section.",
@@ -911,7 +919,7 @@ const BLOCK_REGISTRY_PACKAGES = [
     title: "Social Proof Blocks",
     description: "Stats that count up into view and a wall of love testimonial grid.",
     premium: true,
-    components: ["blocks/motion-kit/counting-stats", "blocks/motion-kit/wall-of-love"],
+    components: ["blocks/motion-kit/counting-stats", "blocks/motion-kit/wall-of-love", "blocks/motion-kit/clothesline"],
   },
   {
     name: "newsletter-blocks",

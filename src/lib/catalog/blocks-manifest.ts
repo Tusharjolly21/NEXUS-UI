@@ -353,7 +353,7 @@ export default function Features() {
     category: "Testimonials",
     tags: ["social proof", "testimonials", "stats", "reviews", "wall of love", "motion kit", "framer-motion"],
     premium: true,
-    variants: ["Counting Stats", "Wall of Love", "Scrolling Testimonials"],
+    variants: ["Counting Stats", "Wall of Love", "Scrolling Testimonials", "Clothesline"],
     reactSource: `import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
 
 export default function Testimonials() {

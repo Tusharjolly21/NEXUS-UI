@@ -37,6 +37,7 @@ import { DrawnTimeline } from "./drawn-timeline";
 import { IntegrationsOrbit } from "./integrations-orbit";
 import { CountingStats } from "./counting-stats";
 import { WallOfLove } from "./wall-of-love";
+import { Clothesline } from "./clothesline";
 import { SeatRulerPricing } from "./seat-ruler-pricing";
 import { BeamPricing } from "./beam-pricing";
 import { SlideToPay } from "./slide-to-pay";
@@ -64,6 +65,7 @@ export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: bool
   "mk-integrations-orbit": IntegrationsOrbit,
   "mk-counting-stats": CountingStats,
   "mk-wall-of-love": WallOfLove,
+  "mk-clothesline": Clothesline,
   "mk-seat-ruler-pricing": SeatRulerPricing,
   "mk-beam-pricing": BeamPricing,
   "mk-slide-to-pay": SlideToPay,

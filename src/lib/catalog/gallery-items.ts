@@ -157,6 +157,14 @@ const SELF_DEMO = new Set([
   "stock-line",
   "pulse-monitor",
   "spend-donut",
+  "vinyl-player",
+  "ferrofluid-record",
+  "sand-timer",
+  "zipper-reveal",
+  "slingshot-send",
+  "domino-select",
+  "lenticular-pass",
+  "origami-pricing",
 ]);
 
 /** Hover effects that look like nothing until a pointer passes over them. */
@@ -308,6 +316,14 @@ const TINT_OF: Record<string, TileTint> = {
   "stateful-button": "mint",
   "gooey-search-input": "mint",
   "ask-nexus-input": "sky",
+  "vinyl-player": "peach",
+  "ferrofluid-record": "mint",
+  "sand-timer": "butter",
+  "zipper-reveal": "sky",
+  "slingshot-send": "sky",
+  "domino-select": "mint",
+  "lenticular-pass": "sky",
+  "origami-pricing": "peach",
 };
 
 /**
@@ -315,6 +331,15 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // tenth batch (Rare)
+  "vinyl-player",
+  "ferrofluid-record",
+  "sand-timer",
+  "zipper-reveal",
+  "slingshot-send",
+  "domino-select",
+  "lenticular-pass",
+  "origami-pricing",
   // ninth batch (Depth)
   "tag-pit",
   "usage-stack",

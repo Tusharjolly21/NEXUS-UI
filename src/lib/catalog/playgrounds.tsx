@@ -48,6 +48,14 @@ import { MagnifyDock } from "@/components/magnify-dock";
 import { UploadChips } from "@/components/upload-chips";
 import { NotificationStack } from "@/components/notification-stack";
 import { IslandMorph } from "@/components/island-morph";
+import { VinylPlayer } from "@/components/vinyl-player";
+import { FerrofluidRecord } from "@/components/ferrofluid-record";
+import { SandTimer } from "@/components/sand-timer";
+import { ZipperReveal } from "@/components/zipper-reveal";
+import { SlingshotSend } from "@/components/slingshot-send";
+import { DominoSelect } from "@/components/domino-select";
+import { LenticularPass } from "@/components/lenticular-pass";
+import { OrigamiPricing } from "@/components/origami-pricing";
 import { ClothBanner } from "@/components/cloth-banner";
 import { TrafficBars } from "@/components/traffic-bars";
 import { StockLine } from "@/components/stock-line";
@@ -2994,6 +3002,76 @@ export const playgrounds: Record<string, Playground> = {
         className="max-w-[760px]"
       />
     ),
+  },
+  "vinyl-player": {
+    componentName: "VinylPlayer",
+    importPath: "@/components/vinyl-player",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false }],
+    render: (v) => <VinylPlayer key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "ferrofluid-record": {
+    componentName: "FerrofluidRecord",
+    importPath: "@/components/ferrofluid-record",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Move the magnet", defaultValue: false }],
+    render: (v) => <FerrofluidRecord key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "sand-timer": {
+    componentName: "SandTimer",
+    importPath: "@/components/sand-timer",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "seconds", label: "Seconds", min: 10, max: 120, step: 5, defaultValue: 30 },
+      { kind: "toggle", prop: "autoplay", label: "Turn over by itself", defaultValue: false },
+    ],
+    render: (v) => <SandTimer key={`${v.seconds}-${v.autoplay}`} seconds={v.seconds as number} autoplay={v.autoplay as boolean} />,
+  },
+  "zipper-reveal": {
+    componentName: "ZipperReveal",
+    importPath: "@/components/zipper-reveal",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "code", label: "Code", options: ["NXS-8F2Q-PRO", "LAUNCH-7K4M", "WELCOME-2026"], defaultValue: "NXS-8F2Q-PRO" },
+      { kind: "toggle", prop: "autoplay", label: "Zip by itself", defaultValue: false },
+    ],
+    render: (v) => <ZipperReveal key={String(v.autoplay)} code={v.code as string} autoplay={v.autoplay as boolean} />,
+  },
+  "slingshot-send": {
+    componentName: "SlingshotSend",
+    importPath: "@/components/slingshot-send",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "name", label: "Contact", options: ["Maya", "Jun", "Priya"], defaultValue: "Maya" },
+      { kind: "toggle", prop: "autoReply", label: "Canned replies", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Fire by itself", defaultValue: false },
+    ],
+    render: (v) => <SlingshotSend key={String(v.autoplay)} name={v.name as string} autoReply={v.autoReply as boolean} autoplay={v.autoplay as boolean} />,
+  },
+  "domino-select": {
+    componentName: "DominoSelect",
+    importPath: "@/components/domino-select",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Topple by itself", defaultValue: false }],
+    render: (v) => <DominoSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "lenticular-pass": {
+    componentName: "LenticularPass",
+    importPath: "@/components/lenticular-pass",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Rock by itself", defaultValue: false }],
+    render: (v) => <LenticularPass key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "origami-pricing": {
+    componentName: "OrigamiPricing",
+    importPath: "@/components/origami-pricing",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "planName", label: "Plan", options: ["Nexus Pro", "Studio", "Team"], defaultValue: "Nexus Pro" },
+      { kind: "select", prop: "price", label: "Price", options: ["$9", "$19", "$49"], defaultValue: "$9" },
+      { kind: "toggle", prop: "autoplay", label: "Fold by itself", defaultValue: false },
+    ],
+    render: (v) => <OrigamiPricing key={String(v.autoplay)} planName={v.planName as string} price={v.price as string} autoplay={v.autoplay as boolean} />,
   },
 };
 
