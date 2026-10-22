@@ -26,7 +26,11 @@ export interface KeyboardProps {
   soundType?: SoundType;
   /** KeyboardEvent.code values to show as held, e.g. from `usePhysicalKeyboard()`. */
   activeKeys?: string[];
-  /** Also react to the real keyboard: keys sink, ripple, click and type while the page has focus. */
+  /**
+   * Also react to the real keyboard: keys sink, ripple, click and type while the page has focus.
+   * With several listening keyboards on a page, only one answers: the last one pressed or
+   * hovered, else the one nearest the middle of the screen.
+   */
   listen?: boolean;
   /** Shows a strip above the keys with what has been typed. Return clears it. */
   showOutput?: boolean;
@@ -84,6 +88,35 @@ const BY_CHAR = new Map(MAC_ROWS.flat().filter((k) => k.char && k.char.length ==
 
 const MAX_CHARS = 32;
 
+// Several keyboards can listen on one page. Each key press goes to exactly one of them: the one
+// the visitor last pressed or hovered, if it is still on screen, otherwise the one nearest the
+// middle of the viewport. Every listener runs the same check, so they agree without talking.
+const listening = new Map<number, () => HTMLElement | null>();
+let lastUsed: number | null = null;
+let nextId = 0;
+
+function onScreen(el: HTMLElement | null) {
+  if (!el) return null;
+  const r = el.getBoundingClientRect();
+  const h = window.innerHeight;
+  if (r.bottom <= 0 || r.top >= h || r.width === 0) return null;
+  return Math.abs((r.top + r.bottom) / 2 - h / 2);
+}
+
+function ownsKeys(id: number) {
+  if (lastUsed !== null && listening.has(lastUsed) && onScreen(listening.get(lastUsed)!()) !== null) return lastUsed === id;
+  let best: number | null = null;
+  let bestDist = Infinity;
+  listening.forEach((get, k) => {
+    const d = onScreen(get());
+    if (d !== null && d < bestDist) {
+      bestDist = d;
+      best = k;
+    }
+  });
+  return best === id;
+}
+
 /**
  * A Mac keyboard drawn in HTML. Press a key and it sinks, squashes and springs
  * back while a ring of backlight spreads out from it through the gaps between
@@ -120,6 +153,7 @@ export function MacKeyboard({
   const els = React.useRef(new Map<string, HTMLElement>());
   const touched = React.useRef(false);
   const seq = React.useRef(0);
+  const [id] = React.useState(() => ++nextId);
   const [ripples, setRipples] = React.useState<Ripple[]>([]);
   const [held, setHeld] = React.useState<string[]>([]);
   const [text, setText] = React.useState("");
@@ -179,14 +213,22 @@ export function MacKeyboard({
     return () => pending.forEach((t) => window.clearTimeout(t));
   }, []);
 
+  /** The first real press ends the demo and clears what it typed. */
+  const takeOver = React.useCallback(() => {
+    lastUsed = id;
+    if (touched.current) return;
+    touched.current = true;
+    if (autoplay) setText("");
+  }, [id, autoplay]);
+
   const onPress = React.useCallback(
     (key: KeyDef) => {
-      touched.current = true;
+      takeOver();
       tap(key);
       strike(key, true);
       onKeyPress?.(key);
     },
-    [tap, strike, onKeyPress],
+    [takeOver, tap, strike, onKeyPress],
   );
 
   // Real keyboard.
@@ -196,14 +238,15 @@ export function MacKeyboard({
 
   React.useEffect(() => {
     if (!listen) return;
+    listening.set(id, () => body.current);
     const down = (e: KeyboardEvent) => {
       const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
+      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
       if (e.metaKey || e.ctrlKey) return;
       const code = CODE_ALIASES[e.code] ?? e.code;
       const key = BY_CODE.get(code);
-      if (!key) return;
-      touched.current = true;
+      if (!key || !ownsKeys(id)) return;
+      takeOver();
       if (code === "Space" || code === "Backspace" || code === "Tab" || code === "Quote" || code === "Slash") e.preventDefault();
       if (!e.repeat) strike(key, true);
       setHeld((h) => (h.includes(code) ? h : [...h, code]));
@@ -217,11 +260,13 @@ export function MacKeyboard({
     window.addEventListener("keyup", up);
     window.addEventListener("blur", blur);
     return () => {
+      listening.delete(id);
+      if (lastUsed === id) lastUsed = null;
       window.removeEventListener("keydown", down);
       window.removeEventListener("keyup", up);
       window.removeEventListener("blur", blur);
     };
-  }, [listen, strike]);
+  }, [listen, strike, id, takeOver]);
 
   // Demo: type the text on the keys, send it with Return, pause, repeat.
   React.useEffect(() => {
@@ -298,7 +343,10 @@ export function MacKeyboard({
         ref={body}
         role="group"
         aria-label="Mac keyboard"
-        onPointerEnter={primeSound}
+        onPointerEnter={() => {
+          primeSound();
+          if (listen) lastUsed = id;
+        }}
         onFocus={primeSound}
         onPointerUp={unlockSound}
         className={cn(`relative w-full select-none overflow-hidden rounded-[min(22px,3cqw)] p-[min(14px,1.8cqw)] ${skin.body}`, className)}
