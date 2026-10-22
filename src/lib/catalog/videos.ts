@@ -405,7 +405,7 @@ export const videos: VideoEntry[] = [
     "premium": true,
     "dark": false,
     "createdAt": "2026-10-22",
-    "posterAt": 7,
+    "posterAt": 12.4,
     "defaults": {
       "intro": "Everything in Nexus UI.",
       "n1": "183",
@@ -525,7 +525,7 @@ export const videos: VideoEntry[] = [
     "premium": true,
     "dark": false,
     "createdAt": "2026-10-22",
-    "posterAt": 6,
+    "posterAt": 3,
     "defaults": {
       "title": "Same UI.",
       "sub": "Different feeling.",
