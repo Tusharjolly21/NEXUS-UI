@@ -9,29 +9,33 @@ import { ProBadge, useProAccess } from "@/components/pro/pro-access";
 import { SOUNDS, playSound, setSoundVolume, useSoundStyle, type SoundCategory, type SoundName } from "@/lib/ui-sounds";
 import { MAC_SOUND_LABELS } from "@/lib/ui-sounds-mac-meta";
 import { PRO_SOUND_META } from "@/lib/ui-sounds-pro-meta";
+import { RECORDED_SOUND_META, type RecordedSoundCategory } from "@/lib/ui-sounds-recorded-meta";
+import { playRecordedPreview, warmRecordedPreview } from "@/components/sounds/recorded-preview";
 import type { ProSoundCategory, ProSoundName } from "@/lib/ui-sounds-pro";
 import { cn } from "@/lib/utils";
 import { SoundBlob } from "@/components/sounds/sound-blob";
 
-type Category = SoundCategory | ProSoundCategory;
+type Category = SoundCategory | ProSoundCategory | RecordedSoundCategory;
 type Access = "all" | "free" | "pro";
 type Used = { slug: string; name: string }[];
 
 const FREE_CATEGORIES: SoundCategory[] = ["Actions", "Feedback", "Navigation", "Notifications", "Selection", "Movement", "Progress", "System"];
-const PRO_CATEGORIES: ProSoundCategory[] = ["Glass", "Paper and wood", "Arcade", "Studio"];
+const PRO_CATEGORIES: (ProSoundCategory | RecordedSoundCategory)[] = ["Glass", "Paper and wood", "Arcade", "Studio", "Recorded"];
 
 /** One entry on the board, free or Pro. The Pro recipes load only when one is played. */
-type Item = { key: string; name: string; label: string; category: Category; pro: boolean };
+type Item = { key: string; name: string; label: string; category: Category; pro: boolean; recorded?: boolean };
 const ITEMS: Item[] = [
   ...(Object.keys(SOUNDS) as SoundName[]).map((n) => ({ key: n, name: n, label: SOUNDS[n].label, category: SOUNDS[n].category as Category, pro: false })),
   ...PRO_SOUND_META.map((m) => ({ key: `pro:${m.name}`, name: m.name, label: m.label, category: m.category as Category, pro: true })),
+  ...RECORDED_SOUND_META.map((m) => ({ key: `rec:${m.name}`, name: m.name, label: m.label, category: m.category as Category, pro: true, recorded: true })),
 ];
 
 
 /**
  * The sounds library as a board of orbs: tap one to hear it, filter by free or Pro and by kind, set
  * the volume, and copy the one line that plays it. Every sound plays for everyone. A Pro sound's
- * code, install command and file open with Pro. Everything is synthesised in the browser.
+ * code, install command and file open with Pro. Everything is synthesised in the browser except the
+ * five recorded sounds, which play from small compressed previews; their full-quality files are Pro only.
  */
 export function SoundBoard({
   source,
@@ -39,6 +43,7 @@ export function SoundBoard({
   installFree,
   installPro,
   installMac,
+  installRecorded,
 }: {
   /** The free ui-sounds.ts file, shown in full. */
   source: string;
@@ -47,6 +52,7 @@ export function SoundBoard({
   installFree: string;
   installPro: string;
   installMac: string;
+  installRecorded: string;
 }) {
   const reduce = useReducedMotion();
   const { isPro, requestUpgrade } = useProAccess();
@@ -95,6 +101,10 @@ export function SoundBoard({
     }
     // Start the audio context inside the tap (Safari needs that), then play once the chunk is in.
     setSoundVolume(volume);
+    if (item.recorded) {
+      playRecordedPreview(item.name);
+      return;
+    }
     void loadPro().then((m) => m.playProSound(item.name as ProSoundName, 1, true));
   };
 
@@ -116,7 +126,7 @@ export function SoundBoard({
     void loadMac().then(() => setSoundStyle("mac"));
   };
 
-  const lockedFile = current.pro ? "ui-sounds-pro" : "ui-sounds-mac";
+  const lockedFile = current.recorded ? "ui-sounds-recorded" : current.pro ? "ui-sounds-pro" : "ui-sounds-mac";
   const showProFile = () => {
     if (proFile.name !== lockedFile || proFile.state === "idle" || proFile.state === "error") {
       setProFile({ name: lockedFile, state: "loading", text: "" });
@@ -133,7 +143,7 @@ export function SoundBoard({
     setShowFile((v) => !v);
   };
 
-  const snippet = current.pro ? `playProSound("${current.name}")` : mac ? `setSoundStyle("mac")` : `playSound("${current.name}")`;
+  const snippet = current.recorded ? `playRecordedSound("${current.name}")` : current.pro ? `playProSound("${current.name}")` : mac ? `setSoundStyle("mac")` : `playSound("${current.name}")`;
   const VolumeIcon = volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
   const used = !current.pro ? (usedBy[current.name] ?? []) : [];
   const ACCESS: { id: Access; label: string; n: number }[] = [
@@ -233,7 +243,7 @@ export function SoundBoard({
                 <button
                   type="button"
                   onClick={() => play(item)}
-                  onPointerEnter={item.pro ? () => void loadPro() : undefined}
+                  onPointerEnter={item.recorded ? () => warmRecordedPreview(item.name) : item.pro ? () => void loadPro() : undefined}
                   aria-label={`Play ${labelOf(item)}, ${item.category}${item.pro ? ", Pro" : mac ? ", Mac style" : ""}`}
                   aria-pressed={active}
                   className={cn(
@@ -283,17 +293,19 @@ export function SoundBoard({
         {currentLocked && !isPro ? (
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <p className="max-w-[560px] text-[13.5px] leading-relaxed text-muted-foreground">
-              {current.pro
+              {current.recorded
+                ? "Every recorded sound plays here, from a small compressed copy. The full-quality recording, the code and the install command come with Pro, together with every Pro component, block and template."
+                : current.pro
                 ? "Every Pro sound plays here. The code, the install command and the file come with Pro, together with every Pro component, block and template."
                 : "Every Mac-style sound plays here and in every component on this site while the style is on. The file and its install command come with Pro."}
             </p>
             <button
               type="button"
-              onClick={() => requestUpgrade(current.pro ? "The Pro sound pack" : "The Mac sound style")}
+              onClick={() => requestUpgrade(current.recorded ? "The recorded sounds" : current.pro ? "The Pro sound pack" : "The Mac sound style")}
               className="inline-flex h-10 items-center gap-2 rounded-full bg-action px-4 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
             >
               <Lock className="size-4" aria-hidden />
-              {current.pro ? "Unlock the Pro pack" : "Unlock the Mac style"}
+              {current.recorded ? "Unlock the recorded sounds" : current.pro ? "Unlock the Pro pack" : "Unlock the Mac style"}
             </button>
           </div>
         ) : (
@@ -306,12 +318,20 @@ export function SoundBoard({
               className="h-10 rounded-full bg-card px-4 text-[13.5px] font-medium text-link shadow-[0_0_0_1px_var(--border)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:bg-white/[0.06] dark:shadow-none"
             >
               {showFile ? "Hide " : ""}
-              {current.pro ? "ui-sounds-pro.ts" : mac ? "ui-sounds-mac.ts" : "ui-sounds.ts"}
+              {current.recorded ? "ui-sounds-recorded.ts" : current.pro ? "ui-sounds-pro.ts" : mac ? "ui-sounds-mac.ts" : "ui-sounds.ts"}
             </button>
           </div>
         )}
         <p className="mt-3 text-[13px] text-muted-foreground">
-          {current.pro ? (
+          {current.recorded ? (
+            isPro ? (
+              <>
+                Install with <code className="font-mono text-foreground">{installRecorded}</code>. The recordings are inside the package, and it brings <code className="font-mono text-foreground">ui-sounds</code> with it.
+              </>
+            ) : (
+              "One of five recorded sounds: typing, camera, message, notification and screenshot."
+            )
+          ) : current.pro ? (
             isPro ? (
               <>
                 Install with <code className="font-mono text-foreground">{installPro}</code>. It brings <code className="font-mono text-foreground">ui-sounds</code> with it.
@@ -336,7 +356,7 @@ export function SoundBoard({
       </div>
 
       <p className="mt-3 text-[13px] text-muted-foreground">
-        {freeCount} free and {proCount} Pro sounds, synthesised in the browser. No audio files.
+        {freeCount} free and {proCount} Pro sounds. All but the {RECORDED_SOUND_META.length} recorded ones are synthesised in the browser with no audio files; those five play from small previews here.
         {mac ? " Mac style is on: every component on this site plays it until you switch back." : ""}
       </p>
 
