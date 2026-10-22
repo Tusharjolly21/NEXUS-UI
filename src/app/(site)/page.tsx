@@ -8,6 +8,7 @@ import { HeroSpotlight } from "@/components/home/hero-spotlight";
 import { HeroStickers } from "@/components/home/hero-stickers";
 import { HeroWord } from "@/components/home/hero-word";
 import { PricingTeaser } from "@/components/home/pricing-teaser";
+import { IfPro } from "@/components/pro/pro-access";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
 import { ComponentGallery } from "@/components/gallery/component-gallery";
@@ -329,19 +330,35 @@ export default function Home() {
             Start with the component you need today.
           </h2>
           <p className="mx-auto mt-5 max-w-[460px] text-[17px] text-white/60">
-            {CATALOG_COUNTS.freeComponents} are free. Pro unlocks the rest, from {formatPrice(PRICES.pro)} a year.
+            <IfPro
+              pro={`All ${CATALOG_COUNTS.components} components, every template and every block are yours.`}
+              otherwise={`${CATALOG_COUNTS.freeComponents} are free. Pro unlocks the rest, from ${formatPrice(PRICES.pro)} a year.`}
+            />
           </p>
           <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <PillLink href="/components" variant="cta" className="h-14 px-8 text-[16px]">
               Browse components
             </PillLink>
-            <PillLink
-              href="/pricing"
-              variant="white"
-              className="h-14 bg-white/10 px-8 text-[16px] text-white shadow-none hover:bg-white/15"
-            >
-              See plans
-            </PillLink>
+            <IfPro
+              pro={
+                <PillLink
+                  href="/dashboard"
+                  variant="white"
+                  className="h-14 bg-white/10 px-8 text-[16px] text-white shadow-none hover:bg-white/15"
+                >
+                  Open your dashboard
+                </PillLink>
+              }
+              otherwise={
+                <PillLink
+                  href="/pricing"
+                  variant="white"
+                  className="h-14 bg-white/10 px-8 text-[16px] text-white shadow-none hover:bg-white/15"
+                >
+                  See plans
+                </PillLink>
+              }
+            />
           </div>
         </div>
       </section>

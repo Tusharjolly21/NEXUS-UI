@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Minus, Plus } from "lucide-react";
-import { CheckoutButton } from "@/components/pricing/checkout-button";
+import { PlanAction, PlanNotice, PlanTag } from "@/components/pricing/plan-action";
 import { PillLink, RainbowWord } from "@/components/site";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
@@ -174,6 +174,7 @@ export default function PricingPage() {
           <p className="mx-auto mt-6 max-w-[580px] text-[19px] leading-[1.55] text-muted-foreground">
             {freeComponents} components and {freeTemplates} templates are free. One plan unlocks every Pro component, all {templates} templates and every block.
           </p>
+          <PlanNotice />
         </div>
       </section>
 
@@ -185,11 +186,7 @@ export default function PricingPage() {
                 key={p.name}
                 className={cn("pg-float relative flex flex-col rounded-tile p-7", p.featured ? "bg-card ring-2 ring-action" : "bg-card")}
               >
-                {p.featured ? (
-                  <span className="absolute right-6 top-6 rounded-full bg-action/10 px-3 py-1 text-[12px] font-semibold text-link">
-                    Recommended
-                  </span>
-                ) : null}
+                {p.name !== "Starter" ? <PlanTag tier={p.name === "Pro" ? "pro" : "all-access"} featured={!!p.featured} /> : null}
                 <h2 className="text-[17px] font-semibold text-foreground">{p.name}</h2>
                 <p className="mt-3 flex items-baseline gap-2">
                   <span className="text-[48px] font-semibold leading-none tracking-[-0.035em] text-foreground">{p.price}</span>
@@ -210,15 +207,12 @@ export default function PricingPage() {
                       Browse free components
                     </PillLink>
                   ) : p.name === "Pro" ? (
-                    <CheckoutButton plan="annual">Get Pro</CheckoutButton>
+                    <PlanAction tier="pro">Get Pro</PlanAction>
                   ) : (
-                    <CheckoutButton plan="lifetime" variant="cta">
+                    <PlanAction tier="all-access" variant="cta">
                       Get All-Access
-                    </CheckoutButton>
+                    </PlanAction>
                   )}
-                  {p.name !== "Starter" ? (
-                    <p className="mt-3 text-center text-[13px] text-muted-foreground">Plus tax where it applies, shown at checkout.</p>
-                  ) : null}
                 </div>
               </article>
             ))}

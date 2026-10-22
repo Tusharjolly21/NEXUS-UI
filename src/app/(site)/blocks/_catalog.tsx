@@ -9,7 +9,7 @@ import * as React from "react";
 import { useUrlParam } from "@/components/gallery/use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
-import { cn } from "@/lib/utils";
+import { AccessTag } from "@/components/pro/pro-access";
 
 /** One section of one block, shown as a tile on the blocks wall. */
 export type BlockTileItem = GalleryItem & {
@@ -60,16 +60,7 @@ function BlockTile({ item, eager }: { item: BlockTileItem; eager: boolean }) {
           <p className="truncate text-[13px] text-muted-foreground">{item.blockName}</p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <span
-            className={cn(
-              "rounded-full px-2.5 py-0.5 text-[12px] font-semibold",
-              item.premium
-                ? "bg-[#1d1d1f] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]"
-                : "bg-[#34c759]/12 text-[#248a3d] dark:text-[#30d158]",
-            )}
-          >
-            {item.premium ? "Pro" : "Free"}
-          </span>
+          <AccessTag premium={!!item.premium} />
           <span
             aria-hidden
             className="grid size-8 place-items-center rounded-full bg-action text-white transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"

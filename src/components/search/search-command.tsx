@@ -21,6 +21,7 @@ import { blocks } from "@/lib/catalog/blocks";
 import { getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { DOCS_PAGES } from "@/components/docs/docs-nav";
 import { cn } from "@/lib/utils";
+import { useProAccess } from "@/components/pro/pro-access";
 
 /* ── Index ─────────────────────────────────────────────────────────────────── */
 
@@ -212,6 +213,7 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
   const isClient = useIsClient();
   const reduce = useReducedMotion();
   const uid = React.useId();
+  const { isPro } = useProAccess();
   const [open, setOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
   const [activeIdx, setActiveIdx] = React.useState(0);
@@ -621,7 +623,7 @@ export function SearchCommand({ variant = "default" }: { variant?: "default" | "
                         </p>
                         <p className="mt-0.5 text-[12.5px] text-muted-foreground">
                           {activeItem.subtitle}
-                          {activeItem.kind !== "doc" && <> · {activeItem.premium ? "Pro" : "Free"}</>}
+                          {activeItem.kind !== "doc" && <> · {activeItem.premium ? (isPro ? "Unlocked" : "Pro") : "Free"}</>}
                         </p>
                         <p className="mt-2 line-clamp-3 text-[13px] leading-[1.5] text-foreground/75">
                           {activeItem.description}
