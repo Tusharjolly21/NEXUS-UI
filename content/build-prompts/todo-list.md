@@ -75,3 +75,90 @@ A prop `enableSound?: boolean` (default `true`; `false` silences it) plays inter
 - [ ] Undo puts the task back at the end of the open list, unticked.
 - [ ] "All clear." appears when every task is done.
 - [ ] Autoplay ticks one task every 1.5s, resets when all are done, and stops at the first click or key press.
+
+
+---
+
+<!-- Todo List: Nexus states variant brief -->
+
+> The Todo List page has a variant. The brief above rebuilds the original; the section below rebuilds the All Caught Up variant. It is a separate component that shares the card look but not the add or Completed drawer features.
+
+---
+
+<!-- variant: all-caught-up -->
+
+# All Caught Up
+
+Build a to-do list that ends somewhere nice. A card titled "Today" with a "n of 4 done" line and a small progress ring in the corner lists four tasks. Tick one and its circle fills green with a drawn check, a line strikes through the text, and about 650ms later the row folds away while the ring fills. Tick the last one and the same ring travels to the middle of the card, grows, closes into a big drawn check with two ripples, and "All caught up" appears with three chips for tomorrow and a Start over button.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `LayoutGroup`, `useReducedMotion`), React `useId`, a `cn` class-merge helper, an `IntersectionObserver` and the page visibility API for the demo.
+- File: `components/todo-list/all-caught-up.tsx`. Named exports `AllCaughtUp`, `AllCaughtUpProps`, `AllCaughtUpTask` and the constants `ALL_CAUGHT_UP_TASKS`, `ALL_CAUGHT_UP_TOMORROW`.
+
+## API
+
+`AllCaughtUpTask`: `{ id: number; title: string; tag: string }`.
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `tasks` | `AllCaughtUpTask[]` | four demo tasks | The list. |
+| `tomorrow` | `string[]` | three demo items | Chips on the finished screen. |
+| `heading` | `string` | `"Today"` | Card heading. |
+| `onTick` | `(task) => void` | none | A task was ticked by hand. |
+| `onComplete` | `() => void` | none | The last task was ticked by hand. |
+| `autoplay` | `boolean` | `false` | Ticks tasks off and starts over until touched. |
+| `enableSound` | `boolean` | `true` | Interface sounds. |
+| `className` | `string` | none | Extra classes on the card. |
+
+Demo tasks: "Reply to Maya about the roadmap" (Inbox), "Approve pricing page copy" (Review), "Ship the onboarding checklist" (Build), "Book the design review" (Calendar). Tomorrow: "Q4 planning", "1:1 with Leo", "Invoice run".
+
+## Layout and look
+
+- Card: width 420px, `max-width: 100%`, radius 28px, padding 20px (24px from 640px), white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -30px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`).
+- Header: the heading 20px semibold tracking -0.02em (`#1d1d1f` / dark `#f5f5f7`) over a 13px tabular "n of N done" in `#6e6e73` / dark `#a1a1a6`; a 34px progress ring on the right (4px stroke, track `#ececf0` / dark `#3a3a3c`, progress `#34c759` / dark `#30d158`, round caps, rotated -90 degrees).
+- Body: 16px under the header, min-height 340px. Rows are full-width buttons, radius 14px, padding 8px by 12px, 12px gap, hover bg `#fafafa` / dark `#2c2c2e`: a 22px circle (2px border `#c7c7cc` on white; dark `#636366` on `#1c1c1e`), the title (14.5px, truncated, `#1d1d1f` / dark `#f5f5f7`), and a tag pill (11px medium, bg `#f5f5f7` / dark `#2c2c2e`, text `#6e6e73` / dark `#a1a1a6`, 8px by 2px padding).
+- Ticked row: circle border and fill `#34c759` (dark `#30d158`) with a 12px white check (3.4 stroke); the title turns `#8e8e93`; a 1px line `#a1a1a6` strikes across it.
+- Finished screen: centred column, 16px from the top. An 84px ring (6px stroke, full) with a 34px check inside in the same green (3 stroke), then 20px below it "All caught up" (19px semibold, tracking -0.02em), then "Nothing else due today. Here's what's next:" (13.5px muted), then the chips (12.5px medium, radius full, 12px by 6px padding, bg `#f5f5f7` / dark `#2c2c2e`, a muted "Tomorrow" prefix), then a Start over pill (36px, bg `#1d1d1f` white text; dark bg `#f5f5f7` text `#1d1d1f`).
+
+## Motion
+
+- Tick: the circle border and fill change colour over 0.3s and the circle pulses `scale 1 -> 1.2 -> 1`; the check path draws (`pathLength 0 -> 1`, 0.25s, 0.05s delay); the strike line scales on X from 0 to 1 from the left (0.3s, 0.1s delay). 650ms after the tick the row is removed.
+- Rows: `AnimatePresence` + `layout`; enter `opacity 0, height 0` to auto; exit to the same over 0.3s `cubic-bezier(.4,0,.2,1)`.
+- Ring: `pathLength` follows `done / total` with a spring (stiffness 120, damping 20); the header ring and the big ring share one `layoutId` so it travels and grows between them with a spring (stiffness 200, damping 24). A `LayoutGroup` with an id from `useId` keeps two instances on one page from sharing it.
+- Finish: the check scales in from .4 (spring stiffness 400, damping 16, 0.35s delay) while its path draws (0.45s delay, 0.35s); two ripple rings (84px, 2px border, same green) scale from 1 to 1.9 and fade from .5 to 0 over 1.1s at 0.4s and 0.65s delays; the heading rises 8px and fades in at 0.5s; the sub line at 0.6s; each chip rises 12px at `0.75 + 0.08 * i` seconds (spring stiffness 400, damping 26); Start over fades in at 1s.
+- Reduced motion: no pulses, ripples, layout travel or rise; the ring is not shared (the big one fades in), checks and strikes appear at once, rows fold with a 0.12s fade.
+
+## Interaction and states
+
+- Each row is a button with `aria-pressed` reflecting whether it is ticked; a ticked task cannot be unticked. The count updates immediately; the row leaves after 650ms.
+- When no rows are left the finished screen shows. Start over restores every task. `onTick` and `onComplete` fire for hand ticks only.
+
+## Autoplay demo
+
+Only while the card is on screen, the tab is visible and motion is not reduced: reset at 0.1s, tick task `i` at `0.9s + i * 1s`, hold the finished screen for about 4s, reset, and loop. Any pointer or key press inside the card stops it for good.
+
+## Accessibility
+
+- A persistent `sr-only` polite `role="status"` region reads "n of N done" and then "All caught up". Ring, checks, strike and ripples are `aria-hidden`.
+- The tomorrow chips are a list. Buttons have a 2px focus outline at 2px offset (`#0071e3`, dark `#0a84ff`).
+- All timers (the 650ms folds and the demo) are cleared on unmount.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Ticking a task plays `tick` at 50% (a tiny dry click: a 12ms burst of high-passed noise above 5 kHz). Ticking the last task plays `success` at 60% instead (two rising soft triangle notes, about 1046 Hz then 1318 Hz) as the ring fills, so each press makes exactly one sound. Start over and the row folds are silent.
+- The autoplay loop plays the same sounds: `tick` for each task it ticks and `success` for the last, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
+## Acceptance checklist
+
+- [ ] Ticking draws the check, fills the circle green and strikes the text, then the row folds away about 650ms later.
+- [ ] The header ring fills a quarter at a time and the count reads "n of 4 done".
+- [ ] The last tick makes the ring travel to the middle, grow to 84px and close into a big check with two ripples.
+- [ ] "All caught up", the sub line, three Tomorrow chips and Start over arrive in that order.
+- [ ] Start over brings back all four tasks.
+- [ ] Autoplay loops and stops for good on touch; it never runs under reduced motion.
+- [ ] Reduced motion swaps states with short fades only.
+- [ ] Dark mode uses the dark card, `#636366` empty circles and the brighter green.
+- [ ] It fits a 320px container.

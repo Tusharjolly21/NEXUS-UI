@@ -75,3 +75,88 @@ A prop `enableSound?: boolean` (default `true`; `false` silences it) plays inter
 - [ ] The button fills with progress and cannot be pressed mid-generation.
 - [ ] No network requests are made.
 - [ ] Autoplay cycles prompts and scenes and stops on the first interaction.
+
+
+---
+
+<!-- Generate Image: Nexus states variant brief -->
+
+> The Generate Image page has a variant. The brief above rebuilds the original; the section below rebuilds the Image Generating variant. Nothing is fetched: the pictures are painted on a canvas.
+
+---
+
+<!-- variant: image-generating -->
+
+# Image Generating
+
+Build an image-generation state that looks like the picture is actually forming. A card holds a prompt line with a step counter, a hairline progress bar, a framed picture that starts as pure static, becomes a blocky blurred guess, sharpens in 30 steps while the grain fades, and finally lands with a tiny settle. Three action pills slide up under it. Everything is painted locally on a canvas; nothing is fetched.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`), a `cn` class-merge helper, an `IntersectionObserver` and the page visibility API for the demo.
+- File: `components/generate-image/image-generating.tsx`. Named exports `ImageGenerating`, `ImageGeneratingProps`, `ImageGeneratingAction` and the constant `IMAGE_GENERATING_PROMPTS`.
+
+## API
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `prompts` | `string[]` | two demo prompts | Shown in turn, one per run (`run % prompts.length`). |
+| `steps` | `number` | `30` | Denoising steps in a run. |
+| `onAction` | `(action, prompt) => void` | none | Called when Variations, Upscale or Download is pressed (`action` is one of those three strings). |
+| `autoplay` | `boolean` | `false` | Starts a new run every 7s until touched. |
+| `enableSound` | `boolean` | `true` | Interface sounds. |
+| `className` | `string` | none | Extra classes on the card. |
+
+Demo prompts: "A quiet harbour at dusk, soft film grain" and "Desert dunes under a pale morning moon".
+
+## Layout and look
+
+- Card: width 520px, `max-width: 100%`, radius 28px, padding 16px (20px from 640px viewport width), white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -30px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`, shadow alpha .9).
+- Top row (4px side padding, 12px gap): the prompt on the left, 14px, truncated, the word "Prompt · " in `#6e6e73` / dark `#a1a1a6` then the prompt in `#1d1d1f` / dark `#f5f5f7`. On the right a 12px tabular counter in the muted colour: "Step n of 30" while running, then "Done in x.ys" using the measured time (just "Done" under reduced motion).
+- Progress line: 8px under the top row, 2px tall, fully rounded, track `#f0f0f3` / dark `#3a3a3c`, bar `#1d1d1f` / dark `#f5f5f7`.
+- Picture frame: 12px under the line, radius 18px, `overflow: hidden`, bg `#1d1d1f` / dark `#2c2c2e`, holding a 480 by 320 canvas drawn at `width: 100%; height: auto`. While running a "Generating" chip sits 12px from the top left: radius full, bg black 45% with a backdrop blur, white 11.5px medium text, 10px by 4px padding, with a 6px white dot.
+- Action row: 12px under the frame, 36px tall, 8px gap. Variations and Upscale are 36px pills with 16px side padding, 13px medium, bg `#f5f5f7` text `#1d1d1f` (hover `#ececf0`); dark bg `#2c2c2e`, text `#f5f5f7`, hover `#3a3a3c`. Download is pushed right, bg `#1d1d1f` text white; dark bg `#f5f5f7` text `#1d1d1f`.
+- The painted result alternates by run: even runs are a dusk harbour (a navy to rose to amber sky, a pale sun, two plum ridges, a sea gradient from salmon to indigo with 40 short glints under the sun, two dark boats with a mast), odd runs are a desert (a grey-blue to sand sky, a small white moon, three dune ridges `#e2b98b`, `#d39d6a`, `#b97d4e`). Ridges are sums of two sines; glint widths use a seeded generator so a seed always paints the same picture.
+
+## Motion
+
+- A frame is drawn every 105ms (never faster) from a `requestAnimationFrame` loop. At step `k` of `steps`, `t = k / steps`: draw the target into a small canvas of width `max(4, round(t^1.6 * 480))` (height from the 3:2 ratio, minimum 3), scale it up smoothed onto the main canvas, then add noise of amplitude `(1 - t)^1.4 * 255` per pixel (red x1, green x0.9, blue x1.1; skipped once the amplitude is 2 or less). For the first 4 steps the picture is replaced by pure grey static (128 plus noise). After the last step the exact target is drawn.
+- The progress bar width follows `step / steps` (0.1s); when done it fades out after a 0.3s delay.
+- On landing the frame scales `1 -> 1.012 -> 1` over 0.5s. The "Generating" chip fades in and out; its dot pulses opacity 1 to .3 to 1 every 1s.
+- The three buttons enter in turn: `opacity 0, y 8` to rest, delay `0.15 + 0.06 * i` seconds; they fade on exit.
+- Reduced motion: no coarse-to-fine animation. The finished picture is drawn at once, the counter says "Done", the buttons just fade in.
+
+## Interaction and states
+
+- On mount a run starts immediately (silent). When it finishes the three actions appear.
+- Variations calls `onAction` and starts the next run (next prompt, next picture, step back to 0, actions leave). Upscale and Download only call `onAction`.
+- The canvas has `role="img"`; its label is "Image generating" and then "Generated image: <prompt>".
+
+## Autoplay demo
+
+Only while the card is on screen, the tab is visible and motion is not reduced: every 7s start the next run, as if Variations had been pressed. A pointer press or key press inside the card stops it for good.
+
+## Accessibility
+
+- A persistent `sr-only` polite `role="status"` region reads "Generating image" and then "Image ready: <prompt>"; the visible counter and chip are `aria-hidden`.
+- Actions are real buttons with a 2px focus outline at 2px offset (`#0071e3`, dark `#0a84ff`).
+- No timers, observers or frames are left running after unmount.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Pressing Variations plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). When the picture of a run you started finishes forming, `chime` plays at 50% (a soft bell: three sine partials at about 880, 2430 and 4750 Hz with different tails). The first picture on mount is silent.
+- The autoplay loop plays the same sounds: `tap` at 40% when it starts a run and `chime` when the picture lands, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. The grain, the steps, hover and the other two buttons are silent. Under reduced motion the run has no animation, so only the tap plays.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
+## Acceptance checklist
+
+- [ ] It opens on pure static and sharpens in about 3 seconds, the counter reading "Step n of 30".
+- [ ] Early frames are blocky and blurry, the grain fades to nothing, the last frame is crisp.
+- [ ] The picture settles with a 1.2% pulse and the counter changes to "Done in x.ys".
+- [ ] Variations, Upscale and Download slide up one after another; Download is on the right.
+- [ ] Variations starts the next prompt with the other landscape.
+- [ ] Autoplay starts a run every 7s and stops for good on touch; it never runs under reduced motion.
+- [ ] Reduced motion shows the finished picture straight away.
+- [ ] Nothing is fetched. Dark mode uses the dark card, `#2c2c2e` frame and the inverted Download pill.
+- [ ] It fits a 320px container.

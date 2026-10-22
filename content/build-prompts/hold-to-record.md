@@ -73,3 +73,87 @@ A prop `enableSound?: boolean` (default `true`; `false` silences it) plays inter
 - Very short holds show "Hold a little longer".
 - Space/Enter hold works from the keyboard; Escape cancels.
 - `useMicrophone` drives the bars from the real mic.
+
+
+---
+
+<!-- Hold To Record: Nexus states variant brief -->
+
+> The Hold To Record page has a variant. The brief above rebuilds the original; the section below rebuilds the Voice Dictation variant. It simulates the voice and the words; no microphone is used.
+
+---
+
+<!-- variant: voice-dictation -->
+
+# Voice Dictation
+
+Build a dictation card that shows it is listening and what it heard. A "New reminder" card has a transcript box, a round mic button and a row of 32 level bars. Tap the mic: a red dot and a running clock appear, the bars dance with a simulated voice, and the words arrive one by one, faint while they are still a guess and firming up once sure. Some words are corrected with more context ("for" becomes "4", "pm" becomes "PM") and visibly swap in place with a blue flash. Stop and the bars settle into a line, the status says "Ready" and a Save button appears. The voice and words are a simulation; the microphone is never used.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`), a `cn` class-merge helper, an `IntersectionObserver` and the page visibility API for the demo.
+- File: `components/hold-to-record/voice-dictation.tsx`. Named exports `VoiceDictation`, `VoiceDictationProps`, `VoiceDictationWord` and the constant `VOICE_DICTATION_SCRIPT`.
+
+## API
+
+`VoiceDictationWord`: `{ w: string; fix?: string; pause?: number }`: the word as first heard, what it becomes later, and extra ms to wait before it.
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `script` | `VoiceDictationWord[]` | a short reminder | The words the demo hears. |
+| `title` | `string` | `"New reminder"` | Label top left. |
+| `onSave` | `(text: string) => void` | none | Called with the finished text (fixes applied, joined by spaces) when Save is pressed; the card then resets. |
+| `autoplay` | `boolean` | `false` | Dictates, rests and repeats until touched. |
+| `enableSound` | `boolean` | `true` | Interface sounds. |
+| `className` | `string` | none | Extra classes on the card. |
+
+Default script: Remind, me, to, send, the, deck, to, Leo, by (pause 300), for (fix "4"), pm (fix "PM"), tomorrow.
+
+## Layout and look
+
+- Card: width 480px, `max-width: 100%`, radius 28px, padding 20px (24px from 640px), white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -30px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`).
+- Status row: 13px. The title on the left (medium, `#6e6e73` / dark `#a1a1a6`). On the right: "Tap the mic and talk" when idle, "Ready" when done (both muted), or while listening a pulsing 8px `#ff3b30` dot and a tabular clock "m:ss" in `#d70015` / dark `#ff453a`, medium.
+- Transcript box: 12px under the status, min-height 96px, radius 16px, padding 16px, bg `#f5f5f7` / dark `#2c2c2e`, text 18px, line-height 1.5, tracking -0.01em. Empty it shows "What should I remember?" in `#86868b` / dark `#8e8e93`. Words are inline-blocks with a 0.28em right margin; a word still being guessed is `#8e8e93`, a confirmed one `#1d1d1f` / dark `#f5f5f7` (colour fades over 0.3s). While listening a 2px by 1em blinking cursor (`#0071e3`, dark `#0a84ff`) follows the last word.
+- Control row: 16px under the box, 12px gap. Mic button 48px round, bg `#1d1d1f` white icon (dark bg `#f5f5f7`, icon `#1d1d1f`); while listening bg `#ff3b30` with a white 16px rounded-square stop glyph and a pulse ring behind it. The mic glyph is a 20px outline microphone (2 stroke). Then 32 bars filling the remaining width, 48px tall, 3px gaps, fully rounded, minimum height 3px, colour `#d2d2d7` / dark `#48484a` at rest and `#1d1d1f` / dark `#f5f5f7` while listening. After a dictation finishes a Save pill appears on the right (40px tall, 16px padding, 14px medium, bg `#0071e3`, white text).
+
+## Motion
+
+- Timeline when the mic is pressed: starting at 500ms, each word arrives `230 + pause` ms after the previous one; 520ms after arriving it is confirmed (turns dark); a corrected word swaps to its fix 900ms after arriving; 1500ms after the last word arrives the dictation ends by itself.
+- Word arrival: `opacity 0, y 6, blur 4px` to rest over 0.28s. A correction replaces the word in place (the old one exits to `y 10`, blur, the new one enters from `y -10`) with a `#0071e3` 15% (dark `#0a84ff` 30%) wash behind it that fades out over 0.9s after 0.3s.
+- Bars: a new level is pushed every frame (the row scrolls one place); level = `0.35 + 0.55 * |sin(phase * .35)| * (0.6 + rand * 0.4)` times `(0.5 + rand * 0.7)`, clamped to 0.08 to 1, phase += .18 per frame. Heights spring (stiffness 500, damping 30). When not listening all bars return to 8%. The bars update in their own component so the transcript does not re-render at frame rate.
+- Dot and cursor blink every 1s; the button pulse ring scales 1 to 1.5 and fades .35 to 0 every 1.3s; the mic/stop icons swap with a scale pop; the button scales to .92 while pressed; Save grows in from width 0.
+- Reduced motion: the bars stay flat, the dot and cursor are solid, no pulse ring or press scale, words fade in with no blur or slide; the clock still runs and every state is reachable.
+
+## Interaction and states
+
+- Idle -> listening (mic pressed) -> done. Pressing the mic while listening stops at once and fills in the whole text with all corrections applied. Pressing it when done starts a fresh dictation. Save calls `onSave` with the final text and returns to idle.
+
+## Autoplay demo
+
+Only while the card is on screen, the tab is visible and motion is not reduced: 1.2s after idle start listening, let the script finish, rest 3.6s on "Ready", return to idle and repeat. A pointer or key press inside the card stops it for good.
+
+## Accessibility
+
+- The mic button is a real button labelled "Start dictation" / "Stop dictation". The transcript is a labelled group (not a live region, so words are not read one by one); a separate `sr-only` polite `role="status"` region says "Listening" and then "Dictation ready: <full text>". Dot, clock, bars, flash and cursor are `aria-hidden`.
+- Buttons have a 2px focus outline at 2px offset (`#0071e3`, dark `#0a84ff`).
+- Every timer, interval and frame is cleared on unmount.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Starting to listen plays `on` at 50% (a tiny noise click then a short sine glide rising from 600 to 900 Hz). When listening stops, whether you press stop or the dictation finishes by itself, `off` plays at 50% (the same click with a glide falling from 760 to 480 Hz). The level bars, the words, corrections and Save are silent.
+- The autoplay loop plays the same two sounds at the same moments through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
+## Acceptance checklist
+
+- [ ] Pressing the mic shows the red dot, the clock and bars that move; the words arrive faint then firm up.
+- [ ] "for" becomes "4" and "pm" becomes "PM" with a blue flash, in place.
+- [ ] The dictation ends by itself with the status "Ready", flat bars and a Save button.
+- [ ] Stopping early completes the text with corrections applied.
+- [ ] Save calls `onSave` and returns the card to its start.
+- [ ] No microphone permission is ever requested.
+- [ ] Autoplay loops and stops for good on touch; it never runs under reduced motion.
+- [ ] Reduced motion keeps bars flat and fades words in.
+- [ ] Dark mode uses the dark card, `#2c2c2e` transcript box and light bars.
+- [ ] It fits a 320px container.
