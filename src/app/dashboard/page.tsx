@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/env";
-import { getUserEntitlements } from "@/lib/entitlements";
+import { getApiTokenInfo, getUserEntitlements } from "@/lib/entitlements";
 import { blocksManifest } from "@/lib/catalog/blocks-manifest";
 import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { OverviewView } from "@/components/dashboard/overview-view";
@@ -29,9 +29,10 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
     redirect("/login?next=/dashboard");
   }
 
-  const { subscription, orders } = await getUserEntitlements(user.id);
+  const [{ subscription, orders }, tokenInfo] = await Promise.all([getUserEntitlements(user.id), getApiTokenInfo(user.id)]);
   const plan = summarisePlan(subscription, orders);
   const isPremium = plan.hasAccess;
+  const token = { exists: !!tokenInfo, used: !!tokenInfo?.last_used_at };
 
   const freeBlocks = blocksManifest.filter((b) => !b.premium).length;
   const counts = {
@@ -52,6 +53,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Pr
       plan={plan}
       counts={counts}
       activating={checkout === "success" && !isPremium}
+      justUnlocked={checkout === "success" && isPremium}
+      token={token}
       contact={legalConfig.contactEmail}
     />
   );

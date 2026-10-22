@@ -9,7 +9,8 @@
 
 import { cache } from "react";
 import { getCachedUser } from "@/lib/supabase/server";
-import { canAccessComponent, hasPremiumAccess } from "@/lib/entitlements";
+import { canAccessComponent, getUserEntitlements, hasPremiumAccess } from "@/lib/entitlements";
+import { summarisePlan, type PlanKind } from "@/lib/plan";
 import { isSupabaseConfigured } from "@/lib/env";
 
 /** The signed-in user for this request, or null (never throws: auth outages fail closed). */
@@ -30,6 +31,22 @@ export const sessionHasPro = cache(async (): Promise<boolean> => {
     return await hasPremiumAccess(user.id);
   } catch {
     return false;
+  }
+});
+
+/**
+ * Which plan unlocks Pro for this session: "yearly" (Pro), "lifetime" (All-Access) or "free". Only
+ * shapes what pages offer (a Pro member isn't shown "Get Pro"); checkout checks again on the server.
+ */
+export const sessionPlanKind = cache(async (): Promise<PlanKind> => {
+  const user = await getSessionUser();
+  if (!user) return "free";
+  try {
+    const { subscription, orders } = await getUserEntitlements(user.id);
+    const plan = summarisePlan(subscription, orders);
+    return plan.hasAccess ? plan.kind : "free";
+  } catch {
+    return "free";
   }
 });
 

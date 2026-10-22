@@ -120,7 +120,7 @@ export function Sidebar({ user }: SidebarProps) {
               <span
                 className={cn(
                   "shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold leading-none",
-                  user.paid ? "bg-action/10 text-link" : "bg-muted text-muted-foreground",
+                  user.paid ? "bg-[#34c759]/16 text-[#248a3d] dark:text-[#30d158]" : "bg-muted text-muted-foreground",
                 )}
               >
                 {user.plan}

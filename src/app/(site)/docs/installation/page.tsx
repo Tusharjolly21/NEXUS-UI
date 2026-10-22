@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ProNote } from "@/components/pro/pro-access";
 import Link from "next/link";
 import {
   DocFooterNav,
@@ -210,6 +211,13 @@ export function cn(...inputs: ClassValue[]) {
             supplied as an Authorization header. The installation panel on each premium item
             provides that configuration.
           </p>
+          <ProNote>
+            You have Pro.{" "}
+            <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
+              Create your API token
+            </Link>{" "}
+            on the dashboard first.
+          </ProNote>
         </DocSection>
 
         <DocSection title="6. Start the dev server">

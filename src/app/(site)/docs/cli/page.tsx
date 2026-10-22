@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ProNote } from "@/components/pro/pro-access";
 import Link from "next/link";
 import {
   DocFooterNav,
@@ -119,6 +120,13 @@ npx shadcn@latest add @nexus-labs/pricing-section`}</DocPre>
           Premium components and blocks use the same registry endpoint with the API key from your
           Nexus UI dashboard:
         </p>
+        <ProNote className="mt-3">
+          You have Pro, so your key is ready to make.{" "}
+          <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
+            Create your API token
+          </Link>
+          , then paste it where the config below says to.
+        </ProNote>
         <DocPre>{`{
   "$schema": "https://ui.shadcn.com/schema.json",
   "style": "default",

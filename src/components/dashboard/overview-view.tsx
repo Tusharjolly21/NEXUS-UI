@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Boxes, LayoutTemplate, Receipt, Terminal } from "lucide-react";
+import { ArrowUpRight, Boxes, Check, LayoutTemplate, LockOpen, Receipt, Sparkles, Terminal } from "lucide-react";
 import { Card, DashboardPage, Notice, PageHeader, StatusPill } from "@/components/dashboard/ui";
 import { PlanActivating } from "@/components/dashboard/plan-activating";
 import { pillClassName } from "@/components/site/pill-link";
@@ -19,6 +19,8 @@ export function OverviewView({
   plan,
   counts,
   activating,
+  justUnlocked,
+  token,
   contact,
 }: {
   firstName: string;
@@ -26,6 +28,10 @@ export function OverviewView({
   counts: OverviewCounts;
   /** True right after checkout, until the webhook has unlocked the plan. */
   activating: boolean;
+  /** True right after checkout once the plan is active: shows the unlocked welcome. */
+  justUnlocked: boolean;
+  /** Whether the API token exists and whether the CLI has used it. */
+  token: { exists: boolean; used: boolean };
   contact: string;
 }) {
   const stats = [
@@ -65,6 +71,46 @@ export function OverviewView({
     },
   ];
 
+  const visibleLinks = plan.hasAccess ? links.filter((l) => l.href !== "/dashboard/api-key") : links;
+
+  // What a Pro member can do, in the order that gets them value fastest. The first two know whether
+  // they're done (the token exists; the CLI has used it); the rest are things to try.
+  const steps = [
+    {
+      key: "token",
+      title: "Create your API token",
+      body: "One token lets the shadcn CLI add Pro components and premium blocks to any project.",
+      href: "/dashboard/api-key",
+      cta: token.exists ? "View token" : "Create token",
+      done: token.exists,
+    },
+    {
+      key: "install",
+      title: "Install your first Pro component",
+      body: "Open a Pro component and run its one-line install. This turns green once the CLI has used your token.",
+      href: "/components?access=pro",
+      cta: "Pick a component",
+      done: token.used,
+    },
+    {
+      key: "prompt",
+      title: "Copy a build prompt",
+      body: "Every Pro component has the exact brief to rebuild it with Claude, Cursor or v0.",
+      href: "/components?access=pro",
+      cta: "Try one",
+      done: null,
+    },
+    {
+      key: "template",
+      title: "Start from a template",
+      body: "Open any template and use Download source to get the whole landing page.",
+      href: "/templates",
+      cta: "Browse templates",
+      done: null,
+    },
+  ] as const;
+  const nextKey = steps.find((s) => s.done === false)?.key ?? null;
+
   return (
     <DashboardPage>
       <PageHeader
@@ -73,10 +119,20 @@ export function OverviewView({
       />
 
       {activating ? <PlanActivating contact={contact} /> : null}
+      {justUnlocked ? (
+        <div className="mb-5">
+          <Notice tone="success">Payment received. Pro is unlocked, and everything below is yours. Start with the checklist.</Notice>
+        </div>
+      ) : null}
 
       <Card className="mb-5 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
+            {plan.hasAccess ? (
+              <span aria-hidden className="grid size-9 place-items-center rounded-full bg-[#34c759]/16 text-[#248a3d] dark:text-[#30d158]">
+                <LockOpen className="size-[18px]" strokeWidth={2.2} />
+              </span>
+            ) : null}
             <h2 className="text-[22px] font-semibold tracking-[-0.02em] text-foreground">{plan.label}</h2>
             <StatusPill status={plan.badge.label} label={plan.badge.label} tone={plan.badge.tone} />
           </div>
@@ -101,23 +157,72 @@ export function OverviewView({
       <ul className="grid gap-4 sm:grid-cols-3">
         {stats.map((s) => {
           const pct = s.total ? Math.round((s.yours / s.total) * 100) : 0;
+          const all = s.total > 0 && s.yours === s.total;
           return (
-            <Card as="li" key={s.label} className="p-6">
+            <Card as="li" key={s.label} className="relative p-6">
               <p className="text-[40px] font-bold leading-none tracking-[-0.04em] text-foreground">
                 {s.yours}
                 {s.yours !== s.total ? <span className="text-[20px] font-semibold text-muted-foreground"> of {s.total}</span> : null}
               </p>
+              {all ? (
+                <span className="absolute right-5 top-5 inline-flex items-center gap-1 rounded-full bg-[#34c759]/16 px-2 py-0.5 text-[11.5px] font-semibold text-[#248a3d] dark:text-[#30d158]">
+                  <Check className="size-3" strokeWidth={3} aria-hidden />
+                  All unlocked
+                </span>
+              ) : null}
               <p className="mt-2 text-[14.5px] text-body">{s.label} you can use</p>
               <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-muted" role="presentation">
-                <div className="h-full rounded-full bg-action" style={{ width: `${pct}%` }} />
+                <div className={cn("h-full rounded-full", all ? "bg-[#34c759]" : "bg-action")} style={{ width: `${pct}%` }} />
               </div>
             </Card>
           );
         })}
       </ul>
 
+      {plan.hasAccess ? (
+        <Card className="mt-5">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="size-[18px] text-[#248a3d] dark:text-[#30d158]" aria-hidden />
+            <h2 className="text-[19px] font-semibold tracking-[-0.02em] text-foreground">What to do with Pro</h2>
+          </div>
+          <ol className="mt-4 divide-y divide-border">
+            {steps.map((step, i) => (
+              <li key={step.key} className="flex items-start gap-4 py-4 first:pt-1 last:pb-1">
+                <span
+                  aria-hidden
+                  className={cn(
+                    "mt-0.5 grid size-7 shrink-0 place-items-center rounded-full text-[13px] font-semibold",
+                    step.done ? "bg-[#34c759] text-white" : step.key === nextKey ? "bg-action text-white" : "bg-muted text-muted-foreground",
+                  )}
+                >
+                  {step.done ? <Check className="size-4" strokeWidth={3} /> : i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="flex flex-wrap items-center gap-2 text-[16px] font-semibold text-foreground">
+                    {step.title}
+                    {step.done ? (
+                      <span className="rounded-full bg-[#34c759]/16 px-2 py-0.5 text-[11.5px] font-semibold text-[#248a3d] dark:text-[#30d158]">Done</span>
+                    ) : step.key === nextKey ? (
+                      <span className="rounded-full bg-action/10 px-2 py-0.5 text-[11.5px] font-semibold text-link">Next</span>
+                    ) : null}
+                  </p>
+                  <p className="mt-1 text-[14.5px] leading-relaxed text-muted-foreground">{step.body}</p>
+                </div>
+                <Link
+                  href={step.href}
+                  className="mt-0.5 inline-flex shrink-0 items-center gap-1 text-[14px] font-medium text-link hover:underline hover:underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                >
+                  {step.cta}
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </Card>
+      ) : null}
+
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        {links.map(({ href, icon: Icon, title, body }) => (
+        {visibleLinks.map(({ href, icon: Icon, title, body }) => (
           <Link
             key={href}
             href={href}
