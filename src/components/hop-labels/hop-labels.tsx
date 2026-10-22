@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion } from "framer-motion";
 
 export interface HopFieldProps {
@@ -30,6 +31,7 @@ export interface HopLabelsProps {
 export function HopField({ label, type = "text", validate, errorMessage = "That doesn't look like an email.", accent = "#0071e3", demo }: HopFieldProps) {
   const id = useId();
   const [v, setV] = useState("");
+  useTypedText(v);
   const [focus, setFocus] = useState(false);
   const [lw, setLw] = useState(0);
   const lab = useRef<HTMLSpanElement>(null);

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 
 export type SplitSignupValues = { email: string; password: string };
@@ -123,6 +124,8 @@ export function SplitSignup({
   const id = React.useId();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  useTypedText(email);
+  useTypedText(password);
   const [show, setShow] = React.useState(false);
   const [state, setState] = React.useState<"idle" | "pending" | "done">("idle");
   const [error, setError] = React.useState<string | null>(null);

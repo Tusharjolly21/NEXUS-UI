@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -94,6 +95,7 @@ export function SuggestPassword({ email = "maya@orbitly.com", autoplay = false, 
   const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [pw, setPw] = useState("");
+  useTypedText(pw, enableSound);
   const [shown, setShown] = useState("");
   const [suggested, setSuggested] = useState("");
   const [using, setUsing] = useState(false);

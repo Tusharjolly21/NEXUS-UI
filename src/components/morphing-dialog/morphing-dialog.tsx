@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -80,6 +81,7 @@ export function MorphingDialog({
   const uid = useId().replace(/:/g, "");
   const [open, setOpen] = useState<Kind | null>(null);
   const [typed, setTyped] = useState("");
+  useTypedText(typed, enableSound);
   const [gone, setGone] = useState(false);
   const [copied, setCopied] = useState(false);
   const [viaAuto, setViaAuto] = useState(false);

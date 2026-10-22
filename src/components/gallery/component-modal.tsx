@@ -10,7 +10,8 @@ import { buildSnippet, ControlRow, initialValues, Segmented } from "@/components
 import type { Playground, PlaygroundValues } from "@/lib/catalog/playgrounds";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { cn } from "@/lib/utils";
-import { SoundSwitch } from "@/components/site/sound-switch";
+import { SoundSwitch, TypingSoundSwitch } from "@/components/site/sound-switch";
+import { TYPING_NOTE } from "@/lib/catalog/component-sounds";
 import { ProBadge, useCopyBuildPrompt, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { FitPreview } from "./fit-preview";
 import { INTERACTION_FILTERS, TINT_CLASSES, type GalleryItem } from "./types";
@@ -518,6 +519,12 @@ function Inspector({ item }: { item: GalleryItem }) {
             <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-muted/60 p-4">
               <SoundSwitch variant="pill" />
               <p className="min-w-0 flex-1 basis-48 text-[13px] leading-snug text-muted-foreground">{item.sound}</p>
+            </div>
+          ) : null}
+          {item.typing ? (
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-muted/60 p-4">
+              <TypingSoundSwitch />
+              <p className="min-w-0 flex-1 basis-48 text-[13px] leading-snug text-muted-foreground">{TYPING_NOTE}</p>
             </div>
           ) : null}
         </div>

@@ -115,7 +115,7 @@ export function GalleryTile({
 
       {item.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute right-4 top-4" /> : null}
 
-      {item.isNew || item.variants || item.sound ? (
+      {item.isNew || item.variants || item.sound || item.typing ? (
         <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-1.5">
           {item.isNew ? (
             <span
@@ -137,7 +137,7 @@ export function GalleryTile({
               {item.variants} variants
             </span>
           ) : null}
-          {item.sound ? (
+          {item.sound || item.typing ? (
             <span
               title="Makes sound. Off until you switch it on."
               className={cn(

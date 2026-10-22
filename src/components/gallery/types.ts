@@ -29,6 +29,8 @@ export type GalleryItem = {
   hasPrompt?: boolean;
   /** What you hear, in one sentence, for components that make interface sound. */
   sound?: string;
+  /** Types text with a key click for every character (has the typing sound switch). */
+  typing?: boolean;
   /** How many designs live on this component's page (the original plus its variants). Only set above 1. */
   variants?: number;
   /**

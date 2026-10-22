@@ -324,8 +324,7 @@ const playgrounds: BlockPlaygrounds = {
   "text-generate": {
     Component: TextGenerateStage,
     // The preview starts silent: the visitor turns the key sound on with the speaker button.
-    // The sound file is the local one the block ships with, never a remote URL.
-    baseProps: { muted: true, soundSrc: "/sounds/sound.ogg" },
+    baseProps: { muted: true },
     props: [
       {
         name: "text",
@@ -381,15 +380,8 @@ const playgrounds: BlockPlaygrounds = {
         name: "muted",
         type: "boolean (initial state)",
         description:
-          "Start with the key sound off. Read once on mount; after that the speaker button toggles it. The preview here always starts muted.",
+          "Silences this component's key clicks. Without it the sound follows the typing sound switch (the speaker button here turns it on or off for every typing component). The preview here starts with sound off.",
         defaultValue: "false",
-      },
-      {
-        name: "soundSrc",
-        type: "string (audio file path)",
-        description:
-          "Audio sprite with the key clicks. Ships as /sounds/sound.ogg; put the file in public/sounds or point this at your own.",
-        defaultValue: '"/sounds/sound.ogg"',
       },
       CLASS_NAME,
     ],

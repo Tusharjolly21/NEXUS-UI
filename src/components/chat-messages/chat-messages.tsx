@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/ui-sounds";
@@ -107,6 +108,8 @@ export function ChatMessages({
   const [typing, setTyping] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [demoDraft, setDemoDraft] = useState("");
+  useTypedText(demoDraft, enableSound);
+  useTypedText(draft, enableSound);
   const scroller = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
   const touched = useRef(false);

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -37,6 +38,7 @@ export function PasswordStrength({ accent = "#0071e3", onChange, autoplay = fals
   const id = useId();
   const play = useSound(enableSound);
   const [pw, setPw] = useState("");
+  useTypedText(pw, enableSound);
   const [show, setShow] = useState(false);
   const touched = useRef(false);
   const reachedTop = useRef(false);

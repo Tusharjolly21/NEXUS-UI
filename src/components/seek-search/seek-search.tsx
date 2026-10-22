@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -44,6 +45,7 @@ export function SeekSearch({ suggestions = RECENT, placeholder = "Search files",
   const play = useSound(enableSound);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
+  useTypedText(q, enableSound);
   const input = useRef<HTMLInputElement>(null);
   const touched = useRef(false);
   const term = q.trim().slice(0, maxLength);

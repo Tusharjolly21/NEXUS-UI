@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { motion, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 import { Divider, FloatField, SocialRow, SubmitMorph, cardClass, focusRing, playScript, typeSteps, type SubmitState } from "./form-parts";
@@ -57,6 +58,8 @@ export function LoginForm({
   const play = useSound(enableSound);
   const id = React.useId().replace(/:/g, "");
   const [values, setValues] = React.useState<LoginFormValues>({ email: defaultValues?.email ?? "", password: defaultValues?.password ?? "" });
+  useTypedText(values.email, enableSound);
+  useTypedText(values.password, enableSound);
   const [errors, setErrors] = React.useState<Partial<Record<keyof LoginFormValues, string>>>({});
   const [shakes, setShakes] = React.useState<Partial<Record<keyof LoginFormValues, number>>>({});
   const [formError, setFormError] = React.useState<string | null>(null);

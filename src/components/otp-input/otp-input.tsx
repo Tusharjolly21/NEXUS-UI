@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -34,6 +35,7 @@ export function OtpInput({
   const uid = useId();
   const play = useSound(enableSound);
   const [code, setCode] = useState("");
+  useTypedText(code, enableSound);
   const [status, setStatus] = useState<Status>("idle");
   const [focused, setFocused] = useState(false);
   const [showError, setShowError] = useState(false);

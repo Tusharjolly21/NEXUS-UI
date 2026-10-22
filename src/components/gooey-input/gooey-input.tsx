@@ -7,6 +7,7 @@
  */
 
 import * as React from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/ui-sounds";
@@ -114,6 +115,7 @@ export function GooeyInput({
 
   const isControlled = valueProp !== undefined;
   const searchText = (isControlled ? (valueProp ?? "") : uncontrolledValue) ?? "";
+  useTypedText(searchText, enableSound);
 
   const W = expandedOffset + expandedWidth;
   const collapsedLeft = Math.max(0, (W - collapsedWidth) / 2);

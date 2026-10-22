@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import {
   AnimatePresence,
   LayoutGroup,
@@ -89,6 +90,7 @@ export function AiCommandBar({
   const still = useReducedMotion() === true;
   const [mode, setMode] = useState<AiCommandMode>(defaultMode);
   const [value, setValue] = useState("");
+  useTypedText(value, enableSound);
   const [phase, setPhase] = useState<Phase>("idle");
   const [query, setQuery] = useState("");
   const [list, setList] = useState<string[]>([]);

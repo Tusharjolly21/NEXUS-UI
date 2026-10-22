@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import {
   AnimatePresence,
   animate,
@@ -117,6 +118,8 @@ export function GlassLogin({
   const still = useReducedMotion() === true;
   const id = React.useId();
   const [values, setValues] = React.useState<GlassLoginValues>({ email: "", password: "", remember: true });
+  useTypedText(values.email);
+  useTypedText(values.password);
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [message, setMessage] = React.useState<string | null>(null);
   const [reveal, setReveal] = React.useState(false);

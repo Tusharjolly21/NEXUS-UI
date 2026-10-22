@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import {
   AnimatePresence,
   animate,
@@ -129,6 +130,7 @@ export function CursorCrowdHero({ words = DEFAULT_WORDS, autoplay = false, onAct
 
   const [inside, setInside] = useState(false);
   const [word, setWord] = useState<string | null>(null);
+  useTypedText(word ?? "");
   const [selRun, setSel] = useState(0); // 0..1 selection sweep across the word
   const [typingRun, setTyping] = useState(false);
   const [pressedRun, setPressed] = useState<number | null>(null);

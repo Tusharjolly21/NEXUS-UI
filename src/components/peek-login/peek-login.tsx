@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
 
 export interface PeekLoginValues {
@@ -51,6 +52,8 @@ export function PeekLogin({ accent = "#0071e3", onSubmit, autoplay = false }: Pe
   const [field, setField] = useState<"none" | "email" | "pw">("none");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
+  useTypedText(email);
+  useTypedText(pw);
   const [show, setShow] = useState(false);
   const [blink, setBlink] = useState(false);
   const [status, setStatus] = useState<"idle" | "busy" | "done">("idle");

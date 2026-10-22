@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/ui-sounds";
@@ -66,6 +67,7 @@ export function AskNexusInput({
   const dark = useDark();
   const still = useReducedMotion() === true;
   const [value, setValue] = useState(defaultValue);
+  useTypedText(value, enableSound);
   const [phase, setPhase] = useState<Phase>("idle");
   const [snapshot, setSnapshot] = useState("");
   const [font, setFont] = useState("");

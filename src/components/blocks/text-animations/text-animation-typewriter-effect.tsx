@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useTypedText } from "@/lib/typing-sound";
 import { cn } from "@/lib/utils";
 
 export type TextAnimationTypewriterEffectProps = {
@@ -14,6 +15,8 @@ export type TextAnimationTypewriterEffectProps = {
   /** The caret. The default "|" draws a thin rounded caret in the accent blue; any other string renders as text. */
   cursor?: string;
   className?: string;
+  /** A key click for every character typed and deleted. Follows the typing switch; pass false to silence this one. */
+  enableSound?: boolean;
 };
 
 export function TextAnimationTypewriterEffect({
@@ -25,6 +28,7 @@ export function TextAnimationTypewriterEffect({
   showCursor = true,
   cursor = "|",
   className,
+  enableSound = true,
 }: TextAnimationTypewriterEffectProps) {
   const entries = React.useMemo(() => {
     const list = Array.isArray(texts) ? texts : [texts];
@@ -38,6 +42,7 @@ export function TextAnimationTypewriterEffect({
   const currentText = entries[textIndex] ?? "";
   // reduced motion: no typing, the first line simply stands
   const renderedText = reduceMotion ? (entries[0] ?? "") : currentText.slice(0, charIndex);
+  useTypedText(reduceMotion ? "" : renderedText, enableSound);
   // the caret holds solid while keys are moving and only blinks when the line is at rest
   const busy = ready && !reduceMotion && (deleting || charIndex < currentText.length);
 

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -23,6 +24,7 @@ export function FeedbackPill({ label = "Feedback", placeholder = "What would mak
   const id = useId();
   const [stage, setStage] = useState<Stage>("closed");
   const [text, setText] = useState("");
+  useTypedText(text, enableSound);
   const touched = useRef(false);
   const areaRef = useRef<HTMLTextAreaElement>(null);
   const timers = useRef<number[]>([]);

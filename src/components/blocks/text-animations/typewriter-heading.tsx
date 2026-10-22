@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import { useTypedText } from "@/lib/typing-sound";
 import { cn } from "@/lib/utils";
 
 export type TypewriterHeadingProps = {
@@ -13,6 +14,8 @@ export type TypewriterHeadingProps = {
   cursorColor?: string;
   loop?: boolean;
   showCursor?: boolean;
+  /** A key click for every character typed. Follows the typing switch; pass false to silence this one. */
+  enableSound?: boolean;
 };
 
 const SOFT = { type: "spring" as const, stiffness: 240, damping: 30 };
@@ -26,6 +29,7 @@ export function TypewriterHeading({
   cursorColor,
   loop = false,
   showCursor = true,
+  enableSound = true,
 }: TypewriterHeadingProps) {
   const [index, setIndex] = React.useState(0);
   const [started, setStarted] = React.useState(false);
@@ -41,6 +45,7 @@ export function TypewriterHeading({
   }
 
   const visibleText = reduceMotion ? text : text.slice(0, index);
+  useTypedText(reduceMotion ? "" : visibleText, enableSound);
   const done = reduceMotion || index >= text.length;
   const showCaret = showCursor && (started || !!reduceMotion);
 

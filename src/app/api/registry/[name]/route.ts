@@ -36,7 +36,7 @@ type Params = { params: Promise<{ name: string }> };
 export async function GET(_req: Request, { params }: Params) {
   const { name } = await params;
   // Free, non-catalog registry items (a font setup, the UI sounds library).
-  const isPublicRegistryAsset = name === "nexus-font" || name === "ui-sounds";
+  const isPublicRegistryAsset = name === "nexus-font" || name === "ui-sounds" || name === "typing-sound";
   // The Pro sound pack: not a catalog component, but always Pro (a plan or All-Access).
   const isProSoundPack = name === "ui-sounds-pro" || name === "ui-sounds-mac" || name === "ui-sounds-recorded";
 

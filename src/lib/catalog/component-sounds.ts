@@ -15,7 +15,7 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "code-block": "Chimes softly when you press Copy.",
   "hold-to-record": "Clicks on when recording starts, off when you keep the note, hushes when you cancel and taps on play, pause and delete. The Voice Dictation variant clicks on when listening starts and off when it stops, whether you press stop or it finishes on its own; the level bars make no sound.",
   "otp-input": "Ticks quietly for each digit, chimes when the code verifies and bumps on a wrong code.",
-  "password-strength": "Stays quiet while you type, then gives one soft chime the first time the password reaches Strong.",
+  "password-strength": "Clicks for every character it types (and you type), then gives one soft chime the first time the password reaches Strong.",
   "signup-form": "Taps when you press submit, chimes on success and bumps on an error, with a very quiet tick when a password rule turns green.",
   "ask-nexus-input": "Whooshes when you send a question.",
   "forge-ai-command-bar": "Whooshes on send, ticks when you switch mode and taps when you pick a suggestion.",
@@ -82,15 +82,48 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "empty-projects": "Taps when you pick a template or start over and lands the new project card with a soft drop; the fan-out on hover is silent.",
   "no-results": "Pops when the missing letter slides into the search box, ticks softly as the filter chips peel away (every other chip) and taps on Reset; typing and hover are silent.",
   "empty-chart": "Taps when you connect a source and plays a soft finished chime when the numbers arrive and the line bends into place; hovering the chart is silent.",
-  "empty-team": "Drops softly as each avatar lands in its seat, taps on Send invites and gives a quiet error bump when an email is invalid or already added; typing is silent.",
+  "empty-team": "Drops softly as each avatar lands in its seat, taps on Send invites and gives a quiet error bump when an email is invalid or already added; the invite address types with a key click.",
   "streaming-answer": "Ticks quietly as the thinking steps finish and plays one soft completion chord when the answer has streamed in, with nothing for individual words; autoplay makes the same sounds once the visitor has used the page.",
   "diff-review": "Chimes softly when you press Accept all, switches off with a quiet click on Reject and taps when you take a single change; autoplay makes the accept sound once the visitor has used the page.",
   "agent-run": "Ticks quietly after every other step, chimes softly when the run finishes and switches off with a click when you press Stop; autoplay makes the tick and finish sounds once the visitor has used the page.",
-  "ghost-autocomplete": "Gives one quiet tick when Tab accepts a suggestion and stays silent while you type; autoplay makes the same tick once the visitor has used the page.",
+  "ghost-autocomplete": "Gives one quiet tick when Tab accepts a suggestion and clicks for each character the draft types; autoplay makes the same sounds once the visitor has used the page.",
   "morphing-dialog": "Lifts when a dialog opens out of its button, drops when it closes by Done, Cancel, the backdrop or Escape, and taps when you confirm Delete forever.",
   "glow-button": "The Magnetic Button variant taps softly when you press it.",
   "orbital-loader": "The Step Loader variant ticks as each step finishes (every step, or every second one when the run is fast), plays a done chime when the result appears, and makes a soft off sound when you press Cancel.",
 };
+
+/**
+ * The components that type text, by themselves in their demo or as you type. Each plays a key click for every
+ * character that lands (and a Backspace for every one deleted) from the shared typing sound in
+ * `@/lib/typing-sound`. It follows its own on/off switch and the site-wide sound switch.
+ */
+export const TYPING_COMPONENTS: ReadonlySet<string> = new Set([
+  "typewriter-effect",
+  "terminal",
+  "chat-messages",
+  "ask-nexus-input",
+  "forge-ai-command-bar",
+  "seek-search",
+  "gooey-search-input",
+  "ghost-autocomplete",
+  "peek-login",
+  "signup-form",
+  "glass-login-stack",
+  "password-strength",
+  "phone-input",
+  "otp-input",
+  "feedback-pill",
+  "sagging-field",
+  "hop-labels",
+  "empty-team",
+  "morphing-dialog",
+]);
+
+export const TYPING_NOTE = "Types with a key click for every character, in sync with the text. The click stays off until you switch it on.";
+
+export function typesFor(slug: string): boolean {
+  return TYPING_COMPONENTS.has(slug);
+}
 
 export function soundFor(slug: string): string | undefined {
   return COMPONENT_SOUNDS[slug];
