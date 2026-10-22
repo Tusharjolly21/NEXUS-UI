@@ -329,13 +329,14 @@
       "name": "orbital-loader",
       "type": "registry:component",
       "title": "Orbital Loader",
-      "description": "A loader with a comet that laps the ring, speeding up and easing off each lap, its tail stretching with the speed and shrinking as it slows. Give it progress and the arc fills behind the comet; at 100% the ring pops, turns green and draws a tick.",
+      "description": "A loader with a comet that laps the ring, speeding up and easing off each lap, its tail stretching with the speed and shrinking as it slows. Give it progress and the arc fills behind the comet; at 100% the ring pops, turns green and draws a tick. Also includes Step Loader: For long jobs: the current step sits centred, finished ones roll up with a tick, a ring shows progress, Cancel is always there, and it ends on the result.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -344,6 +345,10 @@
         },
         {
           "path": "next-ui/orbital-loader/orbital-loader.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/orbital-loader/step-loader.tsx",
           "type": "registry:component"
         }
       ]
@@ -383,14 +388,15 @@
       "name": "glow-button",
       "type": "registry:component",
       "title": "Glow Button",
-      "description": "A call-to-action link with a coloured light that lives on its rim. The brightest arc turns to face the pointer and the glow behind the button leans the same way, the button drifts a few pixels toward the cursor and the arrow springs ahead on hover.",
+      "description": "A call-to-action link with a coloured light that lives on its rim. The brightest arc turns to face the pointer and the glow behind the button leans the same way, the button drifts a few pixels toward the cursor and the arrow springs ahead on hover. Also includes Magnetic Button: Leans toward your pointer with the label leaning further, ink floods in from where you enter and drains toward where you leave, and it squashes on press.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -400,6 +406,10 @@
         {
           "path": "next-ui/glow-button/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/glow-button/magnetic-button.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -856,13 +866,14 @@
       "name": "glowing-effect-cards",
       "type": "registry:component",
       "title": "Glowing Effect Cards",
-      "description": "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width).",
+      "description": "Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width). Also includes Lit Border: A wrapper for any element: <LitBorder> draws a thin border whose light band turns to face the pointer and brightens as it gets closer. Put several inside <LightGroup> and they share one light, shown here on pricing cards and a search field.",
       "dependencies": [
         "framer-motion",
         "react"
       ],
       "registryDependencies": [
-        "http://127.0.0.1:3000/api/registry/nexus-font"
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
       ],
       "files": [
         {
@@ -880,6 +891,10 @@
         {
           "path": "next-ui/glowing-effect-cards/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/glowing-effect-cards/lit-border.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -1310,7 +1325,7 @@
       "name": "hover-highlight-text",
       "type": "registry:component",
       "title": "Hover Highlight Text",
-      "description": "A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail.",
+      "description": "A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail. Also includes Marker Annotations: Hand-drawn marks play over your copy in reading order as it scrolls in: a highlighter pass across line breaks, a scribbled underline, a loose circle and a strike-through.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1327,6 +1342,10 @@
         {
           "path": "next-ui/hover-highlight-text/index.ts",
           "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/hover-highlight-text/marker-annotations.tsx",
+          "type": "registry:component"
         },
         {
           "path": "next-ui/hover-highlight-text.tsx",
@@ -1511,7 +1530,7 @@
       "name": "link-preview",
       "type": "registry:component",
       "title": "Link Preview",
-      "description": "An inline link that lifts a preview card out of the text on hover or keyboard focus. The card rises with a stretch and settles, leans and slides as the pointer moves along the link, and draws its own cover from the title and site when no image is given.",
+      "description": "An inline link that lifts a preview card out of the text on hover or keyboard focus. The card rises with a stretch and settles, leans and slides as the pointer moves along the link, and draws its own cover from the title and site when no image is given. Also includes Cursor Card: A preview card trails your cursor through a project list, leans into your movement and swaps content row to row without disappearing.",
       "dependencies": [
         "framer-motion",
         "react",
@@ -1523,6 +1542,10 @@
         "utils"
       ],
       "files": [
+        {
+          "path": "next-ui/link-preview/cursor-card.tsx",
+          "type": "registry:component"
+        },
         {
           "path": "next-ui/link-preview/index.ts",
           "type": "registry:lib"

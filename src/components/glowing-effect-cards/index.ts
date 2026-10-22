@@ -5,3 +5,5 @@ export { GlowingCard } from "./GlowingCard";
 export type { GlowingCardsLayoutProps } from "./GlowingCardsLayout";
 export { GlowingCardsLayout, DEFAULT_GLOW_CARDS } from "./GlowingCardsLayout";
 export { GlowingEffectCardsDemo } from "./demo";
+export type { LitBorderProps, LightGroupProps } from "./lit-border";
+export { LitBorder, LightGroup } from "./lit-border";

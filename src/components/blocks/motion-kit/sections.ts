@@ -52,6 +52,19 @@ import { CursorCrowdHero } from "./cursor-crowd-hero";
 import { XrayHero } from "./xray-hero";
 import { CircuitHero } from "./circuit-hero";
 import { FlipDotHero } from "./flip-dot-hero";
+import { TeamClock } from "./team-clock";
+import { StatsOdometer } from "./stats-odometer";
+import { BlogWithContents } from "./blog-with-contents";
+import { WaitlistCta } from "./waitlist-cta";
+import { AuthMorph } from "./auth-morph";
+import { ParallaxSlider } from "./parallax-slider";
+import { CardRail } from "./card-rail";
+import { StickyScrollStory } from "./sticky-scroll-story";
+import { BeamTimeline } from "./beam-timeline";
+import { StackingCards } from "./stacking-cards";
+import { PreviewBlockVariantMkScrollNavbar } from "@/registry/blocks/nexus-essentials-blocks-c";
+import { MorphMenu } from "./morph-menu";
+import { AnnounceBar } from "./announce-bar";
 
 /** Gallery stages take `compact`, not `autoplay` (they always play); the block page passes autoplay. */
 const asSection = (c: ComponentType<{ compact?: boolean }>) => c as unknown as ComponentType<{ autoplay?: boolean }>;
@@ -59,6 +72,20 @@ const asSection = (c: ComponentType<{ compact?: boolean }>) => c as unknown as C
 /** Motion Kit block sections by variant id, as rendered on their block's page. */
 export const MOTION_KIT_SECTIONS: Record<string, ComponentType<{ autoplay?: boolean }>> = {
   "mk-morphing-nav": MorphingNavStage,
+  "mk-team-clock": TeamClock as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-stats-odometer": StatsOdometer as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-blog-with-contents": BlogWithContents as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-waitlist-cta": WaitlistCta as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-auth-morph": AuthMorph as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-parallax-slider": ParallaxSlider as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-card-rail": CardRail as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-sticky-scroll-story": StickyScrollStory as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-beam-timeline": BeamTimeline as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-stacking-cards": StackingCards as unknown as ComponentType<{ autoplay?: boolean }>,
+  // The navbar needs a scrolling frame with a page inside it, so the section is its preview.
+  "mk-scroll-navbar": asSection(PreviewBlockVariantMkScrollNavbar),
+  "mk-morph-menu": MorphMenu as unknown as ComponentType<{ autoplay?: boolean }>,
+  "mk-announce-bar": AnnounceBar as unknown as ComponentType<{ autoplay?: boolean }>,
   "mk-spotlight-hero": SpotlightHero,
   "mk-halftone-planet": HalftonePlanet,
   "mk-parallax-stack-hero": ParallaxStackHero,

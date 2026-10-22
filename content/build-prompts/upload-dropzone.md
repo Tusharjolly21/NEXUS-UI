@@ -84,7 +84,7 @@ Every 2.9s until touched: set dragging on and fly a file glyph into the zone (fr
 
 <!-- Upload Dropzone: Motion Kit variant brief -->
 
-> The Upload Dropzone page now has 3 parts: the original Upload Dropzone (above) plus 2 Motion Kit variants, Avatar Upload and Upload Queue. The original source is on the page; the briefs below rebuild the two variants. Neither variant uploads anywhere: progress is simulated and every callback is optional.
+> The Upload Dropzone page now has 4 parts: the original Upload Dropzone (above) plus 3 Motion Kit variants, Avatar Upload, Upload Queue and Empty Table. The original source is on the page; the briefs below rebuild the variants. None of the variants uploads anywhere: progress is simulated and every callback is optional.
 
 ---
 
@@ -248,3 +248,84 @@ Loop of 14000ms while running: clear at 0, show the overlay with "3 files" at 50
 - Dropping files on the card or choosing them with Upload plays `drop` from `@/lib/ui-sounds` (a short low thump falling in pitch, with a soft landing hiss). Each row you added that finishes its transfer plays `done` when its check appears (four soft triangle notes in a rising major chord, ringing together).
 - The autoplay sample rows play the same sounds: `drop` as they land and `done` as each finishes, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Pausing, resuming, cancelling and dragging over the card are silent.
 - The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
+---
+
+<!-- variant: empty-table -->
+
+# Empty Table
+
+Build an empty table that shows exactly what goes where. A card titled "Customers" ("No data yet") holds a four-column table frame with greyed ghost headings and five dashed ghost rows, under a frosted overlay that says "Bring in your customers" with Upload CSV and Use sample data buttons. Drop a CSV (or take the sample) and the overlay gives way: a scan line reads down the table while each cell fills in reading order out of a blur, the headings turn real and label their detected types, and the row count rolls up to the total.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`), a `cn` class-merge helper, an `IntersectionObserver` and the page visibility API for the demo.
+- File: `components/upload-dropzone/empty-table.tsx`. Named exports `EmptyTable`, `EmptyTableProps`, `EmptyTableData` and the constant `EMPTY_TABLE_SAMPLE`.
+
+## API
+
+`EmptyTableData`: `{ file: string; cols: string[]; kinds: string[]; rows: string[][]; total: number }`.
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `title` | `string` | `"Customers"` | Card heading. |
+| `sample` | `EmptyTableData` | a customers file | Loaded by Use sample data; its `cols` label the ghost header. |
+| `onImport` | `(table) => void` | none | Called with the parsed table after a CSV is dropped or chosen, or the sample is loaded by hand. |
+| `autoplay` | `boolean` | `false` | Drops the sample in, shows it, clears it and repeats until touched. |
+| `enableSound` | `boolean` | `true` | Interface sounds. |
+| `className` | `string` | none | Extra classes on the card. |
+
+Sample: file `customers.csv`, columns Name / Email / Plan / MRR with types Text / Email / Option / Currency, total 248, rows Maya Chen (maya@orbitly.example, Pro, $480), Leo Park (leo@meridian.example, Team, $1,200), Ana Lima (ana@vela.example, Pro, $480), Kai Ito (kai@quadrant.example, Starter, $90), Noor Haddad (noor@meridian.example, Team, $1,200).
+
+## Layout and look
+
+- Card: width 560px, `max-width: 100%`, radius 28px, padding 20px (24px from 640px), white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -30px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`).
+- Header row: title 20px semibold tracking -0.02em; under it a 13px tabular line, "No data yet" or "<count> rows from <file>", in `#6e6e73` / dark `#a1a1a6`. Once there is data a Clear pill (32px, 12.5px medium, bg `#f5f5f7` / dark `#2c2c2e`) sits on the right.
+- Table frame: 16px under the header, radius 16px, `overflow: hidden`, 1px border black 7% / dark white 8%. The grid columns are `1.1fr 1.5fr .95fr .85fr` (with `minmax(0, ...)`); other column counts split evenly.
+- Heading row: bg `#fafafa` / dark white 4%, bottom hairline; cells 12px semibold, padding 12px by 10px. Ghost headings are `#c7c7cc` / dark `#48484a`; real ones `#1d1d1f` / dark `#f5f5f7`. A type badge sits after each real heading (9.5px semibold, radius 5px, bg `#eef5ff` text `#0071e3`; dark bg `#0a84ff` 20% text `#6cb4ff`), hidden below 640px viewport width.
+- Body: fixed 230px tall. Data rows have 13px text, padding 12px by 10px, hairline `black 5%` / dark `white 6%`; email is muted (`#6e6e73` / dark `#a1a1a6`), MRR is tabular. Ghost rows have a dashed bottom border and a rounded 8px bar in each cell (`#f2f2f5` / dark white 7%) of widths 60, 80, 40, 50 percent minus 4 per row index.
+- Overlay (empty state): fills the body, centred column, bg white 70% / dark `#1c1c1e` 70% with a 1.5px backdrop blur; while a file is dragged over it turns `#eef5ff` 85% (dark `#0a2540` 85%). A 44px icon tile (radius 13px, white / dark `#2c2c2e`, ring and soft shadow) with a 20px document glyph; 12px under it the title (15px semibold, "Bring in your customers", or "Drop to import" while dragging); the hint (13px muted, "Drop a CSV here. We'll detect the columns."); then two 32px pills 12px below: Upload CSV (bg `#1d1d1f` white text; dark bg `#f5f5f7` text `#1d1d1f`) and Use sample data (white with a hairline ring; dark `#2c2c2e` with a white 12% ring).
+
+## Motion
+
+- Loading: the ghost rows and overlay fade out (0.15s) and the data rows fade in (`AnimatePresence mode="wait"`). Cell `(row ri, column ci)` goes from `opacity 0, blur 5px, x -4` to rest over 0.3s with delay `0.25 + 0.13 * ri + 0.04 * ci` seconds.
+- Scan line: a 40px band (transparent to `#0071e3` 10% to transparent, dark `#0a84ff` 20%) with a 1px centre line (`#0071e3` 50%, dark `#0a84ff` 60%) sweeps from `top -40px` to `240px` over 1.1s ease-in-out, fading out at the end.
+- Type badges pop in (`y -4, scale .8` to rest) at `1.1 + 0.08 * i` seconds.
+- Count: after a 700ms wait, an ease-out cubic (`1 - (1 - k)^3`) rolls the number from 0 to the total over 900ms, driven by `requestAnimationFrame`; a new load cancels the old roll.
+- Drag over the card: the icon tile lifts 6px and scales 1.08 (spring stiffness 400, damping 18); leaving the card (not moving between its children) puts it back.
+- Reduced motion: no blur, slide, stagger or scan line; cells fade in over 0.15s, the count rolls over 250ms with no wait, the tile does not lift.
+
+## Interaction and states
+
+- Drop a file anywhere on the card: the first file is read in the browser with `File.text()` and parsed as CSV (header plus up to the first 5 rows, 4 columns, quotes handled, type guessed from the first row: Email, Currency, Number, Date or Text). Total is the number of data lines. Files over 2 MB or with fewer than 2 non-empty lines show "That didn't look like a CSV with a header row. Try another." in red (`#d70015`, dark `#ff453a`) in place of the hint.
+- Upload CSV opens a hidden `<input type="file" accept=".csv,text/csv">`; Use sample data loads the sample. Clear returns to the empty state. Nothing is uploaded anywhere.
+
+## Autoplay demo
+
+Only while the card is on screen, the tab is visible and motion is not reduced: at 0.05s clear, at 1s show the drag-over state, at 1.9s drop the sample in, at 7s clear, repeat every 7.4s. A pointer press, key press or drag inside the card stops it for good.
+
+## Accessibility
+
+- With data the frame has `role="table"` (labelled "<title> preview"), the heading row `row` / `columnheader`, the body `rowgroup` / `row` / `cell`. In the empty state the ghost header and rows are `aria-hidden` and the overlay is plain content.
+- A persistent `sr-only` polite `role="status"` region announces "Imported 248 rows from customers.csv" or the read error. The hidden file input is `aria-hidden` and out of the tab order; both buttons are real buttons.
+- Buttons have a 2px focus outline at 2px offset (`#0071e3`, dark `#0a84ff`).
+- The roll-up frame and demo timers are cancelled on unmount.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Pressing Upload CSV or Use sample data plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). When the import finishes, as the row count lands on its total, `done` plays at 50% (four soft triangle notes in a rising major chord, ringing together), for a dropped or chosen file as well as the sample.
+- The autoplay loop plays `done` when its sample import lands, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Dragging, Clear and hover are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
+## Acceptance checklist
+
+- [ ] The empty state shows four ghost headings, five dashed ghost rows and a frosted overlay with two buttons.
+- [ ] Dragging a file over lifts the icon and tints the overlay blue, with "Drop to import".
+- [ ] Dropping a CSV (or Use sample data) sweeps a scan line down and fills the cells in reading order from a blur.
+- [ ] Headings become real and show Email, Currency and similar badges; the count rolls to the total.
+- [ ] Clear returns to the empty state; a bad file shows the red hint.
+- [ ] Nothing is uploaded; the file never leaves the browser.
+- [ ] Autoplay loops and stops for good on touch; it never runs under reduced motion.
+- [ ] Dark mode uses the dark card, tinted overlay and brighter blue badges.
+- [ ] It fits a 360px container with truncating cells.

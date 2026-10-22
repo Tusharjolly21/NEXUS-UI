@@ -69,3 +69,67 @@ Build a set of feature cards with pointer-reactive glowing rims. Each card has a
 - `colors`, `spread`, `intensity`, `blur` and `proximity` visibly change the effect.
 - Autoplay sweeps light across every card until the pointer arrives.
 - Reduced motion snaps the arc without swing or flare.
+
+# Lit Border
+
+Build a wrapper that gives any element a thin border with a band of light that turns to face the pointer and brightens as the pointer gets closer. Put several wrappers inside a shared group and they read as one light moving across a row of cards. It is used here on three pricing cards and a pill-shaped search field. It should feel like a single lamp sweeping past, not like each card reacting on its own.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useMotionTemplate`, `useReducedMotion`), `cn` from `@/lib/utils`.
+- File: `components/glowing-effect-cards/lit-border.tsx`. Named exports `LitBorder`, `LightGroup` and types `LitBorderProps`, `LightGroupProps`. Re-export from the folder's `index.ts`.
+- No sound: it is decorative and makes none.
+
+## API
+
+| Prop | On | Type | Default | Meaning |
+|---|---|---|---|---|
+| `children` | both | `ReactNode` | required | The wrapped element, or the elements sharing the light. |
+| `radius` | `LitBorder` | `number` | `24` | Outer corner radius in px (use 999 for pills). |
+| `width` | `LitBorder` | `number` | `1.5` | Border thickness in px. |
+| `colors` | `LitBorder` | `[string, string, string]` | `["0,113,227", "94,92,230", "48,209,88"]` | RGB triplets for the head, middle and tail of the arc. |
+| `className` | both | `string` | none | Extra classes on the outer frame / wrapper. |
+| `autoplay` | `LightGroup` | `boolean` | `false` | The light circles the group on its own until a real pointer arrives. |
+
+A `LitBorder` inside a `LightGroup` uses the group's pointer. On its own it tracks the pointer over itself.
+
+## Layout and look
+
+- `LitBorder` outer frame: `motion.div`, `position: relative`, `padding = width`, `border-radius = radius`. The frame's own background is the light, so the padding is the visible border.
+- Inner surface: `position: relative`, `height: 100%`, radius `radius - width`, white (dark `#1c1c1e`). The wrapped content goes inside.
+- Light: `conic-gradient(from <angle>deg at 50% 50%, rgba(c1,g) 0deg, rgba(c2,g) 40deg, REST 90deg, REST 270deg, rgba(c3,g) 320deg, rgba(c1,g) 360deg)` where `g` is the glow alpha and `REST` is `rgba(0,0,0,.08)` in light mode and `rgba(255,255,255,.16)` in dark mode (switch with two CSS variables on the frame, `--lit-rest` as space-separated RGB and `--lit-rest-a`).
+- Demo (in the preview, not the component): a `LightGroup` column, `max-width 720px`, gap 12px, 8px padding: a three-column grid (one column under `sm`) of pricing cards, then a pill search field.
+  - Card: 20px padding, name 15px semibold, optional "Popular" chip (11px semibold, `#eef5ff` with `#0062c4` text; dark `#0a84ff` at 20% with `#64b5ff` text), price 32px semibold tracking -0.03em with " /month" 14px in `#6e6e73` (dark `#a1a1a6`), a 13.5px description, and a 40px full-width pill button (`#0071e3` with white text for the popular plan, `#f5f5f7` / dark `#2c2c2e` for the others).
+  - Plans: Starter $0, Studio $19 (popular), Scale $49.
+  - Search: 48px tall, 20px side padding, 16px search icon, 15px input with an `aria-label`.
+
+## Motion
+
+- Pointer: two motion values `px`, `py` in viewport coordinates, `-9999` when there is no pointer. In a group they live in the group; the group sets them on pointer move and resets them on pointer leave.
+- For each border, whenever `px` or `py` changes: take the border's centre, `angle = atan2(dy, dx) in degrees + 90`; distance `out = max(0, |dx| - width/2, |dy| - height/2)`; `glow = max(floor, 1 - out / 260)` where `floor` is 0.12 normally and 1 while focus is inside. The conic gradient is built from these motion values with `useMotionTemplate`, so nothing re-renders.
+- Focus: focus anywhere inside a `LitBorder` sets glow to 1 and keeps it there until focus leaves.
+- Reduced motion: pointer tracking is direct (no autoplay), so it stays; there is no looping motion.
+
+## Interaction and states
+
+- Mouse and touch drags move the light; leaving the group or the border dims it back to rest.
+- Inputs and buttons inside keep their own focus styles (2px outline, `#0071e3`, dark `#0a84ff`).
+
+## Autoplay demo
+
+With `autoplay` on `LightGroup`, only while the group is on screen, the tab is visible and motion is not reduced: every 1.6s move the virtual pointer to `centre + (cos(t * 0.9) * 0.55 * width, sin(t * 0.9) * 0.8 * height)` over 1.6s, ease-in-out (the first step is instant), so the light circles the group. The first real pointer move inside the group stops it for good.
+
+## Accessibility
+
+- The border is purely decorative; wrapped content keeps its own semantics and tab order. The light is never the only focus cue: wrapped controls keep visible outlines.
+- Rest and lit colours are non-text decoration; all text sits on the white / `#1c1c1e` inner surface and meets 4.5:1.
+
+## Acceptance checklist
+
+- [ ] Moving across the pricing cards turns each card's light band toward the pointer; the nearest card is brightest.
+- [ ] Cards far from the pointer sit at a faint hairline.
+- [ ] The search pill (radius 999) lights the same way.
+- [ ] A lone `LitBorder` outside any group tracks the pointer over itself.
+- [ ] Tabbing into the search field or a button fully lights its border.
+- [ ] Dark mode has a `#1c1c1e` interior and a visible hairline at rest.
+- [ ] Leaving the group dims the light; autoplay circles it until the first pointer arrives and then never restarts.

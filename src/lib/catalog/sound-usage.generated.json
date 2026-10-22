@@ -5,6 +5,12 @@
       "name": "Hold to Confirm"
     }
   ],
+  "chime": [
+    {
+      "slug": "generate-image",
+      "name": "Generate Image"
+    }
+  ],
   "done": [
     {
       "slug": "hold-to-confirm",
@@ -123,6 +129,10 @@
   ],
   "off": [
     {
+      "slug": "agent-run",
+      "name": "Agent Run"
+    },
+    {
       "slug": "animated-tabs",
       "name": "Animated Tabs"
     },
@@ -133,6 +143,10 @@
     {
       "slug": "copy-button",
       "name": "Copy Button"
+    },
+    {
+      "slug": "diff-review",
+      "name": "Diff Review"
     },
     {
       "slug": "emoji-reactions",
@@ -149,6 +163,10 @@
     {
       "slug": "like-burst",
       "name": "Like Burst"
+    },
+    {
+      "slug": "orbital-loader",
+      "name": "Orbital Loader"
     },
     {
       "slug": "pull-cord",
@@ -269,6 +287,10 @@
       "name": "Copy Button"
     },
     {
+      "slug": "diff-review",
+      "name": "Diff Review"
+    },
+    {
       "slug": "feedback-pill",
       "name": "Feedback Pill"
     },
@@ -361,6 +383,18 @@
       "name": "Command Palette"
     },
     {
+      "slug": "diff-review",
+      "name": "Diff Review"
+    },
+    {
+      "slug": "empty-chart",
+      "name": "Empty Chart"
+    },
+    {
+      "slug": "empty-projects",
+      "name": "Empty Projects"
+    },
+    {
       "slug": "feedback-pill",
       "name": "Feedback Pill"
     },
@@ -371,6 +405,10 @@
     {
       "slug": "generate-image",
       "name": "Generate Image"
+    },
+    {
+      "slug": "glow-button",
+      "name": "Glow Button"
     },
     {
       "slug": "gooey-search-input",
@@ -387,6 +425,10 @@
     {
       "slug": "liquid-dial",
       "name": "Liquid Dial"
+    },
+    {
+      "slug": "no-results",
+      "name": "No Results"
     },
     {
       "slug": "otp-input",
@@ -437,6 +479,10 @@
       "name": "Toast Stack"
     },
     {
+      "slug": "upload-dropzone",
+      "name": "Upload Dropzone"
+    },
+    {
       "slug": "zipper-reveal",
       "name": "Zipper Reveal"
     }
@@ -483,12 +529,20 @@
       "name": "Forge AI Command Bar"
     },
     {
+      "slug": "ghost-autocomplete",
+      "name": "Ghost Autocomplete"
+    },
+    {
       "slug": "goo-reorder",
       "name": "Goo Reorder"
     },
     {
       "slug": "magnet-select",
       "name": "Magnet Select"
+    },
+    {
+      "slug": "no-results",
+      "name": "No Results"
     },
     {
       "slug": "otp-input",
