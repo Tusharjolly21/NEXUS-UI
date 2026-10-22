@@ -189,9 +189,9 @@ function SectionTitle({ id, children }: { id?: string; children: React.ReactNode
 // ── per-variant actions ─────────────────────────────────────────────
 
 /** Copies this variant's own build prompt (Pro), the same way the page-level button copies the whole brief. */
-function VariantPromptButton({ slug, name, title, promptId }: { slug: string; name: string; title: string; promptId: string }) {
+function VariantPromptButton({ slug, title, promptId }: { slug: string; title: string; promptId: string }) {
   const { isPro } = useProAccess();
-  const [state, copy] = useCopyBuildPrompt(slug, name, `/api/prompt/${encodeURIComponent(slug)}?variant=${encodeURIComponent(promptId)}`);
+  const [state, copy] = useCopyBuildPrompt(slug, title, `/api/prompt/${encodeURIComponent(slug)}?variant=${encodeURIComponent(promptId)}`);
   return (
     <button
       type="button"
@@ -290,7 +290,7 @@ function Stage({
           ))}
         </div>
         <div className="flex flex-wrap gap-1.5">
-          {variant?.promptId ? <VariantPromptButton slug={slug} name={name} title={title} promptId={variant.promptId} /> : null}
+          {variant?.promptId ? <VariantPromptButton slug={slug} title={title} promptId={variant.promptId} /> : null}
           {variant ? <VariantLinkButton anchor={variant.anchor} title={title} /> : null}
           {view === "preview" ? (
             <button
