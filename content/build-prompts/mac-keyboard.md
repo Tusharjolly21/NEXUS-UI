@@ -62,6 +62,8 @@ Each press layers three Web Audio voices straight to the destination. Two noise 
 
 Type multipliers (click gain, thud gain, body gain, click Q): mechanical 1/1/1/1, soft 0.28/0.75/0.6/0.5, clicky 1.55/0.85/0.55/1.9. Create the AudioContext lazily on first press, resume if suspended, swallow errors, close it on unmount.
 
+`MacKeyboard` plays this only while `enableSound` (default `true`) is on and the site-wide sound switch is on: the hook checks `getSoundsEnabled()` from `@/lib/ui-sounds` (default on in installed apps, `setSoundsEnabled` turns it off) before it creates or resumes the audio context. Only real presses (a tap on a cap, or the physical keyboard when `listen` is set) make sound; the autoplay typing and hover are silent. This is the one component that keeps its own synthesis; `@/lib/ui-sounds` is imported only for the switch.
+
 ## Interaction and states
 
 - Clicking a cap: mark touched, show held for 130ms, ripple, sound, update text, call `onKeyPress`.
