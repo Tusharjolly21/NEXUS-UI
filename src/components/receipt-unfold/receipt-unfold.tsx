@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const PW = 280;
 const PH = 104;
@@ -15,6 +16,8 @@ export interface ReceiptUnfoldProps {
   total?: string;
   /** Opens and folds by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const LINES: ReceiptLine[] = [
@@ -39,7 +42,8 @@ function Panel({ children, className = "" }: { children: ReactNode; className?: 
  * Press "Get invoice" and a folded slip rises out of the row, then unfolds
  * panel by panel like a paper receipt. The total gets circled by hand last.
  */
-export function ReceiptUnfold({ lines = LINES, total = "$49.68", autoplay = false }: ReceiptUnfoldProps) {
+export function ReceiptUnfold({ lines = LINES, total = "$49.68", autoplay = false, enableSound = true }: ReceiptUnfoldProps) {
+  const play = useSound(enableSound);
   const [open, setOpen] = useState(false);
   const [stage, setStage] = useState(0); // 0 closed, 1 risen, 2 first fold, 3 second fold
   const touched = useRef(false);
@@ -160,6 +164,7 @@ export function ReceiptUnfold({ lines = LINES, total = "$49.68", autoplay = fals
         type="button"
         onClick={() => {
           touched.current = true;
+          play(open ? "swipe" : "whoosh", open ? 0.6 : 1);
           run(!open);
         }}
         aria-expanded={open}

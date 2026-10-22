@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { motion, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface MagnetOption {
   id: string;
@@ -30,6 +31,8 @@ export interface MagnetSelectProps {
   label?: string;
   /** Points at and picks options by itself until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Centre of the 300×300 stage and ring radius. */
@@ -123,7 +126,8 @@ function Option({
  * pick it and the orb slides over, pushing the options it passes out of the
  * way, while a bridge of liquid stretches and snaps behind it.
  */
-export function MagnetSelect({ options = DEFAULT_MAGNET_OPTIONS, defaultValue, onChange, label = "Status", autoplay = false }: MagnetSelectProps) {
+export function MagnetSelect({ options = DEFAULT_MAGNET_OPTIONS, defaultValue, onChange, label = "Status", autoplay = false, enableSound = true }: MagnetSelectProps) {
+  const play = useSound(enableSound);
   const pos = useMemo(() => layout(options.length), [options.length]);
   const [sel, setSel] = useState(() => {
     const i = options.findIndex((o) => o.id === defaultValue);
@@ -160,6 +164,7 @@ export function MagnetSelect({ options = DEFAULT_MAGNET_OPTIONS, defaultValue, o
   }, [hover, sel, pos, probeX, probeY]);
 
   const pick = (i: number) => {
+    if (i !== sel) play("tick", 0.6);
     setSel(i);
     const o = options[i];
     if (o) onChange?.(o.id);

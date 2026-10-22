@@ -58,6 +58,10 @@ Open 700ms after mount, then toggle every 3600ms. Both are skipped once the user
 - Each chip: `aria-label="{name} {hex}. Copy"`, focus-visible 2px ring `#0071e3` (dark `#0a84ff`).
 - The copied pill has `role="status"` so the copy is announced.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Clicking a colour chip, which copies its hex, plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 60% volume. Fanning the deck out or closing it makes no sound, and neither does hovering a chip or the autoplay. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Closed, the deck is a single upright chip stack with a rivet near its base and a faint splay.

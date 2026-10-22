@@ -59,6 +59,13 @@ Build a dark command palette that opens as a modal. A pill in the middle of a da
 - [ ] Enter, Escape, ESC chip and backdrop click all close it, with an exit animation.
 - [ ] Panel fits at 320px with 16px side padding.
 
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it) on `CommandPalette`.
+- Opening the palette, by clicking the pill or pressing Cmd/Ctrl+K while it is closed, plays `pop` from `@/lib/ui-sounds` at 70% volume (a short blip that rises quickly in pitch). Moving the highlight with Arrow Up/Down, Home or End plays `tick` at 40% (a tiny dry high click), only when the highlight really moved and no more than once every 40ms. Running a command, by Enter or click, plays `tap` (a short soft thump that falls in pitch, with a hint of click).
+- Closing (Escape, backdrop, ESC chip, the shortcut again), typing and hovering rows are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 > The Command Palette page has 2 variants. The brief above rebuilds the original Command Palette; the sections below rebuild the Motion Kit Command Morph variant.
 
 ---
@@ -140,3 +147,10 @@ With `autoplay`, every 900ms run the next step, looping: highlight 1, highlight 
 - [ ] Two instances on a page each animate their own highlight.
 - [ ] At 296px wide nothing overflows; long labels truncate.
 - [ ] Dark mode swaps panel, chips, highlight, text, borders and shadow.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it) on `CommandMorph`.
+- Running a command, or opening a group page, by Enter or click, plays `tap` from `@/lib/ui-sounds` (a short soft thump that falls in pitch, with a hint of click). Moving the highlight with Arrow Up/Down plays `tick` at 40% (a tiny dry high click), only when the highlight really moved and no more than once every 40ms. Going back a page, with Backspace on an empty field, Escape or the breadcrumb chip, plays `tick` at 40%. With `hotkey` on, Cmd/Ctrl+K plays `pop` at 70% (a short blip that rises quickly in pitch) as the field takes focus.
+- The autoplay walkthrough, typing in the field and hovering rows are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

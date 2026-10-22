@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SignAndSealProps {
   name?: string;
@@ -9,6 +10,8 @@ export interface SignAndSealProps {
   ink?: string;
   /** Signs itself on a loop until the user draws. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const W = 300;
@@ -38,11 +41,13 @@ const readDarkServer = () => false;
  * Sign the card with your pointer, one stroke at a time. Pause for a moment and
  * a clear plastic sleeve slides down over it, with a glint running across.
  */
-export function SignAndSeal({ name = "Alex Rivera", title = "Founding member", ink, autoplay = false }: SignAndSealProps) {
+export function SignAndSeal({ name = "Alex Rivera", title = "Founding member", ink, autoplay = false, enableSound = true }: SignAndSealProps) {
+  const play = useSound(enableSound);
   const canvas = useRef<HTMLCanvasElement>(null);
   const strokes = useRef<[number, number][][]>([]);
   const drawing = useRef(false);
   const idle = useRef<number | undefined>(undefined);
+  const sounds = useRef<number[]>([]);
   const [inked, setInked] = useState(false);
   const [sealed, setSealed] = useState(false);
   const touched = useRef(false);
@@ -93,12 +98,20 @@ export function SignAndSeal({ name = "Alex Rivera", title = "Founding member", i
   const armSeal = useCallback(() => {
     clearTimeout(idle.current);
     idle.current = window.setTimeout(() => {
-      if (strokes.current.some((s) => s.length > 6)) setSealed(true);
+      if (strokes.current.some((s) => s.length > 6)) {
+        setSealed(true);
+        // Only the visitor's own signature is heard, never the autoplay demo.
+        if (touched.current) {
+          sounds.current.push(window.setTimeout(() => play("knock"), 350), window.setTimeout(() => play("success"), 800));
+        }
+      }
     }, 900);
-  }, []);
+  }, [play]);
 
   const clear = useCallback(() => {
     clearTimeout(idle.current);
+    sounds.current.forEach((t) => window.clearTimeout(t));
+    sounds.current.length = 0;
     strokes.current = [];
     setInked(false);
     setSealed(false);
@@ -132,7 +145,13 @@ export function SignAndSeal({ name = "Alex Rivera", title = "Founding member", i
     };
   }, [autoplay, clear, redraw, armSeal]);
 
-  useEffect(() => () => clearTimeout(idle.current), []);
+  useEffect(() => {
+    const pending = sounds.current;
+    return () => {
+      clearTimeout(idle.current);
+      pending.forEach((t) => window.clearTimeout(t));
+    };
+  }, []);
 
   const pos = (e: RPointerEvent) => {
     const r = canvas.current!.getBoundingClientRect();

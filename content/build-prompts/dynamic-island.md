@@ -71,3 +71,10 @@ Uncontrolled only. Every 1700ms run a three-beat loop: open, close, then advance
 - Music bars dance while playing and rest when paused.
 - `cycle` steps through states when closed; autoplay opens, closes and advances until touched.
 - Reduced motion removes the squash, blur and springs.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Tapping the compact pill to open its controls plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) at reduced volume; tucking it away again (tap on the island, Escape or a tap outside) plays the same `pop` at a quieter level. Stopping the timer or declining the call, which sends the island back to idle, plays `whoosh` (a soft band of filtered noise sweeping from low to high) at reduced volume.
+- Automatic changes (`cycle` and `autoplay`) are silent, and so are play/pause, accept and hover.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

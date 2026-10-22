@@ -82,3 +82,7 @@ Stage coordinates: width `W = 360`, height `H = 160`, groove at `Y0 = 90`, side 
 - Releasing makes the knob and rail vibrate through the groove a few times and settle straight, without changing the value.
 - Arrow keys step by 1, Shift+Arrow by 10, with a quick spring.
 - With `autoplay`, the knob is plucked to a random spot every 2.6s until grabbed.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). When the user grabs the knob, play one soft `on` (a tiny latch click plus a 600 to 900 Hz rising blip, volume 0.4) and nothing else on release. While the user drags the knob sideways or presses the arrow keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time the whole-number value changes, at most once every 40 ms; pulling the rail up or down and the twang are silent. Autoplay plucks and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

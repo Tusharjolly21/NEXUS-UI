@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { flushSync } from "react-dom";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SlingshotMessage {
   id: number;
@@ -24,6 +25,8 @@ export interface SlingshotSendProps {
   autoReply?: boolean;
   /** Types, pulls back and fires messages by itself until someone touches the component. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 type Point = { x: number; y: number };
@@ -44,7 +47,8 @@ const STEPS = 12;
  * thread with a squash. A short tug just twangs back. Return still sends it
  * normally, and Enter or Space on the focused stone fires it too.
  */
-export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autoplay = false }: SlingshotSendProps) {
+export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autoplay = false, enableSound = true }: SlingshotSendProps) {
+  const play = useSound(enableSound);
   const [msgs, setMsgs] = useState<SlingshotMessage[]>(START);
   const [draft, setDraft] = useState("See you at 7?");
   const draftRef = useRef("See you at 7?");
@@ -100,12 +104,13 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
     }
   };
 
-  const fire = (power: number) => {
+  const fire = (power: number, byUser = false) => {
     const text = draftRef.current.trim();
     const rootEl = root.current;
     const stoneEl = stone.current;
     const listEl = list.current;
     if (!text || !rootEl || !stoneEl || !listEl) return;
+    if (byUser) play("whoosh");
     const rr = rootEl.getBoundingClientRect();
     const sr = stoneEl.getBoundingClientRect();
     const from = { x: sr.left - rr.left + sr.width / 2, y: sr.top - rr.top + sr.height / 2 };
@@ -133,9 +138,9 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
     setFlight({ text, from, to: { x: er.left - rr.left, y: er.top - rr.top, w: er.width, h: er.height }, power, id });
   };
 
-  const release = () => {
+  const release = (byUser = false) => {
     const d = Math.hypot(x.get(), y.get());
-    if (d > 26 && draftRef.current.trim()) fire(Math.min(1, d / 70));
+    if (d > 26 && draftRef.current.trim()) fire(Math.min(1, d / 70), byUser);
     const spring = { type: "spring" as const, stiffness: 700, damping: d > 26 ? 12 : 9 };
     animate(x, 0, spring);
     animate(y, 0, spring);
@@ -183,7 +188,7 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
   const submit = (e: FormEvent) => {
     e.preventDefault();
     touched.current = true;
-    fire(0.6);
+    fire(0.6, true);
   };
 
   const keyFire = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -191,8 +196,9 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
     e.preventDefault();
     touched.current = true;
     if (!draftRef.current.trim()) return;
+    play("lift");
     void pull(-12, 46).then(() => {
-      release();
+      release(true);
       input.current?.focus();
     });
   };
@@ -283,8 +289,9 @@ export function SlingshotSend({ name = "Maya", onSend, autoReply = true, autopla
                 dragConstraints={{ left: -50, right: 50, top: -10, bottom: 70 }}
                 onDragStart={() => {
                   touched.current = true;
+                  play("lift");
                 }}
-                onDragEnd={release}
+                onDragEnd={() => release(true)}
                 style={{ x, y }}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

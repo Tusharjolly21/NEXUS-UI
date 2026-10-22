@@ -46,6 +46,10 @@ With `autoplay`, the first toggle happens after 700 ms, then every 3.6 s, altern
 - Canvas `role="img"` with aria-label "A closed cardboard box." or "The box is open and its contents are spilled on the floor."
 - Native button; focus-visible outline 2px, offset 2px, `#0071e3` (dark `#2997ff`).
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Pressing "Open the box" plays `pop` as the flaps burst open (a quick sine glide from about 320 Hz up to 980 Hz in 70ms). Pressing "Pack it up", the bouncing pieces and the autoplay open and pack make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Closed box shows a lid strip; opening swings both flaps back with a visible overshoot.

@@ -67,6 +67,10 @@ Loop: at 700ms open (without firing callbacks), type "motion" one letter every 1
 - Closed pill is a button with `aria-expanded={false}` and `aria-controls` the input; focus ring 2px `#0071e3` (dark `#0a84ff`), 2px offset on `#f5f5f7` (dark black).
 - With suggestions the input is a `combobox` (`aria-expanded`, `aria-controls`, `aria-autocomplete="list"`, `aria-activedescendant`), label "Search" unless one is passed. Options have `role="option"` and `aria-selected`. All goo shapes are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Opening the pill with a click plays `pop` (a quick sine glide from about 320 Hz up to 980 Hz in 70ms). Closing it by the visitor (Escape, or clicking away from an empty field) plays `off` (a tiny noise click followed by a short sine glide falling from 760 to 480 Hz). Picking a suggestion, with a click or Enter, plays `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss). Typing, moving the highlight and the autoplay open, type and close loop are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Clicking the pill stretches it with overshoot while the icon pinches off into a separate bubble, joined by a gooey neck that snaps.

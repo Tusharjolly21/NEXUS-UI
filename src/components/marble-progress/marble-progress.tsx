@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Matter from "matter-js";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface MarbleStep {
   /** Checklist text. Also used as the React key, so keep labels unique. */
@@ -15,6 +16,8 @@ export interface MarbleProgressProps {
   steps?: MarbleStep[];
   /** Ticks the steps one by one, then clears them, until someone clicks a step. Off under reduced motion. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const STEPS: MarbleStep[] = [
@@ -34,7 +37,8 @@ type Marble = { body: Matter.Body; step: number; color: string; pop?: number };
  * marble drops in at the top, rattles down the ramps and settles in the jar;
  * untick it and that marble pops. When the jar is full it lights up.
  */
-export function MarbleProgress({ steps = STEPS, autoplay = false }: MarbleProgressProps) {
+export function MarbleProgress({ steps = STEPS, autoplay = false, enableSound = true }: MarbleProgressProps) {
+  const play = useSound(enableSound);
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<Matter.Engine | null>(null);
   const marbles = useRef<Marble[]>([]);
@@ -231,7 +235,15 @@ export function MarbleProgress({ steps = STEPS, autoplay = false }: MarbleProgre
                 type="button"
                 role="checkbox"
                 aria-checked={done[i]}
-                onClick={() => { touched.current = true; toggle(i); }}
+                onClick={() => {
+                  touched.current = true;
+                  if (doneRef.current[i]) play("off", 0.6);
+                  else {
+                    play("tick", 0.6);
+                    if (doneRef.current.filter(Boolean).length === steps.length - 1) play("done", 0.8);
+                  }
+                  toggle(i);
+                }}
                 className="flex w-full items-center gap-2.5 rounded-[12px] px-2 py-2 text-left outline-none hover:bg-[#f5f5f7] focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:hover:bg-[#2c2c2e] dark:focus-visible:ring-[#0a84ff]"
               >
                 <motion.span

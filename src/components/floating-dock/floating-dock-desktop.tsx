@@ -3,6 +3,7 @@
 import * as React from "react";
 import { LayoutGroup, animate, motion, useMotionValue, useReducedMotion, type AnimationPlaybackControls } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useSound } from "@/lib/ui-sounds";
 import { IconContainer } from "./icon-container";
 import type { FloatingDockItem } from "./types";
 
@@ -25,6 +26,8 @@ export type FloatingDockDesktopProps = {
   position?: "fixed" | "inline";
   /** Sweeps an invisible pointer across the dock and bounces a tile until someone points at it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 };
 
 /**
@@ -39,7 +42,9 @@ export function FloatingDockDesktop({
   onSelect,
   position = "fixed",
   autoplay = false,
+  enableSound = true,
 }: FloatingDockDesktopProps) {
+  const play = useSound(enableSound);
   const pathname = usePathname();
   const still = useReducedMotion() === true;
   const group = React.useId();
@@ -135,6 +140,7 @@ export function FloatingDockDesktop({
               disableLink={disableLinks}
               bounce={bounces[item.href] ?? 0}
               onActivate={() => {
+                play("pop");
                 touch();
                 setPicked(item.href);
                 onSelect?.(item);

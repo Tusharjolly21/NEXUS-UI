@@ -12,6 +12,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export type TickSliderSize = "sm" | "md" | "lg";
 
@@ -46,6 +47,8 @@ export type TickSliderProps = {
   /** Sweeps the needle to a few values until someone touches it. */
   autoplay?: boolean;
   disabled?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -173,9 +176,12 @@ export function TickSlider({
   hint = "Drag across the ticks, or use the arrow keys.",
   autoplay = false,
   disabled = false,
+  enableSound = true,
   className,
 }: TickSliderProps) {
   const reduced = useReducedMotion() ?? false;
+  const play = useSound(enableSound);
+  const lastTick = React.useRef(0);
   const [inner, setInner] = React.useState(() => clamp(defaultValue, min, max));
   const value = clamp(controlled ?? inner, min, max);
   const decimals = decimalsOf(step);
@@ -261,6 +267,16 @@ export function TickSlider({
     latest.current = value;
   }, [value]);
 
+  // One quiet tick when the value crosses onto a different tick mark (called from input handlers only).
+  const tickIfCrossed = (from: number, to: number, always = false) => {
+    const mark = (v: number) => Math.round(((v - min) / span) * (count - 1));
+    if (!always && mark(from) === mark(to)) return;
+    const now = performance.now();
+    if (now - lastTick.current < 40) return;
+    lastTick.current = now;
+    play("tick", 0.4);
+  };
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     if (disabled || e.button > 0) return;
     e.preventDefault();
@@ -269,6 +285,7 @@ export function TickSlider({
     setDragging(true);
     const first = valueAt(e.clientX);
     if (first !== latest.current) {
+      tickIfCrossed(latest.current, first);
       latest.current = first;
       commit(first);
     }
@@ -278,6 +295,7 @@ export function TickSlider({
       pointer.set(localX(ev.clientX));
       const next = valueAt(ev.clientX);
       if (next !== latest.current) {
+        tickIfCrossed(latest.current, next);
         latest.current = next;
         commit(next);
       }
@@ -312,6 +330,7 @@ export function TickSlider({
     touched.current = true;
     const next = snap(map[e.key]);
     if (next !== value) {
+      tickIfCrossed(value, next, true);
       commit(next);
       onCommit?.(next);
     }

@@ -78,3 +78,10 @@ Every 2300ms, switch to the next of `feature → pile → row → grid`, repeati
 - Clicking a photo fills the stage with it at 24px radius while the others dim to 25%; clicking again or Escape restores it.
 - A slight left-to-right stagger is visible on layout changes.
 - With `autoplay`, layouts cycle every 2.3s until the first interaction.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Choosing a different layout with the segmented control plays `tap` from `@/lib/ui-sounds` at 80% volume (a short soft thump that falls in pitch, with a hint of click) as the photos start to glide.
+- Opening or closing a photo, choosing the layout that is already active, hovering and the autoplay loop are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

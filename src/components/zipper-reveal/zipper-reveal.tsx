@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import { animate, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useVelocity, type AnimationPlaybackControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ZipperRevealProps {
   /** The invite code shown once the pouch is open, and copied by the button. */
   code?: string;
   /** Zips itself open and shut until someone grabs the pull. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const W = 320, H = 420, CX = W / 2;
@@ -21,7 +24,8 @@ const openAt = (y: number, sy: number) => (y >= sy ? 0 : MAXO * (1 - Math.exp((-
  * them, and the code inside comes into view. The pull tab swings from the
  * slider as you move it. It stays where you leave it, like a real zip.
  */
-export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false }: ZipperRevealProps) {
+export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false, enableSound = true }: ZipperRevealProps) {
+  const play = useSound(enableSound);
   const id = useId().replace(/[^a-z0-9]/gi, "");
   const reduce = useReducedMotion();
   const s = useMotionValue(0);
@@ -36,6 +40,8 @@ export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false }: Zipper
   const box = useRef<SVGSVGElement>(null);
   const root = useRef<HTMLDivElement>(null);
   const touched = useRef(false);
+  const tickAt = useRef({ y: 0, t: 0 });
+  const atEnd = useRef(false);
   const run = useRef<AnimationPlaybackControls | null>(null);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [copied, setCopied] = useState(false);
@@ -59,16 +65,30 @@ export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false }: Zipper
     teeth.push({ x: CX + side * (o + (o > 0.5 ? 3 : 1.5)), y, a: (Math.atan(slope) * 180) / Math.PI * side, side });
   }
 
+  /** Called only from the visitor's own input. A quiet tick every few teeth, and one latch at the open end. */
+  const sound = (to: number, y: number, step = 18) => {
+    const now = performance.now();
+    if (Math.abs(y - tickAt.current.y) >= step && now - tickAt.current.t >= 50) {
+      tickAt.current = { y, t: now };
+      play("tick", 0.4);
+    }
+    if (to >= 1 && !atEnd.current) play("on");
+    atEnd.current = to >= 1;
+  };
   const setFromY = (clientY: number) => {
     const r = box.current!.getBoundingClientRect();
     const y = ((clientY - r.top) / r.height) * H;
-    s.set(Math.max(0, Math.min(1, (y - Z0) / (Z1 - Z0))));
+    const to = Math.max(0, Math.min(1, (y - Z0) / (Z1 - Z0)));
+    sound(to, Z0 + to * (Z1 - Z0));
+    s.set(to);
   };
   const down = (e: RPointerEvent<SVGGElement>) => {
     touched.current = true;
     drag.current = true;
     run.current?.stop();
     s.stop();
+    tickAt.current.y = Z0 + s.get() * (Z1 - Z0);
+    atEnd.current = s.get() >= 1;
     (e.currentTarget as Element).setPointerCapture(e.pointerId);
   };
   const move = (e: RPointerEvent) => { if (drag.current) setFromY(e.clientY); };
@@ -79,7 +99,9 @@ export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false }: Zipper
       e.preventDefault();
       touched.current = true;
       run.current?.stop();
-      run.current = animate(s, Math.max(0, Math.min(1, s.get() + d)), { type: "spring", stiffness: 300, damping: 30 });
+      const to = Math.max(0, Math.min(1, s.get() + d));
+      if (to !== s.get()) sound(to, Z0 + to * (Z1 - Z0), 0);
+      run.current = animate(s, to, { type: "spring", stiffness: 300, damping: 30 });
     }
   };
 
@@ -108,6 +130,7 @@ export function ZipperReveal({ code = "NXS-8F2Q-PRO", autoplay = false }: Zipper
   useEffect(() => () => { if (copyTimer.current) clearTimeout(copyTimer.current); }, []);
 
   const copy = () => {
+    play("tap");
     void navigator.clipboard?.writeText(code).catch(() => {});
     setCopied(true);
     if (copyTimer.current) clearTimeout(copyTimer.current);

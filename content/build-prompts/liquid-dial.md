@@ -72,3 +72,7 @@ With `autoplay`: run at 700ms, then every 5200ms, while not touched. A run opens
 - [ ] Picking an action closes the dial, calls `onSelect`, and shows "New photo" style toast for 1.4s.
 - [ ] Tab reaches action buttons only when open.
 - [ ] Autoplay opens, browses, picks Note and repeats every 5.2s until first pointer down.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). When the user clicks an action, play one `tap` (a short 900 to 620 Hz sine blip with a faint high click, volume 0.8). Opening and closing the dial, hovering and focusing actions, and the autoplay pick are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

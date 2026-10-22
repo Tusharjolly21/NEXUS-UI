@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform, type PanInfo } from "framer-motion";
+import { useSound, type SoundName } from "@/lib/ui-sounds";
 
 export interface CardData {
   id: string;
@@ -57,6 +58,8 @@ export interface CardStackRotatorProps {
   onChange?: (id: string) => void;
   /** Flicks the top card away every 2.6s until someone touches the stack. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 }
 
@@ -121,6 +124,7 @@ function Card({
   fixedHeight,
   onThrown,
   pulse,
+  play,
 }: {
   card: CardData;
   tone: string[];
@@ -138,6 +142,7 @@ function Card({
   onThrown: (dir: number) => void;
   /** Bumped by the parent to throw the front card programmatically. */
   pulse: number;
+  play: (name: SoundName, volume?: number) => void;
 }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -174,6 +179,7 @@ function Card({
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (Math.abs(info.offset.x) > SWIPE || Math.abs(info.velocity.x) > 520) {
+      play("swipe");
       fling(info.offset.x || info.velocity.x, info.offset.y);
     } else {
       animate(x, 0, SETTLE);
@@ -315,8 +321,10 @@ export function CardStackRotator({
   hint = "Flick the top card away.",
   onChange,
   autoplay = false,
+  enableSound = true,
   className = "",
 }: CardStackRotatorProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() === true;
   const [order, setOrder] = useState<number[]>(() => cards.map((_, i) => i));
   const [pulse, setPulse] = useState(0);
@@ -387,10 +395,12 @@ export function CardStackRotator({
     if (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       touched.current = true;
+      play("swipe");
       setPulse((p) => p + 1);
     } else if (e.key === "ArrowLeft") {
       e.preventDefault();
       touched.current = true;
+      play("swipe");
       rotate(-1);
     }
   };
@@ -430,6 +440,7 @@ export function CardStackRotator({
               reduce={reduce}
               fixedHeight={fixedHeight}
               pulse={pulse}
+              play={play}
               onThrown={() => rotate(1)}
             />
           );

@@ -51,6 +51,10 @@ Every 1.4s, on a cycle of `steps.length + 3` ticks: tick each step in order, wai
 - Each step is a `button` with `role="checkbox"` and `aria-checked`; focus ring 2px `#0071e3` (dark `#0a84ff`).
 - The counter is `aria-live="polite"`; the canvas is `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Ticking a step plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 60% volume; unticking it plays `off` at 60% (a small noise click with a sine falling from 760 to 480 Hz over 70ms). Ticking the last open step also plays `done` at 80% (four soft triangle notes, C5 E5 G5 C6, 40ms apart, ringing for about 0.6s) on top of the tick. The marbles rattling down and the autoplay ticking make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Ticking a step drops a marble that zig-zags down all three ramps and settles in the jar without getting stuck.

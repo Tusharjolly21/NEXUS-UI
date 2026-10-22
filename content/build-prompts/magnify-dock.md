@@ -56,6 +56,10 @@ When `autoplay` is true: run a sweep 700ms after mount and then every 4200ms, sk
 - Each icon is a `type="button"` with `aria-label` = app label and a 2px `#0071e3` focus-visible outline, offset 2px. Focusing an icon shows its label (magnification is pointer-only).
 - Glyph SVGs are `aria-hidden`.
 
+## Sound
+
+`MagnifyDock` takes `enableSound?: boolean` (default `true`; `false` silences it). Clicking or activating an icon plays `pop` from `@/lib/ui-sounds` (a short, round sine glide from about 320 Hz up to 980 Hz in 70ms). Pointer magnification, tooltips and the autoplay sweep are silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Seven 46px icons sit in a frosted bar with a dot under Home.

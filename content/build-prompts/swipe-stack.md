@@ -59,6 +59,10 @@ Every 1700ms: if touched, stop the interval for good; if the deck is empty, relo
 - Buttons are real `type="button"` elements labelled "Flag payment" and "Approve payment"; the status line is `aria-live="polite"`.
 - Cards under the top one are `aria-hidden`; stamps and icons are decorative.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Every card the visitor throws, by dragging it away or pressing the round buttons, plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s) as it leaves. Approving also plays `success` at 60% volume (two soft triangle notes, 1046 Hz then 1318 Hz, 90ms apart, a rising third); flagging plays `off` at 60% (a small noise click with a sine falling from 760 to 480 Hz over 70ms) instead. A card that springs back and "Load more" make no sound. The autoplay throws make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Three cards are visible, stacked upward 12px apart and 5% smaller each; a fourth waits invisibly.
@@ -135,6 +139,10 @@ With `autoplay`, every 1800ms: if 2 or fewer rows remain, reset to `items` and c
 - Each row foreground is focusable (`tabIndex 0`), `role="group"`, labelled "{from}: {subject}. Right arrow archives, Delete removes."
 - Flag, Delete and Undo are native buttons; focus rings 2px (white inset on the action buttons, white on Undo). Hidden action buttons are `aria-hidden` and `tabIndex -1`.
 - A persistent visually hidden `role="status"` announces "Archived/Deleted {subject}".
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Archiving a row (by swipe, the right arrow key) plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s) followed by `success` at 50% volume (two soft triangle notes, 1046 Hz then 1318 Hz, 90ms apart); deleting it (long swipe, the Delete button, Delete or Backspace) plays the same whisk followed by `off` at 50% (a noise click with a sine falling from 760 to 480 Hz over 70ms). Tapping Flag plays `tap` (a short sine falling from 900 to 620 Hz over 60ms with a faint click) and Undo plays `pop` (a sine rising from 320 to 980 Hz in 70ms). Parking a row half open and the autoplay demo make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

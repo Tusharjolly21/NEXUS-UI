@@ -40,7 +40,7 @@ export function SoundBoard({ source }: { source: string }) {
   const play = (name: SoundName) => {
     setSelected(name);
     setHits((h) => ({ ...h, [name]: (h[name] ?? 0) + 1 }));
-    playSound(name);
+    playSound(name, 1, true);
   };
 
   const changeVolume = (v: number) => {

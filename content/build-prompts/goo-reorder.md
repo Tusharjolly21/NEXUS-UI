@@ -63,6 +63,10 @@ With `autoplay`, every 1600ms swap two random rows: draw two random numbers befo
 - Each row has `aria-label` = `"{label}, position {i + 1} of {n}. Use the up and down arrow keys to move."`.
 - The filter SVG and grip icon are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Picking a row up plays `lift` at 70% volume (a short airy rise: noise sweeping 800 to 2400 Hz over 80ms with a faint sine rising from 300 to 520 Hz) and letting it go plays `drop` at 70% (a sine falling from 380 to 120 Hz over 80ms with a small noise thud). Each time the dragged row passes a neighbour and the order changes it plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 40% volume. Moving a row with the up and down arrow keys plays `drop` at 60%. The autoplay swaps make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Five dark pills, 280px wide and 48px tall, with 10px gaps and coloured numbered badges.

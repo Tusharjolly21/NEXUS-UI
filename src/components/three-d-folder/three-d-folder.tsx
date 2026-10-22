@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export type FolderProject = {
   id: string;
@@ -36,6 +37,8 @@ export type ThreeDFolderProps = {
   hint?: string;
   /** Opens and closes the folder by itself until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
 };
 
@@ -98,8 +101,10 @@ export function ThreeDFolder({
   onOpenProject,
   hint = "Hover or tap the folder.",
   autoplay = false,
+  enableSound = true,
   className = "",
 }: ThreeDFolderProps) {
+  const play = useSound(enableSound);
   const u = size === "sm" ? 0.62 : 1;
   const still = useReducedMotion() === true;
   const uid = useId().replace(/:/g, "");
@@ -131,12 +136,15 @@ export function ThreeDFolder({
 
   const show = (i: number | null, from?: HTMLElement | null) => {
     if (i !== null && from) returnTo.current = from;
+    if (i === null) play("hush", 0.5);
+    else play("whoosh", 0.7);
     setActive(i);
     onOpenProject?.(i === null ? null : (projects[i]?.id ?? null));
   };
   const page = (d: number) => {
     if (active === null || projects.length === 0) return;
     const n = (active + d + projects.length) % projects.length;
+    play("tick", 0.5);
     setActive(n);
     onOpenProject?.(projects[n]?.id ?? null);
   };
@@ -146,6 +154,7 @@ export function ThreeDFolder({
     closeBtn.current?.focus();
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        play("hush", 0.5);
         setActive(null);
         onOpenProject?.(null);
       }
@@ -157,7 +166,7 @@ export function ThreeDFolder({
       document.body.style.overflow = prevOverflow;
       window.removeEventListener("keydown", onKey);
     };
-  }, [active, onOpenProject]);
+  }, [active, onOpenProject, play]);
 
   const wasOpen = useRef(false);
   useEffect(() => {
@@ -273,6 +282,7 @@ export function ThreeDFolder({
             aria-expanded={isOpen}
             onClick={() => {
               touched.current = true;
+              play(open ? "hush" : "whoosh", open ? 0.6 : 1);
               setOpen((o) => !o);
             }}
             className="absolute inset-x-0 bottom-0 z-10 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { animate, motion, useMotionValue, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface StretchNavProps {
   items?: string[];
@@ -8,13 +9,16 @@ export interface StretchNavProps {
   onChange?: (index: number) => void;
   /** Moves between items by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
  * The active pill moves its leading edge first and lets the trailing edge
  * catch up, so it stretches toward the target and snaps back to size.
  */
-export function StretchNav({ items = ["Home", "Work", "Writing", "About", "Contact"], defaultIndex = 0, onChange, autoplay = false }: StretchNavProps) {
+export function StretchNav({ items = ["Home", "Work", "Writing", "About", "Contact"], defaultIndex = 0, onChange, autoplay = false, enableSound = true }: StretchNavProps) {
+  const play = useSound(enableSound);
   const [active, setActive] = useState(defaultIndex);
   const [hover, setHover] = useState<number | null>(null);
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -92,6 +96,7 @@ export function StretchNav({ items = ["Home", "Work", "Writing", "About", "Conta
           onPointerEnter={() => setHover(i)}
           onClick={() => {
             touched.current = true;
+            if (i !== active) play("tick", 0.6);
             setActive(i);
             onChange?.(i);
           }}

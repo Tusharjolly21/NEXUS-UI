@@ -66,3 +66,10 @@ When `autoplay` is true, every 1500ms set the active item to the next index in t
 - [ ] Item widths of different labels are respected exactly.
 - [ ] With `autoplay`, the capsule hops around every 1.5s until you click an item.
 - [ ] Dark mode inverts the capsule and text colours as listed.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Selecting a different item plays `tick` from `@/lib/ui-sounds` at 60% volume (a tiny dry high click) as the capsule starts to stretch toward it.
+- Pressing the item that is already active, hovering and the autoplay loop are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

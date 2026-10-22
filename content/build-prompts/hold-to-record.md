@@ -59,6 +59,10 @@ Loop: start a demo session at 900ms (no listeners), keep it at 3700ms, play at 4
 - Idle button `aria-label="{label}. Hold Space to record, slide left or press Escape to cancel."`, focus ring 2px `#0071e3` (dark `#0a84ff`) offset 2px.
 - Recording strip `role="status"` labelled "Recording, 0:03" or "Release to cancel". Player buttons "Play voice note" / "Pause voice note" and "Delete voice note". A hidden polite live region says "Recording", "Voice note recorded" or the hint.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. The component makes no audio of its own (the microphone is only read for the waveform), so sound comes only from this prop. Pressing to start recording plays `on` (a tiny noise click then a short sine glide rising from 600 to 900 Hz); letting go to keep the note plays `off` (the same click with a glide falling from 760 to 480 Hz), including a hold that was too short and is ignored. Sliding left or pressing Escape to discard plays `hush` at 70% (a sine sliding down from 520 to 180 Hz over about 0.35s with a faint hiss). Play, pause and delete on the kept note play `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss) at 60%. The autoplay demo is silent. With `useMicrophone` the start sound can be picked up by the microphone, so set `enableSound={false}` if that matters. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Holding morphs the pill into a strip with a timer and a scrolling live waveform.

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Lock, RotateCcw, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Lock, RotateCcw, SlidersHorizontal, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { demoScript, FitPreview } from "./fit-preview";
@@ -115,7 +115,7 @@ export function GalleryTile({
 
       {item.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute right-4 top-4" /> : null}
 
-      {item.isNew || item.variants ? (
+      {item.isNew || item.variants || item.sound ? (
         <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-1.5">
           {item.isNew ? (
             <span
@@ -135,6 +135,18 @@ export function GalleryTile({
               )}
             >
               {item.variants} variants
+            </span>
+          ) : null}
+          {item.sound ? (
+            <span
+              title="Makes sound. Off until you switch it on."
+              className={cn(
+                "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-[-0.01em]",
+                dark ? "bg-white/12 text-white backdrop-blur-md" : "bg-white/90 text-[#1d1d1f] shadow-[0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md",
+              )}
+            >
+              <Volume2 className="size-3" aria-hidden />
+              Sound
             </span>
           ) : null}
         </div>

@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export type IslandMode = "idle" | "timer" | "call" | "music";
 
 export interface IslandMorphProps {
   /** Cycles through the states by itself until a control is pressed. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const SIZES: Record<IslandMode, { width: number; height: number; radius: number }> = {
@@ -18,7 +21,8 @@ const SIZES: Record<IslandMode, { width: number; height: number; radius: number 
 
 const morph = { type: "spring", stiffness: 380, damping: 30, mass: 0.9 } as const;
 
-export function IslandMorph({ autoplay = false }: IslandMorphProps) {
+export function IslandMorph({ autoplay = false, enableSound = true }: IslandMorphProps) {
+  const play = useSound(enableSound);
   const uid = useId();
   const [mode, setMode] = useState<IslandMode>("idle");
   const [secs, setSecs] = useState(272);
@@ -43,6 +47,7 @@ export function IslandMorph({ autoplay = false }: IslandMorphProps) {
 
   const pick = (m: IslandMode) => {
     touched.current = true;
+    if (m !== mode) play("whoosh", 0.5);
     setMode(m);
   };
 

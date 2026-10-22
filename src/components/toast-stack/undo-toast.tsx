@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface UndoToastMail {
   id: number;
@@ -22,6 +23,8 @@ export interface UndoToastProps {
   onUndo?: (mails: UndoToastMail[]) => void;
   /** Archives a row and undoes it on a loop until someone touches the component. Never runs under reduced motion. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
 }
@@ -71,7 +74,8 @@ function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * Undo counts down; press it and the row drops back into its old place with
  * a brief highlight. Archive several in a row and the toast counts them up.
  */
-export function UndoToast({ mails = INBOX, holdMs = HOLD, onArchive, onUndo, autoplay = false, className = "" }: UndoToastProps) {
+export function UndoToast({ mails = INBOX, holdMs = HOLD, onArchive, onUndo, autoplay = false, enableSound = true, className = "" }: UndoToastProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [list, setList] = useState(mails);
   const [batch, setBatch] = useState<UndoToastMail[]>([]);
@@ -223,6 +227,7 @@ export function UndoToast({ mails = INBOX, holdMs = HOLD, onArchive, onUndo, aut
                   type="button"
                   onClick={() => {
                     touched.current = true;
+                    play("ping");
                     archive(m);
                   }}
                   aria-label={`Archive ${m.subject}`}
@@ -306,6 +311,7 @@ export function UndoToast({ mails = INBOX, holdMs = HOLD, onArchive, onUndo, aut
                 type="button"
                 onClick={() => {
                   touched.current = true;
+                  play("drop");
                   undo();
                 }}
                 className="relative flex h-10 flex-none items-center gap-2 rounded-full bg-white/10 pl-2 pr-4 text-[14px] font-semibold hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]"

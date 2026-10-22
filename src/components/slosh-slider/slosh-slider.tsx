@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 import { animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform, useVelocity, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface SloshSliderProps {
   /** Label above the track; also the slider's accessible name. */
@@ -13,6 +14,8 @@ export interface SloshSliderProps {
   onChange?: (value: number) => void;
   /** Throws the handle to a series of values until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Track size in px. */
@@ -24,7 +27,8 @@ const H = 46;
  * your finger; the liquid fill behind it lags, leans with the speed you drag
  * at and sloshes back and forth before it settles.
  */
-export function SloshSlider({ label = "Volume", defaultValue = 55, accent = "#0071e3", onChange, autoplay = false }: SloshSliderProps) {
+export function SloshSlider({ label = "Volume", defaultValue = 55, accent = "#0071e3", onChange, autoplay = false, enableSound = true }: SloshSliderProps) {
+  const play = useSound(enableSound);
   const start = Math.max(0, Math.min(100, defaultValue));
   const hx = useMotionValue((start / 100) * W);
   // The liquid level follows the handle on a soft, under-damped spring...
@@ -45,6 +49,9 @@ export function SloshSlider({ label = "Volume", defaultValue = 55, accent = "#00
   const ref = useRef<HTMLDivElement>(null);
   const changeRef = useRef(onChange);
   const last = useRef(Math.round(start));
+  // Ticks come every 5%, not every percent, and never faster than every 40 ms.
+  const lastDetent = useRef(Math.floor(Math.round(start) / 5));
+  const lastTick = useRef(0);
 
   useEffect(() => {
     changeRef.current = onChange;
@@ -52,6 +59,16 @@ export function SloshSlider({ label = "Volume", defaultValue = 55, accent = "#00
 
   useMotionValueEvent(hx, "change", (x) => {
     const v = Math.round((x / W) * 100);
+    const detent = Math.floor(v / 5);
+    if (detent !== lastDetent.current) {
+      lastDetent.current = detent;
+      const now = performance.now();
+      // touched is set by the first pointer or key input, so autoplay stays silent.
+      if (touched.current && now - lastTick.current >= 40) {
+        lastTick.current = now;
+        play("tick", 0.4);
+      }
+    }
     if (v === last.current) return;
     last.current = v;
     setVal(v);

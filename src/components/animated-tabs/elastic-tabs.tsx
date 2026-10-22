@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type ReactNode, type RefObject } from "react";
 import { AnimatePresence, animate, motion, useMotionTemplate, useMotionValue, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ElasticTabItem {
   id: string;
@@ -20,6 +21,8 @@ export interface ElasticTabsProps {
   autoplay?: boolean;
   /** Extra classes for the card. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]";
@@ -146,7 +149,8 @@ function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * it covers them, the panel slides in from the side you moved toward, and the
  * frame eases to the new height.
  */
-export function ElasticTabs({ tabs = DEFAULT_TABS, label = "Dashboard", onChange, autoplay = false, className = "" }: ElasticTabsProps) {
+export function ElasticTabs({ tabs = DEFAULT_TABS, label = "Dashboard", onChange, autoplay = false, className = "", enableSound = true }: ElasticTabsProps) {
+  const play = useSound(enableSound);
   const uid = useId();
   const reduce = useReducedMotion() ?? false;
   const count = tabs.length;
@@ -258,6 +262,7 @@ export function ElasticTabs({ tabs = DEFAULT_TABS, label = "Dashboard", onChange
 
   const go = (k: number) => {
     touched.current = true;
+    if (k !== index.current && k >= 0 && k < count) play("tick", 0.6);
     select(k);
   };
   const key = (e: KeyboardEvent) => {

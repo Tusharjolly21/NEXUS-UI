@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ApiKeyFieldProps {
   /** Called with the (fake) key after a real press of the copy button. The autoplay demo never calls it. */
@@ -10,6 +11,8 @@ export interface ApiKeyFieldProps {
   onRotate?: (key: string) => void;
   /** Reveals, copies and rotates by itself in a loop until someone presses or types in the card. Never touches the clipboard. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
 }
@@ -88,7 +91,8 @@ function useAutoplayGate(ref: RefObject<HTMLElement | null>, enabled: boolean, r
  * The key is demo data (it starts with nx_demo_), rotating makes another fake
  * one on the client, and nothing leaves the page except a press on Copy.
  */
-export function ApiKeyField({ onCopy, onRotate, autoplay = false, className }: ApiKeyFieldProps) {
+export function ApiKeyField({ onCopy, onRotate, autoplay = false, enableSound = true, className }: ApiKeyFieldProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
   const [keyText, setKeyText] = useState(INITIAL_KEY);
@@ -199,11 +203,13 @@ export function ApiKeyField({ onCopy, onRotate, autoplay = false, className }: A
   const toggle = () => {
     const next = !revealedRef.current;
     setReveal(next);
+    play(next ? "on" : "off");
     setStatus(next ? "Key revealed." : "Key hidden.");
   };
   const copy = () => {
     void writeClipboard(keyRef.current);
     flashCopied();
+    play("success", 0.6);
     setStatus("Key copied to clipboard.");
     onCopy?.(keyRef.current);
   };
@@ -218,6 +224,7 @@ export function ApiKeyField({ onCopy, onRotate, autoplay = false, className }: A
   };
   const confirmRotate = () => {
     focusRotate.current = true;
+    play("whoosh", 0.6);
     doRotate(true);
   };
 

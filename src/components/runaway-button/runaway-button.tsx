@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type MouseEvent as RMouseEvent, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, motion, useSpring } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface RunawayButtonProps {
   /** Called when the cancel button is finally clicked (or activated from the keyboard). */
@@ -9,6 +10,8 @@ export interface RunawayButtonProps {
   onKeep?: () => void;
   /** Hops the cancel button around the dialog every 1.1 s, until someone points at or focuses it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const W = 320,
@@ -27,7 +30,8 @@ const MAX_TRIES = 4;
  * place and lets you click it. Keyboard users get a normal button: it never
  * moves while it has keyboard focus, and Enter or Space always activates it.
  */
-export function RunawayButton({ onCancel, onKeep, autoplay = false }: RunawayButtonProps) {
+export function RunawayButton({ onCancel, onKeep, autoplay = false, enableSound = true }: RunawayButtonProps) {
+  const play = useSound(enableSound);
   const x = useSpring(HOME.x, { stiffness: 260, damping: 18 });
   const y = useSpring(HOME.y, { stiffness: 260, damping: 18 });
   const [tries, setTriesState] = useState(0);
@@ -109,6 +113,7 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false }: RunawayBut
   // A click with detail 0 came from the keyboard (Enter / Space).
   const finish = (e: RMouseEvent, how: "kept" | "cancelled") => {
     refocus.current = e.detail === 0 ? "restart" : null;
+    play(how === "cancelled" ? "success" : "tap");
     setDone(how);
     if (how === "kept") onKeep?.();
     else onCancel?.();
@@ -116,6 +121,7 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false }: RunawayBut
 
   const restart = (e: RMouseEvent) => {
     refocus.current = e.detail === 0 ? "keep" : null;
+    play("tap", 0.6);
     setDone("none");
     setTries(0);
     goHome();
@@ -158,6 +164,10 @@ export function RunawayButton({ onCancel, onKeep, autoplay = false }: RunawayBut
             </motion.button>
             <motion.button
               type="button"
+              onPointerDown={(e) => {
+                // A mouse press that lands while it is still dodging gets a bump. Touch has no dodge, so it goes straight to the click.
+                if (e.pointerType !== "touch" && !tired) play("knock", 0.7);
+              }}
               onClick={(e) => finish(e, "cancelled")}
               onFocus={(e) => {
                 touched.current = true;

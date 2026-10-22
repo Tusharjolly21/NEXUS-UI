@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 type Stage = "idle" | "loading" | "done";
 
@@ -12,6 +13,8 @@ export interface ProgressButtonProps {
   task?: (onProgress: (p: number) => void) => Promise<void>;
   /** Runs itself on a loop until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const fakeTask = (onProgress: (p: number) => void) =>
@@ -26,7 +29,8 @@ const fakeTask = (onProgress: (p: number) => void) =>
 
 const morph = { type: "spring", stiffness: 300, damping: 28 } as const;
 
-export function ProgressButton({ label = "Download", doneLabel = "Open file", accent = "#0071e3", task = fakeTask, autoplay = false }: ProgressButtonProps) {
+export function ProgressButton({ label = "Download", doneLabel = "Open file", accent = "#0071e3", task = fakeTask, autoplay = false, enableSound = true }: ProgressButtonProps) {
+  const play = useSound(enableSound);
   const [stage, setStage] = useState<Stage>("idle");
   const [pct, setPct] = useState(0);
   const progress = useMotionValue(0);
@@ -34,13 +38,16 @@ export function ProgressButton({ label = "Download", doneLabel = "Open file", ac
   const touched = useRef(false);
   useMotionValueEvent(progress, "change", (v) => setPct(Math.round(v * 100)));
 
-  const run = async () => {
+  const run = async (audible = false) => {
     if (stage !== "idle") return;
     progress.set(0);
     setStage("loading");
     await task((p) => animate(progress, p, { type: "spring", stiffness: 120, damping: 20 }));
     animate(progress, 1, { duration: 0.2 });
-    setTimeout(() => setStage("done"), 350);
+    setTimeout(() => {
+      if (audible) play("done");
+      setStage("done");
+    }, 350);
   };
 
   const runRef = useRef(run);
@@ -69,8 +76,10 @@ export function ProgressButton({ label = "Download", doneLabel = "Open file", ac
         type="button"
         onClick={() => {
           touched.current = true;
+          if (stage === "loading") return;
+          play("tap");
           if (stage === "done") { setStage("idle"); progress.set(0); return; }
-          run();
+          run(true);
         }}
         aria-live="polite"
         aria-busy={stage === "loading"}

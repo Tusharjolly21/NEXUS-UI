@@ -63,6 +63,10 @@ Layers, back to front:
 - The amount is a real `<button type="button">` with `aria-label="Send ${amount} to {to.name}. Drag onto {to.name}, or press Enter."`.
 - The goo layer, filter SVG and drop ring are `aria-hidden`. Balances are plain text.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. When the visitor's drag lands on the friend (or Enter or Space sends it) and the money goes across, `paid` plays (three soft triangle notes climbing 1318 Hz, 1568 Hz, 2093 Hz, 65ms apart, the last ringing about 0.3s). Stretching the goo, letting go short of the friend and the autoplay sends make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Dragging pulls a blob out with a fused, liquid neck that thins and disappears by about 175px.

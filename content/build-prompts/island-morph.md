@@ -71,3 +71,10 @@ When `autoplay` is true, every 2600ms advance through timer → call → music �
 - [ ] In music, the equaliser bounces while playing, flattens on pause, and the icon spins between play and pause.
 - [ ] The segment thumb slides between options.
 - [ ] With `autoplay`, it cycles every 2.6s and stops after a press.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Pressing a state button (Idle, Timer, Call, Music), or Accept or Decline on the call, plays `whoosh` from `@/lib/ui-sounds` (a soft band of filtered noise sweeping from low to high) at reduced volume as the island changes shape. Pressing the state that is already active makes no sound.
+- The autoplay cycle is silent, and so are play/pause and hover.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

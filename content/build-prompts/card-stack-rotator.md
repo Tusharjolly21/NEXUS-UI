@@ -66,6 +66,10 @@ With 2+ cards, bump the pulse every 2600ms; any pointer down or key press stops 
 - Stack: `role="group"`, `aria-roledescription="carousel"`, `aria-label="Testimonials, {i} of {n}: {name}"`, `tabIndex 0`, focus ring 2px `#0071e3` (dark `#0a84ff`) with 4px offset on `#f5f5f7` (dark black).
 - Cards behind the front are `aria-hidden`. A visually hidden `aria-live="polite"` region reads the front quote (asterisks stripped), name and designation. Decorative quote glyph and initials are `aria-hidden`.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Flicking the front card away (a drag past 90px or a fast fling) or pressing an arrow key plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s). A card that springs back makes no sound, and neither do the timed `rotationInterval` throws or autoplay. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Three cards are visible: the front flat, two behind smaller, lower and tilted opposite ways.
@@ -136,6 +140,10 @@ Every 2600ms call `goBy(1)` while the drum is on screen and the tab is visible. 
 ## Accessibility
 
 - The viewport is a `group` with `aria-roledescription="carousel"`, a label that explains the arrow keys and `aria-keyshortcuts`. The 3D drum and dots are `aria-hidden`. A screen reader only paragraph reads "Testimonial X of N: quote, name, role" and is announced politely only after the visitor has interacted, so autoplay does not chatter.
+
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Turning the drum by hand plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 40% volume each time a new card comes square to the front, never more often than every 40ms, so a fast spin gives a quick run of clicks. A drag released with real speed also plays `swipe` (a soft paper whisk: bandpass noise sweeping from about 3.2 kHz down to 500 Hz in 0.12s) at 50% volume. The arrow keys tick through the same rule. The autoplay clicks to the next quote make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
 
 ## Acceptance checklist
 

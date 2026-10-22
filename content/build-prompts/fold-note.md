@@ -65,6 +65,10 @@ Every 2s, alternate settling to −180 and 0, starting with fold. When touched, 
 
 - The flap is `role="button"`, `tabIndex={0}`, `aria-label="Fold or unfold the note"`, with a focus-visible 2px ring `#0071e3` (dark `#2997ff`).
 
+## Sound
+
+`FoldNote` takes `enableSound?: boolean` (default `true`; `false` silences it). When the visitor opens the note (by drag or tap) `whoosh` plays from `@/lib/ui-sounds` (a short airy noise sweep rising from low to high, about 0.25s). When they fold it shut, `off` plays (a tiny noise click with a falling blip, 760 to 480 Hz over about 70ms, like a latch). It plays once per state change, at release, not while dragging. The autoplay folding is silent. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - At rest the note looks like one continuous printed bill with a faint crease.

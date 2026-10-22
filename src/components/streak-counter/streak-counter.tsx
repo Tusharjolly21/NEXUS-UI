@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const DAYS = ["M", "T", "W", "T", "F", "S", "S"];
 
@@ -9,6 +10,8 @@ export interface StreakCounterProps {
   start?: number;
   /** Logs a day by itself every couple of seconds until the user presses. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const EMBERS = Array.from({ length: 16 }, (_, i) => {
@@ -22,7 +25,8 @@ const EMBERS = Array.from({ length: 16 }, (_, i) => {
  * room for today, and the flame bursts into embers that fly out and fall back
  * into it, burning a little hotter each time.
  */
-export function StreakCounter({ start = 11, autoplay = false }: StreakCounterProps) {
+export function StreakCounter({ start = 11, autoplay = false, enableSound = true }: StreakCounterProps) {
+  const play = useSound(enableSound);
   const [count, setCount] = useState(start);
   const [burst, setBurst] = useState(0);
   const flame = useAnimationControls();
@@ -156,6 +160,7 @@ export function StreakCounter({ start = 11, autoplay = false }: StreakCounterPro
         whileTap={{ scale: 0.95 }}
         onClick={() => {
           touched.current = true;
+          play("success");
           log();
         }}
         className="h-11 w-full rounded-full text-[15px] font-semibold text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]"

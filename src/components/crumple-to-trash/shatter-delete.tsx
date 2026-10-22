@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 const CW = 300;
 const CH = 112;
@@ -70,6 +71,8 @@ export interface ShatterDeleteProps {
   onUndo?: () => void;
   /** Shatters and mends the card every 2.3s until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 type Phase = "whole" | "broken" | "mending";
@@ -87,7 +90,9 @@ export function ShatterDelete({
   onDelete,
   onUndo,
   autoplay = false,
+  enableSound = true,
 }: ShatterDeleteProps) {
+  const play = useSound(enableSound);
   const [state, setState] = useState<Phase>("whole");
   const [hit, setHit] = useState({ x: 70, y: 50 });
   const [seed, setSeed] = useState(7);
@@ -142,6 +147,7 @@ export function ShatterDelete({
   const del = (e: ReactMouseEvent<HTMLButtonElement>) => {
     touched.current = true;
     focusNext.current = "undo";
+    play("knock");
     const box = cardBox.current?.getBoundingClientRect();
     // Keyboard activation has no pointer position (detail 0): crack from the button.
     if (!box || e.detail === 0) smash(85, 50);
@@ -152,6 +158,7 @@ export function ShatterDelete({
   const undo = () => {
     touched.current = true;
     focusNext.current = "delete";
+    play("swipe", 0.8);
     mend();
     onUndo?.();
   };

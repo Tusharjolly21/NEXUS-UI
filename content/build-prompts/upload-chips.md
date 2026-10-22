@@ -75,3 +75,10 @@ Every 1600ms, with counter `k`: if `k % 4 === 3` clear all chips, else start sam
 - [ ] Removing a chip slides it right and the others close up.
 - [ ] Autoplay adds three samples then clears, repeating, and stops on first pointer down.
 - [ ] Dark mode uses the listed variables and colours.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Dropping or choosing files plays `tap` from `@/lib/ui-sounds` (a soft, short click with a tiny falling pitch) once for the batch as the chips appear. When each upload's promise resolves, `done` plays (four soft triangle notes in a rising major chord, ringing together) as its check appears.
+- The autoplay sample files, removing a chip and dragging over the zone are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

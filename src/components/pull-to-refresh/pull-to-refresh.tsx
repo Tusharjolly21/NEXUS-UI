@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface PullToRefreshProps {
   /** Balance shown before the first refresh. */
@@ -9,6 +10,8 @@ export interface PullToRefreshProps {
   onRefresh?: (balance: number, delta: number) => void;
   /** Pulls the card down and refreshes every 4.2 s, until someone drags it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** How far (px) the card has to travel before letting go refreshes it. */
@@ -50,7 +53,8 @@ function series(seed: number) {
  * commits, holds while it spins, then springs back with a little overshoot as
  * the balance rolls and the chart redraws.
  */
-export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay = false }: PullToRefreshProps) {
+export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay = false, enableSound = true }: PullToRefreshProps) {
+  const play = useSound(enableSound);
   const y = useMotionValue(0);
   const [phase, setPhase] = useState<"idle" | "ready" | "loading">("idle");
   const [bal, setBal] = useState(initialBalance);
@@ -61,6 +65,9 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
   const ringOpacity = useTransform(y, [0, 30], [0, 1]);
   const touched = useRef(false);
   const loading = useRef(false);
+  // True while the user is the one moving the card (a drag or a key press); the autoplay pull never sets it.
+  const userDriven = useRef(false);
+  const pastLine = useRef(false);
   const timer = useRef(0);
   const onRefreshRef = useRef(onRefresh);
   const balRef = useRef(initialBalance);
@@ -71,6 +78,12 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
   useEffect(() => () => window.clearTimeout(timer.current), []);
 
   useMotionValueEvent(y, "change", (v) => {
+    const past = v >= LINE;
+    if (past !== pastLine.current) {
+      pastLine.current = past;
+      // One tick as the card crosses the release line, only while the user is pulling.
+      if (userDriven.current && !loading.current) play("tick", past ? 0.6 : 0.35);
+    }
     if (phase !== "loading") setPhase(v >= LINE ? "ready" : "idle");
   });
 
@@ -80,6 +93,8 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
     setPhase("loading");
     animate(y, 62, { type: "spring", stiffness: 400, damping: 30 });
     timer.current = window.setTimeout(() => {
+      const audible = userDriven.current;
+      userDriven.current = false;
       const ch = +(Math.random() * 2400 - 600).toFixed(2);
       setDelta(ch);
       const next = +(balRef.current + ch).toFixed(2);
@@ -90,8 +105,9 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
       animate(y, 0, { type: "spring", stiffness: 300, damping: 14 });
       setPhase("idle");
       loading.current = false;
+      if (audible) play("done");
     }, 1300);
-  }, [y]);
+  }, [y, play]);
 
   /** The same pull the demo does: ease down past the line, then commit. */
   const pull = useCallback(() => {
@@ -112,6 +128,7 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
     if (e.key === "Enter" || e.key === " " || e.key === "ArrowDown") {
       e.preventDefault();
       touched.current = true;
+      userDriven.current = true;
       pull();
     }
   };
@@ -154,10 +171,12 @@ export function PullToRefresh({ initialBalance = 58834.75, onRefresh, autoplay =
           dragElastic={{ top: 0, bottom: 0.55 }}
           onDragStart={() => {
             touched.current = true;
+            userDriven.current = true;
             y.stop();
           }}
           onDragEnd={() => {
             if (y.get() >= LINE) refresh();
+            else userDriven.current = false;
           }}
           tabIndex={0}
           role="group"

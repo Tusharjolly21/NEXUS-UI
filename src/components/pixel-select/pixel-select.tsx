@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface Mood {
   id: string;
@@ -27,6 +28,8 @@ export interface PixelSelectProps {
   onChange?: (id: string) => void;
   /** Opens and picks moods by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Small seeded generator so every open gets fresh jitter without impure renders. */
@@ -45,7 +48,8 @@ function seeded(seed: number) {
  * A dropdown that assembles itself out of pixels tinted with the current mood,
  * then dissolves back into a shower of them when it closes.
  */
-export function PixelSelect({ options = MOODS, onChange, autoplay = false }: PixelSelectProps) {
+export function PixelSelect({ options = MOODS, onChange, autoplay = false, enableSound = true }: PixelSelectProps) {
+  const play = useSound(enableSound);
   const uid = useId();
   const [value, setValue] = useState((options[1] ?? options[0]).id);
   const [phase, setPhase] = useState<Phase>("closed");
@@ -68,13 +72,14 @@ export function PixelSelect({ options = MOODS, onChange, autoplay = false }: Pix
 
   const openMenu = () => {
     if (phase !== "closed") return;
+    play("pop", 0.7);
     setSeed((s) => s + 1);
     setPhase("opening");
     setTimeout(() => setPhase("open"), 420);
   };
   const closeMenu = (pick?: string) => {
     if (phase !== "open") return;
-    if (pick) { setValue(pick); onChange?.(pick); }
+    if (pick) { play("tap", 0.8); setValue(pick); onChange?.(pick); }
     setSeed((s) => s + 1);
     setPhase("closing");
     setTimeout(() => setPhase("closed"), 900);

@@ -9,6 +9,7 @@ import { buildSnippet, ControlRow, initialValues, Segmented } from "@/components
 import type { Playground, PlaygroundValues } from "@/lib/catalog/playgrounds";
 import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
 import { cn } from "@/lib/utils";
+import { SoundSwitch } from "@/components/site/sound-switch";
 import { ProBadge, useCopyBuildPrompt, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { FitPreview } from "./fit-preview";
 import { INTERACTION_FILTERS, TINT_CLASSES, type GalleryItem } from "./types";
@@ -510,6 +511,12 @@ function Inspector({ item }: { item: GalleryItem }) {
             <div className="mt-5 rounded-2xl bg-muted/60 p-4">
               <p className="text-[13px] font-medium text-foreground">Install</p>
               <code className="mt-1.5 block break-all font-mono text-[12.5px] leading-relaxed text-muted-foreground">{install}</code>
+            </div>
+          ) : null}
+          {item.sound ? (
+            <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-muted/60 p-4">
+              <SoundSwitch variant="pill" />
+              <p className="min-w-0 flex-1 basis-48 text-[13px] leading-snug text-muted-foreground">{item.sound}</p>
             </div>
           ) : null}
         </div>

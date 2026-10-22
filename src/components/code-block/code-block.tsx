@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion, useSpring } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,8 @@ export type CodeBlockProps = {
   hoverHighlight?: boolean;
   /** Walks the glide bar through `highlightLines` (or every line) until the pointer comes over the code. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   className?: string;
   style?: React.CSSProperties;
 };
@@ -546,9 +549,11 @@ export function CodeBlock({
   highlightLines,
   hoverHighlight = true,
   autoplay = false,
+  enableSound = true,
   className,
   style,
 }: CodeBlockProps) {
+  const play = useSound(enableSound);
   const uid = React.useId().replace(/:/g, "");
   const still = useReducedMotion() === true;
   const pageDark = React.useSyncExternalStore(subscribeDark, readDark, () => false);
@@ -653,6 +658,7 @@ export function CodeBlock({
         document.execCommand("copy");
         document.body.removeChild(ta);
       }
+      play("success", 0.6);
       setCopied(true);
       if (timer.current !== null) window.clearTimeout(timer.current);
       timer.current = window.setTimeout(() => setCopied(false), Math.max(300, header.copy?.copiedDurationMs ?? 1400));

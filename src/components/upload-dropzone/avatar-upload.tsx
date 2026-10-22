@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState, type DragEvent, type KeyboardEvent, type RefObject } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, type AnimationPlaybackControls } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface AvatarUploadResult {
   /** The chosen file. Null for the built-in demo photo. */
@@ -20,6 +21,8 @@ export interface AvatarUploadProps {
   onRemove?: () => void;
   /** Plays a self-running demo (a demo photo, a drag to frame, zoom, save) until someone presses or drops on the card. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
   /** Extra classes for the card. */
   className?: string;
 }
@@ -96,7 +99,8 @@ const clamp = (v: number, lim: number) => Math.max(-lim, Math.min(lim, v));
  * done. Dragging a file over the avatar makes it reach out for it. The upload
  * is simulated: the photo never leaves the browser.
  */
-export function AvatarUpload({ onUpload, onRemove, autoplay = false, className }: AvatarUploadProps) {
+export function AvatarUpload({ onUpload, onRemove, autoplay = false, enableSound = true, className }: AvatarUploadProps) {
+  const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<Phase>("empty");
@@ -165,9 +169,11 @@ export function AvatarUpload({ onUpload, onRemove, autoplay = false, className }
     if (!f) return;
     if (!f.type.startsWith("image/")) {
       setNote("That file is not an image. Try a PNG or JPG.");
+      play("error");
       return;
     }
     setNote("");
+    play("drop");
     stopAnims();
     revoke();
     const url = URL.createObjectURL(f);
@@ -191,13 +197,14 @@ export function AvatarUpload({ onUpload, onRemove, autoplay = false, className }
           setPhase("done");
           if (real) {
             setStatus("Photo saved.");
+            play("done");
             const current = srcRef.current;
             if (current) onUpload?.({ file: fileRef.current, src: current, zoom: zoomRef.current, x: x.get(), y: y.get() });
           }
         },
       });
     },
-    [onUpload, reduce, ring, x, y],
+    [onUpload, play, reduce, ring, x, y],
   );
 
   const reset = useCallback(

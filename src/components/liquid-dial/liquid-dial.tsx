@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, animate, motion, useMotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface LiquidDialAction {
   id: string;
@@ -38,6 +39,8 @@ export interface LiquidDialProps {
   onSelect?: (id: string) => void;
   /** Opens and browses by itself until the user interacts. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
@@ -46,7 +49,8 @@ export interface LiquidDialProps {
  * they are close. The highlight is two blobs on different springs, so it pulls
  * into a thread between actions before snapping round the new one.
  */
-export function LiquidDial({ actions = ACTIONS, color, accent, onSelect, autoplay = false }: LiquidDialProps) {
+export function LiquidDial({ actions = ACTIONS, color, accent, onSelect, autoplay = false, enableSound = true }: LiquidDialProps) {
+  const play = useSound(enableSound);
   const fid = "goo" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const blob = color ?? "var(--ld-blob)";
   const hl = accent ?? "var(--ld-accent)";
@@ -156,7 +160,7 @@ export function LiquidDial({ actions = ACTIONS, color, accent, onSelect, autopla
             tabIndex={open ? 0 : -1}
             onPointerEnter={() => setHover(i)}
             onFocus={() => setHover(i)}
-            onClick={() => choose(a)}
+            onClick={() => { play("tap", 0.8); choose(a); }}
             className="absolute flex h-[52px] w-[52px] items-center justify-center rounded-full text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
             style={{ left: -26, top: -26, pointerEvents: open ? "auto" : "none", ["--tw-ring-color" as string]: hl }}
             initial={false}

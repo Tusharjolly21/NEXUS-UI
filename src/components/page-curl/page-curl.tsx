@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, type PointerEvent as RPointerEvent, type ReactNode } from "react";
 import { animate, motion, useMotionValue, useMotionValueEvent } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 type P = [number, number];
 
@@ -13,6 +14,8 @@ export interface PageCurlProps {
   back?: ReactNode;
   /** Peeks the corner by itself until the user grabs it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 // Clip a polygon to the half-plane (p - m)·n <= 0 (Sutherland–Hodgman, one edge).
@@ -67,7 +70,8 @@ const BACK = (
  * and the folded flap is the corner region mirrored across it, shaded as the
  * paper's back. Let go far enough and it peels off; otherwise it lies back down.
  */
-export function PageCurl({ width = 400, height = 260, front = FRONT, back = BACK, autoplay = false }: PageCurlProps) {
+export function PageCurl({ width = 400, height = 260, front = FRONT, back = BACK, autoplay = false, enableSound = true }: PageCurlProps) {
+  const play = useSound(enableSound);
   const C: P = [width, height];
   const px = useMotionValue(width);
   const py = useMotionValue(height);
@@ -115,6 +119,7 @@ export function PageCurl({ width = 400, height = 260, front = FRONT, back = BACK
   useMotionValueEvent(py, "change", compute);
 
   const peelOff = () => {
+    play("swipe");
     setPeeled(true);
     animate(px, -width * 1.1, { type: "spring", stiffness: 60, damping: 16 });
     animate(py, -height * 0.9, { type: "spring", stiffness: 60, damping: 16 });
@@ -131,6 +136,7 @@ export function PageCurl({ width = 400, height = 260, front = FRONT, back = BACK
   };
 
   const reset = () => {
+    play("swipe", 0.6);
     setPeeled(false);
     animate(px, width, { type: "spring", stiffness: 120, damping: 20 });
     animate(py, height, { type: "spring", stiffness: 120, damping: 20 });

@@ -74,3 +74,10 @@ When `autoplay` is true, every 2400ms the selection steps through option indices
 - [ ] Tab into the group and use arrow keys: selection follows and the focus outline is visible.
 - [ ] With `autoplay`, it cycles Team → Basic → Plus every 2.4s and stops after a click.
 - [ ] Dark mode colours match the values above.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Choosing a different card, by click or by arrow keys in the group, plays `tick` from `@/lib/ui-sounds` (a tiny dry high click) as the ring moves.
+- The autoplay cycle is silent, and so is hover and pressing the card that is already selected.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

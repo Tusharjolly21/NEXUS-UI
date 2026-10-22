@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 type Status = "idle" | "verifying" | "error" | "success" | "done";
 
@@ -15,6 +16,8 @@ export interface OtpInputProps {
   onResend?: () => void;
   /** Called once a code verifies. */
   onVerified?: (code: string) => void;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const spring = { type: "spring", stiffness: 500, damping: 30 } as const;
@@ -26,8 +29,10 @@ export function OtpInput({
   accent = "#0071e3",
   onResend,
   onVerified,
+  enableSound = true,
 }: OtpInputProps) {
   const uid = useId();
+  const play = useSound(enableSound);
   const [code, setCode] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [focused, setFocused] = useState(false);
@@ -45,15 +50,18 @@ export function OtpInput({
     timers.current = [];
   };
 
-  const submit = async (value: string) => {
+  // `audible` is true only for codes the visitor typed; the autoplay demo stays silent.
+  const submit = async (value: string, audible = false) => {
     setStatus("verifying");
     await new Promise<void>((r) => later(r, 900));
     const ok = await verify(value);
     if (ok) {
+      if (audible) play("success");
       setStatus("success");
       onVerified?.(value);
       later(() => setStatus("done"), 650);
     } else {
+      if (audible) play("error");
       setStatus("error");
       setShowError(true);
       shake.start({ x: [0, -14, 12, -9, 7, -4, 0], transition: { duration: 0.5 } });
@@ -67,9 +75,10 @@ export function OtpInput({
   const handle = (raw: string) => {
     if (status === "verifying" || status === "success" || status === "done") return;
     const value = raw.replace(/\D/g, "").slice(0, length);
+    if (value.length > code.length) play("tick", 0.45);
     setCode(value);
     if (value.length) setShowError(false);
-    if (value.length === length) submit(value);
+    if (value.length === length) submit(value, true);
   };
 
   const reset = () => {

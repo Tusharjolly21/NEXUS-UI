@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useTransform } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface StepPlayerStep {
   /** Step title. */
@@ -18,6 +19,8 @@ export interface StepPlayerProps {
   stepDuration?: number;
   /** Starts playing on mount. Set to false to start paused (the play button still works). */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 export const DEFAULT_STEPS: StepPlayerStep[] = [
@@ -32,7 +35,11 @@ export const DEFAULT_STEPS: StepPlayerStep[] = [
  * while it plays; when it's full the bar eases over to the next dot and a
  * small wave runs through the ones ahead. Play, pause or tap a dot to jump.
  */
-export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDuration = 3.2, autoplay = true }: StepPlayerProps) {
+export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDuration = 3.2, autoplay = true, enableSound = true }: StepPlayerProps) {
+  const play = useSound(enableSound);
+  const soundRef = useRef(play);
+  // True from the moment the visitor presses play until the run reaches the end: only then do the automatic advances make sound.
+  const heard = useRef(false);
   const [rawI, setI] = useState(0);
   const [playing, setPlaying] = useState(autoplay);
   const [wave, setWave] = useState(0);
@@ -45,6 +52,9 @@ export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDura
   useEffect(() => {
     playRef.current = playing;
   }, [playing]);
+  useEffect(() => {
+    soundRef.current = play;
+  }, [play]);
 
   useEffect(() => {
     if (count === 0) return;
@@ -56,6 +66,11 @@ export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDura
       last = now;
       if (playRef.current) prog.set(Math.min(1, prog.get() + dt / stepDuration));
       if (prog.get() >= 1) {
+        if (heard.current) {
+          const atEnd = i >= count - 1;
+          soundRef.current(atEnd ? "done" : "step");
+          if (atEnd) heard.current = false;
+        }
         setI((n) => (n + 1) % count);
         setWave((w) => w + 1);
         return;
@@ -98,6 +113,7 @@ export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDura
               aria-selected={k === i}
               aria-label={s.t}
               onClick={() => {
+                if (k !== i) play(k === count - 1 ? "done" : "step");
                 setI(k);
                 prog.set(0);
               }}
@@ -117,7 +133,12 @@ export function StepPlayer({ accent = "#0071e3", steps = DEFAULT_STEPS, stepDura
         <motion.button
           type="button"
           whileTap={{ scale: 0.9 }}
-          onClick={() => setPlaying((p) => !p)}
+          onClick={() => {
+            const next = !playing;
+            play(next ? "on" : "off");
+            heard.current = next;
+            setPlaying(next);
+          }}
           aria-label={playing ? "Pause" : "Play"}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1d1d1f] text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"
         >

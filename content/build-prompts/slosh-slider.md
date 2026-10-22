@@ -71,3 +71,7 @@ With `autoplay`, every 1700ms animate `hx` to the next of `[0.92, 0.18, 0.7, 0.3
 - [ ] `onChange` fires only when the rounded value changes.
 - [ ] Autoplay throws the handle every 1.7s and stops for good on the first pointer or key input.
 - [ ] Dark mode swaps the track and text colours; the handle stays white and the liquid keeps the accent.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags, clicks the track or uses the keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time the value crosses a multiple of 5 (twenty detents), at most once every 40 ms; the liquid sloshing afterwards is silent. Autoplay throws and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

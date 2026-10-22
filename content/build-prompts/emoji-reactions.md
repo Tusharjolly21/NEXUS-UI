@@ -62,6 +62,13 @@ Build a message bubble with a row of emoji reaction chips under it. Tapping a ch
 - [ ] `accent` recolours tint, ring and sparks; `message={null}` shows only the row.
 - [ ] Dark mode swaps bubble, chip and picker surfaces.
 
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Adding a reaction, either by picking an emoji from the picker or by tapping a chip you have not reacted with, plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) as the sparks fire. Removing yours by tapping the chip again plays `off` (a soft latch click that falls slightly in pitch) at about half volume.
+- Opening the picker and hovering over emojis are silent, and so is a pick of an emoji you have already reacted with (nothing changes).
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 > The Emoji Reactions page has 2 variants. The brief above rebuilds the original Emoji Reactions; the sections below rebuild the Motion Kit Spark Reactions variant.
 
 ---
@@ -146,3 +153,10 @@ With `autoplay`, every 1300ms run the next step, looping: toggle rocket; open th
 - [ ] `onChange` reports the full row after each user toggle.
 - [ ] Autoplay runs the seven-step loop and stops for good on the first interaction.
 - [ ] Dark mode swaps the bubble, pills, smiley, picker and the near-black Eyes icon.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Adding a reaction, from the picker or by tapping a pill that is not yours yet, plays `pop` from `@/lib/ui-sounds` (a short rising blip, low to high, like a bubble) as the icon pops and sparks. Removing yours by tapping your pill plays `off` (a soft latch click that falls slightly in pitch) at about half volume.
+- The autoplay loop is silent, as is opening the picker; nothing plays on hover.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

@@ -76,3 +76,7 @@ Each frame kick at x with speed `|x − previousX| · 60`, then set the value fr
 - `onValueChange` fires only when the rounded value changes.
 - Autoplay sweeps in an irregular back-and-forth and stops for good after the first interaction.
 - Changing `accent` recolours immediately without resetting the springs.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags across the bars, clicks, or uses the keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time the coloured edge moves onto a different bar, at most once every 40 ms. Autoplay sweeps and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

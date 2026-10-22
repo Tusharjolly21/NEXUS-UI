@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ScrubInputProps {
   label: string;
@@ -11,6 +12,8 @@ export interface ScrubInputProps {
   step?: number;
   unit?: string;
   accent?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
@@ -18,7 +21,8 @@ export interface ScrubInputProps {
  * tool. Shift moves ten times faster, Alt ten times finer. A badge rides above
  * the number showing how far you have moved from where you started.
  */
-export function ScrubInput({ label, value, onChange, min, max, step = 1, unit = "", accent = "#0071e3" }: ScrubInputProps) {
+export function ScrubInput({ label, value, onChange, min, max, step = 1, unit = "", accent = "#0071e3", enableSound = true }: ScrubInputProps) {
+  const play = useSound(enableSound);
   const id = useId();
   const [drag, setDrag] = useState<{ start: number; delta: number } | null>(null);
   const [result, setResult] = useState<number | null>(null);
@@ -26,6 +30,15 @@ export function ScrubInput({ label, value, onChange, min, max, step = 1, unit = 
   const [shown, setShown] = useState(value);
   const origin = useRef({ x: 0, v: 0 });
   const resultT = useRef<number | undefined>(undefined);
+  const lastTick = useRef(0);
+  // One quiet tick per step actually taken (not at the ends, where the value cannot move).
+  const tick = (from: number, to: number) => {
+    if (from === to) return;
+    const now = performance.now();
+    if (now - lastTick.current < 40) return;
+    lastTick.current = now;
+    play("tick", 0.4);
+  };
   const clamp = (v: number) => Math.max(min, Math.min(max, v));
 
   // Keep the text box in step with the value when it changes from outside.
@@ -47,6 +60,7 @@ export function ScrubInput({ label, value, onChange, min, max, step = 1, unit = 
     const mult = e.shiftKey ? 10 : e.altKey ? 0.1 : 1;
     const raw = origin.current.v + ((e.clientX - origin.current.x) / 2) * step * mult;
     const v = clamp(Math.round(raw / (step * (e.altKey ? 0.1 : 1))) * step * (e.altKey ? 0.1 : 1));
+    tick(Number((drag.start + drag.delta).toFixed(2)), Number(v.toFixed(2)));
     onChange(Number(v.toFixed(2)));
     setDrag({ start: drag.start, delta: Number((v - drag.start).toFixed(2)) });
   };
@@ -102,8 +116,8 @@ export function ScrubInput({ label, value, onChange, min, max, step = 1, unit = 
           onBlur={() => { const n = Number(text); if (!Number.isNaN(n)) onChange(clamp(n)); else setText(String(value)); }}
           onKeyDown={(e) => {
             if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-            if (e.key === "ArrowUp") { e.preventDefault(); onChange(clamp(value + step * (e.shiftKey ? 10 : 1))); }
-            if (e.key === "ArrowDown") { e.preventDefault(); onChange(clamp(value - step * (e.shiftKey ? 10 : 1))); }
+            if (e.key === "ArrowUp") { e.preventDefault(); const to = clamp(value + step * (e.shiftKey ? 10 : 1)); tick(value, to); onChange(to); }
+            if (e.key === "ArrowDown") { e.preventDefault(); const to = clamp(value - step * (e.shiftKey ? 10 : 1)); tick(value, to); onChange(to); }
           }}
           className="w-full cursor-ew-resize bg-transparent text-[14px] font-medium tabular-nums text-[#1d1d1f] outline-none focus:cursor-text dark:text-[#f5f5f7]"
         />
@@ -118,10 +132,12 @@ export interface ScrubInputsProps {
   accent?: string;
   /** Scrubs the three fields by itself until the user touches them. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** A small inspector: radius, rotate and scale fields driving a sample shape. */
-export function ScrubInputs({ accent = "#0071e3", autoplay = false }: ScrubInputsProps) {
+export function ScrubInputs({ accent = "#0071e3", autoplay = false, enableSound = true }: ScrubInputsProps) {
   const [radius, setRadius] = useState(28);
   const [rotate, setRotate] = useState(0);
   const [scale, setScale] = useState(100);
@@ -152,9 +168,9 @@ export function ScrubInputs({ accent = "#0071e3", autoplay = false }: ScrubInput
         />
       </div>
       <div className="flex w-[230px] flex-col gap-2.5">
-        <ScrubInput label="Radius" value={radius} onChange={setRadius} min={0} max={60} unit="px" accent={accent} />
-        <ScrubInput label="Rotate" value={rotate} onChange={setRotate} min={-180} max={180} unit="°" accent={accent} />
-        <ScrubInput label="Scale" value={scale} onChange={setScale} min={50} max={150} unit="%" accent={accent} />
+        <ScrubInput label="Radius" value={radius} onChange={setRadius} min={0} max={60} unit="px" accent={accent} enableSound={enableSound} />
+        <ScrubInput label="Rotate" value={rotate} onChange={setRotate} min={-180} max={180} unit="°" accent={accent} enableSound={enableSound} />
+        <ScrubInput label="Scale" value={scale} onChange={setScale} min={50} max={150} unit="%" accent={accent} enableSound={enableSound} />
         <span className="pt-1 text-[12px] text-[#86868b] dark:text-[#8e8e93]">Drag a label sideways. Shift for big steps.</span>
       </div>
     </div>

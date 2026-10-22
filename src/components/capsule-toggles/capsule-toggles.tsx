@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface CapsuleToggleProps {
   checked: boolean;
@@ -11,13 +12,16 @@ export interface CapsuleToggleProps {
   offColor?: string;
   /** Ball colour (and glow) when on. */
   onColor?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /**
  * A ball sealed in a glass capsule. Flip it and the ball rolls to the other
  * end, stretching into a pill mid-flight and changing colour as it lands.
  */
-export function CapsuleToggle({ checked, onChange, label, offColor, onColor = "#34c759" }: CapsuleToggleProps) {
+export function CapsuleToggle({ checked, onChange, label, offColor, onColor = "#34c759", enableSound = true }: CapsuleToggleProps) {
+  const play = useSound(enableSound);
   const [prev, setPrev] = useState(checked);
   const [flying, setFlying] = useState(false);
   // stretch into a pill whenever `checked` changes, however it changed
@@ -40,7 +44,10 @@ export function CapsuleToggle({ checked, onChange, label, offColor, onColor = "#
       role="switch"
       aria-checked={checked}
       aria-label={label}
-      onClick={() => onChange(!checked)}
+      onClick={() => {
+        play(checked ? "off" : "on");
+        onChange(!checked);
+      }}
       className="relative h-[38px] w-[74px] flex-none rounded-full bg-[linear-gradient(180deg,rgba(255,255,255,.65),rgba(235,235,240,.5))] shadow-[inset_0_1px_1px_rgba(255,255,255,.9),inset_0_-2px_4px_rgba(0,0,0,.06),inset_0_0_0_1px_rgba(0,0,0,.08),0_6px_14px_-8px_rgba(0,0,0,.25)] outline-none [--ct-off:#c7c7cc] focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04))] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,.14),inset_0_-2px_4px_rgba(0,0,0,.3),inset_0_0_0_1px_rgba(255,255,255,.1),0_6px_14px_-8px_rgba(0,0,0,.7)] dark:[--ct-off:#636366] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"
     >
       <motion.span
@@ -88,6 +95,8 @@ export interface CapsuleTogglesProps {
   title?: string;
   /** Flips the rows one after another until the user touches the panel. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const ROWS: CapsuleToggleRow[] = [
@@ -98,7 +107,7 @@ const ROWS: CapsuleToggleRow[] = [
 ];
 
 /** A settings panel of capsule toggles, each row lighting up in its own colour. */
-export function CapsuleToggles({ rows = ROWS, title = "Controls", autoplay = false }: CapsuleTogglesProps) {
+export function CapsuleToggles({ rows = ROWS, title = "Controls", autoplay = false, enableSound = true }: CapsuleTogglesProps) {
   const id = useId().replace(/:/g, "");
   const [state, setState] = useState(() => Object.fromEntries(rows.map((r) => [r.id, r.on])) as Record<string, boolean>);
   const touched = useRef(false);
@@ -161,7 +170,7 @@ export function CapsuleToggles({ rows = ROWS, title = "Controls", autoplay = fal
                 <span className="text-[15px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">{r.label}</span>
                 <span className="text-[12px] text-[#86868b] dark:text-[#8e8e93]">{on ? r.hint : "Off"}</span>
               </span>
-              <CapsuleToggle label={r.label} checked={on} onColor={r.color} onChange={(v) => setState((s) => ({ ...s, [r.id]: v }))} />
+              <CapsuleToggle label={r.label} checked={on} onColor={r.color} enableSound={enableSound} onChange={(v) => setState((s) => ({ ...s, [r.id]: v }))} />
             </li>
           );
         })}

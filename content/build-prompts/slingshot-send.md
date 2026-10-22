@@ -52,6 +52,10 @@ Every 3.2 s, while on screen and the tab is visible: set the input to the next o
 
 - Thread: `role="log"`, `aria-live="polite"`, label "Conversation with {name}". Input labelled "Message". Stone labelled "Send message. Drag back and release, or press Enter or Space." with `aria-disabled` while the draft is empty. The flying copy is `aria-hidden`. Visible focus rings on input and stone.
 
+## Sound
+
+A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Picking up the stone (starting a drag, or pressing Enter or Space on it) plays `lift` once per pull (a soft rising noise sweep from about 800 to 2400 Hz with a short sine rising from 300 to 520 Hz, 80ms). Letting go past the dead zone with text in the field, or sending with Return, plays `whoosh` as the message leaves (an airy noise sweep rising from 400 to 3200 Hz over about 0.25s). A short tug that just twangs back sends nothing and plays no whoosh. Incoming replies and the autoplay conversation make no sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - Releasing beyond 26px sends; a shorter tug sends nothing and only twangs.

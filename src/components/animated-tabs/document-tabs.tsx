@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type KeyboardEvent, type RefObject } from "react";
 import { AnimatePresence, Reorder, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface DocumentTab {
   id: number;
@@ -22,6 +23,8 @@ export interface DocumentTabsProps {
   autoplay?: boolean;
   /** Extra classes for the window. */
   className?: string;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 const START: DocumentTab[] = [
@@ -72,7 +75,8 @@ function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  * gap, open a new one and it grows in from the plus. The active tab joins the
  * page below it, and the address and content follow whatever you pick.
  */
-export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = false, className = "" }: DocumentTabsProps) {
+export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = false, className = "", enableSound = true }: DocumentTabsProps) {
+  const play = useSound(enableSound);
   const uid = useId();
   const reduce = useReducedMotion() ?? false;
   const [tabs, setTabs] = useState(initialTabs);
@@ -150,6 +154,7 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
     setTabs(a);
   };
   const focusTab = (id: number) => {
+    if (activeRef.current !== id) play("tick", 0.6);
     setActive(id);
     strip.current?.querySelector<HTMLElement>(`[data-tab="${id}"]`)?.focus();
   };
@@ -158,9 +163,11 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
     touched.current = true;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
+      if (activeRef.current !== t.id) play("tick", 0.6);
       setActive(t.id);
     } else if (e.key === "Delete" || e.key === "Backspace") {
       e.preventDefault();
+      play("swipe", 0.4);
       close(t.id);
     } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
       e.preventDefault();
@@ -249,7 +256,11 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
                   aria-keyshortcuts="Delete"
                   tabIndex={on ? 0 : -1}
                   onKeyDown={(e) => onTabKey(e, t, i)}
-                  onPointerDown={() => setActive(t.id)}
+                  onPointerDown={() => {
+                    if (!on) play("tick", 0.6);
+                    setActive(t.id);
+                  }}
+                  onDragEnd={() => play("drop", 0.5)}
                   className="group relative flex h-10 flex-none cursor-default select-none items-center outline-none focus-visible:z-20 [&:focus-visible>span:first-child]:outline-2 [&:focus-visible>span:first-child]:-outline-offset-2 [&:focus-visible>span:first-child]:outline-[#0071e3] dark:[&:focus-visible>span:first-child]:outline-[#0a84ff]"
                   style={{ zIndex: on ? 10 : 1 }}
                   initial={{ width: 0, opacity: 0 }}
@@ -284,6 +295,7 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
                       onClick={(e) => {
                         e.stopPropagation();
                         touched.current = true;
+                        play("swipe", 0.4);
                         close(t.id);
                       }}
                       className={`ml-auto h-5 w-5 flex-none items-center justify-center rounded-full text-[#6e6e73] hover:bg-black/10 dark:text-[#a1a1a6] dark:hover:bg-white/15 ${on ? "flex opacity-100" : otherW >= 96 ? "flex opacity-0 group-hover:opacity-100" : "hidden"}`}
@@ -304,6 +316,7 @@ export function DocumentTabs({ initialTabs = START, onActiveChange, autoplay = f
           whileTap={reduce ? undefined : { scale: 0.9 }}
           onClick={() => {
             touched.current = true;
+            play("pop", 0.6);
             add();
           }}
           disabled={tabs.length >= MAX_TABS}

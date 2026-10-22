@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface PullCordProps {
   /** Whether the light starts on. */
@@ -17,6 +18,8 @@ export interface PullCordProps {
   className?: string;
   /** Tugs the cord every 2.6s until someone grabs it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Panel size in px. The scene is drawn at this size and scaled down to fit narrower parents. */
@@ -49,7 +52,9 @@ export function PullCord({
   hint = "Pull the cord.",
   className = "",
   autoplay = false,
+  enableSound = true,
 }: PullCordProps) {
+  const play = useSound(enableSound);
   const [on, setOn] = useState(defaultOn);
   const [scale, setScale] = useState(1);
   const fit = useRef<HTMLDivElement>(null);
@@ -72,8 +77,11 @@ export function PullCord({
     const next = !onRef.current;
     onRef.current = next;
     setOn(next);
-    if (byUser) changeRef.current?.(next);
-  }, []);
+    if (byUser) {
+      play(next ? "on" : "off");
+      changeRef.current?.(next);
+    }
+  }, [play]);
 
   // Pull the bead down programmatically, then release.
   const tug = useCallback(

@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
 export interface ScratchRevealProps {
   /** The code under the foil; copied to the clipboard by the Copy button. */
@@ -21,6 +22,8 @@ export interface ScratchRevealProps {
   className?: string;
   /** Scratches the card in a zig-zag, reveals it and starts over, until someone touches it. */
   autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
 }
 
 /** Card size and brush width in px. The card is drawn at this size and scaled down to fit narrower parents. */
@@ -78,7 +81,9 @@ export function ScratchReveal({
   onCopy,
   className = "",
   autoplay = false,
+  enableSound = true,
 }: ScratchRevealProps) {
+  const play = useSound(enableSound);
   const foil = useRef<HTMLCanvasElement>(null);
   const dust = useRef<HTMLCanvasElement>(null);
   const fit = useRef<HTMLDivElement>(null);
@@ -88,6 +93,7 @@ export function ScratchReveal({
   const doneRef = useRef(false);
   const revealRef = useRef(onReveal);
   const touched = useRef(false);
+  const lastSwipe = useRef(0);
   const [done, setDone] = useState(false);
   const [copied, setCopied] = useState<"idle" | "copied" | "failed">("idle");
   const [pct, setPct] = useState(0);
@@ -97,12 +103,16 @@ export function ScratchReveal({
     revealRef.current = onReveal;
   }, [onReveal]);
 
-  const reveal = useCallback(() => {
-    if (doneRef.current) return;
-    doneRef.current = true;
-    setDone(true);
-    revealRef.current?.();
-  }, []);
+  const reveal = useCallback(
+    (byUser = false) => {
+      if (doneRef.current) return;
+      doneRef.current = true;
+      setDone(true);
+      if (byUser) play("success");
+      revealRef.current?.();
+    },
+    [play],
+  );
 
   // A fresh foil is painted whenever the card is (re)covered.
   useEffect(() => {
@@ -150,7 +160,7 @@ export function ScratchReveal({
   }, []);
 
   const scratch = useCallback(
-    (x: number, y: number) => {
+    (x: number, y: number, byUser = false) => {
       const c = foil.current;
       const ctx = c?.getContext("2d", { willReadFrequently: true });
       if (doneRef.current || !c || !ctx) return;
@@ -164,6 +174,13 @@ export function ScratchReveal({
       ctx.lineTo(x, y);
       ctx.stroke();
       last.current = { x, y };
+      if (byUser) {
+        const now = performance.now();
+        if (now - lastSwipe.current >= 120) {
+          lastSwipe.current = now;
+          play("swipe", 0.25);
+        }
+      }
       for (let i = 0; i < 3; i++) {
         flecks.current.push({ x: x + (Math.random() - 0.5) * BRUSH, y: y + (Math.random() - 0.5) * 8, vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 1.5, life: 1 });
       }
@@ -178,10 +195,10 @@ export function ScratchReveal({
         }
         const p = clear / total;
         setPct(Math.round(p * 100));
-        if (p > threshold) reveal();
+        if (p > threshold) reveal(byUser);
       }
     },
-    [threshold, reveal],
+    [threshold, reveal, play],
   );
 
   useEffect(() => {
@@ -223,6 +240,7 @@ export function ScratchReveal({
 
   const copy = async () => {
     touched.current = true;
+    play("tap");
     try {
       await navigator.clipboard.writeText(code);
       setCopied("copied");
@@ -276,19 +294,19 @@ export function ScratchReveal({
                   e.currentTarget.setPointerCapture(e.pointerId);
                   last.current = null;
                   const p = pos(e);
-                  scratch(p.x, p.y);
+                  scratch(p.x, p.y, true);
                 }}
                 onPointerMove={(e) => {
                   if (e.buttons || e.pointerType === "touch") {
                     const p = pos(e);
-                    scratch(p.x, p.y);
+                    scratch(p.x, p.y, true);
                   } else last.current = null;
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === " ") {
                     e.preventDefault();
                     touched.current = true;
-                    reveal();
+                    reveal(true);
                   }
                 }}
               />

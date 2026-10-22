@@ -68,3 +68,10 @@ Every 4200ms, run that same pull and refresh. A drag or a keyboard pull marks it
 - [ ] A negative change shows a red ▼ line and a red chart.
 - [ ] Focusing the card and pressing Enter performs the same refresh.
 - [ ] With `autoplay`, it refreshes itself every 4.2s until dragged.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- While the user drags the card (or pulls it with the keyboard), crossing the release line plays `tick` from `@/lib/ui-sounds` (a very short, dry high click made of filtered noise) at reduced volume, and crossing back above it plays a quieter tick. When the refresh finishes and the balance rolls, `done` plays (four soft triangle notes in a rising major chord, ringing together).
+- The autoplay pull, the hold while refreshing and the spring back are silent; nothing plays on hover or at any other point of the drag.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

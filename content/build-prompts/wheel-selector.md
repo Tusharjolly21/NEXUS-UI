@@ -74,3 +74,7 @@ Every `autoRotateInterval` ms (n ≥ 2), spring `rot` one step forward (`round(r
 - The hub counter rolls and the panel blurs between items; dots stretch for the active one.
 - Wheel and arrow keys step one item; `onActiveChange` fires once per settle.
 - Below 560px container width the panel stacks under the dial (responsive).
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags, flings, scrolls, clicks a node or uses the keys, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time a new item passes the top marker, at most once every 40 ms, and one soft `drop` (a low sine thump falling 380 to 120 Hz with a brief noise tap, volume 0.5) when the dial settles after actually turning. Autoplay turns, controlled-value changes and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

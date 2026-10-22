@@ -52,6 +52,19 @@ Every 700ms toggle the next icon in order, wrapping. A `pointerdown` on the grid
 - Tiles: `type="button"`, `aria-pressed`, `aria-label` = off-state label.
 - Focus-visible: 2px `#0071e3` outline, 2px offset. Particles `pointer-events-none`.
 
+## Sound
+
+`AnimatedIcons` takes `enableSound?: boolean` (default `true`; `false` silences it). Clicking a tile plays one short sound from `@/lib/ui-sounds` for the direction it turns, chosen per icon (volume in brackets):
+- Menu: `on` when it opens, `off` when it closes (a tiny noise click with a short rising or falling blip).
+- Play: `tap` both ways (a dry click, a sine dropping from 900 to 620 Hz in 60ms).
+- Like: `pop` when it fills (a sine gliding up from 320 to 980 Hz in 70ms), a quiet `tick` (0.5) when unliked.
+- Bell: `ping` (0.8) when alerts turn on (a soft high sine, long decay), `off` (0.8) when they turn off.
+- Theme: `off` going to dark, `on` going back to light.
+- Save: `tick` (0.8) when saved, `tick` (0.4) when removed (a very short high-passed noise click).
+- Sound: `tick` (0.6) both ways.
+- Lock: `off` when it unlocks, `on` when it locks again.
+The standalone icons are silent; only the grid plays sound. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
 ## Acceptance checklist
 
 - [ ] Menu lines cross into an X; middle line vanishes.

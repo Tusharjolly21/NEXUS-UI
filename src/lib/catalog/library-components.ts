@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { AnimationKind, ComponentCategorySlug } from "@/lib/catalog/taxonomy";
 import * as Previews from "@/registry/component-previews";
+import { COMPONENT_SOUNDS, ENABLE_SOUND_PROP } from "@/lib/catalog/component-sounds";
 
 export type LibraryComponent = {
   slug: string;
@@ -43,7 +44,7 @@ export type LibraryComponent = {
 
 const tw = `Use Tailwind utility composition with rounded-3xl, border-white/10, bg-zinc-950, backdrop-blur-xl, and gradient overlays. Prefer oklch-based neutrals and cyan/fuchsia accents for luminous contrast.`;
 
-export const libraryComponents: LibraryComponent[] = [
+const baseLibraryComponents: LibraryComponent[] = [
   {
     slug: "scroll-progress-bar",
     name: "Scroll Progress Bar",
@@ -9188,6 +9189,13 @@ export function ProPlan() {
     tailwindSource: tw,
   },
 ];
+
+/** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
+export const libraryComponents: LibraryComponent[] = baseLibraryComponents.map((c) =>
+  COMPONENT_SOUNDS[c.slug] && !c.props?.some((p) => p.name === ENABLE_SOUND_PROP.name)
+    ? { ...c, props: [...(c.props ?? []), { ...ENABLE_SOUND_PROP }] }
+    : c,
+);
 
 export function getLibraryComponent(slugOrRegistryName: string) {
   return (

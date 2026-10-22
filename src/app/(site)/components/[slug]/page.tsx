@@ -10,6 +10,7 @@ import {
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { COMPONENT_FAQ } from "@/lib/catalog/component-faq";
+import { soundFaq, soundFor } from "@/lib/catalog/component-sounds";
 import { getGuidesForComponent } from "@/lib/blog";
 import { getComponentCategoryHref, getComponentCategoryLabel } from "@/lib/catalog/taxonomy";
 import { promptIdsFor } from "@/lib/build-prompts";
@@ -164,7 +165,8 @@ export default async function ComponentDetailPage({ params }: Props) {
     ],
   };
 
-  const faq = COMPONENT_FAQ[item.slug] ?? [];
+  const soundQ = soundFaq(item.slug);
+  const faq = [...(COMPONENT_FAQ[item.slug] ?? []), ...(soundQ ? [soundQ] : [])];
   const faqJsonLd = faq.length
     ? {
         "@context": "https://schema.org",
@@ -217,6 +219,7 @@ export default async function ComponentDetailPage({ params }: Props) {
         reactSource={locked ? undefined : item.reactSource}
         locked={locked}
         hasPrompt={hasBuildPrompt(item.slug)}
+        sound={soundFor(item.slug)}
         variantPrompts={variantPrompts}
         props={item.props}
         previewExportName={getPreviewExportName(item.Preview)}

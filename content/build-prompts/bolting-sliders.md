@@ -81,3 +81,7 @@ With `autoplay`, every 1100ms throw the next slider in order (wrapping) to a ran
 - [ ] With reduced motion enabled the knob jumps straight to the target.
 - [ ] Autoplay throws one knob after another every 1.1s and stops for good on the first pointer or key press.
 - [ ] Dark mode swaps the panel, groove and text colours; the knob stays white.
+
+## Sound
+
+Add an `enableSound` prop (boolean, default `true`; `false` silences it). When the user clicks a track or presses an arrow, Home or End key and the knob leaps, play `lift` as it launches (a short rising air whisk with a soft rising tone, volume 0.5) and `drop` as it lands with the squash (a low sine thump falling 380 to 120 Hz plus a brief noise tap, volume 0.5). With reduced motion only the `drop` plays. Dragging the knob itself makes no sound. Autoplay leaps and hover are silent. It is silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.

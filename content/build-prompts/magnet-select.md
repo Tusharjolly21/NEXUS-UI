@@ -83,3 +83,10 @@ With `autoplay`, the order is `[0, 2, 4, 1, 6, 3, 5]` (indices beyond the option
 - [ ] Arrow keys move the selection around the group and focus follows.
 - [ ] Autoplay previews (reach) then picks an option every 1.7s and stops for good on the first pointer or key interaction.
 - [ ] Dark mode changes the wells, icon strokes and label; the orb gradient is unchanged.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`; `false` silences it).
+- Choosing a different option, by click or by arrow keys, plays `tick` from `@/lib/ui-sounds` at 60% volume (a tiny dry high click) as the orb sets off toward it.
+- Pointing at an option (the reach of the liquid), clicking the option that is already selected and the autoplay loop are silent.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
