@@ -68,8 +68,6 @@ export function TerminalDemo() {
           hostname="nexus"
           theme={theme}
           autoplay
-          soundSpriteUrl="/sounds/sound.ogg"
-          soundSpriteConfigUrl="/sounds/sprite-config.json"
         />
       </div>
     </section>

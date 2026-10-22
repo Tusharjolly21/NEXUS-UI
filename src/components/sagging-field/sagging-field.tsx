@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useEffectEvent, useId, useMemo, useRef, useState } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useMotionValueEvent, useSpring } from "framer-motion";
 
 export interface SaggingFieldProps {
@@ -40,6 +41,7 @@ const slope = (t: number, sag: number, w: number) => (sag * (6 * t - 3 * t * t) 
 export function SaggingField({ label = "What's weighing on you?", width = 400, maxChars = 34, accent = "#0071e3", autoplay = false }: SaggingFieldProps) {
   const id = useId();
   const [value, setValue] = useState("");
+  useTypedText(value);
   const [fallen, setFallen] = useState<FallenLetter[]>([]);
   const [focused, setFocused] = useState(false);
   const sagMV = useSpring(0, { stiffness: 90, damping: 9, mass: 1.2 });

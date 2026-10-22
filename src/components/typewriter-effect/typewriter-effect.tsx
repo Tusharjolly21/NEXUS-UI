@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform, type AnimationPlaybackControls } from "framer-motion";
+import { useTypedText } from "@/lib/typing-sound";
 import { cn } from "@/lib/utils";
 
 type TypewriterTag = "h1" | "h2" | "p" | "span" | "div";
@@ -32,6 +33,8 @@ export type TypewriterEffectProps = {
   onComplete?: () => void;
   /** Loops through the phrases until someone clicks or taps the text, then stops after the current one. */
   autoplay?: boolean;
+  /** A key click for every character typed and deleted. Follows the typing switch; pass false to silence this one. */
+  enableSound?: boolean;
 };
 
 /** Deterministic per-keystroke jitter (no Math.random), so the rhythm feels typed rather than metronomic. */
@@ -64,6 +67,7 @@ function Typer({
   as = "span",
   onComplete,
   autoplay = false,
+  enableSound = true,
 }: TypewriterEffectProps & { phrases: string[] }) {
   const still = useReducedMotion() === true;
   const Tag = as;
@@ -128,6 +132,8 @@ function Typer({
   const scaleX = useTransform(kick, (k) => Math.max(0.4, 1 - k * 0.5));
 
   const shown = still ? (phrases[phrases.length - 1] ?? "") : current.slice(0, n);
+  // A key click for every character that lands or is deleted.
+  useTypedText(still ? "" : shown, enableSound);
   const idle = still || phase === "pausing" || phase === "done";
   const parts = shown.split(/(\s+)/);
   const starts = parts.map((_, k) => parts.slice(0, k).reduce((sum, p) => sum + p.length, 0));

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import {
   AnimatePresence,
   animate,
@@ -116,6 +117,7 @@ function SearchDemo({ live }: { live: boolean }) {
   }, [seen, live, k, n]);
   const q = QUERIES[live ? k : 0];
   const typed = live ? n : q.q.length;
+  useTypedText(q.q.slice(0, typed));
   const done = typed >= q.q.length;
   return (
     <div ref={ref} className="w-full max-w-[340px]" aria-hidden="true">

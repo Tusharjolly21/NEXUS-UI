@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
 export interface TypoCatchingSignupProps {
@@ -91,6 +92,7 @@ export function TypoCatchingSignup({
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const reduce = useReducedMotion();
   const [email, setEmail] = useState("");
+  useTypedText(email);
   const [state, setState] = useState<"idle" | "bad" | "done">("idle");
   const [touched, setTouched] = useState(false);
   const badTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

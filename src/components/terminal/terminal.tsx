@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, useVelocity } from "framer-motion";
+import { playTypingSound, useTypingSound, useTypingSoundEnabled } from "@/lib/typing-sound";
 import { createTerminalSpriteSfx } from "./sprite-audio";
 import { cn } from "@/lib/utils";
 
@@ -57,7 +58,7 @@ export type TerminalProps = {
   onCommand?: (input: string) => TerminalOutput | void;
   /** Shows the caret. */
   showCursor?: boolean;
-  /** Plays a key click while typing. Synthesised unless you pass a sprite. */
+  /** Plays a key click for every character typed. It uses the shared typing sound (recorded key clicks) unless you pass your own sprite. */
   enableSound?: boolean;
   /** OGG sprite for real key sounds. Nothing is fetched unless you set this. */
   soundSpriteUrl?: string;
@@ -271,7 +272,7 @@ export function Terminal({
   interactive = true,
   onCommand,
   showCursor = true,
-  enableSound = false,
+  enableSound = true,
   soundSpriteUrl,
   soundSpriteConfigUrl,
   simpleSoundUrl,
@@ -301,7 +302,12 @@ export function Terminal({
   const [typed, setTyped] = React.useState("");
   const [draft, setDraft] = React.useState("");
   const [focused, setFocused] = React.useState(false);
-  const [soundOn, setSoundOn] = React.useState(enableSound);
+  // Without a sprite of your own the terminal uses the shared typing sound and its switch.
+  const shared = !soundSpriteUrl && !simpleSoundUrl;
+  const typing = useTypingSound(enableSound);
+  const [typingOn, setTypingOn] = useTypingSoundEnabled();
+  const [ownSoundOn, setOwnSoundOn] = React.useState(enableSound);
+  const soundOn = shared ? enableSound && typingOn : ownSoundOn;
   const [inView, setInView] = React.useState(false);
   const [working, setWorking] = React.useState(false);
 
@@ -321,13 +327,19 @@ export function Terminal({
   const click = React.useCallback(
     (kind: "key" | "enter", ch = " ") => {
       if (!soundRef.current || still) return;
+      if (shared) {
+        // The scripted demo is a self-playing sound; keys the visitor presses always are heard.
+        if (demo.current) typing.type(kind === "enter" ? "\n" : ch);
+        else playTypingSound(kind === "enter" ? "\n" : ch, { auto: false });
+        return;
+      }
       try {
         sfx.tick(kind === "enter" ? { kind: "enter" } : { kind: "key", ch });
       } catch {
         /* audio is optional */
       }
     },
-    [sfx, still],
+    [sfx, still, shared, typing],
   );
 
   React.useEffect(() => {
@@ -377,7 +389,7 @@ export function Terminal({
       const input = cmd.input ?? "";
       if (still) setTyped(input);
       else {
-        if (soundRef.current) await sfx.ensureLoaded().catch(() => {});
+        if (soundRef.current && !shared) await sfx.ensureLoaded().catch(() => {});
         for (let c = 0; c < input.length; c++) {
           while (paused.current) await sleep(120, signal);
           setTyped(input.slice(0, c + 1));
@@ -593,8 +605,11 @@ export function Terminal({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  void sfx.resume().catch(() => {});
-                  setSoundOn((v) => !v);
+                  if (shared) setTypingOn(!soundOn);
+                  else {
+                    void sfx.resume().catch(() => {});
+                    setOwnSoundOn((v) => !v);
+                  }
                 }}
                 aria-label={soundOn ? "Mute key sounds" : "Play key sounds"}
                 aria-pressed={soundOn}

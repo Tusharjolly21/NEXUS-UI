@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -88,6 +89,7 @@ export function GhostAutocomplete({
   const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
   const [v, setV] = useState(defaultValue);
+  useTypedText(v, enableSound);
   const [ghost, setGhost] = useState("");
   const [dismissed, setDismissed] = useState<string | null>(null); // the text a suggestion was dismissed at
   const [caretEnd, setCaretEnd] = useState(true);

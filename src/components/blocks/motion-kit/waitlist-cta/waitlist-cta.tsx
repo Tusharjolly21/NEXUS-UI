@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, LayoutGroup, animate, motion, useReducedMotion, type AnimationPlaybackControls } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/ui-sounds";
@@ -97,6 +98,7 @@ export function WaitlistCta({
   const root = useRef<HTMLElement>(null);
   const onScreen = useOnScreen(root);
   const [email, setEmail] = useState("");
+  useTypedText(email, enableSound);
   const [state, setState] = useState<State>("idle");
   const [bad, setBad] = useState(false);
   const [count, setCount] = useState(baseCount);

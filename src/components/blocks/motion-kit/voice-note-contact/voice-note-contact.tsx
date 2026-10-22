@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import {
   AnimatePresence,
   LayoutGroup,
@@ -364,6 +365,7 @@ export function VoiceNoteContact({ accent, contactEmail = "hello@northwind.studi
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState("");
+  useTypedText(msg);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [touched, setTouched] = useState(false);

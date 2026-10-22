@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, LayoutGroup, motion, useAnimationControls, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
@@ -57,6 +58,7 @@ export function OtpLine({ code: codeProp = DEFAULT_CODE, autoplay = false, onVer
   const uid = useId();
   const reduce = useReducedMotion() ?? false;
   const [v, setV] = useState("");
+  useTypedText(v, enableSound);
   const [state, setState] = useState<State>("typing");
   const [focus, setFocus] = useState(false);
   const [interacted, setInteracted] = useState(false);

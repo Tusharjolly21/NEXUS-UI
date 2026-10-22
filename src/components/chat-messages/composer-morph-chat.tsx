@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type FormEvent, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useSound } from "@/lib/ui-sounds";
@@ -125,6 +126,7 @@ export function ComposerMorphChat({ autoplay = false, onSend, enableSound = true
   const playRef = useRef(play);
   const [msgs, setMsgs] = useState<Msg[]>(() => [{ id: 1, me: false, text: "Hi, I'm Nexus. Ask me anything about your interface." }]);
   const [draft, setDraft] = useState("");
+  useTypedText(draft, enableSound);
   const [thinking, setThinking] = useState(false);
   const [flight, setFlight] = useState<{ id: number; text: string; from: DOMRect; to: DOMRect } | null>(null);
   const [live, setLive] = useState(false);

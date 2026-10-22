@@ -15,6 +15,7 @@ const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), 
 const PROJECT_RUNTIME_DEPENDENCIES = new Set(Object.keys(packageJson.dependencies ?? {}));
 const NEXUS_FONT_REGISTRY_NAME = "nexus-font";
 const UI_SOUNDS_REGISTRY_NAME = "ui-sounds";
+const TYPING_SOUND_REGISTRY_NAME = "typing-sound";
 const UI_SOUNDS_PRO_REGISTRY_NAME = "ui-sounds-pro";
 const UI_SOUNDS_MAC_REGISTRY_NAME = "ui-sounds-mac";
 const UI_SOUNDS_RECORDED_REGISTRY_NAME = "ui-sounds-recorded";
@@ -132,6 +133,8 @@ function registryDepsForReactSource(src) {
   if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
   // Components that make sound import the shared synthesiser; the CLI installs it alongside them.
   if (src.includes("@/lib/ui-sounds")) deps.add(`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`);
+  // Components that type text play a key click per character from the shared typing sound.
+  if (src.includes("@/lib/typing-sound")) deps.add(`${homepage}/api/registry/${TYPING_SOUND_REGISTRY_NAME}`);
 
   for (const match of src.matchAll(/@\/components\/ui\/([a-z0-9-]+)/g)) {
     const dependency = match[1];
@@ -181,6 +184,21 @@ function buildUiSoundsItem() {
     dependencies: [],
     registryDependencies: [],
     files: [{ path: "next-ui/lib/ui-sounds.ts", type: "registry:lib", target: "lib/ui-sounds.ts", content }],
+  };
+}
+
+/** The typing sound: a key click for every character a component types, with its own on/off switch. Builds on ui-sounds. */
+function buildTypingSoundItem() {
+  const content = fs.readFileSync(path.join(root, "src", "lib", "typing-sound.ts"), "utf8");
+  return {
+    $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    name: TYPING_SOUND_REGISTRY_NAME,
+    type: "registry:lib",
+    title: "Typing Sound",
+    description: "A key click for every character a component types, in sync: useTypedText, useTypingSound and a remembered on/off switch (useTypingSoundEnabled). Plays public/sounds/sound.ogg with its sprite-config.json when present, a synthesised click otherwise. Builds on ui-sounds.",
+    dependencies: [],
+    registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
+    files: [{ path: "next-ui/lib/typing-sound.ts", type: "registry:lib", target: "lib/typing-sound.ts", content }],
   };
 }
 
@@ -1240,7 +1258,7 @@ const movedPath = path.join(root, "src", "lib", "catalog", "moved-sections.ts");
 const catalogTs = fs.readFileSync(catalogPath, "utf8") + "\n" + fs.readFileSync(movedPath, "utf8");
 const blocks = extractBlocks(catalogTs);
 
-const items = [buildNexusFontItem(), buildUiSoundsItem(), buildUiSoundsProItem(), buildUiSoundsMacItem(), buildUiSoundsRecordedItem()];
+const items = [buildNexusFontItem(), buildUiSoundsItem(), buildTypingSoundItem(), buildUiSoundsProItem(), buildUiSoundsMacItem(), buildUiSoundsRecordedItem()];
 const bySlug = new Map(blocks.map((b) => [b.slug, b.text]));
 
 for (const { slug } of blocks) {
@@ -1368,6 +1386,7 @@ function writeRegistry(destination, registryItems) {
 const publicNames = new Set([
   NEXUS_FONT_REGISTRY_NAME,
   UI_SOUNDS_REGISTRY_NAME,
+  TYPING_SOUND_REGISTRY_NAME,
   ...BLOCK_REGISTRY_PACKAGES
     .filter((blockPackage) => !blockPackage.premium)
     .map((blockPackage) => blockPackage.name),

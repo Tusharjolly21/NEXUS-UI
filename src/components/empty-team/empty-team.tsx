@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 import { cn } from "@/lib/utils";
@@ -94,6 +95,7 @@ export function EmptyTeam({
   const suggestions = suggested ?? EMPTY_TEAM_PEOPLE.map((name) => `${name}@${domain}`);
   const [people, setPeople] = useState<Person[]>([]);
   const [value, setValue] = useState("");
+  useTypedText(value, enableSound);
   const [fly, setFly] = useState<Fly | null>(null);
   const [sent, setSent] = useState(false);
   const [bad, setBad] = useState(false);

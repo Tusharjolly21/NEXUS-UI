@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { motion, useReducedMotion } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 import { Divider, FloatField, Rule, SocialRow, SubmitMorph, cardClass, focusRing, playScript, typeSteps, type SubmitState } from "./form-parts";
@@ -76,6 +77,11 @@ export function SignupForm({
     confirmPassword: defaultValues?.confirmPassword ?? "",
   };
   const [values, setValues] = React.useState<SignupFormValues>(empty);
+  useTypedText(values.firstName, enableSound);
+  useTypedText(values.lastName, enableSound);
+  useTypedText(values.email, enableSound);
+  useTypedText(values.password, enableSound);
+  useTypedText(values.confirmPassword, enableSound);
   const [errors, setErrors] = React.useState<Errors>({});
   const [shakes, setShakes] = React.useState<Partial<Record<keyof SignupFormValues, number>>>({});
   const [formError, setFormError] = React.useState<string | null>(null);

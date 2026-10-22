@@ -1,3 +1,4 @@
+import { TypingSoundPanel } from "@/components/site/typing-sound-panel";
 import { notFound } from "next/navigation";
 import { PreviewShield } from "@/components/pro/preview-shield";
 import type { Metadata } from "next";
@@ -448,7 +449,7 @@ export default async function BlockDetailPage({ params }: Props) {
           </PreviewCodeSection>
         </>
       ) : isTextAnimationsCard ? (
-        <>
+        <TypingSoundPanel>
           <PreviewCodeSection block={block.slug} title="Typewriter Heading" code={code} usageCode={TYPEWRITER_HEADING_USAGE} locked={locked}>
             <FlippingWordsDemo />
           </PreviewCodeSection>
@@ -482,7 +483,7 @@ export default async function BlockDetailPage({ params }: Props) {
           >
             <TextGenerateTypewriterDemo />
           </PreviewCodeSection>
-        </>
+        </TypingSoundPanel>
       ) : isBlogContentSectionsCard ? (
         <>
           <PreviewCodeSection
@@ -835,7 +836,7 @@ const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
     "The sections ship with demo handlers (a timed fake charge, and 424242 as the right code). Pass onPay, verify and onSubmit to wire them to your payment provider.",
   ],
   "block-text-animations": [
-    "TextGenerateTypewriter plays /sounds/sound.ogg by default. Add your own audio file at public/sounds/sound.ogg or pass a different soundSrc value.",
+    "The typewriters play a key click for every character, from the shared typing sound (lib/typing-sound.ts, installed with them). Put sound.ogg and sprite-config.json in public/sounds for the recorded clicks; without them a short synthesised click plays. Visitors switch it with one typing-sound switch, and each component takes muted or enableSound to stay silent.",
   ],
   "block-why-choose-us": [
     "SpotlightBentoGrid renders Unsplash images with next/image. Add images.unsplash.com to images.remotePatterns in next.config.mjs before using that variant.",
@@ -1373,10 +1374,8 @@ export default function AiDraft() {
   return (
       <TextGenerateTypewriter
         text="Nexus-ui is generating a production-ready landing section with sound."
-        soundSrc="/sounds/sound.ogg"
       startOnView
       typingSpeed={22}
-      volume={0.18}
     />
   );
 }`;

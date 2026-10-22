@@ -1,7 +1,7 @@
 import type { GalleryItem, Interaction, TileTint } from "@/components/gallery/types";
 import { getPreviewExportName, libraryComponents, type LibraryComponent } from "@/lib/catalog/library-components";
 import { getTileFit } from "@/lib/catalog/tile-fit";
-import { soundFor } from "@/lib/catalog/component-sounds";
+import { soundFor, typesFor } from "@/lib/catalog/component-sounds";
 import {
   COMPONENT_SIDEBAR_SECTIONS,
   getComponentCategoryLabel,
@@ -548,7 +548,7 @@ function interactionsOf(c: LibraryComponent): Interaction[] {
   for (const i of EXTRA_INTERACTIONS[c.slug] ?? []) set.add(i);
   const triggered = ["hover", "press", "drag", "scroll", "type"].some((i) => set.has(i as Interaction));
   if (!triggered) set.add("loop");
-  if (soundFor(c.slug)) set.add("sound");
+  if (soundFor(c.slug) || typesFor(c.slug)) set.add("sound");
   return [...set];
 }
 
@@ -570,6 +570,7 @@ function toItem(c: LibraryComponent): GalleryItem | null {
     premium: c.premium,
     hasPrompt: hasBuildPrompt(c.slug),
     sound: soundFor(c.slug),
+    typing: typesFor(c.slug) || undefined,
     variants: c.previewSections && c.previewSections.length > 1 ? c.previewSections.length : undefined,
     demo: SELF_DEMO.has(c.slug) ? null : DRAG.has(c.slug) ? "drag" : WANDER.has(c.slug) ? "wander" : null,
   };

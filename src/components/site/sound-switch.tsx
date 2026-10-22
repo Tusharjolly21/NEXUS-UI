@@ -1,8 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { Volume2, VolumeOff } from "lucide-react";
+import { Keyboard, Volume2, VolumeOff } from "lucide-react";
 import { AutoplaySound, configureSounds, playSound, useSoundStyle, useSoundsEnabled } from "@/lib/ui-sounds";
+import { playTypingSound, useTypingSoundEnabled } from "@/lib/typing-sound";
 import { cn } from "@/lib/utils";
 
 // Nexus UI is a wall of live previews, so it stays quiet until a visitor asks for sound. In your own
@@ -60,6 +61,35 @@ export function SoundSwitch({ variant = "icon", className }: { variant?: "icon" 
       )}
     >
       <Icon className="size-[15px]" aria-hidden />
+    </button>
+  );
+}
+
+/**
+ * The switch for the typing sound: a key click for every character a component types. It sits on the
+ * pages and pop-ups whose component types by itself. Turning it on also turns site sound on (it would
+ * be silent otherwise) and answers with a click; turning it off silences typing only.
+ */
+export function TypingSoundSwitch({ className }: { className?: string }) {
+  const [on, setOn] = useTypingSoundEnabled();
+  const toggle = () => {
+    const next = !on;
+    setOn(next);
+    if (next) window.setTimeout(() => playTypingSound("k", { auto: false, volume: 0.6 }), 30);
+  };
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      onClick={toggle}
+      className={cn(
+        "pg-float inline-flex h-9 items-center gap-2 rounded-full bg-card px-3.5 text-[13px] font-medium text-foreground transition-colors hover:bg-foreground/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+        className,
+      )}
+    >
+      <Keyboard className={cn("size-4", !on && "opacity-50")} aria-hidden />
+      {on ? "Typing sound on" : "Typing sound off"}
     </button>
   );
 }

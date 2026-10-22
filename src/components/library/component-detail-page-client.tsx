@@ -20,7 +20,8 @@ import { CodeBlock } from "@/components/code-block/code-block";
 import { GalleryTile, TileCell, TileGrid } from "@/components/gallery/gallery-tile";
 import { TINT_CLASSES, type GalleryItem, type TileTint } from "@/components/gallery/types";
 import { InstallCard } from "@/components/site/install-card";
-import { SoundSwitch } from "@/components/site/sound-switch";
+import { SoundSwitch, TypingSoundSwitch } from "@/components/site/sound-switch";
+import { TYPING_NOTE } from "@/lib/catalog/component-sounds";
 import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/components/pro/pro-access";
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
@@ -837,6 +838,8 @@ type ComponentDetailProps = {
   variantPrompts?: (string | null)[];
   /** What you hear, when the component makes interface sound. */
   sound?: string;
+  /** The component types text: shows the typing sound switch. */
+  typing?: boolean;
   /** Questions and answers about this component (also sent as FAQPage structured data). */
   faq?: { q: string; a: string }[];
   /** Blog guides that use this component. */
@@ -868,6 +871,7 @@ export function ComponentDetailPageClient({
   locked = false,
   hasPrompt = false,
   sound,
+  typing = false,
   variantPrompts = [],
   faq = [],
   guides = [],
@@ -932,6 +936,12 @@ export function ComponentDetailPageClient({
               <p className="max-w-[560px] text-[13.5px] leading-snug text-muted-foreground">
                 {sound} Sound is off on this site until you switch it on.
               </p>
+            </div>
+          ) : null}
+          {typing ? (
+            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+              <TypingSoundSwitch />
+              <p className="max-w-[560px] text-[13.5px] leading-snug text-muted-foreground">{TYPING_NOTE}</p>
             </div>
           ) : null}
           <nav aria-label="On this page" className="mt-5 flex flex-wrap items-center gap-2 text-[13.5px]">

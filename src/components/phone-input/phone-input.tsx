@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -150,6 +151,7 @@ export function PhoneInput({
   const list = countries.length ? countries : COUNTRIES;
   const [iso, setIso] = useState(() => (list.some((c) => c.iso === defaultCountry) ? defaultCountry : list[0].iso));
   const [digits, setDigits] = useState("");
+  useTypedText(digits);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);

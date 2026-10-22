@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 
 export type SplitContactValues = { name: string; email: string; topic: string; message: string };
@@ -139,6 +140,9 @@ export function SplitContact({
   const id = React.useId().replace(/:/g, "");
   const time = useZoneTime(timeZone);
   const [values, setValues] = React.useState<SplitContactValues>({ name: "", email: "", topic: topics[0] ?? "", message: "" });
+  useTypedText(values.name);
+  useTypedText(values.email);
+  useTypedText(values.message);
   const [phase, setPhase] = React.useState<Phase>("idle");
   const [flying, setFlying] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);

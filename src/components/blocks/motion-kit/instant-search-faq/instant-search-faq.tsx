@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useState, type CSSProperties } from "react";
+import { useTypedText } from "@/lib/typing-sound";
 import { AnimatePresence, LayoutGroup, motion, useReducedMotion } from "framer-motion";
 
 export interface InstantSearchFaqItem {
@@ -75,6 +76,7 @@ export function InstantSearchFaq({
   const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
   const reduce = useReducedMotion();
   const [q, setQ] = useState("");
+  useTypedText(q);
   const [cat, setCat] = useState("All");
   const [open, setOpen] = useState<string | null>(faqs[0]?.q ?? null);
   const [touched, setTouched] = useState(false);

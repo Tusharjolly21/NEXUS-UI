@@ -183,7 +183,6 @@ export function TextGenerateTypewriterDemo() {
           text="Churn rose 1.8 points, almost entirely from annual plans that renewed in August. Most of those accounts never invited a second teammate, so the fastest lever is an invite prompt in week one."
           startOnView
           typingSpeed={40}
-          volume={0.22}
           className="mt-4"
         />
       </div>
