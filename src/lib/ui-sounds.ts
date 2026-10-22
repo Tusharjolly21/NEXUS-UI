@@ -109,7 +109,13 @@ export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
 }
 
 /** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
-export type SoundDef = { category: string; label: string; play: (c: AudioContext, out: AudioNode) => void };
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
 type Def = SoundDef & { category: SoundCategory };
 
 export const SOUNDS = {
@@ -323,7 +329,7 @@ export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
   g.gain.value = Math.max(0, Math.min(1, volume));
   g.connect(master);
   def.play(c, g);
-  setTimeout(() => g.disconnect(), 2000);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
 }
 
 /** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
