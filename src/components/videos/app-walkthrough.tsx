@@ -18,6 +18,7 @@ export interface AppWalkthroughProps {
 export const meta: VideoMeta<AppWalkthroughProps> = {
   id: "app-walkthrough",
   title: "App Walkthrough",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Product demo",
   motion: "Cursor-driven UI with auto-zoom camera",
   app: "FormMe",

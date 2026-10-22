@@ -69,8 +69,31 @@ export type Field =
   | { key: string; label: string; type: "color" }
   | { key: string; label: string; type: "number"; min: number; max: number; step?: number };
 
+export type FormatId = "9:16" | "4:5" | "1:1" | "16:9" | "app" | "21:9";
+export interface Format { id: FormatId; w: number; h: number; label: string; where: string }
+export const FORMATS: Record<FormatId, Format> = {
+  "9:16": { id: "9:16", w: 1080, h: 1920, label: "9:16", where: "Reels, TikTok, Shorts" },
+  "4:5": { id: "4:5", w: 1080, h: 1350, label: "4:5", where: "LinkedIn, Instagram feed" },
+  "1:1": { id: "1:1", w: 1080, h: 1080, label: "1:1", where: "X, LinkedIn" },
+  "16:9": { id: "16:9", w: 1920, h: 1080, label: "16:9", where: "YouTube, X, Product Hunt" },
+  "app": { id: "app", w: 886, h: 1920, label: "App Store", where: "App Store preview (6.9in)" },
+  "21:9": { id: "21:9", w: 2520, h: 1080, label: "21:9", where: "Website hero" },
+};
+export const formatsOf = (m: { formats?: FormatId[] }) => (m.formats ?? ["9:16"]).map((f) => FORMATS[f]);
+
+/** Frame size every video receives. Videos made for one format can ignore it. */
+export interface Frame { w?: number; h?: number }
+
 export interface VideoMeta<Props = Record<string, unknown>> {
   id: string;
+  /** Where it's meant to be posted, e.g. ["YouTube", "X"] */
+  platforms: string[];
+  /** Formats it can render in; the first is the default. Omitted = 9:16 only. */
+  formats?: FormatId[];
+  /** Seamless loop (website backgrounds): no intro or end card, frame 0 == last frame */
+  loop?: boolean;
+  /** No soundtrack */
+  silent?: boolean;
   title: string;
   /** What the video is for, e.g. "Product launch" */
   purpose: string;
@@ -88,4 +111,13 @@ export interface VideoMeta<Props = Record<string, unknown>> {
   /** The full build prompt (Pro) */
   prompt: string;
   dark?: boolean;
+}
+
+/** bgBlobs for any frame size: one light near the top-left, one near the bottom-right. */
+export function blobsFor(t: number, w: number, h: number, a = "rgba(10,132,255,.16)", b = "rgba(236,72,153,.12)") {
+  const s = Math.max(w, h) * 0.62;
+  return [
+    { position: "absolute", width: s, height: s, borderRadius: "50%", filter: "blur(60px)", left: -s * 0.35 + Math.sin(t * 0.5) * s * 0.05, top: -s * 0.3 + Math.cos(t * 0.4) * s * 0.05, background: `radial-gradient(circle, ${a}, transparent 65%)` },
+    { position: "absolute", width: s, height: s, borderRadius: "50%", filter: "blur(60px)", left: w - s * 0.6 + Math.cos(t * 0.45) * s * 0.06, top: h - s * 0.6 + Math.sin(t * 0.5) * s * 0.05, background: `radial-gradient(circle, ${b}, transparent 65%)` },
+  ] as CSSProperties[];
 }

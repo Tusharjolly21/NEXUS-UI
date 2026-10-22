@@ -18,6 +18,7 @@ export interface WhatsNewProps {
 export const meta: VideoMeta<WhatsNewProps> = {
   id: "whats-new",
   title: "What's New",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Changelog & updates",
   motion: "Split-flap month, beam timeline, live mini demos",
   app: "Nexus UI",

@@ -9,14 +9,14 @@ import { PRICES, formatPrice } from "@/lib/pricing";
 
 export const metadata: Metadata = createMetadata({
   title: "Product Video Templates: Launch, Pricing and Update Videos in React",
-  description: `${videos.length} vertical product videos for launches, pricing, changelogs and app walkthroughs. Each one is a React component with its own soundtrack: watch it, change the words, then take the prompt and the code.`,
+  description: `${videos.length} product videos for launches, pricing, changelogs, app previews and website backgrounds, in the shapes each platform wants. Each one is a React component with its own soundtrack: watch it, change the words, then take the prompt and the code.`,
   alternates: { canonical: "/videos" },
 });
 
 const STEPS = [
-  { title: "Pick one", body: "Vertical videos for a launch, a price, an update, a demo or a teaser. Each is cut to its own soundtrack." },
+  { title: "Pick one", body: "Videos for a launch, a price, an update, a demo, an app store listing or a site background. Each is cut to its own soundtrack." },
   { title: "Make it yours", body: "Type your words, pick your colours and watch it redraw as you go. The numbers are already live." },
-  { title: "Render it", body: "A small script turns your edit into an MP4, ready for Reels, Shorts and TikTok." },
+  { title: "Render it", body: "A small script turns your edit into an MP4 in the shape you pick: 9:16 for Reels, 1:1 for X, 16:9 for YouTube." },
 ];
 
 export default function VideosPage() {
@@ -30,17 +30,17 @@ export default function VideosPage() {
             Product videos, ready to make <RainbowWord>yours</RainbowWord>
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            {videos.length} vertical videos for launches, pricing, updates and demos, each with its own soundtrack. Watch one, change
-            the words, then take the prompt and the code. {free} are free.
+            {videos.length} videos for launches, pricing, updates, demos and app stores, in the shapes each platform wants and each with its
+            own soundtrack. Watch one, change the words, then take the prompt and the code. {free} are free.
           </p>
         </div>
       </section>
 
       <section aria-label="Videos" className="px-4 pb-24 pt-8">
-        <ul className="mx-auto grid max-w-[1152px] grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-          {videos.map((v, i) => (
-            <li key={v.slug}>
-              <VideoCard video={v} priority={i < 4} />
+        <ul className="mx-auto max-w-[1152px] columns-2 gap-4 sm:gap-5 lg:columns-4">
+          {videos.map((v) => (
+            <li key={v.slug} className="mb-4 break-inside-avoid sm:mb-5">
+              <VideoCard video={v} />
             </li>
           ))}
         </ul>

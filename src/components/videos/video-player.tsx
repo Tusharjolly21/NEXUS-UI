@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { videoAudioSrc, videoPosterSrc } from "@/lib/catalog/videos";
+import { videoAudioSrc, videoPosterSrc, type FormatId } from "@/lib/catalog/videos";
 import { VideoStage } from "./video-stage";
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -13,6 +13,8 @@ const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).p
  * a clock: it advances `t` about 30 times a second and redraws. With the sound on, the soundtrack
  * is the clock instead (so picture and music cannot drift), and it loops.
  *
+ * Videos with no soundtrack (the website loop) have no sound button and just loop.
+ *
  * Sound starts only after a press on the sound button, never by itself. Playback pauses while the
  * player is off screen, and with reduced motion it waits on its still frame until asked to play.
  */
@@ -20,6 +22,9 @@ export function VideoPlayer({
   slug,
   duration,
   posterAt,
+  format = "9:16",
+  silent = false,
+  posterFormat = "9:16",
   values,
   autoPlay = false,
   className,
@@ -27,6 +32,12 @@ export function VideoPlayer({
   slug: string;
   duration: number;
   posterAt: number;
+  /** The shape to play in. */
+  format?: FormatId;
+  /** No soundtrack: hides the sound button. */
+  silent?: boolean;
+  /** The shape the pre-rendered still was made in; it is only shown while that shape is playing. */
+  posterFormat?: FormatId;
   values?: Record<string, unknown>;
   autoPlay?: boolean;
   className?: string;
@@ -154,7 +165,7 @@ export function VideoPlayer({
       aria-label="Video player"
     >
       <button type="button" onClick={toggle} aria-label={playing ? "Pause video" : "Play video"} className="block w-full cursor-pointer outline-none">
-        <VideoStage slug={slug} t={t} values={values} poster={videoPosterSrc(slug)} />
+        <VideoStage slug={slug} t={t} format={format} values={values} poster={format === posterFormat ? videoPosterSrc(slug) : undefined} />
       </button>
 
       {!playing ? (
@@ -188,15 +199,17 @@ export function VideoPlayer({
         <span className="w-[72px] shrink-0 text-right text-[12px] tabular-nums text-white/85">
           {fmt(t)} / {fmt(duration)}
         </span>
-        <button
-          type="button"
-          onClick={toggleSound}
-          aria-label={sound ? "Turn sound off" : "Turn sound on"}
-          aria-pressed={sound}
-          className="grid size-9 shrink-0 place-items-center rounded-full bg-white/15 backdrop-blur transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-white"
-        >
-          {sound ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
-        </button>
+        {silent ? null : (
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-label={sound ? "Turn sound off" : "Turn sound on"}
+            aria-pressed={sound}
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-white/15 backdrop-blur transition-colors hover:bg-white/25 focus-visible:outline-2 focus-visible:outline-white"
+          >
+            {sound ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
+          </button>
+        )}
       </div>
     </div>
   );

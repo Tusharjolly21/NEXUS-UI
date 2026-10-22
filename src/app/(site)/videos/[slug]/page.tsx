@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!v) return {};
   return createMetadata({
     title: `${v.title}: ${v.purpose} Video Template in React`,
-    description: `${v.blurb} A ${v.duration}-second vertical video with its own soundtrack: edit the words live, then take the prompt and the code.`,
+    description: `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video${v.silent ? " that loops without a seam" : " with its own soundtrack"}: edit the words live, then take the prompt and the code.`,
     alternates: { canonical: `/videos/${v.slug}` },
   });
 }
@@ -42,7 +42,12 @@ export default async function VideoPage({ params }: Props) {
     duration: `PT${video.duration}S`,
     isAccessibleForFree: !video.premium,
   };
-  const more = videos.filter((v) => v.slug !== video.slug).slice(0, 4);
+  // Same-shaped neighbours first, so the row sits level.
+  const tall = (v: { formats: string[] }) => ["9:16", "app"].includes(v.formats[0]);
+  const more = videos
+    .filter((v) => v.slug !== video.slug)
+    .sort((a, b) => Number(tall(b) === tall(video)) - Number(tall(a) === tall(video)))
+    .slice(0, 4);
 
   return (
     <>
@@ -79,7 +84,7 @@ export default async function VideoPage({ params }: Props) {
               See all {videos.length} ›
             </Link>
           </div>
-          <ul className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+          <ul className="mt-8 grid grid-cols-2 items-start gap-4 sm:gap-5 lg:grid-cols-4">
             {more.map((v) => (
               <li key={v.slug}>
                 <VideoCard video={v} />

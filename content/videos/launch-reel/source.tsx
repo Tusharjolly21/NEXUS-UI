@@ -30,6 +30,7 @@ export interface LaunchReelProps {
 export const meta: VideoMeta<LaunchReelProps> = {
   id: "launch-reel",
   title: "Launch Reel",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Product launch",
   motion: "Type match-cut into the live site",
   app: "Nexus UI",

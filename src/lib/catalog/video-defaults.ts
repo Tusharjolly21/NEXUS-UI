@@ -14,6 +14,17 @@ export function videoDefaults(slug: string): Record<string, string> {
   if (slug === "launch-reel") {
     base.stat = `${CATALOG_COUNTS.components} animated components.`;
   }
+  if (slug === "bento-tour") {
+    base.n1 = String(CATALOG_COUNTS.components);
+    base.n2 = String(sounds);
+    base.n3 = String(CATALOG_COUNTS.templates);
+  }
+  if (slug === "install-seconds") {
+    base.sub = `${CATALOG_COUNTS.components} components. One command each.`;
+  }
+  if (slug === "hero-loop") {
+    base.sub = `${CATALOG_COUNTS.components} animated components for React.`;
+  }
   if (slug === "price-reveal") {
     base.items = `${CATALOG_COUNTS.components} components, ${CATALOG_COUNTS.blocks} blocks, ${CATALOG_COUNTS.templates} templates, ${sounds} sounds`;
     base.price = formatPrice(PRICES.allAccess);

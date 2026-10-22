@@ -50,8 +50,9 @@ export default function VideosDocsPage() {
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
             Copy the video file and <code className={docInlineCodeClass}>kit.ts</code> into one folder, for example{" "}
             <code className={docInlineCodeClass}>components/videos/</code>, and the images into{" "}
-            <code className={docInlineCodeClass}>public/videos/assets/</code>. The video draws on a fixed 1080 by 1920 canvas and takes{" "}
-            <code className={docInlineCodeClass}>t</code> (seconds) plus its copy as props:
+            <code className={docInlineCodeClass}>public/videos/assets/</code>. Each video draws on a fixed canvas for its shape (1080 by 1920 for 9:16, 1920 by 1080 for 16:9) and takes{" "}
+            <code className={docInlineCodeClass}>t</code> (seconds), the frame size{" "}
+            <code className={docInlineCodeClass}>w</code> and <code className={docInlineCodeClass}>h</code> (for the videos that come in more than one shape) and its copy as props:
           </p>
           <DocPre>{`<LaunchReel t={4.2} words="landing page, dashboard" brand="Your brand" url="yourbrand.com" />`}</DocPre>
         </DocSection>
@@ -68,13 +69,18 @@ export default function VideosDocsPage() {
         <DocSection title="3. Render">
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">
             Install Playwright once, make sure ffmpeg is on your PATH, start your app and run the script. The launch reel and the app
-            walkthrough are 12 seconds; the others are 10.
+            walkthrough are 12 seconds, the others are between 5 and 16; each video&apos;s page says how long it is.
           </p>
           <DocPre>{`npm i -D playwright
 npx playwright install chromium
-node render.mjs --url http://localhost:3000/video-frame --duration 12 --audio launch-reel.mp3 --out launch-reel.mp4`}</DocPre>
+node render.mjs --url http://localhost:3000/video-frame --duration 12 --audio launch-reel.mp3 --out launch-reel.mp4
+
+# a video that comes in more than one shape: pick it with --format
+node render.mjs --url http://localhost:3000/video-frame --format 16:9 --duration 12 --audio install-seconds.mp3 --out install-16x9.mp4`}</DocPre>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            The output is 1080 by 1920 at 30 frames a second, the shape Instagram Reels, TikTok and YouTube Shorts want. Use{" "}
+            The default output is 1080 by 1920 at 30 frames a second, the shape Instagram Reels, TikTok and YouTube Shorts want;{" "}
+            <code className={docInlineCodeClass}>--format</code> takes 9:16, 4:5, 1:1, 16:9, app or 21:9 for the videos that support them (the Hero Loop has no soundtrack, so leave out{" "}
+            <code className={docInlineCodeClass}>--audio</code>). Use{" "}
             <code className={docInlineCodeClass}>--width 540</code> for a quick draft; every frame is rendered, so a full-size render takes a
             few minutes.
           </p>

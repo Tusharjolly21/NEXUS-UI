@@ -17,6 +17,7 @@ export interface RouteStoryProps {
 export const meta: VideoMeta<RouteStoryProps> = {
   id: "route-story",
   title: "Route Story",
+  platforms: ["Reels", "TikTok", "Shorts"],
   purpose: "Travel & creators",
   motion: "Route draws with a follow camera",
   app: "Routecast",

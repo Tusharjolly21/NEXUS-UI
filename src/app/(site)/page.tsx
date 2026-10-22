@@ -274,8 +274,8 @@ export default function Home() {
           <div>
             <h2 className="pg-display text-[clamp(40px,6vw,56px)] leading-[1.02] text-foreground">Videos that move like the site</h2>
             <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-              {videos.length} vertical product videos for launches, pricing and updates, each with its own soundtrack. Change the
-              words, then render it for Reels and Shorts.
+              {videos.length} product videos for launches, pricing, updates and app stores, each with its own soundtrack. Change the
+              words, then render it for Reels, Shorts or YouTube.
             </p>
           </div>
           <PillLink href="/videos" variant="white" className="shrink-0 self-start md:self-auto">
