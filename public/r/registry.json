@@ -982,7 +982,7 @@
       "name": "mac-keyboard",
       "type": "registry:component",
       "title": "Mac Keyboard",
-      "description": "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, click with synthesised sound and show what you type in a strip above.",
+      "description": "A Mac keyboard drawn in HTML, in silver or space grey. Press a key and it sinks, squashes and springs back while a ring of backlight spreads out from it through the gaps; it can listen to the real keyboard, plays a recorded mechanical click for each key the instant it goes down, and shows what you type in a strip above.",
       "dependencies": [
         "framer-motion",
         "react"
@@ -1016,6 +1016,22 @@
         {
           "path": "next-ui/mac-keyboard.tsx",
           "type": "registry:component"
+        },
+        {
+          "path": "next-ui/key-sound/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/key-sound/key-sound-slices.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/key-sound/key-sound.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/key-sound/use-key-sound.ts",
+          "type": "registry:lib"
         }
       ]
     },

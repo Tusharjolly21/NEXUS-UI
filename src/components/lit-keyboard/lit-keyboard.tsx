@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useSound } from "@/lib/ui-sounds";
+import { DEFAULT_KEY_SOUND_SRC, playKeyTick, useKeySound } from "@/components/key-sound";
+import { audioAwake, getSoundsEnabled, useAutoplaySoundAllowed } from "@/lib/ui-sounds";
 
 const ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
 
@@ -10,8 +11,18 @@ export interface LitKeyboardProps {
   glow?: string;
   /** Plays a recorded phrase by itself until the user types. */
   autoplay?: boolean;
-  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  /**
+   * Plays a key click with every press, click and replayed key. Follows the site-wide sound
+   * switch (`ui-sounds`). Autoplay clicks too, once the visitor has used the page.
+   */
   enableSound?: boolean;
+  /**
+   * Recorded Cherry MX clicks, one per key. Put keys.ogg in public/sounds or point this at
+   * your own copy. Until it loads, or if it is missing, keys play a short synthesised tick.
+   */
+  soundSrc?: string;
+  /** Click volume, 0 to 1. */
+  volume?: number;
 }
 
 /** One recorded key press: the key and when it happened (performance.now()). */
@@ -22,12 +33,15 @@ export interface LitKeyboardHit {
 
 const OFF_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
-function Key({ k, lit, glow, wide }: { k: string; lit: number; glow: string; wide?: boolean }) {
+function Key({ k, lit, glow, wide, onDown }: { k: string; lit: number; glow: string; wide?: boolean; onDown: (k: string) => void }) {
   const on = lit > 0;
   return (
     <motion.span
       aria-hidden="true"
-      className="relative flex h-10 items-center justify-center rounded-[9px] text-[13px] font-medium uppercase"
+      onPointerDown={(e) => {
+        if (e.button === 0 && e.isTrusted) onDown(k);
+      }}
+      className="relative flex h-10 cursor-pointer select-none items-center justify-center rounded-[9px] text-[13px] font-medium uppercase"
       style={{
         width: wide ? 230 : 40,
         backgroundColor: on ? glow : "var(--lk-key)",
@@ -52,9 +66,7 @@ function Key({ k, lit, glow, wide }: { k: string; lit: number; glow: string; wid
  * A tilted keyboard that lights up under your typing, with a soft afterglow.
  * Record a run and replay it with the original timing.
  */
-export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = true }: LitKeyboardProps) {
-  const sfx = useSound(enableSound);
-  const sfxRef = useRef(sfx);
+export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = true, soundSrc = DEFAULT_KEY_SOUND_SRC, volume = 0.6 }: LitKeyboardProps) {
   const [lit, setLit] = useState<Record<string, number>>({});
   const [text, setText] = useState("");
   const [rec, setRec] = useState<"idle" | "recording" | "playing">("idle");
@@ -63,6 +75,25 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
   const touched = useRef(false);
   const timers = useRef<number[]>([]);
   const area = useRef<HTMLDivElement>(null);
+  const keySound = useKeySound({ enabled: enableSound, src: soundSrc, volume });
+  const autoAllowed = useAutoplaySoundAllowed();
+
+  /** The click for a key, played in the same event as the press so it lands with the light. */
+  const click = (key: string, auto = false) => {
+    if (!enableSound || !getSoundsEnabled()) return;
+    // Autoplay stays silent until the browser lets audio start, while the tab is hidden, and where the site mutes demos.
+    if (auto && (!autoAllowed || document.hidden || !audioAwake())) return;
+    const code = key === "space" ? "Space" : key === "backspace" ? "Backspace" : `Key${key.toUpperCase()}`;
+    if (!keySound.play(code)) playKeyTick(volume);
+  };
+
+  /** First real input ends the demo. */
+  const begin = () => {
+    if (touched.current) return;
+    touched.current = true;
+    timers.current.forEach(clearTimeout);
+    setText("");
+  };
 
   const flash = (key: string) => {
     const id = Date.now() + Math.random();
@@ -73,8 +104,7 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
   const press = (raw: string, record = true, sound: boolean | "auto" = false) => {
     const key = raw === " " ? "space" : raw.toLowerCase();
     if (key !== "space" && !/^[a-z]$/.test(key)) return false;
-    if (sound === "auto") sfxRef.current.auto("tap", 0.5);
-    else if (sound) sfxRef.current("tap", 0.5);
+    if (sound) click(key, sound === "auto");
     flash(key);
     setText((t) => (t + (key === "space" ? " " : key)).slice(-34));
     if (record && rec === "recording") tape.current.push({ key: raw, t: performance.now() });
@@ -82,7 +112,7 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
   };
 
   // `sound` is true for a replay the visitor asked for and "auto" for the autoplay demo. The demo types about
-  // seven keys a second, so it taps only on the first letter and the space of each word, not on every key.
+  // seven keys a second, so it clicks only on the first letter and the space of each word, not on every key.
   const play = (hits: LitKeyboardHit[], sound: boolean | "auto" = false) => {
     if (!hits.length) return;
     setRec("playing");
@@ -94,10 +124,6 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
     });
     timers.current.push(window.setTimeout(() => setRec("idle"), hits[hits.length - 1].t - t0 + 400));
   };
-
-  useEffect(() => {
-    sfxRef.current = sfx;
-  }, [sfx]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -113,6 +139,12 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoplay]);
 
+  /** Clicking a key on screen types it, like pressing it. */
+  const tapKey = (k: string) => {
+    begin();
+    press(k === "space" ? " " : k);
+  };
+
   useEffect(() => {
     const list = timers.current;
     return () => list.forEach(clearTimeout);
@@ -126,10 +158,13 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
         role="textbox"
         aria-label="Type here to light up the keyboard"
         onPointerDown={() => area.current?.focus()}
+        onPointerEnter={keySound.prime}
+        onFocus={keySound.prime}
+        onPointerUp={keySound.unlock}
         onKeyDown={(e) => {
           if (e.metaKey || e.ctrlKey) return;
-          if (!touched.current) { touched.current = true; timers.current.forEach(clearTimeout); setText(""); }
-          if (e.key === "Backspace") { if (!e.repeat) sfx("tap", 0.4); setText((t) => t.slice(0, -1)); return; }
+          begin();
+          if (e.key === "Backspace") { if (!e.repeat) click("backspace"); setText((t) => t.slice(0, -1)); return; }
           if (press(e.key, true, !e.repeat)) e.preventDefault();
         }}
         className="group flex w-full max-w-[480px] flex-col items-center gap-5 rounded-[24px] outline-none"
@@ -152,10 +187,10 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
           <div className="flex flex-col items-center gap-1.5">
             {ROWS.map((row, r) => (
               <div key={row} className="flex gap-1.5" style={{ paddingLeft: r * 14 }}>
-                {row.split("").map((k) => <Key key={k} k={k} lit={lit[k] || 0} glow={glow} />)}
+                {row.split("").map((k) => <Key key={k} k={k} lit={lit[k] || 0} glow={glow} onDown={tapKey} />)}
               </div>
             ))}
-            <Key k="space" lit={lit.space || 0} glow={glow} wide />
+            <Key k="space" lit={lit.space || 0} glow={glow} wide onDown={tapKey} />
           </div>
         </div>
       </div>
@@ -181,7 +216,7 @@ export function LitKeyboard({ glow = "#ff9f0a", autoplay = false, enableSound = 
           type="button"
           whileTap={{ scale: 0.94 }}
           disabled={!hasTape || rec !== "idle"}
-          onClick={() => { touched.current = true; play(tape.current, true); }}
+          onClick={() => { touched.current = true; play(tape.current); }}
           className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#0a84ff]"
         >
           Replay

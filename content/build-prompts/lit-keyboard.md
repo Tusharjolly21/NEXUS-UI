@@ -1,10 +1,10 @@
 # Lit Keyboard
 
-Build a small QWERTY keyboard, tilted back in perspective, that lights up under the user's real typing: each key snaps on in a glow colour and fades back over almost a second, leaving a soft trail. A text pill above shows what was typed, and a run can be recorded and replayed with its original timing. Calm, tactile, Apple-like.
+Build a small QWERTY keyboard, tilted back in perspective, that lights up under the user's real typing or clicks, with a recorded mechanical click on every key: each key snaps on in a glow colour and fades back over almost a second, leaving a soft trail. A text pill above shows what was typed, and a run can be recorded and replayed with its original timing. Calm, tactile, Apple-like.
 
 ## Stack
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`).
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`), Web Audio for the key clicks via the shared `components/key-sound` module (`useKeySound`, `playKeyTick`, `DEFAULT_KEY_SOUND_SRC`), which plays one recorded Cherry MX slice per key from `/sounds/keys.ogg`.
 - File: `components/lit-keyboard/lit-keyboard.tsx`, named export `LitKeyboard`. Also export the types `LitKeyboardProps` and `LitKeyboardHit` (`{ key: string; t: number }`, where `t` is a `performance.now()` timestamp).
 
 ## API
@@ -12,7 +12,10 @@ Build a small QWERTY keyboard, tilted back in perspective, that lights up under 
 | Prop | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `glow` | `string` | `"#ff9f0a"` | Colour a key flashes to when pressed. A hex colour; the glow shadow appends alpha `88` to it. Also colours the text caret. |
-| `autoplay` | `boolean` | `false` | Plays a sample phrase by itself every few seconds until the user types or uses a button. |
+| `autoplay` | `boolean` | `false` | Plays a sample phrase by itself every few seconds until the user types or uses a button. The demo is silent. |
+| `enableSound` | `boolean` | `true` | Key click with every press, click and replayed key. Follows the site-wide sound switch (`getSoundsEnabled()` from `@/lib/ui-sounds`). |
+| `soundSrc` | `string` | `"/sounds/keys.ogg"` | Recorded clicks; until loaded (or if missing) a short synthesised tick plays. |
+| `volume` | `number` | `0.6` | Click volume, 0 to 1. |
 
 ## Layout and look
 
@@ -61,6 +64,8 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
   - Record: mark touched, empty the tape, clear the text, enter `recording`, focus the typing area. Each accepted press then pushes `{ key, t: performance.now() }`.
   - Stop: back to `idle`; Replay is available only if the tape has hits.
   - Replay (enabled only with a tape and in `idle`): mark touched, clear the text, enter `playing`, schedule each hit at `hit.t − firstHit.t` ms without recording, and return to `idle` 400ms after the last hit.
+- Keys are also clickable: `pointerdown` (primary button) on a key or the space bar ends the demo like a keystroke and types that key; the pointer-down bubbles to the typing area, which takes focus, so typing can continue.
+- Sound: play the click inside the same event as the press (keydown, key pointerdown, or the replay timer), before the flash, so sound and light land together. Map `a`-`z` to `KeyA`-`KeyZ`, space to `Space`, Backspace to `Backspace` (Backspace clicks but does not flash). Skip the click on auto-repeat (`e.repeat`). Replays click; the autoplay demo does not (no user gesture, and it would be noise). Prime the sound (download and decode) on the typing area's `pointerenter` and `focus`, and unlock audio on its `pointerup` for touch screens. If `useKeySound().play(code)` returns false (not loaded yet), call `playKeyTick(volume)`.
 - Clear all timers on unmount.
 
 ## Autoplay demo
@@ -74,7 +79,7 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
 
 ## Sound
 
-`LitKeyboard` takes `enableSound?: boolean` (default `true`; `false` silences it). Each letter or space the visitor types plays `tap` from `@/lib/ui-sounds` at 50% volume (a short dry click: a sine dropping from 900 to 620 Hz in 60ms plus a faint high hiss), and Backspace plays the same at 40%. Held-key repeats are silent. A replay the visitor starts with the Replay button taps each recorded key with the original timing; the autoplay phrase taps the same `tap` (50%) through the same play function's `auto` variant, but only on the first letter and the space of each word, because it types about seven keys a second and a tap on every key would be too busy. `auto` stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Still silent on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+`LitKeyboard` takes `enableSound?: boolean` (default `true`; `false` silences it), `soundSrc` (default `"/sounds/keys.ogg"`) and `volume` (default `0.6`). Each letter, space or Backspace the visitor types or clicks plays that key's recorded Cherry MX click from `/sounds/keys.ogg` through `useKeySound` (`components/key-sound`), in the same event as the press. Held-key repeats are silent. A replay the visitor starts with the Replay button clicks each recorded key with the original timing; the autoplay phrase clicks the same way, but only on the first letter and the space of each word, because it types about seven keys a second and a click on every key would be too busy. Autoplay clicks are gated like the `auto` variant of `useSound` in `@/lib/ui-sounds` (`useAutoplaySoundAllowed()`, `audioAwake()` and a hidden-tab check): silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Silent on hover. The clicks follow the site-wide switch: check `getSoundsEnabled()` from `@/lib/ui-sounds` before playing (on by default in installed apps; `setSoundsEnabled(false)` turns everything off). Until the recording has loaded, or if `keys.ogg` is missing, play `playKeyTick(volume)` instead, a short synthesised tick.
 
 ## Acceptance checklist
 
@@ -82,5 +87,6 @@ Below, two buttons 8px apart, 36px tall, fully rounded, `px-4`, 13px medium:
 - Space lights the 230px bar; digits, punctuation and Cmd/Ctrl shortcuts do nothing.
 - The pill never holds more than 34 characters; Backspace deletes one.
 - The plate tilts back 24° around its bottom edge.
+- Every typed, clicked or replayed key plays its own click in step with its light; the autoplay demo is silent.
 - Record, type, Stop, then Replay reproduces the run with the same rhythm, and Replay is disabled during playback.
 - With `autoplay`, "motion is a material" types itself after 0.7s and every 5.2s, and stops forever after the first keystroke.
