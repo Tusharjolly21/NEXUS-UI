@@ -201,6 +201,42 @@ export interface Database {
         };
         Relationships: [];
       };
+      login_handoffs: {
+        Row: {
+          id: string;
+          secret_hash: string;
+          status: "pending" | "approved" | "claimed";
+          device: string | null;
+          location: string | null;
+          hashed_token: string | null;
+          user_id: string | null;
+          created_at: string;
+          expires_at: string;
+        };
+        Insert: {
+          id?: string;
+          secret_hash: string;
+          status?: "pending" | "approved" | "claimed";
+          device?: string | null;
+          location?: string | null;
+          hashed_token?: string | null;
+          user_id?: string | null;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Update: {
+          id?: string;
+          secret_hash?: string;
+          status?: "pending" | "approved" | "claimed";
+          device?: string | null;
+          location?: string | null;
+          hashed_token?: string | null;
+          user_id?: string | null;
+          created_at?: string;
+          expires_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

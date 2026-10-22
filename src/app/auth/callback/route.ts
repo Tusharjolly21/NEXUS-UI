@@ -1,29 +1,9 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
-import type { EmailOtpType } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/database.types";
 import { safeNextPath } from "@/lib/safe-redirect";
-
-const OTP_TYPES: readonly EmailOtpType[] = [
-  "signup",
-  "invite",
-  "magiclink",
-  "recovery",
-  "email_change",
-  "email",
-];
-
-function isOtpType(value: string | null): value is EmailOtpType {
-  return OTP_TYPES.includes(value as EmailOtpType);
-}
-
-/** Collapse a Supabase auth error into a stable code the login page can map to a message. */
-function authErrorCode(error: { message: string; code?: string }): string {
-  if (/code verifier/i.test(error.message)) return "pkce_missing";
-  if (error.code === "otp_expired" || /expired|invalid/i.test(error.message)) return "otp_expired";
-  return "exchange_failed";
-}
+import { authErrorCode, getPendingHandoff, isHandoffId, isOtpType } from "@/lib/login-handoff";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -45,6 +25,19 @@ export async function GET(request: Request) {
   }
 
   if (!code && !(tokenHash && isOtpType(type))) return login("missing_code");
+
+  /* A link that belongs to a cross-device request is not redeemed on GET: mail scanners and
+     link previews fetch URLs automatically and would burn the one-time token (or sign in a
+     device nobody checked). The approve screen redeems it on an explicit tap instead. */
+  const rid = searchParams.get("rid");
+  if (tokenHash && isOtpType(type) && isHandoffId(rid) && (await getPendingHandoff(rid))) {
+    const approve = new URL(`${origin}/login/approve`);
+    approve.searchParams.set("rid", rid);
+    approve.searchParams.set("token_hash", tokenHash);
+    approve.searchParams.set("type", type);
+    approve.searchParams.set("next", next);
+    return NextResponse.redirect(approve);
+  }
 
   const cookieStore = await cookies();
   const supabase = createServerClient<Database>(url, key, {
