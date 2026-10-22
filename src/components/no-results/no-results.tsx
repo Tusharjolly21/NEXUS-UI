@@ -41,6 +41,8 @@ export interface NoResultsProps {
   typo?: NoResultsTypo;
   /** What the rows are called, used in the headline and the input label. */
   noun?: string;
+  /** Most rows the list shows once nothing is hiding them. */
+  maxRows?: number;
   /** Called with the new query when the typo fix is pressed. Not called by the autoplay demo. */
   onFixTypo?: (query: string) => void;
   /** Called when the filters are cleared. Not called by the autoplay demo. */
@@ -130,6 +132,7 @@ export function NoResults({
   query = START_QUERY,
   typo = NO_RESULTS_TYPO,
   noun = "invoices",
+  maxRows = 6,
   onFixTypo,
   onClearFilters,
   autoplay = false,
@@ -149,7 +152,7 @@ export function NoResults({
   const q = field.chars.map((x) => x.c).join("");
   const typoRe = new RegExp(typo.wrong.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") || "$^", "i");
   const hasTypo = typoRe.test(q);
-  const shown = hasTypo ? [] : rows.filter((r) => filters.every((f) => f.test(r)));
+  const shown = hasTypo ? [] : rows.filter((r) => filters.every((f) => f.test(r))).slice(0, Math.max(0, maxRows));
   const changed = q !== query || filters.length !== initialFilters.length;
   const fresh = new Set(field.fresh);
 

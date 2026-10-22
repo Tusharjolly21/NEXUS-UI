@@ -62,3 +62,88 @@ Build a ring loader with a comet that laps the ring. In its endless mode the com
 - [ ] Messages swap every 1.9s with blur and slide.
 - [ ] Autoplay loops the pretend upload until a click.
 - [ ] Dark mode swaps the track, guide ring, percentage and message colours.
+
+> The Orbital Loader page has 2 variants. The brief above rebuilds the original Orbital Loader; the section below rebuilds the Nexus Essentials Step Loader variant.
+
+---
+
+<!-- variant: step-loader -->
+
+# Step Loader
+
+Build a loader for long jobs that keeps people oriented. A card shows a progress ring with an "n/total" count; under it a vertical reel of steps keeps the current step in the middle, finished steps roll up above it with a green tick, and upcoming steps wait below, faded. Cancel is always available. When the last step finishes the whole reel folds away into a result with a big tick, a heading and a button. The feel is calm and Apple-like.
+
+## Stack
+
+- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`), `@/lib/ui-sounds`, an `IntersectionObserver` and the page visibility API for the demo.
+- File: `components/orbital-loader/step-loader.tsx`. Named exports `StepLoader`, `STEP_LOADER_STEPS`, type `StepLoaderProps`.
+
+## API
+
+| Prop | Type | Default | Meaning |
+|---|---|---|---|
+| `steps` | `string[]` | six demo steps | In order. Demo: "Creating your workspace", "Importing 248 customers", "Matching accounts to plans", "Building your first dashboard", "Inviting your team", "Ready". |
+| `stepMs` | `number` | `1050` | How long each step stays current. |
+| `title` | `string` | `"Set up your workspace"` | Heading before the job starts. |
+| `idleText` | `string` | `"This takes about six seconds."` | Line under it. |
+| `startLabel` | `string` | `"Start setup"` | Start button label. |
+| `doneTitle` | `string` | `"Your workspace is ready"` | Result heading. |
+| `doneText` | `string` | `"248 customers imported, dashboard built, 3 invites sent."` | Result line. |
+| `actionLabel` | `string` | `"Open workspace"` | Result button label. |
+| `onComplete` | `() => void` | none | Called once when the result appears. |
+| `onCancel` | `() => void` | none | Called when Cancel is pressed. |
+| `onAction` | `() => void` | none | Called when the result button is pressed. |
+| `autoplay` | `boolean` | `false` | Runs the job on a loop until the card is touched. |
+| `enableSound` | `boolean` | `true` | Interface sounds. |
+| `className` | `string` | `""` | Extra classes on the card. |
+
+## Layout and look
+
+- Card: `position: relative`, flex column, centred both ways, height 420px, width 440px with `max-width: 100%`, padding 24px, radius 28px, `overflow: hidden`, white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -30px rgba(0,0,0,.35)` (dark: ring `rgba(255,255,255,.08)`, shadow alpha .9).
+- Running view, top to bottom, centred: a 56px progress ring (SVG viewBox 56, circle r 24, stroke 4, rotated -90 degrees; track `#ececf0` / dark `#3a3a3c`, arc `#0071e3` / dark `#0a84ff`, round caps) with "n/total" centred inside (13px semibold, tabular numbers, `#1d1d1f` / dark `#f5f5f7`); 24px gap; the reel; 16px gap; a Cancel button.
+- Reel: full width, height 220px (5 rows of 44px), `overflow: hidden`, masked with `linear-gradient(transparent, #000 30%, #000 70%, transparent)` so the ends fade. Each row is 44px tall, content centred, 10px gap: a 20px icon box then the label (16px). The current row is semibold in `#1d1d1f` / dark `#f5f5f7`; others are regular `#6e6e73` / dark `#a1a1a6`.
+- Row icons: finished = 18px green disc (`#34c759` / dark `#30d158`) with a white 2.6px round tick; current = 16px spinner, 2px border `#d2d2d7` / dark `#48484a` with the top edge `#0071e3` / dark `#0a84ff`; upcoming = 8px dot `#d2d2d7` / dark `#48484a`.
+- Cancel: 36px tall pill, 16px side padding, 13px medium, bg `#f5f5f7` / dark `#2c2c2e`, hover `#ececf0` / dark `#3a3a3c`.
+- Idle and cancelled view: centred heading 20px semibold, tracking -0.02em; line 14px `#6e6e73` / dark `#a1a1a6` with 4px gap; a 40px tall pill button 20px side padding, 14px medium, white on `#0071e3`, 20px above it. Idle says the title and `idleText` with "Start setup"; cancelled says "Setup cancelled", "Nothing was changed. Start again any time." and "Start again".
+- Done view: a 56px green disc (white 2.2px tick) , 16px below it a 22px semibold heading (tracking -0.02em), a 14px muted line, then a 40px pill button, 20px above, `#1d1d1f` with white text / dark `#f5f5f7` with `#1d1d1f` text.
+
+## Motion
+
+- Step timing: step `k` becomes current at `k * stepMs`. The result appears `stepMs + 200` ms after the last step becomes current.
+- Ring: the arc is a `pathLength` of `max(0.03, i / (total - 1))`, spring stiffness 80, damping 20.
+- Reel: the list translates to `y = 88 - i * 44` px with spring stiffness 200, damping 26, so the current row sits in the middle (third) slot. Row opacity is 1 current, 0.45 finished, 0.3 upcoming; row scale is 1 current, 0.92 others.
+- Tick: when a row finishes, its tick path draws from `pathLength 0` to 1. Spinner: rotates 360 degrees in 0.8s, linear, forever.
+- View swaps use `AnimatePresence mode="wait"`: running fades and scales from 0.97; done fades in from `y 10`, the big tick pops from scale 0.4 with a spring (stiffness 400, damping 15) and its path draws after 0.15s.
+- Reduced motion: no spinner rotation (a still partial ring), reel and ring jump instantly, no scale or slide, short fades only; the whole sequence is still reachable.
+
+## Interaction and states
+
+- States: `idle` -> `running` -> `done`, or `running` -> `cancelled`. Start begins at step 0. Cancel stops the timers, plays no further steps and shows the cancelled view. Start again restarts.
+- Focus follows the action: after Start the Cancel button takes focus, after Cancel the Start again button does.
+
+## Autoplay demo
+
+Only while the card is on screen, the tab is visible and motion is not reduced: from idle wait 900ms and start the job; when the result shows wait 3.2s and start again. Leaving the screen pauses a running demo job where it is and returning resumes it. Any pointer press or focus inside the card stops the loop for good.
+
+## Accessibility
+
+- The reel is `aria-hidden`; a persistent `sr-only` polite `role="status"` region announces "Step n of total: label", "Your workspace is ready" and "Setup cancelled". The ring is decorative.
+- Start, Cancel and the result button are real buttons with 2px outlines `#0071e3` (dark `#0a84ff`), 2px offset.
+
+## Sound
+
+- Prop `enableSound?: boolean` (default `true`).
+- Each time a step finishes and the next becomes current, `tick` from `@/lib/ui-sounds` plays at 0.4 volume. When `stepMs` is under 800 it plays only after every second step so fast runs stay sparse.
+- When the result appears, `done` plays at 0.6. Pressing Cancel plays `off` at 0.5.
+- The autoplay job makes the same sounds through `play.auto`, which stays silent until the visitor has interacted with the page once. Starting the job is silent. Nothing plays on hover.
+- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+
+## Acceptance checklist
+
+- [ ] The current step is always in the middle of the reel, finished steps above with ticks, upcoming ones below faded, edges masked.
+- [ ] The ring fills with a spring and the count reads "n/total".
+- [ ] After the last step the reel folds into the result with a popping tick.
+- [ ] Cancel shows the cancelled view and Start again restarts; focus lands on the next button.
+- [ ] Ticks play per finished step (every second step when `stepMs` < 800), `done` at the end, `off` on Cancel.
+- [ ] Autoplay loops, pauses off screen and stops at first touch; reduced motion shows no loop.
+- [ ] Dark mode matches the colours above.

@@ -8,10 +8,12 @@ import { cn } from "@/lib/utils";
 export interface EmptyTeamProps {
   /** Total seats, including yours. */
   seats?: number;
-  /** Teammates offered as one-tap chips under the field. Defaults to three people on the demo domain. */
+  /** Teammates offered as one-tap chips under the field. Defaults to three people on `domain`. */
   suggestions?: string[];
-  /** The domain shown in "From <domain>". */
+  /** The domain shown in "From <domain>", also used for the default suggestions. */
   domain?: string;
+  /** Placeholder of the email field. */
+  placeholder?: string;
   /** Called with the email when an avatar lands in a seat. Not called by the autoplay demo. */
   onAdd?: (email: string) => void;
   /** Called with every pending email when "Send invites" is pressed. Not called by the autoplay demo. */
@@ -24,7 +26,8 @@ export interface EmptyTeamProps {
   className?: string;
 }
 
-export const EMPTY_TEAM_SUGGESTIONS = ["leo.park@orbitly.com", "ana.lima@orbitly.com", "kai@orbitly.com"];
+/** The three demo teammates, as names before the @ sign. */
+export const EMPTY_TEAM_PEOPLE = ["leo.park", "ana.lima", "kai"];
 
 type Person = { email: string; hue: string };
 type Fly = { p: Person; from: readonly [number, number]; to: readonly [number, number]; auto: boolean };
@@ -77,8 +80,9 @@ function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
  */
 export function EmptyTeam({
   seats = 6,
-  suggestions = EMPTY_TEAM_SUGGESTIONS,
+  suggestions: suggested,
   domain = "orbitly.com",
+  placeholder = "name@company.com",
   onAdd,
   onSend,
   autoplay = false,
@@ -87,6 +91,7 @@ export function EmptyTeam({
 }: EmptyTeamProps) {
   const play = useSound(enableSound);
   const reduce = useReducedMotion() ?? false;
+  const suggestions = suggested ?? EMPTY_TEAM_PEOPLE.map((name) => `${name}@${domain}`);
   const [people, setPeople] = useState<Person[]>([]);
   const [value, setValue] = useState("");
   const [fly, setFly] = useState<Fly | null>(null);
@@ -293,7 +298,7 @@ export function EmptyTeam({
             }
           }}
           type="email"
-          placeholder="name@company.com"
+          placeholder={placeholder}
           aria-label="Teammate's email"
           aria-invalid={bad || undefined}
           className="min-w-0 flex-1 bg-transparent text-[15px] text-[#1d1d1f] outline-none placeholder:text-[#6e6e73] dark:text-[#f5f5f7] dark:placeholder:text-[#a1a1a6]"
