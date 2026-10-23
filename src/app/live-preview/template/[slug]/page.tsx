@@ -111,6 +111,19 @@ const SideBPage = nextDynamic(
   { loading: TemplateFallback },
 );
 
+const KilnPage = nextDynamic(
+  () => import("@/components/templates/kiln-page").then((m) => ({ default: m.KilnPage })),
+  { loading: TemplateFallback },
+);
+const CairnPage = nextDynamic(
+  () => import("@/components/templates/cairn-page").then((m) => ({ default: m.CairnPage })),
+  { loading: TemplateFallback },
+);
+const StrataPage = nextDynamic(
+  () => import("@/components/templates/strata-page").then((m) => ({ default: m.StrataPage })),
+  { loading: TemplateFallback },
+);
+
 type Props = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -142,6 +155,12 @@ export default async function TemplateLivePreviewPage({ params }: Props) {
     return <ThemeReceiver><WayfarePage /></ThemeReceiver>;
   } else if (tmpl.slug === "side-b") {
     return <ThemeReceiver><SideBPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "kiln") {
+    return <ThemeReceiver><KilnPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "cairn") {
+    return <ThemeReceiver><CairnPage /></ThemeReceiver>;
+  } else if (tmpl.slug === "strata") {
+    return <ThemeReceiver><StrataPage /></ThemeReceiver>;
   } else if (tmpl.slug === "nexus-ai-launch") {
     return <ThemeReceiver><NexusAiLaunchTemplatePage /></ThemeReceiver>;
   } else if (tmpl.slug === "noir-studio") {
