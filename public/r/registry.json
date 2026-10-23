@@ -2205,11 +2205,10 @@
       "name": "logo-clouds",
       "type": "registry:component",
       "title": "Brand Logo Animation",
-      "description": "A complete set of animated logo cloud layouts including marquee, spotlight, swapping, and blur variants.",
+      "description": "A complete set of animated logo cloud layouts including flip, marquee, spotlight, swapping, shelf, and blur variants.",
       "dependencies": [
         "react",
-        "framer-motion",
-        "react-fast-marquee"
+        "framer-motion"
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
@@ -2222,6 +2221,10 @@
         },
         {
           "path": "next-ui/blocks/logo-clouds/logo-cloud-marquee.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/blocks/logo-clouds/logo-cloud-shelf.tsx",
           "type": "registry:component"
         },
         {

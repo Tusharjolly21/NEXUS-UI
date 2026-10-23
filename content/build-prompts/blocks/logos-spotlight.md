@@ -1,93 +1,82 @@
 # Cursor Spotlight
 
-Build a partner grid on a raised white panel: twelve monochrome lockups sit dimmed in hairline-divided cells, and a soft circle of light trails the cursor, revealing the same grid at full strength underneath. When the pointer leaves, the light glides back to the middle. It should feel like moving a torch over a dark shelf, smooth and slightly lagging.
+Build a panel of twelve brand lockups in a hairline grid. They sit dim and grey, and a soft light follows the pointer: inside the light each lockup turns to full ink with its brand colour. The light chases the pointer on a spring. With `autoplay` it drifts along a figure-eight by itself until the first touch.
 
 ## Stack
 
-- React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useMotionValue`, `useSpring`, `useMotionTemplate`, `useReducedMotion`, `Variants`).
-- File: `components/blocks/logo-clouds/logo-cloud-spotlight.tsx`, default export `LogoCloudSpotlight`.
-- The marks come from a sibling `logos.tsx` exporting `LOGOS` and `LogoLockup` (spec below). A `cn()` class-merge helper is assumed.
-- Pointer position lives in motion values and drives the mask through `useMotionTemplate`, so moving the pointer never re-renders React.
+- React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useAnimationFrame`, `useInView`, `useMotionTemplate`, `useMotionValue`, `useSpring`, `useReducedMotion`). A `cn()` class-merge helper is assumed.
+- File: `components/blocks/logo-clouds/logo-cloud-spotlight.tsx`, default export `LogoCloudSpotlight`; also export `LogoCloudSpotlightProps`.
+- Marks and helpers come from a sibling `logos.tsx` (spec below).
 
 ## API
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
-| `title` | `string` | `"Twelve partners, one integration standard."` | Headline. |
-| `subtitle` | `string` | `"Move across the grid to light up each partner."` | Line under the headline; empty string hides it. |
-| `spotlightRadius` | `number` | `240` | Radius of the circle of light in px, clamped 80–600. |
-| `dimOpacity` | `number` | — (25% ink) | Strength of the dim layer, clamped 0–1. Unset keeps the `/25` text colours; when set, dim cells use full ink and wrap the lockup in an `inline-flex` span with this opacity. |
-| `count` | `number` | all logos (12) | How many marks to show, clamped 1–24. |
-| `logos` | `Logo[]` | `LOGOS` | Marks from `logos.tsx` (`{ name, Icon, color, wordmark? }`); first 24 used. |
-| `className` | `string` | — | Merged onto the outer `<section>`. |
-
-Export the props type as `LogoCloudSpotlightProps`. Every prop is optional and the defaults reproduce the section exactly as described below. Both grid layers render the same marks. Text from props renders as plain text.
+| `logos` | `Logo[]` | the twenty placeholder brands | Brands to show. |
+| `title` | `string` | `Twelve partners, one integration standard.` | Headline. |
+| `subtitle` | `string` | `Move across the grid to light up each partner.` | Line under the headline; empty hides it. |
+| `radius` | `number` | `200` | Radius of the light, px. |
+| `autoplay` | `boolean` | `false` | Drifts the light by itself until someone touches the panel. |
+| `className` | `string` | none | Merged onto the outer `<section>`. |
 
 ## Layout and look
 
-- Section: full width, `px-4`, `py-16` (64px), `sm:py-24` (96px), background `#f5f5f7`, dark `black`.
-- Header: `max-w-2xl` (672px), centred.
-  - `h2`: "Twelve partners, one integration standard." 28px, `sm:` 40px, semibold, line-height 1.1, tracking −0.03em, `text-balance`, `#1d1d1f` / dark `#f5f5f7`.
-  - `p`: "Move across the grid to light up each partner." 12px top margin, 17px, line-height 1.47, `#6e6e73` / dark `#a1a1a6`.
-- Panel: 48px top margin (`sm:` 56px), `max-w-4xl` (896px), centred, `relative overflow-hidden`, radius 28px, 8px padding, white (dark `#1c1c1e`). Shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -24px rgba(0,0,0,.25)`; dark `0 0 0 1px rgba(255,255,255,.08)`.
-- Grid (rendered twice, see below): `grid-cols-2`, `sm:grid-cols-3`, `md:grid-cols-4`, 1px gap, `overflow-hidden`, radius 20px, background `black/6%` (dark `white/8%`) so the 1px gaps read as hairlines.
-- Cell: 80px tall (`sm:` 96px), flex centred, 12px side padding, white (dark `#1c1c1e`). Content: `<LogoLockup logo={logo} className="text-[15px] sm:text-[18px]" />`.
-  - Dim grid text: `#1d1d1f` at 25% (dark `#f5f5f7` at 25%).
-  - Lit grid text: full `#1d1d1f` / `#f5f5f7`.
-- Lit layer: `absolute inset-0`, same 8px padding, `pointer-events-none`, with `mask-image` and `-webkit-mask-image` = `radial-gradient(circle 240px at {x}px {y}px, black 0%, transparent 72%)`.
-
-## Placeholder marks (`logos.tsx`)
-
-Twelve invented brands. `LogoLockup({ logo, tinted = false, className })` renders an `inline-flex items-center gap-2 whitespace-nowrap leading-none` span, base 17px: glyph (24×24 viewBox SVG, `fill="none"`, `aria-hidden`, `size-[1.35em] shrink-0`, `currentColor`) then the name with its wordmark classes.
-
-| Name | Wordmark classes | Glyph |
-|---|---|---|
-| Arcwell | `font-semibold tracking-[-0.03em]` | `M4 18a8 8 0 0 1 16 0`, `M8.5 18a3.5 3.5 0 0 1 7 0`, stroke 2.4, round caps |
-| Basalt | `text-[0.78em] font-semibold uppercase tracking-[0.22em]` | `M12 2.5 20.2 7v10L12 21.5 3.8 17V7Z` stroke 2; `M12 12v9.5M12 12l8.2-5M12 12 3.8 7` stroke 1.6 |
-| Corvid | `font-serif text-[1.08em] italic tracking-[-0.01em]` | filled `M3 17 12 5l9 12h-5.2L12 11.6 8.2 17Z` |
-| driftline | `font-medium tracking-[-0.02em]` | y = 7, 12, 17: `M3 {y}c2.2-2 4.3-2 6.5 0s4.3 2 6.5 0 3.7-1.6 5 0`, stroke 2 |
-| Emberly | `font-bold tracking-[-0.04em]` | filled `M12 2.5c4 4.2 6.5 7.6 6.5 11.2A6.5 6.5 0 0 1 5.5 13.7c0-2.3 1.1-4.3 3-6.2.3 2 1.3 3.2 2.6 3.6C11 8 11 5.4 12 2.5Z` |
-| fieldnote | `font-mono text-[0.9em] font-medium tracking-[-0.04em]` | `M4.5 3.5h10l5 5v12h-15Z` stroke 2; `M14.5 3.5v5h5` stroke 1.6; `M8 13h8M8 16.5h5` stroke 1.8 |
-| Glasshouse | `font-light tracking-[0.02em]` | `M3.5 11 12 3.5l8.5 7.5v9.5h-17Z` stroke 2; `M12 9v11.5M3.5 15h17` stroke 1.6 |
-| KESTREL | `text-[0.86em] font-black tracking-[0.08em]` | filled `M2.5 15.5 14 4.5l-3 7h10.5L10 19.5l3-4Z` |
-| Lumora | `font-serif text-[1.08em] tracking-[-0.01em]` | circle r 9 stroke 2; filled `M12 3a9 9 0 0 1 0 18Z` |
-| Oakhaven | `font-semibold tracking-[-0.02em]` | `M12 21.5V11M12 11c-5.5 0-8-3.5-8-8.5 5.3 0 8 2.6 8 8.5Zm0 0c5.5 0 8-3.5 8-8.5-5.3 0-8 2.6-8 8.5Z` filled + stroke 1.4 |
-| Quill & Co | `font-serif text-[1.06em] italic` | filled `M20.5 3.5C11 4.5 6 10 5 20.5 9 13.8 13 10.5 20.5 3.5Z`; `M3.5 20.5h8` stroke 2 |
-| Tidewater | `font-medium tracking-[-0.01em]` | circle r 9 stroke 2; filled `M3.5 13.5c2.8-2.4 5.7-2.4 8.5 0s5.7 2.4 8.5 0V15a9 9 0 0 1-17 0Z` |
+- Section: full width, `px-4`, `py-16` (64px), `sm:py-24` (96px), white, dark `black`; `className` merges onto it.
+- Header: `LogoHeading`.
+- Panel: 48px below the header (`sm:` 56px), `max-w-3xl`, centred, radius 24px, padding 8px, white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark: a 1px `rgba(255,255,255,.08)` ring), `overflow-hidden`.
+- The grid is drawn twice, stacked: a base layer and a lit layer. Each is `grid-cols-2` (`sm:grid-cols-4`), a 1px gap over a seam colour of `rgba(0,0,0,.06)` / dark `rgba(255,255,255,.08)`, radius 18px, clipped. Cells are 84px tall, white / dark `#1c1c1e`, with a lockup at 16px (`sm:` 18px).
+- Base layer text: ink at 30% opacity, no tint. Lit layer: full ink with the glyph tinted, `aria-hidden`, absolutely positioned over the base with 8px padding, `pointer-events-none`, and masked with `radial-gradient(circle {radius}px at {x}px {y}px, black 0%, transparent 72%)`, where `x`/`y` are springs (stiffness 220, damping 28, mass 0.6) following the target.
 
 ## Motion
 
-- Entrance: wrapper `motion.div` with `initial="hidden"`, `whileInView="visible"`, `viewport={{ once: true, margin: "-80px" }}`, stagger 0.08s. Headline, paragraph and the panel use "rise": hidden `opacity 0, y 16, blur(6px)` → visible `opacity 1, y 0, blur(0px)`, spring stiffness 240, damping 30. Reduced motion: opacity only, 0.4s.
-- Light: raw motion values `mouseX`, `mouseY` start at −9999 (light off-canvas). Springs `x = useSpring(mouseX, { stiffness: 260, damping: 30, mass: 0.6 })`, same for `y`, so the light trails the pointer. The mask string is built with `useMotionTemplate` from the springs; radius `spotlightRadius` (240px by default).
+- The target follows `mousemove` over the panel (relative to its box). When the pointer leaves, the target eases back to the middle.
+- Autoplay (on screen, not reduced, not yet touched): every frame the target moves to `0.5 + 0.38 sin(t/1300)` of the width and `0.5 + 0.3 sin(t/650)` of the height, a slow figure-eight. A mouse move over the panel ends it for good.
+- The loop does nothing while the panel is off screen. Without autoplay the light rests in the middle.
 
-## Interaction and states
+## Shared helpers (also in `logos.tsx`)
 
-- `onMouseMove` on the panel: set `mouseX/Y` to the pointer position relative to the panel's bounding rect.
-- Rest position: a `rest(instant)` callback sets the raw values to the panel's centre (`clientWidth / 2`, `clientHeight / 2`); when `instant`, also `jump()` both springs there.
-- On mount, wait one `requestAnimationFrame` (the masked layer subscribes after the effect) then call `rest(true)`, so the light starts lit in the middle with no sweep; cancel the frame on cleanup.
-- `onMouseLeave`: `rest(false)`, so the light glides back to centre on the spring.
-- Touch and keyboard users never move it; they see the centre lit.
-- Reduced motion changes only the entrance.
+- `SPRING = { type: "spring", stiffness: 340, damping: 30 }`; `INK = "text-[#1d1d1f] dark:text-[#f5f5f7]"`; `EDGE = "linear-gradient(to right, transparent, black 12%, black 88%, transparent)"` (a mask).
+- `LogoHeading({ eyebrow?, eyebrowClassName?, title, subtitle? })`: a `max-w-2xl` centred block that rises once into view (`whileInView`, `viewport={{ once: true, margin: "-80px" }}`) from `opacity 0, y 16, blur(6px)` to rest on a spring (stiffness 240, damping 30); under reduced motion it only fades. The optional eyebrow is a 15px semibold `#6e6e73` / dark `#a1a1a6` line with 4px below it. The `h2` is 28px (`sm:` 40px), semibold, line-height 1.1, tracking −0.03em, `text-balance`, `#1d1d1f` / dark `#f5f5f7`. The subtitle is 12px below, 17px, line-height 1.47, `#6e6e73` / dark `#a1a1a6`.
+- `usePager(logos, slots, ms, run)`: a page counter that ticks every `ms` while `run` is true and there is more than one page; returns `{ page, items }`, where `items[i] = logos[(page × slots + i) % logos.length]`, so a short last page wraps to the start.
+- `Track({ items, speed, reverse, render, gap, active, pauseOnHover })`: a `flex w-max` row of the items twice over, translated by a motion value that a `requestAnimationFrame` loop moves by `speed × throttle × dt` px (dt capped at 64ms) and wraps at half the row width. `reverse` runs it rightwards (starting a quarter-width in). `throttle` is a spring (stiffness 120, damping 24) that eases to 0 while the pointer is over the row (if `pauseOnHover`) and back to 1 after. It does nothing while `active` is false or under reduced motion.
 
-## Demo data
+## Placeholder marks (`logos.tsx`)
 
-The default headline and line above with all twelve placeholder lockups (4×3 on desktop, 3×4 on tablet, 2×6 on phones).
+Twenty invented brands, so a page built from the block never implies a real customer. Export `type Logo = { name: string; Icon: ComponentType<{ className?: string; style?: CSSProperties }>; color: string; wordmark?: string }`, the array `LOGOS: Logo[]`, and `LogoLockup({ logo, tinted = false, className })`.
+
+`LogoLockup` renders an `inline-flex items-center gap-2 whitespace-nowrap leading-none` span, base 17px: the glyph (24×24 viewBox SVG, `fill="none"`, `aria-hidden`, `size-[1.35em] shrink-0`, drawn in `currentColor`, with a 300ms colour transition and the brand `color` applied only when `tinted`), then the name with its wordmark classes. The wordmark stays ink, so a row of lockups reads as one quiet band. Strokes use round caps and joins.
+
+| Name | Colour | Wordmark classes | Glyph |
+|---|---|---|---|
+| Arcwell | `#3b5bdb` | `font-semibold tracking-[-0.03em]` | `M4 18a8 8 0 0 1 16 0` (stroke 2.4); `M8.5 18a3.5 3.5 0 0 1 7 0` (stroke 2.4) |
+| BASALT | `#868e96` | `text-[0.78em] font-semibold tracking-[0.22em]` | `M12 2.5 20.2 7v10L12 21.5 3.8 17V7Z` (stroke 2); `M12 12v9.5M12 12l8.2-5M12 12 3.8 7` (stroke 1.6) |
+| Corvid | `#7048e8` | `font-serif text-[1.08em] italic` | `M3 17 12 5l9 12h-5.2L12 11.6 8.2 17Z` (filled) |
+| driftline | `#0c8599` | `font-medium tracking-[-0.02em]` | `M3 {y} c2.2-2 4.3-2 6.5 0 s4.3 2 6.5 0 3.7-1.6 5 0 (three waves, y = 7, 12, 17)` (stroke 2) |
+| Emberly | `#e8590c` | `font-bold tracking-[-0.04em]` | `M12 2.5c4 4.2 6.5 7.6 6.5 11.2A6.5 6.5 0 0 1 5.5 13.7c0-2.3 1.1-4.3 3-6.2.3 2 1.3 3.2 2.6 3.6C11 8 11 5.4 12 2.5Z` (filled) |
+| fieldnote | `#2b8a3e` | `font-mono text-[0.9em] font-medium tracking-[-0.04em]` | `M4.5 3.5h10l5 5v12h-15Z` (stroke 2); `M8 13h8M8 16.5h5` (stroke 1.8) |
+| Glasshouse | `#1971c2` | `font-light tracking-[0.02em]` | `M3.5 11 12 3.5l8.5 7.5v9.5h-17Z` (stroke 2); `M12 9v11.5M3.5 15h17` (stroke 1.6) |
+| KESTREL | `#e03131` | `text-[0.86em] font-black tracking-[0.08em]` | `M2.5 15.5 14 4.5l-3 7h10.5L10 19.5l3-4Z` (filled) |
+| Lumora | `#f08c00` | `font-serif text-[1.08em]` | circle (12, 12) r 9 (stroke 2); `M12 3a9 9 0 0 1 0 18Z` (filled) |
+| Oakhaven | `#5c940d` | `font-semibold tracking-[-0.02em]` | `M12 21.5V11M12 11c-5.5 0-8-3.5-8-8.5 5.3 0 8 2.6 8 8.5Zm0 0c5.5 0 8-3.5 8-8.5-5.3 0-8 2.6-8 8.5Z` (filled, stroke 1.4) |
+| Quill & Co | `#ae3ec9` | `font-serif text-[1.06em] italic` | `M20.5 3.5C11 4.5 6 10 5 20.5 9 13.8 13 10.5 20.5 3.5Z` (filled); `M3.5 20.5h8` (stroke 2) |
+| Tidewater | `#1c7ed6` | `font-medium tracking-[-0.01em]` | circle (12, 12) r 9 (stroke 2); `M3.5 13.5c2.8-2.4 5.7-2.4 8.5 0s5.7 2.4 8.5 0V15a9 9 0 0 1-17 0Z` (filled) |
+| MONOLITH | `#868e96` | `text-[0.82em] font-bold tracking-[0.18em]` | rect x 8 y 2.5 8×19 r 1.5 (filled); `M4 21.5h16` (stroke 2) |
+| brightloop | `#f59f00` | `font-semibold tracking-[-0.04em]` | `M12 12c-2.2-3.2-6.5-3.2-6.5 0s4.3 3.2 6.5 0Zm0 0c2.2 3.2 6.5 3.2 6.5 0s-4.3-3.2-6.5 0Z` (stroke 2.2); circle (12, 4) r 1.6 (filled) |
+| Sablewood | `#2f9e44` | `font-serif text-[1.06em]` | `M12 2.5 19 14H5Z` (filled); `M12 8.5 20.5 21h-17Z` (filled) at .55 opacity |
+| VANTAGE | `#4263eb` | `text-[0.84em] font-extrabold tracking-[0.12em]` | `M3 4.5h5.5L12 13l3.5-8.5H21L13.5 20h-3Z` (filled) |
+| Pinecrest | `#099268` | `font-medium tracking-[-0.02em]` | `M12 2.5 6 11h3.2L5 17.5h14L14.8 11H18Z` (filled); `M12 17.5v4` (stroke 2.2) |
+| cobalt | `#1864ab` | `font-bold tracking-[-0.05em]` | circle (8, 8) r 4.5 (filled); circle (16, 16) r 4.5 (filled) at .55 opacity; circle (16, 8) r 2.4 (filled) |
+| Ridgeway | `#d9480f` | `font-light tracking-[0.01em]` | `M2.5 19 9 8l3.5 5.5L15 10l6.5 9Z` (filled); circle (17.5, 5.5) r 2 (filled) |
+| Halyard | `#0b7285` | `font-serif text-[1.06em] italic` | `M12 3v15.5M5 13.5c0 4 3.1 7 7 7s7-3 7-7M7.5 7.5h9` (stroke 2.2); circle (12, 3.5) r 1.8 (filled) |
 
 ## Accessibility
 
-- `<section>` and `<h2>`. The dim grid is the one exposed to assistive tech; the lit duplicate is `aria-hidden="true"`, so names are read once.
-- Glyph SVGs are `aria-hidden`; names are real text.
-- The light is decorative; all content is present without it.
+- The base layer carries the text, so the brands are readable at all times; the lit layer is `aria-hidden`. The light is decorative.
 
 ## Acceptance checklist
 
-- [ ] A white 28px-radius panel with an 8px inset holds a 20px-radius grid split by 1px hairlines.
-- [ ] Cells are 80px tall on phones, 96px from `sm`; 2, 3 and 4 columns at phone, `sm` and `md`.
-- [ ] On load the centre of the grid is already lit, without an animated sweep.
-- [ ] Moving the pointer drags a 240px soft circle of full-strength marks that lags slightly behind.
-- [ ] Outside the circle, marks stay at 25% ink.
-- [ ] Leaving the panel glides the light back to the centre.
-- [ ] Pointer movement causes no React re-renders.
-- [ ] Screen readers hear each partner name once.
-- [ ] Section background is `#f5f5f7` in light mode and black in dark, panel `#1c1c1e` in dark.
-- [ ] Entrance fades and un-blurs with an 80ms stagger, once; reduced motion makes it a plain fade.
+- [ ] Twelve cells in a hairline grid, dim at rest.
+- [ ] A soft light follows the pointer with a little lag; inside it marks are crisp with their brand colour.
+- [ ] `autoplay` drifts the light until the first mouse move; it idles off screen.
+- [ ] `radius` changes the size of the light.
+- [ ] Dark mode: `#1c1c1e` cells, faint white seams and ring.

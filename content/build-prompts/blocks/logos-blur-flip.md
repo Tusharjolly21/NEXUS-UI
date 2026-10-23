@@ -1,88 +1,85 @@
 # Blur Flip Grid
 
-Build a "used by" logo section: a centred headline and subtitle over a quiet grid of monochrome brand lockups. Every few seconds each mark rolls over in place, one after another left to right: the face tips back and blurs away while a fresh copy springs up from below. It should feel calm and mechanical, like a split-flap board made of glass. Only transforms, opacity and filter animate, so nothing around the grid shifts.
+Build a "used by" logo band where eight brand lockups sit in a quiet grid and, every few seconds, each slot rolls over to the next brand one after another: the old lockup tips back and blurs away while the new one springs up from below. It should feel like a departures board that is quiet about it.
 
 ## Stack
 
-- React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useInView`, `useReducedMotion`, `Variants`).
-- File: `components/blocks/logo-clouds/logos-blur-flip.tsx`, default export `LogosBlurFlip`; also export the `LogoEntry` and `LogosBlurFlipProps` types.
-- The placeholder marks live in a sibling `logos.tsx` that exports `LOGOS` and a `LogoLockup` component (spec below). A `cn()` class-merge helper (clsx + tailwind-merge) is assumed.
+- React 19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useInView`, `useReducedMotion`). A `cn()` class-merge helper is assumed.
+- File: `components/blocks/logo-clouds/logos-blur-flip.tsx`, default export `LogosBlurFlip`; also export `LogosBlurFlipProps`.
+- Marks and helpers come from a sibling `logos.tsx` (spec below).
 
 ## API
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
-| `logos` | `LogoEntry[]` | twelve placeholder lockups | Marks in the grid. `LogoEntry = { icon: ReactNode; name?: string; id?: string }`. |
-| `title` | `string` | `"Used by teams that ship every week"` | Headline. |
-| `subtitle` | `string` | `"From two-person studios to platform teams of four hundred."` | Line under the headline; falsy hides it. |
-| `interval` | `number` | `2600` | Milliseconds between flips. |
-| `className` | `string` | — | Merged onto the outer `<section>`. |
-
-Default `logos`: every entry of `LOGOS` mapped to `{ icon: <LogoLockup logo={l} className="text-[17px] sm:text-[19px]" />, id: l.name }` (no `name`, so no caption under the default marks).
+| `logos` | `Logo[]` | the twenty placeholder brands | Brands to show. |
+| `title` | `string` | `Used by teams that ship every week` | Headline. |
+| `subtitle` | `string` | `From two-person studios to platform teams of four hundred.` | Line under the headline; empty hides it. |
+| `interval` | `number` | `3000` | Milliseconds between flips. |
+| `className` | `string` | none | Merged onto the outer `<section>`. |
 
 ## Layout and look
 
-- Section: full width, `px-4`, `py-16` (64px), `sm:py-24` (96px). Background white, dark `black`.
-- Header block: `max-w-2xl` (672px), centred, text centred.
-  - `h2`: 28px, `sm:` 40px, semibold, line-height 1.1, tracking −0.03em, `text-balance`, colour `#1d1d1f` / dark `#f5f5f7`.
-  - Subtitle: 12px top margin, 17px, line-height 1.47, `#6e6e73` / dark `#a1a1a6`.
-- Grid (`<ul>`): 48px top margin (`sm:` 56px), `max-w-5xl` (1024px), centred. `grid-cols-2`, `sm:grid-cols-3`, `lg:grid-cols-6`, `place-items-center`, column gap 16px (`sm:` 40px), row gap 16px. Twelve marks = 6×2 on desktop, 4×3 on tablet, 2×6 on phones.
-- Item (`<li>`): full cell width. Inside, a 64px-tall relative flex box, centred, ink colour `#1d1d1f` / dark `#f5f5f7`, resting opacity 0.55, `transition-opacity 300ms ease-out`, hover opacity 1, and `perspective: 700px` so the rotateX reads as 3D.
-- Face: a `motion.span`, vertical flex, items centred, 6px gap, `transform-origin: center`. It holds an icon wrapper (36px tall and min-width, `sm:` 40px, centred) and, only when `name` is set, a caption: 12px, medium, `whitespace-nowrap`, `select-none`.
-
-## Placeholder marks (`logos.tsx`)
-
-Twelve invented brands, so the section never implies a real company is a customer. `LogoLockup({ logo, tinted = false, className })` renders an `inline-flex items-center gap-2 whitespace-nowrap leading-none` span, base 17px, with the glyph (24×24 viewBox SVG, `fill="none"`, `aria-hidden`, `size-[1.35em] shrink-0`, drawn in `currentColor`) then the name in a span carrying the wordmark classes. Each brand also carries an accent colour, unused here.
-
-| Name | Wordmark classes | Glyph (strokes use `currentColor`) |
-|---|---|---|
-| Arcwell | `font-semibold tracking-[-0.03em]` | `M4 18a8 8 0 0 1 16 0` and `M8.5 18a3.5 3.5 0 0 1 7 0`, stroke 2.4, round caps |
-| Basalt | `text-[0.78em] font-semibold uppercase tracking-[0.22em]` | `M12 2.5 20.2 7v10L12 21.5 3.8 17V7Z` stroke 2 round join; `M12 12v9.5M12 12l8.2-5M12 12 3.8 7` stroke 1.6 |
-| Corvid | `font-serif text-[1.08em] italic tracking-[-0.01em]` | filled `M3 17 12 5l9 12h-5.2L12 11.6 8.2 17Z` |
-| driftline | `font-medium tracking-[-0.02em]` | for y in 7, 12, 17: `M3 {y}c2.2-2 4.3-2 6.5 0s4.3 2 6.5 0 3.7-1.6 5 0`, stroke 2, round caps |
-| Emberly | `font-bold tracking-[-0.04em]` | filled `M12 2.5c4 4.2 6.5 7.6 6.5 11.2A6.5 6.5 0 0 1 5.5 13.7c0-2.3 1.1-4.3 3-6.2.3 2 1.3 3.2 2.6 3.6C11 8 11 5.4 12 2.5Z` |
-| fieldnote | `font-mono text-[0.9em] font-medium tracking-[-0.04em]` | `M4.5 3.5h10l5 5v12h-15Z` stroke 2 round join; `M14.5 3.5v5h5` stroke 1.6; `M8 13h8M8 16.5h5` stroke 1.8 round caps |
-| Glasshouse | `font-light tracking-[0.02em]` | `M3.5 11 12 3.5l8.5 7.5v9.5h-17Z` stroke 2 round join; `M12 9v11.5M3.5 15h17` stroke 1.6 |
-| KESTREL | `text-[0.86em] font-black tracking-[0.08em]` | filled `M2.5 15.5 14 4.5l-3 7h10.5L10 19.5l3-4Z` |
-| Lumora | `font-serif text-[1.08em] tracking-[-0.01em]` | circle r 9 at 12,12 stroke 2; filled `M12 3a9 9 0 0 1 0 18Z` |
-| Oakhaven | `font-semibold tracking-[-0.02em]` | `M12 21.5V11M12 11c-5.5 0-8-3.5-8-8.5 5.3 0 8 2.6 8 8.5Zm0 0c5.5 0 8-3.5 8-8.5-5.3 0-8 2.6-8 8.5Z` filled + stroke 1.4 round join |
-| Quill & Co | `font-serif text-[1.06em] italic` | filled `M20.5 3.5C11 4.5 6 10 5 20.5 9 13.8 13 10.5 20.5 3.5Z`; `M3.5 20.5h8` stroke 2 round cap |
-| Tidewater | `font-medium tracking-[-0.01em]` | circle r 9 stroke 2; filled `M3.5 13.5c2.8-2.4 5.7-2.4 8.5 0s5.7 2.4 8.5 0V15a9 9 0 0 1-17 0Z` |
+- Section: full width, `px-4`, `py-16` (64px), `sm:py-24` (96px), white, dark `black`; `className` merges onto it.
+- Header: `LogoHeading`.
+- Grid: a `ul` with 48px top margin (`sm:` 56px), `max-w-3xl` (768px), centred, `grid-cols-2` (`sm:grid-cols-4`), column gap 24px, row gap 16px. Eight slots.
+- Slot: a `li`, `relative`, 64px tall, flex centred, `[perspective:700px]`, ink colour, resting opacity 0.8 and 1 on hover. The lockup is 19px (`sm:` 21px).
 
 ## Motion
 
-- Entrance: the content wrapper uses `initial="hidden"`, `whileInView="visible"`, `viewport={{ once: true, margin: "-80px" }}` and staggers children by 0.04s. Headline, subtitle and each `<li>` use the shared "rise" variant: hidden `opacity 0, y 16, blur(6px)` → visible `opacity 1, y 0, blur(0px)` on a spring (stiffness 240, damping 30).
-- Flip cycle: a `cycle` counter increments on `setInterval(interval)`. The face is keyed by `cycle` inside `AnimatePresence mode="popLayout" initial={false}`, so the old face exits while the new one enters in the same spot.
-  - Enter: from `opacity 0, rotateX 80, y "45%", blur(8px)` to `opacity 1, rotateX 0, y 0, blur(0px)`.
-  - Exit: to `opacity 0, rotateX −80, y "−45%", blur(8px)`.
-  - Both use a spring (stiffness 300, damping 26) delayed by `index × 0.05s`, which gives the left-to-right roll.
-- The `<li>` owns the entrance; the inner box owns resting opacity and hover, so the two animations never fight.
+- Each slot wraps its lockup in `AnimatePresence mode="popLayout" initial={false}`, keyed `${page}-${name}`, so a page change re-mounts every slot.
+- Enter from `opacity 0, rotateX 80, y 45%, blur(8px)` to `opacity 1, rotateX 0, y 0, blur(0)`; exit to `opacity 0, rotateX −80, y −45%, blur(8px)`. Both on `SPRING` with `delay = slotIndex × 0.07s`.
+- Reduced motion: enter and exit are plain opacity changes and the pager never runs.
 
 ## Interaction and states
 
-- The flip timer runs only while the grid is in view (`useInView` on the `<ul>`, margin −80px, not once) and reduced motion is off. Clear the interval on cleanup; changing `interval` restarts it.
-- Hovering a cell raises it from 0.55 to full opacity (CSS transition). No click behaviour.
-- With `prefers-reduced-motion`: the rise variant becomes opacity-only (0.4s), the flip never runs, and the face transitions are opacity-only (exit 0.2s).
+- `usePager(logos, 8, interval, inView && !reduced)`, where `inView` is `useInView` on the grid with a −80px margin. With twenty brands and eight slots there are three pages, and the last one wraps to the start.
+- Hover raises a slot to full opacity. There is no click behaviour.
 
-## Demo data
+## Shared helpers (also in `logos.tsx`)
 
-Defaults only: the headline, subtitle and twelve placeholder lockups above, flipping every 2600ms.
+- `SPRING = { type: "spring", stiffness: 340, damping: 30 }`; `INK = "text-[#1d1d1f] dark:text-[#f5f5f7]"`; `EDGE = "linear-gradient(to right, transparent, black 12%, black 88%, transparent)"` (a mask).
+- `LogoHeading({ eyebrow?, eyebrowClassName?, title, subtitle? })`: a `max-w-2xl` centred block that rises once into view (`whileInView`, `viewport={{ once: true, margin: "-80px" }}`) from `opacity 0, y 16, blur(6px)` to rest on a spring (stiffness 240, damping 30); under reduced motion it only fades. The optional eyebrow is a 15px semibold `#6e6e73` / dark `#a1a1a6` line with 4px below it. The `h2` is 28px (`sm:` 40px), semibold, line-height 1.1, tracking −0.03em, `text-balance`, `#1d1d1f` / dark `#f5f5f7`. The subtitle is 12px below, 17px, line-height 1.47, `#6e6e73` / dark `#a1a1a6`.
+- `usePager(logos, slots, ms, run)`: a page counter that ticks every `ms` while `run` is true and there is more than one page; returns `{ page, items }`, where `items[i] = logos[(page × slots + i) % logos.length]`, so a short last page wraps to the start.
+- `Track({ items, speed, reverse, render, gap, active, pauseOnHover })`: a `flex w-max` row of the items twice over, translated by a motion value that a `requestAnimationFrame` loop moves by `speed × throttle × dt` px (dt capped at 64ms) and wraps at half the row width. `reverse` runs it rightwards (starting a quarter-width in). `throttle` is a spring (stiffness 120, damping 24) that eases to 0 while the pointer is over the row (if `pauseOnHover`) and back to 1 after. It does nothing while `active` is false or under reduced motion.
+
+## Placeholder marks (`logos.tsx`)
+
+Twenty invented brands, so a page built from the block never implies a real customer. Export `type Logo = { name: string; Icon: ComponentType<{ className?: string; style?: CSSProperties }>; color: string; wordmark?: string }`, the array `LOGOS: Logo[]`, and `LogoLockup({ logo, tinted = false, className })`.
+
+`LogoLockup` renders an `inline-flex items-center gap-2 whitespace-nowrap leading-none` span, base 17px: the glyph (24×24 viewBox SVG, `fill="none"`, `aria-hidden`, `size-[1.35em] shrink-0`, drawn in `currentColor`, with a 300ms colour transition and the brand `color` applied only when `tinted`), then the name with its wordmark classes. The wordmark stays ink, so a row of lockups reads as one quiet band. Strokes use round caps and joins.
+
+| Name | Colour | Wordmark classes | Glyph |
+|---|---|---|---|
+| Arcwell | `#3b5bdb` | `font-semibold tracking-[-0.03em]` | `M4 18a8 8 0 0 1 16 0` (stroke 2.4); `M8.5 18a3.5 3.5 0 0 1 7 0` (stroke 2.4) |
+| BASALT | `#868e96` | `text-[0.78em] font-semibold tracking-[0.22em]` | `M12 2.5 20.2 7v10L12 21.5 3.8 17V7Z` (stroke 2); `M12 12v9.5M12 12l8.2-5M12 12 3.8 7` (stroke 1.6) |
+| Corvid | `#7048e8` | `font-serif text-[1.08em] italic` | `M3 17 12 5l9 12h-5.2L12 11.6 8.2 17Z` (filled) |
+| driftline | `#0c8599` | `font-medium tracking-[-0.02em]` | `M3 {y} c2.2-2 4.3-2 6.5 0 s4.3 2 6.5 0 3.7-1.6 5 0 (three waves, y = 7, 12, 17)` (stroke 2) |
+| Emberly | `#e8590c` | `font-bold tracking-[-0.04em]` | `M12 2.5c4 4.2 6.5 7.6 6.5 11.2A6.5 6.5 0 0 1 5.5 13.7c0-2.3 1.1-4.3 3-6.2.3 2 1.3 3.2 2.6 3.6C11 8 11 5.4 12 2.5Z` (filled) |
+| fieldnote | `#2b8a3e` | `font-mono text-[0.9em] font-medium tracking-[-0.04em]` | `M4.5 3.5h10l5 5v12h-15Z` (stroke 2); `M8 13h8M8 16.5h5` (stroke 1.8) |
+| Glasshouse | `#1971c2` | `font-light tracking-[0.02em]` | `M3.5 11 12 3.5l8.5 7.5v9.5h-17Z` (stroke 2); `M12 9v11.5M3.5 15h17` (stroke 1.6) |
+| KESTREL | `#e03131` | `text-[0.86em] font-black tracking-[0.08em]` | `M2.5 15.5 14 4.5l-3 7h10.5L10 19.5l3-4Z` (filled) |
+| Lumora | `#f08c00` | `font-serif text-[1.08em]` | circle (12, 12) r 9 (stroke 2); `M12 3a9 9 0 0 1 0 18Z` (filled) |
+| Oakhaven | `#5c940d` | `font-semibold tracking-[-0.02em]` | `M12 21.5V11M12 11c-5.5 0-8-3.5-8-8.5 5.3 0 8 2.6 8 8.5Zm0 0c5.5 0 8-3.5 8-8.5-5.3 0-8 2.6-8 8.5Z` (filled, stroke 1.4) |
+| Quill & Co | `#ae3ec9` | `font-serif text-[1.06em] italic` | `M20.5 3.5C11 4.5 6 10 5 20.5 9 13.8 13 10.5 20.5 3.5Z` (filled); `M3.5 20.5h8` (stroke 2) |
+| Tidewater | `#1c7ed6` | `font-medium tracking-[-0.01em]` | circle (12, 12) r 9 (stroke 2); `M3.5 13.5c2.8-2.4 5.7-2.4 8.5 0s5.7 2.4 8.5 0V15a9 9 0 0 1-17 0Z` (filled) |
+| MONOLITH | `#868e96` | `text-[0.82em] font-bold tracking-[0.18em]` | rect x 8 y 2.5 8×19 r 1.5 (filled); `M4 21.5h16` (stroke 2) |
+| brightloop | `#f59f00` | `font-semibold tracking-[-0.04em]` | `M12 12c-2.2-3.2-6.5-3.2-6.5 0s4.3 3.2 6.5 0Zm0 0c2.2 3.2 6.5 3.2 6.5 0s-4.3-3.2-6.5 0Z` (stroke 2.2); circle (12, 4) r 1.6 (filled) |
+| Sablewood | `#2f9e44` | `font-serif text-[1.06em]` | `M12 2.5 19 14H5Z` (filled); `M12 8.5 20.5 21h-17Z` (filled) at .55 opacity |
+| VANTAGE | `#4263eb` | `text-[0.84em] font-extrabold tracking-[0.12em]` | `M3 4.5h5.5L12 13l3.5-8.5H21L13.5 20h-3Z` (filled) |
+| Pinecrest | `#099268` | `font-medium tracking-[-0.02em]` | `M12 2.5 6 11h3.2L5 17.5h14L14.8 11H18Z` (filled); `M12 17.5v4` (stroke 2.2) |
+| cobalt | `#1864ab` | `font-bold tracking-[-0.05em]` | circle (8, 8) r 4.5 (filled); circle (16, 16) r 4.5 (filled) at .55 opacity; circle (16, 8) r 2.4 (filled) |
+| Ridgeway | `#d9480f` | `font-light tracking-[0.01em]` | `M2.5 19 9 8l3.5 5.5L15 10l6.5 9Z` (filled); circle (17.5, 5.5) r 2 (filled) |
+| Halyard | `#0b7285` | `font-serif text-[1.06em] italic` | `M12 3v15.5M5 13.5c0 4 3.1 7 7 7s7-3 7-7M7.5 7.5h9` (stroke 2.2); circle (12, 3.5) r 1.8 (filled) |
 
 ## Accessibility
 
-- Semantic `<section>`, `<h2>`, `<ul>`/`<li>`.
-- When a `LogoEntry` has a `name`, its `<li>` gets `role="img"` and `aria-label={name}`. The default lockups render their name as text, so they read without a label; glyph SVGs are `aria-hidden`.
-- Flips swap identical content, so nothing new is announced; reduced motion stops them entirely.
+- `<section>`, `<h2>`, and a list. Each lockup carries `role="img"` and `aria-label={name}`, and the glyph SVG is `aria-hidden`.
 
 ## Acceptance checklist
 
-- [ ] Twelve marks sit in 6 columns on desktop, 3 on tablet, 2 on phones, each in a 64px-tall cell at 55% opacity.
-- [ ] Headline is 28px on phones and 40px from `sm`, with a grey 17px subtitle; an empty subtitle renders nothing.
-- [ ] Scrolling the section in fades and un-blurs headline, subtitle and marks in a short stagger, once.
-- [ ] Every 2.6s each mark tips back and blurs out while a copy springs up from below, 50ms after its neighbour.
-- [ ] The surrounding layout never moves during a flip.
-- [ ] Hovering a mark brings it to full opacity.
-- [ ] Scrolling the grid out of view pauses flipping; scrolling back resumes it.
-- [ ] Passing `interval={5000}` slows the cycle; passing custom `logos` with `name` shows a 12px caption under each icon.
-- [ ] With reduced motion on, nothing flips and the entrance is a plain fade.
-- [ ] Dark mode: black background, `#f5f5f7` ink, `#a1a1a6` subtitle.
+- [ ] Eight 64px slots, four per row from `sm`, two per row on phones.
+- [ ] Every 3s the slots flip left to right, 70ms apart, to the next eight brands.
+- [ ] Outgoing lockups tip back and blur; incoming ones rise from below and sharpen.
+- [ ] Flipping pauses while the grid is off screen and never runs under reduced motion.
+- [ ] Dark mode: black background, `#f5f5f7` marks and headline.

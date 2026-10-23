@@ -101,7 +101,7 @@ export default function Page() {
     registryCliName: "logo-clouds",
     name: "Brand Logo Animation",
     description:
-      "Six production-ready animated logo cloud variants: blur-flip grid, hover-reveal blur, infinite marquee, cursor spotlight, periodic swap, and minimal single row.",
+      "Seven animated logo cloud variants on twenty invented brands: a flip grid, hover-reveal blur, two-row marquee, cursor spotlight, page swap, a single row with a lift, and a shelf of app-icon tiles.",
     category: "Logo clouds",
     tags: ["logos", "brands", "marquee", "spotlight", "animation", "framer-motion"],
     premium: false,
@@ -112,6 +112,7 @@ export default function Page() {
       "Cursor Spotlight",
       "Swap Animation",
       "Single Row Lift",
+      "Logo Shelf",
       "Loupe Logo Cloud",
       "Cinematic Logo Cloud",
       "Logo Stories",
@@ -123,6 +124,7 @@ import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee
 import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
+import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
 
 export default function Page() {
   return (
@@ -133,6 +135,7 @@ export default function Page() {
       <LogoCloudSpotlight />
       <LogoCloudSwap />
       <LogoCloudSingleRow />
+      <LogoCloudShelf />
     </>
   );
 }`,

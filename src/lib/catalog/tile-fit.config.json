@@ -349,6 +349,10 @@
         140
       ],
       "object": true
+    },
+    "cubes-grid": {
+      "scene": true,
+      "span": 2
     }
   },
   "$overrides": "Per-component fixes when the measured footprint is wrong: focus [x,y,w,h] on the canvas, scene, object, span (1-2), pad."

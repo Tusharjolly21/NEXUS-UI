@@ -64,6 +64,8 @@ export interface ChladniUploadProps {
   /** Size in MB. The "x of y MB" line counts up to it. */
   fileSize?: number;
   /** Called once each time an upload reaches 100%. */
+  /** How long a full upload takes, in seconds. */
+  duration?: number;
   onComplete?: () => void;
   /** Uploads, holds the check, resets and goes again until someone presses the button. Pauses off screen and never runs under reduced motion. */
   autoplay?: boolean;
@@ -71,7 +73,7 @@ export interface ChladniUploadProps {
   className?: string;
 }
 
-export function ChladniUpload({ fileName = "mix-final.wav", fileSize = 24.6, onComplete, autoplay = false, className }: ChladniUploadProps) {
+export function ChladniUpload({ fileName = "mix-final.wav", fileSize = 24.6, duration = 7, onComplete, autoplay = false, className }: ChladniUploadProps) {
   const reduce = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
   const onScreen = useDemoActive(cardRef, true);
@@ -111,7 +113,7 @@ export function ChladniUpload({ fileName = "mix-final.wav", fileSize = 24.6, onC
     setStage(0);
     run.current?.stop();
     run.current = animate(progress, 1, {
-      duration: 7,
+      duration,
       ease: [0.3, 0.1, 0.4, 1],
       onComplete: () => {
         phaseRef.current = "done";

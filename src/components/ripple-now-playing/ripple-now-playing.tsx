@@ -33,7 +33,7 @@ function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
 }
 
 
-type Track = { title: string; artist: string; bpm: number; length: number; a: string; b: string; c: string; ink: string };
+export type Track = { title: string; artist: string; bpm: number; length: number; a: string; b: string; c: string; ink: string };
 
 const TRACKS: Track[] = [
   { title: "Low Tide", artist: "Harbour Lights", bpm: 96, length: 204, a: "#ff375f", b: "#ff9f0a", c: "#5e0b2b", ink: "#ffffff" },
@@ -76,11 +76,13 @@ function makeRingMap(size = 256) {
 export interface RippleNowPlayingProps {
   /** Starts playing by itself and skips to the next track every seven seconds until someone touches the card. Pauses off screen and never runs under reduced motion. Without it the card waits, paused, until you press play. */
   autoplay?: boolean;
+  /** The playlist: title, artist, bpm (the ripples follow it), length in seconds, three gradient colours (a, b, c) and the ink colour of the title. Defaults to three demo tracks. */
+  tracks?: Track[];
   /** Extra classes for the card. */
   className?: string;
 }
 
-export function RippleNowPlaying({ autoplay = false, className }: RippleNowPlayingProps) {
+export function RippleNowPlaying({ autoplay = false, tracks = TRACKS, className }: RippleNowPlayingProps) {
   const reduce = useReducedMotion() ?? false;
   const cardRef = useRef<HTMLDivElement>(null);
   const onScreen = useDemoActive(cardRef, true);
@@ -94,7 +96,7 @@ export function RippleNowPlaying({ autoplay = false, className }: RippleNowPlayi
   const [dir, setDir] = useState(1);
   const [playing, setPlaying] = useState(autoplay && !reduce);
   const playingRef = useRef(autoplay && !reduce);
-  const track = TRACKS[index];
+  const track = tracks[index % tracks.length];
   const trackRef = useRef(track);
   useEffect(() => {
     trackRef.current = track;
@@ -189,7 +191,7 @@ export function RippleNowPlaying({ autoplay = false, className }: RippleNowPlayi
   const skip = (d: number, user = true) => {
     if (user) touch();
     setDir(d);
-    setIndex((i) => (i + d + TRACKS.length) % TRACKS.length);
+    setIndex((i) => (i + d + tracks.length) % tracks.length);
     time.set(user ? 0 : 20 + Math.random() * 40);
     pulse(150, 150, 1);
   };

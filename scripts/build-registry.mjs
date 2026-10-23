@@ -739,7 +739,7 @@ const BLOCK_REGISTRY_PACKAGES = [
     name: "logo-clouds",
     title: "Brand Logo Animation",
     description:
-      "A complete set of animated logo cloud layouts including marquee, spotlight, swapping, and blur variants.",
+      "A complete set of animated logo cloud layouts including flip, marquee, spotlight, swapping, shelf, and blur variants.",
     premium: false,
     components: ["blocks/logo-clouds"],
   },
