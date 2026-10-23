@@ -22,6 +22,8 @@ const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   "launch-day": () => import("./launch-day"),
   "logo-bumper": () => import("./logo-bumper"),
   "hero-loop": () => import("./hero-loop"),
+  "keynote-film": () => import("./keynote-film"),
+  "brand-film": () => import("./brand-film"),
 };
 
 /** One lazy component per video, created once at module level. */
