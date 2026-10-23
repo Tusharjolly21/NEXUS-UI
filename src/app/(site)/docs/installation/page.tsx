@@ -116,17 +116,35 @@ html.dark {
           <p className="text-sm text-muted-foreground">
             Every Nexus UI component imports{" "}
             <code className={docInlineCodeClass}>cn</code> from{" "}
-            <code className={docInlineCodeClass}>@/lib/utils</code>. Install the dependencies and
-            create the file:
+            <code className={docInlineCodeClass}>@/lib/utils</code>. A new Next.js project does{" "}
+            <strong className="font-medium text-foreground">not</strong> include it, and it does not
+            even have a <code className={docInlineCodeClass}>src/lib</code> folder yet, so you
+            create both. First install the packages (Nexus UI animates with{" "}
+            <code className={docInlineCodeClass}>framer-motion</code>):
           </p>
-          <DocPre>{`npm install clsx tailwind-merge motion`}</DocPre>
-          <DocPre>{`// src/lib/utils.ts
-import { type ClassValue, clsx } from "clsx";
+          <DocPre>{`npm install clsx tailwind-merge framer-motion`}</DocPre>
+          <p className="text-sm text-muted-foreground">
+            Then make the folder and the file. On macOS and Linux:
+          </p>
+          <DocPre>{`mkdir -p src/lib
+touch src/lib/utils.ts`}</DocPre>
+          <p className="text-sm text-muted-foreground">
+            On Windows, or in your editor, create a folder named{" "}
+            <code className={docInlineCodeClass}>lib</code> inside{" "}
+            <code className={docInlineCodeClass}>src</code>, then a file named{" "}
+            <code className={docInlineCodeClass}>utils.ts</code> inside it. Paste this into{" "}
+            <code className={docInlineCodeClass}>src/lib/utils.ts</code>:
+          </p>
+          <DocPre>{`import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }`}</DocPre>
+          <p className="text-sm text-muted-foreground">
+            The next step uses this same file. If the shadcn setup asks about an existing{" "}
+            <code className={docInlineCodeClass}>lib/utils.ts</code>, keep yours.
+          </p>
         </DocSection>
 
         <DocSection title="4. Initialize shadcn/ui">
