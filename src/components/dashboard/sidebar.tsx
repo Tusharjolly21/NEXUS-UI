@@ -35,7 +35,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/orders", label: "Orders", icon: ShoppingBag },
-  { href: "/dashboard/api-key", label: "API token", icon: Key },
+  { href: "/dashboard/api-key", label: "API key", icon: Key },
   { href: "/dashboard/profile", label: "Account", icon: User },
 ] as const;
 

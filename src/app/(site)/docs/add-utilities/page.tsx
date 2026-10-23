@@ -53,13 +53,13 @@ export default function AddUtilitiesPage() {
       />
       <TechArticleJsonLd
         title="Set Up the cn() Helper: clsx + tailwind-merge"
-        description="Install clsx, tailwind-merge, and a cn() helper — the same composition pattern Nexus UI uses across components."
+        description="Install clsx and tailwind-merge and create the cn() helper in src/lib/utils.ts, the className utility every Nexus UI component imports."
         slug="add-utilities"
       />
       <DocPageShell>
         <DocPageHeader
           title="Add utilities: the cn() helper"
-          description="Utility helpers keep className composition predictable when variants, state, and Tailwind strings collide. Nexus UI uses clsx plus tailwind-merge behind a single cn() export — and Motion for all animation."
+          description="Utility helpers keep className composition predictable when variants, state, and Tailwind strings collide. Nexus UI components use clsx plus tailwind-merge behind a single cn() export, and Framer Motion for animation."
         />
 
         <DocSection title="What is cn() in Tailwind?">
@@ -85,7 +85,8 @@ export default function AddUtilitiesPage() {
             They solve different problems, which is why <code className={docInlineCodeClass}>cn()</code>{" "}
             uses both. <code className={docInlineCodeClass}>clsx</code> only joins class names and drops
             falsy values — it knows nothing about Tailwind.{" "}
-            <code className={docInlineCodeClass}>tailwind-merge</code> knows Tailwind&apos;s utility
+            <code className={docInlineCodeClass}>tailwind-merge</code>{" "}
+            knows Tailwind&apos;s utility
             groups, so when two classes target the same property it keeps the last one.
           </p>
           <DocPre>{`clsx("p-4", isActive && "p-6")     // → "p-4 p-6"  (both kept)
@@ -100,21 +101,39 @@ cn("p-4", isActive && "p-6")        // → "p-6"      (clsx, then twMerge)`}</Do
           <div data-doc-widget><CnPlayground /></div>
         </DocSection>
 
+        <DocSection title="Already ran shadcn init?">
+          <p className="text-sm text-muted-foreground">
+            Then <code className={docInlineCodeClass}>npx shadcn@latest init</code> (step 2 of the{" "}
+            <Link href="/docs/installation" className="text-link underline-offset-4 hover:underline">
+              Quick Start
+            </Link>
+            ) already installed <code className={docInlineCodeClass}>clsx</code> and{" "}
+            <code className={docInlineCodeClass}>tailwind-merge</code> and created{" "}
+            <code className={docInlineCodeClass}>src/lib/utils.ts</code>. Open that file, check it exports{" "}
+            <code className={docInlineCodeClass}>cn</code>, and skip to step 3. Follow steps 1 and 2 only if you did not use
+            shadcn, or the file is missing.
+          </p>
+        </DocSection>
+
         <DocSection title="1. Install dependencies">
           <p className="text-sm text-muted-foreground">
-            Install the three libraries every Nexus UI component relies on:{" "}
-            <code className={docInlineCodeClass}>clsx</code> for conditional class logic,{" "}
-            <code className={docInlineCodeClass}>tailwind-merge</code> for conflict resolution, and{" "}
-            <code className={docInlineCodeClass}>framer-motion</code> for animations.
+            Install the two libraries <code className={docInlineCodeClass}>cn()</code> is built from:{" "}
+            <code className={docInlineCodeClass}>clsx</code> for conditional class logic and{" "}
+            <code className={docInlineCodeClass}>tailwind-merge</code> for conflict resolution. Nexus UI components also
+            animate with <code className={docInlineCodeClass}>framer-motion</code>, so add that too:
           </p>
           <DocPre>{`npm install clsx tailwind-merge framer-motion`}</DocPre>
         </DocSection>
 
         <DocSection title="2. Create the cn() helper">
           <p className="text-sm text-muted-foreground">
-            Create{" "}
-            <code className={docInlineCodeClass}>src/lib/utils.ts</code> (this exact file is used
-            throughout Nexus UI):
+            A new Next.js project has no <code className={docInlineCodeClass}>src/lib</code> folder, so create the folder
+            and the file. In your editor, make a folder named <code className={docInlineCodeClass}>lib</code> inside{" "}
+            <code className={docInlineCodeClass}>src</code>, then a file named{" "}
+            <code className={docInlineCodeClass}>utils.ts</code> inside it (or run{" "}
+            <code className={docInlineCodeClass}>mkdir -p src/lib && touch src/lib/utils.ts</code> on macOS and Linux).
+            Paste this into <code className={docInlineCodeClass}>src/lib/utils.ts</code>. Components import it as{" "}
+            <code className={docInlineCodeClass}>@/lib/utils</code>:
           </p>
           <DocPre>{`import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -164,7 +183,8 @@ function Card({ className, active }: { className?: string; active?: boolean }) {
             order.
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            <code className={docInlineCodeClass}>twMerge</code> understands Tailwind&apos;s utility
+            <code className={docInlineCodeClass}>twMerge</code>{" "}
+            understands Tailwind&apos;s utility
             groups and strips any earlier arguments that conflict with later ones, so design-system
             defaults and consumer overrides always compose safely:
           </p>
@@ -176,50 +196,18 @@ cn("p-4", "p-6")       // → "p-6"
 cn("p-4", props.className)  // consumer override is respected`}</DocPre>
         </DocSection>
 
-        <DocSection title="Next.js 15 + React 19 overrides">
-          <p className="text-sm text-muted-foreground">
-            If you are using Next.js 15 with React 19 and see peer-dependency warnings from the{" "}
-            <code className={docInlineCodeClass}>motion</code> package, add an overrides block to your{" "}
-            <code className={docInlineCodeClass}>package.json</code>:
-          </p>
-          <DocPre>{`{
-  "overrides": {
-    "motion": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
-    }
-  }
-}`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            If you are using <code className={docInlineCodeClass}>framer-motion</code> instead of{" "}
-            <code className={docInlineCodeClass}>motion</code>, replace the key accordingly:
-          </p>
-          <DocPre>{`{
-  "overrides": {
-    "framer-motion": {
-      "react": "^19.0.0",
-      "react-dom": "^19.0.0"
-    }
-  }
-}`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            Run <code className={docInlineCodeClass}>npm install</code> again after editing{" "}
-            <code className={docInlineCodeClass}>package.json</code>.
-          </p>
-        </DocSection>
-
         <DocSection title="Verify the setup">
           <p className="text-sm text-muted-foreground">
-            Import <code className={docInlineCodeClass}>cn</code> in any component and check the
-            output. With TypeScript the function signature is:
+            Import <code className={docInlineCodeClass}>cn</code> in any component, for example{" "}
+            <code className={docInlineCodeClass}>src/app/page.tsx</code>, and log the result:
           </p>
           <DocPre>{`import { cn } from "@/lib/utils";
 
-// resolves to "rounded-xl bg-primary text-white px-6"
+// logs: rounded-xl bg-primary text-white px-6
 const cls = cn("rounded-xl bg-muted", "bg-primary text-white", "px-4 px-6");
 console.log(cls);`}</DocPre>
           <p className="text-sm text-muted-foreground">
-            No TypeScript errors and the output string should contain only{" "}
+            The editor should show no import error, and the string printed in the terminal running <code className={docInlineCodeClass}>npm run dev</code> should contain only{" "}
             <code className={docInlineCodeClass}>px-6</code> (not{" "}
             <code className={docInlineCodeClass}>px-4</code>) and{" "}
             <code className={docInlineCodeClass}>bg-primary</code> (not{" "}

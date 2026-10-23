@@ -65,7 +65,7 @@ export function ProfileView({ data }: { data: ProfileData }) {
               Billing
             </Link>
             <Link href="/dashboard/api-key" className={pillClassName("white", "sm")}>
-              API token
+              API key
             </Link>
           </div>
         </Card>

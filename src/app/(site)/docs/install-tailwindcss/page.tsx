@@ -15,7 +15,7 @@ import { DarkModeDemo } from "@/components/docs/interactive/dark-mode-demo";
 export const metadata: Metadata = createMetadata({
   title: "Install Tailwind CSS",
   description:
-    "Add Tailwind CSS v4 with PostCSS to a Next.js project, aligned with the OKLCH design tokens and globals Nexus UI components expect. Includes shadcn config.",
+    "Check that Tailwind CSS v4 is set up in your Next.js project, add it if it is missing, and learn the colour tokens and dark mode setup Nexus UI components expect.",
   alternates: { canonical: "/docs/install-tailwindcss" },
 });
 
@@ -24,61 +24,91 @@ export default function InstallTailwindPage() {
     <>
       <TechArticleJsonLd
         title="Install Tailwind CSS"
-        description="Add Tailwind CSS v4 with PostCSS to a Next.js app — aligned with Nexus-UI globals and shadcn-style tokens."
+        description="Check that Tailwind CSS v4 is set up in your Next.js project, add it if it is missing, and learn the colour tokens and dark mode setup Nexus UI components expect."
         slug="install-tailwindcss"
       />
       <DocPageShell>
         <DocPageHeader
           title="Install Tailwind CSS"
-          description="Nexus UI uses Tailwind v4 with the PostCSS plugin, CSS-first configuration, and OKLCH design tokens. Follow these steps on a fresh Next.js app or compare with this repository's postcss.config and globals."
+          description="Nexus UI components are styled with Tailwind CSS v4 and read their colours from CSS variables. If you followed the Quick Start, Tailwind is already installed; this page shows how to check, how to add it to an older project, and how the colour tokens and dark mode work."
         />
 
-        <DocSection title="1. Create a Next.js project">
+        <DocSection title="1. Check what you already have">
           <p className="text-sm text-muted-foreground">
-            If you don&apos;t have a project yet, scaffold one with TypeScript and ESLint enabled — the
-            same flags this repo uses:
+            A project made with the command on the{" "}
+            <Link href="/docs/installation" className="text-link underline-offset-4 hover:underline">
+              Quick Start
+            </Link>{" "}
+            (it includes <code className={docInlineCodeClass}>--tailwind</code>) already has Tailwind CSS v4. You can
+            confirm it:
           </p>
-          <DocPre>{`npx create-next-app@latest my-app --typescript --eslint
-cd my-app`}</DocPre>
+          <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            <li>
+              <code className={docInlineCodeClass}>package.json</code> lists <code className={docInlineCodeClass}>tailwindcss</code>{" "}
+              (version 4), together with a Tailwind plugin for your bundler: <code className={docInlineCodeClass}>@tailwindcss/postcss</code>{" "}
+              or, in newer Next.js projects, <code className={docInlineCodeClass}>@tailwindcss/turbopack</code>.
+            </li>
+            <li>
+              That plugin is switched on in <code className={docInlineCodeClass}>postcss.config.mjs</code> (PostCSS) or in the{" "}
+              <code className={docInlineCodeClass}>turbopack</code> section of <code className={docInlineCodeClass}>next.config.ts</code>.
+            </li>
+            <li>
+              <code className={docInlineCodeClass}>src/app/globals.css</code> starts with{" "}
+              <code className={docInlineCodeClass}>{'@import "tailwindcss";'}</code>.
+            </li>
+          </ul>
+          <p className="text-sm text-muted-foreground">
+            If all three are true, skip to{" "}
+            <a href="#design-tokens-and-globals-css" className="text-link underline-offset-4 hover:underline">
+              design tokens
+            </a>
+            . If not, follow steps 2 and 3, which use the PostCSS setup.
+          </p>
         </DocSection>
 
-        <DocSection title="2. Install packages">
+        <DocSection title="2. Install Tailwind in a project that lacks it">
           <p className="text-sm text-muted-foreground">
-            From your project root, install Tailwind and its PostCSS plugin. Tailwind v4 ships the
-            PostCSS adapter as a separate package — you do not need{" "}
-            <code className={docInlineCodeClass}>autoprefixer</code> for v4 projects.
+            From your project root, install Tailwind and its PostCSS plugin. Tailwind v4 needs no{" "}
+            <code className={docInlineCodeClass}>autoprefixer</code> and no <code className={docInlineCodeClass}>tailwind.config.js</code>;
+            configuration lives in CSS.
           </p>
           <DocPre>{`npm install tailwindcss @tailwindcss/postcss`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            No{" "}
-            <code className={docInlineCodeClass}>tailwind.config.js</code> file is needed for v4 — all
-            configuration moves to CSS.
-          </p>
         </DocSection>
 
         <DocSection title="3. Configure PostCSS">
           <p className="text-sm text-muted-foreground">
-            Create or update{" "}
-            <code className={docInlineCodeClass}>postcss.config.mjs</code> at your project root (this
-            matches{" "}
-            <code className={docInlineCodeClass}>postcss.config.mjs</code> in Nexus UI):
+            Create <code className={docInlineCodeClass}>postcss.config.mjs</code> in the project root (next to{" "}
+            <code className={docInlineCodeClass}>package.json</code>), or replace the one that is there:
           </p>
           <DocPre>{`export default {
   plugins: {
     "@tailwindcss/postcss": {},
   },
 };`}</DocPre>
+          <p className="text-sm text-muted-foreground">
+            Then make sure <code className={docInlineCodeClass}>src/app/globals.css</code> begins with the import below and
+            that <code className={docInlineCodeClass}>src/app/layout.tsx</code> imports the file with{" "}
+            <code className={docInlineCodeClass}>{'import "./globals.css";'}</code>.
+          </p>
+          <DocPre>{`@import "tailwindcss";`}</DocPre>
         </DocSection>
 
-        <DocSection title="4. Set up globals.css">
+        <DocSection title="Design tokens and globals.css">
           <p className="text-sm text-muted-foreground">
-            Replace your{" "}
-            <code className={docInlineCodeClass}>src/app/globals.css</code> with a Tailwind v4 import
-            and your design token definitions. Nexus UI uses{" "}
-            <strong className="font-medium text-foreground">OKLCH color values</strong> for consistent
-            perceptual luminance across light and dark themes, and a{" "}
-            <code className={docInlineCodeClass}>@theme inline</code> block to map shadcn-style CSS
-            variables to Tailwind utilities.
+            Nexus UI components never hard-code colours. They use classes such as{" "}
+            <code className={docInlineCodeClass}>bg-card</code>, <code className={docInlineCodeClass}>text-muted-foreground</code>{" "}
+            and <code className={docInlineCodeClass}>border-border</code>, which read CSS variables defined in{" "}
+            <code className={docInlineCodeClass}>globals.css</code>. Change a variable and every component follows.
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <strong className="font-medium text-foreground">If you ran</strong>{" "}
+            <code className={docInlineCodeClass}>npx shadcn@latest init</code>
+            , it has already added these variables, so do not replace your file with the block below; edit the values you
+            want to change. <strong className="font-medium text-foreground">If you skipped shadcn</strong>, add this block
+            to <code className={docInlineCodeClass}>src/app/globals.css</code> under the import line. It uses{" "}
+            <strong className="font-medium text-foreground">OKLCH colours</strong>, which keep light and dark themes
+            visually balanced, and an <code className={docInlineCodeClass}>@theme inline</code> block that turns each
+            variable into a Tailwind class.
           </p>
           <DocPre>{`@import "tailwindcss";
 
@@ -106,7 +136,7 @@ cd my-app`}</DocPre>
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) * 1.4);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "Cascadia Code", Menlo, Monaco, Consolas, monospace;
 }
 
@@ -154,20 +184,15 @@ html.dark {
   --input: oklch(0.25 0.006 260);
   --ring: oklch(0.55 0.015 260);
 }`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            Import this stylesheet from your root{" "}
-            <code className={docInlineCodeClass}>src/app/layout.tsx</code>:
-          </p>
-          <DocPre>{`import "./globals.css";`}</DocPre>
         </DocSection>
 
-        <DocSection title="5. Dark mode variant">
+        <DocSection title="Dark mode">
           <p className="text-sm text-muted-foreground">
             Nexus UI applies dark mode via a{" "}
             <code className={docInlineCodeClass}>.dark</code> class on the{" "}
             <code className={docInlineCodeClass}>{"<html>"}</code> element (not the{" "}
             <code className={docInlineCodeClass}>media</code> strategy). Register the custom variant
-            once in your globals, right after the Tailwind import:
+            once in your globals, right after the Tailwind import (shadcn init adds this line for you):
           </p>
           <DocPre>{`@import "tailwindcss";
 
@@ -180,16 +205,17 @@ html.dark {
           <div data-doc-widget><DarkModeDemo /></div>
         </DocSection>
 
-        <DocSection title="6. Start the dev server">
+        <DocSection title="Check it works">
           <DocPre>{`npm run dev`}</DocPre>
           <p className="text-sm text-muted-foreground">
             Open{" "}
-            <code className={docInlineCodeClass}>http://localhost:3000</code>. Tailwind utilities and
-            your OKLCH tokens should be active. Next, add the{" "}
+            <code className={docInlineCodeClass}>http://localhost:3000</code> and add a class such as{" "}
+            <code className={docInlineCodeClass}>bg-primary text-primary-foreground</code> to any element; it should pick up
+            the colours from your tokens. Next, set up the{" "}
             <Link href="/docs/add-utilities" className="text-link underline-offset-4 hover:underline">
               cn() utility helper
             </Link>{" "}
-            so components can merge class strings safely.
+            that components use to merge class names.
           </p>
         </DocSection>
 

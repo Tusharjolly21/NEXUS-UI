@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Eye, EyeOff, Copy, Check, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { pillClassName } from "@/components/site/pill-link";
 import { regenerateApiToken } from "./actions";
+import { API_KEY_ENV_VAR, REGISTRIES_PRO, envLocalLine, installCommand } from "@/lib/registry-config";
 
 const STEP_BADGE =
   "flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-sm font-bold text-background";
@@ -17,7 +19,6 @@ function maskKey(key: string) {
 
 type TokenInfo = { hint: string; createdAt: string; lastUsedAt: string | null };
 
-const TOKEN_PLACEHOLDER = "nxs_your_token_here";
 
 // Fixed locale + time zone so server and client render the same string
 const dateFormat = new Intl.DateTimeFormat("en-US", {
@@ -29,44 +30,71 @@ function formatDate(iso: string) {
   return dateFormat.format(new Date(iso));
 }
 
+function CodeBox({
+  title,
+  text,
+  copied,
+  onCopy,
+  onToggle,
+  visible,
+}: {
+  title: string;
+  text: string;
+  copied: boolean;
+  onCopy: () => void;
+  onToggle?: () => void;
+  visible?: boolean;
+}) {
+  return (
+    <div className="overflow-x-auto rounded-xl bg-zinc-950">
+      <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
+        <span className="font-mono text-xs text-zinc-400">{title}</span>
+        <div className="flex items-center gap-2">
+          {onToggle ? (
+            <button
+              type="button"
+              onClick={onToggle}
+              aria-label={visible ? "Hide the key" : "Show the key"}
+              className="rounded p-1 text-zinc-400 transition-colors hover:text-zinc-100"
+            >
+              {visible ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onCopy}
+            aria-label={`Copy ${title}`}
+            className="rounded p-1 text-zinc-400 transition-colors hover:text-zinc-100"
+          >
+            {copied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
+          </button>
+        </div>
+      </div>
+      <pre className="overflow-x-auto p-4 font-mono text-sm leading-relaxed text-zinc-100">{text}</pre>
+    </div>
+  );
+}
+
 export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | null }) {
   // Plaintext token — only present right after generating, never refetched
   const [apiKey, setApiKey] = React.useState<string | null>(null);
   const [tokenInfo, setTokenInfo] = React.useState<TokenInfo | null>(existingToken);
   const [visible, setVisible] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
-  const [codeCopied, setCodeCopied] = React.useState(false);
+  const [copiedBlock, setCopiedBlock] = React.useState<"env" | "json" | "cmd" | null>(null);
   const [isPending, startTransition] = React.useTransition();
   const [confirming, setConfirming] = React.useState(false);
 
-  const configKey = apiKey ?? TOKEN_PLACEHOLDER;
   const displayKey = apiKey
     ? visible ? apiKey : maskKey(apiKey)
     : tokenInfo
       ? `nxs_••••••••${tokenInfo.hint}`
-      : "No token generated yet";
+      : "No key generated yet";
 
-  const componentsJson = `{
-  "registries": {
-    "@nexus-labs": {
-      "url": "https://www.nexus-ui.com/api/registry/{name}",
-      "headers": {
-        "Authorization": "Bearer ${configKey}"
-      }
-    }
-  }
-}`;
-
-  const maskedComponentsJson = `{
-  "registries": {
-    "@nexus-labs": {
-      "url": "https://www.nexus-ui.com/api/registry/{name}",
-      "headers": {
-        "Authorization": "Bearer ••••••••••••••••••••"
-      }
-    }
-  }
-}`;
+  // The .env.local line carries the real key right after generating, otherwise a placeholder. The key
+  // never goes into components.json: that file is usually committed, this one is git-ignored.
+  const envLine = envLocalLine(apiKey ?? undefined);
+  const shownEnvLine = apiKey && !visible ? envLocalLine(maskKey(apiKey)) : envLine;
 
   async function copyKey() {
     if (!apiKey) return;
@@ -81,16 +109,16 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
     setTimeout(() => setCopied(false), 2000);
   }
 
-  async function copyCode() {
+  async function copyText(text: string, which: "env" | "json" | "cmd") {
     try {
-      await navigator.clipboard.writeText(componentsJson);
+      await navigator.clipboard.writeText(text);
     } catch {
-      toast.error("Couldn't copy. Select the config and copy it by hand.");
+      toast.error("Couldn't copy. Select the text and copy it by hand.");
       return;
     }
-    setCodeCopied(true);
-    toast.success("Config copied to clipboard");
-    setTimeout(() => setCodeCopied(false), 2000);
+    setCopiedBlock(which);
+    toast.success("Copied to clipboard");
+    setTimeout(() => setCopiedBlock((c) => (c === which ? null : c)), 2000);
   }
 
   function handleRegenerate() {
@@ -147,7 +175,7 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
 
         {confirming ? (
           <p role="alert" className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
-            The current token stops working immediately. Update components.json everywhere you use it.
+            The current key stops working immediately. Update .env.local in every project that uses it.
           </p>
         ) : apiKey ? (
           <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-400">
@@ -204,87 +232,86 @@ export function ApiKeyClient({ existingToken }: { existingToken: TokenInfo | nul
         </div>
       </div>
 
-      {/* Step 2 — Add to components.json */}
+      {/* Step 2 — .env.local */}
       <div className="pg-float rounded-tile border-0 bg-card p-6">
         <div className="mb-1 flex items-center gap-3">
           <div className={STEP_BADGE}>2</div>
-          <h2 className="font-semibold text-foreground">Add to components.json</h2>
+          <h2 className="font-semibold text-foreground">Save it in .env.local</h2>
         </div>
         <p className="mb-5 ml-10 text-sm text-muted-foreground">
-          Add the Nexus UI registry to your{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">components.json</code>{" "}
-          file. This allows shadcn CLI to fetch components directly from Nexus UI.
+          In your project&apos;s root folder, next to{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">package.json</code>, create a file named{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">.env.local</code> and put this one line in it.
+          A new Next.js project already keeps this file out of git, so the key stays private. Do not put the key in{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">components.json</code>.
         </p>
-
-        {/* Code block */}
-        <div className="overflow-x-auto rounded-xl bg-zinc-950">
-          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2">
-            <span className="font-mono text-xs text-zinc-400">components.json</span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setVisible((v) => !v)}
-                aria-label={visible ? "Hide key in config" : "Show key in config"}
-                className="rounded p-1 text-zinc-400 transition-colors hover:text-zinc-100"
-              >
-                {visible ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-              </button>
-              <button
-                type="button"
-                onClick={copyCode}
-                aria-label="Copy config"
-                className="rounded p-1 text-zinc-400 transition-colors hover:text-zinc-100"
-              >
-                {codeCopied ? <Check className="size-3.5 text-emerald-400" /> : <Copy className="size-3.5" />}
-              </button>
-            </div>
-          </div>
-          <pre className="overflow-x-auto p-4 font-mono text-sm leading-relaxed">
-            {(visible ? componentsJson : maskedComponentsJson)
-              .split("\n")
-              .map((line, i) => {
-                const isKey = line.includes('"registries"') || line.includes('"@nexus-labs"');
-                const isUrl = line.includes('"url"');
-                const isHeader = line.includes('"headers"') || line.includes('"Authorization"');
-                const isBearer = line.includes("Bearer");
-                return (
-                  <span key={i} className={cn("block",
-                    isKey ? "text-emerald-400" :
-                    isUrl ? "text-sky-400" :
-                    isHeader ? "text-violet-400" :
-                    isBearer ? "text-amber-300" :
-                    "text-zinc-100"
-                  )}>
-                    {line}
-                  </span>
-                );
-              })}
-          </pre>
-        </div>
+        <CodeBox
+          title=".env.local"
+          text={shownEnvLine}
+          copied={copiedBlock === "env"}
+          onCopy={() => copyText(envLine, "env")}
+          onToggle={apiKey ? () => setVisible((v) => !v) : undefined}
+          visible={visible}
+        />
+        {!apiKey ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            {tokenInfo
+              ? "Use the key you copied when you generated it. If you no longer have it, regenerate it above."
+              : "Generate a key above first; this line then fills in with your key."}
+          </p>
+        ) : null}
       </div>
 
-      {/* Step 3 — Install components */}
+      {/* Step 3 — components.json */}
       <div className="pg-float rounded-tile border-0 bg-card p-6">
         <div className="mb-1 flex items-center gap-3">
           <div className={STEP_BADGE}>3</div>
-          <h2 className="font-semibold text-foreground">Install components</h2>
+          <h2 className="font-semibold text-foreground">Connect the registry in components.json</h2>
         </div>
         <p className="mb-5 ml-10 text-sm text-muted-foreground">
-          Now you can install any Nexus UI component using the shadcn CLI:
+          Open <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">components.json</code> (created by{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">npx shadcn@latest init -d</code>) and add this
+          entry inside the outermost braces, next to <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">&quot;aliases&quot;</code>.
+          If there is already a <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">&quot;registries&quot;</code> entry, replace it.
+          Leave <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{"{name}"}</code> and{" "}
+          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{"${" + API_KEY_ENV_VAR + "}"}</code> exactly as
+          written: the CLI fills in the component name and reads your key from .env.local.
         </p>
+        <CodeBox
+          title="components.json"
+          text={REGISTRIES_PRO}
+          copied={copiedBlock === "json"}
+          onCopy={() => copyText(REGISTRIES_PRO, "json")}
+        />
+      </div>
 
-        <div className="overflow-x-auto rounded-xl bg-zinc-950">
-          <pre className="p-4 font-mono text-sm text-zinc-100">
-            <span className="text-zinc-500">$</span>{" "}
-            <span className="text-emerald-400">npx</span>{" "}
-            <span className="text-sky-400">shadcn@latest</span>{" "}
-            <span className="text-zinc-100">add @nexus-labs/component-name</span>
-          </pre>
+      {/* Step 4 — Install components */}
+      <div className="pg-float rounded-tile border-0 bg-card p-6">
+        <div className="mb-1 flex items-center gap-3">
+          <div className={STEP_BADGE}>4</div>
+          <h2 className="font-semibold text-foreground">Install a component</h2>
         </div>
+        <p className="mb-5 ml-10 text-sm text-muted-foreground">
+          Run this from the project root, the folder that holds .env.local. Every component and block page shows its own
+          command in the Install box; the part after <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">@nexus-labs/</code> is
+          its name.
+        </p>
+        <CodeBox
+          title="Terminal"
+          text={installCommand("particle-reveal")}
+          copied={copiedBlock === "cmd"}
+          onCopy={() => copyText(installCommand("particle-reveal"), "cmd")}
+        />
         <p className="mt-3 text-sm text-muted-foreground">
-          Replace{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">component-name</code>{" "}
-          with the component you want to install.
+          Starting a project from scratch? The{" "}
+          <Link href="/docs/installation" className="font-medium text-link underline-offset-4 hover:underline">
+            Quick Start
+          </Link>{" "}
+          has every command in order, and the{" "}
+          <Link href="/docs/cli" className="font-medium text-link underline-offset-4 hover:underline">
+            CLI page
+          </Link>{" "}
+          explains the error messages.
         </p>
       </div>
     </div>

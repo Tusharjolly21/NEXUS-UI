@@ -106,9 +106,9 @@ const ITEMS: readonly CliItem[] = [
 const ITEM_BY_ID = Object.fromEntries(ITEMS.map((item) => [item.id, item])) as Record<CliItemId, CliItem>;
 
 const UNAUTHORIZED_MESSAGE =
-  "Unauthorized. This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key";
+  "Unauthorized. This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Save your API key as NEXUS_API_KEY in .env.local and send it from components.json. Steps: nexus-ui.com/docs/installation";
 
-/** A fresh Next.js app after `shadcn init`. */
+/** A fresh Next.js app after `shadcn init`, plus the .env.local that holds the Pro API key. */
 const BASE_FILES: readonly string[] = [
   "app/favicon.ico",
   "app/globals.css",
@@ -117,7 +117,7 @@ const BASE_FILES: readonly string[] = [
   "components/ui/button.tsx",
   "lib/utils.ts",
   "public/next.svg",
-  ".env",
+  ".env.local",
   "components.json",
   "next.config.ts",
   "package.json",
@@ -237,16 +237,16 @@ function buildScript(item: CliItem, hasPro: boolean, existing: readonly string[]
 
   if (item.pro) {
     push(160, { type: "line", kind: "note", text: 'components.json sends "Authorization": "Bearer ${NEXUS_API_KEY}"' });
-    push(220, { type: "line", kind: "step", status: "pending", tag: tag("env"), text: "Reading NEXUS_API_KEY from .env." });
+    push(220, { type: "line", kind: "step", status: "pending", tag: tag("env"), text: "Reading NEXUS_API_KEY from .env.local." });
     if (hasPro) {
-      push(520, { type: "settle", tag: tag("env"), status: "ok", text: "Read NEXUS_API_KEY from .env." });
-      push(0, { type: "flash", path: ".env" });
+      push(520, { type: "settle", tag: tag("env"), status: "ok", text: "Read NEXUS_API_KEY from .env.local." });
+      push(0, { type: "flash", path: ".env.local" });
     } else {
       push(520, {
         type: "settle",
         tag: tag("env"),
         status: "fail",
-        text: "No NEXUS_API_KEY in .env. Sending the request without a token.",
+        text: "No NEXUS_API_KEY in .env.local. Sending the request without a key.",
       });
     }
   }

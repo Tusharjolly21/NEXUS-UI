@@ -149,7 +149,7 @@ const FAQ = [
   },
   {
     q: "How do I add the Pro sounds to my app?",
-    a: "On a Pro plan, add your Nexus API key to components.json as in the CLI guide, run the install command for ui-sounds-pro (it also installs ui-sounds), then call playProSound or the useProSound hook. For the recorded sounds, install ui-sounds-recorded and call playRecordedSound or useRecordedSound. All of them follow the same on/off switch and volume as the free ones.",
+    a: "On a Pro plan, set up your API key as in the Quick Start (save it as NEXUS_API_KEY in .env.local and add the registries entry to components.json), run the install command for ui-sounds-pro (it also installs ui-sounds), then call playProSound or the useProSound hook. For the recorded sounds, install ui-sounds-recorded and call playRecordedSound or useRecordedSound. All of them follow the same on/off switch and volume as the free ones.",
   },
   {
     q: "Is it free?",

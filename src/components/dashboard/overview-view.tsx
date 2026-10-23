@@ -30,7 +30,7 @@ export function OverviewView({
   activating: boolean;
   /** True right after checkout once the plan is active: shows the unlocked welcome. */
   justUnlocked: boolean;
-  /** Whether the API token exists and whether the CLI has used it. */
+  /** Whether the API key exists and whether the CLI has used it. */
   token: { exists: boolean; used: boolean };
   contact: string;
 }) {
@@ -61,7 +61,7 @@ export function OverviewView({
       href: "/dashboard/api-key",
       icon: Terminal,
       title: "Install with the CLI",
-      body: "Create a token to add premium items with the shadcn CLI.",
+      body: "Create an API key to add Pro items with the shadcn CLI.",
     },
     {
       href: "/dashboard/orders",
@@ -78,16 +78,16 @@ export function OverviewView({
   const steps = [
     {
       key: "token",
-      title: "Create your API token",
-      body: "One token lets the shadcn CLI add Pro components and premium blocks to any project.",
+      title: "Create your API key",
+      body: "One key lets the shadcn CLI add Pro components and blocks to any project.",
       href: "/dashboard/api-key",
-      cta: token.exists ? "View token" : "Create token",
+      cta: token.exists ? "View key" : "Create key",
       done: token.exists,
     },
     {
       key: "install",
       title: "Install your first Pro component",
-      body: "Open a Pro component and run its one-line install. This turns green once the CLI has used your token.",
+      body: "Open a Pro component and run its one-line install. This turns green once the CLI has used your key.",
       href: "/components?access=pro",
       cta: "Pick a component",
       done: token.used,

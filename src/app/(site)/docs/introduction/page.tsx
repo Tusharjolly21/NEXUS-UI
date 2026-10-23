@@ -4,6 +4,7 @@ import {
   DocFooterNav,
   DocPageHeader,
   DocPageShell,
+  DocPre,
   DocSection,
   TechArticleJsonLd,
   docInlineCodeClass,
@@ -15,300 +16,173 @@ import { CliSimulator } from "@/components/docs/interactive/cli-simulator";
 export const metadata: Metadata = createMetadata({
   title: "Introduction",
   description:
-    "Nexus UI — a modern React component library, block catalog, and template marketplace built on Next.js, Tailwind CSS v4, Framer Motion, and shadcn/ui.",
+    "Nexus UI is a library of animated React components, page-section blocks and landing-page templates for Next.js, built with Tailwind CSS v4 and Framer Motion and installed with the shadcn CLI.",
   alternates: { canonical: "/docs/introduction" },
 });
+
+const code = docInlineCodeClass;
+const link = "text-link underline-offset-4 hover:underline";
 
 export default function IntroductionPage() {
   return (
     <>
       <TechArticleJsonLd
         title="Introduction"
-        description="Nexus UI — a modern React component library, block catalog, and template marketplace built on Next.js, Tailwind CSS v4, Framer Motion, and shadcn/ui."
+        description="Nexus UI is a library of animated React components, page-section blocks and landing-page templates for Next.js, built with Tailwind CSS v4 and Framer Motion and installed with the shadcn CLI."
         slug="introduction"
       />
       <DocPageShell>
         <DocPageHeader
           title="Introduction"
-          description="Nexus UI is a curated collection of animated React components, production-ready blocks, and full-page templates — all copy-paste ready, built on the modern web stack."
+          description="Nexus UI is a library of animated React components, page-section blocks and landing-page templates. You add the ones you want to your own project and the code is yours to change."
         />
 
         <DocSection title="What is Nexus UI?">
           <p className="text-sm leading-relaxed text-muted-foreground">
-            Nexus UI is a component library and marketplace that ships polished, animated UI primitives
-            you own completely. Instead of wrapping a third-party package, you copy the source directly
-            into your project and adapt it however you need. Every piece is built on the same
-            production-proven stack:{" "}
-            <strong className="font-medium text-foreground">Next.js App Router</strong>,{" "}
+            There is no Nexus UI package to install and import from. Each component is a handful of source files that you
+            copy into your project, so you can read them, restyle them and delete what you do not need. They are written
+            for <strong className="font-medium text-foreground">Next.js</strong> (App Router) with{" "}
             <strong className="font-medium text-foreground">TypeScript</strong>,{" "}
-            <strong className="font-medium text-foreground">Tailwind CSS v4</strong>,{" "}
-            <strong className="font-medium text-foreground">Framer Motion</strong>, and{" "}
-            <strong className="font-medium text-foreground">shadcn/ui</strong> design tokens.
+            <strong className="font-medium text-foreground">Tailwind CSS v4</strong> and{" "}
+            <strong className="font-medium text-foreground">Framer Motion</strong>.
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            The library is organized into three layers: a{" "}
-            <Link href="/components" className="text-link underline-offset-4 hover:underline">
-              component catalog
+            The library has three parts: {CATALOG_COUNTS.components}{" "}
+            <Link href="/components" className={link}>
+              components
+            </Link>
+            , {CATALOG_COUNTS.blocks}{" "}
+            <Link href="/blocks" className={link}>
+              blocks
             </Link>{" "}
-            of {CATALOG_COUNTS.components} animated components, a{" "}
-            <Link href="/blocks" className="text-link underline-offset-4 hover:underline">
-              block catalog
+            (page sections that come in several layouts) and {CATALOG_COUNTS.templates}{" "}
+            <Link href="/templates" className={link}>
+              templates
             </Link>{" "}
-            of multi-variant page sections, and a{" "}
-            <Link href="/templates" className="text-link underline-offset-4 hover:underline">
-              template marketplace
-            </Link>{" "}
-            of full landing-page compositions.
+            (whole landing pages). {CATALOG_COUNTS.freeComponents} of the components are free; the rest need a{" "}
+            <Link href="/pricing" className={link}>
+              Pro plan
+            </Link>
+            . Every Pro item stays visible with a live preview, and only its source and install are locked.
           </p>
         </DocSection>
 
-        <DocSection title="Tech stack">
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            {[
-              ["Next.js App Router", "File-based routing, server components, and edge-ready deployment"],
-              ["TypeScript", "Strict mode throughout — every component and hook is fully typed"],
-              ["Tailwind CSS v4", "CSS-first config, PostCSS plugin, and OKLCH design tokens"],
-              ["Framer Motion", "Spring physics, scroll-linked animations, and AnimatePresence transitions"],
-              ["shadcn/ui", "Radix-powered primitives — button, dialog, tabs, and more"],
-              ["Supabase (optional)", "Auth, user profiles, and bookmarks for gated content"],
-              ["Dodo Payments (optional)", "Plan checkout with webhook handling"],
-            ].map(([name, desc]) => (
-              <li key={name} className="flex gap-2">
-                <span className="mt-0.5 shrink-0 text-primary">—</span>
-                <span>
-                  <strong className="font-medium text-foreground">{name}</strong>
-                  {" — "}
-                  {desc}
-                </span>
-              </li>
-            ))}
+        <DocSection title="What is in the box">
+          <ul className="space-y-3 text-sm text-muted-foreground">
+            <li>
+              <strong className="font-medium text-foreground">Components.</strong> One animated piece of interface, such as
+              a button, a card stack, a text effect or a background. Each page has a live preview, a usage example, its
+              props and the install command.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Blocks.</strong> A full section of a page, such as a hero,
+              a FAQ or a sidebar, with several layouts to choose from. They install the same way as components.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Templates.</strong> Complete landing pages built from the
+              components, each with a live preview.
+            </li>
+            <li>
+              <strong className="font-medium text-foreground">Sounds.</strong> Optional interface sounds that some
+              components play. They are off until the visitor turns them on, and{" "}
+              <Link href="/sounds" className={link}>
+                the Sounds page
+              </Link>{" "}
+              lets you hear them.
+            </li>
           </ul>
         </DocSection>
 
-        <DocSection title="Component catalog">
+        <DocSection title="How a component gets into your project">
           <p className="text-sm leading-relaxed text-muted-foreground">
-            {CATALOG_COUNTS.components} animated components spanning backgrounds, cards, text effects, inputs, navigation,
-            media, and data display — all with live previews and copy-ready React source on each detail
-            page.
-          </p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {[
-              {
-                category: "Backgrounds & Heroes",
-                items: ["Background Boxes", "Background Gradient", "Dot Grid Hero", "Starfield Hero", "Particle Noise", "Layered Wave Background", "Shader Flow", "Shooting Stars Grid"],
-              },
-              {
-                category: "Cards & Decks",
-                items: ["Cinematic Card Deck", "Card Carousel 3D", "Card Stack Rotator", "Draggable Card Stack", "Expandable Cards", "Glowing Effect Cards", "Warp Speed Card", "3D Folder"],
-              },
-              {
-                category: "Text Effects",
-                items: ["Cursor Text Reveal", "Text Generate Effect", "Text Reveal Card", "Typewriter Effect", "Encrypted Text", "Squiggly Text", "Hover Highlight Text", "Animated Select Headline"],
-              },
-              {
-                category: "Inputs & Forms",
-                items: ["Gooey Input", "Signup Form", "Phone Input", "Ask Nexus Input", "Command Palette", "Stateful Button", "Glow Button"],
-              },
-              {
-                category: "Navigation",
-                items: ["Floating Dock", "Keyboard"],
-              },
-              {
-                category: "Media & Visuals",
-                items: ["Globe Pins", "Interactive Globe Explorer", "Interactive Dots", "Image Trail", "Compare", "Sparkles", "Meteors", "Wavy Lines"],
-              },
-              {
-                category: "Data & Social",
-                items: ["Infinite Moving Cards", "Scrolling Testimonials", "Avatar Group", "Images Badge", "Chat Messages", "Profile Orbit", "Animated Countdown"],
-              },
-              {
-                category: "Layout & Motion",
-                items: ["Animated Bento Grid", "Bento Grid Skeleton", "Motion Layer Scroller", "Circular Carousel", "Word Magnet", "Real-Time Cursors", "Spectra Frame", "Feature Tools Card"],
-              },
-            ].map(({ category, items }) => (
-              <div key={category} className="rounded-xl border border-border bg-muted/40 p-4">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary/80">
-                  {category}
-                </p>
-                <ul className="space-y-0.5">
-                  {items.map((item) => (
-                    <li key={item} className="text-sm text-muted-foreground">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Browse the full catalog →{" "}
-            <Link href="/components" className="text-link underline-offset-4 hover:underline">
-              /components
-            </Link>
-          </p>
-        </DocSection>
-
-        <DocSection title="Block catalog">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Blocks are multi-variant page sections — each block ships several layout options you can
-            drop into any landing page without wiring up animation from scratch.
-          </p>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            {[
-              ["Text Animations", "Typewriter, blur-fade-in, flipping words, and AI generate-typewriter headings"],
-              ["Brand Logo Animation", "Blur-flip grid, marquee, spotlight, swap, and single-row logo clouds"],
-              ["Interactive Background Card", "Interactive dots, layered waves, particle noise, and aurora wavy lines"],
-              ["Why Choose Us Bento Grid", "Mentorship, ATS scoring, upload flow, progress tracking, interview cards"],
-              ["FAQ Folder Card", "Questions & answers, searchable FAQ, and chat-style animated FAQ"],
-              ["Sidebar", "Simple hover sidebar, collapsible icon-only sidebar, and grouped sidebar"],
-              ["Contact Page", "Global signal, centered intake, gradient proof, and image story layouts"],
-              ["Blog Content Sections", "Centered article, sticky TOC, editorial story, and featured posts index"],
-            ].map(([name, desc]) => (
-              <li key={name} className="flex gap-2">
-                <span className="mt-0.5 shrink-0 text-primary">—</span>
-                <span>
-                  <strong className="font-medium text-foreground">{name}</strong>
-                  {" — "}
-                  {desc}
-                </span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-sm text-muted-foreground">
-            Browse blocks →{" "}
-            <Link href="/blocks" className="text-link underline-offset-4 hover:underline">
-              /blocks
-            </Link>
-          </p>
-        </DocSection>
-
-        <DocSection title="Template marketplace">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Full-page templates are complete landing page compositions built from Nexus UI components.
-            Each template includes a live preview, source download, and a &ldquo;Your Brand&rdquo;
-            customizer for instant colour and copy changes.
-          </p>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {[
-              { name: "Asteria AI Launch", category: "AI Startup" },
-              { name: "Aurora SaaS Launch", category: "SaaS" },
-              { name: "Forge AI Startup", category: "AI Startup" },
-              { name: "Simplistic AI SaaS", category: "SaaS" },
-              { name: "Orbit AI Developer Tool", category: "AI Tools" },
-              { name: "TalentHub Agency Landing", category: "Startup" },
-              { name: "Synapse AI Agent Platform", category: "AI Tools" },
-              { name: "Helix AI Workflow Intelligence", category: "AI Tools" },
-              { name: "Orion Autonomous Enterprise AI", category: "AI Tools" },
-              { name: "Startup Landing Page", category: "Startup" },
-              { name: "Nova One — Apple-Style Product", category: "Startup" },
-              { name: "Lumis AI Agency", category: "Agency" },
-              { name: "Pulse Engineering Operations", category: "SaaS" },
-              { name: "Aether Personal Portfolio", category: "Portfolio" },
-              { name: "Ocean Flow Diving Equipment", category: "E-Commerce" },
-            ].map(({ name, category }) => (
-              <div
-                key={name}
-                className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-2.5"
-              >
-                <span className="text-sm text-foreground">{name}</span>
-                <span className="ml-3 shrink-0 rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-muted-foreground">
-                  {category}
-                </span>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Browse templates →{" "}
-            <Link href="/templates" className="text-link underline-offset-4 hover:underline">
-              /templates
-            </Link>
-          </p>
-        </DocSection>
-
-        <DocSection title="How components are delivered">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Nexus UI uses the{" "}
-            <strong className="font-medium text-foreground">shadcn registry model</strong>. You never
-            install an <code className={docInlineCodeClass}>npm</code> package for UI components — you
-            copy the source code into your own project and own it fully. Two ways to get a component:
+            There are two ways, and both end with the same files in your project. Both start from a Next.js project that
+            has shadcn/ui set up (the{" "}
+            <Link href="/docs/installation" className={link}>
+              Quick Start
+            </Link>{" "}
+            does that in two commands).
           </p>
           <ul className="space-y-3 text-sm text-muted-foreground">
-            <li className="flex gap-2">
-              <span className="mt-0.5 shrink-0 text-primary">1.</span>
-              <span>
-                <strong className="font-medium text-foreground">Copy from the detail page</strong> —
-                open any component page, switch to the{" "}
-                <strong className="font-medium text-foreground">Code</strong> tab, and paste the React
-                source into your project.
-              </span>
+            <li>
+              <strong className="font-medium text-foreground">With the CLI.</strong> Connect the{" "}
+              <code className={code}>@nexus-labs</code> registry once, then one command installs a component, the helpers
+              it imports and its npm packages:
+              <div className="mt-2">
+                <DocPre>{`npx shadcn@latest add @nexus-labs/glow-button`}</DocPre>
+              </div>
+              Free items need nothing more. Pro items also need an API key from your dashboard, kept in{" "}
+              <code className={code}>.env.local</code>.
             </li>
-            <li className="flex gap-2">
-              <span className="mt-0.5 shrink-0 text-primary">2.</span>
-              <span>
-                <strong className="font-medium text-foreground">
-                  Install via the @nexus-labs registry
-                </strong>{" "}
-                — add the hosted registry to your{" "}
-                <code className={docInlineCodeClass}>components.json</code> and pull any component by
-                slug:
-                <pre className="mt-2 overflow-x-auto rounded-xl border border-[#3e3e3e] bg-[#1e1e1e] p-4 text-[13px] leading-relaxed text-[#d4d4d4]">
-                  <code>{`npx shadcn@latest add @nexus-labs/glow-button\nnpx shadcn@latest add @nexus-labs/typewriter-effect`}</code>
-                </pre>
-              </span>
+            <li>
+              <strong className="font-medium text-foreground">By hand.</strong>{" "}
+              The component&apos;s page lists every
+              source file with the exact path to save it to. You create those files and paste the code. No registry or API
+              key is involved, though Pro source is shown only while you are signed in with a Pro plan.
             </li>
           </ul>
-          <p className="text-sm text-muted-foreground">
-            See the{" "}
-            <Link href="/docs/cli" className="text-link underline-offset-4 hover:underline">
-              CLI guide
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            The exact steps for both, free and Pro, are in the{" "}
+            <Link href="/docs/installation" className={link}>
+              Quick Start
+            </Link>
+            , and the{" "}
+            <Link href="/docs/cli" className={link}>
+              CLI page
             </Link>{" "}
-            for full registry setup instructions.
+            is the reference for the commands.
           </p>
-          <div data-doc-widget><CliSimulator autoplay={false} /></div>
+          <div data-doc-widget>
+            <CliSimulator autoplay={false} />
+          </div>
         </DocSection>
 
-        <DocSection title="Get started">
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Follow the setup guides in order to get a working environment that matches the Nexus UI
-            stack.
-          </p>
+        <DocSection title="Read the docs in this order">
           <ol className="space-y-2 text-sm text-muted-foreground">
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">1.</span>
-              <Link href="/docs/installation" className="text-link underline-offset-4 hover:underline">
-                Nexus-UI setup
-              </Link>
-              {" — create a Next.js app, add Tailwind, cn(), shadcn/ui, and your first component"}
+              <span>
+                <Link href="/docs/installation" className={link}>
+                  Quick Start
+                </Link>
+                {" — "}the whole path from an empty folder to a component on screen. If you only read one page, read this
+                one.
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">2.</span>
-              <Link href="/docs/install-nextjs" className="text-link underline-offset-4 hover:underline">
-                Install Next.js
-              </Link>
-              {" — create a fresh App Router project as your target app"}
+              <span>
+                <Link href="/docs/install-nextjs" className={link}>
+                  Install Next.js
+                </Link>
+                {" — "}what the create command does, if you want the detail.
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">3.</span>
-              <Link href="/docs/install-tailwindcss" className="text-link underline-offset-4 hover:underline">
-                Install Tailwind CSS
-              </Link>
-              {" — add Tailwind v4 with PostCSS and shared design tokens"}
+              <span>
+                <Link href="/docs/install-tailwindcss" className={link}>
+                  Install Tailwind CSS
+                </Link>
+                {" — "}the colour tokens and dark mode.
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">4.</span>
-              <Link href="/docs/add-utilities" className="text-link underline-offset-4 hover:underline">
-                Add utilities
-              </Link>
-              {" — install clsx, tailwind-merge, and wire the "}
-              <code className={docInlineCodeClass}>cn()</code>
-              {" helper"}
+              <span>
+                <Link href="/docs/add-utilities" className={link}>
+                  Add utilities
+                </Link>
+                {" — "}the <code className={code}>cn()</code> helper every component imports.
+              </span>
             </li>
             <li className="flex gap-2">
               <span className="shrink-0 text-primary">5.</span>
-              <Link href="/docs/cli" className="text-link underline-offset-4 hover:underline">
-                CLI
-              </Link>
-              {" — initialize shadcn/ui and pull components via the @nexus-labs registry"}
+              <span>
+                <Link href="/docs/cli" className={link}>
+                  CLI
+                </Link>
+                {" — "}registry setup, Pro API keys, options and error messages.
+              </span>
             </li>
           </ol>
         </DocSection>

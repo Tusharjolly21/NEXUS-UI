@@ -339,7 +339,8 @@ export function DarkModeDemo({ autoplay = true, className }: DarkModeDemoProps) 
               <p className="mt-2 text-[12.5px] leading-[1.55] text-muted-foreground">
                 <code className="font-mono text-foreground">:is(.dark *)</code> matches any element inside something
                 with the <code className="font-mono text-foreground">dark</code> class. Add it to one wrapper and
-                every <code className="font-mono text-foreground">dark:</code> utility below it switches at once. This
+                every <code className="font-mono text-foreground">dark:</code>{" "}
+                utility below it switches at once. This
                 demo keys the same selector to its own wrapper so the page&apos;s theme stays out.
               </p>
             </div>

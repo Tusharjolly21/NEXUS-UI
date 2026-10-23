@@ -58,7 +58,14 @@ import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getMovedSection } from "@/lib/catalog/moved-sections";
-import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
+import { SHADCN_REGISTRY_SCOPE } from "@/lib/registry-scope";
+import {
+  API_KEY_ENV_VAR,
+  REGISTRIES_PRO,
+  envLocalLine,
+  installCommand as shadcnAddCommand,
+  registryAddCommand,
+} from "@/lib/registry-config";
 import { InstallCard, RainbowWord } from "@/components/site";
 import { motionKitSectionsOf, variantAnchor, variantsOf } from "@/lib/catalog/block-variants";
 import {
@@ -886,57 +893,7 @@ function BlockInstallation({
   block: BlockManifestEntry;
   details: BlockInstallDetails;
 }) {
-  const config = block.premium
-    ? `{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "css": "src/app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
-  "registries": {
-    "${SHADCN_REGISTRY_SCOPE}": {
-      "url": "${shadcnRegistryUrl()}",
-      "headers": {
-        "Authorization": "Bearer YOUR_NEXUS_API_KEY"
-      }
-    }
-  }
-}`
-    : `{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "css": "src/app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
-  "registries": {
-    "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"
-  }
-}`;
-  const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${details.registryName}`;
+  const command = shadcnAddCommand(details.registryName);
 
   const stepCount = details.files.length > 0 ? 5 : 4;
 
@@ -958,27 +915,61 @@ function BlockInstallation({
       <ol className="mt-8 gap-4 lg:columns-2 [&>li]:mb-4 [&>li]:break-inside-avoid">
         <InstallationStep number="1" title="Prepare a shadcn project">
           <p>
-            Use a Next.js project with Tailwind CSS and the <span className="font-mono text-foreground">@/</span> alias.
-            If shadcn is not set up yet, run:
+            Use a Next.js project with Tailwind CSS and the <span className="font-mono text-foreground">@/</span> alias. In its
+            root folder, run this once. It creates <span className="font-mono text-foreground">components.json</span> and the{" "}
+            <span className="font-mono text-foreground">cn()</span> helper:
           </p>
-          <GuideCode value="npx shadcn@latest init" />
+          <GuideCode value="npx shadcn@latest init -d" />
+          <p className="mt-3">
+            Starting from nothing? The{" "}
+            <Link href="/docs/installation" className="font-medium text-link hover:underline">
+              Quick Start
+            </Link>{" "}
+            covers it.
+          </p>
         </InstallationStep>
 
         <InstallationStep
           number="2"
           title={block.premium ? "Connect the registry with your API key" : "Connect the Nexus UI registry"}
         >
-          <p>
-            Replace your <span className="font-mono text-foreground">components.json</span> with this, or add the{" "}
-            <span className="font-mono text-foreground">registries</span> key to the one you have.
-            {block.premium && (
-              <>
-                {" "}Swap <span className="font-mono text-foreground">YOUR_NEXUS_API_KEY</span> for the key in your Nexus UI
-                dashboard.
-              </>
-            )}
-          </p>
-          <GuideCode value={config} label="components.json" tall />
+          {block.premium ? (
+            <>
+              <p>This is a Pro block, so the CLI has to send your API key. Do this once per project.</p>
+              <ol className="mt-3 list-decimal space-y-3 pl-5 marker:font-semibold marker:text-foreground">
+                <li>
+                  Create a key at{" "}
+                  <Link href="/dashboard/api-key" className="font-medium text-link hover:underline">
+                    nexus-ui.com/dashboard/api-key
+                  </Link>
+                  . It starts with <span className="font-mono text-foreground">nxs_</span> and is shown only once.
+                </li>
+                <li>
+                  Create a file named <span className="font-mono text-foreground">.env.local</span> in the project root, next to{" "}
+                  <span className="font-mono text-foreground">package.json</span>, with your key:
+                  <GuideCode value={envLocalLine()} label=".env.local" />
+                </li>
+                <li>
+                  Add this entry to <span className="font-mono text-foreground">components.json</span>, inside the outermost braces. Leave{" "}
+                  <span className="font-mono text-foreground">{"{name}"}</span> and{" "}
+                  <span className="font-mono text-foreground">{"${" + API_KEY_ENV_VAR + "}"}</span> as written, the CLI fills them in:
+                  <GuideCode value={REGISTRIES_PRO} label="components.json" />
+                </li>
+              </ol>
+            </>
+          ) : (
+            <>
+              <p>
+                Run this once per project. It writes the Nexus UI entry into{" "}
+                <span className="font-mono text-foreground">components.json</span> for you:
+              </p>
+              <GuideCode value={registryAddCommand()} />
+              <p className="mt-3">
+                Type it exactly as shown. <span className="font-mono text-foreground">{"{name}"}</span> is filled in by the CLI, so you
+                never replace it.
+              </p>
+            </>
+          )}
         </InstallationStep>
 
         <InstallationStep number="3" title="Install the block">
@@ -1002,10 +993,10 @@ function BlockInstallation({
           <p>
             Open the <span className="font-medium text-foreground">Code</span> tab on the section you want, copy its
             usage snippet and paste it into a page such as{" "}
-            <span className="font-mono text-foreground">app/page.tsx</span>:
+            <span className="font-mono text-foreground">src/app/page.tsx</span>:
           </p>
           <GuideCode
-            label="app/page.tsx"
+            label="src/app/page.tsx"
             value={`import YourBlock from "@/components/...";\n\nexport default function Page() {\n  return (\n    <main>\n      <YourBlock />\n    </main>\n  );\n}`}
           />
           <p className="text-[13px]">Each section&apos;s Code tab shows its exact import path.</p>
