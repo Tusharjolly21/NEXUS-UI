@@ -16,15 +16,15 @@ Build a keyword that melts into the next one. Two copies of the word sit on top 
 | `morphTime` | `number` | `1.1` | Seconds each morph takes. |
 | `holdTime` | `number` | `1.6` | Seconds each word rests. |
 | `align` | `"left" \| "center" \| "right"` | `"center"` | Alignment of the lead and the word. |
-| `color` | `string` | `"#0071e3"` | Colour of the morphing word. |
+| `color` | `string` | none | Colour of the morphing word. Leave it out for the house blue (`#0a84ff`, readable on light and dark fills); `"currentColor"` inherits. |
 | `autoplay` | `boolean` | `false` | Starts cycling on its own. Off, it rests on the first word until Play is pressed. |
 | `className` | `string` | none | Extra classes for the wrapper. |
 
 ## Layout and look
 
-- A column with a 24px gap. The heading is `clamp(34px, 3.6vw, 60px)`, weight 600, line-height 1.02, tracking -0.045em, ink `#1d1d1f`. The lead is its own block line; the word sits inline under it.
+- A column with a 24px gap. The heading is `clamp(34px, 3.6vw, 60px)`, weight 600, line-height 1.02, tracking -0.045em, ink inherited from the parent (`text-inherit`, so the wrapper decides: near-black on light fills, near-white on dark ones). The lead is its own block line; the word sits inline under it.
 - The word box is `relative inline-block`. An invisible copy of the longest word reserves the width so nothing reflows. Two absolutely positioned spans (`inset-0`) hold the outgoing and incoming words in the chosen colour.
-- Below, a 44px pill button, white with a hairline ring, with a pause or play glyph and the label "Pause" or "Play" (`aria-pressed`).
+- Below, a 44px pill button, a translucent fill and hairline ring drawn from `currentColor` (`bg-current/10`, `ring-current/15`) with inherited text, so it reads on any fill, with a pause or play glyph and the label "Pause" or "Play" (`aria-pressed`).
 
 ## Motion
 
