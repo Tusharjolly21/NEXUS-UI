@@ -80,14 +80,15 @@ const baseLibraryComponents: LibraryComponent[] = [
     ],
     Preview: Previews.PreviewScrollProgressBarRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRef } from "react";
 import { ScrollProgressBar } from "@/components/scroll-progress-bar";
 
 const chapters = ["Why", "How it works", "Pricing", "FAQ"];
 
-export function StorySection() {
+export default function Page() {
   const sectionRef = useRef<HTMLElement>(null);
 
   return (
@@ -140,7 +141,8 @@ export function StorySection() {
     ],
     Preview: Previews.PreviewWheelSelectorRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { WheelSelector, type WheelItem } from "@/components/wheel-selector";
@@ -152,7 +154,7 @@ const services: WheelItem[] = [
   { id: "research", label: "Insights", subtitle: "Learn", title: "User research", description: "Turn user signals into confident decisions.", icon: "analytics", accentColor: "#bf5af2", ctaHref: "#research" },
 ];
 
-export function ServicesWheel() {
+export default function Page() {
   const [index, setIndex] = useState(0);
   return (
     <WheelSelector
@@ -202,7 +204,7 @@ export function ServicesWheel() {
     ],
     Preview: Previews.PreviewCinematicCardDeckRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CinematicCardDeck } from "@/components/cinematic-card-deck";
 
@@ -212,12 +214,11 @@ const cards = [
   { title: "Launch", description: "Go live with motion that feels made, not added.", tag: "Week 3", cardColor: "#1d1438", accentColor: "#bf5af2" },
 ];
 
-export function LaunchDeck() {
+export default function Page() {
   return (
     <CinematicCardDeck
       cards={cards}
       intensity="cinematic"
-      onChange={(i) => console.log("front card", i)}
     />
   );
 }`,
@@ -262,11 +263,11 @@ export function LaunchDeck() {
       {
         title: "Ink lens",
         Preview: Previews.PreviewCursorTextRevealRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
 
-export function Manifesto() {
+export default function Page() {
   return (
     <CursorTextReveal
       baseText="The first rule of motion is clarity."
@@ -279,11 +280,11 @@ export function Manifesto() {
       {
         title: "Image lens",
         Preview: Previews.PreviewCursorTextRevealImageRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
 
-export function PhotoReveal() {
+export default function Page() {
   return (
     <CursorTextReveal
       mode="image"
@@ -296,11 +297,11 @@ export function PhotoReveal() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CursorTextReveal } from "@/components/cursor-text-reveal";
 
-export function Manifesto() {
+export default function Page() {
   return (
     <CursorTextReveal
       baseText="The first rule of motion is clarity."
@@ -356,12 +357,13 @@ export function CursorTextRevealExample() {
     ],
     Preview: Previews.PreviewPhoneInputRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { PhoneInput, type PhoneInputValue } from "@/components/phone-input";
 
-export function CheckoutPhone() {
+export default function Page() {
   const [phone, setPhone] = useState<PhoneInputValue | null>(null);
 
   return (
@@ -412,11 +414,11 @@ export function CheckoutPhone() {
     ],
     Preview: Previews.PreviewNebulaGlassCardRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { NebulaGlassCard } from "@/components/nebula-glass-card";
 
-export function PlanCard() {
+export default function Page() {
   return (
     <NebulaGlassCard
       eyebrow="Team plan"
@@ -429,7 +431,6 @@ export function PlanCard() {
       ]}
       cta="Start free trial"
       hues={["#30d158", "#0a84ff", "#bf5af2"]}
-      onAction={() => console.log("trial")}
     />
   );
 }`,
@@ -459,11 +460,11 @@ export function PlanCard() {
     ],
     Preview: Previews.PreviewDepthTestimonialsRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { DepthTestimonials } from "@/components/depth-testimonials";
 
-export function Testimonials() {
+export default function Page() {
   return (
     <section className="flex justify-center py-24">
       <DepthTestimonials
@@ -473,7 +474,6 @@ export function Testimonials() {
           { quote: "Accessibility review took ten minutes, not a week.", name: "Tomas Reyes", role: "Frontend engineer, Harborline" },
           { quote: "Launch week sign-ups were up a third.", name: "Mei Tanaka", role: "Founder, Quietly", tone: ["#7ee0a1", "#1fa463"] },
         ]}
-        onChange={(i) => console.log("showing", i)}
       />
     </section>
   );
@@ -502,11 +502,11 @@ export function Testimonials() {
     ],
     Preview: Previews.PreviewBeamSweepFieldRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BeamField } from "@/components/beam-sweep-field";
 
-export function TracingHero() {
+export default function Page() {
   return (
     <BeamField beams={3} color="#67e8f9" speed={11} hint="" className="min-h-[520px]">
       <div className="relative max-w-xl text-center">
@@ -546,11 +546,11 @@ export function TracingHero() {
     ],
     Preview: Previews.PreviewVectorTiltSceneRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { VectorTiltScene } from "@/components/vector-tilt-scene";
 
-export function FeatureHighlight() {
+export default function Page() {
   return (
     <div className="flex justify-center py-16">
       <VectorTiltScene
@@ -590,7 +590,8 @@ export function FeatureHighlight() {
     ],
     Preview: Previews.PreviewGlassLoginStackRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { GlassLogin } from "@/components/glass-login-stack";
@@ -600,7 +601,7 @@ async function signIn(email: string, password: string) {
   if (password.length < 8) throw new Error("Those details didn't match. Try again.");
 }
 
-export function LoginPage() {
+export default function Page() {
   const router = useRouter();
   return (
     <GlassLogin
@@ -609,7 +610,6 @@ export function LoginPage() {
         await signIn(email, password);
         router.push("/app");
       }}
-      onPasskey={() => console.log("start passkey flow")}
       onForgotPassword={() => router.push("/reset")}
       onSignUp={() => router.push("/signup")}
     />
@@ -652,7 +652,8 @@ export function LoginPage() {
       {
         title: "Signup Form",
         Preview: Previews.PreviewSignupFormRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { SignupForm, type SignupFormValues } from "@/components/signup-form";
@@ -662,13 +663,12 @@ async function createAccount(values: SignupFormValues) {
   console.log("create account for", values.email);
 }
 
-export function AuthSignupCard() {
+export default function Page() {
   const router = useRouter();
   return (
     <SignupForm
       showConfirmPasswordField={false}
       onSubmit={createAccount}
-      onSocialLogin={(provider) => console.log("social", provider)}
       onSignIn={() => router.push("/login")}
     />
   );
@@ -677,7 +677,8 @@ export function AuthSignupCard() {
       {
         title: "Login Form",
         Preview: Previews.PreviewSignupFormLoginRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { LoginForm, type LoginFormValues } from "@/components/signup-form";
@@ -687,7 +688,7 @@ async function signIn(values: LoginFormValues) {
   if (values.password !== "correct horse") throw new Error("Wrong email or password.");
 }
 
-export function AuthLoginCard() {
+export default function Page() {
   const router = useRouter();
   return (
     <LoginForm
@@ -699,7 +700,8 @@ export function AuthLoginCard() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { SignupForm, type SignupFormValues } from "@/components/signup-form";
@@ -709,13 +711,12 @@ async function createAccount(values: SignupFormValues) {
   console.log("create account for", values.email);
 }
 
-export function AuthSignupCard() {
+export default function Page() {
   const router = useRouter();
   return (
     <SignupForm
       showConfirmPasswordField={false}
       onSubmit={createAccount}
-      onSocialLogin={(provider) => console.log("social", provider)}
       onSignIn={() => router.push("/login")}
     />
   );
@@ -745,7 +746,7 @@ export function AuthSignupCard() {
     ],
     Preview: Previews.PreviewPulseDashboardKpisRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { KpiStrip, type Kpi } from "@/components/pulse-dashboard-kpis";
 
@@ -762,13 +763,12 @@ const periods: Record<string, Kpi[]> = {
   ],
 };
 
-export function Overview() {
+export default function Page() {
   return (
     <KpiStrip
       title="Revenue at a glance"
       periods={periods}
       defaultPeriod="Week"
-      onPeriodChange={(p) => console.log("period", p)}
     />
   );
 }`,
@@ -815,55 +815,54 @@ export function Overview() {
       {
         title: "Progress",
         Preview: Previews.PreviewOrbitalLoaderRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { OrbitalLoader } from "@/components/orbital-loader";
 
-export function UploadStatus({ progress }: { progress: number }) {
-  return <OrbitalLoader progress={progress} messages={["Uploading your files"]} doneMessage="All files uploaded" />;
+// progress runs from 0 to 100. Pass your real upload percentage instead of 64.
+export default function Page() {
+  return <OrbitalLoader progress={64} messages={["Uploading your files"]} doneMessage="All files uploaded" />;
 }`,
       },
       {
         title: "Endless",
         Preview: Previews.PreviewOrbitalLoaderEndless,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { OrbitalLoader } from "@/components/orbital-loader";
 
-export function Booting() {
+export default function Page() {
   return <OrbitalLoader size={120} />;
 }`,
       },
       {
         title: "Step Loader",
         Preview: Previews.PreviewStepLoader,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { StepLoader } from "@/components/orbital-loader";
 
-export function WorkspaceSetup() {
+export default function Page() {
   return (
     <StepLoader
       steps={["Creating your workspace", "Importing customers", "Building your dashboard", "Ready"]}
       stepMs={1200}
-      onComplete={() => console.log("workspace ready")}
-      onAction={() => console.log("open workspace")}
     />
   );
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { OrbitalLoader } from "@/components/orbital-loader";
 
-export function UploadStatus({ progress }: { progress: number }) {
+// progress runs from 0 to 100. Pass your real upload percentage instead of 64.
+export default function Page() {
   return (
     <OrbitalLoader
-      progress={progress}
+      progress={64}
       messages={["Uploading your files", "Making thumbnails"]}
       doneMessage="All files uploaded"
-      onComplete={() => console.log("done")}
     />
   );
 }`,
@@ -904,11 +903,11 @@ export function UploadStatus({ progress }: { progress: number }) {
       {
         title: "Milestone Timeline",
         Preview: Previews.PreviewMilestoneTimelineRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 
-export function Roadmap() {
+export default function Page() {
   return (
     <MilestoneTimeline
       heading="Roadmap"
@@ -925,7 +924,7 @@ export function Roadmap() {
       {
         title: "Roadmap Scrubber",
         Preview: Previews.PreviewRoadmapScrubber,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { RoadmapScrubber, type RoadmapScrubberTrack } from "@/components/milestone-timeline";
 
@@ -941,7 +940,7 @@ const TRACKS: RoadmapScrubberTrack[] = [
   },
 ];
 
-export function ProductRoadmap() {
+export default function Page() {
   return <RoadmapScrubber tracks={TRACKS} year={2026} today="2026-06-15" title="Roadmap 2026" />;
 }
 `,
@@ -949,7 +948,7 @@ export function ProductRoadmap() {
       {
         title: "Commit Graph Roadmap",
         Preview: Previews.PreviewCommitGraphRoadmap,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CommitGraphRoadmap, type RoadmapBranch, type RoadmapCommit } from "@/components/milestone-timeline";
 
@@ -960,18 +959,18 @@ const COMMITS: RoadmapCommit[] = [
 ];
 const BRANCHES: RoadmapBranch[] = [{ lane: 1, from: 2, to: 0, color: "#bf5af2" }];
 
-export function ProductGraph() {
+export default function Page() {
   return <CommitGraphRoadmap commits={COMMITS} branches={BRANCHES} />;
 }
 `,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MilestoneTimeline } from "@/components/milestone-timeline";
 
-export function Roadmap() {
+export default function Page() {
   return (
     <MilestoneTimeline
       heading="Roadmap"
@@ -1025,11 +1024,11 @@ export function Roadmap() {
       {
         title: "Glow Button",
         Preview: Previews.PreviewGlowButtonRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { GlowButton } from "@/components/glow-button";
 
-export function HeroCta() {
+export default function Page() {
   return (
     <div className="flex items-center gap-4">
       <GlowButton href="/signup">Start free trial</GlowButton>
@@ -1043,12 +1042,13 @@ export function HeroCta() {
       {
         title: "Magnetic Button",
         Preview: Previews.PreviewMagneticButton,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { MagneticButton } from "@/components/glow-button";
 
-export function HeroActions() {
+export default function Page() {
   const [pressed, setPressed] = useState(0);
 
   return (
@@ -1066,11 +1066,11 @@ export function HeroActions() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { GlowButton } from "@/components/glow-button";
 
-export function HeroCta() {
+export default function Page() {
   return (
     <div className="flex items-center gap-4">
       <GlowButton href="/signup">Start free trial</GlowButton>
@@ -1109,11 +1109,11 @@ export function HeroCta() {
     ],
     Preview: Previews.PreviewWordMagnetRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { WordMagnet } from "@/components/word-magnet";
 
-export function MagneticHeadline() {
+export default function Page() {
   return (
     <section className="flex min-h-[420px] items-center justify-center px-6">
       <WordMagnet
@@ -1158,7 +1158,7 @@ export function MagneticHeadline() {
       {
         title: "Single folder",
         Preview: Previews.PreviewThreeDFolderRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ThreeDFolder } from "@/components/three-d-folder";
 
@@ -1168,14 +1168,13 @@ const projects = [
   { id: "signal", title: "Signal", meta: "Campaign, 2025", bg: "linear-gradient(160deg,#ffd60a,#ff9f0a 50%,#ff453a)" },
 ];
 
-export function WorkFolder() {
+export default function Page() {
   return (
     <ThreeDFolder
       title="Selected work"
       projects={projects}
       folderBackColor="#3d9cf0"
       folderFrontColor="#6cb8f6"
-      onOpenProject={(id) => console.log("preview", id)}
     />
   );
 }`,
@@ -1183,7 +1182,7 @@ export function WorkFolder() {
       {
         title: "Compact grid",
         Preview: Previews.PreviewThreeDFolderGridRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ThreeDFolder } from "@/components/three-d-folder";
 
@@ -1193,7 +1192,7 @@ const folders = [
   { title: "Product", back: "#30b65a", front: "#5fd47f" },
 ];
 
-export function FolderGrid() {
+export default function Page() {
   return (
     <div className="flex flex-wrap justify-center gap-4">
       {folders.map((f) => (
@@ -1204,7 +1203,7 @@ export function FolderGrid() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ThreeDFolder } from "@/components/three-d-folder";
 
@@ -1214,14 +1213,13 @@ const projects = [
   { id: "signal", title: "Signal", meta: "Campaign, 2025", bg: "linear-gradient(160deg,#ffd60a,#ff9f0a 50%,#ff453a)" },
 ];
 
-export function WorkFolder() {
+export default function Page() {
   return (
     <ThreeDFolder
       title="Selected work"
       projects={projects}
       folderBackColor="#3d9cf0"
       folderFrontColor="#6cb8f6"
-      onOpenProject={(id) => console.log("preview", id)}
     />
   );
 }`,
@@ -1268,7 +1266,7 @@ export function WorkFolder() {
       {
         title: "Draggable Card Stack",
         Preview: Previews.PreviewDraggableCardStackRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { DraggableCardStack } from "@/components/draggable-card-stack";
 
@@ -1279,18 +1277,18 @@ const cards = [
   { id: "rum", title: "Wadi Rum", subtitle: "Sand at first light", bg: "linear-gradient(180deg,#fddb92,#f6a04d)" },
 ];
 
-export function TripStack() {
-  return <DraggableCardStack cards={cards} cardWidth={240} cardHeight={320} onChange={(id) => console.log("top card", id)} />;
+export default function Page() {
+  return <DraggableCardStack cards={cards} cardWidth={240} cardHeight={320} />;
 }`,
       },
       {
         title: "Spread Deck",
         Preview: Previews.PreviewSpreadDeck,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SpreadDeck } from "@/components/draggable-card-stack";
 
-export function Gallery() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[600px]">
       <SpreadDeck />
@@ -1302,18 +1300,18 @@ export function Gallery() {
       {
         title: "Riffle Stack",
         Preview: Previews.PreviewRiffleStack,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { RiffleStack } from "@/components/draggable-card-stack";
 
-export function Features() {
-  return <RiffleStack onShuffle={(top) => console.log("on top:", top)} />;
+export default function Page() {
+  return <RiffleStack />;
 }
 `,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { DraggableCardStack } from "@/components/draggable-card-stack";
 
@@ -1324,8 +1322,8 @@ const cards = [
   { id: "rum", title: "Wadi Rum", subtitle: "Sand at first light", bg: "linear-gradient(180deg,#fddb92,#f6a04d)" },
 ];
 
-export function TripStack() {
-  return <DraggableCardStack cards={cards} cardWidth={240} cardHeight={320} onChange={(id) => console.log("top card", id)} />;
+export default function Page() {
+  return <DraggableCardStack cards={cards} cardWidth={240} cardHeight={320} />;
 }`,
     tailwindSource: tw,
   },
@@ -1358,7 +1356,7 @@ export function TripStack() {
     ],
     Preview: Previews.PreviewCardCarousel3DRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CardCarousel3D } from "@/components/card-carousel-3d";
 
@@ -1370,13 +1368,12 @@ const cards = [
   { id: "pro", name: "Lumen Pro", price: "From $999", color: "#3a3a3c" },
 ];
 
-export function ProductRing() {
+export default function Page() {
   return (
     <CardCarousel3D
       cards={cards}
       itemWidth={180}
       itemHeight={236}
-      onChange={(i) => console.log("in front", cards[i].name)}
     />
   );
 }`,
@@ -1404,11 +1401,11 @@ export function ProductRing() {
     ],
     Preview: Previews.PreviewRealTimeCursorsRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { RealTimeCursors } from "@/components/real-time-cursors";
 
-export function TeamBoard() {
+export default function Page() {
   return (
     <RealTimeCursors
       title="Q3 roadmap"
@@ -1444,11 +1441,11 @@ export function TeamBoard() {
     ],
     Preview: Previews.PreviewSvgNoiseShaderRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SvgNoise } from "@/components/svg-noise-shader";
 
-export function GrainPoster() {
+export default function Page() {
   return (
     <SvgNoise colors={["#ff375f", "#ff9f0a", "#bf5af2", "#0a84ff"]} grain={0.45} className="h-[380px] max-w-[560px]">
       <div className="pointer-events-none text-center text-white">
@@ -1482,11 +1479,11 @@ export function GrainPoster() {
     ],
     Preview: Previews.PreviewTracingSpotlightPanelRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TracingSpotlightPanel } from "@/components/tracing-spotlight-panel";
 
-export function TeamPlan() {
+export default function Page() {
   return (
     <TracingSpotlightPanel color="#bf5af2" lap={6}>
       <p className="text-sm font-semibold">Team</p>
@@ -1521,16 +1518,16 @@ export function TeamPlan() {
     ],
     Preview: Previews.PreviewForgeAiCommandBarRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { AiCommandBar } from "@/components/forge-ai-command-bar";
 
-export function CopilotBar() {
+export default function Page() {
   return (
     <AiCommandBar
       placeholder="Ask the copilot..."
       suggestions={["Add a pricing table", "Make the hero animate in", "Write the FAQ"]}
-      onSubmit={(prompt, mode) => console.log(mode, prompt)}
       steps={(prompt) => ["Reading the project", \`Planning: \${prompt}\`, "Writing 2 files", "Done"]}
     />
   );
@@ -1567,14 +1564,15 @@ export function CopilotBar() {
     ],
     Preview: Previews.PreviewGooeySearchInputRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { GooeyInput } from "@/components/gooey-input";
 
 const PAGES = ["Pricing", "Changelog", "Components", "Templates", "Docs", "Blog"];
 
-export function SiteSearch() {
+export default function Page() {
   const router = useRouter();
 
   return (
@@ -1637,11 +1635,11 @@ export function SiteSearch() {
       {
         title: "Carbon",
         Preview: Previews.PreviewTerminalRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { Terminal } from "@/components/terminal";
 
-export function CarbonTerminal() {
+export default function Page() {
   return (
     <Terminal
       autoplay
@@ -1656,11 +1654,11 @@ export function CarbonTerminal() {
       {
         title: "Paper",
         Preview: Previews.PreviewTerminalPaperRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { Terminal } from "@/components/terminal";
 
-export function PaperTerminal() {
+export default function Page() {
   return (
     <Terminal
       theme="paper"
@@ -1671,11 +1669,12 @@ export function PaperTerminal() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { Terminal } from "@/components/terminal";
 
-export function InstallTerminal() {
+export default function Page() {
   return (
     <div className="flex h-[420px] flex-col">
       <Terminal
@@ -1729,11 +1728,11 @@ export function InstallTerminal() {
     ],
     Preview: Previews.PreviewSquigglyTextRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SquigglyText, SquigglyWord } from "@/components/squiggly-text";
 
-export function HandDrawnHero() {
+function HandDrawnHero() {
   return (
     <h1 className="text-center text-5xl font-semibold tracking-tight">
       Interfaces with{" "}
@@ -1745,7 +1744,7 @@ export function HandDrawnHero() {
   );
 }
 
-export function SketchedLabel() {
+export default function Page() {
   return (
     <SquigglyText
       text="Sketched, not printed."
@@ -1786,7 +1785,7 @@ export function SketchedLabel() {
     ],
     Preview: Previews.PreviewFloatingDockRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BookOpen, Home, LayoutGrid, Search, Settings } from "lucide-react";
 import { FloatingDock } from "@/components/floating-dock";
@@ -1799,7 +1798,7 @@ const items = [
   { title: "Settings", icon: <Settings />, href: "/settings" },
 ];
 
-export function AppDock() {
+export default function Page() {
   return <FloatingDock items={items} />;
 }`,
     tailwindSource: tw,
@@ -1837,7 +1836,8 @@ export function AppDock() {
     ],
     Preview: Previews.PreviewStatefulButtonRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { StatefulButton } from "@/components/stateful-button";
 
@@ -1846,7 +1846,7 @@ async function publish() {
   if (!res.ok) throw new Error("Publish failed");
 }
 
-export function PublishButton() {
+export default function Page() {
   return (
     <StatefulButton onClick={publish} loadingText="Publishing" successText="Published" errorText="Try again">
       Publish post
@@ -1888,11 +1888,11 @@ export function PublishButton() {
     ],
     Preview: Previews.PreviewSparklesRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { Sparkles } from "@/components/sparkles";
 
-export function SparkleHeadline() {
+export default function Page() {
   return (
     <div className="relative overflow-hidden rounded-3xl bg-white px-6 py-16 text-center dark:bg-[#1c1c1e]">
       <h2 className="text-6xl font-semibold tracking-[-0.05em] text-[#1d1d1f] dark:text-[#f5f5f7]">Nexus</h2>
@@ -1947,11 +1947,11 @@ export function SparkleHeadline() {
     ],
     Preview: Previews.PreviewTextGenerateEffectRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TextGenerateEffect } from "@/components/text-generate-effect";
 
-export function AnswerCard({ answer }: { answer: string }) {
+function AnswerCard({ answer }: { answer: string }) {
   return (
     <div className="rounded-3xl bg-white p-6 shadow-sm">
       <TextGenerateEffect
@@ -1964,7 +1964,7 @@ export function AnswerCard({ answer }: { answer: string }) {
   );
 }
 
-export function HeroLine() {
+export default function Page() {
   return (
     <TextGenerateEffect
       as="h1"
@@ -2013,11 +2013,11 @@ export function HeroLine() {
     ],
     Preview: Previews.PreviewBackgroundGradientRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BackgroundGradient } from "@/components/background-gradient";
 
-export function ProPlanCard() {
+export default function Page() {
   return (
     <div className="flex flex-col items-center gap-6">
       <BackgroundGradient className="w-full max-w-[320px]" containerClassName="p-6">
@@ -2025,7 +2025,7 @@ export function ProPlanCard() {
         <p className="mt-2 text-4xl font-semibold tracking-[-0.045em] tabular-nums">$18 / month</p>
         <p className="mt-3 text-sm text-[#6e6e73] dark:text-[#a1a1a6]">Unlimited projects, team seats and priority builds.</p>
       </BackgroundGradient>
-      <BackgroundGradient as="button" borderRadius="999px" containerClassName="px-6 py-3 text-[15px] font-semibold" onClick={() => console.log("upgrade")}>
+      <BackgroundGradient as="button" borderRadius="999px" containerClassName="px-6 py-3 text-[15px] font-semibold">
         Upgrade now
       </BackgroundGradient>
     </div>
@@ -2062,11 +2062,11 @@ export function ProPlanCard() {
     ],
     Preview: Previews.PreviewTypewriterEffectRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TypewriterEffect } from "@/components/typewriter-effect";
 
-export function Hero() {
+function Hero() {
   return (
     <h1 className="text-5xl font-semibold tracking-tight">
       Made for{" "}
@@ -2080,7 +2080,7 @@ export function Hero() {
   );
 }
 
-export function SearchPlaceholder() {
+export default function Page() {
   return (
     <label className="flex h-12 items-center gap-2 rounded-full bg-white px-4 shadow-sm">
       <span className="text-zinc-500">
@@ -2123,11 +2123,11 @@ export function SearchPlaceholder() {
     ],
     Preview: Previews.PreviewTextRevealCardRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TextRevealCard } from "@/components/text-reveal-card";
 
-export function PitchCard() {
+export default function Page() {
   return (
     <TextRevealCard
       title="Launch review"
@@ -2186,11 +2186,11 @@ export function PitchCard() {
       {
         title: "2-1-2 layout",
         Preview: Previews.PreviewGlowingEffectCardsRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
 
-export function FeatureGrid() {
+export default function Page() {
   return (
     <GlowingCardsLayout
       cards={[
@@ -2207,11 +2207,11 @@ export function FeatureGrid() {
       {
         title: "Single card and custom wrapper",
         Preview: Previews.PreviewGlowingCardSingleRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { GlowingCard, GlowingEffect } from "@/components/glowing-effect-cards";
 
-export function GlowExamples() {
+export default function Page() {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <GlowingCard
@@ -2234,7 +2234,7 @@ export function GlowExamples() {
       {
         title: "Lit Border",
         Preview: Previews.PreviewLitBorder,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { LightGroup, LitBorder } from "@/components/glowing-effect-cards";
 
@@ -2244,7 +2244,7 @@ const plans = [
   { name: "Scale", price: "$49" },
 ];
 
-export function Pricing() {
+export default function Page() {
   return (
     <LightGroup autoplay className="flex w-full max-w-[720px] flex-col gap-3">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -2265,11 +2265,11 @@ export function Pricing() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { GlowingCardsLayout } from "@/components/glowing-effect-cards";
 
-export function FeatureGrid() {
+export default function Page() {
   return (
     <GlowingCardsLayout
       cards={[
@@ -2313,7 +2313,7 @@ export function FeatureGrid() {
     ],
     Preview: Previews.PreviewInfiniteMovingCardsRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { InfiniteMovingCards } from "@/components/infinite-moving-cards";
 
@@ -2323,7 +2323,7 @@ const reviews = [
   { id: 3, title: "People play with it", description: "Visitors fling the reviews. Time on page went up.", name: "Lena Okafor", role: "Design manager, Cloudframe", rating: 5 },
 ];
 
-export function ReviewsRail() {
+export default function Page() {
   return (
     <div className="space-y-4 py-16">
       <InfiniteMovingCards items={reviews} speed="slow" />
@@ -2366,11 +2366,11 @@ export function ReviewsRail() {
     ],
     Preview: Previews.PreviewMeteorsRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { Meteors } from "@/components/meteors";
 
-export function WishCard() {
+export default function Page() {
   return (
     <Meteors
       number={22}
@@ -2421,11 +2421,11 @@ export function WishCard() {
     ],
     Preview: Previews.PreviewBackgroundBoxesRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BackgroundBoxes } from "@/components/background-boxes";
 
-export function GridHero() {
+export default function Page() {
   return (
     <BackgroundBoxes className="h-[520px] w-full rounded-3xl bg-white dark:bg-[#0b0b0d]">
       <div className="pointer-events-none flex h-full flex-col items-center justify-center text-center">
@@ -2468,11 +2468,11 @@ export function GridHero() {
     ],
     Preview: Previews.PreviewEncryptedTextRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { EncryptedText } from "@/components/encrypted-text";
 
-export function VaultTitle() {
+function VaultTitle() {
   return (
     <EncryptedText
       as="h2"
@@ -2485,7 +2485,7 @@ export function VaultTitle() {
   );
 }
 
-export function DecodeButton() {
+export default function Page() {
   return (
     <button className="rounded-full bg-[#1d1d1f] px-5 py-2.5 text-sm font-medium text-white">
       <EncryptedText text="Get started" trigger="hover" speed={35} iterations={4} className="font-sans" scrambleClassName="text-white/60" />
@@ -2532,38 +2532,37 @@ export function DecodeButton() {
       {
         title: "Silver, typing on its own",
         Preview: Previews.PreviewMacKeyboardRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { MacKeyboard } from "@/components/keyboard";
 
-export function DemoKeyboard() {
+export default function Page() {
   return <MacKeyboard autoplay listen autoplayText="hello, nexus" />;
 }`,
       },
       {
         title: "Space grey, listening to your keyboard",
         Preview: Previews.PreviewMacKeyboardListenRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { MacKeyboard } from "@/components/keyboard";
 
-export function LiveKeyboard() {
+export default function Page() {
   return <MacKeyboard listen theme="dark" accent="#bf5af2" placeholder="Type on your keyboard..." />;
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MacKeyboard } from "@/components/keyboard";
 
-export function TypingPlayground() {
+export default function Page() {
   return (
     <MacKeyboard
       listen
       theme="auto"
       soundType="clicky"
       volume={0.5}
-      onKeyPress={(key) => console.log(key.code)}
     />
   );
 }`,
@@ -2596,7 +2595,7 @@ export function TypingPlayground() {
     ],
     Preview: Previews.PreviewImagesBadgeRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ImagesBadge } from "@/components/images-badge";
 
@@ -2609,7 +2608,7 @@ const TEAM = [
   { alt: "Kai Moss" },
 ];
 
-export function TeamBadge() {
+export default function Page() {
   return (
     <ImagesBadge
       images={TEAM}
@@ -2617,7 +2616,6 @@ export function TeamBadge() {
       revealCount={2}
       label="Editing now"
       size="md"
-      onClick={() => console.log("open team")}
     />
   );
 }`,
@@ -2656,11 +2654,11 @@ export function TeamBadge() {
       {
         title: "Photo",
         Preview: Previews.PreviewCompareRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { Compare } from "@/components/compare";
 
-export function GradeCompare() {
+export default function Page() {
   return (
     <Compare
       beforeImage="/images/lake-flat.jpg"
@@ -2674,11 +2672,11 @@ export function GradeCompare() {
       {
         title: "Any content",
         Preview: Previews.PreviewCompareCodeRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { Compare } from "@/components/compare";
 
-export function RefactorCompare() {
+export default function Page() {
   return (
     <Compare
       beforeLabel="Before"
@@ -2691,11 +2689,11 @@ export function RefactorCompare() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { Compare } from "@/components/compare";
 
-export function RetouchCompare() {
+export default function Page() {
   return (
     <Compare
       beforeImage="/images/portrait-raw.jpg"
@@ -2732,7 +2730,7 @@ export function RetouchCompare() {
     ],
     Preview: Previews.PreviewExpandableCardsRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ExpandableCards, type CardItem } from "@/components/expandable-cards";
 
@@ -2759,8 +2757,8 @@ const cards: CardItem[] = [
   },
 ];
 
-export function StoryGrid() {
-  return <ExpandableCards cards={cards} expandInto="viewport" onOpenChange={(id) => console.log("open", id)} />;
+export default function Page() {
+  return <ExpandableCards cards={cards} expandInto="viewport" />;
 }`,
     tailwindSource: tw,
   },
@@ -2789,11 +2787,11 @@ export function StoryGrid() {
     ],
     Preview: Previews.PreviewAnimatedSelectHeadlineRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AnimatedSelectHeadline } from "@/components/animated-select-headline";
 
-export function Hero() {
+export default function Page() {
   return (
     <AnimatedSelectHeadline
       prefix="Build websites at"
@@ -2832,18 +2830,18 @@ export function Hero() {
     ],
     Preview: Previews.PreviewWarpSpeedCardRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { WarpSpeedCard, WarpTextTrigger } from "@/components/warp-speed-card";
 
-export function WarpHero() {
+export default function Page() {
   return (
     <WarpSpeedCard className="mx-auto max-w-xl">
       <div className="px-8 py-14 text-center">
         <h2 className="text-5xl font-semibold tracking-tight">
           Build amazing websites
           <br />
-          at <WarpTextTrigger onWarpChange={(on) => console.log("warp", on)}>warp speed</WarpTextTrigger>
+          at <WarpTextTrigger>warp speed</WarpTextTrigger>
         </h2>
       </div>
     </WarpSpeedCard>
@@ -2873,7 +2871,8 @@ export function WarpHero() {
     ],
     Preview: Previews.PreviewCircularCarouselRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { CircularCarousel } from "@/components/circular-carousel";
@@ -2886,7 +2885,7 @@ const steps = [
   { id: "learn", tag: "Learn", title: "Loop back", description: "Feed what you saw into the next brief." },
 ];
 
-export function ProcessWheel() {
+export default function Page() {
   const [step, setStep] = useState(0);
   return <CircularCarousel items={steps} activeIndex={step} onActiveChange={setStep} />;
 }`,
@@ -2928,11 +2927,12 @@ export function ProcessWheel() {
       {
         title: "Chat Messages",
         Preview: Previews.PreviewChatMessagesRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { ChatMessages } from "@/components/chat-messages";
 
-export function SupportChat() {
+export default function Page() {
   return (
     <ChatMessages
       title="Support"
@@ -2953,14 +2953,13 @@ export function SupportChat() {
       {
         title: "Composer Morph Chat",
         Preview: Previews.PreviewComposerMorphChat,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ComposerMorphChat } from "@/components/chat-messages";
 
-export function AssistantPanel() {
+export default function Page() {
   return (
     <ComposerMorphChat
-      onSend={(text) => console.log("sent", text)}
       className="mx-auto"
     />
   );
@@ -2970,17 +2969,15 @@ export function AssistantPanel() {
       {
         title: "Chat Head",
         Preview: Previews.PreviewChatHead,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ChatHead } from "@/components/chat-messages";
 
-export function SupportBubble() {
+export default function Page() {
   return (
     <div className="relative mx-auto w-full max-w-[360px]">
       <ChatHead
         name="Maya"
-        onReply={(text) => console.log("quick reply", text)}
-        onDismiss={() => console.log("dismissed")}
       />
     </div>
   );
@@ -2989,11 +2986,12 @@ export function SupportBubble() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { ChatMessages } from "@/components/chat-messages";
 
-export function SupportChat() {
+export default function Page() {
   return (
     <ChatMessages
       title="Support"
@@ -3035,11 +3033,11 @@ export function SupportChat() {
     ],
     Preview: Previews.PreviewShaderFlowRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ShaderFlow } from "@/components/shader-flow";
 
-export function FlowHero() {
+export default function Page() {
   return (
     <ShaderFlow className="min-h-[520px]" intensity="high" colors={["#05060d", "#0a5bd6", "#5e5ce6", "#64d2ff"]}>
       <div className="relative px-6 text-center text-white">
@@ -3073,16 +3071,15 @@ export function FlowHero() {
     ],
     Preview: Previews.PreviewAskNexusInputRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AskNexusInput } from "@/components/ask-nexus-input";
 
-export function HelpSearch() {
+export default function Page() {
   return (
     <AskNexusInput
       title="How can we help?"
       placeholders={["How do I reset my password?", "Can I change my plan?", "Where are my invoices?"]}
-      onSubmit={(question) => console.log("asked", question)}
     />
   );
 }`,
@@ -3110,7 +3107,7 @@ export function HelpSearch() {
     ],
     Preview: Previews.PreviewInteractiveGlobeExplorerRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { InteractiveGlobeExplorer, type GlobeLocation } from "@/components/interactive-globe-explorer";
 
@@ -3121,7 +3118,7 @@ const offices: GlobeLocation[] = [
   { id: "syd", name: "Sydney", lat: -33.87, lng: 151.21, address: "40 Bridge St, Sydney NSW 2000, AU", email: "sydney@yourco.com" },
 ];
 
-export function Offices() {
+export default function Page() {
   return <InteractiveGlobeExplorer locations={offices} initialLocationId="lis" className="h-[480px]" />;
 }`,
     tailwindSource: tw,
@@ -3156,7 +3153,7 @@ export function Offices() {
       {
         title: "Dark with marked lines",
         Preview: Previews.PreviewCodeBlockRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CodeBlock } from "@/components/code-block";
 
@@ -3164,7 +3161,7 @@ const code = \`export function Badge({ count }: { count: number }) {
   return <span>{count > 99 ? "99+" : count}</span>;
 }\`;
 
-export function MarkedSnippet() {
+export default function Page() {
   return (
     <div className="h-[200px]">
       <CodeBlock code={code} language="tsx" theme="dark" highlightLines={[2]} header={{ enabled: true, showDots: true, title: "badge.tsx", copy: { enabled: true } }} />
@@ -3175,11 +3172,13 @@ export function MarkedSnippet() {
       {
         title: "Follows the page theme",
         Preview: Previews.PreviewCodeBlockAutoRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CodeBlock } from "@/components/code-block";
 
-export function ThemedSnippet({ code }: { code: string }) {
+const code = 'export function Badge() { return <span className="rounded-full px-2 text-xs">New</span>; }';
+
+export default function Page() {
   return (
     <div className="h-[320px]">
       <CodeBlock code={code} language="tsx" theme="auto" header={{ enabled: true, title: "badge.tsx", copy: { enabled: true } }} />
@@ -3188,7 +3187,7 @@ export function ThemedSnippet({ code }: { code: string }) {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CodeBlock } from "@/components/code-block";
 
@@ -3196,7 +3195,7 @@ const code = \`export function Greeting({ name }: { name: string }) {
   return <p>Hello, {name}</p>;
 }\`;
 
-export function Snippet() {
+export default function Page() {
   return (
     <div className="h-[220px]">
       <CodeBlock
@@ -3248,7 +3247,7 @@ export function Snippet() {
       {
         title: "Card Stack Rotator",
         Preview: Previews.PreviewCardStackRotatorRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CardStackRotator } from "@/components/card-stack-rotator";
 
@@ -3258,14 +3257,14 @@ const cards = [
   { id: "3", content: "Swapped our carousel and **time on page doubled**.", name: "Hana Ito", designation: "Growth Lead", company: "Tidepool" },
 ];
 
-export function CustomerQuotes() {
+export default function Page() {
   return <CardStackRotator cards={cards} cardWidth="400px" rotationInterval={6000} />;
 }`,
       },
       {
         title: "Rolodex Testimonials",
         Preview: Previews.PreviewRolodexTestimonials,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { RolodexTestimonials } from "@/components/card-stack-rotator";
 
@@ -3275,14 +3274,14 @@ const quotes = [
   { quote: "It feels expensive. It wasn't.", name: "Dev Patel", role: "Indie maker", hue: ["#ffd60a", "#ff9f0a"] as [string, string] },
 ];
 
-export function Wall() {
-  return <RolodexTestimonials cards={quotes} onChange={(i) => console.log("front", i)} />;
+export default function Page() {
+  return <RolodexTestimonials cards={quotes} />;
 }
 `,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CardStackRotator } from "@/components/card-stack-rotator";
 
@@ -3292,7 +3291,7 @@ const cards = [
   { id: "3", content: "Swapped our carousel and **time on page doubled**.", name: "Hana Ito", designation: "Growth Lead", company: "Tidepool" },
 ];
 
-export function CustomerQuotes() {
+export default function Page() {
   return <CardStackRotator cards={cards} cardWidth="400px" rotationInterval={6000} />;
 }`,
     tailwindSource: `"use client";
@@ -3342,11 +3341,11 @@ export function CardStackRotatorDemo() {
     ],
     Preview: Previews.PreviewScrollRevealTextRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ScrollRevealText } from "@/components/scroll-reveal-text";
 
-export function Manifesto() {
+function Manifesto() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-[40vh]">
       <ScrollRevealText
@@ -3358,7 +3357,7 @@ export function Manifesto() {
   );
 }
 
-export function LineByLine() {
+export default function Page() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-[40vh]">
       <ScrollRevealText
@@ -3409,11 +3408,11 @@ export function LineByLine() {
       {
         title: "Animated Countdown",
         Preview: Previews.PreviewAnimatedCountdown,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { AnimatedCountdown } from "@/components/animated-countdown";
 
-export function LaunchCountdown() {
+export default function Page() {
   return (
     <AnimatedCountdown
       targetDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
@@ -3426,20 +3425,19 @@ export function LaunchCountdown() {
       {
         title: "Split-Flap Board",
         Preview: Previews.PreviewSplitFlapBoard,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SplitFlapBoard } from "@/components/animated-countdown";
 
 const LAUNCH = new Date("2026-12-01T17:00:00Z");
 
-export function LaunchBoard() {
+export default function Page() {
   return (
     <SplitFlapBoard
       to={LAUNCH}
       label="Launch · v2.0"
       statuses={["ON TIME", "GATE OPEN", "FINAL CALL"]}
       autoplay
-      onComplete={() => console.log("we have lift-off")}
     />
   );
 }`,
@@ -3447,13 +3445,13 @@ export function LaunchBoard() {
       {
         title: "Watch Countdown",
         Preview: Previews.PreviewWatchCountdown,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { WatchCountdown } from "@/components/animated-countdown";
 
 const LAUNCH = new Date("2026-12-01T09:00:00Z");
 
-export function LaunchRings() {
+export default function Page() {
   return <WatchCountdown to={LAUNCH} title="Nexus 3.0 ships in" />;
 }
 `,
@@ -3461,17 +3459,16 @@ export function LaunchRings() {
       {
         title: "Fuse Countdown",
         Preview: Previews.PreviewFuseCountdown,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { FuseCountdown } from "@/components/animated-countdown";
 
-export function DoorsOpen() {
+export default function Page() {
   return (
     <FuseCountdown
       seconds={30}
       title="Doors open in"
       launchMessage="We are live."
-      onLaunch={() => console.log("launched")}
     />
   );
 }
@@ -3483,11 +3480,11 @@ export function DoorsOpen() {
       Previews.PreviewAnimatedCountdownDigital,
       Previews.PreviewAnimatedCountdownMinimal,
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AnimatedCountdown } from "@/components/animated-countdown";
 
-export function LaunchCountdown() {
+export default function Page() {
   return (
     <AnimatedCountdown
       targetDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
@@ -3534,11 +3531,11 @@ export function LaunchCountdown() {
       {
         title: "Hover Highlight Text",
         Preview: Previews.PreviewHoverHighlightTextRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { HoverHighlightText } from "@/components/hover-highlight-text";
 
-export function Hero() {
+function Hero() {
   return (
     <section className="flex min-h-[60vh] items-center justify-center px-6">
       <HoverHighlightText
@@ -3552,7 +3549,7 @@ export function Hero() {
   );
 }
 
-export function BlueMarker() {
+export default function Page() {
   return (
     <HoverHighlightText
       text="Highlight what matters."
@@ -3565,7 +3562,7 @@ export function BlueMarker() {
       {
         title: "Marker Annotations",
         Preview: Previews.PreviewMarkerAnnotations,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { MarkerAnnotations, type MarkerSegment } from "@/components/hover-highlight-text";
 
@@ -3581,17 +3578,17 @@ const segments: MarkerSegment[] = [
   ".",
 ];
 
-export function Pitch() {
+export default function Page() {
   return <MarkerAnnotations segments={segments} showReplay={false} />;
 }`,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { HoverHighlightText } from "@/components/hover-highlight-text";
 
-export function Hero() {
+function Hero() {
   return (
     <section className="flex min-h-[60vh] items-center justify-center px-6">
       <HoverHighlightText
@@ -3605,7 +3602,7 @@ export function Hero() {
   );
 }
 
-export function BlueMarker() {
+export default function Page() {
   return (
     <HoverHighlightText
       text="Highlight what matters."
@@ -3644,11 +3641,11 @@ export function BlueMarker() {
     ],
     Preview: Previews.PreviewMotionLayerScrollerRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MotionLayerScroller } from "@/components/motion-layer-scroller";
 
-export function DepthHero() {
+export default function Page() {
   return (
     <section className="mx-auto max-w-4xl px-6 py-16">
       <MotionLayerScroller
@@ -3692,7 +3689,7 @@ export function DepthHero() {
     ],
     Preview: Previews.PreviewSpectraFrameRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SpectraFrame } from "@/components/spectra-frame";
 
@@ -3705,7 +3702,7 @@ const photos = [
   { src: "/gallery/06.jpg", alt: "Old library" },
 ];
 
-export function Portfolio() {
+export default function Page() {
   return (
     <SpectraFrame
       images={photos}
@@ -3713,7 +3710,6 @@ export function Portfolio() {
       columns={3}
       cellMinHeight={150}
       hoveredMinHeight={210}
-      onSelect={(i) => console.log("open", photos[i].alt)}
     />
   );
 }`,
@@ -3757,7 +3753,7 @@ export function SpectraFrameDemo() {
     ],
     Preview: Previews.PreviewProfileOrbitRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ProfileOrbit } from "@/components/profile-orbit";
 
@@ -3769,11 +3765,10 @@ const team = [
   { seed: 5, name: "Sara Holm", role: "Support", email: "sara@acme.dev" },
 ];
 
-export function Team() {
+export default function Page() {
   return (
     <ProfileOrbit
       people={team}
-      onConnect={(p, on) => console.log(on ? "connect" : "disconnect", p.email)}
     />
   );
 }`,
@@ -3805,18 +3800,18 @@ export function ProfileOrbitDemo() {
       {
         title: "Command Palette",
         Preview: Previews.PreviewCommandPalette,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CommandPalette } from "@/components/command-palette";
 
-export function CommandPaletteDemo() {
+export default function Page() {
   return <CommandPalette />;
 }`,
       },
       {
         title: "Command Morph",
         Preview: Previews.PreviewCommandMorph,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CommandMorph, type CommandItem } from "@/components/command-palette";
 
@@ -3835,12 +3830,11 @@ const commands: CommandItem[] = [
   { id: "logout", label: "Log out", icon: "M9 21H5V3h4M16 17l5-5-5-5M21 12H9" },
 ];
 
-export function AppCommands() {
+export default function Page() {
   return (
     <CommandMorph
       commands={commands}
       hotkey
-      onSelect={(cmd, path) => console.log([...path.map((p) => p.id), cmd.id].join("/"))}
     />
   );
 }`,
@@ -3853,11 +3847,11 @@ import { CommandPalette } from "@/components/command-palette";
 export function CommandPaletteDemo() {
   return <CommandPalette />;
 }`,
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CommandPalette } from "@/components/command-palette";
 
-export function CommandPaletteDemo() {
+export default function Page() {
   return <CommandPalette />;
 }`,
     props: [
@@ -3906,22 +3900,22 @@ export function CommandPaletteDemo() {
       {
         title: "Trail",
         Preview: Previews.PreviewImageTrailRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ImageTrail } from "@/components/image-trail";
 
-export function Postcards() {
+export default function Page() {
   return <ImageTrail className="h-96 w-full" />;
 }`,
       },
       {
         title: "Magnetic, with a headline",
         Preview: Previews.PreviewImageTrailMagnetic,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ImageTrail } from "@/components/image-trail";
 
-export function SummerHero() {
+export default function Page() {
   return (
     <ImageTrail magneticEffect magneticStrength={0.5} spacing={36} duration={1600} cornerRadius={48} className="h-96 w-full">
       <div className="pointer-events-none flex h-full items-center justify-center">
@@ -3932,7 +3926,7 @@ export function SummerHero() {
 }`,
       },
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ImageTrail } from "@/components/image-trail";
 
@@ -3943,7 +3937,7 @@ const photos = [
   { src: "/photos/harbour.jpg", alt: "Harbour" },
 ];
 
-export function TravelHero() {
+export default function Page() {
   return (
     <ImageTrail images={photos} imageSize={140} spacing={56} className="h-[520px] w-full">
       <div className="pointer-events-none flex h-full items-center justify-center">
@@ -4010,7 +4004,7 @@ export function ImageTrailExample() {
     ],
     Preview: Previews.PreviewAvatarGroupRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AvatarGroup, type AvatarData } from "@/components/avatar-group";
 
@@ -4024,8 +4018,8 @@ const team: AvatarData[] = [
   { fallback: "EB", tooltip: "Elsa Berg" },
 ];
 
-export function ProjectMembers() {
-  return <AvatarGroup avatars={team} size={44} overlap={12} max={5} onSelect={(person) => console.log(person.tooltip)} />;
+export default function Page() {
+  return <AvatarGroup avatars={team} size={44} overlap={12} max={5} />;
 }`,
     tailwindSource: tw,
   },
@@ -4059,11 +4053,11 @@ export function ProjectMembers() {
     ],
     Preview: Previews.PreviewFeatureToolsCardRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FeatureToolsCard } from "@/components/feature-tools-card";
 
-export function IntegrationsCard() {
+export default function Page() {
   return (
     <FeatureToolsCard
       title="Works with your tools"
@@ -4113,11 +4107,11 @@ export function IntegrationsCard() {
       {
         title: "Link Preview",
         Preview: Previews.PreviewLinkPreviewRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { LinkPreview } from "@/components/link-preview";
 
-export function ArticleIntro() {
+export default function Page() {
   return (
     <p className="max-w-prose text-lg leading-relaxed">
       We rebuilt the editor on top of{" "}
@@ -4136,7 +4130,7 @@ export function ArticleIntro() {
       {
         title: "Cursor Card",
         Preview: Previews.PreviewCursorCard,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CursorCard, type CursorCardItem } from "@/components/link-preview";
 
@@ -4146,17 +4140,17 @@ const work: CursorCardItem[] = [
   { title: "Moorgate", kind: "Dashboard", year: "2024", colors: ["#64d2ff", "#30d158"], href: "/work/moorgate" },
 ];
 
-export function SelectedWork() {
+export default function Page() {
   return <CursorCard items={work} ctaLabel="Read the story" />;
 }`,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LinkPreview } from "@/components/link-preview";
 
-export function ArticleIntro() {
+export default function Page() {
   return (
     <p className="max-w-prose text-lg leading-relaxed">
       We rebuilt the editor on top of{" "}
@@ -4206,12 +4200,13 @@ export function ArticleIntro() {
     ],
     Preview: Previews.PreviewTickSliderRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { TickSlider } from "@/components/tick-slider";
 
-export function BrushSize() {
+export default function Page() {
   const [size, setSize] = useState(24);
 
   return (
@@ -4223,7 +4218,6 @@ export function BrushSize() {
       max={64}
       unit="px"
       ticks={32}
-      onCommit={(v) => console.log("saved", v)}
     />
   );
 }`,
@@ -4257,12 +4251,13 @@ export function BrushSize() {
     ],
     Preview: Previews.PreviewTimeScrubberRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { TimeScrubber } from "@/components/time-scrubber";
 
-export function PickupTime() {
+export default function Page() {
   const [minutes, setMinutes] = useState(18 * 60);
 
   return (
@@ -4271,7 +4266,6 @@ export function PickupTime() {
       value={minutes}
       onChange={setMinutes}
       interval={10}
-      onCommit={(m) => console.log("pickup at", Math.floor(m / 60), m % 60)}
     />
   );
 }`,
@@ -4305,7 +4299,8 @@ export function PickupTime() {
     ],
     Preview: Previews.PreviewSlideToConfirmRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { SlideToConfirm } from "@/components/slide-to-confirm";
 
@@ -4314,7 +4309,7 @@ async function pay() {
   if (!res.ok) throw new Error("Payment failed");
 }
 
-export function PayButton() {
+export default function Page() {
   return (
     <SlideToConfirm
       label="Slide to pay $24.00"
@@ -4359,7 +4354,7 @@ export function PayButton() {
       {
         title: "Emoji Reactions",
         Preview: Previews.PreviewEmojiReactions,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { EmojiReactions, type Reaction } from "@/components/emoji-reactions";
 
@@ -4368,14 +4363,13 @@ const initial: Reaction[] = [
   { emoji: "🔥", count: 2, reacted: true },
 ];
 
-export function ReleaseNote() {
+export default function Page() {
   return (
     <EmojiReactions
       message="Shipped the new onboarding flow"
       reactions={initial}
       emojis={["👍", "❤️", "😂", "🎉", "🔥", "🚀", "👀", "🙏"]}
       accent="#5b8def"
-      onChange={(reactions) => console.log(reactions)}
     />
   );
 }`,
@@ -4383,11 +4377,11 @@ export function ReleaseNote() {
       {
         title: "Spark Reactions",
         Preview: Previews.PreviewSparkReactions,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SparkReactions } from "@/components/emoji-reactions";
 
-export function ReleaseNoteReactions() {
+export default function Page() {
   return (
     <SparkReactions
       message="v2.4 is live for everyone"
@@ -4395,14 +4389,13 @@ export function ReleaseNoteReactions() {
         { id: "party", count: 8, mine: true },
         { id: "rocket", count: 5, mine: false },
       ]}
-      onChange={(row) => console.log("reactions", row)}
     />
   );
 }`,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { EmojiReactions, type Reaction } from "@/components/emoji-reactions";
 
@@ -4411,14 +4404,13 @@ const initial: Reaction[] = [
   { emoji: "🔥", count: 2, reacted: true },
 ];
 
-export function ReleaseNote() {
+export default function Page() {
   return (
     <EmojiReactions
       message="Shipped the new onboarding flow"
       reactions={initial}
       emojis={["👍", "❤️", "😂", "🎉", "🔥", "🚀", "👀", "🙏"]}
       accent="#5b8def"
-      onChange={(reactions) => console.log(reactions)}
     />
   );
 }`,
@@ -4461,19 +4453,20 @@ export function ReleaseNote() {
       {
         title: "Like Burst",
         Preview: Previews.PreviewLikeBurst,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client"; // onChange is a function, which a server page cannot hand to a client component
 
-import * as React from "react";
 import { LikeBurst } from "@/components/like-burst";
 
-export function PostActions({ postId, likes, likedByMe }: { postId: string; likes: number; likedByMe: boolean }) {
+export default function Page() {
   return (
     <LikeBurst
-      defaultCount={likes}
-      defaultLiked={likedByMe}
+      defaultCount={128}
+      defaultLiked={false}
       color="#ff3b5c"
       onChange={(liked) => {
-        void fetch(\`/api/posts/\${postId}/like\`, { method: liked ? "POST" : "DELETE" });
+        // Replace with your own request.
+        void fetch("/api/posts/42/like", { method: liked ? "POST" : "DELETE" });
       }}
     />
   );
@@ -4482,35 +4475,35 @@ export function PostActions({ postId, likes, likedByMe }: { postId: string; like
       {
         title: "Confetti Like",
         Preview: Previews.PreviewConfettiLike,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ConfettiLike } from "@/components/like-burst";
 
-export function PostLike() {
+export default function Page() {
   return (
     <ConfettiLike
       count={2481}
       accent="#ff375f"
-      onChange={(liked, count) => console.log(liked ? "liked" : "unliked", count)}
     />
   );
 }`,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // onChange is a function, which a server page cannot hand to a client component
 
-import * as React from "react";
 import { LikeBurst } from "@/components/like-burst";
 
-export function PostActions({ postId, likes, likedByMe }: { postId: string; likes: number; likedByMe: boolean }) {
+export default function Page() {
   return (
     <LikeBurst
-      defaultCount={likes}
-      defaultLiked={likedByMe}
+      defaultCount={128}
+      defaultLiked={false}
       color="#ff3b5c"
       onChange={(liked) => {
-        void fetch(\`/api/posts/\${postId}/like\`, { method: liked ? "POST" : "DELETE" });
+        // Replace with your own request.
+        void fetch("/api/posts/42/like", { method: liked ? "POST" : "DELETE" });
       }}
     />
   );
@@ -4556,11 +4549,12 @@ export function PostActions({ postId, likes, likedByMe }: { postId: string; like
       {
         title: "Toast Stack",
         Preview: Previews.PreviewToastStackRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { ToastStack, useToastStack } from "@/components/toast-stack";
 
-export function CheckoutNotifications() {
+export default function Page() {
   const { toasts, push, dismiss } = useToastStack();
 
   async function pay() {
@@ -4593,15 +4587,13 @@ export function CheckoutNotifications() {
       {
         title: "Undo Toast",
         Preview: Previews.PreviewUndoToast,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { UndoToast } from "@/components/toast-stack";
 
-export function InboxExample() {
+export default function Page() {
   return (
     <UndoToast
-      onArchive={(mail) => console.log("archived", mail.subject)}
-      onUndo={(mails) => console.log("restored", mails.length)}
     />
   );
 }
@@ -4610,15 +4602,13 @@ export function InboxExample() {
       {
         title: "Promise Toast",
         Preview: Previews.PreviewPromiseToast,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { PromiseToast } from "@/components/toast-stack";
 
-export function DeployExample() {
+export default function Page() {
   return (
     <PromiseToast
-      onVisit={() => console.log("visit pressed")}
-      onViewLogs={() => console.log("view logs pressed")}
     />
   );
 }
@@ -4626,11 +4616,12 @@ export function DeployExample() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { ToastStack, useToastStack } from "@/components/toast-stack";
 
-export function CheckoutNotifications() {
+export default function Page() {
   const { toasts, push, dismiss } = useToastStack();
 
   async function pay() {
@@ -4706,7 +4697,8 @@ export function CheckoutNotifications() {
       {
         title: "Upload Dropzone",
         Preview: Previews.PreviewUploadDropzoneRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { UploadDropzone } from "@/components/upload-dropzone";
 
@@ -4723,7 +4715,7 @@ function upload(file: File, setProgress: (p: number) => void) {
   });
 }
 
-export function Attachments() {
+export default function Page() {
   return (
     <UploadDropzone
       title="Drop your files"
@@ -4737,15 +4729,13 @@ export function Attachments() {
       {
         title: "Avatar Upload",
         Preview: Previews.PreviewAvatarUpload,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { AvatarUpload } from "@/components/upload-dropzone";
 
-export function ProfilePhoto() {
+export default function Page() {
   return (
     <AvatarUpload
-      onUpload={({ file, zoom, x, y }) => console.log("framed", file?.name, zoom, x, y)}
-      onRemove={() => console.log("removed")}
     />
   );
 }
@@ -4754,15 +4744,13 @@ export function ProfilePhoto() {
       {
         title: "Upload Queue",
         Preview: Previews.PreviewUploadQueue,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { UploadQueue } from "@/components/upload-dropzone";
 
-export function Assets() {
+export default function Page() {
   return (
     <UploadQueue
-      onFiles={(files) => console.log("added", files.length)}
-      onComplete={(name) => console.log("done", name)}
     />
   );
 }
@@ -4771,15 +4759,14 @@ export function Assets() {
       {
         title: "Empty Table",
         Preview: Previews.PreviewEmptyTable,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { EmptyTable } from "@/components/upload-dropzone";
 
-export function CustomersImport() {
+export default function Page() {
   return (
     <EmptyTable
       title="Customers"
-      onImport={(table) => console.log("imported", table.total, "rows from", table.file)}
     />
   );
 }
@@ -4787,7 +4774,8 @@ export function CustomersImport() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { UploadDropzone } from "@/components/upload-dropzone";
 
@@ -4804,7 +4792,7 @@ function upload(file: File, setProgress: (p: number) => void) {
   });
 }
 
-export function Attachments() {
+export default function Page() {
   return (
     <UploadDropzone
       title="Drop your files"
@@ -4851,17 +4839,15 @@ export function Attachments() {
       {
         title: "Hold to Record",
         Preview: Previews.PreviewHoldToRecordRedesign,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { HoldToRecord } from "@/components/hold-to-record";
 
-export function ChatComposerMic() {
+export default function Page() {
   return (
     <HoldToRecord
       useMicrophone
       maxDuration={30_000}
-      onRecorded={({ durationMs, levels }) => console.log("note", durationMs, levels.length)}
-      onCancel={() => console.log("discarded")}
     />
   );
 }`,
@@ -4869,15 +4855,14 @@ export function ChatComposerMic() {
       {
         title: "Voice Dictation",
         Preview: Previews.PreviewVoiceDictation,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { VoiceDictation } from "@/components/hold-to-record";
 
-export function NewReminder() {
+export default function Page() {
   return (
     <VoiceDictation
       title="New reminder"
-      onSave={(text) => console.log("saved:", text)}
     />
   );
 }
@@ -4885,17 +4870,15 @@ export function NewReminder() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { HoldToRecord } from "@/components/hold-to-record";
 
-export function ChatComposerMic() {
+export default function Page() {
   return (
     <HoldToRecord
       useMicrophone
       maxDuration={30_000}
-      onRecorded={({ durationMs, levels }) => console.log("note", durationMs, levels.length)}
-      onCancel={() => console.log("discarded")}
     />
   );
 }`,
@@ -4928,14 +4911,14 @@ export function ChatComposerMic() {
     ],
     Preview: Previews.PreviewCursorBuddyRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CursorBuddy } from "@/components/cursor-buddy";
 
-export function EmptyInbox() {
+export default function Page() {
   return (
     <div className="flex flex-col items-center gap-5 py-16 text-center">
-      <CursorBuddy shape="squircle" eyes="dots" size={96} follow={70} onPoke={() => console.log("boop")} />
+      <CursorBuddy shape="squircle" eyes="dots" size={96} follow={70} />
       <div>
         <p className="text-base font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Nothing here yet</p>
         <p className="text-sm text-[#6e6e73] dark:text-[#a1a1a6]">New messages will land right here.</p>
@@ -4972,11 +4955,11 @@ export function EmptyInbox() {
     ],
     Preview: Previews.PreviewDotSphereRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { DotSphere } from "@/components/dot-sphere";
 
-export function GlobalHero() {
+export default function Page() {
   return (
     <section className="grid items-center gap-10 py-20 md:grid-cols-2">
       <div>
@@ -5018,12 +5001,13 @@ export function GlobalHero() {
     ],
     Preview: Previews.PreviewDynamicIslandRedesign,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import * as React from "react";
 import { DynamicIsland, type IslandState } from "@/components/dynamic-island";
 
-export function AppTopBar() {
+export default function Page() {
   const [activity, setActivity] = React.useState<IslandState>("timer");
 
   return (
@@ -5075,11 +5059,12 @@ export function AppTopBar() {
       {
         title: "OTP Input",
         Preview: Previews.PreviewOtpInput,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { OtpInput } from "@/components/otp-input";
 
-export function VerifyPhone() {
+export default function Page() {
   return (
     <OtpInput
       verify={async (code) => {
@@ -5095,15 +5080,13 @@ export function VerifyPhone() {
       {
         title: "OTP Autofill",
         Preview: Previews.PreviewOtpAutofill,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { OtpAutofill } from "@/components/otp-input";
 
-export function VerifyScreen() {
+export default function Page() {
   return (
     <OtpAutofill
-      onVerified={(code) => console.log("verified", code)}
-      onResend={() => console.log("resend requested")}
     />
   );
 }
@@ -5112,22 +5095,23 @@ export function VerifyScreen() {
       {
         title: "Underline OTP",
         Preview: Previews.PreviewOtpLine,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { OtpLine } from "@/components/otp-input";
 
-export function TwoStepScreen() {
-  return <OtpLine code="905172" onVerified={(code) => console.log("verified", code)} />;
+export default function Page() {
+  return <OtpLine code="905172" />;
 }
 `,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { OtpInput } from "@/components/otp-input";
 
-export function VerifyPhone() {
+export default function Page() {
   return (
     <OtpInput
       verify={async (code) => {
@@ -5163,15 +5147,14 @@ export function VerifyPhone() {
     ],
     Preview: Previews.PreviewRadioCards,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { RadioCards } from "@/components/radio-cards";
 
-export function ChoosePlan() {
+export default function Page() {
   return (
     <RadioCards
       defaultValue="pro"
-      onChange={(id) => console.log("plan", id)}
       options={[
         { id: "starter", title: "Starter", description: "For side projects", meta: "Free", features: ["3 sites", "Community support"] },
         { id: "pro", title: "Pro", description: "For growing products", meta: "$20/mo", features: ["Unlimited sites", "Analytics", "Custom domains"] },
@@ -5207,16 +5190,17 @@ export function ChoosePlan() {
     ],
     Preview: Previews.PreviewHoldToConfirm,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // the handlers are functions, which a server page cannot hand to a client component
 
 import { HoldToConfirm } from "@/components/hold-to-confirm";
 
-export function DangerZone({ projectId }: { projectId: string }) {
+export default function Page() {
   return (
     <HoldToConfirm
       holdMs={1800}
-      onConfirm={() => fetch(\`/api/projects/\${projectId}\`, { method: "DELETE" })}
-      onUndo={() => fetch(\`/api/projects/\${projectId}/restore\`, { method: "POST" })}
+      onConfirm={() => fetch("/api/projects/42", { method: "DELETE" })}
+      onUndo={() => fetch("/api/projects/42/restore", { method: "POST" })}
     />
   );
 }`,
@@ -5245,11 +5229,11 @@ export function DangerZone({ projectId }: { projectId: string }) {
     ],
     Preview: Previews.PreviewBeforeAfter,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BeforeAfter } from "@/components/before-after";
 
-export function GradeComparison() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-2xl">
       <BeforeAfter
@@ -5285,20 +5269,20 @@ export function GradeComparison() {
     ],
     Preview: Previews.PreviewPriceOdometer,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PriceOdometer, RollingNumber } from "@/components/price-odometer";
 
-export function TeamPricing() {
-  return <PriceOdometer monthlyRate={20} yearlyRate={16} maxSeats={250} />;
-}
-
-// RollingNumber works on its own too:
-export function LiveCount({ value }: { value: number }) {
+export default function Page() {
   return (
-    <span className="text-5xl font-semibold tabular-nums">
-      <RollingNumber value={value} />
-    </span>
+    <div className="grid gap-10">
+      <PriceOdometer monthlyRate={20} yearlyRate={16} maxSeats={250} />
+
+      {/* RollingNumber works on its own too */}
+      <span className="text-5xl font-semibold tabular-nums">
+        <RollingNumber value={1284} />
+      </span>
+    </div>
   );
 }`,
     tailwindSource: tw,
@@ -5335,12 +5319,13 @@ export function LiveCount({ value }: { value: number }) {
       {
         title: "Password Strength",
         Preview: Previews.PreviewPasswordStrength,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { PasswordStrength } from "@/components/password-strength";
 
-export function CreatePassword() {
+export default function Page() {
   const [ok, setOk] = useState(false);
   return (
     <form className="flex flex-col gap-6">
@@ -5355,14 +5340,13 @@ export function CreatePassword() {
       {
         title: "Crack-time Meter",
         Preview: Previews.PreviewCrackTimePassword,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CrackTimePassword } from "@/components/password-strength";
 
-export function ChoosePassword() {
+export default function Page() {
   return (
     <CrackTimePassword
-      onChange={(value, crackSeconds) => console.log(value.length, crackSeconds)}
     />
   );
 }
@@ -5371,15 +5355,14 @@ export function ChoosePassword() {
       {
         title: "Suggested Password",
         Preview: Previews.PreviewSuggestPassword,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SuggestPassword } from "@/components/password-strength";
 
-export function SignUpPassword() {
+export default function Page() {
   return (
     <SuggestPassword
       email="maya@orbitly.com"
-      onSubmit={(password) => console.log("create account", password.length)}
     />
   );
 }
@@ -5387,12 +5370,13 @@ export function SignUpPassword() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { PasswordStrength } from "@/components/password-strength";
 
-export function CreatePassword() {
+export default function Page() {
   const [ok, setOk] = useState(false);
   return (
     <form className="flex flex-col gap-6">
@@ -5426,11 +5410,11 @@ export function CreatePassword() {
     ],
     Preview: Previews.PreviewTiltPass,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TiltPass } from "@/components/tilt-pass";
 
-export function MemberWelcome() {
+export default function Page() {
   return (
     <div className="flex flex-col items-center gap-6 py-16">
       <TiltPass title="Backstage" name="Sam Okafor" number="No. 0318" autoplay />
@@ -5470,17 +5454,18 @@ export function MemberWelcome() {
       {
         title: "Animated Tabs",
         Preview: Previews.PreviewAnimatedTabs,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { AnimatedTabs, Switch } from "@/components/animated-tabs";
 
-export function SettingsPage() {
+function SettingsPage() {
   return <AnimatedTabs />;
 }
 
 // The switch is exported on its own as well:
-export function WifiRow() {
+export default function Page() {
   const [on, setOn] = useState(true);
   return (
     <div className="flex items-center justify-between">
@@ -5493,7 +5478,7 @@ export function WifiRow() {
       {
         title: "Elastic Tabs",
         Preview: Previews.PreviewElasticTabs,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ElasticTabs } from "@/components/animated-tabs";
 
@@ -5503,15 +5488,15 @@ const tabs = [
   { id: "three", label: "Reports", content: <p>Reports content</p> },
 ];
 
-export function TabsExample() {
-  return <ElasticTabs tabs={tabs} label="Dashboard" onChange={(id) => console.log(id)} />;
+export default function Page() {
+  return <ElasticTabs tabs={tabs} label="Dashboard" />;
 }
 `,
       },
       {
         title: "Document Tabs",
         Preview: Previews.PreviewDocumentTabs,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { DocumentTabs } from "@/components/animated-tabs";
 
@@ -5520,24 +5505,25 @@ const tabs = [
   { id: 2, title: "Notes", url: "example.app/notes", color: "#30d158", letter: "N" },
 ];
 
-export function EditorExample() {
-  return <DocumentTabs initialTabs={tabs} onActiveChange={(id) => console.log(id)} />;
+export default function Page() {
+  return <DocumentTabs initialTabs={tabs} />;
 }
 `,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { AnimatedTabs, Switch } from "@/components/animated-tabs";
 
-export function SettingsPage() {
+function SettingsPage() {
   return <AnimatedTabs />;
 }
 
 // The switch is exported on its own as well:
-export function WifiRow() {
+export default function Page() {
   const [on, setOn] = useState(true);
   return (
     <div className="flex items-center justify-between">
@@ -5567,11 +5553,11 @@ export function WifiRow() {
     ],
     Preview: Previews.PreviewSharedElementCards,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SharedElementCards } from "@/components/shared-element-cards";
 
-export function Stories() {
+export default function Page() {
   return (
     <SharedElementCards
       cards={[
@@ -5617,11 +5603,11 @@ export function Stories() {
     ],
     Preview: Previews.PreviewRotatingHeadline,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { RotatingHeadline } from "@/components/rotating-headline";
 
-export function Hero() {
+export default function Page() {
   return (
     <section className="py-24">
       <RotatingHeadline lead="Made for" words={["founders.", "designers.", "teams."]} sub="One kit, every launch." accent="#ff375f" />
@@ -5651,7 +5637,8 @@ export function Hero() {
     ],
     Preview: Previews.PreviewStretchNav,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { usePathname, useRouter } from "next/navigation";
 import { StretchNav } from "@/components/stretch-nav";
@@ -5663,7 +5650,7 @@ const LINKS = [
   { label: "About", href: "/about" },
 ];
 
-export function SiteNav() {
+export default function Page() {
   const router = useRouter();
   const path = usePathname();
   const current = Math.max(0, LINKS.findIndex((l) => l.href === path));
@@ -5693,11 +5680,12 @@ export function SiteNav() {
     ],
     Preview: Previews.PreviewFeedbackPill,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { FeedbackPill } from "@/components/feedback-pill";
 
-export function FeedbackCorner() {
+export default function Page() {
   return (
     <div className="fixed bottom-6 right-6">
       <FeedbackPill
@@ -5731,16 +5719,19 @@ export function FeedbackCorner() {
     ],
     Preview: Previews.PreviewStaggerMenu,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // onSelect is a function, which a server page cannot hand to a client component
 
 import { StaggerMenu } from "@/components/stagger-menu";
 
-export function ShareButton({ url }: { url: string }) {
+const url = "https://example.com/post/42";
+
+export default function Page() {
   return (
     <StaggerMenu
       onSelect={(id) => {
         if (id === "link") navigator.clipboard.writeText(url);
-        if (id === "email") window.location.href = \`mailto:?body=\${encodeURIComponent(url)}\`;
+        if (id === "email") window.location.href = "mailto:?body=" + encodeURIComponent(url);
       }}
     />
   );
@@ -5772,12 +5763,13 @@ export function ShareButton({ url }: { url: string }) {
     ],
     Preview: Previews.PreviewRulerPicker,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { RulerPicker } from "@/components/ruler-picker";
 
-export function FocusTimer() {
+export default function Page() {
   const [minutes, setMinutes] = useState(25);
   return (
     <div className="flex flex-col items-center gap-6">
@@ -5812,12 +5804,12 @@ export function FocusTimer() {
     ],
     Preview: Previews.PreviewElasticStepper,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ElasticStepper } from "@/components/elastic-stepper";
 
-export function TableBooking() {
-  return <ElasticStepper label="Guests" min={1} max={12} defaultValue={2} onChange={(n) => console.log(n)} />;
+export default function Page() {
+  return <ElasticStepper label="Guests" min={1} max={12} defaultValue={2} />;
 }`,
     tailwindSource: tw,
   },
@@ -5851,27 +5843,26 @@ export function TableBooking() {
       {
         title: "Todo List",
         Preview: Previews.PreviewTodoList,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { TodoList } from "@/components/todo-list";
 
-export function LaunchChecklist() {
+export default function Page() {
   return <TodoList initial={["Write release notes", "Record the demo", "Update pricing page", "Email beta users"]} accent="#34c759" />;
 }`,
       },
       {
         title: "All Caught Up",
         Preview: Previews.PreviewAllCaughtUp,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { AllCaughtUp } from "@/components/todo-list";
 
-export function TodayView() {
+export default function Page() {
   return (
     <AllCaughtUp
       heading="Today"
       tomorrow={["Q4 planning", "1:1 with Leo", "Invoice run"]}
-      onComplete={() => console.log("inbox zero")}
     />
   );
 }
@@ -5879,11 +5870,11 @@ export function TodayView() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TodoList } from "@/components/todo-list";
 
-export function LaunchChecklist() {
+export default function Page() {
   return <TodoList initial={["Write release notes", "Record the demo", "Update pricing page", "Email beta users"]} accent="#34c759" />;
 }`,
     tailwindSource: tw,
@@ -5910,11 +5901,12 @@ export function LaunchChecklist() {
     ],
     Preview: Previews.PreviewProgressButton,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { ProgressButton } from "@/components/progress-button";
 
-export function ExportButton() {
+export default function Page() {
   return (
     <ProgressButton
       label="Export video"
@@ -5966,14 +5958,16 @@ export function ExportButton() {
       {
         title: "Copy Button",
         Preview: Previews.PreviewCopyButton,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { CopyChip, CopyCommand } from "@/components/copy-button";
 
-export function ApiKeyRow({ keyId }: { keyId: string }) {
+const keyId = "nxs_8f3a91c2d4e5";
+
+export default function Page() {
   return (
     <div className="flex flex-col items-start gap-4">
-      <CopyChip value={keyId} display={\`\${keyId.slice(0, 7)}…\${keyId.slice(-4)}\`} />
+      <CopyChip value={keyId} display={keyId.slice(0, 7) + "…" + keyId.slice(-4)} />
       <CopyCommand command="npx shadcn@latest add @nexus-labs/copy-button" />
     </div>
   );
@@ -5982,18 +5976,17 @@ export function ApiKeyRow({ keyId }: { keyId: string }) {
       {
         title: "Selection Copy",
         Preview: Previews.PreviewSelectCopy,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SelectCopy } from "@/components/copy-button";
 
-export function ShareCard() {
+export default function Page() {
   return (
     <SelectCopy
       fields={[
         { label: "Share link", value: "nexus-ui.com/s/8fK2-motion-kit", mono: false },
         { label: "Install", value: "npm i @nexus/motion", prefix: "$" },
       ]}
-      onCopy={(value) => console.log("copied", value)}
     />
   );
 }
@@ -6002,15 +5995,13 @@ export function ShareCard() {
       {
         title: "API Key Field",
         Preview: Previews.PreviewApiKeyField,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ApiKeyField } from "@/components/copy-button";
 
-export function KeySettings() {
+export default function Page() {
   return (
     <ApiKeyField
-      onCopy={() => console.log("demo key copied")}
-      onRotate={(next) => console.log("new demo key", next)}
     />
   );
 }
@@ -6018,14 +6009,16 @@ export function KeySettings() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CopyChip, CopyCommand } from "@/components/copy-button";
 
-export function ApiKeyRow({ keyId }: { keyId: string }) {
+const keyId = "nxs_8f3a91c2d4e5";
+
+export default function Page() {
   return (
     <div className="flex flex-col items-start gap-4">
-      <CopyChip value={keyId} display={\`\${keyId.slice(0, 7)}…\${keyId.slice(-4)}\`} />
+      <CopyChip value={keyId} display={keyId.slice(0, 7) + "…" + keyId.slice(-4)} />
       <CopyCommand command="npx shadcn@latest add @nexus-labs/copy-button" />
     </div>
   );
@@ -6052,12 +6045,13 @@ export function ApiKeyRow({ keyId }: { keyId: string }) {
     ],
     Preview: Previews.PreviewAnimatedIcons,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { MenuIcon, ThemeIcon } from "@/components/animated-icons";
 
-export function HeaderControls() {
+export default function Page() {
   const [open, setOpen] = useState(false);
   const [dark, setDark] = useState(false);
   return (
@@ -6094,11 +6088,11 @@ export function HeaderControls() {
     ],
     Preview: Previews.PreviewFolderPeek,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FolderPeek } from "@/components/folder-peek";
 
-export function ProjectFolders() {
+export default function Page() {
   return (
     <div className="grid grid-cols-2 gap-10 pt-16">
       <FolderPeek title="Launch kit" meta="12 files · Edited 2h ago" color="#34c759" />
@@ -6127,11 +6121,11 @@ export function ProjectFolders() {
     ],
     Preview: Previews.PreviewMagnifyDock,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MagnifyDock } from "@/components/magnify-dock";
 
-export function AppDock() {
+export default function Page() {
   return (
     <div className="fixed inset-x-0 bottom-4 flex justify-center">
       <MagnifyDock />
@@ -6160,11 +6154,12 @@ export function AppDock() {
     ],
     Preview: Previews.PreviewUploadChips,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { UploadChips } from "@/components/upload-chips";
 
-export function Attachments() {
+export default function Page() {
   return (
     <UploadChips
       upload={(file, onProgress) =>
@@ -6200,11 +6195,11 @@ export function Attachments() {
     ],
     Preview: Previews.PreviewNotificationStack,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { NotificationStack } from "@/components/notification-stack";
 
-export function NotificationsDemo() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-md py-10">
       <NotificationStack />
@@ -6231,11 +6226,11 @@ export function NotificationsDemo() {
     ],
     Preview: Previews.PreviewIslandMorph,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { IslandMorph } from "@/components/island-morph";
 
-export function PhoneMockupTop() {
+export default function Page() {
   return (
     <div className="flex justify-center pt-4">
       <IslandMorph autoplay />
@@ -6267,11 +6262,11 @@ export function PhoneMockupTop() {
     ],
     Preview: Previews.PreviewLanyardBadge,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LanyardBadge } from "@/components/lanyard-badge";
 
-export function SpeakerBadge() {
+export default function Page() {
   return (
     <div className="flex justify-center">
       <LanyardBadge name="Priya Sharma" role="Staff Engineer" event="Motion Summit" tag="Speaker" strap="#ff375f" />
@@ -6317,11 +6312,11 @@ export function SpeakerBadge() {
       {
         title: "Glass Lens",
         Preview: Previews.PreviewGlassLens,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { GlassLens } from "@/components/glass-lens";
 
-export function FinePrint() {
+export default function Page() {
   return (
     <GlassLens size={140} zoom={1.6} width={480} height={280}>
       <div className="flex h-full flex-col justify-center gap-2 px-8">
@@ -6337,11 +6332,11 @@ export function FinePrint() {
       {
         title: "Zoom Lens",
         Preview: Previews.PreviewZoomLens,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ZoomLens } from "@/components/glass-lens";
 
-export function FloorPlan() {
+export default function Page() {
   return (
     <ZoomLens
       image="/plans/level-2.png"
@@ -6356,11 +6351,11 @@ export function FloorPlan() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { GlassLens } from "@/components/glass-lens";
 
-export function FinePrint() {
+export default function Page() {
   return (
     <GlassLens size={140} zoom={1.6} width={480} height={280}>
       <div className="flex h-full flex-col justify-center gap-2 px-8">
@@ -6394,11 +6389,11 @@ export function FinePrint() {
     ],
     Preview: Previews.PreviewAsciiWake,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AsciiWake } from "@/components/ascii-wake";
 
-export function TerminalHero() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[640px]">
       <AsciiWake height={260} accent="#30d158" autoplay />
@@ -6429,15 +6424,14 @@ export function TerminalHero() {
     ],
     Preview: Previews.PreviewLiquidDial,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LiquidDial } from "@/components/liquid-dial";
 
-export function ComposeButton() {
+export default function Page() {
   return (
     <LiquidDial
       accent="#ff375f"
-      onSelect={(id) => console.log("create", id)}
     />
   );
 }`,
@@ -6462,11 +6456,11 @@ export function ComposeButton() {
     ],
     Preview: Previews.PreviewVoiceOrb,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { VoiceOrb } from "@/components/voice-orb";
 
-export function AssistantPanel() {
+export default function Page() {
   return (
     <div className="flex flex-col items-center gap-4 py-10">
       <p className="m-0 text-[15px] text-[#6e6e73]">How can I help?</p>
@@ -6498,11 +6492,11 @@ export function AssistantPanel() {
     ],
     Preview: Previews.PreviewSaggingField,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SaggingField } from "@/components/sagging-field";
 
-export function WorryJournal() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center py-16">
       <SaggingField label="What's on your mind today?" maxChars={40} accent="#ff375f" />
@@ -6533,11 +6527,11 @@ export function WorryJournal() {
     ],
     Preview: Previews.PreviewTearOffTicket,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TearOffTicket } from "@/components/tear-off-ticket";
 
-export function CheckInTicket() {
+export default function Page() {
   return (
     <div className="flex justify-center py-16">
       <TearOffTicket title="Night Market" venue="Pier 9 · Lower Deck" date="Fri 20 Nov · 19:30" seat="General admission" />
@@ -6565,7 +6559,7 @@ export function CheckInTicket() {
     ],
     Preview: Previews.PreviewThrowWheel,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ThrowWheel, type WheelCard } from "@/components/throw-wheel";
 
@@ -6580,7 +6574,7 @@ const collections: WheelCard[] = [
   { title: "Books", sub: "90 pieces", art: "linear-gradient(160deg,#ffe2b8,#ffb36b 50%,#5ac8fa)" },
 ];
 
-export function CollectionPicker() {
+export default function Page() {
   return <ThrowWheel cards={collections} />;
 }`,
     tailwindSource: tw,
@@ -6605,7 +6599,8 @@ export function CollectionPicker() {
     ],
     Preview: Previews.PreviewPixelSelect,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // onChange is a function, which a server page cannot hand to a client component
 
 import { PixelSelect, type Mood } from "@/components/pixel-select";
 
@@ -6616,8 +6611,9 @@ const themes: Mood[] = [
   { id: "berry", label: "Berry", color: "#ff375f" },
 ];
 
-export function ThemePicker({ onTheme }: { onTheme: (id: string) => void }) {
-  return <PixelSelect options={themes} onChange={onTheme} />;
+export default function Page() {
+  // id is the theme the visitor picked: save it or apply it here.
+  return <PixelSelect options={themes} onChange={(id) => console.log(id)} />;
 }`,
     tailwindSource: tw,
   },
@@ -6647,12 +6643,13 @@ export function ThemePicker({ onTheme }: { onTheme: (id: string) => void }) {
     ],
     Preview: Previews.PreviewScrubInputs,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { ScrubInput } from "@/components/scrub-inputs";
 
-export function LayerInspector() {
+export default function Page() {
   const [opacity, setOpacity] = useState(100);
   const [blur, setBlur] = useState(0);
 
@@ -6687,11 +6684,11 @@ export function LayerInspector() {
     ],
     Preview: Previews.PreviewLitKeyboard,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LitKeyboard } from "@/components/lit-keyboard";
 
-export function TypingHero() {
+export default function Page() {
   return (
     <section className="mx-auto flex w-full max-w-[560px] flex-col items-center gap-8 py-16">
       <h2 className="text-3xl font-semibold tracking-tight">Shortcuts for everything</h2>
@@ -6722,11 +6719,11 @@ export function TypingHero() {
     ],
     Preview: Previews.PreviewRippleField,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { RippleField } from "@/components/ripple-field";
 
-export function LaunchBanner() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[720px]">
       <RippleField height={260} gap={16} colors={["#0a84ff", "#64d2ff", "#bf5af2"]} autoplay />
@@ -6757,7 +6754,7 @@ export function LaunchBanner() {
     ],
     Preview: Previews.PreviewDotGlobe,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { DotGlobe, type DotGlobeCity } from "@/components/dot-globe";
 
@@ -6767,7 +6764,7 @@ const offices: DotGlobeCity[] = [
   { id: "sgp", name: "Singapore", lat: 1.35, lon: 103.82 },
 ];
 
-export function OfficesMap() {
+export default function Page() {
   return (
     <DotGlobe
       size={360}
@@ -6799,11 +6796,11 @@ export function OfficesMap() {
     ],
     Preview: Previews.PreviewComponentLayers,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ComponentLayers } from "@/components/component-layers";
 
-export function AnatomySection() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center gap-6 py-20">
       <h2 className="text-3xl font-semibold tracking-tight">Built from four layers</h2>
@@ -6834,11 +6831,14 @@ export function AnatomySection() {
     ],
     Preview: Previews.PreviewStandingCalendar,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StandingCalendar } from "@/components/standing-calendar";
 
-export function ActivityCard({ weeks }: { weeks: number[][] }) {
+// Your own counts: one array of 7 numbers (Mon to Sun) per week, each from 0 to 4.
+const weeks = Array.from({ length: 20 }, (_, w) => Array.from({ length: 7 }, (_, d) => (w * 3 + d * 5) % 5));
+
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[680px] rounded-3xl p-6">
       <StandingCalendar
@@ -6872,11 +6872,11 @@ export function ActivityCard({ weeks }: { weeks: number[][] }) {
     ],
     Preview: Previews.PreviewMoneyGoo,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MoneyGoo } from "@/components/money-goo";
 
-export function SplitBill() {
+export default function Page() {
   return (
     <MoneyGoo
       amount={25}
@@ -6906,11 +6906,11 @@ export function SplitBill() {
     ],
     Preview: Previews.PreviewWeatherPuck,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { WeatherPuck } from "@/components/weather-puck";
 
-export function TimeOfDayCard() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center gap-4">
       <h2 className="text-lg font-semibold">Pick your golden hour</h2>
@@ -6940,11 +6940,11 @@ export function TimeOfDayCard() {
     ],
     Preview: Previews.PreviewMetalOrbs,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MetalOrbs } from "@/components/metal-orbs";
 
-export function HeroOrbs() {
+export default function Page() {
   return (
     <div className="flex justify-center py-16">
       <MetalOrbs width={520} height={300} autoplay />
@@ -6978,12 +6978,13 @@ export function HeroOrbs() {
     ],
     Preview: Previews.PreviewBendingRail,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { BendingRail } from "@/components/bending-rail";
 
-export function BrightnessControl() {
+export default function Page() {
   const [brightness, setBrightness] = useState(70);
   return (
     <div className="flex flex-col items-center gap-2">
@@ -7012,11 +7013,11 @@ export function BrightnessControl() {
     ],
     Preview: Previews.PreviewLayoutSwitch,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LayoutSwitch } from "@/components/layout-switch";
 
-export function TripGallery() {
+export default function Page() {
   return (
     <section className="mx-auto flex max-w-[680px] flex-col gap-6 px-4 py-12">
       <h2 className="text-2xl font-semibold tracking-tight">Last summer</h2>
@@ -7045,7 +7046,7 @@ export function TripGallery() {
     ],
     Preview: Previews.PreviewFanDeck,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FanDeck } from "@/components/fan-deck";
 
@@ -7059,7 +7060,7 @@ const brand = [
   { name: "Coral", hex: "#F76B4B" },
 ];
 
-export function BrandPalette() {
+export default function Page() {
   return <FanDeck chips={brand} />;
 }`,
     tailwindSource: tw,
@@ -7084,11 +7085,11 @@ export function BrandPalette() {
     ],
     Preview: Previews.PreviewReceiptUnfold,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ReceiptUnfold } from "@/components/receipt-unfold";
 
-export function BillingRow() {
+export default function Page() {
   return (
     <ReceiptUnfold
       lines={[
@@ -7124,11 +7125,11 @@ export function BillingRow() {
     ],
     Preview: Previews.PreviewPageCurl,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PageCurl } from "@/components/page-curl";
 
-export function SecretOffer() {
+export default function Page() {
   return (
     <PageCurl
       width={360}
@@ -7170,11 +7171,11 @@ export function SecretOffer() {
     ],
     Preview: Previews.PreviewSignAndSeal,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SignAndSeal } from "@/components/sign-and-seal";
 
-export function MemberCard() {
+export default function Page() {
   return <SignAndSeal name="Jordan Lee" title="Early supporter" ink="#0071e3" />;
 }`,
     tailwindSource: tw,
@@ -7198,11 +7199,11 @@ export function MemberCard() {
     ],
     Preview: Previews.PreviewStreakCounter,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StreakCounter } from "@/components/streak-counter";
 
-export function HabitCard() {
+export default function Page() {
   return <StreakCounter start={27} />;
 }`,
     tailwindSource: tw,
@@ -7232,12 +7233,13 @@ export function HabitCard() {
     ],
     Preview: Previews.PreviewCapsuleToggles,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { CapsuleToggle } from "@/components/capsule-toggles";
 
-export function NotificationsSetting() {
+export default function Page() {
   const [on, setOn] = useState(true);
   return (
     <label className="flex items-center justify-between gap-6">
@@ -7266,11 +7268,11 @@ export function NotificationsSetting() {
     ],
     Preview: Previews.PreviewGlassBubbles,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { GlassBubbles } from "@/components/glass-bubbles";
 
-export function PlayfulEmptyState() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center gap-6 py-16 text-center">
       <GlassBubbles autoplay />
@@ -7299,11 +7301,11 @@ export function PlayfulEmptyState() {
     ],
     Preview: Previews.PreviewBoxSpill,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BoxSpill } from "@/components/box-spill";
 
-export function OrderDelivered() {
+export default function Page() {
   return (
     <div className="flex flex-col items-center gap-6 py-12">
       <h2 className="text-2xl font-semibold tracking-tight">Your order has arrived</h2>
@@ -7332,7 +7334,7 @@ export function OrderDelivered() {
     ],
     Preview: Previews.PreviewCurvedReel,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CurvedReel, type ReelPoster } from "@/components/curved-reel";
 
@@ -7347,7 +7349,7 @@ const issues: ReelPoster[] = [
   { bg: "#0b8f6a", fg: "#e9fff6", big: "Fern", small: "Field notes", serif: true },
 ];
 
-export function MagazineArchive() {
+export default function Page() {
   return <CurvedReel posters={issues} />;
 }`,
     tailwindSource: tw,
@@ -7372,11 +7374,11 @@ export function MagazineArchive() {
     ],
     Preview: Previews.PreviewSqueezeProgress,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SqueezeProgress } from "@/components/squeeze-progress";
 
-export function ExportPanel() {
+export default function Page() {
   return (
     <div className="flex justify-center py-12">
       <SqueezeProgress accent="#1d1d1f" paused="#ff375f" />
@@ -7407,11 +7409,11 @@ export function ExportPanel() {
     ],
     Preview: Previews.PreviewBoltingSliders,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BoltingSliders } from "@/components/bolting-sliders";
 
-export function AudioPanel() {
+export default function Page() {
   return (
     <BoltingSliders
       title="Mixer"
@@ -7457,42 +7459,62 @@ export function AudioPanel() {
       {
         title: "Crumple to Trash",
         Preview: Previews.PreviewCrumpleToTrash,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
+"use client"; // the handlers are functions, which a server page cannot hand to a client component
 
 import { CrumpleToTrash } from "@/components/crumple-to-trash";
 
-export function DeleteDraft({ onDelete, onRestore }: { onDelete: () => void; onRestore: () => void }) {
-  return <CrumpleToTrash title="Launch checklist" onTrash={onDelete} onRestore={onRestore} />;
+export default function Page() {
+  return (
+    <CrumpleToTrash
+      title="Launch checklist"
+      onTrash={() => {
+        // Delete the draft on your server.
+      }}
+      onRestore={() => {
+        // Bring it back.
+      }}
+    />
+  );
 }`,
       },
       {
         title: "Shatter Delete",
         Preview: Previews.PreviewShatterDelete,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ShatterDelete } from "@/components/crumple-to-trash";
 
-export function DeleteFile() {
+export default function Page() {
   return (
     <ShatterDelete
       fileName="brand-guidelines.fig"
       meta="18 MB · edited today"
       badge="FIG"
       badgeColor="#a259ff"
-      onDelete={() => console.log("deleted")}
-      onUndo={() => console.log("restored")}
     />
   );
 }`,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // the handlers are functions, which a server page cannot hand to a client component
 
 import { CrumpleToTrash } from "@/components/crumple-to-trash";
 
-export function DeleteDraft({ onDelete, onRestore }: { onDelete: () => void; onRestore: () => void }) {
-  return <CrumpleToTrash title="Launch checklist" onTrash={onDelete} onRestore={onRestore} />;
+export default function Page() {
+  return (
+    <CrumpleToTrash
+      title="Launch checklist"
+      onTrash={() => {
+        // Delete the draft on your server.
+      }}
+      onRestore={() => {
+        // Bring it back.
+      }}
+    />
+  );
 }`,
     tailwindSource: tw,
   },
@@ -7516,7 +7538,7 @@ export function DeleteDraft({ onDelete, onRestore }: { onDelete: () => void; onR
     ],
     Preview: Previews.PreviewTapeShelf,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TapeShelf } from "@/components/tape-shelf";
 
@@ -7528,8 +7550,8 @@ const mixtapes = [
   { title: "Rainy Day", artist: "Acoustic", color: "#30d158", ink: "#0b2814" },
 ];
 
-export function Mixtapes() {
-  return <TapeShelf tapes={mixtapes} onPick={(i) => console.log("playing", i)} />;
+export default function Page() {
+  return <TapeShelf tapes={mixtapes} />;
 }`,
     tailwindSource: tw,
   },
@@ -7553,14 +7575,14 @@ export function Mixtapes() {
     ],
     Preview: Previews.PreviewPacketRouter,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PacketRouter } from "@/components/packet-router";
 
-export function RoutingSettings() {
+export default function Page() {
   return (
     <section className="mx-auto max-w-[800px]">
-      <PacketRouter defaultStrategy="Cost" onStrategyChange={(s) => console.log("strategy", s)} />
+      <PacketRouter defaultStrategy="Cost" />
     </section>
   );
 }`,
@@ -7585,7 +7607,7 @@ export function RoutingSettings() {
     ],
     Preview: Previews.PreviewStampSwirl,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StampSwirl, type SwirlStamp } from "@/components/stamp-swirl";
 
@@ -7595,7 +7617,7 @@ const stamps: SwirlStamp[] = [
   { name: "Pine Ridge", date: "1993", value: "29c", art: "radial-gradient(50% 50% at 40% 35%, #e6f7d9, rgba(230,247,217,0) 60%), linear-gradient(160deg, #8fc490, #1f4d3a)" },
 ];
 
-export function StampCollection() {
+export default function Page() {
   return <StampSwirl stamps={stamps} />;
 }`,
     tailwindSource: tw,
@@ -7620,7 +7642,7 @@ export function StampCollection() {
     ],
     Preview: Previews.PreviewBubbleCluster,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BubbleCluster, type ClusterPerson } from "@/components/bubble-cluster";
 
@@ -7632,7 +7654,7 @@ const team: ClusterPerson[] = [
   { id: "eli", name: "Eli", hue: 50 },
 ];
 
-export function TeamCircles() {
+export default function Page() {
   return (
     <BubbleCluster
       people={team}
@@ -7667,11 +7689,11 @@ export function TeamCircles() {
     ],
     Preview: Previews.PreviewStickerToss,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StickerToss } from "@/components/sticker-toss";
 
-export function StudioHeader() {
+export default function Page() {
   return <StickerToss text="NORTHWIND · EST. 2026 · " color="#ff375f" accent="#ffd60a" />;
 }`,
     tailwindSource: tw,
@@ -7697,7 +7719,7 @@ export function StudioHeader() {
     ],
     Preview: Previews.PreviewContextMeter,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ContextMeter, type ContextCategory } from "@/components/context-meter";
 
@@ -7707,7 +7729,7 @@ const usage: ContextCategory[] = [
   { id: "chat", label: "Chat history", color: "#0071e3", tokens: 22 },
 ];
 
-export function ChatSidebarUsage() {
+export default function Page() {
   return <ContextMeter categories={usage} limit={128} growId="chat" />;
 }`,
     tailwindSource: tw,
@@ -7731,7 +7753,7 @@ export function ChatSidebarUsage() {
     ],
     Preview: Previews.PreviewMoodWheel,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MoodWheel, type Mood } from "@/components/mood-wheel";
 
@@ -7743,7 +7765,7 @@ const moods: Mood[] = [
   { word: "Grateful", a: "#9fd36b", b: "#eefcd9" },
 ];
 
-export function DailyCheckIn() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center gap-6 py-12">
       <h2 className="text-[22px] font-semibold tracking-[-0.02em]">How are you today?</h2>
@@ -7783,7 +7805,7 @@ export function DailyCheckIn() {
       {
         title: "Swipe Stack",
         Preview: Previews.PreviewSwipeStack,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SwipeStack, type SwipePayment } from "@/components/swipe-stack";
 
@@ -7793,11 +7815,10 @@ const queue: SwipePayment[] = [
   { amount: "$540", from: "Orbit Labs", to: "you", note: "invoice #204", when: "1d", hue: 140 },
 ];
 
-export function ReviewQueue() {
+export default function Page() {
   return (
     <SwipeStack
       payments={queue}
-      onDecide={(payment, approved) => console.log(approved ? "approved" : "flagged", payment.amount)}
     />
   );
 }`,
@@ -7805,7 +7826,7 @@ export function ReviewQueue() {
       {
         title: "Swipe Rows",
         Preview: Previews.PreviewSwipeRows,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { SwipeRows, type SwipeRowItem } from "@/components/swipe-stack";
 
@@ -7815,22 +7836,18 @@ const mail: SwipeRowItem[] = [
   { id: "a3", from: "Noah Kim", subject: "Lunch on Thursday?", time: "Yesterday", color: "#30d158" },
 ];
 
-export function Inbox() {
+export default function Page() {
   return (
     <SwipeRows
       title="Inbox"
       items={mail}
-      onArchive={(m) => console.log("archive", m.id)}
-      onDelete={(m) => console.log("delete", m.id)}
-      onFlag={(m) => console.log("flag", m.id)}
-      onUndo={(m, action) => console.log("undo", action, m.id)}
     />
   );
 }`,
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SwipeStack, type SwipePayment } from "@/components/swipe-stack";
 
@@ -7840,11 +7857,10 @@ const queue: SwipePayment[] = [
   { amount: "$540", from: "Orbit Labs", to: "you", note: "invoice #204", when: "1d", hue: 140 },
 ];
 
-export function ReviewQueue() {
+export default function Page() {
   return (
     <SwipeStack
       payments={queue}
-      onDecide={(payment, approved) => console.log(approved ? "approved" : "flagged", payment.amount)}
     />
   );
 }`,
@@ -7875,11 +7891,11 @@ export function ReviewQueue() {
     ],
     Preview: Previews.PreviewFlightTracker,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FlightTracker } from "@/components/flight-tracker";
 
-export function TripSidebar() {
+export default function Page() {
   return (
     <aside className="flex flex-col gap-4">
       <FlightTracker from="SFO" to="NRT" flight="NH 7" departs="11:25 AM" arrives="3:10 PM" minutes={665} miles={5130} />
@@ -7912,11 +7928,11 @@ export function TripSidebar() {
     ],
     Preview: Previews.PreviewMatrixLoaders,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MatrixLoader } from "@/components/matrix-loaders";
 
-export function GeneratingState() {
+export default function Page() {
   return (
     <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 shadow-sm dark:bg-[#1c1c1e]">
       <MatrixLoader pattern="ripple" size={28} label="Generating answer" />
@@ -7949,11 +7965,11 @@ export function GeneratingState() {
     ],
     Preview: Previews.PreviewTodoTower,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TodoTower } from "@/components/todo-tower";
 
-export function TodayPile() {
+export default function Page() {
   return (
     <TodoTower
       tasks={[
@@ -7963,7 +7979,6 @@ export function TodayPile() {
         { text: "Answer support tickets", x: 0 },
       ]}
       moreTasks={["Update the changelog", "Book a design review"]}
-      onComplete={(task) => console.log("done:", task)}
     />
   );
 }`,
@@ -7989,11 +8004,12 @@ export function TodayPile() {
     ],
     Preview: Previews.PreviewPeekLogin,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { PeekLogin } from "@/components/peek-login";
 
-export function SignInPage() {
+export default function Page() {
   return (
     <main className="flex min-h-[560px] items-center justify-center">
       <PeekLogin
@@ -8028,11 +8044,11 @@ export function SignInPage() {
     ],
     Preview: Previews.PreviewHeatField,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { HeatField } from "@/components/heat-field";
 
-export function ActivityHero() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center gap-6 py-16">
       <h2 className="text-3xl font-semibold tracking-tight">Where people click</h2>
@@ -8063,11 +8079,11 @@ export function ActivityHero() {
     ],
     Preview: Previews.PreviewParticleMark,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ParticleMark } from "@/components/particle-mark";
 
-export function BrandIntro() {
+export default function Page() {
   return (
     <section className="flex justify-center py-20">
       <ParticleMark text="hello" accent="#ff375f" hint="" />
@@ -8104,16 +8120,15 @@ export function BrandIntro() {
       {
         title: "Generate Image",
         Preview: Previews.PreviewGenerateImage,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { GenerateImage } from "@/components/generate-image";
 
-export function PromptPlayground() {
+export default function Page() {
   return (
     <div className="flex justify-center py-12">
       <GenerateImage
         prompt="Moonlit ridge, deep teal"
-        onGenerate={(prompt) => console.log("generate:", prompt)}
       />
     </div>
   );
@@ -8122,15 +8137,14 @@ export function PromptPlayground() {
       {
         title: "Image Generating",
         Preview: Previews.PreviewImageGenerating,
-        reactSource: `"use client";
+        reactSource: `// src/app/page.tsx
 
 import { ImageGenerating } from "@/components/generate-image";
 
-export function ConceptStudio() {
+export default function Page() {
   return (
     <ImageGenerating
       prompts={["A quiet harbour at dusk, soft film grain", "Desert dunes under a pale morning moon"]}
-      onAction={(action, prompt) => console.log(action, "for", prompt)}
     />
   );
 }
@@ -8138,16 +8152,15 @@ export function ConceptStudio() {
       },
     ],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { GenerateImage } from "@/components/generate-image";
 
-export function PromptPlayground() {
+export default function Page() {
   return (
     <div className="flex justify-center py-12">
       <GenerateImage
         prompt="Moonlit ridge, deep teal"
-        onGenerate={(prompt) => console.log("generate:", prompt)}
       />
     </div>
   );
@@ -8173,7 +8186,7 @@ export function PromptPlayground() {
     ],
     Preview: Previews.PreviewFalloffAccordion,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FalloffAccordion } from "@/components/falloff-accordion";
 
@@ -8184,7 +8197,7 @@ const places = [
   { title: "Lagoon", meta: "Maldives", art: "linear-gradient(170deg,#e0fffb,#6fe3d6 40%,#1695a3 78%,#0b3c55)" },
 ];
 
-export function Destinations() {
+export default function Page() {
   return <FalloffAccordion strips={places} />;
 }`,
     tailwindSource: tw,
@@ -8211,12 +8224,13 @@ export function Destinations() {
     ],
     Preview: Previews.PreviewMagnetSelect,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { MagnetSelect } from "@/components/magnet-select";
 
-export function StatusPicker() {
+export default function Page() {
   const [status, setStatus] = useState("here");
   return (
     <div className="flex flex-col items-center gap-4">
@@ -8249,11 +8263,11 @@ export function StatusPicker() {
     ],
     Preview: Previews.PreviewAspectCrop,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AspectCrop } from "@/components/aspect-crop";
 
-export function CoverCrop() {
+export default function Page() {
   return (
     <AspectCrop
       src="/images/cover.jpg"
@@ -8263,7 +8277,6 @@ export function CoverCrop() {
         { id: "4:5", w: 4, h: 5 },
         { id: "16:9", w: 16, h: 9 },
       ]}
-      onChange={(ratio) => console.log("crop to", ratio)}
     />
   );
 }`,
@@ -8291,15 +8304,15 @@ export function CoverCrop() {
     ],
     Preview: Previews.PreviewSloshSlider,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SloshSlider } from "@/components/slosh-slider";
 
-export function MixerPanel() {
+export default function Page() {
   return (
     <div className="flex flex-col gap-8">
       <SloshSlider label="Volume" defaultValue={55} />
-      <SloshSlider label="Bass" defaultValue={30} accent="#ff9f0a" onChange={(v) => console.log("bass", v)} />
+      <SloshSlider label="Bass" defaultValue={30} accent="#ff9f0a" />
     </div>
   );
 }`,
@@ -8325,7 +8338,7 @@ export function MixerPanel() {
     ],
     Preview: Previews.PreviewGooReorder,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { GooReorder } from "@/components/goo-reorder";
 
@@ -8336,8 +8349,8 @@ const steps = [
   { id: "ship", label: "Ship it", color: "#ff375f" },
 ];
 
-export function ReleaseSteps() {
-  return <GooReorder items={steps} onReorder={(next) => console.log(next.map((s) => s.id))} />;
+export default function Page() {
+  return <GooReorder items={steps} />;
 }`,
     tailwindSource: tw,
   },
@@ -8360,11 +8373,12 @@ export function ReleaseSteps() {
     ],
     Preview: Previews.PreviewHopLabels,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { HopField } from "@/components/hop-labels";
 
-export function SignupForm() {
+export default function Page() {
   return (
     <form className="flex w-[320px] flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
       <HopField label="Full name" accent="#5e5ce6" />
@@ -8402,7 +8416,7 @@ export function SignupForm() {
     ],
     Preview: Previews.PreviewStepPlayer,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StepPlayer, type StepPlayerStep } from "@/components/step-player";
 
@@ -8412,7 +8426,7 @@ const tour: StepPlayerStep[] = [
   { t: "Share it", b: "Friends can listen without an account." },
 ];
 
-export function WelcomeTour() {
+export default function Page() {
   return <StepPlayer steps={tour} accent="#ff375f" stepDuration={4} />;
 }`,
     tailwindSource: tw,
@@ -8437,15 +8451,14 @@ export function WelcomeTour() {
     ],
     Preview: Previews.PreviewPullToRefresh,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PullToRefresh } from "@/components/pull-to-refresh";
 
-export function WalletScreen() {
+export default function Page() {
   return (
     <PullToRefresh
       initialBalance={12480.5}
-      onRefresh={(balance, delta) => console.log("New balance", balance, "change", delta)}
     />
   );
 }`,
@@ -8471,14 +8484,14 @@ export function WalletScreen() {
     ],
     Preview: Previews.PreviewRunawayButton,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { RunawayButton } from "@/components/runaway-button";
 
-export function CancelPlan() {
+export default function Page() {
   return (
     <RunawayButton
-      onKeep={() => console.log("Stayed on the plan")}
       onCancel={() => fetch("/api/subscription", { method: "DELETE" })}
     />
   );
@@ -8507,12 +8520,13 @@ export function CancelPlan() {
     ],
     Preview: Previews.PreviewWakeSlider,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { WakeSlider } from "@/components/wake-slider";
 
-export function DisplaySettings() {
+export default function Page() {
   const [volume, setVolume] = useState(60);
   return (
     <div className="flex flex-col gap-8">
@@ -8545,14 +8559,15 @@ export function DisplaySettings() {
     ],
     Preview: Previews.PreviewSeekSearch,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { SeekSearch } from "@/components/seek-search";
 
 const DOCS = ["Getting started", "Billing and invoices", "Team permissions", "API keys", "Webhooks"];
 
-export function DocsSearch() {
+export default function Page() {
   const router = useRouter();
   return (
     <SeekSearch
@@ -8587,11 +8602,11 @@ export function DocsSearch() {
     ],
     Preview: Previews.PreviewFoldNote,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FoldNote } from "@/components/fold-note";
 
-export function RewardCard() {
+export default function Page() {
   return (
     <div className="flex flex-col items-center gap-6">
       <p className="text-[15px] text-neutral-500">You earned a reward. Fold it to keep it.</p>
@@ -8622,7 +8637,8 @@ export function RewardCard() {
     ],
     Preview: Previews.PreviewAssignPicker,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { AssignPicker, type AssignPerson } from "@/components/assign-picker";
@@ -8633,7 +8649,7 @@ const TEAM: AssignPerson[] = [
   { id: "sf", name: "Sofia Ferreira", role: "Product", colors: ["#30d158", "#0b8f6a"] },
 ];
 
-export function TaskAssignees() {
+export default function Page() {
   const [ids, setIds] = useState<string[]>(["ok"]);
   return (
     <div className="flex flex-col gap-2">
@@ -8667,11 +8683,12 @@ export function TaskAssignees() {
     ],
     Preview: Previews.PreviewBendText,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { BendText } from "@/components/bend-text";
 
-export function PluckHeadline() {
+export default function Page() {
   return (
     <BendText
       text="NEW SEASON · NEW SOUNDS · "
@@ -8708,11 +8725,11 @@ export function PluckHeadline() {
     ],
     Preview: Previews.PreviewPressureText,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PressureText } from "@/components/pressure-text";
 
-export function HeroHeadline() {
+export default function Page() {
   return <PressureText text="Made to be touched" accent="#5e5ce6" spread={0.25} hint="" />;
 }`,
     tailwindSource: tw,
@@ -8744,11 +8761,11 @@ export function HeroHeadline() {
     ],
     Preview: Previews.PreviewMorphCursor,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MorphCursor } from "@/components/morph-cursor";
 
-export function ToolbarPanel() {
+export default function Page() {
   return (
     <MorphCursor
       buttonLabel="New board"
@@ -8758,7 +8775,6 @@ export function ToolbarPanel() {
         { id: "notes", label: "Notes", gradient: "linear-gradient(135deg,#ffd60a,#ff9f0a)" },
         { id: "tasks", label: "Tasks", gradient: "linear-gradient(135deg,#30d158,#0a7d3b)" },
       ]}
-      onAction={(id) => console.log("pressed", id)}
     />
   );
 }`,
@@ -8785,12 +8801,13 @@ export function ToolbarPanel() {
     ],
     Preview: Previews.PreviewInkThemeSwitch,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { InkThemeSwitch } from "@/components/ink-theme-switch";
 
-export function AppearanceSetting() {
+export default function Page() {
   const [dark, setDark] = useState(false);
   return (
     <div className="flex flex-col items-center gap-3">
@@ -8825,18 +8842,17 @@ export function AppearanceSetting() {
     ],
     Preview: Previews.PreviewLiquidGauge,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LiquidGauge } from "@/components/liquid-gauge";
 
-export function StorageCard() {
+export default function Page() {
   return (
     <LiquidGauge
       total={512}
       defaultUsed={301}
       accent="#30d158"
       warnAt={90}
-      onChange={(used) => console.log("now using", used, "GB")}
     />
   );
 }`,
@@ -8866,11 +8882,11 @@ export function StorageCard() {
     ],
     Preview: Previews.PreviewThermoDial,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ThermoDial } from "@/components/thermo-dial";
 
-export function LivingRoomThermostat() {
+export default function Page() {
   return (
     <ThermoDial
       room={68}
@@ -8878,7 +8894,6 @@ export function LivingRoomThermostat() {
       min={50}
       max={86}
       step={1}
-      onChange={(target) => console.log("set to", target, "°F")}
     />
   );
 }`,
@@ -8908,12 +8923,13 @@ export function LivingRoomThermostat() {
     ],
     Preview: Previews.PreviewPullCord,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { PullCord } from "@/components/pull-cord";
 
-export function FocusLamp() {
+export default function Page() {
   const [focus, setFocus] = useState(false);
   return (
     <PullCord
@@ -8953,19 +8969,17 @@ export function FocusLamp() {
     ],
     Preview: Previews.PreviewScratchReveal,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ScratchReveal } from "@/components/scratch-reveal";
 
-export function WelcomeGift() {
+export default function Page() {
   return (
     <ScratchReveal
       eyebrow="Welcome gift"
       headline="Free month"
       code="HELLO-30"
       accent="#ff375f"
-      onReveal={() => console.log("revealed")}
-      onCopy={(code) => console.log("copied", code)}
     />
   );
 }`,
@@ -8995,17 +9009,16 @@ export function WelcomeGift() {
     ],
     Preview: Previews.PreviewPolaroidDevelop,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PolaroidDevelop } from "@/components/polaroid-develop";
 
-export function TripSnapshot() {
+export default function Page() {
   return (
     <PolaroidDevelop
       src="/images/porto.jpg"
       alt="Rooftops in Porto"
       caption="Porto, last light"
-      onDeveloped={(caption) => console.log("developed", caption)}
     />
   );
 }`,
@@ -9034,7 +9047,7 @@ export function TripSnapshot() {
     ],
     Preview: Previews.PreviewWalletStack,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { WalletStack } from "@/components/wallet-stack";
 
@@ -9044,8 +9057,8 @@ const cards = [
   { id: "team", name: "Team", last: "7340", bg: "linear-gradient(135deg,#ffb38a,#ff375f)", ink: "#ffffff", brand: "Acme Bank" },
 ];
 
-export function PaymentMethods() {
-  return <WalletStack cards={cards} label="Cards" onSelect={(id) => console.log("selected", id)} />;
+export default function Page() {
+  return <WalletStack cards={cards} label="Cards" />;
 }`,
     tailwindSource: tw,
   },
@@ -9071,11 +9084,11 @@ export function PaymentMethods() {
     ],
     Preview: Previews.PreviewTrafficBars,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TrafficBars } from "@/components/traffic-bars";
 
-export function AnalyticsOverview() {
+export default function Page() {
   return (
     <section className="grid gap-6 md:grid-cols-2">
       <TrafficBars />
@@ -9109,11 +9122,11 @@ export function AnalyticsOverview() {
     ],
     Preview: Previews.PreviewStockLine,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StockLine } from "@/components/stock-line";
 
-export function Watchlist() {
+export default function Page() {
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <StockLine symbol="NXUS" />
@@ -9144,11 +9157,11 @@ export function Watchlist() {
     ],
     Preview: Previews.PreviewPulseMonitor,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PulseMonitor } from "@/components/pulse-monitor";
 
-export function HealthSummary() {
+export default function Page() {
   return (
     <section className="grid gap-6 sm:grid-cols-2">
       <PulseMonitor bpm={62} />
@@ -9178,11 +9191,11 @@ export function HealthSummary() {
     ],
     Preview: Previews.PreviewSpendDonut,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SpendDonut } from "@/components/spend-donut";
 
-export function BudgetPanel() {
+export default function Page() {
   return (
     <aside className="flex justify-center p-6">
       <SpendDonut thickness={22} gap={6} />
@@ -9212,13 +9225,13 @@ export function BudgetPanel() {
     ],
     Preview: Previews.PreviewTagPit,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TagPit } from "@/components/tag-pit";
 
 const INTERESTS = ["Design", "Motion", "AI", "Music", "Travel", "Coffee", "Code", "Film", "Fitness", "Writing"];
 
-export function OnboardingInterests() {
+export default function Page() {
   return (
     <div className="flex min-h-[520px] items-center justify-center">
       <TagPit tags={INTERESTS} min={3} accent="#0071e3" />
@@ -9247,17 +9260,16 @@ export function OnboardingInterests() {
     ],
     Preview: Previews.PreviewUsageStack,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { UsageStack } from "@/components/usage-stack";
 
-export function PricingCalculator() {
+export default function Page() {
   return (
     <section className="flex flex-col items-center gap-6 py-16">
       <h2 className="text-3xl font-semibold tracking-tight">Pay for what you use</h2>
       <UsageStack
         defaultValue={200_000}
-        onChange={(requests, price) => console.log(requests, price)}
       />
     </section>
   );
@@ -9283,7 +9295,7 @@ export function PricingCalculator() {
     ],
     Preview: Previews.PreviewMarbleProgress,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MarbleProgress } from "@/components/marble-progress";
 
@@ -9293,7 +9305,7 @@ const STEPS = [
   { label: "Send your first invoice", color: "#ff9f0a" },
 ];
 
-export function SetupChecklist() {
+export default function Page() {
   return <MarbleProgress steps={STEPS} />;
 }`,
     tailwindSource: tw,
@@ -9321,11 +9333,12 @@ export function SetupChecklist() {
     ],
     Preview: Previews.PreviewClothBanner,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { ClothBanner } from "@/components/cloth-banner";
 
-export function LaunchAnnouncement() {
+export default function Page() {
   return (
     <div className="flex justify-center py-10">
       <ClothBanner
@@ -9357,11 +9370,11 @@ export function LaunchAnnouncement() {
     ],
     Preview: Previews.PreviewVinylPlayer,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { VinylPlayer } from "@/components/vinyl-player";
 
-export function NowPlaying() {
+export default function Page() {
   return (
     <VinylPlayer
       tracks={[
@@ -9391,11 +9404,11 @@ export function NowPlaying() {
     ],
     Preview: Previews.PreviewFerrofluidRecord,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FerrofluidRecord } from "@/components/ferrofluid-record";
 
-export function VoiceNoteComposer() {
+export default function Page() {
   return (
     <div className="flex justify-center py-10">
       <FerrofluidRecord />
@@ -9423,11 +9436,11 @@ export function VoiceNoteComposer() {
     ],
     Preview: Previews.PreviewSandTimer,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SandTimer } from "@/components/sand-timer";
 
-export function SessionExpiry() {
+export default function Page() {
   return (
     <div className="grid place-items-center py-16">
       <SandTimer seconds={120} />
@@ -9455,11 +9468,11 @@ export function SessionExpiry() {
     ],
     Preview: Previews.PreviewZipperReveal,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ZipperReveal } from "@/components/zipper-reveal";
 
-export function InviteGift() {
+export default function Page() {
   return (
     <div className="grid place-items-center py-12">
       <ZipperReveal code="LAUNCH-7K4M" />
@@ -9489,11 +9502,12 @@ export function InviteGift() {
     ],
     Preview: Previews.PreviewSlingshotSend,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { SlingshotSend } from "@/components/slingshot-send";
 
-export function ChatComposer() {
+export default function Page() {
   return (
     <SlingshotSend
       name="Maya"
@@ -9526,12 +9540,13 @@ export function ChatComposer() {
     ],
     Preview: Previews.PreviewDominoSelect,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useState } from "react";
 import { DominoSelect } from "@/components/domino-select";
 
-export function Inbox() {
+export default function Page() {
   const [selected, setSelected] = useState<number[]>([]);
 
   return (
@@ -9561,11 +9576,11 @@ export function Inbox() {
     ],
     Preview: Previews.PreviewLenticularPass,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { LenticularPass } from "@/components/lenticular-pass";
 
-export function SummitTicket() {
+export default function Page() {
   return (
     <div className="flex justify-center py-12">
       <LenticularPass />
@@ -9602,11 +9617,11 @@ export function SummitTicket() {
     ],
     Preview: Previews.PreviewOrigamiPricing,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { OrigamiPricing } from "@/components/origami-pricing";
 
-export function ProPlan() {
+export default function Page() {
   return (
     <div className="flex justify-center py-12">
       <OrigamiPricing
@@ -9614,7 +9629,6 @@ export function ProPlan() {
         price="$19"
         features={["Unlimited projects", "Custom domains", "Team seats", "Priority support"]}
         ctaLabel="Start free trial"
-        onCtaClick={() => console.log("open the checkout flow")}
       />
     </div>
   );
@@ -9645,17 +9659,16 @@ export function ProPlan() {
     ],
     Preview: Previews.PreviewEmptyProjects,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { EmptyProjects } from "@/components/empty-projects";
 
-export function ProjectsPage() {
+export default function Page() {
   return (
     <main className="mx-auto flex w-full max-w-[560px] flex-col gap-6 px-4 py-16">
       <EmptyProjects
         title="Workspaces"
         emptyTitle="No workspaces yet"
-        onCreate={(template) => console.log("create", template.id)}
         autoplay
       />
     </main>
@@ -9690,17 +9703,16 @@ export function ProjectsPage() {
     ],
     Preview: Previews.PreviewNoResults,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { NoResults } from "@/components/no-results";
 
-export function InvoiceSearch() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[560px] px-4 py-16">
       <NoResults
         noun="invoices"
         query="invoce march"
-        onFixTypo={(query) => console.log("search again for", query)}
         autoplay
       />
     </section>
@@ -9735,17 +9747,16 @@ export function InvoiceSearch() {
     ],
     Preview: Previews.PreviewEmptyChart,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { EmptyChart } from "@/components/empty-chart";
 
-export function RevenueCard() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[560px] px-4 py-16">
       <EmptyChart
         title="Revenue, last 12 months"
         sources={["Payments", "Spreadsheet"]}
-        onConnect={(source) => console.log("connect", source)}
         autoplay
       />
     </section>
@@ -9778,18 +9789,17 @@ export function RevenueCard() {
     ],
     Preview: Previews.PreviewEmptyTeam,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { EmptyTeam } from "@/components/empty-team";
 
-export function InviteStep() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[520px] px-4 py-16">
       <EmptyTeam
         seats={5}
         domain="fernhill.io"
         suggestions={["jo.reyes@fernhill.io", "sam@fernhill.io"]}
-        onSend={(emails) => console.log("invite", emails)}
         autoplay
       />
     </section>
@@ -9822,11 +9832,11 @@ export function InviteStep() {
     ],
     Preview: Previews.PreviewStreamingAnswer,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StreamingAnswer } from "@/components/streaming-answer";
 
-export function AskPanel() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[560px] py-12">
       <StreamingAnswer
@@ -9866,7 +9876,7 @@ export function AskPanel() {
     ],
     Preview: Previews.PreviewDiffReview,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { DiffReview, type DiffPart } from "@/components/diff-review";
 
@@ -9879,7 +9889,7 @@ const PARTS: DiffPart[] = [
   ["ins", "Exports finish in seconds."],
 ];
 
-export function ReleaseNote() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[560px] py-12">
       <DiffReview title="Changelog · Export" parts={PARTS} autoplay />
@@ -9912,7 +9922,8 @@ export function ReleaseNote() {
     ],
     Preview: Previews.PreviewAgentRun,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { AgentRun, type AgentRunStep } from "@/components/agent-run";
 
@@ -9921,14 +9932,13 @@ const STEPS: AgentRunStep[] = [
   { label: "Updating the timeout", ms: 1400, body: () => <p className="m-0 font-mono text-xs">+ timeoutMs: 8000</p> },
 ];
 
-export function RunPanel() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[560px] py-12">
       <AgentRun
         task="Raise the request timeout"
         steps={STEPS}
         report={{ title: "Done: timeout raised", body: "Requests now wait up to 8 seconds.", files: 1, added: 1, removed: 0 }}
-        onReview={() => console.log("review")}
         autoplay
       />
     </section>
@@ -9960,7 +9970,8 @@ export function RunPanel() {
     ],
     Preview: Previews.PreviewGhostAutocomplete,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // the rules contain regular expressions, which a server page cannot hand to a client component
 
 import { GhostAutocomplete, type GhostRule } from "@/components/ghost-autocomplete";
 
@@ -9969,10 +9980,10 @@ const RULES: GhostRule[] = [
   [/Looking forward to $/i, "hearing from you."],
 ];
 
-export function ComposeMail() {
+export default function Page() {
   return (
     <section className="mx-auto w-full max-w-[520px] py-12">
-      <GhostAutocomplete to="nina@fieldnotes.example" defaultValue={"Hi Nina,\\n\\nHope you're "} rules={RULES} onAccept={(text) => console.log(text)} />
+      <GhostAutocomplete to="nina@fieldnotes.example" defaultValue={"Hi Nina,\\n\\nHope you're "} rules={RULES} />
     </section>
   );
 }`,
@@ -10006,19 +10017,19 @@ export function ComposeMail() {
     ],
     Preview: Previews.PreviewSkeletonMorph,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // it keeps loading state, so this page runs in the browser
 
 import { useEffect, useState } from "react";
 import { SkeletonMorph } from "@/components/skeleton-morph";
 
-export function ArticleCard({ articleId }: { articleId: string }) {
+export default function Page() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    setReady(false);
     const id = window.setTimeout(() => setReady(true), 1200); // swap for your own fetch
     return () => window.clearTimeout(id);
-  }, [articleId]);
+  }, []);
 
   return (
     <SkeletonMorph
@@ -10057,17 +10068,15 @@ export function ArticleCard({ articleId }: { articleId: string }) {
     ],
     Preview: Previews.PreviewMorphingDialog,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MorphingDialog } from "@/components/morphing-dialog";
 
-export function ProjectHeader() {
+export default function Page() {
   return (
     <MorphingDialog
       projectName="launch-notes"
       pageCount={9}
-      onDelete={() => console.log("project deleted")}
-      onRestore={() => console.log("project restored")}
     />
   );
 }`,
@@ -10098,17 +10107,17 @@ export function ProjectHeader() {
     ],
     Preview: Previews.PreviewTravellingTooltip,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // TRAVELLING_TOOLTIP_TOOLS is a value imported from a client file, so it can only be used in a client page
 
 import { TravellingTooltip, TRAVELLING_TOOLTIP_TOOLS } from "@/components/travelling-tooltip";
 
-export function EditorToolbar() {
+export default function Page() {
   return (
     <TravellingTooltip
       tools={TRAVELLING_TOOLTIP_TOOLS.slice(0, 4)}
       label="Text formatting"
       openDelay={300}
-      onSelect={(tool) => console.log("pressed", tool.id)}
     />
   );
 }`,
@@ -10134,11 +10143,11 @@ export function EditorToolbar() {
     ],
     Preview: Previews.PreviewSoundMark,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { SoundMark } from "@/components/sound-mark";
 
-export function BrandHero() {
+export default function Page() {
   return (
     <section className="mx-auto flex w-full max-w-[880px] justify-center py-16">
       <SoundMark word="studio" />
@@ -10167,11 +10176,11 @@ export function BrandHero() {
     ],
     Preview: Previews.PreviewRippleNowPlaying,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { RippleNowPlaying } from "@/components/ripple-now-playing";
 
-export function PlayerPanel() {
+export default function Page() {
   return (
     <aside className="mx-auto w-full max-w-[360px] py-10">
       <RippleNowPlaying />
@@ -10203,16 +10212,15 @@ export function PlayerPanel() {
     ],
     Preview: Previews.PreviewChladniUpload,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ChladniUpload } from "@/components/chladni-upload";
 
-export function ExportStatus() {
+export default function Page() {
   return (
     <ChladniUpload
       fileName="album-master.wav"
       fileSize={48.2}
-      onComplete={() => console.log("uploaded")}
     />
   );
 }`,
@@ -10237,11 +10245,11 @@ export function ExportStatus() {
     ],
     Preview: Previews.PreviewTankRecorder,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { TankRecorder } from "@/components/tank-recorder";
 
-export function VoiceMemo() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[360px] py-10">
       <TankRecorder />
@@ -10269,11 +10277,11 @@ export function VoiceMemo() {
     ],
     Preview: Previews.PreviewRippleToast,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { RippleToast } from "@/components/ripple-toast";
 
-export function NotificationsDemo() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[380px] py-10">
       <RippleToast />
@@ -10320,12 +10328,12 @@ export function NotificationsDemo() {
     Preview: Previews.PreviewCubesGrid,
     detailPreviews: [Previews.PreviewCubesGrid, Previews.PreviewCubesGridPerspective],
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CubesGrid } from "@/components/cubes-grid";
 
 // The grid fills its nearest positioned parent, so give it a relative box.
-export function Hero() {
+export default function Page() {
   return (
     <section className="relative h-[560px] overflow-hidden bg-[#f5f5f4]">
       <CubesGrid variant="isometric" />
@@ -10338,11 +10346,11 @@ export function Hero() {
     reactExamples: [
       {
         title: "Dark perspective grid",
-        code: `"use client";
+        code: `// src/app/page.tsx
 
 import { CubesGrid } from "@/components/cubes-grid";
 
-export function DarkHero() {
+export default function Page() {
   return (
     <section className="relative h-[560px] overflow-hidden bg-[#0b0b0d]">
       <CubesGrid variant="perspective" waveColor="#ff6a2b" gridSize={44} />
@@ -10380,26 +10388,26 @@ export function DarkHero() {
     ],
     Preview: Previews.PreviewVenomButton,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { VenomButton } from "@/components/venom-button";
 
 // The button comes with its own light stage; set height to give the goo room to reach.
-export function Cta() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-[720px]">
-      <VenomButton label="let’s collaborate" onClick={() => console.log("clicked")} />
+      <VenomButton label="let’s collaborate" />
     </div>
   );
 }`,
     reactExamples: [
       {
         title: "Shorter reach, system cursor",
-        code: `"use client";
+        code: `// src/app/page.tsx
 
 import { VenomButton } from "@/components/venom-button";
 
-export function QuietCta() {
+export default function Page() {
   return (
     <VenomButton
       label="Book a call"
@@ -10439,27 +10447,27 @@ export function QuietCta() {
     ],
     Preview: Previews.PreviewWebSlingButton,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { WebSlingButton } from "@/components/web-sling-button";
 
 // The stage is a dark, rounded box that fills its parent's width. Clicks on the button itself
 // still reach onClick; clicks anywhere else on the stage shoot a web.
-export function CallToAction() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-3xl">
-      <WebSlingButton label="Get started" onClick={() => console.log("clicked")} />
+      <WebSlingButton label="Get started" />
     </div>
   );
 }`,
     reactExamples: [
       {
         title: "Easier to snap, shorter stage",
-        code: `"use client";
+        code: `// src/app/page.tsx
 
 import { WebSlingButton } from "@/components/web-sling-button";
 
-export function SnappyWeb() {
+export default function Page() {
   return <WebSlingButton label="Join the swarm" snapAt={1.6} height={340} />;
 }`,
       },
@@ -10490,28 +10498,28 @@ export function SnappyWeb() {
     ],
     Preview: Previews.PreviewFrostInput,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { FrostInput } from "@/components/frost-input";
 
 // The stage has its own dark blue background, so it works on any page. Set its height with the height prop.
-export function Waitlist() {
+export default function Page() {
   return (
     <FrostInput
       headline="Join the cold list."
       done="You’re on the list."
-      onSubmit={(email) => console.log("subscribe", email)}
     />
   );
 }`,
     reactExamples: [
       {
         title: "Taller stage with your own copy",
-        code: `"use client";
+        code: `// src/app/page.tsx
+"use client";
 
 import { FrostInput } from "@/components/frost-input";
 
-export function Launch() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-3xl">
       <FrostInput
@@ -10551,12 +10559,12 @@ export function Launch() {
     ],
     Preview: Previews.PreviewBlackHoleDelete,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BlackHoleDelete } from "@/components/black-hole-delete";
 
 // The stage is dark and sets its own height. Swipe a message away or press its close button.
-export function Inbox() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[560px]">
       <BlackHoleDelete />
@@ -10566,7 +10574,7 @@ export function Inbox() {
     reactExamples: [
       {
         title: "Your own messages",
-        code: `"use client";
+        code: `// src/app/page.tsx
 
 import { BlackHoleDelete, type BlackHoleMessage } from "@/components/black-hole-delete";
 
@@ -10577,7 +10585,7 @@ const messages: BlackHoleMessage[] = [
   { title: "Sam Rivera", body: "Sent the redlines, one open question on IP", time: "Tue", color: "#ff375f" },
 ];
 
-export function MyInbox() {
+export default function Page() {
   return <BlackHoleDelete messages={messages} height={420} />;
 }`,
       },
@@ -10605,12 +10613,12 @@ export function MyInbox() {
     ],
     Preview: Previews.PreviewPortalCard,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PortalCard } from "@/components/portal-card";
 
 // Draw a circle on the card to open the portal. With no children it shows a dusk valley.
-export function Showcase() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-[720px]">
       <PortalCard height={440} />
@@ -10620,11 +10628,11 @@ export function Showcase() {
     reactExamples: [
       {
         title: "Your own content on the other side",
-        code: `"use client";
+        code: `// src/app/page.tsx
 
 import { PortalCard } from "@/components/portal-card";
 
-export function Pricing() {
+export default function Page() {
   return (
     <div className="mx-auto max-w-[720px]">
       <PortalCard height={420}>
@@ -10668,12 +10676,12 @@ export function Pricing() {
     ],
     Preview: Previews.PreviewMeshNet,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MeshNet } from "@/components/mesh-net";
 
 // The net fills its box, so give it a height. Content goes on top as children.
-export function Hero() {
+export default function Page() {
   return (
     <section className="h-[560px]">
       <MeshNet color="#5b4fe0">
@@ -10687,11 +10695,11 @@ export function Hero() {
     reactExamples: [
       {
         title: "Tighter, warmer net",
-        code: `"use client";
+        code: `// src/app/page.tsx
 
 import { MeshNet } from "@/components/mesh-net";
 
-export function WarmNet() {
+export default function Page() {
   return (
     <div className="h-[480px]">
       <MeshNet color="#ff6a2b" background="#0b0b0d" gridSize={44} revealRadius={180} push={22} />
@@ -10728,11 +10736,11 @@ export function WarmNet() {
     ],
     Preview: Previews.PreviewParticleReveal,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ParticleReveal } from "@/components/particle-reveal";
 
-export function Headline() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[640px] py-10">
       <ParticleReveal text="Launch" />
@@ -10766,11 +10774,11 @@ export function Headline() {
     ],
     Preview: Previews.PreviewMorphingText,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MorphingText } from "@/components/morphing-text";
 
-export function Hero() {
+export default function Page() {
   return (
     <section className="px-6 py-24">
       <MorphingText lead="Interfaces that feel" words={["alive.", "tactile.", "yours."]} autoplay />
@@ -10802,11 +10810,11 @@ export function Hero() {
     ],
     Preview: Previews.PreviewCodeSnippet,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CodeSnippet } from "@/components/code-snippet";
 
-export function InstallExample() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[520px] py-10">
       <CodeSnippet initial="ts" theme="dark" controls={false} />
@@ -10840,11 +10848,11 @@ export function InstallExample() {
     ],
     Preview: Previews.PreviewWorkflowNetwork,
     previewShell: "plain",
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { WorkflowNetwork } from "@/components/workflow-network";
 
-export function IncidentFlow() {
+export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[720px] py-10">
       <WorkflowNetwork autoplay beamColor="#3b6cf6" />

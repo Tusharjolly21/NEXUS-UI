@@ -370,7 +370,8 @@ function Stage({
       )}
       {view === "code" ? (
         <p className="px-2 pt-3 text-[13px] leading-relaxed text-muted-foreground">
-          This shows how to use {name} in a page, not its own files. To get the component, use the command under{" "}
+          A complete page you can paste into <code className="rounded bg-muted px-1 py-0.5 text-[12px]">src/app/page.tsx</code>{" "}
+          once {name} is installed. It is not the component&apos;s own code. To get the component, use the command under{" "}
           <a href="#setup-heading" className="font-medium text-foreground underline underline-offset-4">
             Add it to your project
           </a>

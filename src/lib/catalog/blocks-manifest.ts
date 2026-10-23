@@ -46,9 +46,11 @@ export const blocksManifest: BlockManifestEntry[] = [
     tags: ["pricing", "plans", "comparison", "subscription", "framer-motion"],
     premium: false,
     variants: ["Radio Plan Selector", "Four Tier Billing Switch", "Advanced Pricing Columns", "Spotlight Pricing Cards", "Seat Ruler Pricing", "Beam Pricing", "Toggle Pricing"],
-    reactSource: `import { RadioPlanPricing } from "@/components/blocks/pricing-section";
+    reactSource: `// src/app/page.tsx
 
-export default function PricingPage() {
+import { RadioPlanPricing } from "@/components/blocks/pricing-section";
+
+export default function Page() {
   return <RadioPlanPricing />;
 }`,
   },
@@ -69,7 +71,9 @@ export default function PricingPage() {
       "Scramble Heading",
       "Scroll-read Manifesto",
     ],
-    reactSource: `import {
+    reactSource: `// src/app/page.tsx
+
+import {
   TextAnimationBlurFadeIn,
   TextAnimationTypewriterEffect,
   TextGenerateTypewriter,
@@ -118,7 +122,9 @@ export default function Page() {
       "Logo Stories",
       "Filterable Logo Wall",
     ],
-    reactSource: `import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
+    reactSource: `// src/app/page.tsx
+
+import LogosBlurFlip from "@/components/blocks/logo-clouds/logos-blur-flip";
 import LogoCloudBlur from "@/components/blocks/logo-clouds/logo-cloud-blur";
 import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";
 import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
@@ -150,8 +156,24 @@ export default function Page() {
     tags: ["background animation for website", "background animation css", "background animation react", "interactive background", "cursor", "canvas", "waves", "particles"],
     premium: true,
     variants: ["Interactive Dots", "Layered Wave Background", "Particle Noise", "Aurora Wavy Lines", "Halftone Planet"],
-    reactSource: `export { InteractiveDots } from "@/components/interactive-dots";
-export { WavyLines } from "@/components/wavy-lines";`,
+    reactSource: `// src/app/page.tsx
+
+import { InteractiveDots } from "@/components/interactive-dots";
+import { WavyLines } from "@/components/wavy-lines";
+
+// Both fill the box they sit in, so give the wrapper a height.
+export default function Page() {
+  return (
+    <div className="mx-auto grid max-w-5xl gap-6 p-6">
+      <div className="h-[420px]">
+        <InteractiveDots />
+      </div>
+      <div className="h-[420px]">
+        <WavyLines />
+      </div>
+    </div>
+  );
+}`,
   },
   {
     slug: "block-why-choose-us",
@@ -162,7 +184,9 @@ export { WavyLines } from "@/components/wavy-lines";`,
     tags: ["bento", "features", "animated", "ats", "upload", "framer-motion"],
     premium: true,
     variants: ["Mentorship Bento", "ATS Bento Grid", "Upload Flow", "Progress Tracker", "Interview Cards", "Pulse Bento", "Live Demo Bento", "Signal Bento Grid", "Animated Bento Grid", "Bento Grid Skeleton"],
-    reactSource: `import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";\n\nexport default function Page() {\n  return <WhyChooseUsBento />;\n}`,
+    reactSource: `// src/app/page.tsx
+
+import WhyChooseUsBento from "@/components/blocks/animated-bento-grid";\n\nexport default function Page() {\n  return <WhyChooseUsBento />;\n}`,
   },
   {
     slug: "block-faq-folder-card",
@@ -174,7 +198,9 @@ export { WavyLines } from "@/components/wavy-lines";`,
     tags: ["faq", "accordion", "chat", "support", "framer-motion"],
     premium: true,
     variants: ["Questions & Answers FAQ", "Searchable FAQ", "Chat FAQ", "Instant Search FAQ", "Motion FAQ Disclosure"],
-    reactSource: `import {
+    reactSource: `// src/app/page.tsx
+
+import {
   ChatFaqSection,
   FaqFolderCard,
   SearchableFaqSection,
@@ -213,7 +239,9 @@ export default function Page() {
     tags: ["sidebar component react", "sidebar component react tailwind", "sidebar ui component react", "collapsible sidebar react", "navigation", "dashboard", "framer-motion"],
     premium: false,
     variants: ["Simple Sidebar with Hover", "Collapsible Sidebar", "Grouped Sidebar", "Collapsing Rail", "Workbench Sidebar"],
-    reactSource: `import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
+    reactSource: `// src/app/page.tsx
+
+import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
 import GroupedSidebar from "@/components/blocks/sidebar/grouped-sidebar";
 
@@ -237,7 +265,9 @@ export default function Page() {
     tags: ["contact", "forms", "map", "testimonial", "landing page", "framer-motion"],
     premium: false,
     variants: ["Global Signal", "Centered Intake", "Gradient Proof", "Image Story", "Voice Note Contact", "Split Contact Glass"],
-    reactSource: `import ContactPageBlock from "@/components/blocks/contact-page";
+    reactSource: `// src/app/page.tsx
+
+import ContactPageBlock from "@/components/blocks/contact-page";
 
 export default function Page() {
   return <ContactPageBlock />;
@@ -253,7 +283,9 @@ export default function Page() {
     tags: ["blog", "article", "content", "toc", "editorial", "featured posts", "blog card", "single post", "seo"],
     premium: false,
     variants: ["Blog Content Centered", "Blog Content With TOC", "Blog Content Editorial", "Blog Header Featured Posts", "Blog Hover Image Card", "Editorial Blog Rail"],
-    reactSource: `import {
+    reactSource: `// src/app/page.tsx
+
+import {
   BlogContentCentered,
   BlogContentEditorial,
   BlogHeaderFeaturedPosts,
@@ -261,7 +293,7 @@ export default function Page() {
   BlogContentWithToc,
 } from "@/components/blocks/blog-content-sections";
 
-export default function BlogPage() {
+export default function Page() {
   return (
     <main className="bg-background">
       <BlogContentCentered />
@@ -283,7 +315,8 @@ export default function BlogPage() {
     tags: ["checkout", "payment", "slide to pay", "3d secure", "otp", "tip", "rating", "order summary", "framer-motion"],
     premium: true,
     variants: ["Pay & Confirm", "Verify Payment", "Tip & Rate", "Slide to Pay"],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { PayAndConfirm, TipAndRate, VerifyPayment } from "@/components/blocks/checkout-moments";
 
@@ -291,7 +324,7 @@ async function charge(totalCents: number) {
   await fetch("/api/pay", { method: "POST", body: JSON.stringify({ totalCents }) });
 }
 
-export default function CheckoutPage() {
+export default function Page() {
   return (
     <main className="grid min-h-screen place-items-center gap-10 bg-[#f5f5f7] p-6 dark:bg-[#0b0b10]">
       <PayAndConfirm merchant="Studio Supply" onPay={charge} receiptEmail="you@studio.co" />
@@ -311,9 +344,11 @@ export default function CheckoutPage() {
     tags: ["navigation", "navbar", "mega menu", "dropdown", "header", "motion kit", "framer-motion"],
     premium: true,
     variants: ["Morphing Nav", "Float Glass Navbar"],
-    reactSource: `import { MorphingNav } from "@/components/blocks/motion-kit/morphing-nav";
+    reactSource: `// src/app/page.tsx
 
-export default function Header() {
+import { MorphingNav } from "@/components/blocks/motion-kit/morphing-nav";
+
+export default function Page() {
   return <MorphingNav />;
 }`,
   },
@@ -327,9 +362,11 @@ export default function Header() {
     tags: ["hero", "landing page", "header section", "above the fold", "motion kit", "framer-motion"],
     premium: true,
     variants: ["Spotlight Hero", "Parallax Stack Hero", "Kinetic Hero", "Aurora Hero Spotlight", "Interactive Dot Grid Hero", "Interactive Starfield Hero", "Shooting Stars Grid", "Cursor Crowd Hero", "X-ray Hero", "Circuit Hero", "Flip-dot Hero"],
-    reactSource: `import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
+    reactSource: `// src/app/page.tsx
 
-export default function Home() {
+import { SpotlightHero } from "@/components/blocks/motion-kit/spotlight-hero";
+
+export default function Page() {
   return <SpotlightHero />;
 }`,
   },
@@ -343,9 +380,11 @@ export default function Home() {
     tags: ["features", "feature section", "tabs", "timeline", "integrations", "motion kit", "framer-motion"],
     premium: true,
     variants: ["Auto-advancing Tabs", "Drawn Timeline", "Integrations Orbit", "Step Flow", "Lattice Feature Grid"],
-    reactSource: `import { AutoAdvancingTabs } from "@/components/blocks/motion-kit/auto-advancing-tabs";
+    reactSource: `// src/app/page.tsx
 
-export default function Features() {
+import { AutoAdvancingTabs } from "@/components/blocks/motion-kit/auto-advancing-tabs";
+
+export default function Page() {
   return <AutoAdvancingTabs />;
 }`,
   },
@@ -359,9 +398,11 @@ export default function Features() {
     tags: ["social proof", "testimonials", "stats", "reviews", "wall of love", "motion kit", "framer-motion"],
     premium: true,
     variants: ["Counting Stats", "Wall of Love", "Scrolling Testimonials", "Clothesline", "Velocity Marquee"],
-    reactSource: `import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
+    reactSource: `// src/app/page.tsx
 
-export default function Testimonials() {
+import { WallOfLove } from "@/components/blocks/motion-kit/wall-of-love";
+
+export default function Page() {
   return <WallOfLove />;
 }`,
   },
@@ -375,9 +416,12 @@ export default function Testimonials() {
     tags: ["newsletter", "email signup", "waitlist", "cta", "form", "motion kit", "framer-motion"],
     premium: true,
     variants: ["Typo-catching Signup"],
-    reactSource: `import { TypoCatchingSignup } from "@/components/blocks/motion-kit/typo-catching-signup";
+    reactSource: `// src/app/page.tsx
+"use client"; // onSubmit is a function, which a server page cannot hand to a client component
 
-export default function Newsletter() {
+import { TypoCatchingSignup } from "@/components/blocks/motion-kit/typo-catching-signup";
+
+export default function Page() {
   return <TypoCatchingSignup onSubmit={async (email) => { /* add to your list */ }} />;
 }`,
   },
@@ -391,9 +435,11 @@ export default function Newsletter() {
     tags: ["gallery", "portfolio", "exhibition", "three.js", "react-three-fiber", "webgl", "motion kit"],
     premium: true,
     variants: ["Drift Gallery"],
-    reactSource: `import { DriftGallery } from "@/components/blocks/motion-kit/drift-gallery";
+    reactSource: `// src/app/page.tsx
 
-export default function Work() {
+import { DriftGallery } from "@/components/blocks/motion-kit/drift-gallery";
+
+export default function Page() {
   return <DriftGallery />;
 }`,
   },
@@ -407,9 +453,11 @@ export default function Work() {
     tags: ["changelog", "release notes", "product updates", "whats new", "physics", "matter-js", "motion kit"],
     premium: true,
     variants: ["Changelog Pile"],
-    reactSource: `import { ChangelogPile } from "@/components/blocks/motion-kit/changelog-pile";
+    reactSource: `// src/app/page.tsx
 
-export default function Changelog() {
+import { ChangelogPile } from "@/components/blocks/motion-kit/changelog-pile";
+
+export default function Page() {
   return <ChangelogPile />;
 }`,
   },
@@ -423,9 +471,11 @@ export default function Changelog() {
     tags: ["404", "not found", "error page", "physics", "matter-js", "motion kit"],
     premium: true,
     variants: ["Gravity 404"],
-    reactSource: `import { Gravity404 } from "@/components/blocks/motion-kit/gravity-404";
+    reactSource: `// src/app/page.tsx
 
-export default function NotFound() {
+import { Gravity404 } from "@/components/blocks/motion-kit/gravity-404";
+
+export default function Page() {
   return <Gravity404 />;
 }`,
   },
@@ -439,9 +489,11 @@ export default function NotFound() {
     tags: ["cta", "call to action", "landing page", "signup", "motion kit", "framer-motion"],
     premium: true,
     variants: ["Nebula CTA Glow"],
-    reactSource: `import { NebulaCtaGlow } from "@/components/nebula-cta-glow";
+    reactSource: `// src/app/page.tsx
 
-export default function Cta() {
+import { NebulaCtaGlow } from "@/components/nebula-cta-glow";
+
+export default function Page() {
   return <NebulaCtaGlow />;
 }`,
   },
@@ -455,9 +507,11 @@ export default function Cta() {
     tags: ["footer", "site footer", "newsletter", "links", "motion kit", "framer-motion"],
     premium: false,
     variants: ["Orbit Footer"],
-    reactSource: `import { OrbitFooter } from "@/components/orbit-footer";
+    reactSource: `// src/app/page.tsx
 
-export default function Footer() {
+import { OrbitFooter } from "@/components/orbit-footer";
+
+export default function Page() {
   return <OrbitFooter />;
 }`,
   },
@@ -471,9 +525,11 @@ export default function Footer() {
     tags: ["signup", "sign up", "register", "onboarding", "form", "motion kit", "framer-motion"],
     premium: false,
     variants: ["Split Signup Convert"],
-    reactSource: `import { SplitSignup } from "@/components/split-signup-convert";
+    reactSource: `// src/app/page.tsx
 
-export default function SignUp() {
+import { SplitSignup } from "@/components/split-signup-convert";
+
+export default function Page() {
   return <SplitSignup />;
 }`,
   },
