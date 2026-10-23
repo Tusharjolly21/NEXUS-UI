@@ -41,8 +41,8 @@ export function PreviewParticleReveal({ compact = false }: { compact?: boolean }
 export function PreviewMorphingText({ compact = false }: { compact?: boolean } = {}) {
   void compact;
   return (
-    <div className="flex h-full min-h-[380px] w-full items-center justify-center bg-[#f5f5f7] p-6 sm:p-8 dark:bg-[#f5f5f7]">
-      <MorphingText autoplay lead="" words={["Text", "Animation", "Morphing", "Motion", "Kit"]} color="#111111" />
+    <div className="flex h-full min-h-[380px] w-full items-center justify-center bg-[#f5f5f7] p-6 text-[#111111] sm:p-8 dark:bg-zinc-950 dark:text-white">
+      <MorphingText autoplay lead="" words={["Text", "Animation", "Morphing", "Motion", "Kit"]} color="currentColor" />
     </div>
   );
 }
