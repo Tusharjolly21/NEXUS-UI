@@ -10471,7 +10471,7 @@ export function Headline() {
       { name: "morphTime", type: "number", defaultValue: "1.1", description: "Seconds each morph takes." },
       { name: "holdTime", type: "number", defaultValue: "1.6", description: "Seconds each word rests before the next morph." },
       { name: "align", type: "\"left\" | \"center\" | \"right\"", defaultValue: "\"center\"", description: "Alignment of the lead line and the word." },
-      { name: "color", type: "string", description: "Colour of the morphing word. Leave it out for the house blue, which lightens in dark mode, or pass \"currentColor\" to inherit." },
+      { name: "color", type: "string", description: "Colour of the morphing word. Leave it out for the house blue, which reads on light and dark fills, or pass \"currentColor\" to inherit. The lead line and Pause button take the text colour of the parent." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the words on its own. Off, it rests on the first word until Play is pressed. Pauses off screen, and reduced motion swaps words with a plain fade." },
       { name: "className", type: "string", description: "Extra classes for the wrapper." },
     ],

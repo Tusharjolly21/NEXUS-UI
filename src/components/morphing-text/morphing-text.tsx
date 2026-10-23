@@ -20,7 +20,7 @@ export type MorphingTextProps = {
   /** Seconds each word rests before the next morph. */
   holdTime?: number;
   align?: "left" | "center" | "right";
-  /** Colour of the morphing word. Leave it out for the house blue, which lightens in dark mode; pass "currentColor" to inherit. */
+  /** Colour of the morphing word. Leave it out for the house blue, which reads on light and dark fills; pass "currentColor" to inherit. The lead line and Pause button always inherit the text colour of the parent, so set it on the wrapper. */
   color?: string;
   /** Cycles through the words on its own. Off, it rests on the first word until Play is pressed. */
   autoplay?: boolean;
@@ -132,13 +132,13 @@ export function MorphingText({
           <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 255 -140" />
         </filter>
       </svg>
-      <h3 className="m-0 font-semibold leading-[1.02] tracking-[-0.045em] text-[#1d1d1f] dark:text-[#f5f5f7]" style={{ fontSize: "clamp(34px, 3.6vw, 60px)" }}>
+      <h3 className="m-0 font-semibold leading-[1.02] tracking-[-0.045em] text-inherit" style={{ fontSize: "clamp(34px, 3.6vw, 60px)" }}>
         {lead ? <span className="block">{lead}</span> : null}
         <span ref={boxRef} className="relative inline-block" aria-live="polite">
           {/* invisible longest word reserves the width so nothing reflows */}
           <span className="invisible" aria-hidden="true">{longest}</span>
-          <span ref={aRef} className={`absolute inset-0 ${align === "center" ? "text-center" : ""} ${color ? "" : "text-[#0071e3] dark:text-[#2997ff]"}`} style={color ? { color } : undefined} />
-          <span ref={bRef} className={`absolute inset-0 ${align === "center" ? "text-center" : ""} ${color ? "" : "text-[#0071e3] dark:text-[#2997ff]"}`} style={color ? { color } : undefined} aria-hidden="true" />
+          <span ref={aRef} className={`absolute inset-0 ${align === "center" ? "text-center" : ""} ${color ? "" : "text-[#0a84ff]"}`} style={color ? { color } : undefined} />
+          <span ref={bRef} className={`absolute inset-0 ${align === "center" ? "text-center" : ""} ${color ? "" : "text-[#0a84ff]"}`} style={color ? { color } : undefined} aria-hidden="true" />
           <span className="sr-only">{words[current]}</span>
         </span>
       </h3>
@@ -147,7 +147,7 @@ export function MorphingText({
         whileTap={{ scale: 0.94 }}
         aria-pressed={!playing}
         onClick={() => setPlaying((p) => !p)}
-        className="inline-flex h-11 items-center gap-2 rounded-full bg-white px-4 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] outline-none dark:bg-white/10 dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.16)] focus-visible:ring-2 focus-visible:ring-[#0071e3]"
+        className="inline-flex h-11 items-center gap-2 rounded-full bg-current/10 px-4 text-[13px] font-medium text-inherit ring-1 ring-current/15 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           {playing ? <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /> : <path d="M8 5.5v13l11-6.5z" />}
