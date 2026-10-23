@@ -48,20 +48,20 @@ export const movedSections: MovedSection[] = [
       {"name": "autoplay", "type": "boolean", "description": "Grid only: sweeps the spotlight across the logos until someone points at them.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { CinematicLogoCloud } from "@/components/cinematic-logo-cloud";
-import { AcmeLogo, GlobexLogo, InitechLogo } from "@/components/brand-logos";
 
 const clients = [
-  { name: "Acme", logo: <AcmeLogo /> },
-  { name: "Globex", logo: <GlobexLogo /> },
-  { name: "Initech", logo: <InitechLogo /> },
+  // With no logo or src, a monogram is drawn from the name. Add src: "/logos/acme.svg" for your own image.
+  { name: "Acme" },
+  { name: "Globex" },
+  { name: "Initech" },
   { name: "Umbrella", src: "/logos/umbrella.svg", invertDark: true },
   { name: "Hooli", text: true, className: "font-black tracking-tight" },
 ];
 
-export function CustomerLogos() {
+export default function Page() {
   return (
     <CinematicLogoCloud
       clients={clients}
@@ -95,7 +95,7 @@ export function CustomerLogos() {
       {"name": "textClassName", "type": "string", "description": "Extra classes for the step list column."},
       {"name": "imageClassName", "type": "string", "description": "Extra classes for the card deck column."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { StepFlow, type StepFlowItem } from "@/components/step-flow";
 
@@ -107,11 +107,10 @@ const steps: StepFlowItem[] = [
   { serial: "04", title: "Ship the page", description: "Package a polished, responsive page your users can copy into production.", image: "/images/ship.jpg", imageAlt: "The finished landing page" },
 ];
 
-export function ProcessSection() {
+export default function Page() {
   return (
     <StepFlow
       steps={steps}
-      onStepChange={(i) => console.log("step", i + 1)}
       className="mx-auto max-w-5xl"
     />
   );
@@ -139,11 +138,11 @@ export function ProcessSection() {
       {"name": "autoplay", "type": "boolean", "description": "Moves a pretend pointer across the hero until someone moves over it.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { HeroAurora } from "@/components/hero-aurora-spotlight";
 
-export function LandingHero() {
+export default function Page() {
   return (
     <HeroAurora
       eyebrow="Now with live analytics"
@@ -178,11 +177,11 @@ export function LandingHero() {
       {"name": "autoplay", "type": "boolean", "description": "Sweeps the chart cursor back and forth until someone points at the grid.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the grid."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { BentoSignals } from "@/components/bento-signal-grid";
 
-export function StatusGrid() {
+export default function Page() {
   return (
     <BentoSignals
       latency={38}
@@ -225,7 +224,8 @@ export function StatusGrid() {
       {"name": "autoplay", "type": "boolean", "description": "Tours the links and breathes between wide and compact until someone points at it.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the wrapper."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { usePathname, useRouter } from "next/navigation";
 import { FloatGlassNavbar } from "@/components/float-glass-navbar";
@@ -237,7 +237,7 @@ const links = [
   { label: "Changelog", href: "/changelog" },
 ];
 
-export function SiteHeader() {
+export default function Page() {
   const router = useRouter();
   const pathname = usePathname();
   return (
@@ -278,7 +278,8 @@ export function SiteHeader() {
       {"name": "autoplay", "type": "boolean", "description": "Sweeps a wave through the wordmark until someone points at the footer.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the footer."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { OrbitFooter } from "@/components/orbit-footer";
 
@@ -287,7 +288,7 @@ async function addToNewsletter(email: string) {
   console.log("subscribe", email);
 }
 
-export function SiteFooter() {
+export default function Page() {
   return (
     <OrbitFooter
       brand="Orbit"
@@ -323,7 +324,7 @@ export function SiteFooter() {
       {"name": "autoplay", "type": "boolean", "description": "Flips the billing period every 2.6s until someone touches the component.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes for the wrapper."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { PricingToggle, type PricingPlan } from "@/components/toggle-pricing-pro";
 
@@ -333,14 +334,12 @@ const plans: PricingPlan[] = [
   { id: "business", name: "Business", monthly: 79, annual: 64, description: "For whole companies.", features: ["SSO and SCIM", "Audit logs", "99.99% SLA"] },
 ];
 
-export function Pricing() {
+export default function Page() {
   return (
     <PricingToggle
       plans={plans}
       defaultBilling="annual"
       currency="$"
-      onBillingChange={(b) => console.log("billing", b)}
-      onSelect={(plan, billing) => console.log("checkout", plan, billing)}
     />
   );
 }`,
@@ -371,7 +370,8 @@ export function Pricing() {
       {"name": "autoplay", "type": "boolean", "description": "Types a demo signup on a loop until someone touches the form.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the root."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { SplitSignup } from "@/components/split-signup-convert";
@@ -381,14 +381,13 @@ async function createAccount(email: string, password: string) {
   console.log("create", email, password.length);
 }
 
-export function SignupSection() {
+export default function Page() {
   const router = useRouter();
   return (
     <SplitSignup
       headline="Ship interfaces your team is proud of"
       benefits={["Every component, live and editable", "One-line installs", "Light and dark"]}
       onSubmit={({ email, password }) => createAccount(email, password)}
-      onSso={(provider) => console.log("sso", provider)}
       onSignIn={() => router.push("/login")}
     />
   );
@@ -425,12 +424,13 @@ export function SignupSection() {
       {"name": "autoplay", "type": "boolean", "description": "Walks through rows, a search and a collapse until someone touches it.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the aside."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { usePathname, useRouter } from "next/navigation";
 import { WorkbenchSidebar } from "@/components/workbench-sidebar";
 
-export function AppSidebar() {
+export default function Page() {
   const router = useRouter();
   const active = usePathname().split("/")[1] || "overview";
   return (
@@ -466,7 +466,8 @@ export function AppSidebar() {
       {"name": "autoplay", "type": "boolean", "description": "Wanders the light over the lattice and plays each tile in turn until someone points at it.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // icons and visuals are passed as components, which a server page cannot hand to a client component
 
 import { Lock, Zap } from "lucide-react";
 import { LatticeFeatures, type LatticeVisualProps } from "@/components/lattice-feature-grid";
@@ -488,7 +489,7 @@ function PreviewBars({ active }: LatticeVisualProps) {
   );
 }
 
-export function Features() {
+export default function Page() {
   return (
     <LatticeFeatures
       eyebrow="Platform"
@@ -524,17 +525,16 @@ export function Features() {
       {"name": "autoplay", "type": "boolean", "description": "Opens each question in turn until someone touches the list.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { MotionFaq } from "@/components/motion-faq-disclosure";
 
-export function Faq() {
+export default function Page() {
   return (
     <MotionFaq
       heading="Questions, answered"
       intro="Everything people ask before they sign up."
       contact={{ label: "Talk to a human", href: "/contact" }}
-      onToggle={(i, open) => console.log("question", i, open ? "opened" : "closed")}
       items={[
         { q: "Can I use this commercially?", a: "Yes. Personal and client work are both fine." },
         { q: "Does it work with the App Router?", a: "Every component is a typed client component built for it. Drop it into a server page and it hydrates on its own." },
@@ -567,12 +567,13 @@ export function Faq() {
       {"name": "autoplay", "type": "boolean", "description": "Drifts an invisible pointer around the button and presses it now and then until someone points at the card.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the card."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { useRouter } from "next/navigation";
 import { NebulaCtaGlow } from "@/components/nebula-cta-glow";
 
-export function PricingCta() {
+export default function Page() {
   const router = useRouter();
   return (
     <NebulaCtaGlow
@@ -606,11 +607,11 @@ export function PricingCta() {
       {"name": "autoplay", "type": "boolean", "description": "Previews each story in the featured slot in turn until someone points at the rail.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { EditorialRail } from "@/components/editorial-blog-rail";
 
-export function JournalSection() {
+export default function Page() {
   return (
     <EditorialRail
       heading="From the journal"
@@ -659,7 +660,8 @@ export function JournalSection() {
       {"name": "autoplay", "type": "boolean", "description": "Fills in and sends a demo message on a loop until someone touches the form.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client";
 
 import { SplitContact, type SplitContactValues } from "@/components/split-contact-glass";
 
@@ -668,7 +670,7 @@ async function sendToInbox(values: SplitContactValues) {
   console.log("new message", values);
 }
 
-export function ContactSection() {
+export default function Page() {
   return (
     <SplitContact
       email="hello@studio.dev"
@@ -709,11 +711,11 @@ export function ContactSection() {
       {"name": "autoplay", "type": "boolean", "description": "Sweeps a pretend pointer through the field and sends a ripple every few seconds until someone moves over it.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { DotGridHero } from "@/components/dot-grid-hero";
 
-export function HomeHero() {
+export default function Page() {
   return (
     <DotGridHero
       title={"Design systems\\nthat move."}
@@ -754,11 +756,11 @@ export function HomeHero() {
       {"name": "children", "type": "ReactNode", "description": "Replaces the default hero content."},
       {"name": "className", "type": "string", "description": "Extra classes on the section."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { InteractiveStarfieldHero } from "@/components/starfield-hero";
 
-export function SpaceHero() {
+export default function Page() {
   return (
     <InteractiveStarfieldHero
       title={"Launch day.\\nEvery day."}
@@ -800,11 +802,11 @@ export function SpaceHero() {
       {"name": "interactive", "type": "boolean", "description": "Spotlight under the pointer; stars steer toward it.", "defaultValue": "true"},
       {"name": "autoplay", "type": "boolean", "description": "Steers the stars round a pretend pointer until someone moves over the grid.", "defaultValue": "false"}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ShootingStarsGrid } from "@/components/shooting-stars-grid";
 
-export function LaunchHero() {
+export default function Page() {
   return (
     <ShootingStarsGrid shootingStarCount={7} gridSize={48} className="min-h-[560px]">
       <div className="mx-auto max-w-2xl text-center">
@@ -837,7 +839,7 @@ export function LaunchHero() {
       {"name": "className", "type": "string", "description": "Extra classes for the grid."},
       {"name": "itemClassName", "type": "string", "description": "Extra classes for every tile wrapper."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { AnimatedBentoGrid, type BentoItem } from "@/components/animated-bento-grid";
 
@@ -848,7 +850,7 @@ const items: BentoItem[] = [
   { id: "nps", label: "NPS", value: "72", span: "2x1", accent: "#30d158", trend: { value: 4, label: "this quarter" } },
 ];
 
-export function RevenueBento() {
+export default function Page() {
   return <AnimatedBentoGrid items={items} columns={3} variant="spotlight" />;
 }`,
     tailwindSource: "",
@@ -870,9 +872,10 @@ export function RevenueBento() {
       {"name": "autoplay", "type": "boolean", "description": "Plays each card's scene in turn until someone points at the grid.", "defaultValue": "false"},
       {"name": "className", "type": "string", "description": "Extra classes for the grid wrapper."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
+"use client"; // it keeps loading state, so this page runs in the browser
 
-import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { BentoGridSkeleton, type BentoSkeletonCard } from "@/components/bento-grid-skeleton";
 
 const cards: BentoSkeletonCard[] = [
@@ -882,8 +885,15 @@ const cards: BentoSkeletonCard[] = [
   { id: "diff", title: "Latest diff", description: "Lines type themselves out.", tag: "Code", span: "2x1", skeletonType: "code" },
 ];
 
-export function LoadingWorkspace({ ready, children }: { ready: boolean; children: ReactNode }) {
-  return ready ? <>{children}</> : <BentoGridSkeleton cards={cards} />;
+export default function Page() {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setReady(true), 2500); // swap for your own loading state
+    return () => window.clearTimeout(id);
+  }, []);
+
+  return ready ? <p>Your real content goes here.</p> : <BentoGridSkeleton cards={cards} />;
 }`,
     tailwindSource: "",
   },
@@ -913,7 +923,7 @@ export function LoadingWorkspace({ ready, children }: { ready: boolean; children
       {"name": "autoplay", "type": "boolean", "description": "Flings the wall up and down every few seconds until someone touches it.", "defaultValue": "false"},
       {"name": "cardBackground / borderColor / textColor / mutedTextColor / backgroundColor", "type": "string", "description": "Optional colour overrides; by default it follows light and dark mode."}
     ],
-    reactSource: `"use client";
+    reactSource: `// src/app/page.tsx
 
 import { ScrollingTestimonials } from "@/components/scrolling-testimonials";
 
@@ -926,7 +936,7 @@ const reviews = [
   { id: "6", quote: "Clients keep asking how we built it.", name: "Nadia Petrova", role: "Studio owner", company: "Fieldhouse", rating: 4 },
 ];
 
-export function WallOfLove() {
+export default function Page() {
   return (
     <section className="mx-auto max-w-5xl px-6 py-24">
       <ScrollingTestimonials testimonials={reviews} title="Loved by product teams" height={520} speed={28000} />

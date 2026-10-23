@@ -335,13 +335,17 @@ cd my-app`}</DocPre>
         <DocSection title="6. Use it in a page">
           <p className="text-sm text-muted-foreground">
             Installing only adds the component to your project; it does not show it anywhere until a page uses it. Every
-            component page has a <Strong>Usage</Strong> tab on its preview: that is a short example, not the component
-            itself. Copy the import and the tag from it. Replace the contents of{" "}
-            <code className={code}>src/app/page.tsx</code> with:
+            component page has a <Strong>Usage</Strong> tab on its preview: a complete page that uses it, not the
+            component itself. Its first line says where to save it, normally{" "}
+            <code className={code}>src/app/page.tsx</code>, so you paste the whole example there. Some start with{" "}
+            <code className={code}>&quot;use client&quot;</code> because they pass functions to the component; keep that
+            line. For the Glow Button the page is:
           </p>
-          <DocPre>{`import { GlowButton } from "@/components/glow-button";
+          <DocPre>{`// src/app/page.tsx
 
-export default function Home() {
+import { GlowButton } from "@/components/glow-button";
+
+export default function Page() {
   return (
     <main className="flex min-h-screen items-center justify-center">
       <GlowButton href="#">Get started</GlowButton>
