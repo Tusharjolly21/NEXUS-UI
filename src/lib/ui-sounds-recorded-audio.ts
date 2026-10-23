@@ -11,4 +11,8 @@ export const RECORDED_AUDIO: Record<RecordedSoundName, string> = {
   message: "",
   notification: "",
   screenshot: "",
+  buildup: "",
+  landing: "",
+  pitchtick: "",
+  sting: "",
 };

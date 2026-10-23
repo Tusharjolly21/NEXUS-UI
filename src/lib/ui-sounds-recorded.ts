@@ -1,6 +1,7 @@
 /**
- * Five recorded interface sounds for the Nexus UI Pro plan: typing, camera, message, notification
- * and screenshot. Unlike the synthesised sounds in `@/lib/ui-sounds` and `@/lib/ui-sounds-pro`, these
+ * Nine recorded interface sounds for the Nexus UI Pro plan: typing, camera, message, notification
+ * and screenshot, plus four cut from the Word Rush and Glass Orbit video soundtracks (buildup,
+ * landing, pitchtick and sting). Unlike the synthesised sounds in `@/lib/ui-sounds` and `@/lib/ui-sounds-pro`, these
  * are short audio recordings. They ship inside `ui-sounds-recorded-audio.ts`, so there is nothing
  * to host and no file to fetch. They play through `@/lib/ui-sounds`, so they follow the same on and
  * off switch, volume and autoplay rules as every other sound.
@@ -18,10 +19,29 @@ import * as React from "react";
 import { audioAwake, playDef, useAutoplaySoundAllowed, type SoundDef } from "@/lib/ui-sounds";
 import { RECORDED_AUDIO } from "@/lib/ui-sounds-recorded-audio";
 
-export type RecordedSoundName = "typing" | "camera" | "message" | "notification" | "screenshot";
+export type RecordedSoundName =
+  | "typing"
+  | "camera"
+  | "message"
+  | "notification"
+  | "screenshot"
+  | "buildup"
+  | "landing"
+  | "pitchtick"
+  | "sting";
 
 /** Seconds each recording lasts, so the shared engine keeps it connected until it ends. */
-const LENGTH: Record<RecordedSoundName, number> = { typing: 3.1, camera: 0.6, message: 0.55, notification: 1.05, screenshot: 0.55 };
+const LENGTH: Record<RecordedSoundName, number> = {
+  typing: 3.1,
+  camera: 0.6,
+  message: 0.55,
+  notification: 1.05,
+  screenshot: 0.55,
+  buildup: 1.85,
+  landing: 1.85,
+  pitchtick: 0.15,
+  sting: 3.7,
+};
 /** The recordings are levelled to peak near full scale; this brings them to the level of the synthesised sounds. */
 const LEVEL = 0.5;
 
@@ -89,6 +109,10 @@ export const RECORDED_SOUNDS: Record<RecordedSoundName, SoundDef> = {
   message: define("message", "Message"),
   notification: define("notification", "Notification"),
   screenshot: define("screenshot", "Screenshot"),
+  buildup: define("buildup", "Build-up"),
+  landing: define("landing", "Landing"),
+  pitchtick: define("pitchtick", "Pitch tick"),
+  sting: define("sting", "Glass sting"),
 };
 
 /** Play a recorded sound by name. volume is 0..1 on top of the master level. Silent while sounds are off unless `force`. */
