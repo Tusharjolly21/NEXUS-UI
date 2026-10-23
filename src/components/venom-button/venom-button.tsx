@@ -313,8 +313,8 @@ export function VenomButton({
       const a = stage.getBoundingClientRect(), b = btn.getBoundingClientRect();
       const k = stage.offsetWidth ? a.width / stage.offsetWidth : 1;
       pill.x = (b.left - a.left) / k; pill.y = (b.top - a.top) / k; pill.w = b.width / k; pill.h = b.height / k;
-      pill.r = b.height / 2;
-      pill.ls = Math.max(0, b.width - b.height);
+      pill.r = pill.h / 2;
+      pill.ls = Math.max(0, pill.w - pill.h);
       pill.P = 2 * pill.ls + 2 * Math.PI * pill.r || 1;
     };
     const at = (s: number) => {
