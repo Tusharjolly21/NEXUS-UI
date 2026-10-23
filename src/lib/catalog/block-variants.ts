@@ -85,6 +85,7 @@ const baseVariants: BlockVariant[] = [
   v("logos-spotlight", "block-logo-clouds", "Cursor Spotlight"),
   v("logos-swap", "block-logo-clouds", "Swap Animation"),
   v("logos-single-row", "block-logo-clouds", "Single Row Lift"),
+  v("logos-shelf", "block-logo-clouds", "Logo Shelf"),
   mk("loupe-logo-cloud", "block-logo-clouds", "Loupe Logo Cloud", "LoupeLogoCloud"),
   mk("logo-stories", "block-logo-clouds", "Logo Stories", "LogoStories"),
   mk("filterable-logo-wall", "block-logo-clouds", "Filterable Logo Wall", "FilterableLogoWall"),

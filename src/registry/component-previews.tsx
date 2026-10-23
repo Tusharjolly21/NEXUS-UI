@@ -4338,6 +4338,7 @@ export * from "./signature/motion-kit-ab";
 export * from "./signature/nexus-states-a";
 export * from "./signature/nexus-states-b";
 export * from "./signature/made-by-sound";
+export * from "./signature/cubes-grid";
 export * from "./signature/nexus-states-c";
 export * from "./signature/nexus-essentials-a";
 export * from "./signature/nexus-essentials-b";

@@ -10161,6 +10161,7 @@ export function BrandHero() {
     animationKinds: ["press", "drag", "spring"],
     dependencies: ["framer-motion"],
     props: [
+      { name: "tracks", type: "RippleNowPlayingTrack[]", defaultValue: "three demo tracks", description: "The playlist: title, artist, bpm (the ripples follow it), length in seconds, three gradient colours (a, b, c) and the ink colour of the title." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Starts playing by itself and skips to the next track every seven seconds until someone touches the card. Pauses off screen and never runs under reduced motion. Without it the card waits, paused, until you press play." },
       { name: "className", type: "string", description: "Extra classes for the card." },
     ],
@@ -10195,6 +10196,7 @@ export function PlayerPanel() {
     props: [
       { name: "fileName", type: "string", defaultValue: "\"mix-final.wav\"", description: "The file name shown under the plate." },
       { name: "fileSize", type: "number", defaultValue: "24.6", description: "Size in MB. The \"x of y MB\" line counts up to it." },
+      { name: "duration", type: "number", defaultValue: "7", description: "How long a full upload takes, in seconds." },
       { name: "onComplete", type: "() => void", description: "Called once each time an upload reaches 100%." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uploads, holds the check, resets and goes again until someone presses the button. Pauses off screen and never runs under reduced motion." },
       { name: "className", type: "string", description: "Extra classes for the card." },
@@ -10278,6 +10280,77 @@ export function NotificationsDemo() {
     </div>
   );
 }`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "cubes-grid",
+    name: "Cubes Grid",
+    registryCliName: "cubes-grid",
+    description:
+      "A field of 3D cubes that ripples under the cursor. Moving the pointer lifts cubes into a travelling wave that spreads, bounces off the edges and settles on its own. Pick a flat light isometric floor with soft crest highlights, or a dark tilted grid fading into fog with glowing crests. One canvas and one animation loop, no re-renders.",
+    categorySlug: "background-effects",
+    tags: ["cubes", "grid", "3d", "isometric", "canvas", "ripple", "wave", "background", "hover", "pointer", "hero", "motion kit"],
+    premium: true,
+    trendingScore: 163,
+    createdAt: "2026-10-23",
+    animationKinds: ["hover"],
+    dependencies: [],
+    props: [
+      { name: "variant", type: "\"isometric\" | \"perspective\"", defaultValue: "\"isometric\"", description: "The flat light isometric floor, or the dark tilted 3D grid." },
+      { name: "autoplay", type: "boolean", description: "Drops random ripples while the pointer is idle so the grid demos itself. Same as idleRipples, and wins over it when set." },
+      { name: "idleRipples", type: "boolean", defaultValue: "true", description: "Drops random ripples when the pointer stops." },
+      { name: "idleDelay", type: "number", defaultValue: "1.5", description: "Seconds the grid stays still before random ripples start." },
+      { name: "amplitude", type: "number", description: "Wave height. Isometric: in tiles (0.7). Perspective: in cube sizes (0.9)." },
+      { name: "glow", type: "number", description: "Strength of the light on the wave crests (0.5 isometric, 0.9 perspective). 0 turns it off." },
+      { name: "speed", type: "number", description: "Wave speed, in cubes per second (7 isometric, 9 perspective)." },
+      { name: "damping", type: "number", description: "Wave energy kept per second, 0 to 1 (0.08 isometric, 0.1 perspective). Lower settles faster." },
+      { name: "gap", type: "number", description: "Seam between cubes. Isometric: a fraction of a tile (0.025). Perspective: world units (0.16)." },
+      { name: "cellSize", type: "number", defaultValue: "150", description: "Isometric only. On-screen width of one tile, in px." },
+      { name: "topColor", type: "string", defaultValue: "\"#fafaf9\"", description: "Isometric only. Top face colour." },
+      { name: "leftColor", type: "string", defaultValue: "\"#e7e5e4\"", description: "Isometric only. Left face colour." },
+      { name: "rightColor", type: "string", defaultValue: "\"#d6d3d1\"", description: "Isometric only. Right face colour." },
+      { name: "glowColor", type: "string", defaultValue: "\"#a8a29e\"", description: "Isometric only. Colour of the light that follows the ripple." },
+      { name: "gridSize", type: "number", defaultValue: "40", description: "Perspective only. Number of cubes per side." },
+      { name: "baseColor", type: "string", defaultValue: "\"#2a2a30\"", description: "Perspective only. Cube colour at rest." },
+      { name: "waveColor", type: "string", defaultValue: "\"#ff6a2b\"", description: "Perspective only. Colour of the wave crests." },
+      { name: "backgroundColor", type: "string", defaultValue: "\"#0b0b0d\"", description: "Perspective only. Scene background and fog colour." },
+      { name: "tilt", type: "number", defaultValue: "0.7", description: "Perspective only. Camera tilt away from top-down, in radians." },
+      { name: "className", type: "string", description: "Extra classes for the canvas wrapper." },
+    ],
+    Preview: Previews.PreviewCubesGrid,
+    detailPreviews: [Previews.PreviewCubesGrid, Previews.PreviewCubesGridPerspective],
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CubesGrid } from "@/components/cubes-grid";
+
+// The grid fills its nearest positioned parent, so give it a relative box.
+export function Hero() {
+  return (
+    <section className="relative h-[560px] overflow-hidden bg-[#f5f5f4]">
+      <CubesGrid variant="isometric" />
+      <div className="pointer-events-none relative z-10 flex h-full items-center justify-center">
+        <h1 className="text-5xl font-semibold tracking-tight">Move across the floor</h1>
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Dark perspective grid",
+        code: `"use client";
+
+import { CubesGrid } from "@/components/cubes-grid";
+
+export function DarkHero() {
+  return (
+    <section className="relative h-[560px] overflow-hidden bg-[#0b0b0d]">
+      <CubesGrid variant="perspective" waveColor="#ff6a2b" gridSize={44} />
+    </section>
+  );
+}`,
+      },
+    ],
     tailwindSource: tw,
   },
 ];

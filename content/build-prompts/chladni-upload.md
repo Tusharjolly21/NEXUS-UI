@@ -13,6 +13,7 @@ Build an upload progress indicator out of sand on a vibrating plate. Each stage 
 |---|---|---|---|
 | `fileName` | `string` | `"mix-final.wav"` | File name under the plate. |
 | `fileSize` | `number` | `24.6` | Size in MB; the "x of y MB" line counts up to it. |
+| `duration` | `number` | `7` | How long a full upload takes, in seconds. |
 | `onComplete` | `() => void` | none | Called each time an upload reaches 100%. |
 | `autoplay` | `boolean` | `false` | Uploads, holds the check, resets and repeats until the button is pressed. |
 | `className` | `string` | none | Extra classes for the card. |
@@ -28,7 +29,7 @@ Build an upload progress indicator out of sand on a vibrating plate. Each stage 
 ## Motion
 
 - Five stages (notes A2, E3, B3, F#4, C#5) use the plate modes (1,3), (2,3), (3,5), (3,7), (5,8). Each grain gets random jitter proportional to the local mode amplitude |cos(nπx)cos(mπy) − cos(mπx)cos(nπy)|, so the sand drifts off the antinodes and rests on the nodal lines.
-- The upload runs 7 seconds on an ease curve; the stage follows progress. A stage change kicks the plate (a short scale pulse and extra jitter).
+- The upload runs `duration` seconds (7 by default) on an ease curve; the stage follows progress. A stage change kicks the plate (a short scale pulse and extra jitter).
 - On completion each grain is pulled to the nearest point on a check-mark polyline with a little jitter, and the plate gets a larger kick.
 - The canvas loop only steps while the card is on screen. Autoplay uploads, holds the check, resets, waits, repeats; it only runs on screen and never under reduced motion; pressing the button ends it.
 

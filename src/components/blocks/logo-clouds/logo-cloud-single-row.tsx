@@ -1,145 +1,82 @@
 "use client";
-// Single Row with Hover Lift: the most restrained variant. One row of monochrome marks settles in
-// with a light stagger. Hovering a mark lifts it on a spring while the rest of the row recedes.
+// Single Row Lift: the most restrained variant. The line sits on the left and one row of five marks
+// rotates through the brands beside it. Hover a mark and it lifts and takes its brand colour while
+// the rest of the row recedes, and the rotation holds until the pointer leaves.
 
 import * as React from "react";
-import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { LOGOS, LogoLockup, type Logo } from "./logos";
-
-const STAGGER = 0.06;
-const SPRING = { type: "spring" as const, stiffness: 420, damping: 30 };
-const SOFT = { type: "spring" as const, stiffness: 240, damping: 30 };
+import { INK, LOGOS, LogoLockup, SPRING, usePager, type Logo } from "./logos";
 
 export type LogoCloudSingleRowProps = {
-  /** Small grey line above the row. Empty string hides it. */
-  title?: string;
-  /** How many marks to show (1–12), taken from the start of `logos`. */
-  count?: number;
-  /** Opacity of every mark while nothing is hovered (0.1–1). */
-  restOpacity?: number;
-  /** Opacity of the other marks while one is hovered (0–1). */
-  recedeOpacity?: number;
-  /** How far the hovered mark lifts, in px (0–16). */
-  lift?: number;
-  /** Scale of the hovered mark (1–1.3). */
-  hoverScale?: number;
-  /** Marks to pick from. Defaults to the twelve placeholder lockups. */
+  /** Brands to rotate through: { name, Icon, color, wordmark? }. Defaults to twenty invented brands. */
   logos?: Logo[];
+  /** The line on the left. */
+  title?: string;
+  /** Milliseconds between rotations. */
+  interval?: number;
+  /** Opacity of the other marks while one is hovered (0 to 1). */
+  recedeOpacity?: number;
+  /** How far the hovered mark lifts, in px. */
+  lift?: number;
   className?: string;
 };
 
-type HoverLook = { rest: number; recede: number; lift: number; scale: number };
-
-function clamp(value: number | undefined, min: number, max: number, fallback: number) {
-  return typeof value === "number" && Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback;
-}
-
-function LogoItem({
-  logo,
-  rise,
-  reduced,
-  isHovered,
-  anyHovered,
-  onHoverStart,
-  look,
-}: {
-  logo: Logo;
-  rise: Variants;
-  reduced: boolean;
-  isHovered: boolean;
-  anyHovered: boolean;
-  onHoverStart: () => void;
-  look: HoverLook;
-}) {
-  return (
-    // Outer wrapper takes the entrance stagger; the inner one owns hover, so the two never fight
-    <motion.li variants={rise}>
-      <motion.div
-        onHoverStart={onHoverStart}
-        initial={false}
-        animate={{
-          opacity: anyHovered ? (isHovered ? 1 : look.recede) : look.rest,
-          y: isHovered && !reduced ? -look.lift : 0,
-          scale: isHovered && !reduced ? look.scale : 1,
-        }}
-        transition={SPRING}
-        className="flex cursor-default items-center text-[#1d1d1f] dark:text-[#f5f5f7]"
-      >
-        <LogoLockup logo={logo} className="text-[16px] sm:text-[18px]" />
-      </motion.div>
-    </motion.li>
-  );
-}
-
 export default function LogoCloudSingleRow({
-  title = "Product teams at these companies plan their week with us.",
-  count = 6,
-  restOpacity = 0.55,
-  recedeOpacity = 0.22,
-  lift = 4,
-  hoverScale = 1.06,
   logos = LOGOS,
+  title = "Product teams at these companies plan their week with us.",
+  interval = 2600,
+  recedeOpacity = 0.3,
+  lift = 4,
   className,
 }: LogoCloudSingleRowProps) {
-  const [hovered, setHovered] = React.useState<number | null>(null);
+  const ref = React.useRef<HTMLUListElement>(null);
+  const inView = useInView(ref, { margin: "-80px" });
   const reduced = !!useReducedMotion();
-
-  const source = Array.isArray(logos) ? logos : LOGOS;
-  const rowLogos = source.slice(0, Math.round(clamp(count, 1, 12, 6)));
-  const look: HoverLook = {
-    rest: clamp(restOpacity, 0.1, 1, 0.55),
-    recede: clamp(recedeOpacity, 0, 1, 0.22),
-    lift: clamp(lift, 0, 16, 4),
-    scale: clamp(hoverScale, 1, 1.3, 1.06),
-  };
-
-  const rise: Variants = reduced
-    ? { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.4 } } }
-    : {
-        hidden: { opacity: 0, y: 12, filter: "blur(6px)" },
-        visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: SOFT },
-      };
+  const [hover, setHover] = React.useState<number | null>(null);
+  const { page, items } = usePager(logos, 5, Math.max(1600, interval), inView && hover === null && !reduced);
 
   return (
-    <section className={cn("w-full bg-white px-4 py-14 dark:bg-black sm:py-20", className)}>
-      <motion.div
-        className="mx-auto max-w-5xl"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-80px" }}
-        variants={{ hidden: {}, visible: { transition: { staggerChildren: STAGGER } } }}
-      >
+    <section className={cn("w-full bg-white px-4 py-16 dark:bg-black sm:py-24", className)}>
+      <div className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 md:flex-row md:gap-10">
         {title ? (
-          <motion.h2
-            variants={rise}
-            className="text-center text-[15px] font-medium tracking-[-0.01em] text-[#6e6e73] dark:text-[#a1a1a6]"
-          >
+          <p className="m-0 max-w-[15rem] text-balance text-center text-[17px] font-semibold leading-[1.35] tracking-[-0.015em] text-[#1d1d1f] dark:text-[#f5f5f7] md:shrink-0 md:border-r md:border-black/10 md:pr-10 md:text-left dark:md:border-white/15">
             {title}
-          </motion.h2>
+          </p>
         ) : null}
-
         <ul
-          onMouseLeave={() => setHovered(null)}
-          className={cn(
-            title ? "mt-9" : null,
-            "grid grid-cols-2 place-items-center gap-x-6 gap-y-8 sm:flex sm:flex-wrap sm:justify-center sm:gap-x-12 sm:gap-y-8",
-          )}
+          ref={ref}
+          onMouseLeave={() => setHover(null)}
+          className="m-0 grid w-full list-none grid-cols-2 gap-6 p-0 sm:grid-cols-3 md:flex md:flex-1 md:justify-between"
         >
-          {rowLogos.map((logo, i) => (
-            <LogoItem
-              key={`${i}-${logo.name}`}
-              logo={logo}
-              rise={rise}
-              reduced={reduced}
-              isHovered={hovered === i}
-              anyHovered={hovered !== null}
-              onHoverStart={() => setHovered(i)}
-              look={look}
-            />
+          {items.map((b, i) => (
+            <motion.li
+              key={i}
+              onHoverStart={() => setHover(i)}
+              animate={{
+                opacity: hover === null ? 0.82 : hover === i ? 1 : recedeOpacity,
+                y: hover === i && !reduced ? -lift : 0,
+                scale: hover === i && !reduced ? 1.06 : 1,
+              }}
+              transition={SPRING}
+              className={cn("relative flex h-12 items-center justify-center", INK)}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={`${page}-${b.name}`}
+                  role="img"
+                  aria-label={b.name}
+                  initial={reduced ? { opacity: 0 } : { opacity: 0, y: 14, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)", transition: { ...SPRING, delay: i * 0.06 } }}
+                  exit={reduced ? { opacity: 0 } : { opacity: 0, y: -14, filter: "blur(8px)", transition: { ...SPRING, delay: i * 0.06 } }}
+                >
+                  <LogoLockup logo={b} tinted={hover === i} className="text-[17px] sm:text-[19px]" />
+                </motion.span>
+              </AnimatePresence>
+            </motion.li>
           ))}
         </ul>
-      </motion.div>
+      </div>
     </section>
   );
 }

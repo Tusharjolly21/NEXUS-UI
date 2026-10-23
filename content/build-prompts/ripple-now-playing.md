@@ -11,6 +11,7 @@ Build a music player card whose cover art sits under water. Every beat of the tr
 
 | Prop | Type | Default | Meaning |
 |---|---|---|---|
+| `tracks` | `Track[]` | three demo tracks | The playlist: `{ title, artist, bpm, length, a, b, c, ink }`, where `a`, `b`, `c` are the gradient colours and `length` is in seconds. |
 | `autoplay` | `boolean` | `false` | Starts playing and skips a track every seven seconds until touched. |
 | `className` | `string` | none | Extra classes for the card. |
 

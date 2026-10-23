@@ -23,6 +23,7 @@ import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee
 import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
+import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
 import { PayAndConfirm, TipAndRate, VerifyPayment } from "@/components/blocks/checkout-moments";
 import SimpleSidebar from "@/components/blocks/sidebar/simple-sidebar";
 import CollapsibleSidebar from "@/components/blocks/sidebar/collapsible-sidebar";
@@ -233,7 +234,7 @@ export function PreviewBlockVariantLogosBlurFlip() {
 }
 
 export function PreviewBlockVariantLogosBlurReveal() {
-  return <LogoCloudBlur />;
+  return <LogoCloudBlur autoplay />;
 }
 
 export function PreviewBlockVariantLogosMarquee() {
@@ -241,7 +242,7 @@ export function PreviewBlockVariantLogosMarquee() {
 }
 
 export function PreviewBlockVariantLogosSpotlight() {
-  return <LogoCloudSpotlight />;
+  return <LogoCloudSpotlight autoplay />;
 }
 
 export function PreviewBlockVariantLogosSwap() {
@@ -250,6 +251,10 @@ export function PreviewBlockVariantLogosSwap() {
 
 export function PreviewBlockVariantLogosSingleRow() {
   return <LogoCloudSingleRow />;
+}
+
+export function PreviewBlockVariantLogosShelf() {
+  return <LogoCloudShelf />;
 }
 
 export function PreviewBlockVariantCheckoutPay() {

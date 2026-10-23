@@ -54,6 +54,7 @@ import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee
 import LogoCloudSpotlight from "@/components/blocks/logo-clouds/logo-cloud-spotlight";
 import LogoCloudSwap from "@/components/blocks/logo-clouds/logo-cloud-swap";
 import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
+import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
 import { createMetadata, siteConfig } from "@/lib/seo";
 import { COMPONENT_SEO } from "@/lib/catalog/component-seo";
 import { getMovedSection } from "@/lib/catalog/moved-sections";
@@ -184,6 +185,9 @@ export default async function BlockDetailPage({ params }: Props) {
     : "";
   const logoSingleRowCode = isLogoCloudCard
     ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-single-row.tsx", "")
+    : "";
+  const logoShelfCode = isLogoCloudCard
+    ? await readSourceFile("src/components/blocks/logo-clouds/logo-cloud-shelf.tsx", "")
     : "";
   const typewriterEffectCode = isTextAnimationsCard
     ? await readSourceFile("src/components/blocks/text-animations/text-animation-typewriter-effect.tsx", "")
@@ -617,7 +621,7 @@ export default async function BlockDetailPage({ params }: Props) {
             className="mt-16"
             locked={locked}
           >
-            <LogoCloudBlur />
+            <LogoCloudBlur autoplay />
           </PreviewCodeSection>
           <PreviewCodeSection
             block={block.slug}
@@ -637,7 +641,7 @@ export default async function BlockDetailPage({ params }: Props) {
             className="mt-16"
             locked={locked}
           >
-            <LogoCloudSpotlight />
+            <LogoCloudSpotlight autoplay />
           </PreviewCodeSection>
           <PreviewCodeSection
             block={block.slug}
@@ -658,6 +662,16 @@ export default async function BlockDetailPage({ params }: Props) {
             locked={locked}
           >
             <LogoCloudSingleRow />
+          </PreviewCodeSection>
+          <PreviewCodeSection
+            block={block.slug}
+            title="Logo Shelf"
+            code={logoShelfCode}
+            usageCode={LOGO_SHELF_USAGE}
+            className="mt-16"
+            locked={locked}
+          >
+            <LogoCloudShelf />
           </PreviewCodeSection>
         </>
       ) : isCheckoutMomentsCard ? (
@@ -791,6 +805,7 @@ const BLOCK_INSTALL_FILES: Record<string, string[]> = {
   "block-logo-clouds": [
     "components/blocks/logo-clouds/logo-cloud-blur.tsx",
     "components/blocks/logo-clouds/logo-cloud-marquee.tsx",
+    "components/blocks/logo-clouds/logo-cloud-shelf.tsx",
     "components/blocks/logo-clouds/logo-cloud-single-row.tsx",
     "components/blocks/logo-clouds/logo-cloud-spotlight.tsx",
     "components/blocks/logo-clouds/logo-cloud-swap.tsx",
@@ -1210,6 +1225,7 @@ function defaultUsageForTitle(title: string) {
   if (title === "Cursor Spotlight") return LOGO_SPOTLIGHT_USAGE;
   if (title === "Swap Animation") return LOGO_SWAP_USAGE;
   if (title === "Single Row Lift") return LOGO_SINGLE_ROW_USAGE;
+  if (title === "Logo Shelf") return LOGO_SHELF_USAGE;
   return `<${title.replaceAll(" ", "")} />`;
 }
 
@@ -1527,8 +1543,7 @@ export default function Page() {
   return <LogoCloudBlur />;
 }`;
 
-const LOGO_MARQUEE_USAGE = `// npm install react-fast-marquee
-import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";
+const LOGO_MARQUEE_USAGE = `import LogoCloudMarquee from "@/components/blocks/logo-clouds/logo-cloud-marquee";
 
 export default function Page() {
   return <LogoCloudMarquee />;
@@ -1544,6 +1559,12 @@ const LOGO_SWAP_USAGE = `import LogoCloudSwap from "@/components/blocks/logo-clo
 
 export default function Page() {
   return <LogoCloudSwap />;
+}`;
+
+const LOGO_SHELF_USAGE = `import LogoCloudShelf from "@/components/blocks/logo-clouds/logo-cloud-shelf";
+
+export default function Page() {
+  return <LogoCloudShelf />;
 }`;
 
 const LOGO_SINGLE_ROW_USAGE = `import LogoCloudSingleRow from "@/components/blocks/logo-clouds/logo-cloud-single-row";
