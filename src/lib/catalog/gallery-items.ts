@@ -49,6 +49,11 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "portal-card",
+  "black-hole-delete",
+  "frost-input",
+  "web-sling-button",
+  "venom-button",
   "cubes-grid",
   "mesh-net",
   "particle-reveal",
@@ -354,6 +359,12 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // fifteenth batch (Venom Button, Web Sling Button, Frost Input, Black Hole Delete, Portal Card)
+  "venom-button",
+  "web-sling-button",
+  "frost-input",
+  "black-hole-delete",
+  "portal-card",
   // fourteenth batch (Mesh Net, Particle Reveal, Morphing Text, Code Snippet, Workflow Network)
   "mesh-net",
   "particle-reveal",

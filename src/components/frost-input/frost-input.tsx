@@ -377,6 +377,7 @@ export function FrostInput({
     api.current.shatter = (fromButton: boolean) => {
       if (shattered) return;
       shattered = true;
+      const frozen = Math.max(cold, 0.8);
       focused = false;
       cold = 0;
       if (reduced) {
@@ -390,8 +391,8 @@ export function FrostInput({
       snap.width = Math.round(pill.w * dpr); snap.height = Math.round(pill.h * dpr);
       const sg = snap.getContext("2d")!;
       sg.setTransform(dpr, 0, 0, dpr, 0, 0);
-      drawBody(sg, 0, 0, 1);
-      drawFrost(sg, 0, 0, 1);
+      drawBody(sg, 0, 0, frozen);
+      drawFrost(sg, 0, 0, frozen);
       sg.font = FONT;
       sg.textBaseline = "middle";
       sg.fillStyle = "#eaf7ff";
@@ -447,8 +448,7 @@ export function FrostInput({
     let gt = 0, typed = 0;
     const ghost = { x: 0, y: 0, on: false };
 
-    const update = (dt: number, now: number) => {
-      void now;
+    const update = (dt: number) => {
       // autoplay: click in, type, send, wait, repeat
       ghost.on = false;
       if (ambient && !userTouched.current) {
@@ -493,13 +493,12 @@ export function FrostInput({
         cold += ((focused ? 1 : 0) - cold) * Math.min(1, dt * (focused ? 2.2 : 1.1));
         if (!focused && cold < 0.02) cold = 0;
       }
+      if (!focused && cold === 0 && seeds) clearIce();
       if (!reduced) growFrost(dt);
-      else if (!focused && cold === 0 && seeds) clearIce();
       // cold vapour curling up off the frozen field
       if (!reduced && focused && cold > 0.3 && !shattered && Math.random() < dt * 9 * cold) {
         mist.push({ x: pill.x + pill.h * 0.4 + Math.random() * (pill.w - pill.h * 0.8), y: pill.y + 4, r: 6 + Math.random() * 10, age: 0, life: 2 + Math.random() * 1.6, vx: (Math.random() - 0.5) * 8 });
       }
-      if (!focused && cold === 0 && seeds) clearIce();
       growCracks(dt);
     };
 
@@ -623,11 +622,12 @@ export function FrostInput({
       const dt = Math.max(1 / 240, Math.min(0.033, (now - prev) / 1000));
       prev = now;
       measure();
-      update(dt, now);
+      update(dt);
       draw(dt, now);
       // keep going while anything moves; one more frame after the last effect clears the fx layer
-      const busy = ambient || focused || cold > 0 || branches.length > 0 || cracks.length > 0 || shards.length > 0 || chips.length > 0 || mist.length > 0 || shake > 0 || hadFx;
-      if (busy) raf = requestAnimationFrame((t) => frame(t));
+      const busy = ambient || (focused && !reduced) || cold > 0 || branches.length > 0 || cracks.length > 0 || shards.length > 0 || chips.length > 0 || mist.length > 0 || shake > 0 || hadFx;
+      // api calls made during this frame may already have queued the next one
+      if (busy && !raf) raf = requestAnimationFrame((t) => frame(t));
     };
 
     const ro = new ResizeObserver(fit);
