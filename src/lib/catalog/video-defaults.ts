@@ -2,6 +2,7 @@ import { CATALOG_COUNTS } from "@/lib/catalog/counts";
 import { SOUNDS } from "@/lib/ui-sounds";
 import { PRICES, formatPrice } from "@/lib/pricing";
 import { getVideo } from "@/lib/catalog/videos";
+import { blockVariants } from "@/lib/catalog/block-variants";
 
 /**
  * A video's starting copy with the live numbers swapped in: the real component, block, template
@@ -27,6 +28,14 @@ export function videoDefaults(slug: string): Record<string, string> {
   }
   if (slug === "keynote-film") {
     base.count = String(CATALOG_COUNTS.components);
+  }
+  if (slug === "launch-film") {
+    base.count = String(CATALOG_COUNTS.components);
+    base.free = String(CATALOG_COUNTS.freeComponents);
+    base.sections = String(blockVariants.length);
+    base.blocks = String(CATALOG_COUNTS.blocks);
+    base.templates = String(CATALOG_COUNTS.templates);
+    base.sounds = String(sounds);
   }
   if (slug === "price-reveal") {
     base.items = `${CATALOG_COUNTS.components} components, ${CATALOG_COUNTS.blocks} blocks, ${CATALOG_COUNTS.templates} templates, ${sounds} sounds`;

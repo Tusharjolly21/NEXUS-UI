@@ -1,5 +1,5 @@
 /**
- * The video catalogue: nineteen videos, each a React component that is a pure function of time, drawn
+ * The video catalogue: twenty videos, each a React component that is a pure function of time, drawn
  * on a fixed canvas for each shape it supports (9:16, 1:1, 16:9 and more), with its own soundtrack. This file is metadata only (it is safe to import from
  * server code); the animation lives in `src/components/videos/<slug>.tsx`, the prompt and the
  * downloadable source in `content/videos/<slug>/` (served only through the gated route).
@@ -1623,6 +1623,88 @@ export const videos: VideoEntry[] = [
       {
         "key": "haze",
         "label": "Dark stage tint",
+        "type": "color"
+      }
+    ]
+  },
+  {
+    "slug": "launch-film",
+    "title": "Launch Film",
+    "purpose": "Product launch film",
+    "motion": "Real Nexus UI components running live, the real site in a browser window, glass cards, chain links, a component network and the lockup",
+    "app": "Nexus UI",
+    "platforms": [
+      "X",
+      "YouTube",
+      "LinkedIn",
+      "Product Hunt"
+    ],
+    "formats": [
+      "16:9",
+      "9:16",
+      "1:1"
+    ],
+    "duration": 44,
+    "bpm": 100,
+    "cuts": [
+      2.9,
+      4.5,
+      5.1,
+      9.2,
+      11,
+      13.6,
+      15.3,
+      17.2,
+      20.8,
+      26.2,
+      28.6,
+      31.2,
+      32.4,
+      35.6,
+      38.8,
+      40.4
+    ],
+    "blurb": "A 44-second launch film for Nexus UI built from the library itself. Ten real components (Glass Bubbles, Curved Reel, Island Morph, Magnify Dock, Packet Router, Ruler Picker, Stretch Nav, Folder Peek, Price Odometer, Dot Sphere) and the Mac Keyboard run live in the frame on their own autoplay. The real nexus-ui.com scrolls in a browser window, from the hero to the gallery to the Mac Keyboard props, with light and dark versions of the site, the real logo, the real counts and the real release notes. Original 100 BPM score with every move scored.",
+    "premium": true,
+    "dark": false,
+    "createdAt": "2026-10-23",
+    "posterAt": 20,
+    "defaults": {
+      "brand": "Nexus UI",
+      "url": "nexus-ui.com",
+      "blue": "#0071e3",
+      "count": "205",
+      "pkg": "@nexus-labs/mac-keyboard"
+    },
+    "fields": [
+      {
+        "key": "brand",
+        "label": "Brand",
+        "type": "text",
+        "max": 16
+      },
+      {
+        "key": "url",
+        "label": "URL",
+        "type": "text",
+        "max": 24
+      },
+      {
+        "key": "pkg",
+        "label": "Package",
+        "type": "text",
+        "max": 32
+      },
+      {
+        "key": "count",
+        "label": "Components",
+        "type": "number",
+        "min": 1,
+        "max": 999
+      },
+      {
+        "key": "blue",
+        "label": "Accent",
         "type": "color"
       }
     ]

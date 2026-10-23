@@ -24,6 +24,7 @@ const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   "hero-loop": () => import("./hero-loop"),
   "glass-orbit": () => import("./glass-orbit"),
   "word-rush": () => import("./word-rush"),
+  "launch-film": () => import("./launch-film"),
   "keynote-film": () => import("./keynote-film"),
   "brand-film": () => import("./brand-film"),
 };
