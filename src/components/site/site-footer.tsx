@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { openCookieSettings } from "@/lib/consent";
-import { siteConfig } from "@/lib/seo";
+import { SocialLinks } from "@/components/site/social-links";
 
 const COLUMNS = [
   {
@@ -46,8 +46,6 @@ const LEGAL = [
 
 /** Quiet Apple-style footer with the ghost "Nexus UI" wordmark bleeding off the bottom edge. */
 export function SiteFooter() {
-  const xHandle = siteConfig.twitterHandle?.replace("@", "");
-
   return (
     <footer className="relative overflow-hidden border-t border-border bg-footer px-4 pt-16 text-foreground">
       <div className="relative z-10 mx-auto max-w-[1152px]">
@@ -60,6 +58,8 @@ export function SiteFooter() {
             <p className="mt-4 max-w-[260px] text-[13px] leading-relaxed text-muted-foreground">
               Animated React components and Next.js templates you copy into your project and own.
             </p>
+            <p className="mt-6 text-[12.5px] font-semibold text-foreground">Connect with us</p>
+            <SocialLinks className="mt-3" />
           </div>
           {COLUMNS.map((col) => (
             <nav key={col.title} aria-label={col.title}>
@@ -87,11 +87,6 @@ export function SiteFooter() {
             <button type="button" onClick={openCookieSettings} className="transition-colors hover:text-foreground">
               Cookie settings
             </button>
-            {xHandle && (
-              <a href={`https://x.com/${xHandle}`} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
-                X
-              </a>
-            )}
           </div>
         </div>
       </div>

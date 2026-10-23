@@ -19,11 +19,11 @@ export const siteConfig = {
   description:
     "Free animated React components and Next.js templates built with Tailwind CSS and Framer Motion. Copy-paste, or install with the shadcn CLI.",
   url: site,
-  // Official accounts only. Left empty until Nexus UI has its own profiles — a handle owned
-  // by someone else would tie the brand to their account in Google and AI answers.
-  twitterHandle: null as string | null, // e.g. "@nexusui"
+  // Official accounts only: a handle owned by someone else would tie the brand to their account
+  // in Google and AI answers.
+  twitterHandle: "@nexusuilabs" as string | null,
   /** Organization `sameAs` URLs (X, GitHub, 21st.dev, LinkedIn…), also listed in public/llms.txt. */
-  socialProfiles: [] as string[],
+  socialProfiles: ["https://x.com/nexusuilabs", "https://www.instagram.com/nexusuilabs/"] as string[],
   // NOTE: Google explicitly does NOT use the <meta name="keywords"> tag.
   // Keywords are intentionally omitted — focus effort on titles, descriptions,
   // headings, and structured data instead (per Google SEO Starter Guide).
