@@ -10114,6 +10114,172 @@ export function EditorToolbar() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "sound-mark",
+    name: "Sound Mark",
+    registryCliName: "sound-mark",
+    description:
+      "A brand mark under a tray of water with a vibrating rod in it. The rod drives a standing ripple that bends the mark like light through water. Press and hold to turn the note up, tap to drop a ripple, drag the rod to move the source, and pick a pitch to tighten or loosen the rings.",
+    categorySlug: "motion-effects",
+    tags: ["logo", "brand", "water", "ripple", "shader", "webgl", "sound", "audio", "web audio", "wordmark", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 166,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "spring", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "word", type: "string", defaultValue: "\"sound\"", description: "The word set beside the mark. It is drawn into the water, so keep it short." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Swells, drops ripples and cycles the colours and pitch by itself until someone touches it. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewSoundMark,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { SoundMark } from "@/components/sound-mark";
+
+export function BrandHero() {
+  return (
+    <section className="mx-auto flex w-full max-w-[880px] justify-center py-16">
+      <SoundMark word="studio" />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ripple-now-playing",
+    name: "Ripple Now Playing",
+    registryCliName: "ripple-now-playing",
+    description:
+      "A player card whose cover sits under water. Every beat of the track drops a ring that spreads through the artwork, so the cover pulses in time. Pause and the water goes still, scrub the bar and a ring follows your finger, skip and the new cover slides in.",
+    categorySlug: "cards",
+    tags: ["music", "player", "now playing", "cover art", "ripple", "displacement", "svg filter", "audio", "spotify", "scrub", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 163,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Starts playing by itself and skips to the next track every seven seconds until someone touches the card. Pauses off screen and never runs under reduced motion. Without it the card waits, paused, until you press play." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewRippleNowPlaying,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { RippleNowPlaying } from "@/components/ripple-now-playing";
+
+export function PlayerPanel() {
+  return (
+    <aside className="mx-auto w-full max-w-[360px] py-10">
+      <RippleNowPlaying />
+    </aside>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "chladni-upload",
+    name: "Chladni Upload",
+    registryCliName: "chladni-upload",
+    description:
+      "An upload progress indicator made of sand on a vibrating plate. Each stage of the upload plays a higher note, the sand jumps off the moving parts and settles on the new quiet lines so the pattern gets finer as the file goes up, and at 100% it gathers into a check mark.",
+    categorySlug: "loaders",
+    tags: ["upload", "progress", "chladni", "sand", "particles", "canvas", "file", "loader", "progress bar", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 161,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "fileName", type: "string", defaultValue: "\"mix-final.wav\"", description: "The file name shown under the plate." },
+      { name: "fileSize", type: "number", defaultValue: "24.6", description: "Size in MB. The \"x of y MB\" line counts up to it." },
+      { name: "onComplete", type: "() => void", description: "Called once each time an upload reaches 100%." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Uploads, holds the check, resets and goes again until someone presses the button. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewChladniUpload,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ChladniUpload } from "@/components/chladni-upload";
+
+export function ExportStatus() {
+  return (
+    <ChladniUpload
+      fileName="album-master.wav"
+      fileSize={48.2}
+      onComplete={() => console.log("uploaded")}
+    />
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "tank-recorder",
+    name: "Tank Recorder",
+    registryCliName: "tank-recorder",
+    description:
+      "A voice memo button over a glass tank seen from the side. While you hold to record, your simulated voice shakes a pin in the water and the surface carries it as real waves that bounce off the glass. The timer sits behind the water, so the part below the line wobbles with the voice. Let go and the memo drops into a list with its waveform.",
+    categorySlug: "inputs-controls",
+    tags: ["recorder", "voice", "audio", "record", "timer", "liquid", "water", "svg", "level meter", "voice memo", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 159,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Records a short simulated take, saves it, and goes again until someone touches the button. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewTankRecorder,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { TankRecorder } from "@/components/tank-recorder";
+
+export function VoiceMemo() {
+  return (
+    <div className="mx-auto w-full max-w-[360px] py-10">
+      <TankRecorder />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "ripple-toast",
+    name: "Ripple Toast",
+    registryCliName: "ripple-toast",
+    description:
+      "Notifications that arrive like a drop hitting water. Each toast falls in as a small bead, splashes flat into a pill with an overshoot, sends out a ring, and its text resolves out of the ripples. Up to three stack, and dismissed ones lift away as a drop.",
+    categorySlug: "motion-effects",
+    tags: ["toast", "notification", "snackbar", "alert", "water", "ripple", "svg filter", "displacement", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 157,
+    createdAt: "2026-10-23",
+    animationKinds: ["spring", "layout", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sends a notification every couple of seconds and dismisses one now and then, until someone presses a button. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewRippleToast,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { RippleToast } from "@/components/ripple-toast";
+
+export function NotificationsDemo() {
+  return (
+    <div className="mx-auto w-full max-w-[380px] py-10">
+      <RippleToast />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

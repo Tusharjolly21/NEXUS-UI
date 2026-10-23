@@ -60,6 +60,11 @@ const SELF_DEMO = new Set([
   "skeleton-morph",
   "morphing-dialog",
   "travelling-tooltip",
+  "sound-mark",
+  "ripple-now-playing",
+  "chladni-upload",
+  "tank-recorder",
+  "ripple-toast",
   "tick-slider",
   "time-scrubber",
   "slide-to-confirm",
@@ -343,6 +348,12 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // twelfth batch (Made by sound)
+  "sound-mark",
+  "ripple-now-playing",
+  "chladni-upload",
+  "tank-recorder",
+  "ripple-toast",
   // eleventh batch (States and Essentials)
   "empty-projects",
   "no-results",
