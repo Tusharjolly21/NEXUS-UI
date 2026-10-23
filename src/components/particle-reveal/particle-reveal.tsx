@@ -79,8 +79,8 @@ export function ParticleReveal({
     const build = () => {
       const r = wrap.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
-      w = r.width;
-      h = r.height;
+      w = wrap.offsetWidth || r.width;
+      h = wrap.offsetHeight || r.height;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       // sample the word from an offscreen canvas
@@ -126,9 +126,11 @@ export function ParticleReveal({
 
     const onMove = (e: PointerEvent) => {
       const r = wrap.getBoundingClientRect();
-      pointer.x = e.clientX - r.left;
-      pointer.y = e.clientY - r.top;
-      pointer.live = pointer.x >= 0 && pointer.y >= 0 && pointer.x <= r.width && pointer.y <= r.height;
+      // Undo any CSS scale on a parent so pointer space matches layout space.
+      const k = wrap.offsetWidth ? r.width / wrap.offsetWidth : 1;
+      pointer.x = (e.clientX - r.left) / k;
+      pointer.y = (e.clientY - r.top) / k;
+      pointer.live = pointer.x >= 0 && pointer.y >= 0 && pointer.x <= w && pointer.y <= h;
       if (pointer.live) touched = true;
     };
     window.addEventListener("pointermove", onMove, { passive: true });

@@ -111,7 +111,10 @@ export function WorkflowNetwork({
       if (!box || !src) return;
       const b = box.getBoundingClientRect();
       const s = src.getBoundingClientRect();
-      const ax = s.right - b.left, ay = s.top + s.height / 2 - b.top;
+      // The canvas can sit inside a scaled parent (preview shells use a CSS
+      // transform), so convert screen-space deltas back to layout space.
+      const k = box.offsetWidth ? b.width / box.offsetWidth : 1;
+      const ax = (s.right - b.left) / k, ay = (s.top + s.height / 2 - b.top) / k;
       const t = autoplay ? (now - start) / 1000 : cycle * 0.6;
       // fill 0-55%, hold to 75%, drain from the source end to 100%
       const p = mode === "once" ? Math.min(1, t / cycle) * 0.55 : (t / cycle) % 1;
@@ -122,7 +125,7 @@ export function WorkflowNetwork({
         const wire = wireRefs.current[i], beam = beamRefs.current[i], dot = dotRefs.current[i];
         if (!el || !wire || !beam) return;
         const r = el.getBoundingClientRect();
-        const bx = r.left - b.left, by = r.top + r.height / 2 - b.top;
+        const bx = (r.left - b.left) / k, by = (r.top + r.height / 2 - b.top) / k;
         const dx = Math.max(30, (bx - ax) * 0.55);
         const d = `M${ax},${ay} C${ax + dx},${ay} ${bx - dx},${by} ${bx},${by}`;
         wire.setAttribute("d", d);

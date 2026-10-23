@@ -60,8 +60,8 @@ export function MeshNet({
     const build = () => {
       const r = wrap.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
-      w = r.width;
-      h = r.height;
+      w = wrap.offsetWidth || r.width;
+      h = wrap.offsetHeight || r.height;
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       const s = gridSize;
@@ -90,8 +90,10 @@ export function MeshNet({
 
     const onMove = (e: PointerEvent) => {
       const r = wrap.getBoundingClientRect();
-      const x = e.clientX - r.left, y = e.clientY - r.top;
-      if (x < -40 || y < -40 || x > r.width + 40 || y > r.height + 40) {
+      // Undo any CSS scale on a parent so pointer space matches layout space.
+      const k = wrap.offsetWidth ? r.width / wrap.offsetWidth : 1;
+      const x = (e.clientX - r.left) / k, y = (e.clientY - r.top) / k;
+      if (x < -40 || y < -40 || x > w + 40 || y > h + 40) {
         pointer.live = false;
         return;
       }
