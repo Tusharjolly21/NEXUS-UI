@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Mail } from "lucide-react";
 import { RainbowWord } from "@/components/site";
+import { SocialLinks } from "@/components/site/social-links";
 import { legalConfig } from "@/lib/legal";
 import { createMetadata } from "@/lib/seo";
 import { ContactForm } from "./contact-form";
@@ -57,6 +58,12 @@ export default function ContactPage() {
               >
                 {contactEmail}
               </a>
+            </div>
+
+            <div className="rounded-tile bg-card p-7 pg-float">
+              <h2 className="text-[17px] font-semibold text-foreground">Connect with us</h2>
+              <p className="mt-1 text-[15px] leading-relaxed text-body">Follow along for updates and new releases.</p>
+              <SocialLinks withHandle className="mt-4 flex-wrap" />
             </div>
 
             <div className="rounded-tile bg-tint-sky p-7">
