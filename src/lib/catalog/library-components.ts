@@ -10353,6 +10353,217 @@ export function DarkHero() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "mesh-net",
+    name: "Mesh Net",
+    registryCliName: "mesh-net",
+    description:
+      "A distorted triangle net that hides in the dark until the cursor comes near. Nodes are shoved outward on springs, overshoot a little as they settle, and the edges light up like a torch passing over them, then fade out again with distance.",
+    categorySlug: "background-effects",
+    tags: ["net", "mesh", "triangles", "canvas", "spring", "cursor", "reveal", "background", "hero", "dark", "motion kit"],
+    premium: true,
+    trendingScore: 166,
+    createdAt: "2026-10-23",
+    animationKinds: ["hover", "spring"],
+    dependencies: [],
+    props: [
+      { name: "color", type: "string", defaultValue: "\"#5b4fe0\"", description: "Colour of the lit edges, as a 6-digit hex." },
+      { name: "background", type: "string", defaultValue: "\"#000000\"", description: "Colour the canvas is cleared to." },
+      { name: "gridSize", type: "number", defaultValue: "64", description: "Spacing between nodes, in px." },
+      { name: "distortion", type: "number", defaultValue: "0.5", description: "Random offset of each node, as a fraction of the spacing (0 to 0.5)." },
+      { name: "revealRadius", type: "number", defaultValue: "230", description: "Radius around the pointer where the net shows and reacts, in px." },
+      { name: "push", type: "number", defaultValue: "30", description: "How far nodes are shoved away from the pointer, in px." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost pointer drifts in a slow loop until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+      { name: "children", type: "ReactNode", description: "Content layered above the net." },
+    ],
+    Preview: Previews.PreviewMeshNet,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MeshNet } from "@/components/mesh-net";
+
+// The net fills its box, so give it a height. Content goes on top as children.
+export function Hero() {
+  return (
+    <section className="h-[560px]">
+      <MeshNet color="#5b4fe0">
+        <div className="pointer-events-none flex h-full items-center justify-center">
+          <h1 className="text-5xl font-semibold tracking-tight text-white">Every node, one move away.</h1>
+        </div>
+      </MeshNet>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Tighter, warmer net",
+        code: `"use client";
+
+import { MeshNet } from "@/components/mesh-net";
+
+export function WarmNet() {
+  return (
+    <div className="h-[480px]">
+      <MeshNet color="#ff6a2b" background="#0b0b0d" gridSize={44} revealRadius={180} push={22} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "particle-reveal",
+    name: "Particle Reveal",
+    registryCliName: "particle-reveal",
+    description:
+      "A headline made of thousands of dots that gather out of a scatter on springs, each with its own slight delay, like dust settling. The cursor pushes nearby dots aside and combs them into streaks, they flow back when it leaves, and a click blows the word apart again.",
+    categorySlug: "motion-effects",
+    tags: ["text", "particles", "dots", "canvas", "headline", "reveal", "spring", "cursor", "hero", "motion kit"],
+    premium: true,
+    trendingScore: 165,
+    createdAt: "2026-10-23",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "text", type: "string", defaultValue: "\"Reveal\"", description: "The word to draw. Short words read best." },
+      { name: "color", type: "string", defaultValue: "\"#3a3a3c\"", description: "Colour of the dots." },
+      { name: "particleSize", type: "number", defaultValue: "1", description: "Radius of each dot in px." },
+      { name: "density", type: "number", defaultValue: "3.2", description: "Sampling step in px. Lower is denser (2 to 8)." },
+      { name: "dispersion", type: "number", defaultValue: "1", description: "How far the dots start from the letters, as a fraction of the stage (0 to 1.5)." },
+      { name: "hoverRadius", type: "number", defaultValue: "70", description: "Radius around the cursor that pushes dots away, in px." },
+      { name: "hoverForce", type: "number", defaultValue: "1", description: "Strength of the push." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost cursor combs through the word and the word bursts and re-forms every few seconds, until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewParticleReveal,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { ParticleReveal } from "@/components/particle-reveal";
+
+export function Headline() {
+  return (
+    <div className="mx-auto w-full max-w-[640px] py-10">
+      <ParticleReveal text="Launch" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "morphing-text",
+    name: "Morphing Text",
+    registryCliName: "morphing-text",
+    description:
+      "A keyword that melts into the next one. Two blurred copies meet under an SVG alpha threshold, so the letters flow into new letters instead of cross-fading. The threshold is only on during the morph, so resting text stays crisp, and a pause button stops the cycle.",
+    categorySlug: "motion-effects",
+    tags: ["text", "morph", "gooey", "blur", "svg filter", "headline", "keyword", "rotating text", "hero", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 164,
+    createdAt: "2026-10-23",
+    animationKinds: ["spring", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "lead", type: "string", defaultValue: "\"Interfaces that feel\"", description: "Static line above the morphing word. An empty string hides it." },
+      { name: "words", type: "string[]", defaultValue: "[\"alive.\", \"tactile.\", \"physical.\", \"inevitable.\", \"yours.\"]", description: "The words to cycle through." },
+      { name: "morphTime", type: "number", defaultValue: "1.1", description: "Seconds each morph takes." },
+      { name: "holdTime", type: "number", defaultValue: "1.6", description: "Seconds each word rests before the next morph." },
+      { name: "align", type: "\"left\" | \"center\" | \"right\"", defaultValue: "\"center\"", description: "Alignment of the lead line and the word." },
+      { name: "color", type: "string", defaultValue: "\"#0071e3\"", description: "Colour of the morphing word." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Cycles through the words on its own. Off, it rests on the first word until Play is pressed. Pauses off screen, and reduced motion swaps words with a plain fade." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewMorphingText,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { MorphingText } from "@/components/morphing-text";
+
+export function Hero() {
+  return (
+    <section className="px-6 py-24">
+      <MorphingText lead="Interfaces that feel" words={["alive.", "tactile.", "yours."]} autoplay />
+    </section>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "code-snippet",
+    name: "Code Snippet",
+    registryCliName: "code-snippet",
+    description:
+      "A code block for developer pages. A macOS-style header with the language in quiet monospace (click it to switch) and a small Copy button that morphs into a tick. Real token-level highlighting for JS, TS, Python, Bash and JSON with no highlighter library, dark and light themes, optional line numbers, and lines that roll in one after another.",
+    categorySlug: "cards",
+    tags: ["code", "snippet", "syntax highlighting", "developer", "docs", "copy", "tabs", "dark", "light", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 163,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "initial", type: "\"js\" | \"ts\" | \"python\" | \"bash\" | \"json\"", defaultValue: "\"js\"", description: "Language shown first." },
+      { name: "theme", type: "\"dark\" | \"light\"", defaultValue: "\"dark\"", description: "Colour theme of the block." },
+      { name: "lineNumbers", type: "boolean", defaultValue: "true", description: "Shows line numbers." },
+      { name: "controls", type: "boolean", defaultValue: "true", description: "Shows the chip row for language, theme and line numbers under the block." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Tours the languages every few seconds until someone touches it. Pauses off screen." },
+      { name: "className", type: "string", description: "Extra classes for the wrapper." },
+    ],
+    Preview: Previews.PreviewCodeSnippet,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { CodeSnippet } from "@/components/code-snippet";
+
+export function InstallExample() {
+  return (
+    <div className="mx-auto w-full max-w-[520px] py-10">
+      <CodeSnippet initial="ts" theme="dark" controls={false} />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
+  {
+    slug: "workflow-network",
+    name: "Workflow Network",
+    registryCliName: "workflow-network",
+    description:
+      "One trigger fans out to its targets along curved wires on a dark dotted canvas. Light runs out of the source along every wire at once, fills each one up to its target, holds, then drains and starts again, with an optional dot riding the front of each beam. Hover or focus a target to light only its route. Wires are measured from the real cards, so they stay attached at any width.",
+    categorySlug: "ai-components",
+    tags: ["workflow", "automation", "nodes", "wires", "beam", "diagram", "fan out", "trigger", "canvas", "svg", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 162,
+    createdAt: "2026-10-23",
+    animationKinds: ["hover", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "source", type: "FlowNode", defaultValue: "an Error Trigger node", description: "The node the wires start from: title, sub, colour and an icon." },
+      { name: "targets", type: "FlowNode[]", defaultValue: "three demo targets", description: "The nodes the wires end at. Each takes a title, sub, colour and icon (an inline SVG or an img of a logo)." },
+      { name: "beamColor", type: "string", defaultValue: "\"#3b6cf6\"", description: "Colour of the light and the dot." },
+      { name: "cycle", type: "number", defaultValue: "2.6", description: "Seconds for one fill, hold and drain." },
+      { name: "dots", type: "boolean", defaultValue: "true", description: "Rides a dot on the front of each beam." },
+      { name: "mode", type: "\"loop\" | \"once\"", defaultValue: "\"loop\"", description: "Loop forever, or fill once and stay lit." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Runs the beams. Off, the wires rest filled. Pauses off screen." },
+      { name: "className", type: "string", description: "Extra classes for the canvas." },
+    ],
+    Preview: Previews.PreviewWorkflowNetwork,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { WorkflowNetwork } from "@/components/workflow-network";
+
+export function IncidentFlow() {
+  return (
+    <div className="mx-auto w-full max-w-[720px] py-10">
+      <WorkflowNetwork autoplay beamColor="#3b6cf6" />
+    </div>
+  );
+}`,
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

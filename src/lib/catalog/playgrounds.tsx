@@ -203,6 +203,11 @@ import { SoundMark } from "@/components/sound-mark";
 import { RippleNowPlaying } from "@/components/ripple-now-playing";
 import { ChladniUpload } from "@/components/chladni-upload";
 import { CubesGrid } from "@/components/cubes-grid";
+import { MeshNet } from "@/components/mesh-net";
+import { ParticleReveal } from "@/components/particle-reveal";
+import { MorphingText } from "@/components/morphing-text";
+import { CodeSnippet } from "@/components/code-snippet";
+import { WorkflowNetwork } from "@/components/workflow-network";
 import { TankRecorder } from "@/components/tank-recorder";
 import { RippleToast } from "@/components/ripple-toast";
 
@@ -3379,6 +3384,112 @@ export const playgrounds: Record<string, Playground> = {
           amplitude={v.amplitude as number}
           glow={v.glow as number}
           idleRipples={v.idleRipples as boolean}
+        />
+      </div>
+    ),
+  },
+  "mesh-net": {
+    componentName: "MeshNet",
+    importPath: "@/components/mesh-net",
+    defaultFill: "dark",
+    controls: [
+      { kind: "range", prop: "gridSize", label: "Node spacing", min: 36, max: 110, step: 2, defaultValue: 64 },
+      { kind: "range", prop: "revealRadius", label: "Reveal radius", min: 100, max: 400, step: 10, defaultValue: 230 },
+      { kind: "range", prop: "push", label: "Push", min: 0, max: 70, step: 1, defaultValue: 30 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="relative h-[420px] w-full overflow-hidden rounded-2xl bg-black">
+        <MeshNet
+          key={`${v.gridSize}-${v.autoplay}`}
+          gridSize={v.gridSize as number}
+          revealRadius={v.revealRadius as number}
+          push={v.push as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "particle-reveal": {
+    componentName: "ParticleReveal",
+    importPath: "@/components/particle-reveal",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "text", label: "Word", options: ["Reveal", "Launch", "Motion", "Nexus"], defaultValue: "Reveal" },
+      { kind: "range", prop: "density", label: "Density (lower is denser)", min: 2, max: 8, step: 0.2, defaultValue: 3.2 },
+      { kind: "range", prop: "hoverRadius", label: "Push radius", min: 30, max: 160, step: 5, defaultValue: 70 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost cursor", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[560px]">
+        <ParticleReveal
+          key={`${v.text}-${v.density}-${v.autoplay}`}
+          text={String(v.text || "Reveal")}
+          density={v.density as number}
+          hoverRadius={v.hoverRadius as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "morphing-text": {
+    componentName: "MorphingText",
+    importPath: "@/components/morphing-text",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "align", label: "Align", options: ["left", "center", "right"], defaultValue: "center" },
+      { kind: "range", prop: "morphTime", label: "Morph seconds", min: 0.4, max: 2.4, step: 0.1, defaultValue: 1.1 },
+      { kind: "range", prop: "holdTime", label: "Hold seconds", min: 0.5, max: 4, step: 0.1, defaultValue: 1.6 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <MorphingText
+        key={String(v.autoplay)}
+        align={v.align as "left" | "center" | "right"}
+        morphTime={v.morphTime as number}
+        holdTime={v.holdTime as number}
+        autoplay={v.autoplay as boolean}
+      />
+    ),
+  },
+  "code-snippet": {
+    componentName: "CodeSnippet",
+    importPath: "@/components/code-snippet",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "initial", label: "Language", options: ["js", "ts", "python", "bash", "json"], defaultValue: "js" },
+      { kind: "select", prop: "theme", label: "Theme", options: ["dark", "light"], defaultValue: "dark" },
+      { kind: "toggle", prop: "lineNumbers", label: "Line numbers", defaultValue: true },
+      { kind: "toggle", prop: "controls", label: "Chip row", defaultValue: true },
+    ],
+    render: (v) => (
+      <CodeSnippet
+        key={`${v.initial}-${v.theme}-${v.lineNumbers}`}
+        initial={v.initial as "js" | "ts" | "python" | "bash" | "json"}
+        theme={v.theme as "dark" | "light"}
+        lineNumbers={v.lineNumbers as boolean}
+        controls={v.controls as boolean}
+      />
+    ),
+  },
+  "workflow-network": {
+    componentName: "WorkflowNetwork",
+    importPath: "@/components/workflow-network",
+    defaultFill: "dark",
+    controls: [
+      { kind: "range", prop: "cycle", label: "Cycle seconds", min: 1.2, max: 6, step: 0.1, defaultValue: 2.6 },
+      { kind: "select", prop: "mode", label: "Mode", options: ["loop", "once"], defaultValue: "loop" },
+      { kind: "toggle", prop: "dots", label: "Dot on the beam", defaultValue: true },
+      { kind: "toggle", prop: "autoplay", label: "Run the beams", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[720px]">
+        <WorkflowNetwork
+          key={`${v.mode}-${v.autoplay}`}
+          cycle={v.cycle as number}
+          mode={v.mode as "loop" | "once"}
+          dots={v.dots as boolean}
+          autoplay={v.autoplay as boolean}
         />
       </div>
     ),
