@@ -105,13 +105,7 @@ cn("p-4", isActive && "p-6")        // → "p-6"      (clsx, then twMerge)`}</Do
             Install the three libraries every Nexus UI component relies on:{" "}
             <code className={docInlineCodeClass}>clsx</code> for conditional class logic,{" "}
             <code className={docInlineCodeClass}>tailwind-merge</code> for conflict resolution, and{" "}
-            <code className={docInlineCodeClass}>motion</code> for animations.
-          </p>
-          <DocPre>{`npm install clsx tailwind-merge motion`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            If you prefer the original Framer Motion package name, both are compatible — Nexus UI
-            components import from{" "}
-            <code className={docInlineCodeClass}>motion/react</code> (the Motion library):
+            <code className={docInlineCodeClass}>framer-motion</code> for animations.
           </p>
           <DocPre>{`npm install clsx tailwind-merge framer-motion`}</DocPre>
         </DocSection>
