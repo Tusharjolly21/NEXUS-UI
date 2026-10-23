@@ -10354,6 +10354,295 @@ export function DarkHero() {
     tailwindSource: tw,
   },
   {
+    slug: "venom-button",
+    name: "Venom Button",
+    registryCliName: "venom-button",
+    description:
+      "A glossy black pill that hunts for a host. Come near and pseudopods ooze out and feel toward the cursor; get close and they lunge, each one wrapping a finger of a cartoon glove. Pull away and they stretch, snap and melt back into the button, which wobbles and throws up a few spikes.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "cta", "webgl", "shader", "metaball", "liquid", "goo", "cursor", "hover", "lacquer", "motion kit"],
+    premium: false,
+    trendingScore: 172,
+    createdAt: "2026-10-23",
+    animationKinds: ["hover", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "label", type: "string", defaultValue: "\"let’s collaborate\"", description: "Text on the button." },
+      { name: "onClick", type: "() => void", description: "Click handler. It is a real button, so it is focusable and works from the keyboard." },
+      { name: "strands", type: "number", defaultValue: "7", description: "Thick strands, 2 to 7. About as many fine hairs are added between them." },
+      { name: "sense", type: "number", defaultValue: "290", description: "Distance from the edge, in px, at which the goo notices the cursor and starts reaching for it." },
+      { name: "reach", type: "number", defaultValue: "140", description: "Distance from the edge, in px, at which the strands lunge and grab the fingers." },
+      { name: "release", type: "number", defaultValue: "215", description: "Distance from the edge, in px, at which they snap. Keep it above reach." },
+      { name: "cursor", type: "\"glove\" | \"native\"", defaultValue: "\"glove\"", description: "\"glove\" draws a cartoon hand inside the stage; \"native\" keeps the system pointer." },
+      { name: "height", type: "number", defaultValue: "420", description: "Stage height in px." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost glove plays with the button until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the stage." },
+    ],
+    Preview: Previews.PreviewVenomButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { VenomButton } from "@/components/venom-button";
+
+// The button comes with its own light stage; set height to give the goo room to reach.
+export function Cta() {
+  return (
+    <div className="mx-auto max-w-[720px]">
+      <VenomButton label="let’s collaborate" onClick={() => console.log("clicked")} />
+    </div>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Shorter reach, system cursor",
+        code: `"use client";
+
+import { VenomButton } from "@/components/venom-button";
+
+export function QuietCta() {
+  return (
+    <VenomButton
+      label="Book a call"
+      cursor="native"
+      strands={4}
+      sense={220}
+      reach={110}
+      release={170}
+      height={320}
+    />
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "web-sling-button",
+    name: "Web Sling Button",
+    registryCliName: "web-sling-button",
+    description:
+      "A call-to-action button on a dark stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays.",
+    categorySlug: "inputs-controls",
+    tags: ["button", "cta", "web", "silk", "verlet", "rope", "canvas", "physics", "drag", "cursor", "playful", "dark", "motion kit"],
+    premium: false,
+    trendingScore: 171,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "drag", "spring"],
+    dependencies: [],
+    props: [
+      { name: "label", type: "string", defaultValue: "\"Get started\"", description: "Text on the button." },
+      { name: "onClick", type: "() => void", description: "Called when the button itself is clicked." },
+      { name: "height", type: "number", defaultValue: "460", description: "Height of the stage, in px." },
+      { name: "snapAt", type: "number", defaultValue: "2.3", description: "How far a line can be stretched, as a multiple of its length, before it snaps." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost shoots, pulls and snaps lines in a loop until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the stage." },
+    ],
+    Preview: Previews.PreviewWebSlingButton,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { WebSlingButton } from "@/components/web-sling-button";
+
+// The stage is a dark, rounded box that fills its parent's width. Clicks on the button itself
+// still reach onClick; clicks anywhere else on the stage shoot a web.
+export function CallToAction() {
+  return (
+    <div className="mx-auto max-w-3xl">
+      <WebSlingButton label="Get started" onClick={() => console.log("clicked")} />
+    </div>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Easier to snap, shorter stage",
+        code: `"use client";
+
+import { WebSlingButton } from "@/components/web-sling-button";
+
+export function SnappyWeb() {
+  return <WebSlingButton label="Join the swarm" snapAt={1.6} height={340} />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "frost-input",
+    name: "Frost Input",
+    registryCliName: "frost-input",
+    description:
+      "A sign-up field that freezes. Focus it and six-fold frost crystals grow across the glass, every key you type drives a crack through the ice from the caret, and sending it shatters the field from the point of impact into falling shards before it freezes back together. It is a real form field with a label, Enter to submit and an onSubmit callback.",
+    categorySlug: "inputs-controls",
+    tags: ["input", "email", "sign up", "newsletter", "frost", "ice", "crystal", "shatter", "canvas", "focus", "typing", "form", "motion kit"],
+    premium: true,
+    trendingScore: 170,
+    createdAt: "2026-10-23",
+    animationKinds: ["type", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "placeholder", type: "string", defaultValue: "\"you@studio.com\"", description: "Placeholder text inside the empty field." },
+      { name: "headline", type: "string", defaultValue: "\"Join the cold list.\"", description: "Headline above the field." },
+      { name: "done", type: "string", defaultValue: "\"You’re on the list.\"", description: "Message shown after the field shatters." },
+      { name: "onSubmit", type: "(value: string) => void", description: "Called with the trimmed value when the form is sent." },
+      { name: "height", type: "number", defaultValue: "420", description: "Height of the stage, in px." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost clicks in, types an address and sends it, in a loop, until a real pointer or key arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the stage." },
+    ],
+    Preview: Previews.PreviewFrostInput,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { FrostInput } from "@/components/frost-input";
+
+// The stage has its own dark blue background, so it works on any page. Set its height with the height prop.
+export function Waitlist() {
+  return (
+    <FrostInput
+      headline="Join the cold list."
+      done="You’re on the list."
+      onSubmit={(email) => console.log("subscribe", email)}
+    />
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Taller stage with your own copy",
+        code: `"use client";
+
+import { FrostInput } from "@/components/frost-input";
+
+export function Launch() {
+  return (
+    <div className="mx-auto max-w-3xl">
+      <FrostInput
+        height={480}
+        headline="Get the first thaw."
+        placeholder="name@company.com"
+        done="Frozen in. See you soon."
+        onSubmit={async (email) => {
+          await fetch("/api/waitlist", { method: "POST", body: JSON.stringify({ email }) });
+        }}
+      />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "black-hole-delete",
+    name: "Black Hole Delete",
+    registryCliName: "black-hole-delete",
+    description:
+      "An inbox where deleting is a cosmic event. Swipe a message away, or press its close button, and a black hole opens beside it: the list bends around it like a lens, the message is stretched thin and spirals in, and a shockwave ripples through the rest. Restore runs it backwards with a white hole.",
+    categorySlug: "inputs-controls",
+    tags: ["delete", "swipe", "inbox", "list", "webgl", "shader", "lens", "black hole", "gesture", "dark", "motion kit"],
+    premium: true,
+    trendingScore: 168,
+    createdAt: "2026-10-23",
+    animationKinds: ["drag", "press", "spring"],
+    dependencies: [],
+    props: [
+      { name: "messages", type: "BlackHoleMessage[]", defaultValue: "six sample messages", description: "The inbox: title, body, time and avatar colour for each message. Each one also gets a real delete button for keyboard and screen reader users." },
+      { name: "height", type: "number", defaultValue: "540", description: "Height of the stage, in px. About 76 + 69 per message + 40 fits the list and the hint line." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost pointer swipes a few messages away and restores them, until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the stage." },
+    ],
+    Preview: Previews.PreviewBlackHoleDelete,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { BlackHoleDelete } from "@/components/black-hole-delete";
+
+// The stage is dark and sets its own height. Swipe a message away or press its close button.
+export function Inbox() {
+  return (
+    <div className="mx-auto w-full max-w-[560px]">
+      <BlackHoleDelete />
+    </div>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own messages",
+        code: `"use client";
+
+import { BlackHoleDelete, type BlackHoleMessage } from "@/components/black-hole-delete";
+
+const messages: BlackHoleMessage[] = [
+  { title: "Ava Chen", body: "Design review moved to Thursday at 3?", time: "9:41", color: "#5e5ce6" },
+  { title: "Build bot", body: "Deploy failed: step 4 of 7 timed out", time: "9:12", color: "#ff9f0a" },
+  { title: "Marco", body: "Lunch? Ramen again or somewhere new", time: "8:55", color: "#30d158" },
+  { title: "Sam Rivera", body: "Sent the redlines, one open question on IP", time: "Tue", color: "#ff375f" },
+];
+
+export function MyInbox() {
+  return <BlackHoleDelete messages={messages} height={420} />;
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "portal-card",
+    name: "Portal Card",
+    registryCliName: "portal-card",
+    description:
+      "Hold and draw a circle on a dark card and a ring of molten sparks tears open where you drew it. Through it you see another world that shifts against the pointer like a view through a window. Click in to step through, click out and it collapses in embers. The other side is plain DOM, so any content can wait behind it.",
+    categorySlug: "cards",
+    tags: ["portal", "card", "canvas", "particles", "sparks", "gesture", "draw", "reveal", "transition", "reveal card", "motion kit"],
+    premium: true,
+    trendingScore: 169,
+    createdAt: "2026-10-23",
+    animationKinds: ["press", "parallax"],
+    dependencies: [],
+    props: [
+      { name: "children", type: "ReactNode", description: "What waits on the other side. Defaults to a dusk valley." },
+      { name: "height", type: "number", defaultValue: "460", description: "Height of the card, in px. It is always as wide as its parent." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost hand draws a circle, opens the portal, steps through and returns, until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the card." },
+    ],
+    Preview: Previews.PreviewPortalCard,
+    previewShell: "plain",
+    reactSource: `"use client";
+
+import { PortalCard } from "@/components/portal-card";
+
+// Draw a circle on the card to open the portal. With no children it shows a dusk valley.
+export function Showcase() {
+  return (
+    <div className="mx-auto max-w-[720px]">
+      <PortalCard height={440} />
+    </div>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Your own content on the other side",
+        code: `"use client";
+
+import { PortalCard } from "@/components/portal-card";
+
+export function Pricing() {
+  return (
+    <div className="mx-auto max-w-[720px]">
+      <PortalCard height={420}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0b1f3a] px-6 text-center">
+          <p className="m-0 text-4xl font-semibold tracking-tight text-white">Welcome to the team.</p>
+          <a href="/signup" className="mt-5 rounded-full bg-white px-5 py-2 text-sm font-medium text-[#0b1f3a]">
+            Start free
+          </a>
+        </div>
+      </PortalCard>
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
     slug: "mesh-net",
     name: "Mesh Net",
     registryCliName: "mesh-net",

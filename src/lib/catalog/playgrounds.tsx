@@ -208,6 +208,11 @@ import { ParticleReveal } from "@/components/particle-reveal";
 import { MorphingText } from "@/components/morphing-text";
 import { CodeSnippet } from "@/components/code-snippet";
 import { WorkflowNetwork } from "@/components/workflow-network";
+import { VenomButton } from "@/components/venom-button";
+import { WebSlingButton } from "@/components/web-sling-button";
+import { FrostInput } from "@/components/frost-input";
+import { BlackHoleDelete } from "@/components/black-hole-delete";
+import { PortalCard } from "@/components/portal-card";
 import { TankRecorder } from "@/components/tank-recorder";
 import { RippleToast } from "@/components/ripple-toast";
 
@@ -3385,6 +3390,118 @@ export const playgrounds: Record<string, Playground> = {
           glow={v.glow as number}
           idleRipples={v.idleRipples as boolean}
         />
+      </div>
+    ),
+  },
+  "venom-button": {
+    componentName: "VenomButton",
+    importPath: "@/components/venom-button",
+    defaultFill: "light",
+    controls: [
+      { kind: "range", prop: "strands", label: "Strands", min: 2, max: 7, step: 1, defaultValue: 7 },
+      { kind: "range", prop: "sense", label: "Sense distance", min: 120, max: 400, step: 10, unit: "px", defaultValue: 290 },
+      { kind: "range", prop: "reach", label: "Grab distance", min: 60, max: 200, step: 5, unit: "px", defaultValue: 140 },
+      { kind: "select", prop: "cursor", label: "Cursor", options: ["glove", "native"], defaultValue: "glove" },
+      { kind: "toggle", prop: "autoplay", label: "Ghost glove", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[720px]">
+        <VenomButton
+          key={`${v.strands}-${v.cursor}-${v.autoplay}`}
+          strands={v.strands as number}
+          sense={v.sense as number}
+          reach={v.reach as number}
+          release={Math.max((v.reach as number) + 40, (v.sense as number) - 60)}
+          cursor={v.cursor as "glove" | "native"}
+          autoplay={v.autoplay as boolean}
+          height={380}
+        />
+      </div>
+    ),
+  },
+  "web-sling-button": {
+    componentName: "WebSlingButton",
+    importPath: "@/components/web-sling-button",
+    defaultFill: "dark",
+    controls: [
+      { kind: "select", prop: "label", label: "Label", options: ["Get started", "Join the swarm", "Swing in", "Hang on"], defaultValue: "Get started" },
+      { kind: "range", prop: "snapAt", label: "Snap point", min: 1.3, max: 4, step: 0.1, unit: "x", defaultValue: 2.3 },
+      { kind: "range", prop: "height", label: "Stage height", min: 320, max: 560, step: 10, unit: "px", defaultValue: 460 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost shooter", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[720px]">
+        <WebSlingButton
+          label={String(v.label || "Get started")}
+          snapAt={v.snapAt as number}
+          height={v.height as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "frost-input": {
+    componentName: "FrostInput",
+    importPath: "@/components/frost-input",
+    defaultFill: "dark",
+    controls: [
+      { kind: "select", prop: "headline", label: "Headline", options: ["Join the cold list.", "Get the first thaw.", "Keep this one cool."], defaultValue: "Join the cold list." },
+      { kind: "select", prop: "done", label: "Confirmation", options: ["You’re on the list.", "Frozen in. See you soon.", "Cold storage confirmed."], defaultValue: "You’re on the list." },
+      { kind: "range", prop: "height", label: "Height", unit: "px", min: 320, max: 560, step: 10, defaultValue: 420 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost demo", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="w-full overflow-hidden rounded-2xl bg-[#081624] p-3">
+        <FrostInput
+          key={`${v.height}-${v.autoplay}`}
+          headline={v.headline as string}
+          done={v.done as string}
+          height={v.height as number}
+          autoplay={v.autoplay as boolean}
+        />
+      </div>
+    ),
+  },
+  "black-hole-delete": {
+    componentName: "BlackHoleDelete",
+    importPath: "@/components/black-hole-delete",
+    defaultFill: "dark",
+    controls: [
+      { kind: "select", prop: "count", label: "Messages", options: ["3", "4", "5", "6"], defaultValue: "6" },
+      { kind: "range", prop: "height", label: "Height", min: 540, max: 700, step: 10, unit: "px", defaultValue: 540 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost pointer", defaultValue: false, startOn: true },
+    ],
+    render: (v) => {
+      const inbox = [
+        { title: "Ava Chen", body: "Design review moved to Thursday at 3?", time: "9:41", color: "#5e5ce6" },
+        { title: "Build bot", body: "Deploy failed: step 4 of 7 timed out", time: "9:12", color: "#ff9f0a" },
+        { title: "Marco", body: "Lunch? Ramen again or somewhere new", time: "8:55", color: "#30d158" },
+        { title: "Motion Weekly", body: "Twelve interfaces that move like physics", time: "8:20", color: "#64d2ff" },
+        { title: "Sam Rivera", body: "Sent the redlines, one open question on IP", time: "Tue", color: "#ff375f" },
+        { title: "Flash sale", body: "48 hours left. Your cart is waiting", time: "Mon", color: "#bf5af2" },
+      ];
+      return (
+        <div className="mx-auto w-full max-w-[720px]">
+          <BlackHoleDelete
+            messages={inbox.slice(0, Number(v.count) || 6)}
+            height={v.height as number}
+            autoplay={v.autoplay as boolean}
+          />
+        </div>
+      );
+    },
+  },
+  "portal-card": {
+    componentName: "PortalCard",
+    importPath: "@/components/portal-card",
+    defaultFill: "dark",
+    controls: [
+      { kind: "range", prop: "height", label: "Height", min: 320, max: 560, step: 10, unit: "px", defaultValue: 460 },
+      { kind: "toggle", prop: "autoplay", label: "Ghost hand", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="w-full">
+        <PortalCard height={v.height as number} autoplay={v.autoplay as boolean} />
       </div>
     ),
   },
