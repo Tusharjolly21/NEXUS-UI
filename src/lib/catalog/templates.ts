@@ -773,6 +773,19 @@ export const templates: MarketplaceTemplate[] = [
   },
 ];
 
+/**
+ * Every template is drawn in one colour scheme and has no alternate theme. The preview's
+ * light/dark switch used to flip only the page around the frame, so it looked broken: the switch is
+ * now disabled and says which scheme the template is designed in. Add a slug here only if a
+ * template gains a real dark variant that responds to the `dark` class (then drop it from this map).
+ */
+const FIXED_SCHEME: Record<string, "light" | "dark"> = { kiln: "dark", strata: "dark" };
+
+/** The scheme a template is designed in; every template currently ignores the site theme. */
+export function templateScheme(slug: string): "light" | "dark" {
+  return FIXED_SCHEME[slug] ?? "light";
+}
+
 export function getTemplate(slug: string) {
   return templates.find((t) => t.slug === slug) ?? null;
 }

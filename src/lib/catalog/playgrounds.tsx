@@ -277,7 +277,7 @@ export type Playground = {
   snippetBaseProps?: string[];
   /** Which surface the stage starts on. */
   defaultFill?: "light" | "dark";
-  /** Designed for light surfaces only: the stage stays light in dark mode and the Fill switch is hidden. */
+  /** A fixed scene (own photo, shader or dark card) that ignores light/dark: the stage stays light and the Fill switch is hidden, so it never looks like the switch is broken. */
   lightOnly?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
 };
@@ -905,6 +905,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <HoldToConfirm key={String(v.autoplay)} autoplay={v.autoplay as boolean} color={v.color as string} holdMs={v.holdMs as number} label={v.label as string} />,
   },
   "before-after": {
+    lightOnly: true,
     componentName: "BeforeAfter",
     importPath: "@/components/before-after",
     snippetBaseProps: ['before={<img src="/before.jpg" alt="" className="h-full w-full object-cover" />}', 'after={<img src="/after.jpg" alt="" className="h-full w-full object-cover" />}'],
@@ -1222,6 +1223,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <TearOffTicket key={String(v.autoplay)} title={v.title as string} autoplay={v.autoplay as boolean} />,
   },
   "throw-wheel": {
+    lightOnly: true,
     componentName: "ThrowWheel",
     importPath: "@/components/throw-wheel",
     defaultFill: "light",
@@ -1341,6 +1343,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <BendingRail key={String(v.autoplay)} accent={v.accent as string} label={v.label as string} autoplay={v.autoplay as boolean} />,
   },
   "layout-switch": {
+    lightOnly: true,
     componentName: "LayoutSwitch",
     importPath: "@/components/layout-switch",
     defaultFill: "light",
@@ -1423,6 +1426,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <BoxSpill key={String(v.autoplay)} count={v.count as number} autoplay={v.autoplay as boolean} />,
   },
   "curved-reel": {
+    lightOnly: true,
     componentName: "CurvedReel",
     importPath: "@/components/curved-reel",
     defaultFill: "light",
@@ -1430,6 +1434,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <CurvedReel autoplay={v.autoplay as boolean} />,
   },
   "squeeze-progress": {
+    lightOnly: true,
     componentName: "SqueezeProgress",
     importPath: "@/components/squeeze-progress",
     defaultFill: "light",
@@ -1491,6 +1496,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <StampSwirl key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "bubble-cluster": {
+    lightOnly: true,
     componentName: "BubbleCluster",
     importPath: "@/components/bubble-cluster",
     defaultFill: "light",
@@ -1533,6 +1539,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <SwipeStack key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "flight-tracker": {
+    lightOnly: true,
     componentName: "FlightTracker",
     importPath: "@/components/flight-tracker",
     defaultFill: "light",
@@ -1605,6 +1612,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <GenerateImage key={`${v.prompt}-${v.autoplay}`} prompt={v.prompt as string} autoplay={v.autoplay as boolean} />,
   },
   "falloff-accordion": {
+    lightOnly: true,
     componentName: "FalloffAccordion",
     importPath: "@/components/falloff-accordion",
     defaultFill: "light",
@@ -1622,6 +1630,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <MagnetSelect key={`${v.defaultValue}-${v.autoplay}`} defaultValue={v.defaultValue as string} autoplay={v.autoplay as boolean} />,
   },
   "aspect-crop": {
+    lightOnly: true,
     componentName: "AspectCrop",
     importPath: "@/components/aspect-crop",
     defaultFill: "light",
@@ -1704,6 +1713,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <SeekSearch key={String(v.autoplay)} placeholder={v.placeholder as string} autoplay={v.autoplay as boolean} />,
   },
   "fold-note": {
+    lightOnly: true,
     componentName: "FoldNote",
     importPath: "@/components/fold-note",
     defaultFill: "light",
@@ -1803,6 +1813,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "pull-cord": {
+    lightOnly: true,
     componentName: "PullCord",
     importPath: "@/components/pull-cord",
     defaultFill: "light",
@@ -1839,6 +1850,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <PolaroidDevelop key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "wallet-stack": {
+    lightOnly: true,
     componentName: "WalletStack",
     importPath: "@/components/wallet-stack",
     defaultFill: "light",
@@ -2032,6 +2044,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "beam-sweep-field": {
+    lightOnly: true,
     componentName: "BeamField",
     importPath: "@/components/beam-sweep-field",
     defaultFill: "light",
@@ -2122,6 +2135,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "cinematic-card-deck": {
+    lightOnly: true,
     componentName: "CinematicCardDeck",
     importPath: "@/components/cinematic-card-deck",
     defaultFill: "light",
@@ -2154,6 +2168,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "code-block": {
+    lightOnly: true,
     componentName: "CodeBlock",
     importPath: "@/components/code-block",
     defaultFill: "light",
@@ -2174,6 +2189,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   compare: {
+    lightOnly: true,
     componentName: "Compare",
     importPath: "@/components/compare",
     snippetBaseProps: ['beforeLabel="Original"', 'afterLabel="Graded"'],
@@ -2243,6 +2259,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "draggable-card-stack": {
+    lightOnly: true,
     componentName: "DraggableCardStack",
     importPath: "@/components/draggable-card-stack",
     defaultFill: "light",
@@ -2775,6 +2792,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "shader-flow": {
+    lightOnly: true,
     componentName: "ShaderFlow",
     importPath: "@/components/shader-flow",
     defaultFill: "dark",
@@ -2822,6 +2840,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "spectra-frame": {
+    lightOnly: true,
     componentName: "SpectraFrame",
     importPath: "@/components/spectra-frame",
     defaultFill: "light",
@@ -2894,6 +2913,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "svg-noise-shader": {
+    lightOnly: true,
     componentName: "SvgNoise",
     importPath: "@/components/svg-noise-shader",
     defaultFill: "dark",
@@ -2914,6 +2934,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   terminal: {
+    lightOnly: true,
     componentName: "Terminal",
     importPath: "@/components/terminal",
     snippetBaseProps: ["commands={commands}"],
@@ -3128,6 +3149,7 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => <DominoSelect key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
   "lenticular-pass": {
+    lightOnly: true,
     componentName: "LenticularPass",
     importPath: "@/components/lenticular-pass",
     defaultFill: "light",
@@ -3339,6 +3361,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "sound-mark": {
+    lightOnly: true,
     componentName: "SoundMark",
     importPath: "@/components/sound-mark",
     defaultFill: "light",
@@ -3394,6 +3417,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "venom-button": {
+    lightOnly: true,
     componentName: "VenomButton",
     importPath: "@/components/venom-button",
     defaultFill: "light",
@@ -3420,6 +3444,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "web-sling-button": {
+    lightOnly: true,
     componentName: "WebSlingButton",
     importPath: "@/components/web-sling-button",
     defaultFill: "dark",
@@ -3441,6 +3466,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "frost-input": {
+    lightOnly: true,
     componentName: "FrostInput",
     importPath: "@/components/frost-input",
     defaultFill: "dark",
@@ -3506,6 +3532,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "mesh-net": {
+    lightOnly: true,
     componentName: "MeshNet",
     importPath: "@/components/mesh-net",
     defaultFill: "dark",
@@ -3528,6 +3555,7 @@ export const playgrounds: Record<string, Playground> = {
     ),
   },
   "particle-reveal": {
+    lightOnly: true,
     componentName: "ParticleReveal",
     importPath: "@/components/particle-reveal",
     defaultFill: "light",
