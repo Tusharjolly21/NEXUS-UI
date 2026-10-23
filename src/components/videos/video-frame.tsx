@@ -41,6 +41,8 @@ export function VideoFrame({ slug, format = "9:16", values }: { slug: string; fo
   if (!known) return null;
   return (
     <div style={{ position: "fixed", left: 0, top: 0, width: "100vw", height: "100vh", zIndex: 2147483647, overflow: "hidden", background: "#000" }}>
+      {/* The site reserves a scrollbar gutter on <html>; here it would paint a strip down the right edge of every frame. */}
+      <style>{"html{scrollbar-gutter:auto!important}"}</style>
       <div style={{ width: W, height: H, transform: `scale(${scale})`, transformOrigin: "0 0" }}>
         <React.Suspense fallback={null}>
           <Comp t={t} w={W} h={H} {...values} />
