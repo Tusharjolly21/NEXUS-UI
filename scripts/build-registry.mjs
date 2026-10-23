@@ -239,8 +239,8 @@ function buildUiSoundsMacItem() {
  */
 function buildUiSoundsRecordedItem() {
   const player = fs.readFileSync(path.join(root, "src", "lib", "ui-sounds-recorded.ts"), "utf8");
-  const names = [...player.matchAll(/^  (typing|camera|message|notification|screenshot): define\(/gm)].map((m) => m[1]);
-  if (names.length !== 5) throw new Error("ui-sounds-recorded.ts must define the five recorded sounds.");
+  const names = [...player.matchAll(/^  ([a-z]+): define\(/gm)].map((m) => m[1]);
+  if (names.length !== 9) throw new Error("ui-sounds-recorded.ts must define the nine recorded sounds.");
   const dir = path.join(root, "assets-pro", "sounds");
   const rows = names.map((n) => {
     const data = fs.readFileSync(path.join(dir, `${n}.mp3`));
@@ -261,7 +261,7 @@ function buildUiSoundsRecordedItem() {
     name: UI_SOUNDS_RECORDED_REGISTRY_NAME,
     type: "registry:lib",
     title: "UI Sounds Recorded",
-    description: "Five recorded interface sounds (typing, camera, message, notification, screenshot) with playRecordedSound and useRecordedSound. The audio ships inside the package. Builds on ui-sounds.",
+    description: "Nine recorded interface sounds (typing, camera, message, notification, screenshot, build-up, landing, pitch tick, glass sting) with playRecordedSound and useRecordedSound. The audio ships inside the package. Builds on ui-sounds.",
     dependencies: [],
     registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
     files: [

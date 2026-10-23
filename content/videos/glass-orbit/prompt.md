@@ -1,0 +1,11 @@
+Make a 24.6-second brand-identity motion piece for my React component library Nexus UI in 4:5 (also 9:16 and 1:1), one React component, pure function of time t. Built to post as one video or to be cut at the chapter marks into an Instagram carousel.
+
+Look: deep navy (#04070f) with a soft navy centre light and a faint dot grid that fades out at the edges. Fixed frame furniture: "'26" and "Nexus UI — Component Library" top-left, the URL bottom-left, four carousel dots bottom-centre (the active one is the current chapter). One blue (#2f6bff) used as light: orbs, glows, ribbons. Type: Inter Display.
+
+Chapter 1 (0–7.2): a huge glowing blue orb sweeps in from the right and uncovers the name letter by letter as it passes; a paper-plane cursor glides in and taps it; the letters glitch (scrambled glyphs, RGB split) and collapse into a dark glass app icon with the Nexus mark and a blue rim light; the icon slides left and a vertical menu (Components, Blocks, Templates, Videos, Sounds) appears to its right like an iOS picker: the active item is white and sharp, the others dim and blur with distance, a glowing dot marks the active item and the selection steps down every 0.6 s.
+Chapter 2 (7.2–15.6): a 3D drum of words (Springs, Gestures, Layout, Scroll, Hover, Physics, Sound) on a vertical cylinder, stepping round one word every 0.9 s with an eased overshoot, motion blur while moving, depth blur and dimming at the back, and a ribbon of blurred blue light behind it.
+Chapter 3 (15.6–21): six glass icons (cursor, toggle, sliders, layers, sparkle, code) fly out and orbit a "Components" label on a tilted ellipse, each with a blue glow behind it, scaling and blurring with depth and passing in front of and behind the label.
+Chapter 4 (21–24.6): "LET'S MAKE IT / MOVE." in heavy caps, MOVE in blue, "a quick start for your" with a white chip that types "next launch", a horizon of blue light rising at the bottom, "● save ● share" bottom-left.
+Between chapters a blue orb wipes across the frame.
+
+Sound: original 100 BPM ambient electronic bed (dark pad, sub pulses, glassy plucks) with whooshes on each orb wipe, a glitch burst, a tick for each menu step and drum step, a shimmer under the orbit and a warm swell on the end card.

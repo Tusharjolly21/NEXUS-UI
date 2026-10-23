@@ -22,7 +22,7 @@ const PRO_COUNT = SYNTH_PRO_COUNT + RECORDED_COUNT;
 
 export const metadata: Metadata = createMetadata({
   title: "UI Sound Effects for React — Web Audio and Recorded",
-  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade and studio sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications and screenshots.`,
+  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade and studio sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications, screenshots, build-ups, landings and stings.`,
   alternates: { canonical: "/sounds" },
 });
 const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;
@@ -145,7 +145,7 @@ const FAQ = [
   },
   {
     q: "What are the recorded sounds?",
-    a: `Five short recordings for moments a synthesiser does not do well: typing, camera, message, notification and screenshot. On this page they play from small, compressed previews so you can judge them. The install carries the full-quality recordings, levelled to sit with the other sounds, inside a TypeScript file, so there is nothing to host. They follow the same on/off switch, volume and autoplay rules as every other sound, and they are Pro only.`,
+    a: `Nine short recordings for moments a synthesiser does not do well: typing, camera, message, notification and screenshot, plus a build-up, a landing, a pitch tick and a glass sting cut from the Nexus UI Word Rush and Glass Orbit video soundtracks. On this page they play from small, compressed previews so you can judge them. The install carries the full-quality recordings, levelled to sit with the other sounds, inside a TypeScript file, so there is nothing to host. They follow the same on/off switch, volume and autoplay rules as every other sound, and they are Pro only.`,
   },
   {
     q: "How do I add the Pro sounds to my app?",
@@ -230,7 +230,7 @@ export default async function SoundsPage() {
             <InstallCard wrap command={INSTALL_PRO} className="mt-4" />
             <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The recorded sounds</h3>
             <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-              {RECORDED_COUNT} recordings: typing, camera, message, notification and screenshot. The audio ships inside the
+              {RECORDED_COUNT} recordings: typing, camera, message, notification, screenshot, build-up, landing, pitch tick and glass sting. The audio ships inside the
               package, so there is no file to host. Included in the Pro plan.
             </p>
             <InstallCard wrap command={INSTALL_RECORDED} className="mt-4" />

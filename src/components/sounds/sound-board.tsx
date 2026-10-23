@@ -35,7 +35,7 @@ const ITEMS: Item[] = [
  * The sounds library as a board of orbs: tap one to hear it, filter by free or Pro and by kind, set
  * the volume, and copy the one line that plays it. Every sound plays for everyone. A Pro sound's
  * code, install command and file open with Pro. Everything is synthesised in the browser except the
- * five recorded sounds, which play from small compressed previews; their full-quality files are Pro only.
+ * recorded sounds, which play from small compressed previews; their full-quality files are Pro only.
  */
 export function SoundBoard({
   source,
@@ -329,7 +329,7 @@ export function SoundBoard({
                 Install with <code className="font-mono text-foreground">{installRecorded}</code>. The recordings are inside the package, and it brings <code className="font-mono text-foreground">ui-sounds</code> with it.
               </>
             ) : (
-              "One of five recorded sounds: typing, camera, message, notification and screenshot."
+              "One of nine recorded sounds: typing, camera, message, notification, screenshot, build-up, landing, pitch tick and glass sting."
             )
           ) : current.pro ? (
             isPro ? (
@@ -356,7 +356,7 @@ export function SoundBoard({
       </div>
 
       <p className="mt-3 text-[13px] text-muted-foreground">
-        {freeCount} free and {proCount} Pro sounds. All but the {RECORDED_SOUND_META.length} recorded ones are synthesised in the browser with no audio files; those five play from small previews here.
+        {freeCount} free and {proCount} Pro sounds. All but the {RECORDED_SOUND_META.length} recorded ones are synthesised in the browser with no audio files; those play from small previews here.
         {mac ? " Mac style is on: every component on this site plays it until you switch back." : ""}
       </p>
 

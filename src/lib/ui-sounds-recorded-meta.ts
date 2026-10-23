@@ -11,4 +11,8 @@ export const RECORDED_SOUND_META: { name: string; label: string; category: Recor
   { name: "message", label: "Message", category: "Recorded", length: 0.55 },
   { name: "notification", label: "Notification", category: "Recorded", length: 1.05 },
   { name: "screenshot", label: "Screenshot", category: "Recorded", length: 0.55 },
+  { name: "buildup", label: "Build-up", category: "Recorded", length: 1.85 },
+  { name: "landing", label: "Landing", category: "Recorded", length: 1.85 },
+  { name: "pitchtick", label: "Pitch tick", category: "Recorded", length: 0.15 },
+  { name: "sting", label: "Glass sting", category: "Recorded", length: 3.7 },
 ];

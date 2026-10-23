@@ -1,5 +1,5 @@
 /**
- * The video catalogue: seventeen videos, each a React component that is a pure function of time, drawn
+ * The video catalogue: nineteen videos, each a React component that is a pure function of time, drawn
  * on a fixed canvas for each shape it supports (9:16, 1:1, 16:9 and more), with its own soundtrack. This file is metadata only (it is safe to import from
  * server code); the animation lives in `src/components/videos/<slug>.tsx`, the prompt and the
  * downloadable source in `content/videos/<slug>/` (served only through the gated route).
@@ -1455,6 +1455,174 @@ export const videos: VideoEntry[] = [
       {
         "key": "c2",
         "label": "Second colour",
+        "type": "color"
+      }
+    ]
+  },
+  {
+    "slug": "glass-orbit",
+    "title": "Glass Orbit",
+    "purpose": "Brand identity reveal / carousel",
+    "motion": "Deep-navy brand reveal: a blue orb uncovers the name, a glass app icon drives a menu, a 3D word drum spins and glass icons orbit",
+    "app": "Nexus UI",
+    "platforms": [
+      "Instagram carousel",
+      "Reels",
+      "LinkedIn"
+    ],
+    "formats": [
+      "4:5",
+      "9:16",
+      "1:1"
+    ],
+    "duration": 24.6,
+    "bpm": 100,
+    "cuts": [
+      0.3,
+      2.5,
+      3.3,
+      7.2,
+      15.6,
+      21
+    ],
+    "blurb": "A brand-identity piece in four chapters, built to post as one video or cut into a carousel. On deep navy with a dot grid, a glowing blue orb sweeps across and uncovers the name, a cursor taps it, the letters glitch and collapse into a glass app icon that drives a menu. Then a 3D drum of words spins behind a ribbon of blue light, glass icons orbit a label in depth, and it closes on \"Let's make it move.\"",
+    "premium": true,
+    "dark": true,
+    "createdAt": "2026-10-23",
+    "posterAt": 17,
+    "defaults": {
+      "name": "Nexus UI",
+      "sub": "Nexus UI — Component Library",
+      "menu": "Components|Blocks|Templates|Videos|Sounds",
+      "drum": "Springs|Gestures|Layout|Scroll|Hover|Physics|Sound",
+      "hub": "Components",
+      "end1": "LET'S MAKE IT",
+      "end2": "MOVE.",
+      "chip": "next launch",
+      "url": "nexus-ui.com",
+      "blue": "#2f6bff"
+    },
+    "fields": [
+      {
+        "key": "name",
+        "label": "Name",
+        "type": "text",
+        "max": 12
+      },
+      {
+        "key": "sub",
+        "label": "Header line",
+        "type": "text",
+        "max": 40
+      },
+      {
+        "key": "menu",
+        "label": "Menu items (| between)",
+        "type": "text",
+        "max": 80
+      },
+      {
+        "key": "drum",
+        "label": "Drum words (| between)",
+        "type": "text",
+        "max": 90
+      },
+      {
+        "key": "hub",
+        "label": "Orbit label",
+        "type": "text",
+        "max": 14
+      },
+      {
+        "key": "end1",
+        "label": "Closing line 1",
+        "type": "text",
+        "max": 16
+      },
+      {
+        "key": "end2",
+        "label": "Closing line 2 (blue)",
+        "type": "text",
+        "max": 10
+      },
+      {
+        "key": "chip",
+        "label": "Typed chip",
+        "type": "text",
+        "max": 16
+      },
+      {
+        "key": "url",
+        "label": "URL",
+        "type": "text",
+        "max": 24
+      },
+      {
+        "key": "blue",
+        "label": "Blue",
+        "type": "color"
+      }
+    ]
+  },
+  {
+    "slug": "word-rush",
+    "title": "Word Rush",
+    "purpose": "Brand manifesto in 10 seconds",
+    "motion": "One word per beat, flipping between a mint and a hazy lavender stage; the last word types itself",
+    "app": "Nexus UI",
+    "platforms": [
+      "Reels",
+      "TikTok",
+      "Shorts",
+      "X"
+    ],
+    "formats": [
+      "9:16",
+      "1:1",
+      "4:5"
+    ],
+    "duration": 9.6,
+    "bpm": 150,
+    "cuts": [],
+    "blurb": "Nine and a half seconds of kinetic type at 150 BPM: one word on every beat, each cut flipping the stage between a mint gradient with black type and a hazy grey-lavender gradient with white type. It opens with a two-line statement, rattles through what the library does, and lands on the brand typing itself out. Every cut is scored.",
+    "premium": true,
+    "dark": false,
+    "createdAt": "2026-10-23",
+    "posterAt": 2.6,
+    "defaults": {
+      "words": "we|we don't|just|just copy|we|animate|springs|hover|gestures|layout|scroll|physics|sound|polish|feelings",
+      "last": "nexus ui.",
+      "url": "nexus-ui.com",
+      "mint": "#7ee3a0",
+      "haze": "#a7b2ff"
+    },
+    "fields": [
+      {
+        "key": "words",
+        "label": "Words (| between, a space makes two lines)",
+        "type": "text",
+        "max": 200
+      },
+      {
+        "key": "last",
+        "label": "Last word (typed)",
+        "type": "text",
+        "max": 14
+      },
+      {
+        "key": "url",
+        "label": "URL",
+        "type": "text",
+        "max": 24
+      },
+      {
+        "key": "mint",
+        "label": "Light stage",
+        "type": "color"
+      },
+      {
+        "key": "haze",
+        "label": "Dark stage tint",
         "type": "color"
       }
     ]
