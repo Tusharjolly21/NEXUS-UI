@@ -1913,6 +1913,53 @@
       ]
     },
     {
+      "name": "venom-button",
+      "type": "registry:component",
+      "title": "Venom Button",
+      "description": "A glossy black pill that hunts for a host. Come near and pseudopods ooze out and feel toward the cursor; get close and they lunge, each one wrapping a finger of a cartoon glove. Pull away and they stretch, snap and melt back into the button, which wobbles and throws up a few spikes.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/venom-button/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/venom-button/venom-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "web-sling-button",
+      "type": "registry:component",
+      "title": "Web Sling Button",
+      "description": "A call-to-action button on a dark stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays.",
+      "dependencies": [
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "utils"
+      ],
+      "files": [
+        {
+          "path": "next-ui/web-sling-button/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/web-sling-button/web-sling-button.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
