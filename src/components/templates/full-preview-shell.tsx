@@ -20,7 +20,7 @@ import {
   Sun,
   Tablet as TabletIcon,
 } from "lucide-react";
-import type { MarketplaceTemplate } from "@/lib/catalog/templates";
+import { templateScheme, type MarketplaceTemplate } from "@/lib/catalog/templates";
 import { getTemplateSource } from "@/lib/template-sources";
 import { cn } from "@/lib/utils";
 
@@ -74,7 +74,7 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
   const [mode, setMode] = React.useState<"preview" | "code">("preview");
   const [viewport, setViewport] = React.useState<"desktop" | "tablet" | "mobile">("desktop");
   const [copied, setCopied] = React.useState(false);
-  const [isDark, setIsDark] = React.useState(true);
+  const scheme = templateScheme(tmpl.slug);
   const iframeRef = React.useRef<HTMLIFrameElement>(null);
   const code = getTemplateCode(tmpl);
 
@@ -98,18 +98,6 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
     } catch {
       // Download is optional in preview mode.
     }
-  };
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    // Toggle shell
-    document.documentElement.classList.toggle("dark", nextDark);
-    // Sync iframe via postMessage
-    iframeRef.current?.contentWindow?.postMessage(
-      { type: "nexus-theme", dark: nextDark },
-      "*",
-    );
   };
 
   const iframeContainerClass = cn(
@@ -374,12 +362,15 @@ export function FullPreviewShell({ tmpl, isPremium = false }: { tmpl: Marketplac
                 <ShoppingCart className="size-3.5" />
               </Link>
             )}
+            {/* No template has a second theme, so the switch is shown disabled, naming the one it has,
+                rather than flipping only the page around the frame. */}
             <button
-              onClick={toggleTheme}
-              title="Toggle theme"
-              className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted/50 hover:text-foreground dark:hover:bg-white/5"
+              disabled
+              title={`${scheme === "dark" ? "Dark" : "Light"} only: this template has no ${scheme === "dark" ? "light" : "dark"} version`}
+              aria-label={`${scheme === "dark" ? "Dark" : "Light"} only template`}
+              className="cursor-not-allowed rounded-full p-1.5 text-muted-foreground/60 transition"
             >
-              {isDark ? <Sun className="size-3.5" /> : <Moon className="size-3.5" />}
+              {scheme === "dark" ? <Moon className="size-3.5" /> : <Sun className="size-3.5" />}
             </button>
           </div>
 
