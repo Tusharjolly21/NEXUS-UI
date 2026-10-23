@@ -199,6 +199,11 @@ import { GhostAutocomplete } from "@/components/ghost-autocomplete";
 import { SkeletonMorph } from "@/components/skeleton-morph";
 import { MorphingDialog } from "@/components/morphing-dialog";
 import { TravellingTooltip } from "@/components/travelling-tooltip";
+import { SoundMark } from "@/components/sound-mark";
+import { RippleNowPlaying } from "@/components/ripple-now-playing";
+import { ChladniUpload } from "@/components/chladni-upload";
+import { TankRecorder } from "@/components/tank-recorder";
+import { RippleToast } from "@/components/ripple-toast";
 
 // matter-js stays out of the shared playground bundle: these load lazily.
 const TagPit = React.lazy(() => import("@/components/tag-pit").then((m) => ({ default: m.TagPit })));
@@ -3321,6 +3326,53 @@ export const playgrounds: Record<string, Playground> = {
         label={v.label as string}
       />
     ),
+  },
+  "sound-mark": {
+    componentName: "SoundMark",
+    importPath: "@/components/sound-mark",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "word", label: "Word", options: ["sound", "studio", "listen", "nexus"], defaultValue: "sound" },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => <SoundMark key={String(v.autoplay)} autoplay={v.autoplay as boolean} word={v.word as string} />,
+  },
+  "ripple-now-playing": {
+    componentName: "RippleNowPlaying",
+    importPath: "@/components/ripple-now-playing",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
+    render: (v) => <RippleNowPlaying key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "chladni-upload": {
+    componentName: "ChladniUpload",
+    importPath: "@/components/chladni-upload",
+    defaultFill: "light",
+    controls: [
+      { kind: "select", prop: "fileName", label: "File name", options: ["mix-final.wav", "album-master.wav", "demo-take-3.aiff"], defaultValue: "mix-final.wav" },
+      { kind: "range", prop: "fileSize", label: "File size", min: 2, max: 120, step: 0.5, unit: "MB", defaultValue: 24.6 },
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <ChladniUpload key={String(v.autoplay)} autoplay={v.autoplay as boolean}
+        fileName={v.fileName as string}
+        fileSize={v.fileSize as number}
+      />
+    ),
+  },
+  "tank-recorder": {
+    componentName: "TankRecorder",
+    importPath: "@/components/tank-recorder",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
+    render: (v) => <TankRecorder key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
+  },
+  "ripple-toast": {
+    componentName: "RippleToast",
+    importPath: "@/components/ripple-toast",
+    defaultFill: "light",
+    controls: [{ kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true }],
+    render: (v) => <RippleToast key={String(v.autoplay)} autoplay={v.autoplay as boolean} />,
   },
 };
 
