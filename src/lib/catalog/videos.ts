@@ -1,5 +1,5 @@
 /**
- * The video catalogue: fifteen videos, each a React component that is a pure function of time, drawn
+ * The video catalogue: seventeen videos, each a React component that is a pure function of time, drawn
  * on a fixed canvas for each shape it supports (9:16, 1:1, 16:9 and more), with its own soundtrack. This file is metadata only (it is safe to import from
  * server code); the animation lives in `src/components/videos/<slug>.tsx`, the prompt and the
  * downloadable source in `content/videos/<slug>/` (served only through the gated route).
@@ -1455,6 +1455,190 @@ export const videos: VideoEntry[] = [
       {
         "key": "c2",
         "label": "Second colour",
+        "type": "color"
+      }
+    ]
+  },
+  {
+    "slug": "keynote-film",
+    "title": "Keynote Film",
+    "purpose": "Flagship brand film",
+    "motion": "Apple-keynote film with no devices: frameless screens, a dive through the page, floating screen lineups and themes that morph scene to scene",
+    "app": "Nexus UI",
+    "platforms": [
+      "YouTube",
+      "Reels",
+      "X",
+      "Website"
+    ],
+    "formats": [
+      "16:9",
+      "9:16"
+    ],
+    "duration": 30.6,
+    "bpm": 112,
+    "cuts": [
+      0.9,
+      3.4,
+      8.4,
+      13.3,
+      18.2,
+      19.4,
+      20.6,
+      21.8,
+      23.2,
+      24.6,
+      27.2
+    ],
+    "blurb": "A 30-second film cut like an Apple keynote. The name rises out of black, the real Nexus UI site scrolls on a frameless floating screen, the camera dives into the page and out into a light theme, and desktop, tablet and phone-sized screens line up with real templates on them. No device frames, just the work. The whole stage then morphs: into colour for the whole component library orbiting a phone-sized screen, through each template's own palette, and from light to dark with one flip of a switch. Original 112 BPM score with every move scored.",
+    "premium": true,
+    "dark": false,
+    "createdAt": "2026-10-23",
+    "posterAt": 11,
+    "defaults": {
+      "name": "Nexus UI",
+      "line1": "Motion you can copy and paste.",
+      "line2": "One library. Every screen.",
+      "count": "175",
+      "line3": "Templates that feel finished.",
+      "cta": "Free to start. Pro when you're ready.",
+      "url": "nexus-ui.com"
+    },
+    "fields": [
+      {
+        "key": "name",
+        "label": "Name",
+        "type": "text",
+        "max": 14
+      },
+      {
+        "key": "line1",
+        "label": "Opening line",
+        "type": "text",
+        "max": 34
+      },
+      {
+        "key": "line2",
+        "label": "Lineup line",
+        "type": "text",
+        "max": 30
+      },
+      {
+        "key": "count",
+        "label": "Component count",
+        "type": "number",
+        "min": 10,
+        "max": 999
+      },
+      {
+        "key": "line3",
+        "label": "Templates line",
+        "type": "text",
+        "max": 32
+      },
+      {
+        "key": "cta",
+        "label": "Closing line",
+        "type": "text",
+        "max": 40
+      },
+      {
+        "key": "url",
+        "label": "URL",
+        "type": "text",
+        "max": 24
+      }
+    ]
+  },
+  {
+    "slug": "brand-film",
+    "title": "Brand Film",
+    "purpose": "Brand film / launch hero",
+    "motion": "Dark aurora, a prompt bar typed in close-up, crash zooms, white bar wipes and a hub of live components",
+    "app": "Nexus UI",
+    "platforms": [
+      "Reels",
+      "YouTube",
+      "X"
+    ],
+    "formats": [
+      "9:16",
+      "16:9"
+    ],
+    "duration": 24.6,
+    "bpm": 100,
+    "cuts": [
+      1.5,
+      3.3,
+      7.4,
+      9.5,
+      11.4,
+      13.5,
+      17.6,
+      19.7,
+      22.4
+    ],
+    "blurb": "A 25-second motion-graphics film in the dark, glassy style of high-end AI launch reels. A question types itself and glitches into a promise, a prompt bar draws itself in extreme close-up, a click crash-zooms into the install, white bars wipe through the real components, and everything resolves into a hub around the Nexus mark. Every move has its own sound: soft key ticks, glass pops, whooshes, risers and a deep sub under the cuts.",
+    "premium": true,
+    "dark": true,
+    "createdAt": "2026-10-23",
+    "posterAt": 11.2,
+    "defaults": {
+      "hook": "Need a landing page?",
+      "turn": "Stop building from scratch.",
+      "prompt": "Animated pricing section",
+      "install": "npx shadcn add @nexus-labs/pricing-cards",
+      "tagline": "From prompt to production. Built with",
+      "name": "Nexus UI",
+      "url": "nexus-ui.com",
+      "accent": "#7d96ff"
+    },
+    "fields": [
+      {
+        "key": "hook",
+        "label": "Opening question",
+        "type": "text",
+        "max": 26
+      },
+      {
+        "key": "turn",
+        "label": "The turn",
+        "type": "text",
+        "max": 30
+      },
+      {
+        "key": "prompt",
+        "label": "Typed prompt",
+        "type": "text",
+        "max": 28
+      },
+      {
+        "key": "install",
+        "label": "Install line",
+        "type": "text",
+        "max": 48
+      },
+      {
+        "key": "tagline",
+        "label": "Tagline",
+        "type": "text",
+        "max": 44
+      },
+      {
+        "key": "name",
+        "label": "Brand",
+        "type": "text",
+        "max": 12
+      },
+      {
+        "key": "url",
+        "label": "URL",
+        "type": "text",
+        "max": 24
+      },
+      {
+        "key": "accent",
+        "label": "Accent",
         "type": "color"
       }
     ]
