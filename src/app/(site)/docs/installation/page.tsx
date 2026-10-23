@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { ProNote } from "@/components/pro/pro-access";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   DocFooterNav,
@@ -13,241 +13,354 @@ import {
 import { createMetadata } from "@/lib/seo";
 import { SetupChecklist } from "@/components/docs/setup-checklist";
 import { docSectionId } from "@/lib/doc-anchor";
+import { ProNote } from "@/components/pro/pro-access";
+import { API_KEY_ENV_VAR, REGISTRIES_PRO, envLocalLine, registryAddCommand } from "@/lib/registry-config";
 
 export const metadata: Metadata = createMetadata({
   title: "Quick Start",
   description:
-    "Get your own app running with Nexus UI components in minutes — Next.js, Tailwind CSS v4, shadcn/ui, and your first component.",
+    "Create a Next.js project, set up shadcn/ui and add your first Nexus UI component, free or Pro, with the CLI or by copying the files by hand.",
   alternates: { canonical: "/docs/installation" },
 });
 
 const STEPS = [
   { id: docSectionId("1. Create a Next.js project"), title: "Create a Next.js project" },
-  { id: docSectionId("2. Confirm Tailwind CSS v4"), title: "Confirm Tailwind CSS v4" },
-  { id: docSectionId("3. Add the cn() utility"), title: "Add the cn() utility" },
-  { id: docSectionId("4. Initialize shadcn/ui"), title: "Initialize shadcn/ui" },
-  { id: docSectionId("5. Add your first component"), title: "Add your first component" },
-  { id: docSectionId("6. Start the dev server"), title: "Start the dev server" },
+  { id: docSectionId("2. Set up shadcn/ui"), title: "Set up shadcn/ui" },
+  { id: docSectionId("3. Add a free component with the CLI"), title: "Add a free component (CLI)" },
+  { id: docSectionId("4. Add a Pro component with the CLI"), title: "Add a Pro component (CLI)" },
+  { id: docSectionId("5. Or copy a component by hand"), title: "Or copy it by hand" },
+  { id: docSectionId("6. Use it in a page"), title: "Use it in a page" },
 ];
+
+const code = docInlineCodeClass;
+const link = "text-link underline-offset-4 hover:underline";
+
+/** A numbered list for the small steps inside one section. */
+function Steps({ children }: { children: ReactNode }) {
+  return (
+    <ol className="list-decimal space-y-4 pl-5 text-sm leading-relaxed text-muted-foreground marker:font-semibold marker:text-foreground">
+      {children}
+    </ol>
+  );
+}
+
+function Strong({ children }: { children: ReactNode }) {
+  return <strong className="font-medium text-foreground">{children}</strong>;
+}
 
 export default function InstallationPage() {
   return (
     <>
       <TechArticleJsonLd
         title="Quick Start"
-        description="Get your own app running with Nexus UI components in minutes — Next.js, Tailwind CSS v4, shadcn/ui, and your first component."
+        description="Create a Next.js project, set up shadcn/ui and add your first Nexus UI component, free or Pro, with the CLI or by copying the files by hand."
         slug="installation"
       />
       <DocPageShell>
         <DocPageHeader
           title="Quick Start"
-          description="From zero to your first Nexus UI component in six steps. Create a Next.js app with Tailwind and an import alias, initialize shadcn/ui, connect the registry, and install a component."
+          description="From an empty folder to a Nexus UI component on screen. Steps 1 and 2 are the same for everyone. Then add components with the CLI (steps 3 and 4) or copy the files by hand (step 5)."
         />
 
         <SetupChecklist steps={STEPS} />
 
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          You need <Strong>Node.js 20.9 or newer</Strong> (check with <code className={code}>node -v</code>) and a
+          terminal. Free components work without an account. <Strong>Pro</Strong> components need a Pro plan and an API
+          key (step 4); the{" "}
+          <Link href="/pricing" className={link}>
+            pricing page
+          </Link>{" "}
+          lists what each plan includes.
+        </p>
+
         <DocSection title="1. Create a Next.js project">
           <p className="text-sm text-muted-foreground">
-            Nexus UI targets the App Router with TypeScript. Scaffold a new project:
+            Run this in the folder where you keep your projects. It creates a new folder called{" "}
+            <code className={code}>my-app</code> and moves into it:
           </p>
-          <DocPre>{`npx create-next-app@latest my-app --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
+          <DocPre>{`npx create-next-app@latest my-app --ts --tailwind --eslint --app --src-dir --import-alias "@/*" --yes
 cd my-app`}</DocPre>
           <p className="text-sm text-muted-foreground">
-            This command sets up the App Router, TypeScript, Tailwind CSS, ESLint, a{" "}
-            <code className={docInlineCodeClass}>src/</code> directory, and the{" "}
-            <code className={docInlineCodeClass}>@/*</code> alias used by Nexus UI imports.
+            That gives you the App Router, TypeScript, Tailwind CSS v4, ESLint, a{" "}
+            <code className={code}>src/</code> folder and the <code className={code}>@/</code> import alias that every
+            Nexus UI component uses (<code className={code}>@/lib/utils</code> means{" "}
+            <code className={code}>src/lib/utils.ts</code>). Packages are installed for you, so there is no separate{" "}
+            <code className={code}>npm install</code>. Every command from here on runs inside{" "}
+            <code className={code}>my-app</code>.
           </p>
         </DocSection>
 
-        <DocSection title="2. Confirm Tailwind CSS v4">
+        <DocSection title="2. Set up shadcn/ui">
           <p className="text-sm text-muted-foreground">
-            The create command above already installs Tailwind. Confirm that{" "}
-            <code className={docInlineCodeClass}>src/app/globals.css</code> starts with the
-            Tailwind import, then add or customize tokens as your design needs:
+            Nexus UI is installed with the shadcn CLI, and the components import its{" "}
+            <code className={code}>cn()</code> helper. One command sets up both:
           </p>
-          <DocPre>{`@import "tailwindcss";
-
-@custom-variant dark (&:is(.dark *));
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-border: var(--border);
-  --radius-lg: var(--radius);
-}
-
-html {
-  --background: oklch(0.99 0.002 260);
-  --foreground: oklch(0.16 0.015 260);
-  --primary: oklch(0.28 0.02 260);
-  --primary-foreground: oklch(0.99 0 0);
-  --muted: oklch(0.96 0.006 260);
-  --muted-foreground: oklch(0.48 0.015 260);
-  --border: oklch(0.90 0.008 260);
-  --radius: 0.625rem;
-}
-
-html.dark {
-  --background: oklch(0.09 0.008 260);
-  --foreground: oklch(0.97 0.006 260);
-  --primary: oklch(0.82 0.02 260);
-  --primary-foreground: oklch(0.12 0.015 260);
-  --muted: oklch(0.20 0.006 260);
-  --muted-foreground: oklch(0.62 0.006 260);
-  --border: oklch(0.25 0.006 260);
-}`}</DocPre>
+          <DocPre>{`npx shadcn@latest init -d`}</DocPre>
           <p className="text-sm text-muted-foreground">
-            See the{" "}
-            <Link
-              href="/docs/install-tailwindcss"
-              className="text-link underline-offset-4 hover:underline"
-            >
-              full Tailwind guide
-            </Link>{" "}
-            for the complete token set including sidebar, chart, and popover colors.
+            <code className={code}>-d</code> accepts the defaults so it asks nothing; leave it off if you want to choose
+            a style yourself. The command:
           </p>
-        </DocSection>
-
-        <DocSection title="3. Add the cn() utility">
-          <p className="text-sm text-muted-foreground">
-            Every Nexus UI component imports{" "}
-            <code className={docInlineCodeClass}>cn</code> from{" "}
-            <code className={docInlineCodeClass}>@/lib/utils</code>. A new Next.js project does{" "}
-            <strong className="font-medium text-foreground">not</strong> include it, and it does not
-            even have a <code className={docInlineCodeClass}>src/lib</code> folder yet, so you
-            create both. First install the packages (Nexus UI animates with{" "}
-            <code className={docInlineCodeClass}>framer-motion</code>):
-          </p>
-          <DocPre>{`npm install clsx tailwind-merge framer-motion`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            Then make the folder and the file. On macOS and Linux:
-          </p>
-          <DocPre>{`mkdir -p src/lib
-touch src/lib/utils.ts`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            On Windows, or in your editor, create a folder named{" "}
-            <code className={docInlineCodeClass}>lib</code> inside{" "}
-            <code className={docInlineCodeClass}>src</code>, then a file named{" "}
-            <code className={docInlineCodeClass}>utils.ts</code> inside it. Paste this into{" "}
-            <code className={docInlineCodeClass}>src/lib/utils.ts</code>:
-          </p>
-          <DocPre>{`import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            The next step uses this same file. If the shadcn setup asks about an existing{" "}
-            <code className={docInlineCodeClass}>lib/utils.ts</code>, keep yours.
-          </p>
-        </DocSection>
-
-        <DocSection title="4. Initialize shadcn/ui">
-          <p className="text-sm text-muted-foreground">
-            Nexus UI components compose on top of shadcn primitives. Run the initializer — it wires
-            CSS variables, writes{" "}
-            <code className={docInlineCodeClass}>components.json</code>, and installs shared
-            dependencies:
-          </p>
-          <DocPre>{`npx shadcn@latest init`}</DocPre>
-          <p className="text-sm text-muted-foreground">
-            Pick a style and base color that match your brand. Add only the primitives you need:
-          </p>
-          <DocPre>{`npx shadcn@latest add button dialog tabs`}</DocPre>
-        </DocSection>
-
-        <DocSection title="5. Add your first component">
-          <p className="text-sm text-muted-foreground">
-            Two ways to get a Nexus UI component into your project:
-          </p>
-          <ul className="space-y-4 text-sm text-muted-foreground">
-            <li className="flex gap-2">
-              <span className="mt-0.5 shrink-0 text-primary">A.</span>
-              <span>
-                <strong className="font-medium text-foreground">Copy from the detail page</strong>{" "}
-                — open any component on{" "}
-                <Link
-                  href="/components"
-                  className="text-link underline-offset-4 hover:underline"
-                >
-                  /components
-                </Link>
-                , switch to the <strong className="font-medium text-foreground">Code</strong> tab,
-                and paste the React source into your project.
-              </span>
+          <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
+            <li>
+              creates <code className={code}>components.json</code> in the project root, the file the CLI reads its
+              settings from;
             </li>
-            <li className="flex gap-2">
-              <span className="mt-0.5 shrink-0 text-primary">B.</span>
-              <span>
-                <strong className="font-medium text-foreground">Install via the CLI</strong> — add
-                the <code className={docInlineCodeClass}>@nexus-labs</code> registry to your{" "}
-                <code className={docInlineCodeClass}>components.json</code> and pull a component
-                directly:
-              </span>
+            <li>
+              creates <code className={code}>src/lib/utils.ts</code> with the <code className={code}>cn()</code> helper;
+            </li>
+            <li>
+              installs <code className={code}>clsx</code> and <code className={code}>tailwind-merge</code> (the two
+              packages <code className={code}>cn()</code> is built from) and adds colour variables to{" "}
+              <code className={code}>src/app/globals.css</code>.
             </li>
           </ul>
-          <DocPre>{`{
-  "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "default",
-  "rsc": true,
-  "tsx": true,
-  "tailwind": {
-    "css": "src/app/globals.css",
-    "baseColor": "neutral",
-    "cssVariables": true,
-    "prefix": ""
-  },
-  "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
-    "hooks": "@/hooks"
-  },
-  "registries": {
-    "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
-  }
-}`}</DocPre>
-          <DocPre>{`npx shadcn@latest add @nexus-labs/glow-button`}</DocPre>
           <p className="text-sm text-muted-foreground">
-            The CLI installs declared dependencies (e.g.{" "}
-            <code className={docInlineCodeClass}>framer-motion</code>), pulls the{" "}
-            <code className={docInlineCodeClass}>utils</code> helper if missing, and writes files
-            under your components alias. See the{" "}
-            <Link href="/docs/cli" className="text-link underline-offset-4 hover:underline">
-              CLI guide
+            Check that <code className={code}>src/lib/utils.ts</code> now exists. If it does not, create it yourself with
+            the two-line helper on the{" "}
+            <Link href="/docs/add-utilities" className={link}>
+              cn() page
+            </Link>
+            . To understand each piece, see{" "}
+            <Link href="/docs/install-nextjs" className={link}>
+              Install Next.js
+            </Link>
+            ,{" "}
+            <Link href="/docs/install-tailwindcss" className={link}>
+              Install Tailwind CSS
             </Link>{" "}
-            for full details.
+            and{" "}
+            <Link href="/docs/add-utilities" className={link}>
+              Add utilities
+            </Link>
+            .
           </p>
-          <p className="text-sm text-muted-foreground">
-            Premium components and blocks use the same API endpoint with your Nexus UI API key
-            supplied as an Authorization header. The installation panel on each premium item
-            provides that configuration.
-          </p>
-          <ProNote>
-            You have Pro.{" "}
-            <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
-              Create your API token
-            </Link>{" "}
-            on the dashboard first.
-          </ProNote>
         </DocSection>
 
-        <DocSection title="6. Start the dev server">
+        <DocSection title="3. Add a free component with the CLI">
+          <p className="text-sm text-muted-foreground">
+            We will add the Glow Button, which is free. The same two steps work for every free component and block.
+          </p>
+          <Steps>
+            <li>
+              <Strong>Tell the CLI where Nexus UI lives.</Strong> This writes one entry into your{" "}
+              <code className={code}>components.json</code> for you, so there is nothing to edit by hand. Run it once per
+              project:
+              <div className="mt-3">
+                <DocPre>{registryAddCommand()}</DocPre>
+              </div>
+              <span className="mt-3 block">
+                Type it exactly as shown, including <code className={code}>{"{name}"}</code>. That is a placeholder the
+                CLI fills in itself: when you later ask for <code className={code}>@nexus-labs/glow-button</code> it
+                requests <code className={code}>https://www.nexus-ui.com/api/registry/glow-button</code>. You never
+                replace it with anything.
+              </span>
+            </li>
+            <li>
+              <Strong>Install the component.</Strong>
+              <div className="mt-3">
+                <DocPre>{`npx shadcn@latest add @nexus-labs/glow-button`}</DocPre>
+              </div>
+              <span className="mt-3 block">
+                It asks you to confirm, then writes the component files into{" "}
+                <code className={code}>src/components/glow-button/</code>, adds the helper it needs in{" "}
+                <code className={code}>src/lib/ui-sounds.ts</code>, and installs the packages it uses (such as{" "}
+                <code className={code}>framer-motion</code>). It may also add the Inter font setup so the component looks
+                like its preview. Add <code className={code}>--dry-run</code> to see the list without writing anything,
+                or <code className={code}>-y</code> to skip the confirmation.
+              </span>
+            </li>
+            <li>
+              <Strong>For any other component,</Strong> open its page on{" "}
+              <Link href="/components" className={link}>
+                /components
+              </Link>{" "}
+              and copy the command from its <Strong>Install</Strong> box. The name after{" "}
+              <code className={code}>@nexus-labs/</code>{" "}
+              is the component&apos;s registry name.
+            </li>
+          </Steps>
+          <p className="text-sm text-muted-foreground">
+            Prefer not to touch <code className={code}>components.json</code>? Skip step 1 and install a free component
+            straight from its address instead (it still needs the file from step 2 above):
+          </p>
+          <DocPre>{`npx shadcn@latest add https://www.nexus-ui.com/api/registry/glow-button`}</DocPre>
+          <p className="text-sm text-muted-foreground">
+            Then jump to{" "}
+            <a href="#use-it-in-a-page" className={link}>
+              step 6
+            </a>
+            .
+          </p>
+        </DocSection>
+
+        <DocSection title="4. Add a Pro component with the CLI">
+          <p className="text-sm text-muted-foreground">
+            Pro components are served only to people with a Pro plan, so the CLI has to prove who you are with an{" "}
+            <Strong>API key</Strong>. You make the key once and reuse it in every project. The example below installs
+            Particle Reveal.
+          </p>
+          <ProNote>
+            You have Pro, so you can make a key right now.{" "}
+            <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
+              Open the API key page
+            </Link>
+            .
+          </ProNote>
+          <Steps>
+            <li>
+              <Strong>Create the key.</Strong> Open{" "}
+              <Link href="/dashboard/api-key" className={link}>
+                nexus-ui.com/dashboard/api-key
+              </Link>{" "}
+              (sign in first; you need a Pro plan) and press <Strong>Generate key</Strong>. Copy the key now: it starts
+              with <code className={code}>nxs_</code> and is shown only once. If you lose it, generate a new one, which
+              stops the old one working.
+            </li>
+            <li>
+              <Strong>Save the key in your project.</Strong> In the project root, next to{" "}
+              <code className={code}>package.json</code>, create a file named{" "}
+              <code className={code}>.env.local</code> and put this one line in it, with your own key after the equals
+              sign:
+              <div className="mt-3">
+                <DocPre>{envLocalLine()}</DocPre>
+              </div>
+              <span className="mt-3 block">
+                Keep the key here and not in <code className={code}>components.json</code>. That file is normally
+                committed to git, while <code className={code}>.env.local</code> is already ignored by git in a new
+                Next.js project.
+              </span>
+            </li>
+            <li>
+              <Strong>Point the registry at the key.</Strong> Open <code className={code}>components.json</code>. Inside
+              the outermost braces, add the <code className={code}>&quot;registries&quot;</code> entry below as a new
+              line next to the others (after a comma on the line above). If you already ran the command from step 3,
+              there is a <code className={code}>&quot;registries&quot;</code> entry already: replace it with this one.
+              <div className="mt-3">
+                <DocPre>{`{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  ...everything the init command wrote stays as it is...,
+  ${REGISTRIES_PRO.split("\n").join("\n  ")}
+}`}</DocPre>
+              </div>
+              <span className="mt-3 block">
+                The dots line stands for what is already in your file; do not type it. Leave{" "}
+                <code className={code}>{"${" + API_KEY_ENV_VAR + "}"}</code> and <code className={code}>{"{name}"}</code>{" "}
+                exactly as written. The CLI reads <code className={code}>{API_KEY_ENV_VAR}</code> from{" "}
+                <code className={code}>.env.local</code> when it runs, and fills in{" "}
+                <code className={code}>{"{name}"}</code> with the component you ask for. This one entry also works for
+                free components.
+              </span>
+            </li>
+            <li>
+              <Strong>Install the component.</Strong> Run it from the project root, the folder that holds{" "}
+              <code className={code}>.env.local</code>:
+              <div className="mt-3">
+                <DocPre>{`npx shadcn@latest add @nexus-labs/particle-reveal`}</DocPre>
+              </div>
+              <span className="mt-3 block">
+                Pro blocks install the same way, for example{" "}
+                <code className={code}>@nexus-labs/text-animations</code>. Each component&apos;s page shows its exact
+                command.
+              </span>
+            </li>
+          </Steps>
+          <p className="text-sm font-medium text-foreground">If it fails</p>
+          <ul className="list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
+            <li>
+              A message that <code className={code}>{API_KEY_ENV_VAR}</code> is missing: the variable was not found. Check
+              the file is named <code className={code}>.env.local</code>, sits in the project root, and that you ran the
+              command from that folder.
+            </li>
+            <li>
+              A <code className={code}>401</code> or unauthorized message: the key is wrong, was replaced by a newer one,
+              or your Pro plan is not active. Generate a key again on the API key page and update{" "}
+              <code className={code}>.env.local</code>.
+            </li>
+            <li>
+              An unknown registry <code className={code}>@nexus-labs</code>: the <code className={code}>registries</code>{" "}
+              entry is missing from <code className={code}>components.json</code> or the file is no longer valid JSON
+              (look for a missing comma).
+            </li>
+          </ul>
+        </DocSection>
+
+        <DocSection title="5. Or copy a component by hand">
+          <p className="text-sm text-muted-foreground">
+            You can skip the registry and the key entirely and copy the files yourself. The steps below use the Glow
+            Button; any component works the same way. Pro components show their source only while you are signed in with
+            a Pro plan.
+          </p>
+          <Steps>
+            <li>
+              <Strong>Install the packages.</Strong> Nearly every component animates with Framer Motion:
+              <div className="mt-3">
+                <DocPre>{`npm install framer-motion`}</DocPre>
+              </div>
+              <span className="mt-3 block">
+                A component page lists any extra package under <Strong>Copying by hand?</Strong>
+              </span>
+            </li>
+            <li>
+              <Strong>Open the source.</Strong> Go to the component&apos;s page on{" "}
+              <Link href="/components" className={link}>
+                /components
+              </Link>
+              , scroll to <Strong>Add it to your project</Strong>, find <Strong>Copying by hand?</Strong> and press{" "}
+              <Strong>Show the source files</Strong>. You get one tab per file, each headed{" "}
+              <Strong>Save as</Strong> with the exact path to use.
+            </li>
+            <li>
+              <Strong>Create each file.</Strong> For every tab, create the file at the path shown (make the folders if
+              they do not exist yet), then paste the code. For the Glow Button that is four files:{" "}
+              <code className={code}>src/components/glow-button/glow-button.tsx</code>,{" "}
+              <code className={code}>src/components/glow-button/magnetic-button.tsx</code>,{" "}
+              <code className={code}>src/components/glow-button/index.ts</code> and the helper{" "}
+              <code className={code}>src/lib/ui-sounds.ts</code>. Do not skip the helper: the component imports it, and
+              without it the build stops with <code className={code}>Module not found: Can&apos;t resolve
+              &apos;@/lib/ui-sounds&apos;</code>.
+            </li>
+            <li>
+              <Strong>Check the helper.</Strong> The components import <code className={code}>cn()</code> from{" "}
+              <code className={code}>@/lib/utils</code>, which step 2 created. Without shadcn, make that file yourself;
+              see the{" "}
+              <Link href="/docs/add-utilities" className={link}>
+                cn() page
+              </Link>
+              .
+            </li>
+          </Steps>
+        </DocSection>
+
+        <DocSection title="6. Use it in a page">
+          <p className="text-sm text-muted-foreground">
+            Installing only adds the component to your project; it does not show it anywhere until a page uses it. Every
+            component page has a <Strong>Usage</Strong> tab on its preview: that is a short example, not the component
+            itself. Copy the import and the tag from it. Replace the contents of{" "}
+            <code className={code}>src/app/page.tsx</code> with:
+          </p>
+          <DocPre>{`import { GlowButton } from "@/components/glow-button";
+
+export default function Home() {
+  return (
+    <main className="flex min-h-screen items-center justify-center">
+      <GlowButton href="#">Get started</GlowButton>
+    </main>
+  );
+}`}</DocPre>
+          <p className="text-sm text-muted-foreground">
+            For Particle Reveal the import is{" "}
+            <code className={code}>{`import { ParticleReveal } from "@/components/particle-reveal"`}</code> and the tag
+            is <code className={code}>{`<ParticleReveal text="Launch" />`}</code>. Then start the app:
+          </p>
           <DocPre>{`npm run dev`}</DocPre>
           <p className="text-sm text-muted-foreground">
-            Open{" "}
-            <code className={docInlineCodeClass}>http://localhost:3000</code> and your first Nexus
-            UI component should be live. Browse{" "}
-            <Link href="/components" className="text-link underline-offset-4 hover:underline">
-              /components
+            Open <code className={code}>http://localhost:3000</code>. If it does not compile, read the first error line:{" "}
+            <code className={code}>Module not found</code> names the file you are missing. The{" "}
+            <Link href="/docs/cli" className={link}>
+              CLI page
             </Link>{" "}
-            for live previews and copy-ready snippets on every detail page.
+            covers monorepos, previewing installs and more.
           </p>
         </DocSection>
 

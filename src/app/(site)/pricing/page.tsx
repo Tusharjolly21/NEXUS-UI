@@ -132,7 +132,7 @@ const FAQ = [
   },
   {
     q: "How do I get the code after paying?",
-    a: "Sign in with the same email. Pro components show their code and playground right on their pages, every template page gets a Download source button, and Pro components and premium blocks install with the shadcn CLI using your API token.",
+    a: "Sign in with the same email. Pro components show their code and playground right on their pages, every template page gets a Download source button, and Pro components and premium blocks install with the shadcn CLI using your API key.",
   },
 ];
 

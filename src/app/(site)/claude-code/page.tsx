@@ -1,3 +1,4 @@
+import { registryAddCommand } from "@/lib/registry-config";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { RainbowWord } from "@/components/site";
@@ -10,11 +11,7 @@ export const metadata: Metadata = createMetadata({
   alternates: { canonical: "/claude-code" },
 });
 
-const REGISTRY_CONFIG = `{
-  "registries": {
-    "@nexus-labs": "https://www.nexus-ui.com/api/registry/{name}"
-  }
-}`;
+const REGISTRY_CONFIG = registryAddCommand();
 
 const INSTALL = `npx shadcn@latest add @nexus-labs/glow-button
 npx shadcn@latest add @nexus-labs/pricing-section`;
@@ -53,8 +50,10 @@ export default function ClaudeCodePage() {
           <div className="rounded-tile bg-card p-7 pg-float">
             <h2 className="text-[19px] font-semibold text-foreground">1. Add the registry once</h2>
             <p className="mt-2 text-[15px] leading-relaxed text-body">
-              Add this to the <code className="text-foreground">components.json</code> that{" "}
-              <code className="text-foreground">npx shadcn@latest init</code> created in your project.
+              Run this in a project where <code className="text-foreground">npx shadcn@latest init</code> has already
+              created <code className="text-foreground">components.json</code>. It adds the{" "}
+              <code className="text-foreground">@nexus-labs</code> entry for you; leave{" "}
+              <code className="text-foreground">{"{name}"}</code> exactly as written.
             </p>
             <Code>{REGISTRY_CONFIG}</Code>
           </div>

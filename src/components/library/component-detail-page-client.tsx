@@ -3,7 +3,8 @@
 import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
 import Link from "next/link";
-import { SHADCN_REGISTRY_SCOPE, shadcnRegistryUrl } from "@/lib/registry-scope";
+import { API_KEY_ENV_VAR, REGISTRIES_PRO, envLocalLine, installCommand, registryAddCommand } from "@/lib/registry-config";
+import { useRegistryFiles } from "@/components/library/use-registry-files";
 import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Link2, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
@@ -311,7 +312,7 @@ function Stage({
               ) : (
                 <Code2 className="size-3.5" aria-hidden />
               )}
-              {v === "preview" ? "Preview" : "Code"}
+              {v === "preview" ? "Preview" : "Usage"}
             </button>
           ))}
         </div>
@@ -359,7 +360,7 @@ function Stage({
             header={{
               enabled: true,
               showDots: true,
-              title: `${title}.tsx`,
+              title: "Usage example",
               copy: { enabled: true, label: "Copy code", copiedLabel: "Copied", copiedDurationMs: 1400 },
             }}
             codeArea={{ showLineNumbers: true, wrap: false, padding: 18 }}
@@ -367,6 +368,15 @@ function Stage({
           />
         </div>
       )}
+      {view === "code" ? (
+        <p className="px-2 pt-3 text-[13px] leading-relaxed text-muted-foreground">
+          This shows how to use {name} in a page, not its own files. To get the component, use the command under{" "}
+          <a href="#setup-heading" className="font-medium text-foreground underline underline-offset-4">
+            Add it to your project
+          </a>
+          .
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -431,7 +441,7 @@ function InstallPanel({
   hasPrompt: boolean;
   hasSound: boolean;
 }) {
-  const command = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryCliName ?? slug}`;
+  const command = installCommand(registryCliName ?? slug);
   const extra = getExtraLibraries(dependencies);
   const { requestUpgrade } = useProAccess();
 
@@ -477,17 +487,17 @@ function InstallPanel({
   return (
     <aside className="pg-float self-start rounded-tile bg-card p-6 lg:sticky lg:top-24">
       <h2 className="text-[19px] font-semibold tracking-[-0.4px] text-foreground">Install</h2>
-      <p className="mt-1 text-[14px] text-muted-foreground">One command adds the component and its dependencies.</p>
+      <p className="mt-1 text-[14px] text-muted-foreground">One command adds the component and its dependencies, once your project is set up.</p>
       <InstallCard wrap command={command} className="mt-4" upsell />
 
       {premium ? (
         <div className="mt-4 flex items-start gap-2.5 rounded-2xl bg-[#34c759]/12 p-3.5 text-[13.5px] leading-relaxed text-foreground">
           <LockOpen className="mt-0.5 size-4 shrink-0 text-[#248a3d] dark:text-[#30d158]" aria-hidden />
           <p>
-            <span className="font-semibold">{name} is unlocked.</span> Premium installs ask for your API token the first time.{" "}
-            <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
-              Set it up
-            </Link>
+            <span className="font-semibold">{name} is unlocked.</span> The command needs your API key, saved once per project.{" "}
+            <a href="#setup-heading" className="font-medium text-link underline-offset-4 hover:underline">
+              See the steps
+            </a>
           </p>
         </div>
       ) : null}
@@ -631,6 +641,70 @@ function PropsTable({ props }: { props?: PropDoc[] }) {
 
 // ── step-by-step setup ──────────────────────────────────────────────
 
+function HandSource({ item, name }: { item: string; name: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [index, setIndex] = React.useState(0);
+  const state = useRegistryFiles(item, open);
+  const files = state.status === "ready" ? state.files : [];
+  const file = files[Math.min(index, Math.max(files.length - 1, 0))];
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-3 inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-5 text-[14px] font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      >
+        <Code2 className="size-4" aria-hidden />
+        Show the source files
+      </button>
+    );
+  }
+  if (state.status === "idle" || state.status === "loading") return <p className="mt-3 text-[14px]">Loading the files…</p>;
+  if (state.status === "locked")
+    return <p className="mt-3 text-[14px]">The source of {name} is part of Pro. Sign in with a Pro plan to see it.</p>;
+  if (state.status === "error" || !file)
+    return <p className="mt-3 text-[14px]">The files could not be loaded. Reload the page, or install with the command above.</p>;
+
+  return (
+    <div className="mt-3">
+      <p className="text-[14px]">
+        {files.length} {files.length === 1 ? "file" : "files"}. For each tab, create the file at the path shown and paste the code. Create the folders if
+        they do not exist yet.
+      </p>
+      <div role="tablist" aria-label="Files to copy" className="mt-3 flex flex-wrap gap-1.5">
+        {files.map((f, i) => (
+          <button
+            key={f.savePath}
+            type="button"
+            role="tab"
+            aria-selected={i === index}
+            onClick={() => setIndex(i)}
+            className={cn(
+              "h-8 rounded-full px-3 font-mono text-[12px] transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+              i === index ? "bg-foreground text-background" : "bg-muted text-foreground hover:bg-muted/70",
+            )}
+          >
+            {f.savePath.split("/").pop()}
+          </button>
+        ))}
+      </div>
+      <p className="mt-3 text-[13px]">
+        Save as <code className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-[12.5px] text-foreground">{file.savePath}</code>
+        {file.from !== item ? " (a helper this component imports)" : ""}
+      </p>
+      <div className="relative mt-2 rounded-2xl bg-[#1d1d1f]">
+        <pre tabIndex={0} className="max-h-[420px] overflow-auto p-4 pr-24 font-mono text-[12.5px] leading-relaxed text-[#e6e6ea]">
+          {file.content}
+        </pre>
+        <div className="absolute right-3 top-3">
+          <CopyBtn text={file.content} dark />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Setup({
   name,
   slug,
@@ -639,6 +713,7 @@ function Setup({
   installedFiles,
   registryImport,
   usageSource,
+  premium,
 }: {
   name: string;
   slug: string;
@@ -647,38 +722,84 @@ function Setup({
   installedFiles: string[];
   registryImport?: string;
   usageSource?: string;
+  premium: boolean;
 }) {
   const registryName = registryCliName ?? slug;
-  const registryCommand = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${registryName}`;
-  const registryConfig = `{\n  "$schema": "https://ui.shadcn.com/schema.json",\n  "style": "default",\n  "rsc": true,\n  "tsx": true,\n  "tailwind": {\n    "css": "src/app/globals.css",\n    "baseColor": "neutral",\n    "cssVariables": true,\n    "prefix": ""\n  },\n  "aliases": {\n    "components": "@/components",\n    "utils": "@/lib/utils",\n    "ui": "@/components/ui",\n    "lib": "@/lib",\n    "hooks": "@/hooks"\n  },\n  "registries": {\n    "${SHADCN_REGISTRY_SCOPE}": "${shadcnRegistryUrl()}"\n  }\n}`;
   const extra = getExtraLibraries(dependencies);
   const exampleImport = getExampleImport(usageSource, registryImport, registryName, name);
-  const example = `// app/page.tsx\n${exampleImport}\n\nexport default function Page() {\n  return (\n    <main>\n      <${getImportName(exampleImport, name)} />\n    </main>\n  );\n}`;
+  const example = `// src/app/page.tsx\n${exampleImport}\n\nexport default function Page() {\n  return (\n    <main>\n      <${getImportName(exampleImport, name)} />\n    </main>\n  );\n}`;
+  const inline = "rounded-md bg-muted px-1.5 py-0.5 font-mono text-[0.9em] text-foreground";
 
   const steps: { title: string; body: React.ReactNode }[] = [
     {
-      title: "Prepare your project",
+      title: "Set up your project once",
       body: (
         <>
           <p>
-            You need Tailwind CSS and the <code className="font-mono text-foreground">@/</code> import alias. If shadcn isn&apos;t set
-            up yet, initialise it once:
+            You need a Next.js project with Tailwind CSS and the <code className={inline}>@/</code> import alias. In its root folder, run this once. It creates{" "}
+            <code className={inline}>components.json</code> and the <code className={inline}>cn()</code> helper in <code className={inline}>src/lib/utils.ts</code>:
           </p>
-          <CodeSnippet code="npx shadcn@latest init" />
-          <p className="mt-4">
-            Then add the Nexus registry to your <code className="font-mono text-foreground">components.json</code> (the{" "}
-            <code className="font-mono text-foreground">registries</code> key is the part that matters):
+          <CodeSnippet code="npx shadcn@latest init -d" />
+          <p className="mt-3">
+            Starting from nothing? The{" "}
+            <Link href="/docs/installation" className="font-medium text-link underline-offset-4 hover:underline">
+              Quick Start
+            </Link>{" "}
+            walks through the whole thing.
           </p>
-          <CodeSnippet code={registryConfig} />
         </>
       ),
     },
+    premium
+      ? {
+          title: "Connect the registry with your API key",
+          body: (
+            <>
+              <p>
+                {name} is a Pro item, so the CLI has to send your API key. Do this once per project:
+              </p>
+              <ol className="mt-3 list-decimal space-y-3 pl-5 marker:font-semibold marker:text-foreground">
+                <li>
+                  Create a key at{" "}
+                  <Link href="/dashboard/api-key" className="font-medium text-link underline-offset-4 hover:underline">
+                    nexus-ui.com/dashboard/api-key
+                  </Link>
+                  . Copy it straight away: it starts with <code className={inline}>nxs_</code> and is shown only once.
+                </li>
+                <li>
+                  In your project root, next to <code className={inline}>package.json</code>, create a file named <code className={inline}>.env.local</code> with this
+                  line, using your own key:
+                  <CodeSnippet code={envLocalLine()} />
+                </li>
+                <li>
+                  Open <code className={inline}>components.json</code> and add this entry inside the outermost braces, next to <code className={inline}>&quot;aliases&quot;</code>.
+                  Leave <code className={inline}>{"{name}"}</code> and <code className={inline}>{"${" + API_KEY_ENV_VAR + "}"}</code> exactly as written; the CLI fills them in:
+                  <CodeSnippet code={REGISTRIES_PRO} />
+                </li>
+              </ol>
+            </>
+          ),
+        }
+      : {
+          title: "Connect the registry",
+          body: (
+            <>
+              <p>
+                Run this once per project. It writes the Nexus UI entry into <code className={inline}>components.json</code> for you:
+              </p>
+              <CodeSnippet code={registryAddCommand()} />
+              <p className="mt-3">
+                Type it exactly as shown. <code className={inline}>{"{name}"}</code> is filled in by the CLI with the component you ask for, so you never replace it.
+              </p>
+            </>
+          ),
+        },
     {
       title: "Add the component",
       body: (
         <>
-          <p>Run this from your project root. It adds the component, the utilities it uses and its packages.</p>
-          <CodeSnippet code={registryCommand} />
+          <p>Run this from your project root. It adds the component, the helpers it imports and its npm packages.</p>
+          <CodeSnippet code={installCommand(registryName)} />
         </>
       ),
     },
@@ -686,30 +807,32 @@ function Setup({
       title: "Check what was added",
       body: (
         <>
-          <p>With the standard aliases, these files land in your project:</p>
+          <p>With a project made as in the Quick Start (a <code className={inline}>src/</code> folder), these files land in it:</p>
           <FolderTree files={installedFiles} />
         </>
       ),
     },
-    ...(extra.length
-      ? [
-          {
-            title: "Copying by hand? Install the packages",
-            body: (
-              <>
-                <p>Skip this if you used the command above.</p>
-                <CodeSnippet code={`npm install ${extra.join(" ")}`} />
-              </>
-            ),
-          },
-        ]
-      : []),
+    {
+      title: "Copying by hand? Skip the registry",
+      body: (
+        <>
+          <p>
+            Instead of steps 2 and 3 you can copy the files yourself, with no registry and no API key. Step 1 still applies, so that{" "}
+            <code className={inline}>cn()</code> exists. Install the packages:
+          </p>
+          <CodeSnippet code={`npm install ${extra.length ? extra.join(" ") : "framer-motion"}`} />
+          <p className="mt-3">Then show the source and create each file at the path it gives:</p>
+          <HandSource item={registryName} name={name} />
+        </>
+      ),
+    },
     {
       title: "Use it in a page",
       body: (
         <>
           <p>
-            Import it and render it. The <span className="font-medium text-foreground">Code</span> tab above has the full example.
+            Installing only adds the files. Import the component in a page and render it. The <span className="font-medium text-foreground">Usage</span> tab on the
+            preview shows a fuller example with props:
           </p>
           <CodeSnippet code={example} />
         </>
@@ -1040,6 +1163,7 @@ export function ComponentDetailPageClient({
             installedFiles={installedFiles}
             registryImport={registryImport}
             usageSource={usageSource}
+            premium={premium}
           />
           </ProLock>
           <About slug={slug} name={name} />

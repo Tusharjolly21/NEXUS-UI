@@ -1,5 +1,6 @@
 "use client";
 
+import { useRegistryFiles } from "@/components/library/use-registry-files";
 import { AutoplaySound } from "@/lib/ui-sounds";
 import * as React from "react";
 import Link from "next/link";
@@ -27,7 +28,6 @@ type Usage = {
   /** The server withheld the code: Pro component, no access. */
   locked?: boolean;
 };
-type RegistryFile = { path: string; target?: string; content: string };
 
 /** Values the visitor changed, as URL params, so a shared link opens with the same settings. */
 function readUrlValues(playground: Playground): PlaygroundValues {
@@ -169,7 +169,6 @@ function Inspector({ item }: { item: GalleryItem }) {
   const [view, setView] = React.useState<"preview" | "code">("preview");
   const [run, setRun] = React.useState(0);
   const [usage, setUsage] = React.useState<Usage | null>(null);
-  const [files, setFiles] = React.useState<RegistryFile[] | null | "locked">(null);
   const [fileIndex, setFileIndex] = React.useState(0);
   const [openSection, setOpenSection] = React.useState<"install" | "usage" | "source">("usage");
   const [shared, share] = useCopied();
@@ -233,18 +232,9 @@ function Inspector({ item }: { item: GalleryItem }) {
     };
   }, [playground]);
 
-  // Full source from the registry, fetched the first time the Source section opens.
-  React.useEffect(() => {
-    if (view !== "code" || openSection !== "source" || files !== null) return;
-    fetch(`/api/registry/${item.install}`)
-      .then(async (r) => {
-        if (r.status === 401 || r.status === 403) return setFiles("locked");
-        if (!r.ok) return setFiles([]);
-        const json = (await r.json()) as { files?: RegistryFile[] };
-        setFiles(json.files ?? []);
-      })
-      .catch(() => setFiles([]));
-  }, [view, openSection, files, item.install]);
+  // Full source from the registry (plus the helper files it imports), fetched the first time the Source section opens.
+  const sourceState = useRegistryFiles(item.install, view === "code" && openSection === "source");
+  const files = sourceState.status === "ready" ? sourceState.files : null;
 
   const install = `npx shadcn@latest add ${SHADCN_REGISTRY_SCOPE}/${item.install}`;
   const installUrl = `npx shadcn@latest add ${SITE}/api/registry/${item.install}`;
@@ -258,7 +248,9 @@ function Inspector({ item }: { item: GalleryItem }) {
     "",
     "1. Install it with the shadcn CLI:",
     `   ${install}`,
-    `   If components.json has no "${SHADCN_REGISTRY_SCOPE}" registry, install from the URL instead: ${installUrl}`,
+    item.premium
+      ? `   This is a Pro item: it needs the API key set up first (save it as NEXUS_API_KEY in .env.local and add the "registries" entry with the Authorization header to components.json, see nexus-ui.com/docs/installation).`
+      : `   If components.json has no "${SHADCN_REGISTRY_SCOPE}" registry, run npx shadcn@latest registry add "${SHADCN_REGISTRY_SCOPE}=${SITE}/api/registry/{name}" first, or install from the URL instead: ${installUrl}`,
     usage?.dependencies?.length ? `   It uses: ${usage.dependencies.join(", ")}.` : null,
     "",
     "2. Use it like this:",
@@ -312,10 +304,27 @@ function Inspector({ item }: { item: GalleryItem }) {
             <Section title="Install" open={openSection === "install"} onToggle={() => setOpenSection("install")} copyText={install}>
               <Code code={install} />
               <p className="px-2 pb-1 pt-3 text-[12.5px] leading-relaxed text-muted-foreground">
-                No <code className="font-mono text-foreground">{SHADCN_REGISTRY_SCOPE}</code> registry in your{" "}
-                <code className="font-mono text-foreground">components.json</code> yet? Install straight from the URL:
+                {item.premium ? (
+                  <>
+                    Pro items need your API key set up first. Follow the{" "}
+                    <Link className="underline" href="/docs/installation#add-a-pro-component-with-the-cli">
+                      Pro steps in the Quick Start
+                    </Link>
+                    .
+                  </>
+                ) : (
+                  <>
+                    First time in this project? Run{" "}
+                    <code className="font-mono text-foreground">npx shadcn@latest init -d</code> once. Then connect the registry
+                    with the command in the{" "}
+                    <Link className="underline" href="/docs/installation#add-a-free-component-with-the-cli">
+                      Quick Start
+                    </Link>
+                    , or install straight from the URL:
+                  </>
+                )}
               </p>
-              <Code code={installUrl} />
+              {item.premium ? null : <Code code={installUrl} />}
             </Section>
             <Section
               title={playground ? "Usage — with your settings" : "Usage"}
@@ -329,13 +338,13 @@ function Inspector({ item }: { item: GalleryItem }) {
               title="Source"
               open={openSection === "source"}
               onToggle={() => setOpenSection("source")}
-              copyText={Array.isArray(files) ? files[fileIndex]?.content : undefined}
+              copyText={files ? files[Math.min(fileIndex, files.length - 1)]?.content : undefined}
               aside={
-                Array.isArray(files) && files.length > 1 ? (
+                files && files.length > 1 ? (
                   <div className="flex max-w-[60%] gap-1 overflow-x-auto">
                     {files.map((f, i) => (
                       <button
-                        key={f.path}
+                        key={f.savePath}
                         type="button"
                         onClick={() => setFileIndex(i)}
                         className={cn(
@@ -343,19 +352,28 @@ function Inspector({ item }: { item: GalleryItem }) {
                           i === fileIndex ? "bg-foreground text-background" : "text-muted-foreground hover:bg-muted",
                         )}
                       >
-                        {f.path.split("/").pop()}
+                        {f.savePath.split("/").pop()}
                       </button>
                     ))}
                   </div>
                 ) : null
               }
             >
-              {files === null ? (
+              {sourceState.status === "idle" || sourceState.status === "loading" ? (
                 <p className="px-2 py-3 text-[13px] text-muted-foreground">Loading…</p>
-              ) : files === "locked" ? (
+              ) : sourceState.status === "locked" ? (
                 <p className="px-2 py-3 text-[13px] text-muted-foreground">The source of this component comes with Pro.</p>
-              ) : files.length ? (
-                <Code code={files[Math.min(fileIndex, files.length - 1)].content} />
+              ) : files && files.length ? (
+                <>
+                  <p className="px-2 pb-2 pt-1 text-[12.5px] leading-relaxed text-muted-foreground">
+                    Copying by hand? Save this file as{" "}
+                    <code className="font-mono text-foreground">{files[Math.min(fileIndex, files.length - 1)].savePath}</code>
+                    {files.length > 1 ? `, and do the same for the other ${files.length - 1} ${files.length === 2 ? "file" : "files"}` : ""}. Run{" "}
+                    <code className="font-mono text-foreground">npx shadcn@latest init -d</code> first so{" "}
+                    <code className="font-mono text-foreground">@/lib/utils</code> exists.
+                  </p>
+                  <Code code={files[Math.min(fileIndex, files.length - 1)].content} />
+                </>
               ) : (
                 <p className="px-2 py-3 text-[13px] text-muted-foreground">
                   Source isn&apos;t available here. <Link className="underline" href={`/components/${item.slug}`}>Open the full page</Link>.

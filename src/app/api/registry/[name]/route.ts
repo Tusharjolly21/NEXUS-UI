@@ -94,8 +94,8 @@ export async function GET(_req: Request, { params }: Params) {
       JSON.stringify({
         error: "Unauthorized",
         message: isProSoundPack
-          ? "The Pro sound pack is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key"
-          : "This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Add your API token to components.json, from nexus-ui.com/dashboard/api-key",
+          ? "The Pro sound pack is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Create an API key at nexus-ui.com/dashboard/api-key, save it as NEXUS_API_KEY in .env.local and send it as an Authorization Bearer header from components.json. Steps: nexus-ui.com/docs/installation"
+          : "This component is part of Nexus UI Pro. See plans at nexus-ui.com/pricing. Already have Pro? Create an API key at nexus-ui.com/dashboard/api-key, save it as NEXUS_API_KEY in .env.local and send it as an Authorization Bearer header from components.json. Steps: nexus-ui.com/docs/installation",
       }),
       { status: 401, headers: PRIVATE_JSON_HEADERS },
     );
@@ -108,7 +108,7 @@ export async function GET(_req: Request, { params }: Params) {
     return new NextResponse(
       JSON.stringify({
         error: "Unauthorized",
-        message: "This API token format has been retired. Generate a new token at nexus-ui.com/dashboard/api-key",
+        message: "This API key format has been retired. Generate a new key at nexus-ui.com/dashboard/api-key",
       }),
       { status: 401, headers: PRIVATE_JSON_HEADERS },
     );
@@ -116,7 +116,10 @@ export async function GET(_req: Request, { params }: Params) {
 
   if (resolved.status !== "valid") {
     return new NextResponse(
-      JSON.stringify({ error: "Invalid token" }),
+      JSON.stringify({
+        error: "Invalid token",
+        message: "This API key was not recognised. It may have been copied incompletely or replaced by a newer one. Create a new key at nexus-ui.com/dashboard/api-key",
+      }),
       { status: 401, headers: PRIVATE_JSON_HEADERS },
     );
   }

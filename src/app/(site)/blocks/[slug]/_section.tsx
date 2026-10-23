@@ -219,7 +219,7 @@ export function BlockSection({
                       <div className="rounded-[20px] bg-card p-5 shadow-[0_0_0_0.5px_var(--border)]">
                         <p className="text-[15px] font-semibold text-foreground">1. Install it</p>
                         <p className="mt-1 text-[13.5px] leading-relaxed text-muted-foreground">
-                          Run this in your project. First time? Add the Nexus registry to components.json, as the{" "}
+                          Run this in your project. First time? Connect the Nexus registry first, as the{" "}
                           <a href="#install" className="font-medium text-link hover:underline">
                             setup guide
                           </a>{" "}

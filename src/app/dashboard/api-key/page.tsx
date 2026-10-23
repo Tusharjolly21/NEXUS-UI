@@ -7,8 +7,8 @@ import { DashboardPage, PageHeader } from "@/components/dashboard/ui";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "API token — Nexus UI",
-  description: "Generate your API key and configure your project to install Nexus UI components.",
+  title: "API key — Nexus UI",
+  description: "Generate your API key, save it in .env.local and connect your project to install Pro components.",
 };
 
 export default async function DashboardApiKeyPage() {
@@ -24,8 +24,8 @@ export default async function DashboardApiKeyPage() {
   return (
     <DashboardPage>
       <PageHeader
-        title="API token"
-        description="Create a token so the shadcn CLI can install Pro components and premium blocks into your project."
+        title="API key"
+        description="Create a key so the shadcn CLI can install Pro components and blocks into your project. Four steps, in order."
       />
       <ApiKeyClient
         existingToken={
