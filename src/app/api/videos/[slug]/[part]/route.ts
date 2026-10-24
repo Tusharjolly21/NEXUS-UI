@@ -35,7 +35,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
 
   const { slug, part } = await params;
   const video = getVideo(slug);
-  if (!video || !(VIDEO_PARTS as readonly string[]).includes(part)) {
+  if (!video || video.files || !(VIDEO_PARTS as readonly string[]).includes(part)) {
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
   }
   const kind = part as VideoPart;

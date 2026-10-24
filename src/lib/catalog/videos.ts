@@ -1,6 +1,8 @@
 /**
- * The video catalogue: twenty videos, each a React component that is a pure function of time, drawn
- * on a fixed canvas for each shape it supports (9:16, 1:1, 16:9 and more), with its own soundtrack. This file is metadata only (it is safe to import from
+ * The video catalogue. Most videos are React components that are pure functions of time, drawn
+ * on a fixed canvas for each shape they support (9:16, 1:1, 16:9 and more), with their own soundtrack.
+ * A few are finished films instead (see `files`): they play and download as the MP4 they were made
+ * as. This file is metadata only (it is safe to import from
  * server code); the animation lives in `src/components/videos/<slug>.tsx`, the prompt and the
  * downloadable source in `content/videos/<slug>/` (served only through the gated route).
  *
@@ -58,6 +60,11 @@ export type VideoEntry = {
   posterAt: number;
   defaults: Record<string, string>;
   fields: VideoField[];
+  /**
+   * A finished film: one MP4 per shape, played and downloaded as made. It has no animation code,
+   * prompt or source, so there is nothing to edit or render, and it is never gated.
+   */
+  files?: Partial<Record<FormatId, string>>;
 };
 
 export const videos: VideoEntry[] = [
@@ -2015,6 +2022,44 @@ export const videos: VideoEntry[] = [
         "max": 22
       }
     ]
+  },
+  {
+    "slug": "will-return",
+    "title": "Will Return",
+    "purpose": "Post-credit teaser",
+    "motion": "Cut to the beat: the real site, live components, then a three-line end card",
+    "app": "Nexus UI",
+    "platforms": [
+      "YouTube",
+      "X",
+      "LinkedIn",
+      "Product Hunt"
+    ],
+    "formats": [
+      "16:9"
+    ],
+    "duration": 15,
+    "bpm": 0,
+    "cuts": [
+      0.74,
+      1.42,
+      2.31,
+      2.68,
+      2.97,
+      5.69,
+      8.01,
+      11.1
+    ],
+    "blurb": "A post-credit scene for Nexus UI. The landing page types itself in on the first notes, the page scrolls into live Venom, Web Sling, Doc Oc Arms and Portal cards, then the Catch Undo web catches a falling row and the Symbiote Cursor takes over before the end card: these components will return in Nexus UI.",
+    "premium": false,
+    "dark": false,
+    "createdAt": "2026-10-24",
+    "posterAt": 4.5,
+    "defaults": {},
+    "fields": [],
+    "files": {
+      "16:9": "/videos/files/will-return.mp4"
+    }
   }
 ];
 

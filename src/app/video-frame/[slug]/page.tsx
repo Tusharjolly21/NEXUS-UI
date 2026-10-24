@@ -9,7 +9,7 @@ type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ p?: st
 export const metadata: Metadata = { title: "Video frame", robots: { index: false, follow: false } };
 
 export function generateStaticParams() {
-  return videos.map((v) => ({ slug: v.slug }));
+  return videos.filter((v) => !v.files).map((v) => ({ slug: v.slug }));
 }
 
 /**
@@ -20,7 +20,8 @@ export default async function VideoFramePage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { p, f } = await searchParams;
   const video = getVideo(slug);
-  if (!video) notFound();
+  // finished films have no animation to draw frame by frame
+  if (!video || video.files) notFound();
 
   const values: Record<string, string> = videoDefaults(slug);
   if (p) {

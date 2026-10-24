@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AccessTag } from "@/components/pro/pro-access";
 import { VideoCard } from "@/components/videos/video-card";
+import { RenderedStudio } from "@/components/videos/rendered-studio";
 import { VideoStudio } from "@/components/videos/video-studio";
 import { getVideo, videoPosterSrc, videoPreviewSrc, videos } from "@/lib/catalog/videos";
 import { videoDefaults } from "@/lib/catalog/video-defaults";
@@ -20,7 +21,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!v) return {};
   return createMetadata({
     title: `${v.title}: ${v.purpose} Video Template in React`,
-    description: `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video${v.silent ? " that loops without a seam" : " with its own soundtrack"}: edit the words live, then take the prompt and the code.`,
+    description: v.files
+      ? `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} film with its own soundtrack. Free to watch, download and post.`
+      : `${v.blurb} A ${v.duration}-second ${v.formats.join(", ")} video${v.silent ? " that loops without a seam" : " with its own soundtrack"}: edit the words live, then take the prompt and the code.`,
     alternates: { canonical: `/videos/${v.slug}` },
   });
 }
@@ -37,7 +40,7 @@ export default async function VideoPage({ params }: Props) {
     name: `${video.title}: ${video.purpose} video`,
     description: video.blurb,
     thumbnailUrl: `${base}${videoPosterSrc(video.slug)}`,
-    contentUrl: `${base}${videoPreviewSrc(video.slug)}`,
+    contentUrl: `${base}${(video.files && video.files[video.formats[0]]) || videoPreviewSrc(video.slug)}`,
     uploadDate: video.createdAt,
     duration: `PT${video.duration}S`,
     isAccessibleForFree: !video.premium,
@@ -72,7 +75,7 @@ export default async function VideoPage({ params }: Props) {
 
       <section className="px-4 pb-24 pt-6">
         <div className="mx-auto max-w-[1152px]">
-          <VideoStudio video={video} defaults={videoDefaults(video.slug)} />
+          {video.files ? <RenderedStudio video={video} /> : <VideoStudio video={video} defaults={videoDefaults(video.slug)} />}
         </div>
       </section>
 
