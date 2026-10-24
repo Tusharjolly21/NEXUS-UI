@@ -384,8 +384,8 @@ function Stage({
 
 // ── build prompt (free on free components, Pro on Pro ones) ──────────────────────────────────────────────
 
-function BuildPromptCard({ slug, name, locked }: { slug: string; name: string; locked: boolean }) {
-  const [state, copy] = useCopyBuildPrompt(slug, name, { hasAccess: !locked });
+function BuildPromptCard({ slug, name, locked, free }: { slug: string; name: string; locked: boolean; free: boolean }) {
+  const [state, copy] = useCopyBuildPrompt(slug, name, { hasAccess: !locked, free });
   return (
     <div className="mt-6 rounded-[18px] bg-foreground/[0.04] p-4">
       <div className="flex items-center justify-between gap-2">
@@ -468,7 +468,7 @@ function InstallPanel({
         >
           See what Pro includes
         </Link>
-        {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} /> : null}
+        {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} free={!premium} /> : null}
         {interactions.length ? (
           <div className="mt-6">
             <p className="text-[13px] font-medium text-foreground">How it moves</p>
@@ -517,7 +517,7 @@ function InstallPanel({
         </div>
       ) : null}
 
-      {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} /> : null}
+      {hasPrompt ? <BuildPromptCard slug={slug} name={name} locked={locked} free={!premium} /> : null}
 
       {interactions.length ? (
         <div className="mt-6">
