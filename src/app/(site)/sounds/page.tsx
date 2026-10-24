@@ -211,78 +211,113 @@ export default async function SoundsPage() {
       </section>
 
       <section aria-labelledby="use-heading" className="px-4 pb-24">
-        <div className="mx-auto grid max-w-[1152px] gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-          <div>
-            <h2 id="use-heading" className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">
-              Add it to your app
-            </h2>
-            <p className="mt-4 max-w-[440px] text-[17px] leading-relaxed text-muted-foreground">
-              One command puts <code className="font-mono text-[15px] text-foreground">lib/ui-sounds.ts</code> in your
-              project. Then any click, toggle or toast can make a sound.
-            </p>
-            <InstallCard wrap command={INSTALL} className="mt-6" />
-            <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Pro pack</h3>
-            <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-              {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
-              command needs your Nexus API key, set up once as described in the{" "}
-              <Link href="/docs/cli" className="font-medium text-foreground underline underline-offset-4">CLI guide</Link>.
-            </p>
-            <InstallCard wrap command={INSTALL_PRO} className="mt-4" />
-            <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The recorded sounds</h3>
-            <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-              {RECORDED_COUNT} recordings: typing, camera, message, notification, screenshot, build-up, landing, pitch tick and glass sting. The audio ships inside the
-              package, so there is no file to host. Included in the Pro plan.
-            </p>
-            <InstallCard wrap command={INSTALL_RECORDED} className="mt-4" />
-            <h3 className="mt-10 text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Mac style</h3>
-            <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-              All {COUNT} free sounds re-voiced to feel at home on a Mac or iPhone. Install it, call{" "}
-              <code className="font-mono text-[14px] text-foreground">useMacSounds()</code> once, and every component that
-              makes sound switches to it. Original recipes, no Apple recordings. Included in the Pro plan.
-            </p>
-            <InstallCard wrap command={INSTALL_MAC} className="mt-4" />
+        {/* Each install step sits beside the code that uses it, so neither column runs on alone. */}
+        <div className="mx-auto flex max-w-[1152px] flex-col gap-14 lg:gap-20">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h2 id="use-heading" className="pg-display text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">
+                Add it to your app
+              </h2>
+              <p className="mt-4 max-w-[440px] text-[17px] leading-relaxed text-muted-foreground">
+                One command puts <code className="font-mono text-[15px] text-foreground">lib/ui-sounds.ts</code> in your
+                project. Then any click, toggle or toast can make a sound.
+              </p>
+              <InstallCard wrap command={INSTALL} className="mt-6" />
+            </div>
+            <div className="grid min-w-0 gap-4">
+                <CodeBlock
+                  code={USAGE}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: true, showDots: true, title: "like-button.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+                  border={{ radius: "20px" }}
+                />
+            </div>
           </div>
-          <div className="grid min-w-0 gap-4">
-            <CodeBlock
-              code={USAGE}
-              language="tsx"
-              theme="dark"
-              header={{ enabled: true, showDots: true, title: "like-button.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
-              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
-              border={{ radius: "20px" }}
-            />
-            <CodeBlock
-              code={PATTERNS}
-              language="tsx"
-              theme="dark"
-              header={{ enabled: true, showDots: true, title: "patterns.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
-              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
-              border={{ radius: "20px" }}
-            />
-            <CodeBlock
-              code={PRO_USAGE}
-              language="tsx"
-              theme="dark"
-              header={{ enabled: true, showDots: true, title: "pro-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
-              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
-              border={{ radius: "20px" }}
-            />
-            <CodeBlock
-              code={RECORDED_USAGE}
-              language="tsx"
-              theme="dark"
-              header={{ enabled: true, showDots: true, title: "recorded-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
-              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
-              border={{ radius: "20px" }}
-            />
-            <CodeBlock
-              code={MAC_USAGE}
-              language="tsx"
-              theme="dark"
-              header={{ enabled: true, showDots: true, title: "mac-style.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
-              codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
-              border={{ radius: "20px" }}
-            />
+
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h3 className="text-[19px] font-semibold tracking-[-0.3px] text-foreground">Patterns you will use</h3>
+              <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
+                Toggles, async work, notifications, components that play themselves, and a sound switch for your settings page. Copy the ones you need.
+              </p>
+            </div>
+            <div className="min-w-0">
+                <CodeBlock
+                  code={PATTERNS}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: true, showDots: true, title: "patterns.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+                  border={{ radius: "20px" }}
+                />
+            </div>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h3 className="text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Pro pack</h3>
+              <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
+                {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
+                command needs your Nexus API key, set up once as described in the{" "}
+                <Link href="/docs/cli" className="font-medium text-foreground underline underline-offset-4">CLI guide</Link>.
+              </p>
+              <InstallCard wrap command={INSTALL_PRO} className="mt-4" />
+            </div>
+            <div className="min-w-0">
+                <CodeBlock
+                  code={PRO_USAGE}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: true, showDots: true, title: "pro-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+                  border={{ radius: "20px" }}
+                />
+            </div>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h3 className="text-[19px] font-semibold tracking-[-0.3px] text-foreground">The recorded sounds</h3>
+              <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
+                {RECORDED_COUNT} recordings: typing, camera, message, notification, screenshot, build-up, landing, pitch tick and glass sting. The audio ships inside the
+                package, so there is no file to host. Included in the Pro plan.
+              </p>
+              <InstallCard wrap command={INSTALL_RECORDED} className="mt-4" />
+            </div>
+            <div className="min-w-0">
+                <CodeBlock
+                  code={RECORDED_USAGE}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: true, showDots: true, title: "recorded-sounds.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+                  border={{ radius: "20px" }}
+                />
+            </div>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
+            <div className="lg:sticky lg:top-24 lg:self-start">
+              <h3 className="text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Mac style</h3>
+              <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
+                All {COUNT} free sounds re-voiced to feel at home on a Mac or iPhone. Install it, call{" "}
+                <code className="font-mono text-[14px] text-foreground">useMacSounds()</code> once, and every component that
+                makes sound switches to it. Original recipes, no Apple recordings. Included in the Pro plan.
+              </p>
+              <InstallCard wrap command={INSTALL_MAC} className="mt-4" />
+            </div>
+            <div className="min-w-0">
+                <CodeBlock
+                  code={MAC_USAGE}
+                  language="tsx"
+                  theme="dark"
+                  header={{ enabled: true, showDots: true, title: "mac-style.tsx", copy: { enabled: true, label: "Copy", copiedLabel: "Copied", copiedDurationMs: 1400 } }}
+                  codeArea={{ showLineNumbers: false, wrap: false, padding: 18 }}
+                  border={{ radius: "20px" }}
+                />
+            </div>
           </div>
         </div>
       </section>
