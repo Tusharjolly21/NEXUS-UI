@@ -48,13 +48,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (variant !== null) {
     const text = /^[a-z0-9-]{1,80}$/.test(variant) ? await variantPrompt(component.slug, variant) : null;
     if (!text) return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
-    const prompt = withLicense(text, (await getSessionUser())?.id, component.slug);
+    const prompt = component.premium ? withLicense(text, (await getSessionUser())?.id, component.slug) : text;
     return NextResponse.json({ name: component.name, prompt }, { headers: PRIVATE });
   }
 
   try {
     const file = path.join(process.cwd(), "content", "build-prompts", `${component.slug}.md`);
-    const prompt = withLicense(await readFile(file, "utf8"), (await getSessionUser())?.id, component.slug);
+    const body = await readFile(file, "utf8");
+    // Only Pro prompts carry the licence line; a free component's prompt is free and unmarked.
+    const prompt = component.premium ? withLicense(body, (await getSessionUser())?.id, component.slug) : body;
     return NextResponse.json({ name: component.name, prompt }, { headers: PRIVATE });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
