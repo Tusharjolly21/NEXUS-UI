@@ -33,6 +33,15 @@ type Strand = {
   sx: number; sy: number; // where it was fired from
   stretch: number;
   alpha: number;
+  /** Age when it struck, and the direction it was travelling in button space. */
+  hitAge: number;
+  dIn: [number, number];
+};
+
+/* deterministic noise, so beads keep their sizes from frame to frame */
+const hash = (n: number) => {
+  const s = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return s - Math.floor(s);
 };
 
 /**
@@ -74,18 +83,19 @@ export function WebSlingButton({
   const stageRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const reticleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const stage = stageRef.current!, btn = btnRef.current!, canvas = canvasRef.current!;
-    const g = canvas.getContext("2d")!;
     const reduced = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     let w = 0, h = 0, dpr = 1;
     // the button's resting box, measured without its transform
     const B = { cx: 0, cy: 0, w: 0, h: 0 };
     const fit = () => {
-      // layout size, not the on-screen size, so a CSS-scaled parent does not change the canvas
+      const r = stage.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
-      w = stage.offsetWidth; h = stage.offsetHeight;
+      // layout size, not on-screen size, so a scaled stage still draws at the right size
+      w = stage.offsetWidth || r.width; h = stage.offsetHeight || r.height;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
       B.w = btn.offsetWidth; B.h = btn.offsetHeight;
       B.cx = btn.offsetLeft + B.w / 2; B.cy = btn.offsetTop + B.h / 2;
@@ -149,9 +159,9 @@ export function WebSlingButton({
           loose: Math.random() < 0.22,
           speed: 0.5 + Math.random(),
         })),
-        splat: Array.from({ length: 13 }, () => ({
-          ang: Math.random() * Math.PI * 2,
-          len: 6 + Math.pow(Math.random(), 1.6) * 26,
+        splat: Array.from({ length: 14 }, (_, k) => ({
+          ang: (k / 14) * Math.PI * 2 + (Math.random() - 0.5) * 0.35,
+          len: 10 + Math.pow(Math.random(), 1.4) * 24,
           curve: (Math.random() - 0.5) * 0.7,
           w: 0.4 + Math.random() * 0.6,
           a: 0.45 + Math.random() * 0.45,
@@ -160,6 +170,8 @@ export function WebSlingButton({
         cross: [],
         knots: Array.from({ length: 3 + Math.floor(Math.random() * 3) }, () => 0.12 + Math.random() * 0.76),
         fray: 0,
+        hitAge: 0,
+        dIn: [-a.nx, -a.ny],
       };
       // a few threads strung across the splat between neighbouring fibres
       for (let k = 0; k < 7; k++) {
@@ -232,145 +244,362 @@ export function WebSlingButton({
       return { x: (a[1] + (b[1] - a[1]) * e) * w, y: (a[2] + (b[2] - a[2]) * e) * h, down: a[3] === 1 };
     };
 
-    // ---- drawing helpers ----
-    const SILK = "236,238,245";
-    const line = (pts: { x: number; y: number }[], width: number, alpha: number, rgb = SILK) => {
-      if (pts.length < 2) return;
-      g.beginPath();
-      g.moveTo(pts[0].x, pts[0].y);
-      for (let i = 1; i < pts.length - 1; i++) g.quadraticCurveTo(pts[i].x, pts[i].y, (pts[i].x + pts[i + 1].x) / 2, (pts[i].y + pts[i + 1].y) / 2);
-      g.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
-      g.strokeStyle = `rgba(${rgb},${alpha.toFixed(3)})`;
-      g.lineWidth = width;
-      g.stroke();
+    // ---- WebGL silk: every fibre is a shaded ribbon, drawn on the GPU ----
+    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: true }) as WebGLRenderingContext | null;
+    const mk = (vs: string, fs: string) => {
+      if (!gl) return null;
+      const sh = (t: number, src: string) => { const o = gl.createShader(t)!; gl.shaderSource(o, src); gl.compileShader(o); return o; };
+      const pr = gl.createProgram()!;
+      gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs));
+      gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(pr);
+      if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) { console.warn("WebSlingButton shader", gl.getProgramInfoLog(pr)); return null; }
+      return pr;
     };
-    // a small, soft knot of glue, drawn out along the line when it is under tension
-    const knot = (x: number, y: number, r: number, ang: number, el: number, alpha: number) => {
-      g.save();
-      g.translate(x, y);
-      g.rotate(ang);
-      g.scale(el, 1 / Math.sqrt(el));
-      const gr = g.createRadialGradient(-r * 0.25, -r * 0.3, 0, 0, 0, r);
-      gr.addColorStop(0, `rgba(250,251,255,${(0.85 * alpha).toFixed(3)})`);
-      gr.addColorStop(1, `rgba(${SILK},${(0.15 * alpha).toFixed(3)})`);
-      g.fillStyle = gr;
-      g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.fill();
-      g.restore();
+    const RVS = `attribute vec2 aPos;attribute vec4 aV;attribute vec2 aSK;uniform vec2 uRes;varying vec4 vV;varying vec2 vSK;
+void main(){vV=aV;vSK=aSK;vec2 c=aPos/uRes*2.0-1.0;gl_Position=vec4(c.x,-c.y,0.0,1.0);}`;
+    const RFS = `precision mediump float;varying vec4 vV;varying vec2 vSK;
+float h(float n){return fract(sin(n)*43758.5453);}
+float nz(float x){float i=floor(x);float f=fract(x);f=f*f*(3.0-2.0*f);return mix(h(i),h(i+1.0),f);}
+void main(){
+  float k=vSK.y;float light=vV.y;float along=vV.w;float ax=abs(vV.x);
+  if(k>1.5){
+    /* glue: a wet, glossy film, thickest in the middle */
+    float e=1.0-smoothstep(0.2,1.0,ax);
+    float a=vV.z*e;
+    float spec=pow(light,6.0)*0.9;
+    vec3 c=mix(vec3(0.70,0.74,0.82),vec3(0.98,0.99,1.0),light)+spec;
+    gl_FragColor=vec4(min(c,vec3(1.0))*a,a);return;
+  }
+  if(k>0.5){
+    /* shadow on the wall behind */
+    float a=vV.z*(1.0-smoothstep(0.0,1.0,ax));
+    gl_FragColor=vec4(0.0,0.0,0.0,a);return;
+  }
+  /* silk: flat ribbons with a crumpled, broken highlight */
+  float e=1.0-smoothstep(0.35,1.0,ax);
+  float cr=nz(along*0.5+vSK.x*37.0)*0.6+nz(along*2.1+vSK.x*11.0)*0.4;
+  float spec=pow(light,3.0)*(0.15+1.6*cr*cr);
+  vec3 base=mix(vec3(0.52,0.57,0.66),vec3(0.93,0.95,0.99),light);
+  vec3 c=base*(0.6+0.4*light)+vec3(1.0,0.99,0.96)*spec;
+  float a=vV.z*e;
+  gl_FragColor=vec4(min(c,vec3(1.0))*a,a);
+}`;
+    const PVS = `attribute vec2 aPos;attribute vec2 aSA;uniform vec2 uRes;uniform float uDpr;varying float vA;
+void main(){vA=aSA.y;vec2 c=aPos/uRes*2.0-1.0;gl_Position=vec4(c.x,-c.y,0.0,1.0);gl_PointSize=aSA.x*uDpr;}`;
+    const PFS = `precision mediump float;varying float vA;
+void main(){vec2 p=gl_PointCoord-0.5;float d=length(p)*2.0;float core=exp(-d*d*14.0);float halo=exp(-d*d*3.0)*0.25;
+vec3 c=(vec3(1.0)*core+vec3(0.7,0.8,1.0)*halo)*vA;gl_FragColor=vec4(c,max(c.r,max(c.g,c.b)));}`;
+    const rProg = mk(RVS, RFS);
+    const pProg = mk(PVS, PFS);
+    const rBuf = gl?.createBuffer() || null;
+    const pBuf = gl?.createBuffer() || null;
+    const VMAX = 90000;
+    const VB = new Float32Array(VMAX * 8);
+    let vn = 0;
+    const PB = new Float32Array(3000 * 4);
+    let pn = 0;
+    const point = (x: number, y: number, size: number, a: number) => {
+      if (pn >= 3000 || a < 0.02) return;
+      const o = pn * 4;
+      PB[o] = x; PB[o + 1] = y; PB[o + 2] = size; PB[o + 3] = Math.min(1, a);
+      pn++;
     };
-    // a soft, irregular patch of glue: translucent, thicker in the middle, no hard edge
-    const patch = (x: number, y: number, r: number, seed: number, alpha: number) => {
-      g.beginPath();
-      for (let k = 0; k <= 30; k++) {
-        const a = (k / 30) * Math.PI * 2;
-        const rr = r * (1 + 0.28 * Math.sin(a * 2 + seed) + 0.18 * Math.sin(a * 5 - seed * 1.7) + 0.1 * Math.sin(a * 9 + seed * 3));
-        if (k === 0) g.moveTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); else g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    const vtx = (x: number, y: number, ac: number, li: number, al: number, lo: number, sd: number, kd: number) => {
+      const o = vn * 8;
+      VB[o] = x; VB[o + 1] = y; VB[o + 2] = ac; VB[o + 3] = li; VB[o + 4] = al; VB[o + 5] = lo; VB[o + 6] = sd; VB[o + 7] = kd;
+      vn++;
+    };
+    /* scratch for one ribbon: centre, width, light, alpha, distance along */
+    const RN = 260;
+    const rx = new Float32Array(RN), ry = new Float32Array(RN), rw = new Float32Array(RN), rl = new Float32Array(RN), ra = new Float32Array(RN), rg = new Float32Array(RN);
+    const ribbon = (n: number, seed: number, kind = 0) => {
+      if (n < 2 || vn + (n - 1) * 6 >= VMAX) return;
+      const minW = 1.2 / dpr;
+      let pnx = 0, pny = 0, pw = 0, pa = 0;
+      for (let i = 0; i < n; i++) {
+        const i0 = Math.max(0, i - 1), i1 = Math.min(n - 1, i + 1);
+        let tx = rx[i1] - rx[i0], ty = ry[i1] - ry[i0];
+        const tl = Math.hypot(tx, ty) || 1;
+        tx /= tl; ty /= tl;
+        const nx = -ty, ny = tx;
+        let wd = rw[i], al = ra[i];
+        if (wd < minW && kind === 0) { al *= wd / minW; wd = minW; }
+        if (i > 0) {
+          const j = i - 1, hj = pw / 2, hi = wd / 2;
+          vtx(rx[j] + pnx * hj, ry[j] + pny * hj, -1, rl[j], pa, rg[j], seed, kind);
+          vtx(rx[j] - pnx * hj, ry[j] - pny * hj, 1, rl[j], pa, rg[j], seed, kind);
+          vtx(rx[i] + nx * hi, ry[i] + ny * hi, -1, rl[i], al, rg[i], seed, kind);
+          vtx(rx[j] - pnx * hj, ry[j] - pny * hj, 1, rl[j], pa, rg[j], seed, kind);
+          vtx(rx[i] - nx * hi, ry[i] - ny * hi, 1, rl[i], al, rg[i], seed, kind);
+          vtx(rx[i] + nx * hi, ry[i] + ny * hi, -1, rl[i], al, rg[i], seed, kind);
+        }
+        pnx = nx; pny = ny; pw = wd; pa = al;
       }
-      g.closePath();
-      const gr = g.createRadialGradient(x - r * 0.2, y - r * 0.25, 0, x, y, r * 1.3);
-      gr.addColorStop(0, `rgba(248,249,253,${(0.8 * alpha).toFixed(3)})`);
-      gr.addColorStop(0.5, `rgba(${SILK},${(0.45 * alpha).toFixed(3)})`);
-      gr.addColorStop(1, `rgba(${SILK},${(0.08 * alpha).toFixed(3)})`);
-      g.fillStyle = gr;
-      g.fill();
     };
+    /* a filled blob: centre fan with soft, irregular rim */
+    const blob = (x: number, y: number, r: number, seed: number, alpha: number, squash = 1, ang = 0) => {
+      if (r < 0.3 || vn + 28 * 3 >= VMAX) return;
+      const K = 28;
+      const c = Math.cos(ang), s = Math.sin(ang);
+      const P = (k: number) => {
+        const a = (k / K) * Math.PI * 2;
+        const rr = r * (1 + 0.24 * Math.sin(a * 2 + seed) + 0.15 * Math.sin(a * 5 - seed * 1.7) + 0.08 * Math.sin(a * 9 + seed * 3));
+        const lx = Math.cos(a) * rr, ly = Math.sin(a) * rr * squash;
+        return [x + lx * c - ly * s, y + lx * s + ly * c, 0.5 - 0.5 * Math.sin(a + 0.8)] as const;
+      };
+      for (let k = 0; k < K; k++) {
+        const p0 = P(k), p1 = P(k + 1);
+        vtx(x, y, 0, 0.85, alpha, 0, seed, 2);
+        vtx(p0[0], p0[1], 1, p0[2], alpha, 0, seed, 2);
+        vtx(p1[0], p1[1], 1, p1[2], alpha, 0, seed, 2);
+      }
+    };
+    const flush = () => {
+      if (!gl || !rProg || !pProg) return;
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      if (vn) {
+        gl.useProgram(rProg);
+        gl.uniform2f(gl.getUniformLocation(rProg, "uRes"), w, h);
+        gl.bindBuffer(gl.ARRAY_BUFFER, rBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, VB.subarray(0, vn * 8), gl.DYNAMIC_DRAW);
+        const a0 = gl.getAttribLocation(rProg, "aPos"), a1 = gl.getAttribLocation(rProg, "aV"), a2 = gl.getAttribLocation(rProg, "aSK");
+        gl.enableVertexAttribArray(a0); gl.vertexAttribPointer(a0, 2, gl.FLOAT, false, 32, 0);
+        gl.enableVertexAttribArray(a1); gl.vertexAttribPointer(a1, 4, gl.FLOAT, false, 32, 8);
+        gl.enableVertexAttribArray(a2); gl.vertexAttribPointer(a2, 2, gl.FLOAT, false, 32, 24);
+        gl.drawArrays(gl.TRIANGLES, 0, vn);
+        gl.disableVertexAttribArray(a1); gl.disableVertexAttribArray(a2);
+      }
+      if (pn) {
+        gl.useProgram(pProg);
+        gl.uniform2f(gl.getUniformLocation(pProg, "uRes"), w, h);
+        gl.uniform1f(gl.getUniformLocation(pProg, "uDpr"), dpr);
+        gl.bindBuffer(gl.ARRAY_BUFFER, pBuf);
+        gl.bufferData(gl.ARRAY_BUFFER, PB.subarray(0, pn * 4), gl.DYNAMIC_DRAW);
+        const a0 = gl.getAttribLocation(pProg, "aPos"), a1 = gl.getAttribLocation(pProg, "aSA");
+        gl.enableVertexAttribArray(a0); gl.vertexAttribPointer(a0, 2, gl.FLOAT, false, 16, 0);
+        gl.enableVertexAttribArray(a1); gl.vertexAttribPointer(a1, 2, gl.FLOAT, false, 16, 8);
+        gl.drawArrays(gl.POINTS, 0, pn);
+        gl.disableVertexAttribArray(a1);
+      }
+      vn = 0; pn = 0;
+    };
+
+    /* the line: a smooth path through the simulated points */
+    const SUB = 4;
+    const MP = (N - 1) * SUB + 1;
+    const PX = new Float32Array(MP), PY = new Float32Array(MP), NX = new Float32Array(MP), NY = new Float32Array(MP), LS = new Float32Array(MP);
+    const smoothPath = (s: Strand, cx0?: number, cy0?: number) => {
+      const X = (i: number) => (i === 0 && cx0 !== undefined ? cx0 : s.x[Math.max(0, Math.min(N - 1, i))]);
+      const Y = (i: number) => (i === 0 && cy0 !== undefined ? cy0! : s.y[Math.max(0, Math.min(N - 1, i))]);
+      let m = 0;
+      for (let i = 0; i < N - 1; i++) {
+        const x0 = X(i - 1), y0 = Y(i - 1), x1 = X(i), y1 = Y(i), x2 = X(i + 1), y2 = Y(i + 1), x3 = X(i + 2), y3 = Y(i + 2);
+        for (let k = 0; k < SUB; k++) {
+          const t = k / SUB, t2 = t * t, t3 = t2 * t;
+          PX[m] = 0.5 * (2 * x1 + (-x0 + x2) * t + (2 * x0 - 5 * x1 + 4 * x2 - x3) * t2 + (-x0 + 3 * x1 - 3 * x2 + x3) * t3);
+          PY[m] = 0.5 * (2 * y1 + (-y0 + y2) * t + (2 * y0 - 5 * y1 + 4 * y2 - y3) * t2 + (-y0 + 3 * y1 - 3 * y2 + y3) * t3);
+          m++;
+        }
+      }
+      PX[m] = X(N - 1); PY[m] = Y(N - 1);
+      let acc = 0;
+      for (let i = 0; i < MP; i++) {
+        if (i > 0) acc += Math.hypot(PX[i] - PX[i - 1], PY[i] - PY[i - 1]);
+        LS[i] = acc;
+        const a = Math.max(0, i - 1), b = Math.min(MP - 1, i + 1);
+        const dx = PX[b] - PX[a], dy = PY[b] - PY[a], dl = Math.hypot(dx, dy) || 1;
+        NX[i] = -dy / dl; NY[i] = dx / dl;
+      }
+      return acc;
+    };
+
     /*
-     * A web line is a loose bundle of fine fibres, not one thread. They drift apart along the span,
-     * pinch together where they are glued into knots, converge where they are stuck, and a few
-     * loose ones sag away from the rest. Pulled taut, the bundle closes up into a thin line; after
-     * a snap the free end frays like a broken brush.
+     * A web line is a loose bundle of flat silk fibres twisted round each other. They drift apart along
+     * the span, pinch together at glue knots, fan out into the splat where the line is stuck, and fray
+     * when it breaks. Pulled taut, the bundle closes up into a thin, bright line.
      */
-    const bundle = (s: Strand, alpha: number, time: number) => {
+    const bundle = (s: Strand, alpha: number, time: number, total: number) => {
       const st = s.stretch;
       const tight = Math.min(1, (st - 1) * 2.2);
       const flying = s.state === "flying";
       const freeEnd = s.state === "dangling" || s.state === "falling";
-      const spread = (flying ? 1.4 : 2.2 + 3.2 * (1 - tight)) / Math.sqrt(st);
-      // tangents and normals along the path
-      const nx = new Float32Array(N), ny = new Float32Array(N);
-      for (let i = 0; i < N; i++) {
-        const a = Math.max(0, i - 1), b = Math.min(N - 1, i + 1);
-        const dx = s.x[b] - s.x[a], dy = s.y[b] - s.y[a], dl = Math.hypot(dx, dy) || 1;
-        nx[i] = -dy / dl; ny[i] = dx / dl;
-      }
+      const spread = (flying ? 1.2 : 1.6 + 2.6 * (1 - tight)) / Math.sqrt(st);
+      const thin = 1 / Math.sqrt(st);
       const env = (u: number) => {
-        // stuck at the button (u = 0); stuck to the shooter too unless the end is loose
-        let e = Math.pow(Math.sin(Math.PI * Math.min(u, freeEnd || flying ? 0.5 : u)), 0.7);
-        if (freeEnd) e *= 1 + s.fray * Math.pow(u, 4) * 2.5;
-        for (const k of s.knots) e *= 1 - 0.75 * Math.exp(-Math.pow((u - k) / 0.035, 2));
+        let e = Math.pow(Math.sin(Math.PI * Math.min(u, freeEnd || flying ? 0.5 : u)), 0.6);
+        // where it is stuck, the fibres fan out into the splat like a little tent
+        if (!flying) e += 1.6 * Math.exp(-u * 14);
+        if (freeEnd) e *= 1 + s.fray * Math.pow(u, 4) * 2.8;
+        for (const k of s.knots) e *= 1 - 0.75 * Math.exp(-Math.pow((u - k) / 0.03, 2));
         return e;
       };
-      // a faint core so the bundle reads as one line from a distance
-      const core: { x: number; y: number }[] = [];
-      for (let i = 0; i < N; i++) core.push({ x: s.x[i], y: s.y[i] });
-      line(core, 1.8 / Math.sqrt(st), 0.22 * alpha);
-      for (const f of s.fib) {
-        const pts: { x: number; y: number }[] = [];
-        const sag = f.loose ? (6 + 10 * (1 - tight)) : 0;
-        for (let i = 0; i < N; i++) {
-          const u = i / (N - 1);
-          const e = env(u);
-          const o = e * spread * ((f.loose ? 1.7 : 1) * f.off + 0.45 * Math.sin(u * f.freq + f.phase + time * 0.7 * f.speed));
-          pts.push({ x: s.x[i] + nx[i] * o, y: s.y[i] + ny[i] * o + e * sag * Math.sin(Math.PI * u) });
-        }
-        line(pts, Math.max(0.3, f.w / Math.sqrt(st)), f.a * alpha);
+      // shadow on the wall
+      for (let i = 0; i < MP; i += 2) {
+        const n = i >> 1;
+        rx[n] = PX[i] + 5; ry[n] = PY[i] + 12; rw[n] = 4.5 * thin + 2; rl[n] = 0; ra[n] = 0.1 * alpha; rg[n] = 0;
       }
-      // glue knots where the fibres meet
+      ribbon(Math.ceil(MP / 2), 0, 1);
+      // fibres
+      for (let q = 0; q < s.fib.length; q++) {
+        const f = s.fib[q];
+        const sag = f.loose ? (5 + 9 * (1 - tight)) : 0;
+        for (let i = 0; i < MP; i++) {
+          const u = i / (MP - 1);
+          const l = LS[i];
+          const e = env(u);
+          const th = f.phase + l * 0.16 + time * 0.8 * f.speed;
+          const o = e * spread * ((f.loose ? 1.7 : 1) * f.off * 0.85 + 0.55 * Math.cos(th));
+          rx[i] = PX[i] + NX[i] * o;
+          ry[i] = PY[i] + NY[i] * o + e * sag * Math.sin(Math.PI * u);
+          const psi = f.phase * 2.3 + l * (0.09 + 0.05 * f.speed) + time * 0.6;
+          rw[i] = (0.55 + 1.15 * f.w) * thin * (0.3 + 0.7 * Math.abs(Math.cos(psi))) * (flying ? 1 + 0.6 * (1 - u) : 1);
+          rl[i] = Math.min(1, 0.1 + 0.9 * (0.5 + 0.5 * Math.sin(th)) * Math.abs(Math.cos(psi - 0.7)));
+          ra[i] = (0.55 + 0.45 * f.a) * alpha * (f.loose ? 0.7 : 1);
+          rg[i] = l;
+        }
+        ribbon(MP, s.seed * 0.137 + q * 0.071);
+      }
+      // loose hairs off the line
+      for (let k = 0; k < 26; k++) {
+        const hs = hash(s.seed * 13 + k * 7.1);
+        const i = Math.min(MP - 2, Math.max(2, Math.round((0.05 + 0.9 * hs) * (MP - 1))));
+        const side = hash(k * 3.3 + s.seed) < 0.5 ? -1 : 1;
+        const back = hash(k * 5.1 + s.seed) < 0.7 ? -1 : 1;
+        const len = (2 + 4.5 * hash(k * 9.7 + s.seed)) * thin;
+        const tx = -NY[i] * back, ty = NX[i] * back;
+        const bx = PX[i] + NX[i] * side * spread * env(i / (MP - 1)) * 0.8, by = PY[i] + NY[i] * side * spread * env(i / (MP - 1)) * 0.8;
+        const ex = bx + (tx * 0.8 + NX[i] * side * 0.6) * len, ey = by + (ty * 0.8 + NY[i] * side * 0.6) * len;
+        rx[0] = bx; ry[0] = by; rx[1] = (bx + ex) / 2 + NX[i] * side * 0.4; ry[1] = (by + ey) / 2 + NY[i] * side * 0.4; rx[2] = ex; ry[2] = ey;
+        rw[0] = 0.6; rw[1] = 0.45; rw[2] = 0.3; rl[0] = rl[1] = rl[2] = 0.3 + 0.6 * hash(k + s.seed);
+        ra[0] = ra[1] = ra[2] = 0.5 * alpha; rg[0] = 0; rg[1] = 1; rg[2] = 2;
+        ribbon(3, 0.5 + k * 0.01);
+      }
+      // glints: wet specks that flicker as the silk turns
+      for (let k = 0; k < 18; k++) {
+        const i = Math.min(MP - 1, Math.round(hash(s.seed * 7 + k * 1.3) * (MP - 1)));
+        const tw = Math.pow(Math.max(0, Math.sin(time * (1.5 + hash(k * 2.7) * 3) + k * 1.9 + s.seed)), 6);
+        const side = hash(k * 4.4 + s.seed) * 2 - 1;
+        point(PX[i] + NX[i] * side * spread, PY[i] + NY[i] * side * spread, 2 + 4 * tw, (0.15 + 0.85 * tw) * alpha);
+      }
+      // glue knots where the fibres are stuck together, drawn out along the line under tension
       if (!flying) {
         for (const k of s.knots) {
-          const fi = k * (N - 1), i = Math.floor(fi), t = fi - i;
-          const x = s.x[i] + (s.x[i + 1] - s.x[i]) * t, y = s.y[i] + (s.y[i + 1] - s.y[i]) * t;
-          const ang = Math.atan2(s.y[i + 1] - s.y[i], s.x[i + 1] - s.x[i]);
-          knot(x, y, (1.3 + 0.6 * Math.sin(k * 40 + s.seed)) / Math.pow(st, 0.35), ang, Math.min(2.4, Math.sqrt(st)), alpha);
+          const i = Math.min(MP - 2, Math.round(k * (MP - 1)));
+          const ang = Math.atan2(PY[i + 1] - PY[i], PX[i + 1] - PX[i]);
+          const r = (1.4 + 0.5 * Math.sin(k * 40 + s.seed)) / Math.pow(st, 0.3);
+          blob(PX[i], PY[i], r * 1.3, s.seed + k * 10, 0.75 * alpha, 1 / Math.min(2.4, Math.sqrt(st)), ang);
+          point(PX[i] - 0.4, PY[i] - 0.5, 2.6, 0.6 * alpha);
         }
       }
+      return total;
     };
-    // where the line hit: a messy splat of flung fibres, a few threads between them and a smear of glue
-    const splat = (s: Strand, A: { x: number; y: number }, alpha: number) => {
-      const grow = Math.min(1, s.age / 0.1);
-      const tips: { x: number; y: number; dx: number; dy: number; len: number }[] = [];
-      for (const f of s.splat) {
-        const a = f.ang + pose.rot;
-        const L = f.len * grow;
-        const dx = Math.cos(a), dy = Math.sin(a);
-        const ex = A.x + dx * L, ey = A.y + dy * L;
-        const cx = A.x + dx * L * 0.5 - dy * L * f.curve, cy = A.y + dy * L * 0.5 + dx * L * f.curve;
-        tips.push({ x: ex, y: ey, dx, dy, len: L });
-        // a whisper of shadow so it reads on a light surface too, then the fibre
-        for (const pass of [0, 1]) {
-          const o = pass === 0 ? 0.8 : 0;
-          g.beginPath();
-          g.moveTo(A.x + o, A.y + o);
-          g.quadraticCurveTo(cx + o, cy + o, ex + o, ey + o);
-          g.strokeStyle = pass === 0 ? `rgba(10,14,40,${(0.16 * alpha).toFixed(3)})` : `rgba(${SILK},${(f.a * alpha).toFixed(3)})`;
-          g.lineWidth = pass === 0 ? f.w + 0.8 : f.w;
-          g.stroke();
+
+    // where the line hit: the head bursts into a splat that grabs the button
+    const SP = 9;
+    const splat = (s: Strand, A: { x: number; y: number }, alpha: number, time: number, pull: { x: number; y: number }) => {
+      const since = s.age - s.hitAge;
+      const grow = 1 - Math.pow(1 - Math.min(1, since / 0.16), 3);
+      const net = Math.max(0, Math.min(1, (since - 0.07) / 0.22));
+      const c = Math.cos(pose.rot), sn = Math.sin(pose.rot);
+      const W = (lx: number, ly: number) => ({ x: B.cx + pose.x + lx * c - ly * sn, y: B.cy + pose.y + lx * sn + ly * c });
+      const R0 = B.h / 2, A0 = Math.max(0, B.w / 2 - R0);
+      // the splat lies on the button: points past its edge wrap round it and fade from view
+      const conform = (lx: number, ly: number) => {
+        const qx = Math.max(-A0, Math.min(A0, lx));
+        const vx = lx - qx, vy = ly;
+        const d = Math.hypot(vx, vy) || 1;
+        const sd = d - R0;
+        if (sd <= 0) return { x: lx, y: ly, a: 1 };
+        const keep = Math.min(sd, 2.5);
+        return { x: qx + (vx / d) * (R0 + keep), y: (vy / d) * (R0 + keep), a: Math.exp(-sd / 5) };
+      };
+      // the centre is dragged toward the pull, so the strands around it tent up
+      const cxL = s.ax + pull.x, cyL = s.ay + pull.y;
+      const tips: { x: number; y: number; a: number }[][] = [];
+      for (let q = 0; q < s.splat.length; q++) {
+        const f = s.splat[q];
+        // the web splashes forward, along the way it was travelling
+        const fwd = Math.cos(f.ang - Math.atan2(s.dIn[1], s.dIn[0]));
+        const L = f.len * 1.35 * (1 + 0.45 * fwd) * grow * (0.9 + 0.2 * Math.sin(since * 30 + q) * Math.exp(-since * 8));
+        const ptsL: { x: number; y: number; a: number }[] = [];
+        let n = 0;
+        for (let j = 0; j < SP; j++) {
+          const v = j / (SP - 1);
+          const a = f.ang + f.curve * v * 1.2;
+          const bx = s.ax + Math.cos(a) * L * v, by = s.ay + Math.sin(a) * L * v;
+          // inner part follows the dragged centre
+          const pullW = Math.pow(1 - v, 2);
+          const p = conform(bx + (cxL - s.ax) * pullW, by + (cyL - s.ay) * pullW);
+          const wp = W(p.x, p.y);
+          ptsL.push(p);
+          rx[n] = wp.x; ry[n] = wp.y;
+          rw[n] = (f.w * 2.2 + 0.9) * (1 - v * 0.62);
+          rl[n] = 0.35 + 0.6 * Math.abs(Math.sin(v * 6 + q * 1.3));
+          ra[n] = alpha * p.a * (0.78 + 0.22 * (1 - v)) * (0.75 + 0.25 * f.a);
+          rg[n] = v * 20 + q * 3;
+          n++;
         }
-        if (f.branch) {
-          const bx = A.x + dx * L * 0.55 - dy * L * f.curve * 0.5, by = A.y + dy * L * 0.55 + dx * L * f.curve * 0.5;
-          const ba = a + f.branch;
-          g.beginPath();
-          g.moveTo(bx, by);
-          g.lineTo(bx + Math.cos(ba) * L * 0.4, by + Math.sin(ba) * L * 0.4);
-          g.strokeStyle = `rgba(${SILK},${(f.a * 0.8 * alpha).toFixed(3)})`;
-          g.lineWidth = f.w * 0.7;
-          g.stroke();
+        tips.push(ptsL);
+        /* a faint contact shadow first, so the silk reads against the button */
+        for (let j = 0; j < n; j++) { rx[j] += 0.8; ry[j] += 1.3; }
+        const keepA = Array.from(ra.subarray(0, n));
+        for (let j = 0; j < n; j++) ra[j] = keepA[j] * 0.35;
+        ribbon(n, 0, 1);
+        for (let j = 0; j < n; j++) { rx[j] -= 0.8; ry[j] -= 1.3; ra[j] = keepA[j]; }
+        ribbon(n, 0.31 + q * 0.05);
+        // a second, finer fibre alongside, slightly apart
+        for (let j = 0; j < n; j++) {
+          const v = j / (SP - 1);
+          rx[j] += -Math.sin(f.ang) * 0.9 * v; ry[j] += Math.cos(f.ang) * 0.9 * v;
+          rw[j] *= 0.55; ra[j] *= 0.8;
+        }
+        ribbon(n, 0.61 + q * 0.05);
+        if (f.branch && grow > 0.5) {
+          const p0 = ptsL[4];
+          const ba = f.ang + f.branch;
+          const bl = L * 0.38;
+          const pe = conform(p0.x + Math.cos(ba) * bl, p0.y + Math.sin(ba) * bl);
+          const w0 = W(p0.x, p0.y), w1 = W((p0.x + pe.x) / 2, (p0.y + pe.y) / 2), w2 = W(pe.x, pe.y);
+          rx[0] = w0.x; ry[0] = w0.y; rx[1] = w1.x; ry[1] = w1.y; rx[2] = w2.x; ry[2] = w2.y;
+          rw[0] = 0.8; rw[1] = 0.6; rw[2] = 0.35; rl[0] = rl[1] = rl[2] = 0.6; ra[0] = ra[1] = ra[2] = f.a * alpha * 0.8 * pe.a; rg[0] = 0; rg[1] = 3; rg[2] = 6;
+          ribbon(3, 0.9 + q * 0.03);
         }
       }
-      g.lineWidth = 0.4;
-      g.strokeStyle = `rgba(${SILK},${(0.45 * alpha).toFixed(3)})`;
-      for (const [i, j, ti, tj] of s.cross) {
-        const p = tips[i], q = tips[j];
-        const x1 = A.x + (p.x - A.x) * ti, y1 = A.y + (p.y - A.y) * ti;
-        const x2 = A.x + (q.x - A.x) * tj, y2 = A.y + (q.y - A.y) * tj;
-        g.beginPath();
-        g.moveTo(x1, y1);
-        g.quadraticCurveTo((x1 + x2) / 2 + (A.x - (x1 + x2) / 2) * 0.1, (y1 + y2) / 2 + 1.2, x2, y2);
-        g.stroke();
+      // rings of thread strung between neighbouring strands, sagging toward the middle
+      if (net > 0) {
+        for (const ring of [0.32, 0.6, 0.85]) {
+          const jr = Math.round(ring * (SP - 1));
+          for (let q = 0; q < s.splat.length; q++) {
+            const q2 = (q + 1) % s.splat.length;
+            let gap = s.splat[q2].ang - s.splat[q].ang;
+            if (gap < 0) gap += Math.PI * 2;
+            if (gap > 1.25) continue;
+            const p0 = tips[q][jr], p1 = tips[q2][jr];
+            let n = 0;
+            for (let j = 0; j <= 6; j++) {
+              const v = j / 6;
+              const sag = Math.sin(Math.PI * v) * 0.22;
+              const lx = p0.x + (p1.x - p0.x) * v, ly = p0.y + (p1.y - p0.y) * v;
+              const wp = W(lx + (cxL - lx) * sag, ly + (cyL - ly) * sag);
+              rx[n] = wp.x; ry[n] = wp.y; rw[n] = 0.95; rl[n] = 0.55 + 0.4 * Math.sin(v * 3 + q);
+              ra[n] = 0.85 * alpha * net * Math.min(p0.a, p1.a) * (ring > 0.8 ? 0.6 : 1); rg[n] = v * 8; n++;
+            }
+            ribbon(n, 0.77 + q * 0.02);
+          }
+        }
       }
-      // a smear of glue dragged along the line's direction, then the denser patch where it struck
-      const lx = s.x[3] - A.x, ly = s.y[3] - A.y, ll = Math.hypot(lx, ly) || 1;
-      patch(A.x + (lx / ll) * 3, A.y + (ly / ll) * 3, 5.5 * grow, s.seed + 2, alpha * 0.55);
-      patch(A.x, A.y, (7 + 1.5 * Math.sin(s.seed)) * grow * (1 + 0.2 * pose.hit), s.seed, alpha);
+      // a sheet of glue in the middle of the splat, and the wet blob where it struck
+      const cW = W(cxL, cyL);
+      const pullAng = Math.atan2(pull.y, pull.x) + pose.rot;
+      const pl = Math.hypot(pull.x, pull.y);
+      blob(cW.x, cW.y, (12 + 2 * Math.sin(s.seed)) * grow, s.seed + 5, 0.4 * alpha, 1 / (1 + pl * 0.06), pullAng);
+      blob(cW.x, cW.y, (6.5 + 1.2 * Math.sin(s.seed * 2)) * grow * (1 + 0.25 * pose.hit), s.seed, 0.9 * alpha, 1 / (1 + pl * 0.08), pullAng);
+      point(cW.x - 1.2, cW.y - 1.4, 3.5 + 1.5 * Math.sin(time * 2 + s.seed), 0.75 * alpha);
+      // the moment it lands: a flash of wet light
+      if (since < 0.14) point(cW.x, cW.y, 26 * (1 - since / 0.14), 0.7 * (1 - since / 0.14) * alpha);
+      return cW;
     };
 
     let raf = 0;
@@ -421,6 +650,12 @@ export function WebSlingButton({
           if (f >= 1) {
             s.state = held === s ? "held" : "dangling";
             s.t = 0;
+            s.hitAge = s.age;
+            {
+              const ddx = A.x - sx, ddy = A.y - sy, ddl = Math.hypot(ddx, ddy) || 1;
+              const c = Math.cos(-pose.rot), sn = Math.sin(-pose.rot);
+              s.dIn = [((ddx / ddl) * c - (ddy / ddl) * sn), ((ddx / ddl) * sn + (ddy / ddl) * c)];
+            }
             pose.hit = 1;
             // the impact knocks the button back a touch
             const dx = A.x - sx, dy = A.y - sy, dl = Math.hypot(dx, dy) || 1;
@@ -511,22 +746,27 @@ export function WebSlingButton({
       btn.style.transform = `translate(${pose.x.toFixed(2)}px, ${pose.y.toFixed(2)}px) rotate(${pose.rot.toFixed(4)}rad) scale(${(1 - pose.hit * 0.04).toFixed(4)})`;
 
       // ---- draw ----
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g.clearRect(0, 0, w, h);
-      g.lineCap = "round";
-      g.lineJoin = "round";
+      if (!gl || !rProg) return;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
       const time = now / 1000;
       for (const s of strands) {
         const alpha = Math.max(0, Math.min(1, s.alpha));
         const A = toWorld(s.ax, s.ay);
         const st = s.stretch;
         if (s.fray > 0) s.fray = Math.max(0.35, s.fray - dt * 0.4);
-        // a faint shadow on the wall behind
-        const sh: { x: number; y: number }[] = [];
-        for (let i = 0; i < N; i++) sh.push({ x: s.x[i] + 4, y: s.y[i] + 10 });
-        line(sh, 3, 0.07 * alpha, "0,0,0");
+        let start: { x: number; y: number } | undefined;
         if (s.state !== "flying" && s.state !== "falling") {
-          splat(s, A, alpha);
+          // how hard the line pulls on the splat, in button-local coordinates
+          let pull = { x: 0, y: 0 };
+          if (st > 1.02) {
+            const dx = s.x[3] - A.x, dy = s.y[3] - A.y, dl = Math.hypot(dx, dy) || 1;
+            const m = Math.min(7, (st - 1) * 9);
+            const c = Math.cos(-pose.rot), sn = Math.sin(-pose.rot);
+            pull = { x: ((dx / dl) * c - (dy / dl) * sn) * m, y: ((dx / dl) * sn + (dy / dl) * c) * m };
+          }
+          start = splat(s, A, alpha, time, pull);
           // under tension, fibres peel out of the splat and stream into the line
           if (st > 1.04) {
             const j = Math.min(N - 1, 2 + Math.round(st * 1.5));
@@ -534,12 +774,20 @@ export function WebSlingButton({
             const peel = Math.min(1, (st - 1) * 3);
             for (const [fx, fy] of s.fibers) {
               const gx = A.x + fx * c - fy * sn, gy = A.y + fx * sn + fy * c;
-              line([{ x: gx, y: gy }, { x: (gx + s.x[j]) / 2, y: (gy + s.y[j]) / 2 + 1.5 }, { x: s.x[j], y: s.y[j] }], 0.45, 0.6 * peel * alpha);
-              knot(gx, gy, 1.2, 0, 1, peel * alpha);
+              rx[0] = gx; ry[0] = gy; rx[1] = (gx + s.x[j]) / 2; ry[1] = (gy + s.y[j]) / 2 + 1.5; rx[2] = s.x[j]; ry[2] = s.y[j];
+              rw[0] = 0.9; rw[1] = 0.7; rw[2] = 0.6; rl[0] = rl[1] = rl[2] = 0.7; ra[0] = ra[1] = ra[2] = 0.7 * peel * alpha; rg[0] = 0; rg[1] = 4; rg[2] = 8;
+              ribbon(3, 0.44);
+              blob(gx, gy, 1.4, fx * 3 + fy, peel * alpha * 0.8);
             }
           }
         }
-        bundle(s, alpha, time);
+        const total = smoothPath(s, start?.x, start?.y);
+        bundle(s, alpha, time, total);
+        // the flying head: a small glob of silk out in front
+        if (s.state === "flying") {
+          blob(s.x[0], s.y[0], 2.6, s.seed, 0.9 * alpha);
+          point(s.x[0], s.y[0], 7, 0.8 * alpha);
+        }
       }
       // flecks of silk thrown off a hit
       for (const d of splash) {
@@ -551,29 +799,19 @@ export function WebSlingButton({
         if (a <= 0) continue;
         const ang = d.seed + d.age * 6;
         const L = 3 + d.r * 2.5;
-        g.beginPath();
-        g.moveTo(d.x - Math.cos(ang) * L / 2, d.y - Math.sin(ang) * L / 2);
-        g.quadraticCurveTo(d.x + Math.sin(ang) * 1.5, d.y - Math.cos(ang) * 1.5, d.x + Math.cos(ang) * L / 2, d.y + Math.sin(ang) * L / 2);
-        g.strokeStyle = `rgba(${SILK},${(0.75 * a).toFixed(3)})`;
-        g.lineWidth = 0.6;
-        g.stroke();
+        rx[0] = d.x - (Math.cos(ang) * L) / 2; ry[0] = d.y - (Math.sin(ang) * L) / 2;
+        rx[1] = d.x + Math.sin(ang) * 1.2; ry[1] = d.y - Math.cos(ang) * 1.2;
+        rx[2] = d.x + (Math.cos(ang) * L) / 2; ry[2] = d.y + (Math.sin(ang) * L) / 2;
+        rw[0] = 0.5; rw[1] = 0.9; rw[2] = 0.4; rl[0] = rl[1] = rl[2] = 0.7; ra[0] = ra[1] = ra[2] = 0.8 * a; rg[0] = 0; rg[1] = 2; rg[2] = 4;
+        ribbon(3, d.seed);
       }
       splash = splash.filter((d) => d.age < 0.7);
+      flush();
       // the shooter's reticle
-      if (show) {
-        g.strokeStyle = held ? "rgba(255,255,255,0.95)" : "rgba(255,255,255,0.7)";
-        g.lineWidth = 1.5;
-        const R = held ? 7 : 10;
-        g.beginPath(); g.arc(hx, hy, R, 0, Math.PI * 2); g.stroke();
-        for (let k = 0; k < 4; k++) {
-          const a = (k * Math.PI) / 2 + Math.PI / 4;
-          g.beginPath();
-          g.moveTo(hx + Math.cos(a) * (R + 3), hy + Math.sin(a) * (R + 3));
-          g.lineTo(hx + Math.cos(a) * (R + 8), hy + Math.sin(a) * (R + 8));
-          g.stroke();
-        }
-        g.fillStyle = "#fff";
-        g.beginPath(); g.arc(hx, hy, 1.6, 0, Math.PI * 2); g.fill();
+      const rt2 = reticleRef.current;
+      if (rt2) {
+        rt2.style.opacity = show ? "1" : "0";
+        if (show) rt2.style.transform = `translate(${hx.toFixed(1)}px, ${hy.toFixed(1)}px) scale(${held ? 0.7 : 1})`;
       }
     };
     raf = requestAnimationFrame(frame);
@@ -623,6 +861,15 @@ export function WebSlingButton({
         {label}
       </button>
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10 h-full w-full" aria-hidden="true" />
+      <div ref={reticleRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-20" style={{ opacity: 0, transition: "opacity .15s" }}>
+        <svg width="40" height="40" viewBox="-20 -20 40 40" style={{ position: "absolute", left: -20, top: -20, overflow: "visible" }}>
+          <circle r="10" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+          {[45, 135, 225, 315].map((d) => (
+            <line key={d} x1={Math.cos((d * Math.PI) / 180) * 13} y1={Math.sin((d * Math.PI) / 180) * 13} x2={Math.cos((d * Math.PI) / 180) * 18} y2={Math.sin((d * Math.PI) / 180) * 18} stroke="rgba(255,255,255,.85)" strokeWidth="1.5" strokeLinecap="round" />
+          ))}
+          <circle r="1.6" fill="#fff" />
+        </svg>
+      </div>
       <p className="pointer-events-none absolute inset-x-0 bottom-5 m-0 text-center text-[13px] text-white/45">
         Click anywhere to shoot a web. Hold and pull. Pull too hard and it snaps.
       </p>

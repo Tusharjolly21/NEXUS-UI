@@ -4,14 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const CAP = 5000; // flung sparks alive at once
-const OCAP = 7000; // sparks racing round the rim
-const BUCKETS: [string, number][] = [
-  ["#fff7d6", 1.7],
-  ["#ffd56e", 1.5],
-  ["#ff9b2f", 1.3],
-  ["#ff5b16", 1.05],
-  ["#b8290c", 0.85],
-];
+const OCAP = 8000; // sparks racing round the rim
 
 /* Least-squares circle through the drawn points (Kasa's method), so an unfinished or wobbly loop
    still opens where the hand meant it to. */
@@ -95,10 +88,11 @@ export type PortalCardProps = {
 export function PortalCard({ children, height = 460, autoplay = false, className }: PortalCardProps) {
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
   const sideRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<{ open: () => void; close: () => void }>({ open: () => {}, close: () => {} });
-  const autoplayRef = useRef(autoplay);
   const [phase, setPhase] = useState<"idle" | "open" | "through">("idle");
+  const autoplayRef = useRef(autoplay);
 
   // The long effect below reads this every frame, so toggling autoplay never rebuilds the scene.
   useEffect(() => {
@@ -107,8 +101,6 @@ export function PortalCard({ children, height = 460, autoplay = false, className
 
   useEffect(() => {
     const stage = stageRef.current!, canvas = canvasRef.current!, side = sideRef.current!;
-    const g = canvas.getContext("2d");
-    if (!g) return;
     const mq = window.matchMedia?.("(prefers-reduced-motion: reduce)");
     let reduced = !!mq?.matches;
     const onMq = () => { reduced = !!mq?.matches; };
@@ -116,9 +108,10 @@ export function PortalCard({ children, height = 460, autoplay = false, className
     side.style.clipPath = "circle(0px at 50% 50%)";
     let w = 0, h = 0, dpr = 1;
     const fit = () => {
-      // Layout size, not the on-screen box, so a CSS-scaled preview shell does not shrink the canvas.
+      const r = stage.getBoundingClientRect();
       dpr = Math.min(2, window.devicePixelRatio || 1);
-      w = stage.offsetWidth; h = stage.offsetHeight;
+      // layout size, not on-screen size, so a scaled stage still draws at the right size
+      w = stage.offsetWidth || r.width; h = stage.offsetHeight || r.height;
       canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
     };
     const ro = new ResizeObserver(fit);
@@ -139,6 +132,131 @@ export function PortalCard({ children, height = 460, autoplay = false, className
       const i = head;
       head = (head + 1) % CAP;
       sx[i] = x; sy[i] = y; svx[i] = vx; svy[i] = vy; life[i] = l; maxl[i] = l; heavy[i] = hv;
+    };
+
+    /* ---------------- WebGL: the ring is a shader, every spark is a soft streak on the GPU ---------------- */
+    const gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: true, antialias: false }) as WebGLRenderingContext | null;
+    const mk = (vs: string, fs: string) => {
+      if (!gl) return null;
+      const sh = (t: number, s: string) => { const o = gl.createShader(t)!; gl.shaderSource(o, s); gl.compileShader(o); return o; };
+      const p = gl.createProgram()!;
+      gl.attachShader(p, sh(gl.VERTEX_SHADER, vs));
+      gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs));
+      gl.linkProgram(p);
+      if (!gl.getProgramParameter(p, gl.LINK_STATUS)) { console.warn("PortalCard shader", gl.getProgramInfoLog(p)); return null; }
+      return p;
+    };
+    /* the ring: molten sparks streaming round the rim, flung outward in spiral streaks */
+    const RING_VS = `attribute vec2 aP;uniform vec2 uRes;varying vec2 vP;void main(){vP=aP;vec2 c=aP/uRes*2.0-1.0;gl_Position=vec4(c.x,-c.y,0.0,1.0);}`;
+    const RING_FS = `precision highp float;varying vec2 vP;
+uniform vec2 uC;uniform float uR;uniform float uT;uniform float uDir;uniform float uI;uniform float uDark;uniform float uFlick;
+float h3(vec3 p){p=fract(p*0.3183099+0.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float n3(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.0-2.0*f);
+return mix(mix(mix(h3(i),h3(i+vec3(1,0,0)),f.x),mix(h3(i+vec3(0,1,0)),h3(i+vec3(1,1,0)),f.x),f.y),
+mix(mix(h3(i+vec3(0,0,1)),h3(i+vec3(1,0,1)),f.x),mix(h3(i+vec3(0,1,1)),h3(i+vec3(1,1,1)),f.x),f.y),f.z);}
+vec3 heat(float h){h=clamp(h,0.0,1.6);
+vec3 c=mix(vec3(0.0),vec3(0.55,0.06,0.0),smoothstep(0.0,0.2,h));
+c=mix(c,vec3(1.0,0.36,0.05),smoothstep(0.15,0.45,h));
+c=mix(c,vec3(1.0,0.72,0.25),smoothstep(0.4,0.75,h));
+c=mix(c,vec3(1.0,0.96,0.82),smoothstep(0.72,1.15,h));return c;}
+void main(){
+  vec2 d=vP-uC;float rr=length(d);float a=atan(d.y,d.x);
+  float R=max(uR,1.0);
+  float x=rr-R;
+  /* streaks: noise stretched along the circle and swept round it with the spin */
+  float sw=a+uDir*uT*3.1+uDir*x*0.010;
+  float k=clamp(R/110.0,0.6,2.2)*3.2;
+  vec3 q=vec3(cos(sw)*k,sin(sw)*k,rr*0.34);
+  float n=n3(q)*0.6+n3(q*vec3(2.0,2.0,2.3)+7.1)*0.3+n3(q*vec3(4.0,4.0,4.6)+3.7)*0.1;
+  float fine=n3(vec3(cos(sw)*k*2.6,sin(sw)*k*2.6,rr*0.9+uT*2.0));
+  float grain=n3(vec3(cos(sw)*k*9.0,sin(sw)*k*9.0,rr*0.18-uT*1.5));
+  float w=4.2+3.0*n;
+  float core=exp(-x*x/(w*w));
+  float sprayL=24.0+40.0*n3(vec3(cos(sw)*k*0.7,sin(sw)*k*0.7,uT*0.6));
+  float spray=x>0.0?exp(-x/sprayL)*smoothstep(0.5,0.95,n*0.55+fine*0.25+grain*0.45)*1.25:0.0;
+  float inner=x<0.0?exp(x/7.0)*0.55*(0.5+0.5*fine):0.0;
+  float hval=(core*(0.62+0.5*fine+0.35*grain)+spray*0.95+inner)*uI*uFlick;
+  vec3 col=heat(hval*1.15)*min(1.0,hval*1.6);
+  /* firelight thrown on the surroundings */
+  float amb=exp(-max(0.0,x)/ (R*0.9))*0.16*uI*smoothstep(0.0,R*0.15,x+R*0.15);
+  col+=vec3(1.0,0.42,0.1)*amb*uFlick;
+  float ca=max(col.r,max(col.g,col.b));
+  /* depth: the far side darkens toward the rim */
+  float dark=x<0.0?uDark*0.62*smoothstep(-R*0.3,0.0,x):0.0;
+  float A=clamp(ca+dark*(1.0-ca),0.0,1.0);
+  gl_FragColor=vec4(min(col,vec3(1.0)),A);
+}`;
+    /* streaks: one quad per spark, hot head and a tail that fades */
+    const ST_VS = `attribute vec2 aP;attribute vec4 aC;attribute vec2 aU;uniform vec2 uRes;varying vec4 vC;varying vec2 vU;
+void main(){vC=aC;vU=aU;vec2 c=aP/uRes*2.0-1.0;gl_Position=vec4(c.x,-c.y,0.0,1.0);}`;
+    const ST_FS = `precision mediump float;varying vec4 vC;varying vec2 vU;
+void main(){float e=1.0-smoothstep(0.15,1.0,abs(vU.x));float t=0.18+0.82*pow(vU.y,1.6);float a=vC.a*e*t;vec3 c=vC.rgb*a;gl_FragColor=vec4(c,max(c.r,max(c.g,c.b)));}`;
+    const ringProg = mk(RING_VS, RING_FS);
+    const stProg = mk(ST_VS, ST_FS);
+    const ringBuf = gl?.createBuffer() || null;
+    const stBuf = gl?.createBuffer() || null;
+    const uRing = (n: string) => (gl && ringProg ? gl.getUniformLocation(ringProg, n) : null);
+    const UR = { res: uRing("uRes"), c: uRing("uC"), r: uRing("uR"), t: uRing("uT"), dir: uRing("uDir"), i: uRing("uI"), dark: uRing("uDark"), flick: uRing("uFlick") };
+    const uStRes = gl && stProg ? gl.getUniformLocation(stProg, "uRes") : null;
+    const SV = new Float32Array(16000 * 6 * 8);
+    let sv = 0;
+    const COLS: [number, number, number][] = [
+      [1.0, 0.97, 0.86],
+      [1.0, 0.82, 0.42],
+      [1.0, 0.56, 0.16],
+      [1.0, 0.33, 0.07],
+      [0.72, 0.14, 0.03],
+    ];
+    const heatCol = (t: number) => {
+      const f = (1 - Math.max(0, Math.min(1, t))) * (COLS.length - 1);
+      const i = Math.min(COLS.length - 2, Math.floor(f));
+      const u = f - i;
+      const a = COLS[i], b = COLS[i + 1];
+      return [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, a[2] + (b[2] - a[2]) * u] as const;
+    };
+    /* one streak from tail (x0,y0) to head (x1,y1) */
+    const streak = (x0: number, y0: number, x1: number, y1: number, wd: number, r: number, gg: number, b: number, a: number) => {
+      if (sv + 6 > 16000 * 6 || a < 0.01) return;
+      let dx = x1 - x0, dy = y1 - y0;
+      const L = Math.hypot(dx, dy);
+      if (L < 0.3) { dx = 0.3; dy = 0; } 
+      const ll = Math.hypot(dx, dy) || 1;
+      const nx = (-dy / ll) * wd * 0.5, ny = (dx / ll) * wd * 0.5;
+      const V = (x: number, y: number, ux: number, uy: number) => {
+        const o = sv * 8;
+        SV[o] = x; SV[o + 1] = y; SV[o + 2] = r; SV[o + 3] = gg; SV[o + 4] = b; SV[o + 5] = a; SV[o + 6] = ux; SV[o + 7] = uy;
+        sv++;
+      };
+      V(x0 + nx, y0 + ny, -1, 0); V(x0 - nx, y0 - ny, 1, 0); V(x1 + nx, y1 + ny, -1, 1);
+      V(x0 - nx, y0 - ny, 1, 0); V(x1 - nx, y1 - ny, 1, 1); V(x1 + nx, y1 + ny, -1, 1);
+    };
+    const flushStreaks = () => {
+      if (!gl || !stProg || !sv) return;
+      gl.useProgram(stProg);
+      gl.uniform2f(uStRes, w, h);
+      gl.bindBuffer(gl.ARRAY_BUFFER, stBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, SV.subarray(0, sv * 8), gl.DYNAMIC_DRAW);
+      const lp = gl.getAttribLocation(stProg, "aP"), lc = gl.getAttribLocation(stProg, "aC"), lu = gl.getAttribLocation(stProg, "aU");
+      gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp, 2, gl.FLOAT, false, 32, 0);
+      gl.enableVertexAttribArray(lc); gl.vertexAttribPointer(lc, 4, gl.FLOAT, false, 32, 8);
+      gl.enableVertexAttribArray(lu); gl.vertexAttribPointer(lu, 2, gl.FLOAT, false, 32, 24);
+      gl.drawArrays(gl.TRIANGLES, 0, sv);
+      gl.disableVertexAttribArray(lc); gl.disableVertexAttribArray(lu);
+      sv = 0;
+    };
+    const drawRing = (cx: number, cy: number, r: number, inten: number, dark: number, time: number, flick: number) => {
+      if (!gl || !ringProg) return;
+      const E = r * 2.4 + 90;
+      const x0 = Math.max(0, cx - E), x1 = Math.min(w, cx + E), y0 = Math.max(0, cy - E), y1 = Math.min(h, cy + E);
+      if (x1 <= x0 || y1 <= y0) return;
+      gl.useProgram(ringProg);
+      gl.bindBuffer(gl.ARRAY_BUFFER, ringBuf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([x0, y0, x1, y0, x0, y1, x1, y0, x1, y1, x0, y1]), gl.DYNAMIC_DRAW);
+      const lp = gl.getAttribLocation(ringProg, "aP");
+      gl.enableVertexAttribArray(lp); gl.vertexAttribPointer(lp, 2, gl.FLOAT, false, 8, 0);
+      gl.uniform2f(UR.res, w, h); gl.uniform2f(UR.c, cx, cy); gl.uniform1f(UR.r, r); gl.uniform1f(UR.t, time);
+      gl.uniform1f(UR.dir, P.dir); gl.uniform1f(UR.i, inten); gl.uniform1f(UR.dark, dark); gl.uniform1f(UR.flick, flick);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
     };
 
     // portal
@@ -218,7 +336,7 @@ export function PortalCard({ children, height = 460, autoplay = false, className
         return;
       }
       if (mode === "idle") {
-        stage.setPointerCapture(e.pointerId);
+        try { stage.setPointerCapture(e.pointerId); } catch { /* the pointer may already be gone */ }
         mode = "drawing";
         pts = []; turn = 0; plen = 0;
         addPoint(p.x, p.y);
@@ -250,6 +368,7 @@ export function PortalCard({ children, height = 460, autoplay = false, className
     const ghost = { x: 0, y: 0, on: false };
 
     let raf = 0;
+    let ringI = 0;
     let visible = true;
     let prev = performance.now();
     const frame = (now: number) => {
@@ -349,7 +468,7 @@ export function PortalCard({ children, height = 460, autoplay = false, className
       const showRing = r > 2 && (mode === "opening" || mode === "open" || mode === "closing" || (mode === "stepping" && P.t < 0.55));
       if (showRing && !reduced) {
         // the spinning ring itself: sparks swept round the rim in curved streaks
-        const orate = Math.min(5200, 4.2 * Math.PI * 2 * r) * (mode === "closing" ? 0.6 : 1);
+        const orate = Math.min(6500, 5.2 * Math.PI * 2 * r) * (mode === "closing" ? 0.6 : 1);
         const on = Math.round(orate * dt);
         for (let k = 0; k < on; k++) {
           const i = ohead;
@@ -373,7 +492,7 @@ export function PortalCard({ children, height = 460, autoplay = false, className
           const sp = 160 + Math.random() * 420;
           const out = 20 + Math.random() * 90;
           // molten drips fall mostly from the lower rim
-          const hv = Math.random() < (Math.sin(a) > 0.3 ? 0.16 : 0.03) ? 1 : 0;
+          const hv = Math.random() < (Math.sin(a) > 0.3 ? 0.26 : 0.03) ? 1 : 0;
           emit(x, y, tx * sp + Math.cos(a) * out, ty * sp + Math.sin(a) * out, hv ? 0.6 + Math.random() * 0.8 : 0.16 + Math.random() * 0.34, hv);
         }
       }
@@ -413,105 +532,60 @@ export function PortalCard({ children, height = 460, autoplay = false, className
       }
 
       // ---- draw ----
-      g.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g.clearRect(0, 0, w, h);
-      if (r > 1 && mode !== "through") {
-        // depth: the far world darkens toward the rim
-        g.globalCompositeOperation = "source-over";
-        const rim = g.createRadialGradient(P.x, P.y, Math.max(0, r * 0.72), P.x, P.y, r);
-        rim.addColorStop(0, "rgba(20,6,0,0)");
-        rim.addColorStop(1, "rgba(20,6,0,0.6)");
-        g.fillStyle = rim;
-        g.beginPath(); g.arc(P.x, P.y, r, 0, Math.PI * 2); g.fill();
+      if (!gl) return;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      const flick = 0.9 + 0.07 * Math.sin(time * 31) + 0.05 * Math.sin(time * 53 + 1);
+      ringI += ((showRing ? 1 : 0) - ringI) * Math.min(1, dt * (showRing ? 9 : 14));
+      if (ringI > 0.01 && r > 1) {
+        drawRing(P.x, P.y, r, ringI * (mode === "opening" ? Math.min(1, 0.35 + P.t * 2.2) : 1), mode === "through" || mode === "stepping" ? 0 : 1, time, flick);
       }
-      g.globalCompositeOperation = "lighter";
-      const flick = 0.85 + 0.1 * Math.sin(time * 31) + 0.06 * Math.sin(time * 53 + 1);
-      if (showRing) {
-        // firelight thrown on everything around the portal
-        const amb = g.createRadialGradient(P.x, P.y, r * 0.85, P.x, P.y, r * 2.6);
-        amb.addColorStop(0, `rgba(255,110,30,${(0.16 * flick).toFixed(3)})`);
-        amb.addColorStop(1, "rgba(255,110,30,0)");
-        g.fillStyle = amb;
-        g.beginPath(); g.arc(P.x, P.y, r * 2.6, 0, Math.PI * 2); g.fill();
-        // the floor catches the glow
-        // a soft oval of light on the floor, squashed so it lies flat
-        g.save();
-        g.translate(P.x, floor);
-        g.scale(1, 0.18);
-        const fl = g.createRadialGradient(0, 0, 0, 0, 0, r * 1.4);
-        fl.addColorStop(0, "rgba(255,120,30,0.3)");
-        fl.addColorStop(1, "rgba(255,120,30,0)");
-        g.fillStyle = fl;
-        g.beginPath(); g.arc(0, 0, r * 1.4, 0, Math.PI * 2); g.fill();
-        g.restore();
-        g.save();
-        g.shadowColor = "#ff7a1a";
-        g.shadowBlur = 28;
-        g.strokeStyle = `rgba(255,120,30,${(0.38 * flick).toFixed(3)})`;
-        g.lineWidth = 10;
-        g.beginPath(); g.arc(P.x, P.y, r, 0, Math.PI * 2); g.stroke();
-        g.restore();
-        g.strokeStyle = "rgba(255,226,160,0.55)";
-        g.lineWidth = 1.6;
-        g.beginPath(); g.arc(P.x, P.y, r, 0, Math.PI * 2); g.stroke();
-        // runes of light chasing round the rim
-        g.strokeStyle = "rgba(255,200,120,0.5)";
-        g.lineWidth = 1;
-        for (let k = 0; k < 3; k++) {
-          const a0 = P.spin * (1 + k * 0.3) + k * 2.1;
-          g.beginPath(); g.arc(P.x, P.y, r * (0.9 - k * 0.04), a0, a0 + 0.9 + k * 0.3); g.stroke();
-        }
+      // the floor catches the light: two soft streaks meeting under the portal
+      if (ringI > 0.01 && r > 1) {
+        const fw = r * 1.5;
+        const fa = 0.32 * ringI * flick * Math.max(0, Math.min(1, 1 - (floor - (P.y + r)) / (r * 1.4)));
+        streak(P.x - fw, floor + 4, P.x, floor + 4, 16, 1, 0.42, 0.12, fa);
+        streak(P.x + fw, floor + 4, P.x, floor + 4, 16, 1, 0.42, 0.12, fa);
       }
+      // the gesture: a white-hot line with an orange bloom, newest end brightest
       if (mode === "drawing" && pts.length > 1) {
-        g.strokeStyle = "rgba(255,170,80,0.55)";
-        g.lineWidth = 2;
-        g.shadowColor = "#ff8a2a"; g.shadowBlur = 12;
-        g.beginPath();
-        g.moveTo(pts[0].x, pts[0].y);
-        for (const p of pts) g.lineTo(p.x, p.y);
-        g.stroke();
-        g.shadowBlur = 0;
-      }
-      // the spinning ring: curved streaks, batched by colour
-      for (let b = 0; b < BUCKETS.length; b++) {
-        g.strokeStyle = BUCKETS[b][0];
-        g.lineWidth = BUCKETS[b][1] * 1.05;
-        g.beginPath();
-        for (let i = 0; i < OCAP; i++) {
-          if (ol[i] <= 0) continue;
-          const t = ol[i] / om[i];
-          const bi = t > 0.78 ? 0 : t > 0.55 ? 1 : t > 0.33 ? 2 : t > 0.14 ? 3 : 4;
-          if (bi !== b) continue;
-          const tail = ow[i] * 0.05;
-          const a1 = oa[i], a0 = a1 - tail;
-          g.moveTo(P.x + Math.cos(a0) * orr[i], P.y + Math.sin(a0) * orr[i]);
-          g.arc(P.x, P.y, orr[i], a0, a1, tail < 0);
+        const n = pts.length;
+        for (let i = 1; i < n; i++) {
+          const age = (n - i) / Math.max(30, n);
+          const a = Math.max(0, 1 - age);
+          /* each segment drawn both ways, so the line is even along its length */
+          for (const [ax, ay, bx, by] of [[pts[i - 1].x, pts[i - 1].y, pts[i].x, pts[i].y], [pts[i].x, pts[i].y, pts[i - 1].x, pts[i - 1].y]]) {
+            streak(ax, ay, bx, by, 16, 1, 0.36, 0.06, 0.18 * a);
+            streak(ax, ay, bx, by, 5, 1, 0.62, 0.2, 0.42 * a);
+            streak(ax, ay, bx, by, 2.0, 1, 0.97, 0.85, 0.62 * a);
+          }
         }
-        g.stroke();
       }
-      // flung sparks, batched by colour
-      for (let b = 0; b < BUCKETS.length; b++) {
-        g.strokeStyle = BUCKETS[b][0];
-        g.lineWidth = BUCKETS[b][1];
-        g.beginPath();
-        for (let i = 0; i < CAP; i++) {
-          if (life[i] <= 0) continue;
-          const t = life[i] / maxl[i];
-          const bi = t > 0.78 ? 0 : t > 0.55 ? 1 : t > 0.33 ? 2 : t > 0.14 ? 3 : 4;
-          if (bi !== b) continue;
-          const k = heavy[i] ? 0.02 : 0.03;
-          g.moveTo(sx[i] - svx[i] * k, sy[i] - svy[i] * k);
-          g.lineTo(sx[i], sy[i]);
-        }
-        g.stroke();
+      // sparks racing round the rim: short arcs drawn as streaks along the circle
+      for (let i = 0; i < OCAP; i++) {
+        if (ol[i] <= 0) continue;
+        const t = ol[i] / om[i];
+        const tail = ow[i] * 0.045;
+        const a1 = oa[i], a0 = a1 - tail;
+        const c = heatCol(t);
+        streak(P.x + Math.cos(a0) * orr[i], P.y + Math.sin(a0) * orr[i], P.x + Math.cos(a1) * orr[i], P.y + Math.sin(a1) * orr[i], 1.5 + t * 0.6, c[0], c[1], c[2], 0.85 * Math.min(1, t * 3));
       }
-      g.globalCompositeOperation = "source-over";
-      if (ghost.on) {
-        g.fillStyle = "rgba(255,255,255,0.9)";
-        g.beginPath(); g.arc(ghost.x, ghost.y, 5, 0, Math.PI * 2); g.fill();
-        g.strokeStyle = "rgba(255,255,255,0.35)";
-        g.lineWidth = 1.5;
-        g.beginPath(); g.arc(ghost.x, ghost.y, 11, 0, Math.PI * 2); g.stroke();
+      // flung sparks: hot streaks along their velocity, cooling as they fly
+      for (let i = 0; i < CAP; i++) {
+        if (life[i] <= 0) continue;
+        const t = life[i] / maxl[i];
+        const k = heavy[i] ? 0.022 : 0.034;
+        const c = heatCol(t);
+        streak(sx[i] - svx[i] * k, sy[i] - svy[i] * k, sx[i], sy[i], heavy[i] ? 2.0 : 1.3, c[0], c[1], c[2], Math.min(1, t * 2.5) * (heavy[i] ? 1 : 0.85));
+      }
+      flushStreaks();
+      const gd = ghostRef.current;
+      if (gd) {
+        gd.style.opacity = ghost.on ? "1" : "0";
+        if (ghost.on) gd.style.transform = `translate(${ghost.x.toFixed(1)}px, ${ghost.y.toFixed(1)}px)`;
       }
     };
     raf = requestAnimationFrame(frame);
@@ -525,6 +599,7 @@ export function PortalCard({ children, height = 460, autoplay = false, className
     io.observe(stage);
     return () => {
       cancelAnimationFrame(raf);
+      raf = 0;
       io.disconnect();
       ro.disconnect();
       mq?.removeEventListener?.("change", onMq);
@@ -563,6 +638,10 @@ export function PortalCard({ children, height = 460, autoplay = false, className
         ) : null}
       </div>
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true" />
+      <div ref={ghostRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0" style={{ opacity: 0 }}>
+        <div className="absolute h-[10px] w-[10px] rounded-full bg-white/90" style={{ left: -5, top: -5, boxShadow: "0 0 12px rgba(255,160,80,.8)" }} />
+        <div className="absolute h-[22px] w-[22px] rounded-full border border-white/35" style={{ left: -11, top: -11 }} />
+      </div>
       <div
         className="pointer-events-none absolute inset-x-0 bottom-9 flex justify-center transition-opacity duration-500 motion-reduce:transition-none"
         style={{ opacity: phase === "idle" ? 1 : 0 }}
