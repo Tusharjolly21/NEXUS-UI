@@ -10861,6 +10861,68 @@ export default function Page() {
 }`,
     tailwindSource: tw,
   },
+  {
+    slug: "testimonial-wall",
+    name: "Testimonial Wall",
+    registryCliName: "testimonial-wall",
+    description:
+      "An endless wall of reviews in columns that drift in opposite directions at slightly different speeds. Cards swell as they pass the middle and recede toward the edges, like reading through a lens. Hover a column and it eases to a stop while the others slow down; drag the wall to scrub it and let go to fling it. Cards can highlight a phrase or turn into a big-number card, and a Pause button stops everything.",
+    categorySlug: "testimonials",
+    tags: ["testimonials", "social proof", "reviews", "wall", "marquee", "columns", "infinite scroll", "drag", "fling", "lens", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 172,
+    createdAt: "2026-10-24",
+    animationKinds: ["scroll", "drag", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "items", type: "WallTestimonial[]", defaultValue: "DEFAULT_WALL_TESTIMONIALS", description: "The reviews: { name, role, quote, hue, mark?, metric?: { value, label } }. mark is a phrase in the quote to highlight; metric turns the card into a big-number card; hue colours the avatar and highlight." },
+      { name: "height", type: "number", defaultValue: "560", description: "Height of the wall, in px." },
+      { name: "speed", type: "number", defaultValue: "30", description: "Base drift in px per second. Each column drifts at its own multiple of this." },
+      { name: "autoplay", type: "boolean", defaultValue: "true", description: "The wall drifts by itself. When false it starts paused and the visitor can press Play. Reduced motion always starts it paused." },
+      { name: "title", type: "string", defaultValue: "\"Loved by teams who ship\"", description: "Heading above the wall." },
+      { name: "className", type: "string", description: "Extra classes for the outer wrapper." },
+    ],
+    Preview: Previews.PreviewTestimonialWall,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { TestimonialWall } from "@/components/testimonial-wall";
+
+const reviews = [
+  { name: "Maya Chen", role: "Design lead, Lumora", quote: "We rebuilt our whole onboarding in an afternoon.", mark: "in an afternoon", hue: 212 },
+  { name: "Daniel Okafor", role: "CTO, fieldnote", quote: "Every component is one file with no surprises.", mark: "one file", hue: 152 },
+  { name: "Sofia Marquez", role: "Founder, Parcel & Pine", quote: "Checkout conversion went up the week we swapped in the new buttons.", metric: { value: "+18%", label: "checkout conversion in week one" }, hue: 28 },
+  { name: "Arjun Mehta", role: "Staff engineer, Quillstack", quote: "The springs are tuned better than anything I would have had time to tune myself.", hue: 268 },
+];
+
+// The wall uses its own width to pick 1, 2 or 3 columns. Give it a light background.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto max-w-[1040px]">
+        <TestimonialWall items={reviews} title="Loved by teams who ship" />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Slower, shorter, starts paused",
+        code: `// src/app/page.tsx
+
+import { TestimonialWall } from "@/components/testimonial-wall";
+
+export default function Page() {
+  return (
+    <div className="bg-[#f5f5f7] px-4 py-12">
+      <TestimonialWall height={440} speed={18} autoplay={false} title="What people are saying" />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
