@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Band, PillLink, RainbowWord } from "@/components/site";
-import { VideoCard } from "@/components/videos/video-card";
+import { VideoGallery } from "@/components/videos/video-gallery";
 import { IfPro } from "@/components/pro/pro-access";
 import { videos } from "@/lib/catalog/videos";
 import { createMetadata } from "@/lib/seo";
@@ -36,14 +36,23 @@ export default function VideosPage() {
         </div>
       </section>
 
-      <section aria-label="Videos" className="px-4 pb-24 pt-8">
-        <ul className="mx-auto max-w-[1152px] columns-2 gap-4 sm:gap-5 lg:columns-4">
-          {videos.map((v) => (
-            <li key={v.slug} className="mb-4 break-inside-avoid sm:mb-5">
-              <VideoCard video={v} />
-            </li>
-          ))}
-        </ul>
+      <section aria-label="Videos" className="px-4 pb-24 pt-6">
+        <div className="mx-auto max-w-[1152px]">
+          <VideoGallery
+            videos={videos.map(({ slug, title, purpose, motion, app, platforms, formats, duration, loop, premium }) => ({
+              slug,
+              title,
+              purpose,
+              motion,
+              app,
+              platforms,
+              formats,
+              duration,
+              loop,
+              premium,
+            }))}
+          />
+        </div>
       </section>
 
       <Band tint="sky">
