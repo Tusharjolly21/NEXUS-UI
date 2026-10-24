@@ -1940,7 +1940,7 @@
       "name": "web-sling-button",
       "type": "registry:component",
       "title": "Web Sling Button",
-      "description": "A call-to-action button on a dark stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays.",
+      "description": "A red call-to-action button on a light stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays. A web fluid meter drains with every shot and refills slowly, and a counter keeps score of shots fired.",
       "dependencies": [
         "react"
       ],

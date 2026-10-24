@@ -81,6 +81,9 @@ export function WebSlingButton({
   className,
 }: WebSlingButtonProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const fluidRef = useRef<HTMLDivElement>(null);
+  const fluidLabelRef = useRef<HTMLSpanElement>(null);
+  const shotsRef = useRef<HTMLSpanElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reticleRef = useRef<HTMLDivElement>(null);
@@ -131,8 +134,23 @@ export function WebSlingButton({
     let touched = false;
     let seedN = 1;
 
+    /* web fluid: every shot uses a cartridge's worth, it refills slowly. Run dry and the shooter sputters. */
+    let fluid = 1;
+    let shots = 0;
+    let dryUntil = 0;
     const fire = (x: number, y: number) => {
       if (reduced) return;
+      if (fluid < 0.12) {
+        // a dry click: a puff of a few flecks and nothing else
+        for (let k = 0; k < 5; k++) {
+          const a = Math.random() * Math.PI * 2, sp = 30 + Math.random() * 70;
+          splash.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 40, r: 0.6 + Math.random(), age: 0, seed: Math.random() * 10 });
+        }
+        dryUntil = performance.now() + 1400;
+        return;
+      }
+      fluid -= 0.12;
+      shots++;
       const a = nearestLocal(x, y);
       const end = toWorld(a.x, a.y);
       const dist = Math.hypot(end.x - x, end.y - y);
@@ -280,7 +298,7 @@ void main(){
   float e=1.0-smoothstep(0.35,1.0,ax);
   float cr=nz(along*0.5+vSK.x*37.0)*0.6+nz(along*2.1+vSK.x*11.0)*0.4;
   float spec=pow(light,3.0)*(0.15+1.6*cr*cr);
-  vec3 base=mix(vec3(0.52,0.57,0.66),vec3(0.93,0.95,0.99),light);
+  vec3 base=mix(vec3(0.6,0.64,0.72),vec3(0.95,0.96,0.99),light);
   vec3 c=base*(0.6+0.4*light)+vec3(1.0,0.99,0.96)*spec;
   float a=vV.z*e;
   gl_FragColor=vec4(min(c,vec3(1.0))*a,a);
@@ -438,7 +456,7 @@ vec3 c=(vec3(1.0)*core+vec3(0.7,0.8,1.0)*halo)*vA;gl_FragColor=vec4(c,max(c.r,ma
       // shadow on the wall
       for (let i = 0; i < MP; i += 2) {
         const n = i >> 1;
-        rx[n] = PX[i] + 5; ry[n] = PY[i] + 12; rw[n] = 4.5 * thin + 2; rl[n] = 0; ra[n] = 0.1 * alpha; rg[n] = 0;
+        rx[n] = PX[i] + 5; ry[n] = PY[i] + 12; rw[n] = 4.5 * thin + 2; rl[n] = 0; ra[n] = 0.13 * alpha; rg[n] = 0;
       }
       ribbon(Math.ceil(MP / 2), 0, 1);
       // fibres
@@ -745,6 +763,21 @@ vec3 c=(vec3(1.0)*core+vec3(0.7,0.8,1.0)*halo)*vA;gl_FragColor=vec4(c,max(c.r,ma
       pose.hit = Math.max(0, pose.hit - dt * 5);
       btn.style.transform = `translate(${pose.x.toFixed(2)}px, ${pose.y.toFixed(2)}px) rotate(${pose.rot.toFixed(4)}rad) scale(${(1 - pose.hit * 0.04).toFixed(4)})`;
 
+      // ---- web fluid meter ----
+      fluid = Math.min(1, fluid + dt * 0.09);
+      const fm = fluidRef.current;
+      if (fm) {
+        fm.style.transform = `scaleX(${fluid.toFixed(3)})`;
+        fm.style.background = fluid < 0.12 ? "#86868b" : "linear-gradient(90deg,#d62828,#ef4444)";
+      }
+      const fla = fluidLabelRef.current;
+      if (fla) {
+        const t = now < dryUntil ? "Out of web fluid" : "Web fluid";
+        if (fla.textContent !== t) fla.textContent = t;
+      }
+      const sr = shotsRef.current;
+      if (sr && sr.textContent !== String(shots)) sr.textContent = String(shots);
+
       // ---- draw ----
       if (!gl || !rProg) return;
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -837,40 +870,100 @@ vec3 c=(vec3(1.0)*core+vec3(0.7,0.8,1.0)*halo)*vA;gl_FragColor=vec4(c,max(c.r,ma
     };
   }, [autoplay, snapAt]);
 
+  /* a generic orb-web drawn as SVG: radials and sagging rings, used as faint decoration */
+  const webPath = (cx: number, cy: number, r0: number, a0: number, a1: number, spokes: number, rings: number) => {
+    let d = "";
+    for (let i = 0; i <= spokes; i++) {
+      const a = a0 + ((a1 - a0) * i) / spokes;
+      d += `M${cx},${cy}L${(cx + Math.cos(a) * r0).toFixed(1)},${(cy + Math.sin(a) * r0).toFixed(1)}`;
+    }
+    for (let k = 1; k <= rings; k++) {
+      const r = (r0 * k) / (rings + 0.4);
+      for (let i = 0; i < spokes; i++) {
+        const b0 = a0 + ((a1 - a0) * i) / spokes, b1 = a0 + ((a1 - a0) * (i + 1)) / spokes, bm = (b0 + b1) / 2;
+        const p0 = [cx + Math.cos(b0) * r, cy + Math.sin(b0) * r], p1 = [cx + Math.cos(b1) * r, cy + Math.sin(b1) * r];
+        const c = [cx + Math.cos(bm) * r * 0.86, cy + Math.sin(bm) * r * 0.86];
+        d += `${i === 0 ? `M${p0[0].toFixed(1)},${p0[1].toFixed(1)}` : ""}Q${c[0].toFixed(1)},${c[1].toFixed(1)} ${p1[0].toFixed(1)},${p1[1].toFixed(1)}`;
+      }
+    }
+    return d;
+  };
+
   return (
     <div
       ref={stageRef}
       className={cn("relative flex w-full touch-none select-none items-center justify-center overflow-hidden rounded-[24px]", className)}
       style={{
         height,
-        background: "radial-gradient(90% 80% at 50% 35%,#272c3d 0%,#141722 55%,#0a0b11 100%)",
+        background: "radial-gradient(110% 85% at 50% 30%, #ffffff 0%, #f5f5f7 55%, #ebebf0 100%)",
+        boxShadow: "0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)",
+        color: "#1d1d1f",
         fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, system-ui, sans-serif",
       }}
     >
+      <style>{`
+        .ws-btn{transition:filter .25s ease, box-shadow .25s ease}
+        .ws-btn:hover{filter:brightness(1.06) saturate(1.05)}
+        .ws-btn:active{filter:brightness(.94)}
+        .ws-btn:focus-visible{outline:3px solid #1f4ea8;outline-offset:4px}
+      `}</style>
+      {/* Spider-Man red and blue as a thin rule along the top */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-[3px]" style={{ background: "linear-gradient(90deg,#d62828 0%,#d62828 48%,#1f4ea8 52%,#1f4ea8 100%)" }} />
+      {/* faint webs strung in two corners */}
+      <svg aria-hidden="true" className="pointer-events-none absolute right-0 top-0" width="260" height="200" viewBox="0 0 260 200" style={{ opacity: 0.1 }}>
+        <path d={webPath(260, 0, 260, Math.PI / 2, Math.PI, 7, 6)} fill="none" stroke="#1d1d1f" strokeWidth="0.9" />
+      </svg>
+      <svg aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0" width="200" height="160" viewBox="0 0 200 160" style={{ opacity: 0.07 }}>
+        <path d={webPath(0, 160, 200, -Math.PI / 2, 0, 6, 5)} fill="none" stroke="#1d1d1f" strokeWidth="0.9" />
+      </svg>
+
+      {/* shooter status: web fluid and shots fired */}
+      <div className="pointer-events-none absolute left-4 top-4 flex items-center gap-2.5 rounded-full bg-white/90 py-1.5 pl-2.5 pr-3 text-[12px] font-medium" style={{ boxShadow: "0 0 0 1px rgba(0,0,0,.06), 0 6px 16px -10px rgba(0,0,0,.35)", color: "#1d1d1f" }}>
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-40" style={{ background: "#d62828" }} />
+          <span className="relative inline-flex h-2 w-2 rounded-full" style={{ background: "#d62828" }} />
+        </span>
+        <span ref={fluidLabelRef}>Web fluid</span>
+        <span className="relative h-[5px] w-[54px] overflow-hidden rounded-full" style={{ background: "#e5e5ea" }}>
+          <span ref={fluidRef} className="absolute inset-0 origin-left rounded-full" style={{ background: "linear-gradient(90deg,#d62828,#ef4444)" }} />
+        </span>
+      </div>
+      <div className="pointer-events-none absolute right-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[12px] font-medium tabular-nums" style={{ boxShadow: "0 0 0 1px rgba(0,0,0,.06), 0 6px 16px -10px rgba(0,0,0,.35)", color: "#6e6e73" }}>
+        Shots <span ref={shotsRef} style={{ color: "#1f4ea8" }}>0</span>
+      </div>
+
       <button
         ref={btnRef}
         type="button"
         onClick={onClick}
-        className="relative z-0 h-[64px] rounded-full border-0 px-10 text-[19px] font-semibold tracking-[-0.015em] text-white outline-none focus-visible:ring-4 focus-visible:ring-white/40"
+        className="ws-btn relative z-0 h-[64px] overflow-hidden rounded-full border-0 px-10 text-[19px] font-semibold tracking-[-0.02em] text-white outline-none"
         style={{
-          background: "linear-gradient(180deg,#5b66ff 0%,#3b43e0 55%,#2c31c2 100%)",
-          boxShadow: "0 1px 0 rgba(255,255,255,.35) inset, 0 -2px 0 rgba(0,0,0,.2) inset, 0 0 0 1px rgba(20,24,90,.6), 0 24px 44px -16px rgba(40,50,220,.55), 0 6px 14px -6px rgba(0,0,0,.6)",
+          background: "linear-gradient(180deg,#f0453f 0%,#d62828 55%,#b51d1d 100%)",
+          boxShadow:
+            "0 1px 0 rgba(255,255,255,.4) inset, 0 -3px 0 rgba(31,78,168,.55) inset, 0 0 0 1px rgba(120,14,14,.45), 0 22px 40px -16px rgba(214,40,40,.6), 0 6px 14px -6px rgba(0,0,0,.35)",
           willChange: "transform",
         }}
       >
-        {label}
+        {/* a fine web etched into the button's face */}
+        <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full" viewBox="0 0 220 64" preserveAspectRatio="xMidYMid slice" style={{ opacity: 0.16 }}>
+          <path d={webPath(110, 32, 130, 0, Math.PI * 2, 14, 5)} fill="none" stroke="#fff" strokeWidth="0.7" />
+        </svg>
+        <span className="relative" style={{ textShadow: "0 1px 1px rgba(90,0,0,.35)" }}>
+          {label}
+        </span>
       </button>
       <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 z-10 h-full w-full" aria-hidden="true" />
       <div ref={reticleRef} aria-hidden="true" className="pointer-events-none absolute left-0 top-0 z-20" style={{ opacity: 0, transition: "opacity .15s" }}>
         <svg width="40" height="40" viewBox="-20 -20 40 40" style={{ position: "absolute", left: -20, top: -20, overflow: "visible" }}>
-          <circle r="10" fill="none" stroke="rgba(255,255,255,.85)" strokeWidth="1.5" />
+          <circle r="10" fill="none" stroke="rgba(255,255,255,.9)" strokeWidth="3.2" />
+          <circle r="10" fill="none" stroke="#1d1d1f" strokeWidth="1.4" />
           {[45, 135, 225, 315].map((d) => (
-            <line key={d} x1={Math.cos((d * Math.PI) / 180) * 13} y1={Math.sin((d * Math.PI) / 180) * 13} x2={Math.cos((d * Math.PI) / 180) * 18} y2={Math.sin((d * Math.PI) / 180) * 18} stroke="rgba(255,255,255,.85)" strokeWidth="1.5" strokeLinecap="round" />
+            <line key={d} x1={Math.cos((d * Math.PI) / 180) * 13} y1={Math.sin((d * Math.PI) / 180) * 13} x2={Math.cos((d * Math.PI) / 180) * 18} y2={Math.sin((d * Math.PI) / 180) * 18} stroke="#d62828" strokeWidth="1.6" strokeLinecap="round" />
           ))}
-          <circle r="1.6" fill="#fff" />
+          <circle r="1.7" fill="#d62828" />
         </svg>
       </div>
-      <p className="pointer-events-none absolute inset-x-0 bottom-5 m-0 text-center text-[13px] text-white/45">
+      <p className="pointer-events-none absolute inset-x-0 bottom-4 m-0 px-4 text-center text-[12px]" style={{ color: "#86868b" }}>
         Click anywhere to shoot a web. Hold and pull. Pull too hard and it snaps.
       </p>
     </div>
