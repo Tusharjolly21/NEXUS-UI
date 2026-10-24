@@ -49,6 +49,7 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "testimonial-wall",
   "portal-card",
   "black-hole-delete",
   "frost-input",
@@ -359,6 +360,8 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // sixteenth batch (Testimonial Wall)
+  "testimonial-wall",
   // fifteenth batch (Venom Button, Web Sling Button, Frost Input, Black Hole Delete, Portal Card)
   "venom-button",
   "web-sling-button",
