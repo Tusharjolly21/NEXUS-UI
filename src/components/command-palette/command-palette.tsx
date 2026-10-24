@@ -112,7 +112,7 @@ export function CommandPalette({ className, enableSound = true }: CommandPalette
               {/* Backdrop */}
               <DialogPrimitive.Overlay asChild forceMount>
                 <motion.div
-                  className="fixed inset-0 z-50 bg-black/55"
+                  className="fixed inset-0 z-[100] bg-black/55"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -125,7 +125,7 @@ export function CommandPalette({ className, enableSound = true }: CommandPalette
               <DialogPrimitive.Content
                 forceMount
                 aria-describedby={undefined}
-                className="fixed left-1/2 top-1/2 z-50 w-full max-w-135 -translate-x-1/2 -translate-y-1/2 px-4 outline-none sm:px-0"
+                className="fixed left-1/2 top-1/2 z-[101] w-full max-w-135 -translate-x-1/2 -translate-y-1/2 px-4 outline-none sm:px-0"
               >
                 <DialogPrimitive.Title className="sr-only">Command Palette</DialogPrimitive.Title>
 
