@@ -210,7 +210,10 @@ export type VenomButtonProps = {
   cursor?: "glove" | "native";
   /** Stage height in px. */
   height?: number;
-  /** A ghost glove plays with the button until a real pointer arrives, and again once it has been away for a few seconds. */
+  /**
+   * A ghost glove plays with the button until a real pointer arrives, and again once it has been away for a few seconds.
+   * Left unset it is on for touch-only devices (phones), where nothing hovers, and off elsewhere.
+   */
   autoplay?: boolean;
   className?: string;
 };
@@ -224,7 +227,7 @@ export function VenomButton({
   release = 215,
   cursor = "glove",
   height = 420,
-  autoplay = false,
+  autoplay,
   className,
 }: VenomButtonProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -363,9 +366,15 @@ export function VenomButton({
       measure();
     };
 
-    const ptr = { x: -999, y: -999, inside: false, last: 0 };
+    // Touch has no hover, so the hand follows a finger only while it is down, lingers a moment after it
+    // lifts (a tap is a quick poke), and lets go at once if the browser takes the gesture to scroll.
+    const touchOnly = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+    const ghostOn = autoplay ?? touchOnly;
+    const LINGER = 1700; // ms the goo keeps hold after a finger lifts
+    const FINGER_LIFT = 52; // px the glove is drawn above a finger, so the hand is not hidden under it
+    const ptr = { x: -999, y: -999, inside: false, last: 0, touch: false, down: false, upAt: 0 };
     let touched = false;
-    const onMove = (e: PointerEvent) => {
+    const place = (e: PointerEvent) => {
       const r = stage.getBoundingClientRect();
       // Undo any CSS scale on a parent so pointer space matches layout space.
       const k = stage.offsetWidth ? r.width / stage.offsetWidth : 1;
@@ -374,7 +383,33 @@ export function VenomButton({
       ptr.inside = ptr.x >= 0 && ptr.y >= 0 && ptr.x <= w && ptr.y <= h;
       if (ptr.inside) { touched = true; ptr.last = performance.now(); }
     };
+    const onMove = (e: PointerEvent) => {
+      if (e.pointerType === "touch") {
+        if (!ptr.down || !e.isPrimary) return;
+        ptr.touch = true;
+      } else ptr.touch = false;
+      place(e);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (e.pointerType !== "touch" || !e.isPrimary) return;
+      ptr.touch = true;
+      ptr.down = true;
+      place(e);
+    };
+    const onUp = (e: PointerEvent) => {
+      if (e.pointerType !== "touch" || !e.isPrimary || !ptr.down) return;
+      ptr.down = false;
+      ptr.upAt = performance.now();
+      // the browser took the gesture to scroll the page: let go straight away
+      if (e.type === "pointercancel") { ptr.inside = false; ptr.last = ptr.upAt; }
+    };
+    // a mouse that leaves the window sends no more moves, so without this the goo would keep holding
+    const onLeaveWindow = () => { if (!ptr.touch) ptr.inside = false; };
     window.addEventListener("pointermove", onMove, { passive: true });
+    stage.addEventListener("pointerdown", onDown, { passive: true });
+    window.addEventListener("pointerup", onUp, { passive: true });
+    window.addEventListener("pointercancel", onUp, { passive: true });
+    document.documentElement.addEventListener("mouseleave", onLeaveWindow);
 
     // ghost path for autoplay, in fractions of the stage, with seconds per leg
     const GHOST: [number, number, number][] = [
@@ -496,9 +531,11 @@ export function VenomButton({
       measure();
       const time = (now - t0) / 1000;
 
-      const ghost = autoplay && !reduced && (!touched || (!ptr.inside && now - ptr.last > 2500));
+      // a lifted finger keeps hold for a moment, then lets go
+      if (ptr.touch && !ptr.down && ptr.inside && now - ptr.upAt > LINGER) { ptr.inside = false; ptr.last = now; }
+      const ghost = ghostOn && !reduced && !ptr.down && (!touched || (!ptr.inside && now - ptr.last > 2500));
       let live = ptr.inside;
-      if (ghost) { hand = ghostAt(time); live = true; } else hand = { x: ptr.x, y: ptr.y };
+      if (ghost) { hand = ghostAt(time); live = true; } else hand = { x: ptr.x, y: ptr.touch ? ptr.y - FINGER_LIFT : ptr.y };
       stage.style.cursor = glove && !ghost && live ? "none" : "";
       btn.style.cursor = glove ? "none" : "pointer";
 
@@ -506,22 +543,26 @@ export function VenomButton({
       anchor = glove ? { x: hand.x + (16 - HOT_X) * sc, y: hand.y + (18 - HOT_Y) * sc } : { x: hand.x, y: hand.y };
       near = nearest(anchor.x, anchor.y);
       const D = Math.max(0, near.dist);
+      // on a narrow touch stage the sensing distance shrinks with it, or the whole stage would be inside `sense`
+      const dk = ptr.touch || (touchOnly && ghost) ? Math.max(0.55, Math.min(1, w / 560)) : 1;
+      // a finger is a clumsy pointer: it keeps the full grab and let-go distances and only senses sooner
+      const sn = sense * dk, rc = reach, rl = release;
       const cx = pill.x + pill.w / 2;
       lean += ((live ? Math.max(-1, Math.min(1, (hand.x - cx) / (pill.w * 1.5))) : 0) - lean) * Math.min(1, dt * 4);
 
       if (!reduced) {
-        if (mode === "idle" && live && D < sense) spawn();
-        else if (mode === "snap" && !violentSnap && live && D < sense) mode = "seek"; // changed its mind
-        else if (mode === "seek" && (!live || D > sense + 25)) snap(false);
-        else if (mode === "seek" && D < reach) { mode = "grow"; grow = 0; }
-        else if ((mode === "grow" || mode === "hold") && (!live || D > release)) snap(true);
+        if (mode === "idle" && live && D < sn) spawn();
+        else if (mode === "snap" && !violentSnap && live && D < sn) mode = "seek"; // changed its mind
+        else if (mode === "seek" && (!live || D > sn + 25)) snap(false);
+        else if (mode === "seek" && D < rc) { mode = "grow"; grow = 0; }
+        else if ((mode === "grow" || mode === "hold") && (!live || D > rl)) snap(true);
       }
       const holding = mode === "hold" || mode === "grow";
       const seeking = mode === "seek";
       // how hard it is reaching: nothing at the edge of its senses, everything at grabbing range
-      const fT = seeking ? Math.max(0, Math.min(1, (sense - D) / Math.max(1, sense - reach))) : holding ? 1 : 0;
+      const fT = seeking ? Math.max(0, Math.min(1, (sn - D) / Math.max(1, sn - rc))) : holding ? 1 : 0;
       seekF += (fT - seekF) * Math.min(1, dt * 5);
-      stretch = holding ? Math.min(1, D / release) : 0;
+      stretch = holding ? Math.min(1, D / rl) : 0;
       if (mode === "grow") {
         grow = Math.min(1, grow + dt / 0.3);
         if (grow >= 1) mode = "hold";
@@ -840,6 +881,10 @@ export function VenomButton({
       io?.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      stage.removeEventListener("pointerdown", onDown);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      document.documentElement.removeEventListener("mouseleave", onLeaveWindow);
       glc.removeEventListener("webglcontextlost", onContextLost);
       stage.style.cursor = "";
       btn.style.cursor = "";
@@ -853,6 +898,8 @@ export function VenomButton({
       className={cn("relative flex w-full items-center justify-center overflow-hidden rounded-[24px]", className)}
       style={{
         height,
+        // a finger can still scroll the page from here; sideways drags and taps drive the goo
+        touchAction: "pan-y",
         background: "linear-gradient(180deg,#f5f4f6 0%,#efeef1 55%,#e4e3e6 100%)",
         fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', Inter, system-ui, sans-serif",
       }}

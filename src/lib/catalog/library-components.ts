@@ -10383,7 +10383,7 @@ export default function Page() {
       { name: "release", type: "number", defaultValue: "215", description: "Distance from the edge, in px, at which they snap. Keep it above reach." },
       { name: "cursor", type: "\"glove\" | \"native\"", defaultValue: "\"glove\"", description: "\"glove\" draws a cartoon hand inside the stage; \"native\" keeps the system pointer." },
       { name: "height", type: "number", defaultValue: "420", description: "Stage height in px." },
-      { name: "autoplay", type: "boolean", defaultValue: "false", description: "A ghost glove plays with the button until a real pointer arrives. Pauses off screen and never runs under reduced motion." },
+      { name: "autoplay", type: "boolean", defaultValue: "on for touch-only devices", description: "A ghost glove plays with the button until a real pointer arrives. Left unset it is on for phones and tablets, where nothing hovers, and off for mouse devices. Pauses off screen and never runs under reduced motion." },
       { name: "className", type: "string", description: "Extra classes for the stage." },
     ],
     Preview: Previews.PreviewVenomButton,
