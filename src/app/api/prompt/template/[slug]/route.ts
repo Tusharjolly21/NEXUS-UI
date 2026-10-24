@@ -45,7 +45,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   if (!file) return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
 
   try {
-    const prompt = withLicense(await readFile(path.join(process.cwd(), file), "utf8"), (await getSessionUser())?.id, tmpl.slug);
+    const body = await readFile(path.join(process.cwd(), file), "utf8");
+    // Free templates' prompts are free and unmarked, like their downloads.
+    const prompt = tmpl.premium ? withLicense(body, (await getSessionUser())?.id, tmpl.slug) : body;
     return NextResponse.json({ name: tmpl.title, prompt }, { headers: PRIVATE });
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
