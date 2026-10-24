@@ -24,6 +24,7 @@ export const COMPONENT_CATEGORIES = [
   { slug: "ai-components", label: "AI Components" },
   { slug: "logo-clouds", label: "Logo Clouds" },
   { slug: "inputs-controls", label: "Inputs & Controls" },
+  { slug: "for-fun", label: "For Fun" },
 ] as const;
 
 export type ComponentCategorySlug = (typeof COMPONENT_CATEGORIES)[number]["slug"];
@@ -92,6 +93,11 @@ export const COMPONENT_SIDEBAR_SECTIONS: {
       "motion-effects",
       "ai-components",
     ],
+  },
+  {
+    id: "fun",
+    label: "For fun",
+    slugs: ["for-fun"],
   },
 ] as const;
 
