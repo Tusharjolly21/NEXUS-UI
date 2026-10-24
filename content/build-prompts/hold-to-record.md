@@ -1,159 +1,1744 @@
-Build a press-and-hold voice note recorder, like a messaging app. At rest it is a white pill with a red mic button and "Hold to record". Press and hold: the pill morphs into a recording strip with a pulsing red dot whose soft halo swells with your voice, a running timer, and a live waveform scrolling in from the right. Slide left and the strip drags toward the dot, which shrinks into a trash bin whose lid swings open; let go past the threshold to throw the note away (the pill tints red). Release normally to keep it: the strip morphs into a compact player with a play button, a static waveform that fills as it plays, the duration, and a delete button.
+Add the "Hold to Record" component from Nexus UI to my project.
 
-## Stack
+Press and hold to record a voice note, release to keep it. A soft halo behind the record dot swells with your voice, the live waveform scrolls in from the right, and sliding left morphs the dot into a bin whose lid opens; let go there to throw the note away. Kept notes become a small player. Also includes Voice Dictation: Bars move with your voice, words arrive faint while they're guesses and firm up when sure, and corrections like “for” to “4” visibly swap in place.
 
-- React client component (`"use client"`), TypeScript, Tailwind CSS, a `cn` helper, framer-motion (`AnimatePresence`, `animate`, `motion`, `useMotionValue`, `useMotionValueEvent`, `useReducedMotion`, `useSpring`, `useTransform`). Optional Web Audio (`getUserMedia` + `AnalyserNode`).
-- File: `components/hold-to-record/hold-to-record.tsx`, named export `HoldToRecord`, types `HoldToRecordProps`, `HoldToRecordResult = { durationMs: number; levels: number[] }` (levels 0-1, about 12 per second).
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+6. Use it like this: `import { HoldToRecord } from "@/components/hold-to-record/hold-to-record";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `onRecorded` | `(result) => void` | — | A recording was kept. |
-| `onCancel` | `() => void` | — | Cancelled by sliding or Escape. |
-| `onDelete` | `() => void` | — | Kept note deleted. |
-| `maxDuration` | `number` | `60000` | Auto-stops (keeps) after this many ms. |
-| `minDuration` | `number` | `400` | Shorter holds are ignored. |
-| `useMicrophone` | `boolean` | `false` | Real mic levels; simulated otherwise. |
-| `cancelDistance` | `number` | `90` | px to slide left to cancel. |
-| `label` | `string` | `"Hold to record"` | Button text. |
-| `accent` | `string` | `"#ff3b30"` | Mic button, dot, halo, live bars. |
-| `autoplay` | `boolean` | `false` | Records, plays and deletes a demo note on a loop (no callbacks) until touched. |
-| `className` | `string` | — | Wrapper classes. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/hold-to-record/hold-to-record.tsx ---
 
-- Wrapper: `inline-flex` column, centred, max-width 100%. CSS variables `--htr-ink: #1d1d1f` / `--htr-dim: #d2d2d7` (dark `#f5f5f7` / `#48484a`).
-- Shell: fully rounded (radius 999), overflow hidden, white (dark `#1c1c1e`), shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark `rgba(255,255,255,.08)` / `.9`); while "cancelling" it becomes `#fff1f0` (dark `#3a1715`) with a 200ms colour transition. Uses `layout` with a spring 420/32 so it resizes between states.
-- Idle button: 56px tall, padding 8px left / 20px right, gap 12, 15px semibold, tracking −0.01em, `#1d1d1f` / `#f5f5f7`, `touch-action: none`. A 40px accent circle with `inset 0 1px 0 rgba(255,255,255,.25)` holding an 18px white mic glyph.
-- Recording strip: 330px wide (max 100%), 56px tall, padding 12px left / 16px right, gap 12.
-  - 32px dot slot: an accent halo circle (inset 0) and a 12px accent dot; over it the trash icon (18px: lid `M3 5h12M7 5V3.4h4V5`, can `M4.6 7.2 5.4 15.6h7.2l.8-8.4`, stroke 1.6) in `#6e6e73` / `#a1a1a6`, red `#d70015` / `#ff6961` when cancelling.
-  - Moving strip: timer `m:ss` (36px wide, 15px semibold tabular), then 22 live bars right-aligned in a 26px-tall clipped row, 3px wide, gap 3, accent with opacity rising `0.3 + 0.7·i/22` towards the newest, 75ms transform transition. The bar row dims to 0.25 while cancelling.
-  - Right: "Slide to cancel" 12px `#6e6e73` / `#a1a1a6`, or "Release to cancel" semibold red.
-- Player: 316px wide, 56px tall, padding 8, gap 12. 40px play/pause (`#1d1d1f` with white icon; dark inverted). 30 bars (3px, gap 3) in a 28px row, height `4 + level·20`, coloured `--htr-ink` once playback passes them, else `--htr-dim`. Time 13px medium tabular `#6e6e73` right-aligned in 36px. A 32px round delete × (10px, stroke 1.6), hover `#f0f0f3` / `#2c2c2e`.
-- Hint under the shell (absolute, 10px below, 12px `#6e6e73` / `#a1a1a6`): "Recording discarded" or "Hold a little longer", only while idle.
+```tsx
+"use client";
 
-## Motion
+import * as React from "react";
+import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useSpring, useTransform, type AnimationPlaybackControls, type MotionValue } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useSound } from "@/lib/ui-sounds";
 
-- Sampling every 80ms: push a level to the session and to a rolling 22-sample window; write bar transforms straight to the DOM (`scaleY((4 + level·22)/26)`) to avoid re-renders; update the level motion value and the seconds counter; stop at `maxDuration`.
-- Simulated voice: advance `p += 0.18`; `syllable = |sin(2.3p)|·(0.5 + 0.5·|sin(0.7p)|)`; pause factor 0.2 when `sin(0.37p) > 0.9`; level `min(1, 0.1 + 0.8·syllable·pause + 0.15·rand)`. Mic: analyser `fftSize 512`, RMS of the time-domain data × 4.5, capped at 1; fall back to simulated on error; stop tracks and close the context on finish.
-- Halo: level through a spring 300/16; scale `1 + 0.7·level` (1 under reduced motion), opacity `0.18 + 0.3·level`.
-- Slide: `dx = min(0, x − startX)`, through a spring 500/36; the strip moves `0.35·dx`. `lidOpen = clamp(−dx/cancelDistance, 0, 1)`: dot scale `1 − 0.7·lidOpen`, dot opacity `1 − lidOpen`, trash opacity `lidOpen`, lid rotates 0 → −38° and lifts 2px about (3, 5).
-- Morphs: `AnimatePresence mode="popLayout" initial={false}`, each view fades in; idle and player exit in 0.1s; the recording strip exits `opacity 0, scale 0.9` in 0.14s. Idle `whileTap` 0.96.
-- Player bars grow from 3px with spring 420/18, staggered 0.012s. Playback animates progress 0 → 1 linearly over the remaining duration; on completion it springs back to 0 (120/20) after 0.5s. Play/pause icons swap with `scale 0.4 ↔ 1`, spring 600/26.
-- Note bars: resample the levels into 30 buckets (max per bucket) normalised by `max(0.2, peak)`.
+export type HoldToRecordResult = {
+  durationMs: number;
+  /** Normalised loudness samples (0-1), roughly 12 per second. */
+  levels: number[];
+};
 
-## Interaction and states
+export type HoldToRecordProps = {
+  /** Called when a recording is kept (not cancelled). */
+  onRecorded?: (result: HoldToRecordResult) => void;
+  /** Called when a recording is cancelled by sliding away or pressing Escape. */
+  onCancel?: () => void;
+  /** Called when the kept note is deleted. */
+  onDelete?: () => void;
+  /** Recording stops by itself after this many ms. */
+  maxDuration?: number;
+  /** Holds shorter than this are ignored, in ms. */
+  minDuration?: number;
+  /** Drive the waveform from the real microphone (asks for permission). Simulated otherwise. */
+  useMicrophone?: boolean;
+  /** How far to slide left (px) before releasing cancels. */
+  cancelDistance?: number;
+  label?: string;
+  /** Colour of the record button, the halo and the live waveform. */
+  accent?: string;
+  /** Records, plays back and deletes a demo note on a loop (no callbacks fire) until someone touches it. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  enableSound?: boolean;
+  className?: string;
+};
 
-- Phases `idle`, `recording`, `recorded`. Primary-button pointer down starts recording (prevent default). `pointermove`/`pointerup`/`pointercancel`/`keydown` listen on `window` during a session.
-- Release: keep unless slid past `cancelDistance`. Escape cancels. Too-short holds show "Hold a little longer". Cancel shows "Recording discarded" and calls `onCancel`.
-- Keyboard: Space or Enter (no repeat) starts; releasing that same key keeps.
-- Clean up timers, listeners, streams and playback on unmount.
+type Phase = "idle" | "recording" | "recorded";
 
-## Autoplay demo
+const SAMPLE_MS = 80;
+const LIVE_BARS = 22;
+const NOTE_BARS = 30;
 
-Loop: start a demo session at 900ms (no listeners), keep it at 3700ms, play at 4400ms, delete at 9200ms, restart at 10200ms. Pointer down or a key inside (capture phase) stops it and discards any demo session; demo runs never fire callbacks.
+function formatTime(sec: number) {
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+}
 
-## Accessibility
+function resample(levels: number[], count: number) {
+  if (!levels.length) return Array.from({ length: count }, () => 0.2);
+  const peak = Math.max(0.2, ...levels);
+  return Array.from({ length: count }, (_, i) => {
+    const a = Math.floor((i / count) * levels.length);
+    const b = Math.max(a + 1, Math.floor(((i + 1) / count) * levels.length));
+    return levels.slice(a, b).reduce((m, v) => Math.max(m, v), 0) / peak;
+  });
+}
 
-- Idle button `aria-label="{label}. Hold Space to record, slide left or press Escape to cancel."`, focus ring 2px `#0071e3` (dark `#0a84ff`) offset 2px.
-- Recording strip `role="status"` labelled "Recording, 0:03" or "Release to cancel". Player buttons "Play voice note" / "Pause voice note" and "Delete voice note". A hidden polite live region says "Recording", "Voice note recorded" or the hint.
+function MicGlyph() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+      <rect x="6" y="1.8" width="6" height="9.4" rx="3" fill="currentColor" />
+      <path d="M3.6 8.6a5.4 5.4 0 0 0 10.8 0M9 14v2.4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
 
-## Sound
+function Trash({ open }: { open: MotionValue<number> }) {
+  const lid = useTransform(open, [0, 1], [0, -38]);
+  const lift = useTransform(open, [0, 1], [0, -2]);
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" className="overflow-visible">
+      <motion.g style={{ rotate: lid, y: lift, originX: "3px", originY: "5px" }}>
+        <path d="M3 5h12M7 5V3.4h4V5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </motion.g>
+      <path d="M4.6 7.2 5.4 15.6h7.2l.8-8.4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. The component makes no audio of its own (the microphone is only read for the waveform), so sound comes only from this prop. Pressing to start recording plays `on` (a tiny noise click then a short sine glide rising from 600 to 900 Hz); letting go to keep the note plays `off` (the same click with a glide falling from 760 to 480 Hz), including a hold that was too short and is ignored. Sliding left or pressing Escape to discard plays `hush` at 70% (a sine sliding down from 520 to 180 Hz over about 0.35s with a faint hiss). Play, pause and delete on the kept note play `tap` (a short dry click: a sine dropping from 900 to 620 Hz over 60ms plus a faint high hiss) at 60%. The autoplay demo plays the same sounds at the same beats (`on` when it starts recording, `off` when it keeps the note, `tap` at 60% when it plays the note and again when it deletes it) through the same play function's `auto` variant (`sfx.auto("on")`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. With `useMicrophone` the start sound can be picked up by the microphone, so set `enableSound={false}` if that matters. Still silent on hover. The sounds follow `enableSound` and the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+function NoteBar({ level, index, progress, still }: { level: number; index: number; progress: MotionValue<number>; still: boolean }) {
+  const at = index / NOTE_BARS;
+  const bg = useTransform(progress, (p) => (p > at ? "var(--htr-ink)" : "var(--htr-dim)"));
+  return (
+    <motion.span
+      className="w-[3px] rounded-full"
+      style={{ backgroundColor: bg }}
+      initial={still ? false : { height: 3 }}
+      animate={{ height: 4 + level * 20 }}
+      transition={{ type: "spring", stiffness: 420, damping: 18, delay: still ? 0 : index * 0.012 }}
+    />
+  );
+}
 
-## Acceptance checklist
+/**
+ * Press and hold to record a voice note. A soft halo behind the record dot
+ * swells with your voice, the live waveform scrolls in from the right, and
+ * sliding left drags the strip toward a bin whose lid opens; let go there to
+ * throw the note away. Kept notes become a small player.
+ */
+export function HoldToRecord({
+  onRecorded,
+  onCancel,
+  onDelete,
+  maxDuration = 60_000,
+  minDuration = 400,
+  useMicrophone = false,
+  cancelDistance = 90,
+  label = "Hold to record",
+  accent = "#ff3b30",
+  autoplay = false,
+  enableSound = true,
+  className,
+}: HoldToRecordProps) {
+  const sfx = useSound(enableSound);
+  const reduce = useReducedMotion() === true;
+  const [phase, setPhase] = React.useState<Phase>("idle");
+  const [sec, setSec] = React.useState(0);
+  const [cancelling, setCancelling] = React.useState(false);
+  const [note, setNote] = React.useState<HoldToRecordResult | null>(null);
+  const [playing, setPlaying] = React.useState(false);
+  const [playSec, setPlaySec] = React.useState(0);
+  const [hint, setHint] = React.useState("");
 
-- Holding morphs the pill into a strip with a timer and a scrolling live waveform.
-- The halo behind the dot swells and shrinks with the level.
-- Sliding left drags the strip, turns the dot into a bin with an opening lid and tints the pill red past 90px.
-- Releasing there cancels; releasing normally keeps the note and shows the player.
-- The player fills its waveform as it plays and resets after finishing.
-- Very short holds show "Hold a little longer".
-- Space/Enter hold works from the keyboard; Escape cancels.
-- `useMicrophone` drives the bars from the real mic.
+  const level = useMotionValue(0.1);
+  const halo = useSpring(level, { stiffness: 300, damping: 16 });
+  const haloScale = useTransform(halo, (l) => (reduce ? 1 : 1 + l * 0.7));
+  const haloOpacity = useTransform(halo, (l) => 0.18 + l * 0.3);
+  const dragRaw = useMotionValue(0);
+  const drag = useSpring(dragRaw, { stiffness: 500, damping: 36 });
+  const stripX = useTransform(drag, (d) => d * 0.35);
+  const lidOpen = useTransform(dragRaw, (d) => Math.min(1, Math.max(0, -d / cancelDistance)));
+  const dotScale = useTransform(lidOpen, (o) => 1 - o * 0.7);
+  const dotOpacity = useTransform(lidOpen, (o) => 1 - o);
+  const progress = useMotionValue(0);
+  const playAnim = React.useRef<AnimationPlaybackControls | null>(null);
+  const bars = React.useRef<(HTMLSpanElement | null)[]>([]);
+  const touched = React.useRef(false);
 
+  const session = React.useRef<{ start: number; x: number; levels: number[]; demo: boolean; stop: () => void; finish: (keep: boolean) => void } | null>(null);
 
----
+  useMotionValueEvent(progress, "change", (p) => {
+    if (note) setPlaySec(Math.floor((p * note.durationMs) / 1000));
+  });
 
-<!-- Hold To Record: Nexus states variant brief -->
+  const begin = React.useCallback(
+    (clientX: number, demo = false) => {
+      if (session.current) return;
+      if (demo) sfx.auto("on");
+      else sfx("on");
+      setHint("");
+      dragRaw.set(0);
+      setCancelling(false);
+      setSec(0);
+      setPhase("recording");
+      const start = performance.now();
+      const levels: number[] = [];
+      const live = Array<number>(LIVE_BARS).fill(0.08);
 
-> The Hold To Record page has a variant. The brief above rebuilds the original; the section below rebuilds the Voice Dictation variant. It simulates the voice and the words; no microphone is used.
+      let phaseT = Math.random() * 10;
+      const simulated = () => {
+        phaseT += 0.18;
+        const syllable = Math.abs(Math.sin(phaseT * 2.3)) * (0.5 + 0.5 * Math.abs(Math.sin(phaseT * 0.7)));
+        const pause = Math.sin(phaseT * 0.37) > 0.9 ? 0.2 : 1;
+        return Math.min(1, 0.1 + syllable * 0.8 * pause + Math.random() * 0.15);
+      };
+      let readLevel = simulated;
+      let teardown = () => {};
+      if (!demo && useMicrophone && typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+        let stream: MediaStream | null = null;
+        let ctx: AudioContext | null = null;
+        let stopped = false;
+        navigator.mediaDevices
+          .getUserMedia({ audio: true })
+          .then((s) => {
+            if (stopped) {
+              s.getTracks().forEach((t) => t.stop());
+              return;
+            }
+            stream = s;
+            ctx = new AudioContext();
+            const analyser = ctx.createAnalyser();
+            analyser.fftSize = 512;
+            ctx.createMediaStreamSource(s).connect(analyser);
+            const buf = new Uint8Array(analyser.fftSize);
+            readLevel = () => {
+              analyser.getByteTimeDomainData(buf);
+              let sum = 0;
+              for (const v of buf) sum += ((v - 128) / 128) ** 2;
+              return Math.min(1, Math.sqrt(sum / buf.length) * 4.5);
+            };
+          })
+          .catch(() => {
+            readLevel = simulated;
+          });
+        teardown = () => {
+          stopped = true;
+          stream?.getTracks().forEach((t) => t.stop());
+          void (ctx as AudioContext | null)?.close();
+        };
+      }
 
----
+      // Bars are written straight to the DOM, so the strip never re-renders per sample.
+      const timer = window.setInterval(() => {
+        const l = readLevel();
+        levels.push(l);
+        live.shift();
+        live.push(l);
+        level.set(l);
+        bars.current.forEach((el, i) => {
+          if (el) el.style.transform = `scaleY(${(4 + live[i] * 22) / 26})`;
+        });
+        const t = performance.now() - start;
+        setSec(Math.floor(t / 1000));
+        if (t >= maxDuration) session.current?.finish(true);
+      }, SAMPLE_MS);
 
-<!-- variant: voice-dictation -->
+      const onMove = (e: PointerEvent) => {
+        if (!session.current) return;
+        const dx = Math.min(0, e.clientX - session.current.x);
+        dragRaw.set(dx);
+        setCancelling(dx <= -cancelDistance);
+      };
+      const onUp = (e: PointerEvent) => {
+        if (!session.current) return;
+        session.current.finish(e.clientX - session.current.x > -cancelDistance);
+      };
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === "Escape") session.current?.finish(false);
+      };
+      if (!demo) {
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+        window.addEventListener("pointercancel", onUp);
+        window.addEventListener("keydown", onKey);
+      }
+
+      const stop = () => {
+        window.clearInterval(timer);
+        teardown();
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onUp);
+        window.removeEventListener("keydown", onKey);
+      };
+
+      const finish = (keep: boolean) => {
+        const s = session.current;
+        if (!s) return;
+        s.stop();
+        session.current = null;
+        level.set(0.1);
+        const durationMs = performance.now() - s.start;
+        dragRaw.set(0);
+        setCancelling(false);
+        if (!keep) {
+          if (!s.demo) sfx("hush", 0.7);
+          setPhase("idle");
+          if (!s.demo) {
+            setHint("Recording discarded");
+            onCancel?.();
+          }
+          return;
+        }
+        if (s.demo) sfx.auto("off");
+        else sfx("off");
+        if (durationMs < minDuration) {
+          setPhase("idle");
+          setHint("Hold a little longer");
+          return;
+        }
+        const result = { durationMs, levels: s.levels.slice() };
+        progress.set(0);
+        setPlaySec(0);
+        setNote(result);
+        setPlaying(false);
+        setPhase("recorded");
+        if (!s.demo) onRecorded?.(result);
+      };
+
+      session.current = { start, x: clientX, levels, demo, stop, finish };
+    },
+    [cancelDistance, maxDuration, minDuration, onCancel, onRecorded, useMicrophone, dragRaw, level, progress, sfx],
+  );
+
+  React.useEffect(
+    () => () => {
+      session.current?.stop();
+      playAnim.current?.stop();
+    },
+    [],
+  );
+
+  const play = React.useCallback(() => {
+    if (!note) return;
+    playAnim.current?.stop();
+    if (progress.get() >= 1) progress.set(0);
+    setPlaying(true);
+    const remaining = (1 - progress.get()) * note.durationMs;
+    // Playback is a clock, so it runs at constant speed.
+    playAnim.current = animate(progress, 1, {
+      duration: remaining / 1000,
+      ease: "linear",
+      onComplete: () => {
+        setPlaying(false);
+        playAnim.current = animate(progress, 0, { type: "spring", stiffness: 120, damping: 20, delay: 0.5 });
+      },
+    });
+  }, [note, progress]);
+
+  const pause = React.useCallback(() => {
+    playAnim.current?.stop();
+    setPlaying(false);
+  }, []);
+
+  const remove = React.useCallback(
+    (demo = false) => {
+      playAnim.current?.stop();
+      setPhase("idle");
+      setNote(null);
+      setPlaying(false);
+      if (!demo) onDelete?.();
+    },
+    [onDelete],
+  );
+
+  // The demo loop reads the latest handlers through a ref, so re-renders don't restart it.
+  const demo = React.useRef({ begin, play, remove, sfx });
+  React.useLayoutEffect(() => {
+    demo.current = { begin, play, remove, sfx };
+  });
+
+  React.useEffect(() => {
+    if (!autoplay) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const at = (ms: number, fn: () => void) => timers.push(setTimeout(() => !touched.current && fn(), ms));
+    const loop = () => {
+      at(900, () => demo.current.begin(0, true));
+      at(3700, () => session.current?.finish(true));
+      at(4400, () => {
+        demo.current.sfx.auto("tap", 0.6);
+        demo.current.play();
+      });
+      at(9200, () => {
+        demo.current.sfx.auto("tap", 0.6);
+        demo.current.remove(true);
+      });
+      at(10200, loop);
+    };
+    loop();
+    return () => timers.forEach(clearTimeout);
+  }, [autoplay]);
+
+  const noteBars = React.useMemo(() => (note ? resample(note.levels, NOTE_BARS) : []), [note]);
+  const spring = { type: "spring" as const, stiffness: 420, damping: 32 };
+  const total = note ? Math.max(1, Math.round(note.durationMs / 1000)) : 0;
+
+  return (
+    <div
+      className={cn(
+        "relative inline-flex max-w-full flex-col items-center [--htr-ink:#1d1d1f] [--htr-dim:#d2d2d7] dark:[--htr-ink:#f5f5f7] dark:[--htr-dim:#48484a]",
+        className,
+      )}
+      onPointerDownCapture={() => {
+        touched.current = true;
+        if (session.current?.demo) session.current.finish(false);
+      }}
+      onKeyDownCapture={() => {
+        touched.current = true;
+      }}
+    >
+      <motion.div
+        layout={!reduce}
+        transition={spring}
+        className={cn(
+          "relative max-w-full overflow-hidden shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] transition-colors duration-200 dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)]",
+          cancelling ? "bg-[#fff1f0] dark:bg-[#3a1715]" : "bg-white dark:bg-[#1c1c1e]",
+        )}
+        style={{ borderRadius: 999 }}
+      >
+        <AnimatePresence mode="popLayout" initial={false}>
+          {phase === "idle" ? (
+            <motion.button
+              key="idle"
+              type="button"
+              layout={!reduce}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
+              whileTap={reduce ? undefined : { scale: 0.96 }}
+              onPointerDown={(e) => {
+                if (e.button !== 0) return;
+                e.preventDefault();
+                begin(e.clientX);
+              }}
+              onKeyDown={(e) => {
+                if ((e.key === " " || e.key === "Enter") && !e.repeat) {
+                  e.preventDefault();
+                  const r = e.currentTarget.getBoundingClientRect();
+                  begin(r.left + r.width / 2);
+                  const up = (k: KeyboardEvent) => {
+                    if (k.key !== e.key) return;
+                    window.removeEventListener("keyup", up);
+                    session.current?.finish(true);
+                  };
+                  window.addEventListener("keyup", up);
+                }
+              }}
+              className="flex h-14 select-none items-center gap-3 whitespace-nowrap rounded-full pl-2 pr-5 text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f] outline-none [touch-action:none] focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 focus-visible:ring-offset-[#f5f5f7] dark:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+              aria-label={`${label}. Hold Space to record, slide left or press Escape to cancel.`}
+            >
+              <span className="grid size-10 place-items-center rounded-full text-white shadow-[inset_0_1px_0_rgba(255,255,255,.25)]" style={{ backgroundColor: accent }}>
+                <MicGlyph />
+              </span>
+              {label}
+            </motion.button>
+          ) : phase === "recording" ? (
+            <motion.div
+              key="rec"
+              layout={!reduce}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.9, transition: { duration: 0.14 } }}
+              role="status"
+              aria-label={cancelling ? "Release to cancel" : `Recording, ${formatTime(sec)}`}
+              className="relative flex h-14 w-[330px] max-w-full select-none items-center gap-3 pl-3 pr-4 [touch-action:none]"
+            >
+              <span className="relative grid size-8 shrink-0 place-items-center" aria-hidden="true">
+                <motion.span className="absolute inset-0 grid place-items-center" style={{ scale: dotScale, opacity: dotOpacity }}>
+                  <motion.span className="absolute inset-0 rounded-full" style={{ backgroundColor: accent, scale: haloScale, opacity: haloOpacity }} />
+                  <span className="relative size-3 rounded-full" style={{ backgroundColor: accent }} />
+                </motion.span>
+                <motion.span className={cn("absolute", cancelling ? "text-[#d70015] dark:text-[#ff6961]" : "text-[#6e6e73] dark:text-[#a1a1a6]")} style={{ opacity: lidOpen }}>
+                  <Trash open={lidOpen} />
+                </motion.span>
+              </span>
+              <motion.span className="flex min-w-0 flex-1 items-center gap-3" style={{ x: stripX }}>
+                <span className="w-9 shrink-0 text-[15px] font-semibold tabular-nums text-[#1d1d1f] dark:text-[#f5f5f7]">{formatTime(sec)}</span>
+                <motion.span className="flex h-[26px] flex-1 items-center justify-end gap-[3px] overflow-hidden" animate={{ opacity: cancelling ? 0.25 : 1 }} aria-hidden="true">
+                  {Array.from({ length: LIVE_BARS }, (_, i) => (
+                    <span
+                      key={i}
+                      ref={(el) => {
+                        bars.current[i] = el;
+                      }}
+                      className="h-[26px] w-[3px] shrink-0 rounded-full transition-transform duration-75"
+                      style={{ backgroundColor: accent, opacity: 0.3 + (i / LIVE_BARS) * 0.7, transform: "scaleY(0.2)" }}
+                    />
+                  ))}
+                </motion.span>
+              </motion.span>
+              <span
+                className={cn(
+                  "relative shrink-0 text-[12px] transition-colors",
+                  cancelling ? "font-semibold text-[#d70015] dark:text-[#ff6961]" : "text-[#6e6e73] dark:text-[#a1a1a6]",
+                )}
+              >
+                {cancelling ? "Release to cancel" : "Slide to cancel"}
+              </span>
+            </motion.div>
+          ) : note ? (
+            <motion.div
+              key="note"
+              layout={!reduce}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, transition: { duration: 0.1 } }}
+              className="flex h-14 w-[316px] max-w-full items-center gap-3 pl-2 pr-2"
+            >
+              <motion.button
+                type="button"
+                whileTap={reduce ? undefined : { scale: 0.9 }}
+                onClick={() => {
+                  sfx("tap", 0.6);
+                  if (playing) pause();
+                  else play();
+                }}
+                aria-label={playing ? "Pause voice note" : "Play voice note"}
+                className="grid size-10 shrink-0 place-items-center rounded-full bg-[#1d1d1f] text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"
+              >
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.svg
+                    key={playing ? "pause" : "play"}
+                    width="14"
+                    height="14"
+                    viewBox="0 0 14 14"
+                    aria-hidden="true"
+                    initial={{ scale: 0.4, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.4, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 600, damping: 26 }}
+                  >
+                    {playing ? <path d="M3.5 2.5h2.2v9H3.5zM8.3 2.5h2.2v9H8.3z" fill="currentColor" /> : <path d="M4 2.2v9.6a.5.5 0 0 0 .76.43l7.6-4.8a.5.5 0 0 0 0-.86L4.76 1.77A.5.5 0 0 0 4 2.2Z" fill="currentColor" />}
+                  </motion.svg>
+                </AnimatePresence>
+              </motion.button>
+              <span className="flex h-7 flex-1 items-center gap-[3px]" aria-hidden="true">
+                {noteBars.map((l, i) => (
+                  <NoteBar key={i} level={l} index={i} progress={progress} still={reduce} />
+                ))}
+              </span>
+              <span className="w-9 shrink-0 text-right text-[13px] font-medium tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">{formatTime(playing || playSec > 0 ? playSec : total)}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  sfx("tap", 0.6);
+                  remove();
+                }}
+                aria-label="Delete voice note"
+                className="grid size-8 shrink-0 place-items-center rounded-full text-[#6e6e73] transition-colors hover:bg-[#f0f0f3] hover:text-[#1d1d1f] focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#a1a1a6] dark:hover:bg-[#2c2c2e] dark:hover:text-[#f5f5f7] dark:focus-visible:outline-[#0a84ff]"
+              >
+                <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                  <path d="M2 2l6 6M8 2 2 8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                </svg>
+              </button>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.div>
+
+      <AnimatePresence>
+        {hint && phase === "idle" ? (
+          <motion.p
+            key={hint}
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="absolute top-full mt-2.5 whitespace-nowrap text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]"
+          >
+            {hint}
+          </motion.p>
+        ) : null}
+      </AnimatePresence>
+      <p aria-live="polite" className="sr-only">
+        {phase === "recording" ? "Recording" : phase === "recorded" ? "Voice note recorded" : hint}
+      </p>
+    </div>
+  );
+}
+```
+
+--- lib/ui-sounds.ts ---
+
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
+
+import * as React from "react";
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```
 
 # Voice Dictation
 
-Build a dictation card that shows it is listening and what it heard. A "New reminder" card has a transcript box, a round mic button and a row of 32 level bars. Tap the mic: a red dot and a running clock appear, the bars dance with a simulated voice, and the words arrive one by one, faint while they are still a guess and firming up once sure. Some words are corrected with more context ("for" becomes "4", "pm" becomes "PM") and visibly swap in place with a blue flash. Stop and the bars settle into a line, the status says "Ready" and a Save button appears. The voice and words are a simulation; the microphone is never used.
+Add the "Voice Dictation" component from Nexus UI to my project.
 
-## Stack
+Please:
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`), a `cn` class-merge helper, an `IntersectionObserver` and the page visibility API for the demo.
-- File: `components/hold-to-record/voice-dictation.tsx`. Named exports `VoiceDictation`, `VoiceDictationProps`, `VoiceDictationWord` and the constant `VOICE_DICTATION_SCRIPT`.
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+6. Use it like this: `import { VOICE_DICTATION_SCRIPT, VoiceDictation } from "@/components/hold-to-record/voice-dictation";`. The props are typed and documented in the code.
 
-## API
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-`VoiceDictationWord`: `{ w: string; fix?: string; pause?: number }`: the word as first heard, what it becomes later, and extra ms to wait before it.
+--- components/hold-to-record/voice-dictation.tsx ---
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `script` | `VoiceDictationWord[]` | a short reminder | The words the demo hears. |
-| `title` | `string` | `"New reminder"` | Label top left. |
-| `onSave` | `(text: string) => void` | none | Called with the finished text (fixes applied, joined by spaces) when Save is pressed; the card then resets. |
-| `autoplay` | `boolean` | `false` | Dictates, rests and repeats until touched. |
-| `enableSound` | `boolean` | `true` | Interface sounds. |
-| `className` | `string` | none | Extra classes on the card. |
+```tsx
+"use client";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
+import { cn } from "@/lib/utils";
 
-Default script: Remind, me, to, send, the, deck, to, Leo, by (pause 300), for (fix "4"), pm (fix "PM"), tomorrow.
+export interface VoiceDictationWord {
+  /** The word as first heard. */
+  w: string;
+  /** What the word becomes once there is more context ("for" becoming "4"). */
+  fix?: string;
+  /** Extra wait in ms before this word arrives, for a natural pause. */
+  pause?: number;
+}
 
-## Layout and look
+export interface VoiceDictationProps {
+  /** The words the demo "hears", in order, with the ones that get corrected. Defaults to a short reminder. */
+  script?: VoiceDictationWord[];
+  /** Label at the top left of the card. */
+  title?: string;
+  /** Called with the finished text when Save is pressed. The card then goes back to its start. */
+  onSave?: (text: string) => void;
+  /** Starts a dictation, lets it finish, and repeats, until someone touches the component. Never runs under reduced motion and pauses when off screen. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  enableSound?: boolean;
+  /** Extra classes for the card. */
+  className?: string;
+}
 
-- Card: width 480px, `max-width: 100%`, radius 28px, padding 20px (24px from 640px), white / dark `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -30px rgba(0,0,0,.35)` (dark ring `rgba(255,255,255,.08)`).
-- Status row: 13px. The title on the left (medium, `#6e6e73` / dark `#a1a1a6`). On the right: "Tap the mic and talk" when idle, "Ready" when done (both muted), or while listening a pulsing 8px `#ff3b30` dot and a tabular clock "m:ss" in `#d70015` / dark `#ff453a`, medium.
-- Transcript box: 12px under the status, min-height 96px, radius 16px, padding 16px, bg `#f5f5f7` / dark `#2c2c2e`, text 18px, line-height 1.5, tracking -0.01em. Empty it shows "What should I remember?" in `#86868b` / dark `#8e8e93`. Words are inline-blocks with a 0.28em right margin; a word still being guessed is `#8e8e93`, a confirmed one `#1d1d1f` / dark `#f5f5f7` (colour fades over 0.3s). While listening a 2px by 1em blinking cursor (`#0071e3`, dark `#0a84ff`) follows the last word.
-- Control row: 16px under the box, 12px gap. Mic button 48px round, bg `#1d1d1f` white icon (dark bg `#f5f5f7`, icon `#1d1d1f`); while listening bg `#ff3b30` with a white 16px rounded-square stop glyph and a pulse ring behind it. The mic glyph is a 20px outline microphone (2 stroke). Then 32 bars filling the remaining width, 48px tall, 3px gaps, fully rounded, minimum height 3px, colour `#d2d2d7` / dark `#48484a` at rest and `#1d1d1f` / dark `#f5f5f7` while listening. After a dictation finishes a Save pill appears on the right (40px tall, 16px padding, 14px medium, bg `#0071e3`, white text).
+export const VOICE_DICTATION_SCRIPT: VoiceDictationWord[] = [
+  { w: "Remind" },
+  { w: "me" },
+  { w: "to" },
+  { w: "send" },
+  { w: "the" },
+  { w: "deck" },
+  { w: "to" },
+  { w: "Leo" },
+  { w: "by", pause: 300 },
+  { w: "for", fix: "4" },
+  { w: "pm", fix: "PM" },
+  { w: "tomorrow." },
+];
 
-## Motion
+const BARS = 32;
+const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]";
 
-- Timeline when the mic is pressed: starting at 500ms, each word arrives `230 + pause` ms after the previous one; 520ms after arriving it is confirmed (turns dark); a corrected word swaps to its fix 900ms after arriving; 1500ms after the last word arrives the dictation ends by itself.
-- Word arrival: `opacity 0, y 6, blur 4px` to rest over 0.28s. A correction replaces the word in place (the old one exits to `y 10`, blur, the new one enters from `y -10`) with a `#0071e3` 15% (dark `#0a84ff` 30%) wash behind it that fades out over 0.9s after 0.3s.
-- Bars: a new level is pushed every frame (the row scrolls one place); level = `0.35 + 0.55 * |sin(phase * .35)| * (0.6 + rand * 0.4)` times `(0.5 + rand * 0.7)`, clamped to 0.08 to 1, phase += .18 per frame. Heights spring (stiffness 500, damping 30). When not listening all bars return to 8%. The bars update in their own component so the transcript does not re-render at frame rate.
-- Dot and cursor blink every 1s; the button pulse ring scales 1 to 1.5 and fades .35 to 0 every 1.3s; the mic/stop icons swap with a scale pop; the button scales to .92 while pressed; Save grows in from width 0.
-- Reduced motion: the bars stay flat, the dot and cursor are solid, no pulse ring or press scale, words fade in with no blur or slide; the clock still runs and every state is reachable.
+type DictationState = "idle" | "listening" | "done";
 
-## Interaction and states
+/** True while the element is on screen and the tab is visible. Only observes when `enabled`. */
+function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) return;
+    let shown = !document.hidden;
+    let inView = false;
+    const sync = () => setActive(shown && inView);
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      sync();
+    });
+    io.observe(el);
+    const onVisibility = () => {
+      shown = !document.hidden;
+      sync();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+      setActive(false);
+    };
+  }, [ref, enabled]);
+  return active;
+}
 
-- Idle -> listening (mic pressed) -> done. Pressing the mic while listening stops at once and fills in the whole text with all corrections applied. Pressing it when done starts a fresh dictation. Save calls `onSave` with the final text and returns to idle.
+/** The simulated voice level bars. They live in their own component so the fast updates never re-render the transcript. They settle into a flat line when not listening. */
+function LevelBars({ listening, reduce }: { listening: boolean; reduce: boolean }) {
+  const [levels, setLevels] = useState<number[]>(() => Array(BARS).fill(0.08));
+  useEffect(() => {
+    if (!listening || reduce) return;
+    let raf = 0;
+    let ph = 0;
+    const tick = () => {
+      ph += 0.18;
+      const env = 0.35 + 0.55 * Math.abs(Math.sin(ph * 0.35)) * (0.6 + Math.random() * 0.4);
+      setLevels((prev) => [...prev.slice(1), Math.max(0.08, Math.min(1, env * (0.5 + Math.random() * 0.7)))]);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      setLevels(Array(BARS).fill(0.08));
+    };
+  }, [listening, reduce]);
+  return (
+    <div className="flex h-12 flex-1 items-center gap-[3px]" aria-hidden="true">
+      {levels.map((l, i) => (
+        <motion.span
+          key={i}
+          className={cn("flex-1 rounded-full transition-colors duration-200", listening ? "bg-[#1d1d1f] dark:bg-[#f5f5f7]" : "bg-[#d2d2d7] dark:bg-[#48484a]")}
+          animate={{ height: `${Math.round(l * 100)}%` }}
+          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          style={{ minHeight: 3 }}
+        />
+      ))}
+    </div>
+  );
+}
 
-## Autoplay demo
+/** The recording clock, counted from when it mounts. */
+function Clock() {
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    const t0 = performance.now();
+    const id = window.setInterval(() => setSecs(Math.floor((performance.now() - t0) / 1000)), 250);
+    return () => window.clearInterval(id);
+  }, []);
+  return (
+    <>
+      {Math.floor(secs / 60)}:{String(secs % 60).padStart(2, "0")}
+    </>
+  );
+}
 
-Only while the card is on screen, the tab is visible and motion is not reduced: 1.2s after idle start listening, let the script finish, rest 3.6s on "Ready", return to idle and repeat. A pointer or key press inside the card stops it for good.
+/**
+ * Dictation that shows you it's listening and what it heard. The bars move
+ * with your voice, each word arrives faint while it's still a guess and
+ * firms up once it's sure, and words it corrects with more context
+ * ("for" becoming "4") visibly swap in place. Stop and the bars settle into
+ * a line and the text is ready to save. The voice and the words are a
+ * simulation: no microphone is used. Under reduced motion the bars stay
+ * still and words appear with a plain fade.
+ */
+export function VoiceDictation({ script = VOICE_DICTATION_SCRIPT, title = "New reminder", onSave, autoplay = false, enableSound = true, className }: VoiceDictationProps) {
+  const play = useSound(enableSound);
+  const reduce = useReducedMotion() ?? false;
+  const root = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<DictationState>("idle");
+  const [n, setN] = useState(0); // words heard
+  const [sure, setSure] = useState(0); // words confirmed
+  const [fixed, setFixed] = useState<Set<number>>(() => new Set());
+  const timers = useRef<number[]>([]);
+  const touched = useRef(false);
+  /** Who started the current dictation, so the stop sound matches. */
+  const origin = useRef<"user" | "auto">("user");
+  const active = useDemoActive(root, autoplay && !reduce);
+  const clear = () => {
+    timers.current.forEach((id) => window.clearTimeout(id));
+    timers.current = [];
+  };
+  useEffect(() => clear, []);
 
-## Accessibility
+  const finalText = script.map((x) => x.fix ?? x.w).join(" ");
+  const sound = (name: "on" | "off") => {
+    if (origin.current === "user") play(name, 0.5);
+    else play.auto(name, 0.5);
+  };
+  const allFixed = () => new Set(script.map((x, i) => (x.fix ? i : -1)).filter((i) => i >= 0));
 
-- The mic button is a real button labelled "Start dictation" / "Stop dictation". The transcript is a labelled group (not a live region, so words are not read one by one); a separate `sr-only` polite `role="status"` region says "Listening" and then "Dictation ready: <full text>". Dot, clock, bars, flash and cursor are `aria-hidden`.
-- Buttons have a 2px focus outline at 2px offset (`#0071e3`, dark `#0a84ff`).
-- Every timer, interval and frame is cleared on unmount.
+  const start = (from: "user" | "auto") => {
+    clear();
+    origin.current = from;
+    sound("on");
+    setState("listening");
+    setN(0);
+    setSure(0);
+    setFixed(new Set());
+    const at = (fn: () => void, t: number) => timers.current.push(window.setTimeout(fn, t));
+    let t = 500;
+    script.forEach((x, i) => {
+      t += 230 + (x.pause ?? 0);
+      at(() => setN(i + 1), t);
+      at(() => setSure(i + 1), t + 520);
+      const fix = x.fix;
+      if (fix) at(() => setFixed((f) => new Set(f).add(i)), t + 900);
+    });
+    at(() => {
+      sound("off");
+      setState("done");
+    }, t + 1500);
+  };
+  const stop = () => {
+    clear();
+    sound("off");
+    setN(script.length);
+    setSure(script.length);
+    setFixed(allFixed());
+    setState("done");
+  };
+  const reset = () => {
+    clear();
+    setState("idle");
+    setN(0);
+    setSure(0);
+    setFixed(new Set());
+  };
 
-## Sound
+  // The demo reads the latest handlers through a ref.
+  const latest = useRef({ start, reset });
+  useEffect(() => {
+    latest.current = { start, reset };
+  });
 
-- Prop `enableSound?: boolean` (default `true`; `false` silences it).
-- Starting to listen plays `on` at 50% (a tiny noise click then a short sine glide rising from 600 to 900 Hz). When listening stops, whether you press stop or the dictation finishes by itself, `off` plays at 50% (the same click with a glide falling from 760 to 480 Hz). The level bars, the words, corrections and Save are silent.
-- The autoplay loop plays the same two sounds at the same moments through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent.
-- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+  // Demo: wait, start listening, let it finish, rest, go back to the start.
+  useEffect(() => {
+    if (!autoplay || reduce || !active) return;
+    if (state === "idle") {
+      const id = window.setTimeout(() => {
+        if (!touched.current) latest.current.start("auto");
+      }, 1200);
+      return () => window.clearTimeout(id);
+    }
+    if (state === "done") {
+      const id = window.setTimeout(() => {
+        if (!touched.current) latest.current.reset();
+      }, 3600);
+      return () => window.clearTimeout(id);
+    }
+  }, [state, autoplay, reduce, active]);
 
-## Acceptance checklist
+  const listening = state === "listening";
+  const pop = reduce ? { duration: 0.12 } : undefined;
+  const status = listening ? "Listening" : state === "done" ? `Dictation ready: ${finalText}` : "";
 
-- [ ] Pressing the mic shows the red dot, the clock and bars that move; the words arrive faint then firm up.
-- [ ] "for" becomes "4" and "pm" becomes "PM" with a blue flash, in place.
-- [ ] The dictation ends by itself with the status "Ready", flat bars and a Save button.
-- [ ] Stopping early completes the text with corrections applied.
-- [ ] Save calls `onSave` and returns the card to its start.
-- [ ] No microphone permission is ever requested.
-- [ ] Autoplay loops and stops for good on touch; it never runs under reduced motion.
-- [ ] Reduced motion keeps bars flat and fades words in.
-- [ ] Dark mode uses the dark card, `#2c2c2e` transcript box and light bars.
-- [ ] It fits a 320px container.
+  return (
+    <div
+      ref={root}
+      className={cn(
+        "w-[480px] max-w-full rounded-[28px] bg-white p-5 shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-30px_rgba(0,0,0,.35)] sm:p-6 dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-30px_rgba(0,0,0,.9)]",
+        className,
+      )}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      onKeyDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div className="flex items-center justify-between text-[13px]">
+        <span className="font-medium text-[#6e6e73] dark:text-[#a1a1a6]">{title}</span>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+            key={state}
+            aria-hidden="true"
+            className={listening ? "flex items-center gap-1.5 font-medium tabular-nums text-[#d70015] dark:text-[#ff453a]" : "text-[#6e6e73] dark:text-[#a1a1a6]"}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={pop}
+          >
+            {listening ? (
+              <>
+                <motion.span className="h-2 w-2 rounded-full bg-[#ff3b30]" animate={reduce ? undefined : { opacity: [1, 0.3, 1] }} transition={{ duration: 1, repeat: Infinity }} />
+                <Clock />
+              </>
+            ) : state === "done" ? (
+              "Ready"
+            ) : (
+              "Tap the mic and talk"
+            )}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+      <span className="sr-only" role="status" aria-live="polite">
+        {status}
+      </span>
+      <div role="group" aria-label="Transcript" className="mt-3 min-h-[96px] rounded-[16px] bg-[#f5f5f7] p-4 text-[18px] leading-[1.5] tracking-[-0.01em] dark:bg-[#2c2c2e]">
+        {n === 0 && !listening && <span className="text-[#86868b] dark:text-[#8e8e93]">What should I remember?</span>}
+        {script.slice(0, n).map((x, i) => {
+          const ok = i < sure;
+          const swapped = fixed.has(i);
+          return (
+            <span key={i} className="relative mr-[0.28em] inline-block">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span
+                  key={swapped ? "f" : "w"}
+                  className={cn("inline-block transition-colors duration-300", ok ? "text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#8e8e93]")}
+                  initial={reduce ? { opacity: 0 } : { opacity: 0, y: swapped ? -10 : 6, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={reduce ? { opacity: 0 } : { opacity: 0, y: 10, filter: "blur(4px)" }}
+                  transition={{ duration: reduce ? 0.12 : 0.28 }}
+                >
+                  {swapped ? x.fix : x.w}
+                </motion.span>
+              </AnimatePresence>
+              {swapped && <motion.span aria-hidden="true" className="absolute -inset-x-1 inset-y-0 rounded-[5px] bg-[#0071e3]/15 dark:bg-[#0a84ff]/30" initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ delay: reduce ? 0 : 0.3, duration: reduce ? 0.2 : 0.9 }} />}
+            </span>
+          );
+        })}
+        {listening && <motion.span aria-hidden="true" className="inline-block h-[1em] w-[2px] translate-y-[3px] bg-[#0071e3] dark:bg-[#0a84ff]" animate={reduce ? undefined : { opacity: [1, 0, 1] }} transition={{ duration: 1, repeat: Infinity }} />}
+      </div>
+
+      <div className="mt-4 flex items-center gap-3">
+        <motion.button
+          type="button"
+          onClick={() => {
+            touched.current = true;
+            if (listening) stop();
+            else start("user");
+          }}
+          aria-label={listening ? "Stop dictation" : "Start dictation"}
+          className={cn(
+            "relative flex h-12 w-12 flex-none items-center justify-center rounded-full transition-colors duration-200",
+            listening ? "bg-[#ff3b30] text-white" : "bg-[#1d1d1f] text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]",
+            FOCUS,
+          )}
+          whileTap={reduce ? undefined : { scale: 0.92 }}
+        >
+          {listening && !reduce && <motion.span aria-hidden="true" className="absolute inset-0 rounded-full bg-[#ff3b30]" animate={{ scale: [1, 1.5], opacity: [0.35, 0] }} transition={{ duration: 1.3, repeat: Infinity }} />}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {listening ? (
+              <motion.span key="stop" aria-hidden="true" className="relative h-4 w-4 rounded-[4px] bg-white" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={pop} />
+            ) : (
+              <motion.svg key="mic" className="relative" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={pop} aria-hidden="true">
+                <rect x="9" y="3" width="6" height="11" rx="3" />
+                <path d="M5 11a7 7 0 0014 0M12 18v3" />
+              </motion.svg>
+            )}
+          </AnimatePresence>
+        </motion.button>
+        {/* live level bars; they settle into a flat line when idle */}
+        <LevelBars listening={listening} reduce={reduce} />
+        <AnimatePresence>
+          {state === "done" && (
+            <motion.button
+              type="button"
+              onClick={() => {
+                touched.current = true;
+                onSave?.(finalText);
+                reset();
+              }}
+              className={cn("h-10 flex-none whitespace-nowrap rounded-full bg-[#0071e3] px-4 text-[14px] font-medium text-white", FOCUS)}
+              initial={reduce ? { opacity: 0 } : { opacity: 0, scale: 0.8, width: 0 }}
+              animate={{ opacity: 1, scale: 1, width: "auto" }}
+              exit={{ opacity: 0, scale: reduce ? 1 : 0.8 }}
+              transition={pop}
+            >
+              Save
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+```
+
+--- lib/ui-sounds.ts ---
+
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
+
+import * as React from "react";
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

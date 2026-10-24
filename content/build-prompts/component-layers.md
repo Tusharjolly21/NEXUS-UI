@@ -1,67 +1,208 @@
 # Component Layers
 
-Build a "how it's made" view of a small music-player card. In its assembled state it is just the finished card. Switch to Explode and the card tips back into an isometric view and peels apart into four stacked sheets (surface, spacing, layout, content), each with a thin leader line and a label. Switch back and the sheets drop together and the card turns face-on again. The feel is a calm, springy design-tool diagram.
+Add the "Component Layers" component from Nexus UI to my project.
 
-## Stack
+A finished music player card tips into an isometric view and peels apart into its surface, spacing, layout and content layers, each with a leader-line label.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `layoutId`). Real CSS 3D (`perspective`, `transform-style: preserve-3d`, translateZ); no canvas or 3D library.
-- File: `components/component-layers/component-layers.tsx`, named export `ComponentLayers`. Also export the `ComponentLayer` type (`{ name, note, render: (accent) => ReactNode, card?: boolean }`) and the `COMPONENT_LAYERS` array.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { ComponentLayers, COMPONENT_LAYERS } from "@/components/component-layers";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `accent` | `string` | `"#0071e3"` | Used in the cover-art gradient and for the hovered layer's outline and leader line. |
-| `autoplay` | `boolean` | `false` | Explodes and assembles on a loop until the user uses the toggle. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/component-layers/component-layers.tsx ---
 
-Root: centred column, gap 24px. Theme variables on the root (light / dark via `dark:` on a `.dark` ancestor): `--cl-line` `#aeaeb2` / `#636366`, `--cl-ring` `rgba(0,0,0,.12)` / `rgba(255,255,255,.18)`, `--cl-sheet` `rgba(255,255,255,.55)` / `rgba(44,44,46,.55)`.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { motion } from "framer-motion";
 
-Stage: 440 × 330px (max-width 100%), content centred, `perspective: 1400px`. Inside, a 260 × 168px group with `preserve-3d`, holding four absolutely stacked layers (each also `preserve-3d`), bottom to top:
+export interface ComponentLayersProps {
+  /** Colour used in the cover art and for the hovered layer's outline and leader line. */
+  accent?: string;
+  /** Explodes and assembles on a loop until the user interacts. */
+  autoplay?: boolean;
+}
 
-1. **Surface** (note "radius 20 · shadow", the base card): radius 20px, `#ffffff`, shadow `0 0 0 1px rgba(0,0,0,.06), 0 30px 40px -20px rgba(0,0,0,.35)`; dark `#1c1c1e` with `0 0 0 1px rgba(255,255,255,.08), 0 30px 40px -20px rgba(0,0,0,.8)`.
-2. **Spacing** ("padding 16 · gap 12"): hatched bands using `repeating-linear-gradient(45deg, rgba(255,55,95,.22) 0 2px, transparent 2px 6px)`: a 16px band along the top and bottom, 16px bands on left and right between them, and a 12 × 56px band at left 72px, top 16px (the gap beside the art). Labels "16" at (18px, 4px) and "12" at (70px, 78px), 8px semibold `#ff375f`.
-3. **Layout** ("auto layout · 3 rows"): the player's structure as dashed boxes (`rounded-md`, 1px dashed `#0071e3` at 60% with `#0071e3` at 6% fill; dark `#0a84ff` at 70% / 12%). Padding 16px, column with space-between: top row (gap 12px) a 56 × 56 box plus a column (gap 6px) of 112 × 16 and 80 × 12 boxes; bottom (gap 6px) a full-width 8px bar, then a row of 28 × 12, 96 × 20, 28 × 12 boxes, spaced between.
-4. **Content** ("type · art · controls"), the real player at padding 16px: a 56px cover (radius 12px, `linear-gradient(140deg, #ff9f0a, #ff375f 55%, accent)`), then "Night Drive" 15px semibold, tracking −0.01em, `#1d1d1f` / `#f5f5f7`, and "Coastal Lines" 12px `#86868b` / `#98989d`. At the bottom, a 4px progress track `#e8e8ed` / `#3a3a3c` filled 42% with `#1d1d1f` / `#f5f5f7`; below it "1:24" and "-2:51" at 10px tabular-nums grey, with previous (16px), pause (20px) and next (16px) icons between them, 16px apart.
+const W = 260;
+const H = 168;
 
-Each layer's content sits inside a 20px-radius sheet with `transition: background-color, box-shadow 300ms ease-out`. When exploded, every layer except Surface gets background `--cl-sheet` and a 1px ring of `--cl-ring` (or `accent` while hovered). When assembled, sheets are transparent with no ring.
+/** The finished component, used as the top layer. */
+function Player({ accent }: { accent: string }) {
+  return (
+    <div className="flex h-full flex-col justify-between p-4">
+      <div className="flex items-center gap-3">
+        <span className="h-14 w-14 rounded-xl" style={{ background: `linear-gradient(140deg, #ff9f0a, #ff375f 55%, ${accent})` }} />
+        <span className="flex flex-col">
+          <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#1d1d1f] dark:text-[#f5f5f7]">Night Drive</span>
+          <span className="text-[12px] text-[#86868b] dark:text-[#98989d]">Coastal Lines</span>
+        </span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <span className="h-1 rounded-full bg-[#e8e8ed] dark:bg-[#3a3a3c]"><span className="block h-full w-[42%] rounded-full bg-[#1d1d1f] dark:bg-[#f5f5f7]" /></span>
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] tabular-nums text-[#86868b] dark:text-[#98989d]">1:24</span>
+          <span className="flex items-center gap-4 text-[#1d1d1f] dark:text-[#f5f5f7]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5v14M18 5L9 12l9 7V5z" stroke="currentColor" strokeWidth="1.5" /></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18 5v14M6 5l9 7-9 7V5z" stroke="currentColor" strokeWidth="1.5" /></svg>
+          </span>
+          <span className="text-[10px] tabular-nums text-[#86868b] dark:text-[#98989d]">-2:51</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-Labels: attached at the layer's top-right (`left: 100%, top: 0`), no pointer events. A 40px × 1px leader line (`--cl-line`, `accent` when hovered), then 6px later a card: radius 8px, `px-2 py-1`, white (dark `#2c2c2e`), ring 1px `rgba(0,0,0,.06)` (dark `rgba(255,255,255,.08)`), with the name at 11px semibold and the note at 9px grey, no wrapping.
+/** Layout boxes: what the component is made of, without content. */
+function Blocks() {
+  const box = "rounded-md border border-dashed border-[#0071e3]/60 bg-[#0071e3]/[.06] dark:border-[#0a84ff]/70 dark:bg-[#0a84ff]/[.12]";
+  return (
+    <div className="flex h-full flex-col justify-between p-4">
+      <div className="flex items-center gap-3">
+        <span className={`h-14 w-14 ${box}`} />
+        <span className="flex flex-1 flex-col gap-1.5">
+          <span className={`h-4 w-28 ${box}`} />
+          <span className={`h-3 w-20 ${box}`} />
+        </span>
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <span className={`h-2 ${box}`} />
+        <div className="flex items-center justify-between">
+          <span className={`h-3 w-7 ${box}`} />
+          <span className={`h-5 w-24 ${box}`} />
+          <span className={`h-3 w-7 ${box}`} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
-Toggle below the stage: a segmented control, `grid-cols-2`, radius 12px, padding 3px, background `#e8e8ed` (dark `#3a3a3c`). Buttons "Assemble" and "Explode": 32px tall, `px-5`, radius 9px, 13px medium, `#1d1d1f` / `#f5f5f7`. The selected one has a sliding white pill (dark `#636366`) with shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, shared via `layoutId` (namespace it with `useId` so several instances don't collide).
+/** Spacing: padding and gaps as tinted bands. */
+function Spacing() {
+  const pad = "bg-[repeating-linear-gradient(45deg,rgba(255,55,95,.22)_0_2px,transparent_2px_6px)]";
+  return (
+    <div className="relative h-full">
+      <span className={`absolute inset-x-0 top-0 h-4 ${pad}`} />
+      <span className={`absolute inset-x-0 bottom-0 h-4 ${pad}`} />
+      <span className={`absolute inset-y-4 left-0 w-4 ${pad}`} />
+      <span className={`absolute inset-y-4 right-0 w-4 ${pad}`} />
+      <span className={`absolute left-[72px] top-4 h-14 w-3 ${pad}`} />
+      <span className="absolute left-[18px] top-[4px] text-[8px] font-semibold text-[#ff375f]">16</span>
+      <span className="absolute left-[70px] top-[78px] text-[8px] font-semibold text-[#ff375f]">12</span>
+    </div>
+  );
+}
 
-## Motion
+/** Surface: the card itself, with radius and shadow. */
+function Surface() {
+  return <div className="h-full rounded-[20px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_40px_-20px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_40px_-20px_rgba(0,0,0,.8)]" />;
+}
 
-- **Group tilt**: exploded `rotateX 58°, rotateZ −38°, y 34px`; assembled all 0. Spring `stiffness 120, damping 18`.
-- **Layer separation**: layer i moves to `z = i × 62px` when exploded, 0 when assembled. Spring `stiffness 140, damping 18`. Delay when exploding `0.15 + i × 0.07s` (bottom first, after the tilt starts); when assembling `(4 − i) × 0.04s` (top layer first).
-- **Layer opacity**: Surface and Content are always 1. Spacing and Layout are 1 only when exploded, 0 when assembled, on the same spring and delay, so the assembled card shows only the finished design.
-- **Labels**: opacity 0 → 1 and `x −10 → 0` when exploding, with delay `0.45 + i × 0.07s` and framer's default transition; they hide immediately (no delay) when assembling.
-- **Hover**: outline and leader line colour cross-fade to `accent` over 300ms.
-- **Segment pill**: `layoutId` spring `stiffness 420, damping 32`.
-- Use `initial={false}` everywhere so nothing animates on mount.
+/** One sheet in the exploded view. */
+export interface ComponentLayer {
+  name: string;
+  note: string;
+  render: (accent: string) => ReactNode;
+  /** The base card: always visible and never outlined. */
+  card?: boolean;
+}
 
-## Interaction and states
+export const COMPONENT_LAYERS: ComponentLayer[] = [
+  { name: "Surface", note: "radius 20 · shadow", render: () => <Surface />, card: true },
+  { name: "Spacing", note: "padding 16 · gap 12", render: () => <Spacing /> },
+  { name: "Layout", note: "auto layout · 3 rows", render: () => <Blocks /> },
+  { name: "Content", note: "type · art · controls", render: (a) => <Player accent={a} /> },
+];
 
-- State: `open` (boolean) and `hover` (layer index or null). Pointer enter/leave on each layer sets and clears the hover.
-- Clicking a toggle button marks the component touched and sets `open` to that button's value; clicking the active one does nothing visible.
+const GAP = 62;
 
-## Autoplay demo
+/**
+ * A finished card tips into an isometric view and peels apart into the layers
+ * it is made of, each with a leader-line label. Assemble stacks it back.
+ */
+export function ComponentLayers({ accent = "#0071e3", autoplay = false }: ComponentLayersProps) {
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState<number | null>(null);
+  const touched = useRef(false);
+  const group = useId().replace(/:/g, "");
 
-When `autoplay` is true, explode 900ms after mount, then toggle `open` every 3400ms. Both are skipped once the user has clicked a toggle button.
+  useEffect(() => {
+    if (!autoplay) return;
+    const a = setTimeout(() => !touched.current && setOpen(true), 900);
+    const t = setInterval(() => !touched.current && setOpen((o) => !o), 3400);
+    return () => { clearTimeout(a); clearInterval(t); };
+  }, [autoplay]);
 
-## Accessibility
+  return (
+    <div className="flex flex-col items-center gap-6 [--cl-line:#aeaeb2] [--cl-ring:rgba(0,0,0,.12)] [--cl-sheet:rgba(255,255,255,0.55)] dark:[--cl-line:#636366] dark:[--cl-ring:rgba(255,255,255,.18)] dark:[--cl-sheet:rgba(44,44,46,0.55)]">
+      <div className="relative flex h-[330px] w-[440px] max-w-full items-center justify-center" style={{ perspective: 1400 }}>
+        <motion.div
+          className="relative"
+          style={{ width: W, height: H, transformStyle: "preserve-3d" }}
+          initial={false}
+          animate={open ? { rotateX: 58, rotateZ: -38, y: 34 } : { rotateX: 0, rotateZ: 0, y: 0 }}
+          transition={{ type: "spring", stiffness: 120, damping: 18 }}
+        >
+          {COMPONENT_LAYERS.map((l, i) => {
+            const outlined = open && !l.card;
+            return (
+              <motion.div
+                key={l.name}
+                className="absolute inset-0"
+                style={{ transformStyle: "preserve-3d" }}
+                initial={false}
+                animate={{ z: open ? i * GAP : 0, opacity: open || l.card || l.name === "Content" ? 1 : 0 }}
+                transition={{ type: "spring", stiffness: 140, damping: 18, delay: open ? 0.15 + i * 0.07 : (COMPONENT_LAYERS.length - i) * 0.04 }}
+                onPointerEnter={() => setHover(i)}
+                onPointerLeave={() => setHover(null)}
+              >
+                <div
+                  className="h-full w-full rounded-[20px] transition-[background-color,box-shadow] duration-300 ease-out"
+                  style={{
+                    backgroundColor: outlined ? "var(--cl-sheet)" : "rgba(255,255,255,0)",
+                    boxShadow: outlined ? `0 0 0 1px ${hover === i ? accent : "var(--cl-ring)"}` : "0 0 0 0px rgba(0,0,0,0)",
+                  }}
+                >
+                  {l.render(accent)}
+                </div>
+                {/* leader line + label, counter-rotated to stay readable */}
+                <motion.div
+                  className="pointer-events-none absolute left-full top-0 flex items-center"
+                  initial={false}
+                  animate={{ opacity: open ? 1 : 0, x: open ? 0 : -10 }}
+                  transition={{ delay: open ? 0.45 + i * 0.07 : 0 }}
+                >
+                  <span className="h-px w-10" style={{ background: hover === i ? accent : "var(--cl-line)" }} />
+                  <span className="ml-1.5 flex flex-col whitespace-nowrap rounded-lg bg-white px-2 py-1 shadow-[0_0_0_1px_rgba(0,0,0,.06)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]">
+                    <span className="text-[11px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">{l.name}</span>
+                    <span className="text-[9px] text-[#86868b] dark:text-[#98989d]">{l.note}</span>
+                  </span>
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+      <div role="group" aria-label="View" className="relative grid grid-cols-2 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+        {["Assemble", "Explode"].map((label, i) => (
+          <button key={label} type="button" aria-pressed={open === (i === 1)} onClick={() => { touched.current = true; setOpen(i === 1); }} className="relative z-10 h-8 rounded-[9px] px-5 text-[13px] font-medium text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#f5f5f7] dark:focus-visible:outline-[#0a84ff]">
+            {open === (i === 1) && <motion.span layoutId={`${group}-layers-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]" />}
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
 
-- Toggle wrapper: `role="group"`, `aria-label="View"`. Each button is `type="button"` with `aria-pressed` and a 2px focus-visible outline `#0071e3` (dark `#0a84ff`).
-- Decorative SVG icons are `aria-hidden`.
+--- components/component-layers/index.ts ---
 
-## Acceptance checklist
-
-- Assembled, the component looks like a single finished player card with no outlines or hatching.
-- Explode tilts the card into an isometric view and four sheets rise 62px apart, bottom first.
-- Each sheet's label and leader line fade and slide in after the sheet has moved.
-- Hovering a sheet turns its outline and leader line `accent`.
-- Assemble collapses the stack top-down and the labels vanish at once.
-- The segmented pill slides between Assemble and Explode.
-- Changing `accent` updates the cover gradient and hover colour.
-- With `autoplay`, it alternates every 3.4s until the toggle is used.
+```ts
+export { ComponentLayers, COMPONENT_LAYERS } from "./component-layers";
+export type { ComponentLayersProps, ComponentLayer } from "./component-layers";
+```

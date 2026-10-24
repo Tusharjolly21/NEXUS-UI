@@ -1,86 +1,279 @@
 # Polaroid Develop
 
-Build an instant photo you develop by shaking it. The print starts as a grey, hazy, washed-out square; grab it and shake, and the faster you move it the quicker the haze clears and the colour, contrast and sharpness come through. The card swings on its own weight while you drag and snaps back to centre when you let go. Once it is fully developed, a handwritten caption writes itself along the bottom margin. It also develops very slowly on its own, like the real thing. The feel is tactile and a little playful, with a loose, swinging spring.
+Add the "Polaroid Develop" component from Nexus UI to my project.
 
-## Stack
+An instant photo you develop by dragging and shaking it: the faster it moves, the quicker the grey haze clears and the colour comes through. It swings with the drag velocity, develops slowly on its own, and writes a handwritten caption once it is done.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`drag`, `useMotionValue`, `useVelocity`, `useTransform`, `useSpring`, `useMotionValueEvent`, `animate`, `AnimatePresence`, `useReducedMotion`).
-- File: `components/polaroid-develop/polaroid-develop.tsx`. Named export `PolaroidDevelop`, plus the `PolaroidScene` type and a `DEFAULT_POLAROID_SCENES` array.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { PolaroidDevelop, DEFAULT_POLAROID_SCENES } from "@/components/polaroid-develop";`. The props are typed and documented in the code.
 
-`PolaroidScene = { sky: [string, string]; sea: string; sun: string; land: string; caption: string }`.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-`PolaroidDevelop` props:
+--- components/polaroid-develop/index.ts ---
 
-- `src?: string`: a real photo to develop. Without it, draw the scenes below.
-- `alt?: string`, default `""`.
-- `caption?: string`: caption written under `src` once developed (no caption if omitted). Drawn scenes use their own `caption`.
-- `scenes?: PolaroidScene[]`: drawn scenes cycled by "New photo". Default:
-  - sky `#ffb38a` → `#ff6f91`, sea `#5b6fd6`, sun `#fff3c4`, land `#3d2a5c`, "Lisbon, at six"
-  - sky `#a1e3ff` → `#e9f7ff`, sea `#2fa4b8`, sun `#ffffff`, land `#2f6b4f`, "Lagoon, day two"
-  - sky `#ffd36e` → `#ff9f6b`, sea `#c2410c`, sun `#fff8e1`, land `#5d3a1a`, "Desert road"
-- `onDeveloped?: (caption: string) => void`: called once when development reaches 100% (with the caption, or `alt` if there is none).
-- `autoplay?: boolean`, default `false`.
-- `className?: string` on the root.
+```ts
+export { PolaroidDevelop, DEFAULT_POLAROID_SCENES } from "./polaroid-develop";
+export type { PolaroidDevelopProps, PolaroidScene } from "./polaroid-develop";
+```
 
-State: a scene index `k` (scene = `scenes[k % scenes.length]`), a motion value `dev` from 0 to 1, and a boolean `done`.
+--- components/polaroid-develop/polaroid-develop.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  useVelocity,
+  type AnimationPlaybackControls,
+} from "framer-motion";
 
-- Root: column, centred, 16px gap, `max-width: 100%`.
-- Print (the draggable element): radius 6px, background `#fdfcf8` (dark `#2c2c2e`), padding 12px with 48px at the bottom, shadow `0 2px 4px rgba(0,0,0,.08), 0 24px 40px -18px rgba(0,0,0,.45)` (dark `0 0 0 1px rgba(255,255,255,.08), 0 24px 40px -18px rgba(0,0,0,.9)`). `cursor: grab` (grabbing while active), `touch-action: none`, no text selection.
-- Photo window: 200×180, `overflow: hidden`, background `#2a2622`. Three stacked layers:
-  1. The image layer (absolute, filling) with motion-driven `filter` and `opacity`. With `src`, an `<img>` filling it with `object-fit: cover`, not draggable. Otherwise an SVG scene, viewBox `0 0 200 180`, filling the window:
-     - Vertical linear gradient `sky[0]` → `sky[1]` on a 200×180 rect (gradient id unique per instance via `useId`).
-     - Sun: circle at (132, 70), r 22, fill `sun`.
-     - Sea: rect at y 100, 200×80, fill `sea`.
-     - Three glints for i = 0..2: rect x `110 − 6i`, y `104 + 8i`, width `44 + 12i`, height 2, rx 1, fill `sun`, opacity `0.6 − 0.15i`.
-     - Land: path `M0 120 C 30 96, 60 104, 86 118 S 130 140, 200 128 V180 H0Z`, fill `land`.
-  2. Haze: absolute, filling, `linear-gradient(160deg,#5b5450,#2e2a27)`, opacity `1 − dev`.
-  3. Vignette: absolute, filling, `box-shadow: inset 0 0 20px rgba(0,0,0,.25)`.
-- Caption slot: a zero-height relative box under the window. The caption is absolutely placed at left 4px, top 12px, no wrapping, 18px, colour `#3a3a3c` (dark `#d1d1d6`), font-family `'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive` (system fonts only, nothing loaded).
-- Footer row: 12px gap. A status text, 13px, `#86868b` (dark `#a1a1a6`): "Grab it and shake." or "Developed.". A "New photo" button: rounded-full, background `#f0f0f3` (dark `#2c2c2e`), padding 6px × 12px, 12px medium, text `#1d1d1f` (dark `#f5f5f7`).
+export interface PolaroidScene {
+  /** Top and bottom colours of the sky gradient. */
+  sky: [string, string];
+  /** Sea colour. */
+  sea: string;
+  /** Sun and glints on the water. */
+  sun: string;
+  /** Foreground hill colour. */
+  land: string;
+  /** Handwritten caption once the photo has developed. */
+  caption: string;
+}
 
-## Motion
+export const DEFAULT_POLAROID_SCENES: PolaroidScene[] = [
+  { sky: ["#ffb38a", "#ff6f91"], sea: "#5b6fd6", sun: "#fff3c4", land: "#3d2a5c", caption: "Lisbon, at six" },
+  { sky: ["#a1e3ff", "#e9f7ff"], sea: "#2fa4b8", sun: "#ffffff", land: "#2f6b4f", caption: "Lagoon, day two" },
+  { sky: ["#ffd36e", "#ff9f6b"], sea: "#c2410c", sun: "#fff8e1", land: "#5d3a1a", caption: "Desert road" },
+];
 
-- Development mapping from `dev = d`:
-  - image `filter: saturate(0.2 + 0.8d) contrast(0.7 + 0.3d) blur((1 − d) · 3px) brightness(1.25 − 0.25d)`
-  - image opacity `0.15 + 0.85d`
-  - haze opacity `1 − d`
-- Drag: free 2D `drag`, `dragSnapToOrigin`, `dragElastic: 0.5`, `dragTransition: { bounceStiffness: 260, bounceDamping: 14 }`, `whileDrag: { scale: 1.04 }`. Position is driven by motion values `x`, `y`.
-- Swing: `vx = useVelocity(x)`, `vy = useVelocity(y)`. Rotation = `useSpring(clamp(vx / 60, −14, 14), { stiffness: 200, damping: 14 })` degrees.
-- Shake to develop: on every change of `vx`, compute `speed = hypot(vx, vy)`. If `speed > 300` and `dev < 1`, add `speed / 90000` to `dev` (capped at 1).
-- Passive development: every 100ms add 0.004 to `dev` while below 1 (about 25s to full).
-- When `dev` reaches 1 and `done` is false: set `done`, call `onDeveloped`.
-- Caption: inside `AnimatePresence`, keyed by `k`, rendered when `done` and there is caption text. Enter by animating `clipPath` from `inset(0 100% 0 0)` to `inset(0 0% 0 0)` over 1.2s easeInOut (it writes left to right); exit to opacity 0.
-- Shake keyframes (autoplay and keyboard): `animate(x, [-40, 36, -32, 30, -26, 22, -16, 10, 0], { duration: 1.6, ease: "easeInOut" })`. The resulting velocity both swings and develops the print.
+export interface PolaroidDevelopProps {
+  /** Optional photo to develop (any local or remote URL). Without it the drawn scenes are used. */
+  src?: string;
+  /** Alt text for `src`. */
+  alt?: string;
+  /** Caption written under `src` once it has developed. Ignored for the drawn scenes, which carry their own. */
+  caption?: string;
+  /** Drawn scenes cycled by "New photo" when no `src` is given. */
+  scenes?: PolaroidScene[];
+  /** Called with the caption (or `alt`) when the photo finishes developing. */
+  onDeveloped?: (caption: string) => void;
+  /** Shakes the photo by itself, then swaps to a new one, until someone touches it. */
+  autoplay?: boolean;
+  /** Extra classes for the root. */
+  className?: string;
+}
 
-## Interaction and states
+const SHAKE = [-40, 36, -32, 30, -26, 22, -16, 10, 0];
+const HAND = "'Bradley Hand', 'Segoe Print', 'Comic Sans MS', cursive";
 
-- Drag and shake the print with mouse or touch. Starting a drag marks the component as touched and stops any running keyboard shake.
-- "New photo": advance `k`, reset `dev` to 0 and `done` to false (with `src`, it re-develops the same photo).
-- Keyboard: the print is focusable (`tabIndex 0`, `role="button"`). Enter or Space plays the shake keyframes (with reduced motion, adds 0.25 to `dev` instead). Does nothing once developed.
+function Scene({ s, gid }: { s: PolaroidScene; gid: string }) {
+  return (
+    <svg viewBox="0 0 200 180" className="h-full w-full" aria-hidden="true">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={s.sky[0]} />
+          <stop offset="1" stopColor={s.sky[1]} />
+        </linearGradient>
+      </defs>
+      <rect width="200" height="180" fill={`url(#${gid})`} />
+      <circle cx="132" cy="70" r="22" fill={s.sun} />
+      <rect y="100" width="200" height="80" fill={s.sea} />
+      {[0, 1, 2].map((i) => (
+        <rect key={i} x={110 - i * 6} y={104 + i * 8} width={44 + i * 12} height="2" rx="1" fill={s.sun} opacity={0.6 - i * 0.15} />
+      ))}
+      <path d="M0 120 C 30 96, 60 104, 86 118 S 130 140, 200 128 V180 H0Z" fill={s.land} />
+    </svg>
+  );
+}
 
-## Autoplay demo
+/**
+ * An instant photo you develop by shaking. Grab it and shake: the faster you
+ * move it, the quicker the grey haze clears and the colour comes through.
+ * It swings on its own weight as you drag, and once it's developed a caption
+ * writes itself along the bottom.
+ */
+export function PolaroidDevelop({
+  src,
+  alt = "",
+  caption,
+  scenes = DEFAULT_POLAROID_SCENES,
+  onDeveloped,
+  autoplay = false,
+  className = "",
+}: PolaroidDevelopProps) {
+  const [k, setK] = useState(0);
+  const dev = useMotionValue(0);
+  const [done, setDone] = useState(false);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const vx = useVelocity(x);
+  const vy = useVelocity(y);
+  const lean = useTransform(vx, (v) => Math.max(-14, Math.min(14, v / 60)));
+  const rotate = useSpring(lean, { stiffness: 200, damping: 14 });
+  const haze = useTransform(dev, (d) => 1 - d);
+  const filter = useTransform(
+    dev,
+    (d) => `saturate(${0.2 + d * 0.8}) contrast(${0.7 + d * 0.3}) blur(${(1 - d) * 3}px) brightness(${1.25 - d * 0.25})`,
+  );
+  const imgOpacity = useTransform(dev, (d) => 0.15 + d * 0.85);
+  const touched = useRef(false);
+  const shakeCtl = useRef<AnimationPlaybackControls | undefined>(undefined);
+  const reduced = useReducedMotion();
+  const gid = `polaroid-sky-${useId().replace(/:/g, "")}`;
+  const s = scenes.length ? scenes[k % scenes.length] : DEFAULT_POLAROID_SCENES[0];
+  const text = src ? caption ?? "" : s.caption;
+  const name = text || alt;
 
-With `autoplay`, every 2000ms: if `dev >= 1`, after 1600ms advance to a new photo (reset `dev` and `done`); otherwise play the shake keyframes (with reduced motion, add 0.25 to `dev` instead). A `touched` ref is set by drag start, the keyboard shake and "New photo"; the next tick clears the interval for good. Clear the interval, the pending timeout and the running animation on unmount.
+  useMotionValueEvent(vx, "change", () => {
+    const speed = Math.hypot(vx.get(), vy.get());
+    if (speed > 300 && dev.get() < 1) dev.set(Math.min(1, dev.get() + speed / 90000));
+  });
+  useMotionValueEvent(dev, "change", (d) => {
+    if (d >= 1 && !done) {
+      setDone(true);
+      onDeveloped?.(name);
+    }
+  });
 
-## Accessibility
+  useEffect(() => {
+    // Develops very slowly on its own, like the real thing.
+    const t = window.setInterval(() => {
+      if (dev.get() < 1) dev.set(Math.min(1, dev.get() + 0.004));
+    }, 100);
+    return () => window.clearInterval(t);
+  }, [dev]);
 
-- Print `aria-label`: undeveloped "Undeveloped instant photo. Drag and shake it to develop, or press Enter to shake it."; developed "Developed photo: <caption or alt>".
-- The status text is `aria-live="polite"`. The SVG scene and the drawn caption are `aria-hidden` (the label carries them).
-- Focus rings: `focus-visible` 2px `#0071e3` (dark `#0a84ff`) on the print and the button; no default outline.
+  useEffect(() => {
+    return () => shakeCtl.current?.stop();
+  }, []);
 
-## Acceptance checklist
+  useEffect(() => {
+    if (!autoplay) return;
+    let next: number | undefined;
+    let ctl: AnimationPlaybackControls | undefined;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      if (dev.get() >= 1) {
+        window.clearTimeout(next);
+        next = window.setTimeout(() => {
+          if (touched.current) return;
+          setK((n) => n + 1);
+          dev.set(0);
+          setDone(false);
+        }, 1600);
+      } else if (reduced) {
+        // No swinging for reduced motion: just develop in visible steps.
+        dev.set(Math.min(1, dev.get() + 0.25));
+      } else {
+        ctl = animate(x, SHAKE, { duration: 1.6, ease: "easeInOut" });
+      }
+    }, 2000);
+    return () => {
+      window.clearInterval(t);
+      window.clearTimeout(next);
+      ctl?.stop();
+    };
+  }, [autoplay, x, dev, reduced]);
 
-- [ ] The print starts grey and hazy; shaking it fast clears it in a few seconds, slow movement barely does.
-- [ ] Left alone it still develops fully in about 25 seconds.
-- [ ] Dragging swings the print up to ±14° and it springs back to centre on release.
-- [ ] When fully developed the caption writes itself in left to right and the status reads "Developed.".
-- [ ] "New photo" cycles the three scenes and resets the haze.
-- [ ] Passing `src` develops a real photo with `object-fit: cover`.
-- [ ] Enter/Space on the focused print shakes it.
-- [ ] Autoplay shakes, waits, swaps photo, and stops for good once someone drags or presses anything.
-- [ ] Two instances on a page use distinct gradient ids.
-- [ ] Dark mode swaps the paper, caption, footer text, button and shadows; the photo is unchanged.
+  const fresh = () => {
+    touched.current = true;
+    shakeCtl.current?.stop();
+    setK((n) => n + 1);
+    dev.set(0);
+    setDone(false);
+  };
+
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    touched.current = true;
+    if (done) return;
+    shakeCtl.current?.stop();
+    if (reduced) dev.set(Math.min(1, dev.get() + 0.25));
+    else shakeCtl.current = animate(x, SHAKE, { duration: 1.6, ease: "easeInOut" });
+  };
+
+  return (
+    <div className={`flex max-w-full flex-col items-center gap-4 ${className}`}>
+      <motion.div
+        drag
+        dragSnapToOrigin
+        dragElastic={0.5}
+        dragTransition={{ bounceStiffness: 260, bounceDamping: 14 }}
+        onDragStart={() => {
+          touched.current = true;
+          shakeCtl.current?.stop();
+        }}
+        style={{ x, y, rotate }}
+        whileDrag={{ scale: 1.04 }}
+        tabIndex={0}
+        role="button"
+        onKeyDown={onKey}
+        aria-label={
+          done
+            ? `Developed photo${name ? `: ${name}` : ""}`
+            : "Undeveloped instant photo. Drag and shake it to develop, or press Enter to shake it."
+        }
+        className="cursor-grab touch-none select-none rounded-[6px] bg-[#fdfcf8] p-3 pb-12 shadow-[0_2px_4px_rgba(0,0,0,.08),0_24px_40px_-18px_rgba(0,0,0,.45)] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] active:cursor-grabbing dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_40px_-18px_rgba(0,0,0,.9)] dark:focus-visible:ring-[#0a84ff]"
+      >
+        <div className="relative h-[180px] w-[200px] overflow-hidden bg-[#2a2622]">
+          <motion.div className="absolute inset-0" style={{ filter, opacity: imgOpacity }}>
+            {src ? (
+              // eslint-disable-next-line @next/next/no-img-element -- any URL the caller passes, no loader config needed
+              <img src={src} alt="" draggable={false} className="h-full w-full select-none object-cover" />
+            ) : (
+              <Scene s={s} gid={gid} />
+            )}
+          </motion.div>
+          <motion.div className="absolute inset-0" style={{ opacity: haze, background: "linear-gradient(160deg,#5b5450,#2e2a27)" }} />
+          <div className="absolute inset-0 shadow-[inset_0_0_20px_rgba(0,0,0,.25)]" />
+        </div>
+        <div className="relative h-0">
+          <AnimatePresence>
+            {done && text && (
+              <motion.span
+                key={k}
+                className="absolute left-1 top-3 whitespace-nowrap text-[18px] text-[#3a3a3c] dark:text-[#d1d1d6]"
+                style={{ fontFamily: HAND }}
+                initial={{ clipPath: "inset(0 100% 0 0)" }}
+                animate={{ clipPath: "inset(0 0% 0 0)" }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1.2, ease: "easeInOut" }}
+                aria-hidden="true"
+              >
+                {text}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.div>
+      <div className="flex items-center gap-3">
+        <span className="text-[13px] text-[#86868b] dark:text-[#a1a1a6]" aria-live="polite">
+          {done ? "Developed." : "Grab it and shake."}
+        </span>
+        <button
+          type="button"
+          onClick={fresh}
+          className="rounded-full bg-[#f0f0f3] px-3 py-1.5 text-[12px] font-medium text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff]"
+        >
+          New photo
+        </button>
+      </div>
+    </div>
+  );
+}
+```

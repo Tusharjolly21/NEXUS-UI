@@ -1,75 +1,172 @@
 # Shared Element Cards
 
-Build two story cards side by side that open into a sheet with a shared-element transition, App Store "Today" style. The card itself grows into the sheet, the eyebrow and title travel from the card's top-left into the bottom of the sheet's artwork header, and only then does the body text fade up. Closing reverses it: the sheet shrinks back into its card. It should feel continuous and spatial, two clear beats, with a firm spring and no bounce.
+Add the "Shared Element Cards" component from Nexus UI to my project.
 
-## Stack
+Story cards that open into a sheet with a shared-element transition: the artwork, eyebrow and title travel from the card into place, then the body fades in. Closes with Escape or a click outside.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `layoutId`).
-- File: `components/shared-element-cards/shared-element-cards.tsx`, named export `SharedElementCards`; export `SharedElementCardsProps` and `StoryCard`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { SharedElementCards } from "@/components/shared-element-cards";`. The props are typed and documented in the code.
+
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
+
+--- components/shared-element-cards/index.ts ---
 
 ```ts
-interface StoryCard { id: string; eyebrow: string; title: string; art: string /* any CSS background */; body: string[] }
+export { SharedElementCards } from "./shared-element-cards";
+export type { SharedElementCardsProps, StoryCard } from "./shared-element-cards";
 ```
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `cards` | `StoryCard[]` | two built-in cards | Cards to show (laid out in a 2-column grid). |
-| `autoplay` | `boolean` | `false` | Opens and closes the cards by itself until the user interacts. |
+--- components/shared-element-cards/shared-element-cards.tsx ---
 
-Default cards:
-1. id `focus`, eyebrow "Get started", title "Find your focus", art `radial-gradient(120% 90% at 20% 10%, #ffd1e0 0%, rgba(255,209,224,0) 60%), radial-gradient(90% 80% at 90% 90%, #c7d7ff 0%, rgba(199,215,255,0) 60%), #f4ecff`. Body: two short paragraphs explaining that shared-element transitions keep people oriented and that each element carries a `layoutId` animated with a spring.
-2. id `night`, eyebrow "Tonight", title "Quiet hours", art `radial-gradient(100% 80% at 80% 20%, #5e5ce6 0%, rgba(94,92,230,0) 60%), radial-gradient(90% 90% at 10% 100%, #0a84ff 0%, rgba(10,132,255,0) 55%), #1c1c3a`. Body: two paragraphs — closing works with the button, Escape or clicking outside; open-only content fades in after the shared elements land.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-Text colour depends on the card: the card with id `night` uses light text (eyebrow white/60%, title white); all others use dark text (eyebrow black/45%, title `#1d1d1f`).
+export interface StoryCard {
+  id: string;
+  eyebrow: string;
+  title: string;
+  art: string; // any CSS background
+  body: string[];
+}
 
-## Layout and look
+const CARDS: StoryCard[] = [
+  {
+    id: "focus",
+    eyebrow: "Get started",
+    title: "Find your focus",
+    art: "radial-gradient(120% 90% at 20% 10%,#ffd1e0 0%,rgba(255,209,224,0) 60%),radial-gradient(90% 80% at 90% 90%,#c7d7ff 0%,rgba(199,215,255,0) 60%),#f4ecff",
+    body: [
+      "Shared-element transitions keep people oriented. The image, title and eyebrow travel from the card into the sheet instead of cutting to a new screen.",
+      "Each element carries a layoutId. Framer Motion measures both positions and animates between them with a spring.",
+    ],
+  },
+  {
+    id: "night",
+    eyebrow: "Tonight",
+    title: "Quiet hours",
+    art: "radial-gradient(100% 80% at 80% 20%,#5e5ce6 0%,rgba(94,92,230,0) 60%),radial-gradient(90% 90% at 10% 100%,#0a84ff 0%,rgba(10,132,255,0) 55%),#1c1c3a",
+    body: [
+      "Close with the button, the Escape key, or by clicking outside. The sheet shrinks back into its card.",
+      "Content that only exists in the open state fades in after the shared elements land, so the motion reads in two beats.",
+    ],
+  },
+];
 
-- Root: `position: relative`, 340px tall, full width, max 460px. The sheet opens inside this box (not full screen).
-- Grid: 2 columns, 12px gap, full height.
-- Card: a `<button>`, radius 24px, `overflow: hidden`, left-aligned, background = `art`, shadow `0 18px 40px -22px rgba(0,0,0,.4)`. Text block at the top-left: 20px padding, 4px gap; eyebrow 12px semibold uppercase, tracking 0.08em; title 24px bold, line-height 1.1, tracking −0.025em.
-- Scrim: extends 12px beyond the root on every side, radius 28px, white/60% with `backdrop-blur-md` (dark: black/50%).
-- Sheet: fills the root, radius 28px, `overflow: hidden`, vertical flex. White with `0 30px 70px -20px rgba(0,0,0,.45)`; dark `#2c2c2e` with `0 0 0 1px rgba(255,255,255,.08), 0 30px 70px -20px rgba(0,0,0,.8)`.
-  - Header: 150px tall, background = `art`. Text block pinned to the bottom-left with the same 20px padding and 4px gap; title grows to 28px.
-  - Close button: top-right, 16px inset, 32px circle, black/25% with `backdrop-blur-md`, white 12px × icon (stroke 3.2, round caps).
-  - Body: scrollable column, 20px horizontal / 16px vertical padding, 12px gap between paragraphs, 15px, line-height 1.5, `#424245` / dark `#d2d2d7`.
+export interface SharedElementCardsProps {
+  cards?: StoryCard[];
+  /** Opens and closes the cards by itself until the user interacts. */
+  autoplay?: boolean;
+}
 
-## Motion
+export function SharedElementCards({ cards = CARDS, autoplay = false }: SharedElementCardsProps) {
+  const ns = useId();
+  const [open, setOpen] = useState<string | null>(null);
+  const touched = useRef(false);
+  const active = cards.find((c) => c.id === open);
 
-- One spring for all shared elements: stiffness 300, damping 32.
-- Card ↔ sheet: the card button and the sheet share `layoutId = {ns}-{id}-card`, where `ns` comes from `useId` so multiple instances don't collide. Framer interpolates position, size and corner radius between them.
-- Text block: the card's text and the sheet's header text share `layoutId = {ns}-{id}-text`; it travels from top-left of the small card to bottom-left of the header and scales up.
-- While a card is open, hide its original with `visibility: hidden` (keep it in the layout so the grid doesn't shift).
-- Scrim: fades opacity 0 → 1, and back on close.
-- Close button: enters from `opacity 0, scale 0.5` with a 0.2s delay (after the shape lands); exits in 0.1s; `whileTap` scale 0.85.
-- Body: enters from `opacity 0, y 16` with delay 0.18s, duration 0.35s; exits fast (opacity 0 in 0.08s) so it's gone before the sheet shrinks.
-- Cards: `whileHover` scale 1.02, `whileTap` scale 0.97.
-- Wrap the scrim and sheet in one `AnimatePresence` so exit animations play.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
-## Interaction and states
+  useEffect(() => {
+    if (!autoplay) return;
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      setOpen((o) => (o ? null : cards[k++ % cards.length].id));
+    }, 2600);
+    return () => clearInterval(t);
+  }, [autoplay, cards]);
 
-- Clicking a card opens it (state holds the open id or null).
-- Close by the × button, clicking the scrim, or pressing Escape (attach a window `keydown` listener only while open, and remove it on close).
-- Any pointer-down within the root marks the component touched.
+  const lid = (id: string, part: string) => `${ns}-${id}-${part}`;
+  const spring = { type: "spring", stiffness: 300, damping: 32 } as const;
 
-## Autoplay demo
+  return (
+    <div className="relative h-[340px] w-full max-w-[460px]" onPointerDown={() => (touched.current = true)}>
+      <div className="grid h-full grid-cols-2 gap-3">
+        {cards.map((c) => (
+          <motion.button
+            key={c.id}
+            type="button"
+            layoutId={lid(c.id, "card")}
+            transition={spring}
+            onClick={() => setOpen(c.id)}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            className="relative flex flex-col overflow-hidden rounded-[24px] text-left shadow-[0_18px_40px_-22px_rgba(0,0,0,.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3]"
+            style={{ background: c.art, visibility: open === c.id ? "hidden" : "visible" }}
+            aria-label={`Open ${c.title}`}
+          >
+            <motion.span layoutId={lid(c.id, "text")} transition={spring} className="flex flex-col gap-1 p-5">
+              <span className={`text-[12px] font-semibold uppercase tracking-[0.08em] ${c.id === "night" ? "text-white/60" : "text-black/45"}`}>{c.eyebrow}</span>
+              <span className={`text-[24px] font-bold leading-[1.1] tracking-[-0.025em] ${c.id === "night" ? "text-white" : "text-[#1d1d1f]"}`}>{c.title}</span>
+            </motion.span>
+          </motion.button>
+        ))}
+      </div>
 
-When `autoplay` is true, every 2600ms toggle: if something is open, close it; otherwise open the next card in order (focus, night, focus, …). Once touched, the interval clears itself on its next tick.
-
-## Accessibility
-
-- Cards are real buttons with `aria-label="Open {title}"` and a 2px `#0071e3` focus-visible outline offset 4px.
-- The sheet is `role="dialog"`, `aria-modal="true"`, `aria-label={title}`.
-- The close button has `aria-label="Close"` and a white focus-visible outline. Escape closes.
-
-## Acceptance checklist
-
-- [ ] Two gradient cards side by side, each with eyebrow and title at the top-left.
-- [ ] Clicking a card grows that card into a sheet covering the whole component, with no crossfade or flash.
-- [ ] The title visibly travels and grows from the card into the bottom of the header.
-- [ ] The close button and body appear only after the sheet settles.
-- [ ] Escape, the × and clicking the blurred scrim all close it, shrinking the sheet back into its card.
-- [ ] The grid never reflows while a card is open.
-- [ ] The "night" card uses white text; the other uses dark text.
-- [ ] With `autoplay`, cards open and close in turn every 2.6s until you interact.
+      <AnimatePresence>
+        {active && (
+          <>
+            <motion.div
+              key="scrim"
+              className="absolute -inset-3 z-10 rounded-[28px] bg-white/60 backdrop-blur-md dark:bg-black/50"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(null)}
+            />
+            <motion.div
+              key="sheet"
+              layoutId={lid(active.id, "card")}
+              transition={spring}
+              role="dialog"
+              aria-modal="true"
+              aria-label={active.title}
+              className="absolute inset-0 z-20 flex flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_30px_70px_-20px_rgba(0,0,0,.45)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_70px_-20px_rgba(0,0,0,.8)]"
+            >
+              <div className="relative h-[150px] flex-none" style={{ background: active.art }}>
+                <motion.div layoutId={lid(active.id, "text")} transition={spring} className="absolute bottom-0 left-0 flex flex-col gap-1 p-5">
+                  <span className={`text-[12px] font-semibold uppercase tracking-[0.08em] ${active.id === "night" ? "text-white/60" : "text-black/45"}`}>{active.eyebrow}</span>
+                  <span className={`text-[28px] font-bold leading-[1.1] tracking-[-0.025em] ${active.id === "night" ? "text-white" : "text-[#1d1d1f]"}`}>{active.title}</span>
+                </motion.div>
+                <motion.button
+                  type="button"
+                  onClick={() => setOpen(null)}
+                  aria-label="Close"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1, transition: { delay: 0.2 } }}
+                  exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.1 } }}
+                  whileTap={{ scale: 0.85 }}
+                  className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-black/25 text-white backdrop-blur-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                </motion.button>
+              </div>
+              <motion.div
+                className="flex flex-col gap-3 overflow-y-auto px-5 py-4 text-[15px] leading-[1.5] text-[#424245] dark:text-[#d2d2d7]"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.18, duration: 0.35 } }}
+                exit={{ opacity: 0, transition: { duration: 0.08 } }}
+              >
+                {active.body.map((p) => (
+                  <p key={p} className="m-0">{p}</p>
+                ))}
+              </motion.div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+```

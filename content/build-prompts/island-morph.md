@@ -1,80 +1,603 @@
 # Island Morph
 
-Build a black, phone-notch-style pill that morphs between four live states: a small idle pill, a countdown timer, an incoming call and a full music player. The shape springs to each new size first, and the new content blurs and scales in just after it lands. A segmented control underneath switches states. It should feel like iOS: heavy, smooth, slightly springy, never wobbly.
+Add the "Island Morph" component from Nexus UI to my project.
 
-## Stack
+A black pill that morphs between a timer, an incoming call and a full music player, with each state's content blurring in once the shape lands.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `layoutId`).
-- File: `components/island-morph/island-morph.tsx`, named export `IslandMorph`; also export `IslandMorphProps` and `type IslandMode = "idle" | "timer" | "call" | "music"`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+5. Use it like this: `import { IslandMorph } from "@/components/island-morph";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `autoplay` | `boolean` | `false` | Cycles through the states by itself until a control is pressed. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-All content (timer, caller, track) is built in; there are no other props.
+--- components/island-morph/index.ts ---
 
-## Layout and look
+```ts
+export { IslandMorph } from "./island-morph";
+export type { IslandMorphProps, IslandMode } from "./island-morph";
+```
 
-- Root: full-width vertical flex, centred, 32px gap.
-- Stage: full width, 190px tall, the island pinned to the top centre (it grows downward).
-- Island: black background, white text, `overflow: hidden`, `position: relative`. Shadow `0 20px 40px -20px rgba(0,0,0,.5)`; dark mode adds a hairline: `0 0 0 1px rgba(255,255,255,.12), 0 20px 40px -20px rgba(0,0,0,.8)`.
-- Sizes (width × height, radius):
-  - idle 126 × 37, 22
-  - timer 230 × 37, 22
-  - call 350 × 76, 40
-  - music 370 × 186, 46
-- Idle: a 10px "camera" dot at the right (12px right padding), `#1c1c1e` with `inset 0 0 0 2px #2c2c2e`.
-- Timer: space-between row, 12px left / 16px right padding. Left: 24px circle `#ff9f0a` at 20% alpha holding a 14px stopwatch icon (orange stroke 2.6, round caps: circle r8 at 12,13 plus `M12 9v4l2 2M10 2h4`). Right: `m:ss` in 17px semibold tabular numbers, `#ff9f0a`.
-- Call: row with 12px padding and gap. 52px avatar circle with a 135° gradient `#5e5ce6 → #bf5af2`, initials "AR" 18px semibold. Text column: "Incoming call" 13px at white/55%, "Alex Rivera" 17px semibold, truncated. Then two 44px round buttons: Decline `#ff3b30` (white phone glyph rotated 135°) and Accept `#34c759` (white phone glyph).
-- Music: 20px padding, column with space-between. Top row (14px gap): 58px artwork square, radius 14px, conic gradient from 200° through `#ff375f, #ff9f0a, #ffd60a, #30d158, #0a84ff, #bf5af2, #ff375f`; title "Night Drive" 17px semibold; artist "Coastal Lines" 14px white/55%; on the right a 28px-tall equaliser of four 3px bars, 3px apart, bottom-aligned, `#ff375f`, fully rounded. Middle: 5px progress track (white/20%, rounded) with a white fill; below it "0:42" and "-2:51" at 11px tabular, white/45%, space-between, 6px gap. Bottom: centred row, 40px gap: Previous, Play/Pause, Next — 40px round hit areas; prev/next icons 22px white/90% (filled + 1.5px stroke), play/pause 30px white.
-- Segmented control: 4-column grid, radius 12px, 3px padding, bg `#e8e8ed` / dark `#3a3a3c`. Buttons 32px tall, 16px horizontal padding, radius 9px, 13px medium, capitalised labels (idle, timer, call, music), `#1d1d1f` / `#f5f5f7`. Active thumb: white / dark `#636366`, radius 9px, shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, behind the label.
+--- components/island-morph/island-morph.tsx ---
 
-## Motion
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
-- Morph spring (shape and content): stiffness 380, damping 30, mass 0.9.
-- Island: `layout` plus `animate={{ width, height, borderRadius }}` from the size table, `initial={false}`.
-- Content swap: `AnimatePresence mode="popLayout" initial={false}`, one absolutely-filling child keyed by mode. Enter from `opacity 0, scale 0.9, blur(10px)` to sharp with the morph spring and a 0.08s delay. Exit to `opacity 0, scale 0.9, blur(10px)` in a quick 0.18s tween. The old content fades fast while the shape moves, and the new content settles after.
-- Accept button breathes: scale `[1, 1.08, 1]`, 1.1s, repeating forever.
-- Taps: call buttons scale 0.88, play/pause 0.85, prev/next 0.82 (`whileTap`).
-- Equaliser while playing: each bar loops its height through its own keyframes — bar 0 `[6,22,8]`, bar 1 `[12,26,6]`, bar 2 `[8,18,24]`, bar 3 `[16,6,20]` px — duration `0.8 + i × 0.12s`, `repeatType: "mirror"`, easeInOut. Paused: all bars go to 4px.
-- Progress: fill starts at 18% width and animates linearly to 92% over 40s while playing; while paused, pass no width target.
-- Play/pause icon swap: `AnimatePresence mode="popLayout"`; enter from `scale 0.4, opacity 0, rotate −40°`, exit to `scale 0.4, opacity 0, rotate 40°`, spring stiffness 500, damping 22.
-- Segment thumb: shared `layoutId` (namespaced with `useId`), spring stiffness 420, damping 32.
+export type IslandMode = "idle" | "timer" | "call" | "music";
 
-## Interaction and states
+export interface IslandMorphProps {
+  /** Cycles through the states by itself until a control is pressed. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  enableSound?: boolean;
+}
 
-- Segment buttons set the mode directly.
-- Decline returns to idle; Accept switches to the timer.
-- Play/pause toggles `playing` (starts true). Previous/Next are visual only.
-- The timer always runs in the background: starts at 272 seconds (4:32), drops by 1 every second, and wraps from 0 to 299. Display minutes without padding and seconds padded to two digits.
-- Every control press marks the component as touched.
+const SIZES: Record<IslandMode, { width: number; height: number; radius: number }> = {
+  idle: { width: 126, height: 37, radius: 22 },
+  timer: { width: 230, height: 37, radius: 22 },
+  call: { width: 350, height: 76, radius: 40 },
+  music: { width: 370, height: 186, radius: 46 },
+};
 
-## Autoplay demo
+const morph = { type: "spring", stiffness: 380, damping: 30, mass: 0.9 } as const;
 
-When `autoplay` is true, every 2600ms advance through timer → call → music → idle, looping. Once any control (segment, accept, decline) is pressed, the interval clears itself on its next tick and the island stays where the user put it.
+export function IslandMorph({ autoplay = false, enableSound = true }: IslandMorphProps) {
+  const play = useSound(enableSound);
+  const uid = useId();
+  const [mode, setMode] = useState<IslandMode>("idle");
+  const [secs, setSecs] = useState(272);
+  const [playing, setPlaying] = useState(true);
+  const touched = useRef(false);
 
-## Accessibility
+  useEffect(() => {
+    const t = setInterval(() => setSecs((s) => (s > 0 ? s - 1 : 299)), 1000);
+    return () => clearInterval(t);
+  }, []);
 
-- The island is `role="status"` with `aria-live="polite"`.
-- The segmented control is `role="group"` labelled "Island state"; each button has `aria-pressed` and a 2px `#0071e3` focus-visible outline.
-- Icon buttons have `aria-label`s: "Decline", "Accept", "Previous", "Next", and "Pause"/"Play" matching the current state. All SVGs are `aria-hidden`; the equaliser too.
+  useEffect(() => {
+    if (!autoplay) return;
+    const order: IslandMode[] = ["timer", "call", "music", "idle"];
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      play.auto("whoosh", 0.5);
+      setMode(order[k++ % order.length]);
+    }, 2600);
+    return () => clearInterval(t);
+  }, [autoplay, play]);
 
-## Acceptance checklist
+  const pick = (m: IslandMode) => {
+    touched.current = true;
+    if (m !== mode) play("whoosh", 0.5);
+    setMode(m);
+  };
 
-- [ ] Idle shows a 126×37 black pill with a dot on the right.
-- [ ] Each segment morphs the pill to the exact size and radius above with one smooth spring.
-- [ ] Old content blurs out quickly; new content blurs in slightly after the shape moves.
-- [ ] The timer counts down every second from 4:32, even while another state is showing.
-- [ ] Accept pulses; Accept goes to the timer, Decline to idle.
-- [ ] In music, the equaliser bounces while playing, flattens on pause, and the icon spins between play and pause.
-- [ ] The segment thumb slides between options.
-- [ ] With `autoplay`, it cycles every 2.6s and stops after a press.
+  const size = SIZES[mode];
+  const mm = String(Math.floor(secs / 60)).padStart(1, "0");
+  const ss = String(secs % 60).padStart(2, "0");
 
-## Sound
+  return (
+    <div className="flex w-full flex-col items-center gap-8">
+      <div className="flex h-[190px] w-full items-start justify-center">
+        <motion.div
+          layout
+          initial={false}
+          animate={{ width: size.width, height: size.height, borderRadius: size.radius }}
+          transition={morph}
+          className="relative overflow-hidden bg-black text-white shadow-[0_20px_40px_-20px_rgba(0,0,0,.5)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.12),0_20px_40px_-20px_rgba(0,0,0,.8)]"
+          role="status"
+          aria-live="polite"
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={mode}
+              initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)", transition: { ...morph, delay: 0.08 } }}
+              exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)", transition: { duration: 0.18 } }}
+              className="absolute inset-0"
+            >
+              {mode === "timer" && (
+                <div className="flex h-full items-center justify-between pl-3 pr-4">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[#ff9f0a]/20">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff9f0a" strokeWidth="2.6" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="13" r="8" /><path d="M12 9v4l2 2M10 2h4" /></svg>
+                  </span>
+                  <span className="text-[17px] font-semibold tabular-nums text-[#ff9f0a]">{mm}:{ss}</span>
+                </div>
+              )}
+              {mode === "call" && (
+                <div className="flex h-full items-center gap-3 px-3">
+                  <span className="flex h-[52px] w-[52px] flex-none items-center justify-center rounded-full bg-[linear-gradient(135deg,#5e5ce6,#bf5af2)] text-[18px] font-semibold">AR</span>
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-[13px] text-white/55">Incoming call</span>
+                    <span className="truncate text-[17px] font-semibold">Alex Rivera</span>
+                  </span>
+                  <motion.button whileTap={{ scale: 0.88 }} type="button" onClick={() => pick("idle")} aria-label="Decline" className="flex h-11 w-11 items-center justify-center rounded-full bg-[#ff3b30]">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true" style={{ transform: "rotate(135deg)" }}><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" /></svg>
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.88 }}
+                    animate={{ scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1.1, repeat: Infinity }}
+                    type="button"
+                    onClick={() => pick("timer")}
+                    aria-label="Accept"
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-[#34c759]"
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25 11.4 11.4 0 0 0 3.6.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z" /></svg>
+                  </motion.button>
+                </div>
+              )}
+              {mode === "music" && (
+                <div className="flex h-full flex-col justify-between p-5">
+                  <div className="flex items-center gap-3.5">
+                    <span className="h-[58px] w-[58px] flex-none rounded-[14px] bg-[conic-gradient(from_200deg,#ff375f,#ff9f0a,#ffd60a,#30d158,#0a84ff,#bf5af2,#ff375f)]" />
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-[17px] font-semibold">Night Drive</span>
+                      <span className="truncate text-[14px] text-white/55">Coastal Lines</span>
+                    </span>
+                    <span className="flex h-7 items-end gap-[3px]" aria-hidden="true">
+                      {[0, 1, 2, 3].map((i) => (
+                        <motion.span
+                          key={i}
+                          className="w-[3px] rounded-full bg-[#ff375f]"
+                          animate={playing ? { height: [[6, 22, 8], [12, 26, 6], [8, 18, 24], [16, 6, 20]][i] } : { height: 4 }}
+                          transition={{ duration: 0.8 + i * 0.12, repeat: Infinity, repeatType: "mirror", ease: "easeInOut" }}
+                        />
+                      ))}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <div className="h-[5px] overflow-hidden rounded-full bg-white/20">
+                      <motion.div className="h-full rounded-full bg-white" initial={{ width: "18%" }} animate={{ width: playing ? "92%" : undefined }} transition={{ duration: 40, ease: "linear" }} />
+                    </div>
+                    <div className="flex justify-between text-[11px] tabular-nums text-white/45"><span>0:42</span><span>-2:51</span></div>
+                  </div>
+                  <div className="flex items-center justify-center gap-10">
+                    <IconBtn label="Previous"><path d="M6 5v14M18 5L9 12l9 7V5z" /></IconBtn>
+                    <motion.button whileTap={{ scale: 0.85 }} type="button" onClick={() => setPlaying((p) => !p)} aria-label={playing ? "Pause" : "Play"} className="flex h-10 w-10 items-center justify-center rounded-full">
+                      <AnimatePresence mode="popLayout" initial={false}>
+                        <motion.svg key={playing ? "pause" : "play"} initial={{ scale: 0.4, opacity: 0, rotate: -40 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.4, opacity: 0, rotate: 40 }} transition={{ type: "spring", stiffness: 500, damping: 22 }} width="30" height="30" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                          {playing ? <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /> : <path d="M7 4.5v15l12.5-7.5z" />}
+                        </motion.svg>
+                      </AnimatePresence>
+                    </motion.button>
+                    <IconBtn label="Next"><path d="M18 5v14M6 5l9 7-9 7V5z" /></IconBtn>
+                  </div>
+                </div>
+              )}
+              {mode === "idle" && (
+                <div className="flex h-full items-center justify-end pr-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#1c1c1e] shadow-[inset_0_0_0_2px_#2c2c2e]" />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+      </div>
 
-- Prop `enableSound?: boolean` (default `true`; `false` silences it).
-- Pressing a state button (Idle, Timer, Call, Music), or Accept or Decline on the call, plays `whoosh` from `@/lib/ui-sounds` (a soft band of filtered noise sweeping from low to high) at reduced volume as the island changes shape. Pressing the state that is already active makes no sound.
-- The autoplay cycle plays the same `whoosh` at each change of shape, through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Play/pause and hover are silent.
-- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+      <div role="group" aria-label="Island state" className="relative grid grid-cols-4 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+        {(["idle", "timer", "call", "music"] as IslandMode[]).map((m) => (
+          <button key={m} type="button" onClick={() => pick(m)} aria-pressed={mode === m} className="relative z-10 h-8 rounded-[9px] px-4 text-[13px] font-medium capitalize text-[#1d1d1f] dark:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]">
+            {mode === m && <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white dark:bg-[#636366] shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
+            {m}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function IconBtn({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <motion.button whileTap={{ scale: 0.82 }} type="button" aria-label={label} className="flex h-10 w-10 items-center justify-center rounded-full text-white/90">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" aria-hidden="true">
+        {children}
+      </svg>
+    </motion.button>
+  );
+}
+```
+
+--- lib/ui-sounds.ts ---
+
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
+
+import * as React from "react";
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```

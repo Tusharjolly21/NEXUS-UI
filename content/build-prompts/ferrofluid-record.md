@@ -1,69 +1,258 @@
 # Ferrofluid Record
 
-Build a voice-note record button drawn as a glossy drop of black ferrofluid on a canvas. A magnet seems to follow your cursor: the drop leans toward it and grows soft spikes pointing at it. Press the drop to "record" and the whole surface bristles in time with a simulated voice; press again and the spikes melt back into a smooth bead and a small voice-note pill drops into a list. The feel is liquid, magnetic and tactile, on an otherwise clean Apple-like page.
+Add the "Ferrofluid Record" component from Nexus UI to my project.
 
-## Stack
+A record button drawn as a drop of ferrofluid on a canvas. It grows spikes towards your cursor like a magnet, bristles in time with a simulated voice while recording, and melts back to a smooth bead when you stop.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`) for the button, pills and icon swaps, and a plain 2D `<canvas>` for the drop (no canvas library).
-- File: `components/ferrofluid-record/ferrofluid-record.tsx`, named export `FerrofluidRecord`, plus exported `FerrofluidRecordProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { FerrofluidRecord } from "@/components/ferrofluid-record";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `autoplay` | `boolean` | `false` | Moves a pretend magnet around the drop and records a few short notes until someone touches it. Does nothing under `prefers-reduced-motion`. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-The microphone is never opened; the "voice" is a mathematical signal.
+--- components/ferrofluid-record/ferrofluid-record.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-- Root: column, centred, width 340px (`max-w-full`).
-- **Stage**: a 300x300 box (`touch-action: none`) holding the canvas (absolute, fills the box, `aria-hidden`) at device pixel ratio capped at 2, and the record button centred on top.
-- **Record button**: 92px circle, transparent, centred with `x: -50%, y: -50%` motion values. Idle shows a microphone icon (26px, white, 2px stroke, round caps: a filled 6x11 rounded capsule at x9 y3, an arc below it and a stem). While recording it shows a 20px rounded square (radius 5px) in `#ff453a`. Focus ring 2px `#0071e3` (dark `#2997ff`), 4px offset (white in light, black in dark).
-- **Status line**: 24px tall, 14px tabular numerals. Idle: "Tap the drop to record." in `#6e6e73` (dark `#a1a1a6`). Recording: a pulsing 8px `#ff453a` dot and "Recording 0:SS" in `#1d1d1f` (dark `#f5f5f7`). `aria-live="polite"`.
-- **Note list**: 12px below, min height 44px, column with 8px gap, at most 3 pills, newest on top. Each pill: full width, fully rounded, padding 8px 16px 8px 12px, gap 12px, background `#f5f5f7` (dark `#2c2c2e`); a 28px round play badge (`#1d1d1f`, dark `#f5f5f7`) with a 10px triangle in the inverse colour; 28 waveform bars, 3px wide, 2px gap, 24px tall row, colour `#1d1d1f` at 70% (dark `#f5f5f7` at 70%); and the duration "0:SS" in 12px tabular `#6e6e73` (dark `#a1a1a6`).
-- **Drop drawing** (canvas units, centre C = 150, base radius R = 46 at rest, 54 while recording). The drop is black in both themes. Fill: radial gradient from (cx - 0.35R, cy - 0.45R) with stops `#3a3a3e` at 0, `#121214` at 0.45, `#000` at 1 (outer radius 1.6R). Clipped to the shape, add a window reflection (radial white at 55% fading to 0, radius 0.55R at (cx - 0.42R, cy - 0.5R)) and a rim light (radial from 0.7R to 2.2R, transparent to `rgba(160,175,200,.35)`). Outline 1px white at 8%. Floor shadow: a flattened ellipse (vertical scale 0.22) centred 34px below the bottom of the drop, radial from `rgba(0,0,0,.28)` to 0.
-- **Theme**: watch the `dark` class on `<html>` with a MutationObserver. In dark mode the floor shadow becomes a faint light glow (white 7%), the rim light rises to 50% and the outline to 22% so the black drop still reads on a black page.
+const S = 300, C = S / 2, N = 26;
+const STEP = 1000 / 60; // the simulation advances in fixed 60 Hz steps, whatever the display refresh rate
 
-## Motion
+export interface FerrofluidRecordProps {
+  /** Moves a pretend magnet around the drop and records a few short notes until someone touches it. */
+  autoplay?: boolean;
+}
 
-Simulation advances in fixed 60 Hz steps (accumulate frame time, cap 4 steps per frame) so it behaves the same on 60 and 120 Hz screens; drawing happens once per frame.
+type Note = { id: number; secs: number };
 
-State: 26 spikes at angles `i/26 * 2pi` (plus a tiny sine jitter) each with a height `h[i]` and velocity `hv[i]`; drop radius `R` with velocity `Rv`; centre `(cx, cy)`; time `t`; voice `level`.
+/**
+ * A record button made of ferrofluid. The black drop grows spikes towards
+ * your cursor like a magnet is pulling at it, and while you record, the whole
+ * surface bristles in time with your voice (a simulated voice: the
+ * microphone is never opened). Stop, and the spikes melt back into a smooth bead.
+ */
+export function FerrofluidRecord({ autoplay = false }: FerrofluidRecordProps) {
+  const root = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const magnet = useRef<{ x: number; y: number; on: boolean }>({ x: C, y: C, on: false });
+  const recRef = useRef(false);
+  const [rec, setRec] = useState(false);
+  const [secs, setSecs] = useState(0);
+  const secsRef = useRef(0);
+  const noteId = useRef(0);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const touched = useRef(false);
+  const active = useRef(true); // on screen and tab visible
+  const gate = useRef<((on: boolean) => void) | null>(null);
+  const reduced = useReducedMotion();
 
-Per step:
-- Voice (only while recording): `phrase = sin(2.1t) * 0.5 + 0.5`; `syllable = 0.45 + 0.55 * |sin(9.7t) * sin(5.3t)|`; `voice = max(0, phrase) * syllable`. `level += (voice - level) * 0.25`.
-- Radius spring: `Rv += (targetR - R) * 0.08 - Rv * 0.25; R += Rv`.
-- Magnet pull: with pointer at distance `md` from centre, `pull = clamp(1 - (md - R) / 170, 0, 1)` (0 when the pointer is outside the stage). The centre eases toward `C + unit-vector-to-magnet * 7 * pull` at 10% per step.
-- For each spike: `align = max(0, cos(angle difference to the magnet direction))^3`; `noise = 0.5 sin(3t + 2.17i) + 0.5 sin(7.1t + 0.73i)`; `target = align^1.5 * pull * 64 + level * (24 + 14 * noise) + (recording ? 7 : 0)`; then a damped spring `hv += (target - h) * 0.12 - hv * 0.22; h += hv`.
+  useEffect(() => {
+    secsRef.current = secs;
+  });
 
-Shape: sample 360 points around the circle; the radius at angle phi is `R + sum over spikes of max(0, h[i]) * (1 - d/W)^2.4` where `d` is the angular distance to spike `i` and `W = (2pi / 26) * 1.6` (only when `d < W`). Join the points into a closed path and fill.
+  // track whether the component is on screen and the tab is visible
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    let inView = true;
+    const update = () => {
+      const on = inView && !document.hidden;
+      if (on === active.current) return;
+      active.current = on;
+      gate.current?.(on);
+    };
+    const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver(([e]) => { inView = e.isIntersecting; update(); }) : null;
+    io?.observe(el);
+    document.addEventListener("visibilitychange", update);
+    return () => { io?.disconnect(); document.removeEventListener("visibilitychange", update); };
+  }, []);
 
-Other motion: the button has `whileTap` scale 0.9; the mic and stop icons swap with a scale pop (stop also rotates from -45 to 0); new pills enter from `y: -12, scale: 0.9, opacity: 0` and the list uses `layout`; each waveform bar animates its height from 2px to `4 + |sin(1.7k + seconds)| * 16` px with a spring (stiffness 400, damping 20) and a delay of 12ms per bar.
+  useEffect(() => {
+    const c = canvas.current;
+    const ctx = c?.getContext("2d");
+    if (!c || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = S * dpr; c.height = S * dpr;
+    // the drop is black on purpose; only the shadow, rim and sheen adapt to the page
+    const html = document.documentElement;
+    let dark = html.classList.contains("dark");
+    const mo = new MutationObserver(() => { dark = html.classList.contains("dark"); });
+    mo.observe(html, { attributes: true, attributeFilter: ["class"] });
 
-## Interaction and states
+    const theta = Array.from({ length: N }, (_, i) => (i / N) * Math.PI * 2 + Math.sin(i * 7.3) * 0.04);
+    const h = new Float32Array(N), hv = new Float32Array(N);
+    let R = 46, Rv = 0, cx = C, cy = C, t = 0, level = 0;
+    const W = ((Math.PI * 2) / N) * 1.6;
 
-- Pointer moving over the stage sets the magnet to the pointer position (scaled into 300x300 canvas space) and marks the component as touched; leaving the stage switches the magnet off so the spikes relax.
-- Clicking the button toggles recording. Starting resets the timer to 0 and counts seconds with a 1s interval. Stopping stores a note with `max(1, seconds)` and keeps only the latest 3, each with a stable incrementing id.
-- Keyboard: the button is focusable and works with Enter/Space; spikes then respond only to the recording voice.
-- Off screen (IntersectionObserver) or hidden tab (`visibilitychange`): cancel the animation frame; resume when visible again, resetting the frame clock so there is no jump. Cancel everything on unmount.
+    const step = () => {
+      t += 1 / 60;
+      const m = magnet.current, recording = recRef.current;
+      // a fake voice: syllables riding on a slower phrase envelope
+      const voice = recording ? Math.max(0, Math.sin(t * 2.1) * 0.5 + 0.5) * (0.45 + 0.55 * Math.abs(Math.sin(t * 9.7) * Math.sin(t * 5.3))) : 0;
+      level += (voice - level) * 0.25;
+      const targetR = recording ? 54 : 46;
+      Rv += ((targetR - R) * 0.08 - Rv * 0.25); R += Rv;
+      const mx = m.x - C, my = m.y - C, md = Math.hypot(mx, my), ma = Math.atan2(my, mx);
+      const pull = m.on ? Math.max(0, Math.min(1, 1 - (md - R) / 170)) : 0;
+      // the bead itself leans towards the magnet
+      cx += (C + (m.on ? (mx / (md || 1)) * 7 * pull : 0) - cx) * 0.1;
+      cy += (C + (m.on ? (my / (md || 1)) * 7 * pull : 0) - cy) * 0.1;
+      for (let i = 0; i < N; i++) {
+        let d = Math.abs(theta[i] - ma) % (Math.PI * 2); if (d > Math.PI) d = Math.PI * 2 - d;
+        const align = Math.pow(Math.max(0, Math.cos(d)), 3);
+        const noise = Math.sin(t * 3 + i * 2.17) * 0.5 + Math.sin(t * 7.1 + i * 0.73) * 0.5;
+        const target = Math.pow(align, 1.5) * pull * 64 + level * (24 + 14 * noise) + (recording ? 7 : 0);
+        hv[i] += (target - h[i]) * 0.12 - hv[i] * 0.22;
+        h[i] += hv[i];
+      }
+    };
 
-## Autoplay demo
+    const draw = () => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, S, S);
+      // soft floor shadow
+      ctx.save(); ctx.translate(C, C + R + 34); ctx.scale(1, 0.22);
+      const sh = ctx.createRadialGradient(0, 0, 2, 0, 0, R * 1.3);
+      sh.addColorStop(0, dark ? "rgba(255,255,255,.07)" : "rgba(0,0,0,.28)"); sh.addColorStop(1, dark ? "rgba(255,255,255,0)" : "rgba(0,0,0,0)");
+      ctx.fillStyle = sh; ctx.beginPath(); ctx.arc(0, 0, R * 1.3, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      ctx.beginPath();
+      const steps = 360;
+      for (let k = 0; k <= steps; k++) {
+        const phi = (k / steps) * Math.PI * 2;
+        let r = R;
+        for (let i = 0; i < N; i++) {
+          let d = Math.abs(phi - theta[i]); if (d > Math.PI) d = Math.PI * 2 - d;
+          if (d < W) r += Math.max(0, h[i]) * Math.pow(1 - d / W, 2.4);
+        }
+        const x = cx + Math.cos(phi) * r, y = cy + Math.sin(phi) * r;
+        if (k) ctx.lineTo(x, y); else ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+      const g = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.45, R * 0.1, cx, cy, R * 1.6);
+      g.addColorStop(0, "#3a3a3e"); g.addColorStop(0.45, "#121214"); g.addColorStop(1, "#000");
+      ctx.fillStyle = g; ctx.fill();
+      ctx.save(); ctx.clip();
+      // glossy highlights: a broad window reflection and a rim light
+      const hl = ctx.createRadialGradient(cx - R * 0.42, cy - R * 0.5, 1, cx - R * 0.42, cy - R * 0.5, R * 0.55);
+      hl.addColorStop(0, "rgba(255,255,255,.55)"); hl.addColorStop(1, "rgba(255,255,255,0)");
+      ctx.fillStyle = hl; ctx.fillRect(0, 0, S, S);
+      const rim = ctx.createRadialGradient(cx, cy, R * 0.7, cx, cy, R * 2.2);
+      rim.addColorStop(0, "rgba(255,255,255,0)"); rim.addColorStop(1, dark ? "rgba(160,175,200,.5)" : "rgba(160,175,200,.35)");
+      ctx.fillStyle = rim; ctx.fillRect(0, 0, S, S);
+      ctx.restore();
+      ctx.lineWidth = 1; ctx.strokeStyle = dark ? "rgba(255,255,255,.22)" : "rgba(255,255,255,.08)"; ctx.stroke();
+    };
 
-Unless the user prefers reduced motion, every 50ms increment a counter k: the magnet orbits at `(150 + cos(0.35k) * 110, 150 + sin(0.455k) * 90)`, switched on for k mod 60 < 40; recording starts at k mod 60 = 40 and stops at 58, adding a "0:01" pill. Any pointer movement over the stage or a button click stops the demo for good. Ticks are skipped while off screen.
+    let raf = 0, last = 0, acc = 0, running = false;
+    const frame = (now: number) => {
+      raf = requestAnimationFrame(frame);
+      if (!last) last = now;
+      acc += Math.min(100, now - last);
+      last = now;
+      let n = 0;
+      while (acc >= STEP && n < 4) { step(); acc -= STEP; n++; }
+      if (n === 4) acc = 0;
+      draw();
+    };
+    const run = (on: boolean) => {
+      if (on && !running) { running = true; last = 0; raf = requestAnimationFrame(frame); }
+      else if (!on && running) { running = false; cancelAnimationFrame(raf); }
+    };
+    gate.current = run;
+    run(active.current);
+    return () => { gate.current = null; run(false); mo.disconnect(); };
+  }, []);
 
-## Accessibility
+  useEffect(() => {
+    if (!rec) return;
+    const id = setInterval(() => setSecs((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, [rec]);
 
-- Button: `aria-pressed={recording}`, `aria-label` "Record a voice note" or "Stop recording".
-- Canvas and waveform bars are `aria-hidden`; the status line is a polite live region.
+  const toggle = useCallback(() => {
+    const next = !recRef.current;
+    recRef.current = next;
+    setRec(next);
+    if (next) setSecs(0);
+    else {
+      const n = Math.max(1, secsRef.current);
+      setNotes((list) => [{ id: ++noteId.current, secs: n }, ...list].slice(0, 3));
+    }
+  }, []);
 
-## Acceptance checklist
+  useEffect(() => {
+    if (!autoplay || reduced) return;
+    let k = 0;
+    const id = setInterval(() => {
+      if (touched.current) return clearInterval(id);
+      if (!active.current) return;
+      k++;
+      const a = k * 0.35;
+      magnet.current = { x: C + Math.cos(a) * 110, y: C + Math.sin(a * 1.3) * 90, on: (k % 60) < 40 };
+      if (k % 60 === 40 || k % 60 === 58) toggle();
+    }, 50);
+    return () => clearInterval(id);
+  }, [autoplay, reduced, toggle]);
 
-- At rest the drop is a smooth black bead with a window reflection and a soft shadow below it.
-- Moving the cursor near it grows spikes toward the cursor and nudges the bead a few pixels that way; moving away relaxes them smoothly with a slight wobble.
-- Pressing the button swells the drop slightly and makes all spikes bristle irregularly, in bursts, like speech.
-- Pressing again melts the spikes smoothly, shows the mic icon again and adds a pill with a waveform and duration.
-- Never more than 3 pills; the newest is on top and animates in.
-- Simulation speed is identical on 60 Hz and 120 Hz displays.
-- The canvas stops drawing off screen and in a hidden tab.
-- Readable in light and dark themes; the drop stays black and the microphone is never requested.
+  return (
+    <div ref={root} className="flex w-[340px] max-w-full flex-col items-center">
+      <div
+        className="relative touch-none"
+        style={{ width: S, height: S }}
+        onPointerMove={(e) => { touched.current = true; const r = e.currentTarget.getBoundingClientRect(); magnet.current = { x: ((e.clientX - r.left) / r.width) * S, y: ((e.clientY - r.top) / r.height) * S, on: true }; }}
+        onPointerLeave={() => { magnet.current = { ...magnet.current, on: false }; }}
+      >
+        <canvas ref={canvas} className="absolute inset-0 h-full w-full" aria-hidden="true" />
+        <motion.button
+          type="button"
+          onClick={() => { touched.current = true; toggle(); }}
+          whileTap={{ scale: 0.9 }}
+          aria-pressed={rec}
+          aria-label={rec ? "Stop recording" : "Record a voice note"}
+          style={{ x: "-50%", y: "-50%" }}
+          className="absolute left-1/2 top-1/2 flex h-[92px] w-[92px] items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 focus-visible:ring-offset-white dark:focus-visible:ring-[#2997ff] dark:focus-visible:ring-offset-black"
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            {rec ? (
+              <motion.span key="stop" className="h-5 w-5 rounded-[5px] bg-[#ff453a]" initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }} />
+            ) : (
+              <motion.svg key="mic" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} aria-hidden="true">
+                <rect x="9" y="3" width="6" height="11" rx="3" fill="#fff" />
+                <path d="M5.5 11a6.5 6.5 0 0013 0M12 17.5V21" />
+              </motion.svg>
+            )}
+          </AnimatePresence>
+        </motion.button>
+      </div>
+      <div className="h-6 text-[14px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]" aria-live="polite">
+        {rec ? <span className="flex items-center gap-2 text-[#1d1d1f] dark:text-[#f5f5f7]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#ff453a]" />Recording 0:{String(secs).padStart(2, "0")}</span> : "Tap the drop to record."}
+      </div>
+      <ul className="m-0 mt-3 flex min-h-[44px] w-full list-none flex-col gap-2 p-0">
+        <AnimatePresence initial={false}>
+          {notes.map(({ id, secs: n }) => (
+            <motion.li key={id} layout initial={{ opacity: 0, y: -12, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-3 rounded-full bg-[#f5f5f7] py-2 pl-3 pr-4 dark:bg-[#2c2c2e]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#1d1d1f] dark:bg-[#f5f5f7]"><svg width="10" height="10" viewBox="0 0 24 24" className="fill-white dark:fill-[#1d1d1f]" aria-hidden="true"><path d="M7 4l13 8-13 8z" /></svg></span>
+              <span className="flex h-6 flex-1 items-center gap-[2px]" aria-hidden="true">
+                {Array.from({ length: 28 }, (_, k) => <motion.span key={k} className="w-[3px] rounded-full bg-[#1d1d1f]/70 dark:bg-[#f5f5f7]/70" initial={{ height: 2 }} animate={{ height: 4 + Math.abs(Math.sin(k * 1.7 + n)) * 16 }} transition={{ delay: k * 0.012, type: "spring", stiffness: 400, damping: 20 }} />)}
+              </span>
+              <span className="text-[12px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">0:{String(n).padStart(2, "0")}</span>
+            </motion.li>
+          ))}
+        </AnimatePresence>
+      </ul>
+    </div>
+  );
+}
+```
+
+--- components/ferrofluid-record/index.ts ---
+
+```ts
+export { FerrofluidRecord } from "./ferrofluid-record";
+export type { FerrofluidRecordProps } from "./ferrofluid-record";
+```

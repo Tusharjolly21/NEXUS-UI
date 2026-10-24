@@ -1,79 +1,264 @@
 # Metal Orbs
 
-Build two blobs of liquid chrome floating on a soft card. They are metaballs: when close, their surfaces bulge toward each other and pool into one shape. Each pixel is shaded with a fake chrome environment (bright sky, dark horizon band, warm ground), a sharp highlight, and a faint cool or warm tint by which orb owns that surface. A segmented control switches Joined / Apart / Orbit, and dragging pulls the cool orb around. No WebGL: 2D canvas pixel work only.
+Add the "Metal Orbs" component from Nexus UI to my project.
 
-## Stack
+Two liquid-metal metaballs shaded per pixel with a fake chrome reflection on a 2D canvas. They bulge toward each other and pool when they meet; switch between joined, apart and orbit, or drag the cool orb around.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (only for the segmented control's sliding pill via `layoutId`).
-- File: `components/metal-orbs/metal-orbs.tsx`, named export `MetalOrbs`. Also export the type `MetalOrbsMode = "joined" | "apart" | "orbit"`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { MetalOrbs } from "@/components/metal-orbs";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `width` | `number` | `440` | Canvas width in px. |
-| `height` | `number` | `280` | Canvas height in px. |
-| `autoplay` | `boolean` | `false` | Cycles Joined, Orbit and Apart by itself until the user interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/metal-orbs/index.ts ---
 
-- Root: centred column, gap 16px.
-- Card: radius 24px, overflow hidden. Light: `linear-gradient(180deg, #ffffff, #f0f0f3)`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -28px rgba(0,0,0,.3)`. Dark: `linear-gradient(180deg, #2c2c2e, #1c1c1e)`, shadow `0 0 0 1px rgba(255,255,255,.08), 0 24px 50px -28px rgba(0,0,0,.6)`.
-- Canvas: `width × height` CSS px, `max-width: 100%`, `display: block`, `cursor-grab`, `touch-action: none`. Backing store × DPR (capped at 2). The canvas is transparent, so the card gradient shows through.
-- Segmented control: `grid-cols-3`, radius 12px, padding 3px, `#e8e8ed` (dark `#3a3a3c`). Buttons "joined", "apart", "orbit" (CSS `capitalize`), 32px tall, `px-5`, radius 9px, 13px medium, `#1d1d1f` / `#f5f5f7`. The active one has a sliding white pill (dark `#636366`), shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, `layoutId` namespaced with `useId`, spring `stiffness 420, damping 32`.
-- Caption: "Drag inside to pull the cool orb around." at 13px `#86868b` (dark `#98989d`).
+```ts
+export { MetalOrbs } from "./metal-orbs";
+export type { MetalOrbsProps, MetalOrbsMode } from "./metal-orbs";
+```
 
-## Rendering (every animation frame)
+--- components/metal-orbs/metal-orbs.tsx ---
 
-Render the metal into an offscreen buffer canvas at half resolution (`bw = floor(width/2)`, `bh = floor(height/2)`) and reuse one `ImageData` and one `Float32Array` field buffer.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type PointerEvent as RPointerEvent } from "react";
+import { motion } from "framer-motion";
 
-Orbs: orb 0 ("cool") starts at `(0.32·width, height/2)`, radius 54, tint `rgb(150,190,255)`. Orb 1 ("warm") starts at `(0.68·width, height/2)`, radius 48, tint `rgb(255,170,120)`.
+export type MetalOrbsMode = "joined" | "apart" | "orbit";
 
-1. **Field**: for each buffer pixel (at full-res position `p = 2·(x, y)`), `f = Σ r² / (|p − orb|² + 1)`.
-2. **Mask**: pixels with `f < 0.85` are transparent. Edge alpha `= min(1, (f − 0.85)/0.25) × 255` for a soft anti-aliased rim.
-3. **Normal** from central differences: `gx = f(x+1) − f(x−1)`, `gy = f(y+1) − f(y−1)`; `nx = −4.5·gx`, `ny = 4.5·gy` (ny positive means facing up). If `|n| > 1`, normalise it. `nz = √max(0, 1 − nx² − ny²)`. The rim gets steep normals, the top stays flat.
-4. **Environment lookup** with `ry = clamp(1.1·ny + 0.05·nz, −1, 1)`:
-   - `ry > 0.18` (sky): `k = (ry − 0.18)/0.82`, colour `(205 + 45k, 214 + 38k, 226 + 28k)`.
-   - `ry > −0.08` (horizon): `k = (ry + 0.08)/0.26`, `e = k²(3 − 2k)` (smoothstep), colour `(92 + 113e + 8·nx, 98 + 116e, 108 + 118e)`.
-   - otherwise (ground): `k = min(1, (−ry − 0.08)/0.7)`, colour `(196 − 70k, 172 − 70k, 140 − 64k)`.
-5. **Tint**: `w = f₀ / (f₀ + f₁)` (orb 0's share of the field at that pixel). Mix the two tints by w, then `colour = 0.72·env + 0.28·tint`. Where the orbs merge, the tint blends smoothly across the neck.
-6. **Specular**: `spec = max(0, −0.45·nx + 0.55·ny + 0.7·nz)^18 × 255`, added to each channel and clamped to 255 (a light from the upper left).
-7. Put the image data into the buffer.
+export interface MetalOrbsProps {
+  width?: number;
+  height?: number;
+  /** Cycles modes by itself until the user interacts. */
+  autoplay?: boolean;
+}
 
-Then on the visible canvas: clear it, draw one **floor shadow** per orb (an ellipse at `(orb.x, height − 30)` with radii `1.2r × 0.25r`, filled with a radial gradient from radius 2 to `1.2r`, `rgba(0,0,0,.18)` to transparent; `.55` in dark mode so it still reads), then draw the buffer scaled up 2× with `imageSmoothingQuality = "high"`. Detect dark mode with a `MutationObserver` watching the `dark` class on `document.documentElement`.
+/**
+ * Two liquid-metal orbs drawn as metaballs. Every frame computes a field over a
+ * low-resolution buffer, derives a surface normal from its gradient, and shades
+ * it with a fake chrome environment (sky above, dark horizon, warm ground). When
+ * the orbs get close their fields add up and the surfaces bulge into each other.
+ */
+export function MetalOrbs({ width = 440, height = 280, autoplay = false }: MetalOrbsProps) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [mode, setMode] = useState<MetalOrbsMode>("apart");
+  const modeRef = useRef<MetalOrbsMode>(mode);
+  const pointer = useRef<{ x: number; y: number } | null>(null);
+  const touched = useRef(false);
+  const seg = useId();
 
-## Motion
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
-Each frame, compute a target for each orb from the mode, with `t = now/1000` seconds and `(cx, cy)` the canvas centre:
+  useEffect(() => {
+    const cv = canvas.current!;
+    const ctx = cv.getContext("2d")!;
+    const S = 2; // buffer downscale
+    const bw = Math.floor(width / S),
+      bh = Math.floor(height / S);
+    const buf = document.createElement("canvas");
+    buf.width = bw;
+    buf.height = bh;
+    const bctx = buf.getContext("2d")!;
+    const img = bctx.createImageData(bw, bh);
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = width * dpr;
+    cv.height = height * dpr;
+    // Floor shadows need more weight on a dark card to read at all.
+    const root = document.documentElement;
+    let dark = root.classList.contains("dark");
+    const mo = new MutationObserver(() => {
+      dark = root.classList.contains("dark");
+    });
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    const orbs = [
+      { x: width * 0.32, y: height / 2, r: 54, tint: [150, 190, 255] },
+      { x: width * 0.68, y: height / 2, r: 48, tint: [255, 170, 120] },
+    ];
+    let raf = 0;
+    const field = new Float32Array(bw * bh);
+    const env = (ny: number, nx: number) => {
+      // chrome-ish environment: bright sky, dark band at horizon, warm ground
+      const t = ny; // -1 bottom .. 1 top
+      if (t > 0.18) {
+        const k = (t - 0.18) / 0.82;
+        return [205 + 45 * k, 214 + 38 * k, 226 + 28 * k];
+      }
+      if (t > -0.08) {
+        const k = (t + 0.08) / 0.26;
+        const e = k * k * (3 - 2 * k);
+        return [92 + 113 * e + nx * 8, 98 + 116 * e, 108 + 118 * e];
+      }
+      const k = Math.min(1, (-t - 0.08) / 0.7);
+      return [196 - 70 * k, 172 - 70 * k, 140 - 64 * k];
+    };
+    // Share of the field owned by the first orb, used to tint the surface.
+    const share = (px: number, py: number) => {
+      const a = orbs[0],
+        c = orbs[1];
+      const fa = (a.r * a.r) / ((px - a.x) ** 2 + (py - a.y) ** 2 + 1);
+      const fc = (c.r * c.r) / ((px - c.x) ** 2 + (py - c.y) ** 2 + 1);
+      return fa / (fa + fc);
+    };
+    const frame = (now: number) => {
+      const m = modeRef.current;
+      const tt = now / 1000;
+      const cx = width / 2,
+        cy = height / 2;
+      let targets: [number, number][];
+      if (m === "joined") targets = [[cx - 30, cy + Math.sin(tt) * 6], [cx + 32, cy - Math.sin(tt) * 6]];
+      else if (m === "apart") targets = [[cx - 120, cy + Math.sin(tt * 0.8) * 10], [cx + 120, cy - Math.sin(tt * 0.8) * 10]];
+      else targets = [[cx + Math.cos(tt * 1.4) * 70, cy + Math.sin(tt * 1.4) * 38], [cx - Math.cos(tt * 1.4) * 70, cy - Math.sin(tt * 1.4) * 38]];
+      if (pointer.current) targets[0] = [pointer.current.x, pointer.current.y];
+      orbs.forEach((o, i) => {
+        o.x += (targets[i][0] - o.x) * 0.08;
+        o.y += (targets[i][1] - o.y) * 0.08;
+      });
 
-- **joined**: `(cx − 30, cy + 6·sin t)` and `(cx + 32, cy − 6·sin t)`, overlapping and gently rocking.
-- **apart** (initial mode): `(cx − 120, cy + 10·sin 0.8t)` and `(cx + 120, cy − 10·sin 0.8t)`, separate and bobbing in counter-phase.
-- **orbit**: `(cx + 70·cos 1.4t, cy + 38·sin 1.4t)` and the mirror point `(cx − 70·cos 1.4t, cy − 38·sin 1.4t)`, circling each other on an ellipse and merging each time they pass.
+      for (let y = 0; y < bh; y++) {
+        for (let x = 0; x < bw; x++) {
+          const px = x * S,
+            py = y * S;
+          let f = 0;
+          for (const o of orbs) {
+            const dx = px - o.x,
+              dy = py - o.y;
+            f += (o.r * o.r) / (dx * dx + dy * dy + 1);
+          }
+          field[y * bw + x] = f;
+        }
+      }
+      const data = img.data;
+      for (let y = 1; y < bh - 1; y++) {
+        for (let x = 1; x < bw - 1; x++) {
+          const i = y * bw + x;
+          const f = field[i];
+          const o = i * 4;
+          if (f < 0.85) {
+            data[o + 3] = 0;
+            continue;
+          }
+          const gx = field[i + 1] - field[i - 1];
+          const gy = field[i + bw] - field[i - bw];
+          // Normal: steep gradient near the rim, flat on top.
+          let nx = -gx * 4.5,
+            ny = gy * 4.5;
+          const len = Math.hypot(nx, ny);
+          if (len > 1) {
+            nx /= len;
+            ny /= len;
+          }
+          const nz = Math.sqrt(Math.max(0, 1 - nx * nx - ny * ny));
+          // reflect a view ray (0,0,1) -> use normal.y as the env lookup with some bend
+          const ry = ny * 1.1 + nz * 0.05;
+          let [r, g, b] = env(Math.max(-1, Math.min(1, ry)), nx);
+          // tint by which orb dominates
+          const w = share(x * S, y * S);
+          const tr = orbs[0].tint[0] * w + orbs[1].tint[0] * (1 - w);
+          const tg = orbs[0].tint[1] * w + orbs[1].tint[1] * (1 - w);
+          const tb = orbs[0].tint[2] * w + orbs[1].tint[2] * (1 - w);
+          r = r * 0.72 + tr * 0.28;
+          g = g * 0.72 + tg * 0.28;
+          b = b * 0.72 + tb * 0.28;
+          // specular
+          const spec = Math.pow(Math.max(0, -nx * 0.45 + ny * 0.55 + nz * 0.7), 18) * 255;
+          const edge = Math.min(1, (f - 0.85) / 0.25);
+          data[o] = Math.min(255, r + spec);
+          data[o + 1] = Math.min(255, g + spec);
+          data[o + 2] = Math.min(255, b + spec);
+          data[o + 3] = 255 * edge;
+        }
+      }
+      bctx.putImageData(img, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, height);
+      // floor shadows
+      orbs.forEach((o) => {
+        const g = ctx.createRadialGradient(o.x, height - 30, 2, o.x, height - 30, o.r * 1.2);
+        g.addColorStop(0, dark ? "rgba(0,0,0,.55)" : "rgba(0,0,0,.18)");
+        g.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.ellipse(o.x, height - 30, o.r * 1.2, o.r * 0.25, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(buf, 0, 0, bw * S, bh * S);
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(raf);
+      mo.disconnect();
+    };
+  }, [width, height]);
 
-While the pointer is held, orb 0's target is the pointer. Each orb eases toward its target with `pos += (target − pos) × 0.08` per frame (exponential follow), so mode changes and drags glide and the orbs visibly stretch into each other in transit. Keep the mode in a ref so the loop reads it without restarting. Restart the loop only when `width` or `height` changes; cancel it and disconnect the observer on unmount.
+  useEffect(() => {
+    if (!autoplay) return;
+    const order: MetalOrbsMode[] = ["joined", "orbit", "apart"];
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      setMode(order[k++ % order.length]);
+    }, 2600);
+    return () => clearInterval(t);
+  }, [autoplay]);
 
-## Interaction and states
+  const toLocal = (e: RPointerEvent<HTMLCanvasElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * width, y: ((e.clientY - r.top) / r.height) * height };
+  };
 
-- Pointer-down on the canvas: mark touched, capture the pointer, set its position (canvas px via the bounding box).
-- Pointer-move: update the position; for a mouse, only while the primary button is held (`buttons === 1`); touch and pen always update while captured.
-- Pointer-up or cancel: clear the pointer; orb 0 eases back to its mode target.
-- Clicking a mode button marks touched and sets the mode.
-
-## Autoplay demo
-
-Every 2600ms, set the mode to the next of `joined → orbit → apart`, repeating. The interval clears itself once the user has pressed the canvas or a mode button.
-
-## Accessibility
-
-- Canvas: `role="img"`, `aria-label="Two liquid metal orbs. Move the pointer to drag the left one."`.
-- Mode buttons in a `role="group"` with `aria-label="Orb motion"`, each `type="button"` with `aria-pressed` and a 2px focus-visible outline `#0071e3`.
-
-## Acceptance checklist
-
-- At load, two separate chrome spheres bob left and right, each with a soft floor shadow.
-- Each is bright on top with a dark middle band, a warm underside and a sharp upper-left highlight; the left reads slightly blue, the right slightly orange.
-- Joined fuses them into one peanut-shaped blob with a smooth neck and blended tint.
-- Orbit makes them circle and merge on every pass.
-- Dragging pulls the left orb toward the pointer with a short lag; releasing lets it drift back.
-- The rim is anti-aliased, not stair-stepped, even though the shading runs at half resolution.
-- With `autoplay`, the mode changes every 2.6s until the first interaction.
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <div className="overflow-hidden rounded-[24px] bg-[linear-gradient(180deg,#ffffff,#f0f0f3)] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-28px_rgba(0,0,0,.3)] dark:bg-[linear-gradient(180deg,#2c2c2e,#1c1c1e)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-28px_rgba(0,0,0,.6)]">
+        <canvas
+          ref={canvas}
+          role="img"
+          aria-label="Two liquid metal orbs. Move the pointer to drag the left one."
+          style={{ width, height, maxWidth: "100%", display: "block" }}
+          className="cursor-grab touch-none"
+          onPointerMove={(e) => {
+            if (e.buttons !== 1 && e.pointerType === "mouse") return;
+            pointer.current = toLocal(e);
+          }}
+          onPointerDown={(e) => {
+            touched.current = true;
+            e.currentTarget.setPointerCapture(e.pointerId);
+            pointer.current = toLocal(e);
+          }}
+          onPointerUp={() => {
+            pointer.current = null;
+          }}
+          onPointerCancel={() => {
+            pointer.current = null;
+          }}
+        />
+      </div>
+      <div role="group" aria-label="Orb motion" className="relative grid grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+        {(["joined", "apart", "orbit"] as MetalOrbsMode[]).map((m) => (
+          <button
+            key={m}
+            type="button"
+            aria-pressed={mode === m}
+            onClick={() => {
+              touched.current = true;
+              setMode(m);
+            }}
+            className="relative z-10 h-8 rounded-[9px] px-5 text-[13px] font-medium capitalize text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#f5f5f7]"
+          >
+            {mode === m && <motion.span layoutId={`${seg}-metal-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]" />}
+            {m}
+          </button>
+        ))}
+      </div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Drag inside to pull the cool orb around.</span>
+    </div>
+  );
+}
+```

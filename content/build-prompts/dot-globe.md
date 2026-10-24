@@ -1,74 +1,312 @@
 # Dot Globe
 
-Build a dotted globe drawn on a canvas, with glowing flight arcs that draw themselves along great circles between cities. It turns slowly on its own; drag it and it coasts to a stop; tap a city chip and it springs round to face that city with a name tag. Clean, light and precise.
+Add the "Dot Globe" component from Nexus UI to my project.
 
-## Stack
+A dotted globe with flight arcs drawing themselves along great circles. Drag to spin it and it coasts to a stop; pick a city and it springs round to face you.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`).
-- 2D canvas with a hand-written orthographic projection; no WebGL or 3D library.
-- File: `components/dot-globe/dot-globe.tsx`, named export `DotGlobe`. Also export `DotGlobeCity` (`{ id, name, lat, lon }`), `DOT_GLOBE_CITIES` and `DOT_GLOBE_ROUTES`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { DotGlobe, DOT_GLOBE_CITIES, DOT_GLOBE_ROUTES } from "@/components/dot-globe";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `size` | `number` | `340` | Canvas width and height in px. |
-| `accent` | `string` | `"#0071e3"` | Arcs, pins and the selected chip. |
-| `cities` | `DotGlobeCity[]` | `DOT_GLOBE_CITIES` | Cities to pin and list as chips. |
-| `routes` | `[string, string][]` | `DOT_GLOBE_ROUTES` | Arcs as pairs of city ids; pairs with an unknown id are skipped. |
-| `autoplay` | `boolean` | `false` | Tours the cities until the user interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Default cities: San Francisco (37.77, −122.42) `sf`, New York (40.71, −74.01) `ny`, São Paulo (−23.55, −46.63) `sp`, London (51.51, −0.13) `ldn`, Cape Town (−33.92, 18.42) `cpt`, Bengaluru (12.97, 77.59) `blr`, Tokyo (35.68, 139.69) `tyo`, Sydney (−33.87, 151.21) `syd`. Default routes: sf–tyo, ny–ldn, ldn–blr, blr–syd, sp–cpt, ny–sp, tyo–syd.
+--- components/dot-globe/dot-globe.tsx ---
 
-## Geometry
+```tsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { animate, motion, useMotionValue } from "framer-motion";
 
-- Lat/lon to unit vector: `[cos(lat)·sin(lon), sin(lat), cos(lat)·cos(lon)]`.
-- Surface dots: 1600 points on a Fibonacci lattice (golden angle `π(3 − √5)`, `y` from 1 to −1, ring radius `√(1 − y²)`), computed once at module level.
-- Rotation: `yaw` and `pitch` are framer motion values in degrees, starting at −20 and −18. Rotate around Y by yaw, then around X by pitch; screen `x = C + x′·R`, `y = C − y′·R`, keep `z′` for depth. `R = 0.42 × size`, `C = size / 2`.
+export interface DotGlobeCity {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+}
 
-## Layout and look
+export const DOT_GLOBE_CITIES: DotGlobeCity[] = [
+  { id: "sf", name: "San Francisco", lat: 37.77, lon: -122.42 },
+  { id: "ny", name: "New York", lat: 40.71, lon: -74.01 },
+  { id: "sp", name: "São Paulo", lat: -23.55, lon: -46.63 },
+  { id: "ldn", name: "London", lat: 51.51, lon: -0.13 },
+  { id: "cpt", name: "Cape Town", lat: -33.92, lon: 18.42 },
+  { id: "blr", name: "Bengaluru", lat: 12.97, lon: 77.59 },
+  { id: "tyo", name: "Tokyo", lat: 35.68, lon: 139.69 },
+  { id: "syd", name: "Sydney", lat: -33.87, lon: 151.21 },
+];
 
-- Root: centred column, gap 16px. Canvas at `size × size` CSS px; backing store × DPR (capped at 2). `cursor-grab` (`grabbing` while active), `touch-action: none`, drop-shadow filter `0 30px 40px rgba(0,0,0,.12)` (dark `.6`).
-- Each frame, clear and draw in order:
-  1. **Body**: a disc of radius R with a radial gradient from `(C − 0.35R, C − 0.4R)`, inner radius `0.1R`, to `(C, C)`, outer radius `1.05R`. Light `#ffffff → #eef1f6`, dark `#3a3a3c → #1c1c1e`.
-  2. **Dots**: skip `z < −0.15`. Alpha `0.06` if `z < 0`, else `0.18 + 0.55z`; radius `0.6 + 0.9·max(0, z)`. Ink `rgb(29,29,31)` light, `rgb(245,245,247)` dark.
-  3. **Arcs** (below).
-  4. **Pins** for front-facing cities (`z ≥ 0`): a pulsing accent halo, then a disc (white, dark `#1c1c1e`) of radius 3.2 (5 when selected), then an accent dot of radius 2.2 (3.6 selected).
-  5. **Name tag** above the selected pin: font `600 12px -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif`; pill width = text width + 16, height 22, radius 11, top at `pinY − 34`; fill `rgba(29,29,31,.9)` light / `rgba(245,245,247,.92)` dark; text centred at `pinY − 23`, `#fff` light / `#1d1d1f` dark.
-- Detect dark mode by watching the `dark` class on `document.documentElement` with a `MutationObserver`, since the canvas cannot use Tailwind variants.
-- City chips below: wrapping row, max-width 420px, centred, gap 6px. Each is 32px tall, `px-3`, fully rounded, 12px medium, ring `0 0 0 1px rgba(0,0,0,.08)` (dark `rgba(255,255,255,.08)`), `transition-colors 300ms`. Idle: `#ffffff` with `#1d1d1f` text (dark `#2c2c2e` / `#f5f5f7`). Selected: `accent` with white text.
+export const DOT_GLOBE_ROUTES: [string, string][] = [["sf", "tyo"], ["ny", "ldn"], ["ldn", "blr"], ["blr", "syd"], ["sp", "cpt"], ["ny", "sp"], ["tyo", "syd"]];
 
-## Motion
+const rad = (d: number) => (d * Math.PI) / 180;
+const toVec = (lat: number, lon: number): [number, number, number] => {
+  const la = rad(lat), lo = rad(lon);
+  return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
+};
 
-- **Idle spin**: while auto-spin is on and nobody is dragging, `yaw += 8°/s`. Auto-spin starts on (regardless of `autoplay`) and turns off permanently on the first drag or city focus.
-- **Arcs**: global `phase = ((now − t0)/2600) mod 1`; route k uses `prog = (phase + 0.17k) mod 1`, `head = min(1, 1.6·prog)`, `tail = max(0, 1.6·prog − 0.6)`. Draw the arc as 48 straight segments of a slerp between the two city vectors, each point scaled by `1 + 0.18·sin(πt)` so the arc lifts off the surface. Draw only segments between tail and head; skip a segment when both ends have `z < −0.05`. Segment alpha `0.25 + 0.75·sin(π·(t − tail)/max(0.01, head − tail))`, line width 1.6, round caps, colour `accent`. The visible stroke grows from the origin, then its tail chases the head to the destination.
-- **Pin pulse**: `pulse = ((now − t0)/1400) mod 1`; halo radius `3 + pulse × 9` (×18 when selected), alpha `(1 − pulse) × 0.5 × z`.
-- **Focus a city**: stop running animations and auto-spin, mark it selected, then spring `yaw` to `−lon` and `pitch` to `lat × 0.85`, both `{ type: "spring", stiffness: 40, damping: 14 }`. Take the shortest way round: `target += round((currentYaw − target)/360) × 360`.
-- **Drag**: on pointer down capture the pointer, stop animations and auto-spin. `yaw = startYaw + dx × 0.4`; `pitch = clamp(startPitch + dy × 0.3, −60, 60)`. Track horizontal velocity as `(Δx × 0.4) / max(0.008, Δt seconds)` in degrees per second.
-- **Release**: `animate(yaw, yaw.get(), { type: "inertia", velocity, power: 0.6, timeConstant: 700 })`, so the globe coasts and slows. Pitch stays where it was left.
-- **Chips**: `whileTap` scale 0.94.
+// Sphere of dots on a Fibonacci lattice.
+const SPHERE: [number, number, number][] = (() => {
+  const out: [number, number, number][] = [];
+  const N = 1600;
+  const g = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i / (N - 1)) * 2;
+    const r = Math.sqrt(1 - y * y);
+    const t = g * i;
+    out.push([Math.cos(t) * r, y, Math.sin(t) * r]);
+  }
+  return out;
+})();
 
-## Interaction and states
+export interface DotGlobeProps {
+  /** Canvas size in px (square). */
+  size?: number;
+  /** Arc, pin and selected-chip colour. */
+  accent?: string;
+  /** Cities to pin and list as chips. */
+  cities?: DotGlobeCity[];
+  /** Flight arcs as pairs of city ids. */
+  routes?: [string, string][];
+  /** Turns slowly and tours cities until the user interacts. */
+  autoplay?: boolean;
+}
 
-- Selection is one id or none; dragging does not clear it. Clicking a chip marks the component touched and focuses that city.
-- Redraw every frame; restart the loop when props or the selection change, and cancel it on unmount.
+/**
+ * A dotted globe drawn on canvas with an orthographic projection. Drag to spin
+ * it (it coasts and slows), or pick a city and it springs round to face you.
+ * Flight arcs draw themselves along great circles between cities.
+ */
+export function DotGlobe({ size = 340, accent = "#0071e3", cities = DOT_GLOBE_CITIES, routes = DOT_GLOBE_ROUTES, autoplay = false }: DotGlobeProps) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const yaw = useMotionValue(-20);
+  const pitch = useMotionValue(-18);
+  const [active, setActive] = useState<string | null>(null);
+  const drag = useRef<{ x: number; y: number; yaw: number; pitch: number; vx: number; lt: number; lx: number } | null>(null);
+  const spin = useRef(true);
+  const touched = useRef(false);
+  const ctl = useRef<{ stop: () => void }[]>([]);
+  const dark = useRef(false);
 
-## Autoplay demo
+  // Track the site theme so the canvas redraws in the right palette.
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => {
+      dark.current = root.classList.contains("dark");
+    };
+    update();
+    const mo = new MutationObserver(update);
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => mo.disconnect();
+  }, []);
 
-Every 3200ms, focus the city at index `k = (k + 3) mod cities.length` (starting from k = 0, so the first stop is index 3). When the user has dragged or clicked a chip, the interval clears itself and the tour stops.
+  const focus = (c: DotGlobeCity) => {
+    ctl.current.forEach((x) => x.stop());
+    spin.current = false;
+    setActive(c.id);
+    // Shortest way round.
+    let target = -c.lon;
+    const cur = yaw.get();
+    target += Math.round((cur - target) / 360) * 360;
+    ctl.current = [
+      animate(yaw, target, { type: "spring", stiffness: 40, damping: 14 }),
+      animate(pitch, c.lat * 0.85, { type: "spring", stiffness: 40, damping: 14 }),
+    ];
+  };
 
-## Accessibility
+  useEffect(() => {
+    const cv = canvas.current;
+    const ctx = cv?.getContext("2d");
+    if (!cv || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = size * dpr;
+    cv.height = size * dpr;
+    const R = size * 0.42;
+    const C = size / 2;
+    let raf = 0;
+    let last = performance.now();
+    const t0 = performance.now();
+    const byId = Object.fromEntries(cities.map((c) => [c.id, c]));
 
-- Canvas: `role="img"`, `aria-label` "Globe. Drag to spin." or "Globe, showing {city}. Drag to spin." when one is selected.
-- Chips are `<button type="button">` with `aria-pressed`, and a 2px focus-visible outline, offset 2px, `#0071e3` (dark `#0a84ff`).
+    const project = (v: [number, number, number], ya: number, pi: number) => {
+      // rotate around Y (yaw) then X (pitch)
+      const cy = Math.cos(ya), sy = Math.sin(ya), cp = Math.cos(pi), sp = Math.sin(pi);
+      const x1 = v[0] * cy + v[2] * sy;
+      const z1 = -v[0] * sy + v[2] * cy;
+      const y2 = v[1] * cp - z1 * sp;
+      const z2 = v[1] * sp + z1 * cp;
+      return { x: C + x1 * R, y: C - y2 * R, z: z2 };
+    };
 
-## Acceptance checklist
+    const frame = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      const isDark = dark.current;
+      const ink = isDark ? "245,245,247" : "29,29,31";
+      if (spin.current && !drag.current) yaw.set(yaw.get() + dt * 8);
+      const ya = rad(yaw.get()), pi = rad(pitch.get());
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, size, size);
 
-- The globe shows a shaded disc with denser, brighter dots toward its centre and faint dots near the rim.
-- It rotates slowly left to right at load.
-- Seven arcs repeatedly draw on and off with staggered timing, arching above the surface and hiding behind the globe.
-- Dragging spins it; a quick flick keeps it coasting; tilt stops at ±60°.
-- Clicking "Tokyo" springs the globe so Tokyo faces front, with a dark name tag above an enlarged pulsing pin.
-- Going from a city at 170° to one at −170° turns the short way.
-- Toggling `.dark` on `<html>` repaints the globe in dark tones.
-- With `autoplay`, the selection changes every 3.2s until the first drag or click.
+      // soft body
+      const g = ctx.createRadialGradient(C - R * 0.35, C - R * 0.4, R * 0.1, C, C, R * 1.05);
+      g.addColorStop(0, isDark ? "#3a3a3c" : "#ffffff");
+      g.addColorStop(1, isDark ? "#1c1c1e" : "#eef1f6");
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(C, C, R, 0, Math.PI * 2);
+      ctx.fill();
+
+      for (const d of SPHERE) {
+        const p = project(d, ya, pi);
+        if (p.z < -0.15) continue;
+        const a = p.z < 0 ? 0.06 : 0.18 + p.z * 0.55;
+        ctx.fillStyle = `rgba(${ink},${a.toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 0.6 + Math.max(0, p.z) * 0.9, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // arcs
+      const phase = ((now - t0) / 2600) % 1;
+      routes.forEach(([a, b], k) => {
+        const A = byId[a], B = byId[b];
+        if (!A || !B) return;
+        const va = toVec(A.lat, A.lon), vb = toVec(B.lat, B.lon);
+        const dot = Math.max(-1, Math.min(1, va[0] * vb[0] + va[1] * vb[1] + va[2] * vb[2]));
+        const om = Math.acos(dot);
+        const steps = 48;
+        const prog = (phase + k * 0.17) % 1;
+        const head = Math.min(1, prog * 1.6);
+        const tail = Math.max(0, prog * 1.6 - 0.6);
+        ctx.lineWidth = 1.6;
+        ctx.lineCap = "round";
+        for (let i = 0; i < steps; i++) {
+          const t1 = i / steps, t2 = (i + 1) / steps;
+          if (t2 < tail || t1 > head) continue;
+          const pt = (t: number) => {
+            const s = Math.sin(om) || 1;
+            const w1 = Math.sin((1 - t) * om) / s, w2 = Math.sin(t * om) / s;
+            const lift = 1 + Math.sin(Math.PI * t) * 0.18;
+            return project([(va[0] * w1 + vb[0] * w2) * lift, (va[1] * w1 + vb[1] * w2) * lift, (va[2] * w1 + vb[2] * w2) * lift], ya, pi);
+          };
+          const p1 = pt(t1), p2 = pt(t2);
+          if (p1.z < -0.05 && p2.z < -0.05) continue;
+          ctx.strokeStyle = accent;
+          ctx.globalAlpha = 0.25 + 0.75 * Math.sin(Math.PI * ((t1 - tail) / Math.max(0.01, head - tail)));
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      });
+
+      // pins
+      const pulse = ((now - t0) / 1400) % 1;
+      cities.forEach((c) => {
+        const p = project(toVec(c.lat, c.lon), ya, pi);
+        if (p.z < 0) return;
+        const on = c.id === active;
+        ctx.fillStyle = accent;
+        ctx.globalAlpha = (1 - pulse) * 0.5 * p.z;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3 + pulse * (on ? 18 : 9), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, on ? 5 : 3.2, 0, Math.PI * 2);
+        ctx.fillStyle = isDark ? "#1c1c1e" : "#fff";
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, on ? 3.6 : 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = accent;
+        ctx.fill();
+        if (on) {
+          ctx.font = "600 12px -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif";
+          const w = ctx.measureText(c.name).width + 16;
+          ctx.fillStyle = isDark ? "rgba(245,245,247,.92)" : "rgba(29,29,31,.9)";
+          ctx.beginPath();
+          ctx.roundRect(p.x - w / 2, p.y - 34, w, 22, 11);
+          ctx.fill();
+          ctx.fillStyle = isDark ? "#1d1d1f" : "#fff";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(c.name, p.x, p.y - 23);
+        }
+      });
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => cancelAnimationFrame(raf);
+  }, [size, accent, cities, routes, active, yaw, pitch]);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      focus(cities[(k += 3) % cities.length]);
+    }, 3200);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoplay]);
+
+  return (
+    <div className="flex flex-col items-center gap-4 [--dg-chip-ink:#1d1d1f] [--dg-chip:#ffffff] dark:[--dg-chip-ink:#f5f5f7] dark:[--dg-chip:#2c2c2e]">
+      <canvas
+        ref={canvas}
+        role="img"
+        aria-label={`Globe${active ? `, showing ${cities.find((c) => c.id === active)?.name}` : ""}. Drag to spin.`}
+        className="cursor-grab touch-none [filter:drop-shadow(0_30px_40px_rgba(0,0,0,.12))] active:cursor-grabbing dark:[filter:drop-shadow(0_30px_40px_rgba(0,0,0,.6))]"
+        style={{ width: size, height: size }}
+        onPointerDown={(e) => {
+          touched.current = true;
+          ctl.current.forEach((x) => x.stop());
+          spin.current = false;
+          e.currentTarget.setPointerCapture(e.pointerId);
+          drag.current = { x: e.clientX, y: e.clientY, yaw: yaw.get(), pitch: pitch.get(), vx: 0, lt: performance.now(), lx: e.clientX };
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d) return;
+          const now = performance.now();
+          d.vx = ((e.clientX - d.lx) * 0.4) / Math.max(0.008, (now - d.lt) / 1000);
+          d.lx = e.clientX;
+          d.lt = now;
+          yaw.set(d.yaw + (e.clientX - d.x) * 0.4);
+          pitch.set(Math.max(-60, Math.min(60, d.pitch + (e.clientY - d.y) * 0.3)));
+        }}
+        onPointerUp={() => {
+          const d = drag.current;
+          drag.current = null;
+          if (d) ctl.current = [animate(yaw, [yaw.get()], { type: "inertia", velocity: d.vx, power: 0.6, timeConstant: 700 })];
+        }}
+      />
+      <div className="flex max-w-[420px] flex-wrap justify-center gap-1.5">
+        {cities.map((c) => (
+          <motion.button
+            key={c.id}
+            type="button"
+            aria-pressed={active === c.id}
+            whileTap={{ scale: 0.94 }}
+            onClick={() => { touched.current = true; focus(c); }}
+            style={{ backgroundColor: active === c.id ? accent : "var(--dg-chip)", color: active === c.id ? "#ffffff" : "var(--dg-chip-ink)" }}
+            className="h-8 rounded-full px-3 text-[12px] font-medium shadow-[0_0_0_1px_rgba(0,0,0,.08)] transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] dark:focus-visible:outline-[#0a84ff]"
+          >
+            {c.name}
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
+
+--- components/dot-globe/index.ts ---
+
+```ts
+export { DotGlobe, DOT_GLOBE_CITIES, DOT_GLOBE_ROUTES } from "./dot-globe";
+export type { DotGlobeProps, DotGlobeCity } from "./dot-globe";
+```

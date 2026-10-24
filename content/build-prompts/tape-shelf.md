@@ -1,76 +1,224 @@
 # Tape Shelf
 
-Build a shelf of cassette cases seen spine-out in 3D. Hovering a spine slides it up out of the row; picking one swings the case round towards the viewer to show its cover with the reels turning, while the rest of the shelf parts and dims. A caption below rolls to "Now playing". The feel is tactile and nostalgic, with soft, slightly bouncy springs.
+Add the "Tape Shelf" component from Nexus UI to my project.
 
-## Stack
+Cassette cases stand spine-out on a tilted 3D shelf. Hovering slides one up; picking one swings it round to show its cover with the reels turning, while the rest of the shelf steps aside and dims.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `useReducedMotion`).
-- File: `components/tape-shelf/tape-shelf.tsx`, named export `TapeShelf`, plus the `ShelfTape` type and `DEFAULT_TAPES`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { TapeShelf, DEFAULT_TAPES } from "@/components/tape-shelf";`. The props are typed and documented in the code.
 
-`ShelfTape = { title: string; artist: string; color: string; ink: string }` (`color` paints the spine and cover label, `ink` is the text colour on them).
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-- `tapes?: ShelfTape[]`, default (title, artist, color, ink):
-  - Night Drive, Coastal Lines, `#ff6b4a`, `#fff`
-  - Paper Moons, Hollow Bay, `#ffd60a`, `#1d1d1f`
-  - Glass Garden, Mira Vale, `#30d158`, `#0b2814`
-  - Static Bloom, Tarn, `#0a84ff`, `#fff`
-  - Low Orbit, Kesh, `#bf5af2`, `#fff`
-  - Salt & Iron, Wren Atlas, `#e5e5ea`, `#1d1d1f`
-  - Afterglow, Juno Park, `#ff375f`, `#fff`
-- `onPick?: (index: number | null) => void`: called when the user picks a tape (index) or puts it back (`null`).
-- `autoplay?: boolean`, default `false`.
+--- components/tape-shelf/index.ts ---
 
-## Layout and look
+```ts
+export { TapeShelf, DEFAULT_TAPES } from "./tape-shelf";
+export type { TapeShelfProps, ShelfTape } from "./tape-shelf";
+```
 
-Constants: spine width `SPINE = 22`, gap `6`, case height `TH = 140`, cover width `CW · 1.6` where `CW = 92` (so 147.2px).
+--- components/tape-shelf/tape-shelf.tsx ---
 
-- Root: column, centred, 16px gap.
-- Scene: 420×250 (max-width 100%), relative, `perspective: 1000px`.
-- Row: absolutely positioned at `top 54px`, horizontally centred (`left 50%`, `margin-left = −rowW/2`), `rowW = n · 28`, height 140, `transform-style: preserve-3d`, `transform: rotateY(−18deg) rotateX(6deg)` so the shelf is seen at a slight angle from above-right.
-- Each case is a `motion.button` at `left = i · 28`, 22×140, `transform-style: preserve-3d`, origin x 50%. It holds two faces, both with `backface-visibility: hidden`:
-  - **Spine**: fills the button, radius 3px, background `color`, box-shadow `inset 0 0 0 1px rgba(0,0,0,.08), inset 2px 0 0 rgba(255,255,255,.35)`. The title runs vertically (rotated −90°), 10px bold uppercase, tracking 0.12em, colour `ink`, no wrapping.
-  - **Cover**: hinged on the spine's left edge: `left 0, top 0`, 147.2×140, `transform-origin: 0% 50%`, `transform: rotateY(90deg)`, radius 6px, background `#1d1d1f`, padding 10px, inset 1px `rgba(255,255,255,.12)`, column with `justify-between`. Inside: a 42px label block (radius 3px, padding-x 8px, background `color`, text `ink`) with the title (11px bold, tight leading) over the artist (9px, 80% opacity); a window 110×46, radius 23px, `#2c2c2e`, inset shadow `0 2px 6px rgba(0,0,0,.6)`, holding a reel, a 30×14 tape strip `#3a2a1c` (radius 3px) and a second reel; and a footer "Side A · 45 min", 8px semibold uppercase, tracking 0.2em, `rgba(255,255,255,.4)`, centred. The cover is a dark illustration surface in both themes.
-- **Reel**: 26×26 SVG: circle r 12 `#f5f5f7`, hub r 4 `#1d1d1f`, six spokes (2×5 rects, rx 1, at y 3, rotated every 60° around the centre) `#1d1d1f`.
-- Shelf shadow under the row: `left/right 40px`, `top 200px`, 12px tall, `radial-gradient(closest-side, rgba(0,0,0,.18), transparent)`; dark uses `.7` alpha.
-- Caption below: 300×40 box, overflow hidden, centred text. Idle: "Pick a tape from the shelf." 13px `#86868b` (dark `#8e8e93`). Picked: title 15px semibold `#1d1d1f` (dark `#f5f5f7`) over "Now playing · {artist}" 12px `#6e6e73` (dark `#a1a1a6`).
+```tsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 
-## Motion
+export interface ShelfTape {
+  title: string;
+  artist: string;
+  /** Spine and label colour. */
+  color: string;
+  /** Text colour on the spine and label. */
+  ink: string;
+}
 
-Every case animates with one spring: `stiffness 160, damping 20`, `initial={false}`.
+export const DEFAULT_TAPES: ShelfTape[] = [
+  { title: "Night Drive", artist: "Coastal Lines", color: "#ff6b4a", ink: "#fff" },
+  { title: "Paper Moons", artist: "Hollow Bay", color: "#ffd60a", ink: "#1d1d1f" },
+  { title: "Glass Garden", artist: "Mira Vale", color: "#30d158", ink: "#0b2814" },
+  { title: "Static Bloom", artist: "Tarn", color: "#0a84ff", ink: "#fff" },
+  { title: "Low Orbit", artist: "Kesh", color: "#bf5af2", ink: "#fff" },
+  { title: "Salt & Iron", artist: "Wren Atlas", color: "#e5e5ea", ink: "#1d1d1f" },
+  { title: "Afterglow", artist: "Juno Park", color: "#ff375f", ink: "#fff" },
+];
 
-- **Resting**: `x 0, y 0, z 0, rotateY 0, scale 1, opacity 1`.
-- **Hover lift** (only when nothing is picked): `y −18, z 8`.
-- **Picked**: `x = rowW/2 − i·28 − 147.2/2` (moves to the middle of the row), `y −16`, `z 150` (towards the viewer), `rotateY −84` (swings so the hinged cover faces you), `scale 1.05`, `opacity 1`. Because the cover sits at `rotateY(90deg)` on the spine's left edge, turning the case by −84° brings the cover almost square to the camera while the spine turns away.
-- **Others while one is picked**: shift `x −14` if left of the pick, `+14` if right, `opacity 0.55`, no lift.
-- **Reels** on the picked case rotate 360° continuously, 1.6s per turn, linear, infinite. When not picked they return to 0 over 0.4s. Under `prefers-reduced-motion` they do not spin.
-- **Caption**: `AnimatePresence mode="popLayout" initial={false}` keyed by the pick. Enter from `y 20, opacity 0, blur(4px)` to `y 0, opacity 1, blur(0)`; exit to `y −20, opacity 0, blur(4px)` (default spring).
+export interface TapeShelfProps {
+  /** Cases on the shelf, left to right. */
+  tapes?: ShelfTape[];
+  /** Called with the picked index, or null when the tape goes back. */
+  onPick?: (index: number | null) => void;
+  /** Pulls a few tapes out and puts them back until someone touches the shelf. */
+  autoplay?: boolean;
+}
 
-## Interaction and states
+const SPINE = 22;
+const GAP = 6;
+const TH = 140; // tape case height
+const CW = 92; // cover width (depth when shelved)
 
-- `pointerenter` / `focus` on a case sets hover; `pointerleave` / `blur` clears it.
-- Click toggles: picking a different case picks it, clicking the picked case puts it back (`null`). Call `onPick` on user picks.
-- Escape (anywhere in the component) puts the picked tape back.
-- If the picked index is out of range (tapes changed), treat it as nothing picked.
+function Reel({ spin }: { spin: boolean }) {
+  const reduce = useReducedMotion();
+  const turning = spin && !reduce;
+  return (
+    <motion.svg
+      width="26"
+      height="26"
+      viewBox="0 0 26 26"
+      animate={turning ? { rotate: 360 } : { rotate: 0 }}
+      transition={turning ? { duration: 1.6, repeat: Infinity, ease: "linear" } : { duration: 0.4 }}
+      aria-hidden="true"
+    >
+      <circle cx="13" cy="13" r="12" fill="#f5f5f7" />
+      <circle cx="13" cy="13" r="4" fill="#1d1d1f" />
+      {[0, 60, 120, 180, 240, 300].map((a) => (
+        <rect key={a} x="12" y="3" width="2" height="5" rx="1" fill="#1d1d1f" transform={`rotate(${a} 13 13)`} />
+      ))}
+    </motion.svg>
+  );
+}
 
-## Autoplay demo
+/**
+ * A shelf of cassette cases seen spine-on. Hover slides one up; pick one and it
+ * swings out to show its cover with the reels turning, while the shelf behind
+ * steps back.
+ */
+export function TapeShelf({ tapes = DEFAULT_TAPES, onPick, autoplay = false }: TapeShelfProps) {
+  const [hover, setHover] = useState<number | null>(null);
+  const [pick, setPickState] = useState<number | null>(null);
+  const touched = useRef(false);
+  const n = tapes.length;
 
-With `autoplay`, every 1800ms step through the sequence `[2, null, 5, null, 0, null]` (each index taken modulo the tape count) and set the pick. Any `pointerdown` or `keydown` inside the component marks it touched; the next tick clears the interval.
+  const setPick = (i: number | null) => {
+    setPickState(i);
+    onPick?.(i);
+  };
 
-## Accessibility
+  useEffect(() => {
+    if (!autoplay || n === 0) return;
+    let k = 0;
+    const seq = [2, null, 5, null, 0, null];
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      const s = seq[k++ % seq.length];
+      setPickState(s === null ? null : s % n);
+    }, 1800);
+    return () => clearInterval(t);
+  }, [autoplay, n]);
 
-- Each case is a `<button type="button">` with `aria-pressed` (picked) and `aria-label` "{title} by {artist}".
-- Focus: no default outline; a 2px `#0071e3` ring on `:focus-visible` (dark `#0a84ff`). Focusing a case lifts it like hover.
-- The caption container is `aria-live="polite"`. Reels and the shadow are `aria-hidden`.
+  const rowW = n * (SPINE + GAP);
+  const picked = pick !== null && pick < n ? pick : null;
 
-## Acceptance checklist
-
-- [ ] Seven coloured spines stand in a row tilted about 18° with vertical titles.
-- [ ] Hovering or tabbing to a spine slides it up 18px with a soft spring.
-- [ ] Picking a spine swings it to the centre and towards you, revealing a dark cover with the coloured label, two reels and "Side A · 45 min".
-- [ ] The reels turn steadily while it is picked (not with reduced motion).
-- [ ] The other spines part by 14px either side and dim to 55%.
-- [ ] Clicking the picked case or pressing Escape returns it to its slot.
-- [ ] The caption blurs and rolls between "Pick a tape from the shelf." and "Now playing · artist".
-- [ ] Autoplay pulls out tapes 3, 6 and 1 in turn and stops after the first interaction.
+  return (
+    <div
+      className="flex flex-col items-center gap-4"
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      onKeyDown={(e) => {
+        touched.current = true;
+        if (e.key === "Escape" && picked !== null) setPick(null);
+      }}
+    >
+      <div className="relative h-[250px] w-[420px] max-w-full" style={{ perspective: 1000 }}>
+        <div
+          className="absolute left-1/2 top-[54px]"
+          style={{ width: rowW, marginLeft: -rowW / 2, height: TH, transformStyle: "preserve-3d", transform: "rotateY(-18deg) rotateX(6deg)" }}
+        >
+          {tapes.map((t, i) => {
+            const isPick = picked === i;
+            const lifted = hover === i && picked === null;
+            const spread = picked !== null && !isPick ? (i < picked ? -14 : 14) : 0;
+            return (
+              <motion.button
+                key={`${t.title}-${i}`}
+                type="button"
+                aria-pressed={isPick}
+                aria-label={`${t.title} by ${t.artist}`}
+                onPointerEnter={() => setHover(i)}
+                onPointerLeave={() => setHover(null)}
+                onFocus={() => setHover(i)}
+                onBlur={() => setHover(null)}
+                onClick={() => {
+                  touched.current = true;
+                  setPick(isPick ? null : i);
+                }}
+                className="absolute top-0 outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
+                style={{ left: i * (SPINE + GAP), width: SPINE, height: TH, transformStyle: "preserve-3d", originX: 0.5 }}
+                initial={false}
+                animate={
+                  isPick
+                    ? { x: rowW / 2 - i * (SPINE + GAP) - (CW * 1.6) / 2, y: -16, z: 150, rotateY: -84, scale: 1.05, opacity: 1 }
+                    : { x: spread, y: lifted ? -18 : 0, z: lifted ? 8 : 0, rotateY: 0, scale: 1, opacity: picked !== null ? 0.55 : 1 }
+                }
+                transition={{ type: "spring", stiffness: 160, damping: 20 }}
+              >
+                {/* spine */}
+                <span
+                  className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-[3px]"
+                  style={{ background: t.color, boxShadow: "inset 0 0 0 1px rgba(0,0,0,.08), inset 2px 0 0 rgba(255,255,255,.35)", backfaceVisibility: "hidden" }}
+                >
+                  <span className="whitespace-nowrap text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: t.ink, transform: "rotate(-90deg)" }}>
+                    {t.title}
+                  </span>
+                </span>
+                {/* cover, hinged on the spine's left edge */}
+                <span
+                  className="absolute top-0 flex flex-col justify-between overflow-hidden rounded-[6px] bg-[#1d1d1f] p-2.5"
+                  style={{
+                    width: CW * 1.6,
+                    height: TH,
+                    left: 0,
+                    transformOrigin: "0% 50%",
+                    transform: "rotateY(90deg)",
+                    backfaceVisibility: "hidden",
+                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,.12)",
+                  }}
+                >
+                  <span className="flex h-[42px] flex-col justify-center rounded-[3px] px-2" style={{ background: t.color, color: t.ink }}>
+                    <span className="text-[11px] font-bold leading-tight">{t.title}</span>
+                    <span className="text-[9px] opacity-80">{t.artist}</span>
+                  </span>
+                  <span className="mx-auto flex h-[46px] w-[110px] items-center justify-between rounded-[23px] bg-[#2c2c2e] px-2.5 shadow-[inset_0_2px_6px_rgba(0,0,0,.6)]">
+                    <Reel spin={isPick} />
+                    <span className="h-[14px] w-[30px] rounded-[3px] bg-[#3a2a1c]" />
+                    <Reel spin={isPick} />
+                  </span>
+                  <span className="text-center text-[8px] font-semibold uppercase tracking-[0.2em] text-white/40">Side A · 45 min</span>
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+        <div
+          className="absolute inset-x-10 top-[200px] h-3 rounded-full bg-[radial-gradient(closest-side,rgba(0,0,0,.18),rgba(0,0,0,0))] dark:bg-[radial-gradient(closest-side,rgba(0,0,0,.7),rgba(0,0,0,0))]"
+          aria-hidden="true"
+        />
+      </div>
+      <div className="relative h-10 w-[300px] max-w-full overflow-hidden text-center" aria-live="polite">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={picked ?? "none"}
+            initial={{ y: 20, opacity: 0, filter: "blur(4px)" }}
+            animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+            exit={{ y: -20, opacity: 0, filter: "blur(4px)" }}
+            className="flex flex-col"
+          >
+            {picked === null ? (
+              <span className="text-[13px] text-[#86868b] dark:text-[#8e8e93]">Pick a tape from the shelf.</span>
+            ) : (
+              <>
+                <span className="text-[15px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">{tapes[picked].title}</span>
+                <span className="text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">Now playing · {tapes[picked].artist}</span>
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+```

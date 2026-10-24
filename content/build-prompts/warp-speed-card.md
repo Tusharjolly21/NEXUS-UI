@@ -1,67 +1,282 @@
-Build a headline card where one phrase has a hyperdrive. The phrase sits inside a thin "selection box" with four little corner handles, like a design-tool selection. Hover, focus or tap it and a starfield inside its box spools up on a spring: the box darkens to deep space, stars stretch into streaks as speed builds and overshoot into the jump, the text turns white, and the phrase squashes and stretches with the kick. Let go and it drops out of warp with a sideways jolt. Ship two pieces: the card and the phrase trigger.
+Add the "Warp Speed Card" component from Nexus UI to my project.
 
-## Stack
+Wrap a phrase in a headline to give it a hyperdrive: hover, focus or tap it and a starfield inside its box spools up on a spring, stretching stars into streaks as speed builds. The phrase squashes and stretches on the kick and drops out of warp with a jolt when you let go.
 
-- React client components (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useSpring`, `useTransform`, `useReducedMotion`), a 2D `<canvas>`, and a `cn` class-merge helper.
-- File: `components/warp-speed-card/warp-speed-card.tsx`, named exports `WarpSpeedCard` and `WarpTextTrigger`, types `WarpSpeedCardProps` and `WarpTextTriggerProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { WarpSpeedCard, WarpTextTrigger } from "@/components/warp-speed-card";`. The props are typed and documented in the code.
 
-`WarpSpeedCard`: `children: ReactNode` (usually a heading containing a trigger), `className?` (card), `contentClassName?` (inner relative wrapper).
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-`WarpTextTrigger`:
+--- components/warp-speed-card/index.ts ---
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `children` | `ReactNode` | – | The phrase. |
-| `className` | `string` | – | Classes for the phrase box. |
-| `beamColor` | `string` | `"255,255,255"` | Star colour as an "r,g,b" triplet. |
-| `onWarpChange` | `(warping: boolean) => void` | – | `true` when the jump starts, `false` when it drops out. |
-| `autoplay` | `boolean` | `false` | Jumps every few seconds until the phrase is hovered, focused or tapped. |
+```ts
+export { WarpSpeedCard, WarpTextTrigger } from "./warp-speed-card";
+export type { WarpSpeedCardProps, WarpTextTriggerProps } from "./warp-speed-card";
+```
 
-Usage: a centred `<h2>` "Build amazing websites<br/>at <WarpTextTrigger>warp speed</WarpTextTrigger>" inside the card with padding 56px × 24px, 36px (40px from `sm`), semibold, leading 1.14, tracking −0.035em.
+--- components/warp-speed-card/warp-speed-card.tsx ---
 
-## Layout and look
+```tsx
+"use client";
 
-- Card: relative, `overflow: hidden`, radius 24, white, text `#1d1d1f`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)`; dark `#1c1c1e`, `#f5f5f7`, `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.8)`.
-- Trigger: a span, `inline-block`, baseline-aligned, `white-space: nowrap`, no selection, default cursor, focus ring 2px `#0071e3` (dark `#0a84ff`) with 4px offset (dark offset colour `#1c1c1e`).
-- Space layer (behind the text, aria-hidden): extends 8px left/right and 4px up/down, radius 6, `overflow: hidden`. Contains a background `radial-gradient(120% 120% at 50% 50%, #1c1c3a 0%, #05050a 70%)` with opacity = `space`, and the canvas filling it.
-- Text: the phrase in its normal colour, plus an absolutely stacked white copy (aria-hidden) whose opacity = `space`, so the phrase cross-fades to white as the box goes dark.
-- Selection frame (on top, same −8/−4 inset, aria-hidden): a 1px border at 60% opacity, radius 6, and four 7×7 handles at the corners (offset −4px), radius 2, 1.5px border, filled white (dark `#1c1c1e`). The border and handle colour interpolate from `#0071e3` at rest to `#8e8e93` while warping.
+import * as React from "react";
+import { animate, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-## Motion
+export interface WarpSpeedCardProps {
+  children: React.ReactNode;
+  className?: string;
+  contentClassName?: string;
+}
 
-- Engagement: `target` 0/1 → `speed = useSpring(target, stiffness 70, damping 11, mass 1)` (it overshoots past 1 on the way in and dips below 0 on the way out). `space = clamp(speed × 2.2, 0, 1)`, so the box goes dark quickly at the start of the spool.
-- Kick on engage: `animate(scaleX, 1, spring 420/11, velocity 2.2)` and `animate(scaleY, 1, spring 420/11, velocity −2.2)`. The phrase stretches wide and flat and wobbles back.
-- Drop out: `animate(jolt, 0, spring 500/9, velocity −140)` on the phrase's x. It lurches left and shakes back.
-- Starfield: 140 stars with deterministic positions from a seeded Park–Miller generator (`seed = seed × 16807 mod 2147483647`, start 11): x, y in −1…1, z in 0.1…1. Canvas sized to the box with DPR ≤ 2 (ResizeObserver). Each frame (dt ≤ 50ms):
-  - `v = max(0, speed)`, focal `f = max(w, h) × 0.5`, centre (w/2, h/2).
-  - Advance `z −= (0.08 + v × 2.6) × dt` (× 0.4 instead of 2.6 under reduced motion). When `z ≤ 0.02`, respawn at a new random x, y with z = 1 and skip drawing it this frame.
-  - Head: `(cx + x/z × f × 0.5, cy + y/z × f × 0.5)`. Tail: same with `tail = min(z_previous + v × 0.22, 1.2)` in place of z. Higher speed means longer streaks.
-  - Alpha `min(1, (1 − z) × 1.4) × min(1, 0.35 + v)`, line width `max(0.6, (1 − z) × 1.8)`, round caps, stroke `rgba(beamColor, alpha)`.
-  - Keep looping while engaged or `|v| > 0.002`; otherwise clear and sleep. Engaging wakes the loop.
+/** The card the phrase lives in: a plain Motion Kit surface. */
+export function WarpSpeedCard({ children, className, contentClassName }: WarpSpeedCardProps) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-[24px] bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
+        className,
+      )}
+    >
+      <div className={cn("relative", contentClassName)}>{children}</div>
+    </div>
+  );
+}
 
-## Interaction and states
+export interface WarpTextTriggerProps {
+  children: React.ReactNode;
+  className?: string;
+  /** Star colour as an "r,g,b" triplet. */
+  beamColor?: string;
+  /** Called with true when the jump starts and false when it drops out. */
+  onWarpChange?: (warping: boolean) => void;
+  /** Makes a jump every few seconds until someone hovers, focuses or taps the phrase. */
+  autoplay?: boolean;
+}
 
-- Mouse: pointerenter engages, pointerleave disengages. Touch/pen: pointerdown toggles. Focus engages, blur disengages. Enter/Space toggles (with `preventDefault`). Any of these marks the trigger touched (ends autoplay).
-- Engaging when already in that state does nothing. On change, update `aria-pressed` directly on the element and call `onWarpChange`.
-- Reduced motion: no squash/stretch or jolt; stars drift slowly; the dark box and white text still fade in so the state is visible.
-- Clean up the ResizeObserver, frame and timers on unmount.
+const STARS = 140;
 
-## Autoplay demo
+/**
+ * Wrap a phrase to give it a hyperdrive. Hover, focus or tap it and a starfield inside its box
+ * spools up on a spring: stars stretch into streaks as speed builds, overshoot into the jump, and
+ * the phrase squashes and stretches with the kick. Let go and it drops out of warp with a jolt.
+ */
+export function WarpTextTrigger({ children, className, beamColor = "255,255,255", onWarpChange, autoplay = false }: WarpTextTriggerProps) {
+  const still = useReducedMotion() === true;
+  const box = React.useRef<HTMLSpanElement>(null);
+  const canvas = React.useRef<HTMLCanvasElement>(null);
+  const touched = React.useRef(false);
+  const on = React.useRef(false);
+  const wake = React.useRef<() => void>(() => {});
+  const changed = React.useRef(onWarpChange);
+  React.useEffect(() => {
+    changed.current = onWarpChange;
+  }, [onWarpChange]);
 
-800ms after mount, engage; disengage 1.7s later. Repeat every 4s. Stop as soon as the user hovers, focuses or taps the phrase.
+  const target = useMotionValue(0);
+  const speed = useSpring(target, { stiffness: 70, damping: 11, mass: 1 });
+  const space = useTransform(speed, (v) => Math.max(0, Math.min(1, v * 2.2)));
+  const sx = useMotionValue(1);
+  const sy = useMotionValue(1);
+  const jolt = useMotionValue(0);
+  const handle = useTransform(space, [0, 1], ["#0071e3", "#8e8e93"]);
 
-## Accessibility
+  const engage = React.useCallback(
+    (next: boolean) => {
+      if (on.current === next) return;
+      on.current = next;
+      box.current?.setAttribute("aria-pressed", String(next));
+      changed.current?.(next);
+      target.set(next ? 1 : 0);
+      wake.current();
+      if (still) return;
+      if (next) {
+        // Squash and stretch on the kick: velocity impulses into stiff springs.
+        animate(sx, 1, { type: "spring", stiffness: 420, damping: 11, velocity: 2.2 });
+        animate(sy, 1, { type: "spring", stiffness: 420, damping: 11, velocity: -2.2 });
+      } else {
+        animate(jolt, 0, { type: "spring", stiffness: 500, damping: 9, velocity: -140 });
+      }
+    },
+    [target, sx, sy, jolt, still],
+  );
 
-- The trigger is `role="button"`, `tabIndex 0`, `aria-pressed` reflecting warp state. Space layer, canvas, the white duplicate and the selection frame are `aria-hidden`, so the phrase is read once.
+  // The starfield. Stars live in 3D; each frame they fly toward the viewer at the current speed and are
+  // drawn as streaks from where they were to where they are. The loop sleeps once speed drops to zero.
+  React.useEffect(() => {
+    const el = canvas.current;
+    const host = box.current;
+    if (!el || !host) return;
+    const ctx = el.getContext("2d");
+    if (!ctx) return;
+    let seed = 11;
+    const rnd = () => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    const stars = Array.from({ length: STARS }, () => ({ x: rnd() * 2 - 1, y: rnd() * 2 - 1, z: rnd() * 0.9 + 0.1 }));
+    let w = 0;
+    let h = 0;
+    const size = () => {
+      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = host.clientWidth;
+      h = host.clientHeight;
+      el.width = Math.round(w * dpr);
+      el.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+    const ro = new ResizeObserver(size);
+    ro.observe(host);
+    let raf = 0;
+    let last = 0;
+    const frame = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now;
+      const v = Math.max(0, speed.get());
+      ctx.clearRect(0, 0, w, h);
+      const cx = w / 2;
+      const cy = h / 2;
+      const f = Math.max(w, h) * 0.5;
+      const dz = (0.08 + v * (still ? 0.4 : 2.6)) * dt;
+      ctx.lineCap = "round";
+      for (const s of stars) {
+        const z0 = s.z;
+        s.z -= dz;
+        if (s.z <= 0.02) {
+          s.x = rnd() * 2 - 1;
+          s.y = rnd() * 2 - 1;
+          s.z = 1;
+          continue;
+        }
+        const x1 = cx + (s.x / s.z) * f * 0.5;
+        const y1 = cy + (s.y / s.z) * f * 0.5;
+        const tail = Math.min(z0 + v * 0.22, 1.2);
+        const x0 = cx + (s.x / tail) * f * 0.5;
+        const y0 = cy + (s.y / tail) * f * 0.5;
+        const a = Math.min(1, (1 - s.z) * 1.4) * Math.min(1, 0.35 + v);
+        ctx.strokeStyle = `rgba(${beamColor},${a.toFixed(3)})`;
+        ctx.lineWidth = Math.max(0.6, (1 - s.z) * 1.8);
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+      }
+      const awake = on.current || Math.abs(v) > 0.002;
+      raf = awake ? requestAnimationFrame(frame) : 0;
+      if (!awake) {
+        last = 0;
+        ctx.clearRect(0, 0, w, h);
+      }
+    };
+    wake.current = () => {
+      if (!raf) raf = requestAnimationFrame(frame);
+    };
+    return () => {
+      ro.disconnect();
+      cancelAnimationFrame(raf);
+      wake.current = () => {};
+    };
+  }, [speed, beamColor, still]);
 
-## Acceptance checklist
+  React.useEffect(() => {
+    if (!autoplay) return;
+    let off: ReturnType<typeof setTimeout> | undefined;
+    const jump = () => {
+      if (touched.current) return;
+      engage(true);
+      off = setTimeout(() => {
+        if (!touched.current) engage(false);
+      }, 1700);
+    };
+    const first = setTimeout(jump, 800);
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      jump();
+    }, 4000);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+      if (off) clearTimeout(off);
+    };
+  }, [autoplay, engage]);
 
-- At rest "warp speed" sits in a blue hairline box with four white corner handles.
-- Hovering darkens the box to deep space, turns the text white and stretches stars into streaks from the centre outward.
-- The phrase visibly squashes and stretches on engage; leaving makes it jolt sideways as the stars slow down and fade.
-- Speed overshoots: streaks briefly get longer than their resting warp length right after the jump.
-- Tapping toggles on touch; Enter/Space toggle on keyboard; `onWarpChange` fires both ways.
-- The canvas loop stops when idle.
-- Autoplay jumps every 4s until first interaction; dark mode recolours the card and handles.
+  const take = () => {
+    touched.current = true;
+  };
+
+  return (
+    <span
+      ref={box}
+      role="button"
+      tabIndex={0}
+      aria-pressed={false}
+      className={cn(
+        "relative inline-block cursor-default select-none whitespace-nowrap align-baseline outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]",
+        className,
+      )}
+      onPointerEnter={(e) => {
+        take();
+        if (e.pointerType === "mouse") engage(true);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse") engage(false);
+      }}
+      onPointerDown={(e) => {
+        take();
+        if (e.pointerType !== "mouse") engage(!on.current);
+      }}
+      onFocus={() => {
+        take();
+        engage(true);
+      }}
+      onBlur={() => engage(false)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          take();
+          engage(!on.current);
+        }
+      }}
+    >
+      <span className="pointer-events-none absolute -inset-x-2 -inset-y-1 overflow-hidden rounded-[6px]" aria-hidden="true">
+        <motion.span className="absolute inset-0 block bg-[radial-gradient(120%_120%_at_50%_50%,#1c1c3a_0%,#05050a_70%)]" style={{ opacity: space }} />
+        <canvas ref={canvas} className="absolute inset-0 h-full w-full" />
+      </span>
+      <motion.span className="relative inline-block" style={{ x: jolt }}>
+        <motion.span className="relative inline-block" style={{ scaleX: sx, scaleY: sy }}>
+          <span>{children}</span>
+          <motion.span aria-hidden="true" className="absolute inset-0 text-white" style={{ opacity: space }}>
+            {children}
+          </motion.span>
+        </motion.span>
+      </motion.span>
+      <span className="pointer-events-none absolute -inset-x-2 -inset-y-1" aria-hidden="true">
+        <motion.span className="absolute inset-0 rounded-[6px] border" style={{ borderColor: handle, opacity: 0.6 }} />
+        {(["-left-[4px] -top-[4px]", "-right-[4px] -top-[4px]", "-left-[4px] -bottom-[4px]", "-right-[4px] -bottom-[4px]"] as const).map((pos) => (
+          <motion.span key={pos} className={cn("absolute size-[7px] rounded-[2px] border-[1.5px] bg-white dark:bg-[#1c1c1e]", pos)} style={{ borderColor: handle }} />
+        ))}
+      </span>
+    </span>
+  );
+}
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

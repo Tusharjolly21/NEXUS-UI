@@ -1,67 +1,172 @@
 # Particle Mark
 
-Build a word drawn as a few hundred small dots on a rounded card. The dots fly in from a scatter on mount and settle into the letters. When the pointer brushes through them they scatter away from it and spring back home behind it, warming from near-black to an accent colour the further they are pushed. Click anywhere and a circular shockwave throws them outward before they gather again. The feel is lively and elastic, like iron filings on springs.
+Add the "Particle Mark" component from Nexus UI to my project.
 
-## Stack
+A word drawn as a few hundred dots that scatter away from the pointer and spring home, warming to the accent colour the further they are pushed. Click anywhere for a shockwave.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS. One 2D `<canvas>` driven by `requestAnimationFrame`; no animation library is needed.
-- File: `components/particle-mark/particle-mark.tsx`, named export `ParticleMark`, plus exported `ParticleMarkProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { ParticleMark } from "@/components/particle-mark";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `text` | `string` | `"motion"` | The word drawn in dots; long words are shrunk to fit. |
-| `accent` | `string` | `"#0071e3"` | Hex colour (3 or 6 digits) dots warm toward when displaced. |
-| `hint` | `string` | `"Brush through the dots. Click for a shockwave."` | Caption under the canvas; empty string hides it. |
-| `autoplay` | `boolean` | `false` | Invisible pointer loop with periodic shockwaves until someone points at it. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/particle-mark/index.ts ---
 
-- Root: column, items centred, 12px gap.
-- Canvas: logical size 440×240, rendered `width: 440px; max-width: 100%; aspect-ratio: 440 / 240`, radius 24px, white with shadow `0 0 0 1px rgba(0,0,0,.05)` (dark `#1c1c1e`, `0 0 0 1px rgba(255,255,255,.08)`), `cursor: pointer`, `touch-action: none`. Backing store 440×240 × DPR (cap 2), context scaled by DPR. Map pointer positions back into 440×240 using the bounding rect.
-- Caption: 13px `#86868b` (dark `#8e8e93`).
+```ts
+export { ParticleMark } from "./particle-mark";
+export type { ParticleMarkProps } from "./particle-mark";
+```
 
-## Sampling the word
+--- components/particle-mark/particle-mark.tsx ---
 
-- Draw `text` on an offscreen 440×240 canvas: black, centred, middle baseline, at `(220, 126)` (6px below centre), font `700 {size}px -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif`.
-- Start at 150px and shrink by 6px while the measured width exceeds 400px (and size stays above 40).
-- Read the pixels; every 5px on both axes where alpha > 128 becomes a particle with home `(hx, hy)`. Its starting position is home plus a random offset in −150…150 on each axis, velocity 0, so the word assembles itself on mount.
+```tsx
+"use client";
+import { useEffect, useRef, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from "react";
 
-## Motion
+export interface ParticleMarkProps {
+  /** The word drawn in dots. Long words are shrunk to fit. */
+  text?: string;
+  /** Colour the dots warm to as they are pushed away from home (hex). */
+  accent?: string;
+  /** Line under the canvas. Pass an empty string to hide it. */
+  hint?: string;
+  /** An invisible pointer loops through the word, with a shockwave every few seconds, until someone points at it. */
+  autoplay?: boolean;
+}
 
-Each frame (`t += 0.016`), for every particle:
+const W = 440, H = 240;
 
-1. **Home spring**: `vx += (hx − x)·0.045`, `vy += (hy − y)·0.045`.
-2. **Pointer repulsion**: if the pointer is within 70px, `f = (70 − d)/70` and push along the unit vector away from it: `v += unit·f·6`.
-3. **Shockwaves**: each wave is `{ x, y, r }`; `r` grows by 9px per frame and the wave is dropped at 520. A particle whose distance from the wave centre is within 14px of `r` gets `v += unit·9` outward.
-4. **Damping**: `v *= 0.82`; then `x += vx`, `y += vy`.
-5. **Colour and size**: `away = min(1, distance from home / 40)`. Colour = lerp from the ink to the accent by `away`; radius = `1.9 + away·0.8`. Ink is `rgb(29,29,31)` in light mode and `rgb(245,245,247)` in dark mode. Detect dark mode by checking for a `dark` class on `document.documentElement`, kept current by a `MutationObserver` on its `class` attribute, and read the flag every frame.
+function parseHex(hex: string): [number, number, number] {
+  let h = hex.replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h.slice(0, 6), 16);
+  if (Number.isNaN(n)) return [0, 113, 227];
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
 
-Clear the canvas every frame. Rebuild everything when `text`, `accent` or `autoplay` changes; cancel the frame on unmount.
+/**
+ * A word drawn as a few hundred dots. They scatter away from the pointer and
+ * spring home behind it, warming to the accent colour the further they are
+ * pushed. Press anywhere and a shockwave throws them out before they gather
+ * again.
+ */
+export function ParticleMark({ text = "motion", accent = "#0071e3", hint = "Brush through the dots. Click for a shockwave.", autoplay = false }: ParticleMarkProps) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const ptr = useRef<{ x: number; y: number } | null>(null);
+  const waves = useRef<{ x: number; y: number; r: number }[]>([]);
+  const touched = useRef(false);
+  const dark = useRef(false);
 
-## Interaction and states
+  // Track the site theme so resting dots are drawn in the right ink.
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => { dark.current = root.classList.contains("dark"); };
+    update();
+    const mo = new MutationObserver(update);
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => mo.disconnect();
+  }, []);
 
-- `pointermove`: mark touched, store the pointer.
-- `pointerdown`: mark touched, add a wave at the pointer with `r = 0`.
-- `pointerleave`: clear the pointer so the dots return home.
-- Keyboard: the canvas is focusable; Enter or Space (default prevented) marks touched and fires a wave from the centre.
+  useEffect(() => {
+    const c = canvas.current;
+    const ctx = c?.getContext("2d");
+    if (!c || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    c.width = W * dpr; c.height = H * dpr;
+    ctx.scale(dpr, dpr);
 
-## Autoplay demo
+    // Sample the word into home positions.
+    const off = document.createElement("canvas");
+    off.width = W; off.height = H;
+    const o = off.getContext("2d", { willReadFrequently: true });
+    if (!o) return;
+    o.fillStyle = "#000";
+    o.textAlign = "center";
+    o.textBaseline = "middle";
+    const font = (px: number) => `700 ${px}px -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif`;
+    let size = 150;
+    o.font = font(size);
+    while (o.measureText(text).width > W - 40 && size > 40) { size -= 6; o.font = font(size); }
+    o.fillText(text, W / 2, H / 2 + 6);
+    const data = o.getImageData(0, 0, W, H).data;
+    const pts: { hx: number; hy: number; x: number; y: number; vx: number; vy: number }[] = [];
+    const step = 5;
+    for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) {
+      if (data[(y * W + x) * 4 + 3] > 128) pts.push({ hx: x, hy: y, x: x + (Math.random() - 0.5) * 300, y: y + (Math.random() - 0.5) * 300, vx: 0, vy: 0 });
+    }
 
-While `autoplay` is on and nothing has touched the canvas, the pointer follows `x = 220 + cos(t·0.7)·190`, `y = 120 + sin(t·1.4)·105` (a wide figure-eight through the word), and a wave fires from the centre whenever more than 4.5s of `t` has passed since the last one. The first real pointer move, press or key hands over control for good.
+    const [ar, ag, ab] = parseHex(accent);
+    let raf = 0, t = 0, lastWave = 0;
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      t += 0.016;
+      let p = ptr.current;
+      if (autoplay && !touched.current) {
+        p = { x: W / 2 + Math.cos(t * 0.7) * 190, y: H / 2 + Math.sin(t * 1.4) * 105 };
+        if (t - lastWave > 4.5) { lastWave = t; waves.current.push({ x: W / 2, y: H / 2, r: 0 }); }
+      }
+      for (const w of waves.current) w.r += 9;
+      waves.current = waves.current.filter((w) => w.r < 520);
+      // Resting ink: #1d1d1f in light, #f5f5f7 in dark.
+      const [ir, ig, ib] = dark.current ? [245, 245, 247] : [29, 29, 31];
+      ctx.clearRect(0, 0, W, H);
+      for (const q of pts) {
+        // Spring toward home.
+        q.vx += (q.hx - q.x) * 0.045; q.vy += (q.hy - q.y) * 0.045;
+        // Pushed away from the pointer inside 70px, harder the closer it is.
+        if (p) {
+          const dx = q.x - p.x, dy = q.y - p.y, d2 = dx * dx + dy * dy;
+          if (d2 < 70 * 70) { const d = Math.sqrt(d2) || 1, f = (70 - d) / 70; q.vx += (dx / d) * f * 6; q.vy += (dy / d) * f * 6; }
+        }
+        // A shockwave ring kicks every dot within 14px of its edge outward.
+        for (const w of waves.current) {
+          const dx = q.x - w.x, dy = q.y - w.y, d = Math.hypot(dx, dy) || 1;
+          if (Math.abs(d - w.r) < 14) { q.vx += (dx / d) * 9; q.vy += (dy / d) * 9; }
+        }
+        q.vx *= 0.82; q.vy *= 0.82;
+        q.x += q.vx; q.y += q.vy;
+        const away = Math.min(1, Math.hypot(q.x - q.hx, q.y - q.hy) / 40);
+        ctx.fillStyle = `rgb(${Math.round(ir + (ar - ir) * away)},${Math.round(ig + (ag - ig) * away)},${Math.round(ib + (ab - ib) * away)})`;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, 1.9 + away * 0.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    };
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [text, accent, autoplay]);
 
-## Accessibility
+  const local = (e: RPointerEvent<HTMLCanvasElement>) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
+  };
 
-- `role="button"`, `tabIndex={0}`, `aria-label="The word {text} made of dots. Press to send a shockwave through it."`. Focus-visible 2px ring `#0071e3` (dark `#0a84ff`).
+  const onKey = (e: RKeyboardEvent<HTMLCanvasElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    touched.current = true;
+    waves.current.push({ x: W / 2, y: H / 2, r: 0 });
+  };
 
-## Acceptance checklist
-
-- [ ] On mount the dots fly in from a scatter and settle into the word in under a second.
-- [ ] Brushing through the letters parts the dots around the pointer and they spring back behind it.
-- [ ] Displaced dots tint toward the accent and grow slightly; settled dots are near-black (near-white in dark mode).
-- [ ] Clicking sends a visible ring that pushes dots outward as it passes, then they regroup.
-- [ ] A long word shrinks to fit within 400px.
-- [ ] The canvas scales down with its container without stretching, and the pointer still lines up.
-- [ ] Enter or Space on the focused canvas fires a shockwave.
-- [ ] Autoplay loops a figure-eight with a wave every 4.5s and stops on the first real input.
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <canvas
+        ref={canvas}
+        className="cursor-pointer touch-none rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05)] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)] dark:focus-visible:ring-[#0a84ff]"
+        style={{ width: W, maxWidth: "100%", aspectRatio: `${W} / ${H}` }}
+        onPointerMove={(e) => { touched.current = true; ptr.current = local(e); }}
+        onPointerDown={(e) => { touched.current = true; waves.current.push({ ...local(e), r: 0 }); }}
+        onPointerLeave={() => { ptr.current = null; }}
+        onKeyDown={onKey}
+        tabIndex={0}
+        role="button"
+        aria-label={`The word ${text} made of dots. Press to send a shockwave through it.`}
+      />
+      {hint ? <span className="text-[13px] text-[#86868b] dark:text-[#8e8e93]">{hint}</span> : null}
+    </div>
+  );
+}
+```

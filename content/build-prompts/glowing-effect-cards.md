@@ -1,135 +1,490 @@
-Build a set of feature cards with pointer-reactive glowing rims. Each card has a hairline border that lights up with a short multicolour arc on the side nearest the pointer, plus a soft blurred bloom outside it. The lit arc chases the pointer round the edge on a loose spring, so it swings past and settles; neighbouring cards catch the light as the pointer approaches them, and pressing a card flares it. Ship three layers: a generic wrapper, a ready-made feature card, and a five-card 2-1-2 grid.
+Add the "Glowing Effect Cards" component from Nexus UI to my project.
 
-## Stack
+Cards wrapped in a hairline rim that lights up on the side nearest the pointer: the lit arc chases the pointer round the edge on a spring, neighbouring cards catch the light as the pointer nears them, and a press flares it. Ships as GlowingEffect (wrap anything), GlowingCard (icon, title, line, call to action) and GlowingCardsLayout (a 2-1-2 grid that stacks by container width). Also includes Lit Border: A wrapper for any element: <LitBorder> draws a thin border whose light band turns to face the pointer and brightens as it gets closer. Put several inside <LightGroup> and they share one light, shown here on pricing cards and a search field.
 
-- React client components (`"use client"`), TypeScript, Tailwind CSS v4 with container queries (`@container`, `@[480px]:`), framer-motion (`animate`, `motion`, `useMotionTemplate`, `useMotionValue`, `useMotionValueEvent`, `useReducedMotion`, `useSpring`, `useTransform`).
-- Folder `components/glowing-effect-cards/`: `GlowingEffect.tsx` (`GlowingEffect`, `GlowingEffectProps`, `GlowPointerContext`), `GlowingCard.tsx` (`GlowingCard`, `GlowingCardProps`), `GlowingCardsLayout.tsx` (`GlowingCardsLayout`, `GlowingCardsLayoutProps`, `DEFAULT_GLOW_CARDS`), `index.ts` re-exporting all.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { GlowingCard } from "@/components/glowing-effect-cards/GlowingCard";`. The props are typed and documented in the code.
 
-`GlowingEffect`:
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `children` | `ReactNode` | required | Content. |
-| `className` | `string` | `""` | Wrapper classes. |
-| `glowColor` | `string` | — | Replaces only the first colour. |
-| `colors` | `string[]` | `#5ac8fa, #0a84ff, #bf5af2, #ff375f, #ff9f0a` | Arc colours tail to head. |
-| `borderRadius` | `string` | `"22px"` | Radius. |
-| `disabled` | `boolean` | `false` | No light. |
-| `intensity` | `number` | `1` | Clamped 0.5-2; rim thickness = 1.5px × intensity. |
-| `blur` | `number` | `18` | Bloom blur px. |
-| `spread` | `number` | `90` | Arc width degrees (clamped 20-300). |
-| `proximity` | `number` | `72` | px outside the card that still lights it. |
+--- components/glowing-effect-cards/GlowingEffect.tsx ---
 
-`GlowingCard`: `title: string`, `description: string`, `icon?: ReactNode`, `accent?: string` (default `#0071e3`), `className?`, `tall?: boolean` (default false), `cta?: string`, `href?: string` (whole card becomes a link), `glow?` (GlowingEffect props without children/className).
+```tsx
+"use client";
 
-`GlowingCardsLayout`: `cards?: GlowingCardProps[]` (default `DEFAULT_GLOW_CARDS`), `autoplay?: boolean` (false), `hint?: string` (`"Move across the cards."`, `""` hides), `className?`.
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
+import {
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 
-`DEFAULT_GLOW_CARDS` (title, description, accent, cta, 18px stroke icon): Interface polish / "Borders that answer the cursor." / `#0071e3` / Components / sparkle; Live metrics / "Every signal on one card." / `#bf5af2` / Dashboard / bar chart; Control rail / "A tall card that keeps the key actions in reach." / `#ff9f0a` / Manage flow / tall / two nodes and a path; Secure by default / "Trust, shown plainly." / `#30b65a` / Policy / shield; Composable / "Mix blocks across pages." / `#ff375f` / Templates / two squares.
+export type GlowingEffectProps = {
+  children: ReactNode;
+  className?: string;
+  /** Lead colour of the light. Used as the first of `colors` when `colors` is not set. */
+  glowColor?: string;
+  /** Colours along the lit arc, from tail to head. */
+  colors?: string[];
+  /** Corner radius, any CSS length. */
+  borderRadius?: string;
+  /** Turns the light off. */
+  disabled?: boolean;
+  /** Rim thickness and brightness multiplier (0.5-2). */
+  intensity?: number;
+  /** Blur of the soft bloom outside the rim, in px. */
+  blur?: number;
+  /** Width of the lit arc, in degrees. */
+  spread?: number;
+  /** How far outside the card the pointer still lights it, in px. */
+  proximity?: number;
+};
 
-## Layout and look
+/** Shared virtual pointer (client coordinates). GlowingCardsLayout uses it to demo the light. */
+export const GlowPointerContext = createContext<{ x: MotionValue<number>; y: MotionValue<number> } | null>(null);
 
-- GlowingEffect (relative, radius): three layers under the content.
-  1. Bloom: absolute `-inset-px`, the conic gradient, `filter: blur({blur}px)`, opacity `glow·0.7`.
-  2. Surface: white (dark `#1c1c1e`).
-  3. Rim (z 2, above the content): the same gradient with padding `1.5·intensity` px, masked to a ring with `mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)` and `-webkit-mask` + `-webkit-mask-composite: xor`; opacity `glow`.
-  - Content wrapper (z 1, full height) with shadow `0 0 0 1px rgba(0,0,0,.06), 0 20px 40px -26px rgba(0,0,0,.35)` (dark `rgba(255,255,255,.08)` / `.9`). Disabled: just the surface.
-- Gradient: `conic-gradient(from {angle − spread/2}deg at 50% 50%, transparent 0deg, c1 s1deg, c2 s2deg, …, transparent {spread}deg, transparent 360deg)` with stop i at `round((i + 1)/(n + 1)·spread)`.
-- GlowingCard body: padding 16, column (space-between when tall). Icon tile 36px, radius 10, accent at 12% (`{accent}1f`) with accent icon, 10px below. Title 16px semibold, tight, tracking −0.02em, `#1d1d1f` / `#f5f5f7`. Description 4px below, 13px, line-height 1.4, `#6e6e73` / `#a1a1a6`. CTA 8px below: 13px semibold in accent with a 12px arrow that slides 4px right on hover (300ms, `cubic-bezier(.34,1.56,.64,1)`). Link variant: focus ring 2px `#0071e3` (dark `#0a84ff`), 2px offset, radius 22.
-- Layout: `@container`, centred, max-width 72rem. Hint above (12px, `#6e6e73` / `#a1a1a6`, centred, 12px gap). Grid gap 12, one column; from container width 480px: columns `1fr 0.85fr 1fr`, two rows; card 1 at col 1 row 1, card 2 col 1 row 2, card 3 (forced tall) col 2 spanning both rows, cards 4 and 5 in col 3 rows 1 and 2.
+const DEFAULT_COLORS = ["#5ac8fa", "#0a84ff", "#bf5af2", "#ff375f", "#ff9f0a"];
+const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
 
-## Motion
+/**
+ * Wraps any content in a hairline rim that lights up on the side nearest the
+ * pointer. The lit arc chases the pointer round the edge on a spring, so it
+ * swings past and settles; neighbouring cards catch the light as the pointer
+ * nears them, and a press flares it.
+ */
+export function GlowingEffect({
+  children,
+  className = "",
+  glowColor,
+  colors,
+  borderRadius = "22px",
+  disabled = false,
+  intensity = 1,
+  blur = 18,
+  spread = 90,
+  proximity = 72,
+}: GlowingEffectProps) {
+  const still = useReducedMotion() === true;
+  const ref = useRef<HTMLDivElement>(null);
+  const shared = useContext(GlowPointerContext);
+  const stops = colors && colors.length > 0 ? colors : glowColor ? [glowColor, ...DEFAULT_COLORS.slice(1)] : DEFAULT_COLORS;
+  const k = clamp(intensity, 0.5, 2);
+  const arc = clamp(spread, 20, 300);
 
-- Every GlowingEffect listens to `window` `pointermove` (passive, rAF-throttled). For the pointer relative to its rect: `outside = max(0, left − x, x − right, top − y, y − bottom)`; `near = 1 − clamp(outside/proximity, 0, 1)`. Set lit target to `near` (0 if disabled). If near > 0, aim: `a = atan2(dx, −dy)` in degrees (0 = top, clockwise), unwrapped against the current target so it always turns the short way: `target += ((a − cur) mod 360 + 540) mod 360 − 180`.
-- Angle spring: stiffness 110, damping 13, mass 0.9 (swings past and settles); reduced motion 1000/100. Lit spring: 140/22. Leaving the document sets lit to 0.
-- Flare on pointer down: set flare to 0.7 then spring it to 0 (stiffness 70, damping 16). `glow = clamp(lit + flare, 0, 1.6)`. Skipped when disabled or reduced motion.
-- Because every card computes its own distance, light hands off naturally between neighbours.
+  const angleTarget = useMotionValue(0);
+  const angle = useSpring(angleTarget, still ? { stiffness: 1000, damping: 100 } : { stiffness: 110, damping: 13, mass: 0.9 });
+  const litTarget = useMotionValue(0);
+  const lit = useSpring(litTarget, { stiffness: 140, damping: 22 });
+  const flare = useMotionValue(0);
+  const glow = useTransform([lit, flare], ([l, f]) => clamp((l as number) + (f as number), 0, 1.6));
+  const from = useTransform(angle, (a) => a - arc / 2);
 
-## Interaction and states
+  const gradient = useMotionTemplate`conic-gradient(from ${from}deg at 50% 50%, transparent 0deg, ${stops
+    .map((c, i) => `${c} ${Math.round(((i + 1) / (stops.length + 1)) * arc)}deg`)
+    .join(", ")}, transparent ${arc}deg, transparent 360deg)`;
+  const bloomOpacity = useTransform(glow, (g) => g * 0.7);
 
-- Works for mouse, pen and touch moves. Tall card spreads content top and bottom.
-- `GlowPointerContext` provides an optional shared virtual pointer `{ x, y }` (client coordinates); when present, each effect also aims at it on change.
+  const proximityRef = useRef(proximity);
+  const disabledRef = useRef(disabled);
+  // Track a point in client coordinates; unwrap the angle so the spring always takes the short way round.
+  const aim = useRef((cx: number, cy: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const dx = cx - (r.left + r.width / 2);
+    const dy = cy - (r.top + r.height / 2);
+    const outside = Math.max(0, Math.max(r.left - cx, cx - r.right, r.top - cy, cy - r.bottom));
+    const near = 1 - clamp(outside / proximityRef.current, 0, 1);
+    litTarget.set(disabledRef.current ? 0 : near);
+    if (near <= 0) return;
+    const a = (Math.atan2(dx, -dy) * 180) / Math.PI;
+    const cur = angleTarget.get();
+    const delta = ((((a - cur) % 360) + 540) % 360) - 180;
+    angleTarget.set(cur + delta);
+  });
+  useEffect(() => {
+    proximityRef.current = proximity;
+    disabledRef.current = disabled;
+    if (disabled) litTarget.set(0);
+  }, [proximity, disabled, litTarget]);
 
-## Autoplay demo
+  useEffect(() => {
+    let raf = 0;
+    let px = 0;
+    let py = 0;
+    const onMove = (e: PointerEvent) => {
+      px = e.clientX;
+      py = e.clientY;
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = 0;
+        aim.current(px, py);
+      });
+    };
+    const onLeave = () => litTarget.set(0);
+    window.addEventListener("pointermove", onMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onLeave);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      document.documentElement.removeEventListener("pointerleave", onLeave);
+      cancelAnimationFrame(raf);
+    };
+  }, [litTarget]);
 
-`GlowingCardsLayout` with `autoplay` provides the context and drives a figure-eight across the grid on rAF: `y = top + h·(0.5 + 0.42·sin(1.1t))`, `x = left + w·(0.5 + 0.48·sin(0.55t))`. A mouse/pen move or any pointer down over the section stops it for good.
+  const fallback = useMotionValue(-1e6);
+  useMotionValueEvent(shared?.x ?? fallback, "change", () => {
+    if (shared) aim.current(shared.x.get(), shared.y.get());
+  });
 
-## Accessibility
+  return (
+    <div
+      ref={ref}
+      className={`relative ${className}`}
+      style={{ borderRadius }}
+      onPointerDown={() => {
+        if (disabled || still) return;
+        flare.set(0.7);
+        animate(flare, 0, { type: "spring", stiffness: 70, damping: 16 });
+      }}
+    >
+      {!disabled ? (
+        <>
+          <motion.div
+            className="pointer-events-none absolute -inset-px"
+            style={{ borderRadius, background: gradient, opacity: bloomOpacity, filter: `blur(${Math.max(0, blur)}px)` }}
+            aria-hidden="true"
+          />
+          <div className="absolute inset-0 bg-white dark:bg-[#1c1c1e]" style={{ borderRadius }} aria-hidden="true" />
+          <motion.div
+            className="pointer-events-none absolute inset-0 z-[2]"
+            style={{
+              borderRadius,
+              padding: 1.5 * k,
+              background: gradient,
+              opacity: glow,
+              WebkitMask: "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)",
+              WebkitMaskComposite: "xor",
+              mask: "linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0)",
+            }}
+            aria-hidden="true"
+          />
+        </>
+      ) : (
+        <div className="absolute inset-0 bg-white dark:bg-[#1c1c1e]" style={{ borderRadius }} aria-hidden="true" />
+      )}
+      <div
+        className="relative z-[1] h-full shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)]"
+        style={{ borderRadius }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+```
 
-- All glow layers are `aria-hidden` and pointer-events none. Titles are `<h3>`. Icons `aria-hidden`. With `href` the whole card is one focusable link.
+--- components/glowing-effect-cards/GlowingCard.tsx ---
 
-## Acceptance checklist
+```tsx
+"use client";
 
-- Each card's rim lights a short rainbow arc on the side facing the pointer, with a soft bloom outside.
-- Moving round a card makes the arc swing after the pointer and overshoot slightly.
-- Nearby cards (within 72px) light faintly; far ones are dark.
-- Pressing flares the rim briefly.
-- The grid is 2-1-2 from 480px container width and a single column below.
-- `colors`, `spread`, `intensity`, `blur` and `proximity` visibly change the effect.
-- Autoplay sweeps light across every card until the pointer arrives.
-- Reduced motion snaps the arc without swing or flare.
+import type { ReactNode } from "react";
+import { GlowingEffect, type GlowingEffectProps } from "./GlowingEffect";
+
+export type GlowingCardProps = {
+  title: string;
+  description: string;
+  /** Icon shown in the tinted tile, usually an inline SVG. */
+  icon?: ReactNode;
+  /** Tint for the icon tile and the call to action. */
+  accent?: string;
+  className?: string;
+  /** Spreads the content out for a tall card. */
+  tall?: boolean;
+  /** Call-to-action label at the bottom. */
+  cta?: string;
+  /** Turns the whole card into a link. */
+  href?: string;
+  /** Passed through to the glow. */
+  glow?: Omit<GlowingEffectProps, "children" | "className">;
+};
+
+function Arrow() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  );
+}
+
+/** A feature card with a pointer-reactive glowing rim: icon, title, one line and an optional call to action. */
+export function GlowingCard({ title, description, icon, accent = "#0071e3", className = "", tall = false, cta, href, glow }: GlowingCardProps) {
+  const body = (
+    <div className={`flex h-full flex-col p-4 ${tall ? "justify-between" : "justify-start"}`}>
+      <div>
+        {icon ? (
+          <span className="mb-2.5 inline-grid size-9 place-items-center rounded-[10px]" style={{ background: `${accent}1f`, color: accent }}>
+            {icon}
+          </span>
+        ) : null}
+        <h3 className="text-[16px] font-semibold leading-tight tracking-[-0.02em] text-[#1d1d1f] dark:text-[#f5f5f7]">{title}</h3>
+        <p className="mt-1 text-[13px] leading-[1.4] text-[#6e6e73] dark:text-[#a1a1a6]">{description}</p>
+      </div>
+      {cta ? (
+        <span className="group/cta mt-2 inline-flex items-center gap-1 text-[13px] font-semibold" style={{ color: accent }}>
+          {cta}
+          <span className="transition-transform duration-300 ease-[cubic-bezier(.34,1.56,.64,1)] group-hover/cta:translate-x-1">
+            <Arrow />
+          </span>
+        </span>
+      ) : null}
+    </div>
+  );
+  return (
+    <GlowingEffect className={`h-full ${className}`} {...glow}>
+      {href ? (
+        <a
+          href={href}
+          className="block h-full rounded-[22px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+        >
+          {body}
+        </a>
+      ) : (
+        body
+      )}
+    </GlowingEffect>
+  );
+}
+```
 
 # Lit Border
 
-Build a wrapper that gives any element a thin border with a band of light that turns to face the pointer and brightens as the pointer gets closer. Put several wrappers inside a shared group and they read as one light moving across a row of cards. It is used here on three pricing cards and a pill-shaped search field. It should feel like a single lamp sweeping past, not like each card reacting on its own.
+Add the "Lit Border" component from Nexus UI to my project.
 
-## Stack
+Please:
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useMotionTemplate`, `useReducedMotion`), `cn` from `@/lib/utils`.
-- File: `components/glowing-effect-cards/lit-border.tsx`. Named exports `LitBorder`, `LightGroup` and types `LitBorderProps`, `LightGroupProps`. Re-export from the folder's `index.ts`.
-- No sound: it is decorative and makes none.
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { LightGroup, LitBorder } from "@/components/glowing-effect-cards/lit-border";`. The props are typed and documented in the code.
 
-## API
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-| Prop | On | Type | Default | Meaning |
-|---|---|---|---|---|
-| `children` | both | `ReactNode` | required | The wrapped element, or the elements sharing the light. |
-| `radius` | `LitBorder` | `number` | `24` | Outer corner radius in px (use 999 for pills). |
-| `width` | `LitBorder` | `number` | `1.5` | Border thickness in px. |
-| `colors` | `LitBorder` | `[string, string, string]` | `["0,113,227", "94,92,230", "48,209,88"]` | RGB triplets for the head, middle and tail of the arc. |
-| `className` | both | `string` | none | Extra classes on the outer frame / wrapper. |
-| `autoplay` | `LightGroup` | `boolean` | `false` | The light circles the group on its own until a real pointer arrives. |
+--- components/glowing-effect-cards/lit-border.tsx ---
 
-A `LitBorder` inside a `LightGroup` uses the group's pointer. On its own it tracks the pointer over itself.
+```tsx
+"use client";
 
-## Layout and look
+import { createContext, useContext, useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { animate, motion, useMotionTemplate, useMotionValue, useReducedMotion, type MotionValue } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-- `LitBorder` outer frame: `motion.div`, `position: relative`, `padding = width`, `border-radius = radius`. The frame's own background is the light, so the padding is the visible border.
-- Inner surface: `position: relative`, `height: 100%`, radius `radius - width`, white (dark `#1c1c1e`). The wrapped content goes inside.
-- Light: `conic-gradient(from <angle>deg at 50% 50%, rgba(c1,g) 0deg, rgba(c2,g) 40deg, REST 90deg, REST 270deg, rgba(c3,g) 320deg, rgba(c1,g) 360deg)` where `g` is the glow alpha and `REST` is `rgba(0,0,0,.08)` in light mode and `rgba(255,255,255,.16)` in dark mode (switch with two CSS variables on the frame, `--lit-rest` as space-separated RGB and `--lit-rest-a`).
-- Demo (in the preview, not the component): a `LightGroup` column, `max-width 720px`, gap 12px, 8px padding: a three-column grid (one column under `sm`) of pricing cards, then a pill search field.
-  - Card: 20px padding, name 15px semibold, optional "Popular" chip (11px semibold, `#eef5ff` with `#0062c4` text; dark `#0a84ff` at 20% with `#64b5ff` text), price 32px semibold tracking -0.03em with " /month" 14px in `#6e6e73` (dark `#a1a1a6`), a 13.5px description, and a 40px full-width pill button (`#0071e3` with white text for the popular plan, `#f5f5f7` / dark `#2c2c2e` for the others).
-  - Plans: Starter $0, Studio $19 (popular), Scale $49.
-  - Search: 48px tall, 20px side padding, 16px search icon, 15px input with an `aria-label`.
+type Pointer = { px: MotionValue<number>; py: MotionValue<number> };
+const LightCtx = createContext<Pointer | null>(null);
 
-## Motion
+/** Where a pointer sits when there is none: far off screen, so the light rests at its dimmest. */
+const AWAY = -9999;
+const ORBIT_MS = 1600;
 
-- Pointer: two motion values `px`, `py` in viewport coordinates, `-9999` when there is no pointer. In a group they live in the group; the group sets them on pointer move and resets them on pointer leave.
-- For each border, whenever `px` or `py` changes: take the border's centre, `angle = atan2(dy, dx) in degrees + 90`; distance `out = max(0, |dx| - width/2, |dy| - height/2)`; `glow = max(floor, 1 - out / 260)` where `floor` is 0.12 normally and 1 while focus is inside. The conic gradient is built from these motion values with `useMotionTemplate`, so nothing re-renders.
-- Focus: focus anywhere inside a `LitBorder` sets glow to 1 and keeps it there until focus leaves.
-- Reduced motion: pointer tracking is direct (no autoplay), so it stays; there is no looping motion.
+export interface LightGroupProps {
+  /** The elements that share the light, usually several `LitBorder`s. */
+  children: ReactNode;
+  /** Extra classes for the wrapper. */
+  className?: string;
+  /** While nobody is pointing, the light circles the group on its own until the first real pointer arrives. Never runs under reduced motion. */
+  autoplay?: boolean;
+}
 
-## Interaction and states
+export interface LitBorderProps {
+  /** The element to wrap: a card, an input, a button, anything. */
+  children: ReactNode;
+  /** Outer corner radius in px. Use a large value (999) for pills. */
+  radius?: number;
+  /** Border thickness in px. */
+  width?: number;
+  /** Three RGB triplets for the lit arc, as "r,g,b" strings: head, middle and tail. */
+  colors?: [string, string, string];
+  /** Extra classes for the outer frame. */
+  className?: string;
+}
 
-- Mouse and touch drags move the light; leaving the group or the border dims it back to rest.
-- Inputs and buttons inside keep their own focus styles (2px outline, `#0071e3`, dark `#0a84ff`).
+/** True while the element is on screen and the tab is visible. Only observes when `enabled`. */
+function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) return;
+    let shown = !document.hidden;
+    let inView = false;
+    const sync = () => setActive(shown && inView);
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      sync();
+    });
+    io.observe(el);
+    const onVisibility = () => {
+      shown = !document.hidden;
+      sync();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+      setActive(false);
+    };
+  }, [ref, enabled]);
+  return active;
+}
 
-## Autoplay demo
+/**
+ * Shares one pointer with every `LitBorder` inside it, so a row of cards reads
+ * as a single light moving across them. With `autoplay`, and no pointer around,
+ * the light slowly circles the group on its own until a real pointer arrives.
+ * When the pointer leaves, the light dims back to rest.
+ */
+export function LightGroup({ children, className, autoplay = false }: LightGroupProps) {
+  const reduce = useReducedMotion() ?? false;
+  const wrap = useRef<HTMLDivElement>(null);
+  const touched = useRef(false);
+  const px = useMotionValue(AWAY);
+  const py = useMotionValue(AWAY);
+  const active = useDemoActive(wrap, autoplay && !reduce);
 
-With `autoplay` on `LightGroup`, only while the group is on screen, the tab is visible and motion is not reduced: every 1.6s move the virtual pointer to `centre + (cos(t * 0.9) * 0.55 * width, sin(t * 0.9) * 0.8 * height)` over 1.6s, ease-in-out (the first step is instant), so the light circles the group. The first real pointer move inside the group stops it for good.
+  useEffect(() => {
+    if (!autoplay || reduce || !active) return;
+    let t = 0;
+    const step = () => {
+      const el = wrap.current;
+      if (touched.current || !el) return;
+      const r = el.getBoundingClientRect();
+      t += 1;
+      animate(px, r.left + r.width / 2 + Math.cos(t * 0.9) * r.width * 0.55, { duration: t === 1 ? 0 : ORBIT_MS / 1000, ease: "easeInOut" });
+      animate(py, r.top + r.height / 2 + Math.sin(t * 0.9) * r.height * 0.8, { duration: t === 1 ? 0 : ORBIT_MS / 1000, ease: "easeInOut" });
+    };
+    step();
+    const id = window.setInterval(step, ORBIT_MS);
+    return () => window.clearInterval(id);
+  }, [autoplay, reduce, active, px, py]);
 
-## Accessibility
+  return (
+    <LightCtx.Provider value={{ px, py }}>
+      <div
+        ref={wrap}
+        className={className}
+        onPointerMove={(e) => {
+          touched.current = true;
+          px.set(e.clientX);
+          py.set(e.clientY);
+        }}
+        onPointerLeave={() => {
+          px.set(AWAY);
+          py.set(AWAY);
+        }}
+      >
+        {children}
+      </div>
+    </LightCtx.Provider>
+  );
+}
 
-- The border is purely decorative; wrapped content keeps its own semantics and tab order. The light is never the only focus cue: wrapped controls keep visible outlines.
-- Rest and lit colours are non-text decoration; all text sits on the white / `#1c1c1e` inner surface and meets 4.5:1.
+/**
+ * Wraps any element in a thin border whose light band turns to face the
+ * pointer and brightens as it gets closer. Works on cards, inputs, buttons,
+ * anything. Inside a `LightGroup` it shares that group's pointer; on its own it
+ * tracks the pointer over itself. When something inside it has keyboard focus
+ * the light stays fully lit.
+ */
+export function LitBorder({ children, radius = 24, width = 1.5, colors = ["0,113,227", "94,92,230", "48,209,88"], className }: LitBorderProps) {
+  const group = useContext(LightCtx);
+  const ownX = useMotionValue(AWAY);
+  const ownY = useMotionValue(AWAY);
+  const px = group?.px ?? ownX;
+  const py = group?.py ?? ownY;
+  const ref = useRef<HTMLDivElement>(null);
+  const focused = useRef(false);
+  const angle = useMotionValue(0);
+  const glow = useMotionValue(0.12);
 
-## Acceptance checklist
+  useEffect(() => {
+    const update = () => {
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const dx = px.get() - (r.left + r.width / 2);
+      const dy = py.get() - (r.top + r.height / 2);
+      angle.set((Math.atan2(dy, dx) * 180) / Math.PI + 90);
+      const out = Math.max(0, Math.abs(dx) - r.width / 2, Math.abs(dy) - r.height / 2);
+      glow.set(Math.max(focused.current ? 1 : 0.12, 1 - out / 260));
+    };
+    const a = px.on("change", update);
+    const b = py.on("change", update);
+    return () => {
+      a();
+      b();
+    };
+  }, [px, py, angle, glow]);
 
-- [ ] Moving across the pricing cards turns each card's light band toward the pointer; the nearest card is brightest.
-- [ ] Cards far from the pointer sit at a faint hairline.
-- [ ] The search pill (radius 999) lights the same way.
-- [ ] A lone `LitBorder` outside any group tracks the pointer over itself.
-- [ ] Tabbing into the search field or a button fully lights its border.
-- [ ] Dark mode has a `#1c1c1e` interior and a visible hairline at rest.
-- [ ] Leaving the group dims the light; autoplay circles it until the first pointer arrives and then never restarts.
+  const [c1, c2, c3] = colors;
+  const bg = useMotionTemplate`conic-gradient(from ${angle}deg at 50% 50%, rgba(${c1},${glow}) 0deg, rgba(${c2},${glow}) 40deg, rgb(var(--lit-rest) / var(--lit-rest-a)) 90deg, rgb(var(--lit-rest) / var(--lit-rest-a)) 270deg, rgba(${c3},${glow}) 320deg, rgba(${c1},${glow}) 360deg)`;
+  const style: CSSProperties = { padding: width, borderRadius: radius };
+
+  return (
+    <motion.div
+      ref={ref}
+      className={cn("relative [--lit-rest-a:.08] [--lit-rest:0_0_0] dark:[--lit-rest-a:.16] dark:[--lit-rest:255_255_255]", className)}
+      style={{ ...style, background: bg }}
+      onPointerMove={
+        group
+          ? undefined
+          : (e) => {
+              ownX.set(e.clientX);
+              ownY.set(e.clientY);
+            }
+      }
+      onPointerLeave={
+        group
+          ? undefined
+          : () => {
+              ownX.set(AWAY);
+              ownY.set(AWAY);
+            }
+      }
+      onFocus={() => {
+        focused.current = true;
+        glow.set(1);
+      }}
+      onBlur={(e) => {
+        if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+        focused.current = false;
+        glow.set(0.12);
+      }}
+    >
+      <div className="relative h-full bg-white dark:bg-[#1c1c1e]" style={{ borderRadius: radius - width }}>
+        {children}
+      </div>
+    </motion.div>
+  );
+}
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

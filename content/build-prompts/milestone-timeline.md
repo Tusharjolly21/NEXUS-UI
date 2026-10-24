@@ -1,216 +1,959 @@
-<!-- Milestone Timeline: Motion Kit variant brief -->
-
-> The Milestone Timeline page has 3 variants. The original Milestone Timeline is a vertical rail of milestones; this brief rebuilds it first, then the two Motion Kit variants: Roadmap Scrubber and Commit Graph Roadmap.
-
----
-
-<!-- variant: milestone-timeline -->
-
 # Milestone Timeline
 
-Build a vertical roadmap timeline inside a card. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress a touch and settles on it. Clicking a milestone (or moving with the arrow keys) slides a raised card to it and opens its notes. Calm, Apple-like, crisp and springy.
+Add the "Milestone Timeline" component from Nexus UI to my project.
 
-## Stack
+A roadmap timeline. When it scrolls into view a glowing bead runs down the rail, drawing each finished milestone's check as it passes, overshoots the milestone in progress slightly and settles on it; clicking a milestone or using the arrow keys slides a raised card to it and opens its notes. Also includes Roadmap Scrubber, an edit-style timeline where you drag a playhead and every bar fills to that day. Also includes Commit Graph Roadmap, a roadmap drawn as git log --graph with release tags, branch lanes and a pulsing HEAD.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `animate`, `useInView`, `useMotionValue`, `useTransform`, `useReducedMotion`, `layoutId`).
-- File: `components/milestone-timeline/milestone-timeline.tsx`. Named export `MilestoneTimeline`, exported types `Milestone` and `MilestoneTimelineProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { MilestoneTimeline } from "@/components/milestone-timeline/milestone-timeline";`. The props are typed and documented in the code.
 
-- `Milestone`: `{ title: string; date?: string; description?: string; status?: "done" | "current" | "upcoming"; tag?: string }`. `tag` is a small pill on the current milestone, e.g. "In progress".
-- `milestones?: Milestone[]`: rich milestones; they take priority over `steps`. Default: Research and discovery (Jan 2026, done), Design system v1 (Mar 2026, done), Private beta (Jun 2026, current, tag "In progress"), Public launch (Sep 2026, upcoming), each with a one-sentence description.
-- `steps?: string[]`: plain titles; everything before the last is done, the last is current.
-- `heading?: string`, default `"Roadmap"`.
-- `defaultOpen?: number`: milestone opened first, default the current one.
-- `autoplay?: boolean`, default `false`: opens each milestone in turn every 2600ms until someone touches the timeline.
-- `className?: string`.
-- Missing statuses are derived: with a current milestone the target is its index, otherwise the last done one; items up to the target are done, the rest upcoming.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/milestone-timeline/milestone-timeline.tsx ---
 
-- Card: `@container`, full width, radius 28px, padding 24px (32px from 480px container width), white / dark `#1c1c1e`, ink `#1d1d1f` / `#f5f5f7`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark: `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.9)`).
-- Header: baseline-aligned, space-between. Heading 22px semibold, tracking -0.03em. At the right "<done> of <total> complete", 13px tabular numbers, `#6e6e73` / dark `#a1a1a6`.
-- List: `<ol>`, 24px below the header. Each `<li>` is a row with a 12px gap (16px from 420px container width) and 12px bottom padding (none on the last).
-- Date column (only from 420px container width, only if the milestone has a date): 68px wide, right aligned, 12px medium tabular numbers, 17px top padding, muted. Below 420px the date sits inside the title row instead.
-- Rail column: 24px wide, 12px top padding. A node 24px across over a 2px connector that runs from the node's centre (top 24px) down to the next node (bottom -36px), track `#e5e5ea` / dark `#3a3a3c`, with an accent fill (`#0071e3` / dark `#0a84ff`) on top that scales from the top by progress.
-- Nodes: done = 24px white circle (dark `#1c1c1e`) with a 2px `#d2d2d7` (dark `#48484a`) inset ring, covered by a filled `#1d1d1f` (dark `#f5f5f7`) disc whose opacity follows progress, with a 12px check (`M2.5 6.3l2.3 2.2 4.7-5`, stroke 2, round caps, white / dark `#1d1d1f`) whose `pathLength` follows progress. Current = 24px accent circle with a 4px accent halo (alpha .16) and an 8px white dot, plus a pulsing ring (scale 1 to 2, opacity .7 to 0, 1.6s, repeat) behind it. Upcoming = 24px dashed circle, 2px border `#c7c7cc` (dark `#48484a`), white / dark `#1c1c1e` fill.
-- Content column: the title button (15px semibold, tracking -0.01em, 16px horizontal and 12px vertical padding, radius 18px, upcoming titles muted), an optional tag pill on the current one (11px semibold white on accent, fully rounded), and the description (13px, relaxed leading, muted, padded 16px sides and 14px bottom).
-- Open card: a rounded-18px layer behind the open milestone. Current: accent at 6% (dark 10%) with a 1px accent ring (alpha .18) and a soft accent drop shadow; others: `#f5f5f7` / dark `#2c2c2e`. It is one shared `layoutId` element so it slides between rows.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import { AnimatePresence, animate, motion, useInView, useMotionValue, useReducedMotion, useTransform, type MotionValue } from "framer-motion";
 
-## Motion
+export type Milestone = {
+  title: string;
+  date?: string;
+  description?: string;
+  status?: "done" | "current" | "upcoming";
+  /** Small label shown on the current milestone, e.g. "In progress". */
+  tag?: string;
+};
 
-- A single motion value `fill` runs from 0 to `target` (the index of the current milestone) when the list first comes into view (`useInView`, once, margin -60px) using a spring: stiffness 38, damping 9, mass 1.1, restDelta .001, delay .2s. The low damping makes the bead overshoot and settle.
-- Segment `i` scales its accent fill by `clamp(fill - i, 0, 1)`. A 10px accent bead with a glow (`0 0 0 4px` accent at alpha .2 plus a 14px blur) rides the leading edge while `0.02 < fill - i < 0.98`, hidden otherwise.
-- Done node `i`: the disc fades in when `fill >= i - 0.04`; the check draws with `clamp((fill - i + 0.04) * 3, 0, 1)`; the node pops with `1 + sin((d + 0.05) / 0.4 * pi) * 0.22` for `-0.05 < d < 0.35` where `d = fill - i`. The current node pops the same way.
-- Open card slides between rows with a spring (stiffness 380, damping 30). The description opens with height spring (stiffness 320, damping 32) and a .18s opacity fade, via `AnimatePresence initial={false}`.
+export type MilestoneTimelineProps = {
+  /** Rich milestones. Takes priority over `steps`. */
+  milestones?: Milestone[];
+  /** Plain titles (older API). Everything before the last is treated as done. */
+  steps?: string[];
+  heading?: string;
+  /** Milestone opened first. Defaults to the current one. */
+  defaultOpen?: number;
+  /** Opens each milestone in turn until someone touches the timeline. */
+  autoplay?: boolean;
+  className?: string;
+};
 
-## Interaction and states
+const MILESTONES: Milestone[] = [
+  { title: "Research and discovery", date: "Jan 2026", description: "Twenty customer interviews and a teardown of every onboarding flow we could find.", status: "done" },
+  { title: "Design system v1", date: "Mar 2026", description: "Tokens, a type scale and 40 components, documented and shipped to the team.", status: "done" },
+  { title: "Private beta", date: "Jun 2026", description: "312 teams onboarded. Activation up 38% after the second iteration.", status: "current", tag: "In progress" },
+  { title: "Public launch", date: "Sep 2026", description: "Pricing, docs and the launch film. Then the real work starts.", status: "upcoming" },
+];
 
-- Click a milestone button to open it. Only one is open at a time. The first open is `defaultOpen` or the current milestone.
-- Arrow Up and Down, Home and End move focus between the milestone buttons.
-- Any pointer press or key press inside the card marks it touched, which stops autoplay for good.
+type Status = "done" | "current" | "upcoming";
 
-## Autoplay demo
+/** Rail piece from node i to node i+1, filled by the shared progress value. */
+function Segment({ i, fill, still }: { i: number; fill: MotionValue<number>; still: boolean }) {
+  const scaleY = useTransform(fill, (f) => Math.max(0, Math.min(1, f - i)));
+  const top = useTransform(fill, (f) => `${Math.max(0, Math.min(1, f - i)) * 100}%`);
+  const bead = useTransform(fill, (f) => (f > i + 0.02 && f < i + 0.98 ? 1 : 0));
+  return (
+    <span aria-hidden="true" className="absolute left-1/2 top-[24px] -bottom-[36px] w-[2px] -translate-x-1/2 rounded-full bg-[#e5e5ea] dark:bg-[#3a3a3c]">
+      <motion.span className="absolute inset-0 origin-top rounded-full bg-[#0071e3] dark:bg-[#0a84ff]" style={{ scaleY }} />
+      {!still ? (
+        <motion.span
+          className="absolute left-1/2 size-2.5 rounded-full bg-[#0071e3] shadow-[0_0_0_4px_rgba(0,113,227,.2),0_0_14px_rgba(0,113,227,.7)] dark:bg-[#0a84ff]"
+          style={{ top, x: "-50%", y: "-50%", opacity: bead }}
+        />
+      ) : null}
+    </span>
+  );
+}
 
-With `autoplay`, once the list is in view and there are two or more milestones, advance the open milestone every 2600ms, wrapping around. The first touch clears the interval. Cleared on unmount.
+function Node({ i, status, fill, still }: { i: number; status: Status; fill: MotionValue<number>; still: boolean }) {
+  const reached = useTransform(fill, (f) => (f >= i - 0.04 ? 1 : 0));
+  const check = useTransform(fill, (f) => Math.max(0, Math.min(1, (f - i + 0.04) * 3)));
+  const pop = useTransform(fill, (f) => {
+    const d = f - i;
+    return d > -0.05 && d < 0.35 ? 1 + Math.sin(((d + 0.05) / 0.4) * Math.PI) * 0.22 : 1;
+  });
+  if (status === "current") {
+    return (
+      <motion.span className="relative grid size-6 place-items-center" style={{ scale: pop }}>
+        {!still ? (
+          <motion.span
+            className="absolute inset-0 rounded-full bg-[#0071e3]/35 dark:bg-[#0a84ff]/40"
+            animate={{ scale: [1, 2], opacity: [0.7, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
+          />
+        ) : null}
+        <span className="relative grid size-6 place-items-center rounded-full bg-[#0071e3] shadow-[0_0_0_4px_rgba(0,113,227,.16)] dark:bg-[#0a84ff]">
+          <span className="size-2 rounded-full bg-white" />
+        </span>
+      </motion.span>
+    );
+  }
+  if (status === "done") {
+    return (
+      <motion.span className="relative grid size-6 place-items-center rounded-full bg-white shadow-[inset_0_0_0_2px_#d2d2d7] dark:bg-[#1c1c1e] dark:shadow-[inset_0_0_0_2px_#48484a]" style={{ scale: pop }}>
+        <motion.span className="absolute inset-0 rounded-full bg-[#1d1d1f] dark:bg-[#f5f5f7]" style={{ opacity: reached }} />
+        <svg viewBox="0 0 12 12" className="relative size-3" fill="none" aria-hidden="true">
+          <motion.path d="M2.5 6.3l2.3 2.2 4.7-5" className="stroke-white dark:stroke-[#1d1d1f]" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ pathLength: check }} />
+        </svg>
+      </motion.span>
+    );
+  }
+  return <span className="block size-6 rounded-full border-2 border-dashed border-[#c7c7cc] bg-white dark:border-[#48484a] dark:bg-[#1c1c1e]" />;
+}
 
-## Accessibility
+/**
+ * A roadmap timeline. When it scrolls into view a glowing bead runs down the
+ * rail, drawing each done milestone's check as it passes, overshoots the
+ * milestone in progress a touch and settles on it. Click a milestone (or use
+ * the arrow keys) and a raised card slides to it and opens its notes.
+ */
+export function MilestoneTimeline({ milestones, steps, heading = "Roadmap", defaultOpen, autoplay = false, className = "" }: MilestoneTimelineProps) {
+  const reduce = useReducedMotion() === true;
+  const uid = useId().replace(/:/g, "");
+  const list: Milestone[] =
+    milestones ?? (steps ? steps.map((title, i) => ({ title, status: i < steps.length - 1 ? "done" : "current" })) : MILESTONES);
+  const hasCurrent = list.some((m) => m.status === "current");
+  const currentIdx = list.findIndex((m) => m.status === "current");
+  const doneCount = list.filter((m) => m.status === "done").length;
+  const target = hasCurrent ? currentIdx : Math.max(0, doneCount - 1);
+  const statusOf = (m: Milestone, i: number): Status => m.status ?? (i <= target ? "done" : "upcoming");
 
-- Real `<ol>` and `<button>`s. Each button has `aria-expanded` and `aria-controls` pointing at its region (`role="region"`, `aria-labelledby` the button). Visible focus outline 2px, offset 1px, `#0071e3` (dark `#0a84ff`).
-- The decorative card layer, rail and nodes are `aria-hidden`.
-- Reduced motion: `fill` is set straight to the target, the bead and pulse are not rendered, the card and the description change without springs.
+  const ref = useRef<HTMLOListElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const fill = useMotionValue(reduce ? target : 0);
+  const [open, setOpen] = useState(() => Math.min(list.length - 1, Math.max(0, defaultOpen ?? target)));
+  const btns = useRef<(HTMLButtonElement | null)[]>([]);
+  const touched = useRef(false);
 
-## Acceptance checklist
+  useEffect(() => {
+    if (!inView) return;
+    if (reduce) {
+      fill.set(target);
+      return;
+    }
+    const run = animate(fill, target, { type: "spring", stiffness: 38, damping: 9, mass: 1.1, restDelta: 0.001, delay: 0.2 });
+    return () => run.stop();
+  }, [inView, reduce, target, fill]);
 
-- [ ] On scroll-in a bead runs down the rail, each done node fills and its check draws as the bead passes.
-- [ ] The bead overshoots the current milestone slightly and settles back on it.
-- [ ] Clicking a milestone slides the raised card to it and opens its notes; the old notes close.
-- [ ] Arrow keys, Home and End move between milestones.
-- [ ] Looks right at 320px (dates move inline) and in dark mode.
+  const count = list.length;
+  useEffect(() => {
+    if (!autoplay || !inView || count < 2) return;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      setOpen((o) => (o + 1) % count);
+    }, 2600);
+    return () => window.clearInterval(t);
+  }, [autoplay, inView, count]);
 
----
+  const key = (e: KeyboardEvent, i: number) => {
+    let to: number | null = null;
+    if (e.key === "ArrowDown") to = Math.min(count - 1, i + 1);
+    if (e.key === "ArrowUp") to = Math.max(0, i - 1);
+    if (e.key === "Home") to = 0;
+    if (e.key === "End") to = count - 1;
+    if (to === null) return;
+    e.preventDefault();
+    touched.current = true;
+    btns.current[to]?.focus();
+  };
 
-<!-- variant: roadmap-scrubber -->
+  return (
+    <section
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      className={`@container w-full rounded-[28px] bg-white p-6 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] @min-[480px]:p-8 dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] ${className}`}
+    >
+      <div className="flex items-baseline justify-between gap-4">
+        <h2 className="text-[22px] font-semibold tracking-[-0.03em]">{heading}</h2>
+        <span className="text-[13px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">
+          {doneCount} of {list.length} complete
+        </span>
+      </div>
+
+      <ol ref={ref} className="mt-6">
+        {list.map((m, i) => {
+          const status = statusOf(m, i);
+          const isOpen = open === i;
+          const last = i === list.length - 1;
+          return (
+            <li key={`${m.title}-${i}`} className="relative flex gap-3 pb-3 last:pb-0 @min-[420px]:gap-4">
+              {m.date ? (
+                <span className="hidden w-[68px] shrink-0 pt-[17px] text-right text-[12px] font-medium tabular-nums text-[#6e6e73] @min-[420px]:block dark:text-[#a1a1a6]">{m.date}</span>
+              ) : null}
+              <span className="relative flex w-6 shrink-0 justify-center pt-[12px]">
+                {!last ? <Segment i={i} fill={fill} still={reduce} /> : null}
+                <span className="relative z-10">
+                  <Node i={i} status={status} fill={fill} still={reduce} />
+                </span>
+              </span>
+              <div className="relative min-w-0 flex-1">
+                {isOpen ? (
+                  <motion.span
+                    layoutId={`${uid}-card`}
+                    aria-hidden="true"
+                    className={`absolute inset-0 rounded-[18px] ${
+                      status === "current"
+                        ? "bg-[#0071e3]/[.06] shadow-[0_0_0_1px_rgba(0,113,227,.18),0_16px_30px_-20px_rgba(0,113,227,.55)] dark:bg-[#0a84ff]/10 dark:shadow-[0_0_0_1px_rgba(10,132,255,.3),0_16px_30px_-20px_rgba(0,0,0,.9)]"
+                        : "bg-[#f5f5f7] dark:bg-[#2c2c2e]"
+                    }`}
+                    transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                ) : null}
+                <button
+                  ref={(el) => {
+                    btns.current[i] = el;
+                  }}
+                  type="button"
+                  id={`${uid}-b${i}`}
+                  aria-expanded={isOpen}
+                  aria-controls={`${uid}-p${i}`}
+                  onClick={() => {
+                    touched.current = true;
+                    setOpen(i);
+                  }}
+                  onKeyDown={(e) => key(e, i)}
+                  className="relative flex w-full flex-wrap items-center gap-x-2 gap-y-1 rounded-[18px] px-4 py-3 text-left outline-none focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]"
+                >
+                  <span className={`text-[15px] font-semibold tracking-[-0.01em] ${status === "upcoming" ? "text-[#6e6e73] dark:text-[#a1a1a6]" : ""}`}>{m.title}</span>
+                  {status === "current" && m.tag ? (
+                    <span className="rounded-full bg-[#0071e3] px-2 py-0.5 text-[11px] font-semibold text-white dark:bg-[#0a84ff]">{m.tag}</span>
+                  ) : null}
+                  {m.date ? <span className="text-[12px] tabular-nums text-[#6e6e73] @min-[420px]:hidden dark:text-[#a1a1a6]">{m.date}</span> : null}
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && m.description ? (
+                    <motion.div
+                      id={`${uid}-p${i}`}
+                      role="region"
+                      aria-labelledby={`${uid}-b${i}`}
+                      className="relative overflow-hidden"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={reduce ? { duration: 0 } : { height: { type: "spring", stiffness: 320, damping: 32 }, opacity: { duration: 0.18 } }}
+                    >
+                      <p className="px-4 pb-3.5 text-[13px] leading-relaxed text-[#6e6e73] dark:text-[#a1a1a6]">{m.description}</p>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </section>
+  );
+}
+```
 
 # Roadmap Scrubber
 
-Build the roadmap as a video-editor style timeline. Tracks of bars run across a twelve-month ruler. A playhead sweeps from January to today when the chart scrolls in; then you can drag it, or use the arrow keys, and every bar fills up to that day, milestone diamonds tick over as you pass them, and a summary underneath says what is in flight and what is next.
+Add the "Roadmap Scrubber" component from Nexus UI to my project.
 
-## Stack
+Please:
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`animate`, `motion`, `AnimatePresence`, `useInView`, `useReducedMotion`).
-- File: `components/milestone-timeline/roadmap-scrubber.tsx`. Named export `RoadmapScrubber`, exported types `RoadmapScrubberProps`, `RoadmapScrubberTrack`, `RoadmapScrubberBar`, `RoadmapScrubberMark`.
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { RoadmapScrubber } from "@/components/milestone-timeline/roadmap-scrubber";`. The props are typed and documented in the code.
 
-## API
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-- `RoadmapScrubberBar`: `{ label: string; start: string; end: string }`. `RoadmapScrubberMark`: `{ label: string; date: string }`. `RoadmapScrubberTrack`: `{ name: string; bars?: RoadmapScrubberBar[]; marks?: RoadmapScrubberMark[] }`. All dates are `YYYY-MM-DD`.
-- `tracks?: RoadmapScrubberTrack[]`. Default dataset (2026):
-  - Design: Design system 2026-01-01 to 2026-03-26; Motion tokens 2026-04-07 to 2026-06-07; Pro templates 2026-08-01 to 2026-11-01.
-  - Engineering: Core library 2026-02-01 to 2026-07-01; Pro blocks 2026-07-13 to 2026-11-19.
-  - Launch: Private beta 2026-05-17 to 2026-08-17; marks Public launch 2026-09-16 and v2 2026-12-13.
-- `year?: number`, default `2026`: the year the chart spans. Dates outside it clamp to the edges.
-- `today?: string`, default `"2026-06-15"`: the date of the red marker and the sweep's end point. The component never reads the real clock, so server and client render the same.
-- `title?: string`, default `Roadmap <year>`.
-- `autoplay?: boolean`, default `false`: after the opening sweep, glides the playhead to late December and back to today on a loop until touched.
-- `className?: string`.
+--- components/milestone-timeline/roadmap-scrubber.tsx ---
 
-## Layout and look
+```tsx
+"use client";
 
-- Date to position: a position runs 0 (Jan 1) to 12 (end of Dec). `pos = (year diff) * 12 + monthIndex + (day - 1) / daysInMonth`, clamped to 0..12, with UTC date maths. Each month is one equal column. A position back to a label: month `m`, day `min(daysInMonth, floor(frac * daysInMonth + 1e-9) + 1)`, written like "Jun 15".
-- Card: full width, `max-w-[860px]`, radius 28px, padding 20px (28px from 640px viewport), white / dark `#1c1c1e`, ink `#1d1d1f` / `#f5f5f7`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.3)` (dark: `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.9)`).
-- Header: space-between. Title 20px semibold, tracking -0.02em. "Jump to today" button: 32px tall, pill, 14px side padding, 13px medium, `#f5f5f7` (hover `#ececf0`) / dark `#2c2c2e` (hover `#3a3a3c`).
-- Scroller: 20px below the header, `overflow-x: auto`. Inside, a block with `min-width: 640px` and 108px left padding for the track names.
-- Month ruler: a 12-column grid, 28px tall, 11px medium labels Jan..Dec, `#6e6e73` / dark `#a1a1a6`, a hairline left border on every column except the first (`#ececf0` / dark `#2c2c2e`).
-- Track area: height `tracks * 52px`, `cursor: ew-resize`, `touch-action: pan-y`, no text selection. A column grid of hairlines behind (`#f3f3f5` / dark `#2c2c2e`). Each track is a 52px row with its name at the far left (13px medium muted, vertically centred, sitting in the left padding).
-- Bar: absolute, top 10px, 32px tall, radius 10px, `overflow: hidden`, background `#eef1f6` / dark `#2c2c2e`, left and width from the positions. It holds its label twice: once in ink, and once white on accent (`#0071e3` / dark `#0a84ff`) clipped with `clip-path: inset(0 <100 - fill%> 0 0)`, where `fill = clamp((playhead - from) / (to - from))`. Label 12.5px medium, truncated, 12px padding.
-- Milestone: an 18px square rotated 45 degrees (radius 4, 2px border) at the date, with its label (12.5px medium) 8px to the right. Not reached: white / dark `#1c1c1e` fill, border `#c7c7cc` / dark `#48484a`, label muted. Reached (playhead at or past it): accent fill and border, ink label. Colours change through CSS classes with a .3s colour transition, never through animated hex strings.
-- Playhead: a vertical line (2px, ink `#1d1d1f` / dark `#f5f5f7`) at the playhead position spanning the track area, topped by a date pill above the ruler (11px semibold tabular numbers, pill, ink background with inverse text, soft shadow). Pointer events none.
-- Today marker: a 6px red dot (`#ff3b30` / dark `#ff453a`) centred on the bottom edge of the track area at the today position.
-- Summary box: 20px below, radius 18px, padding 16px, `#f5f5f7` / dark `#2c2c2e`; from 640px viewport a two-column grid. Left: "In flight" (12px semibold uppercase, tracking .12em, muted) followed by one chip per bar the playhead is inside (`from <= p < to`): white / dark `#1c1c1e` pill, 13px medium, with a percentage badge (12px tabular, `#eef5ff` / dark accent at 20%, accent text) showing the fill. If none: "Nothing this week". Right: "Next: **<label>** in N weeks" where the next item is the earliest bar start (label "<bar> starts") or milestone after the playhead and `N = max(1, round((next - p) * 4.35))` with "week" or "weeks"; or "Year complete".
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from "react";
+import { AnimatePresence, animate, motion, useInView, useReducedMotion, type AnimationPlaybackControls } from "framer-motion";
 
-## Motion
+/** A bar on a track. Dates are calendar days written as `YYYY-MM-DD`. */
+export type RoadmapScrubberBar = { label: string; start: string; end: string };
+/** A milestone diamond on a track. */
+export type RoadmapScrubberMark = { label: string; date: string };
+export type RoadmapScrubberTrack = { name: string; bars?: RoadmapScrubberBar[]; marks?: RoadmapScrubberMark[] };
 
-- Opening sweep: when the track area is first 10% in view, animate the playhead from its position to today over 2.2s with ease `[.22, 1, .36, 1]`.
-- Jump to today: spring, stiffness 120, damping 22, from the current position.
-- Milestone reached: the diamond scales `[1, 1.35, 1]` over .35s.
-- In-flight chips enter and leave with `scale .85` and opacity, spring stiffness 420, damping 30, `layout`, `AnimatePresence mode="popLayout"`.
-- On narrow screens the chart scrolls sideways; whenever the playhead moves and you are not dragging, centre it in the scroller.
+export interface RoadmapScrubberProps {
+  /** Tracks to draw. Defaults to a Design, Engineering and Launch roadmap for 2026. */
+  tracks?: RoadmapScrubberTrack[];
+  /** The calendar year the chart spans, January to December. Dates outside it are clamped to the edges. */
+  year?: number;
+  /** The date marked as today, `YYYY-MM-DD`. The component never reads the real clock, so it always renders the same. */
+  today?: string;
+  /** Heading. Defaults to `Roadmap <year>`. */
+  title?: string;
+  /** After the opening sweep, glides the playhead through the year by itself until someone touches the chart. */
+  autoplay?: boolean;
+  /** Extra classes for the card. */
+  className?: string;
+}
 
-## Interaction and states
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const ROW = 52;
+const LABEL = 108;
 
-- Pressing on the track area jumps the playhead to the pointer and starts a drag (pointer capture; move updates; up, cancel and lost capture end it). The position is `clamp((clientX - left) / width) * 12`.
-- The track area is `role="slider"`, focusable: Right/Up +0.25 month (Shift: +1), Left/Down -0.25 (Shift: -1), Home goes to today, End goes to the end of the year.
-- Any pointer press, key press or Jump to today stops running animation and marks the chart touched: autoplay never resumes.
+const DEFAULT_TRACKS: RoadmapScrubberTrack[] = [
+  {
+    name: "Design",
+    bars: [
+      { label: "Design system", start: "2026-01-01", end: "2026-03-26" },
+      { label: "Motion tokens", start: "2026-04-07", end: "2026-06-07" },
+      { label: "Pro templates", start: "2026-08-01", end: "2026-11-01" },
+    ],
+  },
+  {
+    name: "Engineering",
+    bars: [
+      { label: "Core library", start: "2026-02-01", end: "2026-07-01" },
+      { label: "Pro blocks", start: "2026-07-13", end: "2026-11-19" },
+    ],
+  },
+  {
+    name: "Launch",
+    bars: [{ label: "Private beta", start: "2026-05-17", end: "2026-08-17" }],
+    marks: [
+      { label: "Public launch", date: "2026-09-16" },
+      { label: "v2", date: "2026-12-13" },
+    ],
+  },
+];
 
-## Autoplay demo
+const clamp = (v: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
+const daysIn = (y: number, m: number) => new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
 
-With `autoplay`, not reduced motion, after the opening sweep has finished and while the chart is on screen (`useInView`): wait 1500ms, glide to position 11.6 over 4.2s (ease `[.45, 0, .25, 1]`), wait 900ms, glide back to today over 3.2s, then repeat, until touched. Leaving the screen cancels the loop and entering resumes it from where the playhead is. All timers and animations stop on unmount.
+/** A date as a position in months from January 1 (0) to the end of December (12). Every month is one equal column. */
+function posOf(iso: string, year: number): number {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
+  if (!m) return 0;
+  const y = Number(m[1]);
+  const mo = Number(m[2]) - 1;
+  const d = Number(m[3]);
+  return clamp((y - year) * 12 + mo + (d - 1) / daysIn(y, mo), 0, 12);
+}
 
-## Accessibility
+function labelOf(p: number, year: number): string {
+  const m = Math.min(11, Math.max(0, Math.floor(p)));
+  const n = daysIn(year, m);
+  return `${MONTHS[m]} ${Math.min(n, Math.floor((p - m) * n + 1e-9) + 1)}`;
+}
 
-- Slider: `aria-label="Roadmap date"`, `aria-orientation="horizontal"`, `aria-valuemin=0`, `aria-valuemax=12`, `aria-valuenow`, and `aria-valuetext` the date label (e.g. "Jun 15"). Visible focus outline 2px, offset 2px, `#0071e3` (dark `#0a84ff`).
-- The summary box is `aria-live="polite"`. The clipped duplicate bar label is `aria-hidden`.
-- Reduced motion: the playhead jumps to today with no sweep, no autoplay, milestone and chip animations are instant.
+type Bar = { label: string; from: number; to: number };
+type Track = { name: string; bars: Bar[]; marks: { label: string; at: number }[] };
 
-## Acceptance checklist
+/**
+ * The roadmap as an edit timeline. Drag the playhead through the year and
+ * every bar fills to that day, milestones tick over as you pass them, and the
+ * summary underneath says what is in flight and what is next. It opens by
+ * sweeping from January to today.
+ */
+export function RoadmapScrubber({
+  tracks = DEFAULT_TRACKS,
+  year = 2026,
+  today = "2026-06-15",
+  title,
+  autoplay = false,
+  className = "",
+}: RoadmapScrubberProps) {
+  const reduce = useReducedMotion() ?? false;
+  const [p, setP] = useState(0);
+  const pos = useRef(0);
+  const area = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+  const dragging = useRef(false);
+  const touched = useRef(false);
+  const run = useRef<AnimationPlaybackControls | undefined>(undefined);
+  const [swept, setSwept] = useState(false);
+  const seen = useInView(area, { once: true, amount: 0.1 });
+  const visible = useInView(area, { amount: 0.1 });
 
-- [ ] Server render and first client render are identical (playhead at January, no clock reads).
-- [ ] Scrolling it in sweeps the playhead to the today marker; bars fill as it passes.
-- [ ] Dragging, arrow keys, Home and End all move the playhead; the summary updates live.
-- [ ] Diamonds switch to accent and bounce as the playhead passes them.
-- [ ] Changing `today` or the tracks (dates as strings) re-lays the chart; nothing depends on the real date.
-- [ ] Usable at 320px (chart scrolls sideways, playhead stays in view) and in dark mode.
+  const model: Track[] = useMemo(
+    () =>
+      tracks.map((t) => ({
+        name: t.name,
+        bars: (t.bars ?? []).map((b) => ({ label: b.label, from: posOf(b.start, year), to: posOf(b.end, year) })),
+        marks: (t.marks ?? []).map((m) => ({ label: m.label, at: posOf(m.date, year) })),
+      })),
+    [tracks, year],
+  );
+  const todayPos = posOf(today, year);
+  const heading = title ?? `Roadmap ${year}`;
 
----
+  const set = useCallback((v: number) => {
+    pos.current = v;
+    setP(v);
+  }, []);
+  const stop = useCallback(() => {
+    run.current?.stop();
+    run.current = undefined;
+  }, []);
 
-<!-- variant: commit-graph-roadmap -->
+  // On narrow screens the chart scrolls sideways; keep the playhead in view unless you are dragging it.
+  useEffect(() => {
+    const sc = scroller.current;
+    const el = area.current;
+    if (!sc || !el || dragging.current || sc.scrollWidth <= sc.clientWidth) return;
+    const x = el.offsetLeft + (p / 12) * el.offsetWidth;
+    sc.scrollLeft = x - sc.clientWidth / 2;
+  }, [p]);
+
+  // Opening sweep from January to today, once the chart is on screen.
+  useEffect(() => {
+    if (!seen || touched.current) return;
+    if (reduce) {
+      const id = requestAnimationFrame(() => {
+        set(todayPos);
+        setSwept(true);
+      });
+      return () => cancelAnimationFrame(id);
+    }
+    const c = animate(pos.current, todayPos, { duration: 2.2, ease: [0.22, 1, 0.36, 1], onUpdate: set, onComplete: () => setSwept(true) });
+    run.current = c;
+    return () => c.stop();
+  }, [seen, reduce, todayPos, set]);
+
+  // Autoplay: wander to the end of the year and back to today, on a loop, while on screen and untouched.
+  useEffect(() => {
+    if (!autoplay || reduce || !swept || !visible) return;
+    let dead = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const hold = (ms: number) =>
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, ms);
+      });
+    const glide = (to: number, duration: number) =>
+      new Promise<void>((resolve) => {
+        run.current = animate(pos.current, to, { duration, ease: [0.45, 0, 0.25, 1], onUpdate: set, onComplete: resolve });
+      });
+    void (async () => {
+      while (!dead && !touched.current) {
+        await hold(1500);
+        if (dead || touched.current) return;
+        await glide(11.6, 4.2);
+        if (dead || touched.current) return;
+        await hold(900);
+        if (dead || touched.current) return;
+        await glide(todayPos, 3.2);
+      }
+    })();
+    return () => {
+      dead = true;
+      if (timer) clearTimeout(timer);
+      run.current?.stop();
+    };
+  }, [autoplay, reduce, swept, visible, todayPos, set]);
+
+  const toP = (clientX: number) => {
+    const r = area.current!.getBoundingClientRect();
+    return clamp((clientX - r.left) / r.width) * 12;
+  };
+  const take = () => {
+    touched.current = true;
+    stop();
+  };
+  const down = (e: ReactPointerEvent<HTMLDivElement>) => {
+    take();
+    dragging.current = true;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    set(toP(e.clientX));
+  };
+  const move = (e: ReactPointerEvent) => {
+    if (dragging.current) set(toP(e.clientX));
+  };
+  const up = () => {
+    dragging.current = false;
+  };
+  const key = (e: KeyboardEvent) => {
+    const step = e.shiftKey ? 1 : 0.25;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+      e.preventDefault();
+      take();
+      set(Math.min(12, pos.current + step));
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+      e.preventDefault();
+      take();
+      set(Math.max(0, pos.current - step));
+    } else if (e.key === "Home") {
+      e.preventDefault();
+      take();
+      set(todayPos);
+    } else if (e.key === "End") {
+      e.preventDefault();
+      take();
+      set(12);
+    }
+  };
+  const jump = () => {
+    take();
+    if (reduce) {
+      set(todayPos);
+      return;
+    }
+    run.current = animate(pos.current, todayPos, { type: "spring", stiffness: 120, damping: 22, onUpdate: set });
+  };
+
+  const bars = model.flatMap((t) => t.bars);
+  const live = bars.filter((b) => p >= b.from && p < b.to);
+  const marks = model.flatMap((t) => t.marks);
+  const next = [...bars.map((b) => ({ label: `${b.label} starts`, at: b.from })), ...marks].filter((m) => m.at > p).sort((a, b) => a.at - b.at)[0];
+  const weeks = next ? Math.max(1, Math.round((next.at - p) * 4.35)) : 0;
+
+  return (
+    <div
+      className={`w-full max-w-[860px] rounded-[28px] bg-white p-5 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.3)] sm:p-7 dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] ${className}`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <h3 className="m-0 text-[20px] font-semibold tracking-[-0.02em]">{heading}</h3>
+        <button
+          type="button"
+          onClick={jump}
+          className="h-8 flex-none rounded-full bg-[#f5f5f7] px-3.5 text-[13px] font-medium text-[#1d1d1f] outline-none hover:bg-[#ececf0] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:hover:bg-[#3a3a3c] dark:focus-visible:outline-[#0a84ff]"
+        >
+          Jump to today
+        </button>
+      </div>
+      <div ref={scroller} className="-mx-1 mt-5 overflow-x-auto px-1 pb-1">
+        <div className="relative min-w-[640px]" style={{ paddingLeft: LABEL }}>
+          {/* month ruler */}
+          <div className="grid h-7 grid-cols-12 text-[11px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]">
+            {MONTHS.map((m, i) => (
+              <span key={m} className={`border-l pl-1.5 ${i === 0 ? "border-transparent" : "border-[#ececf0] dark:border-[#2c2c2e]"}`}>
+                {m}
+              </span>
+            ))}
+          </div>
+          {/* tracks */}
+          <div
+            ref={area}
+            className="relative cursor-ew-resize touch-pan-y select-none outline-none focus-visible:rounded-[12px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]"
+            style={{ height: model.length * ROW }}
+            onPointerDown={down}
+            onPointerMove={move}
+            onPointerUp={up}
+            onPointerCancel={up}
+            onLostPointerCapture={up}
+            tabIndex={0}
+            role="slider"
+            aria-label="Roadmap date"
+            aria-orientation="horizontal"
+            aria-valuemin={0}
+            aria-valuemax={12}
+            aria-valuenow={Number(p.toFixed(2))}
+            aria-valuetext={labelOf(p, year)}
+            onKeyDown={key}
+          >
+            <div className="pointer-events-none absolute inset-0 grid grid-cols-12">
+              {MONTHS.map((m, i) => (
+                <span key={m} className={`border-l ${i === 0 ? "border-transparent" : "border-[#f3f3f5] dark:border-[#2c2c2e]"}`} />
+              ))}
+            </div>
+            {model.map((t, r) => (
+              <div key={`${t.name}-${r}`} className="absolute inset-x-0" style={{ top: r * ROW, height: ROW }}>
+                <span className="absolute top-1/2 -translate-y-1/2 text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]" style={{ left: -LABEL }}>
+                  {t.name}
+                </span>
+                {t.bars.map((b) => {
+                  const fill = clamp((p - b.from) / (b.to - b.from || 1));
+                  return (
+                    <div
+                      key={b.label}
+                      className="absolute top-[10px] h-8 overflow-hidden rounded-[10px] bg-[#eef1f6] dark:bg-[#2c2c2e]"
+                      style={{ left: `${(b.from / 12) * 100}%`, width: `${((b.to - b.from) / 12) * 100}%` }}
+                    >
+                      <span className="absolute inset-0 flex items-center truncate px-3 text-[12.5px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">{b.label}</span>
+                      <span
+                        className="absolute inset-0 flex items-center truncate bg-[#0071e3] px-3 text-[12.5px] font-medium text-white dark:bg-[#0a84ff]"
+                        style={{ clipPath: `inset(0 ${(1 - fill) * 100}% 0 0)` }}
+                        aria-hidden="true"
+                      >
+                        {b.label}
+                      </span>
+                    </div>
+                  );
+                })}
+                {t.marks.map((m) => {
+                  const hit = p >= m.at;
+                  return (
+                    <div key={m.label} className="absolute top-1/2 flex -translate-x-[9px] -translate-y-1/2 items-center gap-2" style={{ left: `${(m.at / 12) * 100}%` }}>
+                      <motion.span
+                        className={`h-[18px] w-[18px] rounded-[4px] border-2 transition-colors duration-300 ${
+                          hit
+                            ? "border-[#0071e3] bg-[#0071e3] dark:border-[#0a84ff] dark:bg-[#0a84ff]"
+                            : "border-[#c7c7cc] bg-white dark:border-[#48484a] dark:bg-[#1c1c1e]"
+                        }`}
+                        style={{ rotate: 45 }}
+                        animate={{ scale: hit && !reduce ? [1, 1.35, 1] : 1 }}
+                        transition={{ duration: reduce ? 0 : 0.35 }}
+                      />
+                      <span className={`whitespace-nowrap text-[12.5px] font-medium ${hit ? "text-[#1d1d1f] dark:text-[#f5f5f7]" : "text-[#6e6e73] dark:text-[#a1a1a6]"}`}>{m.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+            {/* playhead */}
+            <div className="pointer-events-none absolute -top-7 bottom-0" style={{ left: `${(p / 12) * 100}%` }}>
+              <span className="absolute left-0 top-0 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d1d1f] px-2 py-[3px] text-[11px] font-semibold tabular-nums text-white shadow-[0_4px_12px_-4px_rgba(0,0,0,.4)] dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+                {labelOf(p, year)}
+              </span>
+              <span className="absolute bottom-0 left-0 top-[22px] w-[2px] -translate-x-1/2 bg-[#1d1d1f] dark:bg-[#f5f5f7]" />
+            </div>
+            {/* today marker */}
+            <span
+              className="pointer-events-none absolute bottom-[-3px] h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#ff3b30] dark:bg-[#ff453a]"
+              style={{ left: `${(todayPos / 12) * 100}%` }}
+              title="Today"
+            />
+          </div>
+        </div>
+      </div>
+      <div aria-live="polite" className="mt-5 grid gap-3 rounded-[18px] bg-[#f5f5f7] p-4 sm:grid-cols-[1fr_auto] sm:items-center dark:bg-[#2c2c2e]">
+        <div className="flex min-h-[28px] flex-wrap items-center gap-2">
+          <span className="text-[12px] font-semibold uppercase tracking-[0.12em] text-[#6e6e73] dark:text-[#a1a1a6]">In flight</span>
+          <AnimatePresence mode="popLayout" initial={false}>
+            {live.length === 0 && (
+              <motion.span key="none" className="text-[14px] text-[#6e6e73] dark:text-[#a1a1a6]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                Nothing this week
+              </motion.span>
+            )}
+            {live.map((b) => (
+              <motion.span
+                key={b.label}
+                layout={!reduce}
+                className="inline-flex items-center gap-2 rounded-full bg-white py-1 pl-3 pr-1 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05)] dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
+                initial={reduce ? false : { opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, scale: 0.85 }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 420, damping: 30 }}
+              >
+                {b.label}
+                <span className="rounded-full bg-[#eef5ff] px-2 py-[1px] text-[12px] tabular-nums text-[#0071e3] dark:bg-[#0a84ff]/20 dark:text-[#0a84ff]">
+                  {Math.round(clamp((p - b.from) / (b.to - b.from || 1)) * 100)}%
+                </span>
+              </motion.span>
+            ))}
+          </AnimatePresence>
+        </div>
+        <span className="text-[14px] text-[#6e6e73] dark:text-[#a1a1a6]">
+          {next ? (
+            <>
+              Next: <span className="font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">{next.label}</span> in {weeks} {weeks === 1 ? "week" : "weeks"}
+            </>
+          ) : (
+            "Year complete"
+          )}
+        </span>
+      </div>
+    </div>
+  );
+}
+```
 
 # Commit Graph Roadmap
 
-Build a roadmap drawn as `git log --graph`. Main runs down the left with release tags, feature work forks off on coloured lanes and merges back, and the current HEAD pulses. The graph draws itself when it scrolls in, hovering a commit lights its whole branch, and clicking a commit opens its commit message below.
+Add the "Commit Graph Roadmap" component from Nexus UI to my project.
 
-## Stack
+Please:
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion.line`, `motion.path`, `motion.span`, `motion.button`, `AnimatePresence`, `useInView`, `useReducedMotion`), inline SVG.
-- File: `components/milestone-timeline/commit-graph-roadmap.tsx`. Named export `CommitGraphRoadmap`, exported types `CommitGraphRoadmapProps`, `RoadmapCommit`, `RoadmapBranch`.
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. The look assumes the Inter font through Tailwind's `font-sans`. If the project uses another font, leave that as it is.
+5. Use it like this: `import { CommitGraphRoadmap } from "@/components/milestone-timeline/commit-graph-roadmap";`. The props are typed and documented in the code.
 
-## API
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-- `RoadmapCommit`: `{ lane: 0 | 1 | 2; tag?: string; title: string; meta: string; body: string; state: "done" | "head" | "next" }`. Lane 0 is main, 1 feature, 2 lab.
-- `RoadmapBranch`: `{ lane: 1 | 2; from: number; to: number; color: string }`: the lane forks from main at row `from` (older, lower) and merges at row `to` (newer, higher). Row 0 is the top.
-- `commits?: RoadmapCommit[]`, newest first. Default (top to bottom):
-  - lane 0, tag v3.0, "Motion Kit", "Planned · Q1", next
-  - lane 0, "Merge charts and sounds", "Planned · Dec", next
-  - lane 1, "Charts", "In progress", head
-  - lane 2, "Sounds", "Ready · Oct", done
-  - lane 1, "Tune panel", "Done · Sep", done
-  - lane 0, tag v2.0, "Nexus Pro", "Shipped · Aug", done
-  - lane 1, "Origami, vinyl, sand", "Done · Jul", done
-  - lane 0, tag v1.4, "Blocks", "Shipped · Jun", done
-  Each has a one-sentence `body` (e.g. "Animated bar, line and ring charts that build as they enter.").
-- `branches?: RoadmapBranch[]`. Default: `{ lane: 1, from: 7, to: 1, color: "#bf5af2" }` and `{ lane: 2, from: 5, to: 1, color: "#ff9f0a" }`.
-- `defaultOpen?: number`: row open first, default the HEAD row.
-- `autoplay?: boolean`, default `false`: opens each commit in turn every 2800ms until touched.
-- `className?: string`.
+--- components/milestone-timeline/commit-graph-roadmap.tsx ---
 
-## Layout and look
+```tsx
+"use client";
 
-- Constants: row height 64, lane x = 22 + lane * 26, row centre y = 32 + row * 64. Lane colours: main `#0a84ff`, feature `#bf5af2`, lab `#ff9f0a`.
-- Card: full width, `max-w-[560px]`, radius 28px, padding 20px (24px from 640px viewport), white / dark `#1c1c1e`, ink `#1d1d1f` / `#f5f5f7`, the usual card shadow (dark: ring `rgba(255,255,255,.08)`). A CSS variable `--surface` is `#ffffff` in light and `#1c1c1e` in dark and is used for the gap ring around dots.
-- Header: monospace 14px semibold "git log --graph" followed by "roadmap" in muted (`#6e6e73` / dark `#a1a1a6`); at the right a legend of three 8px dots with names main, feature, lab (11px muted). Wraps on narrow screens.
-- Graph: relative, height `rows * 64`. An SVG (width `lane2 x + 14`) holds the lines at stroke 3, round caps: the main line is solid from the bottom up to the HEAD row (or the newest done commit when there is no HEAD), then dashed (`2 6`) up to the top at opacity .7. Each branch path forks out of main at row `from`: `M x0 y0 C x0 (y0 - 35), x1 (y0 - 29), x1 (y0 - 64) L x1 (y1 + 64) C x1 (y1 + 29), x0 (y1 + 35), x0 y1`, where x0 is main's x, x1 the lane's x, y0 and y1 the row centres of `from` and `to`.
-- Commit dot: 16px circle centred on its lane at the row centre. Done and head: lane colour fill with a 3px `--surface` ring and a 1.5px halo ring in the lane colour at 20% alpha. Next: `--surface` fill with a 3px lane-colour ring. HEAD also has a 2px ring that expands (scale 1 to 2.3, opacity .8 to 0, 1.5s, repeat, delay 1.4s).
-- Row button: absolute, from `lane2 x + 24` to the right edge, `inset-y-1`, radius 14px, padding 12px by 8px, hover `#f5f5f7` / dark `#2c2c2e`. Content: optional tag pill (mono 11px semibold white on main blue, pill), HEAD pill (mono 11px semibold, ink background with inverse text), the title (15px semibold, tracking -0.01em, truncated; muted for `next`), and under it the meta line (12px muted, truncated). A 14px chevron at the right, rotated 90 degrees when open.
-- Commit message: below the graph, 12px gap: radius 16px, padding 16px, `#f5f5f7` / dark `#2c2c2e`, monospace 12.5px, line height 1.6. Lines: `commit <hex>` muted, where hex is `(0x9f3a1c + row * 0x2b17).toString(16)` + `e` + row; `branch <name>` with the name in the lane colour (`main`, `feature/<first word of title>` or `lab/<first word>`); then the body in the sans font at 14px.
+import { useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, motion, useInView, useReducedMotion } from "framer-motion";
 
-## Motion
+/** One commit row. `lane` 0 is main, 1 is the feature lane, 2 is the lab lane. */
+export type RoadmapCommit = {
+  lane: 0 | 1 | 2;
+  /** Release tag drawn as a pill, e.g. `v2.0`. */
+  tag?: string;
+  title: string;
+  /** Short status line under the title. */
+  meta: string;
+  /** Text shown in the commit message when the row is open. */
+  body: string;
+  /** `done` is solid, `head` is the pulsing current work, `next` is hollow. */
+  state: "done" | "head" | "next";
+};
 
-- When the card is 30% in view (once), draw bottom to top. The main solid line draws `pathLength 0 -> 1` over 1.1s easeInOut; the dashed part fades in after 1.1s. Each branch path draws over 1s easeInOut with delay `(rows - 1 - from) * 0.12 + 0.2`.
-- Dots scale in with a spring (stiffness 500, damping 22) delayed `(rows - 1 - row) * 0.12 + 0.15`. Row buttons fade and slide in from `x -10` with delay `(rows - 1 - row) * 0.12 + 0.25`.
-- Hover or focus on a row sets the active lane: everything on other lanes fades (dots .3, lines .2 to .25, buttons .35). Leaving the graph clears it.
-- The commit message swaps with `AnimatePresence mode="wait"`: height 0 to auto and opacity over .25s.
+/** A feature lane that forks off main at row `from` and merges back at row `to`. Row 0 is the top (newest). */
+export type RoadmapBranch = { lane: 1 | 2; from: number; to: number; color: string };
 
-## Interaction and states
+export interface CommitGraphRoadmapProps {
+  /** Commits, newest first, like `git log --graph`. Defaults to a sample product roadmap. */
+  commits?: RoadmapCommit[];
+  /** Branch lanes drawn between the commits. Must match the commit rows. */
+  branches?: RoadmapBranch[];
+  /** Row opened first. Defaults to the HEAD commit. */
+  defaultOpen?: number;
+  /** Opens each commit in turn, once the graph is on screen, until someone touches it. */
+  autoplay?: boolean;
+  /** Extra classes for the card. */
+  className?: string;
+}
 
-- Click a row to open it; click the open row to close it. Only one is open. The first open row is `defaultOpen` or the HEAD row.
-- Pointer enter on a row (or focus on its button) highlights its lane; blur clears.
-- Any pointer press or click marks the card touched, which stops autoplay for good.
+// newest at the top, like `git log --graph`
+const COMMITS: RoadmapCommit[] = [
+  { lane: 0, tag: "v3.0", title: "Motion Kit", meta: "Planned · Q1", body: "Templates, blocks and a tuning panel for every component.", state: "next" },
+  { lane: 0, title: "Merge charts and sounds", meta: "Planned · Dec", body: "Both branches land on main together for the 2.5 release.", state: "next" },
+  { lane: 1, title: "Charts", meta: "In progress", body: "Animated bar, line and ring charts that build as they enter.", state: "head" },
+  { lane: 2, title: "Sounds", meta: "Ready · Oct", body: "Optional click and whoosh sounds, off by default.", state: "done" },
+  { lane: 1, title: "Tune panel", meta: "Done · Sep", body: "Change springs and timing live, copy the result.", state: "done" },
+  { lane: 0, tag: "v2.0", title: "Nexus Pro", meta: "Shipped · Aug", body: "Pro library with 60 premium blocks.", state: "done" },
+  { lane: 1, title: "Origami, vinyl, sand", meta: "Done · Jul", body: "The rare set: odd interactions people stop for.", state: "done" },
+  { lane: 0, tag: "v1.4", title: "Blocks", meta: "Shipped · Jun", body: "Hero, pricing, FAQ and footer blocks.", state: "done" },
+];
+// branch lane spans [from row (older, bottom) to row (newer, top)]
+const BRANCHES: RoadmapBranch[] = [
+  { lane: 1, from: 7, to: 1, color: "#bf5af2" },
+  { lane: 2, from: 5, to: 1, color: "#ff9f0a" },
+];
 
-## Autoplay demo
+const LANE_COLOR = ["#0a84ff", "#bf5af2", "#ff9f0a"];
+const LANE_NAME = ["main", "feature", "lab"];
+const RH = 64;
+const LX = 22;
+const LW = 26;
+const lx = (l: number) => LX + l * LW;
+const ry = (r: number) => RH / 2 + r * RH;
 
-With `autoplay`, not reduced motion, once the graph has drawn in and while the card is on screen: advance the open row every 2800ms, wrapping; the first touch clears the interval. Cleared on unmount.
+function branchPath(b: RoadmapBranch) {
+  // fork out of main at `from`, run up the lane, merge back at `to`
+  const x0 = lx(0);
+  const x1 = lx(b.lane);
+  const y0 = ry(b.from);
+  const y1 = ry(b.to);
+  return `M ${x0} ${y0} C ${x0} ${y0 - RH * 0.55}, ${x1} ${y0 - RH * 0.45}, ${x1} ${y0 - RH} L ${x1} ${y1 + RH} C ${x1} ${y1 + RH * 0.45}, ${x0} ${y1 + RH * 0.55}, ${x0} ${y1}`;
+}
 
-## Accessibility
+const slug = (title: string) => title.toLowerCase().split(/[ ,]/)[0];
+const branchName = (c: RoadmapCommit) => (c.lane === 0 ? "main" : `${c.lane === 1 ? "feature" : "lab"}/${slug(c.title)}`);
 
-- Each row is a real `<button>` with `aria-expanded` and `aria-controls` pointing at the message panel. The panel is a `role="region"` with `aria-label="Commit message"` and `aria-live="polite"`. The SVG is `aria-hidden`.
-- Visible focus outline 2px, offset 1px, `#0071e3` (dark `#0a84ff`).
-- Reduced motion: no draw-in delays or springs (everything appears at once), no HEAD pulse, no autoplay.
+/**
+ * A roadmap drawn as a commit graph. Main runs down the left with release
+ * tags; feature work forks off on coloured lanes and merges back. The graph
+ * draws itself when it scrolls in, the current HEAD pulses, hovering a commit
+ * lights its whole branch, and clicking opens the commit message.
+ */
+export function CommitGraphRoadmap({ commits = COMMITS, branches = BRANCHES, defaultOpen, autoplay = false, className = "" }: CommitGraphRoadmapProps) {
+  const reduce = useReducedMotion() ?? false;
+  const uid = useId().replace(/:/g, "");
+  const box = useRef<HTMLDivElement>(null);
+  const touched = useRef(false);
+  const seen = useInView(box, { once: true, amount: 0.3 });
+  const visible = useInView(box, { amount: 0.3 });
+  const headRow = commits.findIndex((c) => c.state === "head");
+  const [hoverLane, setHoverLane] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(() => {
+    const first = defaultOpen ?? (headRow >= 0 ? headRow : 0);
+    return commits.length ? Math.min(commits.length - 1, Math.max(0, first)) : null;
+  });
 
-## Acceptance checklist
+  const count = commits.length;
+  useEffect(() => {
+    if (!autoplay || reduce || !seen || !visible || count < 2) return;
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      setOpen((o) => (o === null ? 0 : (o + 1) % count));
+    }, 2800);
+    return () => clearInterval(t);
+  }, [autoplay, reduce, seen, visible, count]);
 
-- [ ] On scroll-in main and both branches draw from the bottom up, with the dots popping in behind them.
-- [ ] Main is solid below HEAD and dashed above it.
-- [ ] HEAD pulses; hovering any commit dims the other lanes.
-- [ ] Clicking a commit opens its message with a hash, branch and body; clicking again closes it.
-- [ ] Dots keep their gap ring colour on both light and dark cards.
-- [ ] Fits at 320px viewport width without overflow.
+  const H = count * RH;
+  const dim = (lane: number) => hoverLane !== null && hoverLane !== lane;
+  // drawing order: bottom (oldest) first
+  const delayFor = (r: number) => (reduce ? 0 : (count - 1 - r) * 0.12);
+  // main is solid up to the HEAD commit (or the newest finished one) and dashed above it
+  const done = commits.findIndex((c) => c.state === "done");
+  const boundary = headRow >= 0 ? headRow : done >= 0 ? done : 0;
+  const openCommit = open !== null ? commits[open] : undefined;
+  const panelId = `${uid}-panel`;
+
+  return (
+    <div
+      ref={box}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      className={`w-full max-w-[560px] rounded-[28px] bg-white p-5 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] [--surface:#ffffff] sm:p-6 dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] dark:[--surface:#1c1c1e] ${className}`}
+    >
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <h3 className="m-0 font-mono text-[14px] font-semibold">
+          git log --graph <span className="text-[#6e6e73] dark:text-[#a1a1a6]">roadmap</span>
+        </h3>
+        <div className="flex gap-3 text-[11px] text-[#6e6e73] dark:text-[#a1a1a6]">
+          {LANE_NAME.map((n, i) => (
+            <span key={n} className="flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full" style={{ background: LANE_COLOR[i] }} />
+              {n}
+            </span>
+          ))}
+        </div>
+      </div>
+      <div className="relative" style={{ height: H }} onPointerLeave={() => setHoverLane(null)}>
+        <svg className="absolute left-0 top-0" width={lx(2) + 14} height={H} aria-hidden="true">
+          {/* main line: past is solid, future is dashed */}
+          <motion.line
+            x1={lx(0)}
+            x2={lx(0)}
+            y1={H}
+            y2={ry(boundary)}
+            stroke={LANE_COLOR[0]}
+            strokeWidth="3"
+            strokeLinecap="round"
+            initial={{ pathLength: 0 }}
+            animate={{ pathLength: seen ? 1 : 0, opacity: dim(0) ? 0.25 : 1 }}
+            transition={{ pathLength: { duration: reduce ? 0 : 1.1, ease: "easeInOut" } }}
+          />
+          <motion.line
+            x1={lx(0)}
+            x2={lx(0)}
+            y1={ry(boundary)}
+            y2={ry(0)}
+            stroke={LANE_COLOR[0]}
+            strokeWidth="3"
+            strokeDasharray="2 6"
+            strokeLinecap="round"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: seen ? (dim(0) ? 0.2 : 0.7) : 0 }}
+            transition={{ delay: reduce ? 0 : 1.1 }}
+          />
+          {branches.map((b) => (
+            <motion.path
+              key={`${b.lane}-${b.from}-${b.to}`}
+              d={branchPath(b)}
+              fill="none"
+              stroke={b.color}
+              strokeWidth="3"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: seen ? 1 : 0, opacity: dim(b.lane) ? 0.2 : 1 }}
+              transition={{ pathLength: { duration: reduce ? 0 : 1, delay: delayFor(b.from) + (reduce ? 0 : 0.2), ease: "easeInOut" } }}
+            />
+          ))}
+        </svg>
+        {commits.map((r, i) => {
+          const c = LANE_COLOR[r.lane];
+          const isOpen = open === i;
+          const wait = seen ? delayFor(i) : 0;
+          return (
+            <div key={`${r.title}-${i}`} className="absolute inset-x-0" style={{ top: i * RH, height: RH }} onPointerEnter={() => setHoverLane(r.lane)}>
+              {/* commit dot */}
+              <motion.span
+                className="absolute rounded-full"
+                style={{
+                  left: lx(r.lane) - 8,
+                  top: RH / 2 - 8,
+                  width: 16,
+                  height: 16,
+                  background: r.state === "next" ? "var(--surface)" : c,
+                  boxShadow: r.state === "next" ? `0 0 0 3px ${c}` : `0 0 0 3px var(--surface), 0 0 0 4.5px ${c}33`,
+                }}
+                initial={{ scale: 0 }}
+                animate={{ scale: seen ? 1 : 0, opacity: dim(r.lane) ? 0.3 : 1 }}
+                transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 22, delay: wait + (seen ? 0.15 : 0) }}
+              />
+              {r.state === "head" && seen && !reduce && (
+                <motion.span
+                  className="absolute rounded-full"
+                  style={{ left: lx(r.lane) - 8, top: RH / 2 - 8, width: 16, height: 16, border: `2px solid ${c}` }}
+                  animate={{ scale: [1, 2.3], opacity: [0.8, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 1.4 }}
+                />
+              )}
+              <motion.button
+                type="button"
+                onClick={() => {
+                  touched.current = true;
+                  setOpen(isOpen ? null : i);
+                }}
+                onFocus={() => setHoverLane(r.lane)}
+                onBlur={() => setHoverLane(null)}
+                aria-expanded={isOpen}
+                aria-controls={panelId}
+                className="absolute inset-y-1 right-0 flex items-center gap-2 rounded-[14px] px-3 py-2 text-left outline-none transition-colors hover:bg-[#f5f5f7] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0071e3] dark:hover:bg-[#2c2c2e] dark:focus-visible:outline-[#0a84ff]"
+                style={{ left: lx(2) + 24 }}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: seen ? (dim(r.lane) ? 0.35 : 1) : 0, x: seen || reduce ? 0 : -10 }}
+                transition={reduce ? { duration: 0 } : { delay: wait + (seen ? 0.25 : 0) }}
+              >
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2">
+                    {r.tag && (
+                      <span className="rounded-full px-2 py-[1px] font-mono text-[11px] font-semibold text-white" style={{ background: LANE_COLOR[0] }}>
+                        {r.tag}
+                      </span>
+                    )}
+                    {r.state === "head" && (
+                      <span className="rounded-full bg-[#1d1d1f] px-2 py-[1px] font-mono text-[11px] font-semibold text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">HEAD</span>
+                    )}
+                    <span className={`truncate text-[15px] font-semibold tracking-[-0.01em] ${r.state === "next" ? "text-[#6e6e73] dark:text-[#a1a1a6]" : ""}`}>{r.title}</span>
+                  </span>
+                  <span className="block truncate text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">{r.meta}</span>
+                </span>
+                <motion.svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#8e8e93"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  className="flex-none"
+                  animate={{ rotate: isOpen ? 90 : 0 }}
+                  transition={reduce ? { duration: 0 } : undefined}
+                  aria-hidden="true"
+                >
+                  <path d="M9 6l6 6-6 6" />
+                </motion.svg>
+              </motion.button>
+            </div>
+          );
+        })}
+      </div>
+      <div id={panelId} role="region" aria-label="Commit message" aria-live="polite">
+        <AnimatePresence initial={false} mode="wait">
+          {open !== null && openCommit && (
+            <motion.div
+              key={open}
+              initial={reduce ? false : { opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, height: 0 }}
+              transition={{ duration: reduce ? 0 : 0.25 }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 rounded-[16px] bg-[#f5f5f7] p-4 font-mono text-[12.5px] leading-[1.6] text-[#1d1d1f] dark:bg-[#2c2c2e] dark:text-[#f5f5f7]">
+                <div className="text-[#6e6e73] dark:text-[#a1a1a6]">commit {(0x9f3a1c + open * 0x2b17).toString(16)}e{open}</div>
+                <div className="break-words">
+                  <span className="text-[#6e6e73] dark:text-[#a1a1a6]">branch </span>
+                  <span style={{ color: LANE_COLOR[openCommit.lane] }}>{branchName(openCommit)}</span>
+                </div>
+                <div className="mt-2 font-sans text-[14px]">{openCommit.body}</div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+```

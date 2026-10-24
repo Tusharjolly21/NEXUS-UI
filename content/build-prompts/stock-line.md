@@ -1,67 +1,414 @@
 # Stock Line
 
-Build a trading-app price chart card. Scrub along it and a dot rides the line, the price rolls digit by digit and the change turns green or red. A 1D/1W/1M/1Y control morphs the line into the next shape instead of redrawing it, and on 1D the last price ticks live. Precise, calm and springy, like Apple Stocks.
+Add the "Stock Line" component from Nexus UI to my project.
 
-## Stack
+A trading-app price chart: scrub along it and a dot rides the line while the price rolls digit by digit and the change turns green or red. Switching range morphs the line into its new shape, and on 1D the last price keeps ticking live.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useMotionValueEvent`, `useSpring`, `useTransform`, `layoutId`).
-- File: `components/stock-line/stock-line.tsx`. Named export `StockLine`, plus `StockLineProps`, `StockLineRange` (`"1D" | "1W" | "1M" | "1Y"`) and `StockLineTheme`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { StockLine } from "@/components/stock-line";`. The props are typed and documented in the code.
 
-- `theme?: "auto" | "light" | "dark"`, default `"auto"` (auto follows a `.dark` ancestor).
-- `symbol?: string`, default `"NXUS"`.
-- `smooth?: boolean`, default `true`: cubic curves vs straight segments.
-- `fill?: boolean`, default `true`: gradient area under the line.
-- `up?: string`, default `"#30d158"`; `down?: string`, default `"#ff453a"`.
-- `autoplay?: boolean`, default `false`.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Data
+--- components/stock-line/index.ts ---
 
-64 points per range from a seeded random walk, LCG `s = (s·9301 + 49297) mod 233280`, `r = s/233280`. Walk from `start`: each step `v += (end − v)/max(1, 64 − i) + (r − 0.5)·vol`, and force the last point to `end`. All end at 58,708.83. 1D: seed 3, start 57,420, vol 260, labels 9:30 AM–4:00 PM. 1W: seed 8, 55,980, 520, labels Mon–Fri. 1M: seed 21, 60,210, 900, labels Sep 19 – Oct 19 2026. 1Y: seed 42, 41,250, 1,900, labels "Oct 2025"–"Oct 2026". No network, no `Math.random`.
+```ts
+export { StockLine } from "./stock-line";
+export type { StockLineProps, StockLineRange, StockLineTheme } from "./stock-line";
+```
 
-## Layout and look
+--- components/stock-line/stock-line.tsx ---
 
-- Palette in CSS variables. Light / dark: card `#ffffff` / `#1c1c1e`; text `#1d1d1f` / `#f5f5f7`; secondary `#6e6e73` / `#98989d`; grid `#ececf0` / `#2c2c2e`; range track `#f0f0f3` / `#2c2c2e`; selected pill `#ffffff` / `#48484a`; shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` / `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.8)`.
-- Card: 380px wide (`max-width: 100%`), radius 24px, padding 20px.
-- Top row: symbol (13px semibold, secondary); on 1D a "Live" badge (11px medium) with an 8px `up` dot and a pulsing copy.
-- Price: 4px below, 34px semibold, tracking −0.035em: "$", the whole part as rolling digits (commas static), then "." and the cents at 20px in secondary.
-- Change: 13px medium tabular, `+1,288.83 (+2.24%)` with a true minus `−` when negative, coloured `up`/`down`, then 8px later a regular secondary label: "Today" (1D) / "Past 1W" etc., or the scrubbed point's label.
-- Plot: 16px below; SVG viewBox `0 0 340 140`, full width, `overflow: visible`. Normalise prices to 0 (high) … 1 (low); `x = i/63·340`, `y = 8 + n·124`. A dashed (`2 4`) grid line at the first point's y. Smooth path: for each segment a cubic with both control points at the midpoint x and the endpoint ys. Area = line path + `L340 140 L0 140 Z`, filled by a vertical gradient of the current colour from .28 to 0 opacity (gradient id from a sanitised `useId`). Line stroke 2, round caps/joins; colours transition over .25s.
-- Dot: a 9px-radius halo in the colour at .18 opacity and a 4.5px circle filled with the card colour, 2.2 stroke in the colour. While scrubbing, a vertical dashed (`3 3`) line at the dot x, secondary at .5 opacity.
-- Range control: 16px below, full width, rounded-full, 3px padding; four equal 28px buttons, 12px semibold; pill shadow `0 1px 3px rgba(0,0,0,.15)`.
+```tsx
+"use client";
+import { useCallback, useEffect, useId, useRef, useState, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform, type MotionValue } from "framer-motion";
 
-## Motion
+export type StockLineTheme = "auto" | "light" | "dark";
+export type StockLineRange = "1D" | "1W" | "1M" | "1Y";
 
-- Rolling digit: each digit is a 1em-tall clipped column of 0–9 whose `y` springs to `−d·10%` (stiffness 260, damping 28). Key characters from the right so columns stay in place when the number gains a digit.
-- Morph: keep `from` and `to` arrays of normalised values and a progress motion value. On range change, set `from` to the currently interpolated shape (so mid-morph switches continue smoothly), `to` to the new range, reset progress to 0 and animate it to 1 with a spring, stiffness 120, damping 20. The path is a `useTransform` of progress and a `live` offset: `lerp(from, to, p)`, then add `live` to the last point clamped to 0..1.
-- Live tick (1D only): every 1.4s draw a seeded delta `(r − 0.45)·120` dollars, add it to the shown last price, and animate `live` to `−delta/(high − low)` with a spring, stiffness 200, damping 18. Changing range resets the delta and tweens `live` to 0 over 0.3s.
-- Dot: raw x/y motion values set from the displayed shape at the scrubbed index (or the last point), smoothed by springs (stiffness 600, damping 40). Re-place it whenever the path changes, so it rides the morph and the live tick.
-- Change colour animates over 0.25s. Live pulse: scale 1→2.4, opacity .6→0, 1.4s, repeating. Pill: per-instance `layoutId`, spring 500/36.
+export interface StockLineProps {
+  /** "auto" follows the page (`.dark` on an ancestor); "light" or "dark" pins the card's palette. */
+  theme?: StockLineTheme;
+  /** Ticker shown in the top-left corner and read out in the chart's label. */
+  symbol?: string;
+  /** Draw the line as smooth cubic curves instead of straight segments. */
+  smooth?: boolean;
+  /** Fade a gradient area under the line. */
+  fill?: boolean;
+  /** Line, dot and change colour while the price is at or above the range's open. */
+  up?: string;
+  /** Line, dot and change colour while the price is below the range's open. */
+  down?: string;
+  /** Cycles through the ranges and sweeps the dot along each one until someone interacts. */
+  autoplay?: boolean;
+}
 
-## Interaction and states
+/**
+ * Palette as CSS variables so SVG fills and inline styles can follow the theme.
+ * Written out in full so Tailwind sees every class.
+ */
+const THEME_VARS: Record<StockLineTheme, string> = {
+  light:
+    "[--sl-card:#ffffff] [--sl-text:#1d1d1f] [--sl-sub:#6e6e73] [--sl-grid:#ececf0] [--sl-seg:#f0f0f3] [--sl-seg-on:#ffffff] [--sl-edge:0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]",
+  dark:
+    "[--sl-card:#1c1c1e] [--sl-text:#f5f5f7] [--sl-sub:#98989d] [--sl-grid:#2c2c2e] [--sl-seg:#2c2c2e] [--sl-seg-on:#48484a] [--sl-edge:0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
+  auto:
+    "[--sl-card:#ffffff] [--sl-text:#1d1d1f] [--sl-sub:#6e6e73] [--sl-grid:#ececf0] [--sl-seg:#f0f0f3] [--sl-seg-on:#ffffff] [--sl-edge:0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:[--sl-card:#1c1c1e] dark:[--sl-text:#f5f5f7] dark:[--sl-sub:#98989d] dark:[--sl-grid:#2c2c2e] dark:[--sl-seg:#2c2c2e] dark:[--sl-seg-on:#48484a] dark:[--sl-edge:0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
+};
 
-- Pointer move/down on the plot sets the index `round((x/width)·63)`, clamped; leaving clears it (on touch that is when the finger lifts). `touch-action: none`, crosshair cursor, no selection.
-- With an index, the price shows that point and the change is measured from the range's first point; without one, the (live) last price.
-- The plot is focusable: Left/Right (Shift for 8 points), Up/Down, Home/End, Escape clears; blur clears.
+const RANGES: readonly StockLineRange[] = ["1D", "1W", "1M", "1Y"];
+const N = 64, W = 340, H = 140, PAD = 8;
 
-## Autoplay demo
+const lcg = (s: number) => (s * 9301 + 49297) % 233280;
 
-Every 4.2s switch to the next range; 0.9s later sweep the index from 0 to the end in steps of 2 every 40ms, then clear it. A `touched` ref set by any pointer down, click, scrub or key stops it for good. Clear all intervals and timeouts on unmount.
+/** Seeded random walk from `start` that is pulled onto `end` by the last point. */
+function walk(seed: number, start: number, end: number, vol: number) {
+  let s = seed;
+  const r = () => (s = lcg(s)) / 233280;
+  const pts: number[] = [];
+  let v = start;
+  for (let i = 0; i < N; i++) {
+    const pull = (end - v) / Math.max(1, N - i);
+    v += pull + (r() - 0.5) * vol;
+    pts.push(v);
+  }
+  pts[N - 1] = end;
+  return pts;
+}
+const SERIES: Record<StockLineRange, { pts: number[]; labels: (i: number) => string }> = {
+  "1D": {
+    pts: walk(3, 57420, 58708.83, 260),
+    labels: (i) => {
+      const m = 9 * 60 + 30 + Math.round((i / (N - 1)) * 390);
+      return `${Math.floor(m / 60) % 12 || 12}:${String(m % 60).padStart(2, "0")} ${m >= 720 ? "PM" : "AM"}`;
+    },
+  },
+  "1W": { pts: walk(8, 55980, 58708.83, 520), labels: (i) => ["Mon", "Tue", "Wed", "Thu", "Fri"][Math.min(4, Math.floor((i / N) * 5))] },
+  "1M": {
+    pts: walk(21, 60210, 58708.83, 900),
+    labels: (i) => new Date(2026, 8, 19 + Math.round((i / (N - 1)) * 30)).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+  },
+  "1Y": {
+    pts: walk(42, 41250, 58708.83, 1900),
+    labels: (i) => new Date(2025, 9 + Math.round((i / (N - 1)) * 12), 1).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+  },
+};
 
-## Accessibility
+/** Map prices to 0 (top, highest) .. 1 (bottom, lowest). */
+const norm = (pts: number[]) => {
+  const lo = Math.min(...pts), hi = Math.max(...pts);
+  return pts.map((p) => (hi - p) / (hi - lo || 1));
+};
+const toXY = (n: number[]) => n.map((v, i) => [(i / (N - 1)) * W, PAD + v * (H - PAD * 2)] as const);
+function pathOf(xy: readonly (readonly [number, number])[], smooth: boolean) {
+  if (!smooth) return xy.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(2)} ${y.toFixed(2)}`).join(" ");
+  let d = `M${xy[0][0]} ${xy[0][1]}`;
+  for (let i = 1; i < xy.length; i++) {
+    const [x0, y0] = xy[i - 1], [x1, y1] = xy[i];
+    const cx = (x0 + x1) / 2;
+    d += ` C${cx.toFixed(2)} ${y0.toFixed(2)} ${cx.toFixed(2)} ${y1.toFixed(2)} ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+  }
+  return d;
+}
+const money = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-- Plot: `role="group"`, `aria-roledescription="chart"`, `aria-label` "NXUS price over 1D: open to last, low …, high …" plus a keyboard hint; the SVG is `aria-hidden`.
-- The rolling digits are `aria-hidden`; a visually hidden span holds the plain price.
-- A visually hidden `aria-live="polite"` region announces "10:42 AM: $58,120.40, +700.40 (+1.22%)" only after the user interacts.
-- Range buttons: `role="tablist"` / `role="tab"` with `aria-selected`; focus ring 2px `#0071e3` (dark `#0a84ff`).
+/** One digit column that rolls to its value. */
+function Digit({ d }: { d: number }) {
+  const y = useSpring(-d * 10, { stiffness: 260, damping: 28 });
+  useEffect(() => {
+    y.set(-d * 10);
+  }, [d, y]);
+  const ty = useTransform(y, (v) => `${v}%`);
+  return (
+    <span className="relative inline-block h-[1em] overflow-hidden leading-none">
+      <span className="invisible">0</span>
+      <motion.span className="absolute left-0 top-0 flex flex-col" style={{ y: ty }}>
+        {Array.from({ length: 10 }, (_, i) => (
+          <span key={i} className="block h-[1em] leading-none">{i}</span>
+        ))}
+      </motion.span>
+    </span>
+  );
+}
 
-## Acceptance checklist
+/** A number whose digits roll independently; keyed from the right so columns stay put as width changes. */
+function Rolling({ text }: { text: string }) {
+  const chars = text.split("");
+  return (
+    <span className="inline-flex tabular-nums" aria-hidden="true">
+      {chars.map((c, i) => {
+        const key = chars.length - i;
+        return /\d/.test(c) ? <Digit key={key} d={+c} /> : <span key={`s${key}`} className="leading-none">{c}</span>;
+      })}
+    </span>
+  );
+}
 
-- [ ] Scrubbing moves the dot along the line and the price digits roll individually.
-- [ ] The change flips to red with a true minus when below the open.
-- [ ] Switching range morphs the existing line into the new one; switching mid-morph continues smoothly.
-- [ ] On 1D the last point and price tick every 1.4s and the dot follows.
-- [ ] `smooth={false}` draws straight segments immediately; `fill={false}` removes the area.
-- [ ] Keyboard and touch scrubbing work; the live region announces values.
-- [ ] Autoplay cycles ranges with a sweep and stops on the first interaction.
+/**
+ * A price chart in the style of a trading app. Run along it and a dot rides
+ * the line while the price rolls digit by digit and the change turns green or
+ * red. Switching range morphs the line from one shape into the next instead of
+ * redrawing it, and on 1D the last point keeps ticking live.
+ */
+export function StockLine({
+  theme = "auto",
+  symbol = "NXUS",
+  smooth = true,
+  fill = true,
+  up = "#30d158",
+  down = "#ff453a",
+  autoplay = false,
+}: StockLineProps) {
+  const gid = `sl-${useId().replace(/[^a-z0-9]/gi, "")}`;
+  const [range, setRange] = useState<StockLineRange>("1D");
+  const [idx, setIdx] = useState<number | null>(null);
+  const [liveDelta, setLiveDelta] = useState(0);
+  const [engaged, setEngaged] = useState(false);
+  const touched = useRef(false);
+  const plot = useRef<HTMLDivElement>(null);
+
+  // Morph: remember the shape we came from and tween a 0..1 progress.
+  const from = useRef<number[]>(norm(SERIES["1D"].pts));
+  const to = useRef<number[]>(norm(SERIES["1D"].pts));
+  const prog = useMotionValue(1);
+  const live = useMotionValue(0);
+  const shown = useRef<number[]>(norm(SERIES["1D"].pts));
+  const rangeRef = useRef<StockLineRange>("1D");
+  const smoothRef = useRef(smooth);
+  const go = useCallback(
+    (r: StockLineRange) => {
+      if (r === rangeRef.current) return;
+      rangeRef.current = r;
+      setLiveDelta(0);
+      animate(live, 0, { duration: 0.3 });
+      const p = prog.get();
+      from.current = from.current.map((a, i) => a + (to.current[i] - a) * p);
+      to.current = norm(SERIES[r].pts);
+      prog.set(0);
+      animate(prog, 1, { type: "spring", stiffness: 120, damping: 20 });
+      setRange(r);
+      setIdx(null);
+    },
+    [live, prog],
+  );
+  const line = useTransform([prog, live] as MotionValue<number>[], ([p, l]: number[]) => {
+    const n = from.current.map((a, i) => a + (to.current[i] - a) * p);
+    n[N - 1] = Math.max(0, Math.min(1, n[N - 1] + l));
+    shown.current = n;
+    return pathOf(toXY(n), smoothRef.current);
+  });
+  // Redraw when the curve style changes (nudging `live` re-runs the transform).
+  useEffect(() => {
+    smoothRef.current = smooth;
+    live.set(live.get() + 1e-9);
+  }, [smooth, live]);
+  const area = useTransform(line, (d) => `${d} L${W} ${H} L0 ${H} Z`);
+
+  const pts = SERIES[range].pts;
+  const last = pts[N - 1] + (range === "1D" ? liveDelta : 0);
+  const price = idx === null ? last : pts[idx];
+  const change = price - pts[0];
+  const pct = (change / pts[0]) * 100;
+  const color = change >= 0 ? up : down;
+  const [whole, cents] = money(price).split(".");
+
+  // Dot rides the displayed line, so it follows the morph too.
+  const dotX = useMotionValue(W), dotY = useMotionValue(H / 2);
+  const sx = useSpring(dotX, { stiffness: 600, damping: 40 }), sy = useSpring(dotY, { stiffness: 600, damping: 40 });
+  const place = useCallback(
+    (i: number) => {
+      const [x, y] = toXY(shown.current)[i];
+      dotX.set(x);
+      dotY.set(y);
+    },
+    [dotX, dotY],
+  );
+  useMotionValueEvent(line, "change", () => place(idx ?? N - 1));
+  useEffect(() => {
+    place(idx ?? N - 1);
+  }, [idx, place]);
+
+  const engage = () => {
+    touched.current = true;
+    setEngaged(true);
+  };
+
+  const pick = (e: RPointerEvent) => {
+    engage();
+    const el = plot.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    setIdx(Math.max(0, Math.min(N - 1, Math.round(((e.clientX - r.left) / r.width) * (N - 1)))));
+  };
+
+  const onKey = (e: RKeyboardEvent) => {
+    const step = e.shiftKey ? 8 : 1;
+    let next: number | null | undefined;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") next = idx === null ? 0 : Math.min(N - 1, idx + step);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = idx === null ? N - 1 : Math.max(0, idx - step);
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = N - 1;
+    else if (e.key === "Escape") next = null;
+    if (next === undefined) return;
+    e.preventDefault();
+    engage();
+    setIdx(next);
+  };
+
+  // On 1D the last price ticks every 1.4s (seeded, so every render agrees).
+  const tickSeed = useRef(7);
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (range !== "1D") return;
+      tickSeed.current = lcg(tickSeed.current);
+      const d = (tickSeed.current / 233280 - 0.45) * 120;
+      setLiveDelta(d);
+      const lo = Math.min(...pts), hi = Math.max(...pts);
+      animate(live, -d / (hi - lo || 1), { type: "spring", stiffness: 200, damping: 18 });
+    }, 1400);
+    return () => clearInterval(id);
+  }, [range, pts, live]);
+
+  useEffect(() => {
+    if (!autoplay) return;
+    let k = 0;
+    let sweep: ReturnType<typeof setInterval> | undefined;
+    let wait: ReturnType<typeof setTimeout> | undefined;
+    const id = setInterval(() => {
+      if (touched.current) {
+        clearInterval(id);
+        if (sweep) clearInterval(sweep);
+        return;
+      }
+      go(RANGES[++k % RANGES.length]);
+      let i = 0;
+      if (sweep) clearInterval(sweep);
+      if (wait) clearTimeout(wait);
+      wait = setTimeout(() => {
+        sweep = setInterval(() => {
+          if (touched.current || i >= N) {
+            clearInterval(sweep);
+            setIdx(null);
+            return;
+          }
+          setIdx(i);
+          i += 2;
+        }, 40);
+      }, 900);
+    }, 4200);
+    return () => {
+      clearInterval(id);
+      if (sweep) clearInterval(sweep);
+      if (wait) clearTimeout(wait);
+    };
+  }, [autoplay, go]);
+
+  const sign = change >= 0 ? "+" : "−";
+  const when = idx === null ? (range === "1D" ? "Today" : `Past ${range}`) : SERIES[range].labels(idx);
+  const lo = Math.min(...pts), hi = Math.max(...pts);
+  const announce = engaged && idx !== null ? `${when}: $${money(price)}, ${sign}${money(Math.abs(change))} (${sign}${Math.abs(pct).toFixed(2)}%)` : "";
+
+  return (
+    <div
+      className={`w-[380px] max-w-full rounded-[24px] p-5 transition-colors duration-300 ${THEME_VARS[theme]}`}
+      style={{ background: "var(--sl-card)", boxShadow: "var(--sl-edge)" }}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <span className="text-[13px] font-semibold" style={{ color: "var(--sl-sub)" }}>{symbol}</span>
+        {range === "1D" && (
+          <span className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: "var(--sl-sub)" }}>
+            <span className="relative flex h-2 w-2">
+              <motion.span
+                className="absolute inset-0 rounded-full"
+                style={{ background: up }}
+                animate={{ scale: [1, 2.4], opacity: [0.6, 0] }}
+                transition={{ duration: 1.4, repeat: Infinity }}
+              />
+              <span className="relative h-2 w-2 rounded-full" style={{ background: up }} />
+            </span>
+            Live
+          </span>
+        )}
+      </div>
+      <div className="mt-1 flex items-baseline text-[34px] font-semibold tracking-[-0.035em]" style={{ color: "var(--sl-text)" }}>
+        <span className="sr-only">${money(price)}</span>
+        <span aria-hidden="true">$</span>
+        <Rolling text={whole} />
+        <span className="text-[20px]" style={{ color: "var(--sl-sub)" }} aria-hidden="true">
+          .<Rolling text={cents} />
+        </span>
+      </div>
+      <motion.div className="text-[13px] font-medium tabular-nums" animate={{ color }} transition={{ duration: 0.25 }}>
+        {sign}
+        {money(Math.abs(change))} ({sign}
+        {Math.abs(pct).toFixed(2)}%)
+        <span className="ml-2 font-normal" style={{ color: "var(--sl-sub)" }}>{when}</span>
+      </motion.div>
+
+      <div
+        ref={plot}
+        tabIndex={0}
+        role="group"
+        aria-roledescription="chart"
+        aria-label={`${symbol} price over ${range}: ${money(pts[0])} to ${money(last)}, low ${money(lo)}, high ${money(hi)}. Use the arrow keys to scrub.`}
+        className="relative mt-4 cursor-crosshair touch-none select-none rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 focus-visible:ring-offset-[color:var(--sl-card)] dark:focus-visible:ring-[#0a84ff]"
+        onPointerMove={pick}
+        onPointerDown={pick}
+        onPointerLeave={() => setIdx(null)}
+        onKeyDown={onKey}
+        onBlur={() => setIdx(null)}
+      >
+        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full overflow-visible" aria-hidden="true">
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor={color} stopOpacity=".28" />
+              <stop offset="1" stopColor={color} stopOpacity="0" />
+            </linearGradient>
+          </defs>
+          <line x1="0" x2={W} y1={toXY(norm(pts))[0][1]} y2={toXY(norm(pts))[0][1]} style={{ stroke: "var(--sl-grid)" }} strokeDasharray="2 4" />
+          {fill && <motion.path d={area} fill={`url(#${gid})`} style={{ transition: "fill .25s" }} />}
+          <motion.path d={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transition: "stroke .25s" }} />
+          {idx !== null && <motion.line x1={sx} x2={sx} y1={0} y2={H} style={{ stroke: "var(--sl-sub)" }} strokeOpacity=".5" strokeDasharray="3 3" />}
+          <motion.circle cx={sx} cy={sy} r="9" fill={color} opacity=".18" />
+          <motion.circle cx={sx} cy={sy} r="4.5" style={{ fill: "var(--sl-card)" }} stroke={color} strokeWidth="2.2" />
+        </svg>
+      </div>
+      <div className="sr-only" aria-live="polite">{announce}</div>
+
+      <div role="tablist" aria-label="Range" className="mt-4 flex justify-between rounded-full p-[3px]" style={{ background: "var(--sl-seg)" }}>
+        {RANGES.map((r) => (
+          <button
+            key={r}
+            role="tab"
+            type="button"
+            aria-selected={range === r}
+            onClick={() => {
+              engage();
+              go(r);
+            }}
+            className="relative h-7 flex-1 rounded-full text-[12px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
+            style={{ color: range === r ? "var(--sl-text)" : "var(--sl-sub)" }}
+          >
+            {range === r && (
+              <motion.span
+                layoutId={`sl-seg-${gid}`}
+                className="absolute inset-0 rounded-full shadow-[0_1px_3px_rgba(0,0,0,.15)]"
+                style={{ background: "var(--sl-seg-on)" }}
+                transition={{ type: "spring", stiffness: 500, damping: 36 }}
+              />
+            )}
+            <span className="relative">{r}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```

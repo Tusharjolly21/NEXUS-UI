@@ -1,68 +1,316 @@
-Build a before and after comparison slider. Press or drag anywhere and a divider springs to the pointer with some follow-through, the round handle stretches in the direction it travels, and each label chip fades out as the divider reaches it. It works with two images, with any two pieces of content, or with a drawn default scene so it needs no assets.
+Add the "Before / After Compare" component from Nexus UI to my project.
 
-## Stack
+A before and after comparison for images or any two pieces of content. Press or drag anywhere and the divider springs to your finger with a little follow-through, the handle stretches in the direction it travels and each label fades as the divider reaches it; arrow keys move it too.
 
-- React client component (`"use client"`), TypeScript, Tailwind CSS, a `cn` helper (clsx plus tailwind-merge), framer-motion (`motion`, `useSpring`, `useTransform`, `useMotionTemplate`, `useVelocity`, `useReducedMotion`).
-- File: `components/compare/compare.tsx`. Named export `Compare`, type `CompareProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { Compare } from "@/components/compare";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `beforeImage` / `afterImage` | `string` | – | Image URLs for the left (before) and right (after) sides. |
-| `beforeAlt` / `afterAlt` | `string` | `"Before"` / `"After"` | Alt text. |
-| `beforeContent` / `afterContent` | `ReactNode` | – | Any content; if either is set, content mode replaces both images. |
-| `beforeLabel` / `afterLabel` | `string` | – | Chips in the top corners; no label means no chip. |
-| `initialPosition` | `number` | `50` | Starting divider position, clamped 0 to 100. |
-| `mode` | `"drag" \| "hover"` | `"drag"` | Drag: press or drag anywhere. Hover: follows the pointer, returns on leave. |
-| `onChange` | `(position: number) => void` | – | Rounded 0 to 100 position when the user moves it. |
-| `autoplay` | `boolean` | `false` | Sweeps the divider until touched. |
-| `className` | `string` | – | Merged last, so it can change aspect ratio and width. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/compare/compare.tsx ---
 
-- Root: `relative isolate`, `aspect-[4/3]`, full width, `max-w-[480px]`, `touch-pan-y`, no selection, overflow hidden, radius 22, background `#1c1c1e`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark `rgba(255,255,255,.08)` and `rgba(0,0,0,.9)`). Cursor is `ew-resize`, or `grabbing` while a drag is held.
-- Layers, bottom to top: the after side filling the root; the before side in a pointer-events-none layer clipped with `clip-path: inset(0 <100 - pos>% 0 0)`, so before shows on the left of the divider; the divider line; the handle; the chips.
-- Images: absolutely filling, `object-cover`, not draggable. In content mode the after content is wrapped in an `absolute inset-0` div, but the before content is rendered as given, so callers should position it themselves (`absolute inset-0`). If only one content prop is set, the other side is empty.
-- Default scene (a 400 by 300 SVG, `xMidYMid slice`, `aria-hidden`): an alpine lake at dusk. Sky gradient `#2a3b78`, `#c36b9a`, `#ffb36b`, `#ffd9a0` over the top 190 units; a soft sun at (262, 150) with a `#fff4d2` core; two mountain ridges `#5d3f7a` and `#3c2b5e` with pale snow caps; a lake gradient `#ffbf80` to `#b8678f` to `#1f2a5c`; three sun-reflection bars; `#1b1533` pines at both edges. With no before image or content, the before side is this same scene with `grayscale(1) contrast(.88) brightness(1.06)`.
-- Divider: 2px wide, full height, `white/95`, shadow `0 0 0 .5px rgba(0,0,0,.15), 0 0 12px rgba(0,0,0,.25)`, centred on the position.
-- Handle: centred vertically on the divider, `z-10`. Inner circle 44px, `white/90`, text `#1d1d1f`, `backdrop-blur-md`, shadow `0 8px 20px -6px rgba(0,0,0,.45)`, holding a 20px double-chevron icon (stroke 1.9, round caps).
-- Chips: 12px from the top and side, pill, `black/45`, `backdrop-blur-md`, padding `4px 10px`, 12px semibold white; before top left, after top right.
+```tsx
+"use client";
 
-## Motion
+import * as React from "react";
+import { motion, useMotionTemplate, useReducedMotion, useSpring, useTransform, useVelocity } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-- Position is a spring: stiffness 320, damping 26, mass 0.7 (reduced motion: 2000 and 120, effectively instant). The divider, handle and clip all read from it.
-- Handle stretch: a second spring (stiffness 500, damping 20) follows `min(0.45, |velocity| / 900)` (0 under reduced motion). The handle scales `scaleX = 1 + s` and `scaleY = 1 - 0.35 s`.
-- Grab: the handle scales to 1.12 while held, spring 500 and 22.
-- Chips: before opacity maps position 6 to 26 onto 0 to 1; after opacity maps 74 to 94 onto 1 to 0.
+export interface CompareProps {
+  /** Image src for the left (before) side. */
+  beforeImage?: string;
+  /** Image src for the right (after) side. */
+  afterImage?: string;
+  /** Alt text for `beforeImage`. */
+  beforeAlt?: string;
+  /** Alt text for `afterImage`. */
+  afterAlt?: string;
+  /** Any content for the left (before) side; overrides beforeImage. */
+  beforeContent?: React.ReactNode;
+  /** Any content for the right (after) side; overrides afterImage. */
+  afterContent?: React.ReactNode;
+  /** Label chip on the left side. */
+  beforeLabel?: string;
+  /** Label chip on the right side. */
+  afterLabel?: string;
+  /** Starting divider position as a percentage (0-100). @default 50 */
+  initialPosition?: number;
+  /** "drag": press or drag anywhere to move the divider. "hover": it follows the pointer and returns on leave. */
+  mode?: "drag" | "hover";
+  /** Called with the divider position (0-100) when the user moves it. */
+  onChange?: (position: number) => void;
+  /** Sweeps the divider back and forth until someone touches it. */
+  autoplay?: boolean;
+  className?: string;
+}
 
-## Interaction and states
+const clamp = (v: number) => Math.min(100, Math.max(0, v));
 
-- Drag mode: a primary-button pointer down captures the pointer, jumps the spring to the pointer's percentage of the root width and sets the grabbed state; pointer move updates while held; up or cancel releases. Other buttons are ignored.
-- Hover mode: pointer move sets the position; pointer leave goes back to the clamped `initialPosition`.
-- Keyboard on the handle: Left or Down minus 5, Right or Up plus 5 (10 with Shift), Home 0, End 100. These do not scroll the page.
-- `onChange` gets the rounded value on user input, including the return on hover leave. Autoplay ticks do not call it.
+/** A drawn alpine lake at dusk, so the component works without any images. */
+function Scene() {
+  const id = React.useId().replace(/:/g, "");
+  return (
+    <svg className="absolute inset-0 size-full" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id={`${id}-sky`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#2a3b78" />
+          <stop offset=".45" stopColor="#c36b9a" />
+          <stop offset=".72" stopColor="#ffb36b" />
+          <stop offset="1" stopColor="#ffd9a0" />
+        </linearGradient>
+        <linearGradient id={`${id}-lake`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffbf80" />
+          <stop offset=".35" stopColor="#b8678f" />
+          <stop offset="1" stopColor="#1f2a5c" />
+        </linearGradient>
+        <radialGradient id={`${id}-sun`} cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stopColor="#fff5d6" />
+          <stop offset=".5" stopColor="#ffe2a3" stopOpacity=".9" />
+          <stop offset="1" stopColor="#ffd28a" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="400" height="190" fill={`url(#${id}-sky)`} />
+      <circle cx="262" cy="150" r="70" fill={`url(#${id}-sun)`} />
+      <circle cx="262" cy="152" r="17" fill="#fff4d2" />
+      <path d="M0 150 L52 98 L86 128 L132 72 L178 132 L214 108 L262 150 L300 112 L344 140 L380 104 L400 120 V190 H0Z" fill="#5d3f7a" />
+      <path d="M132 72 L146 90 L138 92 L128 86 L120 90Z" fill="#f3d7e6" opacity=".9" />
+      <path d="M380 104 L390 116 L382 114 L374 118Z" fill="#f3d7e6" opacity=".8" />
+      <path d="M0 170 L40 140 L76 160 L118 128 L162 166 L206 146 L244 170 L290 150 L338 168 L400 146 V190 H0Z" fill="#3c2b5e" />
+      <rect y="190" width="400" height="110" fill={`url(#${id}-lake)`} />
+      <path d="M0 190 L40 210 L76 200 L118 222 L162 198 L206 212 L244 196 L290 208 L338 198 L400 212 V190Z" fill="#3c2b5e" opacity=".55" />
+      <rect x="236" y="196" width="52" height="3" rx="1.5" fill="#fff4d2" opacity=".75" />
+      <rect x="246" y="206" width="32" height="2.5" rx="1.25" fill="#fff4d2" opacity=".5" />
+      <rect x="254" y="216" width="18" height="2" rx="1" fill="#fff4d2" opacity=".35" />
+      <g fill="#1b1533">
+        <path d="M18 196 L30 150 L42 196Z" />
+        <path d="M36 198 L52 136 L68 198Z" />
+        <path d="M60 196 L72 160 L84 196Z" />
+        <path d="M330 196 L344 146 L358 196Z" />
+        <path d="M352 198 L370 132 L388 198Z" />
+        <rect y="194" width="400" height="6" />
+      </g>
+    </svg>
+  );
+}
 
-## Autoplay demo
+function Chevrons() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+      <path d="M7.5 5.5 3.5 10l4 4.5M12.5 5.5l4 4.5-4 4.5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-With `autoplay`, every 1800ms set the position to the next of `[28, 74, 40, 62]`, cycling. A `touched` ref is set by a pointer down, a hover-mode move or a key press; the next tick clears the interval for good. 
+/**
+ * A before / after comparison. Press or drag anywhere and the divider
+ * springs to your finger with a little follow-through; the handle stretches
+ * in the direction it's travelling and the labels fade as the divider
+ * reaches them. Works with images, any content, or the drawn default scene.
+ */
+export function Compare({
+  beforeImage,
+  afterImage,
+  beforeAlt = "Before",
+  afterAlt = "After",
+  beforeContent,
+  afterContent,
+  beforeLabel,
+  afterLabel,
+  initialPosition = 50,
+  mode = "drag",
+  onChange,
+  autoplay = false,
+  className,
+}: CompareProps) {
+  const still = useReducedMotion() === true;
+  const start = clamp(initialPosition);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const touched = React.useRef(false);
+  const dragging = React.useRef(false);
+  const [grabbed, setGrabbed] = React.useState(false);
+  const [now, setNow] = React.useState(Math.round(start));
 
-## Accessibility
+  const pos = useSpring(start, still ? { stiffness: 2000, damping: 120 } : { stiffness: 320, damping: 26, mass: 0.7 });
+  const left = useMotionTemplate`${pos}%`;
+  const clip = useTransform(pos, (p) => `inset(0 ${100 - clamp(p)}% 0 0)`);
+  const velocity = useVelocity(pos);
+  const stretch = useSpring(
+    useTransform(velocity, (v) => (still ? 0 : Math.min(0.45, Math.abs(v) / 900))),
+    { stiffness: 500, damping: 20 },
+  );
+  const handleSX = useTransform(stretch, (s) => 1 + s);
+  const handleSY = useTransform(stretch, (s) => 1 - s * 0.35);
+  const beforeChip = useTransform(pos, [6, 26], [0, 1]);
+  const afterChip = useTransform(pos, [74, 94], [1, 0]);
 
-- The handle is `role="slider"`, `tabIndex 0`, `aria-label` "Comparison divider", `aria-valuemin` 0, `aria-valuemax` 100, `aria-valuenow` the rounded position, `aria-valuetext` "<n>% <beforeLabel or before>". Focus ring: 2px white, 2px `#0071e3` offset.
-- Images carry their alt text.
+  const setTo = (p: number, notify = true) => {
+    const v = clamp(p);
+    pos.set(v);
+    const r = Math.round(v);
+    setNow(r);
+    if (notify) onChange?.(r);
+  };
 
-## Acceptance checklist
+  const toPercent = (clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return start;
+    const { left: l, width } = el.getBoundingClientRect();
+    return ((clientX - l) / width) * 100;
+  };
 
-- [ ] The default render shows a greyscale lake on the left and the colour lake on the right, split at 50%.
-- [ ] Pressing anywhere jumps the divider with slight overshoot.
-- [ ] The handle stretches when moving fast and swells when held.
-- [ ] Chips fade out as the divider reaches them.
-- [ ] Arrow, Shift, Home and End keys work.
-- [ ] `mode="hover"` follows the pointer and eases home on leave.
-- [ ] Content mode shows any markup on each side.
+  const touch = () => {
+    touched.current = true;
+  };
 
-## Examples on the page
+  React.useEffect(() => {
+    if (!autoplay) return;
+    let k = 0;
+    const stops = [28, 74, 40, 62];
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      const v = stops[k++ % stops.length];
+      pos.set(v);
+      setNow(v);
+    }, 1800);
+    return () => clearInterval(t);
+  }, [autoplay, pos]);
 
-- Photo: `beforeImage="/images/lake-flat.jpg"`, `afterImage="/images/lake-graded.jpg"`, `beforeLabel="Original"`, `afterLabel="Graded"`; drag mode, 50%, 4:3.
-- Any content: `beforeLabel="Before"`, `afterLabel="After"`, `className="aspect-[16/10] max-w-[440px]"`, and two `<pre>` elements as `beforeContent` (white, a `for` loop) and `afterContent` (`#1d1d1f` with white text, an `items.reduce(...)` call), each `absolute inset-0 p-5 font-mono text-sm`.
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    touch();
+    if (mode !== "drag" || e.button > 0) return;
+    dragging.current = true;
+    setGrabbed(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setTo(toPercent(e.clientX));
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const stepBy = e.shiftKey ? 10 : 5;
+    let to: number | null = null;
+    if (e.key === "ArrowLeft" || e.key === "ArrowDown") to = now - stepBy;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") to = now + stepBy;
+    if (e.key === "Home") to = 0;
+    if (e.key === "End") to = 100;
+    if (to === null) return;
+    e.preventDefault();
+    touch();
+    setTo(to);
+  };
+
+  const useContent = !!(beforeContent || afterContent);
+  const after = useContent ? (
+    <div className="absolute inset-0">{afterContent}</div>
+  ) : afterImage ? (
+    // eslint-disable-next-line @next/next/no-img-element -- any URL the caller passes, no loader config needed
+    <img src={afterImage} alt={afterAlt} className="absolute inset-0 block size-full object-cover" draggable={false} />
+  ) : (
+    <Scene />
+  );
+  const before = useContent ? (
+    beforeContent
+  ) : beforeImage ? (
+    // eslint-disable-next-line @next/next/no-img-element -- any URL the caller passes, no loader config needed
+    <img src={beforeImage} alt={beforeAlt} className="absolute inset-0 block size-full object-cover" draggable={false} />
+  ) : (
+    <div className="absolute inset-0 [filter:grayscale(1)_contrast(.88)_brightness(1.06)]">
+      <Scene />
+    </div>
+  );
+
+  return (
+    <div
+      ref={containerRef}
+      onPointerDown={onPointerDown}
+      onPointerMove={(e) => {
+        if (mode === "hover" || dragging.current) {
+          if (mode === "hover") touch();
+          setTo(toPercent(e.clientX));
+        }
+      }}
+      onPointerUp={() => {
+        dragging.current = false;
+        setGrabbed(false);
+      }}
+      onPointerCancel={() => {
+        dragging.current = false;
+        setGrabbed(false);
+      }}
+      onPointerLeave={() => {
+        if (mode === "hover") setTo(start);
+      }}
+      className={cn(
+        "relative isolate aspect-[4/3] w-full max-w-[480px] touch-pan-y select-none overflow-hidden rounded-[22px] bg-[#1c1c1e]",
+        "shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)]",
+        mode === "drag" ? (grabbed ? "cursor-grabbing" : "cursor-ew-resize") : "cursor-ew-resize",
+        className,
+      )}
+    >
+      {after}
+      <motion.div className="pointer-events-none absolute inset-0" style={{ clipPath: clip }}>
+        {before}
+      </motion.div>
+
+      <motion.div className="pointer-events-none absolute inset-y-0 w-[2px] bg-white/95 shadow-[0_0_0_0.5px_rgba(0,0,0,.15),0_0_12px_rgba(0,0,0,.25)]" style={{ left, x: "-50%" }} />
+
+      <motion.div
+        role="slider"
+        tabIndex={0}
+        aria-label="Comparison divider"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={now}
+        aria-valuetext={`${now}% ${beforeLabel ?? "before"}`}
+        onKeyDown={onKeyDown}
+        className="absolute top-1/2 z-10 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0071e3]"
+        style={{ left, x: "-50%", y: "-50%" }}
+      >
+        <motion.span
+          className="grid h-11 w-11 place-items-center rounded-full bg-white/90 text-[#1d1d1f] shadow-[0_0_0_0.5px_rgba(0,0,0,.12),0_8px_20px_-6px_rgba(0,0,0,.45)] backdrop-blur-md"
+          style={{ scaleX: handleSX, scaleY: handleSY }}
+          animate={{ scale: grabbed ? 1.12 : 1 }}
+          transition={{ type: "spring", stiffness: 500, damping: 22 }}
+        >
+          <Chevrons />
+        </motion.span>
+      </motion.div>
+
+      {beforeLabel ? (
+        <motion.span className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[12px] font-semibold text-white backdrop-blur-md" style={{ opacity: beforeChip }}>
+          {beforeLabel}
+        </motion.span>
+      ) : null}
+      {afterLabel ? (
+        <motion.span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/45 px-2.5 py-1 text-[12px] font-semibold text-white backdrop-blur-md" style={{ opacity: afterChip }}>
+          {afterLabel}
+        </motion.span>
+      ) : null}
+    </div>
+  );
+}
+```
+
+--- components/compare/index.ts ---
+
+```ts
+export { Compare } from "./compare";
+export type { CompareProps } from "./compare";
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

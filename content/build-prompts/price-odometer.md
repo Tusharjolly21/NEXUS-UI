@@ -1,70 +1,174 @@
 # Price Odometer
 
-Build a seat-based pricing card whose monthly total rolls like a mechanical odometer. Each digit is its own vertical reel that spins on a soft, slightly heavy spring, digits ripple from right to left, new columns (and the thousands comma) slide in as the number grows, and a "Save N%" badge pops in when you switch to yearly billing. It should feel tactile and precise, like a well-made hardware counter.
+Add the "Price Odometer" component from Nexus UI to my project.
 
-## Stack
+A seat-based pricing card whose total rolls like an odometer: each digit spins on its own spring, columns slide in as the number grows, and a Save badge pops in for yearly billing.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `layout`, `layoutId`).
-- File: `components/price-odometer/price-odometer.tsx`. Named exports `PriceOdometer` (and `PriceOdometerProps`) plus a reusable `RollingNumber({ value }: { value: number })`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { PriceOdometer, RollingNumber } from "@/components/price-odometer";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `monthlyRate` | `number` | `15` | Price per seat billed monthly. |
-| `yearlyRate` | `number` | `12` | Price per seat billed yearly. |
-| `maxSeats` | `number` | `100` | Top of the seats slider (min is 1). |
-| `accent` | `string` | `"#0071e3"` | Slider fill, focus ring, badge text and tint. |
-| `autoplay` | `boolean` | `false` | Changes seats and billing by itself until someone interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-State: `yearly` (starts false), `seats` (starts 8). `rate = yearly ? yearlyRate : monthlyRate`, `total = rate × seats`, `saving = round((1 − yearlyRate / monthlyRate) × 100)`.
+--- components/price-odometer/index.ts ---
 
-## Layout and look
+```ts
+export { PriceOdometer, RollingNumber } from "./price-odometer";
+export type { PriceOdometerProps } from "./price-odometer";
+```
 
-- Card: full width, max 460px, 28px padding, 24px vertical gap, radius 28px. Light: white, shadow `0 0 0 1px rgba(0,0,0,.04), 0 24px 50px -28px rgba(0,0,0,.28)`. Dark: `#2c2c2e`, shadow `0 0 0 1px rgba(255,255,255,.08), 0 24px 50px -28px rgba(0,0,0,.6)`.
-- Top row (space-between): a 220px, 2-column segmented control (radius 12px, 3px padding, bg `#f0f0f3` / dark `#3a3a3c`; buttons 32px tall, radius 9px, 13px medium, `#1d1d1f` / `#f5f5f7`; "Monthly" and "Yearly"). Active thumb: white / dark `#636366`, radius 9px, shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`. On the right, when yearly: badge "Save {saving}%", fully rounded, padding 6px × 10px, 12px semibold, text accent, background accent + `"1f"` (~12% alpha).
-- Price block (4px gap): a row aligned to the top — "$" at 40px, tracking −0.02em, 8px top margin, 4px right margin; the rolling number at 84px semibold, line-height 1, tracking −0.045em, tabular numbers, `#1d1d1f` / `#f5f5f7`; "/mo" at 17px medium, tracking −0.01em, `#86868b` / `#98989d`, bottom-aligned with 12px bottom margin and 10px left margin. Under it: "$`rate` per seat, billed monthly|yearly" at 14px grey.
-- Seats (10px gap): label "Seats" (15px medium) and the value (15px semibold, tabular) space-between on a baseline. Slider area 26px tall: a 4px rounded track `#e8e8ed` / dark `#48484a`, an accent fill from the left with width `(seats − 1) / (maxSeats − 1) × 100%`, and a native range input on top with a transparent track.
-- Range thumb (style via `::-webkit-slider-thumb` and `::-moz-range-thumb`): 26px white circle, no border, shadow `0 3px 10px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.06)`; scales to 1.12 while active (0.2s transition); on keyboard focus the thumb gets `0 0 0 3px accent`.
+--- components/price-odometer/price-odometer.tsx ---
 
-## The rolling number
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-- Format with `toLocaleString("en-US")` and split into characters.
-- Each **digit** is a window `1em` tall and `0.6em` wide, `overflow: hidden`, with a vertical mask `linear-gradient(180deg, transparent, #000 16%, #000 84%, transparent)` (set both `mask-image` and `-webkit-mask-image`) so the reel fades at top and bottom. Inside, a column of the numbers 0–9, each `1em` tall and centred. Show digit `d` by translating the column to `y = −d em`.
-- A **comma** is a plain span `0.28em` wide.
-- Wrap every character in a `motion.span` keyed by its position **from the right** plus its kind, e.g. `p3d` or `p4c`. This keeps the ones/tens/hundreds reels stable as the number gains or loses columns.
+export interface PriceOdometerProps {
+  monthlyRate?: number;
+  yearlyRate?: number;
+  maxSeats?: number;
+  accent?: string;
+  /** Changes seats and billing by itself until the user interacts. */
+  autoplay?: boolean;
+}
 
-## Motion
+const roll = { type: "spring", stiffness: 160, damping: 19, mass: 1.1 } as const;
 
-- Reel spring: stiffness 160, damping 19, mass 1.1 (`initial={false}`). Each reel is delayed `(positionFromRight − 1) × 0.04s`, so the ones digit moves first and the change ripples left.
-- Columns: `AnimatePresence initial={false} mode="popLayout"`, each column `layout`; enter from `opacity 0, width 0, blur(6px)` to `width auto`, sharp; exit back to that; spring stiffness 260, damping 28. The `$`, number row and `/mo` are `layout` too, so they slide when the width changes.
-- Segment thumb: shared `layoutId` (namespaced with `useId`), spring stiffness 420, damping 32.
-- Save badge: enters from `scale 0.4, rotate −14°, opacity 0`, exits to `scale 0.6, opacity 0`, spring stiffness 500, damping 14 (a lively pop with overshoot).
-- Slider fill width: spring stiffness 400, damping 40, so it trails the thumb a touch when autoplay jumps.
+function Digit({ value, delay }: { value: number; delay: number }) {
+  return (
+    <span
+      className="relative inline-block h-[1em] w-[0.6em] overflow-hidden"
+      style={{ maskImage: "linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent)", WebkitMaskImage: "linear-gradient(180deg,transparent,#000 16%,#000 84%,transparent)" }}
+    >
+      <motion.span className="absolute left-0 top-0 flex w-full flex-col" initial={false} animate={{ y: `${-value}em` }} transition={{ ...roll, delay }}>
+        {Array.from({ length: 10 }, (_, n) => (
+          <span key={n} className="block h-[1em] text-center">
+            {n}
+          </span>
+        ))}
+      </motion.span>
+    </span>
+  );
+}
 
-## Interaction and states
+export function RollingNumber({ value }: { value: number }) {
+  const chars = value.toLocaleString("en-US").split("");
+  // Key from the right so existing columns keep their identity as the number grows.
+  return (
+    <span className="inline-flex" aria-label={value.toLocaleString("en-US")}>
+      <AnimatePresence initial={false} mode="popLayout">
+        {chars.map((c, i) => {
+          const fromRight = chars.length - i;
+          return (
+            <motion.span
+              key={`p${fromRight}${c === "," ? "c" : "d"}`}
+              layout
+              initial={{ opacity: 0, width: 0, filter: "blur(6px)" }}
+              animate={{ opacity: 1, width: "auto", filter: "blur(0px)" }}
+              exit={{ opacity: 0, width: 0, filter: "blur(6px)" }}
+              transition={{ type: "spring", stiffness: 260, damping: 28 }}
+              className="inline-flex overflow-hidden"
+              aria-hidden="true"
+            >
+              {c === "," ? <span className="w-[0.28em]">,</span> : <Digit value={Number(c)} delay={(fromRight - 1) * 0.04} />}
+            </motion.span>
+          );
+        })}
+      </AnimatePresence>
+    </span>
+  );
+}
 
-- Monthly/Yearly buttons set billing; the total and the per-seat line update immediately and the reels roll.
-- Slider: `min 1`, `max maxSeats`, integer steps; dragging, clicking the track and arrow keys all update seats.
-- Any pointer-down anywhere on the card, or a slider change, marks the component touched.
+export function PriceOdometer({ monthlyRate = 15, yearlyRate = 12, maxSeats = 100, accent = "#0071e3", autoplay = false }: PriceOdometerProps) {
+  const uid = useId();
+  const [yearly, setYearly] = useState(false);
+  const [seats, setSeats] = useState(8);
+  const touched = useRef(false);
+  const rate = yearly ? yearlyRate : monthlyRate;
+  const total = rate * seats;
+  const saving = Math.round((1 - yearlyRate / monthlyRate) * 100);
 
-## Autoplay demo
+  useEffect(() => {
+    if (!autoplay) return;
+    const seq: Array<["s", number] | ["b"]> = [["s", 24], ["b"], ["s", 3], ["s", 67], ["b"], ["s", 100], ["s", 12]];
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      const step = seq[k++ % seq.length];
+      if (step[0] === "b") setYearly((y) => !y);
+      else setSeats(step[1]);
+    }, 1900);
+    return () => clearInterval(t);
+  }, [autoplay]);
 
-When `autoplay` is true, every 1900ms apply the next step of this loop: seats 24 → toggle billing → seats 3 → seats 67 → toggle billing → seats 100 → seats 12 → repeat. Once touched, the interval clears itself on its next tick.
+  const touch = () => (touched.current = true);
 
-## Accessibility
+  return (
+    <div className="flex w-full max-w-[460px] flex-col gap-6 rounded-[28px] bg-white p-7 shadow-[0_0_0_1px_rgba(0,0,0,.04),0_24px_50px_-28px_rgba(0,0,0,.28)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-28px_rgba(0,0,0,.6)]" onPointerDown={touch}>
+      <div className="flex items-center justify-between">
+        <div role="group" aria-label="Billing period" className="relative grid w-[220px] grid-cols-2 rounded-xl bg-[#f0f0f3] p-[3px] dark:bg-[#3a3a3c]">
+          {["Monthly", "Yearly"].map((l, i) => {
+            const on = (i === 1) === yearly;
+            return (
+              <button key={l} type="button" aria-pressed={on} onClick={() => setYearly(i === 1)} className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2" style={{ outlineColor: accent }}>
+                {on && <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white dark:bg-[#636366] shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />}
+                {l}
+              </button>
+            );
+          })}
+        </div>
+        <AnimatePresence>
+          {yearly && (
+            <motion.span
+              initial={{ scale: 0.4, rotate: -14, opacity: 0 }}
+              animate={{ scale: 1, rotate: 0, opacity: 1 }}
+              exit={{ scale: 0.6, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 14 }}
+              className="rounded-full px-2.5 py-1.5 text-[12px] font-semibold"
+              style={{ color: accent, background: `${accent}1f` }}
+            >
+              Save {saving}%
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
 
-- Number wrapper has `aria-label` with the formatted total; the individual reel characters are `aria-hidden` (the 0–9 columns must not be read). The price row has `role="status"`.
-- Segmented control: `role="group"`, `aria-label="Billing period"`, buttons with `aria-pressed` and a 2px accent focus-visible outline.
-- The slider is a native range input with a `<label htmlFor>` "Seats"; hide the default focus outline and show the thumb ring instead.
+      <div className="flex flex-col gap-1">
+        <motion.div layout className="flex items-start text-[84px] font-semibold leading-none tracking-[-0.045em] text-[#1d1d1f] tabular-nums dark:text-[#f5f5f7]" role="status">
+          <motion.span layout className="mr-1 mt-2 text-[40px] tracking-[-0.02em]">$</motion.span>
+          <RollingNumber value={total} />
+          <motion.span layout className="mb-3 ml-2.5 self-end text-[17px] font-medium tracking-[-0.01em] text-[#86868b] dark:text-[#98989d]">/mo</motion.span>
+        </motion.div>
+        <span className="text-[14px] text-[#86868b] dark:text-[#98989d]">
+          ${rate} per seat, billed {yearly ? "yearly" : "monthly"}
+        </span>
+      </div>
 
-## Acceptance checklist
-
-- [ ] Default shows $120/mo (8 seats × $15).
-- [ ] Dragging seats rolls each digit vertically, ones digit first, with a soft settle.
-- [ ] Going from 3 digits to 4 slides in a new column and a comma; the "$" and "/mo" glide aside.
-- [ ] The rolling digits fade out at the top and bottom edges.
-- [ ] Switching to Yearly rolls to the yearly total, the thumb slides, and "Save 20%" pops in with a tilt.
-- [ ] Screen readers hear the formatted total once, not ten digits per column.
-- [ ] With `autoplay`, values change every 1.9s and stop after the first pointer-down.
-- [ ] Dark mode matches the colours above.
+      <div className="flex flex-col gap-2.5">
+        <div className="flex items-baseline justify-between">
+          <label htmlFor={`${uid}-seats`} className="text-[15px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7]">Seats</label>
+          <span className="text-[15px] font-semibold tabular-nums text-[#1d1d1f] dark:text-[#f5f5f7]">{seats}</span>
+        </div>
+        <div className="relative flex h-[26px] items-center">
+          <div className="absolute inset-x-0 h-1 rounded-full bg-[#e8e8ed] dark:bg-[#48484a]" />
+          <motion.div className="absolute left-0 h-1 rounded-full" style={{ background: accent }} animate={{ width: `${((seats - 1) / (maxSeats - 1)) * 100}%` }} transition={{ type: "spring", stiffness: 400, damping: 40 }} />
+          <input
+            id={`${uid}-seats`}
+            type="range"
+            min={1}
+            max={maxSeats}
+            value={seats}
+            onChange={(e) => { touch(); setSeats(Number(e.target.value)); }}
+            className="odo-range relative w-full cursor-pointer appearance-none bg-transparent focus-visible:outline-none"
+          />
+        </div>
+      </div>
+      <style>{`.odo-range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18),0 0 0 .5px rgba(0,0,0,.06);transition:transform .2s}.odo-range:active::-webkit-slider-thumb{transform:scale(1.12)}.odo-range::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18)}.odo-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px ${accent}}`}</style>
+    </div>
+  );
+}
+```

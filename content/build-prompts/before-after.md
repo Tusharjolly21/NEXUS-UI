@@ -1,66 +1,139 @@
 # Before / After
 
-Build an image comparison slider: two layers stacked in a rounded 16:9 frame, the "before" layer clipped from the right so a vertical white divider reveals one against the other. The round handle follows the pointer on a soft spring, swells while held, the corner labels fade as the divider approaches them, and a segmented "Before / Split / After" control jumps to fixed positions with a bouncier spring. It should feel smooth and weighted, like a native photo app.
+Add the "Before / After" component from Nexus UI to my project.
 
-## Stack
+An image comparison slider with a springy handle, fading corner labels, arrow-key control and a segmented Before / Split / After jump.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useSpring`, `useTransform`, `layoutId`).
-- File: `components/before-after/before-after.tsx`, named export `BeforeAfter`; export `BeforeAfterProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { BeforeAfter } from "@/components/before-after";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `before` | `ReactNode` | required | Content shown left of the divider (usually an `<img>` with `object-cover`, full size). |
-| `after` | `ReactNode` | required | Content shown right of the divider. |
-| `beforeLabel` | `string` | `"Before"` | Top-left chip text. |
-| `afterLabel` | `string` | `"After"` | Top-right chip text. |
-| `autoplay` | `boolean` | `false` | Plays a sweep shortly after mount and every few seconds until touched. |
-| `className` | `string` | `""` | Extra classes on the outer wrapper. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/before-after/before-after.tsx ---
 
-- Wrapper: full-width vertical flex, centred, 20px gap, plus `className`.
-- Frame: full width, `aspect-ratio: 16/9`, radius 24px, `overflow: hidden`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 30px 60px -28px rgba(0,0,0,.35)`. Cursor `ew-resize`, `touch-action: none`, `user-select: none`.
-- Layers: `after` fills the frame; `before` fills it on top, clipped with `clip-path: inset(0 (100 − p)% 0 0)` where `p` is the position in percent (0 = all after, 100 = all before).
-- Chips: 14px from top and the left/right edge, fully rounded, white at 70% with `backdrop-blur-xl` and `backdrop-saturate-150`, padding 6px × 11px, 12px semibold, `#1d1d1f` (same in dark mode, since they sit on imagery).
-- Divider: a zero-width container positioned at `left: p%`, spanning full height, non-interactive. Inside: a 2px white line centred on that x (offset −1px) with a faint `0 0 0 .5px rgba(0,0,0,.08)` edge.
-- Handle: 46px white circle centred on the divider (offset −23px both ways) at mid-height, `#1d1d1f` icon, shadow `0 8px 20px -6px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.08)`, pointer events re-enabled. Icon: 18px, stroke 2.4, round caps, two chevrons `M9 6l-6 6 6 6M15 6l6 6-6 6`.
-- Segmented control: 270px wide, 3 columns, radius 12px, 3px padding, bg `#e8e8ed` / dark `#3a3a3c`. Buttons 32px tall, radius 9px, 13px medium, `#1d1d1f` / `#f5f5f7`, 2px `#0071e3` focus-visible outline. Active thumb: white / dark `#636366`, radius 9px, shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { animate, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
-## Motion
+export interface BeforeAfterProps {
+  before: ReactNode;
+  after: ReactNode;
+  beforeLabel?: string;
+  afterLabel?: string;
+  /** Plays a short sweep on mount and every few seconds until touched. */
+  autoplay?: boolean;
+  className?: string;
+}
 
-- Two motion values: a raw `target` (starts at 50) and the displayed `pos = useSpring(target, { stiffness: 380, damping: 34, mass: 0.6 })`. Everything visual (clip, divider `left`, chip opacity) derives from `pos`, so drags feel smooth and slightly trailing, never jittery.
-- Chip fades: before-chip opacity maps `pos` `[8, 22] → [0, 1]` (it disappears as the divider reaches the left edge); after-chip opacity maps `[78, 92] → [1, 0]`.
-- Handle press: animate `scale` to 1.18 while dragging and back to 1 on release, spring stiffness 500 with damping 22 going up and 12 coming down — so it pops back with a visible wobble.
-- Segment jump: `animate(target, value, { type: "spring", stiffness: 160, damping: 18 })` — a slower, bouncier move that then passes through the `pos` spring as well.
-- Segment thumb: shared `layoutId` (namespaced with `useId`), spring stiffness 420, damping 32.
-- Autoplay sweep: animate `target` through keyframes `[50, 18, 82, 50]` over 2.6s, easeInOut.
+export function BeforeAfter({ before, after, beforeLabel = "Before", afterLabel = "After", autoplay = false, className = "" }: BeforeAfterProps) {
+  const uid = useId();
+  const box = useRef<HTMLDivElement>(null);
+  const target = useMotionValue(50);
+  const pos = useSpring(target, { stiffness: 380, damping: 34, mass: 0.6 });
+  const clip = useTransform(pos, (v) => `inset(0 ${100 - v}% 0 0)`);
+  const left = useTransform(pos, (v) => `${v}%`);
+  const beforeChip = useTransform(pos, [8, 22], [0, 1]);
+  const afterChip = useTransform(pos, [78, 92], [1, 0]);
+  const [dragging, setDragging] = useState(false);
+  const [mode, setMode] = useState<0 | 1 | 2>(1);
+  const touched = useRef(false);
 
-## Interaction and states
+  const setFromX = (clientX: number) => {
+    const r = box.current!.getBoundingClientRect();
+    target.set(Math.max(0, Math.min(100, ((clientX - r.left) / r.width) * 100)));
+  };
 
-- Pointer down anywhere in the frame: mark touched, capture the pointer on the event target, start dragging and set `target` straight to the pointer's x — `clamp((clientX − rect.left) / rect.width × 100, 0, 100)`. Clicking somewhere jumps there (through the spring).
-- Pointer move while dragging updates `target` the same way; pointer up or cancel ends dragging.
-- Segments map Before → 100, Split → 50, After → 0, set the active segment and mark touched. The active segment only changes from these buttons (it starts on Split and is not updated by dragging).
-- Positions are always clamped to 0–100.
+  const jump = (v: number, m: 0 | 1 | 2) => {
+    touched.current = true;
+    setMode(m);
+    animate(target, v, { type: "spring", stiffness: 160, damping: 18 });
+  };
 
-## Autoplay demo
+  useEffect(() => {
+    if (!autoplay) return;
+    const sweep = () => !touched.current && animate(target, [50, 18, 82, 50], { duration: 2.6, ease: "easeInOut" });
+    const a = setTimeout(sweep, 600);
+    const b = setInterval(sweep, 6500);
+    return () => { clearTimeout(a); clearInterval(b); };
+  }, [autoplay, target]);
 
-When `autoplay` is true: run one sweep 600ms after mount and another every 6500ms, but only while untouched. Any pointer-down, arrow key or segment press marks it touched and no further sweeps start.
+  return (
+    <div className={`flex w-full flex-col items-center gap-5 ${className}`}>
+      <div
+        ref={box}
+        className="relative aspect-[16/9] w-full cursor-ew-resize touch-none select-none overflow-hidden rounded-[24px] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_30px_60px_-28px_rgba(0,0,0,.35)]"
+        onPointerDown={(e) => {
+          touched.current = true;
+          (e.target as Element).setPointerCapture?.(e.pointerId);
+          setDragging(true);
+          setFromX(e.clientX);
+        }}
+        onPointerMove={(e) => dragging && setFromX(e.clientX)}
+        onPointerUp={() => setDragging(false)}
+        onPointerCancel={() => setDragging(false)}
+      >
+        <div className="absolute inset-0">{after}</div>
+        <motion.div className="absolute inset-0" style={{ clipPath: clip }}>
+          {before}
+        </motion.div>
+        <motion.span style={{ opacity: beforeChip }} className="absolute left-3.5 top-3.5 rounded-full bg-white/70 px-[11px] py-1.5 text-[12px] font-semibold text-[#1d1d1f] backdrop-blur-xl backdrop-saturate-150">
+          {beforeLabel}
+        </motion.span>
+        <motion.span style={{ opacity: afterChip }} className="absolute right-3.5 top-3.5 rounded-full bg-white/70 px-[11px] py-1.5 text-[12px] font-semibold text-[#1d1d1f] backdrop-blur-xl backdrop-saturate-150">
+          {afterLabel}
+        </motion.span>
+        <motion.div className="pointer-events-none absolute inset-y-0 w-0" style={{ left }}>
+          <span className="absolute inset-y-0 -left-px w-[2px] bg-white shadow-[0_0_0_.5px_rgba(0,0,0,.08)]" />
+          <motion.span
+            role="slider"
+            tabIndex={0}
+            aria-label="Comparison position"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={Math.round(target.get())}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft") { touched.current = true; target.set(Math.max(0, target.get() - 5)); }
+              if (e.key === "ArrowRight") { touched.current = true; target.set(Math.min(100, target.get() + 5)); }
+            }}
+            animate={{ scale: dragging ? 1.18 : 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: dragging ? 22 : 12 }}
+            className="pointer-events-auto absolute left-[-23px] top-1/2 -mt-[23px] flex h-[46px] w-[46px] items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_8px_20px_-6px_rgba(0,0,0,.35),0_0_0_.5px_rgba(0,0,0,.08)] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M9 6l-6 6 6 6M15 6l6 6-6 6" />
+            </svg>
+          </motion.span>
+        </motion.div>
+      </div>
 
-## Accessibility
+      <div role="group" aria-label="Jump to" className="relative grid w-[270px] grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+        {(["Before", "Split", "After"] as const).map((l, i) => (
+          <button
+            key={l}
+            type="button"
+            onClick={() => jump([100, 50, 0][i], i as 0 | 1 | 2)}
+            className="relative z-10 h-8 rounded-[9px] text-[13px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3]"
+          >
+            {mode === i && (
+              <motion.span layoutId={`${uid}-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white dark:bg-[#636366] shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)]" />
+            )}
+            {l}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+```
 
-- The handle is `role="slider"`, `tabIndex={0}`, `aria-label="Comparison position"`, `aria-valuemin={0}`, `aria-valuemax={100}`, `aria-valuenow` = rounded target. Left/Right arrow keys move the target by 5 (clamped) and mark touched.
-- Handle focus: no outline, a 2px `#0071e3` ring with 2px offset on `:focus-visible`.
-- Segmented control is `role="group"` labelled "Jump to". The chevron SVG is `aria-hidden`.
+--- components/before-after/index.ts ---
 
-## Acceptance checklist
-
-- [ ] Starts split at 50% with both chips visible.
-- [ ] Dragging moves the divider smoothly with a slight lag and no jitter; the handle grows while held and wobbles back on release.
-- [ ] Clicking anywhere in the frame glides the divider there.
-- [ ] The Before chip fades out as the divider nears the left edge; the After chip as it nears the right.
-- [ ] Before / Split / After buttons spring the divider to 100 / 50 / 0 with a bounce, and the thumb slides.
-- [ ] Tab to the handle and use arrow keys to step 5% at a time.
-- [ ] Works with touch without scrolling the page.
-- [ ] With `autoplay`, it sweeps left, right and back every 6.5s until touched.
+```ts
+export { BeforeAfter } from "./before-after";
+export type { BeforeAfterProps } from "./before-after";
+```

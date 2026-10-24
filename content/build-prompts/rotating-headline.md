@@ -1,63 +1,125 @@
 # Rotating Headline
 
-Build a large hero headline whose fixed lead words rise one at a time out of a blur, ending on an accent-coloured word that keeps rolling up to the next word every couple of seconds. A grey subline follows word by word, and a dark pill button with a travelling shine replays the whole reveal. It should feel editorial and Apple-keynote-like: slow, soft entrances with a long ease-out, and a crisp spring on the rotating word.
+Add the "Rotating Headline" component from Nexus UI to my project.
 
-## Stack
+A hero headline whose words arrive one by one out of a blur, ending on a word that keeps rolling to the next, with a subline that follows word by word and a replay button.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `layout`).
-- File: `components/rotating-headline/rotating-headline.tsx`, named export `RotatingHeadline`; export `RotatingHeadlineProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { RotatingHeadline } from "@/components/rotating-headline";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `lead` | `string` | `"Built to"` | Words that stay put (split on spaces, each animated). |
-| `words` | `string[]` | `["move.", "delight.", "last.", "ship."]` | Words that take turns at the end. |
-| `sub` | `string` | `"Every word arrives on its own beat. The last one keeps changing."` | Subline under the headline. |
-| `accent` | `string` | `"#0071e3"` | Colour of the rotating word. |
-| `interval` | `number` | `2000` | Milliseconds between word changes. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-There is no `autoplay` prop: the word rotation always runs.
+--- components/rotating-headline/index.ts ---
 
-## Layout and look
+```ts
+export { RotatingHeadline } from "./rotating-headline";
+export type { RotatingHeadlineProps } from "./rotating-headline";
+```
 
-- Root: full-width vertical flex, centred, 24px gap, centred text.
-- Headline `<h2>`: no margin, wrapping flex row, centred, baseline-aligned, horizontal gap 0.25em. 56px semibold, line-height 1.05, tracking −0.035em, `#1d1d1f` / dark `#f5f5f7`. Each lead word is an `inline-block` span.
-- Rotating slot: `inline-flex`, `position: relative`, `overflow: hidden`, bottom padding 0.08em (so descenders aren't clipped), coloured with `accent`. Inside it, the current word as an `inline-block`.
-- Subline `<p>`: no margin, max 360px, 17px, line-height 1.45, tracking −0.01em, `#6e6e73` / dark `#a1a1a6`. Each word is an `inline-block` span with `white-space: pre`, carrying its trailing space (except the last word) so spacing survives the inline-block split.
-- Replay button: fully rounded, padding 10px × 20px, 14px medium; light bg `#1d1d1f` with white text, dark bg `#f5f5f7` with `#1d1d1f` text; `overflow: hidden`. Label "Replay reveal" sits above a shine strip: absolutely positioned, full height, half the button wide, starting at −50% left, `linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent)`.
+--- components/rotating-headline/rotating-headline.tsx ---
 
-## Motion
+```tsx
+"use client";
+import { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-- Shared ease for reveals: `[0.16, 1, 0.3, 1]` (a long ease-out).
-- Lead words: from `opacity 0, y 24, blur(12px)` to rest, 0.9s, delay `0.1 + k × 0.12s` for word `k`.
-- Rotating word: `AnimatePresence mode="popLayout" initial={false}`, keyed by the word. Enter from `y 100%, opacity 0, blur(8px)`; exit to `y −100%, opacity 0, blur(8px)`; spring stiffness 260, damping 26. The slot clips it, so the old word rolls up and out while the new one rolls up in.
-- Slot width: the slot is `layout` with spring stiffness 300, damping 30, so it widens or narrows smoothly to fit each word and the headline re-centres without jumping.
-- Subline words: from `opacity 0, blur(6px)` to sharp, 0.6s, same ease, delay `0.6 + k × 0.035s` — starts after the headline is mostly in.
-- Replay button: `whileHover` scale 1.03, `whileTap` scale 0.95. Shine animates `x` from 0% to 400% of its own width over 1.6s, easeInOut, repeating forever with a 1.4s pause between passes.
+export interface RotatingHeadlineProps {
+  lead?: string;
+  words?: string[];
+  sub?: string;
+  accent?: string;
+  interval?: number;
+}
 
-## Interaction and states
+const ease = [0.16, 1, 0.3, 1] as const;
 
-- An interval advances the word index every `interval` ms, wrapping around `words.length`. Recreate it when `words.length` or `interval` changes; clear it on unmount.
-- Replay increments a `run` counter used as the `key` of both the `<h2>` and the `<p>`. Remounting them restarts the lead-word and subline reveals. The rotating word is not re-revealed on replay (its `AnimatePresence` has `initial={false}`), it simply appears and keeps rotating from the current index.
+export function RotatingHeadline({
+  lead = "Built to",
+  words = ["move.", "delight.", "last.", "ship."],
+  sub = "Every word arrives on its own beat. The last one keeps changing.",
+  accent = "#0071e3",
+  interval = 2000,
+}: RotatingHeadlineProps) {
+  const [run, setRun] = useState(0);
+  const [i, setI] = useState(0);
 
-## Autoplay demo
+  useEffect(() => {
+    const t = setInterval(() => setI((n) => (n + 1) % words.length), interval);
+    return () => clearInterval(t);
+  }, [words.length, interval]);
 
-Not applicable as a prop: on mount the lead words and subline reveal once, and the final word rotates continuously for as long as the component is mounted. The Replay button re-runs the reveal at any time.
+  const leadWords = lead.split(" ");
+  const subWords = sub.split(" ");
 
-## Accessibility
+  return (
+    <div className="flex w-full flex-col items-center gap-6 text-center">
+      <h2 key={`h${run}`} className="m-0 flex flex-wrap items-baseline justify-center gap-x-[0.25em] text-[56px] font-semibold leading-[1.05] tracking-[-0.035em] text-[#1d1d1f] dark:text-[#f5f5f7]">
+        {leadWords.map((w, k) => (
+          <motion.span
+            key={w + k}
+            initial={{ opacity: 0, y: 24, filter: "blur(12px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.9, ease, delay: 0.1 + k * 0.12 }}
+            className="inline-block"
+          >
+            {w}
+          </motion.span>
+        ))}
+        <motion.span
+          layout
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="relative inline-flex overflow-hidden pb-[0.08em]"
+          style={{ color: accent }}
+        >
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={words[i]}
+              initial={{ y: "100%", opacity: 0, filter: "blur(8px)" }}
+              animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
+              exit={{ y: "-100%", opacity: 0, filter: "blur(8px)" }}
+              transition={{ type: "spring", stiffness: 260, damping: 26 }}
+              className="inline-block"
+            >
+              {words[i]}
+            </motion.span>
+          </AnimatePresence>
+        </motion.span>
+      </h2>
 
-- The headline is a real `<h2>` and the subline a `<p>`, so the text is readable as normal content.
-- The shine strip is `aria-hidden`.
-- The Replay button is `type="button"` with a 2px `#0071e3` focus-visible outline, offset 2px.
+      <p key={`p${run}`} className="m-0 max-w-[360px] text-[17px] leading-[1.45] tracking-[-0.01em] text-[#6e6e73] dark:text-[#a1a1a6]">
+        {subWords.map((w, k) => (
+          <motion.span
+            key={w + k}
+            initial={{ opacity: 0, filter: "blur(6px)" }}
+            animate={{ opacity: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.6, ease, delay: 0.6 + k * 0.035 }}
+            className="inline-block whitespace-pre"
+          >
+            {w}{k < subWords.length - 1 ? " " : ""}
+          </motion.span>
+        ))}
+      </p>
 
-## Acceptance checklist
-
-- [ ] "Built to" appears word by word, each rising out of a blur.
-- [ ] The blue word changes every 2s, rolling upward inside a clipped slot.
-- [ ] When the word length changes, the headline re-centres smoothly instead of snapping.
-- [ ] Descenders on the rotating word aren't clipped.
-- [ ] The subline fades in word by word after the headline, with normal spacing.
-- [ ] A soft light sweeps across the Replay button every few seconds.
-- [ ] Replay restarts the headline and subline reveals while rotation continues.
-- [ ] Changing `interval` changes the rotation speed; dark mode inverts the colours listed above.
+      <motion.button
+        type="button"
+        onClick={() => setRun((r) => r + 1)}
+        whileHover={{ scale: 1.03 }}
+        whileTap={{ scale: 0.95 }}
+        className="relative overflow-hidden rounded-full bg-[#1d1d1f] px-5 py-2.5 text-[14px] font-medium text-white dark:bg-[#f5f5f7] dark:text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
+      >
+        <motion.span
+          aria-hidden="true"
+          className="absolute inset-y-0 -left-1/2 w-1/2 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent)]"
+          animate={{ x: ["0%", "400%"] }}
+          transition={{ duration: 1.6, repeat: Infinity, repeatDelay: 1.4, ease: "easeInOut" }}
+        />
+        <span className="relative">Replay reveal</span>
+      </motion.button>
+    </div>
+  );
+}
+```

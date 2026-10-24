@@ -1,80 +1,212 @@
 # Voice Orb
 
-Build one living shape for a voice assistant's four states. Hold to talk: a dotted ring becomes a glowing, breathing gradient; release and it shrinks to a dark glossy thinking sphere with a shimmer, then churns while speaking and settles back to the ring. Parameters spring between states; the outline is rebuilt each frame from layered sine noise. Calm and premium.
+Add the "Voice Orb" component from Nexus UI to my project.
 
-## Stack
+One shape for an assistant's four states. Hold it to talk: a dotted ring becomes a glow, a dark thinking sphere, then a churning voice.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`). The outline is an SVG path string written to a motion value from a `requestAnimationFrame` loop.
-- File: `components/voice-orb/voice-orb.tsx`, named export `VoiceOrb`, plus exported `VoiceOrbProps` and `OrbState = "idle" | "listening" | "thinking" | "speaking"`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { VoiceOrb } from "@/components/voice-orb";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `accent` | `string` | `"#0071e3"` | Glow colour and middle stop of the listening/speaking gradient. |
-| `autoplay` | `boolean` | `false` | Walks through listening, thinking and speaking by itself until pressed. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## State parameters
+--- components/voice-orb/index.ts ---
 
-Seven motion values, one target set per state:
+```ts
+export { VoiceOrb } from "./voice-orb";
+export type { VoiceOrbProps, OrbState } from "./voice-orb";
+```
 
-| State | r | amp | speed | fill | ring | glow | dark |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| idle | 58 | 0 | 0.4 | 0 | 1 | 0 | 0 |
-| listening | 64 | 3 | 1.2 | 1 | 0 | 1 | 0 |
-| thinking | 50 | 0.6 | 0.6 | 1 | 0 | 0.2 | 1 |
-| speaking | 62 | 9 | 3.2 | 1 | 0 | 0.7 | 0 |
+--- components/voice-orb/voice-orb.tsx ---
 
-On every state change, animate each value to its target with a spring (stiffness 120, damping 16). `r` is the base radius, `amp` the wobble amplitude, `speed` the noise phase speed, and `fill / ring / glow / dark` are layer opacities.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState, type KeyboardEvent as RKeyboardEvent } from "react";
+import { animate, motion, useMotionValue } from "framer-motion";
 
-## Layout and look
+export type OrbState = "idle" | "listening" | "thinking" | "speaking";
 
-- Root: column, items centred, 24px gap.
-- Orb button: 200×200, round, `touch-none`. Inside, a 200×200 SVG (viewBox `0 0 200 200`, `overflow-visible`, `aria-hidden`). All layers share the same animated path `d`, centred at (100, 100). Paint order:
-  1. **Glow**: fill `accent`, Gaussian blur `stdDeviation 16` (filter region −50%/200%), opacity = `glow`.
-  2. **Colour body**: radial gradient (cx 38%, cy 32%, r 75%): `#ffffff` at 0%, `accent` at 45% with stop-opacity 0.85, `#5e5ce6` at 100%. Opacity = `fill`.
-  3. **Dark body**: radial gradient (cx 35%, cy 30%, r 80%): stops `#6e6e73` / `#1d1d1f` (55%) / `#000` in light; `#aeaeb2` / `#48484a` / `#2c2c2e` in dark mode (set `stop-color` via classes with `dark:` so it still reads on black). Opacity = `dark`.
-  4. **Thinking shimmer** (only rendered while thinking): ellipse at centre, rx 38, ry 10, `rgba(255,255,255,.18)`, rotating 360° every 1.6s, linear, forever.
-  5. **Idle ring**: same path, no fill, stroke `#1d1d1f` (dark `#f5f5f7`), width 2, dash `3 7`, round caps, opacity = `ring`, rotating 360° every 18s, linear, forever.
-  Gradient and filter ids must be unique per instance (`useId` with non-alphanumerics stripped).
-- State switcher below: `role="group"`, `aria-label="Orb state"`, 4-column grid, radius 12px, 3px padding, `#e8e8ed` (dark `#3a3a3c`). Buttons 32px tall, 14px side padding, radius 9px, 13px medium, capitalised state names, `#1d1d1f` (dark `#f5f5f7`). The active one has a sliding pill behind it (shared `layoutId`, spring 420/32): white with `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, dark `#636366`.
-- Caption: "Press and hold the orb to talk." 13px `#86868b` (dark `#98989d`).
+type OrbParams = { r: number; amp: number; speed: number; fill: number; ring: number; glow: number; dark: number };
 
-## Motion (per-frame outline)
+const TARGETS: Record<OrbState, OrbParams> = {
+  idle: { r: 58, amp: 0, speed: 0.4, fill: 0, ring: 1, glow: 0, dark: 0 },
+  listening: { r: 64, amp: 3, speed: 1.2, fill: 1, ring: 0, glow: 1, dark: 0 },
+  thinking: { r: 50, amp: 0.6, speed: 0.6, fill: 1, ring: 0, glow: 0.2, dark: 1 },
+  speaking: { r: 62, amp: 9, speed: 3.2, fill: 1, ring: 0, glow: 0.7, dark: 0 },
+};
 
-Each frame (`dt` in seconds):
-- `phase += dt · speed`.
-- Fake voice level: target `= 0.4 + 0.6·|sin(now/130)·sin(now/410)|` while listening or speaking, else 0; `level += (target − level)·0.2` (syllable-like bursts, smoothed).
-- `a0 = amp · (0.5 + level)`; `r0 = r + level · (listening ? 6 : 2)`.
-- Sample 72 points around the circle (`i = 0..72`, angle `a = i/72·2π`). Noise: `n = 0.5·sin(3a + 2.1·phase) + 0.3·sin(5a − 2.9·phase) + 0.2·sin(7a + 3.7·phase)`. Radius `rr = r0 + n·a0`. Point `(100 + cos a·rr, 100 + sin a·rr)`. Join with `M … L … Z` (2 decimals) and set the path motion value.
+export interface VoiceOrbProps {
+  accent?: string;
+  /** Walks through listening, thinking and speaking by itself until pressed. */
+  autoplay?: boolean;
+}
 
-Press feedback: `whileTap { scale: 0.96 }`.
+/**
+ * One shape for four assistant states. Every parameter (radius, wobble, speed,
+ * glow, darkness) is a motion value, so switching state springs between them
+ * and the outline is rebuilt each frame from layered sine noise.
+ */
+export function VoiceOrb({ accent = "#0071e3", autoplay = false }: VoiceOrbProps) {
+  const gid = "o" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const [state, setState] = useState<OrbState>("idle");
+  const r = useMotionValue(TARGETS.idle.r);
+  const amp = useMotionValue(0);
+  const speed = useMotionValue(0.4);
+  const fill = useMotionValue(0);
+  const ring = useMotionValue(1);
+  const glow = useMotionValue(0);
+  const dark = useMotionValue(0);
+  const path = useMotionValue("");
+  const level = useRef(0);
+  const touched = useRef(false);
+  const timers = useRef<number[]>([]);
 
-## Interaction and states
+  useEffect(() => {
+    const t = TARGETS[state];
+    const mv = { r, amp, speed, fill, ring, glow, dark };
+    (Object.keys(t) as (keyof OrbParams)[]).forEach((k) => animate(mv[k], t[k], { type: "spring", stiffness: 120, damping: 16 }));
+  }, [state, r, amp, speed, fill, ring, glow, dark]);
 
-- **Press** (pointer down, or Space/Enter key down without repeat): mark touched, cancel pending timers, go to `listening`.
-- **Release** (pointer up, or Space/Enter key up): only if currently `listening`, go to `thinking`, then `speaking` after 1400ms, then `idle` at 4200ms.
-- Prevent default for Space/Enter so the page does not scroll or click twice.
-- Clicking a switcher button marks touched, cancels timers and jumps straight to that state.
+  useEffect(() => {
+    let raf = 0;
+    let phase = 0;
+    let last = performance.now();
+    const N = 72;
+    const loop = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      phase += dt * speed.get();
+      // Fake voice level: bursts of syllables.
+      const target = state === "speaking" || state === "listening" ? 0.4 + 0.6 * Math.abs(Math.sin(now / 130) * Math.sin(now / 410)) : 0;
+      level.current += (target - level.current) * 0.2;
+      const a0 = amp.get() * (0.5 + level.current);
+      const r0 = r.get() + level.current * (state === "listening" ? 6 : 2);
+      let d = "";
+      for (let i = 0; i <= N; i++) {
+        const a = (i / N) * Math.PI * 2;
+        const n = Math.sin(a * 3 + phase * 2.1) * 0.5 + Math.sin(a * 5 - phase * 2.9) * 0.3 + Math.sin(a * 7 + phase * 3.7) * 0.2;
+        const rr = r0 + n * a0;
+        const x = 100 + Math.cos(a) * rr, y = 100 + Math.sin(a) * rr;
+        d += (i ? " L " : "M ") + x.toFixed(2) + " " + y.toFixed(2);
+      }
+      path.set(d + " Z");
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [state, speed, amp, r, path]);
 
-## Autoplay demo
+  const clear = () => { timers.current.forEach(clearTimeout); timers.current = []; };
 
-With `autoplay`: run a flow at 700ms and then every 7400ms while not touched: `listening` → `thinking` at 1800ms → `speaking` at 3300ms → `idle` at 6200ms. Each flow cancels the previous flow's timers. Clear everything on unmount.
+  useEffect(() => {
+    if (!autoplay) return;
+    const flow = () => {
+      if (touched.current) return;
+      clear();
+      setState("listening");
+      timers.current.push(window.setTimeout(() => setState("thinking"), 1800));
+      timers.current.push(window.setTimeout(() => setState("speaking"), 3300));
+      timers.current.push(window.setTimeout(() => setState("idle"), 6200));
+    };
+    const a = setTimeout(flow, 700);
+    const b = setInterval(flow, 7400);
+    return () => { clearTimeout(a); clearInterval(b); clear(); };
+  }, [autoplay]);
 
-## Accessibility
+  const press = () => {
+    touched.current = true;
+    clear();
+    setState("listening");
+  };
+  const release = () => {
+    if (state !== "listening") return;
+    setState("thinking");
+    timers.current.push(window.setTimeout(() => setState("speaking"), 1400));
+    timers.current.push(window.setTimeout(() => setState("idle"), 4200));
+  };
+  const isTalkKey = (e: RKeyboardEvent) => e.key === " " || e.key === "Enter";
 
-- Orb: native `button type="button"`, `aria-label="Hold to talk"`. Hold-to-talk works with Space or Enter.
-- Focus-visible: 2px ring `#0071e3` (dark `#0a84ff`) with 4px offset (dark offset black); no default outline.
-- Switcher buttons use `aria-pressed` and a 2px `#0071e3` focus outline.
-
-## Acceptance checklist
-
-- [ ] Idle shows only a dashed ring, slowly rotating, perfectly round.
-- [ ] Holding the orb grows it to a glowing gradient blob that breathes with bursty "voice" pulses.
-- [ ] Releasing shrinks it into a dark glossy sphere with a rotating shimmer.
-- [ ] After 1.4s it churns visibly while speaking, then returns to the ring at 4.2s.
-- [ ] All transitions between states are smooth springs, never jumps.
-- [ ] Space or Enter held on the focused orb behaves like holding the pointer.
-- [ ] The thinking sphere stays visible on a black background in dark mode.
-- [ ] Switcher pill slides to the active state, including during autoplay.
-- [ ] Autoplay cycles every 7.4s and stops at the first press or switcher click.
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <motion.button
+        type="button"
+        aria-label="Hold to talk"
+        onPointerDown={press}
+        onPointerUp={release}
+        onKeyDown={(e) => {
+          if (!isTalkKey(e)) return;
+          e.preventDefault();
+          if (!e.repeat) press();
+        }}
+        onKeyUp={(e) => {
+          if (!isTalkKey(e)) return;
+          e.preventDefault();
+          release();
+        }}
+        whileTap={{ scale: 0.96 }}
+        className="relative h-[200px] w-[200px] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+      >
+        <svg width="200" height="200" viewBox="0 0 200 200" className="overflow-visible" aria-hidden="true">
+          <defs>
+            <radialGradient id={`${gid}-fill`} cx="38%" cy="32%" r="75%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="45%" stopColor={accent} stopOpacity="0.85" />
+              <stop offset="100%" stopColor="#5e5ce6" />
+            </radialGradient>
+            {/* The thinking sphere lifts a few shades in dark mode so it still reads against black. */}
+            <radialGradient id={`${gid}-dark`} cx="35%" cy="30%" r="80%">
+              <stop offset="0%" className="[stop-color:#6e6e73] dark:[stop-color:#aeaeb2]" />
+              <stop offset="55%" className="[stop-color:#1d1d1f] dark:[stop-color:#48484a]" />
+              <stop offset="100%" className="[stop-color:#000] dark:[stop-color:#2c2c2e]" />
+            </radialGradient>
+            <filter id={`${gid}-blur`} x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="16" />
+            </filter>
+          </defs>
+          <motion.path d={path} fill={accent} filter={`url(#${gid}-blur)`} style={{ opacity: glow }} />
+          <motion.path d={path} fill={`url(#${gid}-fill)`} style={{ opacity: fill }} />
+          <motion.path d={path} fill={`url(#${gid}-dark)`} style={{ opacity: dark }} />
+          {state === "thinking" && (
+            <motion.ellipse cx="100" cy="100" rx="38" ry="10" fill="rgba(255,255,255,.18)" animate={{ rotate: 360 }} transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }} />
+          )}
+          <motion.path
+            d={path}
+            fill="none"
+            className="stroke-[#1d1d1f] dark:stroke-[#f5f5f7]"
+            strokeWidth="2"
+            strokeDasharray="3 7"
+            strokeLinecap="round"
+            style={{ opacity: ring }}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
+          />
+        </svg>
+      </motion.button>
+      <div role="group" aria-label="Orb state" className="relative grid grid-cols-4 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+        {(Object.keys(TARGETS) as OrbState[]).map((s) => (
+          <button
+            key={s}
+            type="button"
+            aria-pressed={state === s}
+            onClick={() => { touched.current = true; clear(); setState(s); }}
+            className="relative z-10 h-8 rounded-[9px] px-3.5 text-[13px] font-medium capitalize text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#f5f5f7]"
+          >
+            {state === s && (
+              <motion.span
+                layoutId={`${gid}-seg`}
+                transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]"
+              />
+            )}
+            {s}
+          </button>
+        ))}
+      </div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Press and hold the orb to talk.</span>
+    </div>
+  );
+}
+```

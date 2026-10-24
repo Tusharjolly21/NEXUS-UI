@@ -1,78 +1,646 @@
 # Liquid Dial
 
-Build a floating "new" button whose actions bud out of it like liquid along an arc. Everything sits under an SVG goo filter, so blobs stay joined as they leave and merge back on return. The highlight is two blobs on different springs, stretching into a thread between actions. Soft and organic, with crisp icons on top.
+Add the "Liquid Dial" component from Nexus UI to my project.
 
-## Stack
+A floating action button whose actions bud out of it like liquid. The highlight is two blobs on different springs, so it pulls into a thread before wrapping the next action.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `animate`, `useMotionValue`).
-- File: `components/liquid-dial/liquid-dial.tsx`, named export `LiquidDial`, plus exported types `LiquidDialProps` and `LiquidDialAction = { id: string; label: string; d: string }` (`d` is SVG path data in a 24×24 box, drawn with a 1.9 stroke).
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+5. Use it like this: `import { LiquidDial } from "@/components/liquid-dial";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `actions` | `LiquidDialAction[]` | Photo, Note, Voice memo, Link | Up to four actions on the arc. |
-| `color` | `string` | `var(--ld-blob)` = `#1d1d1f` (dark `#3a3a3c`) | Blob colour. |
-| `accent` | `string` | `var(--ld-accent)` = `#0071e3` (dark `#0a84ff`) | Highlight blob and focus ring colour. |
-| `onSelect` | `(id: string) => void` | – | Called with the action id when picked. |
-| `autoplay` | `boolean` | `false` | Opens and browses by itself until the user interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Default icon paths:
-- photo: `M4 8h3l2-3h6l2 3h3v11H4zM12 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z`
-- note: `M6 4h9l4 4v12H6zM14 4v5h5M9 13h7M9 17h5`
-- voice: `M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3zM6 11a6 6 0 0 0 12 0M12 17v3`
-- link: `M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1`
+--- components/liquid-dial/index.ts ---
 
-## Geometry
+```ts
+export { LiquidDial } from "./liquid-dial";
+export type { LiquidDialProps, LiquidDialAction } from "./liquid-dial";
+```
 
-Stage 360×300, `relative select-none`. Button centre `(180, 240)`. Actions sit on a circle of radius 112 around it at angles −160°, −118°, −62°, −20°: `x = 180 + cos(a)·112`, `y = 240 + sin(a)·112`.
+--- components/liquid-dial/liquid-dial.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, animate, motion, useMotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
-- **Goo filter** (unique id from `useId`, inside a 0×0 SVG): `feGaussianBlur stdDeviation 9` → `feColorMatrix` with alpha row `0 0 0 22 −9` (identity on RGB) → `feComposite in=SourceGraphic in2=goo operator=atop`.
-- **Liquid layer** (full stage, filtered, `aria-hidden`): a 52px `color` blob per action (centred via −26px offsets, moved by `x, y`); two 2px `accent` dots positioned by `lead` and `tail` and scaled by `hlR` (31 → 62px); the 64px main blob at the centre.
-- **Icon layer** (not filtered): one 52px round `motion.button` per action, white 20px icon (stroke 1.9, round caps/joins), at the same positions as its blob.
-- **Hover label**: 12px medium `#6e6e73` (dark `#a1a1a6`), no wrap, centred 54px above the hovered action.
-- **Main button**: 64px round, white 24px plus icon (`M12 5v14M5 12h14`, stroke 2.4, round), sitting on the main blob.
-- **Toast**: "New {label lowercased}" centred, 32px from the top, pill with padding 14px × 6px, 13px medium, white with `#1d1d1f` text, shadow `0 0 0 1px rgba(0,0,0,.06), 0 8px 20px -10px rgba(0,0,0,.3)`. Dark: `#2c2c2e`, `#f5f5f7`, shadow `0 0 0 1px rgba(255,255,255,.1), 0 8px 20px -10px rgba(0,0,0,.8)`.
+export interface LiquidDialAction {
+  id: string;
+  label: string;
+  /** SVG path data drawn in a 24×24 box with a 1.9 stroke. */
+  d: string;
+}
 
-## Motion
+const ACTIONS: LiquidDialAction[] = [
+  { id: "photo", label: "Photo", d: "M4 8h3l2-3h6l2 3h3v11H4zM12 16a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" },
+  { id: "note", label: "Note", d: "M6 4h9l4 4v12H6zM14 4v5h5M9 13h7M9 17h5" },
+  { id: "voice", label: "Voice memo", d: "M12 4a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V7a3 3 0 0 1 3-3zM6 11a6 6 0 0 0 12 0M12 17v3" },
+  { id: "link", label: "Link", d: "M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" },
+];
 
-- **Action blobs and icons**: open → their point, scale 1 (icons also opacity 1, and scale 1.1 while hovered), spring stiffness 260, damping 16 (wobbly), delay `i·0.05s` for blobs and `i·0.05 + 0.04s` for icons. Closed → centre, scale 0.4 (icons opacity 0), spring stiffness 380, damping 28, blob delay `(n − i)·0.03s` (last one first), icons no delay. `initial={false}`.
-- **Main blob**: scale 1.04 when open.
-- **Plus icon**: rotates to 135° when open (becomes ×), spring 400/20. Main button `whileTap { scale: 0.9 }`.
-- **Highlight**: whenever `hover` or `open` changes, target = hovered action's point if open and hovering, otherwise the centre. Animate `lead` x/y with a fast spring (stiffness 520, damping 30) and `tail` x/y with a slow one (stiffness 140, damping 18). The goo filter joins the two dots into a stretched thread while the tail catches up. Animate `hlR` to 31 when highlighting, 0 otherwise (spring 400/26).
-- **Hover label**: enters from `opacity 0, y 6`.
-- **Toast**: enter from `opacity 0, y 10, scale 0.9`; exit `opacity 0, y −6`; visible for 1400ms (restart the timer on each pick; clear on unmount).
+const W = 360;
+const H = 300;
+const CX = W / 2;
+const CY = H - 60;
+const RADIUS = 112;
+const ANGLES = [-160, -118, -62, -20];
 
-## Interaction and states
+const pos = (i: number) => {
+  const a = (ANGLES[i] * Math.PI) / 180;
+  return { x: CX + Math.cos(a) * RADIUS, y: CY + Math.sin(a) * RADIUS };
+};
 
-- State: `open`, `hover` (index or null), `picked` (label or null).
-- Main button toggles `open` and clears `hover`.
-- Action buttons: pointer enter or focus sets `hover`; click picks: set `picked`, call `onSelect(id)`, close, clear hover.
-- Leaving the stage clears hover; pointer down marks touched. Closed action buttons get `tabIndex -1`, `pointer-events: none`.
+export interface LiquidDialProps {
+  /** Up to four actions, laid out on an arc above the button. */
+  actions?: LiquidDialAction[];
+  /** Blob colour. Defaults to near-black (#1d1d1f), or #3a3a3c in dark mode. */
+  color?: string;
+  /** Highlight colour. Defaults to #0071e3 (#0a84ff in dark mode). */
+  accent?: string;
+  onSelect?: (id: string) => void;
+  /** Opens and browses by itself until the user interacts. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  enableSound?: boolean;
+}
 
-## Autoplay demo
+/**
+ * A floating action button whose actions bud out of it like liquid. Everything
+ * sits under an SVG "goo" filter (blur + alpha threshold), so blobs merge where
+ * they are close. The highlight is two blobs on different springs, so it pulls
+ * into a thread between actions before snapping round the new one.
+ */
+export function LiquidDial({ actions = ACTIONS, color, accent, onSelect, autoplay = false, enableSound = true }: LiquidDialProps) {
+  const play = useSound(enableSound);
+  const fid = "goo" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const blob = color ?? "var(--ld-blob)";
+  const hl = accent ?? "var(--ld-accent)";
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState<number | null>(null);
+  const [picked, setPicked] = useState<string | null>(null);
+  const touched = useRef(false);
+  const pickedTimer = useRef(0);
+  const leadX = useMotionValue(CX), leadY = useMotionValue(CY);
+  const tailX = useMotionValue(CX), tailY = useMotionValue(CY);
+  const hlR = useMotionValue(0);
 
-With `autoplay`: run at 700ms, then every 5200ms, while not touched. A run opens the dial, hovers actions `0, 1, 2, 3, 1` at `650 + k·420ms`, and at 3000ms picks `actions[1]` (showing the toast). Keep the latest `choose` and `actions` in a ref so timers never go stale. Clear every timer on unmount.
+  useEffect(() => {
+    const target = hover !== null && open ? pos(hover) : { x: CX, y: CY };
+    animate(leadX, target.x, { type: "spring", stiffness: 520, damping: 30 });
+    animate(leadY, target.y, { type: "spring", stiffness: 520, damping: 30 });
+    animate(tailX, target.x, { type: "spring", stiffness: 140, damping: 18 });
+    animate(tailY, target.y, { type: "spring", stiffness: 140, damping: 18 });
+    animate(hlR, hover !== null && open ? 31 : 0, { type: "spring", stiffness: 400, damping: 26 });
+  }, [hover, open, leadX, leadY, tailX, tailY, hlR]);
 
-## Accessibility
+  useEffect(() => () => window.clearTimeout(pickedTimer.current), []);
 
-- Main button: `aria-expanded`, `aria-label` "New" when closed, "Close actions" when open.
-- Action buttons: `aria-label` = action label.
-- Focus-visible: 2px ring in the accent with 2px offset (dark offset black); no default outline.
-- Toast has `role="status"`. Liquid layer and filter are `aria-hidden`.
+  const choose = (a: LiquidDialAction) => {
+    setPicked(a.label);
+    onSelect?.(a.id);
+    setOpen(false);
+    setHover(null);
+    window.clearTimeout(pickedTimer.current);
+    pickedTimer.current = window.setTimeout(() => setPicked(null), 1400);
+  };
 
-## Acceptance checklist
+  // The autoplay loop always calls the latest `choose`/`actions`.
+  const latest = useRef({ choose, actions });
+  useEffect(() => {
+    latest.current = { choose, actions };
+  });
 
-- [ ] Opening makes four blobs stretch out of the button, connected by liquid necks, then pop free with a wobble.
-- [ ] Closing pulls them back in reverse order and they merge into the button.
-- [ ] The plus rotates into an ×.
-- [ ] Hovering an action grows an accent blob around it; moving to the next stretches it into a thread first.
-- [ ] Picking an action closes the dial, calls `onSelect`, and shows "New photo" style toast for 1.4s.
-- [ ] Tab reaches action buttons only when open.
-- [ ] Autoplay opens, browses, picks Note and repeats every 5.2s until first pointer down.
+  useEffect(() => {
+    if (!autoplay) return;
+    const ts: number[] = [];
+    const run = () => {
+      if (touched.current) return;
+      setOpen(true);
+      [0, 1, 2, 3, 1].forEach((h, k) =>
+        ts.push(
+          window.setTimeout(() => {
+            if (!touched.current) setHover(h);
+          }, 650 + k * 420),
+        ),
+      );
+      ts.push(
+        window.setTimeout(() => {
+          const { choose: pick, actions: list } = latest.current;
+          if (touched.current || !list[1]) return;
+          play.auto("tap", 0.8);
+          pick(list[1]);
+        }, 3000),
+      );
+    };
+    ts.push(window.setTimeout(run, 700));
+    const loop = setInterval(run, 5200);
+    return () => { clearInterval(loop); ts.forEach(clearTimeout); };
+  }, [autoplay, play]);
 
-## Sound
+  return (
+    <div
+      className="relative select-none [--ld-accent:#0071e3] [--ld-blob:#1d1d1f] dark:[--ld-accent:#0a84ff] dark:[--ld-blob:#3a3a3c]"
+      style={{ width: W, height: H }}
+      onPointerDown={() => { touched.current = true; }}
+      onPointerLeave={() => setHover(null)}
+    >
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <filter id={fid}>
+          <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="b" />
+          <feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9" result="g" />
+          <feComposite in="SourceGraphic" in2="g" operator="atop" />
+        </filter>
+      </svg>
 
-Add an `enableSound` prop (boolean, default `true`; `false` silences it). When the user clicks an action, play one `tap` (a short 900 to 620 Hz sine blip with a faint high click, volume 0.8). Opening and closing the dial and hovering and focusing actions are silent. The autoplay pick plays the same `tap`. Autoplay plays these same sounds through the same play function's `auto` variant (`play.auto(name, volume)`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. It is still silent on hover, and still follows `enableSound` and the site-wide switch. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+      {/* Liquid layer */}
+      <div className="absolute inset-0" style={{ filter: `url(#${fid})` }} aria-hidden="true">
+        {actions.map((a, i) => {
+          const p = pos(i);
+          return (
+            <motion.span
+              key={a.id}
+              className="absolute rounded-full"
+              style={{ width: 52, height: 52, left: -26, top: -26, background: blob }}
+              initial={false}
+              animate={open ? { x: p.x, y: p.y, scale: 1 } : { x: CX, y: CY, scale: 0.4 }}
+              transition={{ type: "spring", stiffness: open ? 260 : 380, damping: open ? 16 : 28, delay: open ? i * 0.05 : (actions.length - i) * 0.03 }}
+            />
+          );
+        })}
+        <motion.span className="absolute rounded-full" style={{ x: tailX, y: tailY, width: 2, height: 2, left: -1, top: -1, scale: hlR, background: hl }} />
+        <motion.span className="absolute rounded-full" style={{ x: leadX, y: leadY, width: 2, height: 2, left: -1, top: -1, scale: hlR, background: hl }} />
+        <motion.span className="absolute rounded-full" style={{ width: 64, height: 64, left: CX - 32, top: CY - 32, background: blob }} animate={{ scale: open ? 1.04 : 1 }} />
+      </div>
+
+      {/* Crisp icon layer on top of the goo */}
+      {actions.map((a, i) => {
+        const p = pos(i);
+        return (
+          <motion.button
+            key={a.id}
+            type="button"
+            aria-label={a.label}
+            tabIndex={open ? 0 : -1}
+            onPointerEnter={() => setHover(i)}
+            onFocus={() => setHover(i)}
+            onClick={() => { play("tap", 0.8); choose(a); }}
+            className="absolute flex h-[52px] w-[52px] items-center justify-center rounded-full text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+            style={{ left: -26, top: -26, pointerEvents: open ? "auto" : "none", ["--tw-ring-color" as string]: hl }}
+            initial={false}
+            animate={open ? { x: p.x, y: p.y, opacity: 1, scale: hover === i ? 1.1 : 1 } : { x: CX, y: CY, opacity: 0, scale: 0.4 }}
+            transition={{ type: "spring", stiffness: open ? 260 : 380, damping: open ? 16 : 28, delay: open ? i * 0.05 + 0.04 : 0 }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d={a.d} />
+            </svg>
+          </motion.button>
+        );
+      })}
+      <AnimatePresence>
+        {open && hover !== null && actions[hover] && (
+          <motion.span
+            key={hover}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="pointer-events-none absolute whitespace-nowrap text-[12px] font-medium text-[#6e6e73] dark:text-[#a1a1a6]"
+            style={{ left: pos(hover).x, top: pos(hover).y - 54, x: "-50%" }}
+          >
+            {actions[hover].label}
+          </motion.span>
+        )}
+      </AnimatePresence>
+      <motion.button
+        type="button"
+        aria-expanded={open}
+        aria-label={open ? "Close actions" : "New"}
+        onClick={() => { touched.current = true; setOpen((o) => !o); setHover(null); }}
+        whileTap={{ scale: 0.9 }}
+        className="absolute flex h-16 w-16 items-center justify-center rounded-full text-white outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-black"
+        style={{ left: CX - 32, top: CY - 32, ["--tw-ring-color" as string]: hl }}
+      >
+        <motion.svg animate={{ rotate: open ? 135 : 0 }} transition={{ type: "spring", stiffness: 400, damping: 20 }} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </motion.svg>
+      </motion.button>
+      <AnimatePresence>
+        {picked && (
+          <motion.span
+            role="status"
+            initial={{ opacity: 0, y: 10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6 }}
+            style={{ x: "-50%" }}
+            className="absolute left-1/2 top-8 rounded-full bg-white px-3.5 py-1.5 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_8px_20px_-10px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_8px_20px_-10px_rgba(0,0,0,.8)]"
+          >
+            New {picked.toLowerCase()}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+```
+
+--- lib/ui-sounds.ts ---
+
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
+
+import * as React from "react";
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```

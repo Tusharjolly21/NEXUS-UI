@@ -1,79 +1,139 @@
 # Falloff Accordion
 
-Build a horizontal row of tall photo strips. When the pointer moves over a strip it opens wide, and its neighbours give way on a smooth bell-shaped falloff, so the whole row leans toward the pointer instead of one item snapping open. A caption fades and rises in on the open strip. It should feel soft, physical and Apple-like: springy widths, a slow zoom-out of the art, nothing abrupt.
+Add the "Falloff Accordion" component from Nexus UI to my project.
 
-## Stack
+A row of photo strips where the one you point at opens and its neighbours give way on a smooth Gaussian falloff, so the whole row leans toward the pointer while a caption rises on the open strip.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`).
-- File: `components/falloff-accordion/falloff-accordion.tsx`. Named export `FalloffAccordion`, plus the `FalloffStrip` type and a `DEFAULT_FALLOFF_STRIPS` array.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { FalloffAccordion, DEFAULT_FALLOFF_STRIPS } from "@/components/falloff-accordion";`. The props are typed and documented in the code.
 
-`FalloffStrip = { title: string; meta: string; art: string }`. `art` is any CSS `background` value (a gradient, or `url(...) center / cover` for a photo). Titles must be unique; they are the React keys.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-`FalloffAccordion` props:
+--- components/falloff-accordion/falloff-accordion.tsx ---
 
-- `strips?: FalloffStrip[]`, default seven gradient strips (angle 170deg, four stops each):
-  - Glacier / Iceland: `#e3f2ff 0%, #9cc9f5 40%, #3f6fa8 75%, #1d2f4f`
-  - Dune / Morocco: `#ffe2b8 0%, #f5a65b 45%, #b4572b 80%, #5a2615`
-  - Fern / New Zealand: `#e4f7c7 0%, #8fd16a 40%, #2f7d4a 75%, #123a26`
-  - Bloom / Japan: `#fff0f5 0%, #ffb3cf 40%, #d1477a 78%, #5c1837`
-  - Basalt / Scotland: `#e8e8ed 0%, #a1a1aa 40%, #4b4b55 78%, #1d1d22`
-  - Lagoon / Maldives: `#e0fffb 0%, #6fe3d6 40%, #1695a3 78%, #0b3c55`
-  - Ember / Hawaii: `#ffe9d6 0%, #ff9f6b 35%, #e0402b 70%, #3b0d0d`
-- `autoplay?: boolean`, default `false`.
+```tsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-## Layout and look
+export interface FalloffStrip {
+  title: string;
+  /** Smaller line under the title, e.g. a place. */
+  meta: string;
+  /** Any CSS background for the strip: a gradient, or `url(...) center / cover` for a photo. */
+  art: string;
+}
 
-- Root: a column, items centred, 12px gap.
-- Row: `display: flex`, 290px tall, 440px wide with `max-width: 100%`, 6px gap between strips.
-- Each strip is a `<button type="button">`: `position: relative`, `min-width: 0`, `flex-basis: 0`, `overflow: hidden`, radius 16px, no outline. Start with `flex-grow: 1` so all strips are equal width.
-- Inside each strip, three stacked layers:
-  1. Art: an absolutely filling span with `background: art`. It is scaled (see Motion).
-  2. Shade: an absolutely filling span with `radial-gradient(120% 60% at 50% 110%, rgba(0,0,0,.45), transparent 60%)` so the bottom darkens for the caption.
-  3. Caption (only on the open strip): absolute, 16px from the bottom and left, a left-aligned column in white. Title 18px semibold, tracking −0.02em; meta 12px at 85% opacity. Keep both on one line (`white-space: nowrap`) so they do not reflow while the strip grows.
-- Hint under the row: "Move along the row.", 13px, `#86868b` (dark `#98989d`).
-- Focus ring: `focus-visible` 2px ring `#0071e3` with 2px offset; in dark mode ring `#0a84ff` with a black offset.
-- The strip art keeps its colours in dark mode.
+export const DEFAULT_FALLOFF_STRIPS: FalloffStrip[] = [
+  { title: "Glacier", meta: "Iceland", art: "linear-gradient(170deg,#e3f2ff 0%,#9cc9f5 40%,#3f6fa8 75%,#1d2f4f)" },
+  { title: "Dune", meta: "Morocco", art: "linear-gradient(170deg,#ffe2b8 0%,#f5a65b 45%,#b4572b 80%,#5a2615)" },
+  { title: "Fern", meta: "New Zealand", art: "linear-gradient(170deg,#e4f7c7 0%,#8fd16a 40%,#2f7d4a 75%,#123a26)" },
+  { title: "Bloom", meta: "Japan", art: "linear-gradient(170deg,#fff0f5 0%,#ffb3cf 40%,#d1477a 78%,#5c1837)" },
+  { title: "Basalt", meta: "Scotland", art: "linear-gradient(170deg,#e8e8ed 0%,#a1a1aa 40%,#4b4b55 78%,#1d1d22)" },
+  { title: "Lagoon", meta: "Maldives", art: "linear-gradient(170deg,#e0fffb 0%,#6fe3d6 40%,#1695a3 78%,#0b3c55)" },
+  { title: "Ember", meta: "Hawaii", art: "linear-gradient(170deg,#ffe9d6 0%,#ff9f6b 35%,#e0402b 70%,#3b0d0d)" },
+];
 
-## Motion
+export interface FalloffAccordionProps {
+  /** The strips in the row. Titles must be unique (they are used as keys). */
+  strips?: FalloffStrip[];
+  /** Opens every other strip in turn until someone points at the row. */
+  autoplay?: boolean;
+}
 
-**Falloff.** Keep one piece of state, `focus: number | null`. For each strip index `i`:
+/**
+ * Photo strips in a fixed-width row. Hover one and it opens while its
+ * neighbours give way on a smooth falloff, so the whole row leans toward the
+ * pointer instead of one item snapping open. The caption rises on the open
+ * strip.
+ */
+export function FalloffAccordion({ strips = DEFAULT_FALLOFF_STRIPS, autoplay = false }: FalloffAccordionProps) {
+  const [focus, setFocus] = useState<number | null>(null);
+  const touched = useRef(false);
 
-- `d = |i − focus|`
-- `grow = focus === null ? 1 : 1 + 6 · exp(−d² / 1.1)`
+  useEffect(() => {
+    if (!autoplay) return;
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      setFocus(k % strips.length);
+      k += 2;
+    }, 1500);
+    return () => clearInterval(t);
+  }, [autoplay, strips.length]);
 
-So the focused strip gets `flex-grow` 7, its direct neighbours about 3.4, the next ones about 1.17, and the rest stay near 1. Animate `flexGrow` to `grow` with a spring: stiffness 200, damping 24. Because all strips share the fixed row width, growing one squeezes the others smoothly.
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div
+        className="flex h-[290px] w-[440px] max-w-full gap-1.5"
+        onPointerLeave={() => setFocus(null)}
+        onPointerEnter={() => {
+          touched.current = true;
+        }}
+      >
+        {strips.map((s, i) => {
+          const d = focus === null ? 0 : Math.abs(i - focus);
+          // Gaussian falloff: the focused strip grows 7x, its neighbours a little less.
+          const grow = focus === null ? 1 : 1 + 6 * Math.exp(-(d * d) / 1.1);
+          const on = focus === i;
+          return (
+            <motion.button
+              key={s.title}
+              type="button"
+              aria-label={`${s.title}, ${s.meta}`}
+              aria-expanded={on}
+              onPointerEnter={() => setFocus(i)}
+              onFocus={() => {
+                touched.current = true;
+                setFocus(i);
+              }}
+              animate={{ flexGrow: grow }}
+              transition={{ type: "spring", stiffness: 200, damping: 24 }}
+              className="relative min-w-0 basis-0 overflow-hidden rounded-[16px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+              style={{ flexGrow: 1 }}
+            >
+              <motion.span
+                className="absolute inset-0"
+                style={{ background: s.art }}
+                animate={{ scale: on ? 1.06 : 1.2 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              />
+              <span className="absolute inset-0" style={{ background: "radial-gradient(120% 60% at 50% 110%, rgba(0,0,0,.45), transparent 60%)" }} />
+              <AnimatePresence>
+                {on && (
+                  <motion.span
+                    key="cap"
+                    className="absolute bottom-4 left-4 flex flex-col items-start text-left text-white"
+                    initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.35, delay: 0.08 }}
+                  >
+                    <span className="whitespace-nowrap text-[18px] font-semibold tracking-[-0.02em]">{s.title}</span>
+                    <span className="whitespace-nowrap text-[12px] opacity-85">{s.meta}</span>
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          );
+        })}
+      </div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Move along the row.</span>
+    </div>
+  );
+}
+```
 
-**Art zoom.** The art layer animates `scale` to 1.06 when its strip is open and 1.2 otherwise, over 0.8s with ease `[0.16, 1, 0.3, 1]`. Opening a strip therefore reads as the photo pulling back slightly.
+--- components/falloff-accordion/index.ts ---
 
-**Caption.** Wrapped in `AnimatePresence`. Enters from `opacity 0, y 14, blur(4px)` to `opacity 1, y 0, blur(0)`; exits to `opacity 0, y 8`. Duration 0.35s with a 0.08s delay.
-
-## Interaction and states
-
-- `pointerenter` on a strip sets `focus` to its index. `focus` on a strip (keyboard Tab) also sets it.
-- `pointerleave` on the row resets `focus` to `null`, so all strips spring back to equal width and captions leave.
-- There is no click behaviour; the component is about the hover and focus falloff.
-- Only one caption is visible at a time.
-
-## Autoplay demo
-
-With `autoplay`, start an interval of 1500ms with a counter `k = 0`. Each tick sets `focus = k mod strips.length`, then adds 2 to `k`, so it opens every other strip and wraps around. A ref `touched` is set when the pointer enters the row or a strip receives focus; the next tick clears the interval for good. Clear the interval on unmount and when `autoplay` or the strip count changes.
-
-## Accessibility
-
-- Each strip is a native button with `aria-label` = `"{title}, {meta}"` and `aria-expanded` true only on the open strip.
-- Tab moves through strips and opens each as it receives focus.
-- The art, shade and caption are decorative; the label carries the content.
-
-## Acceptance checklist
-
-- [ ] At rest all seven strips are equal width in a 440×290 row with 6px gaps and 16px corners.
-- [ ] Hovering a strip opens it to about seven times its neighbours' base share, with neighbours shrinking on a smooth curve rather than all equally.
-- [ ] Moving the pointer along the row shifts the bulge continuously, with spring overshoot but no jitter.
-- [ ] The open strip's art eases from 1.2 to 1.06 scale over 0.8s.
-- [ ] The caption rises and unblurs in about 0.35s after a short delay, and drops away when the strip closes.
-- [ ] Leaving the row returns every strip to equal width.
-- [ ] Tabbing through strips opens each in turn with a visible focus ring.
-- [ ] Autoplay opens every other strip every 1.5s and stops for good once the pointer enters or a strip is focused.
-- [ ] Dark mode changes only the hint colour and focus ring; the strips look the same.
+```ts
+export { FalloffAccordion, DEFAULT_FALLOFF_STRIPS } from "./falloff-accordion";
+export type { FalloffAccordionProps, FalloffStrip } from "./falloff-accordion";
+```

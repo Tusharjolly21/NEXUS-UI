@@ -1,78 +1,207 @@
 # Lanyard Badge
 
-Build a conference badge on a strap that you can grab and throw. Let go and it swings back as a damped pendulum; the strap sags when slack, the badge's angle lags and overshoots, and it twists in 3D with sideways speed. Physical and playful, but tidy: an Apple-event badge.
+Add the "Lanyard Badge" component from Nexus UI to my project.
 
-## Stack
+A conference badge hanging from a strap. Grab it and throw it around; it swings back as a damped pendulum and twists with its sideways speed.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useMotionValue`, `useTransform`). Physics is a custom `requestAnimationFrame` loop writing motion values; no framer drag.
-- File: `components/lanyard-badge/lanyard-badge.tsx`, named export `LanyardBadge`, plus exported `LanyardBadgeProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { LanyardBadge } from "@/components/lanyard-badge";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `name` | `string` | `"Alex Rivera"` | Attendee name; the avatar shows the first letter of each word. |
-| `role` | `string` | `"Design Engineer"` | Line under the name. |
-| `event` | `string` | `"Motion Summit"` | Printed at the top, followed by " 2026". |
-| `tag` | `string` | `"Speaker"` | Label on the coloured band at the bottom. |
-| `strap` | `string` | `"#0071e3"` | Strap, band and avatar gradient start colour. |
-| `autoplay` | `boolean` | `false` | Nudges the badge every few seconds until someone grabs it. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Constants: stage 420×420, strap length `L = 150`, badge 168×228.
+--- components/lanyard-badge/index.ts ---
 
-## Layout and look
+```ts
+export { LanyardBadge } from "./lanyard-badge";
+export type { LanyardBadgeProps } from "./lanyard-badge";
+```
 
-- Stage: `relative`, 420×420, `max-width: 100%`, `perspective: 900px`, `touch-none select-none`. Physics uses stage units; convert pointers with `(clientX − rect.left) / rect.width · 420` (same for y).
-- Anchor at `(210, 0)`. A small clip at the top centre: 32×12, bottom radius 6px, `#d2d2d7` (dark `#48484a`).
-- Strap: a full-stage SVG (`pointer-events-none`) with two paths sharing the same `d`: the strap, stroke `strap`, width 12, round caps; and a stitch line on top, `rgba(255,255,255,.35)`, width 2, dash `2 7`, round caps.
-- Badge wrapper (the draggable element): positioned by motion values `x = px − 84`, `y = py`, `rotate`, `rotateY`, transform origin top centre (`originX 0.5, originY 0`), size 168 × 246 (badge height + 18px for the clip), `transform-style: preserve-3d`, radius 18px, `cursor-grab` / `active:cursor-grabbing`.
-  - Metal clip at top centre: 26×22, radius 6px, `linear-gradient(180deg, #e5e5ea, #aeaeb2)`, shadow `inset 0 1px 0 #fff, 0 2px 4px rgba(0,0,0,.2)`.
-  - Card: bottom-anchored, 228px tall, radius 18px, `overflow-hidden`, white, shadow `0 0 0 1px rgba(0,0,0,.06), 0 30px 50px -24px rgba(0,0,0,.45)`. Dark: `#1c1c1e`, shadow `0 0 0 1px rgba(255,255,255,.1), 0 30px 50px -24px rgba(0,0,0,.9)`.
-    - Slot: 48×8 pill, centred, 12px from top, `#e8e8ed` (dark `#3a3a3c`).
-    - Body: column, centred, 8px gap, 16px side padding, 16px top padding. Event line `"{event} 2026"` 10px semibold uppercase, tracking 0.16em, `#86868b` (dark `#8e8e93`). Avatar 64px circle, `linear-gradient(135deg, {strap}, #5e5ce6)`, initials 22px semibold white. Name 18px semibold, tight leading, tracking −0.02em, `#1d1d1f` (dark `#f5f5f7`). Role 12px `#6e6e73` (dark `#a1a1a6`).
-    - Band: 36px tall, background `strap`, `tag` in 12px semibold uppercase white, tracking 0.18em.
+--- components/lanyard-badge/lanyard-badge.tsx ---
 
-## Motion (physics loop)
+```tsx
+"use client";
+import { useEffect, useRef, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 
-Keep state in a ref: position `x, y`, velocity `vx, vy`, angle `r` and angular velocity `vr`, `dragging`, drag target `tx, ty`, grab offset `ox, oy`, `touched`. Start at `(210, 150)`, at rest. Each frame `dt = min(0.032, elapsed seconds)`.
+export interface LanyardBadgeProps {
+  name?: string;
+  role?: string;
+  event?: string;
+  tag?: string;
+  strap?: string;
+  /** Gives the badge a nudge every few seconds until someone grabs it. */
+  autoplay?: boolean;
+}
 
-**While dragging**: move 45% of the way toward the target each frame (`x += (tx − x)·0.45`), and set velocity to that frame's displacement / dt (so release carries the throw). Clamp distance from the anchor to `1.35·L` (the strap stretches a bit, then stops).
+const W = 420; // stage width
+const H = 420; // stage height
+const L = 150; // strap length
+const BW = 168; // badge width
+const BH = 228; // badge height
 
-**While free**:
-- gravity `vy += 2200·dt`;
-- air drag on both axes `v *= 0.35^dt` (frame-rate independent);
-- integrate `x += vx·dt`, `y += vy·dt`;
-- if distance `d > L`: pull the badge back to `L + (d − L)·0.6` along the strap direction (a stiff, slightly elastic rope), and if the radial (outward) velocity is positive remove 90% of it. Inside `L` the strap is slack and the badge falls freely.
+/**
+ * A badge hanging from a strap. Drag it anywhere; let go and it swings
+ * back as a damped pendulum, twisting with its sideways speed.
+ */
+export function LanyardBadge({ name = "Alex Rivera", role = "Design Engineer", event = "Motion Summit", tag = "Speaker", strap = "#0071e3", autoplay = false }: LanyardBadgeProps) {
+  const stage = useRef<HTMLDivElement>(null);
+  const px = useMotionValue(W / 2);
+  const py = useMotionValue(L);
+  const rot = useMotionValue(0);
+  const twist = useMotionValue(0);
+  const path = useMotionValue(`M ${W / 2} 0 L ${W / 2} ${L}`);
+  const badgeX = useTransform(px, (v) => v - BW / 2);
+  const st = useRef({ x: W / 2, y: L, vx: 0, vy: 0, r: 0, vr: 0, dragging: false, tx: 0, ty: 0, ox: 0, oy: 0, touched: false });
 
-**Badge angle**: target `= −atan2(x − 210, y − 0)` in degrees (the strap's angle). Spring it: `vr += ((target − r)·180 − vr·14)·dt; r += vr·dt`. This makes it lag and overshoot.
+  useEffect(() => {
+    let raf = 0;
+    let last = performance.now();
+    const ax = W / 2;
+    const ay = 0;
+    const tick = (now: number) => {
+      const dt = Math.min(0.032, (now - last) / 1000);
+      last = now;
+      const s = st.current;
+      if (s.dragging) {
+        const nx = s.x + (s.tx - s.x) * 0.45;
+        const ny = s.y + (s.ty - s.y) * 0.45;
+        s.vx = (nx - s.x) / dt;
+        s.vy = (ny - s.y) / dt;
+        s.x = nx;
+        s.y = ny;
+        // Elastic strap: allow some stretch, then resist.
+        const dx = s.x - ax, dy = s.y - ay, d = Math.hypot(dx, dy), max = L * 1.35;
+        if (d > max) { s.x = ax + (dx / d) * max; s.y = ay + (dy / d) * max; }
+      } else {
+        s.vy += 2200 * dt;
+        s.vx *= Math.pow(0.35, dt);
+        s.vy *= Math.pow(0.35, dt);
+        s.x += s.vx * dt;
+        s.y += s.vy * dt;
+        const dx = s.x - ax, dy = s.y - ay, d = Math.hypot(dx, dy);
+        if (d > L) {
+          const nx = dx / d, ny = dy / d;
+          // Pull back toward the strap length like a stiff spring, and drop radial velocity.
+          s.x = ax + nx * (L + (d - L) * 0.6);
+          s.y = ay + ny * (L + (d - L) * 0.6);
+          const radial = s.vx * nx + s.vy * ny;
+          if (radial > 0) { s.vx -= radial * nx * 0.9; s.vy -= radial * ny * 0.9; }
+        }
+      }
+      // Badge angle follows the strap with its own spring, so it lags and overshoots.
+      const target = (-Math.atan2(s.x - ax, s.y - ay) * 180) / Math.PI;
+      s.vr += ((target - s.r) * 180 - s.vr * 14) * dt;
+      s.r += s.vr * dt;
+      px.set(s.x);
+      py.set(s.y);
+      rot.set(s.r);
+      twist.set(Math.max(-55, Math.min(55, s.vx * 0.05)));
+      const d = Math.hypot(s.x - ax, s.y - ay);
+      const sag = Math.sqrt(Math.max(0, L * L - d * d)) * 0.7;
+      const mx = (ax + s.x) / 2, my = (ay + s.y) / 2 + sag;
+      path.set(`M ${ax} ${ay} Q ${mx} ${my} ${s.x} ${s.y}`);
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [path, px, py, rot, twist]);
 
-**3D twist**: `rotateY = clamp(vx·0.05, −55, 55)` degrees.
+  useEffect(() => {
+    if (!autoplay) return;
+    const nudge = () => {
+      const s = st.current;
+      if (s.touched || s.dragging) return;
+      s.vx += (Math.random() > 0.5 ? 1 : -1) * (700 + Math.random() * 500);
+      s.vy -= 200;
+    };
+    const a = setTimeout(nudge, 600);
+    const b = setInterval(nudge, 4200);
+    return () => { clearTimeout(a); clearInterval(b); };
+  }, [autoplay]);
 
-**Strap curve**: quadratic from anchor to badge: `M 210 0 Q mx my x y` where `mx` is the midpoint x and `my = midpoint y + sqrt(max(0, L² − d²))·0.7` (it sags when slack, straight when taut).
+  const toLocal = (e: RPointerEvent) => {
+    const r = stage.current!.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
+  };
 
-Write `px, py, rot, twist` and the path into motion values each frame; cancel on unmount.
+  // Keyboard: arrows flick the badge sideways, Enter/Space toss it up.
+  const onKeyDown = (e: RKeyboardEvent) => {
+    const s = st.current;
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      s.touched = true;
+      s.vx += (e.key === "ArrowLeft" ? -1 : 1) * 900;
+      s.vy -= 200;
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      s.touched = true;
+      s.vy -= 900;
+    }
+  };
 
-## Interaction and states
+  const release = () => {
+    st.current.dragging = false;
+  };
 
-- Pointer down: capture, set dragging and touched, store the grab offset (no jump), target = position. Move: target = pointer − offset. Up/cancel: stop dragging; physics continues with the current velocity.
-- Keyboard on the focused badge: ArrowLeft/ArrowRight add `∓900 / +900` to `vx` and −200 to `vy`; Enter or Space add −900 to `vy` (tosses it up). Prevent default for these keys; all mark touched.
-
-## Autoplay demo
-
-With `autoplay`: a nudge at 600ms, then every 4200ms. A nudge adds `±(700 + random·500)` to `vx` (random side) and −200 to `vy`. Skip when touched or dragging. Clear timers on unmount.
-
-## Accessibility
-
-- Badge wrapper: `role="img"`, `tabIndex={0}`, `aria-label="{event} badge for {name}, {role}. Drag to swing it, or use the arrow keys."`.
-- Focus-visible: 2px ring `#0071e3` (dark `#0a84ff`) with 4px offset (dark offset colour black); no default outline.
-- Strap SVG and anchor clip are `aria-hidden`.
-
-## Acceptance checklist
-
-- [ ] At rest the badge hangs straight down 150px below the anchor with a straight strap.
-- [ ] Dragging follows the pointer smoothly from the grab point and can stretch the strap to about 1.35× before stopping.
-- [ ] A throw keeps its momentum, then swings and settles; pushed up, the strap sags while it falls.
-- [ ] The badge rotation trails the strap and overshoots slightly.
-- [ ] Fast sideways motion twists the badge in 3D up to 55°.
-- [ ] Arrow keys flick it sideways; Enter/Space toss it up.
-- [ ] Autoplay nudges it at 0.6s and every 4.2s until first grab or key press.
+  return (
+    <div ref={stage} className="relative touch-none select-none" style={{ width: W, height: H, maxWidth: "100%", perspective: 900 }}>
+      <svg className="pointer-events-none absolute inset-0" width={W} height={H} viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <motion.path d={path} fill="none" stroke={strap} strokeWidth={12} strokeLinecap="round" />
+        <motion.path d={path} fill="none" stroke="rgba(255,255,255,.35)" strokeWidth={2} strokeDasharray="2 7" strokeLinecap="round" />
+      </svg>
+      <span className="absolute left-1/2 top-0 h-3 w-8 -translate-x-1/2 rounded-b-md bg-[#d2d2d7] dark:bg-[#48484a]" aria-hidden="true" />
+      <motion.div
+        role="img"
+        tabIndex={0}
+        aria-label={`${event} badge for ${name}, ${role}. Drag to swing it, or use the arrow keys.`}
+        className="absolute left-0 top-0 cursor-grab rounded-[18px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 active:cursor-grabbing dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+        style={{ x: badgeX, y: py, rotate: rot, rotateY: twist, originX: 0.5, originY: 0, width: BW, height: BH + 18, transformStyle: "preserve-3d" }}
+        onKeyDown={onKeyDown}
+        onPointerDown={(e) => {
+          const s = st.current;
+          const p = toLocal(e);
+          (e.currentTarget as Element).setPointerCapture(e.pointerId);
+          s.dragging = true;
+          s.touched = true;
+          s.ox = p.x - s.x;
+          s.oy = p.y - s.y;
+          s.tx = s.x;
+          s.ty = s.y;
+        }}
+        onPointerMove={(e) => {
+          const s = st.current;
+          if (!s.dragging) return;
+          const p = toLocal(e);
+          s.tx = p.x - s.ox;
+          s.ty = p.y - s.oy;
+        }}
+        onPointerUp={release}
+        onPointerCancel={release}
+      >
+        <span className="absolute left-1/2 top-0 h-[22px] w-[26px] -translate-x-1/2 rounded-[6px] bg-[linear-gradient(180deg,#e5e5ea,#aeaeb2)] shadow-[inset_0_1px_0_#fff,0_2px_4px_rgba(0,0,0,.2)]" />
+        <div
+          className="absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.06),0_30px_50px_-24px_rgba(0,0,0,.45)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1),0_30px_50px_-24px_rgba(0,0,0,.9)]"
+          style={{ height: BH }}
+        >
+          <span className="mx-auto mt-3 h-2 w-12 rounded-full bg-[#e8e8ed] dark:bg-[#3a3a3c]" />
+          <div className="flex flex-1 flex-col items-center gap-2 px-4 pt-4 text-center">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#86868b] dark:text-[#8e8e93]">{event} 2026</span>
+            <span className="flex h-16 w-16 items-center justify-center rounded-full text-[22px] font-semibold text-white" style={{ background: `linear-gradient(135deg, ${strap}, #5e5ce6)` }}>
+              {name.split(" ").map((w) => w[0]).join("")}
+            </span>
+            <span className="text-[18px] font-semibold leading-tight tracking-[-0.02em] text-[#1d1d1f] dark:text-[#f5f5f7]">{name}</span>
+            <span className="text-[12px] text-[#6e6e73] dark:text-[#a1a1a6]">{role}</span>
+          </div>
+          <span className="flex h-9 items-center justify-center text-[12px] font-semibold uppercase tracking-[0.18em] text-white" style={{ background: strap }}>
+            {tag}
+          </span>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+```
