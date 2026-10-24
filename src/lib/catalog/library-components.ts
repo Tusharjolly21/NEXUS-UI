@@ -10869,7 +10869,7 @@ export default function Page() {
       "An endless wall of reviews in columns that drift in opposite directions at slightly different speeds. Cards swell as they pass the middle and recede toward the edges, like reading through a lens. Hover a column and it eases to a stop while the others slow down; drag the wall to scrub it and let go to fling it. Cards can highlight a phrase or turn into a big-number card, and a Pause button stops everything.",
     categorySlug: "testimonials",
     tags: ["testimonials", "social proof", "reviews", "wall", "marquee", "columns", "infinite scroll", "drag", "fling", "lens", "motion kit", "framer-motion"],
-    premium: true,
+    premium: false,
     trendingScore: 172,
     createdAt: "2026-10-24",
     animationKinds: ["scroll", "drag", "hover"],
