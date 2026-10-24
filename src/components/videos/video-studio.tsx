@@ -121,7 +121,7 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
               onLocked={() => requestUpgrade(video.title, "live editing")}
             />
           ) : null}
-          {tab === "prompt" ? <FileView video={video} unlocked={unlocked} files={[{ part: "prompt", label: "Build prompt" }]} intro="Paste this into Claude, Cursor or any coding agent to build the video from scratch." /> : null}
+          {tab === "prompt" ? <FileView video={video} unlocked={unlocked} files={[{ part: "prompt", label: "Build prompt" }]} intro="Paste this into Claude, Cursor or any coding agent. It holds the exact code, so you get this video, not a look-alike. Then ask for changes in plain words: new text, colours, length or shape. The prompt explains how." /> : null}
           {tab === "source" ? (
             <FileView
               video={video}
@@ -295,7 +295,7 @@ function FileView({ video, unlocked, files, intro }: { video: VideoEntry; unlock
           <div>
             <p className="text-[16px] font-semibold text-foreground">The {file.part === "prompt" ? "prompt" : "source"} comes with Pro</p>
             <p className="mx-auto mt-1.5 max-w-[320px] text-[14px] text-muted-foreground">
-              {file.part === "prompt" ? "The exact brief behind this video, written so a coding agent can rebuild it shot for shot." : "The React file, the shared kit and the script that renders your edit to MP4."}
+              {file.part === "prompt" ? "The exact code and instructions for this video, written so a coding agent builds it exactly, with notes on how to change the words, colours, timing and shape." : "The React file, the shared kit and the script that renders your edit to MP4."}
             </p>
             <button type="button" onClick={() => requestUpgrade(video.title, file.part === "prompt" ? "build prompt" : "source")} className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-action px-5 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               <Lock className="size-4" aria-hidden />
@@ -340,7 +340,7 @@ function FileView({ video, unlocked, files, intro }: { video: VideoEntry; unlock
       <pre
         className={cn(
           "m-0 max-h-[520px] overflow-auto rounded-[20px] bg-foreground/[0.05] p-5 text-[13px] leading-[1.6] text-foreground",
-          file.part === "prompt" ? "whitespace-pre-wrap font-sans text-[13.5px]" : "font-mono",
+          file.part === "prompt" ? "whitespace-pre-wrap break-words font-mono text-[12.5px]" : "font-mono",
         )}
         tabIndex={0}
       >

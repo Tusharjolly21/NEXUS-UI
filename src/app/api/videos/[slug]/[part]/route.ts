@@ -5,10 +5,11 @@ import { getSessionUser, sessionHasPro } from "@/lib/component-access";
 import { licenseComment, withLicense } from "@/lib/license-stamp";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
 import { VIDEO_PARTS, getVideo, type VideoPart } from "@/lib/catalog/videos";
+import { buildVideoPrompt } from "@/lib/video-prompt";
 
 /**
- * GET /api/videos/[slug]/[part] — what comes with a video: its build prompt, its React source, the
- * shared kit, the frame page and the render script. The two free videos are open to everyone; the
+ * GET /api/videos/[slug]/[part] — what comes with a video: its build prompt (instructions plus the
+ * real files), its React source, the shared kit, the frame page and the render script. The two free videos are open to everyone; the
  * rest need Pro (a live plan or All-Access).
  *
  * - Only the catalogue's own slugs and the fixed part names reach the file system, so the path
@@ -52,7 +53,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   }
 
   try {
-    let text = await readFile(path.join(process.cwd(), FILES[kind](slug)), "utf8");
+    // The prompt is built from the video's real files (so it always matches them); the rest are served as they are.
+    let text = kind === "prompt" ? await buildVideoPrompt(video) : await readFile(path.join(process.cwd(), FILES[kind](slug)), "utf8");
     if (video.premium && user) {
       text = kind === "prompt" ? withLicense(text, user.id, `video ${slug}`) : licenseComment(user.id, `video ${slug}`) + text;
     }
