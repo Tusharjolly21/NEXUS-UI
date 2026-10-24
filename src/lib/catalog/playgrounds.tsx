@@ -3447,7 +3447,7 @@ export const playgrounds: Record<string, Playground> = {
     lightOnly: true,
     componentName: "WebSlingButton",
     importPath: "@/components/web-sling-button",
-    defaultFill: "dark",
+    defaultFill: "light",
     controls: [
       { kind: "select", prop: "label", label: "Label", options: ["Get started", "Join the swarm", "Swing in", "Hang on"], defaultValue: "Get started" },
       { kind: "range", prop: "snapAt", label: "Snap point", min: 1.3, max: 4, step: 0.1, unit: "x", defaultValue: 2.3 },

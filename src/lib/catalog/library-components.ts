@@ -10429,9 +10429,9 @@ export default function Page() {
     name: "Web Sling Button",
     registryCliName: "web-sling-button",
     description:
-      "A call-to-action button on a dark stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays.",
+      "A red call-to-action button on a light stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays. A web fluid meter drains with every shot and refills slowly, and a counter keeps score of shots fired.",
     categorySlug: "inputs-controls",
-    tags: ["button", "cta", "web", "silk", "verlet", "rope", "webgl", "physics", "drag", "cursor", "playful", "dark", "motion kit"],
+    tags: ["button", "cta", "web", "silk", "verlet", "rope", "webgl", "physics", "drag", "cursor", "playful", "light", "motion kit"],
     premium: false,
     trendingScore: 171,
     createdAt: "2026-10-23",

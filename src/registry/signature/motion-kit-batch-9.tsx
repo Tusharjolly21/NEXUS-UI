@@ -27,7 +27,7 @@ export function PreviewVenomButton({ compact = false }: { compact?: boolean } = 
 export function PreviewWebSlingButton({ compact = false }: { compact?: boolean } = {}) {
   void compact;
   return (
-    <div className="flex h-full min-h-[420px] w-full items-center justify-center bg-[#0a0b11] p-4 sm:p-6">
+    <div className="flex h-full min-h-[420px] w-full items-center justify-center bg-[#ebeaee] p-4 sm:p-6 dark:bg-[#ebeaee]">
       <div className="w-full max-w-[720px]">
         <WebSlingButton autoplay height={420} />
       </div>
