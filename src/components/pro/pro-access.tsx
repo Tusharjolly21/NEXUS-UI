@@ -166,7 +166,7 @@ function UpgradeDialog({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-[90] bg-black/30 backdrop-blur-md transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none dark:bg-black/60" />
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[90] bg-black/50 sm:bg-black/30 sm:backdrop-blur-md transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none dark:bg-black/60 sm:dark:bg-black/60" />
         <DialogPrimitive.Popup className="fixed left-1/2 top-1/2 z-[91] w-[min(420px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 rounded-[28px] bg-card p-7 text-center shadow-[0_0_0_0.5px_rgba(0,0,0,0.08),0_40px_80px_-30px_rgba(0,0,0,0.45)] outline-none transition-[opacity,transform,scale] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[ending-style]:duration-150 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 motion-reduce:transition-none dark:shadow-[0_0_0_0.5px_rgba(255,255,255,0.1),0_40px_80px_-30px_rgba(0,0,0,0.8)]">
           <span
             aria-hidden
