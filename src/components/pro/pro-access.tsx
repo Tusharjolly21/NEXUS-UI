@@ -76,6 +76,10 @@ type CopyState = "idle" | "loading" | "copied" | "error";
  * dialog. The clipboard write starts inside the click (a ClipboardItem holding the pending
  * fetch), so Safari keeps the user activation it needs.
  *
+ * `free` marks a free component: its prompt is a plain public file (`/free-prompts/<slug>`), so
+ * there is no server check, no sign-in and no licence line. Pro prompts still come from the gated
+ * `/api/prompt/<slug>`.
+ *
  * Options, for things other than components: `endpoint` is the gated API to fetch (default
  * `/api/prompt/<slug>`), and `hasAccess` replaces the site-wide Pro check (a template bought on its
  * own unlocks its prompt without a plan). Without access, nothing is fetched.
@@ -87,12 +91,12 @@ export function useCopyBuildPrompt(
    * Where the prompt comes from (block sections use /api/prompt/blocks/<id>), or options:
    * `endpoint` plus `hasAccess`, which replaces the site-wide Pro check (templates use it).
    */
-  options: string | { endpoint?: string; hasAccess?: boolean } = {},
+  options: string | { endpoint?: string; hasAccess?: boolean; free?: boolean } = {},
 ): [CopyState, () => void] {
   const opts = typeof options === "string" ? { endpoint: options } : options;
   const { isPro: sitePro, requestUpgrade } = useProAccess();
   const isPro = opts.hasAccess ?? sitePro;
-  const endpoint = opts.endpoint ?? `/api/prompt/${encodeURIComponent(slug)}`;
+  const endpoint = opts.endpoint ?? (opts.free ? `/free-prompts/${encodeURIComponent(slug)}` : `/api/prompt/${encodeURIComponent(slug)}`);
   const [state, setState] = React.useState<CopyState>("idle");
 
   React.useEffect(() => {
@@ -105,12 +109,18 @@ export function useCopyBuildPrompt(
     if (!isPro) return requestUpgrade(name, "build prompt");
     setState("loading");
     let denied = false;
-    const text = fetch(endpoint, { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
+    const plain = endpoint.startsWith("/free-prompts/");
+    const text = fetch(endpoint, plain ? undefined : { credentials: "same-origin", cache: "no-store" }).then(async (r) => {
       if (r.status === 401 || r.status === 403) {
         denied = true;
         throw new Error("denied");
       }
       if (!r.ok) throw new Error("failed");
+      if (plain) {
+        const body = await r.text();
+        if (!body.trim()) throw new Error("empty");
+        return body;
+      }
       const json = (await r.json()) as { prompt?: string };
       if (!json.prompt) throw new Error("empty");
       return json.prompt;

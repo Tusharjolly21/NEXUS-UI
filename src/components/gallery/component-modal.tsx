@@ -177,7 +177,7 @@ function Inspector({ item }: { item: GalleryItem }) {
   // The UI lock follows the visitor's plan; the server's answer (usage.locked) wins when it says no.
   const locked = useLocked(item.premium) || !!usage?.locked;
   // Components with a build prompt copy that (free unless the component is Pro); the rest copy the install brief for an agent.
-  const [buildState, copyBuild] = useCopyBuildPrompt(item.slug, item.name, { hasAccess: !locked });
+  const [buildState, copyBuild] = useCopyBuildPrompt(item.slug, item.name, { hasAccess: !locked, free: !item.premium });
   const prompt = (text: string) => (item.hasPrompt ? copyBuild() : locked ? requestUpgrade(item.name) : copyPrompt(text));
   const promptDone = item.hasPrompt ? buildState === "copied" : prompted;
   const promptLabel = item.hasPrompt
