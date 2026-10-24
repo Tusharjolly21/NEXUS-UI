@@ -263,7 +263,7 @@ function ScreenshotViewer({ shot, onClose }: { shot: { src: string; label: strin
   return (
     <DialogPrimitive.Root open={!!shot} onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-[#1d1d1f]/50 backdrop-blur-md transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-[#1d1d1f]/65 sm:bg-[#1d1d1f]/50 sm:backdrop-blur-md transition-opacity duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
         <DialogPrimitive.Popup className="fixed inset-x-3 top-1/2 z-[61] mx-auto max-w-[min(1280px,calc((100dvh_-_150px)*1.6))] -translate-y-1/2 outline-none transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none sm:inset-x-6">
           {shot ? (
             <>

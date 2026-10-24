@@ -153,7 +153,7 @@ export function ComponentModal({ item, onClose }: { item: GalleryItem | null; on
   return (
     <DialogPrimitive.Root open={!!item} onOpenChange={(open) => !open && onClose()}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-background/55 backdrop-blur-xl transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
+        <DialogPrimitive.Backdrop className="fixed inset-0 z-[60] bg-background/90 sm:bg-background/55 sm:backdrop-blur-xl transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none" />
         <DialogPrimitive.Popup className="fixed inset-x-2 bottom-2 top-14 z-[61] mx-auto flex max-w-[1180px] flex-col gap-2 outline-none transition-[opacity,transform] duration-200 ease-out data-[ending-style]:translate-y-3 data-[ending-style]:opacity-0 data-[starting-style]:translate-y-3 data-[starting-style]:opacity-0 motion-reduce:transition-none sm:inset-x-6 sm:bottom-6 sm:top-20 lg:flex-row lg:gap-3">
           {item ? <Inspector key={item.slug} item={item} /> : null}
         </DialogPrimitive.Popup>
