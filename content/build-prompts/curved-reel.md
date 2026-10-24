@@ -30,7 +30,7 @@ export interface ReelPoster {
 
 export interface CurvedReelProps {
   posters?: ReelPoster[];
-  /** Drifts the reel at 38px/s; pauses for 2.5s after a drag. */
+  /** Drifts the reel at 38px/s; pauses for 2.5s after a drag. Off by default: the reel moves when you drag it. */
   autoplay?: boolean;
 }
 
@@ -82,7 +82,7 @@ function Card({ p, i, offset, total }: { p: ReelPoster; i: number; offset: Motio
  * pinch in, cards toward the edges swing round, grow and come forward. It drifts
  * on its own; drag to scrub it and fling it to let it coast.
  */
-export function CurvedReel({ posters = POSTERS, autoplay = true }: CurvedReelProps) {
+export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelProps) {
   const offset = useMotionValue(0);
   const total = posters.length * (CW + GAP);
   const drag = useRef<{ x: number; o: number; v: number; lx: number; lt: number } | null>(null);

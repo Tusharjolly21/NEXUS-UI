@@ -35,7 +35,7 @@ export interface FlightTrackerProps {
   minutes?: number;
   /** Route length in miles; drives the remaining distance in the details. */
   miles?: number;
-  /** Flies the plane along the arc on a loop (about 22 s per flight). When false it sits at 35%. */
+  /** Flies the plane along the arc on a loop (about 22 s per flight). Off by default: the plane sits at 35% of the route. */
   autoplay?: boolean;
 }
 
@@ -55,7 +55,7 @@ export function FlightTracker({
   arrives = "8:40 AM",
   minutes = 410,
   miles = 3459,
-  autoplay = true,
+  autoplay = false,
 }: FlightTrackerProps) {
   const reduce = useReducedMotion();
   const progress = useMotionValue(0.35);

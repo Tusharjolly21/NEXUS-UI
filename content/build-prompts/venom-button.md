@@ -238,7 +238,7 @@ export type VenomButtonProps = {
   height?: number;
   /**
    * A ghost glove plays with the button until a real pointer arrives, and again once it has been away for a few seconds.
-   * Left unset it is on for touch-only devices (phones), where nothing hovers, and off elsewhere.
+   * Off by default: the button only reacts to the visitor's own cursor or finger.
    */
   autoplay?: boolean;
   className?: string;
@@ -395,7 +395,7 @@ export function VenomButton({
     // Touch has no hover, so the hand follows a finger only while it is down, lingers a moment after it
     // lifts (a tap is a quick poke), and lets go at once if the browser takes the gesture to scroll.
     const touchOnly = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-    const ghostOn = autoplay ?? touchOnly;
+    const ghostOn = !!autoplay;
     const LINGER = 1700; // ms the goo keeps hold after a finger lifts
     const FINGER_LIFT = 52; // px the glove is drawn above a finger, so the hand is not hidden under it
     const ptr = { x: -999, y: -999, inside: false, last: 0, touch: false, down: false, upAt: 0 };
