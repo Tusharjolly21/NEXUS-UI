@@ -24,9 +24,11 @@ const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   "hero-loop": () => import("./hero-loop"),
   "glass-orbit": () => import("./glass-orbit"),
   "word-rush": () => import("./word-rush"),
+  "clean-cuts": () => import("./clean-cuts"),
   "launch-film": () => import("./launch-film"),
   "keynote-film": () => import("./keynote-film"),
   "brand-film": () => import("./brand-film"),
+  "will-return": () => import("./will-return"),
 };
 
 /** One lazy component per video, created once at module level. */

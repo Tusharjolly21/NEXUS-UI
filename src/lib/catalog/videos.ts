@@ -1,5 +1,5 @@
 /**
- * The video catalogue: twenty videos, each a React component that is a pure function of time, drawn
+ * The video catalogue: twenty-two videos, each a React component that is a pure function of time, drawn
  * on a fixed canvas for each shape it supports (9:16, 1:1, 16:9 and more), with its own soundtrack. This file is metadata only (it is safe to import from
  * server code); the animation lives in `src/components/videos/<slug>.tsx`, the prompt and the
  * downloadable source in `content/videos/<slug>/` (served only through the gated route).
@@ -1126,7 +1126,7 @@ export const videos: VideoEntry[] = [
     "premium": true,
     "dark": false,
     "createdAt": "2026-10-22",
-    "posterAt": 6.5,
+    "posterAt": 7,
     "defaults": {
       "kicker": "What's new in Nexus UI",
       "from": "September",
@@ -1628,6 +1628,102 @@ export const videos: VideoEntry[] = [
     ]
   },
   {
+    "slug": "clean-cuts",
+    "title": "Clean Cuts",
+    "purpose": "Component showcase reel",
+    "motion": "Beat-cut macro shots of single components: shallow depth of field, a cursor that clicks, everything on white",
+    "app": "Nexus UI",
+    "platforms": [
+      "Reels",
+      "X",
+      "LinkedIn"
+    ],
+    "formats": [
+      "1:1",
+      "9:16",
+      "4:5"
+    ],
+    "duration": 15.3,
+    "bpm": 172,
+    "cuts": [
+      0.3,
+      1.7,
+      3.09,
+      4.49,
+      5.88,
+      7.28,
+      8.67,
+      10.07,
+      11.46,
+      12.86
+    ],
+    "blurb": "A 15-second reel cut on the beat, one component per cut, shot like macro photography. Each one is an extreme close-up on white with shallow depth of field: the copy pill, a search field, a magnifying dock, an incoming-call island, a number wheel, a payment card, a text highlight, a folder that opens and a theme switch that flips the frame to dark for the end card. A cursor drives every shot.",
+    "premium": true,
+    "dark": false,
+    "createdAt": "2026-10-24",
+    "posterAt": 7,
+    "defaults": {
+      "install": "npx shadcn add @nexus-labs/dock",
+      "search": "magnetic dock",
+      "caller": "Alex Rivera",
+      "amount": "$62.40",
+      "phrase": "motion is a material",
+      "name": "Nexus UI",
+      "tagline": "Components with the motion built in.",
+      "url": "nexus-ui.com"
+    },
+    "fields": [
+      {
+        "key": "install",
+        "label": "Install command",
+        "type": "text",
+        "max": 40
+      },
+      {
+        "key": "search",
+        "label": "Search text",
+        "type": "text",
+        "max": 18
+      },
+      {
+        "key": "caller",
+        "label": "Caller",
+        "type": "text",
+        "max": 16
+      },
+      {
+        "key": "amount",
+        "label": "Amount",
+        "type": "text",
+        "max": 9
+      },
+      {
+        "key": "phrase",
+        "label": "Highlighted phrase",
+        "type": "text",
+        "max": 24
+      },
+      {
+        "key": "name",
+        "label": "Brand",
+        "type": "text",
+        "max": 12
+      },
+      {
+        "key": "tagline",
+        "label": "Tagline",
+        "type": "text",
+        "max": 40
+      },
+      {
+        "key": "url",
+        "label": "URL",
+        "type": "text",
+        "max": 24
+      }
+    ]
+  },
+  {
     "slug": "launch-film",
     "title": "Launch Film",
     "purpose": "Product launch film",
@@ -2013,6 +2109,86 @@ export const videos: VideoEntry[] = [
         "label": "Address or CTA",
         "type": "text",
         "max": 22
+      }
+    ]
+  },
+  {
+    "slug": "will-return",
+    "title": "Will Return",
+    "purpose": "Post-credit teaser",
+    "motion": "Site tour cut on the notes, then a post-credit card",
+    "app": "Nexus UI",
+    "platforms": [
+      "YouTube",
+      "X",
+      "Reels",
+      "TikTok",
+      "Shorts"
+    ],
+    "formats": [
+      "16:9",
+      "9:16"
+    ],
+    "duration": 15,
+    "bpm": 60,
+    "cuts": [
+      0.74,
+      1.42,
+      2.31,
+      2.68,
+      2.97,
+      5.69,
+      8.01,
+      11.1
+    ],
+    "blurb": "A post-credit sting for nexus-ui.com, cut to the Doomsday post-credit cue. Each note lands a beat on the live site: the hero types its command, the page scrolls into a grid of components that move, and the two big chords cut to the Catch Undo and Symbiote Cursor pages. On the last chord it drops to black and the words come back one line at a time.",
+    "premium": false,
+    "dark": true,
+    "createdAt": "2026-10-24",
+    "posterAt": 7,
+    "defaults": {
+      "line1": "These components",
+      "line2": "will return in",
+      "brand": "Nexus UI",
+      "url": "nexus-ui.com",
+      "handle": "@nexusuilabs",
+      "accent": "#c9c8ff"
+    },
+    "fields": [
+      {
+        "key": "line1",
+        "label": "First line",
+        "type": "text",
+        "max": 22
+      },
+      {
+        "key": "line2",
+        "label": "Second line",
+        "type": "text",
+        "max": 22
+      },
+      {
+        "key": "brand",
+        "label": "Brand",
+        "type": "text",
+        "max": 12
+      },
+      {
+        "key": "url",
+        "label": "Address",
+        "type": "text",
+        "max": 22
+      },
+      {
+        "key": "handle",
+        "label": "Handle",
+        "type": "text",
+        "max": 20
+      },
+      {
+        "key": "accent",
+        "label": "Shine colour",
+        "type": "color"
       }
     ]
   }
