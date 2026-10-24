@@ -1,73 +1,321 @@
-Build an avatar stack badge: a white pill holding a few overlapping faces, slightly tilted like they were placed by hand, a "+N" chip, and an optional label such as "Editing now". Hover or focus it and the pill lifts 2px while the stack fans open along a gentle arc, each face springing into place a beat after the last, extra faces appearing from behind, and the +N count rolling down. A small dark name tag glides from face to face under the pointer (or the arrow keys), with the hovered face lifting and growing. Faces without a picture show initials on a colour picked from the name.
+Add the "Images Badge" component from Nexus UI to my project.
 
-## Stack
+A pill of overlapping avatars that fans open along a gentle arc on hover or focus, each face springing into place a beat after the last while the +N count rolls down. A name tag glides from face to face under the pointer or the arrow keys, and faces without a picture show initials.
 
-- React client component (`"use client"`), TypeScript, Tailwind CSS, a `cn` helper, framer-motion (`AnimatePresence`, `motion`, `useReducedMotion`, `useSpring`, `useTransform`).
-- File: `components/images-badge/images-badge.tsx`, named export `ImagesBadge`, types `ImagesBadgeProps`, `BadgeImage = { src?: string; alt: string; color?: string }`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { ImagesBadge } from "@/components/images-badge";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `images` | `BadgeImage[]` | Ava Chen, Noah Park, Mira Shah, Leo Grant, Zoe Ito, Kai Moss, Sam Reyes | Front first. `alt` is the alt text, tag and initials source. |
-| `maxVisible` | `number` | `3` | Faces shown closed (min 1). |
-| `revealCount` | `number` | `2` | Extra faces that fan out when open; the rest are counted in +N. |
-| `label` | `string` | — | Text after the stack. |
-| `size` | `"sm" \| "md" \| "lg"` | `"md"` | Face size and pill height. |
-| `shape` | `"circle" \| "rounded" \| "square"` | `"circle"` | Radius 9999px, 32% or 18%. |
-| `autoplay` | `boolean` | `false` | Opens and walks the tag along the faces until hovered or focused. |
-| `className` | `string` | `""` | Pill classes. |
-| `imageClassName` | `string` | `""` | Classes on each face. |
-| `onClick` | `() => void` | — | Makes the whole badge a button. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Sizes (face px, open gap, text, pill): sm 30, 6, 12px, 40px tall with padding 6px left / 14px right and gap 10; md 38, 8, 13px, 48px tall, 5px / 16px, gap 12; lg 50, 10, 15px, 62px tall, 6px / 20px, gap 14.
+--- components/images-badge/images-badge.tsx ---
 
-## Layout and look
+```tsx
+"use client";
 
-- Pill: `inline-flex`, items centred, fully round, white (dark `#1c1c1e`), text `#1d1d1f` / `#f5f5f7`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark `rgba(255,255,255,.08)` / `.9`), focus ring 2px `#0071e3` (dark `#0a84ff`) with 2px offset; pointer cursor when clickable.
-- Face strip: relative, height = face size, animated width. Faces are absolutely positioned at the left, `size × size`, with the shape radius, overflow hidden, a 2.5px white ring (dark `#1c1c1e`). z-index: front face highest (`count − i`), active face 50.
-- Images: cover. Initials: up to two capitals, semibold white at `0.36·size`, on `linear-gradient(140deg, c, color-mix(in srgb, c 70%, #000))` where c = `color` or a palette colour from a string hash (`h = h·31 + charCode`, unsigned) over `#0071e3, #bf5af2, #ff9f0a, #30d158, #ff375f, #5ac8fa, #ffd60a, #64d2ff`.
-- +N chip: same size and shape, `#f0f0f3` (dark `#2c2c2e`), semibold tabular in the size's text class, same ring, z 0 (behind faces).
-- Name tag: dark pill (`#1d1d1f` white text; dark `#f5f5f7` / `#1d1d1f`), padding 4×10, 11px medium, shadow `0 6px 14px -6px rgba(0,0,0,.5)`, centred over the active face.
-- Label: medium, tracking −0.01em, nowrap.
+import * as React from "react";
+import { AnimatePresence, motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-## Geometry
+export type BadgeImage = {
+  /** Picture URL. Leave it out to show initials on a colour instead. */
+  src?: string;
+  /** Name: the image's alt text, the tooltip and the initials. */
+  alt: string;
+  /** Background for the initials when there is no `src`. Defaults to a colour picked from the name. */
+  color?: string;
+};
 
-- `peek = round(0.5·size)` (closed overlap step). Shown list = first `maxVisible + revealCount`. Hidden-now = total − visible; overflow = total − shown.
-- Available room = `innerWidth − 32 − (labelWidth + 16) − 40` (measured on mount and resize). `slots = shown − 1 + (overflow > 0 ? 1 : 0)`. Open step `= max(peek, min(size + gap, floor((room − size)/slots)))` so it squeezes on narrow screens.
-- Closed width `size + (visible − 1)·peek + (hiddenNow > 0 ? peek + 6 : 0)`; open width `size + slots·step`.
-- Face i: x = `i·step` when open; closed, visible faces at `i·peek` and extra faces tucked at `(visible − 1)·peek`. Arc when open: `y = ((i − mid)/mid)²·size·0.07` (edges dip). Closed tilts by index: 0, −4, 3, −5, 4, −3, 4, −4 degrees.
-- Chip x: `shown·step` open, `visible·peek + 6` closed. Count = overflow open, hidden-now closed.
+export interface ImagesBadgeProps {
+  /** People or pictures in the stack, front first. */
+  images?: BadgeImage[];
+  /** How many show while the stack is closed. */
+  maxVisible?: number;
+  /** How many more fan out when it opens. Anyone beyond that is counted in the +N chip. */
+  revealCount?: number;
+  /** Text after the stack. */
+  label?: string;
+  size?: "sm" | "md" | "lg";
+  shape?: "circle" | "rounded" | "square";
+  /** Opens the stack and walks the name tag along it, again and again, until someone hovers or focuses it. */
+  autoplay?: boolean;
+  className?: string;
+  imageClassName?: string;
+  /** Makes the whole badge a button. */
+  onClick?: () => void;
+}
 
-## Motion
+const DEFAULT_PEOPLE: BadgeImage[] = [
+  { alt: "Ava Chen" },
+  { alt: "Noah Park" },
+  { alt: "Mira Shah" },
+  { alt: "Leo Grant" },
+  { alt: "Zoe Ito" },
+  { alt: "Kai Moss" },
+  { alt: "Sam Reyes" },
+];
 
-- Fan spring: stiffness 340, damping 19, mass 0.8, for the pill lift (y −2 open), strip width, faces and chip.
-- Face delays: opening `0.035·i` (front first); closing `0.02·(shown − i)` (back first).
-- Extra faces closed: scale 0.6, opacity 0. Active face: lifts `−0.22·size`, scale 1.12.
-- Chip hides (scale 0.5, opacity 0) when open with no overflow. The count text is `+{round(n)}` from a spring (200/24), so it rolls between values.
-- Tag: enters from `opacity 0, y 6, scale 0.8` to `y = −0.62·size − 14`, spring 420/26, with x following the active face so it glides; exits in 0.12s. The name cross-fades from `blur(3px)` in 0.18s (delay 0.06) on each change.
-- Reduced motion: no lift, tilt, arc delay or width change (stays closed width), faces snap.
+const CFG = {
+  sm: { px: 30, gap: 6, text: "text-[12px]", pill: "h-10 pl-1.5 pr-3.5 gap-2.5" },
+  md: { px: 38, gap: 8, text: "text-[13px]", pill: "h-12 pl-[5px] pr-4 gap-3" },
+  lg: { px: 50, gap: 10, text: "text-[15px]", pill: "h-[62px] pl-1.5 pr-5 gap-3.5" },
+} as const;
 
-## Interaction and states
+const RADIUS = { circle: "9999px", rounded: "32%", square: "18%" } as const;
 
-- Mouse/pen enter opens, leave closes and clears the tag. Touch pointer down toggles. Focus opens, blur closes.
-- Hovering a face while open makes it active.
-- Keys: ArrowRight/ArrowLeft open and move the active face (starting at first/last, clamped); Escape closes; with `onClick`, Enter/Space call it.
+/** Rest tilts, front to back, so the closed stack looks hand-placed. */
+const TILT = [0, -4, 3, -5, 4, -3, 4, -4];
 
-## Autoplay demo
+const FAN = { type: "spring" as const, stiffness: 340, damping: 19, mass: 0.8 };
 
-Every 650ms step through a cycle of `shown + 3` beats: open; activate each face in turn; clear the tag; close. Hover, focus or touch stops it for good. Demo: eight people, `maxVisible 3`, `revealCount 3`, "Editing now", size lg; plus a second sm rounded badge "12k builders".
+const PALETTE = ["#0071e3", "#bf5af2", "#ff9f0a", "#30d158", "#ff375f", "#5ac8fa", "#ffd60a", "#64d2ff"];
 
-## Accessibility
+function colourOf(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return PALETTE[h % PALETTE.length];
+}
 
-- Root `role="group"` (or `button` with `onClick`), `tabIndex 0`, `aria-expanded`, `aria-label="{label}. {all names}"`. Images have alt text; initials are `role="img"` with the name. The chip and tag are decorative.
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join("");
 
-## Acceptance checklist
+/**
+ * A pill of overlapping avatars. Hover or focus it and the stack fans out
+ * along a gentle arc, each face springing into place a beat after the last,
+ * the +N count rolls down and a name tag glides from face to face under the
+ * pointer (or the arrow keys).
+ */
+export function ImagesBadge({
+  images = DEFAULT_PEOPLE,
+  maxVisible = 3,
+  revealCount = 2,
+  label,
+  size = "md",
+  shape = "circle",
+  autoplay = false,
+  className = "",
+  imageClassName = "",
+  onClick,
+}: ImagesBadgeProps) {
+  const still = useReducedMotion() === true;
+  const cfg = CFG[size] ?? CFG.md;
+  const { px, gap } = cfg;
+  const [open, setOpen] = React.useState(false);
+  const [active, setActive] = React.useState<number | null>(null);
+  const touched = React.useRef(false);
+  const labelRef = React.useRef<HTMLSpanElement>(null);
+  /** Width the face strip may use when open: the screen width minus the label and padding. */
+  const [room, setRoom] = React.useState<number | null>(null);
 
-- Closed: three tilted overlapping faces and a +N chip behind them.
-- Hover fans faces out along a slight arc, one after another, and lifts the pill.
-- Extra faces appear and the +N counts down to the true overflow (or vanishes at zero).
-- A name tag follows the hovered face, which lifts and grows.
-- Arrow keys walk the tag; Escape closes.
-- On narrow screens the fan squeezes instead of overflowing.
-- Faces without `src` show coloured initials.
+  React.useEffect(() => {
+    const measure = () => {
+      const label = labelRef.current ? labelRef.current.offsetWidth + 16 : 0;
+      setRoom(Math.max(0, window.innerWidth - 32 - label - 40));
+    };
+    const id = requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  const vis = Math.max(1, maxVisible);
+  const shownList = images.slice(0, vis + Math.max(0, revealCount));
+  const overflow = Math.max(0, images.length - shownList.length);
+  const hiddenNow = Math.max(0, images.length - Math.min(vis, images.length));
+  const count = open ? overflow : hiddenNow;
+
+  const peek = Math.round(px * 0.5);
+  // Fan step: full spacing when there's room, squeezed (never below the closed peek) on narrow screens.
+  const slots = shownList.length - 1 + (overflow > 0 ? 1 : 0);
+  const fit = room === null || slots <= 0 ? px + gap : Math.floor((room - px) / slots);
+  const step = Math.max(peek, Math.min(px + gap, fit));
+  const closedW = px + (Math.min(vis, shownList.length) - 1) * peek + (hiddenNow > 0 ? peek + 6 : 0);
+  const openW = px + slots * step;
+
+  const n = useSpring(count, { stiffness: 200, damping: 24 });
+  React.useEffect(() => {
+    n.set(count);
+  }, [count, n]);
+  const shownCount = useTransform(n, (v) => `+${Math.round(v)}`);
+
+  const ids = images.map((i) => i.alt).join("\u0000");
+  React.useEffect(() => {
+    const len = ids ? Math.min(ids.split("\u0000").length, vis + Math.max(0, revealCount)) : 0;
+    if (!autoplay || len === 0) return;
+    let step = 0;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      const cycle = len + 3;
+      const k = step++ % cycle;
+      if (k === 0) setOpen(true);
+      if (k >= 1 && k <= len) setActive(k - 1);
+      if (k === len + 1) setActive(null);
+      if (k === len + 2) setOpen(false);
+    }, 650);
+    return () => window.clearInterval(t);
+  }, [autoplay, ids, vis, revealCount]);
+
+  const enter = () => {
+    touched.current = true;
+    setOpen(true);
+  };
+  const leave = () => {
+    setOpen(false);
+    setActive(null);
+  };
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (onClick && (e.key === "Enter" || e.key === " ")) {
+      e.preventDefault();
+      onClick();
+      return;
+    }
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      touched.current = true;
+      setOpen(true);
+      setActive((a) => {
+        const last = shownList.length - 1;
+        if (a === null) return e.key === "ArrowRight" ? 0 : last;
+        return Math.max(0, Math.min(last, a + (e.key === "ArrowRight" ? 1 : -1)));
+      });
+    }
+    if (e.key === "Escape") leave();
+  };
+
+  const names = images.map((i) => i.alt).join(", ");
+  const radius = RADIUS[shape] ?? RADIUS.circle;
+
+  return (
+    <motion.div
+      role={onClick ? "button" : "group"}
+      tabIndex={0}
+      aria-label={`${label ? `${label}. ` : ""}${names}`}
+      aria-expanded={open}
+      onPointerEnter={(e) => e.pointerType !== "touch" && enter()}
+      onPointerLeave={(e) => e.pointerType !== "touch" && leave()}
+      onPointerDown={(e) => {
+        if (e.pointerType === "touch") {
+          touched.current = true;
+          setOpen((o) => !o);
+        }
+      }}
+      onFocus={enter}
+      onBlur={leave}
+      onKeyDown={onKey}
+      onClick={onClick}
+      animate={still ? undefined : { y: open ? -2 : 0 }}
+      transition={FAN}
+      className={cn(`inline-flex select-none items-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#1c1c1e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black ${onClick ? "cursor-pointer" : ""} ${cfg.pill}`, className)}
+    >
+      <motion.div className="relative shrink-0" style={{ height: px }} initial={false} animate={{ width: still || !open ? closedW : openW }} transition={FAN}>
+        {shownList.map((img, i) => {
+          const hidden = i >= vis;
+          const mid = (shownList.length - 1) / 2;
+          const arc = mid > 0 ? ((i - mid) / mid) ** 2 * px * 0.07 : 0;
+          const x = open ? i * step : hidden ? (vis - 1) * peek : i * peek;
+          const lift = active === i ? -px * 0.22 : 0;
+          return (
+            <motion.div
+              key={`${img.alt}-${i}`}
+              className={cn(`absolute left-0 top-0 overflow-hidden ring-[2.5px] ring-white dark:ring-[#1c1c1e]`, imageClassName)}
+              style={{ width: px, height: px, borderRadius: radius, zIndex: active === i ? 50 : shownList.length - i }}
+              initial={false}
+              animate={{
+                x,
+                y: (open ? arc : 0) + lift,
+                rotate: still ? 0 : open ? 0 : TILT[i % TILT.length],
+                scale: hidden && !open ? 0.6 : active === i ? 1.12 : 1,
+                opacity: hidden && !open ? 0 : 1,
+              }}
+              transition={{ ...FAN, delay: still ? 0 : open ? i * 0.035 : (shownList.length - i) * 0.02 }}
+              onPointerEnter={() => open && setActive(i)}
+            >
+              {img.src ? (
+                // eslint-disable-next-line @next/next/no-img-element -- any avatar URL
+                <img src={img.src} alt={img.alt} width={px} height={px} draggable={false} className="h-full w-full object-cover" />
+              ) : (
+                <span
+                  className="grid h-full w-full place-items-center font-semibold text-white"
+                  style={{ background: `linear-gradient(140deg, ${img.color ?? colourOf(img.alt)}, color-mix(in srgb, ${img.color ?? colourOf(img.alt)} 70%, #000))`, fontSize: px * 0.36 }}
+                  role="img"
+                  aria-label={img.alt}
+                >
+                  {initials(img.alt)}
+                </span>
+              )}
+            </motion.div>
+          );
+        })}
+        {(count > 0 || overflow > 0) && (
+          <motion.span
+            className={`absolute left-0 top-0 grid place-items-center bg-[#f0f0f3] font-semibold tabular-nums text-[#1d1d1f] ring-[2.5px] ring-white dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:ring-[#1c1c1e] ${cfg.text}`}
+            style={{ width: px, height: px, borderRadius: radius, zIndex: 0 }}
+            initial={false}
+            animate={{
+              x: open ? shownList.length * step : Math.min(vis, shownList.length) * peek + 6,
+              opacity: open && overflow === 0 ? 0 : 1,
+              scale: open && overflow === 0 ? 0.5 : 1,
+            }}
+            transition={FAN}
+            aria-hidden="true"
+          >
+            <motion.span>{shownCount}</motion.span>
+          </motion.span>
+        )}
+        <AnimatePresence>
+          {open && active !== null && shownList[active] && (
+            <motion.span
+              key="tag"
+              className="pointer-events-none absolute left-0 top-0 z-[60]"
+              initial={{ opacity: 0, y: 6, scale: 0.8, x: active * step + px / 2 }}
+              animate={{ opacity: 1, y: -px * 0.62 - 14, scale: 1, x: active * step + px / 2 }}
+              exit={{ opacity: 0, y: 0, scale: 0.8, transition: { duration: 0.12 } }}
+              transition={{ type: "spring", stiffness: 420, damping: 26 }}
+            >
+              <span className="block -translate-x-1/2 whitespace-nowrap rounded-full bg-[#1d1d1f] px-2.5 py-1 text-[11px] font-medium text-white shadow-[0_6px_14px_-6px_rgba(0,0,0,.5)] dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+                <motion.span key={active} className="block" initial={{ opacity: 0, filter: "blur(3px)" }} animate={{ opacity: 1, filter: "blur(0px)" }} transition={{ duration: 0.18, delay: 0.06 }}>
+                  {shownList[active].alt}
+                </motion.span>
+              </span>
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.div>
+      {label && <span ref={labelRef} className={`whitespace-nowrap font-medium tracking-[-0.01em] ${cfg.text}`}>{label}</span>}
+    </motion.div>
+  );
+}
+```
+
+--- components/images-badge/index.ts ---
+
+```ts
+export { ImagesBadge } from "./images-badge";
+export type { ImagesBadgeProps, BadgeImage } from "./images-badge";
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

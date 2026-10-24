@@ -1,63 +1,138 @@
-Build a full-colour progress panel for something like a video export: a big percentage at the top, a thin white line filling left to right through the middle, and a round pause/resume button at the bottom. When paused, the last stretch of the line bunches up into a springy squiggle and the tip pulls back, while the whole panel warms from blue to burnt orange. On resume the squiggle stretches out, the colour cools back and the line carries on. It should feel tactile and elastic.
+Add the "Squeeze Progress" component from Nexus UI to my project.
 
-## Stack
+A full-panel progress line with a big percentage. Pause it and the tip bunches into a springy squiggle while the panel warms from blue to orange; resume and it stretches back out and carries on.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`useMotionValue`, `useSpring`, `useTransform`, `useMotionValueEvent`, `AnimatePresence`, `motion`).
-- File: `components/squeeze-progress/squeeze-progress.tsx`, named export `SqueezeProgress`, exported `SqueezeProgressProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { SqueezeProgress } from "@/components/squeeze-progress";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `accent` | `string` | `"#0071e3"` | Panel colour while running. |
-| `paused` | `string` | `"#c2410c"` | Panel colour while paused. |
-| `autoplay` | `boolean` | `false` | Toggles pause/resume every 2.2 s until the user presses the button. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/squeeze-progress/index.ts ---
 
-- Panel: 440 × 260 px, `max-width: 100%`, radius 24px, `overflow: hidden`, background is a motion value blending between `accent` and `paused`. All content is white, so the panel looks the same on light and dark pages; no `dark:` styles are needed.
-- Percentage: centred, 40px from the top, 44px semibold, tabular numbers, tracking −0.03em, white; followed by a "%" at 22px, 70% opacity, nudged 8px down.
-- Line (SVG covering the panel, `aria-hidden`), baseline y = 130, horizontal inset 24px each side:
-  - Track: line from x 24 to 416, stroke `rgba(255,255,255,.22)`, 4px, round caps.
-  - Progress: path, white, 4px, round caps and joins, no fill.
-  - Tip dot: white circle, radius 6, at the tip x, y = 130.
-- Bottom group, 32px from the bottom, centred column with 8px gap:
-  - Button: 48 × 48 circle, white icon, 2px ring `rgba(255,255,255,.8)`, no fill. `whileTap` scale 0.88. Icon 20 × 20 filled: pause bars (`M7 5h3.5v14H7zM13.5 5H17v14h-3.5z`) while running, play triangle (`M7 4.5v15l12.5-7.5z`) while paused.
-  - Status: 13px medium, white at 85%: "Exporting video" or "Paused".
+```ts
+export { SqueezeProgress } from "./squeeze-progress";
+export type { SqueezeProgressProps } from "./squeeze-progress";
+```
 
-## Motion
+--- components/squeeze-progress/squeeze-progress.tsx ---
 
-- `progress` motion value starts at 0.08. A rAF loop adds `dt·0.06` per second while running (about 16.7 s for a full pass) and wraps to 0 when it reaches 1. The percentage shows `floor(progress·100)`, updated through `useMotionValueEvent` on change.
-- `squeeze` is `useSpring(0, { stiffness: 260, damping: 11 })`, set to 1 when paused and 0 when running. The low damping makes it overshoot, so the squiggle wobbles in and out.
-- Path, rebuilt from both values (`useTransform(() => …)`):
-  - `tip = 24 + progress·392`; bunching length L = 70; `start = max(24, tip − 70)`; `bunchedTip = tip − squeeze·34`.
-  - Straight segment `M 24 130 L start 130`, then 40 line segments for `t = i/40`: `x = start + (bunchedTip − start)·t`, `y = 130 + sin(t·9π)·16·squeeze·sin(πt)`. The `sin(πt)` envelope keeps both ends of the squiggle on the baseline.
-- Tip dot x = `24 + progress·392 − squeeze·34`, so it pulls back with the bunching.
-- Panel colour: `useTransform(squeeze, [0, 1], [accent, paused])`, so it rides the same spring (and briefly overshoots with it).
-- Icon swap: `AnimatePresence mode="popLayout"` with no initial animation, keyed by state; enter from `scale 0.4, rotate −60°, opacity 0` to `scale 1, rotate 0, opacity 1`; exit to `scale 0.4, rotate 60°, opacity 0`.
+```tsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform } from "framer-motion";
 
-## Interaction and states
+const W = 440;
+const H = 260;
+const Y = 130;
 
-- Running: line advances, panel at `accent`, pause icon, "Exporting video".
-- Paused: progress frozen, squiggle at full amplitude, tip pulled back 34px, panel at `paused`, play icon, "Paused".
-- The button toggles the state and marks the component as touched.
-- Near the start (tip less than 70px from x = 24) the squiggle is shorter because `start` clamps to 24.
+export interface SqueezeProgressProps {
+  /** Panel colour while running. */
+  accent?: string;
+  /** Panel colour while paused. */
+  paused?: string;
+  /** Toggles pause and resume every 2.2s until someone presses the button. */
+  autoplay?: boolean;
+}
 
-## Autoplay demo
+/**
+ * A progress line across a full panel. Pause and the tip bunches up into a
+ * springy squiggle while the panel turns warm; resume and the squiggle
+ * stretches back out and the line carries on.
+ */
+export function SqueezeProgress({ accent = "#0071e3", paused: pausedColor = "#c2410c", autoplay = false }: SqueezeProgressProps) {
+  const [running, setRunning] = useState(true);
+  const progress = useMotionValue(0.08);
+  const squeeze = useSpring(0, { stiffness: 260, damping: 11 });
+  const [pct, setPct] = useState(8);
+  const touched = useRef(false);
+  useMotionValueEvent(progress, "change", (v) => setPct(Math.floor(v * 100)));
 
-With `autoplay`, flip running/paused every 2.2 s until the user presses the button; after that the timer does nothing.
+  useEffect(() => {
+    let raf = 0, last = performance.now();
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      if (running) {
+        const v = progress.get() + dt * 0.06;
+        progress.set(v >= 1 ? 0 : v);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [running, progress]);
 
-## Accessibility
+  useEffect(() => { squeeze.set(running ? 0 : 1); }, [running, squeeze]);
 
-- The percentage element is a `role="progressbar"` with `aria-valuemin=0`, `aria-valuemax=100`, `aria-valuenow` the shown percentage, and aria-label "Exporting video" or "Export paused".
-- The button has aria-label "Pause" or "Resume"; focus-visible outline 2px white with a 4px offset.
+  useEffect(() => {
+    if (!autoplay) return;
+    const t = setInterval(() => {
+      if (!touched.current) setRunning((r) => !r);
+    }, 2200);
+    return () => clearInterval(t);
+  }, [autoplay]);
 
-## Acceptance checklist
+  const path = useTransform(() => {
+    const p = progress.get(), s = squeeze.get();
+    const tip = 24 + p * (W - 48);
+    const L = 70; // length of line that bunches
+    const start = Math.max(24, tip - L);
+    const bunchedTip = tip - s * 34; // tip pulls back while compressed
+    let d = `M 24 ${Y} L ${start.toFixed(1)} ${Y}`;
+    const n = 40;
+    for (let i = 1; i <= n; i++) {
+      const t = i / n;
+      const x = start + (bunchedTip - start) * t;
+      const env = Math.sin(Math.PI * t);
+      const y = Y + Math.sin(t * Math.PI * 9) * 16 * s * env;
+      d += ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+    }
+    return d;
+  });
+  const bg = useTransform(squeeze, [0, 1], [accent, pausedColor]);
+  const dotX = useTransform(() => 24 + progress.get() * (W - 48) - squeeze.get() * 34);
 
-- The line grows left to right from 8% at about 6% per second and loops at 100%.
-- Pausing bunches the last 70px of line into roughly four and a half waves, 16px tall, with a visible spring wobble.
-- The tip dot and the end of the line pull back 34px while paused and return on resume.
-- The panel blends smoothly between `accent` and `paused` on the same spring.
-- The percentage freezes while paused and is always an integer.
-- Icons swap with a rotate-and-scale pop.
-- Autoplay alternates every 2.2 s and stops after a click.
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <motion.div className="relative overflow-hidden rounded-[24px]" style={{ width: W, height: H, maxWidth: "100%", background: bg }}>
+        <div
+          role="progressbar"
+          aria-label={running ? "Exporting video" : "Export paused"}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          className="absolute inset-x-0 top-10 flex justify-center text-[44px] font-semibold tabular-nums tracking-[-0.03em] text-white"
+        >
+          {pct}
+          <span className="mt-2 text-[22px] opacity-70">%</span>
+        </div>
+        <svg className="absolute inset-0" width={W} height={H} aria-hidden="true">
+          <line x1={24} y1={Y} x2={W - 24} y2={Y} stroke="rgba(255,255,255,.22)" strokeWidth={4} strokeLinecap="round" />
+          <motion.path d={path} fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+          <motion.circle cx={dotX} cy={Y} r={6} fill="#fff" />
+        </svg>
+        <div className="absolute inset-x-0 bottom-8 flex flex-col items-center gap-2">
+          <motion.button
+            type="button"
+            whileTap={{ scale: 0.88 }}
+            onClick={() => { touched.current = true; setRunning((r) => !r); }}
+            aria-label={running ? "Pause" : "Resume"}
+            className="flex h-12 w-12 items-center justify-center rounded-full text-white ring-2 ring-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          >
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.svg key={String(running)} initial={{ scale: 0.4, rotate: -60, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.4, rotate: 60, opacity: 0 }} width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                {running ? <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" /> : <path d="M7 4.5v15l12.5-7.5z" />}
+              </motion.svg>
+            </AnimatePresence>
+          </motion.button>
+          <span className="text-[13px] font-medium text-white/85">{running ? "Exporting video" : "Paused"}</span>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+```

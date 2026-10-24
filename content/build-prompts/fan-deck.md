@@ -1,74 +1,582 @@
 # Fan Deck
 
-Build a paint-chip swatch deck. Closed, it stands upright as one neat stack of tall chips held by a metal rivet near the bottom. Press "Fan out" and the deck tips onto its side, then the chips swing open one by one around the rivet into a colour-graded half circle. Hovering a chip slides it outward from the fan; clicking it copies its hex and shows a small "copied" pill. The feel is tactile and physical, like handling a real paint fan deck.
+Add the "Fan Deck" component from Nexus UI to my project.
 
-## Stack
+A paint-chip deck that tips onto its side and fans out into a colour-graded half circle around its rivet. Hover lifts a chip and clicking one copies its hex code.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`).
-- Nested rotations with a shared transform origin at the rivet; no canvas or SVG needed.
-- File: `components/fan-deck/fan-deck.tsx`, named export `FanDeck`. Also export the type `FanDeckChip` (`{ name: string; hex: string }`).
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+5. Use it like this: `import { FanDeck } from "@/components/fan-deck";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `chips` | `FanDeckChip[]` | 12 chips, Ember to Rosewood | Swatches in the order they fan out, first on the left. |
-| `autoplay` | `boolean` | `false` | Fans out and closes by itself until the user interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Default chips: Ember `#E5484D`, Coral `#F76B4B`, Marigold `#F5A524`, Butter `#F7CE46`, Pistachio `#A3D977`, Fern `#46A758`, Lagoon `#12A594`, Glacier `#3DB9CF`, Cobalt `#0071E3`, Iris `#5B5BD6`, Orchid `#9E4CC4`, Rosewood `#C2298A`. Use the hex as the React key.
+--- components/fan-deck/fan-deck.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
-- Root: centred column, gap 16px.
-- Stage: 440 × 270px (max-width 100%), relative. The rivet sits at stage point (220, 250).
-- Chip size: 46 × 210px. The rivet is 22px above the bottom of each chip, so every rotating element uses `transform-origin: 50% {(210 − 22)/210 × 100}%` (framer `originX: 0.5`, `originY: 188/210`).
-- Deck container: absolutely placed at `left 220 − 23 = 197px`, `top 250 − 210 + 22 = 62px`, 46 × 210, that origin. All chips stack inside it at `inset: 0` with `zIndex = i`, so later chips sit on top.
-- Chip face (an inner span filling the chip): radius 10px, overflow hidden, white (dark `#2c2c2e`), shadow `0 0 0 1px rgba(0,0,0,.06), 0 6px 14px -6px rgba(0,0,0,.3)` (dark `0 0 0 1px rgba(255,255,255,.08), 0 6px 14px -6px rgba(0,0,0,.7)`).
-  - Top 62%: solid swatch in `hex`.
-  - Below: the name, centred, 8px top padding, 8px semibold uppercase, tracking 0.08em, `#1d1d1f` (dark `#f5f5f7`), set vertically with `writing-mode: vertical-rl`.
-  - Rivet: a 10px circle centred horizontally, 16px from the bottom, `linear-gradient(180deg, #e5e5ea, #8e8e93)` with `inset 0 1px 0 #fff` (dark `linear-gradient(180deg, #aeaeb2, #48484a)` with `inset 0 1px 0 rgba(255,255,255,.5)`).
-- Copied pill: centred at top 8px, fully rounded, `py-1.5 pl-1.5 pr-3`, gap 8px, 13px medium, white with `#1d1d1f` text (dark `#2c2c2e` / `#f5f5f7`), shadow `0 0 0 1px rgba(0,0,0,.06), 0 8px 20px -10px rgba(0,0,0,.3)` (dark rgba(255,255,255,.08) ring and .7 shadow). Contents: a 20px dot in the chip colour, then "{hex} copied".
-- Toggle button below the stage: 36px tall, `px-5`, fully rounded, 13px medium, `#1d1d1f` with white text (dark `#f5f5f7` with `#1d1d1f` text). Label "Fan out" when closed, "Close deck" when open.
+export interface FanDeckChip {
+  name: string;
+  hex: string;
+}
 
-## Motion
+export interface FanDeckProps {
+  /** The paint chips, in the order they fan out (first ends up on the left). */
+  chips?: FanDeckChip[];
+  /** Fans out and closes by itself until the user interacts. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch and stay silent in autoplay. */
+  enableSound?: boolean;
+}
 
-- **Deck tip**: the container rotates to −90° when open (lying on its side, chips pointing left) and 0° when closed, with `y: −6px` when closed and 0 when open. Spring `stiffness 160, damping 18`.
-- **Fan**: chip i rotates to `i / max(1, n − 1) × 180°` when open, so with the deck's −90° the first chip points left, the middle ones point up and the last points right: a half circle around the rivet. Closed, each chip rotates `i × 0.6°`, a barely visible splay that makes the stack look real. Spring `stiffness 170, damping 19`.
-- **Stagger**: opening delay `0.18 + i × 0.045s` (the deck tips first, then the chips peel off left to right); closing delay `(n − i) × 0.02s` (the last chip folds back first).
-- **Hover lift**: when open, the hovered (or focused) chip's inner face moves `y: −16px` (outward along its own radius) on a spring `stiffness 500, damping 26`; it drops back when the pointer leaves.
-- **Copied pill**: `AnimatePresence`; enter from `opacity 0, y 10, scale 0.9` to `opacity 1, y 0, scale 1`; exit to `opacity 0, y −6` (default transitions). It disappears 1400ms after the last copy (clear only if the copied chip is still the same one).
-- **Toggle button**: `whileTap` scale 0.95.
-- `initial={false}` on the deck and chips so nothing animates on mount.
+const CHIPS: FanDeckChip[] = [
+  { name: "Ember", hex: "#E5484D" },
+  { name: "Coral", hex: "#F76B4B" },
+  { name: "Marigold", hex: "#F5A524" },
+  { name: "Butter", hex: "#F7CE46" },
+  { name: "Pistachio", hex: "#A3D977" },
+  { name: "Fern", hex: "#46A758" },
+  { name: "Lagoon", hex: "#12A594" },
+  { name: "Glacier", hex: "#3DB9CF" },
+  { name: "Cobalt", hex: "#0071E3" },
+  { name: "Iris", hex: "#5B5BD6" },
+  { name: "Orchid", hex: "#9E4CC4" },
+  { name: "Rosewood", hex: "#C2298A" },
+];
 
-## Interaction and states
+const CW = 46;
+const CH = 210;
+const PIVOT = 22; // distance of the rivet from the bottom of each chip
 
-- State: `open`, `hover` (index or null), `copied` (chip or null).
-- Chips are buttons. Pointer enter sets hover, pointer leave clears it, focus sets hover too.
-- Click copies `hex` via `navigator.clipboard.writeText`; if the clipboard is blocked, swallow the error and still show the pill.
-- Chips are only tabbable when open (`tabIndex` 0 when open, −1 when closed).
-- Any pointer-down in the component, or the toggle button, marks it touched.
+/**
+ * A paint-chip deck. Closed, it stands upright as one stack. Open it and the
+ * deck tips onto its side, then the chips fan out one by one around the rivet
+ * into a colour-graded half circle. Hover lifts a chip; click copies its hex.
+ */
+export function FanDeck({ chips = CHIPS, autoplay = false, enableSound = true }: FanDeckProps) {
+  const play = useSound(enableSound);
+  const [open, setOpen] = useState(false);
+  const [hover, setHover] = useState<number | null>(null);
+  const [copied, setCopied] = useState<FanDeckChip | null>(null);
+  const touched = useRef(false);
+  const n = chips.length;
 
-## Autoplay demo
+  useEffect(() => {
+    if (!autoplay) return;
+    const a = setTimeout(() => {
+      if (!touched.current) setOpen(true);
+    }, 700);
+    const t = setInterval(() => {
+      if (!touched.current) setOpen((o) => !o);
+    }, 3600);
+    return () => {
+      clearTimeout(a);
+      clearInterval(t);
+    };
+  }, [autoplay]);
 
-Open 700ms after mount, then toggle every 3600ms. Both are skipped once the user has pressed anywhere in the component or used the toggle.
+  const copy = async (c: FanDeckChip) => {
+    play("tick", 0.6);
+    try {
+      await navigator.clipboard.writeText(c.hex);
+    } catch {
+      /* clipboard may be blocked */
+    }
+    setCopied(c);
+    setTimeout(() => setCopied((x) => (x === c ? null : x)), 1400);
+  };
 
-## Accessibility
+  return (
+    <div
+      className="flex flex-col items-center gap-4"
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div className="relative h-[270px] w-[440px] max-w-full">
+        {/* rivet point sits at the bottom centre of the stage */}
+        <motion.div
+          className="absolute"
+          style={{ left: 220 - CW / 2, top: 250 - CH + PIVOT, width: CW, height: CH, originX: 0.5, originY: (CH - PIVOT) / CH }}
+          initial={false}
+          animate={{ rotate: open ? -90 : 0, y: open ? 0 : -6 }}
+          transition={{ type: "spring", stiffness: 160, damping: 18 }}
+        >
+          {chips.map((c, i) => {
+            const angle = open ? (i / Math.max(1, n - 1)) * 180 : i * 0.6;
+            const lifted = open && hover === i;
+            return (
+              <motion.button
+                key={c.hex}
+                type="button"
+                aria-label={`${c.name} ${c.hex}. Copy`}
+                tabIndex={open ? 0 : -1}
+                onPointerEnter={() => setHover(i)}
+                onPointerLeave={() => setHover(null)}
+                onFocus={() => setHover(i)}
+                onClick={() => copy(c)}
+                className="absolute inset-0 rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
+                style={{ originX: 0.5, originY: (CH - PIVOT) / CH, zIndex: i }}
+                initial={false}
+                animate={{ rotate: angle }}
+                transition={{ type: "spring", stiffness: 170, damping: 19, delay: open ? 0.18 + i * 0.045 : (n - i) * 0.02 }}
+              >
+                <motion.span
+                  className="absolute inset-0 flex flex-col overflow-hidden rounded-[10px] bg-white text-left shadow-[0_0_0_1px_rgba(0,0,0,.06),0_6px_14px_-6px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_6px_14px_-6px_rgba(0,0,0,.7)]"
+                  animate={{ y: lifted ? -16 : 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 26 }}
+                >
+                  <span className="h-[62%] w-full" style={{ background: c.hex }} />
+                  <span className="flex flex-1 flex-col items-center justify-start gap-1 pt-2">
+                    <span className="text-[8px] font-semibold uppercase tracking-[0.08em] text-[#1d1d1f] [writing-mode:vertical-rl] dark:text-[#f5f5f7]">{c.name}</span>
+                  </span>
+                  <span className="absolute bottom-[16px] left-1/2 -ml-[5px] h-2.5 w-2.5 rounded-full bg-[linear-gradient(180deg,#e5e5ea,#8e8e93)] shadow-[inset_0_1px_0_#fff] dark:bg-[linear-gradient(180deg,#aeaeb2,#48484a)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,.5)]" />
+                </motion.span>
+              </motion.button>
+            );
+          })}
+        </motion.div>
+        <AnimatePresence>
+          {copied && (
+            <motion.span
+              role="status"
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="absolute left-1/2 top-2 flex items-center gap-2 rounded-full bg-white py-1.5 pl-1.5 pr-3 text-[13px] font-medium text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.06),0_8px_20px_-10px_rgba(0,0,0,.3)] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_8px_20px_-10px_rgba(0,0,0,.7)]"
+              style={{ x: "-50%" }}
+            >
+              <span className="h-5 w-5 rounded-full" style={{ background: copied.hex }} />
+              {copied.hex} copied
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          touched.current = true;
+          setOpen((o) => !o);
+        }}
+        aria-expanded={open}
+        className="h-9 rounded-full bg-[#1d1d1f] px-5 text-[13px] font-medium text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:outline-[#0a84ff]"
+      >
+        {open ? "Close deck" : "Fan out"}
+      </motion.button>
+    </div>
+  );
+}
+```
 
-- Toggle: `<button type="button">` with `aria-expanded`, 2px focus-visible outline with 2px offset, `#0071e3` (dark `#0a84ff`).
-- Each chip: `aria-label="{name} {hex}. Copy"`, focus-visible 2px ring `#0071e3` (dark `#0a84ff`).
-- The copied pill has `role="status"` so the copy is announced.
+--- components/fan-deck/index.ts ---
 
-## Sound
+```ts
+export { FanDeck } from "./fan-deck";
+export type { FanDeckProps, FanDeckChip } from "./fan-deck";
+```
 
-A prop `enableSound?: boolean` (default `true`; `false` silences it) plays interface sounds from `@/lib/ui-sounds`. Clicking a colour chip, which copies its hex, plays `tick` (a tiny dry click, a 12ms burst of high-passed noise above 5 kHz) at 60% volume. Fanning the deck out or closing it makes no sound, and neither does hovering a chip or the autoplay. Silent in autoplay and on hover. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps). No audio files: they are Web Audio synthesis from one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+--- lib/ui-sounds.ts ---
 
-## Acceptance checklist
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
 
-- Closed, the deck is a single upright chip stack with a rivet near its base and a faint splay.
-- Fan out tips the deck left, then chips swing out one after another into a 180° arc above the rivet, red on the left through to magenta on the right.
-- Every chip pivots exactly around its rivet; rivets stay on one point throughout.
-- Hovering a fanned chip slides it 16px outward with a quick spring.
-- Clicking a chip copies its hex and shows "#XXXXXX copied" with a colour dot for about 1.4s.
-- Close deck folds the chips back right to left and stands the deck upright.
-- Chips cannot be tabbed to while closed.
-- With `autoplay`, the deck opens at 0.7s and toggles every 3.6s until the first interaction.
+import * as React from "react";
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```

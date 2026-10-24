@@ -1,69 +1,161 @@
-Build an endless horizontal reel of typographic posters bent around the inside of a curve: the cards in the middle sit back, shrink and face you, while the cards toward the edges swing round, grow and come forward like the walls of a curved screen. It drifts slowly on its own; you can grab it, scrub it and fling it so it coasts to a stop.
+Add the "Curved Reel" component from Nexus UI to my project.
 
-## Stack
+An endless reel of posters bent around the inside of a curve: the centre cards sit back and pinch in while the edge cards swing round and come forward. It drifts on its own, and you can drag it or fling it to coast.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion.
-- File: `components/curved-reel/curved-reel.tsx`, named export `CurvedReel`, exported `CurvedReelProps` and `ReelPoster`.
-- One shared `MotionValue<number>` called `offset` drives everything. Each card derives its own transforms from it with `useTransform`, so nothing re-renders while it moves.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { CurvedReel } from "@/components/curved-reel";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `posters` | `ReelPoster[]` | ten built-in posters | `{ bg, fg, big, small, serif? }`: background, text colour, large glyph, caption, italic serif glyph. |
-| `autoplay` | `boolean` | `true` | Drifts the reel at 38 px/s; pauses for 2.5 s after any drag or key press. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Default posters (bg / fg / big / small / serif): `#0040ff #fff "Aa" "04 · Grotesk"`; `#ff4f00 #1d1d1f "17" "Issue · Motion"`; `#1d1d1f #f5f5f7 "Ω" "Ohm Studio" serif`; `#f2efe6 #1d1d1f "Rare" "Type specimen" serif`; `#c8f560 #1d1d1f "↗" "Up & to the right"`; `#ff6482 #fff "03" "Spring · Summer"`; `#5e5ce6 #fff "Iso" "Grid systems"`; `#ffd60a #1d1d1f "!?" "Loud & clear"`; `#0b8f6a #e9fff6 "Fern" "Field notes" serif`; `#e5e5ea #1d1d1f "88" "Studio archive"`.
+--- components/curved-reel/curved-reel.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useRef } from "react";
+import { animate, motion, useMotionValue, useTransform, type MotionValue } from "framer-motion";
 
-- Wrapper: full width, vertical flex, centred, 12px gap; caption under the reel, 13px, `#86868b` (dark `#98989d`): "Drag the reel, or fling it."
-- Viewport: full width up to 760px, 300px tall, `overflow: hidden`, radius 18px, `perspective: 900px`, `cursor: grab` (grabbing while active), `touch-action: pan-y`, no text selection. Horizontal edge fade with a mask: `linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent)` (also `-webkit-mask-image`). Inside, an absolutely filling layer with `transform-style: preserve-3d`.
-- Card: 150 × 210 px, absolutely centred in the viewport (left/top 50%, negative margins of half its size). Radius 14px, padding 16px, `overflow: hidden`, shadow `0 20px 40px -24px rgba(0,0,0,.5)`, background/text from the poster. Content is a column spaced between:
-  - Top: "No. 01" (index + 1, zero-padded to 2), 9px, semibold, uppercase, tracking 0.18em, 70% opacity.
-  - Middle: the big glyph, line-height 1, tracking −0.04em, 72px (46px when longer than 2 characters); semibold sans, or italic serif when `serif`.
-  - Bottom: caption, 11px, medium, 80% opacity.
-- Constants: card width CW = 150, gap 16, pitch 166, reference view width VIEW = 760. Track length `total = posters.length · 166`.
-- Posters are vivid and need no dark variants.
+/** One poster in the reel: background, text colour, the big glyph and the caption. */
+export interface ReelPoster {
+  bg: string;
+  fg: string;
+  big: string;
+  small: string;
+  /** Sets the big glyph in an italic serif instead of semibold sans. */
+  serif?: boolean;
+}
 
-## Motion
+export interface CurvedReelProps {
+  posters?: ReelPoster[];
+  /** Drifts the reel at 38px/s; pauses for 2.5s after a drag. Off by default: the reel moves when you drag it. */
+  autoplay?: boolean;
+}
 
-Per card `i`, from `offset`:
+const POSTERS: ReelPoster[] = [
+  { bg: "#0040ff", fg: "#fff", big: "Aa", small: "04 · Grotesk" },
+  { bg: "#ff4f00", fg: "#1d1d1f", big: "17", small: "Issue · Motion" },
+  { bg: "#1d1d1f", fg: "#f5f5f7", big: "Ω", small: "Ohm Studio", serif: true },
+  { bg: "#f2efe6", fg: "#1d1d1f", big: "Rare", small: "Type specimen", serif: true },
+  { bg: "#c8f560", fg: "#1d1d1f", big: "↗", small: "Up & to the right" },
+  { bg: "#ff6482", fg: "#fff", big: "03", small: "Spring · Summer" },
+  { bg: "#5e5ce6", fg: "#fff", big: "Iso", small: "Grid systems" },
+  { bg: "#ffd60a", fg: "#1d1d1f", big: "!?", small: "Loud & clear" },
+  { bg: "#0b8f6a", fg: "#e9fff6", big: "Fern", small: "Field notes", serif: true },
+  { bg: "#e5e5ea", fg: "#1d1d1f", big: "88", small: "Studio archive" },
+];
 
-- Looping x from the centre: `v = i·166 − offset`, wrap into `[0, total)` with a positive modulo, then subtract `total` if `v > total/2`. Use it as `x`.
-- Normalised distance: `d = clamp(x / 380, −1.4, 1.4)`.
-- `rotateY = −d·48` degrees (cards on the right turn their face left toward the centre, and vice versa).
-- `scale = 0.82 + |d|^1.6 · 0.42` (centre pinched to 0.82, edges grow).
-- `z = |d|·90` px (edges come forward).
-- `opacity = |d| > 1.25 ? 0 : 1` (hides the wrap seam).
-- `filter: brightness(1 − min(0.25, |d|·0.18))`.
+const CW = 150;
+const CH = 210;
+const GAP = 16;
+const VIEW = 760;
 
-Drift: a rAF loop adds `dt·38` to `offset` whenever autoplay is on, no drag is active and the idle deadline has passed.
+function Card({ p, i, offset, total }: { p: ReelPoster; i: number; offset: MotionValue<number>; total: number }) {
+  // Position on a looping track, measured from the centre of the view.
+  const x = useTransform(offset, (o) => {
+    let v = i * (CW + GAP) - o;
+    v = ((v % total) + total) % total;
+    if (v > total / 2) v -= total;
+    return v;
+  });
+  const d = useTransform(x, (v) => Math.max(-1.4, Math.min(1.4, v / (VIEW / 2))));
+  const rotateY = useTransform(d, (v) => -v * 48);
+  const scale = useTransform(d, (v) => 0.82 + Math.pow(Math.abs(v), 1.6) * 0.42);
+  const z = useTransform(d, (v) => Math.abs(v) * 90);
+  const opacity = useTransform(d, (v) => (Math.abs(v) > 1.25 ? 0 : 1));
+  const bright = useTransform(d, (v) => `brightness(${1 - Math.min(0.25, Math.abs(v) * 0.18)})`);
+  return (
+    <motion.div className="absolute left-1/2 top-1/2" style={{ x, rotateY, scale, z, opacity, width: CW, height: CH, marginLeft: -CW / 2, marginTop: -CH / 2, filter: bright }}>
+      <div className="flex h-full w-full flex-col justify-between overflow-hidden rounded-[14px] p-4 shadow-[0_20px_40px_-24px_rgba(0,0,0,.5)]" style={{ background: p.bg, color: p.fg }}>
+        <span className="text-[9px] font-semibold uppercase tracking-[0.18em] opacity-70">No. {String(i + 1).padStart(2, "0")}</span>
+        <span className={`leading-none tracking-[-0.04em] ${p.serif ? "font-serif italic" : "font-semibold"}`} style={{ fontSize: p.big.length > 2 ? 46 : 72 }}>{p.big}</span>
+        <span className="text-[11px] font-medium opacity-80">{p.small}</span>
+      </div>
+    </motion.div>
+  );
+}
 
-Drag: on pointer down, stop any running animation, capture the pointer and record the start x, start offset and a velocity tracker. On move, `offset = startOffset + (startX − clientX)` (drag left moves the reel forward) and velocity `= (lastX − clientX) / max(0.008, seconds since last move)`. On pointer up or cancel, clear the drag, set the idle deadline to now + 2.5 s, and start framer-motion inertia on `offset`: `{ type: "inertia", velocity, power: 0.5, timeConstant: 500 }`.
+/**
+ * A reel of posters on the inside of a curve: cards at the centre sit back and
+ * pinch in, cards toward the edges swing round, grow and come forward. It drifts
+ * on its own; drag to scrub it and fling it to let it coast.
+ */
+export function CurvedReel({ posters = POSTERS, autoplay = false }: CurvedReelProps) {
+  const offset = useMotionValue(0);
+  const total = posters.length * (CW + GAP);
+  const drag = useRef<{ x: number; o: number; v: number; lx: number; lt: number } | null>(null);
+  const ctl = useRef<{ stop: () => void } | null>(null);
+  const idleUntil = useRef(0);
 
-Keyboard: Left/Right arrows stop any running animation, set the idle deadline to now + 2.5 s, and spring `offset` by ∓/± one pitch (166px) with `{ type: "spring", stiffness: 220, damping: 28 }`. Right moves to the next poster.
+  useEffect(() => {
+    let raf = 0, last = performance.now();
+    const loop = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      if (autoplay && !drag.current && now > idleUntil.current) offset.set(offset.get() + dt * 38);
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [autoplay, offset]);
 
-## Interaction and states
+  useEffect(() => () => ctl.current?.stop(), []);
 
-- The reel is infinite in both directions; no snapping after a fling.
-- Grabbing during inertia stops it instantly at the current position.
-- Stop the inertia animation on unmount.
+  const release = () => {
+    const d = drag.current;
+    drag.current = null;
+    idleUntil.current = performance.now() + 2500;
+    if (d) ctl.current = animate(offset, [offset.get()], { type: "inertia", velocity: d.v, power: 0.5, timeConstant: 500 });
+  };
 
-## Autoplay demo
+  return (
+    <div className="flex w-full flex-col items-center gap-3">
+      <div
+        tabIndex={0}
+        className="relative h-[300px] w-full max-w-[760px] cursor-grab touch-pan-y select-none overflow-hidden rounded-[18px] active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#2997ff]"
+        style={{ perspective: 900, maskImage: "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)" }}
+        onPointerDown={(e) => {
+          ctl.current?.stop();
+          e.currentTarget.setPointerCapture(e.pointerId);
+          drag.current = { x: e.clientX, o: offset.get(), v: 0, lx: e.clientX, lt: performance.now() };
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d) return;
+          const now = performance.now();
+          d.v = (d.lx - e.clientX) / Math.max(0.008, (now - d.lt) / 1000);
+          d.lx = e.clientX; d.lt = now;
+          offset.set(d.o + (d.x - e.clientX));
+        }}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onKeyDown={(e) => {
+          if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+          e.preventDefault();
+          ctl.current?.stop();
+          idleUntil.current = performance.now() + 2500;
+          const step = (e.key === "ArrowRight" ? 1 : -1) * (CW + GAP);
+          ctl.current = animate(offset, offset.get() + step, { type: "spring", stiffness: 220, damping: 28 });
+        }}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="Poster reel. Drag to scroll, or use the left and right arrow keys."
+      >
+        <div className="absolute inset-0" style={{ transformStyle: "preserve-3d" }}>
+          {posters.map((p, i) => <Card key={i} p={p} i={i} offset={offset} total={total} />)}
+        </div>
+      </div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Drag the reel, or fling it.</span>
+    </div>
+  );
+}
+```
 
-`autoplay` defaults to `true`: the reel drifts continuously and resumes 2.5 s after the last drag or key press. With `autoplay={false}` it only moves when the user drags or uses the keys.
+--- components/curved-reel/index.ts ---
 
-## Accessibility
-
-- Viewport: `role="region"`, `aria-roledescription="carousel"`, aria-label "Poster reel. Drag to scroll, or use the left and right arrow keys.", `tabIndex={0}`, focus-visible outline 2px, offset 4px, `#0071e3` (dark `#2997ff`).
-
-## Acceptance checklist
-
-- Centre cards are smaller and flat-on; edge cards are larger, rotated up to ~48°, pushed forward and slightly darker.
-- The reel loops seamlessly with no visible jump at the wrap point.
-- Autoplay drifts at about 38 px/s and pauses 2.5 s after interaction.
-- Dragging scrubs 1:1; a fast fling coasts and eases out (time constant 500 ms).
-- Arrow keys step exactly one card with a spring.
-- Edges fade out via the mask; vertical page scrolling still works on touch.
-- Cards with glyphs longer than two characters use 46px, otherwise 72px.
+```ts
+export { CurvedReel } from "./curved-reel";
+export type { CurvedReelProps, ReelPoster } from "./curved-reel";
+```

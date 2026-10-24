@@ -1,69 +1,305 @@
-Build text that "boils" like a stop-motion pencil drawing. An SVG turbulence + displacement filter re-rolls its noise seed every few frames so the letter edges wobble in place, and an optional hand-drawn squiggle underline draws itself in. Sweeping the pointer across the text stirs the ink: the wobble jumps with pointer speed, overshoots and settles back on a springy decay. Ship three pieces: a word wrapper, a whole-line wrapper and a ready-made hero headline.
+Add the "RippleLine squiggly text" component from Nexus UI to my project.
 
-## Stack
+Text that boils like a stop-motion pencil drawing: an SVG turbulence filter re-rolls its noise every few frames, and an optional hand-drawn underline draws itself in. Sweeping the pointer across it stirs the ink, which jumps with pointer speed and settles back on a spring.
 
-- React client components (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useSpring`, `useReducedMotion`), React `useId`, and a `cn` helper built on tailwind-merge.
-- File: `components/squiggly-text/squiggly-text.tsx`. Named exports `SquigglyWord`, `SquigglyText`, `SquigglyDrinksHeadline` and types `SquigglyWordProps`, `SquigglyTextProps`, `SquigglyDrinksHeadlineProps`.
-- The boil never re-renders React: write `seed` and `scale` straight to the filter elements through refs.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name and folder. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { SquigglyText, SquigglyWord, SquigglyDrinksHeadline } from "@/components/squiggly-text";`. The props are typed and documented in the code.
 
-`SquigglyWord`:
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `children` | `ReactNode` | – | Content to boil. |
-| `className` | `string` | – | Classes on the wrapper span. |
-| `steps` | `number` | `5` | Distinct noise frames cycled (rounded, min 1). |
-| `stepDuration` | `number` | `80` | Ms each frame is held (min 16). |
-| `scale` | `number \| readonly [number, number]` | `[6, 8]` | Resting displacement px; a pair alternates frame by frame. |
-| `baseFrequency` | `number` | `0.02` | Noise frequency (min 0.001). |
-| `numOctaves` | `number` | `3` | Noise detail, clamped 1–5. |
-| `stir` | `number` | `0.06` | Pointer-speed strength; 0 disables. |
-| `underline` | `boolean` | `false` | Hand-drawn squiggle under the text. |
-| `underlineColor` | `string` | `#0071e3` (dark `#0a84ff`) | Underline colour. |
-| `autoplay` | `boolean` | `false` | Stirs and redraws every 2.8s until pointed at. |
+--- components/squiggly-text/index.ts ---
 
-`SquigglyText` takes all of the above except children/className, plus `children?`, `text?` (used when no children), `as?: "span" | "div"` (default `"span"`), `className?` (root) and `textClassName?` (the boiling node). Root: `relative inline-block max-w-full overflow-visible`; it renders one `SquigglyWord` with `inline-block` + `textClassName`.
+```ts
+export type { SquigglyTextProps, SquigglyWordProps, SquigglyDrinksHeadlineProps } from "./squiggly-text";
+export { SquigglyText, SquigglyWord, SquigglyDrinksHeadline } from "./squiggly-text";
+```
 
-`SquigglyDrinksHeadline`: `className?`, `headingClassName?`, `steps = 5`, `stepDuration = 90`, `baseFrequency = 0.022`, `numOctaves = 3`, `lead = "Interfaces with"`, `phrase = "a little life"`, `tail = "in every line."`, `autoplay = false`.
+--- components/squiggly-text/squiggly-text.tsx ---
 
-## Layout and look
+```tsx
+"use client";
 
-- Filter: a zero-size hidden SVG inside each word holding `<filter>` with a unique id from `useId` (strip non `[A-Za-z0-9_-]` chars), region x −20%, y −30%, width 140%, height 160%, `color-interpolation-filters: sRGB`. Inside: `feTurbulence type="fractalNoise"`, the given frequency/octaves, `seed="1"`, result `noise`; then `feDisplacementMap in="SourceGraphic" in2="noise"`, scale = the first scale value, x channel R, y channel G.
-- The text span (relative, inline-block) gets `filter: url(#id)` (and `-webkit-filter`). The underline lives inside the filtered span, so it boils too.
-- Underline: an SVG `viewBox 0 0 200 20`, `preserveAspectRatio="none"`, absolute at `bottom: −0.18em`, left 0, full width, `height: 0.28em`, overflow visible. One path drawn with a fixed hand-made curve: `M2 12 C 22 4, 38 18, 58 10 S 96 4, 116 11 S 156 18, 176 9 S 194 8, 198 10`. Stroke 4, round caps, `vector-effect: non-scaling-stroke`, no fill.
-- Headline: `<h2>`, centred, `max-width: 14ch`, balanced, 44px (56px from `sm`), semibold, tracking −0.035em, leading 1.06, `#1d1d1f` (dark `#f5f5f7`). The phrase is a `SquigglyWord` with `scale [3, 4.5]`, `underline`, text `#0071e3` (dark `#0a84ff`), passing steps/stepDuration/frequency/octaves/autoplay through. Only add the default `leading-[1.06]` if the caller's classes contain no `leading-*` class (tailwind-merge would otherwise drop it when a text size is passed).
+import * as React from "react";
+import { animate, motion, useMotionValue, useReducedMotion, useSpring, type AnimationPlaybackControls } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-## Motion
+/**
+ * Hand-drawn "line boil" text. One SVG turbulence + displacement filter re-rolls its noise seed
+ * every `stepDuration` ms, like a stop-motion pencil drawing. Moving the pointer across the text
+ * stirs the ink: the displacement jumps with pointer speed and settles back on a spring. All of it
+ * is written straight to the filter's attributes, so React never re-renders while it boils.
+ */
 
-- Boil: an interval every `stepDuration` ms advances `frame = (frame + 1) mod steps`, sets the turbulence `seed` to `frame + 1`, then repaints the displacement `scale = (frame odd ? s1 : s0) + |excite|`, rounded to 2 decimals. Paint once on mount.
-- Stir: a motion value `excite` (extra px) whose change event also repaints. On pointermove over the word: if the previous sample is within 120ms, `speed = distance / ms` (px/ms); if `speed > 0.05`, pulse with `amount = min(18, speed × 1000 × stir × 0.12)`.
-- Pulse: stop the previous animation and run `animate(excite, 0, { type: "spring", stiffness: 140, damping: 9, velocity: amount × 10 })`. Starting at its current value with an impulse makes it jump, swing negative (the absolute value keeps it positive) and calm down.
-- Underline draw: `pathLength` from a motion value `draw` through `useSpring(stiffness 90, damping 16)`. 250ms after mount set `draw` to 1 so it draws in with a slight overshoot. Redraw = jump both `draw` and the spring to 0, then set `draw` to 1.
-- Pointer enter on the word marks it touched and redraws the underline (if `underline`). Pointer leave clears the speed sample.
+const safeId = (raw: string) => raw.replace(/[^a-zA-Z0-9_-]/g, "");
 
-## Interaction and states
+/** Squiggle underline in a 0..200 x 0..20 box, drawn once so server and client print the same path. */
+const UNDERLINE = "M2 12 C 22 4, 38 18, 58 10 S 96 4, 116 11 S 156 18, 176 9 S 194 8, 198 10";
 
-- Works with mouse, pen and touch moves. No click behaviour; the text stays selectable and readable.
-- Reduced motion: no filter applied, no interval, no pulses, underline shown fully drawn from the start.
-- Clean up: clear the interval and the 250ms timeout, unsubscribe the change listener and stop the spring on unmount.
+export type SquigglyWordProps = {
+  children: React.ReactNode;
+  className?: string;
+  /** How many different noise frames the boil cycles through. */
+  steps?: number;
+  /** Milliseconds each frame is held. Lower is jumpier. */
+  stepDuration?: number;
+  /** Resting displacement in px. A pair alternates between the two values frame by frame. */
+  scale?: number | readonly [number, number];
+  /** Noise frequency. Higher makes tighter wiggles. */
+  baseFrequency?: number;
+  /** Noise detail (1 to 5). */
+  numOctaves?: number;
+  /** Extra displacement added per unit of pointer speed while the pointer moves over the text. */
+  stir?: number;
+  /** Draws a hand-drawn squiggle under the text that redraws itself when stirred. */
+  underline?: boolean;
+  /** Underline colour (any CSS colour). Defaults to the accent blue. */
+  underlineColor?: string;
+  /** Stirs the ink and redraws the underline every 2.8s until someone points at it. */
+  autoplay?: boolean;
+};
 
-## Autoplay demo
+/** One boiling fragment. Use it inside a heading to wobble a single word or phrase. */
+export function SquigglyWord({
+  children,
+  className,
+  steps = 5,
+  stepDuration = 80,
+  scale = [6, 8],
+  baseFrequency = 0.02,
+  numOctaves = 3,
+  stir = 0.06,
+  underline = false,
+  underlineColor,
+  autoplay = false,
+}: SquigglyWordProps) {
+  const still = useReducedMotion() === true;
+  const id = `sq-${safeId(React.useId())}`;
+  const turb = React.useRef<SVGFETurbulenceElement>(null);
+  const disp = React.useRef<SVGFEDisplacementMapElement>(null);
+  const last = React.useRef<{ x: number; y: number; t: number } | null>(null);
+  const touched = React.useRef(false);
+  const run = React.useRef<AnimationPlaybackControls | undefined>(undefined);
+  /** Extra displacement on top of the resting scale; kicked with velocity so it rings and settles. */
+  const excite = useMotionValue(0);
+  const draw = useMotionValue(still ? 1 : 0);
+  const drawn = useSpring(draw, { stiffness: 90, damping: 16 });
 
-With `autoplay` (and motion allowed), every 2.8s pulse with amount 14 and redraw the underline. The first pointer enter stops it for good.
+  const frames = Math.max(1, Math.round(steps));
+  const s0 = typeof scale === "number" ? scale : scale[0];
+  const s1 = typeof scale === "number" ? scale : (scale[1] ?? scale[0]);
 
-## Accessibility
+  // The boil: one interval swaps the seed; a motion-value listener feeds the stir into the scale.
+  React.useEffect(() => {
+    let frame = 0;
+    const paint = () => {
+      const base = frame % 2 ? s1 : s0;
+      disp.current?.setAttribute("scale", String(Math.round((base + Math.abs(excite.get())) * 100) / 100));
+    };
+    paint();
+    if (still) return;
+    const t = window.setInterval(() => {
+      frame = (frame + 1) % frames;
+      turb.current?.setAttribute("seed", String(frame + 1));
+      paint();
+    }, Math.max(16, Math.round(stepDuration)));
+    const off = excite.on("change", paint);
+    return () => {
+      window.clearInterval(t);
+      off();
+    };
+  }, [excite, frames, s0, s1, stepDuration, still]);
 
-- The filter SVG and underline SVG are `aria-hidden` and `focusable="false"`. The real text stays in the DOM unchanged, so screen readers read it normally. Use a real heading element for the headline.
+  // Draw the underline in shortly after mount.
+  React.useEffect(() => {
+    if (still) return;
+    const t = window.setTimeout(() => draw.set(1), 250);
+    return () => {
+      window.clearTimeout(t);
+      run.current?.stop();
+    };
+  }, [draw, still]);
 
-## Acceptance checklist
+  /** A velocity impulse into an under-damped spring: the ink jumps, overshoots and calms down. */
+  const pulse = React.useCallback(
+    (amount: number) => {
+      if (still) return;
+      run.current?.stop();
+      run.current = animate(excite, 0, { type: "spring", stiffness: 140, damping: 9, velocity: amount * 10 });
+    },
+    [excite, still],
+  );
 
-- The headline reads "Interfaces with a little life in every line." with the phrase in blue and underlined.
-- Letter edges of the phrase wobble continuously at a stop-motion rate (about 11 fps), cycling five noise frames.
-- The underline draws in left-to-right shortly after load with a small overshoot.
-- Sweeping the pointer quickly across the phrase makes it wobble much harder, then it settles back within about a second.
-- Entering the phrase redraws the underline.
-- `SquigglyText` with `scale={[2,3]}` and `stepDuration={140}` looks gentle; `[6,8]` at 70ms looks lively.
-- Reduced motion shows crisp, still text with a fully drawn underline.
-- No React re-render happens per boil frame.
+  const redraw = React.useCallback(() => {
+    if (still || !underline) return;
+    draw.jump(0);
+    drawn.jump(0);
+    draw.set(1);
+  }, [draw, drawn, still, underline]);
+
+  React.useEffect(() => {
+    if (!autoplay || still) return;
+    const t = window.setInterval(() => {
+      if (touched.current) {
+        window.clearInterval(t);
+        return;
+      }
+      pulse(14);
+      redraw();
+    }, 2800);
+    return () => window.clearInterval(t);
+  }, [autoplay, pulse, redraw, still]);
+
+  const filter = still ? undefined : `url(#${id})`;
+
+  return (
+    <span
+      className={cn("relative inline-block", className)}
+      onPointerEnter={() => {
+        touched.current = true;
+        redraw();
+      }}
+      onPointerMove={(e) => {
+        const now = e.timeStamp;
+        const prev = last.current;
+        last.current = { x: e.clientX, y: e.clientY, t: now };
+        if (!prev || now - prev.t > 120) return;
+        const speed = Math.hypot(e.clientX - prev.x, e.clientY - prev.y) / Math.max(1, now - prev.t);
+        if (speed > 0.05) pulse(Math.min(18, speed * 1000 * stir * 0.12));
+      }}
+      onPointerLeave={() => {
+        last.current = null;
+      }}
+    >
+      <svg aria-hidden="true" focusable="false" className="pointer-events-none absolute h-0 w-0 overflow-hidden">
+        <defs>
+          <filter id={id} x="-20%" y="-30%" width="140%" height="160%" colorInterpolationFilters="sRGB">
+            <feTurbulence ref={turb} type="fractalNoise" baseFrequency={String(Math.max(0.001, baseFrequency))} numOctaves={Math.max(1, Math.min(5, Math.round(numOctaves)))} seed="1" result="noise" />
+            <feDisplacementMap ref={disp} in="SourceGraphic" in2="noise" scale={String(s0)} xChannelSelector="R" yChannelSelector="G" />
+          </filter>
+        </defs>
+      </svg>
+      <span className="relative inline-block" style={{ filter, WebkitFilter: filter }}>
+        {children}
+        {underline ? (
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            viewBox="0 0 200 20"
+            preserveAspectRatio="none"
+            className="pointer-events-none absolute -bottom-[0.18em] left-0 h-[0.28em] w-full overflow-visible"
+          >
+            <motion.path
+              d={UNDERLINE}
+              fill="none"
+              strokeWidth={4}
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+              className={underlineColor ? undefined : "stroke-[#0071e3] dark:stroke-[#0a84ff]"}
+              style={{ pathLength: drawn, stroke: underlineColor }}
+            />
+          </svg>
+        ) : null}
+      </span>
+    </span>
+  );
+}
+
+export type SquigglyTextProps = Omit<SquigglyWordProps, "children" | "className"> & {
+  children?: React.ReactNode;
+  /** Convenience text when no children are given. */
+  text?: string;
+  /** Root element. */
+  as?: "span" | "div";
+  /** Classes for the root element. */
+  className?: string;
+  /** Classes for the boiling text node. */
+  textClassName?: string;
+};
+
+/** A whole line (or block) of boiling text. */
+export function SquigglyText({ children, text, as = "span", className, textClassName, ...word }: SquigglyTextProps) {
+  const Tag = as === "div" ? "div" : "span";
+  return (
+    <Tag className={cn("relative inline-block max-w-full overflow-visible", className)}>
+      <SquigglyWord {...word} className={cn("inline-block", textClassName)}>
+        {children ?? text}
+      </SquigglyWord>
+    </Tag>
+  );
+}
+
+/** tailwind-merge drops a default `leading-*` whenever a later `text-*` size arrives, so the default goes last unless the caller set one. */
+const withLeading = (cls: string | undefined, fallback: string) => (/(^|\s)([\w-]+:)*leading-/.test(cls ?? "") ? undefined : fallback);
+
+export type SquigglyDrinksHeadlineProps = {
+  className?: string;
+  headingClassName?: string;
+  steps?: number;
+  stepDuration?: number;
+  baseFrequency?: number;
+  numOctaves?: number;
+  /** Text before the boiling phrase. */
+  lead?: string;
+  /** The phrase that boils and gets the underline. */
+  phrase?: string;
+  /** Text after the boiling phrase. */
+  tail?: string;
+  /** Stirs the phrase every 2.8s until someone points at it. */
+  autoplay?: boolean;
+};
+
+/** Ready-made hero headline: plain lead, a boiling underlined phrase, a plain tail. */
+export function SquigglyDrinksHeadline({
+  className,
+  headingClassName,
+  steps = 5,
+  stepDuration = 90,
+  baseFrequency = 0.022,
+  numOctaves = 3,
+  lead = "Interfaces with",
+  phrase = "a little life",
+  tail = "in every line.",
+  autoplay = false,
+}: SquigglyDrinksHeadlineProps) {
+  return (
+    <h2
+      className={cn(
+        "m-0 max-w-[14ch] text-balance text-center text-[44px] font-semibold tracking-[-0.035em] text-[#1d1d1f] sm:text-[56px] dark:text-[#f5f5f7]",
+        headingClassName,
+        className,
+        withLeading(`${headingClassName ?? ""} ${className ?? ""}`, "leading-[1.06]"),
+      )}
+    >
+      {lead}{" "}
+      <SquigglyWord steps={steps} stepDuration={stepDuration} baseFrequency={baseFrequency} numOctaves={numOctaves} scale={[3, 4.5]} underline autoplay={autoplay} className="text-[#0071e3] dark:text-[#0a84ff]">
+        {phrase}
+      </SquigglyWord>{" "}
+      {tail}
+    </h2>
+  );
+}
+```
+
+--- components/squiggly-text.tsx ---
+
+```tsx
+/** Re-export shim: `@/components/squiggly-text` resolves here or to the directory. */
+export type { SquigglyTextProps, SquigglyWordProps, SquigglyDrinksHeadlineProps } from "./squiggly-text/squiggly-text";
+export { SquigglyText, SquigglyWord, SquigglyDrinksHeadline } from "./squiggly-text/squiggly-text";
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

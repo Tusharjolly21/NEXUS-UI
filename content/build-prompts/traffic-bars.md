@@ -1,68 +1,388 @@
 # Traffic Bars
 
-Build a stacked bar chart card of website visits by source over 28 days. Scrub along it and the column under you is ringed, the rest dim, the total counts to that column and a tooltip glides beside it. A Day/Week control regroups the chart: every day's slices fly across and stack inside their week's bar. The feel is a calm, Apple-like analytics widget with springy motion.
+Add the "Traffic Bars" component from Nexus UI to my project.
 
-## Stack
+A stacked bar chart of daily visits by source: the column under your pointer is ringed, the others dim and a tooltip glides beside it with the breakdown. Switch Day to Week and every day's slices fly over and pile into their week.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useSpring`, `useMotionValue`, `useTransform`, `layoutId`).
-- File: `components/traffic-bars/traffic-bars.tsx`. Named export `TrafficBars`, plus `TrafficBarsProps` and `TrafficBarsTheme`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { TrafficBars } from "@/components/traffic-bars";`. The props are typed and documented in the code.
 
-- `theme?: "auto" | "light" | "dark"`, default `"auto"`. Auto follows a `.dark` class on an ancestor; light/dark pin the palette.
-- `colors?: string[]`, default `["#0071e3", "#64d2ff", "#bf5af2"]`: fills for Direct, Search, Referral (bottom to top).
-- `radius?: number`, default `2`: corner radius of every slice in SVG units (capped at half the slice width).
-- `stagger?: number`, default `12`: ms between neighbouring days when slices regroup.
-- `autoplay?: boolean`, default `false`.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Data
+--- components/traffic-bars/index.ts ---
 
-Local, deterministic demo data: 28 days × 3 series from a seeded LCG `s = (s·9301 + 49297) mod 233280`, `r = s/233280`, seed 11. For day `d`: `weekend = 0.62` when `d % 7` is 5 or 6, else 1; `trend = 1 + d/60`; Direct `round((300 + r·260)·weekend·trend)`, Search `round((200 + r·220)·…)`, Referral `round((60 + r·120)·…)` (call `r()` in that order). Day 0 is Sep 22, 2026; labels use `en-US` "Sep 22". Week totals are the sums of days 0–6, 7–13, 14–20, 21–27.
+```ts
+export { TrafficBars } from "./traffic-bars";
+export type { TrafficBarsProps, TrafficBarsTheme } from "./traffic-bars";
+```
 
-## Layout and look
+--- components/traffic-bars/traffic-bars.tsx ---
 
-- Palette lives in CSS variables on the root so SVG and inline styles follow the theme. Light / dark: card `#ffffff` / `#1c1c1e`; text `#1d1d1f` / `#f5f5f7`; secondary `#6e6e73` / `#98989d`; grid `#ececf0` / `#2c2c2e`; segment track `#f0f0f3` / `#2c2c2e`; selected pill `#ffffff` / `#48484a`; tooltip bg `#1d1d1f` / `#f5f5f7`; tooltip text `#ffffff` / `#1d1d1f`; tooltip labels `rgba(255,255,255,.6)` / `rgba(29,29,31,.6)`; ring `#1d1d1f` / `#f5f5f7`; card shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` / `0 0 0 1px rgba(255,255,255,.08), 0 20px 40px -26px rgba(0,0,0,.8)`.
-- Card: 380px wide (`max-width: 100%`), radius 24px, padding 20px, `transition-colors 300ms`.
-- Header: "Traffic" (14px semibold) over a 12px secondary line ("Last 28 days" or the highlighted label). Right: segmented control, rounded-full, 3px padding; buttons 28px tall, 12px padding-x, 12px medium, "day"/"week" capitalised; pill shadow `0 1px 3px rgba(0,0,0,.15)`.
-- Total: 12px below, 30px semibold, tabular numbers, tracking −0.03em, followed by "visits" in 13px regular secondary.
-- Plot: 16px below. SVG viewBox `0 0 336 150`, full width, height auto, `overflow: visible`. Dashed grid lines (`2 4`) at 25/50/75% height, a solid baseline at y 150.5.
-- Day mode: 28 columns, 4-unit gap, bar width `(336 − 4·27)/28`. Week mode: 4 columns, 18-unit gap. Vertical scale `yk = (150 − 6) / (max column total · 1.08)` for the current mode.
-- Stacking: Day mode stacks a day's three slices from the baseline. Week mode puts each day's slice inside its week's band for that series: series bands stack from the baseline, and inside a band day k sits above days 0…k−1 of that week. In Week mode slices get a 0.6 stroke in the card colour so the day seams show.
-- Ring: rounded rect from x −3, y −4, width `bw + 6`, height 158, radius `min(8, bw/2 + 3)`, no fill, stroke ring colour at .5 opacity, 1.2 wide.
-- Tooltip: absolute at top 0, min-width 136px, radius 12px, padding 8×12px, 11px, shadow `0 10px 30px -10px rgba(0,0,0,.5)`; a semibold label, then three rows of 6px dot + name (left) and value (right).
-- Below: first and last date (11px secondary), then a legend of 8px dots + names (12px, 16px gap).
+```tsx
+"use client";
+import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as RKeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import { motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
 
-## Motion
+export type TrafficBarsTheme = "auto" | "light" | "dark";
 
-- Every slice is a `motion.rect` animating `x`, `y`, `width` (min 0.5), `height` and `opacity` with a spring, stiffness 210, damping 26, `initial={false}`. Delay into Week: `(d % 7)·stagger/1000 + series·0.02` s; back to Day: `(6 − d % 7)·stagger/1000` s. Opacity uses its own 0.15s tween, no delay. Dimmed columns go to opacity .32.
-- Ring: a motion value springs to `col·(bw + gap)` with stiffness 420, damping 34. The first highlight after none jumps there instantly (both raw and spring); later moves glide. The ring group fades in on mount.
-- Tooltip `left` is derived from the ring spring: scale by plot width / 336, place 10px to the right of the column; if it would overflow the right edge by more than 12px, flip to 10px left of the column; clamp to [−12, plotWidth + 12 − 140]. Track plot width with a ResizeObserver into a motion value. It enters with opacity 0→1, scale .92→1, spring 500/32.
-- Total counter: a `useSpring` (stiffness 140, damping 22) set to the new value, rendered through `useTransform` as an `en-US` rounded integer.
-- Segment pill: shared `layoutId` unique per instance (`useId`), spring 500/36.
+export interface TrafficBarsProps {
+  /** "auto" follows the page (`.dark` on an ancestor); "light" or "dark" pins the card's palette. */
+  theme?: TrafficBarsTheme;
+  /** Fill for the Direct, Search and Referral slices, bottom to top. */
+  colors?: string[];
+  /** Corner radius of each slice, in SVG units. */
+  radius?: number;
+  /** Delay between neighbouring days when slices regroup, in ms. */
+  stagger?: number;
+  /** Scrubs along the columns and flips Day/Week every few seconds until someone interacts. */
+  autoplay?: boolean;
+}
 
-## Interaction and states
+/**
+ * Palette as CSS variables so springs and SVG fills can follow the theme.
+ * Written out in full so Tailwind sees every class.
+ */
+const THEME_VARS: Record<TrafficBarsTheme, string> = {
+  light:
+    "[--tb-card:#ffffff] [--tb-text:#1d1d1f] [--tb-sub:#6e6e73] [--tb-grid:#ececf0] [--tb-seg:#f0f0f3] [--tb-seg-on:#ffffff] [--tb-tip:#1d1d1f] [--tb-tip-text:#ffffff] [--tb-tip-sub:rgba(255,255,255,.6)] [--tb-ring:#1d1d1f] [--tb-edge:0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)]",
+  dark:
+    "[--tb-card:#1c1c1e] [--tb-text:#f5f5f7] [--tb-sub:#98989d] [--tb-grid:#2c2c2e] [--tb-seg:#2c2c2e] [--tb-seg-on:#48484a] [--tb-tip:#f5f5f7] [--tb-tip-text:#1d1d1f] [--tb-tip-sub:rgba(29,29,31,.6)] [--tb-ring:#f5f5f7] [--tb-edge:0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
+  auto:
+    "[--tb-card:#ffffff] [--tb-text:#1d1d1f] [--tb-sub:#6e6e73] [--tb-grid:#ececf0] [--tb-seg:#f0f0f3] [--tb-seg-on:#ffffff] [--tb-tip:#1d1d1f] [--tb-tip-text:#ffffff] [--tb-tip-sub:rgba(255,255,255,.6)] [--tb-ring:#1d1d1f] [--tb-edge:0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:[--tb-card:#1c1c1e] dark:[--tb-text:#f5f5f7] dark:[--tb-sub:#98989d] dark:[--tb-grid:#2c2c2e] dark:[--tb-seg:#2c2c2e] dark:[--tb-seg-on:#48484a] dark:[--tb-tip:#f5f5f7] dark:[--tb-tip-text:#1d1d1f] dark:[--tb-tip-sub:rgba(29,29,31,.6)] dark:[--tb-ring:#f5f5f7] dark:[--tb-edge:0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.8)]",
+};
 
-- Pointer move/down picks `floor((x + gap/2)/(bw + gap))` in viewBox units, clamped. Mouse leave clears it; touch keeps the last column. `touch-action: none`.
-- Switching mode clears the highlight. A highlight index outside the current column count is treated as none (derive it; don't fix it in an effect).
-- The plot is focusable: Right/Up next column (from none → first), Left/Down previous (from none → last), Home/End, Escape clears; blur clears.
+const SERIES = [
+  { key: "direct", label: "Direct" },
+  { key: "search", label: "Search" },
+  { key: "referral", label: "Referral" },
+] as const;
+const DEFAULT_COLORS = ["#0071e3", "#64d2ff", "#bf5af2"];
+const DAYS = 28, W = 336, H = 150, TW = 140;
 
-## Autoplay demo
+/** 28 days of seeded demo traffic: weekends dip, the month trends up. */
+function makeData(seed = 11) {
+  let s = seed;
+  const r = () => ((s = (s * 9301 + 49297) % 233280) / 233280);
+  return Array.from({ length: DAYS }, (_, d) => {
+    const weekend = d % 7 === 5 || d % 7 === 6 ? 0.62 : 1;
+    const trend = 1 + d / 60;
+    return [Math.round((300 + r() * 260) * weekend * trend), Math.round((200 + r() * 220) * weekend * trend), Math.round((60 + r() * 120) * weekend * trend)];
+  });
+}
+const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
+const dateLabel = (d: number) => new Date(2026, 8, 22 + d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 
-Every 260ms advance the highlight one column (wrapping); on every 26th tick clear it and flip Day/Week. A `touched` ref set on any pointer down in the card, on clicks, scrubbing or keys stops it for good.
+function Count({ value }: { value: number }) {
+  const mv = useSpring(value, { stiffness: 140, damping: 22 });
+  useEffect(() => {
+    mv.set(value);
+  }, [value, mv]);
+  const text = useTransform(mv, fmt);
+  return <motion.span style={{ color: "var(--tb-text)" }}>{text}</motion.span>;
+}
 
-## Accessibility
+/**
+ * Stacked traffic bars you can run your pointer along. The column under you
+ * is ringed, the rest dim, and a tooltip glides beside it. Switch Day to Week
+ * and every day's slices fly over and pile up into their week, so you can see
+ * where each total came from.
+ */
+export function TrafficBars({ theme = "auto", colors = DEFAULT_COLORS, radius = 2, stagger = 12, autoplay = false }: TrafficBarsProps) {
+  const uid = useId().replace(/[^a-zA-Z0-9_-]/g, "");
+  const data = useMemo(() => makeData(), []);
+  const [mode, setMode] = useState<"day" | "week">("day");
+  const [hover, setHover] = useState<number | null>(null);
+  const [engaged, setEngaged] = useState(false);
+  const touched = useRef(false);
+  const plot = useRef<HTMLDivElement>(null);
 
-- Plot: `role="group"`, `aria-roledescription="chart"`, `aria-label` with grouping, date range, total and a keyboard hint. SVG and tooltip are `aria-hidden`.
-- A visually hidden `aria-live="polite"` region reads "Sep 25: 1,234 visits. Direct …, Search …, Referral …" — only after the user has interacted, so autoplay stays silent.
-- A visually hidden table lists every day (or week) with each series and the total.
-- Segmented control: `role="tablist"` with `role="tab"` buttons and `aria-selected`; focus ring 2px `#0071e3` (dark `#0a84ff`).
+  const cols = mode === "day" ? DAYS : 4;
+  const gap = mode === "day" ? 4 : 18;
+  const bw = (W - gap * (cols - 1)) / cols;
+  const hi = hover !== null && hover < cols ? hover : null;
+  const weekTotals = useMemo(() => [0, 1, 2, 3].map((w) => SERIES.map((_, s) => data.slice(w * 7, w * 7 + 7).reduce((a, d) => a + d[s], 0))), [data]);
+  const colTotals = mode === "day" ? data.map((d) => d[0] + d[1] + d[2]) : weekTotals.map((w) => w[0] + w[1] + w[2]);
+  const max = Math.max(...colTotals) * 1.08;
+  const yk = (H - 6) / max;
+  const total = data.reduce((a, d) => a + d[0] + d[1] + d[2], 0);
 
-## Acceptance checklist
+  // Where every slice sits in both layouts. In Week mode a day's slice is
+  // stacked inside its week's band for that series, so the regroup is literal.
+  const rects = useMemo(() => {
+    const out: { key: string; d: number; s: number; x: number; y: number; w: number; h: number }[] = [];
+    data.forEach((day, d) => {
+      if (mode === "day") {
+        let base = H;
+        day.forEach((v, s) => {
+          const h = v * yk;
+          base -= h;
+          out.push({ key: `${d}-${s}`, d, s, x: d * (bw + gap), y: base, w: bw, h });
+        });
+      } else {
+        const wk = Math.floor(d / 7), k = d % 7;
+        let bandBase = H;
+        for (let s = 0; s < 3; s++) {
+          const below = data.slice(wk * 7, wk * 7 + k).reduce((a, dd) => a + dd[s], 0);
+          const h = day[s] * yk;
+          const y = bandBase - below * yk - h;
+          out.push({ key: `${d}-${s}`, d, s, x: wk * (bw + gap), y, w: bw, h });
+          bandBase -= weekTotals[wk][s] * yk;
+        }
+      }
+    });
+    return out;
+  }, [data, mode, yk, bw, gap, weekTotals]);
 
-- [ ] Hovering a column rings it, dims the rest to .32 and counts the total to that column.
-- [ ] The tooltip follows the ring, flips near the right edge and never leaves the card.
-- [ ] Day → Week: each day's slices fly into their week bar with a visible left-to-right stagger and seams between days.
-- [ ] Week → Day reverses with the stagger running the other way.
-- [ ] Arrow keys, Home, End and Escape scrub the chart; the live region announces values.
-- [ ] `theme="auto"` follows `.dark`; light/dark pin the palette.
-- [ ] Autoplay sweeps and flips modes, then stops on the first interaction.
+  const colOf = (d: number) => (mode === "day" ? d : Math.floor(d / 7));
+  const ringX = useMotionValue(0);
+  const ringXs = useSpring(ringX, { stiffness: 420, damping: 34 });
+  // Tooltip sits beside the column, flips to the other side near the edge and
+  // never leaves the card.
+  const pw = useMotionValue(W);
+  const bwMv = useMotionValue(bw);
+  useEffect(() => {
+    bwMv.set(bw);
+  }, [bw, bwMv]);
+  const tipX = useTransform([ringXs, pw, bwMv] as MotionValue<number>[], ([x, w, b]: number[]) => {
+    const k = w / W, cx = x * k, bp = b * k;
+    let L = cx + bp + 10;
+    if (L + TW > w + 12) L = cx - 10 - TW;
+    return Math.max(-12, Math.min(w + 12 - TW, L));
+  });
+  useEffect(() => {
+    const el = plot.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => {
+      pw.set(el.offsetWidth);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [pw]);
+  const wasHover = useRef(false);
+  useEffect(() => {
+    if (hi === null) {
+      wasHover.current = false;
+      return;
+    }
+    const x = hi * (bw + gap);
+    if (!wasHover.current) {
+      ringX.jump(x);
+      ringXs.jump(x);
+    } else ringX.set(x);
+    wasHover.current = true;
+  }, [hi, bw, gap, ringX, ringXs]);
+
+  const engage = () => {
+    touched.current = true;
+    setEngaged(true);
+  };
+
+  const pick = (e: RPointerEvent) => {
+    engage();
+    const el = plot.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const x = ((e.clientX - r.left) / r.width) * W;
+    setHover(Math.max(0, Math.min(cols - 1, Math.floor((x + gap / 2) / (bw + gap)))));
+  };
+
+  const onKey = (e: RKeyboardEvent) => {
+    const last = cols - 1;
+    let next: number | null | undefined;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") next = hi === null ? 0 : Math.min(last, hi + 1);
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = hi === null ? last : Math.max(0, hi - 1);
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    else if (e.key === "Escape") next = null;
+    if (next === undefined) return;
+    e.preventDefault();
+    engage();
+    setHover(next);
+  };
+
+  const switchMode = (m: "day" | "week") => {
+    engage();
+    setHover(null);
+    setMode(m);
+  };
+
+  useEffect(() => {
+    if (!autoplay) return;
+    let i = 0;
+    const id = setInterval(() => {
+      if (touched.current) return clearInterval(id);
+      i++;
+      if (i % 26 === 0) {
+        setHover(null);
+        setMode((m) => (m === "day" ? "week" : "day"));
+        return;
+      }
+      setHover((h) => (h === null ? 0 : (h + 1) % (mode === "day" ? DAYS : 4)));
+    }, 260);
+    return () => clearInterval(id);
+  }, [autoplay, mode]);
+
+  const hv = hi !== null ? (mode === "day" ? data[hi] : weekTotals[hi]) : null;
+  const labelOf = (c: number) => (mode === "day" ? dateLabel(c) : `${dateLabel(c * 7)} – ${dateLabel(c * 7 + 6)}`);
+  const hLabel = hi === null ? "" : labelOf(hi);
+  const unit = mode === "day" ? "day" : "week";
+  const announce =
+    engaged && hv ? `${hLabel}: ${fmt(hv[0] + hv[1] + hv[2])} visits. ${SERIES.map((s, i) => `${s.label} ${fmt(hv[i])}`).join(", ")}.` : "";
+  const tableRows = mode === "day" ? data : weekTotals;
+
+  return (
+    <div
+      className={`w-[380px] max-w-full rounded-[24px] p-5 transition-colors duration-300 ${THEME_VARS[theme]}`}
+      style={{ background: "var(--tb-card)", boxShadow: "var(--tb-edge)" }}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col">
+          <span className="text-[14px] font-semibold" style={{ color: "var(--tb-text)" }}>Traffic</span>
+          <span className="text-[12px]" style={{ color: "var(--tb-sub)" }}>{hi === null ? "Last 28 days" : hLabel}</span>
+        </div>
+        <div role="tablist" aria-label="Group by" className="relative flex rounded-full p-[3px]" style={{ background: "var(--tb-seg)" }}>
+          {(["day", "week"] as const).map((m) => (
+            <button
+              key={m}
+              role="tab"
+              type="button"
+              aria-selected={mode === m}
+              onClick={() => switchMode(m)}
+              className="relative h-7 rounded-full px-3 text-[12px] font-medium capitalize outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:focus-visible:ring-[#0a84ff]"
+              style={{ color: mode === m ? "var(--tb-text)" : "var(--tb-sub)" }}
+            >
+              {mode === m && (
+                <motion.span
+                  layoutId={`tb-seg-${uid}`}
+                  className="absolute inset-0 rounded-full shadow-[0_1px_3px_rgba(0,0,0,.15)]"
+                  style={{ background: "var(--tb-seg-on)" }}
+                  transition={{ type: "spring", stiffness: 500, damping: 36 }}
+                />
+              )}
+              <span className="relative">{m}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="mt-3 flex items-baseline gap-1.5 text-[30px] font-semibold tabular-nums tracking-[-0.03em]">
+        <Count value={hv ? hv[0] + hv[1] + hv[2] : total} />
+        <span className="text-[13px] font-normal tracking-normal" style={{ color: "var(--tb-sub)" }}>visits</span>
+      </div>
+
+      <div
+        ref={plot}
+        tabIndex={0}
+        role="group"
+        aria-roledescription="chart"
+        aria-label={`Stacked bar chart of visits by ${unit}, ${dateLabel(0)} to ${dateLabel(DAYS - 1)}. Total ${fmt(total)}. Use the arrow keys to move between ${unit}s.`}
+        className="relative mt-4 touch-none select-none rounded-[6px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4 focus-visible:ring-offset-[color:var(--tb-card)] dark:focus-visible:ring-[#0a84ff]"
+        onPointerMove={pick}
+        onPointerDown={pick}
+        onPointerLeave={(e) => e.pointerType === "mouse" && setHover(null)}
+        onKeyDown={onKey}
+        onBlur={() => setHover(null)}
+      >
+        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full overflow-visible" aria-hidden="true">
+          {[0.25, 0.5, 0.75].map((g) => (
+            <line key={g} x1="0" x2={W} y1={H * g} y2={H * g} style={{ stroke: "var(--tb-grid)" }} strokeDasharray="2 4" />
+          ))}
+          <line x1="0" x2={W} y1={H + 0.5} y2={H + 0.5} style={{ stroke: "var(--tb-grid)" }} />
+          {rects.map((r) => {
+            const dim = hi !== null && colOf(r.d) !== hi;
+            return (
+              <motion.rect
+                key={r.key}
+                initial={false}
+                animate={{ x: r.x, y: r.y, width: Math.max(0.5, r.w), height: Math.max(0, r.h), opacity: dim ? 0.32 : 1 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 210,
+                  damping: 26,
+                  delay: mode === "week" ? (r.d % 7) * (stagger / 1000) + r.s * 0.02 : (6 - (r.d % 7)) * (stagger / 1000),
+                  opacity: { duration: 0.15, delay: 0 },
+                }}
+                rx={Math.min(radius, Math.max(0, r.w / 2))}
+                fill={colors[r.s]}
+                style={{ stroke: mode === "week" ? "var(--tb-card)" : "none" }}
+                strokeWidth={mode === "week" ? 0.6 : 0}
+              />
+            );
+          })}
+          {hi !== null && (
+            <motion.g style={{ x: ringXs }} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <rect x={-3} y={-4} width={bw + 6} height={H + 8} rx={Math.min(8, bw / 2 + 3)} fill="none" style={{ stroke: "var(--tb-ring)" }} strokeOpacity=".5" strokeWidth="1.2" />
+            </motion.g>
+          )}
+        </svg>
+
+        {hv && (
+          <motion.div
+            className="pointer-events-none absolute top-0 z-10 min-w-[136px] rounded-[12px] px-3 py-2 text-[11px] shadow-[0_10px_30px_-10px_rgba(0,0,0,.5)]"
+            style={{ left: tipX, background: "var(--tb-tip)", color: "var(--tb-tip-text)" }}
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: "spring", stiffness: 500, damping: 32 }}
+            aria-hidden="true"
+          >
+            <div className="mb-1 font-semibold">{hLabel}</div>
+            {SERIES.map((s, i) => (
+              <div key={s.key} className="flex items-center justify-between gap-3 tabular-nums">
+                <span className="flex items-center gap-1.5" style={{ color: "var(--tb-tip-sub)" }}>
+                  <span className="h-1.5 w-1.5 rounded-full" style={{ background: colors[i] }} />
+                  {s.label}
+                </span>
+                <span>{fmt(hv[i])}</span>
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </div>
+
+      <div className="sr-only" aria-live="polite">{announce}</div>
+      <table className="sr-only">
+        <caption>Visits by {unit}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{mode === "day" ? "Day" : "Week"}</th>
+            {SERIES.map((s) => (
+              <th key={s.key} scope="col">{s.label}</th>
+            ))}
+            <th scope="col">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tableRows.map((row, c) => (
+            <tr key={c}>
+              <th scope="row">{labelOf(c)}</th>
+              {row.map((v, s) => (
+                <td key={s}>{fmt(v)}</td>
+              ))}
+              <td>{fmt(row[0] + row[1] + row[2])}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="mt-2 flex justify-between text-[11px] tabular-nums" style={{ color: "var(--tb-sub)" }} aria-hidden="true">
+        <span>{dateLabel(0)}</span>
+        <span>{dateLabel(DAYS - 1)}</span>
+      </div>
+      <div className="mt-3 flex gap-4 text-[12px]" style={{ color: "var(--tb-sub)" }}>
+        {SERIES.map((s, i) => (
+          <span key={s.key} className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: colors[i] }} />
+            {s.label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+```

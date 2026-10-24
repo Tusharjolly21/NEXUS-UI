@@ -1,87 +1,589 @@
 # Layout Switch
 
-Build a small photo gallery where the same six photos glide between four arrangements: Grid, Row, Feature and Pile. Nothing fades or cuts: every photo springs from its old box to its new one, resizing and rotating on the way, with a tiny stagger so the motion ripples. Clicking a photo grows it to fill the whole frame while the others dim; clicking it again (or pressing Escape) puts it back. The feel is smooth and confident, like a native photos app.
+Add the "Layout Switch" component from Nexus UI to my project.
 
-## Stack
+A photo set that glides between grid, row, feature and pile arrangements on springs, with nothing fading or cutting. Click a photo and it grows to fill the frame; click again or press Escape to put it back.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `layoutId` for the segmented control).
-- Photos are absolutely positioned and animated explicitly (x, y, width, height, rotate); do not use framer's `layout` prop for them.
-- File: `components/layout-switch/layout-switch.tsx`, named export `LayoutSwitch`. Also export the type `LayoutSwitchLayout = "grid" | "row" | "feature" | "pile"`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+5. Use it like this: `import { LayoutSwitch } from "@/components/layout-switch";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `autoplay` | `boolean` | `false` | Changes layouts by itself until the user interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Content
+--- components/layout-switch/index.ts ---
 
-Six photos, each a CSS gradient "art" plus a title (gradients are `radial-gradient(...)` over `linear-gradient(...)`):
+```ts
+export { LayoutSwitch } from "./layout-switch";
+export type { LayoutSwitchProps, LayoutSwitchLayout } from "./layout-switch";
+```
 
-1. Salt flats: `radial-gradient(80% 60% at 30% 25%, #fff3d6, rgba(255,243,214,0) 60%), linear-gradient(180deg,#9ec9ff,#e8f1ff 55%,#f5e9dd)`
-2. Red canyon: `radial-gradient(70% 60% at 70% 20%, #ffd2a6, rgba(255,210,166,0) 60%), linear-gradient(160deg,#ff9f6b,#c4553d 60%,#5b2a2a)`
-3. Pine ridge: `radial-gradient(60% 50% at 50% 15%, #e7fff1, rgba(231,255,241,0) 60%), linear-gradient(180deg,#bfe3d0,#3f8f6b 60%,#173d2e)`
-4. Night pier: `radial-gradient(40% 30% at 70% 30%, #fff6c7, rgba(255,246,199,0) 60%), linear-gradient(180deg,#1b2140,#3a3f78 60%,#0c0f22)`
-5. Lavender: `radial-gradient(70% 60% at 30% 30%, #fff, rgba(255,255,255,0) 55%), linear-gradient(170deg,#e4d4ff,#a98bf0 55%,#5e4bb3)`
-6. Low tide: `radial-gradient(70% 50% at 60% 20%, #fffbe8, rgba(255,251,232,0) 60%), linear-gradient(180deg,#a7e3f2,#5fb6c9 55%,#d9c7a8)`
+--- components/layout-switch/layout-switch.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
-- Root: full-width centred column, gap 20px. Order: segmented control, stage, caption "Switch layouts, or click a photo to open it." (13px `#86868b`, dark `#98989d`).
-- Segmented control: `grid-cols-4`, radius 12px, padding 3px, `#e8e8ed` (dark `#3a3a3c`). Buttons grid / row / feature / pile (CSS `capitalize`), 32px tall, `px-5`, radius 9px, 13px medium, `#1d1d1f` / `#f5f5f7`. Active: sliding white pill (dark `#636366`), shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, `layoutId` namespaced with `useId`, spring `stiffness 420, damping 32`.
-- Stage: full width, max 640px, 320px tall, overflow hidden. Inside, a fixed 640 × 320 coordinate box centred horizontally (left 50%, margin-left −320px), so narrower containers clip the sides rather than scale.
+export type LayoutSwitchLayout = "grid" | "row" | "feature" | "pile";
+interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  r: number;
+  z: number;
+}
 
-Boxes for photo i of n = 6 (stage `W = 640`, `H = 320`, gap `G = 10`), as `{ x, y, w, h, rotate, z }`:
+const PHOTOS = [
+  { id: "a", title: "Salt flats", art: "radial-gradient(80% 60% at 30% 25%, #fff3d6, rgba(255,243,214,0) 60%), linear-gradient(180deg,#9ec9ff,#e8f1ff 55%,#f5e9dd)" },
+  { id: "b", title: "Red canyon", art: "radial-gradient(70% 60% at 70% 20%, #ffd2a6, rgba(255,210,166,0) 60%), linear-gradient(160deg,#ff9f6b,#c4553d 60%,#5b2a2a)" },
+  { id: "c", title: "Pine ridge", art: "radial-gradient(60% 50% at 50% 15%, #e7fff1, rgba(231,255,241,0) 60%), linear-gradient(180deg,#bfe3d0,#3f8f6b 60%,#173d2e)" },
+  { id: "d", title: "Night pier", art: "radial-gradient(40% 30% at 70% 30%, #fff6c7, rgba(255,246,199,0) 60%), linear-gradient(180deg,#1b2140,#3a3f78 60%,#0c0f22)" },
+  { id: "e", title: "Lavender", art: "radial-gradient(70% 60% at 30% 30%, #fff, rgba(255,255,255,0) 55%), linear-gradient(170deg,#e4d4ff,#a98bf0 55%,#5e4bb3)" },
+  { id: "f", title: "Low tide", art: "radial-gradient(70% 50% at 60% 20%, #fffbe8, rgba(255,251,232,0) 60%), linear-gradient(180deg,#a7e3f2,#5fb6c9 55%,#d9c7a8)" },
+];
 
-- **grid**: 3 × 2. `w = (W − 2G)/3`, `h = (H − G)/2`; `x = (i mod 3)(w + G)`, `y = floor(i/3)(h + G)`.
-- **row**: one line. `w = (W − G(n − 1))/n`, `h = 170`; `x = i(w + G)`, `y = (H − h)/2`.
-- **feature**: photo 0 is `420 × 320` at (0, 0). The others stack on the right at `x = 430`, `w = W − 430`, `h = (H − G(n − 2))/(n − 1)`, `y = (i − 1)(h + G)`.
-- **pile**: all `240 × 170`, `x = W/2 − 120 + (i − n/2)·14`, `y = H/2 − 85 + |i − n/2|·4`, rotations `[−9, 6, −4, 10, −2, 3]°`, `z = i + 1` (later photos on top).
-- **open** photo: `0, 0, 640, 320`, rotate 0, z 50.
+const LAYOUTS: LayoutSwitchLayout[] = ["grid", "row", "feature", "pile"];
+const W = 640;
+const H = 320;
+const G = 10;
 
-Photo tiles are `<button>`s, absolutely positioned at top-left, overflow hidden, background = art. Radius 16px (24px when open). Shadow `0 18px 40px -16px rgba(0,0,0,.45)` in pile layout or when open, otherwise a hairline `0 0 0 1px rgba(0,0,0,.04)`. Title at bottom 12px, left 14px: 14px semibold white with `text-shadow: 0 1px 8px rgba(0,0,0,.35)`. Same visuals in light and dark (the art is self-coloured).
+function rects(layout: LayoutSwitchLayout, n: number): Rect[] {
+  return Array.from({ length: n }, (_, i) => {
+    switch (layout) {
+      case "grid": {
+        const w = (W - G * 2) / 3,
+          h = (H - G) / 2;
+        return { x: (i % 3) * (w + G), y: Math.floor(i / 3) * (h + G), w, h, r: 0, z: 1 };
+      }
+      case "row": {
+        const w = (W - G * (n - 1)) / n,
+          h = 170;
+        return { x: i * (w + G), y: (H - h) / 2, w, h, r: 0, z: 1 };
+      }
+      case "feature": {
+        if (i === 0) return { x: 0, y: 0, w: 420, h: H, r: 0, z: 1 };
+        const h = (H - G * (n - 2)) / (n - 1);
+        return { x: 430, y: (i - 1) * (h + G), w: W - 430, h, r: 0, z: 1 };
+      }
+      case "pile": {
+        const rot = [-9, 6, -4, 10, -2, 3][i % 6];
+        return { x: W / 2 - 120 + (i - n / 2) * 14, y: H / 2 - 85 + Math.abs(i - n / 2) * 4, w: 240, h: 170, r: rot, z: i + 1 };
+      }
+    }
+  });
+}
 
-## Motion
+export interface LayoutSwitchProps {
+  /** Changes layouts by itself until the user interacts. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  enableSound?: boolean;
+}
 
-- Every tile animates `x, y, width, height, rotate, borderRadius, opacity, zIndex` with `{ type: "spring", stiffness: 220, damping: 26, mass: 0.9 }`. `zIndex` changes instantly (`duration: 0`) so stacking is correct from the first frame.
-- Stagger: delay `i × 0.025s` when changing layout; no delay while a photo is opening or closing.
-- Opening: the chosen tile grows to the full stage; every other tile fades to opacity 0.25 (and back to 1 on close).
-- Hover: `whileHover` scale 1.02, disabled (scale 1) while any photo is open.
-- Titles: visible when the tile is open, or when nothing is open and the layout is not `row` (row tiles are too narrow). Enter from `opacity 0, y 8` to `opacity 1, y 0`; exit to opacity 0 (`AnimatePresence`, default transitions).
-- `initial={false}` on tiles so the first render does not animate.
+/**
+ * The same photos glide between four arrangements. Nothing fades or cuts: each
+ * one springs from its old box to its new one, and clicking a photo grows it to
+ * fill the frame.
+ */
+export function LayoutSwitch({ autoplay = false, enableSound = true }: LayoutSwitchProps) {
+  const play = useSound(enableSound);
+  const [layout, setLayout] = useState<LayoutSwitchLayout>("grid");
+  const [open, setOpen] = useState<string | null>(null);
+  const touched = useRef(false);
+  const seg = useId();
+  const boxes = rects(layout, PHOTOS.length);
 
-## Interaction and states
+  useEffect(() => {
+    if (!autoplay) return;
+    const order: LayoutSwitchLayout[] = ["feature", "pile", "row", "grid"];
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      play.auto("tap", 0.8);
+      setLayout(order[k++ % order.length]);
+    }, 2300);
+    return () => clearInterval(t);
+  }, [autoplay, play]);
 
-- State: `layout` (starts `grid`) and `open` (photo id or null).
-- Clicking a tile toggles it open or closed. Clicking another tile while one is open opens that one instead.
-- Choosing a layout closes any open photo and switches.
-- Escape (window keydown listener, only while a photo is open) closes it.
-- Any pointer-down inside the component marks it touched.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
 
-## Autoplay demo
+  return (
+    <div
+      className="flex w-full flex-col items-center gap-5"
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div role="group" aria-label="Layout" className="relative grid grid-cols-4 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+        {LAYOUTS.map((l) => (
+          <button
+            key={l}
+            type="button"
+            aria-pressed={layout === l}
+            onClick={() => {
+              touched.current = true;
+              if (l !== layout) play("tap", 0.8);
+              setOpen(null);
+              setLayout(l);
+            }}
+            className="relative z-10 h-8 rounded-[9px] px-5 text-[13px] font-medium capitalize text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#f5f5f7]"
+          >
+            {layout === l && <motion.span layoutId={`${seg}-ls-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]" />}
+            {l}
+          </button>
+        ))}
+      </div>
+      <div className="relative w-full max-w-[640px] overflow-hidden" style={{ height: H, aspectRatio: `${W} / ${H}` }}>
+        <div className="absolute left-1/2 top-0 origin-top" style={{ width: W, height: H, marginLeft: -W / 2 }}>
+          {PHOTOS.map((p, i) => {
+            const isOpen = open === p.id;
+            const b = isOpen ? { x: 0, y: 0, w: W, h: H, r: 0, z: 50 } : boxes[i];
+            return (
+              <motion.button
+                key={p.id}
+                type="button"
+                aria-label={isOpen ? `Close ${p.title}` : `Open ${p.title}`}
+                onClick={() => {
+                  touched.current = true;
+                  setOpen(isOpen ? null : p.id);
+                }}
+                className="absolute left-0 top-0 overflow-hidden text-left outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-black"
+                initial={false}
+                animate={{ x: b.x, y: b.y, width: b.w, height: b.h, rotate: b.r, zIndex: b.z, opacity: open && !isOpen ? 0.25 : 1, borderRadius: isOpen ? 24 : 16 }}
+                transition={{ type: "spring", stiffness: 220, damping: 26, mass: 0.9, delay: open ? 0 : i * 0.025, zIndex: { duration: 0 } }}
+                style={{ background: p.art, boxShadow: layout === "pile" || isOpen ? "0 18px 40px -16px rgba(0,0,0,.45)" : "0 0 0 1px rgba(0,0,0,.04)" }}
+                whileHover={{ scale: open ? 1 : 1.02 }}
+              >
+                <AnimatePresence>
+                  {(isOpen || (layout !== "row" && !open)) && (
+                    <motion.span
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute bottom-3 left-3.5 text-[14px] font-semibold text-white [text-shadow:0_1px_8px_rgba(0,0,0,.35)]"
+                    >
+                      {p.title}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Switch layouts, or click a photo to open it.</span>
+    </div>
+  );
+}
+```
 
-Every 2300ms, switch to the next of `feature → pile → row → grid`, repeating. The interval clears itself once the user has pressed anywhere in the component or clicked a layout button.
+--- lib/ui-sounds.ts ---
 
-## Accessibility
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
 
-- Segmented control: `role="group"`, `aria-label="Layout"`, buttons `type="button"` with `aria-pressed` and a 2px focus-visible outline `#0071e3`.
-- Tiles: `aria-label` "Open {title}" or "Close {title}", focus-visible 2px ring `#0071e3` (dark `#0a84ff`) with 2px offset (black offset in dark mode).
-- Escape closes an open photo.
+import * as React from "react";
 
-## Acceptance checklist
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
 
-- Grid shows a 3 × 2 mosaic with 10px gaps, each tile titled.
-- Switching to Row, Feature or Pile moves every photo continuously from its current box, never fading or jumping.
-- Feature gives the first photo a large 420px panel and stacks five slim tiles on the right.
-- Pile stacks tilted 240 × 170 cards in the centre with drop shadows, later cards on top.
-- Titles are hidden in Row.
-- Clicking a photo fills the stage with it at 24px radius while the others dim to 25%; clicking again or Escape restores it.
-- A slight left-to-right stagger is visible on layout changes.
-- With `autoplay`, layouts cycle every 2.3s until the first interaction.
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
 
-## Sound
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
 
-- Prop `enableSound?: boolean` (default `true`; `false` silences it).
-- Choosing a different layout with the segmented control plays `tap` from `@/lib/ui-sounds` at 80% volume (a short soft thump that falls in pitch, with a hint of click) as the photos start to glide.
-- The autoplay loop plays the same `tap` at 80% each time it changes layout, through the same play function's `auto` variant (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Opening or closing a photo, choosing the layout that is already active and hovering are silent.
-- The sounds follow the site-wide switch (`setSoundsEnabled` from `@/lib/ui-sounds`, on by default in installed apps). No audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```

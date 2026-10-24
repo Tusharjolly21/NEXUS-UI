@@ -1,66 +1,137 @@
 # Tilt Pass
 
-Build a credit-card-sized membership pass that tilts in 3D toward the pointer. A white glare follows the pointer, a holographic rainbow sheen shifts its angle as the card turns, and the drop shadow moves opposite to the tilt as if lit from above. Clicking flips the card over on a soft spring to a dark back with a scannable code. It should feel like a physical, slightly glossy card in your hand: responsive, a little springy, never twitchy.
+Add the "Tilt Pass" component from Nexus UI to my project.
 
-## Stack
+A membership pass that tilts towards the pointer with a moving glare and holographic sheen, casts a shadow that shifts with it, and flips over to a scannable back on click.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useMotionValue`, `useSpring`, `useTransform`, `useMotionTemplate`, `useAnimationFrame`).
-- File: `components/tilt-pass/tilt-pass.tsx`, named export `TiltPass`; export `TiltPassProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { TiltPass } from "@/components/tilt-pass";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `name` | `string` | `"Alex Rivera"` | Holder's name, front and back. |
-| `title` | `string` | `"Founders Pass"` | Pass name on the front. |
-| `number` | `string` | `"No. 0042"` | Membership number, front and back. |
-| `autoplay` | `boolean` | `false` | Floats gently on its own while the pointer is away. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/tilt-pass/index.ts ---
 
-- Wrapper: vertical flex, centred, 20px gap, `perspective: 1100px`. Under the card, a hint: "Move your pointer over it. Click to flip." 13px, `#86868b` / dark `#98989d`.
-- Card (tilting element): 350 × 220px, radius 22px, `transform-style: preserve-3d`, pointer cursor. Inside it, a flipper layer (also `preserve-3d`, fills the card) holds two faces with `backface-visibility: hidden`.
-- Front (stays light in both themes): radius 22px, `overflow: hidden`, background `linear-gradient(145deg, #ffffff 0%, #eeeef2 45%, #dcdce2 100%)`, dynamic drop shadow (see Motion). Layers bottom to top:
-  1. An inset edge: `inset 0 0 0 1px rgba(255,255,255,.9), inset 0 -1px 0 rgba(0,0,0,.06)`.
-  2. Holographic sheen with `mix-blend-mode: color-dodge`.
-  3. Content at `translateZ(40px)` so it floats above the surface: 24px padding, column with space-between. Top row: "MEMBER" 12px semibold uppercase, tracking 0.14em, `#86868b`, over the `title` at 22px semibold, tracking −0.02em, `#1d1d1f`; at the top right a 34px logo of two overlapping 11px-radius rings (centres x 13 and 21, y 17, 2px `#1d1d1f` stroke, the second at 35% opacity). Middle: a 48 × 36px chip, radius 6px, `linear-gradient(135deg, #d9c48f, #f4e6bd 45%, #c7ad6e)` with `inset 0 0 0 1px rgba(0,0,0,.12)`. Bottom row (aligned to the bottom): `name` 16px medium, tracking −0.01em, `#1d1d1f`; `number` 13px medium tabular, `#6e6e73`.
-  4. Glare, non-interactive, `mix-blend-mode: overlay`.
-- Back: pre-rotated `rotateY(180deg)`, radius 22px, bg `#1d1d1f` (dark `#2c2c2e`), white text, 24px padding, row with 20px gap. Shadow `0 30px 60px -24px rgba(0,0,0,.45)`; dark adds a hairline: `0 0 0 1px rgba(255,255,255,.08), 0 30px 60px -24px rgba(0,0,0,.7)`. Left: a 120px white square, radius 12px, 10px padding, an 8 × 8 grid with 3px gaps; cell `i` is filled `#1d1d1f` (radius 1px) when `(i·7 + floor(i/8)·3) mod 5 < 2` or `i mod 9 = 0`, otherwise empty. Right column (6px gap): "SCAN AT ENTRY" 12px semibold uppercase, tracking 0.14em, white/50%; `name` 18px semibold, tracking −0.01em; `number` 13px tabular, white/60%.
+```ts
+export { TiltPass } from "./tilt-pass";
+export type { TiltPassProps } from "./tilt-pass";
+```
 
-## Motion
+--- components/tilt-pass/tilt-pass.tsx ---
 
-- Pointer position is normalised to `px, py` in 0–1 (start 0.5, 0.5). Smooth both with `useSpring(…, { stiffness: 180, damping: 18 })` → `sx, sy`. Everything below derives from `sx, sy`.
-- Tilt: `rotateY` maps `sx` `[0,1] → [−16°, 16°]`; `rotateX` maps `sy` `[0,1] → [12°, −12°]` (the edge under the pointer dips away).
-- Glare: `radial-gradient(circle at {sx·100}% {sy·100}%, rgba(255,255,255,.75), rgba(255,255,255,0) 45%)`.
-- Sheen: `linear-gradient({angle}deg, rgba(255,0,128,0) 20%, rgba(120,170,255,.28) 40%, rgba(255,220,140,.28) 55%, rgba(170,255,210,.22) 68%, rgba(255,0,128,0) 85%)` where `angle` maps `sx` `[0,1] → [100, 160]`.
-- Shadow: `{x}px {y}px 60px -20px rgba(0,0,0,.35)` with `x` mapping `sx` `[0,1] → [24, −24]` and `y` mapping `sy` `[0,1] → [10, 40]`. Build these strings with `useMotionTemplate` so nothing re-renders per frame.
-- Flip: the flipper animates `rotateY` 0 ↔ 180° with spring stiffness 120, damping 16 (slow with a gentle overshoot). The tilt keeps working on top of the flip.
-- Press: `whileTap` scale 0.98 on the card.
-- Float (autoplay): every animation frame, while not hovered, set `px = 0.5 + sin(t / 1400) · 0.28` and `py = 0.5 + cos(t / 1900) · 0.22` (`t` in ms). The different periods trace a slow Lissajous drift.
+```tsx
+"use client";
+import { useRef, useState } from "react";
+import { motion, useAnimationFrame, useMotionTemplate, useMotionValue, useSpring, useTransform } from "framer-motion";
 
-## Interaction and states
+export interface TiltPassProps {
+  name?: string;
+  title?: string;
+  number?: string;
+  /** Floats gently on its own while the pointer is away. */
+  autoplay?: boolean;
+}
 
-- Pointer move over the card: `px = (clientX − rect.left) / rect.width`, `py = (clientY − rect.top) / rect.height`.
-- Pointer enter sets hover; pointer leave clears it and resets `px, py` to 0.5, so the springs ease the card back flat.
-- Click toggles the flip. Enter or Space also toggle it (`preventDefault` on Space).
+export function TiltPass({ name = "Alex Rivera", title = "Founders Pass", number = "No. 0042", autoplay = false }: TiltPassProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const px = useMotionValue(0.5);
+  const py = useMotionValue(0.5);
+  const sx = useSpring(px, { stiffness: 180, damping: 18 });
+  const sy = useSpring(py, { stiffness: 180, damping: 18 });
+  const rotateY = useTransform(sx, [0, 1], [-16, 16]);
+  const rotateX = useTransform(sy, [0, 1], [12, -12]);
+  const gx = useTransform(sx, (v) => v * 100);
+  const gy = useTransform(sy, (v) => v * 100);
+  const glare = useMotionTemplate`radial-gradient(circle at ${gx}% ${gy}%, rgba(255,255,255,.75), rgba(255,255,255,0) 45%)`;
+  const sheen = useMotionTemplate`linear-gradient(${useTransform(sx, [0, 1], [100, 160])}deg, rgba(255,0,128,.0) 20%, rgba(120,170,255,.28) 40%, rgba(255,220,140,.28) 55%, rgba(170,255,210,.22) 68%, rgba(255,0,128,0) 85%)`;
+  const shadowX = useTransform(sx, [0, 1], [24, -24]);
+  const shadowY = useTransform(sy, [0, 1], [10, 40]);
+  const shadow = useMotionTemplate`${shadowX}px ${shadowY}px 60px -20px rgba(0,0,0,.35)`;
+  const [hover, setHover] = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
-## Autoplay demo
+  useAnimationFrame((t) => {
+    if (!autoplay || hover) return;
+    px.set(0.5 + Math.sin(t / 1400) * 0.28);
+    py.set(0.5 + Math.cos(t / 1900) * 0.22);
+  });
 
-When `autoplay` is true the card floats with the drift above whenever the pointer isn't over it. Hovering pauses the float and gives control to the pointer; leaving resets to centre and the float resumes on the next frame. It does not stop permanently.
+  return (
+    <div className="flex flex-col items-center gap-5" style={{ perspective: 1100 }}>
+      <motion.div
+        ref={ref}
+        role="button"
+        tabIndex={0}
+        aria-label={flipped ? "Show front of pass" : "Show back of pass"}
+        onPointerMove={(e) => {
+          const r = ref.current!.getBoundingClientRect();
+          px.set((e.clientX - r.left) / r.width);
+          py.set((e.clientY - r.top) / r.height);
+        }}
+        onPointerEnter={() => setHover(true)}
+        onPointerLeave={() => { setHover(false); px.set(0.5); py.set(0.5); }}
+        onClick={() => setFlipped((f) => !f)}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setFlipped((f) => !f); } }}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        whileTap={{ scale: 0.98 }}
+        className="relative h-[220px] w-[350px] cursor-pointer rounded-[22px] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-4"
+      >
+        <motion.div
+          className="absolute inset-0"
+          style={{ transformStyle: "preserve-3d" }}
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ type: "spring", stiffness: 120, damping: 16 }}
+        >
+          {/* Front */}
+          <motion.div
+            className="absolute inset-0 overflow-hidden rounded-[22px] bg-[linear-gradient(145deg,#ffffff_0%,#eeeef2_45%,#dcdce2_100%)]"
+            style={{ backfaceVisibility: "hidden", boxShadow: shadow }}
+          >
+            <div className="absolute inset-0 rounded-[22px] shadow-[inset_0_0_0_1px_rgba(255,255,255,.9),inset_0_-1px_0_rgba(0,0,0,.06)]" />
+            <motion.div className="absolute inset-0 mix-blend-color-dodge" style={{ backgroundImage: sheen }} />
+            <div className="relative flex h-full flex-col justify-between p-6" style={{ transform: "translateZ(40px)" }}>
+              <div className="flex items-start justify-between">
+                <div className="flex flex-col">
+                  <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-[#86868b]">Member</span>
+                  <span className="text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">{title}</span>
+                </div>
+                <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+                  <circle cx="13" cy="17" r="11" fill="none" stroke="#1d1d1f" strokeWidth="2" />
+                  <circle cx="21" cy="17" r="11" fill="none" stroke="#1d1d1f" strokeWidth="2" opacity=".35" />
+                </svg>
+              </div>
+              <div className="h-9 w-12 rounded-md bg-[linear-gradient(135deg,#d9c48f,#f4e6bd_45%,#c7ad6e)] shadow-[inset_0_0_0_1px_rgba(0,0,0,.12)]" />
+              <div className="flex items-end justify-between">
+                <span className="text-[16px] font-medium tracking-[-0.01em] text-[#1d1d1f]">{name}</span>
+                <span className="text-[13px] font-medium tabular-nums text-[#6e6e73]">{number}</span>
+              </div>
+            </div>
+            <motion.div className="pointer-events-none absolute inset-0 mix-blend-overlay" style={{ background: glare }} />
+          </motion.div>
 
-## Accessibility
-
-- The card is `role="button"`, `tabIndex={0}`, with `aria-label` "Show back of pass" when showing the front and "Show front of pass" when flipped.
-- Focus: no outline; on `:focus-visible` a 2px `#0071e3` ring with 4px offset.
-- Decorative SVGs are `aria-hidden`.
-
-## Acceptance checklist
-
-- [ ] Moving the pointer to a corner tilts that corner away by up to 16° horizontally and 12° vertically, through a spring.
-- [ ] A soft white glare tracks the pointer; a rainbow sheen visibly shifts as you move left to right.
-- [ ] The shadow moves to the opposite side and gets longer toward the bottom.
-- [ ] The text and chip float above the surface (parallax at an angle).
-- [ ] Leaving the card eases it back to flat.
-- [ ] Click, Enter or Space flips to the dark back with a code grid; the front never shows through.
-- [ ] With `autoplay`, the card drifts on its own until hovered and resumes after.
-- [ ] In dark mode the back gets the lighter `#2c2c2e` and a hairline; the front stays light.
+          {/* Back */}
+          <div
+            className="absolute inset-0 flex items-center gap-5 overflow-hidden rounded-[22px] bg-[#1d1d1f] p-6 text-white shadow-[0_30px_60px_-24px_rgba(0,0,0,.45)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_30px_60px_-24px_rgba(0,0,0,.7)]"
+            style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+          >
+            <div className="grid h-[120px] w-[120px] flex-none grid-cols-8 gap-[3px] rounded-xl bg-white p-2.5">
+              {Array.from({ length: 64 }, (_, i) => (
+                <span key={i} className="rounded-[1px]" style={{ background: (i * 7 + (i >> 3) * 3) % 5 < 2 || i % 9 === 0 ? "#1d1d1f" : "transparent" }} />
+              ))}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/50">Scan at entry</span>
+              <span className="text-[18px] font-semibold tracking-[-0.01em]">{name}</span>
+              <span className="text-[13px] text-white/60 tabular-nums">{number}</span>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Move your pointer over it. Click to flip.</span>
+    </div>
+  );
+}
+```

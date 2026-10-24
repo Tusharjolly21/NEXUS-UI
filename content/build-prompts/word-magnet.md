@@ -1,71 +1,261 @@
-Build a headline whose words behave like fridge magnets. The pointer (or a finger) pushes nearby words away, mostly up and down. Each word tilts in the direction it was shoved, holds its new spot for a beat, then springs home on an under-damped spring so it wobbles before it settles. Whole words move as units and letters never split. Big, bold, playful type on a calm page.
+Add the "Word Magnet" component from Nexus UI to my project.
 
-## Stack
+A headline whose words behave like fridge magnets: the pointer pushes nearby words away, each one tilts in the direction it was shoved, holds for a beat, then springs home with a wobble. Whole words move, letters never split, and it works with touch as well as a mouse.
 
-- React client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useMotionValue`, `useReducedMotion`), React `useSyncExternalStore`, and a `cn` helper built on tailwind-merge.
-- File: `components/word-magnet/word-magnet.tsx`, named export `WordMagnet` (also default), exported type `WordMagnetProps`.
-- One rAF loop integrates every word and writes into per-word motion values (x, y, rotate). React never re-renders during the motion.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { WordMagnet } from "@/components/word-magnet";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `text` | `string` | `"Magnetic words react to your cursor and snap back into place"` | Split on whitespace into words. |
-| `radius` | `number` | `130` | Influence radius px (min 10). |
-| `force` | `number` | `0.45` | Push strength 0–1 (min 0). |
-| `damping` | `number` | `28` | Return-spring damping (min 1). Lower wobbles longer. |
-| `returnDelay` | `number` | `360` | Ms a pushed word holds before returning (min 0). |
-| `disableOnMobile` | `boolean` | `false` | Off when `(max-width: 767px), (pointer: coarse)` matches. |
-| `overflow` | `CSSProperties["overflow"]` | `"visible"` | Whether pushed words may spill out. |
-| `className` | `string` | – | Container classes. |
-| `wordClassName` | `string` | – | Classes for every word. |
-| `style` | `CSSProperties` | – | Container inline styles (merged after overflow). |
-| `autoplay` | `boolean` | `false` | A ghost pointer drifts through until a real pointer arrives. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Keep config values in a ref so the loop always reads the latest without restarting.
+--- components/word-magnet/index.ts ---
 
-## Layout and look
+```ts
+export { WordMagnet } from "./word-magnet";
+export type { WordMagnetProps } from "./word-magnet";
+```
 
-- Container: relative, flex-wrap, centred both ways, `max-width: 64rem`, column gap 0.24em, row gap 0.08em, centred text, 40px (52px from `sm`), semibold, tracking −0.035em, `#1d1d1f` (dark `#f5f5f7`), `touch-action: pan-y` (vertical page scroll still works on touch). Line height 1.12, added only if the caller's `className` has no `leading-*` class (tailwind-merge would otherwise drop it when a text size is passed).
-- An sr-only copy of the full text; every visible word is `aria-hidden`, `inline-block`, `white-space: nowrap`, `will-change: transform`.
-- Ghost pointer (autoplay only): a 20px circle centred on the ghost position, `#0071e3` at 15% fill with a 1.5px ring `rgba(0,113,227,.55)` (dark `#0a84ff` at 20% with `rgba(10,132,255,.7)`), pointer-events none, opacity 1 while the ghost drives and 0 after.
+--- components/word-magnet/word-magnet.tsx ---
 
-## Motion
+```tsx
+"use client";
 
-Per word keep a body `{ x, y, vx, vy, tx, ty, hold }`. Each frame (dt capped at 33ms, first frame 16ms):
+import * as React from "react";
+import { motion, useMotionValue, useReducedMotion, type MotionValue } from "framer-motion";
+import { cn } from "@/lib/utils";
 
-1. Pointer `p` = the real pointer (container-local px) or the ghost.
-2. For each word, rest centre = `offsetLeft + offsetWidth/2`, `offsetTop + offsetHeight/2` (layout offsets ignore transforms, so the rest position never drifts). `dx = cx − p.x`, `dy = cy − p.y`, `d = hypot(dx, dy)` (min 1).
-3. If `d < radius`: `k = (1 − d/radius)^1.6 × force × 80`; target `tx = (dx/d) × k × 0.55`, `ty = (dy/d) × k`; `hold = now + returnDelay`. The x push is scaled down because words share a line and a sideways shove would just pile them into their neighbours.
-4. If `now > hold`, target returns to (0, 0).
-5. Spring integration with stiffness 190 and `c = damping × 0.5`: `v += (190·(t − pos) − c·v)·dt`; `pos += v·dt` for both axes.
-6. Write `x`, `y` (rounded to 2 decimals) and `rotate = clamp(x × 0.16 + vx × 0.012, −14°, 14°)`, so a word tilts the way it is moving and swings back as it returns.
-7. Keep looping while a pointer is present, any word moves (`|x|+|y|+|vx|+|vy| > 0.05`) or is still holding; otherwise stop and reset the clock. Pointer events wake the loop.
+export type WordMagnetProps = {
+  /** Text split into magnetic words (letters never split). */
+  text?: string;
+  /** Pointer influence radius in px. */
+  radius?: number;
+  /** Push strength, 0 to 1. */
+  force?: number;
+  /** Damping of the return spring. Lower wobbles longer, higher settles flat. */
+  damping?: number;
+  /** Milliseconds a pushed word holds its place before it springs back. */
+  returnDelay?: number;
+  /** Turns the effect off on touch screens and narrow viewports. */
+  disableOnMobile?: boolean;
+  /** Whether pushed words may spill out of the text box. */
+  overflow?: React.CSSProperties["overflow"];
+  className?: string;
+  /** Classes for every word. */
+  wordClassName?: string;
+  style?: React.CSSProperties;
+  /** A ghost pointer drifts through the words until a real pointer arrives. */
+  autoplay?: boolean;
+};
 
-With the defaults a word right under the pointer is pushed about 36px vertically, holds about a third of a second after the pointer moves away, then overshoots and wobbles a couple of times before settling.
+type Slot = { el: HTMLSpanElement | null; x: MotionValue<number>; y: MotionValue<number>; r: MotionValue<number> };
+type Body = { x: number; y: number; vx: number; vy: number; tx: number; ty: number; hold: number };
 
-## Interaction and states
+function useNarrowOrTouch(enabled: boolean) {
+  return React.useSyncExternalStore(
+    (cb) => {
+      if (!enabled) return () => {};
+      const mq = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+      mq.addEventListener("change", cb);
+      return () => mq.removeEventListener("change", cb);
+    },
+    () => enabled && window.matchMedia("(max-width: 767px), (pointer: coarse)").matches,
+    () => false,
+  );
+}
 
-- `pointerenter`, `pointermove` and `pointerdown` on the container set the local pointer (from the container rect), mark it touched and wake the loop. `pointerleave` and `pointercancel` clear the pointer, so words return after their hold.
-- Works with mouse, pen and touch (dragging a finger across the words pushes them).
-- Off state (reduced motion, or `disableOnMobile` on a narrow/coarse device, tracked with `useSyncExternalStore` over a `matchMedia` listener, server snapshot false): render plain static spans, reset all motion values to 0 and run no loop.
-- Changing `text` re-registers words; each word registers its element and motion values with the parent on mount and unregisters on unmount. Cancel the frame on unmount.
+/** tailwind-merge drops a default `leading-*` whenever a later `text-*` size arrives, so the default goes last unless the caller set one. */
+const withLeading = (cls: string | undefined, fallback: string) => (/(^|\s)([\w-]+:)*leading-/.test(cls ?? "") ? undefined : fallback);
 
-## Autoplay demo
+function Word({ word, index, register, className }: { word: string; index: number; register: (i: number, s: Slot) => () => void; className?: string }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const r = useMotionValue(0);
+  const el = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => register(index, { el: el.current, x, y, r }), [register, index, x, y, r]);
+  return (
+    <motion.span ref={el} aria-hidden="true" className={cn("inline-block whitespace-nowrap will-change-transform", className)} style={{ x, y, rotate: r }}>
+      {word}
+    </motion.span>
+  );
+}
 
-While untouched, a ghost pointer travels a Lissajous path over the container: `x = width × (0.5 + 0.46·sin(0.7t))`, `y = height × (0.5 + 0.42·sin(1.3t + 0.6))`, t accumulating dt. The ghost dot is shown at that point and pushes words exactly like a real pointer. The first real pointer event hands control over and hides the dot.
+/**
+ * A headline whose words behave like fridge magnets. The pointer pushes nearby words away; each
+ * one tilts in the direction it is shoved, holds for a beat, then springs home on an under-damped
+ * spring so it wobbles before it settles. One rAF loop integrates every word and writes straight
+ * into motion values.
+ */
+export function WordMagnet({
+  text = "Magnetic words react to your cursor and snap back into place",
+  radius = 130,
+  force = 0.45,
+  damping = 28,
+  returnDelay = 360,
+  disableOnMobile = false,
+  overflow = "visible",
+  className,
+  wordClassName,
+  style,
+  autoplay = false,
+}: WordMagnetProps) {
+  const still = useReducedMotion() === true;
+  const blocked = useNarrowOrTouch(disableOnMobile);
+  const off = still || blocked;
+  const words = React.useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
+  const root = React.useRef<HTMLDivElement>(null);
+  const slots = React.useRef<Slot[]>([]);
+  const pointer = React.useRef<{ x: number; y: number } | null>(null);
+  const touched = React.useRef(false);
+  const wake = React.useRef<() => void>(() => {});
+  const gx = useMotionValue(-100);
+  const gy = useMotionValue(-100);
+  const go = useMotionValue(0);
+  const cfg = React.useRef({ radius, force, damping, returnDelay });
+  React.useEffect(() => {
+    cfg.current = { radius: Math.max(10, radius), force: Math.max(0, force), damping: Math.max(1, damping), returnDelay: Math.max(0, returnDelay) };
+  }, [radius, force, damping, returnDelay]);
 
-## Accessibility
+  const register = React.useCallback((i: number, s: Slot) => {
+    slots.current[i] = s;
+    return () => {
+      if (slots.current[i] === s) delete slots.current[i];
+    };
+  }, []);
 
-- Screen readers get the single sr-only sentence; the animated words are `aria-hidden`. Nothing traps focus or blocks vertical scrolling on touch. Reduced motion shows the text perfectly still.
+  React.useEffect(() => {
+    if (off) {
+      slots.current.forEach((s) => {
+        s?.x.set(0);
+        s?.y.set(0);
+        s?.r.set(0);
+      });
+      return;
+    }
+    const bodies: Body[] = [];
+    let raf = 0;
+    let last = 0;
+    let t = 0;
+    const tick = (now: number) => {
+      const dt = last ? Math.min(0.033, (now - last) / 1000) : 0.016;
+      last = now;
+      const { radius: R, force: F, damping: D, returnDelay: hold } = cfg.current;
+      const host = root.current;
+      let ghost: { x: number; y: number } | null = null;
+      if (autoplay && !touched.current && host) {
+        t += dt;
+        ghost = { x: host.clientWidth * (0.5 + Math.sin(t * 0.7) * 0.46), y: host.clientHeight * (0.5 + Math.sin(t * 1.3 + 0.6) * 0.42) };
+        gx.set(ghost.x);
+        gy.set(ghost.y);
+        go.set(1);
+      } else go.set(0);
+      const p = pointer.current ?? ghost;
+      let moving = !!p;
+      slots.current.forEach((s, i) => {
+        if (!s?.el) return;
+        const b = (bodies[i] ??= { x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, hold: 0 });
+        if (p) {
+          // Rest position comes from layout offsets, which transforms do not change.
+          const cx = s.el.offsetLeft + s.el.offsetWidth / 2;
+          const cy = s.el.offsetTop + s.el.offsetHeight / 2;
+          const dx = cx - p.x;
+          const dy = cy - p.y;
+          const d = Math.hypot(dx, dy) || 1;
+          if (d < R) {
+            // Mostly vertical: words share a line, so a sideways shove would just pile them into their neighbours.
+            const k = (1 - d / R) ** 1.6 * F * 80;
+            b.tx = (dx / d) * k * 0.55;
+            b.ty = (dy / d) * k;
+            b.hold = now + hold;
+          }
+        }
+        if (now > b.hold) {
+          b.tx = 0;
+          b.ty = 0;
+        }
+        const stiff = 190;
+        const c = D * 0.5;
+        b.vx += (stiff * (b.tx - b.x) - c * b.vx) * dt;
+        b.vy += (stiff * (b.ty - b.y) - c * b.vy) * dt;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        s.x.set(Math.round(b.x * 100) / 100);
+        s.y.set(Math.round(b.y * 100) / 100);
+        s.r.set(Math.max(-14, Math.min(14, b.x * 0.16 + b.vx * 0.012)));
+        if (Math.abs(b.x) + Math.abs(b.y) + Math.abs(b.vx) + Math.abs(b.vy) > 0.05 || now < b.hold) moving = true;
+      });
+      raf = moving ? requestAnimationFrame(tick) : 0;
+      if (!moving) last = 0;
+    };
+    wake.current = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    if (autoplay) wake.current();
+    return () => {
+      cancelAnimationFrame(raf);
+      wake.current = () => {};
+    };
+  }, [off, autoplay, words, gx, gy, go]);
 
-## Acceptance checklist
+  const locate = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (off) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    touched.current = true;
+    pointer.current = { x: e.clientX - r.left, y: e.clientY - r.top };
+    wake.current();
+  };
 
-- The headline wraps and centres like normal text.
-- Moving the pointer through it pushes nearby words away, mostly vertically, with words closest to the pointer moving furthest.
-- Pushed words tilt toward their motion and hold briefly after the pointer leaves.
-- Words then spring home with a visible wobble; `damping={60}` settles almost flat, `damping={12}` wobbles longer.
-- Letters never separate; layout never reflows during the effect.
-- Touch drags push words while vertical page scrolling still works.
-- Autoplay shows a small blue ghost ring weaving through the words until the user's pointer arrives.
-- Reduced motion or `disableOnMobile` on a phone renders static text.
+  return (
+    <div
+      ref={root}
+      onPointerEnter={locate}
+      onPointerMove={locate}
+      onPointerDown={locate}
+      onPointerLeave={() => {
+        pointer.current = null;
+      }}
+      onPointerCancel={() => {
+        pointer.current = null;
+      }}
+      className={cn(
+        "relative flex max-w-5xl touch-pan-y flex-wrap items-center justify-center gap-x-[0.24em] gap-y-[0.08em] text-center text-[40px] font-semibold tracking-[-0.035em] text-[#1d1d1f] sm:text-[52px] dark:text-[#f5f5f7]",
+        className,
+        withLeading(className, "leading-[1.12]"),
+      )}
+      style={{ overflow, ...style }}
+    >
+      <span className="sr-only">{text}</span>
+      {words.map((w, i) =>
+        off ? (
+          <span key={`${w}-${i}`} aria-hidden="true" className={cn("inline-block whitespace-nowrap", wordClassName)}>
+            {w}
+          </span>
+        ) : (
+          <Word key={`${w}-${i}`} word={w} index={i} register={register} className={wordClassName} />
+        ),
+      )}
+      {autoplay && !off ? (
+        <motion.span aria-hidden="true" className="pointer-events-none absolute left-0 top-0" style={{ x: gx, y: gy, opacity: go }}>
+          <span className="block size-5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0071e3]/15 shadow-[0_0_0_1.5px_rgba(0,113,227,.55)] dark:bg-[#0a84ff]/20 dark:shadow-[0_0_0_1.5px_rgba(10,132,255,.7)]" />
+        </motion.span>
+      ) : null}
+    </div>
+  );
+}
+
+export default WordMagnet;
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

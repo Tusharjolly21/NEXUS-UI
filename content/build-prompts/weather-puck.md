@@ -1,82 +1,210 @@
 # Weather Puck
 
-Build a "time of day" card. The top half is a small landscape: a gradient sky, a sun or moon, stars and two mountain ridges. The bottom half is a field of dots with a soft glowing puck on it. Drag the puck and nearby dots lift and warm in its light while the landscape relights continuously from before dawn to night, with the hour's name and a clock in the corner. Serene and tactile, like dragging a lamp across a table.
+Add the "Weather Puck" component from Nexus UI to my project.
 
-## Stack
+Drag a glowing puck across a field of dots to set the time of day. Nearby dots lift and warm, and the landscape above relights from dawn to night with the hour name and clock rolling along.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useTransform`, `useMotionValueEvent`, `AnimatePresence`, `drag`).
-- The dot field is a 2D canvas redrawn every animation frame; the landscape is DOM + inline SVG driven by motion values (no React re-render per frame).
-- File: `components/weather-puck/weather-puck.tsx`, named export `WeatherPuck`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { WeatherPuck } from "@/components/weather-puck";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `autoplay` | `boolean` | `false` | Sweeps the light across the day until the user drags it. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/weather-puck/index.ts ---
 
-Root: centred column, gap 12px; below the card a caption "Drag the light across the dots." at 13px `#86868b` (dark `#98989d`).
+```ts
+export { WeatherPuck } from "./weather-puck";
+export type { WeatherPuckProps } from "./weather-puck";
+```
 
-Card: 440px wide (max-width 100%), radius 24px, overflow hidden. Light: `#ffffff`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 24px 50px -28px rgba(0,0,0,.35)`. Dark: `#1c1c1e`, shadow `0 0 0 1px rgba(255,255,255,.08), 0 24px 50px -28px rgba(0,0,0,.6)`.
+--- components/weather-puck/weather-puck.tsx ---
 
-**Scene** (180px tall, overflow hidden, `aria-hidden`):
+```tsx
+"use client";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, animate, motion, useMotionValue, useMotionValueEvent, useTransform } from "framer-motion";
 
-- Background `linear-gradient(180deg, skyTop, skyBottom)`.
-- Stars: 24 white 2px dots, star i at `left (i × 37) mod 100 %`, `top (i × 23) mod 55 %`, opacity `0.5 + ((i × 7) mod 5)/10`, all inside one layer whose opacity is driven by time.
-- Sun: a 44px circle centred on `(sunX, sunY)`, filled with the glow colour, `box-shadow: 0 0 40px 12px {glow}`.
-- Ridges: an SVG 440 × 110 pinned to the bottom with two polygons. Far: `M0 60 L60 30 L120 55 L190 15 L260 50 L330 25 L440 55 L440 110 L0 110 Z`. Near (on top): `M0 85 L80 55 L150 80 L230 50 L300 78 L370 60 L440 80 L440 110 L0 110 Z`.
-- Readout at left 16px, top 12px: the hour name (15px semibold white, in a 20px-tall overflow-hidden slot) and the clock below (12px medium tabular-nums, white at 85%), both with `text-shadow: 0 1px 6px rgba(0,0,0,.25)`.
+const W = 440;
+const SCENE = 180;
+const FIELD = 130;
+const STOPS = [0, 0.2, 0.45, 0.7, 0.85, 1];
+const LABELS = ["Before dawn", "Sunrise", "Midday", "Golden hour", "Dusk", "Night"];
 
-**Field** (130px tall): a canvas covering it, plus the puck. The puck is a 44px circle centred on its position with `radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,.6) 45%, rgba(255,255,255,0) 70%)` and `box-shadow: 0 0 0 1px rgba(0,0,0,.06), 0 0 30px 6px {glow}`, `cursor-grab` (`grabbing` while active), focus-visible 2px ring `#0071e3` (dark `#0a84ff`).
+export interface WeatherPuckProps {
+  /** Sweeps the light across the day until the user drags it. */
+  autoplay?: boolean;
+}
 
-## Colour and position mapping
+/**
+ * Drag the light across a field of dots. Dots near it lift and warm up, and the
+ * landscape above relights in real time: sky, sun, ridges and the name of the
+ * hour all interpolate from the puck's position.
+ */
+export function WeatherPuck({ autoplay = false }: WeatherPuckProps) {
+  const px = useMotionValue(W * 0.45);
+  const py = useMotionValue(FIELD / 2);
+  const t = useTransform(px, [22, W - 22], [0, 1]);
+  const skyTop = useTransform(t, STOPS, ["#1b2a4a", "#f2a77c", "#6fa8e6", "#e98a52", "#4a3b6b", "#0b1530"]);
+  const skyBot = useTransform(t, STOPS, ["#3b4d7a", "#ffe3c4", "#d8ecff", "#ffd29a", "#c77d8f", "#1d2a4d"]);
+  const far = useTransform(t, STOPS, ["#3a4466", "#b9a5b5", "#8fb0cf", "#c48a7a", "#5b4a6e", "#141c33"]);
+  const near = useTransform(t, STOPS, ["#262c45", "#7d6f86", "#5f86a8", "#8a5a5e", "#3a2f4f", "#0b1022"]);
+  const glow = useTransform(t, STOPS, ["#c7d2ff", "#ffc48a", "#fff3c2", "#ffad5c", "#ff9fb3", "#e3e7ff"]);
+  const sunX = useTransform(t, [0, 1], [30, W - 30]);
+  const sunY = useTransform(t, (v) => 150 - Math.sin(Math.PI * Math.min(1, Math.max(0, (v - 0.08) / 0.8))) * 115);
+  const stars = useTransform(t, [0, 0.15, 0.8, 0.95], [1, 0, 0, 1]);
+  const sky = useTransform(() => `linear-gradient(180deg, ${skyTop.get()}, ${skyBot.get()})`);
+  const sunShadow = useTransform(glow, (c) => `0 0 40px 12px ${c}`);
+  const puckShadow = useTransform(glow, (c) => `0 0 0 1px rgba(0,0,0,.06), 0 0 30px 6px ${c}`);
+  const [label, setLabel] = useState(LABELS[2]);
+  const [clock, setClock] = useState("12:00");
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const touched = useRef(false);
 
-Puck position: motion values `px` (start `0.45 × 440 = 198`) and `py` (start 65). Time `t = map(px, [22, 418] → [0, 1])`, clamped.
+  useMotionValueEvent(t, "change", (v) => {
+    let best = 0;
+    STOPS.forEach((s, i) => {
+      if (Math.abs(s - v) < Math.abs(STOPS[best] - v)) best = i;
+    });
+    setLabel(LABELS[best]);
+    const minutes = Math.round(4.5 * 60 + v * 19 * 60);
+    setClock(`${String(Math.floor(minutes / 60) % 24).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`);
+  });
 
-Interpolate these with `useTransform(t, STOPS, colours)` where `STOPS = [0, 0.2, 0.45, 0.7, 0.85, 1]` and the hour names are Before dawn, Sunrise, Midday, Golden hour, Dusk, Night:
+  useEffect(() => {
+    const cv = canvas.current!;
+    const ctx = cv.getContext("2d")!;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = W * dpr;
+    cv.height = FIELD * dpr;
+    // Resting dots are drawn in the text colour, so follow the site theme.
+    const root = document.documentElement;
+    let dark = root.classList.contains("dark");
+    const mo = new MutationObserver(() => {
+      dark = root.classList.contains("dark");
+    });
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    let raf = 0;
+    const G = 14;
+    const frame = () => {
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, FIELD);
+      const x0 = px.get(),
+        y0 = py.get();
+      const col = glow.get();
+      for (let y = G / 2; y < FIELD; y += G) {
+        for (let x = G / 2; x < W; x += G) {
+          const d = Math.hypot(x - x0, y - y0);
+          const f = Math.exp(-(d * d) / (2 * 46 * 46));
+          const lift = f * 10;
+          ctx.beginPath();
+          ctx.arc(x, y - lift, 1.5 + f * 2.6, 0, Math.PI * 2);
+          if (f > 0.08) {
+            ctx.fillStyle = col;
+            ctx.globalAlpha = 0.35 + f * 0.65;
+          } else {
+            ctx.fillStyle = dark ? "#f5f5f7" : "#1d1d1f";
+            ctx.globalAlpha = dark ? 0.2 : 0.16;
+          }
+          ctx.fill();
+        }
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(raf);
+      mo.disconnect();
+    };
+  }, [px, py, glow]);
 
-| | 0 | 0.2 | 0.45 | 0.7 | 0.85 | 1 |
-| --- | --- | --- | --- | --- | --- | --- |
-| sky top | `#1b2a4a` | `#f2a77c` | `#6fa8e6` | `#e98a52` | `#4a3b6b` | `#0b1530` |
-| sky bottom | `#3b4d7a` | `#ffe3c4` | `#d8ecff` | `#ffd29a` | `#c77d8f` | `#1d2a4d` |
-| far ridge | `#3a4466` | `#b9a5b5` | `#8fb0cf` | `#c48a7a` | `#5b4a6e` | `#141c33` |
-| near ridge | `#262c45` | `#7d6f86` | `#5f86a8` | `#8a5a5e` | `#3a2f4f` | `#0b1022` |
-| glow | `#c7d2ff` | `#ffc48a` | `#fff3c2` | `#ffad5c` | `#ff9fb3` | `#e3e7ff` |
+  useEffect(() => {
+    if (!autoplay) return;
+    let ctl: { stop: () => void } | null = null;
+    const sweep = () => {
+      if (touched.current) return;
+      ctl = animate(px, [px.get(), W - 30, 30, W * 0.62], { duration: 7, ease: "easeInOut" });
+      animate(py, [py.get(), FIELD * 0.3, FIELD * 0.7, FIELD * 0.5], { duration: 7, ease: "easeInOut" });
+    };
+    const a = setTimeout(sweep, 600);
+    const b = setInterval(sweep, 8000);
+    return () => {
+      clearTimeout(a);
+      clearInterval(b);
+      ctl?.stop();
+    };
+  }, [autoplay, px, py]);
 
-- `sunX = map(t, [0, 1] → [30, 410])`.
-- `sunY = 150 − sin(π · clamp((t − 0.08)/0.8, 0, 1)) × 115`: the sun rises from behind the ridges, arcs to 35px from the top at midday and sets again; at the extremes it sits low as a pale moon.
-- Stars opacity: `t [0, 0.15, 0.8, 0.95] → [1, 0, 0, 1]`.
-- Hour name: the label of the stop nearest to t. Clock: `minutes = round(270 + t × 1140)` (04:30 to 23:30), shown as zero-padded `HH:MM`. Update both from a `useMotionValueEvent(t, "change")`; before the first change they read "Midday" and "12:00".
-
-## Motion
-
-- **Dot field** (each frame): dots on a 14px grid starting at 7px. For a dot at distance d from the puck, `f = exp(−d² / (2 × 46²))` (Gaussian falloff, σ = 46px). Draw it raised by `10f` px with radius `1.5 + 2.6f`. If `f > 0.08`, fill with the current glow colour at alpha `0.35 + 0.65f`; otherwise use ink `#1d1d1f` at alpha 0.16 (dark: `#f5f5f7` at 0.2). Canvas backing store at DPR capped to 2. Detect dark mode with a `MutationObserver` watching the `dark` class on `document.documentElement`.
-- **Hour name**: `AnimatePresence mode="popLayout" initial={false}` keyed by the label; enter from `y 18, opacity 0, blur(4px)`, exit to `y −18, opacity 0, blur(4px)`, default transition.
-- **Puck drag**: framer `drag` bound to `px`/`py`, `dragMomentum={false}`, `dragElastic 0.05`, constraints `left 22, right 418, top 22, bottom 108`, `whileDrag` scale 1.15. The puck stays exactly under the pointer and stops dead on release.
-- Everything else (sky, ridges, sun, stars, glows) follows the motion values instantly, so the scene is continuous with no steps.
-
-## Interaction and states
-
-- Pointer-down on the puck marks the component touched.
-- Keyboard on the focused puck: ArrowRight / ArrowLeft animate `px` by ±30px (framer's default transition), clamped to 22–418, and mark touched. Vertical position has no keys.
-
-## Autoplay demo
-
-600ms after mount and every 8000ms after, unless touched: animate `px` through `[current, 410, 30, 0.62 × 440]` and `py` through `[current, 39, 91, 65]`, each over 7s `easeInOut`. One sweep runs dawn to night, back to dawn, and settles in the afternoon. Stop any running sweep on unmount.
-
-## Accessibility
-
-- Puck: `role="slider"`, `tabIndex={0}`, `aria-label="Time of day"`, `aria-valuetext="{hour name}, {clock}"`.
-- Scene and canvas are `aria-hidden`.
-
-## Acceptance checklist
-
-- At load the scene shows a blue midday sky with the sun high and the puck slightly left of centre.
-- Dragging left turns the sky deep navy with stars; dragging right goes through orange golden hour, purple dusk, then night with stars.
-- The sun follows a smooth arc and sinks behind the ridges near both ends.
-- Dots within roughly 100px of the puck rise, grow and tint with the glow; farther dots stay grey.
-- The hour name rolls with a blur when crossing between stops, and the clock updates continuously.
-- The puck cannot leave the field and does not coast after release.
-- Arrow keys move the light in 30px steps.
-- With `autoplay`, a 7s sweep repeats every 8s until the puck is touched.
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div
+        className="overflow-hidden rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_24px_50px_-28px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_24px_50px_-28px_rgba(0,0,0,.6)]"
+        style={{ width: W, maxWidth: "100%" }}
+      >
+        <motion.div className="relative overflow-hidden" style={{ height: SCENE, background: sky }} aria-hidden="true">
+          <motion.div className="absolute inset-0" style={{ opacity: stars }}>
+            {Array.from({ length: 24 }, (_, i) => (
+              <span key={i} className="absolute h-[2px] w-[2px] rounded-full bg-white" style={{ left: `${(i * 37) % 100}%`, top: `${(i * 23) % 55}%`, opacity: 0.5 + ((i * 7) % 5) / 10 }} />
+            ))}
+          </motion.div>
+          <motion.span className="absolute h-11 w-11 rounded-full" style={{ x: sunX, y: sunY, left: -22, top: -22, background: glow, boxShadow: sunShadow }} />
+          <motion.svg className="absolute bottom-0 left-0" width={W} height="110" viewBox={`0 0 ${W} 110`}>
+            <motion.path d={`M0 60 L60 30 L120 55 L190 15 L260 50 L330 25 L${W} 55 L${W} 110 L0 110 Z`} style={{ fill: far }} />
+            <motion.path d={`M0 85 L80 55 L150 80 L230 50 L300 78 L370 60 L${W} 80 L${W} 110 L0 110 Z`} style={{ fill: near }} />
+          </motion.svg>
+          <div className="absolute left-4 top-3 flex flex-col">
+            <span className="relative h-5 overflow-hidden text-[15px] font-semibold text-white [text-shadow:0_1px_6px_rgba(0,0,0,.25)]">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span key={label} className="block" initial={{ y: 18, opacity: 0, filter: "blur(4px)" }} animate={{ y: 0, opacity: 1, filter: "blur(0px)" }} exit={{ y: -18, opacity: 0, filter: "blur(4px)" }}>
+                  {label}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+            <span className="text-[12px] font-medium tabular-nums text-white/85 [text-shadow:0_1px_6px_rgba(0,0,0,.25)]">{clock}</span>
+          </div>
+        </motion.div>
+        <div className="relative" style={{ height: FIELD }}>
+          <canvas ref={canvas} className="absolute inset-0" style={{ width: W, height: FIELD }} aria-hidden="true" />
+          <motion.div
+            drag
+            dragMomentum={false}
+            dragConstraints={{ left: 22, right: W - 22, top: 22, bottom: FIELD - 22 }}
+            dragElastic={0.05}
+            onPointerDown={() => {
+              touched.current = true;
+            }}
+            whileDrag={{ scale: 1.15 }}
+            role="slider"
+            tabIndex={0}
+            aria-label="Time of day"
+            aria-valuetext={`${label}, ${clock}`}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight") {
+                touched.current = true;
+                animate(px, Math.min(W - 22, px.get() + 30));
+              }
+              if (e.key === "ArrowLeft") {
+                touched.current = true;
+                animate(px, Math.max(22, px.get() - 30));
+              }
+            }}
+            className="absolute left-0 top-0 h-11 w-11 cursor-grab rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] active:cursor-grabbing dark:focus-visible:ring-[#0a84ff]"
+            style={{
+              x: px,
+              y: py,
+              marginLeft: -22,
+              marginTop: -22,
+              background: "radial-gradient(circle at 35% 30%, #fff, rgba(255,255,255,.6) 45%, rgba(255,255,255,0) 70%)",
+              boxShadow: puckShadow,
+            }}
+          />
+        </div>
+      </div>
+      <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">Drag the light across the dots.</span>
+    </div>
+  );
+}
+```

@@ -1,77 +1,173 @@
 # Standing Calendar
 
-Build a GitHub-style contribution grid that can stand up into a 3D field of columns. Flat, it is an ordinary grid of rounded squares. Switch to Standing and the grid tips back into an isometric view while every day grows into a box as tall as its count, rising in a wave from the first week to the last. Hovering a day highlights its top in orange and rolls its details into the header. The feel is a tidy data toy: precise, springy, slightly playful.
+Add the "Standing Calendar" component from Nexus UI to my project.
 
-## Stack
+A contribution grid that stands up into a 3D field of columns. Each day becomes a box as tall as its count, rising in a wave across the weeks; hover a day to read its value.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`, `layoutId`).
-- Real CSS 3D: `perspective`, `transform-style: preserve-3d`, per-face rotations and translateZ. No canvas or 3D library. Every cell is three DOM faces.
-- File: `components/standing-calendar/standing-calendar.tsx`, named export `StandingCalendar`. Also export `STANDING_CALENDAR_LEVELS`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { StandingCalendar, STANDING_CALENDAR_LEVELS } from "@/components/standing-calendar";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `weeks` | `number` | `30` | Weeks of sample data to generate. Ignored when `data` is passed. |
-| `data` | `number[][]` | sample data | One array of 7 counts (Mon to Sun) per week. |
-| `levels` | `string[]` | `STANDING_CALENDAR_LEVELS` | Five colours from no activity to busiest. |
-| `autoplay` | `boolean` | `false` | Stands up and lies down on a loop until the user interacts. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-`STANDING_CALENDAR_LEVELS = ["var(--sc-empty)", "#c6e2ff", "#7db8ff", "#2f8cff", "#0060df"]`.
+--- components/standing-calendar/index.ts ---
 
-Level of a count v: 0 if `v = 0`, 1 if `v < 3`, 2 if `v < 6`, 3 if `v < 9`, else 4.
+```ts
+export { StandingCalendar, STANDING_CALENDAR_LEVELS } from "./standing-calendar";
+export type { StandingCalendarProps } from "./standing-calendar";
+```
 
-Sample data must be deterministic (same on server and client): a linear congruential generator `seed = (seed × 9301 + 49297) mod 233280`, starting at seed 7, returning `seed / 233280`. For week w and day d: `weekend = d ≥ 5 ? 0.4 : 1`, `season = 0.55 + 0.45·sin((w / weeks)·1.6π + 0.6)`, `count = max(0, round(rnd() × 12 × weekend × season − 1.5))`. Memoise it on `weeks`.
+--- components/standing-calendar/standing-calendar.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-Root: full-width centred column, gap 20px. Theme variables (light / dark via `dark:` on a `.dark` ancestor): `--sc-empty` `#ebedf0` / `#2c2c2e`, `--sc-empty-side` `#e2e4e8` / `#242426`, `--sc-empty-front` `#d9dce1` / `#1c1c1e`.
+export interface StandingCalendarProps {
+  /** How many weeks of sample data to draw. Ignored when `data` is passed. */
+  weeks?: number;
+  /** Your own counts: one array of 7 numbers (Mon to Sun) per week. Sample data is generated if left out. */
+  data?: number[][];
+  /** Five colours from "no activity" to "busiest". The first one is themed for light and dark by default. */
+  levels?: string[];
+  /** Stands up and lies down on a loop until the user interacts. */
+  autoplay?: boolean;
+}
 
-- **Header**: max-width 640px, `px-1`, baseline-aligned, space-between. Left: "{total} contributions" (total of all counts, `toLocaleString("en-US")`), 15px semibold, `#1d1d1f` / `#f5f5f7`. Right: a 20px-tall, min 160px wide, right-aligned, overflow-hidden slot at 13px tabular-nums, `#6e6e73` / `#a1a1a6`, showing "Week {w+1}, {Mon…Sun}: {count}" for the hovered cell or "Hover a day".
-- **Stage**: full width, 250px tall, content centred, `perspective: 1600px`. Inside, the grid group (`preserve-3d`) sized `weeks × 18` by `7 × 18` px.
-- **Cells**: 14 × 14px with a 4px gap (pitch 18px). Week w is the column (`left = w × 18`), day d the row (`top = d × 18`). Each cell (`preserve-3d`) holds three faces:
-  - **Top**: fills the cell, background = level colour (`#ff9f0a` while hovered), radius 3px flat / 1px standing, translated by `z = height`.
-  - **Front**: pinned to the bottom edge, full width, `transform-origin: bottom`, `rotateX(−90deg)`, its height = column height. Colour `color-mix(in oklab, {top} 72%, #001a40)`, or `--sc-empty-front` for level 0.
-  - **Side**: pinned to the right edge, full height, `transform-origin: right`, `rotateY(90deg)`, its width = column height. Colour `color-mix(in oklab, {top} 84%, #001a40)`, or `--sc-empty-side` for level 0.
-  Column height is `3 + count × 6` px when standing and 0 when flat, so even empty days become a 3px slab.
-- **Footer row** (gap 16px):
-  - Segmented control "Flat" / "Standing": `grid-cols-2`, radius 12px, padding 3px, `#e8e8ed` (dark `#3a3a3c`). Buttons 32px tall, `px-5`, radius 9px, 13px medium, `#1d1d1f` / `#f5f5f7`. The active one has a sliding white pill (dark `#636366`), shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, shared via a `layoutId` namespaced with `useId`.
-  - Legend: "Less", five 10px squares (radius 2px) in the `levels` colours, "More"; 11px `#86868b` / `#98989d`, gap 4px.
+const CELL = 14;
+const GAP = 4;
+const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-## Motion
+export const STANDING_CALENDAR_LEVELS = ["var(--sc-empty)", "#c6e2ff", "#7db8ff", "#2f8cff", "#0060df"];
 
-- **Grid tilt**: standing `rotateX 58°, rotateZ −32°, scale 0.92, y 20px`; flat all neutral. Spring `stiffness 90, damping 18`.
-- **Columns**: front height, side width, top `z` and top radius all animate on one spring, `stiffness 160, damping 16`, with a per-cell delay:
-  - standing up: `0.25 + w × 0.025 + d × 0.01` s (after the tilt begins, a wave across the weeks with a small ripple down each week);
-  - lying down: `(weeks − w) × 0.01` s (the last week collapses first).
-  The springs overshoot slightly so columns bounce at their peak.
-- **Header readout**: `AnimatePresence mode="popLayout" initial={false}`, keyed by the hovered cell. Enter from `y 14, opacity 0` to `y 0, opacity 1`; exit to `y −14, opacity 0` (default transition). Values roll upward as you sweep across cells.
-- **Segment pill**: `layoutId` spring `stiffness 420, damping 32`.
-- Use `initial={false}` on all animated faces so nothing animates on mount.
+/** Deterministic sample data with a weekly rhythm and a busy stretch. */
+function sampleData(weeks: number) {
+  let seed = 7;
+  const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  return Array.from({ length: weeks }, (_, w) =>
+    Array.from({ length: 7 }, (_, d) => {
+      const weekend = d >= 5 ? 0.4 : 1;
+      const season = 0.55 + 0.45 * Math.sin((w / weeks) * Math.PI * 1.6 + 0.6);
+      return Math.max(0, Math.round(rnd() * 12 * weekend * season - 1.5));
+    }),
+  );
+}
 
-## Interaction and states
+const level = (v: number) => (v === 0 ? 0 : v < 3 ? 1 : v < 6 ? 2 : v < 9 ? 3 : 4);
 
-- `standing` boolean and `hover` (`{ w, d, v }` or null).
-- Pointer enter on a cell sets the hover; leaving the grid group clears it. Hover works in both flat and standing views.
-- Clicking Flat or Standing sets the state. Any pointer-down anywhere in the component marks it touched.
-- Passing `data` overrides `weeks`; the grid width follows `data.length`.
+/**
+ * A year-of-activity grid that stands up into a 3D field of columns. Each cell
+ * becomes a box (top, front and side faces) whose height is its count, and the
+ * columns rise in a wave from the first week to the last.
+ */
+export function StandingCalendar({ weeks: weeksProp = 30, data: dataProp, levels = STANDING_CALENDAR_LEVELS, autoplay = false }: StandingCalendarProps) {
+  const [standing, setStanding] = useState(false);
+  const [hover, setHover] = useState<{ w: number; d: number; v: number } | null>(null);
+  const touched = useRef(false);
+  const group = useId().replace(/:/g, "");
 
-## Autoplay demo
+  const sample = useMemo(() => sampleData(weeksProp), [weeksProp]);
+  const data = dataProp ?? sample;
+  const weeks = data.length;
 
-When `autoplay` is true, stand up 800ms after mount, then toggle every 3800ms. Both are skipped once the user has pressed a pointer anywhere in the component.
+  useEffect(() => {
+    if (!autoplay) return;
+    const a = setTimeout(() => !touched.current && setStanding(true), 800);
+    const t = setInterval(() => !touched.current && setStanding((s) => !s), 3800);
+    return () => { clearTimeout(a); clearInterval(t); };
+  }, [autoplay]);
 
-## Accessibility
+  const total = data.flat().reduce((a, b) => a + b, 0);
+  const W = weeks * (CELL + GAP);
+  const H = 7 * (CELL + GAP);
 
-- Toggle wrapper: `role="group"`, `aria-label="View"`; buttons are `type="button"` with `aria-pressed` and a 2px focus-visible outline `#0071e3` (dark `#0a84ff`).
-- The legend is `aria-hidden`. The hovered-day readout is plain text in the header.
-
-## Acceptance checklist
-
-- Flat view: a 30 × 7 grid of 14px rounded squares in five shades of blue, with empty days in light grey (dark grey in dark mode).
-- The header total equals the sum of all counts, comma-formatted.
-- Standing tilts the grid back and to the side while columns rise left to right, each `3 + 6 × count` px tall.
-- Every column shows a lighter side face and a darker front face, mixed toward deep navy.
-- Flat collapses the columns right to left and returns the grid to face-on.
-- Hovering any day turns its top `#ff9f0a` and rolls "Week n, Day: count" into the header.
-- The sample data is identical on every render and between server and client.
-- With `autoplay`, it alternates every 3.8s until the first pointer-down.
+  return (
+    <div
+      className="flex w-full flex-col items-center gap-5 [--sc-empty-front:#d9dce1] [--sc-empty-side:#e2e4e8] [--sc-empty:#ebedf0] dark:[--sc-empty-front:#1c1c1e] dark:[--sc-empty-side:#242426] dark:[--sc-empty:#2c2c2e]"
+      onPointerDown={() => (touched.current = true)}
+    >
+      <div className="flex w-full max-w-[640px] items-baseline justify-between px-1">
+        <span className="text-[15px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">{total.toLocaleString("en-US")} contributions</span>
+        <span className="relative h-5 min-w-[160px] overflow-hidden text-right text-[13px] tabular-nums text-[#6e6e73] dark:text-[#a1a1a6]">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={hover ? `${hover.w}-${hover.d}` : "none"} className="block" initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }}>
+              {hover ? `Week ${hover.w + 1}, ${DAYS[hover.d]}: ${hover.v}` : "Hover a day"}
+            </motion.span>
+          </AnimatePresence>
+        </span>
+      </div>
+      <div className="flex h-[250px] w-full items-center justify-center" style={{ perspective: 1600 }}>
+        <motion.div
+          className="relative"
+          style={{ width: W, height: H, transformStyle: "preserve-3d" }}
+          initial={false}
+          animate={standing ? { rotateX: 58, rotateZ: -32, scale: 0.92, y: 20 } : { rotateX: 0, rotateZ: 0, scale: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 90, damping: 18 }}
+          onPointerLeave={() => setHover(null)}
+        >
+          {data.map((week, w) =>
+            week.map((v, d) => {
+              const h = standing ? 3 + v * 6 : 0;
+              const lv = level(v);
+              const top = levels[lv];
+              const delay = standing ? 0.25 + w * 0.025 + d * 0.01 : (weeks - w) * 0.01;
+              const spring = { type: "spring", stiffness: 160, damping: 16, delay } as const;
+              const isHover = hover?.w === w && hover?.d === d;
+              return (
+                <div
+                  key={`${w}-${d}`}
+                  className="absolute"
+                  style={{ left: w * (CELL + GAP), top: d * (CELL + GAP), width: CELL, height: CELL, transformStyle: "preserve-3d" }}
+                  onPointerEnter={() => setHover({ w, d, v })}
+                >
+                  {/* front face (stands up from the bottom edge) */}
+                  <motion.span
+                    className="absolute bottom-0 left-0 w-full origin-bottom"
+                    style={{ rotateX: -90, background: lv ? `color-mix(in oklab, ${top} 72%, #001a40)` : "var(--sc-empty-front)" }}
+                    initial={false}
+                    animate={{ height: h }}
+                    transition={spring}
+                  />
+                  {/* side face (stands up from the right edge) */}
+                  <motion.span
+                    className="absolute right-0 top-0 h-full origin-right"
+                    style={{ rotateY: 90, background: lv ? `color-mix(in oklab, ${top} 84%, #001a40)` : "var(--sc-empty-side)" }}
+                    initial={false}
+                    animate={{ width: h }}
+                    transition={spring}
+                  />
+                  {/* top face */}
+                  <motion.span
+                    className="absolute inset-0 rounded-[3px]"
+                    style={{ background: isHover ? "#ff9f0a" : top }}
+                    initial={false}
+                    animate={{ z: h, borderRadius: standing ? 1 : 3 }}
+                    transition={spring}
+                  />
+                </div>
+              );
+            }),
+          )}
+        </motion.div>
+      </div>
+      <div className="flex items-center gap-4">
+        <div role="group" aria-label="View" className="relative grid grid-cols-2 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#3a3a3c]">
+          {["Flat", "Standing"].map((l, i) => (
+            <button key={l} type="button" aria-pressed={standing === (i === 1)} onClick={() => { touched.current = true; setStanding(i === 1); }} className="relative z-10 h-8 rounded-[9px] px-5 text-[13px] font-medium text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#f5f5f7] dark:focus-visible:outline-[#0a84ff]">
+              {standing === (i === 1) && <motion.span layoutId={`${group}-cal-seg`} transition={{ type: "spring", stiffness: 420, damping: 32 }} className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#636366]" />}
+              {l}
+            </button>
+          ))}
+        </div>
+        <span className="flex items-center gap-1 text-[11px] text-[#86868b] dark:text-[#98989d]" aria-hidden="true">
+          Less {levels.map((c, i) => <span key={i} className="h-2.5 w-2.5 rounded-[2px]" style={{ background: c }} />)} More
+        </span>
+      </div>
+    </div>
+  );
+}
+```

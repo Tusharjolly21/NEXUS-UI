@@ -1,62 +1,233 @@
 # Bend Text
 
-Build a line of type you can pluck like a guitar string. The text runs along a thin horizontal string and drifts slowly along it. Grab anywhere and pull: the string bends to pass through your hand and the words flow round the curve. Let go and it twangs back, overshooting a few times before it lies flat. The feel is playful but clean, on a white Apple-like card.
+Add the "Bend Text" component from Nexus UI to my project.
 
-## Stack
+A line of type running along a string that you can grab and pull, with the words flowing round the bend. Let go and an underdamped spring twangs it back, overshooting a few times before it lies flat.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion.path`, `motion.textPath`, `motion.circle`, `useMotionValue`, `useSpring`, `useTransform`, `animate`, `useReducedMotion`).
-- File: `components/bend-text/bend-text.tsx`. Named export `BendText`, exported `BendTextProps`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { BendText } from "@/components/bend-text";`. The props are typed and documented in the code.
 
-- `text?: string`, default `"PLUCK THE LINE · MAKE IT SING · "` (one repeat; rendered four times).
-- `accent?: string`, default `"#0071e3"`: grab point and focus ring.
-- `hint?: string`, default `"Grab the line, pull, and let go."`; empty string hides it.
-- `onPluck?: (pull: number) => void`: called on release with the distance of the grab point from rest, in stage units.
-- `autoplay?: boolean`, default `false`.
-- `className?: string` on the root.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/bend-text/bend-text.tsx ---
 
-- Root: column, centred, 12px gap, `max-width: 100%`.
-- Stage: a 340×260 box (`width: 340px; max-width: 100%; aspect-ratio: 340/260`), radius 24px, white (dark `#1c1c1e`), shadow `0 0 0 1px rgba(0,0,0,.05)` (dark `0 0 0 1px rgba(255,255,255,.08)`), `overflow: hidden`, `touch-action: none`, no text selection, `cursor: grab` (`grabbing` while active).
-- One SVG fills it: `viewBox="0 0 340 260"`, width/height 100%, `aria-hidden`. Constants `W = 340`, `H = 260`, rest height `Y = 130`.
-- String: a path `M 10 Y Q (2·x − W/2) (2·y − Y) (W − 10) Y`, where (x, y) is the sprung grab point. Putting the control point there makes the curve pass through (x, y). Stroke 1px `#e5e5ea` (dark `#3a3a3c`), no fill. The path gets an id unique per instance (`bend-${useId()}`).
-- Text: `<text>` 22px, weight 700, letter-spacing 1, `dy="-8"` (sits just above the string), fill `#1d1d1f` (dark `#f5f5f7`), `white-space: pre`, containing a `<textPath href="#bend-…">` with `text.repeat(4)`.
-- Grab point: circle at the sprung (x, y), r 5, fill `accent`, opacity .85.
-- Anchors: circles at (10, Y) and (W − 10, Y), r 3, fill `#c7c7cc` (dark `#48484a`).
-- Hint: 13px, `#86868b` (dark `#98989d`).
+```tsx
+"use client";
+import { useEffect, useId, useRef, type KeyboardEvent, type PointerEvent as RPointerEvent } from "react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type AnimationPlaybackControls,
+  type MotionValue,
+} from "framer-motion";
 
-## Motion
+export interface BendTextProps {
+  /** One repeat of the text that runs along the string. It is repeated four times so the line is always full. */
+  text?: string;
+  /** Colour of the grab point on the string and the focus ring. */
+  accent?: string;
+  /** Small caption under the stage. Pass an empty string to hide it. */
+  hint?: string;
+  /** Called when the string is let go, with how far it was pulled from rest (in stage units, 0 to about 120). */
+  onPluck?: (pull: number) => void;
+  /** Plucks the string every 2.6s until someone touches it. */
+  autoplay?: boolean;
+  /** Extra classes for the root element. */
+  className?: string;
+}
 
-- Target motion values `tx`, `ty` start at (W/2, Y). The drawn point is `cx = useSpring(tx)`, `cy = useSpring(ty)` with stiffness 180, damping 4, mass 0.6: very underdamped, so it overshoots several times.
-- Drift: the `textPath`'s `startOffset` (in SVG units) decreases by 11.5 units per second (equal to 0.06% of the path per frame at 60fps), using rAF with frame time capped at 50ms. It wraps by adding the measured length of ONE repeat when it goes below minus that length, so the loop is seamless. Measure it with `getComputedTextLength()` of a hidden `<text>` with the same font settings containing one repeat (fallback 450). No drift when the user prefers reduced motion.
-- Pluck (used by autoplay and the keyboard): stop any running pluck, `jump` `tx`/`ty` to the spring's current values, animate `tx` and `ty` to the pull point over 0.5s `easeOut`, then on completion set them back to (W/2, Y) so the springs twang. Stop running animations on unmount.
+/** Stage size in SVG units and the resting height of the string. */
+const W = 340;
+const H = 260;
+const Y = 130;
+/** How far the text drifts along the string, in SVG units per second (0.06% of the path per frame at 60fps). */
+const DRIFT = 11.5;
+const SPRING = { stiffness: 180, damping: 4, mass: 0.6 };
 
-## Interaction and states
+/**
+ * A line of type you can pluck. Text runs along a string; grab anywhere and
+ * pull, and the string bends under your hand with the words flowing round
+ * the curve. Let go and it twangs back, overshooting a few times before it
+ * lies flat again.
+ */
+export function BendText({
+  text = "PLUCK THE LINE · MAKE IT SING · ",
+  accent = "#0071e3",
+  hint = "Grab the line, pull, and let go.",
+  onPluck,
+  autoplay = false,
+  className = "",
+}: BendTextProps) {
+  const id = useId().replace(/:/g, "");
+  const reduce = useReducedMotion();
+  const tx = useMotionValue(W / 2);
+  const ty = useMotionValue(Y);
+  const cx = useSpring(tx, SPRING);
+  const cy = useSpring(ty, SPRING);
+  // The quadratic's control point is placed so the curve passes through (cx, cy).
+  const d = useTransform([cx, cy] as MotionValue<number>[], ([x, y]: number[]) => `M 10 ${Y} Q ${2 * x - W / 2} ${2 * y - Y} ${W - 10} ${Y}`);
+  const offset = useMotionValue(0);
+  const drag = useRef(false);
+  const stage = useRef<HTMLDivElement>(null);
+  const measure = useRef<SVGTextElement>(null);
+  const touched = useRef(false);
+  const anims = useRef<AnimationPlaybackControls[]>([]);
 
-- Pointer down on the stage: capture the pointer, mark touched, stop any pluck, and set (tx, ty) to the pointer position in stage units (`(clientX − left) / width · W`, same for y with H), so it works when the stage is scaled down.
-- Pointer move while dragging: set tx clamped to [40, W − 40] and ty clamped to [20, H − 20].
-- Pointer up, cancel or lost capture: call `onPluck(hypot(tx − W/2, ty − Y))`, then set (tx, ty) back to rest.
-- Keyboard: the stage is focusable (`role="button"`, `tabIndex=0`). Enter, Space or ArrowUp plucks to (W/2, 40); ArrowDown to (W/2, 220); ArrowLeft to (90, 40); ArrowRight to (250, 220). Each also calls `onPluck` with that pull distance.
+  const stopAnims = () => {
+    anims.current.forEach((a) => a.stop());
+    anims.current = [];
+  };
 
-## Autoplay demo
+  // Drift the text along the string, wrapping by exactly one repeat so the loop is seamless.
+  useEffect(() => {
+    if (reduce) return;
+    let raf = 0;
+    let last = 0;
+    let period = 0;
+    const loop = (now: number) => {
+      raf = requestAnimationFrame(loop);
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0;
+      last = now;
+      if (!period) period = measure.current?.getComputedTextLength() ?? 0;
+      const p = period || 450;
+      let o = offset.get() - DRIFT * dt;
+      if (o < -p) o += p;
+      offset.set(o);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [offset, reduce, text]);
 
-With `autoplay`, every 2600ms pluck to a random x in [90, 250] and y either 40 or 220 (50/50). A `touched` ref set on pointer down or key pluck makes the next tick clear the interval for good.
+  /** Pull the string to (px, py) over half a second, then let it go. */
+  const pluck = (px: number, py: number) => {
+    stopAnims();
+    tx.jump(cx.get());
+    ty.jump(cy.get());
+    anims.current = [
+      animate(tx, px, { duration: 0.5, ease: "easeOut" }),
+      animate(ty, py, {
+        duration: 0.5,
+        ease: "easeOut",
+        onComplete: () => {
+          tx.set(W / 2);
+          ty.set(Y);
+        },
+      }),
+    ];
+  };
+  const pluckRef = useRef(pluck);
+  useEffect(() => {
+    pluckRef.current = pluck;
+  });
 
-## Accessibility
+  useEffect(() => {
+    if (!autoplay) return;
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      pluckRef.current(90 + Math.random() * 160, Math.random() > 0.5 ? 40 : 220);
+    }, 2600);
+    return () => clearInterval(t);
+  }, [autoplay]);
 
-- Stage: `role="button"`, `aria-label="<text trimmed>. Press Enter or the arrow keys to pluck the line."`.
-- Focus ring: `focus-visible` 2px in `accent`; no default outline.
-- The SVG is `aria-hidden`.
+  useEffect(() => () => stopAnims(), []);
 
-## Acceptance checklist
+  const local = (e: RPointerEvent) => {
+    const r = stage.current?.getBoundingClientRect();
+    if (!r || !r.width || !r.height) return { x: W / 2, y: Y };
+    return { x: ((e.clientX - r.left) / r.width) * W, y: ((e.clientY - r.top) / r.height) * H };
+  };
 
-- [ ] At rest the text sits flat on the string and drifts left with no visible jump when it wraps.
-- [ ] Dragging bends the string so it passes under the pointer, with the text following the curve.
-- [ ] Releasing makes the string overshoot and wobble several times before settling.
-- [ ] The grab dot is clamped 40 units from the sides and 20 from top and bottom.
-- [ ] Autoplay plucks every 2.6s and stops for good on first touch.
-- [ ] Enter and the arrow keys pluck it; `onPluck` fires on every release.
-- [ ] Below 340px wide the stage scales down and dragging still tracks the pointer.
-- [ ] Dark mode swaps the card, string, text and anchors.
+  const release = () => {
+    if (!drag.current) return;
+    drag.current = false;
+    onPluck?.(Math.hypot(tx.get() - W / 2, ty.get() - Y));
+    tx.set(W / 2);
+    ty.set(Y);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    const target =
+      e.key === "ArrowUp" || e.key === "Enter" || e.key === " "
+        ? { x: W / 2, y: 40 }
+        : e.key === "ArrowDown"
+          ? { x: W / 2, y: 220 }
+          : e.key === "ArrowLeft"
+            ? { x: 90, y: 40 }
+            : e.key === "ArrowRight"
+              ? { x: 250, y: 220 }
+              : null;
+    if (!target) return;
+    e.preventDefault();
+    touched.current = true;
+    pluck(target.x, target.y);
+    onPluck?.(Math.hypot(target.x - W / 2, target.y - Y));
+  };
+
+  return (
+    <div className={`flex max-w-full flex-col items-center gap-3 ${className}`}>
+      <div
+        ref={stage}
+        role="button"
+        tabIndex={0}
+        aria-label={`${text.trim()}. Press Enter or the arrow keys to pluck the line.`}
+        className="relative aspect-[340/260] w-[340px] max-w-full cursor-grab touch-none select-none overflow-hidden rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05)] outline-none focus-visible:ring-2 focus-visible:ring-[var(--bend-accent)] active:cursor-grabbing dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08)]"
+        style={{ ["--bend-accent" as string]: accent }}
+        onPointerDown={(e) => {
+          touched.current = true;
+          stopAnims();
+          drag.current = true;
+          e.currentTarget.setPointerCapture(e.pointerId);
+          const p = local(e);
+          tx.set(p.x);
+          ty.set(p.y);
+        }}
+        onPointerMove={(e) => {
+          if (!drag.current) return;
+          const p = local(e);
+          tx.set(Math.max(40, Math.min(W - 40, p.x)));
+          ty.set(Math.max(20, Math.min(H - 20, p.y)));
+        }}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onLostPointerCapture={release}
+        onKeyDown={onKeyDown}
+      >
+        <svg width="100%" height="100%" viewBox={`0 0 ${W} ${H}`} className="block" aria-hidden="true">
+          <motion.path id={`bend-${id}`} d={d} fill="none" strokeWidth="1" className="stroke-[#e5e5ea] dark:stroke-[#3a3a3c]" />
+          {/* Invisible copy of one repeat, measured to wrap the drift seamlessly. */}
+          <text ref={measure} fontSize="22" fontWeight="700" letterSpacing="1" visibility="hidden" style={{ whiteSpace: "pre" }}>
+            {text}
+          </text>
+          <text fontSize="22" fontWeight="700" letterSpacing="1" dy="-8" className="fill-[#1d1d1f] dark:fill-[#f5f5f7]" style={{ whiteSpace: "pre" }}>
+            <motion.textPath href={`#bend-${id}`} startOffset={offset}>
+              {text.repeat(4)}
+            </motion.textPath>
+          </text>
+          <motion.circle cx={cx} cy={cy} r="5" fill={accent} opacity=".85" />
+          <circle cx="10" cy={Y} r="3" className="fill-[#c7c7cc] dark:fill-[#48484a]" />
+          <circle cx={W - 10} cy={Y} r="3" className="fill-[#c7c7cc] dark:fill-[#48484a]" />
+        </svg>
+      </div>
+      {hint ? <span className="text-[13px] text-[#86868b] dark:text-[#98989d]">{hint}</span> : null}
+    </div>
+  );
+}
+```
+
+--- components/bend-text/index.ts ---
+
+```ts
+export { BendText } from "./bend-text";
+export type { BendTextProps } from "./bend-text";
+```

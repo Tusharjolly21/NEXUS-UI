@@ -1,79 +1,258 @@
 # Liquid Gauge
 
-Build a storage meter drawn as liquid in a glass orb. Two layers of waves roll across the surface at different speeds, small bubbles rise through the liquid, the surface leans toward the pointer, and the big percentage in the middle is drawn twice so the part that sits under the liquid turns white. Pressing "Clean up" or "Add files" changes the level, which springs to its new height and sloshes. Near full, the liquid turns orange and the caption warns. The feel is a calm Apple-style settings widget with a playful physical core.
+Add the "Liquid Gauge" component from Nexus UI to my project.
 
-## Stack
+A storage meter drawn as liquid in a glass orb, with two rolling wave layers, rising bubbles and a surface that leans toward the pointer. The percentage is drawn twice so the part under the liquid turns white, and changing the level sloshes it.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useMotionValueEvent`, `useReducedMotion`, `useSpring`).
-- File: `components/liquid-gauge/liquid-gauge.tsx`. Named export `LiquidGauge` and its `LiquidGaugeProps` type.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { LiquidGauge } from "@/components/liquid-gauge";`. The props are typed and documented in the code.
 
-- `total?: number`, default `200`: capacity, in units (treat anything below 1 as 1).
-- `defaultUsed?: number`, default `136`: amount used on first render, clamped to `0..total`.
-- `accent?: string`, default `"#0a84ff"`: liquid colour below the warning level.
-- `warnAt?: number`, default `85`: percentage at which the liquid turns `#ff9f0a` and the caption warns.
-- `unit?: string`, default `"GB"`.
-- `onChange?: (used: number) => void`: called with the new amount after a button press, only if it actually changed.
-- `autoplay?: boolean`, default `false`.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/liquid-gauge/index.ts ---
 
-- Root: column, centred, 16px gap.
-- Orb: an SVG exactly 220×220 (`S = 220`, viewBox `0 0 220 220`), `role="img"`, `aria-label="Storage {pct}% used"`. Orb radius `R = 100`, centred at (110, 110). Give every id below a per-instance suffix from `useId()` with colons stripped.
-- Defs: clipPath `orb` (the orb circle); clipPath `liq` holding one path (the front wave shape, updated every frame); radialGradient `gl` at cx 35%, cy 28%, r 75% with white stops at offset 0 / opacity .9, offset .35 / opacity .15, offset 1 / opacity 0.
-- Paint order:
-  1. Orb background circle, fill `#f2f4f8` (dark `#2c2c2e`).
-  2. Group clipped to `orb`: the back wave path (fill = liquid colour, opacity .35), the front wave path (fill = liquid colour), the percentage text, the same text again inside a group clipped to `liq` filled `#ffffff`, then the bubbles.
-  3. Glare: the orb circle filled with `gl` (dark: opacity .5).
-  4. Rim: the orb circle, no fill, 1.5px stroke `rgba(0,0,0,.08)` (dark `rgba(255,255,255,.1)`).
-  5. Highlight: an ellipse at (76, 58), rx 26, ry 10, white at fill-opacity .6 (dark: the element also gets opacity .6), rotated −28° about its centre.
-- Percentage text: centred at x 110, baseline y 124, 44px, weight 600, letter-spacing −0.04em, tabular numbers, fill `#1d1d1f` (dark `#f5f5f7`). Content is the rounded level, e.g. `68%`.
-- Bubbles: 7 circles at cx `50 + i·20`, r `2 + (i mod 3)`, white at fill-opacity .55.
-- Caption block (column, centred, 4px gap, `aria-live="polite"`): `"{used} {unit} of {total} {unit} used"` at 15px semibold `#1d1d1f` (dark `#f5f5f7`); under it 12px either "Plenty of room left." in `#86868b` (dark `#98989d`) or, when warning, "Almost full. Time for a clean-up." in `#c2410c` (dark `#ff9f0a`).
-- Buttons row, 8px gap. Both 36px tall, rounded-full, 16px horizontal padding, 13px medium:
-  - "Clean up": background `#f0f0f3`, text `#1d1d1f` (dark `#2c2c2e` / `#f5f5f7`). Subtracts 40.
-  - "Add files": background `#1d1d1f`, text white (dark `#f5f5f7` / `#1d1d1f`). Adds 30. Its focus ring has a 2px offset (dark offset colour `#1c1c1e`).
+```ts
+export { LiquidGauge } from "./liquid-gauge";
+export type { LiquidGaugeProps } from "./liquid-gauge";
+```
 
-## Motion
+--- components/liquid-gauge/liquid-gauge.tsx ---
 
-- `level`: `useSpring(used / total, { stiffness: 40, damping: 9 })`, a 0..1 fraction. Setting it springs the surface and overshoots a little.
-- `lean`: `useSpring(0, { stiffness: 80, damping: 12 })`. On pointer move over the root set it to `((clientX − left) / width − 0.5) · 2` (−1..1); on pointer leave set it to 0.
-- `amp`: a motion value starting at 6 (wave amplitude in px).
-- Waves are built every frame in a `requestAnimationFrame` loop and written straight to the path `d` attributes (no React renders). A time `t` advances 0.04 per frame. For a wave with phase `φ`, amplitude `a` and wavelength factor `k`: `y0 = 110 + 100 − level · 200`; start at `M 0 220`, then for x = 0, 4, 8 … 220 add `L x (y0 + sin(x / k + φ) · a + (x − 110) · lean · 0.18)`, close with `L 220 220 Z`.
-  - Back wave: `φ = t · 0.8 + 1.6`, `a = amp · 0.8`, `k = 26`.
-  - Front wave: `φ = t · 1.3`, `a = amp`, `k = 34`. The same string goes into the `liq` clip path.
-- Changing the level: clamp to `0..total`, round, set state, `level.set(v / total)`, and slosh: stop any running slosh, then `animate(amp, [6, 16, 6], { duration: 1.6, ease: "easeOut" })`.
-- Displayed percentage: subscribe to `level` with `useMotionValueEvent` and store `round(level · 100)` in state, so the number counts while the surface springs.
-- Liquid colour: both wave paths `animate={{ fill: colour }}` (default tween), where colour is `#ff9f0a` when the percentage ≥ `warnAt`, else `accent`.
-- Bubbles: each animates `cy` from `S + 10` (230) to `110 + 100 − (pct / 100) · 200 + 20` (just under the surface) with `duration 2.4 + (i mod 4) · 0.5`, `delay i · 0.45`, `repeat: Infinity`, `ease: "easeIn"`; `initial cy` 230.
-- Buttons: `whileTap={{ scale: 0.94 }}`.
-- Reduced motion (`useReducedMotion()`): `t` stops advancing (the surface stays still but still follows the level), no slosh, no bubbles.
+```tsx
+"use client";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useMotionValueEvent,
+  useReducedMotion,
+  useSpring,
+  type AnimationPlaybackControls,
+} from "framer-motion";
 
-## Interaction and states
+export interface LiquidGaugeProps {
+  /** Capacity of the store, in `unit`s. */
+  total?: number;
+  /** Amount used when the gauge first renders, in `unit`s (clamped to 0..total). */
+  defaultUsed?: number;
+  /** Colour of the liquid while usage is below `warnAt`. */
+  accent?: string;
+  /** Percentage at which the liquid turns orange and the caption warns that it's almost full. */
+  warnAt?: number;
+  /** Unit shown in the caption, e.g. "GB". */
+  unit?: string;
+  /** Called with the new amount used after the user presses "Clean up" (−40) or "Add files" (+30). */
+  onChange?: (used: number) => void;
+  /** Sloshes through a few fill levels every 2.6s until someone presses a button. */
+  autoplay?: boolean;
+}
 
-- "Clean up" subtracts 40 and "Add files" adds 30, clamped. If the clamped value differs, call `onChange(used)`.
-- Moving the pointer anywhere over the component tilts the surface toward it.
-- Warning state (≥ `warnAt`%): orange liquid and the warning caption.
+/** Orb canvas size and radius, in px. */
+const S = 220;
+const R = 100;
+const BUBBLES = 7;
+/** Autoplay levels, written against a 200-unit store and scaled to `total`. */
+const DEMO = [168, 92, 186, 136];
 
-## Autoplay demo
+/**
+ * Storage shown as liquid in a glass orb. Two layers of waves roll at
+ * different speeds, bubbles rise, the surface leans toward the pointer, and
+ * the percentage is drawn twice so the part under the liquid turns white.
+ * Changing the level sloshes it.
+ */
+export function LiquidGauge({
+  total = 200,
+  defaultUsed = 136,
+  accent = "#0a84ff",
+  warnAt = 85,
+  unit = "GB",
+  onChange,
+  autoplay = false,
+}: LiquidGaugeProps) {
+  const id = useId().replace(/:/g, "");
+  const still = useReducedMotion() === true;
+  const cap = Math.max(1, total);
+  const start = Math.max(0, Math.min(cap, defaultUsed));
+  const level = useSpring(start / cap, { stiffness: 40, damping: 9 });
+  const lean = useSpring(0, { stiffness: 80, damping: 12 });
+  const amp = useMotionValue(6);
+  const back = useRef<SVGPathElement>(null);
+  const front = useRef<SVGPathElement>(null);
+  const clip = useRef<SVGPathElement>(null);
+  const slosh = useRef<AnimationPlaybackControls | undefined>(undefined);
+  const touched = useRef(false);
+  const [used, setUsed] = useState(start);
+  const [shown, setShown] = useState(Math.round((start / cap) * 100));
+  useMotionValueEvent(level, "change", (v) => setShown(Math.round(v * 100)));
 
-With `autoplay`, every 2600ms set the level to the next of `[168, 92, 186, 136]` (written for a 200-unit store; scale each by `total / 200`), looping. A `touched` ref is set on pointer down on the buttons row or by pressing a button; the next tick clears the interval for good. `onChange` is not called by autoplay. Cancel the frame loop, the interval and any slosh animation on unmount.
+  const setTo = useCallback(
+    (g: number) => {
+      const v = Math.max(0, Math.min(cap, Math.round(g)));
+      setUsed(v);
+      level.set(v / cap);
+      if (!still) {
+        slosh.current?.stop();
+        slosh.current = animate(amp, [6, 16, 6], { duration: 1.6, ease: "easeOut" });
+      }
+      return v;
+    },
+    [cap, level, amp, still],
+  );
 
-## Accessibility
+  useEffect(() => () => slosh.current?.stop(), []);
 
-- The orb is `role="img"` with a live percentage label; the caption is `aria-live="polite"`.
-- Both buttons are native `<button type="button">`; focus ring `focus-visible` 2px `#0071e3` (dark `#0a84ff`), no default outline.
-- SSR safe: the wave paths render empty on the server and are filled by the first frame.
+  // Wave paths are rebuilt every frame straight into the DOM; React never re-renders for them.
+  useEffect(() => {
+    let raf = 0;
+    let t = 0;
+    const wave = (phase: number, a: number, k: number) => {
+      const y0 = S / 2 + R - level.get() * 2 * R;
+      let d = `M 0 ${S}`;
+      for (let x = 0; x <= S; x += 4) {
+        const tilt = (x - S / 2) * lean.get() * 0.18;
+        d += ` L ${x} ${y0 + Math.sin(x / k + phase) * a + tilt}`;
+      }
+      return `${d} L ${S} ${S} Z`;
+    };
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      if (!still) t += 0.04;
+      const a = amp.get();
+      back.current?.setAttribute("d", wave(t * 0.8 + 1.6, a * 0.8, 26));
+      const f = wave(t * 1.3, a, 34);
+      front.current?.setAttribute("d", f);
+      clip.current?.setAttribute("d", f);
+    };
+    loop();
+    return () => cancelAnimationFrame(raf);
+  }, [level, lean, amp, still]);
 
-## Acceptance checklist
+  useEffect(() => {
+    if (!autoplay) return;
+    const seq = DEMO.map((g) => (g / 200) * cap);
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) {
+        clearInterval(t);
+        return;
+      }
+      setTo(seq[k++ % seq.length]);
+    }, 2600);
+    return () => clearInterval(t);
+  }, [autoplay, cap, setTo]);
 
-- [ ] The liquid rolls in two layers, the back one fainter and moving slower.
-- [ ] Moving the pointer left or right tilts the surface toward it; leaving levels it out with a little wobble.
-- [ ] Pressing a button springs the level with a visible overshoot and a bigger wave that settles over about 1.6s.
-- [ ] The percentage counts up or down during the spring, and the part under the liquid is white while the rest is dark.
-- [ ] At 85% or more the liquid turns orange and the caption warns in orange.
-- [ ] Bubbles rise from the bottom and stop just under the surface.
-- [ ] Autoplay cycles 84% → 46% → 93% → 68% every 2.6s and stops for good on the first button press.
-- [ ] Two instances on a page each use their own clip paths.
-- [ ] Dark mode swaps the orb, rim, text, caption and buttons; reduced motion stills the waves.
+  const press = (delta: number) => {
+    touched.current = true;
+    const v = setTo(used + delta);
+    if (v !== used) onChange?.(v);
+  };
+
+  const pct = `${shown}%`;
+  const warn = shown >= warnAt;
+  const color = warn ? "#ff9f0a" : accent;
+  const textStyle = { letterSpacing: "-0.04em", fontVariantNumeric: "tabular-nums" } as const;
+
+  return (
+    <div
+      className="flex flex-col items-center gap-4"
+      onPointerMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        lean.set(((e.clientX - r.left) / r.width - 0.5) * 2);
+      }}
+      onPointerLeave={() => lean.set(0)}
+    >
+      <div className="relative" style={{ width: S, height: S }}>
+        <svg width={S} height={S} viewBox={`0 0 ${S} ${S}`} role="img" aria-label={`Storage ${pct} used`}>
+          <defs>
+            <clipPath id={`orb-${id}`}>
+              <circle cx={S / 2} cy={S / 2} r={R} />
+            </clipPath>
+            <clipPath id={`liq-${id}`}>
+              <path ref={clip} />
+            </clipPath>
+            <radialGradient id={`gl-${id}`} cx="35%" cy="28%" r="75%">
+              <stop offset="0" stopColor="#fff" stopOpacity=".9" />
+              <stop offset=".35" stopColor="#fff" stopOpacity=".15" />
+              <stop offset="1" stopColor="#fff" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx={S / 2} cy={S / 2} r={R} className="fill-[#f2f4f8] dark:fill-[#2c2c2e]" />
+          <g clipPath={`url(#orb-${id})`}>
+            <motion.path ref={back} animate={{ fill: color }} style={{ opacity: 0.35 }} />
+            <motion.path ref={front} animate={{ fill: color }} />
+            <text x={S / 2} y={S / 2 + 14} textAnchor="middle" fontSize="44" fontWeight="600" className="fill-[#1d1d1f] dark:fill-[#f5f5f7]" style={textStyle}>
+              {pct}
+            </text>
+            <g clipPath={`url(#liq-${id})`}>
+              <text x={S / 2} y={S / 2 + 14} textAnchor="middle" fontSize="44" fontWeight="600" fill="#ffffff" style={textStyle}>
+                {pct}
+              </text>
+            </g>
+            {!still &&
+              Array.from({ length: BUBBLES }, (_, i) => (
+                <motion.circle
+                  key={i}
+                  cx={50 + i * 20}
+                  r={2 + (i % 3)}
+                  fill="#fff"
+                  fillOpacity=".55"
+                  initial={{ cy: S + 10 }}
+                  animate={{ cy: [S + 10, S / 2 + R - (shown / 100) * 2 * R + 20] }}
+                  transition={{ duration: 2.4 + (i % 4) * 0.5, repeat: Infinity, delay: i * 0.45, ease: "easeIn" }}
+                />
+              ))}
+          </g>
+          <circle cx={S / 2} cy={S / 2} r={R} fill={`url(#gl-${id})`} className="dark:opacity-50" />
+          <circle cx={S / 2} cy={S / 2} r={R} fill="none" strokeWidth="1.5" className="stroke-[rgba(0,0,0,.08)] dark:stroke-[rgba(255,255,255,.1)]" />
+          <ellipse
+            cx={S / 2 - 34}
+            cy={S / 2 - 52}
+            rx="26"
+            ry="10"
+            fill="#fff"
+            fillOpacity=".6"
+            className="dark:opacity-60"
+            transform={`rotate(-28 ${S / 2 - 34} ${S / 2 - 52})`}
+          />
+        </svg>
+      </div>
+      <div className="flex flex-col items-center gap-1" aria-live="polite">
+        <span className="text-[15px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">
+          {used} {unit} of {cap} {unit} used
+        </span>
+        <span className={`text-[12px] ${warn ? "text-[#c2410c] dark:text-[#ff9f0a]" : "text-[#86868b] dark:text-[#98989d]"}`}>
+          {warn ? "Almost full. Time for a clean-up." : "Plenty of room left."}
+        </span>
+      </div>
+      <div
+        className="flex gap-2"
+        onPointerDown={() => {
+          touched.current = true;
+        }}
+      >
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.94 }}
+          onClick={() => press(-40)}
+          className="h-9 rounded-full bg-[#f0f0f3] px-4 text-[13px] font-medium text-[#1d1d1f] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:focus-visible:ring-[#0a84ff]"
+        >
+          Clean up
+        </motion.button>
+        <motion.button
+          type="button"
+          whileTap={{ scale: 0.94 }}
+          onClick={() => press(30)}
+          className="h-9 rounded-full bg-[#1d1d1f] px-4 text-[13px] font-medium text-white outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] focus-visible:ring-offset-2 dark:bg-[#f5f5f7] dark:text-[#1d1d1f] dark:focus-visible:ring-[#0a84ff] dark:focus-visible:ring-offset-[#1c1c1e]"
+        >
+          Add files
+        </motion.button>
+      </div>
+    </div>
+  );
+}
+```

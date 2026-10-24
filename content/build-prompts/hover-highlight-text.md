@@ -1,71 +1,522 @@
 # Marker Annotations
 
-Build a paragraph that gets marked up by hand as it scrolls into view: a yellow highlighter pass that follows the text across line breaks, a scribbled underline, a loose circle round one word and a red strike-through for the old way. The marks play in reading order, one after another, and a "Draw again" button plays them again. It should feel hand-drawn, with wobbly paths rather than clean geometry.
+Add the "Marker Annotations" component from Nexus UI to my project.
 
-## Stack
+A headline you read with a highlighter: words near the pointer turn from grey to ink and a marker stroke swipes in under each one with a small overshoot. As the pointer moves on, the strokes linger and retract one after another like a comet tail. Also includes Marker Annotations: Hand-drawn marks play over your copy in reading order as it scrolls in: a highlighter pass across line breaks, a scribbled underline, a loose circle and a strike-through.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useInView`, `useReducedMotion`), `cn` from `@/lib/utils`.
-- File: `components/hover-highlight-text/marker-annotations.tsx`. Named exports `MarkerAnnotations`, the constant `MARKER_SEGMENTS`, and types `MarkerAnnotationsProps`, `MarkerKind`, `MarkerSegment`. Re-export from the folder's `index.ts` (and from a sibling `hover-highlight-text.tsx` barrel if one exists).
-- No sound: the component is decorative and makes none.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name and folder. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion`, `clsx`, `tailwind-merge` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It imports `cn` from `@/lib/utils`. If the project has no such helper, create it from the file below.
+5. Use it like this: `import { HoverHighlightText, MarkerAnnotations, MARKER_SEGMENTS } from "@/components/hover-highlight-text";`. The props are typed and documented in the code.
 
-`MarkerKind` is `"highlight" | "underline" | "circle" | "strike"`. `MarkerSegment` is a plain string or `{ text: string; kind: MarkerKind; color?: string; darkColor?: string; delay?: number }`.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-| Prop | Type | Default | Meaning |
-|---|---|---|---|
-| `segments` | `MarkerSegment[]` | `MARKER_SEGMENTS` | The paragraph, strings between marked-up objects. |
-| `showReplay` | `boolean` | `true` | Show the replay button. |
-| `replayLabel` | `string` | `"Draw again"` | Button label. |
-| `autoplay` | `boolean` | `false` | Replay the marks every 7s while on screen until touched. |
-| `className` | `string` | none | Extra classes on the paragraph. |
+--- components/hover-highlight-text/hover-highlight-text.tsx ---
 
-Demo `MARKER_SEGMENTS`: "Stop " + strike("hand-tuning", delay 0.1) + " every animation. This kit gives you " + highlight("springs that already feel right", 0.5) + ", components you can " + underline("copy in one click", 1.3) + ", and a design that respects " + circle("everyone", 1.9) + ".". When a segment has no `delay`, use its index times 0.4s.
+```tsx
+"use client";
 
-Default colours (light / dark): strike `#ff3b30` / `#ff453a`; highlight `#ffd60a` / `rgba(255,214,10,.42)` (a dimmer yellow so light text stays readable on it); underline `#0071e3` / `#0a84ff`; circle `#34c759` / `#30d158`.
+import * as React from "react";
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+  useTransform,
+  type MotionValue,
+  type SpringOptions,
+} from "framer-motion";
+import { cn } from "@/lib/utils";
 
-## Layout and look
+type HoverHighlightTextElement = "h1" | "h2" | "p" | "span";
 
-- Root: a column, `gap 24px`, `max-width 640px`, full width, 8px horizontal padding, items aligned to the start.
-- Paragraph: zero margin, `font-size: clamp(22px, 3.4vw, 30px)`, weight 600, line-height 1.45, tracking -0.02em, ink `#1d1d1f` (dark `#f5f5f7`).
-- Highlight: a `<mark>` with 3px radius, 2px horizontal padding, `box-decoration-break: clone` so each wrapped line gets its own stroke, transparent background colour, text colour inherited. Its background image is `linear-gradient(104deg, transparent 0.6%, C 2.4%, C at 80% opacity 95%, transparent 98%)` where `C` is the mark colour. `background-position: 0 60%`, `background-repeat: no-repeat`, `background-size` animates from `0% 72%` to `100% 72%`.
-- Underline, circle, strike: the words sit in an `inline-block`, `whitespace-nowrap` span (the strike uses a `<del>` with its default line removed, so assistive tech still hears "deleted"). An absolutely positioned SVG with `viewBox="0 0 100 20"`, `preserveAspectRatio="none"`, `overflow: visible`, `aria-hidden`, stretches to the words:
-  - underline: `inset-x-0`, `bottom: -38%`, height 60%. Path `M 2 15 C 20 18, 40 12, 60 15 S 90 17, 98 13`, stroke width 2.4.
-  - strike: `inset-x-0`, `top: 25%`, height 50%. Path `M 0 11 C 25 9, 60 12, 100 9`, stroke width 2.4.
-  - circle: `left: -10%`, `top: -30%`, height 160%, width 120%. Path `M 50 2 C 80 1, 99 6, 98 11 C 97 17, 70 20, 46 19 C 18 18, 1 15, 2 9 C 3 4, 24 1, 56 2`, stroke width 1.6.
-  - All strokes use `stroke-linecap: round`, `fill: none`, and the mark colour (light or dark) through a CSS variable switched with `dark:`.
-- Replay button: 36px tall pill, 16px horizontal padding, 13px medium text, a 13px circular-arrow icon and 6px gap; background `#f5f5f7` (hover `#ececf0`), text `#1d1d1f`; dark `#2c2c2e` (hover `#3a3a3c`), text `#f5f5f7`. Focus outline 2px, offset 2px, `#0071e3` (dark `#0a84ff`).
+export type HoverHighlightTextProps = {
+  /** The sentence to highlight. */
+  text: string;
+  /** Element used for the text. */
+  as?: HoverHighlightTextElement;
+  /** Classes for the text element (size, weight, width). */
+  baseClassName?: string;
+  /** Classes for every marker stroke, e.g. a custom background colour. */
+  highlightClassName?: string;
+  /** Classes for the outer wrapper that listens to the pointer. */
+  containerClassName?: string;
+  /** How far from the pointer, in px, a word still gets highlighted. */
+  reach?: number;
+  /** @deprecated Use `reach`. When given without `reach`, reach is 35% of it. */
+  spotlightRadius?: number;
+  /** Colour of words that are not highlighted. Defaults to a mid grey. */
+  baseColor?: string;
+  /** Colour of highlighted words. Defaults to the ink colour. */
+  highlightColor?: string;
+  /** Marker colour (any CSS colour). Defaults to a highlighter yellow. */
+  markerColor?: string;
+  /** Seconds a word stays highlighted after the pointer moves on. */
+  linger?: number;
+  /** Spring for the marker stroke. The default overshoots a little. */
+  springConfig?: SpringOptions;
+  /** Turns the effect off and shows plain text. */
+  disabled?: boolean;
+  /** Sweeps a highlighter across the words, line by line, until a real pointer arrives. */
+  autoplay?: boolean;
+  /** @deprecated No longer used; the marker replaced the spotlight mask. */
+  spotlightSoftness?: number;
+  /** @deprecated No longer used. */
+  strokeColor?: string;
+  /** @deprecated No longer used. */
+  strokeWidth?: number;
+  /** @deprecated No longer used. */
+  enableGlow?: boolean;
+};
 
-## Motion
+function subscribeTheme(cb: () => void) {
+  const mo = new MutationObserver(cb);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+  return () => mo.disconnect();
+}
+/** Follows the site's class-based dark mode; false on the server and during hydration. */
+function useIsDark() {
+  return React.useSyncExternalStore(subscribeTheme, () => document.documentElement.classList.contains("dark"), () => false);
+}
 
-- The whole paragraph decides when to start: `useInView(paragraph, { once: true, amount: 0.6 })`. Until it is true every mark is in its hidden state.
-- Highlight: `background-size` from `0% 72%` to `100% 72%` over 0.7s, ease `[0.5, 0, 0.2, 1]`, after its delay.
-- Underline and strike: `pathLength` 0 to 1 and opacity 0 to 1 over 0.5s, ease `[0.6, 0, 0.3, 1]`. Circle: the same over 0.8s.
-- Replay: increment a counter used as the paragraph's `key`, which remounts it and replays every mark from hidden.
-- Reduced motion: no drawing. Each mark simply fades in over 0.25s with no delay; the highlight is fully drawn from the start.
+/** tailwind-merge drops a default `leading-*` whenever a later `text-*` size arrives, so the default goes last unless the caller set one. */
+const withLeading = (cls: string | undefined, fallback: string) => (/(^|\s)([\w-]+:)*leading-/.test(cls ?? "") ? undefined : fallback);
 
-## Interaction and states
+const SPRING: SpringOptions = { stiffness: 320, damping: 17, mass: 0.7 };
 
-- Marks are decorative overlays: they never take pointer events and never change the text.
-- "Draw again" replays instantly (it is available once the paragraph has been seen).
+type Slot = { el: HTMLSpanElement | null; heat: MotionValue<number> };
 
-## Autoplay demo
+function Word({
+  word,
+  index,
+  register,
+  spring,
+  base,
+  ink,
+  marker,
+  markerClassName,
+}: {
+  word: string;
+  index: number;
+  register: (i: number, slot: Slot) => () => void;
+  spring: SpringOptions;
+  base: string;
+  ink: string;
+  marker: string;
+  markerClassName?: string;
+}) {
+  const heat = useMotionValue(0);
+  const s = useSpring(heat, spring);
+  const color = useTransform(s, [0, 1], [base, ink], { clamp: true });
+  const scaleX = useTransform(s, (v) => Math.max(0, v));
+  const opacity = useTransform(s, (v) => Math.min(1, Math.max(0, v * 3)));
+  const el = React.useRef<HTMLSpanElement>(null);
+  React.useEffect(() => register(index, { el: el.current, heat }), [register, index, heat]);
+  return (
+    <span ref={el} className="relative inline-block">
+      <motion.span
+        aria-hidden="true"
+        className={cn("pointer-events-none absolute inset-x-[-0.08em] bottom-[0.04em] top-[0.32em] rounded-[0.16em]", markerClassName)}
+        style={{ scaleX, opacity, originX: 0, skewX: -8, backgroundColor: markerClassName && /\bbg-/.test(markerClassName) ? undefined : marker }}
+      />
+      <motion.span className="relative" style={{ color }}>
+        {word}
+      </motion.span>
+    </span>
+  );
+}
 
-Only while the component is on screen, the tab is visible and motion is not reduced: every 7s, replay the marks. Any pointer press inside the component (including the replay button) stops the loop for good.
+/**
+ * A headline you read with a highlighter. Words near the pointer get inked and a marker stroke
+ * swipes in under each one with a small overshoot; as the pointer moves on, the strokes linger
+ * and retract one after another like a comet tail. One rAF loop writes every word's heat into
+ * motion values, so React never re-renders while you move.
+ */
+export function HoverHighlightText({
+  text,
+  as = "h2",
+  baseClassName,
+  highlightClassName,
+  containerClassName,
+  reach,
+  spotlightRadius,
+  baseColor,
+  highlightColor,
+  markerColor,
+  linger = 0.9,
+  springConfig,
+  disabled = false,
+  autoplay = false,
+}: HoverHighlightTextProps) {
+  const still = useReducedMotion() === true;
+  const dark = useIsDark();
+  const Tag = as;
+  const words = React.useMemo(() => text.split(/\s+/).filter(Boolean), [text]);
+  const root = React.useRef<HTMLDivElement>(null);
+  const slots = React.useRef<Slot[]>([]);
+  const pointer = React.useRef<{ x: number; y: number } | null>(null);
+  const touched = React.useRef(false);
+  const wake = React.useRef<() => void>(() => {});
+  const span = Math.max(4, reach ?? (spotlightRadius !== undefined ? spotlightRadius * 0.35 : 40));
+  const cfg = React.useRef({ reach: span, linger });
+  React.useEffect(() => {
+    cfg.current = { reach: span, linger: Math.max(0.05, linger) };
+  }, [span, linger]);
 
-## Accessibility
+  const off = disabled || still;
+  const register = React.useCallback((i: number, slot: Slot) => {
+    slots.current[i] = slot;
+    return () => {
+      if (slots.current[i] === slot) delete slots.current[i];
+    };
+  }, []);
 
-- The paragraph reads as normal text. The highlight is a real `<mark>`; the strike is a real `<del>`; the SVG strokes are `aria-hidden`.
-- Replay is a real button with a visible focus outline.
-- Highlight in dark mode uses a translucent yellow so `#f5f5f7` text keeps contrast above 4.5:1.
+  // The heat loop. It sleeps when nothing is lit and no pointer (real or demo) is around.
+  React.useEffect(() => {
+    if (off) return;
+    let raf = 0;
+    let last = 0;
+    let ghost: { x: number; y: number } | null = null;
+    let demoWord = 0;
+    let demoAt = 0;
+    const tick = (now: number) => {
+      const dt = last ? Math.min(0.05, (now - last) / 1000) : 0.016;
+      last = now;
+      const { reach: near, linger: hold } = cfg.current;
+      const list = slots.current;
+      // Autoplay: a highlighter glides from word to word, line by line, then starts over.
+      if (autoplay && !touched.current) {
+        const target = list[demoWord]?.el;
+        if (target) {
+          const tx = target.offsetLeft + target.offsetWidth * 0.9;
+          const ty = target.offsetTop + target.offsetHeight * 0.55;
+          ghost = ghost ? { x: ghost.x + (tx - ghost.x) * Math.min(1, dt * 12), y: ghost.y + (ty - ghost.y) * Math.min(1, dt * 12) } : { x: target.offsetLeft, y: ty };
+        }
+        if (now - demoAt > (demoWord >= list.length - 1 ? 1600 : 170)) {
+          demoAt = now;
+          demoWord = demoWord >= list.length - 1 ? 0 : demoWord + 1;
+          if (demoWord === 0) ghost = null;
+        }
+      } else ghost = null;
+      const p = pointer.current ?? ghost;
+      let busy = !!p;
+      list.forEach((slot) => {
+        if (!slot?.el) return;
+        const el = slot.el;
+        let target = 0;
+        if (p) {
+          const dx = Math.max(el.offsetLeft - p.x, 0, p.x - (el.offsetLeft + el.offsetWidth));
+          const dy = Math.max(el.offsetTop - p.y, 0, p.y - (el.offsetTop + el.offsetHeight));
+          const d = Math.hypot(dx, dy * 1.6);
+          target = d < near ? 1 : 0;
+        }
+        const cur = slot.heat.get();
+        const next = target >= cur ? target : Math.max(0, cur - dt / hold);
+        if (next !== cur) slot.heat.set(next);
+        if (next > 0) busy = true;
+      });
+      raf = busy ? requestAnimationFrame(tick) : 0;
+      if (!busy) last = 0;
+    };
+    wake.current = () => {
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    if (autoplay) wake.current();
+    return () => {
+      cancelAnimationFrame(raf);
+      wake.current = () => {};
+    };
+  }, [off, autoplay, words]);
 
-## Acceptance checklist
+  const base = baseColor ?? (dark ? "#6e6e73" : "#86868b");
+  const ink = highlightColor ?? (dark ? "#f5f5f7" : "#1d1d1f");
+  const marker = markerColor ?? (dark ? "rgba(255,214,10,0.34)" : "rgba(255,214,10,0.62)");
 
-- [ ] Scrolling the paragraph about 60% into view starts the sequence: strike, highlighter, underline, circle, in that order.
-- [ ] The highlighter follows the text across a wrapped line break, each line getting its own stroke.
-- [ ] Narrowing to 360px keeps everything inside the container with no horizontal scroll.
-- [ ] Draw again replays the whole sequence.
-- [ ] Custom `segments` with other colours and delays work.
-- [ ] Dark mode shows brighter strokes and a dim yellow highlight with readable text.
-- [ ] Under reduced motion the marks fade in with no drawing.
-- [ ] Autoplay replays about every 7s and stops for good after a press.
+  const locate = (e: React.PointerEvent) => {
+    const r = root.current?.getBoundingClientRect();
+    const tag = root.current?.firstElementChild as HTMLElement | null;
+    if (!r || !tag) return;
+    // Word offsets are measured from the text element, so measure the pointer from it too.
+    const t = tag.getBoundingClientRect();
+    pointer.current = { x: e.clientX - t.left, y: e.clientY - t.top };
+    wake.current();
+  };
+
+  return (
+    <div
+      ref={root}
+      className={cn("relative inline-block max-w-full", containerClassName)}
+      onPointerEnter={(e) => {
+        touched.current = true;
+        locate(e);
+      }}
+      onPointerMove={locate}
+      onPointerLeave={() => {
+        pointer.current = null;
+      }}
+    >
+      <Tag className={cn("relative m-0 text-balance text-center text-[40px] font-semibold tracking-[-0.035em] sm:text-[52px]", baseClassName, withLeading(baseClassName, "leading-[1.12]"))}>
+        {off ? (
+          <span style={{ color: ink }}>{text}</span>
+        ) : (
+          <>
+            <span className="sr-only">{text}</span>
+            <span aria-hidden="true" key={dark ? "d" : "l"}>
+              {words.map((w, i) => (
+                <React.Fragment key={`${w}-${i}`}>
+                  <Word word={w} index={i} register={register} spring={springConfig ?? SPRING} base={base} ink={ink} marker={marker} markerClassName={highlightClassName} />
+                  {i < words.length - 1 ? " " : null}
+                </React.Fragment>
+              ))}
+            </span>
+          </>
+        )}
+      </Tag>
+    </div>
+  );
+}
+```
+
+--- components/hover-highlight-text/index.ts ---
+
+```ts
+export { HoverHighlightText } from "./hover-highlight-text";
+export type { HoverHighlightTextProps } from "./hover-highlight-text";
+export { MarkerAnnotations, MARKER_SEGMENTS } from "./marker-annotations";
+export type { MarkerAnnotationsProps, MarkerKind, MarkerSegment } from "./marker-annotations";
+```
+
+--- components/hover-highlight-text/marker-annotations.tsx ---
+
+```tsx
+"use client";
+
+import { Fragment, useEffect, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+export type MarkerKind = "highlight" | "underline" | "circle" | "strike";
+
+export type MarkerSegment =
+  | string
+  | {
+      /** The words to mark up. */
+      text: string;
+      /** Which hand-drawn mark to play over them. */
+      kind: MarkerKind;
+      /** Mark colour in light mode. Any CSS colour. Defaults to the kind's colour. */
+      color?: string;
+      /** Mark colour in dark mode. Defaults to the kind's dark colour. */
+      darkColor?: string;
+      /** Seconds to wait after the paragraph scrolls into view before this mark plays. */
+      delay?: number;
+    };
+
+export interface MarkerAnnotationsProps {
+  /** The paragraph, as plain strings with marked-up objects between them. Defaults to the demo sentence. */
+  segments?: MarkerSegment[];
+  /** Shows the "Draw again" button under the paragraph. */
+  showReplay?: boolean;
+  /** Label of the replay button. */
+  replayLabel?: string;
+  /** Plays the marks again every few seconds while the paragraph is on screen, until someone presses a button or touches the text. Never runs under reduced motion. */
+  autoplay?: boolean;
+  /** Extra classes for the paragraph (size, weight, colour). */
+  className?: string;
+}
+
+/** The demo sentence: a strike-through, a highlighter pass, a scribbled underline and a loose circle, in reading order. */
+export const MARKER_SEGMENTS: MarkerSegment[] = [
+  "Stop ",
+  { text: "hand-tuning", kind: "strike", delay: 0.1 },
+  " every animation. This kit gives you ",
+  { text: "springs that already feel right", kind: "highlight", delay: 0.5 },
+  ", components you can ",
+  { text: "copy in one click", kind: "underline", delay: 1.3 },
+  ", and a design that respects ",
+  { text: "everyone", kind: "circle", delay: 1.9 },
+  ".",
+];
+
+const KIND_COLORS: Record<MarkerKind, { light: string; dark: string }> = {
+  strike: { light: "#ff3b30", dark: "#ff453a" },
+  highlight: { light: "#ffd60a", dark: "rgba(255,214,10,.42)" },
+  underline: { light: "#0071e3", dark: "#0a84ff" },
+  circle: { light: "#34c759", dark: "#30d158" },
+};
+
+/** Wobbly hand-drawn shapes, sized in a 100x20 box and stretched to the word. */
+const PATHS: Record<Exclude<MarkerKind, "highlight">, string> = {
+  underline: "M 2 15 C 20 18, 40 12, 60 15 S 90 17, 98 13",
+  circle: "M 50 2 C 80 1, 99 6, 98 11 C 97 17, 70 20, 46 19 C 18 18, 1 15, 2 9 C 3 4, 24 1, 56 2",
+  strike: "M 0 11 C 25 9, 60 12, 100 9",
+};
+
+const FOCUS = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] dark:focus-visible:outline-[#0a84ff]";
+const REPLAY_MS = 7000;
+
+/** True while the element is on screen and the tab is visible. Only observes when `enabled`. */
+function useDemoActive(ref: RefObject<HTMLElement | null>, enabled: boolean) {
+  const [active, setActive] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!enabled || !el) return;
+    let shown = !document.hidden;
+    let inView = false;
+    const sync = () => setActive(shown && inView);
+    const io = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      sync();
+    });
+    io.observe(el);
+    const onVisibility = () => {
+      shown = !document.hidden;
+      sync();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
+      setActive(false);
+    };
+  }, [ref, enabled]);
+  return active;
+}
+
+function Mark({ kind, delay, color, darkColor, children, go, reduce }: { kind: MarkerKind; delay: number; color: string; darkColor: string; children: ReactNode; go: boolean; reduce: boolean }) {
+  const vars = { "--mk": color, "--mk-dark": darkColor } as CSSProperties;
+  const tone = "[--c:var(--mk)] dark:[--c:var(--mk-dark)]";
+  // Reduced motion: the mark simply fades in, with no drawing.
+  const fade = { duration: 0.25, delay: 0 };
+
+  if (kind === "highlight") {
+    // background grows across each wrapped line, like a highlighter pass
+    return (
+      <motion.mark
+        className={cn("rounded-[3px] bg-no-repeat px-[2px] text-inherit [box-decoration-break:clone] [-webkit-box-decoration-break:clone]", tone)}
+        style={{
+          ...vars,
+          backgroundImage: "linear-gradient(104deg, transparent 0.6%, var(--c) 2.4%, color-mix(in srgb, var(--c) 80%, transparent) 95%, transparent 98%)",
+          backgroundColor: "transparent",
+          backgroundPosition: "0 60%",
+          backgroundSize: reduce ? "100% 72%" : undefined,
+        }}
+        initial={reduce ? { opacity: 0 } : { backgroundSize: "0% 72%" }}
+        animate={reduce ? { opacity: go ? 1 : 0 } : { backgroundSize: go ? "100% 72%" : "0% 72%" }}
+        transition={reduce ? fade : { duration: 0.7, delay, ease: [0.5, 0, 0.2, 1] }}
+      >
+        {children}
+      </motion.mark>
+    );
+  }
+
+  const box = kind === "circle" ? "-left-[10%] -top-[30%] h-[160%]" : kind === "strike" ? "inset-x-0 top-[25%] h-[50%]" : "inset-x-0 -bottom-[38%] h-[60%]";
+  const drawing = (
+    <svg className={cn("pointer-events-none absolute overflow-visible", box)} style={{ width: kind === "circle" ? "120%" : "100%" }} viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true">
+      <motion.path
+        d={PATHS[kind]}
+        fill="none"
+        style={{ stroke: "var(--c)" }}
+        strokeWidth={kind === "circle" ? 1.6 : 2.4}
+        strokeLinecap="round"
+        initial={reduce ? { opacity: 0 } : { pathLength: 0, opacity: 0 }}
+        animate={reduce ? { opacity: go ? 1 : 0 } : { pathLength: go ? 1 : 0, opacity: go ? 1 : 0 }}
+        transition={reduce ? fade : { duration: kind === "circle" ? 0.8 : 0.5, delay, ease: [0.6, 0, 0.3, 1] }}
+      />
+    </svg>
+  );
+  const Tag = kind === "strike" ? "del" : "span";
+  return (
+    <Tag className={cn("relative inline-block whitespace-nowrap no-underline", tone)} style={vars}>
+      {children}
+      {drawing}
+    </Tag>
+  );
+}
+
+/**
+ * Hand-drawn annotations that mark up your copy as it scrolls into view: a
+ * highlighter pass that follows the text across line breaks, a scribbled
+ * underline, a loose circle round a word, and a strike-through for the old
+ * way. They play in reading order, one after another. "Draw again" replays
+ * them. Under reduced motion the marks fade in instead of being drawn.
+ */
+export function MarkerAnnotations({ segments = MARKER_SEGMENTS, showReplay = true, replayLabel = "Draw again", autoplay = false, className }: MarkerAnnotationsProps) {
+  const reduce = useReducedMotion() ?? false;
+  const [play, setPlay] = useState(0);
+  const touched = useRef(false);
+  const root = useRef<HTMLDivElement>(null);
+  // the whole paragraph decides when to start, so marks that poke outside their words still play
+  const para = useRef<HTMLParagraphElement>(null);
+  const go = useInView(para, { once: true, amount: 0.6 });
+  const active = useDemoActive(root, autoplay && !reduce);
+
+  useEffect(() => {
+    if (!autoplay || reduce || !active) return;
+    const id = window.setInterval(() => {
+      if (!touched.current) setPlay((p) => p + 1);
+    }, REPLAY_MS);
+    return () => window.clearInterval(id);
+  }, [autoplay, reduce, active]);
+
+  return (
+    <div
+      ref={root}
+      className="flex w-full max-w-[640px] flex-col items-start gap-6 px-2"
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <p ref={para} key={play} className={cn("m-0 text-[clamp(22px,3.4vw,30px)] font-semibold leading-[1.45] tracking-[-0.02em] text-[#1d1d1f] dark:text-[#f5f5f7]", className)}>
+        {segments.map((s, i) =>
+          typeof s === "string" ? (
+            <Fragment key={i}>{s}</Fragment>
+          ) : (
+            <Mark key={i} kind={s.kind} delay={s.delay ?? i * 0.4} color={s.color ?? KIND_COLORS[s.kind].light} darkColor={s.darkColor ?? KIND_COLORS[s.kind].dark} go={go} reduce={reduce}>
+              {s.text}
+            </Mark>
+          ),
+        )}
+      </p>
+      {showReplay && (
+        <button
+          type="button"
+          onClick={() => {
+            touched.current = true;
+            setPlay((p) => p + 1);
+          }}
+          className={cn("flex h-9 items-center gap-1.5 rounded-full bg-[#f5f5f7] px-4 text-[13px] font-medium text-[#1d1d1f] hover:bg-[#ececf0] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:hover:bg-[#3a3a3c]", FOCUS)}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+            <path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7" />
+          </svg>
+          {replayLabel}
+        </button>
+      )}
+    </div>
+  );
+}
+```
+
+--- components/hover-highlight-text.tsx ---
+
+```tsx
+export { HoverHighlightText } from "./hover-highlight-text/hover-highlight-text";
+export type { HoverHighlightTextProps } from "./hover-highlight-text/hover-highlight-text";
+export { MarkerAnnotations, MARKER_SEGMENTS } from "./hover-highlight-text/marker-annotations";
+export type { MarkerAnnotationsProps, MarkerKind, MarkerSegment } from "./hover-highlight-text/marker-annotations";
+```
+
+--- lib/utils.ts ---
+
+```ts
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+```

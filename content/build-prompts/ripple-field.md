@@ -1,80 +1,195 @@
 # Ripple Field
 
-Build a quiet, full-width grid of small grey dots on a rounded card. Clicking anywhere sends an invisible ring outward from that point; every dot the ring crosses bursts into a random bright colour, gets kicked away from the centre, then springs back home and fades to grey. Dots near the pointer swell slightly. The feel is soft and playful, like dropping a pebble into a pond of confetti.
+Add the "Ripple Field" component from Nexus UI to my project.
 
-## Stack
+A quiet grid of dots: click anywhere and a ring travels outward. Every dot it crosses bursts into colour, gets kicked away from the centre and springs back home.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS. Rendering is a single 2D `<canvas>` driven by `requestAnimationFrame`; no animation library is needed.
-- File: `components/ripple-field/ripple-field.tsx`, named export `RippleField`. Also export the default palette as `RIPPLE_FIELD_PALETTE`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { RippleField, RIPPLE_FIELD_PALETTE } from "@/components/ripple-field";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `height` | `number` | `300` | Field height in px. Width always fills the container. |
-| `gap` | `number` | `18` | Distance between dot centres in px. |
-| `colors` | `string[]` | `RIPPLE_FIELD_PALETTE` | Colours a dot can burst into; one is picked at random each time a ring hits it. |
-| `autoplay` | `boolean` | `false` | Drops rings at random spots until the user clicks. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-`RIPPLE_FIELD_PALETTE = ["#ff375f", "#ff9f0a", "#ffd60a", "#30d158", "#64d2ff", "#0a84ff", "#bf5af2"]`.
+--- components/ripple-field/index.ts ---
 
-## Layout and look
+```ts
+export { RippleField, RIPPLE_FIELD_PALETTE } from "./ripple-field";
+export type { RippleFieldProps } from "./ripple-field";
+```
 
-- Wrapper: `relative w-full overflow-hidden`, height = `height`, radius 24px, `cursor-crosshair`, no outline. Light: background `#ffffff`, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 50px -28px rgba(0,0,0,.3)`. Dark: background `#1c1c1e`, shadow `0 0 0 1px rgba(255,255,255,.08), 0 20px 50px -28px rgba(0,0,0,.8)`. Focus-visible: 2px ring `#0071e3` (dark `#0a84ff`).
-- Canvas: absolutely fills the wrapper. Backing store = CSS size × devicePixelRatio, with DPR capped at 2; draw with `setTransform(dpr,0,0,dpr,0,0)` and clear every frame.
-- Dots: a grid starting at `gap / 2` on both axes and stepping by `gap` while inside the width/height. Rebuild the grid (and resize the canvas) with a `ResizeObserver` on the wrapper.
-- Resting dot: radius 1.6px, fill `rgba(ink, .18)` where ink is `29,29,31` in light mode and `245,245,247` in dark mode. Because the canvas cannot read Tailwind classes, detect dark mode by checking whether `document.documentElement` has the `dark` class, kept current with a `MutationObserver` on its `class` attribute.
+--- components/ripple-field/ripple-field.tsx ---
 
-## Motion
+```tsx
+"use client";
+import { useEffect, useRef, type PointerEvent as RPointerEvent } from "react";
 
-Keep a list of rings `{ x, y, t }` (t = `performance.now()` at creation) and per-dot state `{ offset (ox, oy), velocity (vx, vy), energy e, colour c, lastHitRing }`.
+export interface RippleFieldProps {
+  /** Height of the field in px. It fills the width of its container. */
+  height?: number;
+  /** Distance between dots in px. */
+  gap?: number;
+  /** Colours a dot can burst into; one is picked at random per hit. */
+  colors?: string[];
+  /** Drops rings at random spots until the user clicks. */
+  autoplay?: boolean;
+}
 
-Constants: ring speed `SPEED = 340` px/s, band half-width `BAND = 22` px, max radius `MAXR = 230` px, ring lifetime `MAXR / 340 × 1000 + 100` ms (≈776ms); drop expired rings each frame. Frame delta `dt` is in seconds and clamped to `0.033`.
+export const RIPPLE_FIELD_PALETTE = ["#ff375f", "#ff9f0a", "#ffd60a", "#30d158", "#64d2ff", "#0a84ff", "#bf5af2"];
 
-For each dot, each frame:
+/**
+ * A quiet grid of dots. Click and a ring travels outward from that point; dots
+ * it passes over burst into colour, get kicked away from the centre, and then
+ * settle back to grey.
+ */
+export function RippleField({ height = 300, gap = 18, colors = RIPPLE_FIELD_PALETTE, autoplay = false }: RippleFieldProps) {
+  const wrap = useRef<HTMLDivElement>(null);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const rings = useRef<{ x: number; y: number; t: number }[]>([]);
+  const pointer = useRef<{ x: number; y: number } | null>(null);
+  const touched = useRef(false);
+  const dark = useRef(false);
 
-1. **Ring hits.** For every live ring, `radius = (now − t)/1000 × SPEED`. If `radius < MAXR`, `|dist(dot, ring centre) − radius| < BAND`, and the dot has not already been hit by this ring, register a hit:
-   - `strength = 1 − radius / MAXR` (hits weaken with distance);
-   - `e = max(e, 0.35 + 0.65 × strength)`;
-   - pick a random colour from `colors`;
-   - `kick = (60 + random × 120) × strength`, added to the velocity along the unit vector from the ring centre to the dot (guard against division by zero).
-2. **Spring home** (semi-implicit Euler):
-   ```
-   v += −offset × 90 × dt;  v *= 0.02^dt;  offset += v × dt
-   ```
-   i.e. stiffness 90 with velocity keeping 2% of itself per second.
-3. **Colour decay**: `e = max(0, e − 1.1 × dt)`.
-4. **Size**: `1.6 + 2.6 × e`. If the pointer is over the field, `hover = max(0, 1 − pointerDistance / 70)` and size grows by `1.2 × hover`.
-5. **Draw** a circle at `home + offset`. If `e > 0.02`, fill with the dot's colour at alpha `min(1, 0.25 + e)`. Otherwise fill with ink at alpha `0.22 + 0.4 × hover` when hovered, or `0.18` when not.
+  // Track the site theme so the resting dots can be redrawn in the right ink.
+  useEffect(() => {
+    const root = document.documentElement;
+    const update = () => {
+      dark.current = root.classList.contains("dark");
+    };
+    update();
+    const mo = new MutationObserver(update);
+    mo.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => mo.disconnect();
+  }, []);
 
-Reset `globalAlpha` to 1 after drawing.
+  useEffect(() => {
+    const cv = canvas.current;
+    const el = wrap.current;
+    const ctx = cv?.getContext("2d");
+    if (!cv || !el || !ctx) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    let w = 0, h = 0, raf = 0;
+    type Dot = { x: number; y: number; e: number; c: string; ox: number; oy: number; vx: number; vy: number; hit: number };
+    let dots: Dot[] = [];
+    const build = () => {
+      w = el.clientWidth;
+      h = height;
+      cv.width = w * dpr;
+      cv.height = h * dpr;
+      cv.style.width = w + "px";
+      cv.style.height = h + "px";
+      dots = [];
+      for (let y = gap / 2; y < h; y += gap) for (let x = gap / 2; x < w; x += gap) dots.push({ x, y, e: 0, c: colors[0], ox: 0, oy: 0, vx: 0, vy: 0, hit: -1 });
+    };
+    build();
+    const ro = new ResizeObserver(build);
+    ro.observe(el);
 
-## Interaction and states
+    const SPEED = 340, BAND = 22, MAXR = 230, LIFE = (MAXR / 340) * 1000 + 100;
+    let last = performance.now();
+    const frame = (now: number) => {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
+      const ink = dark.current ? "245,245,247" : "29,29,31";
+      rings.current = rings.current.filter((r) => now - r.t < LIFE);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      for (const d of dots) {
+        for (let k = 0; k < rings.current.length; k++) {
+          const r = rings.current[k];
+          const radius = ((now - r.t) / 1000) * SPEED;
+          const dx = d.x - r.x, dy = d.y - r.y;
+          const dist = Math.hypot(dx, dy);
+          if (radius < MAXR && Math.abs(dist - radius) < BAND && d.hit !== r.t) {
+            d.hit = r.t;
+            const strength = 1 - radius / MAXR;
+            d.e = Math.max(d.e, 0.35 + strength * 0.65);
+            d.c = colors[Math.floor(Math.random() * colors.length)];
+            const kick = (60 + Math.random() * 120) * strength;
+            d.vx += (dx / (dist || 1)) * kick;
+            d.vy += (dy / (dist || 1)) * kick;
+          }
+        }
+        // Spring the dot back home and let the colour decay.
+        d.vx += -d.ox * 90 * dt;
+        d.vy += -d.oy * 90 * dt;
+        d.vx *= Math.pow(0.02, dt);
+        d.vy *= Math.pow(0.02, dt);
+        d.ox += d.vx * dt;
+        d.oy += d.vy * dt;
+        d.e = Math.max(0, d.e - dt * 1.1);
+        let size = 1.6 + d.e * 2.6;
+        let hover = 0;
+        if (pointer.current) {
+          const pd = Math.hypot(d.x - pointer.current.x, d.y - pointer.current.y);
+          hover = Math.max(0, 1 - pd / 70);
+          size += hover * 1.2;
+        }
+        ctx.beginPath();
+        ctx.arc(d.x + d.ox, d.y + d.oy, size, 0, Math.PI * 2);
+        if (d.e > 0.02) {
+          ctx.globalAlpha = Math.min(1, 0.25 + d.e);
+          ctx.fillStyle = d.c;
+        } else {
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = hover > 0 ? `rgba(${ink},${0.22 + hover * 0.4})` : `rgba(${ink},.18)`;
+        }
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    return () => { cancelAnimationFrame(raf); ro.disconnect(); };
+  }, [height, gap, colors]);
 
-- Pointer coordinates are converted to field-local px (scale by the wrapper's `clientWidth` and `height` so it stays correct under CSS transforms).
-- `pointermove`: store the pointer for the hover swell; `pointerleave`: clear it.
-- `pointerdown`: push a ring at the pointer and mark the component as touched.
-- Multiple rings can overlap; each dot reacts once per ring.
-- Keyboard: Enter or Space (with `preventDefault`) pushes a ring at the exact centre of the field. This does not count as touching, so autoplay keeps going.
-- Changing `height`, `gap` or `colors` restarts the loop and rebuilds the grid. Cancel the animation frame and disconnect observers on unmount.
+  useEffect(() => {
+    if (!autoplay) return;
+    const drop = () => {
+      if (touched.current || !wrap.current) return;
+      const w = wrap.current.clientWidth;
+      rings.current.push({ x: w * (0.15 + Math.random() * 0.7), y: height * (0.2 + Math.random() * 0.6), t: performance.now() });
+    };
+    const a = setTimeout(drop, 500);
+    const b = setInterval(drop, 1700);
+    return () => { clearTimeout(a); clearInterval(b); };
+  }, [autoplay, height]);
 
-## Autoplay demo
+  const local = (e: RPointerEvent) => {
+    const el = e.currentTarget as HTMLDivElement;
+    const r = el.getBoundingClientRect();
+    return { x: ((e.clientX - r.left) / r.width) * el.clientWidth, y: ((e.clientY - r.top) / r.height) * height };
+  };
 
-When `autoplay` is true, drop a ring 500ms after mount and then every 1700ms at a random point: x in 15%–85% of the width, y in 20%–80% of the height. Each drop is skipped once the user has pressed a pointer on the field, so the demo stops permanently after the first click.
-
-## Accessibility
-
-- Wrapper: `role="button"`, `tabIndex={0}`, `aria-label="Dot field. Click anywhere to send a ring of colour across it."`, visible focus ring.
-- Canvas is `aria-hidden="true"`.
-
-## Acceptance checklist
-
-- At rest the field shows an even grid of faint 1.6px dots, offset by half a gap from the edges.
-- A click produces an expanding ring of colour that reaches about 230px and is gone in under a second.
-- Dots near the click flash bigger, brighter and travel further than dots near the ring's edge.
-- Kicked dots overshoot slightly and settle back to their exact grid positions.
-- Colour fades to grey in under a second after a hit.
-- Moving the pointer swells and darkens dots within 70px.
-- Enter/Space fires a ring from the centre.
-- Toggling the `.dark` class on `<html>` switches the resting dots to light ink without a reload.
-- With `autoplay`, rings appear every 1.7s until the first click.
+  return (
+    <div
+      ref={wrap}
+      role="button"
+      tabIndex={0}
+      aria-label="Dot field. Click anywhere to send a ring of colour across it."
+      className="relative w-full cursor-crosshair overflow-hidden rounded-[24px] bg-white shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_50px_-28px_rgba(0,0,0,.3)] outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_50px_-28px_rgba(0,0,0,.8)] dark:focus-visible:ring-[#0a84ff]"
+      style={{ height }}
+      onPointerMove={(e) => {
+        pointer.current = local(e);
+      }}
+      onPointerLeave={() => {
+        pointer.current = null;
+      }}
+      onPointerDown={(e) => {
+        touched.current = true;
+        rings.current.push({ ...local(e), t: performance.now() });
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        const w = e.currentTarget.clientWidth;
+        rings.current.push({ x: w / 2, y: height / 2, t: performance.now() });
+      }}
+    >
+      <canvas ref={canvas} className="absolute inset-0" aria-hidden="true" />
+    </div>
+  );
+}
+```

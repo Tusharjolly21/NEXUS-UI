@@ -1,82 +1,607 @@
 # Throw Wheel
 
-Build a carousel of cards arranged around a 3D drum that you can grab and throw. While it spins, every card turns edge-on in the direction of travel and blurs with speed; as it slows down the cards straighten one by one on slightly different springs, and the wheel snaps a card dead to the front. The feel is weighty and physical, like flicking a real drum, with Apple-style travel cards.
+Add the "Throw Wheel" component from Nexus UI to my project.
 
-## Stack
+Cards on a 3D drum you can fling. While it spins every card turns edge-on and blurs with speed, then they straighten one by one as the wheel snaps a card to the front.
 
-- React 19.2+ client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `animate`, `useMotionValue`, `useMotionValueEvent`, `useSpring`, `useTransform`, `useVelocity`). The autoplay throw uses React's `useEffectEvent` (on older React, a ref to the latest callback).
-- File: `components/throw-wheel/throw-wheel.tsx`, named export `ThrowWheel`, plus exported `ThrowWheelProps` and `WheelCard = { title: string; sub: string; art: string }` (`art` is any CSS background).
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
+5. Use it like this: `import { ThrowWheel } from "@/components/throw-wheel";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `cards` | `WheelCard[]` | ten destinations | Cards on the drum. Titles are used as React keys, so keep them unique. |
-| `autoplay` | `boolean` | `false` | Throws the wheel every few seconds until someone grabs it. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Default cards (title, sub, art):
-Kyoto / Temples at dawn / `linear-gradient(160deg,#ffb3c7,#ff6482 60%,#bf5af2)`;
-Lisbon / Yellow trams / `linear-gradient(160deg,#ffe58a,#ffcc00 50%,#ff9f0a)`;
-Reykjavík / Blue lagoons / `linear-gradient(160deg,#c6f1ff,#64d2ff 50%,#0a84ff)`;
-Marrakesh / Spice markets / `linear-gradient(160deg,#ffc9a3,#ff9f0a 50%,#d1495b)`;
-Oaxaca / Painted streets / `linear-gradient(160deg,#b7f7c5,#30d158 55%,#0b8f6a)`;
-Hokkaido / Powder snow / `linear-gradient(160deg,#f2f2f7,#c7d7ff 55%,#7d8cff)`;
-Tbilisi / Balconies / `linear-gradient(160deg,#ffd6e7,#c49bff 60%,#5e5ce6)`;
-Cape Town / Table Mountain / `linear-gradient(160deg,#ffe2b8,#ffb36b 50%,#5ac8fa)`;
-Hanoi / Lakeside mornings / `linear-gradient(160deg,#d5ffe6,#66d4cf 55%,#0a84ff)`;
-Bergen / Fjords / `linear-gradient(160deg,#dbe9ff,#8fb5ff 50%,#30486e)`.
+--- components/throw-wheel/index.ts ---
 
-## Geometry
+```ts
+export { ThrowWheel } from "./throw-wheel";
+export type { ThrowWheelProps, WheelCard } from "./throw-wheel";
+```
 
-- Card 150×200. `n` cards, `step = 360/n` degrees.
-- Drum radius: `round(75 / tan(π/n)) + 40` (cards edge to edge plus 40px breathing room; 271px for ten cards).
-- Each card wrapper: centred in the stage (`left/top 50%`, negative half margins), `transform: rotateY(i·step deg) translateZ(radius px)`, `preserve-3d`.
-- Drum: an `absolute inset-0` layer with `preserve-3d`, `rotateY = rot` and `z = −radius` (pushes the drum back so the front card sits at the screen plane).
+--- components/throw-wheel/throw-wheel.tsx ---
 
-## Layout and look
+```tsx
+"use client";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { animate, motion, useMotionValue, useMotionValueEvent, useSpring, useTransform, useVelocity, type MotionValue } from "framer-motion";
+import { useSound } from "@/lib/ui-sounds";
 
-- Root: column, full width, items centred, 20px gap.
-- Stage: 260px tall, `w-full max-w-[720px]`, `overflow-hidden`, `perspective: 1100px`, `touch-pan-y` (vertical page scroll still works), `select-none`, `cursor-grab` / `active:cursor-grabbing`. Edge fade mask: `linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent)` (also `-webkit-mask-image`).
-- Card face: full size, radius 18px, 14px padding, content at the bottom, `overflow-hidden`, background `art`, shadow `0 18px 30px -16px rgba(0,0,0,.45)`, `backface-visibility: hidden`. Title 17px semibold, tracking −0.02em, white, `text-shadow: 0 1px 8px rgba(0,0,0,.25)`; sub 12px white at 85%.
-- Controls row (12px gap): Previous and Next buttons, 36×36 round, white with `#1d1d1f` icon and ring `0 0 0 1px rgba(0,0,0,.08)` (dark `#2c2c2e`, `#f5f5f7`, ring `rgba(255,255,255,.1)`), 14px chevrons (`M15 6l-6 6 6 6` / `M9 6l6 6-6 6`, stroke 2.6, round). Between them the front card's title, 14px medium, min-width 120px, centred, `#1d1d1f` (dark `#f5f5f7`).
+export interface WheelCard {
+  title: string;
+  sub: string;
+  /** Any CSS background for the card face. */
+  art: string;
+}
 
-## Motion
+export interface ThrowWheelProps {
+  cards?: WheelCard[];
+  /** Throws the wheel by itself every few seconds until the user grabs it. */
+  autoplay?: boolean;
+  /** Plays interface sounds on interaction. They follow the site-wide sound switch. Autoplay makes the same sounds once the visitor has used the page. */
+  enableSound?: boolean;
+}
 
-- `rot` (degrees) is the single source of truth. `vel = useVelocity(rot)` (deg/s).
-- **Tilt**: `tilt = clamp(−vel·0.09, −70, 70)` degrees. Each card face rotates on Y by its own `useSpring(tilt, { stiffness: 90 + (i % 3)·40, damping: 18 })`, so cards relax at three different rates and straighten one by one.
-- **Speed blur**: `blur = min(6, |vel|·0.006)` px, applied as `filter: blur()` on every face.
-- **Depth fade**: per card, angular distance from the front `= |((i·step + rot) mod 360, wrapped to −180..180)|`; opacity maps `[0, 90, 120] → [1, 0.75, 0]`, hiding the back of the drum.
-- **Drag**: rotation follows the pointer at 0.28° per px from the grab point. Track release velocity per move: `v = frameDx·0.28 / max(0.008, frameDt seconds)`.
-- **Throw and snap**: on release run an inertia animation: `animate(rot, rot.get(), { type: "inertia", velocity: v, power: 0.55, timeConstant: 420, modifyTarget: t => round(t/step)·step })`, so it glides and always lands with a card centred. Pointer cancel settles with velocity 0.
-- **Buttons**: `target = round(rot/step)·step − k·step` (Next `k = 1`, Previous `k = −1`), spring stiffness 60, damping 14 (a heavy, slightly overshooting turn that still triggers tilt and blur). `whileTap { scale: 0.9 }`.
-- Always stop the running animation before starting a new one, on pointer down, and on unmount.
+const CARDS: WheelCard[] = [
+  { title: "Kyoto", sub: "Temples at dawn", art: "linear-gradient(160deg,#ffb3c7,#ff6482 60%,#bf5af2)" },
+  { title: "Lisbon", sub: "Yellow trams", art: "linear-gradient(160deg,#ffe58a,#ffcc00 50%,#ff9f0a)" },
+  { title: "Reykjavík", sub: "Blue lagoons", art: "linear-gradient(160deg,#c6f1ff,#64d2ff 50%,#0a84ff)" },
+  { title: "Marrakesh", sub: "Spice markets", art: "linear-gradient(160deg,#ffc9a3,#ff9f0a 50%,#d1495b)" },
+  { title: "Oaxaca", sub: "Painted streets", art: "linear-gradient(160deg,#b7f7c5,#30d158 55%,#0b8f6a)" },
+  { title: "Hokkaido", sub: "Powder snow", art: "linear-gradient(160deg,#f2f2f7,#c7d7ff 55%,#7d8cff)" },
+  { title: "Tbilisi", sub: "Balconies", art: "linear-gradient(160deg,#ffd6e7,#c49bff 60%,#5e5ce6)" },
+  { title: "Cape Town", sub: "Table Mountain", art: "linear-gradient(160deg,#ffe2b8,#ffb36b 50%,#5ac8fa)" },
+  { title: "Hanoi", sub: "Lakeside mornings", art: "linear-gradient(160deg,#d5ffe6,#66d4cf 55%,#0a84ff)" },
+  { title: "Bergen", sub: "Fjords", art: "linear-gradient(160deg,#dbe9ff,#8fb5ff 50%,#30486e)" },
+];
 
-## Interaction and states
+const CW = 150;
+const CH = 200;
 
-- Front index: `((round(−rot/step) % n) + n) % n`, updated in state via `useMotionValueEvent(rot, "change")`; shown in the title label.
-- Pointer down on the stage: mark touched, stop animations, capture the pointer, store start x, start rotation, and timing.
+function Card({ card, i, n, rot, tilt, blur, radius }: { card: WheelCard; i: number; n: number; rot: MotionValue<number>; tilt: MotionValue<number>; blur: MotionValue<number>; radius: number }) {
+  const step = 360 / n;
+  // Cards nearer the front straighten first: each gets its own spring.
+  const distance = useTransform(rot, (r) => {
+    const a = (((i * step + r) % 360) + 540) % 360 - 180;
+    return Math.abs(a);
+  });
+  const stiffness = 90 + (i % 3) * 40;
+  const t = useSpring(tilt, { stiffness, damping: 18 });
+  const opacity = useTransform(distance, [0, 90, 120], [1, 0.75, 0]);
+  const filter = useTransform(blur, (b) => `blur(${b.toFixed(2)}px)`);
+  return (
+    <motion.div
+      className="absolute left-1/2 top-1/2"
+      style={{ width: CW, height: CH, marginLeft: -CW / 2, marginTop: -CH / 2, transform: `rotateY(${i * step}deg) translateZ(${radius}px)`, transformStyle: "preserve-3d", opacity }}
+    >
+      <motion.div
+        className="flex h-full w-full flex-col justify-end overflow-hidden rounded-[18px] p-3.5 shadow-[0_18px_30px_-16px_rgba(0,0,0,.45)]"
+        style={{ background: card.art, rotateY: t, filter, backfaceVisibility: "hidden" }}
+      >
+        <span className="text-[17px] font-semibold tracking-[-0.02em] text-white [text-shadow:0_1px_8px_rgba(0,0,0,.25)]">{card.title}</span>
+        <span className="text-[12px] text-white/85">{card.sub}</span>
+      </motion.div>
+    </motion.div>
+  );
+}
 
-## Autoplay demo
+/**
+ * Cards on a drum you can throw. While it spins, each card turns edge-on in the
+ * direction of travel and blurs with speed; as it slows they straighten one by
+ * one and the wheel snaps a card to the front.
+ */
+export function ThrowWheel({ cards = CARDS, autoplay = false, enableSound = true }: ThrowWheelProps) {
+  const play = useSound(enableSound);
+  const n = cards.length;
+  const step = 360 / n;
+  const radius = Math.round(CW / 2 / Math.tan(Math.PI / n)) + 40;
+  const rot = useMotionValue(0);
+  const vel = useVelocity(rot);
+  const tilt = useTransform(vel, (v) => Math.max(-70, Math.min(70, -v * 0.09)));
+  const blur = useTransform(vel, (v) => Math.min(6, Math.abs(v) * 0.006));
+  const [front, setFront] = useState(0);
+  const drag = useRef<{ x: number; r: number; lastX: number; lastT: number; v: number } | null>(null);
+  const ctl = useRef<{ stop: () => void } | null>(null);
+  const touched = useRef(false);
+  // True while the wheel is moving because of the user (drag, fling, Previous/Next); false for autoplay throws.
+  const audible = useRef(false);
+  const lastFront = useRef(0);
+  const lastTick = useRef(0);
+  const sound = (name: "tick" | "drop", vol: number) => (audible.current ? play(name, vol) : play.auto(name, vol));
 
-With `autoplay`: a throw at 700ms, then every 3600ms while not touched. Each throw calls the same settle with velocity `(70% chance −1, else +1)·(500 + random·900)` deg/s, so it spins, tilts, blurs and snaps exactly like a human throw. Clear timers on unmount.
+  useMotionValueEvent(rot, "change", (r) => {
+    const f = ((Math.round(-r / step) % n) + n) % n;
+    setFront(f);
+    if (f !== lastFront.current) {
+      lastFront.current = f;
+      const now = performance.now();
+      if (now - lastTick.current >= 40) {
+        lastTick.current = now;
+        sound("tick", 0.4);
+      }
+    }
+  });
 
-## Accessibility
+  const settle = (velocity: number) => {
+    ctl.current?.stop();
+    const from = rot.get();
+    ctl.current = animate(rot, [from], {
+      type: "inertia",
+      velocity,
+      power: 0.55,
+      timeConstant: 420,
+      modifyTarget: (t) => Math.round(t / step) * step,
+      onComplete: () => { if (Math.abs(rot.get() - from) > 0.5) sound("drop", 0.5); },
+    });
+  };
 
-- Stage: `role="region"`, `aria-label="Destinations carousel, showing {front title}"`.
-- Title label is `aria-live="polite"`.
-- Previous/Next are native buttons with `aria-label`s and a 2px focus outline `#0071e3` (dark `#0a84ff`); they are the keyboard path.
+  const spinBy = (cardsToMove: number) => {
+    ctl.current?.stop();
+    const target = Math.round(rot.get() / step) * step - cardsToMove * step;
+    ctl.current = animate(rot, target, { type: "spring", stiffness: 60, damping: 14, onComplete: () => sound("drop", 0.5) });
+  };
 
-## Acceptance checklist
+  const throwIt = useEffectEvent(() => {
+    if (!touched.current) {
+      audible.current = false;
+      settle((Math.random() > 0.3 ? -1 : 1) * (500 + Math.random() * 900));
+    }
+  });
 
-- [ ] Ten cards sit on a drum; the front card faces you, side cards recede and the back ones are hidden.
-- [ ] Dragging rotates the drum 1:1 with the pointer (0.28°/px).
-- [ ] A fast flick keeps spinning, cards twist edge-on up to 70° and blur up to 6px.
-- [ ] As it slows, cards straighten at visibly different moments.
-- [ ] It always comes to rest with one card exactly centred.
-- [ ] Next/Previous rotate by one card with a weighty spring; the title updates.
-- [ ] Vertical page scrolling still works over the stage on touch devices.
-- [ ] Autoplay throws every 3.6s in mostly one direction and stops after the first grab or button press.
+  useEffect(() => {
+    if (!autoplay) return;
+    const a = setTimeout(() => throwIt(), 700);
+    const b = setInterval(() => throwIt(), 3600);
+    return () => { clearTimeout(a); clearInterval(b); };
+  }, [autoplay]);
 
-## Sound
+  useEffect(() => () => ctl.current?.stop(), []);
 
-Add an `enableSound` prop (boolean, default `true`; `false` silences it). While the user drags or flings the drum, or presses Previous or Next, play `tick` (a ~12 ms high-passed noise click, played quiet at volume 0.4) each time a new card passes the front, at most once every 40 ms, and one soft `drop` (a low sine thump falling 380 to 120 Hz with a brief noise tap, volume 0.5) when it settles on a card after actually turning. The autoplay throws play the same `tick` and `drop` through the `auto` variant of the same play function (`play.auto`), which stays silent until the visitor has interacted with the page once, because browsers keep audio asleep until then. Hover is silent. The sounds follow the site-wide switch (`setSoundsEnabled`, on by default in installed apps), and no audio files are used: they are Web Audio synthesis in one file, `@/lib/ui-sounds`, which the CLI installs automatically with the component.
+  const current = cards[front] ?? cards[0];
+
+  return (
+    <div className="flex w-full flex-col items-center gap-5">
+      <div
+        className="relative h-[260px] w-full max-w-[720px] cursor-grab touch-pan-y select-none overflow-hidden active:cursor-grabbing"
+        style={{ perspective: 1100, maskImage: "linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)", WebkitMaskImage: "linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent)" }}
+        onPointerDown={(e) => {
+          touched.current = true;
+          audible.current = true;
+          ctl.current?.stop();
+          (e.currentTarget as Element).setPointerCapture(e.pointerId);
+          drag.current = { x: e.clientX, r: rot.get(), lastX: e.clientX, lastT: performance.now(), v: 0 };
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (!d) return;
+          const now = performance.now();
+          const dx = e.clientX - d.lastX;
+          d.v = (dx * 0.28) / Math.max(0.008, (now - d.lastT) / 1000);
+          d.lastX = e.clientX;
+          d.lastT = now;
+          rot.set(d.r + (e.clientX - d.x) * 0.28);
+        }}
+        onPointerUp={() => { if (drag.current) { settle(drag.current.v); drag.current = null; } }}
+        onPointerCancel={() => { if (drag.current) { settle(0); drag.current = null; } }}
+        role="region"
+        aria-label={`Destinations carousel, showing ${current?.title ?? ""}`}
+      >
+        <motion.div className="absolute inset-0" style={{ transformStyle: "preserve-3d", rotateY: rot, z: -radius }}>
+          {cards.map((c, i) => (
+            <Card key={c.title} card={c} i={i} n={n} rot={rot} tilt={tilt} blur={blur} radius={radius} />
+          ))}
+        </motion.div>
+      </div>
+      <div className="flex items-center gap-3">
+        <motion.button whileTap={{ scale: 0.9 }} type="button" aria-label="Previous" onClick={() => { touched.current = true; audible.current = true; spinBy(-1); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] dark:focus-visible:outline-[#0a84ff]">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+        </motion.button>
+        <span className="min-w-[120px] text-center text-[14px] font-medium text-[#1d1d1f] dark:text-[#f5f5f7]" aria-live="polite">{current?.title}</span>
+        <motion.button whileTap={{ scale: 0.9 }} type="button" aria-label="Next" onClick={() => { touched.current = true; audible.current = true; spinBy(1); }} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.08)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:bg-[#2c2c2e] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.1)] dark:focus-visible:outline-[#0a84ff]">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg>
+        </motion.button>
+      </div>
+    </div>
+  );
+}
+```
+
+--- lib/ui-sounds.ts ---
+
+```ts
+/**
+ * UI sounds with no audio files. Every sound is synthesised on the fly with
+ * the Web Audio API (oscillators, filtered noise and envelopes), so the whole
+ * library is this one file and nothing to download.
+ *
+ *   import { playSound } from "@/lib/ui-sounds";
+ *   <button onClick={() => playSound("pop")}>Like</button>
+ *
+ * Browsers only allow audio after a user gesture, so call it from a click,
+ * key press or pointer event.
+ *
+ * Components that make sound use the hook, which also honours the visitor's
+ * on/off choice (see "Preference" below):
+ *
+ *   const play = useSound(enableSound);
+ *   <button onClick={() => play("tap")}>Save</button>
+ *
+ * A component that plays itself (an autoplay demo) calls play.auto("tap") instead: the same sound,
+ * but silent until the visitor has clicked or pressed a key once on the page.
+ */
+
+import * as React from "react";
+
+export type SoundCategory = "Actions" | "Feedback" | "Navigation" | "Notifications" | "Selection" | "Movement" | "Progress" | "System";
+
+let ctx: AudioContext | null = null;
+let master: GainNode | null = null;
+let out: AudioNode | null = null;
+let analyserNode: AnalyserNode | null = null;
+let noiseBuf: AudioBuffer | null = null;
+
+function audio() {
+  if (typeof window === "undefined") return null;
+  if (!ctx) {
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return null;
+    ctx = new AC();
+    master = ctx.createGain();
+    master.gain.value = 0.5;
+    const comp = ctx.createDynamicsCompressor();
+    master.connect(comp).connect(ctx.destination);
+    out = comp;
+  }
+  if (ctx.state === "suspended") void ctx.resume();
+  return ctx;
+}
+
+/**
+ * A tap on everything the library plays, for drawing it (a level meter, a visualiser). It listens
+ * only; nothing extra is heard. Null on the server or before the browser allows audio.
+ */
+export function getSoundAnalyser(): AnalyserNode | null {
+  const c = audio();
+  if (!c || !out) return null;
+  if (!analyserNode) {
+    analyserNode = c.createAnalyser();
+    analyserNode.fftSize = 1024;
+    analyserNode.smoothingTimeConstant = 0.55;
+    out.connect(analyserNode);
+  }
+  return analyserNode;
+}
+
+function noise(c: AudioContext) {
+  if (!noiseBuf) {
+    noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const s = c.createBufferSource();
+  s.buffer = noiseBuf;
+  return s;
+}
+
+export type ToneOpts = { freq: number; to?: number; type?: OscillatorType; at?: number; attack?: number; decay?: number; gain?: number; glide?: number };
+export function tone(c: AudioContext, out: AudioNode, o: ToneOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const osc = c.createOscillator();
+  const g = c.createGain();
+  osc.type = o.type ?? "sine";
+  osc.frequency.setValueAtTime(o.freq, t0);
+  if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.glide ?? o.decay ?? 0.1));
+  const a = o.attack ?? 0.004, d = o.decay ?? 0.12, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  osc.connect(g).connect(out);
+  osc.start(t0);
+  osc.stop(t0 + a + d + 0.05);
+}
+
+export type NoiseOpts = { at?: number; attack?: number; decay?: number; gain?: number; filter?: BiquadFilterType; freq?: number; to?: number; q?: number };
+export function hiss(c: AudioContext, out: AudioNode, o: NoiseOpts) {
+  const t0 = c.currentTime + (o.at ?? 0);
+  const n = noise(c);
+  const f = c.createBiquadFilter();
+  const g = c.createGain();
+  f.type = o.filter ?? "bandpass";
+  f.frequency.setValueAtTime(o.freq ?? 2000, t0);
+  if (o.to) f.frequency.exponentialRampToValueAtTime(o.to, t0 + (o.attack ?? 0.01) + (o.decay ?? 0.1));
+  f.Q.value = o.q ?? 1;
+  const a = o.attack ?? 0.003, d = o.decay ?? 0.08, peak = o.gain ?? 0.3;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d);
+  n.connect(f).connect(g).connect(out);
+  n.start(t0, Math.random() * 0.5);
+  n.stop(t0 + a + d + 0.05);
+}
+
+/** One sound: how it is made from oscillators and noise. `tone` and `hiss` are the building blocks. */
+export type SoundDef = {
+  category: string;
+  label: string;
+  play: (c: AudioContext, out: AudioNode) => void;
+  /** Seconds the sound lasts, when it runs longer than the two the engine keeps it connected for (a recording). */
+  length?: number;
+};
+type Def = SoundDef & { category: SoundCategory };
+
+export const SOUNDS = {
+  tap: { category: "Actions", label: "Tap", play: (c, o) => { tone(c, o, { freq: 900, to: 620, decay: 0.06, gain: 0.25 }); hiss(c, o, { freq: 4000, decay: 0.015, gain: 0.08, filter: "highpass" }); } },
+  pop: { category: "Actions", label: "Pop", play: (c, o) => tone(c, o, { freq: 320, to: 980, glide: 0.07, decay: 0.09, gain: 0.35 }) },
+  knock: { category: "Actions", label: "Knock", play: (c, o) => { tone(c, o, { freq: 160, to: 90, decay: 0.1, gain: 0.5 }); hiss(c, o, { freq: 900, decay: 0.04, gain: 0.25, q: 2 }); tone(c, o, { at: 0.11, freq: 150, to: 85, decay: 0.09, gain: 0.35 }); hiss(c, o, { at: 0.11, freq: 900, decay: 0.035, gain: 0.18, q: 2 }); } },
+
+  success: { category: "Feedback", label: "Landed", play: (c, o) => { tone(c, o, { freq: 1046.5, decay: 0.18, gain: 0.22, type: "triangle" }); tone(c, o, { at: 0.09, freq: 1318.5, decay: 0.32, gain: 0.22, type: "triangle" }); } },
+  error: { category: "Feedback", label: "Bump", play: (c, o) => { tone(c, o, { freq: 220, decay: 0.09, gain: 0.18, type: "square" }); tone(c, o, { at: 0.11, freq: 185, decay: 0.14, gain: 0.18, type: "square" }); } },
+  paid: { category: "Feedback", label: "Paid", play: (c, o) => [1318.5, 1568, 2093].forEach((f, i) => tone(c, o, { at: i * 0.065, freq: f, decay: 0.35 - i * 0.05, gain: 0.16, type: "triangle" })) },
+
+  whoosh: { category: "Navigation", label: "Whisk", play: (c, o) => hiss(c, o, { attack: 0.06, decay: 0.18, freq: 400, to: 3200, gain: 0.22, q: 0.8 }) },
+  step: { category: "Navigation", label: "Step", play: (c, o) => { tone(c, o, { freq: 520, decay: 0.05, gain: 0.18 }); tone(c, o, { at: 0.06, freq: 700, decay: 0.07, gain: 0.16 }); } },
+  glide: { category: "Navigation", label: "Glide", play: (c, o) => tone(c, o, { freq: 440, to: 880, glide: 0.18, attack: 0.03, decay: 0.2, gain: 0.18 }) },
+
+  chime: { category: "Notifications", label: "Chime", play: (c, o) => [1, 2.76, 5.4].forEach((m, i) => tone(c, o, { freq: 880 * m, decay: 0.9 / (i + 1), gain: 0.18 / (i + 1) })) },
+  ping: { category: "Notifications", label: "Ping", play: (c, o) => tone(c, o, { freq: 1760, decay: 0.6, gain: 0.16 }) },
+  beacon: { category: "Notifications", label: "Beacon", play: (c, o) => { tone(c, o, { freq: 1175, decay: 0.25, gain: 0.18, type: "triangle" }); tone(c, o, { at: 0.18, freq: 1568, decay: 0.45, gain: 0.18, type: "triangle" }); } },
+
+  tick: { category: "Selection", label: "Tick", play: (c, o) => hiss(c, o, { freq: 5000, decay: 0.012, gain: 0.3, filter: "highpass" }) },
+  on: { category: "Selection", label: "Latch on", play: (c, o) => { hiss(c, o, { freq: 3000, decay: 0.01, gain: 0.2 }); tone(c, o, { at: 0.01, freq: 600, to: 900, decay: 0.07, gain: 0.2 }); } },
+  off: { category: "Selection", label: "Latch off", play: (c, o) => { hiss(c, o, { freq: 2400, decay: 0.01, gain: 0.18 }); tone(c, o, { at: 0.01, freq: 760, to: 480, decay: 0.07, gain: 0.18 }); } },
+
+  lift: { category: "Movement", label: "Lift", play: (c, o) => { hiss(c, o, { attack: 0.03, decay: 0.08, freq: 800, to: 2400, gain: 0.14 }); tone(c, o, { freq: 300, to: 520, decay: 0.08, gain: 0.12 }); } },
+  drop: { category: "Movement", label: "Drop", play: (c, o) => { tone(c, o, { freq: 380, to: 120, glide: 0.08, decay: 0.12, gain: 0.35 }); hiss(c, o, { at: 0.06, freq: 600, decay: 0.05, gain: 0.15 }); } },
+  swipe: { category: "Movement", label: "Swipe", play: (c, o) => hiss(c, o, { attack: 0.02, decay: 0.12, freq: 3200, to: 500, gain: 0.2, q: 1.2 }) },
+
+  charge: { category: "Progress", label: "Charge", play: (c, o) => tone(c, o, { freq: 220, to: 880, glide: 0.5, attack: 0.08, decay: 0.5, gain: 0.14, type: "triangle" }) },
+  done: { category: "Progress", label: "Complete", play: (c, o) => [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(c, o, { at: i * 0.04, freq: f, attack: 0.01, decay: 0.6, gain: 0.1, type: "triangle" })) },
+  loading: { category: "Progress", label: "Loading", play: (c, o) => [0, 0.12, 0.24].forEach((at, i) => tone(c, o, { at, freq: 660 + i * 40, decay: 0.05, gain: 0.12 })) },
+
+  boot: { category: "System", label: "Boot", play: (c, o) => [130.8, 196, 261.6, 392].forEach((f, i) => tone(c, o, { at: i * 0.07, freq: f, attack: 0.08, decay: 0.9, gain: 0.08, type: "sine" })) },
+  hush: { category: "System", label: "Hush", play: (c, o) => { tone(c, o, { freq: 520, to: 180, glide: 0.35, attack: 0.02, decay: 0.35, gain: 0.14 }); hiss(c, o, { attack: 0.05, decay: 0.3, freq: 1800, to: 300, gain: 0.06, filter: "lowpass" }); } },
+  alert: { category: "System", label: "Alert", play: (c, o) => [0, 0.16, 0.32].forEach((at, i) => tone(c, o, { at, freq: i % 2 ? 740 : 988, decay: 0.12, gain: 0.14, type: "triangle" })) },
+} satisfies Record<string, Def>;
+
+export type SoundName = keyof typeof SOUNDS;
+
+// ── Style ───────────────────────────────────────────────────────────
+//
+// A style re-voices the sounds above under the same names, so every component that plays "tap" or
+// "chime" changes voice at once and no component code changes. The default style is "nexus" (the
+// recipes in this file). Another file can add one: `@/lib/ui-sounds-mac` registers "mac" when it is
+// imported. The visitor's choice is kept in localStorage ("ui-sounds-style").
+
+const STYLE_KEY = "ui-sounds-style";
+const styles = new Map<string, Partial<Record<SoundName, SoundDef>>>();
+let style: string | null = null;
+const styleListeners = new Set<() => void>();
+
+/** Adds a style: recipes keyed by the sound names above. Missing names fall back to the default. */
+export function registerSoundStyle(name: string, defs: Partial<Record<SoundName, SoundDef>>) {
+  styles.set(name, defs);
+  styleListeners.forEach((l) => l());
+}
+
+/** The active style: "nexus" unless the visitor or your code picked another. */
+export function getSoundStyle(): string {
+  if (style === null) {
+    style = "nexus";
+    if (typeof window !== "undefined") {
+      try {
+        style = window.localStorage.getItem(STYLE_KEY) || "nexus";
+      } catch {
+        // storage blocked: the default style
+      }
+    }
+  }
+  return style;
+}
+
+/** Pick the style every sound uses. Remembered in this browser unless `persist` is false. */
+export function setSoundStyle(name: string, persist = true) {
+  style = name;
+  if (persist && typeof window !== "undefined") {
+    try {
+      window.localStorage.setItem(STYLE_KEY, name);
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  styleListeners.forEach((l) => l());
+}
+
+function subscribeStyle(onChange: () => void) {
+  styleListeners.add(onChange);
+  return () => {
+    styleListeners.delete(onChange);
+  };
+}
+
+/** The style as React state: `[style, setStyle]`. The server render reads "nexus". */
+export function useSoundStyle(): [string, (name: string) => void] {
+  const current = React.useSyncExternalStore(subscribeStyle, getSoundStyle, () => "nexus");
+  return [current, setSoundStyle];
+}
+
+// ── Preference ──────────────────────────────────────────────────────
+//
+// One switch for every sound on the page. A visitor's choice is kept in
+// localStorage ("ui-sounds": "on" | "off"); until they choose, the default
+// applies (on, unless you call configureSounds({ defaultEnabled: false })).
+
+const STORE_KEY = "ui-sounds";
+let defaultEnabled = true;
+let chosen: boolean | null = null; // the visitor's saved or runtime choice
+let loaded = false;
+const listeners = new Set<() => void>();
+
+function load() {
+  if (loaded || typeof window === "undefined") return;
+  loaded = true;
+  try {
+    const v = window.localStorage.getItem(STORE_KEY);
+    if (v === "on") chosen = true;
+    else if (v === "off") chosen = false;
+  } catch {
+    // storage blocked: the default applies
+  }
+}
+
+function emit() {
+  listeners.forEach((l) => l());
+}
+
+/** Whether sounds are on right now. */
+export function getSoundsEnabled(): boolean {
+  load();
+  return chosen ?? defaultEnabled;
+}
+
+/** Whether sounds are on until the visitor chooses. Call once, early, in client code. */
+export function configureSounds(opts: { defaultEnabled?: boolean }) {
+  if (typeof opts.defaultEnabled === "boolean" && opts.defaultEnabled !== defaultEnabled) {
+    defaultEnabled = opts.defaultEnabled;
+    emit();
+  }
+}
+
+/** Turn sounds on or off. The choice is remembered in this browser unless `persist` is false. */
+export function setSoundsEnabled(on: boolean, persist = true) {
+  load();
+  chosen = on;
+  if (persist) {
+    try {
+      window.localStorage.setItem(STORE_KEY, on ? "on" : "off");
+    } catch {
+      // storage blocked: the choice lasts until the page closes
+    }
+  }
+  emit();
+}
+
+/** Mute or unmute every sound for this page load (for a "Sounds off" preference you store yourself). */
+export function setSoundsMuted(value: boolean) {
+  setSoundsEnabled(!value, false);
+}
+
+function subscribe(onChange: () => void) {
+  listeners.add(onChange);
+  const onStorage = (e: StorageEvent) => {
+    if (e.key !== STORE_KEY) return;
+    loaded = false;
+    chosen = null;
+    emit();
+  };
+  if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+  return () => {
+    listeners.delete(onChange);
+    if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+  };
+}
+
+/**
+ * The sound switch as React state: `[enabled, setEnabled]`. Use it for a speaker button. The server
+ * render always reads "off", so the first paint matches and the real value arrives right after.
+ */
+export function useSoundsEnabled(): [boolean, (on: boolean) => void] {
+  const enabled = React.useSyncExternalStore(subscribe, getSoundsEnabled, () => false);
+  return [enabled, setSoundsEnabled];
+}
+
+// ── Playing ─────────────────────────────────────────────────────────
+
+const lastPlayed = new Map<string, number>();
+
+/**
+ * Play a sound by name. volume is 0..1 on top of the master level. It stays silent while the
+ * visitor has sounds off, unless `force` is set (for a button whose whole job is to play the sound).
+ */
+export function playSound(name: SoundName, volume = 1, force = false) {
+  if (!(name in SOUNDS)) return;
+  // The active style may voice this sound differently; anything it leaves out keeps the default.
+  playDef(name, styles.get(getSoundStyle())?.[name] ?? SOUNDS[name], volume, force);
+}
+
+/**
+ * Play any sound definition (the Pro sound pack uses this). `key` names it for the 30 ms de-bounce.
+ * It follows the same on/off switch as playSound.
+ */
+export function playDef(key: string, def: SoundDef, volume = 1, force = false) {
+  if (!force && !getSoundsEnabled()) return;
+  if (typeof document !== "undefined" && document.hidden) return;
+  // The same sound twice within 30ms is one sound: it keeps fast input from stacking into a buzz.
+  const now = typeof performance !== "undefined" ? performance.now() : Date.now();
+  if (now - (lastPlayed.get(key) ?? -1e9) < 30) return;
+  lastPlayed.set(key, now);
+  const c = audio();
+  if (!c || !master) return;
+  const g = c.createGain();
+  g.gain.value = Math.max(0, Math.min(1, volume));
+  g.connect(master);
+  def.play(c, g);
+  setTimeout(() => g.disconnect(), Math.max(2000, (def.length ?? 0) * 1000 + 300));
+}
+
+/** Whether the audio engine is awake. Browsers keep it asleep until the visitor's first click or key press. */
+export function audioAwake() {
+  // The visitor has clicked or pressed a key somewhere on the page: the browser lets us start audio now.
+  if (!ctx && typeof navigator !== "undefined" && navigator.userActivation?.hasBeenActive) audio();
+  return !!ctx && ctx.state === "running";
+}
+
+/**
+ * Autoplay demos make sound too, but only where you allow it. It is allowed everywhere by default.
+ * Wrap a part of the page in <AutoplaySound allow={false}> to keep demos silent there (a grid of
+ * previews, say) and in <AutoplaySound allow> to let the one you are showing be heard.
+ */
+// Server components load this file for the sound list; they have no createContext, and never render the provider.
+const AutoplayCtx = (typeof React.createContext === "function" ? React.createContext(true) : null) as unknown as React.Context<boolean>;
+export function AutoplaySound({ allow, children }: { allow: boolean; children?: React.ReactNode }) {
+  return React.createElement(AutoplayCtx.Provider, { value: allow }, children);
+}
+
+/** Whether autoplay demos may make sound here (see AutoplaySound). Used by the Pro sound hook. */
+export function useAutoplaySoundAllowed() {
+  return React.useContext(AutoplayCtx);
+}
+
+export type SoundPlayer = {
+  (name: SoundName, volume?: number): void;
+  /** For a sound that answers the component playing itself (autoplay). Silent until the visitor has used the page once. */
+  auto: (name: SoundName, volume?: number) => void;
+};
+
+/**
+ * For a component with a `sound` option: returns a play function that is silent when `enabled` is
+ * false and otherwise follows the visitor's on/off switch. `play.auto(...)` is the same for sounds
+ * made by autoplay.
+ *
+ *   const play = useSound(enableSound);
+ */
+export function useSound(enabled = true): SoundPlayer {
+  const auto = React.useContext(AutoplayCtx);
+  return React.useMemo(
+    () =>
+      Object.assign(
+        (name: SoundName, volume = 1) => {
+          if (enabled) playSound(name, volume);
+        },
+        {
+          auto: (name: SoundName, volume = 1) => {
+            if (enabled && auto && audioAwake()) playSound(name, volume);
+          },
+        },
+      ),
+    [enabled, auto],
+  );
+}
+
+/** Set the overall level for every sound, 0..1. */
+export function setSoundVolume(v: number) {
+  audio();
+  if (master) master.gain.value = Math.max(0, Math.min(1, v)) * 0.5;
+}
+```

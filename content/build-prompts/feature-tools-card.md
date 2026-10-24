@@ -1,70 +1,341 @@
-Build an integrations feature card. In a soft grey dotted panel, five colourful tool tiles (mail, chat, calendar, docs, cloud) ride slowly round a dashed ring that circles your app's dark hub tile. Each tool is wired to the hub by a thin coloured line that carries a small packet dot inward. Bring the pointer near and the tools lean toward it like magnets, growing slightly with a deeper shadow while their line lights up and their packets speed up; move away and they snap back with a wobble. The whole card tilts toward the pointer in 3D. A title and a line of copy sit below.
+Add the "Feature Tools Card" component from Nexus UI to my project.
 
-## Stack
+An integrations card: five tool icons ride a slow ring round your app's hub, each wired to it by a line that carries small packets inward. Bring the pointer near and the tools lean toward it like magnets, their line lights up and they snap back with a wobble when it moves away, while the whole card tilts toward the pointer.
 
-- React client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `useMotionValue`, `useReducedMotion`, `useSpring`, `useTransform`).
-- File: `components/feature-tools-card/feature-tools-card.tsx`, named export `FeatureToolsCard` (also default), type `FeatureToolsCardProps`.
-- One `requestAnimationFrame` loop in the card drives every tool and writes line/packet attributes directly to SVG elements via refs (no React re-render per frame). Each tool registers a per-frame function with the parent.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { FeatureToolsCard } from "@/components/feature-tools-card";`. The props are typed and documented in the code.
 
-| Prop | Type | Default | Meaning |
-| --- | --- | --- | --- |
-| `title` | `string` | `"Connects with your stack"` | Heading. |
-| `description` | `string` | `"Mail, chat, calendar, docs and storage, synced the moment they change."` | Copy. |
-| `cardBg` | `string` | white / dark `#1c1c1e` | Card background. |
-| `icon1`…`icon5` | `ReactNode` | drawn glyphs | Replace a tool's glyph; custom icons sit on a white tile. |
-| `hubIcon` | `ReactNode` | crosshair glyph | Hub logo. |
-| `enableTilt` | `boolean` | `true` | 3D tilt. |
-| `tiltStrength` | `number` | `8` | Max tilt degrees. |
-| `enableMagnetic` | `boolean` | `true` | Tools lean to the pointer. |
-| `magneticStrength` | `number` | `0.4` | Share of the distance a tool travels (0-1). |
-| `magneticRadius` | `number` | `120` | px at which a tool starts to feel the pointer. |
-| `enableOrbit` | `boolean` | `true` | Tools ride the ring. |
-| `orbitSpeed` | `number` | `36` | Seconds per turn. |
-| `orbitColor` | `string` | `#c7c7cc` / dark `#48484a` | Dashed ring colour. |
-| `autoplay` | `boolean` | `false` | A virtual pointer sweeps round until touched. |
-| `className` | `string` | `""` | Card classes. |
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-## Layout and look
+--- components/feature-tools-card/feature-tools-card.tsx ---
 
-- Card: 340px wide (max 100%), radius 24, padding 16, shadow `0 0 0 1px rgba(0,0,0,.05), 0 20px 40px -26px rgba(0,0,0,.35)` (dark `rgba(255,255,255,.08)` / `rgba(0,0,0,.9)`), text `#1d1d1f` / `#f5f5f7`, `transformPerspective: 900`.
-- Stage: 228px tall, radius 18, overflow hidden, `#f5f5f7` (dark `#2c2c2e`), dot grid `radial-gradient(circle, rgba(0,0,0,.07) 1px, transparent 1.2px)` at 14×14px.
-- An overflow-visible 1×1 SVG at the stage centre holds: the ring (r 84, stroke 1.5, dash `3 7`, round caps); five lines from (0,0) to each tool, stroke in that tool's colour, width 1.5, round caps, base stroke opacity 0.22; five packet circles r 2.6 in the tool colours.
-- Tool colours: `#0a84ff`, `#30b65a`, `#ff375f`, `#ff9f0a`, `#bf5af2`. Labels: Mail, Chat, Calendar, Docs, Cloud.
-- Tool tile: 46px, radius 13, centred on its position, background `linear-gradient(160deg, {colour}cc, {colour})` with a white 22px glyph (stroke 2, round): mail (rect + V), chat bubble, calendar, document, cloud. With a custom icon: white tile and the icon at 24px. `title` attribute = label.
-- Hub (z 20): 64px, radius 20, `#1d1d1f` with white icon (dark `#f5f5f7` / `#1d1d1f`), shadow `0 12px 24px -12px rgba(0,0,0,.6)`. Default glyph: a 3.2-radius circle with four short ticks (28px, stroke 2.2). Behind it a pulse square in `#0071e3`/25% (dark `#0a84ff`/30%).
-- Title: 16px below, 4px side padding, 17px semibold, tight leading, tracking −0.02em. Description: 13px, line-height 1.45, `#6e6e73` / `#a1a1a6`.
+```tsx
+"use client";
 
-## Motion
+import { useCallback, useEffect, useRef, type ReactNode } from "react";
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform, type MotionValue } from "framer-motion";
 
-- Ring: the dashed circle rotates 360° linearly every `orbitSpeed` s, forever (if orbit enabled).
-- Tool position: start angle `−90° + i·72°`; current angle adds `t·360/orbitSpeed` when orbiting. Base point `(cos a·84, sin a·84)`. Render the resting position on the server too (rounded to 2 decimals).
-- Magnetism per frame: `d` from base to pointer (pointer in stage-centre coordinates); `near = max(0, 1 − |d|/magneticRadius)` when live and enabled. Target offset `d·near·strength`, through springs stiffness 260, damping 13 (that's the wobble). `pull = near` through a spring 300/18; `scale = 1 + 0.14·pull`; shadow `0 {8 + 10p}px {18 + 14p}px −10px rgba(0,0,0, 0.35 + 0.15p)`.
-- Lines: endpoint = base + sprung offset; stroke opacity `0.22 + 0.78·near`.
-- Packets: phase `k = (t·(0.45 + 0.9·near) + 0.21·i) mod 1`; position = endpoint·(1 − k) (travelling inward to the hub); opacity `sin(k·π)·(0.55 + 0.45·near)`.
-- Hub pulse: scale 1 → 1.55, opacity 0.6 → 0 over 2.2s easeOut, forever.
-- Tilt: `rotateY = (x% − 0.5)·2·tiltStrength`, `rotateX = −(y% − 0.5)·2·tiltStrength`, springs 160/16; reset to 0 on leave.
+export interface FeatureToolsCardProps {
+  title?: string;
+  description?: string;
+  /** CSS background for the card. Defaults to white (dark grey in dark mode). */
+  cardBg?: string;
+  /** Icon for slot 1 (top). Defaults to a mail glyph. */
+  icon1?: ReactNode;
+  /** Icon for slot 2. Defaults to a chat glyph. */
+  icon2?: ReactNode;
+  /** Icon for slot 3. Defaults to a calendar glyph. */
+  icon3?: ReactNode;
+  /** Icon for slot 4. Defaults to a docs glyph. */
+  icon4?: ReactNode;
+  /** Icon for slot 5. Defaults to a cloud glyph. */
+  icon5?: ReactNode;
+  /** Logo in the hub the tools connect to. */
+  hubIcon?: ReactNode;
+  /** 3D tilt toward the pointer. */
+  enableTilt?: boolean;
+  /** Maximum tilt in degrees. */
+  tiltStrength?: number;
+  /** Icons lean toward the pointer. */
+  enableMagnetic?: boolean;
+  /** Share of the distance an icon travels toward the pointer, 0-1. */
+  magneticStrength?: number;
+  /** Distance at which an icon starts to feel the pointer, in px. */
+  magneticRadius?: number;
+  /** Icons ride slowly round the ring. */
+  enableOrbit?: boolean;
+  /** Seconds per full turn of the ring. */
+  orbitSpeed?: number;
+  /** Colour of the dashed ring. */
+  orbitColor?: string;
+  /** Sweeps a virtual pointer round the ring until someone touches the card. */
+  autoplay?: boolean;
+  className?: string;
+}
 
-## Interaction and states
+const R = 84;
+const COLORS = ["#0a84ff", "#30b65a", "#ff375f", "#ff9f0a", "#bf5af2"];
 
-- `pointermove` on the card sets tilt and the live pointer; `pointerleave` resets tilt and marks the pointer not live (tools spring home).
-- Reduced motion: time frozen at 0 (no orbit, no ring spin), no magnetism, no tilt, packets hidden, no hub pulse.
+const G = (d: ReactNode) => (
+  <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {d}
+  </svg>
+);
+const GLYPHS = [
+  G(<><rect x="3" y="5" width="18" height="14" rx="3" /><path d="M4 7l8 6 8-6" /></>),
+  G(<path d="M5 18l-1 3 4-1.5A8.5 8.5 0 1 0 5 18z" />),
+  G(<><rect x="4" y="5" width="16" height="15" rx="3" /><path d="M4 10h16M9 3v4M15 3v4" /></>),
+  G(<><path d="M7 3h7l5 5v11a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></>),
+  G(<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5z" />),
+];
+const LABELS = ["Mail", "Chat", "Calendar", "Docs", "Cloud"];
 
-## Autoplay demo
+type Frame = (t: number, px: number, py: number, live: boolean) => { x: number; y: number; near: number };
 
-Until the first pointer move or press, drive a live virtual pointer: `a = 0.9t`, `x = cos(a)·84·1.05`, `y = sin(1.3a)·84·0.9`, so tools light up one after another.
+function Tool({
+  index,
+  icon,
+  register,
+  orbit,
+  period,
+  magnetic,
+  strength,
+  radius,
+}: {
+  index: number;
+  icon?: ReactNode;
+  register: (i: number, f: Frame | null) => void;
+  orbit: boolean;
+  period: number;
+  magnetic: boolean;
+  strength: number;
+  radius: number;
+}) {
+  const start = -90 + index * 72;
+  const a0 = (start * Math.PI) / 180;
+  // Resting spot on the ring, so the server render already has it laid out.
+  const bx = useMotionValue(Math.round(Math.cos(a0) * R * 100) / 100);
+  const by = useMotionValue(Math.round(Math.sin(a0) * R * 100) / 100);
+  const tx = useMotionValue(0);
+  const ty = useMotionValue(0);
+  const ox = useSpring(tx, { stiffness: 260, damping: 13 });
+  const oy = useSpring(ty, { stiffness: 260, damping: 13 });
+  const pull = useMotionValue(0);
+  const sp = useSpring(pull, { stiffness: 300, damping: 18 });
+  const x = useTransform([bx, ox], ([a, b]) => Math.round(((a as number) + (b as number)) * 100) / 100);
+  const y = useTransform([by, oy], ([a, b]) => Math.round(((a as number) + (b as number)) * 100) / 100);
+  const scale = useTransform(sp, (p) => 1 + p * 0.14);
+  const lift = useTransform(sp, (p) => `0 ${8 + p * 10}px ${18 + p * 14}px -10px rgba(0,0,0,${0.35 + p * 0.15})`);
 
-## Accessibility
+  useEffect(() => {
+    register(index, (t, px, py, live) => {
+      const a = ((start + (orbit ? (t * 360) / Math.max(1, period) : 0)) * Math.PI) / 180;
+      const cx = Math.cos(a) * R;
+      const cy = Math.sin(a) * R;
+      bx.set(cx);
+      by.set(cy);
+      const dx = px - cx;
+      const dy = py - cy;
+      const near = live && magnetic ? Math.max(0, 1 - Math.hypot(dx, dy) / Math.max(1, radius)) : 0;
+      tx.set(dx * near * strength);
+      ty.set(dy * near * strength);
+      pull.set(near);
+      return { x: cx + ox.get(), y: cy + oy.get(), near };
+    });
+    return () => register(index, null);
+  }, [index, register, orbit, period, magnetic, strength, radius, start, bx, by, tx, ty, ox, oy, pull]);
 
-- Stage `role="img"` with `aria-label="Connected tools: Mail, Chat, Calendar, Docs, Cloud"`; the SVG, glyphs and pulse are `aria-hidden`. Title is an `<h3>`.
+  return (
+    <motion.div className="absolute left-1/2 top-1/2 z-10" style={{ x, y, marginLeft: -23, marginTop: -23 }}>
+      <motion.div
+        className="grid size-[46px] place-items-center rounded-[13px]"
+        style={{ scale, boxShadow: lift, background: icon ? "#ffffff" : `linear-gradient(160deg, ${COLORS[index]}cc, ${COLORS[index]})` }}
+        title={icon ? undefined : LABELS[index]}
+      >
+        {icon ? <span className="grid h-[24px] w-[24px] place-items-center [&>svg]:h-full [&>svg]:w-full">{icon}</span> : GLYPHS[index]}
+      </motion.div>
+    </motion.div>
+  );
+}
 
-## Acceptance checklist
+/**
+ * An integrations card: five tools ride a slow ring round your app's hub,
+ * each wired to it with a line that carries little packets inward. Bring the
+ * pointer near and the tools lean toward it like magnets, their line lights
+ * up and they snap back with a wobble when you move away; the card tilts
+ * toward the pointer too.
+ */
+export function FeatureToolsCard({
+  title = "Connects with your stack",
+  description = "Mail, chat, calendar, docs and storage, synced the moment they change.",
+  cardBg,
+  icon1,
+  icon2,
+  icon3,
+  icon4,
+  icon5,
+  hubIcon,
+  enableTilt = true,
+  tiltStrength = 8,
+  enableMagnetic = true,
+  magneticStrength = 0.4,
+  magneticRadius = 120,
+  enableOrbit = true,
+  orbitSpeed = 36,
+  orbitColor,
+  autoplay = false,
+  className = "",
+}: FeatureToolsCardProps) {
+  const still = useReducedMotion() === true;
+  const stage = useRef<HTMLDivElement>(null);
+  const frames = useRef<(Frame | null)[]>([]);
+  const lines = useRef<(SVGLineElement | null)[]>([]);
+  const dots = useRef<(SVGCircleElement | null)[]>([]);
+  const pointer = useRef({ x: 0, y: 0, live: false });
+  const touched = useRef(false);
+  const rx = useMotionValue(0);
+  const ry = useMotionValue(0);
+  const rotateX: MotionValue<number> = useSpring(rx, { stiffness: 160, damping: 16 });
+  const rotateY: MotionValue<number> = useSpring(ry, { stiffness: 160, damping: 16 });
+  const icons = [icon1, icon2, icon3, icon4, icon5];
 
-- Five coloured tiles sit evenly on a dashed ring round a dark hub, each wired by a faint line.
-- Tiles and the ring rotate slowly (36s per turn).
-- Packets travel along each line toward the hub and fade in and out.
-- Pointer near a tile pulls it toward the pointer, grows it, brightens its line and speeds its packet; leaving makes it wobble back.
-- The card tilts up to 8° toward the pointer and settles on leave.
-- Custom icons render on white tiles.
-- Reduced motion shows a still, flat layout.
+  const register = useCallback((i: number, f: Frame | null) => {
+    frames.current[i] = f;
+  }, []);
+
+  useEffect(() => {
+    let raf = 0;
+    const t0 = performance.now();
+    const loop = (now: number) => {
+      const t = still ? 0 : (now - t0) / 1000;
+      if (autoplay && !touched.current) {
+        const a = t * 0.9;
+        pointer.current = { x: Math.cos(a) * R * 1.05, y: Math.sin(a * 1.3) * R * 0.9, live: true };
+      }
+      const p = pointer.current;
+      frames.current.forEach((f, i) => {
+        if (!f) return;
+        const at = f(t, p.x, p.y, p.live);
+        const line = lines.current[i];
+        const dot = dots.current[i];
+        if (line) {
+          line.setAttribute("x2", at.x.toFixed(2));
+          line.setAttribute("y2", at.y.toFixed(2));
+          line.style.strokeOpacity = String(0.22 + at.near * 0.78);
+        }
+        if (dot) {
+          const k = (t * (0.45 + at.near * 0.9) + i * 0.21) % 1;
+          dot.setAttribute("cx", (at.x * (1 - k)).toFixed(2));
+          dot.setAttribute("cy", (at.y * (1 - k)).toFixed(2));
+          dot.style.opacity = still ? "0" : String(Math.sin(k * Math.PI) * (0.55 + at.near * 0.45));
+        }
+      });
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [still, autoplay]);
+
+  return (
+    <motion.div
+      className={`w-[340px] max-w-full rounded-[24px] p-4 text-[#1d1d1f] shadow-[0_0_0_1px_rgba(0,0,0,.05),0_20px_40px_-26px_rgba(0,0,0,.35)] dark:text-[#f5f5f7] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-26px_rgba(0,0,0,.9)] ${cardBg ? "" : "bg-white dark:bg-[#1c1c1e]"} ${className}`}
+      style={{ background: cardBg, rotateX, rotateY, transformPerspective: 900 }}
+      onPointerMove={(e) => {
+        touched.current = true;
+        const c = e.currentTarget.getBoundingClientRect();
+        if (enableTilt && !still) {
+          ry.set(((e.clientX - c.left) / c.width - 0.5) * 2 * tiltStrength);
+          rx.set(-((e.clientY - c.top) / c.height - 0.5) * 2 * tiltStrength);
+        }
+        const s = stage.current?.getBoundingClientRect();
+        if (s) pointer.current = { x: e.clientX - (s.left + s.width / 2), y: e.clientY - (s.top + s.height / 2), live: true };
+      }}
+      onPointerLeave={() => {
+        rx.set(0);
+        ry.set(0);
+        pointer.current = { ...pointer.current, live: false };
+      }}
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div
+        ref={stage}
+        className="relative h-[228px] overflow-hidden rounded-[18px] bg-[#f5f5f7] dark:bg-[#2c2c2e]"
+        style={{ backgroundImage: "radial-gradient(circle, rgba(0,0,0,.07) 1px, transparent 1.2px)", backgroundSize: "14px 14px" }}
+        role="img"
+        aria-label={`Connected tools: ${LABELS.join(", ")}`}
+      >
+        <svg className="pointer-events-none absolute left-1/2 top-1/2 overflow-visible" width="1" height="1" aria-hidden="true">
+          <motion.circle
+            r={R}
+            fill="none"
+            strokeWidth="1.5"
+            strokeDasharray="3 7"
+            strokeLinecap="round"
+            className={orbitColor ? undefined : "stroke-[#c7c7cc] dark:stroke-[#48484a]"}
+            style={{ stroke: orbitColor }}
+            animate={enableOrbit && !still ? { rotate: 360 } : undefined}
+            transition={{ duration: Math.max(1, orbitSpeed), repeat: Infinity, ease: "linear" }}
+          />
+          {COLORS.map((c, i) => (
+            <line
+              key={`l${i}`}
+              ref={(el) => {
+                lines.current[i] = el;
+              }}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="0"
+              stroke={c}
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              style={{ strokeOpacity: 0.22 }}
+            />
+          ))}
+          {COLORS.map((c, i) => (
+            <circle
+              key={`d${i}`}
+              ref={(el) => {
+                dots.current[i] = el;
+              }}
+              r="2.6"
+              fill={c}
+              style={{ opacity: 0 }}
+            />
+          ))}
+        </svg>
+
+        <div className="absolute left-1/2 top-1/2 z-20 -ml-8 -mt-8">
+          {!still ? (
+            <motion.span
+              className="absolute inset-0 rounded-[20px] bg-[#0071e3]/25 dark:bg-[#0a84ff]/30"
+              animate={{ scale: [1, 1.55], opacity: [0.6, 0] }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+              aria-hidden="true"
+            />
+          ) : null}
+          <span className="relative grid size-16 place-items-center rounded-[20px] bg-[#1d1d1f] text-white shadow-[0_12px_24px_-12px_rgba(0,0,0,.6)] dark:bg-[#f5f5f7] dark:text-[#1d1d1f]">
+            {hubIcon ?? (
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="3.2" />
+                <path d="M12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21" />
+              </svg>
+            )}
+          </span>
+        </div>
+
+        {icons.map((ic, i) => (
+          <Tool
+            key={i}
+            index={i}
+            icon={ic}
+            register={register}
+            orbit={enableOrbit && !still}
+            period={orbitSpeed}
+            magnetic={enableMagnetic && !still}
+            strength={Math.max(0, Math.min(1, magneticStrength))}
+            radius={magneticRadius}
+          />
+        ))}
+      </div>
+      <h3 className="mt-4 px-1 text-[17px] font-semibold leading-tight tracking-[-0.02em]">{title}</h3>
+      <p className="mt-1 px-1 pb-1 text-[13px] leading-[1.45] text-[#6e6e73] dark:text-[#a1a1a6]">{description}</p>
+    </motion.div>
+  );
+}
+
+export default FeatureToolsCard;
+```
+
+--- components/feature-tools-card/index.ts ---
+
+```ts
+export { FeatureToolsCard } from "./feature-tools-card";
+export type { FeatureToolsCardProps } from "./feature-tools-card";
+```

@@ -1,76 +1,294 @@
 # Packet Router
 
-Build a live diagram of an AI request router: glowing packets stream from a "Router" node along curved paths to four model cards. A segmented control switches the routing strategy (Cost, Balanced, Quality) and the traffic re-balances on the fly: packets pick routes by weight, unused routes fade to dashed grey lines, and each model's share and the blended price roll to their new values. The feel is calm, precise and Apple-like, with a steady particle flow.
+Add the "Packet Router" component from Nexus UI to my project.
 
-## Stack
+A live diagram of requests flowing from a router to four AI models along curved paths. Switch between Cost, Balanced and Quality and the traffic re-balances while each model's share and the blended price roll to their new values.
 
-- React 18/19 client component (`"use client"`), TypeScript, Tailwind CSS, framer-motion (`motion`, `AnimatePresence`), an SVG for the routes and a 2D `<canvas>` for the packets.
-- File: `components/packet-router/packet-router.tsx`, named export `PacketRouter`, plus the types `RouterStrategy` (`"Cost" | "Balanced" | "Quality"`) and `RouterModel`.
+Please:
 
-## API
+1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
+2. Install what it needs: `framer-motion` (use this project's package manager).
+3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
+4. Use it like this: `import { PacketRouter, ROUTER_MODELS, ROUTER_SHARES } from "@/components/packet-router";`. The props are typed and documented in the code.
 
-- `defaultStrategy?: RouterStrategy`, default `"Balanced"`.
-- `onStrategyChange?: (strategy: RouterStrategy) => void`: called when the user picks a strategy.
-- `autoplay?: boolean`, default `false`.
+Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
-Data (fixed):
+--- components/packet-router/index.ts ---
 
-- Models (`id, name, price per 1M tokens, color`): Nano 0.1 `#30d158`, Mini 0.6 `#64d2ff`, Pro 3 `#0071e3`, Ultra 15 `#5e5ce6`.
-- Shares (% per model, same order): Cost `[70, 30, 0, 0]`, Balanced `[25, 40, 30, 5]`, Quality `[0, 10, 55, 35]`.
-- Blended price = Σ share/100 · price, shown with two decimals (Balanced = $1.92).
+```ts
+export { PacketRouter, ROUTER_MODELS, ROUTER_SHARES } from "./packet-router";
+export type { PacketRouterProps, RouterStrategy, RouterModel } from "./packet-router";
+```
 
-## Layout and look
+--- components/packet-router/packet-router.tsx ---
 
-Geometry in a fixed 760×260 box: source `(110, 130)`, destinations at `x = 560`, `y = 44, 104, 164, 224`. Route i is a cubic Bézier: `M 110 130 C 270 130, 360 yᵢ, 560 yᵢ`.
+```tsx
+"use client";
+import { useEffect, useId, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 
-- Root: full-width column, centred, 16px gap. Outer wrapper `max-width 760px`, `overflow-x: auto`; inner box exactly 760×260, relative.
-- SVG (760×260, `aria-hidden`) with one path per route, no fill, round caps. Canvas on top, same size, `pointer-events: none`.
-- Router node: 96×56 at `left 14, top 102` (right edge touches the source point), radius 16px, `#1d1d1f`, white text, shadow `0 14px 28px -14px rgba(0,0,0,.5)`; dark `#2c2c2e` with a `rgba(255,255,255,.08)` 1px ring. "Router" 12px semibold over the current strategy name, 10px `tabular-nums`, 60% white, in a 16px-tall clipped slot.
-- Model cards: 180×44 at `left 566`, vertically centred on each `yᵢ`, radius 12px, padding-x 12px, 10px gap. Light: white, shadow `0 0 0 1px rgba(0,0,0,.06), 0 8px 20px -14px rgba(0,0,0,.35)`; dark `#1c1c1e` with a `rgba(255,255,255,.08)` ring. Contents: a 10px colour dot; the name (13px semibold `#1d1d1f`, dark `#f5f5f7`, flex 1); the share in a 40×16 clipped slot (12px semibold, `tabular-nums`, right aligned, e.g. "40%"); and the served count (40px wide, 11px `tabular-nums`, `#86868b` / dark `#8e8e93`).
-- Controls row (wraps, centred, 20px gap):
-  - Segmented control: `role="group"`, 3-column grid, radius 12px, padding 3px, `#e8e8ed` (dark `#1c1c1e`). Buttons 32px tall, padding-x 20px, radius 9px, 13px medium, `#1d1d1f` (dark `#f5f5f7`). The active button has a sliding white thumb (dark `#3a3a3c`), shadow `0 2px 6px rgba(0,0,0,.1), 0 0 0 .5px rgba(0,0,0,.04)`, shared between buttons via a `layoutId` that is unique per instance (from `useId`).
-  - "Blended price $X.XX / 1M tokens": 13px `#6e6e73` (dark `#a1a1a6`), the price 15px semibold `#1d1d1f` (dark `#f5f5f7`) in a 20px-tall clipped slot, baseline aligned.
+export type RouterStrategy = "Cost" | "Balanced" | "Quality";
 
-## Motion
+export interface RouterModel {
+  id: string;
+  name: string;
+  /** Price per 1M tokens, in dollars. */
+  price: number;
+  color: string;
+}
 
-**Routes.** For a route with share s > 0: stroke = model colour, `strokeWidth = 1.5 + s/14`, `strokeOpacity 0.35`, solid (`strokeDasharray "0 0"`). For s = 0: stroke = an idle grey from a CSS variable (`#c7c7cc` light, `#48484a` dark), width 1.2, opacity 0.8, dashed `"3 6"`. Animate width, opacity and dash with framer over 0.5s (`initial={false}`); transition the stroke colour with CSS (`transition: stroke .5s`) so the variable keeps following the theme.
+export const ROUTER_MODELS: RouterModel[] = [
+  { id: "nano", name: "Nano", price: 0.1, color: "#30d158" },
+  { id: "mini", name: "Mini", price: 0.6, color: "#64d2ff" },
+  { id: "pro", name: "Pro", price: 3, color: "#0071e3" },
+  { id: "ultra", name: "Ultra", price: 15, color: "#5e5ce6" },
+];
 
-**Packets (canvas, `requestAnimationFrame`).** Size the canvas backing store to `760·dpr × 260·dpr` with `dpr = min(2, devicePixelRatio)` and draw with `setTransform(dpr, 0, 0, dpr, 0, 0)`.
+/** Percentage of traffic each model gets under each strategy. */
+export const ROUTER_SHARES: Record<RouterStrategy, number[]> = {
+  Cost: [70, 30, 0, 0],
+  Balanced: [25, 40, 30, 5],
+  Quality: [0, 10, 55, 35],
+};
 
-- `dt = min(0.05, frame delta in seconds)`. Accumulate time; every 0.07s spawn a packet (about 14 per second). Pick its route by weighted random choice from the *current* shares (read them through a ref updated in an effect so the loop never restarts): draw `r` in 0…100 and walk the shares subtracting until `r < share`. Speed = `0.55 + random·0.25` path-lengths per second.
-- Each frame clear the canvas and, for every packet, advance `t += dt · speed`. When `t ≥ 1`, increment that route's served counter and remove the packet.
-- Otherwise get the path's total length `L` and two points with `getPointAtLength`: the head at `t·L` and the tail 18px behind it (clamped at 0). Stroke a 3px round-capped line from tail to head with a linear gradient from the model colour at alpha 0 to the full model colour, then fill a 3px-radius dot at the head in the model colour.
-- Every 500ms copy the counters into state to show the served counts.
-- Cancel the frame and interval on unmount.
+const STRATEGIES: RouterStrategy[] = ["Cost", "Balanced", "Quality"];
 
-**Model cards.** Animate `opacity 1, x 0` when the share is above zero, `opacity 0.45, x 6` when it is zero (default spring, `initial={false}`).
+export interface PacketRouterProps {
+  /** Strategy selected on mount. */
+  defaultStrategy?: RouterStrategy;
+  /** Called when someone picks a strategy. */
+  onStrategyChange?: (strategy: RouterStrategy) => void;
+  /** Cycles Cost → Quality → Balanced every 2.8s until someone touches it. */
+  autoplay?: boolean;
+}
 
-**Rolling numbers.** The router's strategy label, each share and the blended price use `AnimatePresence mode="popLayout" initial={false}` keyed by the value: the new value enters from below (`y 12 / 14 / 16`, opacity 0) and the old one exits upward by the same amount.
+const W = 760;
+const H = 260;
+const SRC = { x: 110, y: H / 2 };
+const DST_X = 560;
+const ys = [44, 104, 164, 224];
 
-**Segment thumb.** Spring stiffness 420, damping 32.
+const pathFor = (i: number) => {
+  const y = ys[i];
+  return `M ${SRC.x} ${SRC.y} C ${SRC.x + 160} ${SRC.y}, ${DST_X - 200} ${y}, ${DST_X} ${y}`;
+};
 
-## Interaction and states
+/** "#rrggbb" → "rgba(r,g,b,0)", so a packet's tail fades into nothing on any background. */
+const clear = (hex: string) => {
+  const v = parseInt(hex.slice(1), 16);
+  return `rgba(${(v >> 16) & 255},${(v >> 8) & 255},${v & 255},0)`;
+};
 
-- Clicking a segment sets the strategy and calls `onStrategyChange`. Packets already in flight finish their routes; new packets follow the new weights at once, so the flow visibly shifts.
-- Routes and cards with zero share stay visible (dashed, dimmed) so the topology never changes.
-- Below 760px wide the diagram scrolls horizontally instead of squashing.
+/**
+ * Requests flow from a router to four models. Pick a strategy and the traffic
+ * re-balances live: packets choose routes by weight, unused routes fade to a
+ * dashed line, and the share and blended price roll to their new values.
+ */
+export function PacketRouter({ defaultStrategy = "Balanced", onStrategyChange, autoplay = false }: PacketRouterProps) {
+  const seg = "router-seg-" + useId().replace(/:/g, "");
+  const [mode, setMode] = useState<RouterStrategy>(defaultStrategy);
+  const shares = ROUTER_SHARES[mode];
+  const sharesRef = useRef(shares);
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const paths = useRef<(SVGPathElement | null)[]>([]);
+  const counts = useRef([0, 0, 0, 0]);
+  const [served, setServed] = useState([0, 0, 0, 0]);
+  const touched = useRef(false);
+  const blended = shares.reduce((a, s, i) => a + (s / 100) * ROUTER_MODELS[i].price, 0);
 
-## Autoplay demo
+  useEffect(() => {
+    sharesRef.current = shares;
+  }, [shares]);
 
-With `autoplay`, every 2800ms switch to the next strategy in the order Cost, Quality, Balanced (repeating). A `pointerdown` or `keydown` anywhere in the component marks it touched; the next tick clears the interval. The packet flow itself always runs.
+  useEffect(() => {
+    const cv = canvas.current!;
+    const ctx = cv.getContext("2d")!;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = W * dpr;
+    cv.height = H * dpr;
+    const packets: { route: number; t: number; speed: number }[] = [];
+    let raf = 0,
+      last = performance.now(),
+      acc = 0;
+    const frame = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      acc += dt;
+      // one new request every 70ms, routed by weighted random choice
+      while (acc > 0.07) {
+        acc -= 0.07;
+        const sh = sharesRef.current;
+        let r = Math.random() * 100,
+          route = 0;
+        for (let i = 0; i < sh.length; i++) {
+          if (r < sh[i]) {
+            route = i;
+            break;
+          }
+          r -= sh[i];
+        }
+        packets.push({ route, t: 0, speed: 0.55 + Math.random() * 0.25 });
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      for (let k = packets.length - 1; k >= 0; k--) {
+        const p = packets[k];
+        p.t += dt * p.speed;
+        const el = paths.current[p.route];
+        if (p.t >= 1 || !el) {
+          counts.current[p.route]++;
+          packets.splice(k, 1);
+          continue;
+        }
+        const color = ROUTER_MODELS[p.route].color;
+        const L = el.getTotalLength();
+        const pt = el.getPointAtLength(p.t * L);
+        const pt2 = el.getPointAtLength(Math.max(0, p.t * L - 18));
+        const g = ctx.createLinearGradient(pt2.x, pt2.y, pt.x, pt.y);
+        g.addColorStop(0, clear(color));
+        g.addColorStop(1, color);
+        ctx.strokeStyle = g;
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        ctx.moveTo(pt2.x, pt2.y);
+        ctx.lineTo(pt.x, pt.y);
+        ctx.stroke();
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+    const tally = setInterval(() => setServed([...counts.current]), 500);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(tally);
+    };
+  }, []);
 
-## Accessibility
+  useEffect(() => {
+    if (!autoplay) return;
+    const order: RouterStrategy[] = ["Cost", "Quality", "Balanced"];
+    let k = 0;
+    const t = setInterval(() => {
+      if (touched.current) return clearInterval(t);
+      setMode(order[k++ % order.length]);
+    }, 2800);
+    return () => clearInterval(t);
+  }, [autoplay]);
 
-- Segments are `<button type="button">` with `aria-pressed`, inside the `role="group"` labelled "Routing strategy". Focus: 2px `#0071e3` outline on `:focus-visible` (dark `#0a84ff`).
-- The SVG and canvas are `aria-hidden`; the model names, shares and price are real text.
-
-## Acceptance checklist
-
-- [ ] Packets with short fading tails stream continuously from Router to the models, coloured per model.
-- [ ] Under Balanced, all four routes are solid, thicker for bigger shares, and the price reads $1.92.
-- [ ] Switching to Cost dashes and greys the Pro and Ultra routes, dims and nudges their cards right, and packets stop going there.
-- [ ] Shares, the router label and the price roll vertically to their new values.
-- [ ] The segment thumb slides between options with a firm spring.
-- [ ] Served counters climb roughly in proportion to the shares and update twice a second.
-- [ ] Dark mode uses dark cards, router, control and an idle route grey of `#48484a`; packet tails look clean on both backgrounds.
-- [ ] Autoplay cycles strategies every 2.8s and stops after the first interaction.
+  return (
+    <div
+      className="flex w-full flex-col items-center gap-4 [--pr-idle:#c7c7cc] dark:[--pr-idle:#48484a]"
+      onPointerDown={() => {
+        touched.current = true;
+      }}
+      onKeyDown={() => {
+        touched.current = true;
+      }}
+    >
+      <div className="relative w-full max-w-[760px] overflow-x-auto">
+        <div className="relative" style={{ width: W, height: H }}>
+          <svg className="absolute inset-0" width={W} height={H} aria-hidden="true">
+            {ROUTER_MODELS.map((m, i) => (
+              <motion.path
+                key={m.id}
+                ref={(el) => {
+                  paths.current[i] = el;
+                }}
+                d={pathFor(i)}
+                fill="none"
+                strokeLinecap="round"
+                style={{ stroke: shares[i] ? m.color : "var(--pr-idle)", transition: "stroke .5s" }}
+                initial={false}
+                animate={{
+                  strokeWidth: shares[i] ? 1.5 + shares[i] / 14 : 1.2,
+                  strokeOpacity: shares[i] ? 0.35 : 0.8,
+                  strokeDasharray: shares[i] ? "0 0" : "3 6",
+                }}
+                transition={{ duration: 0.5 }}
+              />
+            ))}
+          </svg>
+          <canvas ref={canvas} className="pointer-events-none absolute inset-0" style={{ width: W, height: H }} aria-hidden="true" />
+          {/* router node */}
+          <div
+            className="absolute flex h-14 w-[96px] flex-col items-center justify-center rounded-2xl bg-[#1d1d1f] text-white shadow-[0_14px_28px_-14px_rgba(0,0,0,.5)] dark:bg-[#2c2c2e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_14px_28px_-14px_rgba(0,0,0,.9)]"
+            style={{ left: SRC.x - 96, top: SRC.y - 28 }}
+          >
+            <span className="text-[12px] font-semibold">Router</span>
+            <span className="relative h-4 overflow-hidden text-[10px] tabular-nums text-white/60">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.span key={mode} className="block" initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -12, opacity: 0 }}>
+                  {mode}
+                </motion.span>
+              </AnimatePresence>
+            </span>
+          </div>
+          {/* model nodes */}
+          {ROUTER_MODELS.map((m, i) => (
+            <motion.div
+              key={m.id}
+              className="absolute flex h-11 w-[180px] items-center gap-2.5 rounded-xl bg-white px-3 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_8px_20px_-14px_rgba(0,0,0,.35)] dark:bg-[#1c1c1e] dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_8px_20px_-14px_rgba(0,0,0,.8)]"
+              style={{ left: DST_X + 6, top: ys[i] - 22 }}
+              initial={false}
+              animate={{ opacity: shares[i] ? 1 : 0.45, x: shares[i] ? 0 : 6 }}
+            >
+              <span className="h-2.5 w-2.5 rounded-full" style={{ background: m.color }} />
+              <span className="flex-1 text-[13px] font-semibold text-[#1d1d1f] dark:text-[#f5f5f7]">{m.name}</span>
+              <span className="relative h-4 w-10 overflow-hidden text-right text-[12px] font-semibold tabular-nums text-[#1d1d1f] dark:text-[#f5f5f7]">
+                <AnimatePresence mode="popLayout" initial={false}>
+                  <motion.span key={shares[i]} className="block" initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -14, opacity: 0 }}>
+                    {shares[i]}%
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+              <span className="w-10 text-right text-[11px] tabular-nums text-[#86868b] dark:text-[#8e8e93]">{served[i]}</span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-5">
+        <div role="group" aria-label="Routing strategy" className="relative grid grid-cols-3 rounded-xl bg-[#e8e8ed] p-[3px] dark:bg-[#1c1c1e]">
+          {STRATEGIES.map((m) => (
+            <button
+              key={m}
+              type="button"
+              aria-pressed={mode === m}
+              onClick={() => {
+                touched.current = true;
+                setMode(m);
+                onStrategyChange?.(m);
+              }}
+              className="relative z-10 h-8 rounded-[9px] px-5 text-[13px] font-medium text-[#1d1d1f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0071e3] dark:text-[#f5f5f7] dark:focus-visible:outline-[#0a84ff]"
+            >
+              {mode === m && (
+                <motion.span
+                  layoutId={seg}
+                  transition={{ type: "spring", stiffness: 420, damping: 32 }}
+                  className="absolute inset-0 -z-10 rounded-[9px] bg-white shadow-[0_2px_6px_rgba(0,0,0,.1),0_0_0_.5px_rgba(0,0,0,.04)] dark:bg-[#3a3a3c] dark:shadow-[0_2px_6px_rgba(0,0,0,.4)]"
+                />
+              )}
+              {m}
+            </button>
+          ))}
+        </div>
+        <span className="flex items-baseline gap-1.5 text-[13px] text-[#6e6e73] dark:text-[#a1a1a6]">
+          Blended price
+          <span className="relative inline-block h-5 overflow-hidden text-[15px] font-semibold tabular-nums text-[#1d1d1f] dark:text-[#f5f5f7]">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.span key={blended.toFixed(2)} className="block" initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -16, opacity: 0 }}>
+                ${blended.toFixed(2)}
+              </motion.span>
+            </AnimatePresence>
+          </span>
+          / 1M tokens
+        </span>
+      </div>
+    </div>
+  );
+}
+```
