@@ -10367,7 +10367,7 @@ export default function Page() {
     registryCliName: "venom-button",
     description:
       "A glossy black pill that hunts for a host. Come near and pseudopods ooze out and feel toward the cursor; get close and they lunge, each one wrapping a finger of a cartoon glove. Pull away and they stretch, snap and melt back into the button, which wobbles and throws up a few spikes.",
-    categorySlug: "inputs-controls",
+    categorySlug: "for-fun",
     tags: ["button", "cta", "webgl", "shader", "metaball", "liquid", "goo", "cursor", "hover", "lacquer", "motion kit"],
     premium: false,
     trendingScore: 172,
@@ -10430,7 +10430,7 @@ export default function Page() {
     registryCliName: "web-sling-button",
     description:
       "A red call-to-action button on a light stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays. A web fluid meter drains with every shot and refills slowly, and a counter keeps score of shots fired.",
-    categorySlug: "inputs-controls",
+    categorySlug: "for-fun",
     tags: ["button", "cta", "web", "silk", "verlet", "rope", "webgl", "physics", "drag", "cursor", "playful", "light", "motion kit"],
     premium: false,
     trendingScore: 171,
@@ -10480,7 +10480,7 @@ export default function Page() {
     registryCliName: "frost-input",
     description:
       "A sign-up field that freezes. Focus it and six-fold frost crystals grow across the glass, every key you type drives a crack through the ice from the caret, and sending it shatters the field from the point of impact into falling shards before it freezes back together. It is a real form field with a label, Enter to submit and an onSubmit callback.",
-    categorySlug: "inputs-controls",
+    categorySlug: "for-fun",
     tags: ["input", "email", "sign up", "newsletter", "frost", "ice", "crystal", "shatter", "canvas", "focus", "typing", "form", "motion kit"],
     premium: true,
     trendingScore: 170,
@@ -10544,7 +10544,7 @@ export default function Page() {
     registryCliName: "black-hole-delete",
     description:
       "An inbox where deleting is a cosmic event. Swipe a message away, or press its close button, and a black hole opens beside it: the list bends around it like a lens, the message is stretched thin and spirals in, and a shockwave ripples through the rest. Restore runs it backwards with a white hole.",
-    categorySlug: "inputs-controls",
+    categorySlug: "for-fun",
     tags: ["delete", "swipe", "inbox", "list", "webgl", "shader", "lens", "black hole", "gesture", "dark", "motion kit"],
     premium: true,
     trendingScore: 168,
@@ -10598,7 +10598,7 @@ export default function Page() {
     registryCliName: "portal-card",
     description:
       "Hold and draw a circle on a dark card and a ring of molten sparks tears open where you drew it. Through it you see another world that shifts against the pointer like a view through a window. Click in to step through, click out and it collapses in embers. The other side is plain DOM, so any content can wait behind it.",
-    categorySlug: "cards",
+    categorySlug: "for-fun",
     tags: ["portal", "card", "webgl", "particles", "sparks", "gesture", "draw", "reveal", "transition", "reveal card", "motion kit"],
     premium: true,
     trendingScore: 169,
