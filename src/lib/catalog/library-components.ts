@@ -10431,7 +10431,7 @@ export default function Page() {
     description:
       "A call-to-action button on a dark stage where the cursor is a web-shooter. Click anywhere and a line of silk splats onto the button in a burst of flung fibres and glue; hold and pull and it drags and tilts the button on stretching silk beaded with glue knots. Let go and the line dangles and swings, and pull too far and it snaps and frays.",
     categorySlug: "inputs-controls",
-    tags: ["button", "cta", "web", "silk", "verlet", "rope", "canvas", "physics", "drag", "cursor", "playful", "dark", "motion kit"],
+    tags: ["button", "cta", "web", "silk", "verlet", "rope", "webgl", "physics", "drag", "cursor", "playful", "dark", "motion kit"],
     premium: false,
     trendingScore: 171,
     createdAt: "2026-10-23",
@@ -10599,7 +10599,7 @@ export default function Page() {
     description:
       "Hold and draw a circle on a dark card and a ring of molten sparks tears open where you drew it. Through it you see another world that shifts against the pointer like a view through a window. Click in to step through, click out and it collapses in embers. The other side is plain DOM, so any content can wait behind it.",
     categorySlug: "cards",
-    tags: ["portal", "card", "canvas", "particles", "sparks", "gesture", "draw", "reveal", "transition", "reveal card", "motion kit"],
+    tags: ["portal", "card", "webgl", "particles", "sparks", "gesture", "draw", "reveal", "transition", "reveal card", "motion kit"],
     premium: true,
     trendingScore: 169,
     createdAt: "2026-10-23",
