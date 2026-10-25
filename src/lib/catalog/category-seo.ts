@@ -27,7 +27,7 @@ const CATEGORY_COPY: Partial<Record<ComponentCategorySlug, CategoryCopy>> = {
       "Playful interactive React components with a superhero streak: a button that slings webs, a card that opens a portal, an input that freezes over, and a delete that drops into a black hole. Tailwind CSS and Framer Motion.",
     heading: "Components For Fun",
     intro:
-      "Not every component has to be serious. These ones borrow powers from the comics: sling a web at a button and drag it around, open a portal in a card, freeze an input, or send a file into a black hole. Each one works with mouse and touch, and respects prefers-reduced-motion.",
+      "Not every component has to be serious. These ones borrow powers from the comics: sling a web at a button and drag it around, open a portal in a card, freeze an input, send a file into a black hole, or feed it to a shredder. Each one works with mouse and touch, and respects prefers-reduced-motion.",
   },
   "inputs-controls": {
     title: "Interactive React Input & Control Components",

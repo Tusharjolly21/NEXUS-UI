@@ -109,6 +109,7 @@ export function ComponentGallery({
   mobileLimit,
   aside,
   pageSize = 24,
+  playOnClick = false,
 }: {
   items: GalleryItem[];
   /** Category chips; omit to hide them. */
@@ -122,6 +123,8 @@ export function ComponentGallery({
   aside?: React.ReactNode;
   /** Tiles revealed at a time when there is no `limit`. */
   pageSize?: number;
+  /** Tiles show a poster with a Play button and only run the live component once pressed. For heavy components (canvas, WebGL). */
+  playOnClick?: boolean;
 }) {
   const [interaction, setInteraction] = React.useState<Interaction | "all">("all");
   const [category, setCategory] = React.useState("all");
@@ -258,7 +261,7 @@ export function ComponentGallery({
           {shown.map((item, i) => (
             <React.Fragment key={item.slug}>
               <TileCell item={item} className={cn(!filtering && mobileLimit && i >= mobileLimit && "max-sm:hidden")}>
-                <GalleryTile item={item} onOpen={setOpenSlug} />
+                <GalleryTile item={item} onOpen={setOpenSlug} playOnClick={playOnClick} />
               </TileCell>
               {paged && !isPro && !needle && access !== "pro" && i === PLANS_CARD_AFTER ? <PlansCard proCount={proCount} /> : null}
             </React.Fragment>

@@ -14,8 +14,13 @@ export const metadata: Metadata = createMetadata({
   alternates: { canonical: "/components" },
 });
 
+/** The "For fun" group (web slingers, portals, black holes, a shredder). Heavy canvas and WebGL, so it lives on its own page instead of in the wall. */
+const FUN_GROUP = "fun";
+
 export default function ComponentsPage() {
-  const items = allGalleryItems();
+  const all = allGalleryItems();
+  const items = all.filter((i) => i.group !== FUN_GROUP);
+  const funCount = all.length - items.length;
 
   return (
     <>
@@ -34,7 +39,21 @@ export default function ComponentsPage() {
 
       <section aria-label="Component gallery" className="px-4 pb-24">
         <div className="mx-auto max-w-[1152px]">
-          <ComponentGallery items={items} categories={galleryCategories(items)} searchable />
+          <ComponentGallery
+            items={items}
+            categories={galleryCategories(items)}
+            searchable
+            aside={
+              funCount ? (
+                <Link
+                  href={getComponentCategoryHref("for-fun")}
+                  className="shrink-0 text-[15px] text-link hover:underline hover:underline-offset-4"
+                >
+                  Just for fun ({funCount}) ›
+                </Link>
+              ) : null
+            }
+          />
 
           <nav aria-labelledby="by-category" className="mt-20">
             <h2 id="by-category" className="text-[17px] font-semibold text-foreground">
@@ -75,7 +94,7 @@ export default function ComponentsPage() {
       {/* every component as a plain link, for crawlers and screen-reader navigation */}
       <nav aria-label="All components" className="sr-only">
         <ul>
-          {items.map((i) => (
+          {all.map((i) => (
             <li key={i.slug}>
               <Link href={`/components/${i.slug}`}>{i.name}</Link>
             </li>
