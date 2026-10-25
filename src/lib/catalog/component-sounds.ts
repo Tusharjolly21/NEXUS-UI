@@ -34,6 +34,7 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "liquid-dial": "Taps when you pick an action.",
   "wheel-selector": "Ticks as each item passes the top and drops softly when the dial settles on a choice.",
   "throw-wheel": "Ticks as each card passes the front and drops softly when it settles on a card.",
+  "cloud-sync": "Sweeps when a backup starts, taps as each app lifts off, bloops as it sinks into the cloud, then chimes with a confirmation beep when everything is up to date, with soft pings as the apps float back out.",
   "pumpkin-reveal": "Off until you press the speaker button in the card. Then wind and a low drone play, each hit thuds with a creak, a ghost wails as it bursts (or your own track plays), and the candies chime and pop.",
   "shredder-delete": "Hums while the motor runs, with a pitch that follows its speed, chews while paper goes through the cutters and rustles as the strips flutter into the bin. Undo runs it in reverse. Everything is driven by the machine itself, so it stays in step with the picture.",
   "crumple-to-trash": "Swishes as the page scrunches and thumps when it lands in the bin; the shatter variant knocks as the card cracks; Undo swishes the pieces back.",
