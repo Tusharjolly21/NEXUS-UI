@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowUpRight, Lock, RotateCcw, SlidersHorizontal, Volume2 } from "lucide-react";
+import { ArrowUpRight, Lock, Play, RotateCcw, SlidersHorizontal, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProBadge, useLocked, useProAccess } from "@/components/pro/pro-access";
 import { demoScript, FitPreview } from "./fit-preview";
@@ -58,6 +58,7 @@ export function GalleryTile({
   onOpen,
   href: hrefProp,
   badge,
+  playOnClick = false,
 }: {
   item: GalleryItem;
   onOpen?: (slug: string) => void;
@@ -65,8 +66,11 @@ export function GalleryTile({
   href?: string;
   /** Small tag shown next to the name, such as Pro. */
   badge?: React.ReactNode;
+  /** Show a poster with a Play button; the live component only mounts (and runs) once it is pressed. */
+  playOnClick?: boolean;
 }) {
   const [run, setRun] = React.useState(0);
+  const [playing, setPlaying] = React.useState(!playOnClick);
   const href = hrefProp ?? `/components/${item.slug}`;
   const opensPage = !!hrefProp && !onOpen;
   const locked = useLocked(item.premium);
@@ -100,6 +104,25 @@ export function GalleryTile({
       )}
       style={fit.bg ? { backgroundColor: fit.bg } : undefined}
     >
+      {!playing ? (
+        <button
+          type="button"
+          onClick={() => setPlaying(true)}
+          aria-label={`Play ${item.name}`}
+          className={cn(
+            "absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center outline-none focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-ring",
+            dark ? "text-white" : "text-[#1d1d1f]",
+          )}
+        >
+          <span className="grid size-12 place-items-center rounded-full bg-action text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)] transition-transform duration-200 group-hover:scale-105">
+            <Play className="size-5 translate-x-px fill-current" aria-hidden />
+          </span>
+          <span className="text-[16px] font-semibold tracking-[-0.02em]">{item.name}</span>
+          {fit.rows.lg >= 2 ? (
+            <span className={cn("line-clamp-3 max-w-[300px] text-[13px] leading-[1.45]", dark ? "text-white/65" : "text-[#6e6e73]")}>{item.description}</span>
+          ) : null}
+        </button>
+      ) : (
       <FitPreview
         key={run}
         exportName={item.exportName}
@@ -112,6 +135,7 @@ export function GalleryTile({
             "not-dark:[&>div>*]:!rounded-none not-dark:[&>div>*]:!border-0 not-dark:[&>div>*]:!bg-transparent not-dark:[&>div>*]:!shadow-none",
         )}
       />
+      )}
 
       {item.premium ? <ProBadge onDark={dark} className="pointer-events-none absolute right-4 top-4" /> : null}
 
