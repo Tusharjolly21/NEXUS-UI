@@ -214,6 +214,7 @@ import { FrostInput } from "@/components/frost-input";
 import { BlackHoleDelete } from "@/components/black-hole-delete";
 import { PortalCard } from "@/components/portal-card";
 import { TestimonialWall } from "@/components/testimonial-wall";
+import { ShredderDelete } from "@/components/shredder-delete";
 import { TankRecorder } from "@/components/tank-recorder";
 import { RippleToast } from "@/components/ripple-toast";
 
@@ -3517,6 +3518,21 @@ export const playgrounds: Record<string, Playground> = {
         </div>
       );
     },
+  },
+  "shredder-delete": {
+    lightOnly: true,
+    componentName: "ShredderDelete",
+    importPath: "@/components/shredder-delete",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "range", prop: "volume", label: "Volume", min: 0, max: 1, step: 0.05, unit: "", defaultValue: 0.7 },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <ShredderDelete key={String(v.autoplay)} autoplay={v.autoplay as boolean} volume={v.volume as number} />
+      </div>
+    ),
   },
   "portal-card": {
     componentName: "PortalCard",

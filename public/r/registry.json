@@ -1960,6 +1960,34 @@
       ]
     },
     {
+      "name": "shredder-delete",
+      "type": "registry:component",
+      "title": "Shredder Delete",
+      "description": "Delete files by feeding them to an office shredder. Drag a document onto the machine, or press Delete on a focused row: it becomes a printed sheet, the cutters pull it down through the throat and it comes out as thin curling strips that flutter into a smoked bin and pile up. Undo within five seconds runs the machine in reverse. It sounds like one too: the motor, the cutters and the strips rustling are driven by the machine itself, so what you hear is what you see. An Auto switch in the card plays the whole thing by itself.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
+      ],
+      "files": [
+        {
+          "path": "next-ui/shredder-delete/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/shredder-delete/shredder-delete.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/shredder-delete/shredder-sound.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",
