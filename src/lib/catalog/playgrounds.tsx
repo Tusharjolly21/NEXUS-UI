@@ -215,6 +215,13 @@ import { BlackHoleDelete } from "@/components/black-hole-delete";
 import { PortalCard } from "@/components/portal-card";
 import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
+import { GlobalDeploy } from "@/components/global-deploy";
+import { CardReaderVerify } from "@/components/card-reader-verify";
+import { IntelligenceGlow } from "@/components/intelligence-glow";
+import { CloudSync } from "@/components/cloud-sync";
+import { SmartLight } from "@/components/smart-light";
+import { RangeCalendar } from "@/components/range-calendar";
+import { StorageClean } from "@/components/storage-clean";
 import { DartRating } from "@/components/dart-rating";
 import { DominoProgress } from "@/components/domino-progress";
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
@@ -3592,6 +3599,104 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto w-full max-w-[720px]">
         <CatchUndo key={String(v.autoplay)} autoplay={v.autoplay as boolean} height={v.height as number} slowHand={v.slowHand as boolean} />
+      </div>
+    ),
+  },
+  "global-deploy": {
+    lightOnly: true,
+    componentName: "GlobalDeploy",
+    importPath: "@/components/global-deploy",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[760px]">
+        <GlobalDeploy key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "card-reader-verify": {
+    lightOnly: true,
+    componentName: "CardReaderVerify",
+    importPath: "@/components/card-reader-verify",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <CardReaderVerify key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "intelligence-glow": {
+    lightOnly: true,
+    componentName: "IntelligenceGlow",
+    importPath: "@/components/intelligence-glow",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[300px]">
+        <IntelligenceGlow key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "cloud-sync": {
+    lightOnly: true,
+    componentName: "CloudSync",
+    importPath: "@/components/cloud-sync",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[480px]">
+        <CloudSync key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "smart-light": {
+    lightOnly: true,
+    componentName: "SmartLight",
+    importPath: "@/components/smart-light",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <SmartLight key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "range-calendar": {
+    lightOnly: true,
+    componentName: "RangeCalendar",
+    importPath: "@/components/range-calendar",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <RangeCalendar key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "storage-clean": {
+    lightOnly: true,
+    componentName: "StorageClean",
+    importPath: "@/components/storage-clean",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <StorageClean key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
       </div>
     ),
   },

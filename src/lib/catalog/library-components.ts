@@ -11252,6 +11252,468 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "global-deploy",
+    name: "Global Deploy",
+    registryCliName: "global-deploy",
+    description:
+      "A deploy map drawn on real coastlines. Press Deploy, or click anywhere to ship from the nearest region: the release leaves as glowing blue arcs that spread from region to region until every one is live, and hovering a region shows its latency. Canvas arcs on a dotted world, with keyboard control, a live region that announces progress and no dependencies beyond Framer Motion.",
+    categorySlug: "dashboards",
+    tags: ["deploy", "map", "world", "regions", "arcs", "latency", "canvas", "dashboard", "devops", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 185,
+    createdAt: "2026-10-25",
+    animationKinds: ["press", "hover"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewGlobalDeploy,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { GlobalDeploy } from "@/components/global-deploy";
+
+// Press Deploy, or click anywhere on the map to ship from the nearest region. Hover a region to see its latency.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[760px]">
+        <GlobalDeploy />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { GlobalDeploy } from "@/components/global-deploy";
+
+// autoplay ships a release, lets the arcs reach every region, then resets, until the visitor touches the map.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[760px] bg-[#f5f5f7] p-6">
+      <GlobalDeploy autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { GlobalDeploy } from "@/components/global-deploy";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[760px]">
+      <GlobalDeploy enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "card-reader-verify",
+    name: "Card Reader Verify",
+    registryCliName: "card-reader-verify",
+    description:
+      "An ID check you do by hand. Drag the card into the reader: the light strip sweeps, the display runs each check, and the card springs back out with a Verified stamp. Insert it flipped and the reader shakes and rejects it. Drag with a mouse or finger, or use the keyboard buttons, in a 3D canvas card that needs only Framer Motion.",
+    categorySlug: "inputs-controls",
+    tags: ["card", "reader", "verify", "identity", "kyc", "drag", "3d", "canvas", "stamp", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 184,
+    createdAt: "2026-10-25",
+    animationKinds: ["drag", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewCardReaderVerify,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { CardReaderVerify } from "@/components/card-reader-verify";
+
+// Drag the card into the reader. Insert it face up to verify it, or flipped to see it rejected.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <CardReaderVerify />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { CardReaderVerify } from "@/components/card-reader-verify";
+
+// autoplay inserts the card, runs the checks and shows the Verified stamp, until the visitor touches it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] bg-[#f5f5f7] p-6">
+      <CardReaderVerify autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { CardReaderVerify } from "@/components/card-reader-verify";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <CardReaderVerify enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "intelligence-glow",
+    name: "Intelligence Glow",
+    registryCliName: "intelligence-glow",
+    description:
+      "Press and hold the screen to call the assistant. Light ripples out from your finger and flows around the edge of a phone, a Writing Tools panel rises, and the draft shimmers and rewrites itself word by word. Built from layered conic gradients on a canvas, with hold-to-call by pointer or keyboard.",
+    categorySlug: "ai-components",
+    tags: ["ai", "assistant", "glow", "gradient", "writing tools", "hold", "phone", "canvas", "siri", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 183,
+    createdAt: "2026-10-25",
+    animationKinds: ["press", "gradient"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewIntelligenceGlow,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { IntelligenceGlow } from "@/components/intelligence-glow";
+
+// Press and hold the screen (or hold Space) to call the assistant, then pick a rewrite.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[300px]">
+        <IntelligenceGlow />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { IntelligenceGlow } from "@/components/intelligence-glow";
+
+// autoplay holds the screen, picks a rewrite and lets the draft rewrite itself, until the visitor touches the phone.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[300px] bg-[#f5f5f7] p-6">
+      <IntelligenceGlow autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { IntelligenceGlow } from "@/components/intelligence-glow";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[300px]">
+      <IntelligenceGlow enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "cloud-sync",
+    name: "Cloud Sync",
+    registryCliName: "cloud-sync",
+    description:
+      "A backup button shaped like a glass cloud. Press it and the apps leave their orbit one by one and sink into the cloud, which wobbles with each one as a level of coloured light rises inside. A soft-body canvas with a 3D orbit, a progress readout and keyboard support.",
+    categorySlug: "loaders",
+    tags: ["sync", "backup", "cloud", "button", "progress", "glass", "soft body", "canvas", "3d", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 182,
+    createdAt: "2026-10-25",
+    animationKinds: ["press", "spring", "3d"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewCloudSync,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { CloudSync } from "@/components/cloud-sync";
+
+// Press the cloud to start the backup. Press it again when it finishes to run it once more.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[480px]">
+        <CloudSync />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { CloudSync } from "@/components/cloud-sync";
+
+// autoplay runs the backup and restarts it, until the visitor touches the cloud.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[480px] bg-[#f5f5f7] p-6">
+      <CloudSync autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { CloudSync } from "@/components/cloud-sync";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[480px]">
+      <CloudSync enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "smart-light",
+    name: "Smart Light",
+    registryCliName: "smart-light",
+    description:
+      "A light control with a real room behind it. Drag the pill to dim the glass pendant, slide from amber to cool white, or tap a scene: the bulb, the wall falloff and the shadows all respond, and the lamp sways. Canvas lighting with pointer and keyboard control.",
+    categorySlug: "inputs-controls",
+    tags: ["light", "lamp", "dimmer", "smart home", "slider", "scenes", "canvas", "lighting", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 181,
+    createdAt: "2026-10-25",
+    animationKinds: ["drag", "press"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewSmartLight,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { SmartLight } from "@/components/smart-light";
+
+// Drag the pill to dim, slide the colour from amber to cool white, or tap a scene.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <SmartLight />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { SmartLight } from "@/components/smart-light";
+
+// autoplay dims the light, shifts its colour and cycles the scenes, until the visitor touches it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] bg-[#f5f5f7] p-6">
+      <SmartLight autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { SmartLight } from "@/components/smart-light";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <SmartLight enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "range-calendar",
+    name: "Range Calendar",
+    registryCliName: "range-calendar",
+    description:
+      "A trip date picker whose selection is one liquid ribbon. Drag and it stretches to your finger, snapping day by day and wrapping across rows; the nights count rolls like an odometer and months turn like the faces of a cube. SVG ribbon with spring physics and full keyboard control.",
+    categorySlug: "inputs-controls",
+    tags: ["calendar", "date range", "picker", "ribbon", "dates", "booking", "svg", "spring", "drag", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 180,
+    createdAt: "2026-10-25",
+    animationKinds: ["drag", "spring", "layout"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewRangeCalendar,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { RangeCalendar } from "@/components/range-calendar";
+
+// Drag across the days to stretch the ribbon, or use the arrow keys. Use the arrows to turn the month.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <RangeCalendar />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { RangeCalendar } from "@/components/range-calendar";
+
+// autoplay drags out a trip, changes it and turns the month, until the visitor touches the calendar.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] bg-[#f5f5f7] p-6">
+      <RangeCalendar autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { RangeCalendar } from "@/components/range-calendar";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <RangeCalendar enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "storage-clean",
+    name: "Storage Clean",
+    registryCliName: "storage-clean",
+    description:
+      "A storage panel you can clean. Press a recommendation and that slice of the bar crumbles into particles that stream into the trash can; the bar springs shut, the number rolls down, and Undo pours the particles back. Canvas particles synced to a spring-driven bar.",
+    categorySlug: "dashboards",
+    tags: ["storage", "clean", "disk", "particles", "trash", "undo", "dashboard", "canvas", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: true,
+    trendingScore: 179,
+    createdAt: "2026-10-25",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewStorageClean,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { StorageClean } from "@/components/storage-clean";
+
+// Press a recommendation to clean it up. Undo pours the particles back.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <StorageClean />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { StorageClean } from "@/components/storage-clean";
+
+// autoplay cleans a slice, undoes it and cleans another, until the visitor touches the panel.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] bg-[#f5f5f7] p-6">
+      <StorageClean autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { StorageClean } from "@/components/storage-clean";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <StorageClean enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

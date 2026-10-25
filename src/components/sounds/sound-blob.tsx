@@ -17,6 +17,7 @@ export const BLOB_COLORS: Record<string, [string, string]> = {
   "Paper and wood": ["#fcd34d", "#b45309"],
   Arcade: ["#e879f9", "#16a34a"],
   Studio: ["#facc15", "#92400e"],
+  Devices: ["#93c5fd", "#4338ca"],
   Recorded: ["#fda4af", "#be123c"],
 };
 

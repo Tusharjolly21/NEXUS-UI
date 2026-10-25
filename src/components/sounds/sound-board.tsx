@@ -20,7 +20,7 @@ type Access = "all" | "free" | "pro";
 type Used = { slug: string; name: string }[];
 
 const FREE_CATEGORIES: SoundCategory[] = ["Actions", "Feedback", "Navigation", "Notifications", "Selection", "Movement", "Progress", "System"];
-const PRO_CATEGORIES: (ProSoundCategory | RecordedSoundCategory)[] = ["Glass", "Paper and wood", "Arcade", "Studio", "Recorded"];
+const PRO_CATEGORIES: (ProSoundCategory | RecordedSoundCategory)[] = ["Glass", "Paper and wood", "Arcade", "Studio", "Devices", "Recorded"];
 
 /** One entry on the board, free or Pro. The Pro recipes load only when one is played. */
 type Item = { key: string; name: string; label: string; category: Category; pro: boolean; recorded?: boolean };
@@ -337,7 +337,7 @@ export function SoundBoard({
                 Install with <code className="font-mono text-foreground">{installPro}</code>. It brings <code className="font-mono text-foreground">ui-sounds</code> with it.
               </>
             ) : (
-              "Part of the Pro sound pack: 24 more sounds in four sets."
+              "Part of the Pro sound pack: 32 more sounds in five sets."
             )
           ) : mac ? (
             isPro ? (
