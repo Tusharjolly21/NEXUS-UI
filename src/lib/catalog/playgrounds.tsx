@@ -215,6 +215,10 @@ import { BlackHoleDelete } from "@/components/black-hole-delete";
 import { PortalCard } from "@/components/portal-card";
 import { TestimonialWall } from "@/components/testimonial-wall";
 import { ShredderDelete } from "@/components/shredder-delete";
+import { DartRating } from "@/components/dart-rating";
+import { DominoProgress } from "@/components/domino-progress";
+import { PumpkinReveal } from "@/components/pumpkin-reveal";
+import { CatchUndo } from "@/components/catch-undo";
 import { TankRecorder } from "@/components/tank-recorder";
 import { RippleToast } from "@/components/ripple-toast";
 
@@ -3531,6 +3535,63 @@ export const playgrounds: Record<string, Playground> = {
     render: (v) => (
       <div className="mx-auto w-full max-w-[440px]">
         <ShredderDelete key={String(v.autoplay)} autoplay={v.autoplay as boolean} volume={v.volume as number} />
+      </div>
+    ),
+  },
+  "dart-rating": {
+    lightOnly: true,
+    componentName: "DartRating",
+    importPath: "@/components/dart-rating",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <DartRating key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "domino-progress": {
+    lightOnly: true,
+    componentName: "DominoProgress",
+    importPath: "@/components/domino-progress",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[560px]">
+        <DominoProgress key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "pumpkin-reveal": {
+    componentName: "PumpkinReveal",
+    importPath: "@/components/pumpkin-reveal",
+    defaultFill: "dark",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[440px]">
+        <PumpkinReveal key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+      </div>
+    ),
+  },
+  "catch-undo": {
+    lightOnly: true,
+    componentName: "CatchUndo",
+    importPath: "@/components/catch-undo",
+    defaultFill: "light",
+    controls: [
+      { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
+      { kind: "range", prop: "height", label: "Height", min: 460, max: 640, step: 10, unit: "px", defaultValue: 560 },
+      { kind: "toggle", prop: "slowHand", label: "Slow hand", defaultValue: false },
+    ],
+    render: (v) => (
+      <div className="mx-auto w-full max-w-[720px]">
+        <CatchUndo key={String(v.autoplay)} autoplay={v.autoplay as boolean} height={v.height as number} slowHand={v.slowHand as boolean} />
       </div>
     ),
   },

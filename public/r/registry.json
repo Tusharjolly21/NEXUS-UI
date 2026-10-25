@@ -1988,6 +1988,99 @@
       ]
     },
     {
+      "name": "dart-rating",
+      "type": "registry:component",
+      "title": "Dart Rating",
+      "description": "Rate something from 1 to 10 by throwing a dart. Press and hold on the board to aim: the reticle wobbles more the longer you hold while a power meter fills, and letting go throws. The ring the dart lands in is the rating, a score and a word appear under the board, and throwing again pulls the old dart out. Number and arrow keys throw a perfect dart straight to that ring, and the board is a real slider for screen readers.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/dart-rating/dart-rating.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/dart-rating/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "domino-progress",
+      "type": "registry:component",
+      "title": "Domino Progress",
+      "description": "A deploy pipeline drawn as a line of standing dominoes. Each completed step tips the current tile onto the next, which wobbles from the hit and lights up as the active step. Pause opens a gap so the falling tile lands flat on the table, Resume slides the next tile in and the chain carries on to Live, and Reset ripples every tile back upright. Buttons, status text and a live region keep it usable without the animation.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/domino-progress/domino-progress.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/domino-progress/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "pumpkin-reveal",
+      "type": "registry:component",
+      "title": "Pumpkin Reveal",
+      "description": "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces, orange outside and pale inside. A ghost escapes and three candies spill out: pick one, and one of them is a trick. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
+      ],
+      "files": [
+        {
+          "path": "next-ui/pumpkin-reveal/index.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "next-ui/pumpkin-reveal/pumpkin-reveal.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "catch-undo",
+      "type": "registry:component",
+      "title": "Catch Undo",
+      "description": "An Undo that catches. Delete a file and the row comes loose, drops out of the list and time slows as it falls into the dark. Hit Undo and a web shoots from the button: a twisted rope of silk fibres that frays open into a hand as it flies, wraps the row, stretches to slow it down gently and reels it back into its slot. Miss it and the row is simply gone. A slow-hand switch gives you more time, and an onCue callback exposes each stage for your own sound layer.",
+      "dependencies": [
+        "framer-motion",
+        "react"
+      ],
+      "registryDependencies": [
+        "http://127.0.0.1:3000/api/registry/nexus-font"
+      ],
+      "files": [
+        {
+          "path": "next-ui/catch-undo/catch-undo.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "next-ui/catch-undo/index.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
       "name": "cinematic-logo-cloud",
       "type": "registry:component",
       "title": "Cinematic Logo Cloud",

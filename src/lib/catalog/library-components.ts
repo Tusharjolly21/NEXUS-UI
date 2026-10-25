@@ -10992,6 +10992,265 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "dart-rating",
+    name: "Dart Rating",
+    registryCliName: "dart-rating",
+    description:
+      "Rate something from 1 to 10 by throwing a dart. Press and hold on the board to aim: the reticle wobbles more the longer you hold while a power meter fills, and letting go throws. The ring the dart lands in is the rating, a score and a word appear under the board, and throwing again pulls the old dart out. Number and arrow keys throw a perfect dart straight to that ring, and the board is a real slider for screen readers.",
+    categorySlug: "inputs-controls",
+    tags: ["rating", "dart", "slider", "feedback", "score", "input", "game", "press", "spring", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 179,
+    createdAt: "2026-10-25",
+    animationKinds: ["press", "spring", "drag"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewDartRating,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { DartRating } from "@/components/dart-rating";
+
+// Press and hold on the board to aim, release to throw. Number keys 1 to 9 and 0 throw a perfect dart at that ring.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <DartRating />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { DartRating } from "@/components/dart-rating";
+
+// autoplay throws a 6, then a 9, then clears the board, until the visitor touches it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] bg-[#f5f5f7] p-6">
+      <DartRating autoplay />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "domino-progress",
+    name: "Domino Progress",
+    registryCliName: "domino-progress",
+    description:
+      "A deploy pipeline drawn as a line of standing dominoes. Each completed step tips the current tile onto the next, which wobbles from the hit and lights up as the active step. Pause opens a gap so the falling tile lands flat on the table, Resume slides the next tile in and the chain carries on to Live, and Reset ripples every tile back upright. Buttons, status text and a live region keep it usable without the animation.",
+    categorySlug: "loaders",
+    tags: ["progress", "stepper", "pipeline", "deploy", "dominoes", "loader", "3d", "physics", "steps", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 178,
+    createdAt: "2026-10-25",
+    animationKinds: ["3d", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewDominoProgress,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { DominoProgress } from "@/components/domino-progress";
+
+// Next tips the chain one step. Pause opens a gap, Resume closes it, Reset stands everything back up.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[560px]">
+        <DominoProgress />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { DominoProgress } from "@/components/domino-progress";
+
+// autoplay runs two steps, pauses at step three, resumes, finishes and ripples back, until the visitor touches it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[560px] bg-[#f5f5f7] p-6">
+      <DominoProgress autoplay />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "pumpkin-reveal",
+    name: "Pumpkin Reveal",
+    registryCliName: "pumpkin-reveal",
+    description:
+      "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces, orange outside and pale inside. A ghost escapes and three candies spill out: pick one, and one of them is a trick. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
+    categorySlug: "for-fun",
+    tags: ["pumpkin", "halloween", "reveal", "coupon", "promo", "confetti", "3d", "canvas", "physics", "sound", "autoplay", "fun", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 177,
+    createdAt: "2026-10-25",
+    animationKinds: ["3d", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "music", type: "string", description: "URL of a track to play when the pumpkin bursts. Without one, a ghost wails instead." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewPumpkinReveal,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { PumpkinReveal } from "@/components/pumpkin-reveal";
+
+// Hit the pumpkin three times (tap it, or focus it and press Space). It splits open and three candies
+// spill out; pick one to see whether it is a treat or a trick. The speaker button turns the sounds on.
+export default function Page() {
+  return (
+    <section className="bg-[#0e0a17] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <PumpkinReveal />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { PumpkinReveal } from "@/components/pumpkin-reveal";
+
+// autoplay hits it three times, picks a trick and then a treat, and hangs a new one, until the visitor touches it.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] p-6">
+      <PumpkinReveal autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "With your own track",
+        code: `// src/app/page.tsx
+
+import { PumpkinReveal } from "@/components/pumpkin-reveal";
+
+// The track starts as the pumpkin bursts and the moonlight pulses with it. Put the file in /public.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] p-6">
+      <PumpkinReveal music="/audio/burst.mp3" />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { PumpkinReveal } from "@/components/pumpkin-reveal";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] p-6">
+      <PumpkinReveal enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
+  {
+    slug: "catch-undo",
+    name: "Catch Undo",
+    registryCliName: "catch-undo",
+    description:
+      "An Undo that catches. Delete a file and the row comes loose, drops out of the list and time slows as it falls into the dark. Hit Undo and a web shoots from the button: a twisted rope of silk fibres that frays open into a hand as it flies, wraps the row, stretches to slow it down gently and reels it back into its slot. Miss it and the row is simply gone. A slow-hand switch gives you more time, and an onCue callback exposes each stage for your own sound layer.",
+    categorySlug: "for-fun",
+    tags: ["undo", "delete", "files", "web", "catch", "webgl", "canvas", "physics", "slow motion", "fun", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 176,
+    createdAt: "2026-10-25",
+    animationKinds: ["press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
+      { name: "height", type: "number", defaultValue: "560", description: "Height of the stage in pixels." },
+      { name: "slowHand", type: "boolean", defaultValue: "false", description: "Starts with the slow hand on: the web takes about two and a half times longer to open its hand." },
+      { name: "onCue", type: "(cue: CatchCue) => void", description: "Called at each stage (delete, slowmo, shoot, catch, reel, restored, missed) so you can attach your own sound or haptics." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewCatchUndo,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { CatchUndo } from "@/components/catch-undo";
+
+// Delete a file with its bin button, then press Undo (Cmd or Ctrl Z) before it is gone.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[720px]">
+        <CatchUndo />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself",
+        code: `// src/app/page.tsx
+
+import { CatchUndo } from "@/components/catch-undo";
+
+// autoplay deletes a file and catches it, then deletes another and misses it, until a real pointer moves in.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[720px] bg-[#f5f5f7] p-6">
+      <CatchUndo autoplay />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "With cues",
+        code: `// src/app/page.tsx
+"use client";
+
+import { CatchUndo, type CatchCue } from "@/components/catch-undo";
+
+// onCue fires at every stage, so a sound or haptic layer can follow the scene.
+export default function Page() {
+  const onCue = (cue: CatchCue) => console.log(cue);
+  return (
+    <div className="mx-auto w-full max-w-[720px] bg-[#f5f5f7] p-6">
+      <CatchUndo slowHand onCue={onCue} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */

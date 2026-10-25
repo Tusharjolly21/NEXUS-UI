@@ -4342,6 +4342,7 @@ export * from "./signature/cubes-grid";
 export * from "./signature/motion-kit-batch-8";
 export * from "./signature/motion-kit-batch-9";
 export * from "./signature/motion-kit-batch-10";
+export * from "./signature/motion-kit-batch-11";
 export * from "./signature/nexus-states-c";
 export * from "./signature/nexus-essentials-a";
 export * from "./signature/nexus-essentials-b";
