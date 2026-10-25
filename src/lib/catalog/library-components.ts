@@ -10923,6 +10923,75 @@ export default function Page() {
     ],
     tailwindSource: tw,
   },
+  {
+    slug: "shredder-delete",
+    name: "Shredder Delete",
+    registryCliName: "shredder-delete",
+    description:
+      "Delete files by feeding them to an office shredder. Drag a document onto the machine, or press Delete on a focused row: it becomes a printed sheet, the cutters pull it down through the throat and it comes out as thin curling strips that flutter into a smoked bin and pile up. Undo within five seconds runs the machine in reverse. It sounds like one too: the motor, the cutters and the strips rustling are driven by the machine itself, so what you hear is what you see. An Auto switch in the card plays the whole thing by itself.",
+    categorySlug: "for-fun",
+    tags: ["delete", "shredder", "files", "list", "undo", "drag", "canvas", "physics", "paper", "sound", "autoplay", "motion kit", "framer-motion"],
+    premium: false,
+    trendingScore: 174,
+    createdAt: "2026-10-25",
+    animationKinds: ["drag", "press", "spring"],
+    dependencies: ["framer-motion"],
+    props: [
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Shreds a file by itself, undoes it, then shreds another, until the visitor touches the card. The Auto switch in the card turns it back on or off. Never runs under reduced motion and pauses while the card is off screen." },
+      { name: "volume", type: "number", defaultValue: "0.7", description: "How loud the shredder is, 0 to 1." },
+      { name: "className", type: "string", description: "Extra classes for the outer card." },
+    ],
+    Preview: Previews.PreviewShredderDelete,
+    previewShell: "plain",
+    reactSource: `// src/app/page.tsx
+
+import { ShredderDelete } from "@/components/shredder-delete";
+
+// A white card with a list of documents and the shredder under it. Drag a row onto the machine,
+// press its bin button, or focus it and press Delete. Undo appears for five seconds.
+export default function Page() {
+  return (
+    <section className="bg-[#f5f5f7] px-4 py-16">
+      <div className="mx-auto w-full max-w-[440px]">
+        <ShredderDelete />
+      </div>
+    </section>
+  );
+}`,
+    reactExamples: [
+      {
+        title: "Plays by itself, quietly",
+        code: `// src/app/page.tsx
+
+import { ShredderDelete } from "@/components/shredder-delete";
+
+// autoplay shreds and restores a file until the visitor touches the card; the Auto switch brings it back.
+// The sound follows the site-wide switch and stays silent until the visitor has clicked or pressed a key once.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px] bg-[#f5f5f7] p-6">
+      <ShredderDelete autoplay volume={0.4} />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Silent",
+        code: `// src/app/page.tsx
+
+import { ShredderDelete } from "@/components/shredder-delete";
+
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[440px]">
+      <ShredderDelete enableSound={false} />
+    </div>
+  );
+}`,
+      },
+    ],
+    tailwindSource: tw,
+  },
 ];
 
 /** Components that make sound get the `enableSound` prop documented, so every page stays true to its source. */
