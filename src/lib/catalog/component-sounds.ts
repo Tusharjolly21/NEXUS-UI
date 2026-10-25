@@ -40,6 +40,7 @@ export const COMPONENT_SOUNDS: Record<string, string> = {
   "smart-light": "Clicks like a relay when the light goes on or off, taps glass as you dim, ticks like wood along the warmth slider, chimes when you pick a scene, and thuds softly at the end of the dimmer.",
   "global-deploy": "Sweeps when a deploy leaves its origin, taps as each region comes live, and lands with a two-note rising beep when every region is live.",
   "intelligence-glow": "Taps when you press and hold, opens with a glass chime as Writing Tools rises, clicks softly as you slide across options, sweeps while the draft shimmers, then sparkles and chimes when the rewrite lands.",
+  "storage-clean": "Clicks when you press a recommendation, crumbles as the bar breaks into grains, bloops as they drop into the can, chimes when the space is freed, and pours with a soft ping when you undo.",
   "pumpkin-reveal": "Off until you press the speaker button in the card. Then wind and a low drone play, each hit thuds with a creak, a ghost wails as it bursts (or your own track plays), and the candies chime and pop.",
   "shredder-delete": "Hums while the motor runs, with a pitch that follows its speed, chews while paper goes through the cutters and rustles as the strips flutter into the bin. Undo runs it in reverse. Everything is driven by the machine itself, so it stays in step with the picture.",
   "crumple-to-trash": "Swishes as the page scrunches and thumps when it lands in the bin; the shatter variant knocks as the card cracks; Undo swishes the pieces back.",

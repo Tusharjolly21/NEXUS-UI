@@ -1,5 +1,15 @@
 {
+  "access-denied": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    }
+  ],
   "access-granted": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
@@ -9,6 +19,12 @@
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    }
+  ],
+  "card-insert": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
     }
   ],
   "charge": [
@@ -121,30 +137,92 @@
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
+  "glass-clink": [
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
     }
   ],
   "glass-close": [
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
     }
   ],
   "glass-open": [
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
     }
   ],
   "glass-ping": [
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
     }
   ],
   "glass-tap": [
     {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "hush": [
@@ -279,6 +357,20 @@
       "name": "Money Goo"
     }
   ],
+  "paper-flip": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    }
+  ],
   "ping": [
     {
       "slug": "notification-stack",
@@ -343,10 +435,38 @@
       "name": "Todo List"
     }
   ],
+  "relay-click": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
   "scan-sweep": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    }
+  ],
+  "sparkle": [
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
     }
   ],
   "success": [
@@ -713,6 +833,28 @@
     {
       "slug": "slingshot-send",
       "name": "Slingshot Send"
+    }
+  ],
+  "wood-block": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    }
+  ],
+  "wood-drop": [
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
+  "wood-tap": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
     }
   ]
 }
