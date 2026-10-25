@@ -172,6 +172,7 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
   rustleLfo.start();
   rustleLfo2.start();
 
+  let wasBack = false;
   const ramp = (p: AudioParam, v: number, tc = 0.035) => p.setTargetAtTime(v, c.currentTime, tc);
   let closed = false;
 
@@ -215,9 +216,11 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
       burst("lowpass", 1500, 400, 0.002, 0.09, 0.4, 0.8);
       burst("bandpass", 3200, 1800, 0.004, 0.12, 0.2, 1.2, 0.03);
     },
+    // Undo starts: the motor winds up with a rising whirr and a breath of air, nothing like the shredding clunk
     "bite-reverse": () => {
-      tone(210, 110, 0.12, 0.42, "triangle");
-      burst("lowpass", 1700, 500, 0.002, 0.08, 0.3, 0.8);
+      tone(190, 560, 0.24, 0.2, "sine");
+      tone(380, 1100, 0.24, 0.07, "triangle");
+      burst("bandpass", 600, 3200, 0.1, 0.16, 0.13, 1.6);
     },
     // the slot lights blue as a file is held over it
     arm: () => tone(1180, 840, 0.05, 0.1, "sine"),
@@ -228,10 +231,11 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
       tone(110, 52, 0.16, 0.34, "triangle");
       burst("bandpass", 2400, 900, 0.003, 0.1, 0.16, 1.1);
     },
-    // Undo: the page comes back out and settles
+    // Undo finishes: the file is back. A soft two-note "ting" and a small pop, the opposite of the thud of deleting
     land: () => {
-      burst("bandpass", 900, 2400, 0.02, 0.1, 0.12, 0.9);
-      tone(640, 520, 0.06, 0.1, "sine", 0.06);
+      burst("bandpass", 1200, 2600, 0.01, 0.07, 0.1, 1.2);
+      tone(1175, 1175, 0.28, 0.13, "sine", 0.02);
+      tone(1568, 1568, 0.34, 0.1, "sine", 0.09);
     },
   };
 
@@ -240,25 +244,49 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
       if (closed) return;
       const m = on ? Math.max(0, Math.min(1, f.motor)) : 0;
       const back = f.dir < 0;
+      const prog = Math.max(0, Math.min(1, f.progress));
       const paper = on ? Math.max(0, Math.min(1, f.paper)) * m : 0;
       const rustle = on ? Math.max(0, Math.min(1, f.rustle)) : 0;
-      // swell through the middle of the sheet, as more teeth bite at once
-      const swell = 0.8 + 0.2 * Math.sin(Math.PI * Math.max(0, Math.min(1, f.progress)));
-      // motor: pitch follows speed, lower and heavier while it spins up
-      const base = (46 + 58 * m) * (back ? 1.22 : 1);
-      ramp(saw.frequency, base, 0.05);
-      ramp(sq.frequency, base * 2.002, 0.05);
-      ramp(motorLP.frequency, 190 + 420 * m, 0.05);
-      ramp(motorOut.gain, 0.2 * m, 0.04);
-      ramp(whine.frequency, 340 + 300 * m * (back ? 1.2 : 1), 0.05);
-      ramp(whineGain.gain, 0.014 * m, 0.05);
-      // cutters
-      ramp(toothLfo.frequency, (30 + 34 * m) * (back ? 0.85 : 1), 0.05);
-      ramp(grindBP.frequency, (1500 + 1500 * m) * (back ? 0.8 : 1) * (0.9 + 0.2 * swell), 0.05);
-      ramp(grindOut.gain, 0.42 * paper * swell, 0.03);
-      ramp(tearOut.gain, 0.15 * paper * swell, 0.03);
-      ramp(tearLfo.frequency, 55 + 30 * m, 0.05);
-      ramp(rustleOut.gain, 0.16 * rustle, 0.06);
+      // Forward and backward are two different sounds, not one sound at another pitch. Shredding is a heavy
+      // growl with chopping teeth. Undo is a lighter rewind: a smooth whirr that climbs as the page is drawn
+      // back up, with a rising airy whoosh in place of the chopping.
+      if (back !== wasBack) {
+        wasBack = back;
+        saw.type = back ? "triangle" : "sawtooth";
+        sq.type = back ? "sine" : "square";
+        grindBP.Q.value = back ? 2.4 : 0.9;
+        ramp(toothDepth.gain, back ? 0.03 : 0.5, 0.02);
+        ramp(teeth.gain, back ? 0.95 : 0.5, 0.02);
+      }
+      if (!back) {
+        // swell through the middle of the sheet, as more teeth bite at once
+        const swell = 0.8 + 0.2 * Math.sin(Math.PI * prog);
+        const base = 46 + 58 * m;
+        ramp(saw.frequency, base, 0.05);
+        ramp(sq.frequency, base * 2.002, 0.05);
+        ramp(motorLP.frequency, 190 + 420 * m, 0.05);
+        ramp(motorOut.gain, 0.2 * m, 0.04);
+        ramp(whine.frequency, 340 + 300 * m, 0.05);
+        ramp(whineGain.gain, 0.014 * m, 0.05);
+        ramp(toothLfo.frequency, 30 + 34 * m, 0.05);
+        ramp(grindBP.frequency, (1500 + 1500 * m) * (0.9 + 0.2 * swell), 0.05);
+        ramp(grindOut.gain, 0.42 * paper * swell, 0.03);
+        ramp(tearOut.gain, 0.15 * paper * swell, 0.03);
+        ramp(tearLfo.frequency, 55 + 30 * m, 0.05);
+        ramp(rustleOut.gain, 0.16 * rustle, 0.06);
+      } else {
+        const base = 95 + 120 * m + 150 * prog;
+        ramp(saw.frequency, base, 0.05);
+        ramp(sq.frequency, base * 2, 0.05);
+        ramp(motorLP.frequency, 700 + 900 * m, 0.05);
+        ramp(motorOut.gain, 0.11 * m, 0.04);
+        ramp(whine.frequency, 700 + 1300 * prog * m, 0.05);
+        ramp(whineGain.gain, 0.03 * m, 0.05);
+        ramp(grindBP.frequency, 500 + 3300 * prog, 0.05);
+        ramp(grindOut.gain, 0.3 * paper, 0.04);
+        ramp(tearOut.gain, 0, 0.03);
+        ramp(rustleOut.gain, 0.05 * rustle, 0.06);
+      }
     },
     hit(name) {
       if (closed) return;
