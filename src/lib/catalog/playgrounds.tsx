@@ -3575,7 +3575,7 @@ export const playgrounds: Record<string, Playground> = {
     ],
     render: (v) => (
       <div className="mx-auto w-full max-w-[440px]">
-        <PumpkinReveal key={String(v.autoplay)} autoplay={v.autoplay as boolean} />
+        <PumpkinReveal key={String(v.autoplay)} autoplay={v.autoplay as boolean} music="/audio/pumpkin-burst.mp3" />
       </div>
     ),
   },

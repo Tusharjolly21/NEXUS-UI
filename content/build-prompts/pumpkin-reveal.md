@@ -539,6 +539,39 @@ function createSpook() {
   let mSrc: AudioBufferSourceNode | null = null, mGain: GainNode | null = null, an: AnalyserNode | null = null;
   const lvl = new Uint8Array(256);
   const ok = () => !!ctx && !!master && !!nb && ctx.state === "running";
+  const ensure = () => {
+    if (!ctx) {
+      const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (!AC) return false;
+      ctx = new AC();
+      master = ctx.createGain(); master.gain.value = 0.7; master.connect(ctx.destination);
+      nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+      const d = nb.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return true;
+  };
+  // iOS plays Web Audio on the "ambient" channel, which the ringer switch mutes. A playing media element,
+  // or the audio session type where Safari supports it, moves the page to the playback channel.
+  let keep: HTMLAudioElement | null = null;
+  const keepMedia = () => {
+    try {
+      const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+      if (session) session.type = "playback";
+    } catch { /* ignore */ }
+    if (keep) { void keep.play().catch(() => {}); return; }
+    try {
+      const n = 4410, u8 = new Uint8Array(44 + n * 2), dv = new DataView(u8.buffer);
+      const w = (o: number, t: string) => { for (let i = 0; i < t.length; i++) dv.setUint8(o + i, t.charCodeAt(i)); };
+      w(0, "RIFF"); dv.setUint32(4, 36 + n * 2, true); w(8, "WAVE"); w(12, "fmt "); dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+      dv.setUint32(24, 44100, true); dv.setUint32(28, 88200, true); dv.setUint16(32, 2, true); dv.setUint16(34, 16, true); w(36, "data"); dv.setUint32(40, n * 2, true);
+      let bin = ""; for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+      keep = new Audio("data:audio/wav;base64," + btoa(bin));
+      keep.loop = true; keep.volume = 0.01; keep.setAttribute("playsinline", "");
+      void keep.play().catch(() => {});
+    } catch { keep = null; }
+  };
+  const releaseMedia = () => { try { keep?.pause(); } catch { /* ignore */ } };
   const env = (g: GainNode, t: number, a: number, peak: number, d: number) => {
     g.gain.setValueAtTime(0.0001, t);
     g.gain.exponentialRampToValueAtTime(peak, t + a);
@@ -686,21 +719,27 @@ function createSpook() {
       for (let i = 0; i < lvl.length; i++) { const v = (lvl[i] - 128) / 128; sum += v * v; }
       return Math.min(1, Math.sqrt(sum / lvl.length) * 3.2);
     },
+    /**
+     * Phones only let audio start from inside a tap. Call this synchronously from the tap handler that
+     * turns the sound on: it creates and resumes the context there, and asks iOS to treat the page as
+     * media so the ringer switch does not mute it.
+     */
+    unlock: () => {
+      if (!ensure() || !ctx) return;
+      void ctx.resume();
+      try { const b = ctx.createBuffer(1, 1, ctx.sampleRate), n = ctx.createBufferSource(); n.buffer = b; n.connect(ctx.destination); n.start(0); } catch { /* ignore */ }
+      keepMedia();
+    },
+    /** Called on every tap while the sound is on: phones suspend or interrupt the context when the page is backgrounded. */
+    nudge: () => { if (ctx && ctx.state !== "running" && ctx.state !== "closed") void ctx.resume(); },
     on: async () => {
-      if (!ctx) {
-        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-        if (!AC) return;
-        ctx = new AC();
-        master = ctx.createGain(); master.gain.value = 0.7; master.connect(ctx.destination);
-        nb = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
-        const d = nb.getChannelData(0);
-        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-      }
+      if (!ensure() || !ctx) return;
+      keepMedia();
       await ctx.resume();
       if (!amb) { amb = ambient(); hoot(); }
       void loadMusic();
     },
-    off: () => { stopMusic(0.05); amb?.stop(); amb = null; void ctx?.suspend(); },
+    off: () => { stopMusic(0.05); amb?.stop(); amb = null; releaseMedia(); void ctx?.suspend(); },
     hit: (n: number) => {
       if (!ok()) return;
       const t = ctx!.currentTime;
@@ -760,7 +799,7 @@ function createSpook() {
       ([[392, 370, 0], [311.1, 293.7, 0.3], [261.6, 196, 0.6]] as const).forEach(([a, b, d], i) => tone(t + d, "triangle", a, b, i === 2 ? 0.7 : 0.24, 0.09, 0.03));
       for (let i = 0; i < 10; i++) noise(t + 0.2 + i * 0.05, 0.02, "bandpass", 2100 + (i % 2) * 600, 3, 0.1, 0.002);
     },
-    dispose: () => { stopMusic(0.02); amb?.stop(); amb = null; void ctx?.close(); ctx = null; },
+    dispose: () => { stopMusic(0.02); amb?.stop(); amb = null; releaseMedia(); void ctx?.close(); ctx = null; },
   };
 }
 type Spook = ReturnType<typeof createSpook>;
@@ -1251,7 +1290,15 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     const iv = window.setInterval(() => { setChatter((c) => c + 1); snd.current?.chatter(); }, 7300);
     return () => window.clearInterval(iv);
   }, []);
-  const toggleSound = () => setSoundChoice(!sound);
+  const toggleSound = () => {
+    // Start the audio engine inside this tap: phones refuse to start audio from the effect below.
+    if (!sound && enableSound) {
+      if (!snd.current) snd.current = createSpook();
+      snd.current.setMusic(music);
+      snd.current.unlock();
+    }
+    setSoundChoice(!sound);
+  };
   useEffect(() => {
     if (!sound) { snd.current?.off(); return; }
     if (!snd.current) snd.current = createSpook();
@@ -1424,6 +1471,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     hit(p.x, p.y);
   };
   const touch = () => {
+    if (sound) snd.current?.nudge();
     if (touched.current) return;
     touched.current = true;
     auto.current.forEach(clearTimeout);

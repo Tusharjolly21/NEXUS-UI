@@ -37,7 +37,7 @@ export function PreviewPumpkinReveal({ compact = false }: { compact?: boolean } 
   return (
     <div className={`${STAGE} min-h-[540px]`}>
       <div className={compact ? "w-full max-w-[400px]" : "w-full max-w-[440px]"}>
-        <PumpkinReveal autoplay />
+        <PumpkinReveal autoplay music="/audio/pumpkin-burst.mp3" />
       </div>
     </div>
   );
