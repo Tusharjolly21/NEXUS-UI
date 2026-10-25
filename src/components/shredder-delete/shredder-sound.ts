@@ -173,6 +173,7 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
   rustleLfo2.start();
 
   let wasBack = false;
+  let lastT = 0;
   const ramp = (p: AudioParam, v: number, tc = 0.035) => p.setTargetAtTime(v, c.currentTime, tc);
   let closed = false;
 
@@ -216,11 +217,11 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
       burst("lowpass", 1500, 400, 0.002, 0.09, 0.4, 0.8);
       burst("bandpass", 3200, 1800, 0.004, 0.12, 0.2, 1.2, 0.03);
     },
-    // Undo starts: the motor winds up with a rising whirr and a breath of air, nothing like the shredding clunk
+    // Undo starts: the strips peel up off the pile, a few quick papery ticks
     "bite-reverse": () => {
-      tone(190, 560, 0.24, 0.2, "sine");
-      tone(380, 1100, 0.24, 0.07, "triangle");
-      burst("bandpass", 600, 3200, 0.1, 0.16, 0.13, 1.6);
+      burst("bandpass", 900, 3400, 0.07, 0.14, 0.14, 1.1);
+      burst("highpass", 4200, 2600, 0.002, 0.02, 0.1, 0.7, 0.05);
+      burst("highpass", 3800, 2400, 0.002, 0.02, 0.08, 0.7, 0.1);
     },
     // the slot lights blue as a file is held over it
     arm: () => tone(1180, 840, 0.05, 0.1, "sine"),
@@ -231,32 +232,36 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
       tone(110, 52, 0.16, 0.34, "triangle");
       burst("bandpass", 2400, 900, 0.003, 0.1, 0.16, 1.1);
     },
-    // Undo finishes: the file is back. A soft two-note "ting" and a small pop, the opposite of the thud of deleting
+    // Undo finishes: the page has stuck back together and lands with a soft pat, then a small settle
     land: () => {
-      burst("bandpass", 1200, 2600, 0.01, 0.07, 0.1, 1.2);
-      tone(1175, 1175, 0.28, 0.13, "sine", 0.02);
-      tone(1568, 1568, 0.34, 0.1, "sine", 0.09);
+      burst("lowpass", 1100, 320, 0.003, 0.11, 0.32, 0.7);
+      tone(120, 80, 0.08, 0.14, "sine");
+      burst("bandpass", 2600, 1500, 0.002, 0.04, 0.1, 1, 0.08);
     },
   };
 
   return {
     frame(f, on) {
       if (closed) return;
+      const nowT = c.currentTime;
+      const dt = Math.min(0.05, nowT - lastT);
+      lastT = nowT;
       const m = on ? Math.max(0, Math.min(1, f.motor)) : 0;
       const back = f.dir < 0;
       const prog = Math.max(0, Math.min(1, f.progress));
       const paper = on ? Math.max(0, Math.min(1, f.paper)) * m : 0;
       const rustle = on ? Math.max(0, Math.min(1, f.rustle)) : 0;
       // Forward and backward are two different sounds, not one sound at another pitch. Shredding is a heavy
-      // growl with chopping teeth. Undo is a lighter rewind: a smooth whirr that climbs as the page is drawn
-      // back up, with a rising airy whoosh in place of the chopping.
+      // growl with chopping teeth. Undo is the strips clinging back into a page: a soft slide and a crackle
+      // of tiny sticks that speeds up as it comes together.
       if (back !== wasBack) {
         wasBack = back;
         saw.type = back ? "triangle" : "sawtooth";
         sq.type = back ? "sine" : "square";
-        grindBP.Q.value = back ? 2.4 : 0.9;
+        grindBP.Q.value = back ? 0.8 : 0.9;
         ramp(toothDepth.gain, back ? 0.03 : 0.5, 0.02);
         ramp(teeth.gain, back ? 0.95 : 0.5, 0.02);
+        ramp(tearDepth.gain, back ? 0.9 : 0.4, 0.02);
       }
       if (!back) {
         // swell through the middle of the sheet, as more teeth bite at once
@@ -275,17 +280,25 @@ export function createShredderSound(volume = 0.7): ShredderSound | null {
         ramp(tearLfo.frequency, 55 + 30 * m, 0.05);
         ramp(rustleOut.gain, 0.16 * rustle, 0.06);
       } else {
-        const base = 95 + 120 * m + 150 * prog;
-        ramp(saw.frequency, base, 0.05);
-        ramp(sq.frequency, base * 2, 0.05);
-        ramp(motorLP.frequency, 700 + 900 * m, 0.05);
-        ramp(motorOut.gain, 0.11 * m, 0.04);
-        ramp(whine.frequency, 700 + 1300 * prog * m, 0.05);
-        ramp(whineGain.gain, 0.03 * m, 0.05);
-        ramp(grindBP.frequency, 500 + 3300 * prog, 0.05);
-        ramp(grindOut.gain, 0.3 * paper, 0.04);
-        ramp(tearOut.gain, 0, 0.03);
-        ramp(rustleOut.gain, 0.05 * rustle, 0.06);
+        // Undo is paper, not machinery: the strips cling back together, so it is a growing crackle of tiny
+        // sticks and a soft slide, with only a faint motor underneath.
+        const stick = paper * prog;
+        ramp(saw.frequency, 70 + 40 * m, 0.05);
+        ramp(sq.frequency, (70 + 40 * m) * 2, 0.05);
+        ramp(motorLP.frequency, 260, 0.05);
+        ramp(motorOut.gain, 0.05 * m, 0.04);
+        ramp(whineGain.gain, 0, 0.05);
+        // a soft papery slide that brightens as the page is drawn up
+        ramp(grindBP.frequency, 1400 + 2600 * prog, 0.05);
+        ramp(grindOut.gain, 0.1 * paper, 0.04);
+        // the crackle: the clinging gets faster and louder towards the end
+        ramp(tearLfo.frequency, 18 + 70 * prog, 0.05);
+        ramp(tearOut.gain, (0.03 + 0.2 * stick) * (paper > 0 ? 1 : 0), 0.04);
+        ramp(rustleOut.gain, 0.14 * rustle * (0.3 + 0.7 * prog), 0.06);
+        // single sticks, more of them the closer the page gets to whole
+        if (paper > 0.05 && dt > 0 && Math.random() < (6 + 46 * prog) * dt) {
+          burst("highpass", 2800 + Math.random() * 2400, 1800, 0.001, 0.012 + Math.random() * 0.02, 0.03 + 0.07 * Math.random(), 0.7);
+        }
       }
     },
     hit(name) {
