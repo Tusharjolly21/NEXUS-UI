@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight, Lock, Play, RotateCcw, SlidersHorizontal, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -71,6 +72,7 @@ export function GalleryTile({
 }) {
   const [run, setRun] = React.useState(0);
   const [playing, setPlaying] = React.useState(!playOnClick);
+  const [posterFailed, setPosterFailed] = React.useState(false);
   const href = hrefProp ?? `/components/${item.slug}`;
   const opensPage = !!hrefProp && !onOpen;
   const locked = useLocked(item.premium);
@@ -114,13 +116,40 @@ export function GalleryTile({
             dark ? "text-white" : "text-[#1d1d1f]",
           )}
         >
-          <span className="grid size-12 place-items-center rounded-full bg-action text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)] transition-transform duration-200 group-hover:scale-105">
-            <Play className="size-5 translate-x-px fill-current" aria-hidden />
-          </span>
-          <span className="text-[16px] font-semibold tracking-[-0.02em]">{item.name}</span>
-          {fit.rows.lg >= 2 ? (
-            <span className={cn("line-clamp-3 max-w-[300px] text-[13px] leading-[1.45]", dark ? "text-white/65" : "text-[#6e6e73]")}>{item.description}</span>
+          {/* A captured frame of the live component, so the tile shows what you are about to play. */}
+          {posterFailed ? null : (
+            <Image
+              src={`/posters/${item.slug}.webp`}
+              alt=""
+              fill
+              sizes="(min-width: 1024px) 33vw, 100vw"
+              className="object-cover"
+              onError={() => setPosterFailed(true)}
+            />
+          )}
+          {posterFailed ? null : <span className="absolute inset-0 bg-black/[0.06] transition-colors duration-200 group-hover:bg-black/[0.02]" aria-hidden />}
+          {posterFailed ? (
+            <span className="relative grid size-12 place-items-center rounded-full bg-action text-white shadow-[0_8px_20px_-8px_rgba(0,0,0,0.5)] transition-transform duration-200 group-hover:scale-105">
+              <Play className="size-5 translate-x-px fill-current" aria-hidden />
+            </span>
           ) : null}
+          {posterFailed ? (
+            <>
+              <span className="relative text-[16px] font-semibold tracking-[-0.02em]">{item.name}</span>
+              {fit.rows.lg >= 2 ? (
+                <span className={cn("relative line-clamp-3 max-w-[300px] text-[13px] leading-[1.45]", dark ? "text-white/65" : "text-[#6e6e73]")}>{item.description}</span>
+              ) : null}
+            </>
+          ) : (
+            <span className="absolute inset-x-0 bottom-4 flex justify-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/92 py-1.5 pl-1.5 pr-4 text-[13.5px] font-semibold text-[#1d1d1f] shadow-[0_8px_24px_-10px_rgba(0,0,0,0.45),0_0_0_0.5px_rgba(0,0,0,0.08)] backdrop-blur-md transition-transform duration-200 group-hover:scale-[1.03]">
+                <span className="grid size-7 place-items-center rounded-full bg-action text-white">
+                  <Play className="size-3.5 translate-x-px fill-current" aria-hidden />
+                </span>
+                Play {item.name}
+              </span>
+            </span>
+          )}
         </button>
       ) : (
       <FitPreview
