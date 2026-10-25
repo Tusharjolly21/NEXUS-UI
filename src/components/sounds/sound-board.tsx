@@ -145,7 +145,7 @@ export function SoundBoard({
 
   const snippet = current.recorded ? `playRecordedSound("${current.name}")` : current.pro ? `playProSound("${current.name}")` : mac ? `setSoundStyle("mac")` : `playSound("${current.name}")`;
   const VolumeIcon = volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
-  const used = !current.pro ? (usedBy[current.name] ?? []) : [];
+  const used = !current.recorded ? (usedBy[current.name] ?? []) : [];
   const ACCESS: { id: Access; label: string; n: number }[] = [
     { id: "all", label: "All", n: ITEMS.length },
     { id: "free", label: "Free", n: freeCount },
@@ -273,7 +273,7 @@ export function SoundBoard({
           {currentLocked ? <ProBadge /> : <span className="rounded-full bg-[#34c759]/12 px-2.5 py-0.5 text-[12px] font-semibold text-[#248a3d] dark:text-[#30d158]">Free</span>}
         </div>
 
-        {!current.pro && used.length ? (
+        {!current.recorded && used.length ? (
           <p className="mt-2 text-[13.5px] leading-relaxed text-muted-foreground">
             Used by{" "}
             {used.slice(0, 8).map((u, i) => (
@@ -286,7 +286,7 @@ export function SoundBoard({
             ))}
             {used.length > 8 ? ` and ${used.length - 8} more` : ""}.
           </p>
-        ) : !current.pro ? (
+        ): !current.pro ? (
           <p className="mt-2 text-[13.5px] text-muted-foreground">No component plays this one yet. It is there for your own app.</p>
         ) : null}
 

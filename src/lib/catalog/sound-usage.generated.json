@@ -1,4 +1,16 @@
 {
+  "access-granted": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
+  "bloop": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
   "charge": [
     {
       "slug": "hold-to-confirm",
@@ -29,6 +41,10 @@
       "name": "Sand Timer"
     },
     {
+      "slug": "shredder-delete",
+      "name": "Shredder Delete"
+    },
+    {
       "slug": "upload-dropzone",
       "name": "Upload Dropzone"
     }
@@ -37,6 +53,10 @@
     {
       "slug": "animated-tabs",
       "name": "Animated Tabs"
+    },
+    {
+      "slug": "bolting-sliders",
+      "name": "Bolting Sliders"
     },
     {
       "slug": "crumple-to-trash",
@@ -97,10 +117,44 @@
       "name": "Upload Dropzone"
     }
   ],
+  "glass-chime": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
+  "glass-close": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
+  "glass-open": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
+  "glass-ping": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
+  "glass-tap": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    }
+  ],
   "hush": [
     {
       "slug": "hold-to-confirm",
       "name": "Hold to Confirm"
+    },
+    {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
     }
   ],
   "knock": [
@@ -114,6 +168,10 @@
     }
   ],
   "lift": [
+    {
+      "slug": "bolting-sliders",
+      "name": "Bolting Sliders"
+    },
     {
       "slug": "draggable-card-stack",
       "name": "Draggable Card Stack"
@@ -157,6 +215,10 @@
       "name": "Gooey Search Input"
     },
     {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
+    },
+    {
       "slug": "ink-theme-switch",
       "name": "Ink Theme Switch"
     },
@@ -197,6 +259,10 @@
     {
       "slug": "copy-button",
       "name": "Copy Button"
+    },
+    {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
     },
     {
       "slug": "ink-theme-switch",
@@ -275,6 +341,12 @@
     {
       "slug": "todo-list",
       "name": "Todo List"
+    }
+  ],
+  "scan-sweep": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
     }
   ],
   "success": [
@@ -417,6 +489,10 @@
     {
       "slug": "hold-to-confirm",
       "name": "Hold to Confirm"
+    },
+    {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
     },
     {
       "slug": "layout-switch",

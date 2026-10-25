@@ -37,11 +37,17 @@ const { SOUND_NAMES } = await (async () => {
   return { SOUND_NAMES: new Set([...body.matchAll(/^  ([a-z]+): \{ category:/gm)].map((m) => m[1])) };
 })();
 
-// Every sound name written as a string inside a play(...) or playSound(...) call, including
+// Pro sound names (some have hyphens), so the page can show which components play them too.
+const PRO_NAMES = new Set(
+  [...fs.readFileSync(path.join(root, "src/lib/ui-sounds-pro.ts"), "utf8").matchAll(/^  (?:"([a-z-]+)"|([a-z]+)): \{ category:/gm)].map((m) => m[1] ?? m[2]),
+);
+const KNOWN = new Set([...SOUND_NAMES, ...PRO_NAMES]);
+
+// Every sound name written as a string inside a play(...), play.auto(...), playSound(...) or sfx(...) call, including
 // ones in a ternary like play(on ? "on" : "off"). Parentheses are matched, so nested calls work.
 function soundNamesIn(text) {
   const names = new Set();
-  for (const m of text.matchAll(/\b(?:play|playSound)\(/g)) {
+  for (const m of text.matchAll(/\b(?:play|playSound|playProSound|sfx)(?:\.auto)?\(/g)) {
     let depth = 1;
     let i = m.index + m[0].length;
     const start = i;
@@ -49,7 +55,7 @@ function soundNamesIn(text) {
       if (text[i] === "(") depth++;
       else if (text[i] === ")") depth--;
     }
-    for (const q of text.slice(start, i).matchAll(/["']([a-z]+)["']/g)) if (SOUND_NAMES.has(q[1])) names.add(q[1]);
+    for (const q of text.slice(start, i).matchAll(/["']([a-z]+(?:-[a-z]+)*)["']/g)) if (KNOWN.has(q[1])) names.add(q[1]);
   }
   return names;
 }

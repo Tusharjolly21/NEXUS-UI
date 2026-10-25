@@ -444,7 +444,7 @@ export function StorageClean({ autoplay = false, enableSound = true, className =
   const freedRef = useRef([false, false, false]);
   const onClosed = (k: number) => {
     if (sim.current.chunks[k].want !== "out") return;
-    sfx("access-granted", 0.6);
+    sfxRef.current("access-granted", 0.6);
     const n = freedRef.current.map((v, i) => (i === k ? true : v));
     freedRef.current = n;
     const tot = sum(n);
@@ -455,7 +455,7 @@ export function StorageClean({ autoplay = false, enableSound = true, className =
   useLayoutEffect(() => { cb.current.closed = onClosed; });
   const run = (k: number) => {
     if (outRef.current[k]) return;
-    sfx("relay-click", 0.5);
+    sfxRef.current("relay-click", 0.5);
     sim.current.chunks[k].want = "out";
     setOut((o) => o.map((v, i) => (i === k ? true : v)));
     kick();
@@ -464,7 +464,7 @@ export function StorageClean({ autoplay = false, enableSound = true, className =
     const was = outRef.current;
     const tot = sum(was);
     if (!tot) return;
-    sfx("glass-tap", 0.5);
+    sfxRef.current("glass-tap", 0.5);
     sim.current.chunks.forEach((c) => { c.want = "in"; });
     setOut([false, false, false]);
     freedRef.current = [false, false, false];
