@@ -11111,7 +11111,7 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
-      { name: "music", type: "string", description: "URL of a track to play when the pumpkin bursts. Without one, a ghost wails instead." },
+      { name: "music", type: "string", description: "URL of an mp3 to play when the pumpkin bursts, with the moonlight pulsing to it. Without one, a ghost wails instead." },
       { name: "className", type: "string", description: "Extra classes for the outer card." },
     ],
     Preview: Previews.PreviewPumpkinReveal,
@@ -11153,11 +11153,12 @@ export default function Page() {
 
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
 
-// The track starts as the pumpkin bursts and the moonlight pulses with it. Put the file in /public.
+// The track starts as the pumpkin bursts and the moonlight pulses with it. Put any mp3 in /public. The demo track on
+// this page is /audio/pumpkin-burst.mp3 on nexus-ui.com.
 export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[440px] p-6">
-      <PumpkinReveal music="/audio/burst.mp3" />
+      <PumpkinReveal music="/audio/pumpkin-burst.mp3" />
     </div>
   );
 }`,
