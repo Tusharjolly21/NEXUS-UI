@@ -47,7 +47,7 @@ const KNOWN = new Set([...SOUND_NAMES, ...PRO_NAMES]);
 // ones in a ternary like play(on ? "on" : "off"). Parentheses are matched, so nested calls work.
 function soundNamesIn(text) {
   const names = new Set();
-  for (const m of text.matchAll(/\b(?:play|playSound|playProSound|sfx)(?:\.auto)?\(/g)) {
+  for (const m of text.matchAll(/\b(?:play|playSound|playProSound|sfx|sfxRef\.current|playRef\.current)(?:\.auto)?\(/g)) {
     let depth = 1;
     let i = m.index + m[0].length;
     const start = i;

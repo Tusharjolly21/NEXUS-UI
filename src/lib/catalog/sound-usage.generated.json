@@ -13,12 +13,24 @@
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "bloop": [
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "card-insert": [
@@ -37,6 +49,12 @@
     {
       "slug": "generate-image",
       "name": "Generate Image"
+    }
+  ],
+  "crumble": [
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "done": [
@@ -201,6 +219,10 @@
     {
       "slug": "smart-light",
       "name": "Smart Light"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "glass-tap": [
@@ -211,6 +233,10 @@
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
     },
     {
       "slug": "intelligence-glow",
@@ -303,6 +329,10 @@
     {
       "slug": "like-burst",
       "name": "Like Burst"
+    },
+    {
+      "slug": "marble-progress",
+      "name": "Marble Progress"
     },
     {
       "slug": "orbital-loader",
@@ -435,6 +465,12 @@
       "name": "Todo List"
     }
   ],
+  "pour": [
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
   "relay-click": [
     {
       "slug": "card-reader-verify",
@@ -447,6 +483,10 @@
     {
       "slug": "smart-light",
       "name": "Smart Light"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "scan-sweep": [
@@ -457,6 +497,10 @@
     {
       "slug": "cloud-sync",
       "name": "Cloud Sync"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
     },
     {
       "slug": "intelligence-glow",

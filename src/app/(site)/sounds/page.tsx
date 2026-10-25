@@ -259,7 +259,7 @@ export default async function SoundsPage() {
             <div className="lg:sticky lg:top-24 lg:self-start">
               <h3 className="text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Pro pack</h3>
               <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-                {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
+                {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade, studio and device sets. Included in the Pro plan. The
                 command needs your Nexus API key, set up once as described in the{" "}
                 <Link href="/docs/cli" className="font-medium text-foreground underline underline-offset-4">CLI guide</Link>.
               </p>
