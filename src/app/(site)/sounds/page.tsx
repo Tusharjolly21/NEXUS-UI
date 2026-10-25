@@ -22,7 +22,7 @@ const PRO_COUNT = SYNTH_PRO_COUNT + RECORDED_COUNT;
 
 export const metadata: Metadata = createMetadata({
   title: "UI Sound Effects for React — Web Audio and Recorded",
-  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade and studio sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications, screenshots, build-ups, landings and stings.`,
+  description: `${COUNT + PRO_COUNT} UI sound effects for React and Next.js, ${COUNT} free and ${PRO_COUNT} Pro, plus a Mac style that re-voices every sound to feel at home on a Mac or iPhone: taps, chimes, glass, paper, arcade, studio and device sounds synthesised with the Web Audio API, and ${RECORDED_COUNT} recorded sounds for typing, camera, messages, notifications, screenshots, build-ups, landings and stings.`,
   alternates: { canonical: "/sounds" },
 });
 const SOUND_COMPONENTS = Object.keys(COMPONENT_SOUNDS).length;
@@ -137,7 +137,7 @@ const FAQ = [
   },
   {
     q: "Which sounds are free and which are Pro?",
-    a: `The ${COUNT} sounds the components use are free, with their full source on this page. The Pro plan adds ${SYNTH_PRO_COUNT} synthesised sounds in four sets (glass, paper and wood, arcade, and studio) and ${RECORDED_COUNT} recorded ones. Every Pro sound plays on this page for everyone, so you can hear it before you decide. Its code, install command and full-quality file come with the Pro plan.`,
+    a: `The ${COUNT} sounds the components use are free, with their full source on this page. The Pro plan adds ${SYNTH_PRO_COUNT} synthesised sounds in five sets (glass, paper and wood, arcade, studio, and devices) and ${RECORDED_COUNT} recorded ones. Every Pro sound plays on this page for everyone, so you can hear it before you decide. Its code, install command and full-quality file come with the Pro plan.`,
   },
   {
     q: "What is the Mac style? Are these Apple's sounds?",
@@ -259,7 +259,7 @@ export default async function SoundsPage() {
             <div className="lg:sticky lg:top-24 lg:self-start">
               <h3 className="text-[19px] font-semibold tracking-[-0.3px] text-foreground">The Pro pack</h3>
               <p className="mt-2 max-w-[440px] text-[15.5px] leading-relaxed text-muted-foreground">
-                {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade and studio sets. Included in the Pro plan. The
+                {SYNTH_PRO_COUNT} more sounds in glass, paper and wood, arcade, studio and device sets. Included in the Pro plan. The
                 command needs your Nexus API key, set up once as described in the{" "}
                 <Link href="/docs/cli" className="font-medium text-foreground underline underline-offset-4">CLI guide</Link>.
               </p>

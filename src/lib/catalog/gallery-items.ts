@@ -49,6 +49,13 @@ const EXTRA_INTERACTIONS: Record<string, Interaction[]> = {
 
 /** Previews that already play their own demo (they render a DemoCursor themselves). */
 const SELF_DEMO = new Set([
+  "global-deploy",
+  "card-reader-verify",
+  "intelligence-glow",
+  "cloud-sync",
+  "smart-light",
+  "range-calendar",
+  "storage-clean",
   "dart-rating",
   "domino-progress",
   "pumpkin-reveal",
@@ -365,6 +372,14 @@ const TINT_OF: Record<string, TileTint> = {
  * the latest additions are always on its first page.
  */
 export const MOTION_KIT_ORDER: string[] = [
+  // nineteenth batch (Motion Kit Pro: Global Deploy, Card Reader Verify, Intelligence Glow, Cloud Sync, Smart Light, Range Calendar, Storage Clean)
+  "global-deploy",
+  "card-reader-verify",
+  "intelligence-glow",
+  "cloud-sync",
+  "smart-light",
+  "range-calendar",
+  "storage-clean",
   // eighteenth batch (Dart Rating, Domino Progress, Pumpkin Reveal, Catch Undo)
   "dart-rating",
   "domino-progress",

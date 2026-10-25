@@ -30,4 +30,12 @@ export const PRO_SOUND_META: { name: string; label: string; category: ProSoundCa
   { name: "confetti-pop", label: "Confetti pop", category: "Studio" },
   { name: "fanfare", label: "Fanfare", category: "Studio" },
   { name: "swell", label: "Swell", category: "Studio" },
+  { name: "scan-sweep", label: "Scan sweep", category: "Devices" },
+  { name: "card-insert", label: "Card insert", category: "Devices" },
+  { name: "access-granted", label: "Access granted", category: "Devices" },
+  { name: "access-denied", label: "Access denied", category: "Devices" },
+  { name: "relay-click", label: "Relay click", category: "Devices" },
+  { name: "bloop", label: "Bloop", category: "Devices" },
+  { name: "crumble", label: "Crumble", category: "Devices" },
+  { name: "pour", label: "Pour", category: "Devices" },
 ];

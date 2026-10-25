@@ -1,4 +1,44 @@
 {
+  "access-denied": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    }
+  ],
+  "access-granted": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
+  "bloop": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
+  "card-insert": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    }
+  ],
   "charge": [
     {
       "slug": "hold-to-confirm",
@@ -9,6 +49,12 @@
     {
       "slug": "generate-image",
       "name": "Generate Image"
+    }
+  ],
+  "crumble": [
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
     }
   ],
   "done": [
@@ -29,6 +75,10 @@
       "name": "Sand Timer"
     },
     {
+      "slug": "shredder-delete",
+      "name": "Shredder Delete"
+    },
+    {
       "slug": "upload-dropzone",
       "name": "Upload Dropzone"
     }
@@ -37,6 +87,10 @@
     {
       "slug": "animated-tabs",
       "name": "Animated Tabs"
+    },
+    {
+      "slug": "bolting-sliders",
+      "name": "Bolting Sliders"
     },
     {
       "slug": "crumple-to-trash",
@@ -97,10 +151,114 @@
       "name": "Upload Dropzone"
     }
   ],
+  "glass-chime": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
+  "glass-clink": [
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    }
+  ],
+  "glass-close": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
+  "glass-open": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
+  "glass-ping": [
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
+  "glass-tap": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
   "hush": [
     {
       "slug": "hold-to-confirm",
       "name": "Hold to Confirm"
+    },
+    {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
     }
   ],
   "knock": [
@@ -114,6 +272,10 @@
     }
   ],
   "lift": [
+    {
+      "slug": "bolting-sliders",
+      "name": "Bolting Sliders"
+    },
     {
       "slug": "draggable-card-stack",
       "name": "Draggable Card Stack"
@@ -157,12 +319,20 @@
       "name": "Gooey Search Input"
     },
     {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
+    },
+    {
       "slug": "ink-theme-switch",
       "name": "Ink Theme Switch"
     },
     {
       "slug": "like-burst",
       "name": "Like Burst"
+    },
+    {
+      "slug": "marble-progress",
+      "name": "Marble Progress"
     },
     {
       "slug": "orbital-loader",
@@ -199,6 +369,10 @@
       "name": "Copy Button"
     },
     {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
+    },
+    {
       "slug": "ink-theme-switch",
       "name": "Ink Theme Switch"
     },
@@ -211,6 +385,20 @@
     {
       "slug": "money-goo",
       "name": "Money Goo"
+    }
+  ],
+  "paper-flip": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "range-calendar",
+      "name": "Range Calendar"
     }
   ],
   "ping": [
@@ -275,6 +463,54 @@
     {
       "slug": "todo-list",
       "name": "Todo List"
+    }
+  ],
+  "pour": [
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
+  "relay-click": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    },
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    },
+    {
+      "slug": "storage-clean",
+      "name": "Storage Clean"
+    }
+  ],
+  "scan-sweep": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "cloud-sync",
+      "name": "Cloud Sync"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
+    },
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
+    }
+  ],
+  "sparkle": [
+    {
+      "slug": "intelligence-glow",
+      "name": "Intelligence Glow"
     }
   ],
   "success": [
@@ -417,6 +653,10 @@
     {
       "slug": "hold-to-confirm",
       "name": "Hold to Confirm"
+    },
+    {
+      "slug": "hold-to-record",
+      "name": "Hold to Record"
     },
     {
       "slug": "layout-switch",
@@ -637,6 +877,28 @@
     {
       "slug": "slingshot-send",
       "name": "Slingshot Send"
+    }
+  ],
+  "wood-block": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    }
+  ],
+  "wood-drop": [
+    {
+      "slug": "smart-light",
+      "name": "Smart Light"
+    }
+  ],
+  "wood-tap": [
+    {
+      "slug": "card-reader-verify",
+      "name": "Card Reader Verify"
+    },
+    {
+      "slug": "global-deploy",
+      "name": "Global Deploy"
     }
   ]
 }
