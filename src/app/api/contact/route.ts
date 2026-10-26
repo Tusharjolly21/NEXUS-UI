@@ -100,13 +100,15 @@ export async function POST(req: Request) {
   }
 
   const resendKey = process.env.RESEND_API_KEY;
-  const notifyEmail = process.env.CONTACT_NOTIFY_EMAIL?.trim();
+  // Messages arrive at the same support address the site shows. (CONTACT_NOTIFY_EMAIL is no longer read:
+  // it held the old contact@ address and sent notifications to an inbox that does not exist.)
+  const notifyEmail = legalConfig.contactEmail;
   // The sender must be on a domain verified in Resend. Override with CONTACT_FROM_EMAIL if needed.
   const from = process.env.CONTACT_FROM_EMAIL?.trim() || `Nexus UI <${legalConfig.contactEmail}>`;
 
-  if (!resendKey || !notifyEmail) {
-    // The message is saved above, so nothing is lost, but nobody gets an email until these are set.
-    console.warn("Contact email not sent: set RESEND_API_KEY and CONTACT_NOTIFY_EMAIL.");
+  if (!resendKey) {
+    // The message is saved above, so nothing is lost, but nobody gets an email until the key is set.
+    console.warn("Contact email not sent: set RESEND_API_KEY.");
   } else {
     const resend = new Resend(resendKey);
     const safeName = escapeHtml(name);
