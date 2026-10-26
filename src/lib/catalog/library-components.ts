@@ -4119,8 +4119,8 @@ export default function Page() {
         React
       </LinkPreview>{" "}
       and wrote up{" "}
-      <LinkPreview href="/blog/migration" title="How we migrated" description="Six weeks, zero downtime." openInNewTab={false}>
-        how the migration went
+      <LinkPreview href="/blog/framer-motion-nextjs-animations" title="Animating Next.js with Framer Motion" description="A complete guide to motion in a Next.js app." openInNewTab={false}>
+        how we handle the animation
       </LinkPreview>
       .
     </p>
@@ -4158,8 +4158,8 @@ export default function Page() {
         React
       </LinkPreview>{" "}
       and wrote up{" "}
-      <LinkPreview href="/blog/migration" title="How we migrated" description="Six weeks, zero downtime." openInNewTab={false}>
-        how the migration went
+      <LinkPreview href="/blog/framer-motion-nextjs-animations" title="Animating Next.js with Framer Motion" description="A complete guide to motion in a Next.js app." openInNewTab={false}>
+        how we handle the animation
       </LinkPreview>
       .
     </p>

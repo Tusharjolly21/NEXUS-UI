@@ -624,7 +624,7 @@ export default function Page() {
         excerpt: "How we stage scroll-linked motion so it explains the product.",
         author: { name: "Mara Okafor" },
         cover: ["#0071e3", "#bf5af2"],
-        href: "/blog/scroll-choreography",
+        href: "/blog/motion-scroll-choreography",
       }}
       posts={[
         { title: "Springs, not curves", category: "Craft", date: "Oct 09", readTime: "7 min", href: "/blog/springs", cover: ["#ff9f0a", "#ff375f"] },
