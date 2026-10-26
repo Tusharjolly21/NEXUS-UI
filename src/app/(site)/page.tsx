@@ -8,6 +8,7 @@ import { HeroSpotlight } from "@/components/home/hero-spotlight";
 import { HeroStickers } from "@/components/home/hero-stickers";
 import { HeroWord } from "@/components/home/hero-word";
 import { PricingTeaser } from "@/components/home/pricing-teaser";
+import { RedditLove } from "@/components/home/reddit-love";
 import { IfPro } from "@/components/pro/pro-access";
 import { ShippingLog } from "@/components/home/shipping-log";
 import { StackStrip } from "@/components/home/stack-strip";
@@ -316,6 +317,11 @@ export default function Home() {
           </ol>
         </div>
       </section>
+
+      {/* What people say: real Reddit comments, looping */}
+      <Band tint="sky" id="love">
+        <RedditLove />
+      </Band>
 
       {/* Release history and requests */}
       <Band tint="mint" id="new">
