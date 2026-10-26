@@ -10,7 +10,6 @@ const PRIVATE_AND_FACETED = [
   "/template-preview/",
   "/auth/",
   "/login",
-  "/r/",
   "/sounds/",
   "/registry.json",
   "/world-atlas-110m.json",
@@ -37,14 +36,17 @@ export default function robots(): MetadataRoute.Robots {
         // "/api/og" is the share-card image every page names in og:image and twitter:image. Crawlers
         // that obey robots.txt (X, LinkedIn, Google) must be able to fetch it, so it stays open while
         // the rest of /api/ is closed: the longer rule wins.
-        allow: ["/", "/api/og"],
+        // "/api/registry/" and "/r/" (the install JSON the shadcn CLI reads) are open on purpose: Google
+        // had already indexed a few of them as bare URLs, and it can only drop an indexed URL after it
+        // is allowed to fetch it and see the "X-Robots-Tag: noindex" header set in next.config.mjs.
+        allow: ["/", "/api/og", "/api/registry/"],
         disallow: PRIVATE_AND_FACETED,
       },
       // Googlebot-Image obeys only its own group and ignores "*", so it repeats the shared rules.
       // Globe texture assets are internal canvas images, not meaningful for Google Images.
       {
         userAgent: "Googlebot-Image",
-        allow: ["/", "/api/og"],
+        allow: ["/", "/api/og", "/api/registry/"],
         disallow: [...PRIVATE_AND_FACETED, "/images/"],
       },
     ],
