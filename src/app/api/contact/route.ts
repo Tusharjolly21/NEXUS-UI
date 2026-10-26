@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminClient } from "@/lib/supabase/admin";
 import { Resend } from "resend";
+import { legalConfig } from "@/lib/legal";
 
 type ContactBody = {
   name?: string;
@@ -99,20 +100,27 @@ export async function POST(req: Request) {
   }
 
   const resendKey = process.env.RESEND_API_KEY;
-  const notifyEmail = process.env.CONTACT_NOTIFY_EMAIL;
+  const notifyEmail = process.env.CONTACT_NOTIFY_EMAIL?.trim();
+  // The sender must be on a domain verified in Resend. Override with CONTACT_FROM_EMAIL if needed.
+  const from = process.env.CONTACT_FROM_EMAIL?.trim() || `Nexus UI <${legalConfig.contactEmail}>`;
 
-  if (resendKey && notifyEmail) {
+  if (!resendKey || !notifyEmail) {
+    // The message is saved above, so nothing is lost, but nobody gets an email until these are set.
+    console.warn("Contact email not sent: set RESEND_API_KEY and CONTACT_NOTIFY_EMAIL.");
+  } else {
     const resend = new Resend(resendKey);
     const safeName = escapeHtml(name);
     const safeEmail = escapeHtml(email);
     const safeCompany = escapeHtml(company);
     const safeMessage = escapeHtml(message).replace(/\n/g, "<br />");
+    // Keep line breaks out of the subject so a name can never add headers.
+    const oneLine = (v: string) => v.replace(/[\r\n]+/g, " ").trim();
 
     const { error: emailError } = await resend.emails.send({
-      from: "Nexus-UI <contact@nexus-ui.com>",
+      from,
       to: notifyEmail,
       replyTo: email,
-      subject: `New contact from ${name}${company ? ` @ ${company}` : ""}`,
+      subject: `New contact from ${oneLine(name)}${company ? ` @ ${oneLine(company)}` : ""}`,
       html: `
         <p><strong>Name:</strong> ${safeName}</p>
         <p><strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a></p>
@@ -120,6 +128,8 @@ export async function POST(req: Request) {
         <hr />
         <p>${safeMessage}</p>
       `,
+      // A plain-text copy helps deliverability and reads in any mail client.
+      text: `Name: ${name}\nEmail: ${email}\n${company ? `Topic: ${company}\n` : ""}\n${message}`,
     });
     if (emailError) {
       console.error("Contact email send failed:", JSON.stringify(emailError));
