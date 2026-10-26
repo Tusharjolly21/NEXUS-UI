@@ -6835,8 +6835,8 @@ export default function Page() {
 
 import { StandingCalendar } from "@/components/standing-calendar";
 
-// Your own counts: one array of 7 numbers (Mon to Sun) per week, each from 0 to 4.
-const weeks = Array.from({ length: 20 }, (_, w) => Array.from({ length: 7 }, (_, d) => (w * 3 + d * 5) % 5));
+// Your own counts: one array of 7 numbers (Mon to Sun) per week. 0 is the first colour, 1-2 the second, 3-5 the third, 6-8 the fourth and 9 or more the fifth.
+const weeks = Array.from({ length: 20 }, (_, w) => Array.from({ length: 7 }, (_, d) => (w * 3 + d * 5) % 12));
 
 export default function Page() {
   return (
