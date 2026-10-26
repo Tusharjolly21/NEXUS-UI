@@ -15,6 +15,7 @@ import { ComponentGallery } from "@/components/gallery/component-gallery";
 import { VideoCard } from "@/components/videos/video-card";
 import { getVideo, videos } from "@/lib/catalog/videos";
 import { Band, PillLink } from "@/components/site";
+import { legalConfig } from "@/lib/legal";
 import { LibraryIndex, type LibraryIndexData } from "@/components/site/library-index";
 import { blockVariants } from "@/lib/catalog/block-variants";
 import { getCategoryComponents, getPopulatedCategories } from "@/lib/catalog/category-seo";
@@ -142,7 +143,7 @@ export default function Home() {
       url: siteConfig.url,
       logo: { "@type": "ImageObject", url: `${siteConfig.url}/nexus-ui-logo.png`, width: 192, height: 192 },
       ...(siteConfig.socialProfiles.length > 0 ? { sameAs: siteConfig.socialProfiles } : {}),
-      contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: "contact@nexus-ui.com" },
+      contactPoint: { "@type": "ContactPoint", contactType: "customer support", email: legalConfig.contactEmail },
     },
     {
       "@context": "https://schema.org",

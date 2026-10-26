@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { openCookieSettings } from "@/lib/consent";
 import { SocialLinks } from "@/components/site/social-links";
+import { legalConfig } from "@/lib/legal";
 
 const COLUMNS = [
   {
@@ -33,7 +34,6 @@ const COLUMNS = [
     links: [
       { href: "/login", label: "Sign in" },
       { href: "/dashboard", label: "Dashboard" },
-      { href: "/contact", label: "Contact" },
     ],
   },
 ] as const;
@@ -46,10 +46,11 @@ const LEGAL = [
 
 /** Quiet Apple-style footer with the ghost "Nexus UI" wordmark bleeding off the bottom edge. */
 export function SiteFooter() {
+  const { contactEmail } = legalConfig;
   return (
     <footer className="relative overflow-hidden border-t border-border bg-footer px-4 pt-16 text-foreground">
       <div className="relative z-10 mx-auto max-w-[1152px]">
-        <div className="grid gap-12 pb-16 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+        <div className="grid gap-12 pb-16 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.3fr]">
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring">
               <Image src="/nexus-ui-logo.png" alt="" width={36} height={36} className="size-9 rounded-lg" />
@@ -58,8 +59,6 @@ export function SiteFooter() {
             <p className="mt-4 max-w-[260px] text-[13px] leading-relaxed text-muted-foreground">
               Animated React components and Next.js templates you copy into your project and own.
             </p>
-            <p className="mt-6 text-[12.5px] font-semibold text-foreground">Connect with us</p>
-            <SocialLinks className="mt-3" />
           </div>
           {COLUMNS.map((col) => (
             <nav key={col.title} aria-label={col.title}>
@@ -75,6 +74,23 @@ export function SiteFooter() {
               </ul>
             </nav>
           ))}
+          <section aria-label="Contact">
+            <p className="mb-3 text-[12.5px] font-semibold text-foreground">Contact</p>
+            <ul className="space-y-2 text-[12.5px] text-muted-foreground">
+              <li>
+                <a href={`mailto:${contactEmail}`} className="break-all transition-colors hover:text-foreground">
+                  {contactEmail}
+                </a>
+              </li>
+              <li>
+                <Link href="/contact" className="transition-colors hover:text-foreground">
+                  Send us a message
+                </Link>
+              </li>
+            </ul>
+            <p className="mt-6 text-[12.5px] font-semibold text-foreground">Connect with us</p>
+            <SocialLinks className="mt-3" />
+          </section>
         </div>
         <div className="flex flex-col gap-3 border-t border-border py-5 text-[12px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Nexus UI</p>
