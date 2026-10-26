@@ -16,7 +16,7 @@ import path from "node:path";
 import { FORMATS, type VideoEntry } from "@/lib/catalog/videos";
 import { videoDefaults } from "@/lib/catalog/video-defaults";
 
-const SITE = "https://nexus-ui.com";
+const SITE = "https://www.nexus-ui.com";
 
 /** Recorded clips a video plays besides its code: file name -> where it is published. */
 const RECORDINGS: Record<string, string[]> = {
