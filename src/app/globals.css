@@ -259,6 +259,26 @@ html.dark {
   50% { opacity: 0; }
 }
 
+/* Endless horizontal loop for the Reddit comments strip: the track holds two identical copies and
+   slides by exactly one of them. */
+@keyframes pg-marquee {
+  to { transform: translateX(-50%); }
+}
+
+.pg-marquee-track {
+  animation: pg-marquee var(--pg-marquee-time, 60s) linear infinite;
+  will-change: transform;
+}
+
+.pg-marquee-track[data-reverse="true"] {
+  animation-direction: reverse;
+}
+
+.pg-marquee:hover .pg-marquee-track,
+.pg-marquee:focus-within .pg-marquee-track {
+  animation-play-state: paused;
+}
+
 @keyframes pg-drop {
   0% { transform: translateY(-0.35em) scale(0.9); }
   60% { transform: translateY(0.05em) scale(1.02); }
@@ -267,8 +287,17 @@ html.dark {
 
 @media (prefers-reduced-motion: reduce) {
   .pg-rainbow-letter,
-  .pg-caret {
+  .pg-caret,
+  .pg-marquee-track {
     animation: none;
+  }
+  .pg-marquee-track > ul[aria-hidden="true"] {
+    display: none;
+  }
+  .pg-marquee {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
   .pg-spotlight {
     display: none;
