@@ -24,7 +24,7 @@ type DodoPayment = {
   payment_id: string;
   total_amount: number;
   currency: string;
-  customer?: { customer_id?: string | null } | null;
+  customer?: { customer_id?: string | null; email?: string | null } | null;
   metadata?: Metadata;
   product_cart?: { product_id: string }[] | null;
 };
@@ -121,6 +121,15 @@ export async function POST(req: Request) {
             });
         if (error) throw error;
         console.log(`[dodo-webhook] lifetime order user=${userId} payment=${payment.payment_id}`);
+      } else if (lifetimeItem) {
+        // A paid lifetime purchase that can't be tied to an account (no user_id in the metadata, for
+        // example from a payment link made in the Dodo dashboard). Nothing can be granted here, so make
+        // it loud: the buyer has paid and is waiting, and this line is how it gets found and fixed by hand.
+        console.error(
+          `[dodo-webhook] UNMATCHED LIFETIME PAYMENT, no user_id in metadata: payment=${payment.payment_id} ` +
+            `email=${payment.customer?.email ?? "unknown"} customer=${payment.customer?.customer_id ?? "unknown"} ` +
+            `amount=${payment.total_amount} ${payment.currency}. Create the orders row by hand.`,
+        );
       }
     } else if (event.type === "refund.succeeded") {
       const refund = event.data as DodoRefund;
@@ -193,6 +202,12 @@ export async function POST(req: Request) {
             .from("subscriptions")
             .insert({ user_id: userId, provider_subscription_id: sub.subscription_id, ...fields });
           if (error) throw error;
+        } else {
+          // Same case for the yearly plan: a subscription we have no row for and can't tie to an account.
+          console.error(
+            `[dodo-webhook] UNMATCHED SUBSCRIPTION, no user_id in metadata: sub=${sub.subscription_id} ` +
+              `status=${sub.status} event=${event.type}. Create the subscriptions row by hand.`,
+          );
         }
         console.log(`[dodo-webhook] ${event.type} sub=${sub.subscription_id} status=${sub.status}`);
       }
