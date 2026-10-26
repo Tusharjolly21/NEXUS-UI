@@ -2,7 +2,7 @@
 
 Add the "Pumpkin Reveal" component from Nexus UI to my project.
 
-Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: a wraith rushes straight at you, bats burst into the night, black widows scuttle across the card, one drops on a thread from the branch, and a skeleton falls out, drags itself upright and lunges before sinking back into the ground. Only then does the offer fly out and land, ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.
+Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: sheet ghosts with cut-out faces fly out and keep circling the night, bats burst out, and black widows scuttle across the card while one drops on a thread from the branch. Then the offer flies out on a torn, bloodied slip with a cobweb and its spider, and lands ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.
 
 Please:
 
@@ -51,7 +51,7 @@ const TREATS: Treat[] = [
   { title: "A free month of Pro", code: "GHOST30" },
 ];
 // how long the horde has the stage before the offer comes out, in ms
-const EMERGE_MS = 3400;
+const EMERGE_MS = 2600;
 
 // A deterministic hash in 0..1. Integer maths only, so the server and the browser agree to the last digit
 // (a sin-based hash does not, and that breaks hydration).
@@ -63,6 +63,16 @@ const rnd = (n: number) => {
   return (h >>> 0) / 4294967296;
 };
 const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
+// the coupon: a torn bottom edge, chamfered top corners, and where the blood runs from the top
+const TORN = (() => {
+  const pts = ["0% 7%", "3% 0%", "97% 0%", "100% 7%"];
+  for (let i = 0; i <= 18; i++) pts.push(`${(100 - (i * 100) / 18).toFixed(2)}% ${(i % 2 ? 93 - rnd(i * 3.3) * 5 : 100 - rnd(i * 1.7) * 2.5).toFixed(2)}%`);
+  return `polygon(${pts.join(",")})`;
+})();
+const DRIPS = [
+  { x: 6, w: 7, l: 15 }, { x: 15, w: 5, l: 24 }, { x: 27, w: 8, l: 12 }, { x: 41, w: 5, l: 30 }, { x: 52, w: 6, l: 14 },
+  { x: 63, w: 9, l: 19 }, { x: 77, w: 5, l: 11 },
+];
 
 // ---------------------------------------------------------------------------
 // A real 3D jack-o'-lantern, drawn on a canvas: a ribbed shell with a carved,
@@ -793,26 +803,25 @@ function createSpook() {
       tone(t + 0.12, "sine", 320, 980, 0.14, 0.18, 0.005);
     },
     /**
-     * What comes out of the pumpkin, in time with the picture: a shriek as the wraith rushes at you,
-     * squeaks and wingbeats, dry scuttling, then the skeleton clattering down, creaking upright,
-     * roaring with its jaw chattering, and rattling back into the ground.
+     * What comes out of the pumpkin, in time with the picture: the ghosts' "whooo", squeaks and
+     * wingbeats as the bats break out, and dry little scuttles as the spiders run.
      */
     horde: (withMusic: boolean) => {
       if (!ok()) return;
-      const c = ctx!, t = c.currentTime, v = withMusic ? 0.65 : 1, R = Math.random;
-      const voice = (at: number, type: OscillatorType, pts: [number, number][], peak: number, fq: number, vib: number, vibAmt: number, dur: number) => {
+      const c = ctx!, t = c.currentTime, v = withMusic ? 0.6 : 1, R = Math.random;
+      // ghosts: soft, wobbling "whooo"s, one for each as it flies out
+      [0.1, 0.32, 0.55, 0.8].forEach((at, i) => {
         const o = c.createOscillator(), g = c.createGain(), fl = c.createBiquadFilter(), lfo = c.createOscillator(), lg = c.createGain();
-        o.type = type; o.frequency.setValueAtTime(pts[0][1], at);
-        pts.slice(1).forEach(([dt, f]) => o.frequency.exponentialRampToValueAtTime(f, at + dt));
-        lfo.frequency.value = vib; lg.gain.value = vibAmt; lfo.connect(lg).connect(o.frequency);
-        fl.type = "bandpass"; fl.frequency.value = fq; fl.Q.value = 1.1;
-        env(g, at, 0.03, peak, dur); o.connect(fl).connect(g).connect(master!);
-        o.start(at); lfo.start(at); o.stop(at + dur + 0.1); lfo.stop(at + dur + 0.1);
-      };
-      // the shriek: two voices a little out of tune, rushing up, and a breath of air through it
-      voice(t + 0.08, "sawtooth", [[0, 620], [0.22, 1850], [0.75, 1150]], 0.08 * v, 1800, 9, 45, 0.8);
-      voice(t + 0.1, "sawtooth", [[0, 655], [0.24, 1990], [0.75, 1080]], 0.05 * v, 2200, 11, 55, 0.75);
-      noise(t + 0.08, 0.6, "highpass", 2600, 0.8, 0.06 * v, 0.04);
+        const f0 = [330, 392, 294, 440][i], t0 = t + at;
+        o.type = "sine";
+        o.frequency.setValueAtTime(f0 * 0.8, t0); o.frequency.exponentialRampToValueAtTime(f0 * 1.35, t0 + 0.35); o.frequency.exponentialRampToValueAtTime(f0 * 0.9, t0 + 1.1);
+        lfo.frequency.value = 5.5; lg.gain.value = f0 * 0.035; lfo.connect(lg).connect(o.frequency);
+        fl.type = "lowpass"; fl.frequency.value = 1400;
+        env(g, t0, 0.18, 0.07 * v, 0.95);
+        o.connect(fl).connect(g).connect(master!);
+        o.start(t0); lfo.start(t0); o.stop(t0 + 1.25); lfo.stop(t0 + 1.25);
+        noise(t0, 0.9, "bandpass", 900, 0.6, 0.018 * v, 0.2);
+      });
       // bats
       for (let i = 0; i < 9; i++) {
         const at = t + 0.12 + R() * 1.1;
@@ -823,76 +832,109 @@ function createSpook() {
       [0.32, 0.95, 1.6, 2.35].forEach((at) => {
         for (let i = 0; i < 16; i++) noise(t + at + i * 0.011 + R() * 0.004, 0.005, "bandpass", 2800 + R() * 2600, 5, (0.045 + R() * 0.04) * v, 0.001);
       });
-      // bones: hollow clicks, irregular
-      const rattle = (at: number, n: number, g: number) => {
-        let x = at;
-        for (let i = 0; i < n; i++) {
-          const f = 1300 + R() * 1500;
-          noise(x, 0.02, "bandpass", f, 12, 0.16 * g, 0.001);
-          tone(x, "sine", f * 0.6, f * 0.54, 0.03, 0.025 * g, 0.001);
-          x += 0.022 + R() * 0.045;
-        }
-      };
-      // the skeleton lands in a heap
-      tone(t + 0.75, "sine", 110, 45, 0.25, 0.32 * v, 0.003);
-      noise(t + 0.75, 0.12, "lowpass", 600, 0.7, 0.2 * v);
-      rattle(t + 0.76, 14, v);
-      // it creaks and clicks itself upright
-      creak(t + 1.3, 0.05 * v);
-      rattle(t + 1.32, 8, 0.6 * v);
-      // jaw chatter as it looks about
-      for (let i = 0; i < 6; i++) noise(t + 1.9 + i * 0.05, 0.012, "bandpass", 2100, 4, 0.1 * v, 0.001);
-      // the lunge: a guttural roar with the jaw wide open
-      voice(t + 2.2, "sawtooth", [[0, 96], [0.3, 82], [0.55, 68]], 0.14 * v, 520, 27, 9, 0.6);
-      noise(t + 2.2, 0.55, "bandpass", 420, 0.8, 0.12 * v, 0.03);
-      // and down it goes, rattling into the earth
-      rattle(t + 2.92, 11, 0.7 * v);
-      noise(t + 2.95, 0.5, "lowpass", 300, 0.7, 0.12 * v, 0.05);
     },
     dispose: () => { stopMusic(0.02); amb?.stop(); amb = null; releaseMedia(); void ctx?.close(); ctx = null; },
   };
 }
 type Spook = ReturnType<typeof createSpook>;
 
-/** A wraith: a tattered, hooded shape with hollow eyes, a stretched scream and clawed hands reaching out. */
-function Wraith({ uid, w }: { uid: string; w: number }) {
+/*
+ * A sheet ghost: a white sheet thrown over something, gauzy at the hem, with a face cut out of black felt.
+ * Faces: 0 an angry glare and a jagged grin, 1 wide eyes and an O mouth, 2 sad slanted eyes and a little
+ * pointed mouth.
+ */
+function SheetGhost({ uid, w, face, dirt = false }: { uid: string; w: number; face: number; dirt?: boolean }) {
   return (
-    <svg width={w} height={w * 1.3} viewBox="-40 -44 80 104" aria-hidden="true" className="overflow-visible">
+    <svg width={w} height={w * 1.44} viewBox="-32 -40 64 92" aria-hidden="true" className="overflow-visible" style={{ filter: "drop-shadow(0 8px 10px rgba(0,0,0,.4))" }}>
       <defs>
-        <linearGradient id={`${uid}wb`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#f4f7ff" stopOpacity=".96" />
-          <stop offset=".42" stopColor="#c9d4ef" stopOpacity=".72" />
-          <stop offset="1" stopColor="#7f90bb" stopOpacity="0" />
+        <linearGradient id={`${uid}sh`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#ffffff" stopOpacity=".98" />
+          <stop offset=".5" stopColor="#f2f3f7" stopOpacity=".92" />
+          <stop offset=".82" stopColor="#e4e6ee" stopOpacity=".72" />
+          <stop offset="1" stopColor="#dde0e9" stopOpacity=".4" />
         </linearGradient>
-        <radialGradient id={`${uid}wg`} cx="50%" cy="38%" r="55%">
-          <stop offset="0" stopColor="#bcd3ff" stopOpacity=".42" />
-          <stop offset="1" stopColor="#bcd3ff" stopOpacity="0" />
+        <linearGradient id={`${uid}fold`} x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stopColor="#9aa0b4" stopOpacity="0" />
+          <stop offset=".5" stopColor="#9aa0b4" stopOpacity=".4" />
+          <stop offset="1" stopColor="#9aa0b4" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id={`${uid}gl`} cx="50%" cy="45%" r="50%">
+          <stop offset="0" stopColor="#ffffff" stopOpacity=".16" />
+          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id={`${uid}dt`} cx="50%" cy="50%" r="50%">
+          <stop offset="0" stopColor="#7a5c3e" stopOpacity=".42" />
+          <stop offset="1" stopColor="#7a5c3e" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <ellipse cx="0" cy="2" rx="40" ry="50" fill={`url(#${uid}wg)`} />
-      {/* arms reaching out, with long bony fingers */}
-      <g fill={`url(#${uid}wb)`}>
-        <path d="M-14 -7 C-24 -6 -31 0 -37 9 L-33.5 11 C-28.5 4 -22 0 -13 0 Z" />
-        <path d="M14 -7 C24 -6 31 0 37 9 L33.5 11 C28.5 4 22 0 13 0 Z" />
-      </g>
-      <g stroke="#e8eeff" strokeWidth=".95" strokeLinecap="round" fill="none" opacity=".9">
-        <path d="M-36 10 q-4 2 -6.5 6.5 M-35 11 q-2.5 3 -3.5 7.5 M-33.6 11 q-.6 3.4 .2 7.6 M-36.6 8.6 q-4.6 0 -7.4 2.4" />
-        <path d="M36 10 q4 2 6.5 6.5 M35 11 q2.5 3 3.5 7.5 M33.6 11 q.6 3.4 -.2 7.6 M36.6 8.6 q4.6 0 7.4 2.4" />
-      </g>
-      {/* the robe, torn into rags at the hem */}
+      {/* a faint glow, so it reads against the night */}
+      <ellipse cx="0" cy="2" rx="36" ry="46" fill={`url(#${uid}gl)`} />
+      {/* the gauzy layer that hangs lowest */}
+      <path d="M-26 30 L-27 46 L-22 41 L-18 51 L-13 44 L-8 53 L-3 45 L2 54 L7 45 L12 53 L17 44 L22 50 L26 42 L28 30 Z" fill="#ffffff" opacity=".22" />
+      {/* the sheet */}
       <path
-        d="M0 -36 C11 -36 17 -28 17 -17 C17 -8 21 2 24 14 C27 27 25 40 21 52 L17 44 L14 57 L9 46 L5 60 L0 47 L-5 59 L-9 46 L-14 56 L-17 44 L-21 51 C-26 39 -27 26 -24 14 C-21 2 -17 -8 -17 -17 C-17 -28 -11 -36 0 -36 Z"
-        fill={`url(#${uid}wb)`}
+        d="M0 -39 C10.5 -39 17 -31 17.5 -20 C18 -10 20 2 24 14 C27 24 29 34 28 44 L24 40 L21 48 L16 42 L12 50 L7 43 L2 50 L-3 43 L-8 50 L-12 42 L-17 49 L-21 41 L-25 46 L-27 40 C-29 30 -26 20 -23 12 C-19 1 -18 -10 -17.5 -20 C-17 -31 -10.5 -39 0 -39 Z"
+        fill={`url(#${uid}sh)`}
       />
-      {/* the hood's shadow, and a face sunk into it */}
-      <ellipse cx="0" cy="-17" rx="11.5" ry="13" fill="rgba(18,12,34,.38)" />
-      <path d="M-9.5 -23 C-6.5 -27 -2.6 -25 -2.6 -20.5 C-2.6 -16 -7 -15 -9.4 -18.4 Z" fill="#06040b" />
-      <path d="M9.5 -23 C6.5 -27 2.6 -25 2.6 -20.5 C2.6 -16 7 -15 9.4 -18.4 Z" fill="#06040b" />
-      <circle cx="-5.6" cy="-20.4" r="1.05" fill="#d9f6ff" />
-      <circle cx="5.6" cy="-20.4" r="1.05" fill="#d9f6ff" />
-      <path d="M-4.6 -11.5 C-6.2 -4 -4.2 4.5 0 6.5 C4.2 4.5 6.2 -4 4.6 -11.5 C2.2 -13.6 -2.2 -13.6 -4.6 -11.5 Z" fill="#06040b" />
-      <path d="M-8.6 -14 Q-7.4 -9.5 -5.6 -7.6 M8.6 -14 Q7.4 -9.5 5.6 -7.6" stroke="rgba(30,24,60,.45)" strokeWidth=".8" fill="none" />
+      {/* folds where the sheet drapes */}
+      <g fill="none" strokeLinecap="round">
+        {["M-6 -4 C-8 12 -10 27 -12 42", "M5 -2 C7 13 10 27 12 45", "M-14 6 C-18 19 -20 30 -22 40", "M15 7 C19 19 22 30 23 40", "M0 4 C0 19 1 32 2 47"].map((d, i) => (
+          <path key={i} d={d} stroke="rgba(150,156,175,.38)" strokeWidth={i === 4 ? 1 : 1.5} />
+        ))}
+        {["M-3.5 -2 C-5 13 -6.5 27 -8 42", "M8 0 C10 14 13 27 15 42"].map((d, i) => <path key={`h${i}`} d={d} stroke="#ffffff" strokeWidth="1.2" opacity=".7" />)}
+      </g>
+      <path d="M-11 -33 Q-4 -38 4 -36.5" stroke="#ffffff" strokeWidth="2" fill="none" opacity=".8" strokeLinecap="round" />
+      {dirt && <ellipse cx="-9" cy="36" rx="17" ry="11" fill={`url(#${uid}dt)`} />}
+      {/* the face */}
+      <g fill="#141414">
+        {face === 0 && (
+          <>
+            <path d="M-11.5 -28 L-3.2 -23.6 C-3.4 -20 -6.5 -18.6 -9 -20.2 C-10.8 -21.6 -11.6 -24.4 -11.5 -28 Z" />
+            <path d="M11.5 -28 L3.2 -23.6 C3.4 -20 6.5 -18.6 9 -20.2 C10.8 -21.6 11.6 -24.4 11.5 -28 Z" />
+            <path d="M-9.5 -14 L-6.6 -11.6 L-4.4 -13.6 L-2.2 -11.4 L0 -13.6 L2.2 -11.4 L4.4 -13.6 L6.6 -11.6 L9.5 -14 C8.6 -7.6 4.6 -4.6 0 -4.6 C-4.6 -4.6 -8.6 -7.6 -9.5 -14 Z" />
+          </>
+        )}
+        {face === 1 && (
+          <>
+            <ellipse cx="-5.8" cy="-25" rx="3.5" ry="4.4" />
+            <ellipse cx="5.8" cy="-25" rx="3.5" ry="4.4" />
+            <ellipse cx="0" cy="-12" rx="4" ry="5.4" />
+          </>
+        )}
+        {face === 2 && (
+          <>
+            <ellipse cx="-5.6" cy="-24" rx="2.9" ry="4.2" transform="rotate(24 -5.6 -24)" />
+            <ellipse cx="5.6" cy="-24" rx="2.9" ry="4.2" transform="rotate(-24 5.6 -24)" />
+            <path d="M0 -17.4 L4.2 -9.4 C1.6 -10.4 -1.6 -10.4 -4.2 -9.4 Z" />
+          </>
+        )}
+      </g>
     </svg>
+  );
+}
+
+/** Sheet ghosts that pop out of the pumpkin and then keep flying round the night until it is rehung. */
+type FlockGhost = { ax: number; ay: number; dx: number[]; dy: number[]; rot: number[]; w: number; face: number; dirt: boolean; dur: number; delay: number };
+function GhostFlock({ uid, plan }: { uid: string; plan: HordePlan }) {
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[13]" aria-hidden="true">
+      {plan.ghosts.map((g, i) => (
+        <motion.div
+          key={i}
+          className="absolute left-0 top-0"
+          style={{ marginLeft: -g.w / 2, marginTop: -g.w * 0.72 }}
+          initial={{ x: plan.x, y: plan.y, scale: 0.2, opacity: 0 }}
+          animate={{ x: g.ax, y: g.ay, scale: 1, opacity: 1 }}
+          transition={{ duration: 0.85, delay: g.delay, ease: [0.2, 0.8, 0.3, 1] }}
+        >
+          <motion.div animate={{ x: g.dx, y: g.dy, rotate: g.rot }} transition={{ duration: g.dur, delay: g.delay + 0.85, repeat: Infinity, ease: "easeInOut" }}>
+            <motion.div style={{ originY: 0 }} animate={{ y: [0, -6, 0], skewX: [0, 4, -3, 0], scaleY: [1, 1.04, 0.97, 1] }} transition={{ duration: 1.5 + i * 0.25, repeat: Infinity, ease: "easeInOut" }}>
+              <SheetGhost uid={`${uid}g${i}`} w={g.w} face={g.face} dirt={g.dirt} />
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      ))}
+    </div>
   );
 }
 
@@ -970,155 +1012,13 @@ function Bat({ w }: { w: number }) {
   );
 }
 
-/*
- * A skeleton, front on, about 160 units tall with its feet at the origin. It is posed by a script (see
- * SkeletonRise): the whole body pivots about its feet, the arms about the shoulders, the head about
- * the neck, and the jaw drops.
- */
-const BONE = "#ece5d3", BONE_EDGE = "#a89d86", VOID = "#120c16";
-function SkeletonHalf() {
-  const ribs = Array.from({ length: 7 }, (_, k) => {
-    const y = -109 + k * 4.5, out = 16.5 - Math.abs(k - 2.2) * 1.3 - (k > 4 ? 2.5 : 0);
-    return `M-1.4 ${y} C${(-7 - k * 0.3).toFixed(1)} ${(y - 2.2).toFixed(1)} ${(-out - 1).toFixed(1)} ${(y + 1).toFixed(1)} ${(-out + 0.6).toFixed(1)} ${(y + 6.5).toFixed(1)}`;
-  });
-  return (
-    <>
-      {/* leg: femur, kneecap, shin bones, foot */}
-      <path d="M-8 -55 L-10 -29.5" stroke={BONE} strokeWidth="3.4" strokeLinecap="round" />
-      <circle cx="-8" cy="-55" r="2.4" fill={BONE} />
-      <circle cx="-10.2" cy="-29" r="2.3" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
-      <path d="M-10 -26.5 L-10 -5" stroke={BONE} strokeWidth="2.4" strokeLinecap="round" />
-      <path d="M-12.4 -26 L-12.1 -5.5" stroke={BONE} strokeWidth="1.3" strokeLinecap="round" />
-      <path d="M-8.6 -4.6 L-15 -1.4 L-16.2 .6 H-7.2 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
-      {/* ribs */}
-      {ribs.map((d, i) => <path key={i} d={d} stroke={BONE} strokeWidth="1.9" fill="none" strokeLinecap="round" />)}
-      {ribs.map((d, i) => <path key={`s${i}`} d={d} stroke={BONE_EDGE} strokeWidth=".45" fill="none" transform="translate(0 .9)" />)}
-      {/* collarbone */}
-      <path d="M-1.5 -115 C-8 -116.2 -15 -115.6 -21 -112.2" stroke={BONE} strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      {/* hip */}
-      <path d="M-2.5 -66 C-10 -70.5 -17.5 -68.5 -18.5 -60.5 C-18.5 -54.5 -12.5 -51 -8 -50.2 C-5.2 -52 -3 -55 0 -55 L0 -66 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
-      <ellipse cx="-7.4" cy="-56.6" rx="3" ry="2.3" fill={VOID} />
-    </>
-  );
-}
-function SkeletonArm() {
-  return (
-    <>
-      <path d="M-21 -111 L-24.4 -84" stroke={BONE} strokeWidth="3" strokeLinecap="round" />
-      <circle cx="-21" cy="-111" r="2.6" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
-      <circle cx="-24.4" cy="-84" r="2" fill={BONE} />
-      <path d="M-25.2 -83 L-27.6 -60 M-23 -83.4 L-25.4 -60.4" stroke={BONE} strokeWidth="1.6" strokeLinecap="round" />
-      <circle cx="-26.4" cy="-58.4" r="2.1" fill={BONE} />
-      <path d="M-28.4 -57.6 l-2.6 4.6 l-.8 4.4 M-27 -56.8 l-1.4 5.6 l-.2 4.6 M-25.6 -56.8 l-.2 5.8 l.6 4.4 M-24.4 -57.4 l1.2 5 l1.2 3.6 M-28.8 -59 l-3.2 2.4" stroke={BONE} strokeWidth="1.05" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-    </>
-  );
-}
-type GRef = React.RefObject<SVGGElement | null>;
-const SkeletonArt = ({ body, armL, armR, head, jaw, eyes }: { body: GRef; armL: GRef; armR: GRef; head: GRef; jaw: GRef; eyes: GRef }) => (
-  <g ref={body}>
-    {/* spine, behind everything */}
-    {Array.from({ length: 15 }, (_, i) => <rect key={i} x="-2.2" y={-115 + i * 3.4} width="4.4" height="2.6" rx="1" fill={BONE} stroke={BONE_EDGE} strokeWidth=".4" />)}
-    <SkeletonHalf />
-    <g transform="scale(-1 1)"><SkeletonHalf /></g>
-    <path d="M-3 -66 L3 -66 L0 -57 Z" fill={BONE_EDGE} />
-    <rect x="-1.7" y="-112.5" width="3.4" height="23" rx="1.5" fill={BONE} stroke={BONE_EDGE} strokeWidth=".45" />
-    <g ref={armL}><SkeletonArm /></g>
-    <g ref={armR}><g transform="scale(-1 1)"><SkeletonArm /></g></g>
-    {[-123.6, -121, -118.4].map((y) => <rect key={y} x="-2.6" y={y} width="5.2" height="2.1" rx=".8" fill={BONE} stroke={BONE_EDGE} strokeWidth=".4" />)}
-    <g ref={head}>
-      <path d="M-7.6 -126.6 H7.6 V-120.6 H-7.6 Z" fill={VOID} />
-      <path d="M-13 -140 C-14 -153 -7 -160.5 0 -160.5 C7 -160.5 14 -153 13 -140 C13 -134 11 -131 9 -129 L9 -126 L-9 -126 L-9 -129 C-11 -131 -13 -134 -13 -140 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".6" />
-      <path d="M-11 -151 Q-6 -157 2 -156.5" stroke="#fffaf0" strokeWidth="1.4" fill="none" opacity=".6" strokeLinecap="round" />
-      <path d="M-9.6 -143 C-9 -147.4 -4 -148.4 -2.5 -144.6 C-2 -141 -4.5 -138.4 -7 -139 C-9 -139.5 -10.1 -141 -9.6 -143 Z" fill={VOID} />
-      <path d="M9.6 -143 C9 -147.4 4 -148.4 2.5 -144.6 C2 -141 4.5 -138.4 7 -139 C9 -139.5 10.1 -141 9.6 -143 Z" fill={VOID} />
-      <g ref={eyes} opacity="0">
-        <circle cx="-5.9" cy="-142.6" r="2.6" fill="#ff4d12" opacity=".35" />
-        <circle cx="5.9" cy="-142.6" r="2.6" fill="#ff4d12" opacity=".35" />
-        <circle cx="-5.9" cy="-142.6" r="1.15" fill="#ffd2a0" />
-        <circle cx="5.9" cy="-142.6" r="1.15" fill="#ffd2a0" />
-      </g>
-      <path d="M0 -138 L-2.1 -133.4 L0 -132.4 L2.1 -133.4 Z" fill={VOID} />
-      <path d="M-12.4 -137 Q-10.4 -133.6 -7 -134.2 M12.4 -137 Q10.4 -133.6 7 -134.2" stroke={BONE_EDGE} strokeWidth=".8" fill="none" />
-      <path d="M-7 -129.6 H7 M-6 -129.6 V-126.6 M-4 -129.6 V-126.6 M-2 -129.6 V-126.6 M0 -129.6 V-126.6 M2 -129.6 V-126.6 M4 -129.6 V-126.6 M6 -129.6 V-126.6" stroke={VOID} strokeWidth=".5" />
-      <g ref={jaw}>
-        <path d="M-9 -126.2 L-9.6 -122 C-8 -118 -4 -116.4 0 -116.4 C4 -116.4 8 -118 9.6 -122 L9 -126.2 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".6" />
-        <path d="M-6.6 -126 V-123.4 M-4.4 -126 V-123.2 M-2.2 -126 V-123 M0 -126 V-123 M2.2 -126 V-123 M4.4 -126 V-123.2 M6.6 -126 V-123.4 M-7 -123.4 Q0 -121.6 7 -123.4" stroke={VOID} strokeWidth=".5" fill="none" />
-      </g>
-    </g>
-  </g>
-);
-
-// smooth step and a small helper to read a keyframed value at time t
-const ease = (t: number) => t * t * (3 - 2 * t);
-const track = (t: number, keys: [number, number][]) => {
-  if (t <= keys[0][0]) return keys[0][1];
-  for (let i = 1; i < keys.length; i++) {
-    if (t <= keys[i][0]) {
-      const [t0, v0] = keys[i - 1], [t1, v1] = keys[i];
-      return v0 + (v1 - v0) * ease((t - t0) / Math.max(1e-6, t1 - t0));
-    }
-  }
-  return keys[keys.length - 1][1];
-};
-/**
- * The skeleton's performance, about 3.2 s: it drops out of the pumpkin head first, clatters onto the
- * ground, jerks itself upright, looks about with glowing eyes, lunges at you with its jaw wide open,
- * then sinks back into the earth.
- */
-function SkeletonRise({ x, fromY, floor, scale, onDone }: { x: number; fromY: number; floor: number; scale: number; onDone: () => void }) {
-  const body = useRef<SVGGElement>(null), armL = useRef<SVGGElement>(null), armR = useRef<SVGGElement>(null), head = useRef<SVGGElement>(null), jaw = useRef<SVGGElement>(null), eyes = useRef<SVGGElement>(null);
-  const done = useRef(onDone);
-  useLayoutEffect(() => { done.current = onDone; });
-  useEffect(() => {
-    let raf = 0;
-    const t0 = performance.now();
-    const drop = fromY - floor; // negative: up from the ground
-    const tick = (now: number) => {
-      const t = (now - t0) / 1000;
-      // fall: gravity from the pumpkin, turning head over heels, then a small bounce
-      const fall = Math.min(1, t / 0.45);
-      let dy = t < 0.45 ? drop * (1 - fall * fall) : t < 0.6 ? -10 * Math.sin(((t - 0.45) / 0.15) * Math.PI) : 0;
-      let rot = t < 0.45 ? 170 - 78 * fall : t < 1.0 ? 92 + Math.sin(t * 40) * (t > 0.7 && t < 0.85 ? 2.5 : 0) : track(t, [[1.0, 92], [1.12, 70], [1.2, 74], [1.34, 38], [1.42, 42], [1.56, 0]]);
-      const sc = t < 0.45 ? 0.55 + 0.45 * fall : track(t, [[1.9, 1], [2.28, 1.8], [2.62, 1.76], [2.75, 1.4]]);
-      // the lunge leans it forward and shakes it; then it sinks
-      if (t > 2.3 && t < 2.62) rot = Math.sin(t * 70) * 1.6;
-      if (t > 2.62) { dy = track(t, [[2.62, 0], [3.2, 240]]); rot = track(t, [[2.62, 0], [3.2, -9]]); }
-      dy += t > 1.9 && t < 2.62 ? -track(t, [[1.9, 0], [2.28, 22], [2.62, 18]]) : 0;
-      // lying on its side, it rests on its ribs instead of sinking into the ground
-      dy -= 15 * Math.max(0, Math.sin((rot * Math.PI) / 180));
-      const arm = track(t, [[1.5, 6], [1.9, 18], [2.25, 128], [2.62, 120], [2.9, 40]]);
-      const tilt = track(t, [[1.56, 0], [1.66, -14], [1.78, 12], [1.9, 0]]);
-      const open = t > 1.6 && t < 1.9 ? (Math.sin((t - 1.6) * 60) > 0 ? 3 : 0.4) : track(t, [[1.9, 0], [2.15, 5.5], [2.62, 5.2], [2.8, 0]]);
-      const glow = track(t, [[1.45, 0], [1.6, 1], [2.62, 1], [3.0, 0]]);
-      body.current?.setAttribute("transform", `translate(0 ${dy.toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${(sc * scale).toFixed(3)})`);
-      armL.current?.setAttribute("transform", `rotate(${arm.toFixed(2)} -21 -111)`);
-      armR.current?.setAttribute("transform", `rotate(${(-arm).toFixed(2)} 21 -111)`);
-      head.current?.setAttribute("transform", `rotate(${tilt.toFixed(2)} 0 -124)`);
-      jaw.current?.setAttribute("transform", `translate(0 ${open.toFixed(2)})`);
-      eyes.current?.setAttribute("opacity", (glow * (0.8 + 0.2 * Math.sin(t * 30))).toFixed(2));
-      if (t < 3.25) raf = requestAnimationFrame(tick);
-      else done.current();
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [fromY, floor, scale]);
-  // clipped at the ground, so it can sink into it
-  return (
-    <svg className="pointer-events-none absolute left-0 top-0 z-[16] overflow-hidden" width="100%" height={floor + 4} aria-hidden="true">
-      <g transform={`translate(${x.toFixed(1)} ${floor})`}>
-        <SkeletonArt body={body} armL={armL} armR={armR} head={head} jaw={jaw} eyes={eyes} />
-      </g>
-    </svg>
-  );
-}
-
 /** Everything that comes out of the pumpkin when it bursts. Paths are rolled when it bursts, so render stays pure. */
 type HordePlan = {
   k: number; x: number; y: number;
   spiders: { xs: number[]; ys: number[]; rot: number[]; size: number; gait: number; dur: number; delay: number }[];
   bats: { xs: number[]; ys: number[]; w: number; dur: number; delay: number }[];
   hang: { x: number; y: number; len: number };
-  skelX: number;
+  ghosts: FlockGhost[];
 };
 const unwrap = (prev: number, next: number) => prev + ((((next - prev + 180) % 360) + 360) % 360) - 180;
 function planHorde(k: number, x: number, y: number, W: number, H: number): HordePlan {
@@ -1139,11 +1039,20 @@ function planHorde(k: number, x: number, y: number, W: number, H: number): Horde
     const d = 200 + R() * 160;
     return { xs: [x, x + Math.cos(a) * d * 0.45 + (R() - 0.5) * 40, x + Math.cos(a) * d * 1.6], ys: [y, y + Math.sin(a) * d * 0.4 - 20, y + Math.sin(a) * d * 1.4 - 60], w: 30 + R() * 18, dur: 1.1 + R() * 0.6, delay: 0.04 + R() * 0.35 };
   });
+  // ghosts: each flies out to a spot of its own, then loops round three more and back
+  const spot = () => [40 + R() * (W - 80), 96 + R() * (H * 0.62 - 96)];
+  const ghosts = Array.from({ length: 4 }, (_, i) => {
+    const [ax, ay] = spot();
+    const pts = [spot(), spot(), spot()];
+    const dx = [0, ...pts.map((p) => p[0] - ax), 0], dy = [0, ...pts.map((p) => p[1] - ay), 0];
+    // lean into the way it is flying
+    const rot = dx.map((v, j) => clamp(((dx[(j + 1) % dx.length] - v) * 0.09), -14, 14));
+    return { ax, ay, dx, dy, rot, w: 46 + R() * 16, face: [0, 1, 2, 1][i], dirt: i % 2 === 0, dur: 7 + R() * 3, delay: 0.08 + i * 0.16 };
+  });
   const hx = W / 2 + 40;
-  return { k, x, y, spiders, bats, hang: { x: hx, y: branchY(hx, W) + 3, len: 96 + R() * 24 }, skelX: clamp(x, 70, W - 70) };
+  return { k, x, y, spiders, bats, hang: { x: hx, y: branchY(hx, W) + 3, len: 96 + R() * 24 }, ghosts };
 }
-function Horde({ uid, plan, floor, scale }: { uid: string; plan: HordePlan; floor: number; scale: number }) {
-  const [skel, setSkel] = useState(true);
+function Horde({ uid, plan }: { uid: string; plan: HordePlan }) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[16]" aria-hidden="true">
       {/* a flash of cold spirit light, and smoke rolling out */}
@@ -1172,18 +1081,6 @@ function Horde({ uid, plan, floor, scale }: { uid: string; plan: HordePlan; floo
       {plan.spiders.map((sp, i) => (
         <motion.div key={`s${i}`} className="absolute left-0 top-0" style={{ marginLeft: -32 * sp.size, marginTop: -32 * sp.size }} initial={{ x: sp.xs[0], y: sp.ys[0], rotate: sp.rot[0], scale: 0.3, opacity: 0 }} animate={{ x: sp.xs, y: sp.ys, rotate: sp.rot, scale: [0.3, 1, 1, 1, 1, 1], opacity: [0, 1, 1, 1, 1, 1] }} transition={{ duration: sp.dur, delay: sp.delay, times: [0, 0.18, 0.3, 0.56, 0.66, 1], ease: "easeInOut" }}>
           <Spider uid={`${uid}s${i}`} size={sp.size} gait={sp.gait} />
-        </motion.div>
-      ))}
-      {skel && <SkeletonRise x={plan.skelX} fromY={plan.y} floor={floor} scale={scale} onDone={() => setSkel(false)} />}
-      {/* wraiths: one rushes straight at you, two curl away into the night */}
-      <motion.div className="absolute left-0 top-0 z-[2]" style={{ marginLeft: -35, marginTop: -45 }} initial={{ x: plan.x, y: plan.y, scale: 0.3, opacity: 0 }} animate={{ x: [plan.x, plan.x, plan.x + 8], y: [plan.y, plan.y - 10, plan.y + 30], scale: [0.3, 1.6, 3.6], opacity: [0, 0.95, 0] }} transition={{ duration: 1.05, delay: 0.08, times: [0, 0.45, 1], ease: "easeIn" }}>
-        <Wraith uid={`${uid}w0`} w={70} />
-      </motion.div>
-      {[-1, 1].map((d, i) => (
-        <motion.div key={`w${i}`} className="absolute left-0 top-0" style={{ marginLeft: -31, marginTop: -40 }} initial={{ x: plan.x, y: plan.y, scale: 0.3, opacity: 0 }} animate={{ x: [plan.x, plan.x + d * 50, plan.x + d * 120, plan.x + d * 70, plan.x + d * 220], y: [plan.y, plan.y - 40, plan.y - 20, plan.y - 150, plan.y - 300], scale: [0.3, 0.9, 1.1, 1, 0.8], opacity: [0, 0.9, 0.85, 0.8, 0], rotate: [0, d * 12, d * -8, d * 14, d * -6] }} transition={{ duration: 2.6, delay: 0.3 + i * 0.25, ease: "easeInOut" }}>
-          <motion.div animate={{ skewX: [0, 6, -5, 0], scaleY: [1, 1.06, 0.96, 1] }} transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}>
-            <Wraith uid={`${uid}w${i + 1}`} w={62} />
-          </motion.div>
         </motion.div>
       ))}
     </div>
@@ -1294,11 +1191,11 @@ function Night({ W, uid, chatter, glow }: { W: number; uid: string; chatter: num
       <motion.div
         className="absolute left-0 top-0"
         initial={{ x: W + 40, y: 210, opacity: 0 }}
-        animate={{ x: [W + 40, W * 0.55, W * 0.15, -60], y: [210, 190, 230, 205], opacity: [0, 0.55, 0.5, 0], rotate: [4, -3, 5, -2] }}
+        animate={{ x: [W + 40, W * 0.55, W * 0.15, -60], y: [210, 190, 230, 205], opacity: [0, 0.8, 0.75, 0], rotate: [4, -3, 5, -2] }}
         transition={{ duration: 13, repeat: Infinity, repeatDelay: 4, delay: 2, ease: "easeInOut" }}
       >
         <motion.div animate={{ y: [0, -6, 0], skewX: [0, 4, -3, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}>
-          <Wraith uid={`${uid}a`} w={34} />
+          <SheetGhost uid={`${uid}a`} w={34} face={1} />
         </motion.div>
       </motion.div>
       <motion.div
@@ -1308,7 +1205,7 @@ function Night({ W, uid, chatter, glow }: { W: number; uid: string; chatter: num
         animate={{ y: [g - 10, g - 60, g - 120], opacity: [0, 0.45, 0], scale: [0.6, 0.85, 1] }}
         transition={{ duration: 4.5, repeat: Infinity, repeatDelay: 7, delay: 6, ease: "easeOut" }}
       >
-        <Wraith uid={`${uid}b`} w={26} />
+        <SheetGhost uid={`${uid}b`} w={26} face={2} />
       </motion.div>
       {/* bats crossing the moon now and then */}
       {[0, 1].map((i) => (
@@ -1352,17 +1249,17 @@ function embersFrom(x: number, y: number): Bit[] {
  * A Halloween promo code inside a jack-o'-lantern piñata hanging from a dead
  * branch under a full moon. Tap it (or press Space) and it swings and
  * spins on its rope with each hit; cracks open after the first and second
- * blow. The third bursts it into pieces and lets out what was inside: a wraith
- * that rushes at you, bats, spiders scuttling across the card, and a skeleton
- * that drops out, gets up and lunges. When they are gone the coupon comes out
- * and lands with a bounce, ready to copy.
+ * blow. The third bursts it into pieces and lets out what was inside: sheet
+ * ghosts that fly round the night, bats, and spiders scuttling across the card.
+ * Then the coupon, a torn and bloodied slip with a spider on it, comes out and
+ * lands with a bounce, ready to copy.
  */
 export interface PumpkinRevealProps {
   /** Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. */
   autoplay?: boolean;
   /** Shows the sound switch in the card. Sounds are synthesised, start off, and never play under a visitor who has not switched them on. */
   enableSound?: boolean;
-  /** URL of a track to play when the pumpkin bursts (optional). Without one, the wraiths wail instead. */
+  /** URL of a track to play when the pumpkin bursts (optional). Without one, the ghosts wail instead. */
   music?: string;
   /** Extra classes for the outer card. */
   className?: string;
@@ -1644,8 +1541,6 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     pulse(1);
     [3.4, 5.0, 6.6].forEach((t) => cue(t, () => { setChatter((c) => c + 1); pulse(0.7); }));
     cue(6.45, () => setSwoop((n) => n + 1));
-    // the card jolts as the skeleton lunges at you
-    cue(2.55, () => { if (root.current) animate(root.current, { x: [0, -5, 5, -3, 2, 0] }, { duration: 0.35 }); });
     if (withMusic) {
       // let the music itself breathe through the moonlight
       const tick = () => { const l = snd.current?.level() ?? 0; glow.set(glow.get() + (l - glow.get()) * 0.25); musicRaf.current = requestAnimationFrame(tick); };
@@ -1664,7 +1559,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     st.current.om += dir * -0.6;
     phaseRef.current = "emerge";
     setPhase("emerge");
-    setMsg("It burst open. Wraiths, bats, spiders and a skeleton came out of it.");
+    setMsg("It burst open. Ghosts, bats and spiders came out of it.");
     later(EMERGE_MS, reveal);
   };
 
@@ -1888,10 +1783,11 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       {/* the pumpkin itself, in 3D, and its shards */}
       <canvas ref={pcv} className="pointer-events-none absolute left-0 top-0 z-10" style={{ width: W, height: CARD_H }} aria-hidden="true" />
 
-      {/* what was trapped inside: wraiths, bats, spiders and a skeleton */}
-      {horde && <Horde key={horde.k} uid={`${uid}h${horde.k}`} plan={horde} floor={floorY} scale={s} />}
+      {/* what was trapped inside: ghosts (they stay and fly round), bats and spiders */}
+      {horde && <GhostFlock key={`f${horde.k}`} uid={`${uid}f${horde.k}`} plan={horde} />}
+      {horde && <Horde key={horde.k} uid={`${uid}h${horde.k}`} plan={horde} />}
 
-      {/* on the theremin's glide down, a wraith swoops back across the graveyard */}
+      {/* on the theremin's glide down, a ghost swoops back across the graveyard */}
       <AnimatePresence>
         {swoop > 0 && phase !== "intact" && (
           <motion.div
@@ -1903,7 +1799,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
             transition={{ duration: 1.9, ease: "easeInOut", times: [0, 0.3, 0.65, 1] }}
             onAnimationComplete={() => setSwoop(0)}
           >
-            <Wraith uid={`${uid}sw`} w={46} />
+            <SheetGhost uid={`${uid}sw`} w={46} face={0} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -1915,31 +1811,74 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
             <motion.div className="absolute rounded-[50%] bg-black/60 blur-[6px]" style={{ left: W / 2 - cw * 0.42, top: floorY - 8, width: cw * 0.84, height: 14, opacity: shadowO, scaleX: shadowS }} />
             <motion.div className="absolute left-0 top-0" style={{ x: cX, y: cY, rotate: cR, scale: cS }}>
               <motion.div
-                className="absolute flex flex-col justify-between overflow-hidden rounded-[18px] bg-[#fffaf2] p-4 shadow-[0_0_0_1px_rgba(0,0,0,.2),0_0_40px_-6px_rgba(255,130,0,.45),0_18px_30px_-16px_rgba(0,0,0,.7)]"
-                style={{ left: -cw / 2, top: -CH / 2, width: cw, height: CH, scaleY: cSq, scaleX: cSqX, originY: 1 }}
+                className="absolute"
+                style={{ left: -cw / 2, top: -CH / 2, width: cw, height: CH, scaleY: cSq, scaleX: cSqX, originY: 1, filter: "drop-shadow(0 0 18px rgba(255,96,0,.45)) drop-shadow(0 16px 14px rgba(0,0,0,.8))" }}
                 role="group"
                 aria-label={`Coupon: ${prize.title}, code ${prize.code}`}
               >
-                <div className="pointer-events-none absolute inset-x-0 top-0 h-[5px]" style={{ background: "repeating-linear-gradient(90deg,#ff7a00 0 14px,#1a1022 14px 28px)" }} />
-                <div className="flex flex-col">
-                  <span className="text-[11.5px] font-semibold uppercase tracking-[0.06em] text-[#b13a0a]">Treat unlocked</span>
-                  <span className={`mt-0.5 ${cw < 290 ? "text-[19px]" : "text-[22px]"} font-semibold leading-[1.15] tracking-[-0.02em] text-[#1d1d1f]`}>{prize.title}</span>
+                {/* a slab of dark, scratched card with a torn bottom edge, bleeding from the top */}
+                <div className="absolute inset-0 overflow-hidden" style={{ clipPath: TORN, background: "radial-gradient(130% 100% at 50% 0%, #301c3c 0%, #170e20 55%, #0a0610 100%)" }}>
+                  <div className="absolute inset-0" style={{ background: "repeating-linear-gradient(112deg, rgba(255,255,255,.035) 0 1px, transparent 1px 11px), repeating-linear-gradient(28deg, rgba(0,0,0,.25) 0 1px, transparent 1px 17px)" }} />
+                  <div className="absolute inset-[3px]" style={{ clipPath: TORN, boxShadow: "inset 0 0 0 1px rgba(255,138,31,.3), inset 0 0 26px rgba(255,80,0,.2)" }} />
+                  <div className="absolute inset-x-0 top-0 h-[5px]" style={{ background: "linear-gradient(#4a0307,#9e0d14)" }} />
+                  {DRIPS.map((d, i) => (
+                    <motion.div
+                      key={i}
+                      className="absolute top-0 rounded-b-full"
+                      style={{ left: `${d.x}%`, width: d.w, height: d.l, originY: 0, background: "linear-gradient(#4a0307,#a50f17 70%,#c81821)" }}
+                      initial={{ scaleY: 0.25 }}
+                      animate={{ scaleY: [0.25, 1, 0.92, 1] }}
+                      transition={{ duration: 2.4 + d.l * 0.05, delay: 0.3 + i * 0.12, times: [0, 0.6, 0.8, 1], ease: "easeOut" }}
+                    />
+                  ))}
+                  {/* now and then a drop runs off one of them */}
+                  <motion.div className="absolute rounded-full bg-[#b3121b]" style={{ left: `calc(${DRIPS[2].x}% + ${DRIPS[2].w / 2 - 2}px)`, top: DRIPS[2].l - 2, width: 4, height: 5 }} animate={{ y: [0, 0, 90], opacity: [0, 1, 0] }} transition={{ duration: 1.6, times: [0, 0.4, 1], repeat: Infinity, repeatDelay: 2.2, delay: 2.6, ease: "easeIn" }} />
+                  {/* a cobweb in the top corner, with its spider */}
+                  <svg className="absolute right-0 top-0" width="58" height="52" viewBox="0 0 58 52" aria-hidden="true">
+                    <g fill="none" stroke="rgba(235,230,250,.4)" strokeWidth=".6">
+                      {[[0, 26], [10, 40], [26, 50], [44, 52]].map(([x, y], i) => <path key={i} d={`M58 0 L${x} ${y}`} />)}
+                      {[14, 26, 38].map((r) => <path key={r} d={`M${58 - r} 0 Q${58 - r * 0.8} ${r * 0.5} ${58 - r * 0.62} ${r * 0.86} Q${58 - r * 0.42} ${r * 1.0} ${58 - r * 0.14} ${r * 1.0}`} />)}
+                    </g>
+                  </svg>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="flex h-9 items-center rounded-[10px] border border-dashed border-[#c7c7cc] bg-[#fafafa] px-2.5 text-[13px] text-[#6e6e73]">
-                    Code&nbsp;<span className="font-semibold tracking-[0.08em] text-[#1d1d1f]">{prize.code}</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={copy}
-                    disabled={phase !== "landed"}
-                    className="h-9 min-w-[92px] flex-none whitespace-nowrap rounded-full bg-[#c2410c] px-3.5 text-[13px] font-medium text-white outline-none transition-colors hover:bg-[#ad3a0b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#c2410c]"
-                  >
-                    <span className="grid place-items-center">
-                      <motion.span className="col-start-1 row-start-1" animate={{ y: copied ? -8 : 0, opacity: copied ? 0 : 1 }} aria-hidden={copied} transition={{ type: "spring", stiffness: 500, damping: 32 }}>Copy code</motion.span>
-                      <motion.span className="col-start-1 row-start-1" initial={false} animate={{ y: copied ? 0 : 8, opacity: copied ? 1 : 0 }} transition={{ type: "spring", stiffness: 500, damping: 32 }} aria-hidden={!copied}>Copied</motion.span>
+                <div className="absolute" style={{ right: 22, top: 20 }} aria-hidden="true">
+                  <motion.div style={{ originX: 0, originY: 0 }} animate={{ rotate: [-6, 6, -6] }} transition={{ duration: 2.6, repeat: Infinity, ease: "easeInOut" }}>
+                    <motion.div className="absolute left-0 top-0 w-px bg-[rgba(235,235,255,.6)]" animate={{ height: [14, 22, 14] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }} />
+                    <motion.div className="absolute" style={{ left: -14.4, top: -6 }} animate={{ y: [14, 22, 14] }} transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}>
+                      <div style={{ transform: "rotate(180deg)" }}><Spider uid={`${uid}cs`} size={0.45} gait={0.6} /></div>
+                    </motion.div>
+                  </motion.div>
+                </div>
+                <div className="relative flex h-full flex-col justify-between px-4 pb-4 pt-[22px]">
+                  <div className="flex flex-col">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#ff8a1f]">
+                      <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.9 2 3 5.7 3 10.4c0 2.7 1.3 4.6 3 5.8V19a1 1 0 0 0 1 1h1.6v-2h1.6v2h3.6v-2h1.6v2H17a1 1 0 0 0 1-1v-2.8c1.7-1.2 3-3.1 3-5.8C21 5.7 17.1 2 12 2Zm-3.6 11.2a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Zm7.2 0a2.2 2.2 0 1 1 0-4.4 2.2 2.2 0 0 1 0 4.4Z" fill="currentColor" /></svg>
+                      You survived
                     </span>
-                  </button>
+                    <span className={`mt-1 ${cw < 290 ? "text-[19px]" : "text-[22px]"} font-bold leading-[1.12] tracking-[-0.01em] text-[#f4ead6]`} style={{ fontFamily: "Georgia, 'Times New Roman', serif", textShadow: "0 0 14px rgba(255,110,20,.4), 0 2px 0 rgba(0,0,0,.7)" }}>
+                      {prize.title}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex h-9 items-center rounded-[10px] border border-dashed border-[#ff8a1f]/60 bg-black/45 px-2.5 text-[13px] text-[#b3a6c2]">
+                      Code&nbsp;
+                      <motion.span className="font-semibold tracking-[0.12em] text-[#ffb35c]" style={{ textShadow: "0 0 10px rgba(255,140,30,.75)" }} animate={{ opacity: [1, 0.72, 1, 0.9, 1] }} transition={{ duration: 2.2, repeat: Infinity, times: [0, 0.08, 0.16, 0.5, 1] }}>
+                        {prize.code}
+                      </motion.span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={copy}
+                      disabled={phase !== "landed"}
+                      className="h-9 min-w-[92px] flex-none whitespace-nowrap rounded-full px-3.5 text-[13px] font-semibold text-[#1a0b03] outline-none transition-[filter] hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff9f0a]"
+                      style={{ background: "linear-gradient(180deg,#ffa24a,#e0520d)", boxShadow: "0 0 16px -2px rgba(255,120,20,.7), inset 0 1px 0 rgba(255,255,255,.35)" }}
+                    >
+                      <span className="grid place-items-center">
+                        <motion.span className="col-start-1 row-start-1" animate={{ y: copied ? -8 : 0, opacity: copied ? 0 : 1 }} aria-hidden={copied} transition={{ type: "spring", stiffness: 500, damping: 32 }}>Copy code</motion.span>
+                        <motion.span className="col-start-1 row-start-1" initial={false} animate={{ y: copied ? 0 : 8, opacity: copied ? 1 : 0 }} transition={{ type: "spring", stiffness: 500, damping: 32 }} aria-hidden={!copied}>Copied</motion.span>
+                      </span>
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
