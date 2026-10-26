@@ -11101,9 +11101,9 @@ export default function Page() {
     name: "Pumpkin Reveal",
     registryCliName: "pumpkin-reveal",
     description:
-      "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: a wraith rushes straight at you, bats burst into the night, black widows scuttle across the card, one drops on a thread from the branch, and a skeleton falls out, drags itself upright and lunges before sinking back into the ground. Only then does the offer fly out and land, ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
+      "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: sheet ghosts with cut-out faces fly out and keep circling the night, bats burst out, and black widows scuttle across the card while one drops on a thread from the branch. Then the offer flies out on a torn, bloodied slip with a cobweb and its spider, and lands ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
     categorySlug: "for-fun",
-    tags: ["pumpkin", "halloween", "reveal", "coupon", "promo", "spiders", "skeleton", "ghost", "horror", "3d", "canvas", "physics", "sound", "autoplay", "fun", "motion kit", "framer-motion"],
+    tags: ["pumpkin", "halloween", "reveal", "coupon", "promo", "spiders", "ghosts", "bats", "spooky", "3d", "canvas", "physics", "sound", "autoplay", "fun", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 177,
     createdAt: "2026-10-25",
@@ -11111,7 +11111,7 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
-      { name: "music", type: "string", description: "URL of an mp3 to play when the pumpkin bursts, with the moonlight pulsing to it. Without one, the wraiths wail instead." },
+      { name: "music", type: "string", description: "URL of an mp3 to play when the pumpkin bursts, with the moonlight pulsing to it. Without one, the ghosts wail instead." },
       { name: "className", type: "string", description: "Extra classes for the outer card." },
     ],
     Preview: Previews.PreviewPumpkinReveal,
@@ -11138,7 +11138,7 @@ export default function Page() {
 
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
 
-// autoplay hits it three times, picks a trick and then a treat, and hangs a new one, until the visitor touches it.
+// autoplay hits it three times, lets the ghosts, bats and spiders out, shows the offer and hangs a new one, until the visitor touches it.
 export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[440px] p-6">
@@ -11153,8 +11153,8 @@ export default function Page() {
 
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
 
-// The track starts as the pumpkin bursts and the moonlight pulses with it. Put any mp3 in /public. The demo track on
-// this page is /audio/pumpkin-burst.mp3 on nexus-ui.com.
+// The track starts as the pumpkin bursts and the moonlight pulses with it. The burst is timed to the demo track
+// (download it next to the build prompt and save it as public/audio/pumpkin-burst.mp3); any mp3 works too.
 export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[440px] p-6">
