@@ -1,3 +1,6 @@
+// This lives in the (index) route group so the skeleton only wraps the /blog list. If it sat at the
+// top of /blog it would also wrap /blog/[slug]; the response status is then already sent as "200" by
+// the time notFound() runs, and Google files a missing post as a duplicate of the home page.
 export default function BlogLoading() {
   return (
     <div className="mx-auto max-w-3xl space-y-12 px-4 py-10 md:py-14">
