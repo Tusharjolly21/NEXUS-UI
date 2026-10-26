@@ -112,6 +112,8 @@ function sharedLibs(files) {
   const src = files.map((f) => f.content).join("\n");
   if (/@\/lib\/utils["']/.test(src)) need.add("utils");
   if (/@\/lib\/ui-sounds["']/.test(src)) need.add("ui-sounds");
+  // the Pro sound pack builds on the free synthesiser, so a prompt that needs it ships both, free one first
+  if (/@\/lib\/ui-sounds-pro["']/.test(src)) { need.add("ui-sounds"); need.add("ui-sounds-pro"); }
   if (/@\/lib\/typing-sound["']/.test(src)) need.add("typing-sound");
   if (need.has("typing-sound")) need.add("ui-sounds");
   return need;

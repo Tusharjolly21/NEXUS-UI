@@ -133,6 +133,8 @@ function registryDepsForReactSource(src) {
   if (src.includes("@/lib/utils") || src.includes("@/components/ui")) deps.add("utils");
   // Components that make sound import the shared synthesiser; the CLI installs it alongside them.
   if (src.includes("@/lib/ui-sounds")) deps.add(`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`);
+  // Pro components that use the Pro sound pack need that file too (the endpoint serves it to Pro accounts).
+  if (src.includes("@/lib/ui-sounds-pro")) deps.add(`${homepage}/api/registry/${UI_SOUNDS_PRO_REGISTRY_NAME}`);
   // Components that type text play a key click per character from the shared typing sound.
   if (src.includes("@/lib/typing-sound")) deps.add(`${homepage}/api/registry/${TYPING_SOUND_REGISTRY_NAME}`);
 
@@ -210,7 +212,7 @@ function buildUiSoundsProItem() {
     name: UI_SOUNDS_PRO_REGISTRY_NAME,
     type: "registry:lib",
     title: "UI Sounds Pro",
-    description: "24 more interface sounds in four sets (Glass, Paper and wood, Arcade, Studio), plus playProSound and useProSound. Builds on ui-sounds.",
+    description: "32 more interface sounds in five sets (Glass, Paper and wood, Arcade, Studio, Devices), plus playProSound and useProSound. Builds on ui-sounds.",
     dependencies: [],
     registryDependencies: [`${homepage}/api/registry/${UI_SOUNDS_REGISTRY_NAME}`],
     files: [{ path: "next-ui/lib/ui-sounds-pro.ts", type: "registry:lib", target: "lib/ui-sounds-pro.ts", content }],
