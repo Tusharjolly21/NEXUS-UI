@@ -2,7 +2,7 @@
 
 Add the "Pumpkin Reveal" component from Nexus UI to my project.
 
-Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces, orange outside and pale inside. A ghost escapes and three candies spill out: pick one, and one of them is a trick. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.
+Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: a wraith rushes straight at you, bats burst into the night, black widows scuttle across the card, one drops on a thread from the branch, and a skeleton falls out, drags itself upright and lunges before sinking back into the ground. Only then does the offer fly out and land, ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.
 
 Please:
 
@@ -44,14 +44,14 @@ const TWIGS = [
 ];
 // things hanging off it that swing when it shakes: a spider on its thread and two dead leaves
 const LEAVES = [{ f: 0.79, a: 0, s: 1 }, { f: 0.9, a: 64, s: 1 }, { f: 0.43, a: 112, s: 0.85 }];
-// what spills out: three wrapped candies, and one of them is a trick
-type Treat = { kind: "treat" | "trick"; title: string; code: string; wrap: [string, string]; name: string };
+// the offer that comes out once the horde has fled; each new pumpkin holds the next one
+type Treat = { title: string; code: string };
 const TREATS: Treat[] = [
-  { kind: "treat", title: "20% off your first year", code: "BOO20", wrap: ["#ff7a00", "#ffc04d"], name: "Orange candy" },
-  { kind: "trick", title: "", code: "", wrap: ["#7c3aed", "#b89cff"], name: "Purple candy" },
-  { kind: "treat", title: "A free month of Pro", code: "GHOST30", wrap: ["#16a34a", "#a3e635"], name: "Green candy" },
+  { title: "20% off your first year", code: "BOO20" },
+  { title: "A free month of Pro", code: "GHOST30" },
 ];
-type Candy = { x: number; y: number; vx: number; vy: number; a: number; va: number; t: number; gone: boolean; settled: boolean; grab: number; pop: number };
+// how long the horde has the stage before the offer comes out, in ms
+const EMERGE_MS = 3400;
 
 // A deterministic hash in 0..1. Integer maths only, so the server and the browser agree to the last digit
 // (a sin-based hash does not, and that breaks hydration).
@@ -792,62 +792,401 @@ function createSpook() {
       for (let i = 0; i < 5; i++) noise(t + i * 0.03, 0.03, "highpass", 3200, 0.7, 0.12, 0.002);
       tone(t + 0.12, "sine", 320, 980, 0.14, 0.18, 0.005);
     },
-    trick: () => {
+    /**
+     * What comes out of the pumpkin, in time with the picture: a shriek as the wraith rushes at you,
+     * squeaks and wingbeats, dry scuttling, then the skeleton clattering down, creaking upright,
+     * roaring with its jaw chattering, and rattling back into the ground.
+     */
+    horde: (withMusic: boolean) => {
       if (!ok()) return;
-      const t = ctx!.currentTime;
-      // a sad trombone in a minor key, then the bones rattle
-      ([[392, 370, 0], [311.1, 293.7, 0.3], [261.6, 196, 0.6]] as const).forEach(([a, b, d], i) => tone(t + d, "triangle", a, b, i === 2 ? 0.7 : 0.24, 0.09, 0.03));
-      for (let i = 0; i < 10; i++) noise(t + 0.2 + i * 0.05, 0.02, "bandpass", 2100 + (i % 2) * 600, 3, 0.1, 0.002);
+      const c = ctx!, t = c.currentTime, v = withMusic ? 0.65 : 1, R = Math.random;
+      const voice = (at: number, type: OscillatorType, pts: [number, number][], peak: number, fq: number, vib: number, vibAmt: number, dur: number) => {
+        const o = c.createOscillator(), g = c.createGain(), fl = c.createBiquadFilter(), lfo = c.createOscillator(), lg = c.createGain();
+        o.type = type; o.frequency.setValueAtTime(pts[0][1], at);
+        pts.slice(1).forEach(([dt, f]) => o.frequency.exponentialRampToValueAtTime(f, at + dt));
+        lfo.frequency.value = vib; lg.gain.value = vibAmt; lfo.connect(lg).connect(o.frequency);
+        fl.type = "bandpass"; fl.frequency.value = fq; fl.Q.value = 1.1;
+        env(g, at, 0.03, peak, dur); o.connect(fl).connect(g).connect(master!);
+        o.start(at); lfo.start(at); o.stop(at + dur + 0.1); lfo.stop(at + dur + 0.1);
+      };
+      // the shriek: two voices a little out of tune, rushing up, and a breath of air through it
+      voice(t + 0.08, "sawtooth", [[0, 620], [0.22, 1850], [0.75, 1150]], 0.08 * v, 1800, 9, 45, 0.8);
+      voice(t + 0.1, "sawtooth", [[0, 655], [0.24, 1990], [0.75, 1080]], 0.05 * v, 2200, 11, 55, 0.75);
+      noise(t + 0.08, 0.6, "highpass", 2600, 0.8, 0.06 * v, 0.04);
+      // bats
+      for (let i = 0; i < 9; i++) {
+        const at = t + 0.12 + R() * 1.1;
+        tone(at, "sine", 6400 + R() * 1600, 4300, 0.035, 0.035 * v, 0.003);
+        noise(at, 0.05, "lowpass", 700, 0.7, 0.05 * v, 0.005);
+      }
+      // spiders: bursts of dry little clicks, like legs on glass
+      [0.32, 0.95, 1.6, 2.35].forEach((at) => {
+        for (let i = 0; i < 16; i++) noise(t + at + i * 0.011 + R() * 0.004, 0.005, "bandpass", 2800 + R() * 2600, 5, (0.045 + R() * 0.04) * v, 0.001);
+      });
+      // bones: hollow clicks, irregular
+      const rattle = (at: number, n: number, g: number) => {
+        let x = at;
+        for (let i = 0; i < n; i++) {
+          const f = 1300 + R() * 1500;
+          noise(x, 0.02, "bandpass", f, 12, 0.16 * g, 0.001);
+          tone(x, "sine", f * 0.6, f * 0.54, 0.03, 0.025 * g, 0.001);
+          x += 0.022 + R() * 0.045;
+        }
+      };
+      // the skeleton lands in a heap
+      tone(t + 0.75, "sine", 110, 45, 0.25, 0.32 * v, 0.003);
+      noise(t + 0.75, 0.12, "lowpass", 600, 0.7, 0.2 * v);
+      rattle(t + 0.76, 14, v);
+      // it creaks and clicks itself upright
+      creak(t + 1.3, 0.05 * v);
+      rattle(t + 1.32, 8, 0.6 * v);
+      // jaw chatter as it looks about
+      for (let i = 0; i < 6; i++) noise(t + 1.9 + i * 0.05, 0.012, "bandpass", 2100, 4, 0.1 * v, 0.001);
+      // the lunge: a guttural roar with the jaw wide open
+      voice(t + 2.2, "sawtooth", [[0, 96], [0.3, 82], [0.55, 68]], 0.14 * v, 520, 27, 9, 0.6);
+      noise(t + 2.2, 0.55, "bandpass", 420, 0.8, 0.12 * v, 0.03);
+      // and down it goes, rattling into the earth
+      rattle(t + 2.92, 11, 0.7 * v);
+      noise(t + 2.95, 0.5, "lowpass", 300, 0.7, 0.12 * v, 0.05);
     },
     dispose: () => { stopMusic(0.02); amb?.stop(); amb = null; releaseMedia(); void ctx?.close(); ctx = null; },
   };
 }
 type Spook = ReturnType<typeof createSpook>;
 
-/** A little ghost: soft white body with a wavy hem and hollow eyes. */
-function Ghost({ uid, w }: { uid: string; w: number }) {
+/** A wraith: a tattered, hooded shape with hollow eyes, a stretched scream and clawed hands reaching out. */
+function Wraith({ uid, w }: { uid: string; w: number }) {
   return (
-    <svg width={w} height={w * 1.3} viewBox="-20 -26 40 52" aria-hidden="true" className="overflow-visible">
+    <svg width={w} height={w * 1.3} viewBox="-40 -44 80 104" aria-hidden="true" className="overflow-visible">
       <defs>
-        <radialGradient id={`${uid}gh`} cx="45%" cy="30%" r="75%">
-          <stop offset="0" stopColor="#ffffff" stopOpacity=".95" />
-          <stop offset=".7" stopColor="#e8e4ff" stopOpacity=".7" />
-          <stop offset="1" stopColor="#cfc8ff" stopOpacity=".25" />
-        </radialGradient>
-        <radialGradient id={`${uid}gg`} cx="50%" cy="50%" r="50%">
-          <stop offset="0" stopColor="#d8d2ff" stopOpacity=".35" />
-          <stop offset="1" stopColor="#d8d2ff" stopOpacity="0" />
+        <linearGradient id={`${uid}wb`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#f4f7ff" stopOpacity=".96" />
+          <stop offset=".42" stopColor="#c9d4ef" stopOpacity=".72" />
+          <stop offset="1" stopColor="#7f90bb" stopOpacity="0" />
+        </linearGradient>
+        <radialGradient id={`${uid}wg`} cx="50%" cy="38%" r="55%">
+          <stop offset="0" stopColor="#bcd3ff" stopOpacity=".42" />
+          <stop offset="1" stopColor="#bcd3ff" stopOpacity="0" />
         </radialGradient>
       </defs>
-      <ellipse cx="0" cy="0" rx="30" ry="34" fill={`url(#${uid}gg)`} />
-      <path d="M-15 4 C-15 -14 -8 -22 0 -22 C8 -22 15 -14 15 4 L15 21 Q11.5 17 8 21 Q4 25 0 21 Q-4 17 -8 21 Q-11.5 25 -15 21 Z" fill={`url(#${uid}gh)`} />
-      <ellipse cx="-5.5" cy="-7" rx="2.6" ry="3.6" fill="#1b1326" />
-      <ellipse cx="5.5" cy="-7" rx="2.6" ry="3.6" fill="#1b1326" />
-      <ellipse cx="0" cy="3" rx="3" ry="4" fill="#1b1326" opacity=".85" />
+      <ellipse cx="0" cy="2" rx="40" ry="50" fill={`url(#${uid}wg)`} />
+      {/* arms reaching out, with long bony fingers */}
+      <g fill={`url(#${uid}wb)`}>
+        <path d="M-14 -7 C-24 -6 -31 0 -37 9 L-33.5 11 C-28.5 4 -22 0 -13 0 Z" />
+        <path d="M14 -7 C24 -6 31 0 37 9 L33.5 11 C28.5 4 22 0 13 0 Z" />
+      </g>
+      <g stroke="#e8eeff" strokeWidth=".95" strokeLinecap="round" fill="none" opacity=".9">
+        <path d="M-36 10 q-4 2 -6.5 6.5 M-35 11 q-2.5 3 -3.5 7.5 M-33.6 11 q-.6 3.4 .2 7.6 M-36.6 8.6 q-4.6 0 -7.4 2.4" />
+        <path d="M36 10 q4 2 6.5 6.5 M35 11 q2.5 3 3.5 7.5 M33.6 11 q.6 3.4 -.2 7.6 M36.6 8.6 q4.6 0 7.4 2.4" />
+      </g>
+      {/* the robe, torn into rags at the hem */}
+      <path
+        d="M0 -36 C11 -36 17 -28 17 -17 C17 -8 21 2 24 14 C27 27 25 40 21 52 L17 44 L14 57 L9 46 L5 60 L0 47 L-5 59 L-9 46 L-14 56 L-17 44 L-21 51 C-26 39 -27 26 -24 14 C-21 2 -17 -8 -17 -17 C-17 -28 -11 -36 0 -36 Z"
+        fill={`url(#${uid}wb)`}
+      />
+      {/* the hood's shadow, and a face sunk into it */}
+      <ellipse cx="0" cy="-17" rx="11.5" ry="13" fill="rgba(18,12,34,.38)" />
+      <path d="M-9.5 -23 C-6.5 -27 -2.6 -25 -2.6 -20.5 C-2.6 -16 -7 -15 -9.4 -18.4 Z" fill="#06040b" />
+      <path d="M9.5 -23 C6.5 -27 2.6 -25 2.6 -20.5 C2.6 -16 7 -15 9.4 -18.4 Z" fill="#06040b" />
+      <circle cx="-5.6" cy="-20.4" r="1.05" fill="#d9f6ff" />
+      <circle cx="5.6" cy="-20.4" r="1.05" fill="#d9f6ff" />
+      <path d="M-4.6 -11.5 C-6.2 -4 -4.2 4.5 0 6.5 C4.2 4.5 6.2 -4 4.6 -11.5 C2.2 -13.6 -2.2 -13.6 -4.6 -11.5 Z" fill="#06040b" />
+      <path d="M-8.6 -14 Q-7.4 -9.5 -5.6 -7.6 M8.6 -14 Q7.4 -9.5 5.6 -7.6" stroke="rgba(30,24,60,.45)" strokeWidth=".8" fill="none" />
     </svg>
   );
 }
 
-/** A wrapped sweet with twisted ends. */
-function CandyArt({ uid, wrap }: { uid: string; wrap: [string, string] }) {
+// a spider seen from above; legs: angle from straight ahead, on the right side (left is mirrored)
+const LEG_ANG = [36, 70, 108, 144];
+const v2 = (side: number, a: number, l: number) => [side * Math.sin((a * Math.PI) / 180) * l, -Math.cos((a * Math.PI) / 180) * l];
+const SPIDER_LEGS = [-1, 1].flatMap((side) =>
+  LEG_ANG.map((a, k) => {
+    const bx = side * 2.4, by = -4.6 + k * 1.6;
+    const [kx, ky] = v2(side, a, 10.5);
+    const a2 = a + (k < 2 ? -30 : 30);
+    const [tx, ty] = v2(side, a2, 13.5);
+    const f = (n: number) => n.toFixed(2);
+    return { side, k, group: (k + (side > 0 ? 0 : 1)) % 2, bx, by, knee: [f(bx + kx), f(by + ky)], tip: [f(bx + kx + tx), f(by + ky + ty)] };
+  }),
+);
+/** A black widow: glossy abdomen with a red hourglass, eight jointed legs that scuttle, and a cluster of red eyes. */
+function Spider({ uid, size, gait }: { uid: string; size: number; gait: number }) {
   return (
-    <svg width="48" height="26" viewBox="0 0 48 26" aria-hidden="true" className="block overflow-visible">
+    <svg width={64 * size} height={64 * size} viewBox="-32 -32 64 64" aria-hidden="true" className="overflow-visible" style={{ filter: "drop-shadow(0 3px 3px rgba(0,0,0,.55))" }}>
       <defs>
-        <linearGradient id={`${uid}w`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={wrap[1]} />
-          <stop offset="1" stopColor={wrap[0]} />
-        </linearGradient>
-        <clipPath id={`${uid}c`}><ellipse cx="24" cy="13" rx="13" ry="9" /></clipPath>
+        <radialGradient id={`${uid}ab`} cx="38%" cy="30%" r="75%">
+          <stop offset="0" stopColor="#4a3a32" />
+          <stop offset=".45" stopColor="#1a1210" />
+          <stop offset="1" stopColor="#060404" />
+        </radialGradient>
       </defs>
-      <path d="M12 13 L1 4 Q3 13 1 22 Z M36 13 L47 4 Q45 13 47 22 Z" fill={`url(#${uid}w)`} stroke="rgba(0,0,0,.25)" strokeWidth=".6" />
-      <path d="M12 13 L5 8 M12 13 L5 18 M36 13 L43 8 M36 13 L43 18" stroke="rgba(255,255,255,.45)" strokeWidth=".7" />
-      <ellipse cx="24" cy="13" rx="13" ry="9" fill={`url(#${uid}w)`} />
-      <g clipPath={`url(#${uid}c)`}>
-        {[-14, -6, 2, 10, 18].map((x) => <path key={x} d={`M${24 + x} 2 l-6 22`} stroke="rgba(255,255,255,.55)" strokeWidth="2.4" />)}
-      </g>
-      <ellipse cx="20" cy="8.5" rx="6" ry="2.2" fill="#fff" opacity=".55" />
-      <ellipse cx="24" cy="13" rx="13" ry="9" fill="none" stroke="rgba(0,0,0,.28)" strokeWidth=".8" />
+      {SPIDER_LEGS.map((l, i) => (
+        <g key={i}>
+          <animateTransform
+            attributeName="transform"
+            type="rotate"
+            values={`${-9 * l.side} ${l.bx} ${l.by};${9 * l.side} ${l.bx} ${l.by};${-9 * l.side} ${l.bx} ${l.by}`}
+            dur={`${gait}s`}
+            begin={l.group ? `-${(gait / 2).toFixed(3)}s` : "0s"}
+            repeatCount="indefinite"
+          />
+          <path d={`M${l.bx} ${l.by} L${l.knee[0]} ${l.knee[1]}`} stroke="#120c0a" strokeWidth="2.1" strokeLinecap="round" />
+          <path d={`M${l.knee[0]} ${l.knee[1]} L${l.tip[0]} ${l.tip[1]}`} stroke="#120c0a" strokeWidth="1.25" strokeLinecap="round" />
+          {/* moonlight catching the top of each leg, so it reads against the dark */}
+          <path d={`M${l.bx} ${l.by} L${l.knee[0]} ${l.knee[1]} L${l.tip[0]} ${l.tip[1]}`} stroke="rgba(190,170,215,.42)" strokeWidth=".55" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <circle cx={l.knee[0]} cy={l.knee[1]} r="1.15" fill="#1c1411" />
+        </g>
+      ))}
+      {/* fangs and feelers */}
+      <path d="M-1.6 -8.6 q-1 2.4 .5 3.2 M1.6 -8.6 q1 2.4 -.5 3.2" stroke="#0a0606" strokeWidth="1.3" strokeLinecap="round" fill="none" />
+      <path d="M-1.4 -8 L-3.6 -11.6 M1.4 -8 L3.6 -11.6" stroke="#120c0a" strokeWidth="1" strokeLinecap="round" />
+      <ellipse cx="0" cy="-3.2" rx="5" ry="5.4" fill={`url(#${uid}ab)`} stroke="rgba(190,170,215,.35)" strokeWidth=".6" />
+      <ellipse cx="0" cy="8.6" rx="7.4" ry="9.2" fill={`url(#${uid}ab)`} stroke="rgba(190,170,215,.35)" strokeWidth=".6" />
+      <ellipse cx="-2.3" cy="4.6" rx="2.2" ry="3.2" fill="#fff" opacity=".16" />
+      <path d="M-2.3 6.4 L2.3 6.4 L0 9.3 Z M-2.3 12.6 L2.3 12.6 L0 9.7 Z" fill="#d11a1a" />
+      {[[-1.15, -7.4, 0.95], [1.15, -7.4, 0.95], [-2.7, -6.7, 0.65], [2.7, -6.7, 0.65], [-0.6, -5.9, 0.5], [0.6, -5.9, 0.5]].map(([x, y, r], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y} r={r} fill="#ff2214" />
+          <circle cx={x - 0.25} cy={y - 0.25} r={r * 0.35} fill="#fff" opacity=".6" />
+        </g>
+      ))}
     </svg>
+  );
+}
+
+/** A bat with a leathery wing membrane and two red eyes; its wings beat while it flies. */
+function Bat({ w }: { w: number }) {
+  return (
+    <svg width={w} height={w * 0.55} viewBox="-11 -6 22 12" aria-hidden="true" className="overflow-visible">
+      <motion.path
+        d="M0 1 C-2 -1 -4 -4 -11 -3 C-8 -1 -8 1 -9 3 C-6 1 -4 2 -3 4 C-2 2 -1 2 0 3 C1 2 2 2 3 4 C4 2 6 1 9 3 C8 1 8 -1 11 -3 C4 -4 2 -1 0 1 Z"
+        fill="#07050a"
+        animate={{ scaleY: [1, 0.3, 1] }}
+        transition={{ duration: 0.16, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <circle cx="-0.7" cy="0.2" r=".45" fill="#ff3b30" />
+      <circle cx="0.7" cy="0.2" r=".45" fill="#ff3b30" />
+    </svg>
+  );
+}
+
+/*
+ * A skeleton, front on, about 160 units tall with its feet at the origin. It is posed by a script (see
+ * SkeletonRise): the whole body pivots about its feet, the arms about the shoulders, the head about
+ * the neck, and the jaw drops.
+ */
+const BONE = "#ece5d3", BONE_EDGE = "#a89d86", VOID = "#120c16";
+function SkeletonHalf() {
+  const ribs = Array.from({ length: 7 }, (_, k) => {
+    const y = -109 + k * 4.5, out = 16.5 - Math.abs(k - 2.2) * 1.3 - (k > 4 ? 2.5 : 0);
+    return `M-1.4 ${y} C${(-7 - k * 0.3).toFixed(1)} ${(y - 2.2).toFixed(1)} ${(-out - 1).toFixed(1)} ${(y + 1).toFixed(1)} ${(-out + 0.6).toFixed(1)} ${(y + 6.5).toFixed(1)}`;
+  });
+  return (
+    <>
+      {/* leg: femur, kneecap, shin bones, foot */}
+      <path d="M-8 -55 L-10 -29.5" stroke={BONE} strokeWidth="3.4" strokeLinecap="round" />
+      <circle cx="-8" cy="-55" r="2.4" fill={BONE} />
+      <circle cx="-10.2" cy="-29" r="2.3" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
+      <path d="M-10 -26.5 L-10 -5" stroke={BONE} strokeWidth="2.4" strokeLinecap="round" />
+      <path d="M-12.4 -26 L-12.1 -5.5" stroke={BONE} strokeWidth="1.3" strokeLinecap="round" />
+      <path d="M-8.6 -4.6 L-15 -1.4 L-16.2 .6 H-7.2 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
+      {/* ribs */}
+      {ribs.map((d, i) => <path key={i} d={d} stroke={BONE} strokeWidth="1.9" fill="none" strokeLinecap="round" />)}
+      {ribs.map((d, i) => <path key={`s${i}`} d={d} stroke={BONE_EDGE} strokeWidth=".45" fill="none" transform="translate(0 .9)" />)}
+      {/* collarbone */}
+      <path d="M-1.5 -115 C-8 -116.2 -15 -115.6 -21 -112.2" stroke={BONE} strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      {/* hip */}
+      <path d="M-2.5 -66 C-10 -70.5 -17.5 -68.5 -18.5 -60.5 C-18.5 -54.5 -12.5 -51 -8 -50.2 C-5.2 -52 -3 -55 0 -55 L0 -66 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
+      <ellipse cx="-7.4" cy="-56.6" rx="3" ry="2.3" fill={VOID} />
+    </>
+  );
+}
+function SkeletonArm() {
+  return (
+    <>
+      <path d="M-21 -111 L-24.4 -84" stroke={BONE} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="-21" cy="-111" r="2.6" fill={BONE} stroke={BONE_EDGE} strokeWidth=".5" />
+      <circle cx="-24.4" cy="-84" r="2" fill={BONE} />
+      <path d="M-25.2 -83 L-27.6 -60 M-23 -83.4 L-25.4 -60.4" stroke={BONE} strokeWidth="1.6" strokeLinecap="round" />
+      <circle cx="-26.4" cy="-58.4" r="2.1" fill={BONE} />
+      <path d="M-28.4 -57.6 l-2.6 4.6 l-.8 4.4 M-27 -56.8 l-1.4 5.6 l-.2 4.6 M-25.6 -56.8 l-.2 5.8 l.6 4.4 M-24.4 -57.4 l1.2 5 l1.2 3.6 M-28.8 -59 l-3.2 2.4" stroke={BONE} strokeWidth="1.05" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+    </>
+  );
+}
+type GRef = React.RefObject<SVGGElement | null>;
+const SkeletonArt = ({ body, armL, armR, head, jaw, eyes }: { body: GRef; armL: GRef; armR: GRef; head: GRef; jaw: GRef; eyes: GRef }) => (
+  <g ref={body}>
+    {/* spine, behind everything */}
+    {Array.from({ length: 15 }, (_, i) => <rect key={i} x="-2.2" y={-115 + i * 3.4} width="4.4" height="2.6" rx="1" fill={BONE} stroke={BONE_EDGE} strokeWidth=".4" />)}
+    <SkeletonHalf />
+    <g transform="scale(-1 1)"><SkeletonHalf /></g>
+    <path d="M-3 -66 L3 -66 L0 -57 Z" fill={BONE_EDGE} />
+    <rect x="-1.7" y="-112.5" width="3.4" height="23" rx="1.5" fill={BONE} stroke={BONE_EDGE} strokeWidth=".45" />
+    <g ref={armL}><SkeletonArm /></g>
+    <g ref={armR}><g transform="scale(-1 1)"><SkeletonArm /></g></g>
+    {[-123.6, -121, -118.4].map((y) => <rect key={y} x="-2.6" y={y} width="5.2" height="2.1" rx=".8" fill={BONE} stroke={BONE_EDGE} strokeWidth=".4" />)}
+    <g ref={head}>
+      <path d="M-7.6 -126.6 H7.6 V-120.6 H-7.6 Z" fill={VOID} />
+      <path d="M-13 -140 C-14 -153 -7 -160.5 0 -160.5 C7 -160.5 14 -153 13 -140 C13 -134 11 -131 9 -129 L9 -126 L-9 -126 L-9 -129 C-11 -131 -13 -134 -13 -140 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".6" />
+      <path d="M-11 -151 Q-6 -157 2 -156.5" stroke="#fffaf0" strokeWidth="1.4" fill="none" opacity=".6" strokeLinecap="round" />
+      <path d="M-9.6 -143 C-9 -147.4 -4 -148.4 -2.5 -144.6 C-2 -141 -4.5 -138.4 -7 -139 C-9 -139.5 -10.1 -141 -9.6 -143 Z" fill={VOID} />
+      <path d="M9.6 -143 C9 -147.4 4 -148.4 2.5 -144.6 C2 -141 4.5 -138.4 7 -139 C9 -139.5 10.1 -141 9.6 -143 Z" fill={VOID} />
+      <g ref={eyes} opacity="0">
+        <circle cx="-5.9" cy="-142.6" r="2.6" fill="#ff4d12" opacity=".35" />
+        <circle cx="5.9" cy="-142.6" r="2.6" fill="#ff4d12" opacity=".35" />
+        <circle cx="-5.9" cy="-142.6" r="1.15" fill="#ffd2a0" />
+        <circle cx="5.9" cy="-142.6" r="1.15" fill="#ffd2a0" />
+      </g>
+      <path d="M0 -138 L-2.1 -133.4 L0 -132.4 L2.1 -133.4 Z" fill={VOID} />
+      <path d="M-12.4 -137 Q-10.4 -133.6 -7 -134.2 M12.4 -137 Q10.4 -133.6 7 -134.2" stroke={BONE_EDGE} strokeWidth=".8" fill="none" />
+      <path d="M-7 -129.6 H7 M-6 -129.6 V-126.6 M-4 -129.6 V-126.6 M-2 -129.6 V-126.6 M0 -129.6 V-126.6 M2 -129.6 V-126.6 M4 -129.6 V-126.6 M6 -129.6 V-126.6" stroke={VOID} strokeWidth=".5" />
+      <g ref={jaw}>
+        <path d="M-9 -126.2 L-9.6 -122 C-8 -118 -4 -116.4 0 -116.4 C4 -116.4 8 -118 9.6 -122 L9 -126.2 Z" fill={BONE} stroke={BONE_EDGE} strokeWidth=".6" />
+        <path d="M-6.6 -126 V-123.4 M-4.4 -126 V-123.2 M-2.2 -126 V-123 M0 -126 V-123 M2.2 -126 V-123 M4.4 -126 V-123.2 M6.6 -126 V-123.4 M-7 -123.4 Q0 -121.6 7 -123.4" stroke={VOID} strokeWidth=".5" fill="none" />
+      </g>
+    </g>
+  </g>
+);
+
+// smooth step and a small helper to read a keyframed value at time t
+const ease = (t: number) => t * t * (3 - 2 * t);
+const track = (t: number, keys: [number, number][]) => {
+  if (t <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    if (t <= keys[i][0]) {
+      const [t0, v0] = keys[i - 1], [t1, v1] = keys[i];
+      return v0 + (v1 - v0) * ease((t - t0) / Math.max(1e-6, t1 - t0));
+    }
+  }
+  return keys[keys.length - 1][1];
+};
+/**
+ * The skeleton's performance, about 3.2 s: it drops out of the pumpkin head first, clatters onto the
+ * ground, jerks itself upright, looks about with glowing eyes, lunges at you with its jaw wide open,
+ * then sinks back into the earth.
+ */
+function SkeletonRise({ x, fromY, floor, scale, onDone }: { x: number; fromY: number; floor: number; scale: number; onDone: () => void }) {
+  const body = useRef<SVGGElement>(null), armL = useRef<SVGGElement>(null), armR = useRef<SVGGElement>(null), head = useRef<SVGGElement>(null), jaw = useRef<SVGGElement>(null), eyes = useRef<SVGGElement>(null);
+  const done = useRef(onDone);
+  useLayoutEffect(() => { done.current = onDone; });
+  useEffect(() => {
+    let raf = 0;
+    const t0 = performance.now();
+    const drop = fromY - floor; // negative: up from the ground
+    const tick = (now: number) => {
+      const t = (now - t0) / 1000;
+      // fall: gravity from the pumpkin, turning head over heels, then a small bounce
+      const fall = Math.min(1, t / 0.45);
+      let dy = t < 0.45 ? drop * (1 - fall * fall) : t < 0.6 ? -10 * Math.sin(((t - 0.45) / 0.15) * Math.PI) : 0;
+      let rot = t < 0.45 ? 170 - 78 * fall : t < 1.0 ? 92 + Math.sin(t * 40) * (t > 0.7 && t < 0.85 ? 2.5 : 0) : track(t, [[1.0, 92], [1.12, 70], [1.2, 74], [1.34, 38], [1.42, 42], [1.56, 0]]);
+      const sc = t < 0.45 ? 0.55 + 0.45 * fall : track(t, [[1.9, 1], [2.28, 1.8], [2.62, 1.76], [2.75, 1.4]]);
+      // the lunge leans it forward and shakes it; then it sinks
+      if (t > 2.3 && t < 2.62) rot = Math.sin(t * 70) * 1.6;
+      if (t > 2.62) { dy = track(t, [[2.62, 0], [3.2, 240]]); rot = track(t, [[2.62, 0], [3.2, -9]]); }
+      dy += t > 1.9 && t < 2.62 ? -track(t, [[1.9, 0], [2.28, 22], [2.62, 18]]) : 0;
+      // lying on its side, it rests on its ribs instead of sinking into the ground
+      dy -= 15 * Math.max(0, Math.sin((rot * Math.PI) / 180));
+      const arm = track(t, [[1.5, 6], [1.9, 18], [2.25, 128], [2.62, 120], [2.9, 40]]);
+      const tilt = track(t, [[1.56, 0], [1.66, -14], [1.78, 12], [1.9, 0]]);
+      const open = t > 1.6 && t < 1.9 ? (Math.sin((t - 1.6) * 60) > 0 ? 3 : 0.4) : track(t, [[1.9, 0], [2.15, 5.5], [2.62, 5.2], [2.8, 0]]);
+      const glow = track(t, [[1.45, 0], [1.6, 1], [2.62, 1], [3.0, 0]]);
+      body.current?.setAttribute("transform", `translate(0 ${dy.toFixed(2)}) rotate(${rot.toFixed(2)}) scale(${(sc * scale).toFixed(3)})`);
+      armL.current?.setAttribute("transform", `rotate(${arm.toFixed(2)} -21 -111)`);
+      armR.current?.setAttribute("transform", `rotate(${(-arm).toFixed(2)} 21 -111)`);
+      head.current?.setAttribute("transform", `rotate(${tilt.toFixed(2)} 0 -124)`);
+      jaw.current?.setAttribute("transform", `translate(0 ${open.toFixed(2)})`);
+      eyes.current?.setAttribute("opacity", (glow * (0.8 + 0.2 * Math.sin(t * 30))).toFixed(2));
+      if (t < 3.25) raf = requestAnimationFrame(tick);
+      else done.current();
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [fromY, floor, scale]);
+  // clipped at the ground, so it can sink into it
+  return (
+    <svg className="pointer-events-none absolute left-0 top-0 z-[16] overflow-hidden" width="100%" height={floor + 4} aria-hidden="true">
+      <g transform={`translate(${x.toFixed(1)} ${floor})`}>
+        <SkeletonArt body={body} armL={armL} armR={armR} head={head} jaw={jaw} eyes={eyes} />
+      </g>
+    </svg>
+  );
+}
+
+/** Everything that comes out of the pumpkin when it bursts. Paths are rolled when it bursts, so render stays pure. */
+type HordePlan = {
+  k: number; x: number; y: number;
+  spiders: { xs: number[]; ys: number[]; rot: number[]; size: number; gait: number; dur: number; delay: number }[];
+  bats: { xs: number[]; ys: number[]; w: number; dur: number; delay: number }[];
+  hang: { x: number; y: number; len: number };
+  skelX: number;
+};
+const unwrap = (prev: number, next: number) => prev + ((((next - prev + 180) % 360) + 360) % 360) - 180;
+function planHorde(k: number, x: number, y: number, W: number, H: number): HordePlan {
+  const R = Math.random;
+  const spiders = Array.from({ length: 6 }, (_, i) => {
+    const a = (i / 6) * Math.PI * 2 + (R() - 0.5) * 0.8;
+    const p1 = [x + Math.cos(a) * (40 + R() * 40), y + Math.sin(a) * (40 + R() * 40) + 30];
+    const b = a + (R() - 0.5) * 1.3;
+    const p2 = [p1[0] + Math.cos(b) * (60 + R() * 70), p1[1] + Math.sin(b) * (60 + R() * 70)];
+    const c = b + (R() - 0.5) * 0.9, far = Math.max(W, H);
+    const p3 = [p2[0] + Math.cos(c) * far, p2[1] + Math.sin(c) * far];
+    const hd = (p: number[], q: number[]) => (Math.atan2(q[1] - p[1], q[0] - p[0]) * 180) / Math.PI + 90;
+    const h1 = hd([x, y], p1), h2 = unwrap(h1, hd(p1, p2)), h3 = unwrap(h2, hd(p2, p3));
+    return { xs: [x, p1[0], p1[0], p2[0], p2[0], p3[0]], ys: [y, p1[1], p1[1], p2[1], p2[1], p3[1]], rot: [h1, h1, h2, h2, h3, h3], size: 0.95 + R() * 0.5, gait: 0.13 + R() * 0.06, dur: 2.6 + R() * 0.9, delay: 0.12 + i * 0.07 + R() * 0.2 };
+  });
+  const bats = Array.from({ length: 8 }, (_, i) => {
+    const a = -Math.PI / 2 + (i / 7 - 0.5) * Math.PI * 1.5 + (R() - 0.5) * 0.3;
+    const d = 200 + R() * 160;
+    return { xs: [x, x + Math.cos(a) * d * 0.45 + (R() - 0.5) * 40, x + Math.cos(a) * d * 1.6], ys: [y, y + Math.sin(a) * d * 0.4 - 20, y + Math.sin(a) * d * 1.4 - 60], w: 30 + R() * 18, dur: 1.1 + R() * 0.6, delay: 0.04 + R() * 0.35 };
+  });
+  const hx = W / 2 + 40;
+  return { k, x, y, spiders, bats, hang: { x: hx, y: branchY(hx, W) + 3, len: 96 + R() * 24 }, skelX: clamp(x, 70, W - 70) };
+}
+function Horde({ uid, plan, floor, scale }: { uid: string; plan: HordePlan; floor: number; scale: number }) {
+  const [skel, setSkel] = useState(true);
+  return (
+    <div className="pointer-events-none absolute inset-0 z-[16]" aria-hidden="true">
+      {/* a flash of cold spirit light, and smoke rolling out */}
+      <motion.div className="absolute rounded-full" style={{ left: plan.x - 90, top: plan.y - 90, width: 180, height: 180, background: "radial-gradient(closest-side, rgba(225,255,235,.95), rgba(150,255,190,.35) 45%, transparent)" }} initial={{ scale: 0.2, opacity: 0 }} animate={{ scale: [0.2, 2.6, 3.2], opacity: [0, 1, 0] }} transition={{ duration: 0.7, ease: "easeOut" }} />
+      {[0, 1, 2, 3, 4].map((i) => (
+        <motion.div key={i} className="absolute rounded-full" style={{ left: plan.x - 60, top: plan.y - 60, width: 120, height: 120, background: "radial-gradient(closest-side, rgba(28,16,38,.7), rgba(28,16,38,.25) 60%, transparent)" }} initial={{ scale: 0.3, opacity: 0, x: 0, y: 0 }} animate={{ scale: [0.3, 1.6 + i * 0.2, 2.4], opacity: [0, 0.85, 0], x: [0, (i - 2) * 38, (i - 2) * 70], y: [0, -30 - i * 8, -110 - i * 16] }} transition={{ duration: 2.6, delay: 0.05 + i * 0.08, ease: "easeOut" }} />
+      ))}
+      {/* the spider that drops on a thread from the branch and stays there */}
+      <div className="absolute" style={{ left: plan.hang.x, top: plan.hang.y }}>
+        <motion.div style={{ originX: 0, originY: 0 }} animate={{ rotate: [-3, 3.5, -3] }} transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: 1.6 }}>
+          <motion.div className="absolute left-[-0.5px] top-0 w-px bg-[rgba(235,235,255,.55)]" initial={{ height: 0 }} animate={{ height: [0, plan.hang.len + 14, plan.hang.len - 6, plan.hang.len] }} transition={{ duration: 1.3, delay: 0.5, times: [0, 0.55, 0.8, 1], ease: "easeOut" }} />
+          <motion.div className="absolute" style={{ left: -32 * 1.15, top: -32 * 1.15 + 8 }} initial={{ y: 0 }} animate={{ y: [0, plan.hang.len + 14, plan.hang.len - 6, plan.hang.len] }} transition={{ duration: 1.3, delay: 0.5, times: [0, 0.55, 0.8, 1], ease: "easeOut" }}>
+            <div style={{ transform: "rotate(180deg)" }}>
+              <Spider uid={`${uid}hs`} size={1.15} gait={0.55} />
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
+      {/* bats bursting out */}
+      {plan.bats.map((b, i) => (
+        <motion.div key={`b${i}`} className="absolute left-0 top-0" style={{ marginLeft: -b.w / 2, marginTop: -b.w * 0.27 }} initial={{ x: b.xs[0], y: b.ys[0], scale: 0.2, opacity: 0 }} animate={{ x: b.xs, y: b.ys, scale: [0.2, 1, 1.25], opacity: [0, 1, 1] }} transition={{ duration: b.dur, delay: b.delay, ease: "easeIn" }}>
+          <Bat w={b.w} />
+        </motion.div>
+      ))}
+      {/* spiders pouring out and scuttling across the card */}
+      {plan.spiders.map((sp, i) => (
+        <motion.div key={`s${i}`} className="absolute left-0 top-0" style={{ marginLeft: -32 * sp.size, marginTop: -32 * sp.size }} initial={{ x: sp.xs[0], y: sp.ys[0], rotate: sp.rot[0], scale: 0.3, opacity: 0 }} animate={{ x: sp.xs, y: sp.ys, rotate: sp.rot, scale: [0.3, 1, 1, 1, 1, 1], opacity: [0, 1, 1, 1, 1, 1] }} transition={{ duration: sp.dur, delay: sp.delay, times: [0, 0.18, 0.3, 0.56, 0.66, 1], ease: "easeInOut" }}>
+          <Spider uid={`${uid}s${i}`} size={sp.size} gait={sp.gait} />
+        </motion.div>
+      ))}
+      {skel && <SkeletonRise x={plan.skelX} fromY={plan.y} floor={floor} scale={scale} onDone={() => setSkel(false)} />}
+      {/* wraiths: one rushes straight at you, two curl away into the night */}
+      <motion.div className="absolute left-0 top-0 z-[2]" style={{ marginLeft: -35, marginTop: -45 }} initial={{ x: plan.x, y: plan.y, scale: 0.3, opacity: 0 }} animate={{ x: [plan.x, plan.x, plan.x + 8], y: [plan.y, plan.y - 10, plan.y + 30], scale: [0.3, 1.6, 3.6], opacity: [0, 0.95, 0] }} transition={{ duration: 1.05, delay: 0.08, times: [0, 0.45, 1], ease: "easeIn" }}>
+        <Wraith uid={`${uid}w0`} w={70} />
+      </motion.div>
+      {[-1, 1].map((d, i) => (
+        <motion.div key={`w${i}`} className="absolute left-0 top-0" style={{ marginLeft: -31, marginTop: -40 }} initial={{ x: plan.x, y: plan.y, scale: 0.3, opacity: 0 }} animate={{ x: [plan.x, plan.x + d * 50, plan.x + d * 120, plan.x + d * 70, plan.x + d * 220], y: [plan.y, plan.y - 40, plan.y - 20, plan.y - 150, plan.y - 300], scale: [0.3, 0.9, 1.1, 1, 0.8], opacity: [0, 0.9, 0.85, 0.8, 0], rotate: [0, d * 12, d * -8, d * 14, d * -6] }} transition={{ duration: 2.6, delay: 0.3 + i * 0.25, ease: "easeInOut" }}>
+          <motion.div animate={{ skewX: [0, 6, -5, 0], scaleY: [1, 1.06, 0.96, 1] }} transition={{ duration: 0.9, repeat: Infinity, ease: "easeInOut" }}>
+            <Wraith uid={`${uid}w${i + 1}`} w={62} />
+          </motion.div>
+        </motion.div>
+      ))}
+    </div>
   );
 }
 
@@ -959,7 +1298,7 @@ function Night({ W, uid, chatter, glow }: { W: number; uid: string; chatter: num
         transition={{ duration: 13, repeat: Infinity, repeatDelay: 4, delay: 2, ease: "easeInOut" }}
       >
         <motion.div animate={{ y: [0, -6, 0], skewX: [0, 4, -3, 0] }} transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}>
-          <Ghost uid={`${uid}a`} w={30} />
+          <Wraith uid={`${uid}a`} w={34} />
         </motion.div>
       </motion.div>
       <motion.div
@@ -969,7 +1308,7 @@ function Night({ W, uid, chatter, glow }: { W: number; uid: string; chatter: num
         animate={{ y: [g - 10, g - 60, g - 120], opacity: [0, 0.45, 0], scale: [0.6, 0.85, 1] }}
         transition={{ duration: 4.5, repeat: Infinity, repeatDelay: 7, delay: 6, ease: "easeOut" }}
       >
-        <Ghost uid={`${uid}b`} w={22} />
+        <Wraith uid={`${uid}b`} w={26} />
       </motion.div>
       {/* bats crossing the moon now and then */}
       {[0, 1].map((i) => (
@@ -996,22 +1335,34 @@ function Night({ W, uid, chatter, glow }: { W: number; uid: string; chatter: num
 }
 
 type Bit = { x: number; y: number; vx: number; vy: number; r: number; vr: number; w: number; h: number; c: string; f: number; vf: number; life: number; k: number };
-type Phase = "intact" | "spill" | "pick" | "burst" | "landed";
-const CONFETTI = ["#ff7a00", "#ffb020", "#9b5cff", "#7c3aed", "#a3e635", "#f5f0e6", "#ff4d00"];
+type Phase = "intact" | "emerge" | "burst" | "landed";
+const EMBERS = ["#ff6a00", "#ffb347", "#ff3d00", "#ffd27a"];
+/** Embers and charred flakes of shell thrown out by the burst. */
+function embersFrom(x: number, y: number): Bit[] {
+  const B: Bit[] = [];
+  for (let i = 0; i < 120; i++) {
+    const ember = i % 3 !== 0;
+    const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.8, sp = (ember ? 160 : 220) + Math.random() * (ember ? 420 : 500);
+    B.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 80, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, w: ember ? 2 + Math.random() * 3.5 : 3 + Math.random() * 4, h: 3 + Math.random() * 4, c: ember ? EMBERS[i % EMBERS.length] : i % 2 ? "#1d1418" : "#3a2418", f: Math.random() * 6, vf: 6 + Math.random() * 10, life: Math.random() * 0.2, k: ember ? 1 : 0 });
+  }
+  return B;
+}
 
 /**
  * A Halloween promo code inside a jack-o'-lantern piñata hanging from a dead
  * branch under a full moon. Tap it (or press Space) and it swings and
  * spins on its rope with each hit; cracks open after the first and second
- * blow. The third bursts it into pieces and confetti, and a coupon tumbles
- * out and lands with a bounce, ready to copy.
+ * blow. The third bursts it into pieces and lets out what was inside: a wraith
+ * that rushes at you, bats, spiders scuttling across the card, and a skeleton
+ * that drops out, gets up and lunges. When they are gone the coupon comes out
+ * and lands with a bounce, ready to copy.
  */
 export interface PumpkinRevealProps {
   /** Plays itself with a ghost pointer until the visitor touches it. Off by default, so a copied component reacts only to the visitor. */
   autoplay?: boolean;
   /** Shows the sound switch in the card. Sounds are synthesised, start off, and never play under a visitor who has not switched them on. */
   enableSound?: boolean;
-  /** URL of a track to play when the pumpkin bursts (optional). Without one, a ghost wails instead. */
+  /** URL of a track to play when the pumpkin bursts (optional). Without one, the wraiths wail instead. */
   music?: string;
   /** Extra classes for the outer card. */
   className?: string;
@@ -1042,17 +1393,14 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
   const autoSoundOk = useAutoplaySoundAllowed();
   const sound = enableSound && (soundChoice ?? (autoplay && autoSoundOk && siteSound));
   const snd = useRef<Spook | null>(null);
-  const [boo, setBoo] = useState<{ k: number; x: number; y: number } | null>(null);
+  const [horde, setHorde] = useState<HordePlan | null>(null);
   const [chatter, setChatter] = useState(0);
   const glow = useMotionValue(0);
   const [swoop, setSwoop] = useState(0);
   const cho = useRef<number[]>([]);
   const musicRaf = useRef(0);
-  const candies = useRef<Candy[]>([]);
-  const candyEls = useRef<(HTMLButtonElement | null)[]>([]);
-  const [candyIds, setCandyIds] = useState<number[]>([]);
   const [prize, setPrize] = useState<Treat>(TREATS[0]);
-  const [trick, setTrick] = useState<{ k: number; x: number } | null>(null);
+  const burstAt = useRef({ x: 0, y: 0 });
   const genRef = useRef(0);
   const touched = useRef(false);
   const timers = useRef<number[]>([]);
@@ -1103,51 +1451,19 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     const sag = S.load * (2.5 + 2.2 * S.om * S.om + Math.max(0, -S.Lv) * 0.004);
     S.bv += (-260 * (S.by - sag) - 7 * S.bv) * dt; S.by += S.bv * dt;
 
-    // candies: fall, bounce, roll to a stop; a grabbed one sinks into the ground
-    const cy0 = floorY - 13;
-    let allDown = candies.current.length > 0;
-    for (const c of candies.current) {
-      if (c.gone) continue;
-      if (c.grab) {
-        c.grab += dt;
-        if (c.grab > 0.42) c.y += 70 * dt;
-        if (c.grab > 1.1) c.gone = true;
-        allDown = false;
-        continue;
-      }
-      if (c.pop) { c.pop += dt; if (c.pop > 0.3) c.gone = true; allDown = false; continue; }
-      if (c.settled) continue;
-      c.vy += 1700 * dt; c.x += c.vx * dt; c.y += c.vy * dt; c.a += c.va * dt;
-      if (c.x < 26) { c.x = 26; c.vx = Math.abs(c.vx) * 0.5; }
-      if (c.x > WRef.current - 26) { c.x = WRef.current - 26; c.vx = -Math.abs(c.vx) * 0.5; }
-      if (c.y >= cy0) {
-        c.y = cy0;
-        if (c.vy > 120) { c.vy = -c.vy * 0.36; c.va *= 0.6; } else c.vy = 0;
-        c.vx *= Math.exp(-5 * dt);
-        // roll: spin follows the ground speed, then the wrapper flops flat
-        c.va = c.vx / 9 * 57.3;
-        const flat = Math.round(c.a / 180) * 180;
-        if (Math.abs(c.vx) < 10) c.a += (flat - c.a) * Math.min(1, dt * 10);
-        if (c.vy === 0 && Math.abs(c.vx) < 6 && Math.abs(c.a - flat) < 0.5) { c.settled = true; c.a = flat; c.vx = 0; c.va = 0; }
-      }
-      if (!c.settled) allDown = false;
-    }
-    if (allDown && phaseRef.current === "spill") {
-      phaseRef.current = "pick"; setPhase("pick");
-      setMsg("Three sweets spilled out. Pick one, but one of them is a trick.");
-    }
     pk.current!.step(dt, floorY, WRef.current);
     // confetti
     const B = bits.current;
     for (let i = B.length - 1; i >= 0; i--) {
       const b = B[i];
       b.life += dt;
-      b.vy += 820 * dt;
-      const drag = Math.exp(-2.1 * dt);
+      // ash falls; embers are light and drift up on the heat once their burst has spent itself
+      b.vy += (b.k === 1 ? -90 : 520) * dt;
+      const drag = Math.exp(-(b.k === 1 ? 2.8 : 2.1) * dt);
       b.vx *= drag; b.vy *= drag;
-      b.x += (b.vx + Math.sin(b.life * 9 + b.f) * 26) * dt; b.y += b.vy * dt;
+      b.x += (b.vx + Math.sin(b.life * 5 + b.f) * (b.k === 1 ? 18 : 26)) * dt; b.y += b.vy * dt;
       b.r += b.vr * dt; b.f += b.vf * dt;
-      if (b.y > CARD_H + 20 || b.life > 4) B.splice(i, 1);
+      if (b.y > CARD_H + 20 || b.y < -30 || b.life > 4) B.splice(i, 1);
     }
     // the coupon
     const c = cp.current;
@@ -1200,14 +1516,6 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       }
       pk.current!.drawShards(pg);
     }
-    candies.current.forEach((cd, i) => {
-      const el = candyEls.current[i];
-      if (!el) return;
-      const sc = cd.pop ? 1 + cd.pop * 2.2 : 1;
-      el.style.transform = `translate(${(cd.x - 24).toFixed(1)}px, ${(cd.y - 13).toFixed(1)}px) rotate(${cd.a.toFixed(1)}deg) scale(${sc.toFixed(3)})`;
-      el.style.opacity = cd.gone ? "0" : cd.pop ? String(Math.max(0, 1 - cd.pop / 0.3)) : cd.grab > 0.5 ? String(Math.max(0, 1 - (cd.grab - 0.5) / 0.5)) : "1";
-      el.style.visibility = cd.gone ? "hidden" : "visible";
-    });
     const c = cp.current;
     if (c.on) {
       cX.set(c.x); cY.set(c.y); cR.set(c.a); cS.set(c.sc); cSq.set(c.sq); cSqX.set(2 - c.sq);
@@ -1220,25 +1528,27 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, WRef.current, CARD_H);
       for (const b of bits.current) {
-        ctx.save();
-        ctx.globalAlpha = b.life > 3.4 ? Math.max(0, (4 - b.life) / 0.6) : 1;
-        ctx.translate(b.x, b.y); ctx.rotate(b.r); ctx.scale(1, Math.cos(b.f));
+        const fade = b.life > 3 ? Math.max(0, (4 - b.life) / 1) : 1;
         if (b.k === 1) {
-          // candy corn: white tip, orange middle, yellow base
-          const hh = b.h * 0.9, ww = b.w * 1.1;
-          const band = (t0: number, t1: number, col: string) => {
-            ctx.beginPath();
-            ctx.moveTo((-ww / 2) * t0, -hh / 2 + hh * t0); ctx.lineTo((ww / 2) * t0, -hh / 2 + hh * t0);
-            ctx.lineTo((ww / 2) * t1, -hh / 2 + hh * t1); ctx.lineTo((-ww / 2) * t1, -hh / 2 + hh * t1);
-            ctx.closePath(); ctx.fillStyle = col; ctx.fill();
-          };
-          band(0, 0.34, "#fff6e8"); band(0.34, 0.68, "#ff8a1f"); band(0.68, 1, "#ffc93c");
+          // an ember: a hot core in a soft glow, flickering as it cools
+          const heat = Math.max(0, 1 - b.life / 4) * (0.7 + 0.3 * Math.sin(b.life * 22 + b.f));
+          ctx.globalCompositeOperation = "lighter";
+          ctx.globalAlpha = 0.28 * fade * heat; ctx.fillStyle = b.c;
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.w * 0.9, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = fade * heat; ctx.fillStyle = "#fff1c4";
+          ctx.beginPath(); ctx.arc(b.x, b.y, b.w * 0.22, 0, Math.PI * 2); ctx.fill();
+          ctx.globalCompositeOperation = "source-over";
         } else {
+          // a flake of charred shell
+          ctx.save();
+          ctx.globalAlpha = fade * 0.85;
+          ctx.translate(b.x, b.y); ctx.rotate(b.r); ctx.scale(1, Math.cos(b.f));
           ctx.fillStyle = b.c;
           ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+          ctx.restore();
         }
-        ctx.restore();
       }
+      ctx.globalAlpha = 1;
     }
   };
 
@@ -1246,8 +1556,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     const S = st.current, c = cp.current;
     const still = Math.abs(S.th) < 0.002 && Math.abs(S.om) < 0.004 && Math.abs(S.ph) < 0.002 && Math.abs(S.pv) < 0.004 && Math.abs(S.yw) < 0.002 && Math.abs(S.yv) < 0.004 && Math.abs(S.sq - 1) < 0.001 && Math.abs(S.sv) < 0.01 && Math.abs(S.L - S.Lt) < 0.05 && Math.abs(S.Lv) < 0.05 && Math.abs(S.bv) < 0.05;
     const piecesDone = !pk.current!.busy() && phaseRef.current !== "intact";
-    const candiesDone = candies.current.every((cd) => cd.gone || (cd.settled && !cd.grab && !cd.pop));
-    return still && piecesDone && candiesDone && bits.current.length === 0 && (!c.on || c.settled);
+    return still && piecesDone && bits.current.length === 0 && (!c.on || c.settled);
   };
 
   const wake = () => {
@@ -1319,18 +1628,24 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
 
   const burst = (dir: number) => {
     const center = pose(0, BODY_Y);
+    burstAt.current = center;
     // The track opens with a hit at 0.24 s; starting it 0.2 s in puts that hit on the burst.
     // Its cues, measured from the burst: theremin glides up at 1.65 s, the bass moves at 3.4, 5.0
     // and 6.6 s, the theremin glides down at 6.5 s, and it fades out from about 10 s.
     const withMusic = !!snd.current && snd.current.playMusic(0.2, () => { cancelAnimationFrame(musicRaf.current); animate(glow, 0, { duration: 0.6 }); });
     snd.current?.burst(withMusic);
-    setBoo((b) => ({ k: (b?.k ?? 0) + 1, x: center.x, y: center.y }));
+    snd.current?.horde(withMusic);
+    // what was trapped inside gets out
+    setHorde(planHorde((horde?.k ?? 0) + 1, center.x, center.y, WRef.current, CARD_H));
+    if (root.current) animate(root.current, { x: [0, -8, 7, -5, 4, -2, 0], y: [0, 3, -3, 2, -1, 0, 0] }, { duration: 0.5, ease: "easeOut" });
     cho.current.forEach(clearTimeout); cho.current = [];
     const cue = (sec: number, fn: () => void) => { cho.current.push(window.setTimeout(fn, sec * 1000)); };
     const pulse = (to: number) => { if (!withMusic) animate(glow, [glow.get(), to, 0.15], { duration: 1.1, times: [0, 0.15, 1] }); };
     pulse(1);
     [3.4, 5.0, 6.6].forEach((t) => cue(t, () => { setChatter((c) => c + 1); pulse(0.7); }));
     cue(6.45, () => setSwoop((n) => n + 1));
+    // the card jolts as the skeleton lunges at you
+    cue(2.55, () => { if (root.current) animate(root.current, { x: [0, -5, 5, -3, 2, 0] }, { duration: 0.35 }); });
     if (withMusic) {
       // let the music itself breathe through the moonlight
       const tick = () => { const l = snd.current?.level() ?? 0; glow.set(glow.get() + (l - glow.get()) * 0.25); musicRaf.current = requestAnimationFrame(tick); };
@@ -1338,32 +1653,38 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       musicRaf.current = requestAnimationFrame(tick);
     }
     pk.current!.burst(dir);
-    // confetti
-    const B: Bit[] = [];
-    for (let i = 0; i < 150; i++) {
-      const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.7, sp = 220 + Math.random() * 620;
-      B.push({ x: center.x, y: center.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 120, r: Math.random() * 6, vr: (Math.random() - 0.5) * 14, w: 4 + Math.random() * 5, h: 7 + Math.random() * 6, c: CONFETTI[i % CONFETTI.length], f: Math.random() * 6, vf: 6 + Math.random() * 10, life: Math.random() * 0.2, k: i % 4 === 0 ? 1 : 0 });
-    }
+    // embers and charred flakes of shell
+    const B = embersFrom(center.x, center.y);
     bits.current = B;
-    // three sweets spill out and land spread across the ground
-    const order = [0, 1, 2].map((j) => (j + genRef.current) % 3);
-    const Wn = WRef.current, land = floorY - 13, v0 = -430, g = 1700;
-    const tl = (-v0 + Math.sqrt(v0 * v0 + 2 * g * Math.max(10, land - center.y))) / g;
-    candies.current = order.map((t, j) => {
-      const tx = Wn * (0.24 + 0.26 * j);
-      return { x: center.x, y: center.y, vx: (tx - center.x) / tl * 0.82, vy: v0 - (j === 1 ? 90 : 0), a: 0, va: (j - 1) * 520 + dir * 80, t, gone: false, settled: false, grab: 0, pop: 0 };
-    });
-    candyEls.current = [];
-    setCandyIds(order);
     // the rope, now weightless, springs back up
     st.current.Lt = 16;
     st.current.Lv -= 200;
     st.current.load = 0;
     st.current.bv -= 70;
     st.current.om += dir * -0.6;
-    phaseRef.current = "spill";
-    setPhase("spill");
-    setMsg("It burst open and sweets spilled out.");
+    phaseRef.current = "emerge";
+    setPhase("emerge");
+    setMsg("It burst open. Wraiths, bats, spiders and a skeleton came out of it.");
+    later(EMERGE_MS, reveal);
+  };
+
+  // once the horde has fled, the offer flies up out of what is left of the pumpkin and lands
+  const reveal = () => {
+    if (phaseRef.current !== "emerge") return;
+    const tr = TREATS[genRef.current % TREATS.length];
+    snd.current?.pop();
+    setPrize(tr);
+    const c = cp.current, from = burstAt.current;
+    const rest = floorY - CH / 2;
+    const v0 = -560, g = 1500, dy = rest - from.y;
+    const tl = (-v0 + Math.sqrt(Math.max(0, v0 * v0 + 2 * g * dy))) / g;
+    const turn = from.x < WRef.current / 2 ? 360 : -360;
+    Object.assign(c, { on: true, x: from.x, y: from.y, vx: (WRef.current / 2 - from.x) / tl, vy: v0, a: 0, at: turn - 1.5 * Math.sign(turn), land: false, sq: 1, sv: 0, sc: 0.25, scv: 0, rest, settled: false });
+    c.va = (c.at - c.a) / tl;
+    phaseRef.current = "burst";
+    setPhase("burst");
+    setMsg(`They are gone, and they left a treat: ${tr.title}. Code ${tr.code}.`);
+    wake();
   };
 
   const hit = (x: number, y: number) => {
@@ -1388,36 +1709,6 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     wake();
   };
 
-  const pick = (i: number) => {
-    const cd = candies.current[i];
-    if (phaseRef.current !== "pick" || !cd || cd.gone || cd.grab || cd.pop) return;
-    const tr = TREATS[cd.t];
-    if (tr.kind === "trick") {
-      cd.grab = 0.001;
-      setTrick((k) => ({ k: (k?.k ?? 0) + 1, x: cd.x }));
-      snd.current?.trick();
-      setMsg("Trick! A skeleton grabbed it. Pick another one.");
-      wake();
-      return;
-    }
-    // a treat: the wrapper pops open and the reward flies out and lands
-    cd.pop = 0.001;
-    candies.current.forEach((o) => { if (o !== cd && !o.gone) o.pop = 0.001; });
-    snd.current?.pop();
-    setPrize(tr);
-    const c = cp.current;
-    const rest = floorY - CH / 2;
-    const v0 = -620, g = 1500, dy = rest - cd.y;
-    const tl = (-v0 + Math.sqrt(Math.max(0, v0 * v0 + 2 * g * dy))) / g;
-    const turn = cd.x < WRef.current / 2 ? 360 : -360;
-    Object.assign(c, { on: true, x: cd.x, y: cd.y, vx: (WRef.current / 2 - cd.x) / tl, vy: v0, a: 0, at: turn - 1.5 * Math.sign(turn), land: false, sq: 1, sv: 0, sc: 0.25, scv: 0, rest, settled: false });
-    c.va = (c.at - c.a) / tl;
-    phaseRef.current = "burst";
-    setPhase("burst");
-    setMsg(`A treat: ${tr.title}. Code ${tr.code}.`);
-    wake();
-  };
-
   const hang = () => {
     const S = st.current;
     snd.current?.stopMusic(0.6);
@@ -1429,7 +1720,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
     pk.current!.reset();
     hangT.current = st.current.t;
     cp.current.on = false;
-    candies.current = []; candyEls.current = []; setCandyIds([]); setTrick(null);
+    setHorde(null);
     genRef.current += 1;
     hitsRef.current = 0;
     setHits(0);
@@ -1489,9 +1780,6 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       at(1000, () => tap(-30, BODY_Y + 6));
       at(2300, () => tap(28, BODY_Y - 14));
       at(3500, () => tap(-22, BODY_Y + 18));
-      const pickKind = (kind: "trick" | "treat") => { const i = candies.current.findIndex((cd) => !cd.gone && !cd.grab && TREATS[cd.t].kind === kind); if (i >= 0) pick(i); };
-      at(6300, () => pickKind("trick"));
-      at(8400, () => pickKind("treat"));
       at(15600, () => { hang(); cycle(); });
     };
     cycle();
@@ -1513,7 +1801,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       <div className="absolute left-5 right-5 top-4 z-20 flex items-start justify-between gap-3">
         <div className="flex flex-col">
           <span className="text-[15px] font-semibold tracking-[-0.01em] text-[#f5f5f7]">Trick or treat</span>
-          <span className="text-[12px] text-[#b4adc4]">{phase === "intact" ? "Something wicked is inside" : phase === "spill" || phase === "pick" ? "Trick or treat? Choose wisely" : "You got a treat"}</span>
+          <span className="text-[12px] text-[#b4adc4]">{phase === "intact" ? "Something wicked is inside" : phase === "emerge" ? "They are loose" : "You survived. Here is your treat"}</span>
         </div>
         <div className="flex flex-none items-center gap-2">
         {enableSound ? (
@@ -1600,62 +1888,10 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       {/* the pumpkin itself, in 3D, and its shards */}
       <canvas ref={pcv} className="pointer-events-none absolute left-0 top-0 z-10" style={{ width: W, height: CARD_H }} aria-hidden="true" />
 
-      {/* the sweets on the ground */}
-      {candyIds.map((t, i) => (
-        <button
-          key={`${gen}-${i}`}
-          ref={(el) => { candyEls.current[i] = el; }}
-          type="button"
-          aria-label={`${TREATS[t].name}. Pick it.`}
-          disabled={phase !== "pick"}
-          onClick={() => pick(i)}
-          className="group absolute left-0 top-0 z-[14] h-[26px] w-12 rounded-full outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#ff9f0a] disabled:cursor-default"
-          style={{ transform: "translate(-100px, -100px)" }}
-        >
-          <motion.span className="block transition-transform duration-150 group-hover:scale-110" animate={phase === "pick" ? { rotate: [0, -7, 6, -3, 0], y: [0, -3, 0] } : { rotate: 0, y: 0 }} transition={phase === "pick" ? { duration: 0.7, repeat: Infinity, repeatDelay: 1.4 + i * 0.35, delay: i * 0.25 } : { duration: 0.2 }}>
-            <CandyArt uid={`${uid}k${i}`} wrap={TREATS[t].wrap} />
-          </motion.span>
-        </button>
-      ))}
-      {/* the trick: a bony hand bursts out of the ground and drags the sweet under */}
-      <AnimatePresence>
-        {trick && (
-          <motion.div key={trick.k} aria-hidden="true" className="pointer-events-none absolute z-[15] overflow-hidden" style={{ left: trick.x - 22, top: floorY - 74, width: 44, height: 76 }} exit={{ opacity: 0 }}>
-            <motion.svg width="44" height="76" viewBox="-22 -70 44 76" className="absolute left-0 top-0" initial={{ y: 70 }} animate={{ y: [70, 6, 6, 70] }} transition={{ duration: 1.25, times: [0, 0.28, 0.5, 1], ease: "easeInOut" }} onAnimationComplete={() => setTrick(null)}>
-              <g stroke="#e6dfcf" strokeLinecap="round" strokeLinejoin="round" fill="none">
-                <path d="M-3 6 L-3.5 -28 M3 6 L3.2 -28" strokeWidth="3" />
-                <path d="M-6 -30 L6 -30 L7 -38 L-7 -38 Z" strokeWidth="2" fill="#e6dfcf" />
-                <path d="M-6 -38 L-10 -48 L-8 -55 M-2 -39 L-3 -52 L-1 -58 M2 -39 L3 -52 L5 -57 M6 -38 L10 -47 L9 -53 M7 -33 L14 -37 L16 -43" strokeWidth="2.2" />
-              </g>
-            </motion.svg>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* what was trapped inside: wraiths, bats, spiders and a skeleton */}
+      {horde && <Horde key={horde.k} uid={`${uid}h${horde.k}`} plan={horde} floor={floorY} scale={s} />}
 
-      {/* the ghost that was trapped inside escapes with a wail */}
-      <AnimatePresence>
-        {boo && (
-          <motion.div
-            key={boo.k}
-            aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 z-[16]"
-            initial={{ x: boo.x - 26, y: boo.y - 34, scale: 0.3, opacity: 0, rotate: 0 }}
-            animate={{
-              x: [boo.x - 26, boo.x - 34, boo.x - 18, boo.x - 30, boo.x + 30, boo.x + 70],
-              y: [boo.y - 34, boo.y - 62, boo.y - 70, boo.y - 66, boo.y - 230, -100],
-              scale: [0.3, 0.8, 0.85, 0.85, 1.3, 1],
-              opacity: [0, 0.9, 0.9, 0.9, 0.85, 0],
-              rotate: [0, -6, 5, -4, -12, 6],
-            }}
-            transition={{ duration: 2.7, ease: "easeInOut", times: [0, 0.15, 0.4, 0.61, 0.8, 1] }}
-            onAnimationComplete={() => setBoo(null)}
-          >
-            <Ghost uid={`${uid}boo`} w={52} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* on the theremin's glide down, the ghost swoops back across the graveyard */}
+      {/* on the theremin's glide down, a wraith swoops back across the graveyard */}
       <AnimatePresence>
         {swoop > 0 && phase !== "intact" && (
           <motion.div
@@ -1667,7 +1903,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
             transition={{ duration: 1.9, ease: "easeInOut", times: [0, 0.3, 0.65, 1] }}
             onAnimationComplete={() => setSwoop(0)}
           >
-            <Ghost uid={`${uid}sw`} w={40} />
+            <Wraith uid={`${uid}sw`} w={46} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -1728,7 +1964,7 @@ export function PumpkinReveal({ autoplay = false, enableSound = true, music, cla
       <canvas ref={canvas} className="pointer-events-none absolute left-0 top-0 z-[25]" style={{ width: W, height: CARD_H }} aria-hidden="true" />
 
       <p className="pointer-events-none absolute inset-x-0 bottom-4 z-20 text-center text-[12.5px] text-[#b4adc4]">
-        {phase === "intact" ? "Smash the pumpkin three times, or press Space." : phase === "pick" ? "Pick a sweet. One of them is a trick." : phase === "spill" ? "" : "Copy the code, or hang another."}
+        {phase === "intact" ? "Smash the pumpkin three times, or press Space." : phase === "emerge" ? "" : "Copy the code, or hang another."}
       </p>
       <span className="sr-only" aria-live="polite">{msg}</span>
     </div>

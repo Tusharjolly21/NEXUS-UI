@@ -1946,7 +1946,8 @@
       ],
       "registryDependencies": [
         "http://127.0.0.1:3000/api/registry/nexus-font",
-        "utils"
+        "utils",
+        "http://127.0.0.1:3000/api/registry/ui-sounds"
       ],
       "files": [
         {
@@ -2037,7 +2038,7 @@
       "name": "pumpkin-reveal",
       "type": "registry:component",
       "title": "Pumpkin Reveal",
-      "description": "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces, orange outside and pale inside. A ghost escapes and three candies spill out: pick one, and one of them is a trick. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
+      "description": "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: a wraith rushes straight at you, bats burst into the night, black widows scuttle across the card, one drops on a thread from the branch, and a skeleton falls out, drags itself upright and lunges before sinking back into the ground. Only then does the offer fly out and land, ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
       "dependencies": [
         "framer-motion",
         "react"
