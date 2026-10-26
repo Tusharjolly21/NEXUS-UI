@@ -30,6 +30,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       `img-src 'self' data: blob: https://images.unsplash.com https://plus.unsplash.com https://i.pravatar.cc https://picsum.photos https://fastly.picsum.photos https://cdn.jsdelivr.net https://cdn.simpleicons.org https://*.google-analytics.com https://*.googletagmanager.com ${adsenseBeaconHosts}`,
       "font-src 'self' https://fonts.gstatic.com",
+      // audio and video from this site, plus the short silent clip (a data: URL) that keeps phone audio on the media channel
+      "media-src 'self' data: blob:",
       `connect-src 'self' blob: https://cdn.jsdelivr.net https://*.supabase.co https://*.google-analytics.com https://analytics.google.com https://*.analytics.google.com https://*.googletagmanager.com https://www.google.com/g/collect https://va.vercel-scripts.com https://vitals.vercel-insights.com https://www.gstatic.com https://cloudflareinsights.com ${adsenseBeaconHosts}`,
       "worker-src 'self' blob:",
       `frame-src 'self' https://checkout.stripe.com ${adsenseFrameHosts}`,

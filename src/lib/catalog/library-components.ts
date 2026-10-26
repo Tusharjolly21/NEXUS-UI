@@ -11101,9 +11101,9 @@ export default function Page() {
     name: "Pumpkin Reveal",
     registryCliName: "pumpkin-reveal",
     description:
-      "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces, orange outside and pale inside. A ghost escapes and three candies spill out: pick one, and one of them is a trick. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
+      "Trick or treat with a real 3D jack-o'-lantern hanging from a dead branch. It turns on its rope, every hit grows glowing cracks where you struck it, and the third splits it along its ribs into curved shell pieces. Then whatever was inside gets out: a wraith rushes straight at you, bats burst into the night, black widows scuttle across the card, one drops on a thread from the branch, and a skeleton falls out, drags itself upright and lunges before sinking back into the ground. Only then does the offer fly out and land, ready to copy. The sounds are synthesised, off until the visitor switches them on, and an optional track can play as it bursts.",
     categorySlug: "for-fun",
-    tags: ["pumpkin", "halloween", "reveal", "coupon", "promo", "confetti", "3d", "canvas", "physics", "sound", "autoplay", "fun", "motion kit", "framer-motion"],
+    tags: ["pumpkin", "halloween", "reveal", "coupon", "promo", "spiders", "skeleton", "ghost", "horror", "3d", "canvas", "physics", "sound", "autoplay", "fun", "motion kit", "framer-motion"],
     premium: false,
     trendingScore: 177,
     createdAt: "2026-10-25",
@@ -11111,7 +11111,7 @@ export default function Page() {
     dependencies: ["framer-motion"],
     props: [
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Plays itself with a ghost pointer until the visitor touches the card. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
-      { name: "music", type: "string", description: "URL of an mp3 to play when the pumpkin bursts, with the moonlight pulsing to it. Without one, a ghost wails instead." },
+      { name: "music", type: "string", description: "URL of an mp3 to play when the pumpkin bursts, with the moonlight pulsing to it. Without one, the wraiths wail instead." },
       { name: "className", type: "string", description: "Extra classes for the outer card." },
     ],
     Preview: Previews.PreviewPumpkinReveal,
@@ -11120,8 +11120,8 @@ export default function Page() {
 
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
 
-// Hit the pumpkin three times (tap it, or focus it and press Space). It splits open and three candies
-// spill out; pick one to see whether it is a treat or a trick. The speaker button turns the sounds on.
+// Hit the pumpkin three times (tap it, or focus it and press Space). It splits open, what was inside
+// crawls and flies out, and then the coupon lands. The speaker button turns the sounds on.
 export default function Page() {
   return (
     <section className="bg-[#0e0a17] px-4 py-16">
