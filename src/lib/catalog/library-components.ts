@@ -11138,7 +11138,7 @@ export default function Page() {
 
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
 
-// autoplay hits it three times, picks a trick and then a treat, and hangs a new one, until the visitor touches it.
+// autoplay hits it three times, lets the ghosts, bats and spiders out, shows the offer and hangs a new one, until the visitor touches it.
 export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[440px] p-6">
@@ -11153,8 +11153,8 @@ export default function Page() {
 
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
 
-// The track starts as the pumpkin bursts and the moonlight pulses with it. Put any mp3 in /public. The demo track on
-// this page is /audio/pumpkin-burst.mp3 on nexus-ui.com.
+// The track starts as the pumpkin bursts and the moonlight pulses with it. The burst is timed to the demo track
+// (download it next to the build prompt and save it as public/audio/pumpkin-burst.mp3); any mp3 works too.
 export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[440px] p-6">

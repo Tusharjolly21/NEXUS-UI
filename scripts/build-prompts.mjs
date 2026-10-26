@@ -40,6 +40,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 `;
 
+/** Files a prompt asks the visitor to download (a music track, say), from src/lib/catalog/prompt-assets.json. */
+const PROMPT_ASSETS = JSON.parse(fs.readFileSync(path.join(root, "src", "lib", "catalog", "prompt-assets.json"), "utf8"));
+const SITE = "https://nexus-ui.com";
+
 const readItem = (name) => {
   const p = path.join(registryDir, `${name}.json`);
   return fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, "utf8")) : null;
@@ -126,7 +130,7 @@ function block(target, content) {
   return `--- ${target} ---\n\n${fence}${langOf(target)}\n${body}\n${fence}\n`;
 }
 
-function sectionFor({ title, heading = true, description, item, files, entryImport, main }) {
+function sectionFor({ title, heading = true, description, item, files, entryImport, main, slug }) {
   const libs = sharedLibs(files);
   const npm = (item.dependencies ?? []).filter((d) => d !== "react" && d !== "react-dom");
   if (libs.has("utils")) for (const d of ["clsx", "tailwind-merge"]) if (!npm.includes(d)) npm.push(d);
@@ -152,11 +156,16 @@ function sectionFor({ title, heading = true, description, item, files, entryImpo
   if (libs.has("utils")) lines.push(`${n++}. It imports \`cn\` from \`@/lib/utils\`. If the project has no such helper, create it from the file below.`);
   if (sharedNames.length) {
     lines.push(
-      `${n++}. It uses ${sharedNames.map((l) => "`@/lib/" + l + "`").join(" and ")} for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create ${sharedNames.length > 1 ? "them" : "it"} at lib/ from the file${sharedNames.length > 1 ? "s" : ""} below.`,
+      `${n++}. It uses ${sharedNames.map((l) => "`@/lib/" + l + "`").join(" and ")} for its interaction sounds, which are synthesised in the browser${(main && PROMPT_ASSETS[slug]) ? "" : ", so no audio files are needed"}. Create ${sharedNames.length > 1 ? "them" : "it"} at lib/ from the file${sharedNames.length > 1 ? "s" : ""} below.`,
     );
   }
   const assets = [...new Set([...src.matchAll(/["'`](\/[A-Za-z0-9_\-/]+\.(?:jpg|jpeg|png|webp|avif|svg|mp3|ogg|wav|mp4|webm|glb))["'`]/g)].map((m) => m[1]))];
   if (assets.length) lines.push(`${n++}. The code refers to these files in /public: ${assets.map((a) => "`" + a + "`").join(", ")}. Point them at the project's own files (or leave them out if they are optional).`);
+  for (const as of (main && PROMPT_ASSETS[slug]) || []) {
+    lines.push(
+      `${n++}. Download the ${as.label} from ${SITE}${as.href} (there is also a download button next to the build prompt on the component page) and save it as \`${as.save}\`. Then use it like this: \`${as.use}\`. ${as.sync} Credit: ${as.credit}.`,
+    );
+  }
   if (/font-sans|--font-sans/.test(src)) lines.push(`${n++}. The look assumes the Inter font through Tailwind's \`font-sans\`. If the project uses another font, leave that as it is.`);
   if (names.length) lines.push(`${n++}. Use it like this: \`import { ${names.slice(0, 4).join(", ")} } from "${entryImport.path}";\`. The props are typed and documented in the code.`);
   lines.push("");
@@ -202,6 +211,7 @@ for (const slug of slugs) {
         files,
         entryImport: { files: barrel ? [barrel] : mainFile ? [mainFile] : files, path: importDir ? `@/${importDir}` : `@/${(mainFile ?? files[0]).target.replace(/\.[a-z]+$/, "")}` },
         main: true,
+        slug,
       }),
     );
   } else {
@@ -217,6 +227,7 @@ for (const slug of slugs) {
           files: closure([start], files),
           entryImport: { files: [start], path: `@/${start.target.replace(/\.[a-z]+$/, "")}` },
           main: true,
+          slug,
         }),
       );
     }
@@ -239,6 +250,7 @@ for (const slug of slugs) {
           files: chosen,
           entryImport: { files: [entry], path: `@/${entry.target.replace(/\.[a-z]+$/, "")}` },
           main: i === 0 && !hasIntro,
+          slug,
         }),
       );
       report.variants++;

@@ -9,8 +9,9 @@ Please:
 1. Create the files below at sensible paths for this project, keeping each file's name. They import each other with relative paths, so keep them together.
 2. Install what it needs: `framer-motion` (use this project's package manager).
 3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
-4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
-5. Use it like this: `import { PumpkinReveal } from "@/components/pumpkin-reveal";`. The props are typed and documented in the code.
+4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser. Create it at lib/ from the file below.
+5. Download the Halloween track from https://nexus-ui.com/audio/pumpkin-burst.mp3 (there is also a download button next to the build prompt on the component page) and save it as `public/audio/pumpkin-burst.mp3`. Then use it like this: `<PumpkinReveal music="/audio/pumpkin-burst.mp3" />`. The burst is timed to this exact recording. Playback starts 0.2 s in, so the hit at 0.24 s lands on the burst. The theremin glides up about 1.65 s after the burst while the ghosts fly out, the skeleton on the grave chatters and the moon pulses on the bass moves at 3.4, 5.0 and 6.6 s, a ghost swoops across the graveyard on the theremin's glide down at 6.45 s, and the track fades from about 10 s. The moonlight also follows the music's loudness as it plays. Use the file as it is: trimming the start or re-encoding it with a different offset moves every cue. Credit: Halloween music by Starostin, from Pixabay.
+6. Use it like this: `import { PumpkinReveal } from "@/components/pumpkin-reveal";`. The props are typed and documented in the code.
 
 Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 

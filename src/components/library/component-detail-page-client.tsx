@@ -5,7 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import { API_KEY_ENV_VAR, REGISTRIES_PRO, envLocalLine, installCommand, registryAddCommand } from "@/lib/registry-config";
 import { useRegistryFiles } from "@/components/library/use-registry-files";
-import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Expand, File, Folder, Link2, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowUpRight, Check, ChevronRight, Code2, Copy, Download, Expand, File, Folder, Link2, Lock, LockOpen, Monitor, Plus, RotateCcw, Sparkles } from "lucide-react";
 import { componentDescriptions } from "@/lib/catalog/component-descriptions";
 import { DynamicPreview } from "@/components/library/dynamic-preview";
 import { FitPreview } from "@/components/library/fit-preview";
@@ -27,6 +27,7 @@ import { ProBadge, ProLock, useCopyBuildPrompt, useProAccess } from "@/component
 import { RainbowWord } from "@/components/site/rainbow-word";
 import { cn } from "@/lib/utils";
 import { PropControl, cleanDefaultValue, getEditableProps, propValueToCode, type PropDoc } from "@/components/library/prop-controls";
+import PROMPT_ASSETS from "@/lib/catalog/prompt-assets.json";
 
 const DEMO_SLUGS = new Set([
   "background-boxes",
@@ -384,8 +385,12 @@ function Stage({
 
 // ── build prompt (free on free components, Pro on Pro ones) ──────────────────────────────────────────────
 
+type PromptAsset = { label: string; href: string; filename: string; size: string; credit: string; save: string };
+const ASSETS = PROMPT_ASSETS as Record<string, PromptAsset[]>;
+
 function BuildPromptCard({ slug, name, locked, free }: { slug: string; name: string; locked: boolean; free: boolean }) {
   const [state, copy] = useCopyBuildPrompt(slug, name, { hasAccess: !locked, free });
+  const assets = locked ? [] : (ASSETS[slug] ?? []);
   return (
     <div className="mt-6 rounded-[18px] bg-foreground/[0.04] p-4">
       <div className="flex items-center justify-between gap-2">
@@ -414,6 +419,22 @@ function BuildPromptCard({ slug, name, locked, free }: { slug: string; name: str
                   : "Copy build prompt with Pro"}
         </span>
       </button>
+      {assets.map((a) => (
+        <div key={a.href} className="mt-3">
+          <a
+            href={a.href}
+            download={a.filename}
+            aria-label={`Download the ${a.label}, mp3, ${a.size}`}
+            className="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-background text-[14px] font-semibold text-foreground ring-1 ring-border transition-colors hover:bg-foreground/[0.04] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          >
+            <Download className="size-4" aria-hidden />
+            Download the track ({a.size})
+          </a>
+          <p className="mt-2 text-[12.5px] leading-relaxed text-muted-foreground">
+            The prompt tells your agent to save it as <code className="font-mono text-[11.5px]">{a.save}</code>; the burst is timed to it. {a.credit}.
+          </p>
+        </div>
+      ))}
     </div>
   );
 }
