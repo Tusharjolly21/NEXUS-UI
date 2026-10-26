@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "next-ui",
-  "homepage": "https://nexus-ui.com",
+  "homepage": "https://www.nexus-ui.com",
   "items": [
     {
       "name": "animated-countdown",

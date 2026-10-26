@@ -24,6 +24,9 @@ const PRIVATE_AND_FACETED = [
   "/templates?",
   // Block base search page + all query variants (noindex, no crawl value).
   "/search",
+  // Cloudflare rewrites mailto: links into /cdn-cgi/l/email-protection#... redirect-style URLs that
+  // 404 when a crawler requests them without the fragment. They are not pages.
+  "/cdn-cgi/",
 ];
 
 export default function robots(): MetadataRoute.Robots {

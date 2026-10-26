@@ -31,7 +31,7 @@ export class TemplateZipError extends Error {
   }
 }
 
-const SITE_URL = "https://nexus-ui.com";
+const SITE_URL = "https://www.nexus-ui.com";
 
 /** Extensions a source import may resolve to, in resolution order. */
 const SOURCE_EXTENSIONS = [".tsx", ".ts", ".jsx", ".js", ".mjs", ".css", ".json"];
