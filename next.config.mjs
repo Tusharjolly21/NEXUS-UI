@@ -158,6 +158,16 @@ const nextConfig = {
         source: "/:file*.(svg|png|jpg|jpeg|webp|avif|gif|ico|otf|woff2|glb|mp4|webm|ogg|mp3)",
         headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
       },
+      // Install JSON for the shadcn CLI. Machine endpoints, not pages: keep them out of search results.
+      // (They are crawlable in robots.txt so Google can see this header and drop any it already indexed.)
+      {
+        source: "/r/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+      },
+      {
+        source: "/api/registry/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex" }],
+      },
       // Prevent indexing of URL-parameter pages that duplicate catalog content
       {
         source: "/components",
