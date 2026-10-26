@@ -8,11 +8,13 @@ import { LAUNCH_BANNER_COOKIE, LAUNCH_BANNER_ID } from "@/lib/launch-banner";
 
 /**
  * The thin strip above the nav: what Pro unlocks and what it costs, with one link to the plans.
+ * It names no per-category counts (templates and blocks are the smaller numbers and read as "not much
+ * for the price"); only the components figure, which is well past it, and that more is coming.
  * Closing it stores a cookie for 60 days; the site shell reads that cookie on the server so the
  * strip never flashes back in on the next page. It is one line, never animates and never returns
  * for someone who closed it.
  */
-export function LaunchBanner({ components, templates, blocks, videos }: { components: number; templates: number; blocks: number; videos: number }) {
+export function LaunchBanner() {
   const [open, setOpen] = React.useState(true);
   if (!open) return null;
 
@@ -32,7 +34,7 @@ export function LaunchBanner({ components, templates, blocks, videos }: { compon
           Pro
         </span>
         <span className="hidden sm:inline">
-          Unlock all {components} components, {templates} templates, {blocks} blocks and {videos} videos for{" "}
+          Unlock 200+ components, templates, blocks, videos and many more to come for{" "}
         </span>
         <span className="sm:hidden">Unlock everything for </span>
         {formatPrice(PRICES.pro)} a year, or {formatPrice(PRICES.allAccess)} once.{" "}
