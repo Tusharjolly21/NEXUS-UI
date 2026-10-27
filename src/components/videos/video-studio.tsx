@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Check, Copy, Lock, RotateCcw } from "lucide-react";
 import { useProAccess } from "@/components/pro/pro-access";
 import { cn } from "@/lib/utils";
-import { FORMATS, type FormatId, type VideoEntry, type VideoPart } from "@/lib/catalog/videos";
+import { FORMATS, isHyperframes, type FormatId, type VideoEntry, type VideoPart } from "@/lib/catalog/videos";
+import { HyperframesPlayer } from "./hyperframes-player";
 import { VideoPlayer } from "./video-player";
 import { useVideoFile } from "./use-video-file";
 
@@ -17,7 +18,17 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "source", label: "Source" },
 ];
 
-const perksOf = (video: VideoEntry) => [
+const perksOf = (video: VideoEntry) =>
+  isHyperframes(video)
+    ? [
+        "The full prompt that builds this video with HyperFrames",
+        "The source: one index.html you can read, restyle and keep",
+        "Words, colours and timing changed in plain text, or by asking Claude Code or any agent",
+        `Its original soundtrack, cut to the picture, and a video that renders to MP4 with sound in one command: ${FORMATS[video.formats[0]].label}, ${video.duration} seconds`,
+      ]
+    : reactPerksOf(video);
+
+const reactPerksOf = (video: VideoEntry) => [
   "The full prompt that builds this video",
   "The React source: one file plus a small shared kit",
   "Live editing of every word and colour, right here",
@@ -37,6 +48,8 @@ const maxWidthFor = (w: number, h: number) => (h > w * 1.2 ? 380 : w / h > 1.5 ?
 export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: Record<string, string> }) {
   const { isPro, requestUpgrade } = useProAccess();
   const unlocked = !video.premium || isPro;
+  const hf = isHyperframes(video);
+  const tabs = hf ? TABS.filter((t) => t.id !== "customize") : TABS;
   const [tab, setTab] = React.useState<Tab>("overview");
   const [values, setValues] = React.useState<Record<string, string>>(defaults);
   const edited = video.fields.some((f) => values[f.key] !== defaults[f.key]);
@@ -68,27 +81,33 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
           </div>
         ) : null}
         <div className={cn("bg-foreground/[0.06] shadow-[0_0_0_0.5px_var(--border),0_40px_80px_-40px_rgba(0,0,0,0.45)]", tall ? "rounded-[40px] p-2.5" : "rounded-[28px] p-2")}>
-          <VideoPlayer
-            slug={video.slug}
-            duration={video.duration}
-            posterAt={video.posterAt}
-            format={format}
-            posterFormat={video.formats[0]}
-            silent={video.silent}
-            values={values}
-            autoPlay
-            className={tall ? "rounded-[32px]" : "rounded-[20px]"}
-          />
+          {hf ? (
+            <HyperframesPlayer slug={video.slug} w={shape.w} h={shape.h} className={tall ? "rounded-[32px]" : "rounded-[20px]"} />
+          ) : (
+            <VideoPlayer
+              slug={video.slug}
+              duration={video.duration}
+              posterAt={video.posterAt}
+              format={format}
+              posterFormat={video.formats[0]}
+              silent={video.silent}
+              values={values}
+              autoPlay
+              className={tall ? "rounded-[32px]" : "rounded-[20px]"}
+            />
+          )}
         </div>
         <p className="mt-4 text-center text-[13px] text-muted-foreground lg:text-left">
-          {video.duration} seconds · {video.bpm} BPM · {video.silent ? "no sound, loops seamlessly" : "press the speaker for sound"}
+          {hf
+            ? `${video.duration} seconds · made with HyperFrames · press the speaker for sound`
+            : `${video.duration} seconds · ${video.bpm} BPM · ${video.silent ? "no sound, loops seamlessly" : "press the speaker for sound"}`}
           {video.formats.length > 1 ? ` · ${shape.where}` : ""}
         </p>
       </div>
 
       <div className="min-w-0">
         <div role="tablist" aria-label="Video details" className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-foreground/[0.06] p-1">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button
               key={t.id}
               type="button"
@@ -126,14 +145,22 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
             <FileView
               video={video}
               unlocked={unlocked}
-              files={[
-                { part: "source", label: `${video.slug}.tsx` },
-                { part: "kit", label: "kit.ts" },
-                ...(video.parts ? [{ part: "parts" as const, label: "parts.tsx" }] : []),
-                { part: "frame", label: "frame.tsx" },
-                { part: "render", label: "render.mjs" },
-              ]}
-              intro="One file per video plus a small shared kit. The frame page and render script turn your edit into an MP4."
+              files={
+                hf
+                  ? [{ part: "source", label: "index.html" }]
+                  : [
+                      { part: "source", label: `${video.slug}.tsx` },
+                      { part: "kit", label: "kit.ts" },
+                      ...(video.parts ? [{ part: "parts" as const, label: "parts.tsx" }] : []),
+                      { part: "frame", label: "frame.tsx" },
+                      { part: "render", label: "render.mjs" },
+                    ]
+              }
+              intro={
+                hf
+                  ? "One HTML file. Save it as index.html, run npx hyperframes render, and you have the MP4. It needs Node 22 and FFmpeg."
+                  : "One file per video plus a small shared kit. The frame page and render script turn your edit into an MP4."
+              }
             />
           ) : null}
         </div>
@@ -143,6 +170,7 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
 }
 
 function Overview({ video, unlocked, onTab }: { video: VideoEntry; unlocked: boolean; onTab: (t: Tab) => void }) {
+  const hf = isHyperframes(video);
   return (
     <div className="grid gap-5">
       <dl className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
@@ -172,11 +200,11 @@ function Overview({ video, unlocked, onTab }: { video: VideoEntry; unlocked: boo
       <div className="flex flex-wrap gap-2.5">
         {unlocked ? (
           <>
-            <button type="button" onClick={() => onTab("customize")} className="h-11 rounded-full bg-foreground px-5 text-[14px] font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-              Make it yours
+            <button type="button" onClick={() => onTab(hf ? "prompt" : "customize")} className="h-11 rounded-full bg-foreground px-5 text-[14px] font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              {hf ? "Copy the prompt" : "Make it yours"}
             </button>
-            <button type="button" onClick={() => onTab("prompt")} className="h-11 rounded-full bg-foreground/[0.07] px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-foreground/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-              Copy the prompt
+            <button type="button" onClick={() => onTab(hf ? "source" : "prompt")} className="h-11 rounded-full bg-foreground/[0.07] px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-foreground/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              {hf ? "See the source" : "Copy the prompt"}
             </button>
           </>
         ) : (
@@ -184,8 +212,8 @@ function Overview({ video, unlocked, onTab }: { video: VideoEntry; unlocked: boo
             <Link href="/pricing" className="inline-flex h-11 items-center rounded-full bg-action px-5 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               Get the prompt and source
             </Link>
-            <button type="button" onClick={() => onTab("customize")} className="h-11 rounded-full bg-foreground/[0.07] px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-foreground/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
-              See what you can edit
+            <button type="button" onClick={() => onTab(hf ? "prompt" : "customize")} className="h-11 rounded-full bg-foreground/[0.07] px-5 text-[14px] font-semibold text-foreground transition-colors hover:bg-foreground/[0.12] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+              {hf ? "See what the prompt holds" : "See what you can edit"}
             </button>
           </>
         )}
@@ -295,7 +323,7 @@ function FileView({ video, unlocked, files, intro }: { video: VideoEntry; unlock
           <div>
             <p className="text-[16px] font-semibold text-foreground">The {file.part === "prompt" ? "prompt" : "source"} comes with Pro</p>
             <p className="mx-auto mt-1.5 max-w-[320px] text-[14px] text-muted-foreground">
-              {file.part === "prompt" ? "The exact code and instructions for this video, written so a coding agent builds it exactly, with notes on how to change the words, colours, timing and shape." : "The React file, the shared kit and the script that renders your edit to MP4."}
+              {file.part === "prompt" ? "The exact code and instructions for this video, written so a coding agent builds it exactly, with notes on how to change the words, colours, timing and shape." : isHyperframes(video) ? "The HTML file for HyperFrames: read it, restyle it, and render it to MP4 with one command." : "The React file, the shared kit and the script that renders your edit to MP4."}
             </p>
             <button type="button" onClick={() => requestUpgrade(video.title, file.part === "prompt" ? "build prompt" : "source")} className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-action px-5 text-[14px] font-semibold text-white transition-colors hover:bg-action-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
               <Lock className="size-4" aria-hidden />
@@ -318,7 +346,7 @@ function FileView({ video, unlocked, files, intro }: { video: VideoEntry; unlock
           className="inline-flex h-10 items-center gap-2 rounded-full bg-foreground px-4 text-[13.5px] font-semibold text-background transition-opacity hover:opacity-90 disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           {copied ? <Check className="size-4" aria-hidden /> : <Copy className="size-4" aria-hidden />}
-          {copied ? "Copied" : `Copy ${files.length > 1 ? "file" : "prompt"}`}
+          {copied ? "Copied" : file.part === "prompt" ? "Copy prompt" : files.length > 1 ? "Copy file" : "Copy source"}
         </button>
       </div>
       {files.length > 1 ? (
@@ -346,7 +374,7 @@ function FileView({ video, unlocked, files, intro }: { video: VideoEntry; unlock
       >
         {state.status === "ready" ? state.text : state.status === "error" ? "Couldn't load this file. Try again in a moment." : "Loading…"}
       </pre>
-      {file.part === "source" ? (
+      {file.part === "source" && !isHyperframes(video) ? (
         <p className="text-[13px] text-muted-foreground">
           The images it uses (the screenshots and tiles) are public files in <span className="font-mono">/videos/assets</span>; copy them next to the video file.
         </p>

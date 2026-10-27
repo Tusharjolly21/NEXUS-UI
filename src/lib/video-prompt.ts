@@ -13,7 +13,7 @@
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { FORMATS, type VideoEntry } from "@/lib/catalog/videos";
+import { FORMATS, isHyperframes, type VideoEntry } from "@/lib/catalog/videos";
 import { videoDefaults } from "@/lib/catalog/video-defaults";
 
 const SITE = "https://www.nexus-ui.com";
@@ -74,7 +74,59 @@ function fieldLines(video: VideoEntry, values: Record<string, string>): string {
     .join("\n");
 }
 
+/**
+ * The prompt for a HyperFrames video: what it is, how to render it, how to change it, the shot list
+ * and the real index.html. There is no kit, frame page or render script, because HyperFrames brings
+ * its own CLI.
+ */
+async function buildHyperframesPrompt(video: VideoEntry): Promise<string> {
+  const slug = video.slug;
+  const [html, brief] = await Promise.all([read(`${slug}/index.html`), read(`${slug}/prompt.md`)]);
+  const shape = FORMATS[video.formats[0]];
+  const header = [
+    `# ${video.title}`,
+    "",
+    `Add the "${video.title}" video from Nexus UI to my project as a HyperFrames composition, and render it to MP4 exactly like the original.`,
+    "",
+    video.blurb,
+    "",
+    `HyperFrames (https://github.com/heygen-com/hyperframes, Apache-2.0) turns an HTML file into a video: it opens the page in headless Chrome, sets the clock to each frame, and encodes the frames with FFmpeg. The animation is a paused GSAP timeline, so the same file always gives the same frames. This one is ${shape.label} (${shape.w}×${shape.h}), ${seconds(video.duration)} long, 30 fps, with a soundtrack.`,
+    "",
+    "Please:",
+    "",
+    "1. Make sure Node.js 22 or newer and FFmpeg are installed. Nothing else needs installing: the CLI runs with `npx hyperframes`.",
+    "2. Make a folder for the video and save the file below in it as `index.html`, exactly as it is. Add a `hyperframes.json` next to it only if your setup asks for one (`npx hyperframes init` makes a starter project you can copy `index.html` into).",
+    `3. Download the soundtrack, ${SITE}/videos/audio/${slug}.mp3, and save it next to \`index.html\` as \`${slug}.mp3\`. The file plays it with an \`<audio>\` tag, and HyperFrames mixes it into the MP4. Every tick, whoosh and hit in it is placed on the same second as the animation it goes with.`,
+    "4. Run `npx hyperframes check` and fix anything it reports as an error. Warnings about the layout of the timeline are fine to leave.",
+    "5. Run `npx hyperframes preview` to watch it in the browser, then `npx hyperframes render -q delivery -o " + slug + ".mp4` for the final file (`-q draft` is quicker while you edit).",
+    "",
+    "Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain how the timing is built. The only thing to adapt is where the file lives.",
+    "",
+    "## Make it yours",
+    "",
+    `Check that the original plays and renders first. Then change only what you want, in plain words, for example: "change the headline to my product's name", "swap the blue for my brand colour", "make it ten seconds", or "make it 1:1".`,
+    "",
+    "- **Words and colours** are in the HTML and in the CSS variables at the top of the `<style>` block (`:root`). Change them there.",
+    `- **Timing.** Every scene is a block with \`data-start\` and \`data-duration\` (seconds), and its animation is a GSAP tween on the timeline at the bottom of the file. Move a scene by changing both its \`data-start\` and the times of its tweens, and keep the root \`data-duration\` at least as long as the last scene. Keep every animation on the paused GSAP timeline registered as \`window.__timelines["${slug}"]\`: anything that runs on its own clock (CSS animations, \`setInterval\`, \`Math.random\`) will not match when HyperFrames renders frame by frame.`,
+    `- **Shape.** The page is ${shape.w}×${shape.h}. For another shape, change \`data-width\` and \`data-height\` on the root element, the \`width\`/\`height\` of \`html, body\` and \`#root\` in the CSS, and the \`viewport\` meta tag, then check each scene in it.`,
+    `- **Sound.** The soundtrack is one mp3 placed with \`data-start="0"\`, so its second 0 is the video's second 0. If you move a scene, the sounds that belong to it have to move too: ask your agent to re-cut the soundtrack to the new times (or to drop it by removing the \`<audio>\` element). If you change the length, change the \`data-duration\` on the \`<audio>\` element as well. Where the file lists times in an array (for example \`KEYS\`, the second each typed letter appears), the soundtrack has a sound on each one: change the text and the sound together, or the letters and the clicks will drift apart.`,
+    "- **Fonts.** The file asks for Inter and falls back to the system font. If your machine does not have Inter, install it or link a font in the `<head>`: the renderer only uses fonts the page can load.",
+    "",
+    "## The shot list",
+    "",
+    "This is the plain-words brief the video was made from. It is the map of the file: use it to find the part you want to change.",
+    "",
+    brief.trim(),
+    "",
+    "## index.html",
+    "",
+    fence("html", html),
+  ].join("\n");
+  return `${header}\n`;
+}
+
 export async function buildVideoPrompt(video: VideoEntry): Promise<string> {
+  if (isHyperframes(video)) return buildHyperframesPrompt(video);
   const slug = video.slug;
   const [source, brief, kit, parts, frame, render] = await Promise.all([
     read(`${slug}/source.tsx`),

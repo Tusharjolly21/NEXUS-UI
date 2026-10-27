@@ -8,8 +8,8 @@ import { createMetadata } from "@/lib/seo";
 import { PRICES, formatPrice } from "@/lib/pricing";
 
 export const metadata: Metadata = createMetadata({
-  title: "Product Video Templates: Launch, Pricing and Update Videos in React",
-  description: `${videos.length} product videos for launches, pricing, changelogs, app previews and website backgrounds, in the shapes each platform wants. Each one is a React component with its own soundtrack: watch it, change the words, then take the prompt and the code.`,
+  title: "Product Video Templates: Launch, Pricing and Update Videos for React and HyperFrames",
+  description: `${videos.length} product videos for launches, pricing, changelogs, app previews and website backgrounds, in the shapes each platform wants. Made as React components or as HTML for HyperFrames: watch one, then take the prompt and the code.`,
   alternates: { canonical: "/videos" },
 });
 
@@ -30,8 +30,8 @@ export default function VideosPage() {
             Product videos, ready to make <RainbowWord>yours</RainbowWord>
           </h1>
           <p className="mt-5 max-w-[620px] text-[19px] leading-[1.55] text-muted-foreground">
-            {videos.length} videos for launches, pricing, updates, demos and app stores, in the shapes each platform wants and each with its
-            own soundtrack. Watch one, change the words, then take the prompt and the code. {free} are free.
+            {videos.length} videos for launches, pricing, updates, demos and app stores, in the shapes each platform wants. Most are React with their
+            own soundtrack; the HTML ones are made for HyperFrames, so an agent can render them. Watch one, then take the prompt and the code. {free} are free.
           </p>
         </div>
       </section>
@@ -81,7 +81,7 @@ export default function VideosPage() {
               <div>
                 <h2 className="pg-display max-w-[620px] text-[clamp(36px,5vw,52px)] leading-[1.02] text-foreground">Get every video</h2>
                 <p className="mt-4 max-w-[520px] text-[18px] text-muted-foreground">
-                  Pro unlocks the prompt, the source, live editing and the render script for all {videos.length}, plus everything we release next, for {formatPrice(PRICES.pro)} a year. All-Access does it for good at {formatPrice(PRICES.allAccess)} once.
+                  Pro unlocks the prompt and the source of all {videos.length}, plus live editing and the render script for the React ones, and everything we release next, for {formatPrice(PRICES.pro)} a year. All-Access does it for good at {formatPrice(PRICES.allAccess)} once.
                 </p>
               </div>
             }
