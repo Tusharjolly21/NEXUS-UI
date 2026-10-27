@@ -6116,7 +6116,7 @@ export default function Page() {
     animationKinds: ["hover", "press", "spring", "magnetic"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "apps", type: "DockApp[]", description: "Each app has id, label, bg (any CSS background) and glyph (an icon)." },
+      { name: "apps", type: "DockApp[]", defaultValue: "Apple Intelligence, Maps, Music, TV, Claude, Chrome", description: "Each app has id, label, icon (an image URL of the finished app icon), and bg (any CSS background) and glyph (an icon) for the tile that shows when there is no icon or it fails to load." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Sweeps an invisible pointer across the dock until someone hovers it." },
     ],
     Preview: Previews.PreviewMagnifyDock,

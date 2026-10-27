@@ -10,7 +10,8 @@ Please:
 2. Install what it needs: `framer-motion` (use this project's package manager).
 3. It is styled with Tailwind CSS classes, so the project needs Tailwind.
 4. It uses `@/lib/ui-sounds` for its interaction sounds, which are synthesised in the browser, so no audio files are needed. Create it at lib/ from the file below.
-5. Use it like this: `import { MagnifyDock } from "@/components/magnify-dock";`. The props are typed and documented in the code.
+5. The code refers to these files in /public: `/dock-icons/apple-intelligence.webp`, `/dock-icons/maps.webp`, `/dock-icons/music.webp`, `/dock-icons/tv.webp`, `/dock-icons/claude.webp`, `/dock-icons/chrome.webp`. Point them at the project's own files (or leave them out if they are optional).
+6. Use it like this: `import { MagnifyDock } from "@/components/magnify-dock";`. The props are typed and documented in the code.
 
 Copy the code exactly as it is. Do not restyle, simplify or rename anything, and keep the comments: they explain why the numbers are what they are. The only thing to adapt is import paths, if this project uses a different alias than `@/`.
 
@@ -26,14 +27,18 @@ export type { MagnifyDockProps, DockApp } from "./magnify-dock";
 ```tsx
 "use client";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AnimatePresence, animate, motion, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
+import { AnimatePresence, animate, motion, transform as mapRange, useMotionValue, useSpring, useTransform, type MotionValue } from "framer-motion";
 import { useSound } from "@/lib/ui-sounds";
 
 export interface DockApp {
   id: string;
   label: string;
+  /** Tile background (any CSS background), shown when there is no `icon` or it fails to load. */
   bg: string;
+  /** Glyph drawn on the tile, shown when there is no `icon` or it fails to load. */
   glyph: ReactNode;
+  /** Image of the app icon (a square with its own rounded corners). It replaces the tile and glyph. */
+  icon?: string;
 }
 
 const G = (d: string, fill = false) => (
@@ -42,30 +47,34 @@ const G = (d: string, fill = false) => (
   </svg>
 );
 
+// Each app has its own icon file in /public/dock-icons; the gradient tile and glyph show if the file is missing.
 const APPS: DockApp[] = [
-  { id: "home", label: "Home", bg: "linear-gradient(180deg,#5ac8fa,#007aff)", glyph: G("M4 11l8-7 8 7v9H4z") },
-  { id: "mail", label: "Mail", bg: "linear-gradient(180deg,#64d2ff,#0a84ff)", glyph: G("M4 6h16v12H4zM4 7l8 6 8-6") },
-  { id: "notes", label: "Notes", bg: "linear-gradient(180deg,#ffe066,#ffcc00)", glyph: G("M7 8h10M7 12h10M7 16h6") },
-  { id: "music", label: "Music", bg: "linear-gradient(180deg,#ff6482,#ff2d55)", glyph: G("M9 18V6l10-2v12M9 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM19 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0z") },
-  { id: "photos", label: "Photos", bg: "conic-gradient(from 0deg,#ff9f0a,#ffd60a,#30d158,#64d2ff,#bf5af2,#ff375f,#ff9f0a)", glyph: G("M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0") },
-  { id: "maps", label: "Maps", bg: "linear-gradient(180deg,#7ee08f,#34c759)", glyph: G("M12 21s-6-5.6-6-11a6 6 0 1 1 12 0c0 5.4-6 11-6 11zM12 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0") },
-  { id: "settings", label: "Settings", bg: "linear-gradient(180deg,#aeaeb2,#636366)", glyph: G("M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM19 12l2-1-1-3-2 .3-1.2-1.2.3-2-3-1-1 2h-1.6l-1-2-3 1 .3 2L5.6 8.3l-2-.3-1 3 2 1v1.6l-2 1 1 3 2-.3 1.2 1.2-.3 2 3 1 1-2h1.6l1 2 3-1-.3-2 1.2-1.2 2 .3 1-3-2-1z") },
+  { id: "intelligence", label: "Apple Intelligence", icon: "/dock-icons/apple-intelligence.webp", bg: "linear-gradient(135deg,#ffb340,#ff375f 55%,#bf5af2)", glyph: G("M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z") },
+  { id: "maps", label: "Maps", icon: "/dock-icons/maps.webp", bg: "linear-gradient(180deg,#7ee08f,#34c759)", glyph: G("M12 21s-6-5.6-6-11a6 6 0 1 1 12 0c0 5.4-6 11-6 11zM12 10m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0") },
+  { id: "music", label: "Music", icon: "/dock-icons/music.webp", bg: "linear-gradient(180deg,#ff6482,#ff2d55)", glyph: G("M9 18V6l10-2v12M9 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM19 16a2 2 0 1 1-4 0 2 2 0 0 1 4 0z") },
+  { id: "tv", label: "TV", icon: "/dock-icons/tv.webp", bg: "linear-gradient(180deg,#3a3a3c,#000)", glyph: G("M4 7h16v10H4zM9 20h6") },
+  { id: "claude", label: "Claude", icon: "/dock-icons/claude.webp", bg: "linear-gradient(180deg,#e8855f,#cc5d3a)", glyph: G("M12 4v16M4 12h16M6.3 6.3l11.4 11.4M17.7 6.3L6.3 17.7") },
+  { id: "chrome", label: "Chrome", icon: "/dock-icons/chrome.webp", bg: "linear-gradient(180deg,#fff,#e5e5ea)", glyph: G("M12 12m-8 0a8 8 0 1 0 16 0a8 8 0 1 0-16 0M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0") },
 ];
 
 const BASE = 46;
 const MAX = 76;
 const RANGE = 150;
+const GAP = 10;
+const PAD = 10;
 
-function Icon({ app, mouseX, running, onLaunch }: { app: DockApp; mouseX: MotionValue<number>; running: boolean; onLaunch: () => void }) {
+function Icon({ app, mouseX, fit, running, onLaunch }: { app: DockApp; mouseX: MotionValue<number>; fit: MotionValue<number>; running: boolean; onLaunch: () => void }) {
   const ref = useRef<HTMLButtonElement>(null);
   const dist = useTransform(mouseX, (x) => {
     const r = ref.current?.getBoundingClientRect();
     return r ? x - (r.left + r.width / 2) : Infinity;
   });
-  const sizeRaw = useTransform(dist, [-RANGE, 0, RANGE], [BASE, MAX, BASE]);
+  const sizeRaw = useTransform([dist, fit], ([d, k]: number[]) => mapRange(d, [-RANGE * k, 0, RANGE * k], [BASE * k, MAX * k, BASE * k]));
   const size = useSpring(sizeRaw, { stiffness: 320, damping: 22, mass: 0.2 });
   const [hover, setHover] = useState(false);
   const [bounce, setBounce] = useState(0);
+  const [iconFailed, setIconFailed] = useState(false);
+  const showIcon = !!app.icon && !iconFailed;
 
   return (
     <div className="relative flex flex-col items-center">
@@ -93,11 +102,23 @@ function Icon({ app, mouseX, running, onLaunch }: { app: DockApp; mouseX: Motion
           setBounce((b) => b + 1);
           onLaunch();
         }}
-        style={{ width: size, height: size, background: app.bg }}
-        className="flex items-center justify-center rounded-[22%] shadow-[inset_0_1px_0_rgba(255,255,255,.35),0_6px_14px_-6px_rgba(0,0,0,.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3]"
+        style={{ width: size, height: size, background: showIcon ? "transparent" : app.bg }}
+        className={`flex items-center justify-center rounded-[22%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0071e3] ${showIcon ? "" : "shadow-[inset_0_1px_0_rgba(255,255,255,.35),0_6px_14px_-6px_rgba(0,0,0,.4)]"}`}
       >
         <motion.span key={bounce} className="flex h-full w-full items-center justify-center" animate={bounce ? { y: [0, -22, 0, -10, 0] } : undefined} transition={{ duration: 0.9, ease: "easeOut" }}>
-          {app.glyph}
+          {showIcon ? (
+            // The icon file is a finished app icon, so it fills the button; the shadow lifts it off the dock.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={app.icon}
+              alt=""
+              draggable={false}
+              onError={() => setIconFailed(true)}
+              className="pointer-events-none h-full w-full select-none drop-shadow-[0_6px_8px_rgba(0,0,0,.28)]"
+            />
+          ) : (
+            app.glyph
+          )}
         </motion.span>
       </motion.button>
       <motion.span className="mt-1 h-1 w-1 rounded-full bg-[#1d1d1f] dark:bg-[#f5f5f7]" initial={false} animate={{ opacity: running ? 0.7 : 0, scale: running ? 1 : 0 }} />
@@ -116,9 +137,29 @@ export interface MagnifyDockProps {
 export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true }: MagnifyDockProps) {
   const play = useSound(enableSound);
   const mouseX = useMotionValue(Infinity);
-  const [running, setRunning] = useState<string[]>(["home"]);
+  const [running, setRunning] = useState<string[]>(["intelligence"]);
   const bar = useRef<HTMLDivElement>(null);
   const hovering = useRef(false);
+  const frame = useRef<HTMLDivElement>(null);
+  const fit = useMotionValue(1);
+  const [k, setK] = useState(1);
+
+  // On a narrow screen the dock would run off the edge, so everything in it (icons, gaps, swell) is
+  // sized down together until it fits. `fit` is 1 whenever there is room.
+  useEffect(() => {
+    const f = frame.current;
+    if (!f) return;
+    const measure = () => {
+      const need = apps.length * BASE + (apps.length - 1) * GAP + PAD * 2 + (MAX - BASE) * 2;
+      const next = Math.min(1, f.clientWidth / need);
+      fit.set(next);
+      setK(next);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(f);
+    return () => ro.disconnect();
+  }, [apps.length, fit]);
 
   useEffect(() => {
     if (!autoplay) return;
@@ -134,17 +175,18 @@ export function MagnifyDock({ apps = APPS, autoplay = false, enableSound = true 
   }, [autoplay, mouseX]);
 
   return (
-    <div className="flex h-[150px] items-end justify-center">
+    <div ref={frame} className="flex h-[150px] w-full items-end justify-center">
       <div
         ref={bar}
+        style={{ height: 66 * k, gap: GAP * k, paddingInline: PAD * k, paddingBottom: 6 * k, borderRadius: 22 * k }}
         onPointerMove={(e) => { hovering.current = true; mouseX.set(e.clientX); }}
         onPointerLeave={() => { hovering.current = false; mouseX.set(Infinity); }}
-        className="flex h-[66px] items-end gap-2.5 rounded-[22px] bg-white/70 px-2.5 pb-1.5 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-20px_rgba(0,0,0,.35)] backdrop-blur-2xl dark:bg-[#2c2c2e]/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-20px_rgba(0,0,0,.7)]"
+        className="flex items-end bg-white/70 shadow-[0_0_0_1px_rgba(0,0,0,.06),0_20px_40px_-20px_rgba(0,0,0,.35)] backdrop-blur-2xl dark:bg-[#2c2c2e]/70 dark:shadow-[0_0_0_1px_rgba(255,255,255,.08),0_20px_40px_-20px_rgba(0,0,0,.7)]"
         role="toolbar"
         aria-label="Dock"
       >
         {apps.map((app) => (
-          <Icon key={app.id} app={app} mouseX={mouseX} running={running.includes(app.id)} onLaunch={() => {
+          <Icon key={app.id} app={app} mouseX={mouseX} fit={fit} running={running.includes(app.id)} onLaunch={() => {
             play("pop");
             setRunning((r) => (r.includes(app.id) ? r : [...r, app.id]));
           }} />
