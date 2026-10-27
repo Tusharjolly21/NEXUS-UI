@@ -10,6 +10,7 @@ import { useUrlParam } from "@/components/gallery/use-url-param";
 import { InfiniteSentinel, useInfiniteCount } from "@/components/gallery/infinite-scroll";
 import { Chip, ChipRail } from "@/components/site/chip-rail";
 import { AccessTag } from "@/components/pro/pro-access";
+import { cn } from "@/lib/utils";
 
 /** One section of one block, shown as a tile on the blocks wall. */
 export type BlockTileItem = GalleryItem & {
@@ -26,6 +27,9 @@ export type BlockTileItem = GalleryItem & {
 const PAGE_SIZE = 12;
 
 export type BlockFilter = { slug: string; name: string; count: number };
+
+/** On a phone only this many filters show until "more" is pressed; wider screens always show them all. */
+const PHONE_FILTERS = 5;
 
 /**
  * A section tile: the live section, scaled down so all of it shows, above a caption that is always
@@ -84,6 +88,11 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
   const infinite = useInfiniteCount({ total: matches.length, batch: PAGE_SIZE, storeKey: `blocks|${active?.slug ?? ""}` });
   const shown = matches.slice(0, infinite.count);
 
+  // The chosen filter always stays visible, even when it is past the phone's short list.
+  const [moreOpen, setMoreOpen] = React.useState(false);
+  const activeIndex = active ? filters.indexOf(active) : -1;
+  const hiddenOnPhone = filters.length - PHONE_FILTERS - (activeIndex >= PHONE_FILTERS ? 1 : 0);
+
   return (
     <div className="scroll-mt-28">
       <ChipRail wrap>
@@ -91,12 +100,25 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
           All
           <span className="text-[12px] opacity-60">{items.length}</span>
         </Chip>
-        {filters.map((f) => (
-          <Chip key={f.slug} active={active?.slug === f.slug} onClick={() => setParam(f.slug)}>
-            {f.name}
-            <span className="text-[12px] opacity-60">{f.count}</span>
-          </Chip>
+        {filters.map((f, i) => (
+          // `contents` keeps the wrapper out of the layout; on a phone the folded ones are removed (and cannot be tabbed to).
+          <span key={f.slug} className={cn("contents", !moreOpen && i >= PHONE_FILTERS && f !== active && "max-sm:hidden")}>
+            <Chip active={active?.slug === f.slug} onClick={() => setParam(f.slug)}>
+              {f.name}
+              <span className="text-[12px] opacity-60">{f.count}</span>
+            </Chip>
+          </span>
         ))}
+        {hiddenOnPhone > 0 ? (
+          <Chip
+            className="sm:hidden"
+            aria-pressed={undefined}
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen((v) => !v)}
+          >
+            {moreOpen ? "Show less" : `${hiddenOnPhone} more`}
+          </Chip>
+        ) : null}
       </ChipRail>
 
       <p className="mt-3 text-[13px] text-muted-foreground" aria-live="polite">
