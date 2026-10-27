@@ -486,7 +486,7 @@ export default async function BlockDetailPage({ params }: Props) {
           </PreviewCodeSection>
           <PreviewCodeSection
             block={block.slug}
-            title="Text Generate Typewriter with typing sound"
+            title="Text Generate Typewriter"
             code={textGenerateCode}
             usageCode={TEXT_GENERATE_TYPEWRITER_USAGE}
             className="mt-16"
@@ -858,7 +858,7 @@ const BLOCK_INSTALL_NOTES: Partial<Record<string, string[]>> = {
     "The sections ship with demo handlers (a timed fake charge, and 424242 as the right code). Pass onPay, verify and onSubmit to wire them to your payment provider.",
   ],
   "block-text-animations": [
-    "The typewriters play a key click for every character, from the shared typing sound (lib/typing-sound.ts, installed with them). Put sound.ogg and sprite-config.json in public/sounds for the recorded clicks; without them a short synthesised click plays. Visitors switch it with one typing-sound switch, and each component takes muted or enableSound to stay silent.",
+    "Typewriter Heading and Text Animation Typewriter Effect play a key click for every character, from the shared typing sound (lib/typing-sound.ts, installed with them); Text Generate Typewriter is silent. Put sound.ogg and sprite-config.json in public/sounds for the recorded clicks; without them a short synthesised click plays. Visitors switch it with one typing-sound switch, and each component takes muted or enableSound to stay silent.",
   ],
   "block-why-choose-us": [
     "SpotlightBentoGrid renders Unsplash images with next/image. Add images.unsplash.com to images.remotePatterns in next.config.mjs before using that variant.",
@@ -1197,7 +1197,7 @@ function defaultUsageForTitle(title: string) {
   if (title === "Typewriter Heading") return TYPEWRITER_HEADING_USAGE;
   if (title === "Text Animation Typewriter Effect") return TYPEWRITER_EFFECT_USAGE;
   if (title === "Text Animation Blur Fade In") return BLUR_FADE_IN_USAGE;
-  if (title === "Text Generate Typewriter with typing sound") return TEXT_GENERATE_TYPEWRITER_USAGE;
+  if (title === "Text Generate Typewriter") return TEXT_GENERATE_TYPEWRITER_USAGE;
   if (title === "Blog Content Centered") return BLOG_CONTENT_CENTERED_USAGE;
   if (title === "Blog Content With TOC") return BLOG_CONTENT_WITH_TOC_USAGE;
   if (title === "Blog Content Editorial") return BLOG_CONTENT_EDITORIAL_USAGE;
@@ -1380,7 +1380,7 @@ const TEXT_GENERATE_TYPEWRITER_USAGE = `import { TextGenerateTypewriter } from "
 export default function AiDraft() {
   return (
       <TextGenerateTypewriter
-        text="Nexus-ui is generating a production-ready landing section with sound."
+        text="Nexus-ui is generating a production-ready landing section."
       startOnView
       typingSpeed={22}
     />

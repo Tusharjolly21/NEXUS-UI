@@ -121,7 +121,7 @@ const baseVariants: BlockVariant[] = [
   v("text-typewriter-heading", "block-text-animations", "Typewriter Heading"),
   v("text-typewriter-effect", "block-text-animations", "Text Animation Typewriter Effect"),
   v("text-blur-fade-in", "block-text-animations", "Text Animation Blur Fade In"),
-  v("text-generate", "block-text-animations", "Text Generate Typewriter with typing sound"),
+  v("text-generate", "block-text-animations", "Text Generate Typewriter"),
   mk("scramble-heading", "block-text-animations", "Scramble Heading", "ScrambleHeading"),
   mk("scroll-read-manifesto", "block-text-animations", "Scroll-read Manifesto", "ScrollReadManifesto"),
 

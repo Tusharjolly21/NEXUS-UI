@@ -323,8 +323,6 @@ const playgrounds: BlockPlaygrounds = {
 
   "text-generate": {
     Component: TextGenerateStage,
-    // The preview starts silent: the visitor turns the key sound on with the speaker button.
-    baseProps: { muted: true },
     props: [
       {
         name: "text",
@@ -344,18 +342,9 @@ const playgrounds: BlockPlaygrounds = {
         step: 2,
       },
       {
-        name: "volume",
-        type: "number",
-        description: "Key sound volume, 0 to 1. Only heard once the sound is switched on.",
-        defaultValue: "0.18",
-        min: 0,
-        max: 1,
-        step: 0.01,
-      },
-      {
         name: "showControls",
         type: "boolean",
-        description: "Show the speaker (mute / unmute) and Replay buttons in the top-right corner.",
+        description: "Show the Replay button in the top-right corner.",
         defaultValue: "true",
       },
       {
@@ -374,13 +363,6 @@ const playgrounds: BlockPlaygrounds = {
         name: "startOnHover",
         type: "boolean",
         description: "Start typing when the pointer enters the card.",
-        defaultValue: "false",
-      },
-      {
-        name: "muted",
-        type: "boolean (initial state)",
-        description:
-          "Silences this component's key clicks. Without it the sound follows the typing sound switch (the speaker button here turns it on or off for every typing component). The preview here starts with sound off.",
         defaultValue: "false",
       },
       CLASS_NAME,
