@@ -50,15 +50,15 @@
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="terminal-install" data-start="0" data-duration="10.5" data-width="1920" data-height="1080">
-      <div id="glow" class="clip" data-start="0" data-duration="10.5" data-track-index="0"></div>
+    <div id="root" data-composition-id="terminal-install" data-start="0" data-duration="12.6" data-width="1920" data-height="1080">
+      <div id="glow" class="clip" data-start="0" data-duration="12.6" data-track-index="0"></div>
 
       <div id="intro" class="center clip" data-start="0" data-duration="2.6" data-track-index="1">
         <h1>Add motion<br />in one line.</h1>
         <p>Animated components for React</p>
       </div>
 
-      <div id="term" class="clip" data-start="1.9" data-duration="6.0" data-track-index="2">
+      <div id="term" class="clip" data-start="1.9" data-duration="8.1" data-track-index="2">
         <div id="bar">
           <i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>
           <b>~/my-app</b>
@@ -72,9 +72,9 @@
       </div>
 
       <!-- The soundtrack: every tick, whoosh and hit is placed on the same times as the animation below. -->
-      <audio id="sound" data-start="0" data-duration="10.5" data-track-index="9" data-volume="1" src="terminal-install.mp3"></audio>
+      <audio id="sound" data-start="0" data-duration="12.6" data-track-index="9" data-volume="1" src="terminal-install.mp3"></audio>
 
-      <div id="outro" class="center clip" data-start="7.6" data-duration="2.9" data-track-index="3">
+      <div id="outro" class="center clip" data-start="9.7" data-duration="2.9" data-track-index="3">
         <h2>nexus-ui.com</h2>
         <p>One command per component.</p>
       </div>
@@ -91,32 +91,31 @@
       tl.fromTo("#intro p", { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 0.7);
       tl.to("#intro", { opacity: 0, scale: 0.96, filter: "blur(10px)", duration: 0.6, ease: "power2.in" }, 1.9);
 
-      // Scene 2: the terminal rises and types (1.9 to 7.9s)
+      // Scene 2: the terminal rises and types (1.9 to 10s)
       tl.fromTo("#term", { opacity: 0, y: 120, scale: 0.94 }, { opacity: 1, y: 0, scale: 1, duration: 0.9, ease: "power4.out" }, 1.9);
-      var typed = { n: 0 };
-      tl.to(typed, {
-        n: COMMAND.length, duration: 1.5, ease: "none",
-        onUpdate: function () { document.getElementById("cmd").textContent = COMMAND.slice(0, Math.round(typed.n)); }
-      }, 2.5);
-      // The caret blinks on a fixed grid so seeking gives the same frame every time.
-      var caret = { v: 1 };
-      tl.to(caret, {
-        v: 0, duration: 6.0, ease: "none",
-        onUpdate: function () {
-          var t = tl.time();
-          var typing = t > 2.5 && t < 4.1;
-          document.getElementById("caret").style.opacity = typing || Math.floor(t * 2) % 2 === 0 ? 1 : 0;
-        }
-      }, 1.9);
+      // Typing. KEYS holds the second each character appears (one per character of COMMAND, on the 30 fps
+      // frame grid). The soundtrack plays one recorded keystroke at exactly these times, so the text and
+      // the sound cannot drift. The count is worked out from the clock, so seeking gives the same frame every time.
+      var KEYS = [2.5, 2.5667, 2.6, 2.6333, 2.9333, 2.9667, 3.0667, 3.1333, 3.1667, 3.2333, 3.4333, 3.4667, 3.5667, 3.6333, 3.6667, 3.7, 3.7333, 3.7667, 3.8, 3.9333, 3.9667, 4.0333, 4.0667, 4.1, 4.1333, 4.2, 4.3667, 4.4333, 4.4667, 4.5, 4.5667, 4.7, 4.7667, 4.8, 4.8333, 5, 5.0333, 5.1, 5.1333, 5.2, 5.2667, 5.3, 5.3333, 5.5667, 5.6, 5.6333, 5.7, 5.7333, 5.8667, 6.1];
+      var cmdEl = document.getElementById("cmd"), caretEl = document.getElementById("caret");
+      function drawTyping() {
+        var t = tl.time(), n = 0;
+        while (n < KEYS.length && KEYS[n] <= t + 1e-4) n++;
+        cmdEl.textContent = COMMAND.slice(0, n);
+        // The caret stays solid while keys are going down, then blinks.
+        var typing = t >= KEYS[0] - 0.1 && t <= KEYS[KEYS.length - 1] + 0.3;
+        caretEl.style.opacity = typing || Math.floor(t * 2) % 2 === 0 ? 1 : 0;
+      }
+      tl.to({ v: 0 }, { v: 1, duration: 8.1, ease: "none", onUpdate: drawTyping }, 1.9);
       ["#l1", "#l2", "#l3"].forEach(function (id, i) {
-        tl.fromTo(id, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 4.1 + i * 0.3);
-        tl.fromTo(id + " .tick", { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(2.4)" }, 4.2 + i * 0.3);
+        tl.fromTo(id, { opacity: 0, x: -24 }, { opacity: 1, x: 0, duration: 0.45, ease: "power3.out" }, 6.2 + i * 0.3);
+        tl.fromTo(id + " .tick", { scale: 0 }, { scale: 1, duration: 0.4, ease: "back.out(2.4)" }, 6.3 + i * 0.3);
       });
-      tl.to("#term", { opacity: 0, y: -80, scale: 0.97, filter: "blur(12px)", duration: 0.6, ease: "power2.in" }, 7.3);
+      tl.to("#term", { opacity: 0, y: -80, scale: 0.97, filter: "blur(12px)", duration: 0.6, ease: "power2.in" }, 9.4);
 
-      // Scene 3: the end card (7.6 to 10.5s)
-      tl.fromTo("#outro h2", { opacity: 0, y: 40, filter: "blur(14px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power4.out" }, 7.7);
-      tl.fromTo("#outro p", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 8.2);
+      // Scene 3: the end card (9.7 to 12.6s)
+      tl.fromTo("#outro h2", { opacity: 0, y: 40, filter: "blur(14px)" }, { opacity: 1, y: 0, filter: "blur(0px)", duration: 0.9, ease: "power4.out" }, 9.8);
+      tl.fromTo("#outro p", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }, 10.3);
 
       window.__timelines["terminal-install"] = tl;
     </script>
