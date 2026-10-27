@@ -25,10 +25,19 @@ export function Chip({
   );
 }
 
-/** A horizontally scrolling row of chips with the scrollbar hidden. */
-export function ChipRail({ className, children }: { className?: string; children: React.ReactNode }) {
+/**
+ * A row of chips. By default it scrolls sideways with the scrollbar hidden; with `wrap` the chips
+ * flow onto as many rows as they need, so every one is in view without sliding the row.
+ */
+export function ChipRail({ className, wrap = false, children }: { className?: string; wrap?: boolean; children: React.ReactNode }) {
   return (
-    <div className={cn("flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", className)}>
+    <div
+      className={cn(
+        "flex gap-2",
+        wrap ? "flex-wrap" : "overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        className,
+      )}
+    >
       {children}
     </div>
   );

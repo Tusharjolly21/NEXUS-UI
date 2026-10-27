@@ -86,7 +86,7 @@ export function BlocksGallery({ items, filters }: { items: BlockTileItem[]; filt
 
   return (
     <div className="scroll-mt-28">
-      <ChipRail>
+      <ChipRail wrap>
         <Chip active={!active} onClick={() => setParam(null)}>
           All
           <span className="text-[12px] opacity-60">{items.length}</span>
