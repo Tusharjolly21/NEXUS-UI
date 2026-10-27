@@ -246,12 +246,82 @@ function VariantLinkButton({ anchor, title }: { anchor: string; title: string })
 // ── stage: live preview / code, with replay and full screen ─────────
 
 /**
- * A page can hold several previews that play themselves. Only one that is mostly on screen may be
- * heard, so scrolling past a variant does not leave its sound running under the next one.
+ * A page with several variants must not run them all at once: the motion and sound of three demos
+ * on top of each other spoil each one. The page keeps one variant "in focus", the one that is most
+ * on screen (ties go to the one nearest the middle of the screen), and only that one plays. The
+ * others stay empty until they are scrolled to, then start from the beginning.
  */
-function HeardWhenVisible({ children }: { children: React.ReactNode }) {
+const VariantFocusContext = React.createContext<{
+  register: (id: string, el: HTMLElement | null) => void;
+  active: string | null;
+} | null>(null);
+
+function VariantFocusProvider({ children }: { children: React.ReactNode }) {
+  const els = React.useRef(new Map<string, HTMLElement>());
+  const [active, setActive] = React.useState<string | null>(null);
+  const frame = React.useRef(0);
+
+  const measure = React.useCallback(() => {
+    cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => {
+      const vh = window.innerHeight;
+      let best: string | null = null;
+      let bestVisible = 0;
+      let bestDistance = Infinity;
+      els.current.forEach((el, id) => {
+        const r = el.getBoundingClientRect();
+        const shown = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+        if (shown <= 0 || r.height <= 0) return;
+        // Share of the variant that is on screen, but a tall variant that fills the screen counts as whole.
+        const visible = Math.min(1, shown / Math.min(r.height, vh * 0.8));
+        const distance = Math.abs(r.top + r.height / 2 - vh / 2);
+        if (visible > bestVisible + 0.05 || (Math.abs(visible - bestVisible) <= 0.05 && distance < bestDistance)) {
+          best = id;
+          bestVisible = visible;
+          bestDistance = distance;
+        }
+      });
+      // Less than a fifth on screen is not being looked at.
+      setActive(bestVisible >= 0.2 ? best : null);
+    });
+  }, []);
+
+  React.useEffect(() => {
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    measure();
+    return () => {
+      cancelAnimationFrame(frame.current);
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure]);
+
+  const register = React.useCallback(
+    (id: string, el: HTMLElement | null) => {
+      if (el) els.current.set(id, el);
+      else els.current.delete(id);
+      measure();
+    },
+    [measure],
+  );
+
+  const value = React.useMemo(() => ({ register, active }), [register, active]);
+  return <VariantFocusContext.Provider value={value}>{children}</VariantFocusContext.Provider>;
+}
+
+/**
+ * Plays its preview only while it is the variant in focus (see VariantFocusProvider); a page with
+ * one variant always plays. Only a preview that is mostly on screen may be heard, so scrolling past
+ * a variant does not leave its sound running under the next one.
+ */
+function HeardWhenVisible({ children, variantId }: { children: React.ReactNode; variantId?: string }) {
   const ref = React.useRef<HTMLDivElement>(null);
   const [visible, setVisible] = React.useState(false);
+  const focus = React.useContext(VariantFocusContext);
+  const [height, setHeight] = React.useState(0);
+  const inFocus = !focus || !variantId || focus.active === variantId;
+
   React.useEffect(() => {
     const el = ref.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
@@ -259,9 +329,27 @@ function HeardWhenVisible({ children }: { children: React.ReactNode }) {
     io.observe(el);
     return () => io.disconnect();
   }, []);
+
+  const register = focus?.register;
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!register || !variantId || !el) return;
+    register(variantId, el);
+    return () => register(variantId, null);
+  }, [register, variantId]);
+
+  // Remember how tall the preview was so the page does not jump when it is taken off the stage.
+  React.useEffect(() => {
+    const el = ref.current;
+    if (!el || !inFocus || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => setHeight(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [inFocus]);
+
   return (
-    <div ref={ref} className="flex w-full">
-      <AutoplaySound allow={visible}>{children}</AutoplaySound>
+    <div ref={ref} className="flex w-full" style={inFocus ? undefined : { minHeight: height || 460 }}>
+      {inFocus ? <AutoplaySound allow={visible}>{children}</AutoplaySound> : null}
     </div>
   );
 }
@@ -345,7 +433,7 @@ function Stage({
       {view === "preview" ? (
         <div className="flex min-h-[460px] overflow-hidden rounded-[20px] bg-card">
           <PreviewShield active={locked} className="flex w-full">
-            <HeardWhenVisible>
+            <HeardWhenVisible variantId={variant?.anchor}>
               <FitPreview key={run}>
                 <DynamicPreview exportName={exportName} compact={false} />
               </FitPreview>
@@ -1129,6 +1217,7 @@ export function ComponentDetailPageClient({
                   ))}
                 </nav>
               ) : null}
+              <VariantFocusProvider>
               {sections.map((s, i) => (
                 <div key={s.title} id={variantId(s.title)} className="scroll-mt-24">
                   {sections.length > 1 ? <h2 className="mb-3 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h2> : null}
@@ -1148,6 +1237,7 @@ export function ComponentDetailPageClient({
                   />
                 </div>
               ))}
+              </VariantFocusProvider>
             </div>
             <InstallPanel
               slug={slug}
