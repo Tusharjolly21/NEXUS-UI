@@ -308,12 +308,15 @@ export function ProLock({
   name,
   label = "Unlock with Pro",
   className,
+  followScroll = false,
   children,
 }: {
   locked: boolean;
   name: string;
   label?: string;
   className?: string;
+  /** For tall sections: the button stays in the middle of the screen while you scroll through, instead of sitting at the middle of the section where it can be off-screen. */
+  followScroll?: boolean;
   children: React.ReactNode;
 }) {
   const { requestUpgrade } = useProAccess();
@@ -326,9 +329,12 @@ export function ProLock({
       <button
         type="button"
         onClick={() => requestUpgrade(name)}
-        className="group/lock absolute inset-0 grid place-items-center rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        className={cn(
+          "group/lock absolute inset-0 rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+          followScroll ? "flex items-start justify-center pt-6" : "grid place-items-center",
+        )}
       >
-        <span className="inline-flex h-10 items-center gap-2 rounded-full bg-card px-4 text-[14px] font-semibold text-foreground shadow-[0_0_0_0.5px_var(--border),0_10px_28px_-12px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover/lock:scale-[1.04] group-active/lock:scale-[0.97]">
+        <span className={cn("inline-flex h-10 items-center gap-2 rounded-full bg-card px-4 text-[14px] font-semibold text-foreground shadow-[0_0_0_0.5px_var(--border),0_10px_28px_-12px_rgba(0,0,0,0.35)] transition-transform duration-200 group-hover/lock:scale-[1.04] group-active/lock:scale-[0.97]", followScroll && "sticky top-[calc(50vh-20px)]")}>
           <Lock className="size-4" strokeWidth={2.4} aria-hidden />
           {label}
         </span>
