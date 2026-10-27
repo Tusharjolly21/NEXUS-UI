@@ -815,6 +815,32 @@ function HandSource({ item, name }: { item: string; name: string }) {
   );
 }
 
+/** The first steps (one-time project setup and the API key) are the same for every component, so they stay readable for everyone. */
+const OPEN_STEPS = 2;
+
+function SetupStep({ index, title, children }: { index: number; title: string; children: React.ReactNode }) {
+  return (
+    <li className="pg-float grid gap-4 rounded-tile bg-card p-6 sm:grid-cols-[48px_minmax(0,1fr)]">
+      <span className="pg-display text-[32px] text-foreground">{index + 1}</span>
+      <div className="min-w-0 text-[15px] leading-relaxed text-muted-foreground">
+        <h3 className="mb-2 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{title}</h3>
+        {children}
+      </div>
+    </li>
+  );
+}
+
+/** Stand-in for a step's commands and code while the install steps are locked: grey bars, no real text. */
+function RedactedStep() {
+  return (
+    <div aria-hidden className="grid gap-2.5 pt-1">
+      <span className="h-3 w-[88%] rounded-full bg-muted" />
+      <span className="h-3 w-[64%] rounded-full bg-muted" />
+      <span className="mt-1 block h-11 w-full rounded-xl bg-muted/70" />
+    </div>
+  );
+}
+
 function Setup({
   name,
   slug,
@@ -824,6 +850,7 @@ function Setup({
   registryImport,
   usageSource,
   premium,
+  locked = false,
 }: {
   name: string;
   slug: string;
@@ -833,6 +860,8 @@ function Setup({
   registryImport?: string;
   usageSource?: string;
   premium: boolean;
+  /** Visitor has no access: steps after the first two show their titles but not their commands, files or code. */
+  locked?: boolean;
 }) {
   const registryName = registryCliName ?? slug;
   const extra = getExtraLibraries(dependencies);
@@ -954,16 +983,23 @@ function Setup({
     <section aria-labelledby="setup-heading" className="mt-20">
       <SectionTitle id="setup-heading">Add it to your project</SectionTitle>
       <ol className="mt-8 grid gap-4">
-        {steps.map((s, i) => (
-          <li key={s.title} className="pg-float grid gap-4 rounded-tile bg-card p-6 sm:grid-cols-[48px_minmax(0,1fr)]">
-            <span className="pg-display text-[32px] text-foreground">{i + 1}</span>
-            <div className="min-w-0 text-[15px] leading-relaxed text-muted-foreground">
-              <h3 className="mb-2 text-[19px] font-semibold tracking-[-0.4px] text-foreground">{s.title}</h3>
-              {s.body}
-            </div>
-          </li>
+        {steps.slice(0, OPEN_STEPS).map((s, i) => (
+          <SetupStep key={s.title} index={i} title={s.title}>
+            {s.body}
+          </SetupStep>
         ))}
       </ol>
+      {steps.length > OPEN_STEPS ? (
+        <ProLock locked={locked} name={name} label="Install it with Pro" className="mt-4 rounded-tile" followScroll>
+          <ol className="grid gap-4">
+            {steps.slice(OPEN_STEPS).map((s, i) => (
+              <SetupStep key={s.title} index={OPEN_STEPS + i} title={s.title}>
+                {locked ? <RedactedStep /> : s.body}
+              </SetupStep>
+            ))}
+          </ol>
+        </ProLock>
+      ) : null}
     </section>
   );
 }
@@ -1266,7 +1302,6 @@ export function ComponentDetailPageClient({
             </ProLock>
           )}
           <PropsTable props={props} />
-          <ProLock locked={locked} name={name} label="Install it with Pro" className="rounded-tile">
           <Setup
             name={name}
             slug={slug}
@@ -1276,8 +1311,8 @@ export function ComponentDetailPageClient({
             registryImport={registryImport}
             usageSource={usageSource}
             premium={premium}
+            locked={locked}
           />
-          </ProLock>
           <About slug={slug} name={name} />
           <Faq name={name} items={faq} />
           <Guides items={guides} />
