@@ -1,7 +1,9 @@
-Make a 10.5-second developer demo video as a HyperFrames composition: one index.html, 1920×1080 (16:9), 30 fps, no sound. Black background with a soft blue and violet glow behind everything, Inter type, Apple-clean. The animation is one paused GSAP timeline.
+Make a 10.5-second developer demo video as a HyperFrames composition: one index.html, 1920×1080 (16:9), 30 fps, with sound. Black background with a soft blue and violet glow behind everything, Inter type, Apple-clean. The animation is one paused GSAP timeline.
 
 0–2.5s: "Add motion in one line." in big white type with "Animated components for React" under it in grey. The headline is already on screen at frame 0 (it works as the thumbnail); the sub line fades up. Both blur and fade away at the end.
 1.9–7.9s: a dark terminal window (three traffic-light dots, "~/my-app" in the title bar) rises in with a soft shadow. A green prompt, then the command "npx shadcn@latest add @nexus-labs/slide-to-confirm" types in at a steady pace with a block caret that blinks on a fixed grid. Then three lines tick in, each with a green check that pops: "Checking registry", "Installing dependencies", and "Created 1 file:" followed by the file path "components/ui/slide-to-confirm.tsx" in blue. The terminal holds for a couple of seconds so the last line can be read, then lifts away with a blur.
 7.6–10.5s: end card, "nexus-ui.com" in a blue, violet and pink gradient with "One command per component." under it in grey, held for at least two seconds.
+
+Sound (a soundtrack made of sound effects, no music, cut to the picture): a soft whoosh as the terminal rises; one key tick for every typed character, with a softer space bar and a deeper Return; a bright pop on each green check, rising in pitch; a whoosh as the terminal leaves; and a deep impact with a glassy shimmer when the end card lands.
 
 The words, the command and the colours are plain text and CSS variables at the top of the file; every scene is a block with data-start and data-duration, and the timeline at the bottom is registered as window.__timelines["terminal-install"].

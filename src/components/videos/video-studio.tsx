@@ -24,7 +24,7 @@ const perksOf = (video: VideoEntry) =>
         "The full prompt that builds this video with HyperFrames",
         "The source: one index.html you can read, restyle and keep",
         "Words, colours and timing changed in plain text, or by asking Claude Code or any agent",
-        `A video that renders to MP4 with one command: ${FORMATS[video.formats[0]].label}, ${video.duration} seconds, no sound`,
+        `Its original soundtrack, cut to the picture, and a video that renders to MP4 with sound in one command: ${FORMATS[video.formats[0]].label}, ${video.duration} seconds`,
       ]
     : reactPerksOf(video);
 
@@ -99,7 +99,7 @@ export function VideoStudio({ video, defaults }: { video: VideoEntry; defaults: 
         </div>
         <p className="mt-4 text-center text-[13px] text-muted-foreground lg:text-left">
           {hf
-            ? `${video.duration} seconds · made with HyperFrames · no sound`
+            ? `${video.duration} seconds · made with HyperFrames · press the speaker for sound`
             : `${video.duration} seconds · ${video.bpm} BPM · ${video.silent ? "no sound, loops seamlessly" : "press the speaker for sound"}`}
           {video.formats.length > 1 ? ` · ${shape.where}` : ""}
         </p>
