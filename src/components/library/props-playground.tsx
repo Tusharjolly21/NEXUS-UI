@@ -186,6 +186,68 @@ export function ControlRow({
   );
 }
 
+/**
+ * Holds the live component inside the stage. The stage grows to the component's height (a phone
+ * mock-up used to be cut off at the top and bottom of a fixed-height box), and a component wider
+ * than the stage, which happens on phones, is scaled down to fit instead of being clipped.
+ */
+function StageFit({ children, onCollapse }: { children: React.ReactNode; onCollapse: () => void }) {
+  const outer = React.useRef<HTMLDivElement>(null);
+  const inner = React.useRef<HTMLDivElement>(null);
+  const [fit, setFit] = React.useState<{ scale: number; height: number } | null>(null);
+
+  React.useEffect(() => {
+    const o = outer.current;
+    const i = inner.current;
+    if (!o || !i) return;
+    let frame = 0;
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const avail = o.clientWidth;
+        if (!avail) return;
+        const prevTransform = i.style.transform;
+        i.style.transform = "none";
+        const need = i.scrollWidth;
+        const height = i.offsetHeight;
+        i.style.transform = prevTransform;
+        if (need <= avail + 1) {
+          setFit((f) => (f === null ? f : null));
+          return;
+        }
+        const scale = avail / need;
+        setFit((f) => (f && Math.abs(f.scale - scale) < 0.001 && Math.abs(f.height - height * scale) < 1 ? f : { scale, height: height * scale }));
+      });
+    };
+    measure();
+    // Autoplay demos can open wider a moment after mount, so measure again once they settle.
+    const later = window.setTimeout(() => {
+      measure();
+      // A component that fills its parent (`h-full`, `absolute inset-0`) has no height of its own here.
+      if (i.offsetHeight < 8) onCollapse();
+    }, 900);
+    const ro = new ResizeObserver(measure);
+    ro.observe(o);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(later);
+      ro.disconnect();
+    };
+  }, [onCollapse]);
+
+  return (
+    <div ref={outer} className="w-full min-w-0 [contain:inline-size]" style={fit ? { height: fit.height } : undefined}>
+      <div
+        ref={inner}
+        className="flex items-center justify-center"
+        style={fit ? { width: `${100 / fit.scale}%`, transform: `scale(${fit.scale})`, transformOrigin: "top left" } : undefined}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 // ── Playground ──────────────────────────────────────────────────────
 
 export function LivePropsPlayground({
@@ -206,6 +268,17 @@ export function LivePropsPlayground({
   const [view, setView] = React.useState<"preview" | "code">("preview");
   const [replayKey, setReplayKey] = React.useState(0);
   const [copied, setCopied] = React.useState(false);
+  // A component that fills the stage (a full-bleed background, say) has no height to give the stage:
+  // it keeps the fixed-height stage instead. Known ones say so (`fillStage`), the rest are detected.
+  const [collapsed, setCollapsed] = React.useState(false);
+  const fillsStage = playground.fillStage || collapsed;
+  const markCollapsed = React.useCallback(() => setCollapsed(true), []);
+  const stageRef = React.useRef<HTMLDivElement>(null);
+  const [codeHeight, setCodeHeight] = React.useState(0);
+  const showView = (next: "preview" | "code") => {
+    if (next === "code") setCodeHeight(stageRef.current?.offsetHeight ?? 0);
+    setView(next);
+  };
 
   const snippet = React.useMemo(() => buildSnippet(playground, values), [playground, values]);
   const start = React.useMemo(() => initialValues(playground.controls), [playground]);
@@ -226,15 +299,27 @@ export function LivePropsPlayground({
     <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_300px]">
       {/* Stage */}
       <div
+        ref={stageRef}
         className={cn(
-          "relative min-h-[420px] overflow-hidden rounded-[28px] sm:min-h-[540px]",
+          "relative flex min-h-[420px] flex-col justify-center overflow-hidden rounded-[28px] sm:min-h-[540px]",
           fill === "dark" ? "dark bg-zinc-950 text-zinc-50" : "bg-zinc-100 text-zinc-900",
         )}
+        // Switching to the code view keeps the height the preview had, so the page does not jump.
+        style={view === "code" && codeHeight ? { minHeight: codeHeight } : undefined}
       >
         {view === "preview" ? (
-          <div key={replayKey} className="absolute inset-0 flex items-center justify-center p-6">
-            <AutoplaySound allow>{playground.render(values, fill)}</AutoplaySound>
-          </div>
+          fillsStage ? (
+            <div key={replayKey} className="absolute inset-0 flex items-center justify-center p-6">
+              <AutoplaySound allow>{playground.render(values, fill)}</AutoplaySound>
+            </div>
+          ) : (
+            // Padding clears the Preview/Code switch above and the replay button below.
+            <div key={replayKey} className="px-4 pb-16 pt-16 sm:px-6">
+              <StageFit onCollapse={markCollapsed}>
+                <AutoplaySound allow>{playground.render(values, fill)}</AutoplaySound>
+              </StageFit>
+            </div>
+          )
         ) : (
           <pre className="absolute inset-0 overflow-auto p-6 pt-16 font-mono text-[13px] leading-relaxed">
             <code>{snippet}</code>
@@ -253,7 +338,7 @@ export function LivePropsPlayground({
                 key={v}
                 type="button"
                 aria-pressed={view === v}
-                onClick={() => (v === "code" && locked ? requestUpgrade(name) : setView(v))}
+                onClick={() => (v === "code" && locked ? requestUpgrade(name) : showView(v))}
                 className={cn(
                   "h-7 rounded-full px-3 text-xs capitalize transition-colors",
                   view === v

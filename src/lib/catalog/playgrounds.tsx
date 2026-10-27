@@ -292,6 +292,8 @@ export type Playground = {
   defaultFill?: "light" | "dark";
   /** A fixed scene (own photo, shader or dark card) that ignores light/dark: the stage stays light and the Fill switch is hidden, so it never looks like the switch is broken. */
   lightOnly?: boolean;
+  /** The component fills whatever box it is given (a full-bleed background): keep the stage at a fixed height instead of letting it grow to the component. */
+  fillStage?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
 };
 
@@ -346,6 +348,7 @@ export const playgrounds: Record<string, Playground> = {
   },
 
   sparkles: {
+    fillStage: true,
     componentName: "Sparkles",
     importPath: "@/components/sparkles",
     snippetBaseProps: ["background"],
@@ -429,6 +432,7 @@ export const playgrounds: Record<string, Playground> = {
   },
 
   "background-boxes": {
+    fillStage: true,
     componentName: "BackgroundBoxes",
     importPath: "@/components/background-boxes",
     snippetBaseProps: ['className="h-[600px] w-full"'],
@@ -493,6 +497,7 @@ export const playgrounds: Record<string, Playground> = {
   },
 
   "image-trail": {
+    fillStage: true,
     componentName: "ImageTrail",
     importPath: "@/components/image-trail",
     snippetBaseProps: ['className="h-96 w-full"'],
@@ -2561,6 +2566,7 @@ export const playgrounds: Record<string, Playground> = {
   // REPLACES the existing `meteors` entry: its "stars" control had defaultValue 60 while the
   // component default is 0 (snippet dropped stars={60}), and it had no autoplay control.
   meteors: {
+    fillStage: true,
     componentName: "Meteors",
     importPath: "@/components/meteors",
     snippetBaseProps: ['className="absolute inset-0"'],
