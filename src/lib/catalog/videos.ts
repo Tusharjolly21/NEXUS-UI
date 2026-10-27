@@ -1,6 +1,8 @@
 /**
- * The video catalogue: twenty-two videos, each a React component that is a pure function of time, drawn
- * on a fixed canvas for each shape it supports (9:16, 1:1, 16:9 and more), with its own soundtrack. This file is metadata only (it is safe to import from
+ * The video catalogue: videos made two ways. Most are React components that are a pure function of time,
+ * drawn on a fixed canvas for each shape they support (9:16, 1:1, 16:9 and more), with their own soundtrack.
+ * The rest are HTML compositions for HyperFrames (`engine: "hyperframes"`): one `index.html` that an agent
+ * renders to MP4, shown on the site as a pre-rendered video. This file is metadata only (it is safe to import from
  * server code); the animation lives in `src/components/videos/<slug>.tsx`, the prompt and the
  * downloadable source in `content/videos/<slug>/` (served only through the gated route).
  *
@@ -25,8 +27,13 @@ export type VideoField =
   | { key: string; label: string; type: "color" }
   | { key: string; label: string; type: "number"; min: number; max: number; step?: number };
 
+/** How a video is made: a React component that draws a frame for any time t, or an HTML composition rendered by HyperFrames. */
+export type VideoEngine = "react" | "hyperframes";
+
 export type VideoEntry = {
   slug: string;
+  /** Defaults to "react". HyperFrames videos ship one `index.html` (no live editing, no shared kit) and play as a pre-rendered MP4 here. */
+  engine?: VideoEngine;
   title: string;
   /** What the video is for, e.g. "Product launch". */
   purpose: string;
@@ -2191,10 +2198,55 @@ export const videos: VideoEntry[] = [
         "type": "color"
       }
     ]
+  },
+  {
+    "slug": "terminal-install",
+    "engine": "hyperframes",
+    "title": "Terminal Install",
+    "purpose": "Developer demo",
+    "motion": "A command types itself and installs a component",
+    "app": "Nexus UI",
+    "platforms": ["YouTube", "X", "Product Hunt"],
+    "formats": ["16:9"],
+    "silent": true,
+    "duration": 10.5,
+    "bpm": 0,
+    "cuts": [],
+    "blurb": "A headline, then a terminal types the one-line install and three checks tick green, ending on your address. One HTML file for HyperFrames, so Claude Code or any agent can restyle it and render the MP4.",
+    "premium": true,
+    "dark": true,
+    "createdAt": "2026-10-27",
+    "posterAt": 6,
+    "defaults": {},
+    "fields": []
+  },
+  {
+    "slug": "kinetic-words",
+    "engine": "hyperframes",
+    "title": "Kinetic Words",
+    "purpose": "Social teaser",
+    "motion": "Four words land one by one, then cards stack up",
+    "app": "Nexus UI",
+    "platforms": ["Reels", "TikTok", "Shorts"],
+    "formats": ["9:16"],
+    "silent": true,
+    "duration": 9.5,
+    "bpm": 0,
+    "cuts": [],
+    "blurb": "Big type lands word by word with a gradient on the last one, four cards drop in and settle, then your address. One HTML file for HyperFrames that an agent can reword and render.",
+    "premium": true,
+    "dark": false,
+    "createdAt": "2026-10-27",
+    "posterAt": 2.6,
+    "defaults": {},
+    "fields": []
   }
 ];
 
 export const VIDEO_FPS = 30;
+
+/** True for the HTML compositions that HyperFrames renders (the rest are React). */
+export const isHyperframes = (v: Pick<VideoEntry, "engine">) => v.engine === "hyperframes";
 
 export function getVideo(slug: string): VideoEntry | undefined {
   return videos.find((v) => v.slug === slug);

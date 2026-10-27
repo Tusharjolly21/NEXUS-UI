@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { VideoFrame } from "@/components/videos/video-frame";
-import { getVideo, videoFormat, videos } from "@/lib/catalog/videos";
+import { getVideo, isHyperframes, videoFormat, videos } from "@/lib/catalog/videos";
 import { videoDefaults } from "@/lib/catalog/video-defaults";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ p?: string; f?: string }> };
@@ -9,7 +9,8 @@ type Props = { params: Promise<{ slug: string }>; searchParams: Promise<{ p?: st
 export const metadata: Metadata = { title: "Video frame", robots: { index: false, follow: false } };
 
 export function generateStaticParams() {
-  return videos.map((v) => ({ slug: v.slug }));
+  // Only the React videos draw in the page; HyperFrames videos are rendered by their own CLI.
+  return videos.filter((v) => !isHyperframes(v)).map((v) => ({ slug: v.slug }));
 }
 
 /**
@@ -20,7 +21,7 @@ export default async function VideoFramePage({ params, searchParams }: Props) {
   const { slug } = await params;
   const { p, f } = await searchParams;
   const video = getVideo(slug);
-  if (!video) notFound();
+  if (!video || isHyperframes(video)) notFound();
 
   const values: Record<string, string> = videoDefaults(slug);
   if (p) {

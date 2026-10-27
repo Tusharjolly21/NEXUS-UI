@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser, sessionHasPro } from "@/lib/component-access";
 import { licenseComment, withLicense } from "@/lib/license-stamp";
 import { getClientIp, rateLimit } from "@/lib/rate-limit";
-import { VIDEO_PARTS, getVideo, type VideoPart } from "@/lib/catalog/videos";
+import { VIDEO_PARTS, getVideo, isHyperframes, type VideoPart } from "@/lib/catalog/videos";
 import { buildVideoPrompt } from "@/lib/video-prompt";
 
 /**
@@ -23,7 +23,7 @@ const PRIVATE = { "Cache-Control": "private, no-store" };
 
 const FILES: Record<VideoPart, (slug: string) => string> = {
   prompt: (s) => `content/videos/${s}/prompt.md`,
-  source: (s) => `content/videos/${s}/source.tsx`,
+  source: (s) => (isHyperframes(getVideo(s) ?? {}) ? `content/videos/${s}/index.html` : `content/videos/${s}/source.tsx`),
   kit: () => "content/videos/kit.ts",
   parts: () => "content/videos/parts.tsx",
   frame: () => "content/videos/frame.tsx",
@@ -40,6 +40,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
     return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
   }
   const kind = part as VideoPart;
+  // A HyperFrames video is one index.html: it has no shared kit, frame page or render script to hand out.
+  if (isHyperframes(video) && kind !== "prompt" && kind !== "source") return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
   if (kind === "parts" && !video.parts) return NextResponse.json({ error: "Not found" }, { status: 404, headers: PRIVATE });
 
   const user = await getSessionUser();
