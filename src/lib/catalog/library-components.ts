@@ -7627,7 +7627,7 @@ export default function Page() {
     name: "Bubble Cluster",
     registryCliName: "bubble-cluster",
     description:
-      "Contacts packed into one cluster of avatar bubbles sized by how close they are, sitting on a liquid backdrop. Switch groups and everyone springs to new places and sizes while people outside the group shrink away.",
+      "Contacts packed into one cluster of soft, tinted bubbles sized by how close they are, over a faint liquid backdrop. Switch groups and everyone springs to new places and sizes while people outside the group shrink away. Hover a bubble to read how close that person is.",
     categorySlug: "motion-effects",
     tags: ["contacts", "avatars", "circle packing", "gooey", "segmented control", "groups", "people", "motion kit", "framer-motion"],
     premium: true,
@@ -7636,9 +7636,9 @@ export default function Page() {
     animationKinds: ["spring", "layout", "press"],
     dependencies: ["framer-motion"],
     props: [
-      { name: "people", type: "ClusterPerson[]", defaultValue: "12 sample contacts", description: "Everyone who can appear, as { id, name, hue }; hue (0-360) tints the avatar gradient." },
+      { name: "people", type: "ClusterPerson[]", defaultValue: "12 sample contacts", description: "Everyone who can appear, as { id, name, hue }; hue (0-360) tints the bubble." },
       { name: "groups", type: "Record<string, Record<string, number>>", defaultValue: "Family, Close friends, Work", description: "Group name to { person id: closeness 1-5 }. Closeness sets bubble size; people left out of a group hide in it." },
-      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps through the groups every 2.4s until someone presses the cluster or the switcher." },
+      { name: "autoplay", type: "boolean", defaultValue: "false", description: "Steps through the groups every 2.6s until someone presses the cluster or the switcher." },
     ],
     Preview: Previews.PreviewBubbleCluster,
     previewShell: "plain",
