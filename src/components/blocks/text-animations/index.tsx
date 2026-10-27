@@ -39,7 +39,7 @@ function useRise(): Variants {
       };
 }
 
-export function TextAnimationsBlock({ className, muteSound = false }: { className?: string; muteSound?: boolean }) {
+export function TextAnimationsBlock({ className }: { className?: string }) {
   const rise = useRise();
 
   return (
@@ -108,7 +108,6 @@ export function TextAnimationsBlock({ className, muteSound = false }: { classNam
               text="Your Q3 churn rose 1.8 points, almost entirely from annual plans that renewed in August. Most of those accounts never invited a second teammate."
               startOnView
               typingSpeed={34}
-              muted={muteSound}
               className="h-full w-full rounded-[20px] bg-[#f5f5f7] shadow-none dark:bg-[#2c2c2e] dark:shadow-none"
             />
           </Specimen>
