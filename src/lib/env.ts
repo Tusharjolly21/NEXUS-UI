@@ -27,3 +27,13 @@ export function getAdminEmails(): string[] {
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
 }
+
+/**
+ * True only for a signed-in user whose confirmed email is listed in ADMIN_EMAILS.
+ * Deliberately ignores user_metadata: users can edit their own metadata, so a role stored
+ * there is not a trustworthy basis for access to /admin.
+ */
+export function isAdminUser(user: { email?: string | null; email_confirmed_at?: string | null }): boolean {
+  if (!user.email || !user.email_confirmed_at) return false;
+  return getAdminEmails().includes(user.email.trim().toLowerCase());
+}

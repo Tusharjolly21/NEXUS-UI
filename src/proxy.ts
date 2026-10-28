@@ -1,6 +1,6 @@
 import type { User } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
-import { getAdminEmails } from "@/lib/env";
+import { isAdminUser } from "@/lib/env";
 import { mayHaveSupabaseAuthCookies, updateSession } from "@/lib/supabase/middleware";
 
 function isLinkPrefetch(request: NextRequest): boolean {
@@ -89,11 +89,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (pathname.startsWith("/admin")) {
-      const admins = getAdminEmails();
-      const email = user.email?.toLowerCase() ?? "";
-      const isAdmin =
-        admins.includes(email) ||
-        (user.user_metadata as { role?: string } | undefined)?.role === "admin";
+      const isAdmin = isAdminUser(user);
       if (!isAdmin) {
         return redirectKeepingSession(new URL("/", request.url), supabaseResponse);
       }
