@@ -36,7 +36,7 @@ export default async function LivePreviewPage({ params, searchParams }: Props) {
   const Preview = item.previewSections?.[index]?.Preview ?? item.Preview;
 
   return (
-    <div className="dark fixed inset-0 overflow-hidden bg-gradient-to-b from-zinc-900 to-zinc-950">
+    <div className="dark min-h-dvh bg-gradient-to-b from-zinc-900 to-zinc-950">
       <h1 className="sr-only">{item.name} — live preview</h1>
       <LivePreviewStage>
         <Preview compact={false} />
