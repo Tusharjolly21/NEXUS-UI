@@ -222,8 +222,7 @@ import { CloudSync } from "@/components/cloud-sync";
 import { SmartLight } from "@/components/smart-light";
 import { RangeCalendar } from "@/components/range-calendar";
 import { StorageClean } from "@/components/storage-clean";
-import { RingGallery } from "@/components/ring-gallery";
-import { RING_PHOTOS } from "@/lib/catalog/ring-photos";
+import { RingGalleryDemo, type RingDemoValues } from "@/lib/catalog/ring-demo";
 import { DartRating } from "@/components/dart-rating";
 import { DominoProgress } from "@/components/domino-progress";
 import { PumpkinReveal } from "@/components/pumpkin-reveal";
@@ -294,6 +293,8 @@ export type Playground = {
   defaultFill?: "light" | "dark";
   /** A fixed scene (own photo, shader or dark card) that ignores light/dark: the stage stays light and the Fill switch is hidden, so it never looks like the switch is broken. */
   lightOnly?: boolean;
+  /** Visitors without Pro can use the controls too (and try their own content); only copying the code needs Pro. */
+  tryIt?: boolean;
   /** The component fills whatever box it is given (a full-bleed background): keep the stage at a fixed height instead of letting it grow to the component. */
   fillStage?: boolean;
   render: (values: PlaygroundValues, fill: "light" | "dark") => React.ReactNode;
@@ -3710,26 +3711,24 @@ export const playgrounds: Record<string, Playground> = {
   },
   "ring-gallery": {
     lightOnly: true,
+    tryIt: true,
     componentName: "RingGallery",
     importPath: "@/components/ring-gallery",
     defaultFill: "light",
+    snippetBaseProps: ["items={photos}"],
     controls: [
+      { kind: "range", prop: "count", label: "Cards in the ring", min: 12, max: 120, step: 1, defaultValue: 57 },
+      { kind: "range", prop: "radius", label: "Ring size", min: 0.6, max: 1.1, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "cardSize", label: "Card size", min: 0.6, max: 1.6, step: 0.05, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "speed", label: "Turn speed", min: 0.4, max: 2.5, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "glide", label: "Glide", min: 0.5, max: 3, step: 0.1, unit: "x", defaultValue: 1 },
+      { kind: "range", prop: "tilt", label: "Camera tilt", min: 0, max: 2, step: 0.1, unit: "x", defaultValue: 1 },
       { kind: "toggle", prop: "autoplay", label: "Play by itself", defaultValue: false, startOn: true },
       { kind: "toggle", prop: "intro", label: "Spin in on load", defaultValue: true },
       { kind: "toggle", prop: "detail", label: "Open entry page", defaultValue: true },
+      { kind: "toggle", prop: "enableSound", label: "Ring sounds", defaultValue: true },
     ],
-    render: (v) => (
-      <div className="mx-auto w-full max-w-[820px]">
-        <RingGallery
-          key={`${String(v.autoplay)}-${String(v.intro)}`}
-          items={RING_PHOTOS}
-          autoplay={v.autoplay as boolean}
-          intro={v.intro as boolean}
-          detail={v.detail as boolean}
-          captureWheel={false}
-        />
-      </div>
-    ),
+    render: (v) => <RingGalleryDemo v={v as unknown as RingDemoValues} />,
   },
   "portal-card": {
     componentName: "PortalCard",

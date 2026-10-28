@@ -65,17 +65,17 @@ function cardT(i: number, lift: number, gg: ReturnType<typeof geometry>, n: numb
   return `rotateY(${((i * 360) / n).toFixed(3)}deg) translateZ(${gg.R.toFixed(2)}px) translateY(${(-gg.y - lift * gg.lift).toFixed(2)}px) rotateY(90deg)`;
 }
 
-function geometry(W: number, H: number) {
+function geometry(W: number, H: number, radius = 1, cardSize = 1) {
   const k = H / (2 * D0 * TAN); // css px per world unit at the ring
   const m = Math.min(W, H);
   const f = m / k / F_DEN;
   return {
     k,
     persp: D0 * k,
-    R: (m / 2) * (1 - 2 * PAD),
-    cw: CARD_W * f * k,
-    ch: CARD_H * f * k,
-    cr: CARD_R * f * k,
+    R: (m / 2) * (1 - 2 * PAD) * radius,
+    cw: CARD_W * f * k * cardSize,
+    ch: CARD_H * f * k * cardSize,
+    cr: CARD_R * f * k * cardSize,
     lift: LIFT * k,
     y: Y_POS * k,
   };
@@ -218,6 +218,16 @@ export interface RingGalleryProps {
   /** Set false to skip the built-in entry page and handle `onSelect` yourself. */
   detail?: boolean;
   onSelect?: (item: RingItem, index: number) => void;
+  /** Size of the ring itself, 1 is the default. Smaller pulls the cards in, larger spreads them out. */
+  radius?: number;
+  /** Size of each card, 1 is the default. Bigger cards overlap more. */
+  cardSize?: number;
+  /** How far the ring turns for each scroll or drag, 1 is the default. */
+  speed?: number;
+  /** How long the ring keeps gliding after you let go, 1 is the default. Higher glides further. */
+  glide?: number;
+  /** How far the camera follows your pointer, 1 is the default and 0 keeps it still. */
+  tilt?: number;
   /** Plays sounds that follow the ring's motion. They follow the visitor's sound switch (off until switched on on this site). */
   enableSound?: boolean;
   /** Extra classes for the outer card. */
@@ -231,6 +241,11 @@ export function RingGallery({
   intro = true,
   captureWheel = true,
   detail = true,
+  radius = 1,
+  cardSize = 1,
+  speed = 1,
+  glide = 1,
+  tilt = 1,
   onSelect,
   enableSound = true,
   className = "",
@@ -253,10 +268,10 @@ export function RingGallery({
   const [firstOpen, setFirstOpen] = useState<number | null>(null); // the entry the corner photo grew into
   const returnFocus = useRef<HTMLElement | null>(null);
 
-  const g = geometry(box.W, box.H);
+  const g = geometry(box.W, box.H, clamp(radius, 0.4, 1.3), clamp(cardSize, 0.4, 2));
   const G = useRef(g);
   const NR = useRef({ N, P });
-  const opts = useRef({ autoplay, intro, reduce: !!reduce });
+  const opts = useRef({ autoplay, intro, reduce: !!reduce, tilt, glide, speed });
 
   // sounds: a real visitor uses play(), the autoplay camera uses play.auto() (silent until the page has been clicked)
   const play = useProSound(enableSound);
@@ -264,7 +279,7 @@ export function RingGallery({
   useLayoutEffect(() => {
     G.current = g;
     NR.current = { N, P };
-    opts.current = { autoplay, intro, reduce: !!reduce };
+    opts.current = { autoplay, intro, reduce: !!reduce, tilt: clamp(tilt, 0, 3), glide: clamp(glide, 0.25, 4), speed: clamp(speed, 0.2, 4) };
     playRef.current = play;
   });
   const sfx = useCallback((name: ProSoundName, volume?: number) => {
@@ -344,8 +359,8 @@ export function RingGallery({
         s.py = Math.sin(tt * 0.29 + 1.2) * 0.55;
       }
 
-      s.rot += (s.target - s.rot) * ease60(ROT_EASE, dt);
-      const par = o.reduce ? 0 : 1;
+      s.rot += (s.target - s.rot) * ease60(Math.max(0.012, ROT_EASE / o.glide), dt);
+      const par = o.reduce ? 0 : o.tilt;
       const kc = ease60(CAM_EASE, dt);
       s.cx += (-s.px * PAR_X * par - s.cx) * kc;
       s.cy += (CAM_H + s.py * PAR_Y * par - s.cy) * kc;
@@ -438,7 +453,7 @@ export function RingGallery({
         }
       }
       if (s.down) {
-        s.target += ((e.clientX - s.lastX) / Math.max(r.width, 1)) * Math.PI * 2;
+        s.target += ((e.clientX - s.lastX) / Math.max(r.width, 1)) * Math.PI * 2 * opts.current.speed;
         s.lastX = e.clientX;
         if (Math.abs(e.clientX - s.downX) > 6) s.moved = true;
       }
@@ -465,7 +480,7 @@ export function RingGallery({
       const d = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY) * unit;
       if (captureWheel && e.cancelable) e.preventDefault();
       S.current.kbCard = -1;
-      S.current.target -= clamp(d, -400, 400) * WHEEL;
+      S.current.target -= clamp(d, -400, 400) * WHEEL * opts.current.speed;
     };
     el.addEventListener("wheel", onWheel, { passive: !captureWheel });
     return () => el.removeEventListener("wheel", onWheel);

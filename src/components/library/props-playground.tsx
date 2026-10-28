@@ -382,7 +382,7 @@ export function LivePropsPlayground({
           </p>
         </div>
 
-        <ProLock locked={locked} name={name} label="Edit it with Pro" className="mt-1 rounded-2xl">
+        <ProLock locked={locked && !playground.tryIt} name={name} label="Edit it with Pro" className="mt-1 rounded-2xl">
         {playground.lightOnly ? null : (
           <div className="mt-5 flex items-center justify-between">
             <span className="text-[13px] text-foreground/75">Fill</span>
@@ -421,6 +421,15 @@ export function LivePropsPlayground({
             {locked ? <Lock className="size-3.5" /> : copied ? <Check className="size-3.5" /> : <Copy className="size-3.5" />}
             {locked ? "Copy code with Pro" : copied ? "Copied" : "Copy code"}
           </button>
+          {locked && playground.tryIt ? (
+            <p className="px-1 text-center text-[12px] leading-relaxed text-muted-foreground">
+              The code you copy has the settings you chose. Pro also gives you the one-line install and a build prompt to
+              rebuild it with your AI tool.{" "}
+              <button type="button" onClick={() => requestUpgrade(name)} className="font-medium text-foreground underline underline-offset-2">
+                See what Pro includes
+              </button>
+            </p>
+          ) : null}
         </div>
       </aside>
     </div>

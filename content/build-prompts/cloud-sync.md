@@ -1229,40 +1229,35 @@ export const PRO_SOUNDS = {
   // and fades with the speed of the spin-in. None plays on hover.
   "ring-tick": { category: "Gallery", label: "Ring tick", play: (c, o) => { const j = 0.94 + Math.random() * 0.12; hiss(c, o, { freq: 3800 * j, decay: 0.013, gain: 0.36, q: 3.2 }); tone(c, o, { freq: 1300 * j, to: 920 * j, decay: 0.03, gain: 0.17, type: "triangle" }); } },
   "ring-settle": { category: "Gallery", label: "Ring settle", play: (c, o) => { tone(c, o, { freq: 150, to: 92, glide: 0.1, decay: 0.16, gain: 0.28 }); hiss(c, o, { freq: 700, decay: 0.06, gain: 0.1, filter: "lowpass" }); tone(c, o, { at: 0.01, freq: 2093, decay: 0.5, gain: 0.035 }); } },
-  "ring-spool": {
-    category: "Gallery",
-    label: "Ring spool",
-    length: 2.2,
-    play: (c, o) => {
-      // Two seconds shaped like the spin it goes with: slow, fastest in the middle, slow again. A band of air opens as
-      // the ring picks up speed and closes as it slows, with a low whine that rises and falls the same way.
-      const t0 = c.currentTime, T = 2, K = 64;
-      const bell = (k: number) => Math.pow(Math.sin((Math.PI * k) / (K - 1)), 1.6);
-      const buf = c.createBuffer(1, c.sampleRate, c.sampleRate);
-      const d = buf.getChannelData(0);
-      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-      const air = c.createBufferSource();
-      air.buffer = buf;
-      air.loop = true;
-      const band = c.createBiquadFilter();
-      band.type = "bandpass";
-      band.Q.value = 0.9;
-      band.frequency.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 260 * Math.pow(10, bell(k))), t0, T);
-      const ag = c.createGain();
-      ag.gain.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 0.0001 + 0.15 * bell(k)), t0, T);
-      air.connect(band).connect(ag).connect(o);
-      air.start(t0);
-      air.stop(t0 + T + 0.05);
-      const whine = c.createOscillator();
-      whine.type = "triangle";
-      whine.frequency.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 90 * Math.pow(3.8, bell(k))), t0, T);
-      const wg = c.createGain();
-      wg.gain.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 0.0001 + 0.06 * bell(k) * bell(k)), t0, T);
-      whine.connect(wg).connect(o);
-      whine.start(t0);
-      whine.stop(t0 + T + 0.05);
-    },
-  },
+  "ring-spool": { category: "Gallery", label: "Ring spool", length: 2.2, play: (c, o) => {
+    // Two seconds shaped like the spin it goes with: slow, fastest in the middle, slow again. A band of air opens as
+    // the ring picks up speed and closes as it slows, with a low whine that rises and falls the same way.
+    const t0 = c.currentTime, T = 2, K = 64;
+    const bell = (k: number) => Math.pow(Math.sin((Math.PI * k) / (K - 1)), 1.6);
+    const buf = c.createBuffer(1, c.sampleRate, c.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    const air = c.createBufferSource();
+    air.buffer = buf;
+    air.loop = true;
+    const band = c.createBiquadFilter();
+    band.type = "bandpass";
+    band.Q.value = 0.9;
+    band.frequency.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 260 * Math.pow(10, bell(k))), t0, T);
+    const ag = c.createGain();
+    ag.gain.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 0.0001 + 0.15 * bell(k)), t0, T);
+    air.connect(band).connect(ag).connect(o);
+    air.start(t0);
+    air.stop(t0 + T + 0.05);
+    const whine = c.createOscillator();
+    whine.type = "triangle";
+    whine.frequency.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 90 * Math.pow(3.8, bell(k))), t0, T);
+    const wg = c.createGain();
+    wg.gain.setValueCurveAtTime(Float32Array.from({ length: K }, (_, k) => 0.0001 + 0.06 * bell(k) * bell(k)), t0, T);
+    whine.connect(wg).connect(o);
+    whine.start(t0);
+    whine.stop(t0 + T + 0.05);
+  } },
   "ring-open": { category: "Gallery", label: "Entry open", play: (c, o) => { hiss(c, o, { attack: 0.12, decay: 0.22, freq: 500, to: 3200, gain: 0.1, q: 0.9 }); tone(c, o, { freq: 196, to: 130, glide: 0.14, attack: 0.01, decay: 0.28, gain: 0.2 }); tone(c, o, { at: 0.2, freq: 1568, decay: 0.5, gain: 0.07 }); tone(c, o, { at: 0.24, freq: 2349, decay: 0.55, gain: 0.05 }); } },
   "ring-close": { category: "Gallery", label: "Entry close", play: (c, o) => { tone(c, o, { freq: 2349, decay: 0.25, gain: 0.05 }); tone(c, o, { at: 0.06, freq: 1568, decay: 0.3, gain: 0.07 }); hiss(c, o, { at: 0.02, attack: 0.06, decay: 0.22, freq: 3200, to: 500, gain: 0.09, q: 0.9 }); tone(c, o, { at: 0.22, freq: 170, to: 110, glide: 0.1, decay: 0.22, gain: 0.18 }); } },
   "ring-next": { category: "Gallery", label: "Next entry", play: (c, o) => { hiss(c, o, { attack: 0.01, decay: 0.08, freq: 2200, to: 4200, gain: 0.18, q: 0.9 }); tone(c, o, { freq: 740, to: 988, glide: 0.07, decay: 0.09, gain: 0.13, type: "triangle" }); } },

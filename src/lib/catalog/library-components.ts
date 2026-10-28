@@ -11730,6 +11730,12 @@ export default function Page() {
     props: [
       { name: "items", type: "RingItem[]", description: "The photos: { src, title, date?, summary?, sections? }. src can be a URL or a data: URI. A card without a src draws a soft gradient plate, so the default works with no image files." },
       { name: "count", type: "number", description: "Cards in the ring, 12 to 120. Defaults to your photos repeated to about 60." },
+      { name: "radius", type: "number", defaultValue: "1", description: "Size of the ring, 0.4 to 1.3. Smaller pulls the cards in, larger spreads them out." },
+      { name: "cardSize", type: "number", defaultValue: "1", description: "Size of each card, 0.4 to 2. Bigger cards overlap more." },
+      { name: "speed", type: "number", defaultValue: "1", description: "How far the ring turns for each scroll or drag, 0.2 to 4." },
+      { name: "glide", type: "number", defaultValue: "1", description: "How long the ring keeps gliding after you let go, 0.25 to 4. Higher glides further." },
+      { name: "tilt", type: "number", defaultValue: "1", description: "How far the camera follows the pointer, 0 to 3. 0 keeps the camera still." },
+      { name: "enableSound", type: "boolean", defaultValue: "true", description: "Plays the ring's sounds: ticks, a thud when it settles, whooshes. They follow the visitor's sound switch, which is off until switched on." },
       { name: "autoplay", type: "boolean", defaultValue: "false", description: "Drifts the camera on its own until the visitor touches it. Off by default, so a copied component reacts only to the visitor. Never runs under reduced motion." },
       { name: "intro", type: "boolean", defaultValue: "true", description: "Spins in with two turns the first time the ring scrolls into view." },
       { name: "captureWheel", type: "boolean", defaultValue: "true", description: "Scrolling over the ring turns it and keeps the page still. Set false to turn it and still scroll the page." },
@@ -11771,6 +11777,21 @@ export default function Page() {
   return (
     <div className="mx-auto w-full max-w-[820px] bg-[#f5f5f7] p-6">
       <RingGallery items={photos} />
+    </div>
+  );
+}`,
+      },
+      {
+        title: "Tune the feel",
+        code: `// src/app/page.tsx
+
+import { RingGallery } from "@/components/ring-gallery";
+
+// A tighter ring of bigger cards that turns quickly, glides a long way and keeps the camera still.
+export default function Page() {
+  return (
+    <div className="mx-auto w-full max-w-[820px] bg-[#f5f5f7] p-6">
+      <RingGallery radius={0.8} cardSize={1.3} speed={1.5} glide={2} tilt={0} count={36} />
     </div>
   );
 }`,
