@@ -180,7 +180,7 @@ function UpgradeDialog({
             {title}
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="mx-auto mt-2.5 max-w-[320px] text-[15px] leading-[1.5] text-muted-foreground">
-            You can preview every component. Pro unlocks {proCount ? `all ${proCount} Pro components` : "every Pro component"}, every
+            {feature === "full-screen preview" ? "You can still try it on the page." : "You can preview every component."} Pro unlocks {proCount ? `all ${proCount} Pro components` : "every Pro component"}, every
             template and the premium blocks.
           </DialogPrimitive.Description>
 

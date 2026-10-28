@@ -418,15 +418,26 @@ function Stage({
               Replay
             </button>
           ) : null}
-          <Link
-            href={`/live-preview/${slug}${variant ? `?v=${variant.index}` : ""}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Open full-screen preview in a new tab"
-            className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
-          >
-            <Expand className="size-4" aria-hidden />
-          </Link>
+          {locked ? (
+            <button
+              type="button"
+              onClick={() => requestUpgrade(name, "full-screen preview")}
+              aria-label="Full-screen preview is part of Pro"
+              className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
+            >
+              <Lock className="size-4" aria-hidden />
+            </button>
+          ) : (
+            <Link
+              href={`/live-preview/${slug}${variant ? `?v=${variant.index}` : ""}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open full-screen preview in a new tab"
+              className="pg-glass grid size-9 place-items-center rounded-full bg-card text-foreground"
+            >
+              <Expand className="size-4" aria-hidden />
+            </Link>
+          )}
         </div>
       </div>
 
